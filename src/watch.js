@@ -204,7 +204,14 @@ class Watch {
     // aren't docs.
     let hasPushed = false;
     // The server assigns and updates the resume token.
-    let resumeToken = null;
+    let resumeToken = undefined;
+
+    // Indicates whether we are interested in data from the stream. Set to false
+    // in the the 'unsubscribe()' callback.
+    let isActive = true;
+
+    // Set to true when we have received a data message from the stream.
+    let isHealthy = false;
 
     // Indicates whether we are interested in data from the stream. Set to false
     // in the the 'unsubscribe()' callback.
@@ -228,6 +235,7 @@ class Watch {
     const resetDocs = function() {
       Firestore.log('Watch.onSnapshot', 'Resetting documents');
       changeMap.clear();
+      resumeToken = undefined;
 
       docTree.forEach((snapshot) => {
         // Mark each document as deleted. If documents are not deleted, they
@@ -252,6 +260,21 @@ class Watch {
       onError(new Error(errMessage));
     };
 
+    /**
+     * If the stream was previously healthy, we'll retry once and then give up.
+     */
+    const maybeReopenStream = function (err) {
+      if (isActive && isHealthy) {
+        Firestore.log('Watch.onSnapshot', 'Stream ended, re-opening');
+        request.addTarget.resumeToken = resumeToken;
+        changeMap.clear();
+        resetStream();
+      } else if (err) {
+        Firestore.log('Watch.onSnapshot', 'Stream ended, sending error: ', err);
+        sendError(err);
+      }
+    };
+
     /** Helper to restart the outgoing stream to the backend. */
     const resetStream = function() {
       Firestore.log('Watch.onSnapshot', 'Opening new stream');
@@ -260,6 +283,9 @@ class Watch {
         currentStream.end();
         currentStream = null;
       }
+
+      isHealthy = false;
+
       // Note that we need to call the internal _listen API to pass additional
       // header values in readWriteStream.
       self._firestore.readWriteStream(
@@ -275,14 +301,11 @@ class Watch {
 
         Firestore.log('Watch.onSnapshot', 'Opened new stream');
         currentStream = backendStream;
-        currentStream.on('error', (err) => {
-          if (isActive && !is.null(resumeToken)) {
-            request.addTarget.resumeToken = resumeToken;
-            resumeToken = null;
-            resetStream();
-          } else {
-            sendError(err);
-          }
+        currentStream.on('error', err => {
+          maybeReopenStream(err);
+        });
+        currentStream.on('end', () => {
+          maybeReopenStream();
         });
         currentStream.on('end', () => {
           if (isActive && !is.null(resumeToken)) {
@@ -441,7 +464,7 @@ class Watch {
      * Assembles a new snapshot from the current set of changes and invokes the
      * user's callback. Clears the current changes on completion.
      */
-    const push = function(readTime) {
+    const push = function(readTime, nextResumeToken) {
       let changes = extractChanges(docMap, changeMap, readTime);
       let diff = computeSnapshot(docTree, docMap, changes);
 
@@ -457,6 +480,7 @@ class Watch {
       docTree = diff.updatedTree;
       docMap = diff.updatedMap;
       changeMap.clear();
+      resumeToken = nextResumeToken;
     };
 
     /**
@@ -479,7 +503,8 @@ class Watch {
           if (noTargetIds && change.readTime && current) {
             // This means everything is up-to-date, so emit the current set of
             // docs as a snapshot, if there were changes.
-            push(DocumentSnapshot.toISOTime(change.readTime));
+            push(DocumentSnapshot.toISOTime(change.readTime),
+                change.resumeToken);
           }
         } else if (change.targetChangeType === 'ADD') {
           assert(WATCH_TARGET_ID === change.targetIds[0],
@@ -494,7 +519,6 @@ class Watch {
           }
           // @todo: Surface a .code property on the exception.
           sendError('Error ' + code + ': ' + message);
-          return;
         } else if (change.targetChangeType === 'RESET') {
           // Whatever changes have happened so far no longer matter.
           resetDocs();
@@ -502,12 +526,11 @@ class Watch {
           current = true;
         } else {
           sendError('Unknown target change type: ' + JSON.stringify(change));
-          return;
         }
 
         if (change.resumeToken &&
             affectsTarget(change.targetIds, WATCH_TARGET_ID)) {
-          resumeToken = change.resumeToken;
+          isHealthy = true;
         }
       } else if (proto.documentChange) {
         Firestore.log('Watch.onSnapshot', 'Processing change event');

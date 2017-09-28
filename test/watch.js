@@ -779,13 +779,52 @@ describe('Query watch', function() {
     });
   });
 
+  it('ignores changes sent after the last snapshot', function() {
+    return watchHelper.runTest(collQueryJSON(), () => {
+      // Mock the server responding to the query.
+      watchHelper.sendAddTarget();
+      watchHelper.sendCurrent([0x0]);
+      watchHelper.sendSnapshot(1);
+      return watchHelper.await('snapshot').then((results) => {
+        lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+
+        // Add a result.
+        watchHelper.sendDoc(doc1, {foo: 'a'});
+        watchHelper.sendDoc(doc2, {foo: 'b'});
+        watchHelper.sendSnapshot(2, [0x1]);
+        return watchHelper.await('snapshot');
+      }).then((results) => {
+        lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+          docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
+          docChanges: [added(doc1, {foo: 'a'}), added(doc2, {foo: 'b'})]
+        });
+        assert.equal(1, streamHelper.streamCount);
+        // This document delete will be ignored.
+        watchHelper.sendDocDelete(doc1);
+        streamHelper.destroyStream();
+        return streamHelper.awaitReopen();
+      }).then(() => {
+        watchHelper.sendDocDelete(doc2);
+        watchHelper.sendSnapshot(3, [0x2]);
+        return watchHelper.await('snapshot');
+      }).then((results) => {
+        lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
+          docs: [
+            snapshot(doc1, {foo: 'a'}),
+          ],
+          docChanges: [removed(doc2, {foo: 'b'})]
+        });
+      });
+    });
+  });
+
   it('ignores non-matching tokens', function() {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
 
       watchHelper.sendCurrent();
-      let resumeToken = [0xABCD];
+      let resumeToken = [0x1];
       watchHelper.sendSnapshot(1, resumeToken);
       return watchHelper.await('snapshot').then((results) => {
         lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
@@ -793,16 +832,17 @@ describe('Query watch', function() {
         // Add a result.
         watchHelper.sendDoc(doc1,{foo: 'a'});
 
-        // Send snapshot with non-matching target id.
+        // Send snapshot with non-matching target id. No snapshot will be send.
         streamHelper.write({
           targetChange: {
             targetChangeType: 'NO_CHANGE',
             targetIds: [0xFEED],
             readTime: { seconds: 0, nanos: 0 },
-            resumeToken: [0xBCDE]
+            resumeToken: [0x2]
           }
         });
 
+        resumeToken = [0x3];
         // Send snapshot with matching target id but no resume token.
         // The old token continues to be used.
         streamHelper.write({
@@ -810,6 +850,7 @@ describe('Query watch', function() {
             targetChangeType: 'NO_CHANGE',
             targetIds: [],
             readTime: { seconds: 0, nanos: 0 },
+            resumeToken: resumeToken
           }
         });
 

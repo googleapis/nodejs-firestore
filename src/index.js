@@ -757,7 +757,7 @@ class Firestore extends commonGrpc.Service {
       });
 
       resultStream.on('error', err => {
-        Firestore.log('Firestore._initializeStream', 'Received stream error');
+        Firestore.log('Firestore._initializeStream', 'Received stream error:', err);
         // If we receive an error before we were able to receive any data,
         // reject this stream.
         if (!streamReleased) {
