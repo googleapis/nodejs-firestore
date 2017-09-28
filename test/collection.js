@@ -16,13 +16,16 @@
 
 'use strict';
 
-let assert = require('assert');
-let grpc = require('grpc');
-let is = require('is');
+const assert = require('assert');
+const grpc = require('grpc');
+const is = require('is');
 
-let Firestore = require('../');
-let DocumentReference = require('../src/reference')(Firestore).
+const Firestore = require('../');
+const DocumentReference = require('../src/reference')(Firestore).
   DocumentReference;
+
+// Change the argument to 'console.log' to enable debug output.
+Firestore.setLogFunction(() => {});
 
 function createInstance() {
   return new Firestore({
@@ -49,7 +52,8 @@ describe('Collection interface', function() {
 
     assert.throws(() => {
       collectionRef.doc(false);
-    }, /Argument "documentPath" is not a valid string\./);
+    }, new RegExp('Argument "documentPath" is not a valid ResourcePath. ' +
+        'Path is not a string.'));
 
     assert.throws(() => {
       collectionRef.doc('doc/col');

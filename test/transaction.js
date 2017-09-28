@@ -16,15 +16,18 @@
 
 'use strict';
 
-let assert = require('assert');
-let grpc = require('grpc');
-let through = require('through2');
+const assert = require('assert');
+const grpc = require('grpc');
+const through = require('through2');
 
-let Firestore = require('../');
+const Firestore = require('../');
 let firestore;
 
-const databaseRoot = 'projects/test-project/databases/(default)';
-const documentName = `${databaseRoot}/documents/collectionId/documentId`;
+const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+const DOCUMENT_NAME = `${DATABASE_ROOT}/documents/collectionId/documentId`;
+
+// Change the argument to 'console.log' to enable debug output.
+Firestore.setLogFunction(() => {});
 
 function createInstance() {
   return new Firestore({
@@ -35,7 +38,7 @@ function createInstance() {
 
 function commit(transaction, writes, err) {
   let proto = {
-    database: databaseRoot,
+    database: DATABASE_ROOT,
     transaction: transaction || 'foo'
   };
 
@@ -66,7 +69,7 @@ function commit(transaction, writes, err) {
 
 function rollback(transaction, err) {
   let proto = {
-    database: databaseRoot,
+    database: DATABASE_ROOT,
     transaction: transaction || 'foo'
   };
 
@@ -79,7 +82,7 @@ function rollback(transaction, err) {
 }
 
 function begin(transaction, prevTransaction, err) {
-  let proto = { database: databaseRoot };
+  let proto = { database: DATABASE_ROOT };
 
   if (prevTransaction) {
     proto.options = {
@@ -103,8 +106,8 @@ function begin(transaction, prevTransaction, err) {
 
 function getDocument(transaction) {
   let request = {
-    database: databaseRoot,
-    documents: [documentName],
+    database: DATABASE_ROOT,
+    documents: [DOCUMENT_NAME],
     transaction: transaction || 'foo'
   };
 
@@ -113,7 +116,7 @@ function getDocument(transaction) {
   setImmediate(function() {
     stream.push({
       found: {
-        name: documentName,
+        name: DOCUMENT_NAME,
         createTime: {seconds: 1, nanos: 2},
         updateTime: {seconds: 3, nanos: 4},
       },
@@ -131,7 +134,7 @@ function getDocument(transaction) {
 
 function query(transaction) {
   let request =  {
-    parent: databaseRoot,
+    parent: DATABASE_ROOT,
     structuredQuery: {
       from: [{
         collectionId: 'col'
@@ -164,7 +167,7 @@ function query(transaction) {
   setImmediate(function() {
     stream.push({
       document: {
-        name: documentName,
+        name: DOCUMENT_NAME,
         createTime: {seconds: 1, nanos: 2},
         updateTime: {seconds: 3, nanos: 4},
       },
@@ -345,11 +348,15 @@ describe('failed transactions', function() {
 
   it('fails on beginTransaction', function() {
     return runTransaction(() => { return Promise.resolve('success'); },
-      begin('foo', null, new Error('Fails on beginTransaction'))
+      begin('foo', null, new Error('Fails (1) on beginTransaction')),
+      begin('foo', null, new Error('Fails (2) on beginTransaction')),
+      begin('foo', null, new Error('Fails (3) on beginTransaction')),
+      begin('foo', null, new Error('Fails (4) on beginTransaction')),
+      begin('foo', null, new Error('Fails (5) on beginTransaction'))
     ).then(() => {
       throw new Error('Unexpected success in Promise');
     }).catch((err) => {
-      assert.equal(err.message, 'Fails on beginTransaction');
+      assert.equal(err.message, 'Fails (5) on beginTransaction');
     });
   });
 
@@ -432,7 +439,7 @@ describe('transaction operations', function() {
       },
       update: {
         fields: {},
-        name: documentName
+        name: DOCUMENT_NAME
       }
     };
 
@@ -450,32 +457,75 @@ describe('transaction operations', function() {
         exists: true
       },
       update: {
-        fields: {},
-        name: documentName
+        fields: {
+          a: {
+            value_type: 'mapValue',
+            mapValue: {
+              fields: {
+                b: {
+                  value_type: 'stringValue',
+                  stringValue: 'c'
+                }
+              }
+            }
+          }
+        },
+        name: DOCUMENT_NAME
       },
       updateMask: {
-        fieldPaths: []
+        fieldPaths: ['a.b']
       }
     };
 
     return runTransaction((updateFunction) => {
-      updateFunction.update(docRef, {});
+      updateFunction.update(docRef, { 'a.b': 'c'});
+      updateFunction.update(docRef, 'a.b', 'c');
+      updateFunction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
       return Promise.resolve();
     },
     begin(),
-    commit(null, [update]));
+    commit(null, [update, update, update]));
   });
 
   it('support set', function() {
     let set = {
       update: {
-        fields: {},
-        name: documentName
+        fields: {
+          'a.b': {
+            value_type: 'stringValue',
+            stringValue: 'c'
+          }
+        },
+        name: DOCUMENT_NAME
       }
     };
 
     return runTransaction((updateFunction) => {
-      updateFunction.set(docRef, {});
+      updateFunction.set(docRef, {'a.b': 'c'});
+      return Promise.resolve();
+    },
+    begin(),
+    commit(null, [set]));
+  });
+
+  it('support set with merge', function() {
+    let set = {
+      update: {
+        fields: {
+          'a.b': {
+            value_type: 'stringValue',
+            stringValue: 'c'
+          }
+        },
+        name: DOCUMENT_NAME
+      },
+      updateMask: {
+        fieldPaths: ['`a.b`']
+      }
+    };
+
+    return runTransaction((updateFunction) => {
+      updateFunction.set(docRef, {'a.b': 'c'}, {merge: true});
       return Promise.resolve();
     },
     begin(),
@@ -484,7 +534,7 @@ describe('transaction operations', function() {
 
   it('support delete', function() {
     let remove = {
-      delete: documentName
+      delete: DOCUMENT_NAME
     };
 
     return runTransaction((updateFunction) => {
@@ -497,13 +547,13 @@ describe('transaction operations', function() {
 
   it('support multiple writes', function() {
     let remove = {
-      delete: documentName
+      delete: DOCUMENT_NAME
     };
 
     let set = {
       update: {
         fields: {},
-        name: documentName
+        name: DOCUMENT_NAME
       }
     };
 

@@ -20,59 +20,64 @@
 
 'use strict';
 
-let bun = require('bun');
-let common = require('@google-cloud/common');
-let commonGrpc = require('@google-cloud/common-grpc');
-let extend = require('extend');
-let is = require('is');
-let through = require('through2');
+const bun = require('bun');
+const common = require('@google-cloud/common');
+const commonGrpc = require('@google-cloud/common-grpc');
+const extend = require('extend');
+const is = require('is');
+const through = require('through2');
+const util = require('util');
 
-let v1beta1 = require('./v1beta1');
+const v1beta1 = require('./v1beta1');
+const libVersion = require('../package.json').version;
+
+const path = require('./path');
+
+/**
+ * @type firestore.ResourcePath
+ */
+const ResourcePath = path.ResourcePath;
+
+/**
+ * @type firestore.ResourcePath
+ */
+const FieldPath = path.FieldPath;
+
+/**
+ * @type firestore.FieldValue
+ */
+const FieldValue = require('./field-value');
 
 /**
  * @type firestore.CollectionReference
- * @private
  */
 let CollectionReference;
 
 /**
  * @type firestore.DocumentReference
- * @private
  */
 let DocumentReference;
 
 /**
  * @type firestore.DocumentSnapshot
- * @private
  */
 let DocumentSnapshot;
 
 /**
  * @type firestore.GeoPoint
- * @private
  */
 let GeoPoint;
 
-/**
- * @type firestore.Path
- * @private
- */
-let Path = require('./path');
-
-/**
- * @private
- */
+/** Injected. */
 let validate;
 
 /**
  * @type firestore.WriteBatch
- * @private
  */
 let WriteBatch;
 
 /**
  * @type firestore.Transaction
- * @private
  */
 let Transaction;
 
@@ -80,9 +85,72 @@ let Transaction;
  * HTTP header for the resource prefix to improve routing and project isolation
  * by the backend.
  * @type string
- * @private
  */
 const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
+
+/**
+ * The maximum number of times to retry idempotent requests.
+ * @type number
+ */
+const MAX_REQUEST_RETRIES = 5;
+
+/**
+ * GRPC Error code for 'UNAVAILABLE'.
+ * @type number
+ */
+const GRPC_UNAVAILABLE = 14;
+
+/**
+ * Document data (e.g. for use with
+ * [set()]{@link firestore.DocumentReference#set}) consisting of fields mapped
+ * to values.
+ *
+ * @public
+ * @typedef {Object.<string, *>} DocumentData
+ * @alias firestore.DocumentData
+ */
+
+/**
+ * Update data (for use with [update]{@link firestore.DocumentReference#update})
+ * that contains paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that
+ * contain dots reference nested fields within the document.
+ *
+ * @public
+ * @typedef {Object.<string, *>} UpdateData
+ */
+
+/**
+ * An options object that configures conditional behavior of
+ * [update()]{@link firestore.DocumentReference#update} and
+ * [delete()]{@link firestore.DocumentReference#delete} calls in
+ * [DocumentReference]{@link firestore.DocumentReference},
+ * [WriteBatch]{@link firestore.WriteBatch}, and
+ * [Transaction]{@link firestore.Transaction}. Using Preconditions, these calls
+ * can be restricted to only apply to documents that match the specified
+ * conditions.
+ *
+ * @public
+ * @property {string} lastUpdateTime - The update time to enforce (specified as
+ * an ISO 8601 string).
+ * @typedef {Object} Precondition
+ */
+
+/**
+ * An options object that configures the behavior of
+ * [set()]{@link firestore.DocumentReference#set} calls in
+ * [DocumentReference]{@link firestore.DocumentReference},
+ * [WriteBatch]{@link firestore.WriteBatch}, and
+ * [Transaction]{@link firestore.Transaction}. These calls can be
+ * configured to perform granular merges instead of overwriting the target
+ * documents in their entirety by providing a SetOptions object with
+ * { merge : true }.
+ *
+ * @public
+ * @property {boolean} merge - Changes the behavior of a set() call to only
+ * replace the values specified in its data argument. Fields omitted from the
+ * set() call remain untouched.
+ * @typedef {Object} SetOptions
+ */
 
 /**
  * The Firestore client represents a Firestore Database and is the entry point
@@ -93,7 +161,7 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
  * @public
  * @alias firestore.Firestore
  */
-class Firestore extends commonGrpc.Service{
+class Firestore extends commonGrpc.Service {
   /**
    * @param {Object=} options - [Configuration object](#/docs).
    */
@@ -114,10 +182,24 @@ class Firestore extends commonGrpc.Service{
 
     options = extend({}, options, {
       libName: 'gccl',
-      libVersion: require('../package.json').version
+      libVersion: libVersion,
     });
 
     super(config, options);
+
+    // GCF currently tears down idle connections after two minutes. Requests
+    // that are issued after this period may fail. On GCF, we therefore issue
+    // these requests as part of a transaction so that we can safely retry until
+    // the network link is reestablished.
+    //
+    // The environment variable FUNCTION_TRIGGER_TYPE is used to detect the GCF
+    // environment.
+    this._preferTransactions = is.defined(process.env.FUNCTION_TRIGGER_TYPE);
+    this._lastSuccessfulRequest = null;
+
+    if (this._preferTransactions) {
+      Firestore.log('Firestore', 'Detected GCF environment');
+    }
 
     /**
      * The Firestore GAPIC client.
@@ -127,11 +209,16 @@ class Firestore extends commonGrpc.Service{
       Firestore: v1beta1(options).firestoreClient(options)
     };
 
-    if (options && options.projectId) {
-      this._referencePath = new Path(options.projectId, '(default)', []);
-    } else {
-      this._referencePath = new Path('{{projectId}}', '(default)', []);
+    this._referencePath = new ResourcePath('{{projectId}}', '(default)');
+
+    if (options) {
+      if (options.projectId) {
+        validate.isString('options.projectId', options.projectId);
+        this._referencePath = new ResourcePath(options.projectId, '(default)');
+      }
     }
+
+    Firestore.log('Firestore', 'Initialized Firestore');
   }
 
   /**
@@ -150,17 +237,17 @@ class Firestore extends commonGrpc.Service{
    * @public
    *
    * @param {string} documentPath - A slash-separated path to a document.
-   * @return {firestore.DocumentReference} A reference to the specified
-   * document.
+   * @return {firestore.DocumentReference} The
+   * [DocumentReference]{@link firestore.DocumentReference} instance.
    *
    * @example
    * let documentRef = firestore.doc('collection/document');
    * console.log(`Path of document is ${documentRef.path}`);
    */
   doc(documentPath) {
-    validate.isString('documentPath', documentPath);
+    validate.isResourcePath('documentPath', documentPath);
 
-    let path = this._referencePath.child(documentPath);
+    let path = this._referencePath.append(documentPath);
     if (!path.isDocument) {
       throw new Error('Argument "documentPath" must point to a document.');
     }
@@ -175,8 +262,8 @@ class Firestore extends commonGrpc.Service{
    * @public
    *
    * @param {string} collectionPath - A slash-separated path to a collection.
-   * @return {firestore.CollectionReference} A reference to the specified
-   * collection.
+   * @return {firestore.CollectionReference} The
+   * [CollectionReference]{@link firestore.CollectionReference} instance.
    *
    * @example
    * let collectionRef = firestore.collection('collection');
@@ -186,10 +273,10 @@ class Firestore extends commonGrpc.Service{
    *   console.log(`Added document at ${documentRef.path})`);
    * });
    */
-   collection(collectionPath) {
-    validate.isString('collectionPath', collectionPath);
+  collection(collectionPath) {
+    validate.isResourcePath('collectionPath', collectionPath);
 
-    let path = this._referencePath.child(collectionPath);
+    let path = this._referencePath.append(collectionPath);
     if (!path.isCollection) {
       throw new Error('Argument "collectionPath" must point to a collection.');
     }
@@ -198,8 +285,8 @@ class Firestore extends commonGrpc.Service{
   }
 
   /**
-   * Creates a [WriteBatch]{@link firestore.WriteBatch} instance that can be
-   * used to atomically commit multiple writes.
+   * Creates a [WriteBatch]{@link firestore.WriteBatch}, used for performing
+   * multiple writes as a single atomic operation.
    *
    * @public
    *
@@ -223,8 +310,41 @@ class Firestore extends commonGrpc.Service{
   }
 
   /**
-   * Executes the given updateFunction and then attempts to commit the
-   * changes applied within the transaction.
+   * Creates a [DocumentSnapshot]{@link firestore.DocumentSnapshot} from a
+   * `Document` proto (or from a resource name for missing documents).
+   *
+   * This API is used by Google Cloud Functions.
+   *
+   * @package
+   * @param {object} documentOrName - The Firestore `Document` proto or the
+   * resource name of a missing document.
+   * @param {object=} readTime - A `Timestamp` proto indicating the time this
+   * document was read.
+   * @return {firestore.DocumentSnapshot} - A DocumentSnapshot.
+   */
+  snapshot_(documentOrName, readTime) {
+    let document = new DocumentSnapshot.Builder();
+
+    if (is.string(documentOrName)) {
+      document.ref = new DocumentReference(
+          this, ResourcePath.fromSlashSeparatedString(documentOrName));
+      document.readTime = DocumentSnapshot.toISOTime(readTime);
+    } else {
+      document.ref = new DocumentReference(
+          this, ResourcePath.fromSlashSeparatedString(documentOrName.name));
+      document.fieldsProto = documentOrName.fields || {};
+      document.createTime =
+          DocumentSnapshot.toISOTime(documentOrName.createTime);
+      document.updateTime =
+          DocumentSnapshot.toISOTime(documentOrName.updateTime);
+      document.readTime = DocumentSnapshot.toISOTime(readTime);
+    }
+    return document.build();
+  }
+
+  /**
+   * Executes the given updateFunction and commits the changes applied within
+   * the transaction.
    *
    * You can use the transaction object passed to 'updateFunction' to read and
    * modify Firestore documents under lock. Transactions are committed once
@@ -238,7 +358,11 @@ class Firestore extends commonGrpc.Service{
    * @param {object=} transactionOptions - Transaction options.
    * @param {number=} transactionOptions.maxAttempts - The maximum number of
    * attempts for this transaction.
-   * @return {Promise} The promise returned from the updateFunction.
+   * @return {Promise} If the transaction completed successfully or was
+   * explicitly aborted (by the updateFunction returning a failed Promise), the
+   * Promise returned by the updateFunction will be returned here. Else if the
+   * transaction failed, a rejected Promise with the corresponding failure
+   * error will be returned.
    *
    * @example
    * let counterTransaction = firestore.runTransaction(transaction => {
@@ -289,19 +413,26 @@ class Firestore extends commonGrpc.Service{
       result = is.instanceof(promise, Promise) ? promise : Promise.reject(
           new Error(
               'You must return a Promise in your transaction()-callback.'));
-
-      return result.catch(() => {
+      return result.catch(err => {
+        Firestore.log('Firestore.runTransaction',
+            'Rolling back transaction after callback error:', err);
         // Rollback the transaction and return the failed result.
-        return transaction.rollback().then(() => { return result; });
+        return transaction.rollback().then(() => {
+          return result;
+        });
       });
     }).then(() => {
-      return transaction.commit().catch((err) => {
+      return transaction.commit().catch(err => {
         if (attemptsRemaining > 0) {
+          Firestore.log('Firestore.runTransaction',
+              `Retrying transaction after error: ${JSON.stringify(err)}.`);
           return this.runTransaction(updateFunction, {
             previousTransaction: transaction,
             maxAttempts: attemptsRemaining
           });
         }
+        Firestore.log('Firestore.runTransaction',
+            'Exhausted transaction retries, returning error: %s', err);
         return Promise.reject(err);
       });
     }).then(() => {
@@ -310,13 +441,33 @@ class Firestore extends commonGrpc.Service{
   }
 
   /**
+   * Fetches the root collections that are associated with this Firestore
+   * database.
+   *
+   * @public
+   *
+   * @returns {Promise.<Array.<firestore.CollectionReference>>} A Promise that
+   * contains an array with CollectionReferences.
+   *
+   * @example
+   * firestore.getCollections().then(collections => {
+   *   for (let collection of collections) {
+   *     console.log(`Found collection with id: ${collection.id}`);
+   *   }
+   * });
+   */
+  getCollections() {
+    let rootDocument = new DocumentReference(this, this._referencePath);
+    return rootDocument.getCollections();
+  }
+
+  /**
    * Retrieves multiple documents from Firestore.
    *
    * @public
    *
-   * @param {
-   * Array.<firestore.DocumentReference>|...firestore.DocumentReference} varArgs
-   * The document references to receive.
+   * @param {...firestore.DocumentReference} documents - The document references
+   * to receive.
    * @return {Promise<Array.<firestore.DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
    *
@@ -329,19 +480,16 @@ class Firestore extends commonGrpc.Service{
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
    */
-  getAll(varArgs) {
-    let documents = [];
+  getAll(documents) {
+    documents = is.array(arguments[0]) ? arguments[0].slice()
+        : Array.prototype.slice.call(arguments);
 
-    varArgs = is.array(arguments[0]) ? arguments[0] : [].slice.call(arguments);
-
-    for (let i = 0; i < varArgs.length; ++i) {
-      validate.isDocumentReference(i, varArgs[i]);
-      documents.push(varArgs[i]);
+    for (let i = 0; i < documents.length; ++i) {
+      validate.isDocumentReference(i, documents[i]);
     }
 
     return this.getAll_(documents, null);
   }
-
 
   /**
    * Internal method to retrieve multiple documents from Firestore, optionally
@@ -358,66 +506,72 @@ class Firestore extends commonGrpc.Service{
    * document).
    */
   getAll_(docRefs, readOptions) {
+    const requestedDocuments = new Set();
+    const retrievedDocuments = new Map();
+
     let request = {
-      database: this.formattedName,
-      documents: []
+      database: this.formattedName
     };
 
-    let inputOrder = {};
-
-    // BatchGetDocuments doesn't preserve document order. We persist the
-    // request order and restore it when we receive the result.
-    for (let i = 0; i < docRefs.length; ++i) {
-      inputOrder[docRefs[i].path] = i;
-      request.documents.push(docRefs[i].formattedName);
+    for (let docRef of docRefs) {
+      requestedDocuments.add(docRef.formattedName);
     }
+    request.documents = Array.from(requestedDocuments);
 
     if (readOptions && readOptions.transactionId) {
       request.transaction = readOptions.transactionId;
     }
 
     let self = this;
-    let documents = [];
 
     return self.readStream(
         this.api.Firestore.batchGetDocuments.bind(this.api.Firestore),
-        request
+        request,
+        /* allowRetries= */ true
     ).then(stream => {
       return new Promise((resolve, reject) => {
         stream.on('error', (err) => {
+          Firestore.log('Firestore.getAll_', 'GetAll failed with error:', err);
           reject(err);
         }).on('data', response => {
           try {
-            let document = new DocumentSnapshot.Builder();
+            let document;
 
             if (response.found) {
-              let found = response.found;
-              document.ref = new DocumentReference(self,
-                  Path.fromName(found.name));
-              document.fieldsProto = found.fields || {};
-              document.createTime =
-                  DocumentSnapshot.toISOTime(found.createTime);
-              document.updateTime =
-                  DocumentSnapshot.toISOTime(found.updateTime);
+              Firestore.log('Firestore.getAll_',
+                  'Received document: %s', response.found.name);
+              document = self.snapshot_(response.found, response.readTime);
             } else {
-              document.ref = new DocumentReference(self,
-                  Path.fromName(response.missing));
+              Firestore.log('Firestore.getAll_',
+                  'Document missing: %s', response.missing);
+              document = self.snapshot_(response.missing, response.readTime);
             }
-
-            document.readTime = DocumentSnapshot.toISOTime(response.readTime);
 
             let path = document.ref.path;
-            if (!is.defined(inputOrder[path])) {
-              throw new Error(`Could not detect input order for "${path}".`);
-            }
-
-            documents[inputOrder[path]] = document.build();
+            retrievedDocuments.set(path, document);
           } catch (err) {
+            Firestore.log('Firestore.getAll_',
+                'GetAll failed with exception:', err);
             reject(err);
           }
         }).on('end', () => {
-          resolve(documents);
+          Firestore.log('Firestore.getAll_', 'Received %d results',
+              retrievedDocuments.size);
+
+          // BatchGetDocuments doesn't preserve document order. We use the
+          // request order to sort the resulting documents.
+          const orderedDocuments = [];
+          for (let docRef of docRefs) {
+            let document = retrievedDocuments.get(docRef.path);
+            if (!is.defined(document)) {
+              reject(new Error(
+                  `Did not receive document for "${docRef.path}".`));
+            }
+            orderedDocuments.push(document);
+          }
+          resolve(orderedDocuments);
         });
+        stream.resume();
       });
     });
   }
@@ -460,7 +614,7 @@ class Firestore extends commonGrpc.Service{
         decoratedGax.otherArgs.headers[CLOUD_RESOURCE_HEADER] =
             self.formattedName;
 
-        resolve({ request: decoratedRequest,  gax: decoratedGax });
+        resolve({request: decoratedRequest, gax: decoratedGax});
       });
     }
 
@@ -471,13 +625,159 @@ class Firestore extends commonGrpc.Service{
     return new Promise((resolve, reject) => {
       this.api.Firestore.getProjectId((err, projectId) => {
         if (err) {
+          Firestore.log('Firestore._decorateRequest',
+              'Failed to detect project ID: %s', err);
           reject(err);
         } else {
-          self._referencePath = new Path(
-              projectId, self._referencePath.databaseId, []);
+          Firestore.log('Firestore._decorateRequest',
+              'Detected project ID: %s', projectId);
+          self._referencePath = new ResourcePath(
+              projectId, self._referencePath.databaseId);
           decorate().then(resolve).catch(reject);
         }
       });
+    });
+  }
+
+  /**
+   * A function returning a Promise that can be retried.
+   *
+   * @private
+   * @callback retryFunction
+   * @return {Promise} A Promise indicating the function's success.
+   */
+
+  /**
+   * Helper method that retries failed Promises.
+   *
+   * If 'delayMs' is specified, waits 'delayMs' between invocations. Otherwise,
+   * schedules the first attempt immediately, and then waits 100 milliseconds
+   * for further attempts.
+   *
+   * @private
+   * @param {number} attemptsRemaining - The number of available attempts.
+   * @param {retryFunction} func - Method returning a Promise than can be
+   * retried.
+   * @param {number=} delayMs - How long to wait before issuing a this retry.
+   * Defaults to zero.
+   * @return {Promise} - A Promise with the function'ss result if successful
+   * within `attemptsRemaining`. Otherwise, returns the last rejected Promise.
+   */
+  _retry(attemptsRemaining, func, delayMs) {
+    let self = this;
+
+    let currentDelay = delayMs || 0;
+    let nextDelay = delayMs || 100;
+
+    --attemptsRemaining;
+
+    return new Promise(resolve => {
+      setTimeout(resolve, currentDelay);
+    }).then(func).then(result => {
+      self._lastSuccessfulRequest = new Date().getTime();
+      return result;
+    }).catch(err => {
+      if (is.defined(err.code) && err.code !== GRPC_UNAVAILABLE) {
+        Firestore.log('Firestore._retry',
+            'Request failed with unrecoverable error:', err);
+        return Promise.reject(err);
+      }
+      if (attemptsRemaining === 0) {
+        Firestore.log('Firestore._retry', 'Request failed with error:', err);
+        return Promise.reject(err);
+      }
+      Firestore.log('Firestore._retry',
+          'Retrying request that failed with error:', err);
+      return self._retry(attemptsRemaining, func, nextDelay);
+    });
+  }
+
+
+  /**
+   * Opens the provided stream and waits for it to become healthy. If an error
+   * occurs before the first byte is read, the method rejects the returned
+   * Promise.
+   *
+   * @private
+   * @param {Stream} resultStream - The Node stream to monitor.
+   * @param {Object=} request - If specified, the request that should be written
+   * to the stream after it opened.
+   * @return {Promise.<Stream>} The given Stream once it is considered healthy.
+   */
+  _initializeStream(resultStream, request) {
+    /** The last error we received and have not forwarded yet. */
+    let errorReceived = null;
+
+    /**
+     * Whether we have resolved the Promise and returned the stream to the
+     * caller.
+     */
+    let streamReleased = false;
+
+    /**
+     * Whether the stream end has been reached. This has to be forwarded to the
+     * caller..
+     */
+    let endCalled = false;
+
+    return new Promise((resolve, reject)  => {
+      const releaseStream = () => {
+        if (errorReceived) {
+          Firestore.log('Firestore._initializeStream', 'Emit error:',
+              errorReceived);
+          resultStream.emit('error', errorReceived);
+          errorReceived = null;
+        } else if (!streamReleased) {
+          Firestore.log('Firestore._initializeStream', 'Releasing stream');
+          streamReleased = true;
+          resultStream.pause();
+          resolve(resultStream);
+          if (endCalled) {
+            setImmediate(() => {
+              Firestore.log(
+                  'Firestore._initializeStream', 'Forwarding stream close');
+              resultStream.emit('end');
+            });
+          }
+        }
+      };
+
+      // We capture any errors received and buffer them until the caller has
+      // registered a listener. We register our event handler as early as
+      // possible to avoid the default stream behavior (which is just to log and
+      // continue).
+      resultStream.on('readable', () => {
+        releaseStream();
+      });
+
+      resultStream.on('end', () => {
+        Firestore.log('Firestore._initializeStream', 'Received stream end');
+        endCalled = true;
+        releaseStream();
+      });
+
+      resultStream.on('error', err => {
+        Firestore.log('Firestore._initializeStream', 'Received stream error');
+        // If we receive an error before we were able to receive any data,
+        // reject this stream.
+        if (!streamReleased) {
+          Firestore.log('Firestore.readStream', 'Received initial error:', err);
+          streamReleased = true;
+          reject(err);
+        } else {
+          errorReceived = err;
+        }
+      });
+
+      if (is.defined(request)) {
+        Firestore.log('Firestore._initializeStream', 'Sending request: %j',
+            request);
+        resultStream.write(request, 'utf-8', () => {
+          Firestore.log('Firestore.readWriteStream',
+              'Marking stream as healthy');
+          releaseStream();
+        });
+      }
     });
   }
 
@@ -490,17 +790,28 @@ class Firestore extends commonGrpc.Service{
    * @param {function} method - Veneer API endpoint that takes a request and
    * GAX options.
    * @param {Object} request - The Protobuf request to send.
-   * @return {Object} A Promise with the request result.
+   * @param {boolean} allowRetries - Whether this is an idempotent request that
+   * can be retried.
+   * @return {Promise.<Object>} A Promise with the request result.
    */
-  request(method, request) {
+  request(method, request, allowRetries) {
+    let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
+
     return this._decorateRequest(request).then(decorated => {
-      return new Promise((resolve, reject) => {
-        method(decorated.request, decorated.gax, (err, result) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(result);
-          }
+      return this._retry(attempts, () => {
+        return new Promise((resolve, reject) => {
+          Firestore.log('Firestore.request',
+              'Sending request: %j', decorated.request);
+          method(decorated.request, decorated.gax, (err, result) => {
+            if (err) {
+              Firestore.log('Firestore.request', 'Received error:', err);
+              reject(err);
+            } else {
+              Firestore.log('Firestore.request', 'Received response: %j',
+                  result);
+              resolve(result);
+            }
+          });
         });
       });
     });
@@ -510,18 +821,41 @@ class Firestore extends commonGrpc.Service{
    * A funnel for read-only streaming API requests, assigning a project ID where
    * necessary within the request options.
    *
+   * The stream is returned in paused state and needs to be resumed once all
+   * listeners are attached.
+   *
    * @package
    *
    * @param {function} method - Streaming Veneer API endpoint that takes a
    * request and GAX options.
    * @param {Object} request - The Protobuf request to send.
-   * @return {Stream} A Promise with the resulting read-only stream.
+   * @param {boolean} allowRetries - Whether this is an idempotent request that
+   * can be retried.
+   * @return {Promise.<Stream>} A Promise with the resulting read-only stream.
    */
-  readStream(method, request) {
-    let self = this;
+  readStream(method, request, allowRetries) {
+    let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return self._decorateRequest(request).then((decorated) => {
-      return method(decorated.request, decorated.gax);
+    return this._decorateRequest(request).then(decorated => {
+      return this._retry(attempts, () => {
+        return new Promise((resolve, reject) => {
+          try {
+            Firestore.log('Firestore.readStream',
+                'Sending request: %j', decorated.request);
+            let stream = method(decorated.request, decorated.gax);
+            let logger = through.obj(function(chunk, enc, callback) {
+              Firestore.log('Firestore.readStream',
+                  'Received response: %j', chunk);
+              this.push(chunk);
+              callback();
+            });
+            resolve(bun([stream, logger]));
+          } catch (err) {
+            Firestore.log('Firestore.readStream', 'Received error:', err);
+            reject(err);
+          }
+        }).then(stream => this._initializeStream(stream));
+      });
     });
   }
 
@@ -529,152 +863,93 @@ class Firestore extends commonGrpc.Service{
    * A funnel for read-write streaming API requests, assigning a project ID
    * where necessary for all writes.
    *
+   * The stream is returned in paused state and needs to be resumed once all
+   * listeners are attached.
+   *
    * @package
    *
    * @param {function} method - Streaming Veneer API endpoint that takes GAX
    * options.
-   * @return {Stream} A Promise with the resulting read/write stream.
+   * @param {Object} request - The Protobuf request to send as the first stream
+   * message.
+   * @param {boolean} allowRetries - Whether this is an idempotent request that
+   * can be retried.
+   * @return {Promise.<Stream>} A Promise with the resulting read/write stream.
    */
-  readWriteStream(method) {
+  readWriteStream(method, request, allowRetries) {
     let self = this;
+    let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return self._decorateRequest({}).then((decorated) => {
-      let requestStream = method(decorated.gax);
+    return this._decorateRequest({}).then(decorated => {
+      return this._retry(attempts, () => {
+        return Promise.resolve().then(() => {
+          Firestore.log('Firestore.readWriteStream', 'Opening stream');
+          // The generated bi-directional streaming API takes the list of GAX
+          // headers as its second argument.
+          let requestStream = method({}, decorated.gax);
 
-      let transform = through.obj(function(chunk, encoding, callback) {
-        let decoratedChunk = extend(true, {}, chunk);
-        common.util.replaceProjectIdToken(decoratedChunk,
-            self._referencePath.projectId);
-        this.push(decoratedChunk);
-        callback();
+          // The transform stream to assign the project ID.
+          let transform = through.obj(function(chunk, encoding, callback) {
+                let decoratedChunk = extend(true, {}, chunk);
+                common.util.replaceProjectIdToken(decoratedChunk,
+                    self._referencePath.projectId);
+                Firestore.log('Firestore.readWriteStream',
+                        'Streaming request: %j', decoratedChunk);
+                requestStream.write(decoratedChunk, encoding, callback);
+              });
+
+          let logger = through.obj(function(chunk, enc, callback) {
+            Firestore.log('Firestore.readWriteStream',
+                'Received response: %j', chunk);
+            this.push(chunk);
+            callback();
+          });
+
+          let resultStream = bun([transform, requestStream, logger]);
+          return this._initializeStream(resultStream, request);
+        });
       });
-
-      return bun([transform, requestStream]);
     });
-  }
-
-  /**
-   * Creates a [GeoPoint]{@link firestore.GeoPoint}.
-   *
-   * @param {number} latitude The latitude as a number between -90 and 90.
-   * @param {number} longitude The longitude as a number between -180 and 180.
-   * @return {firestore.GeoPoint} The GeoPoint pointing to the provided
-   * location.
-   *
-   * @example
-   * let data = {
-   *   google: Firestore.geoPoint(37.422, 122.084)
-   * };
-   *
-   * firestore.doc('col/doc').set(data).then(() => {
-   *   console.log(`Location is ${data.google.latitude}, ` +
-   *     `${data.google.longitude}`);
-   * });
-   */
-  static geoPoint(latitude, longitude) {
-    validate.isNumber('latitude', latitude);
-    validate.isNumber('longitude', longitude);
-
-    return new GeoPoint(latitude, longitude);
-  }
-
-  /**
-   * Creates an escaped field path from a list of field name components.
-   *
-   * @public
-   *
-   * @param {Array.<string>|...string} varArgs The unescaped components to
-   * encode into the field path.
-   * @return {string} A Firestore field path.
-   *
-   * @example
-   * let documentRef = firestore.doc('col/doc');
-   * let data = { outer: { inner1: 'foo', inner2: 'bar' }};
-   * let fieldPath = Firestore.fieldPath('outer', 'inner1');
-   *
-   * documentRef.set(data).then(() => {
-   *   return documentRef.get();
-   * }).then((document) => {
-   *   console.log(`Inner1 is defined: ${document.get(fieldPath)}`);
-   *   return documentRef.update({ fieldPath: Firestore.FieldValue.delete() });
-   * }).then(() => {
-   *   return documentRef.get();
-   * }).then((document) => {
-   *   console.log(`Inner1 is undefined: ${document.get(fieldPath)}`);
-   * });
-   */
-  static fieldPath(varArgs) {
-    varArgs = is.array(arguments[0]) ? arguments[0] : [].slice.call(arguments);
-
-    for (let i = 0; i < varArgs.length; ++i) {
-      validate.isString(i, varArgs[i]);
-    }
-
-    return DocumentSnapshot.encodeFieldPath(varArgs);
   }
 }
 
 /**
+ * A logging function that takes a single string.
+ *
  * @package
+ * @callback firestore.logFunction
+ * @param {string} Log message
  */
-Firestore.deleteSentinel = {};
 
 /**
+ * Log function to use for debug output. By default, we don't perform any
+ * logging.
+ *
  * @package
+ * @type {firestore.logFunction}
  */
-Firestore.serverTimestampSentinel = {};
+Firestore.log = function() {};
 
 /**
- * Sentinel values that can be used when writing documents with set() or
- * update().
+ * Sets the log function for all active Firestore instances.
  *
  * @public
+ * @param {firestore.logFunction} logger - A log function that takes a single
+ * string.
  */
-Firestore.FieldValue = {};
+function setLogFunction(logger) {
+  validate.isFunction('logger', logger);
 
-/**
- * Returns a sentinel used with update() to mark a field for deletion.
- *
- * @public
- *
- * @return {*} The sentinel value to use in your objects.
- *
- * @example
- * let documentRef = firestore.doc('col/doc');
- * let data = { a: 'b', c: 'd' };
- *
- * documentRef.set(data).then(() => {
- *   return documentRef.update({a: Firestore.FieldValue.delete()});
- * }).then(() => {
- *   // Document now only contains { c: 'd' }
- * });
- */
-Firestore.FieldValue.delete = function() {
-  return Firestore.deleteSentinel;
-};
+  Firestore.log = function(methodName, varargs) {
+    varargs = Array.prototype.slice.call(arguments, 1);
 
-/**
- * Returns a sentinel used with set(), create() or update() to include a
- * server-generated timestamp in the written data.
- *
- * @public
- *
- * @return {*} The sentinel value to use in your objects.
- *
- * @example
- * let documentRef = firestore.doc('col/doc');
- *
- * documentRef.set({
- *   time: Firestore.FieldValue.serverTimestamp()
- * }).then(() => {
- *   return documentRef.get();
- * }).then(doc => {
- *   console.log(`Server time set to ${doc.get('time')}`);
- * });
-  */
-Firestore.FieldValue.serverTimestamp = function() {
-  return Firestore.serverTimestampSentinel;
-};
+    let formattedMessage = util.format.apply(null, varargs);
+    let time = new Date().toISOString();
+    logger(
+        `Firestore (${libVersion}) ${time} [${methodName}]: ` +
+        formattedMessage);
+  };
+}
 
 // Initializing dependencies that require that Firestore class type.
 let reference = require('./reference')(Firestore);
@@ -684,10 +959,17 @@ let document = require('./document')(Firestore, DocumentReference);
 DocumentSnapshot = document.DocumentSnapshot;
 GeoPoint = document.GeoPoint;
 validate = require('./validate.js')({
-  DocumentReference: reference.validateDocumentReference
+  DocumentReference: reference.validateDocumentReference,
+  ResourcePath: ResourcePath.validateResourcePath
 });
 WriteBatch = require('./write-batch')(Firestore, DocumentReference).WriteBatch;
 Transaction = require('./transaction')(Firestore);
 
 module.exports = Firestore;
+module.exports.default = Firestore;
+module.exports.Firestore = Firestore;
+module.exports.FieldPath = FieldPath;
+module.exports.FieldValue = FieldValue;
+module.exports.GeoPoint = GeoPoint;
+module.exports.setLogFunction = setLogFunction;
 module.exports.v1beta1 = v1beta1;

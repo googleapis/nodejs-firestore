@@ -16,20 +16,23 @@
 
 'use strict';
 
-let assert = require('assert');
-let extend = require('extend');
-let grpc = require('grpc');
-let is = require('is');
-let through = require('through2');
+const assert = require('assert');
+const extend = require('extend');
+const grpc = require('grpc');
+const is = require('is');
+const through = require('through2');
 
-let Firestore = require('../');
-let reference = require('../src/reference')(Firestore);
-let DocumentReference = reference.DocumentReference;
-let DocumentSnapshot = require('../src/document')(
+const Firestore = require('../');
+const reference = require('../src/reference')(Firestore);
+const DocumentReference = reference.DocumentReference;
+const DocumentSnapshot = require('../src/document')(
   Firestore, DocumentReference).DocumentSnapshot;
-let Path = require('../src/path');
+const ResourcePath = require('../src/path').ResourcePath;
 
-const databaseRoot = 'projects/test-project/databases/(default)';
+const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+
+// Change the argument to 'console.log' to enable debug output.
+Firestore.setLogFunction(() => {});
 
 function createInstance() {
   return new Firestore({
@@ -40,7 +43,8 @@ function createInstance() {
 
 function snapshot(relativePath, data) {
   const snapshot = new DocumentSnapshot.Builder();
-  let path = Path.fromName(`${databaseRoot}/documents/${relativePath}`);
+  let path = ResourcePath.fromSlashSeparatedString(
+      `${DATABASE_ROOT}/documents/${relativePath}`);
   snapshot.ref = new DocumentReference({}, path);
   snapshot.fieldsProto = DocumentSnapshot.encodeFields(data);
   snapshot.readTime = '1970-01-01T00:00:00.000000000Z';
@@ -156,33 +160,57 @@ function select(field) {
   return { select: select };
 }
 
-function startAt(value, before) {
-  return {
+function startAt(before, value) {
+  let cursor = {
     startAt: {
       before: before,
-      values: [{
-        stringValue: value,
-        value_type: 'stringValue'
-      }]
+      values: []
     }
   };
+
+  let values = [].slice.call(arguments, 1);
+
+  for (value of values) {
+    if (is.string(value)) {
+      cursor.startAt.values.push({
+        stringValue: value,
+        value_type: 'stringValue'
+      });
+    } else {
+      cursor.startAt.values.push(value);
+    }
+  }
+
+  return cursor;
 }
 
-function endAt(value, before) {
-  return {
+function endAt(before, value) {
+  let cursor = {
     endAt: {
       before: before,
-      values: [{
-        stringValue: value,
-        value_type: 'stringValue'
-      }]
+      values: []
     }
   };
+
+  let values = [].slice.call(arguments, 1);
+
+  for (value of values) {
+    if (is.string(value)) {
+      cursor.endAt.values.push({
+        stringValue: value,
+        value_type: 'stringValue'
+      });
+    } else {
+      cursor.endAt.values.push(value);
+    }
+  }
+
+  return cursor;
 }
 
 function buildQuery(protoComponent) {
   let query = {
-    parent: databaseRoot,
+    parent: DATABASE_ROOT,
     structuredQuery: {
       from: [{
         collectionId: 'collectionId'
@@ -214,7 +242,7 @@ function document(name) {
     value_type: 'stringValue'
   };
 
-  document.name = `${databaseRoot}/documents/collectionId/${name}`;
+  document.name = `${DATABASE_ROOT}/documents/collectionId/${name}`;
 
   return { document: document, readTime: {seconds: 5, nanos: 6} };
 }
@@ -305,6 +333,21 @@ describe('query interface', function() {
     });
   });
 
+  it('retries on stream failure', function() {
+    let attempts = 0;
+    firestore.api.Firestore._runQuery = function() {
+      ++attempts;
+      throw new Error('Expected error');
+    };
+
+    let query = firestore.collection('collectionId');
+    return query.get().then(() => {
+      throw new Error('Unexpected success');
+    }).catch(() => {
+      assert.equal(5, attempts);
+    });
+  });
+
   it('supports empty streams', function(callback) {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request);
@@ -332,6 +375,7 @@ describe('query interface', function() {
       assert.equal('1970-01-01T00:00:05.000000006Z', results.readTime);
       assert.equal('first', results.docs[0].get('first'));
       assert.equal('second', results.docs[1].get('second'));
+      assert.equal(2, results.docChanges.length);
 
       let count = 0;
 
@@ -347,19 +391,7 @@ describe('query interface', function() {
     });
   });
 
-  it('handles stream exception', function() {
-    firestore.api.Firestore._runQuery = function() {
-      return stream(new Error('Expected error'));
-    };
-
-    return firestore.collection('collectionId').get().then(() => {
-      throw new Error('Unexpected success in Promise');
-    }).catch((err) => {
-      assert.equal(err.message, 'Expected error');
-    });
-  });
-
-  it('returns error', function() {
+  it('handles stream exception at initialization', function() {
     let query = firestore.collection('collectionId');
 
     query._stream = function() {
@@ -372,6 +404,31 @@ describe('query interface', function() {
       assert.equal(err.message, 'Expected error');
     });
   });
+
+  it('handles stream exception during initialization', function() {
+    firestore.api.Firestore._runQuery = function() {
+      return stream(new Error('Expected error'));
+    };
+
+    return firestore.collection('collectionId').get().then(() => {
+      throw new Error('Unexpected success in Promise');
+    }).catch((err) => {
+      assert.equal(err.message, 'Expected error');
+    });
+  });
+
+  it('handles stream exception after initialization', function() {
+    firestore.api.Firestore._runQuery = function() {
+      return stream(document('first'), new Error('Expected error'));
+    };
+
+    return firestore.collection('collectionId').get().then(() => {
+      throw new Error('Unexpected success in Promise');
+    }).catch((err) => {
+      assert.equal(err.message, 'Expected error');
+    });
+  });
+
 
   it('streams results', function(callback) {
     firestore.api.Firestore._runQuery = function(request) {
@@ -464,12 +521,14 @@ describe('where() interface', function() {
 
   it('accepts field path', function() {
     firestore.api.Firestore._runQuery = function(request) {
-      requestEquals(request, fieldFilters('foo.bar', 'EQUAL', 'foobar'));
+      requestEquals(request, fieldFilters(
+          'foo.bar', 'EQUAL', 'foobar', 'bar.foo', 'EQUAL', 'foobar'));
       return stream();
     };
 
     let query = firestore.collection('collectionId');
     query = query.where('foo.bar', '=', 'foobar');
+    query = query.where(new Firestore.FieldPath('bar', 'foo'), '=', 'foobar');
     return query.get();
   });
 
@@ -505,8 +564,8 @@ describe('where() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query = query.orderBy('foo.', '=', 'foobar');
-    }, new RegExp('Argument "fieldPath" is not a valid FieldPath. Field ' +
-        '"foo." was not encoded using Firestore.fieldPath()\.'));
+    }, new RegExp('Argument "fieldPath" is not a valid FieldPath. Paths must ' +
+      'not start or end with \'\.\'\.'));
   });
 
   it('verifies operator', function() {
@@ -566,12 +625,14 @@ describe('orderBy() interface', function() {
 
   it('accepts field path', function() {
     firestore.api.Firestore._runQuery = function(request) {
-      requestEquals(request, orderBy('foo.bar', 'ASCENDING'));
+      requestEquals(request, orderBy(
+          'foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING'));
       return stream();
     };
 
     let query = firestore.collection('collectionId');
     query = query.orderBy('foo.bar');
+    query = query.orderBy(new Firestore.FieldPath('bar', 'foo'));
     return query.get();
   });
 
@@ -579,8 +640,22 @@ describe('orderBy() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query = query.orderBy('foo.');
-    }, new RegExp('Argument "fieldPath" is not a valid FieldPath. Field ' +
-        '"foo." was not encoded using Firestore.fieldPath().'));
+    }, new RegExp('Argument "fieldPath" is not a valid FieldPath. Paths must ' +
+        'not start or end with \'.\'\.'));
+  });
+
+  it('rejects call after cursor', function() {
+    let query = firestore.collection('collectionId');
+
+    assert.throws(function() {
+      query = query.orderBy('foo').startAt('foo').orderBy('foo');
+    }, new RegExp('Cannot specify an orderBy\\(\\) constraint after calling ' +
+        'startAt\\(\\), startAfter\\(\\), endBefore\\(\\) or endAt\\(\\)\\.'));
+
+    assert.throws(function() {
+      query = query.orderBy('foo').endAt('foo').orderBy('foo');
+    }, new RegExp('Cannot specify an orderBy\\(\\) constraint after calling ' +
+        'startAt\\(\\), startAfter\\(\\), endBefore\\(\\) or endAt\\(\\)\\.'));
   });
 
   it('concatenates orders', function() {
@@ -623,7 +698,7 @@ describe('limit() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.limit(Infinity);
-    }, /Argument "n" is not a valid integer./);
+    }, /Argument "limit" is not a valid integer./);
   });
 
   it('uses latest limit', function() {
@@ -660,7 +735,7 @@ describe('offset() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.offset(Infinity);
-    }, /Argument "n" is not a valid integer\./);
+    }, /Argument "offset" is not a valid integer\./);
   });
 
   it('uses latest offset', function() {
@@ -689,10 +764,10 @@ describe('select() interface', function() {
     };
 
     let collection = firestore.collection('collectionId');
-    let query = collection.select('a', 'b.c');
+    let query = collection.select('a', new Firestore.FieldPath('b', 'c'));
 
     return query.get().then(() => {
-      return collection.select(['a', 'b.c']).get();
+      return collection.select('a', 'b.c').get();
     });
   });
 
@@ -701,12 +776,12 @@ describe('select() interface', function() {
     assert.throws(function() {
       query.select(1);
     },  new RegExp('Argument at index 0 is not a valid FieldPath. ' +
-        'Input is not a string.'));
+        'Paths must be strings or FieldPath objects.'));
 
     assert.throws(function() {
       query.select('.');
-    },  new RegExp('Argument at index 0 is not a valid FieldPath. Field "\." ' +
-        'was not encoded using Firestore.fieldPath().'));
+    }, new RegExp('Argument at index 0 is not a valid FieldPath. Paths must ' +
+      'not start or end with \'.\'\.'));
   });
 
   it('uses latest field mask', function() {
@@ -720,7 +795,7 @@ describe('select() interface', function() {
     return query.get();
   });
 
-  it('supports __name__', function() {
+  it('implicitly adds FieldPath.documentId()', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request, select('__name__'));
       return stream();
@@ -739,19 +814,72 @@ describe('startAt() interface', function() {
     firestore = createInstance();
   });
 
-  it('accepts object', function() {
+  it('accepts fields', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request,
-        orderBy('foo', 'ASCENDING'),
-        startAt('bar', true)
+        orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+        startAt(true, 'foo', 'bar')
       );
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').startAt({foo: 'bar'});
+    query = query.orderBy('foo').orderBy('bar').startAt('foo', 'bar');
     return query.get();
+  });
+
+  it('accepts FieldPath.documentId()', function() {
+    firestore.api.Firestore._runQuery = function(request) {
+      requestEquals(request,
+          orderBy('__name__', 'ASCENDING'),
+          startAt(true, {
+            value_type: 'referenceValue',
+            referenceValue: 'projects/test-project/databases/(default)/' +
+                'documents/collectionId/doc'
+          })
+      );
+
+      return stream();
+    };
+
+    let doc = snapshot('collectionId/doc', {foo: 'bar'});
+    let query = firestore.collection('collectionId');
+
+    return Promise.all([
+      query.orderBy(Firestore.FieldPath.documentId()).startAt(
+          doc.id).get(),
+      query.orderBy(Firestore.FieldPath.documentId()).startAt(
+          doc.ref).get()
+    ]);
+  });
+
+  it('validates value for FieldPath.documentId()', function() {
+    let query = firestore.collection('coll/doc/coll');
+
+    assert.throws(() => {
+      query.orderBy(Firestore.FieldPath.documentId()).startAt(
+          42);
+    }, new RegExp('The corresponding value for FieldPath.documentId\\(\\) ' +
+        'must be a string or a DocumentReference\\.'));
+
+    assert.throws(() => {
+      query.orderBy(Firestore.FieldPath.documentId()).startAt(
+          firestore.doc('coll/doc/other/doc'));
+    }, new RegExp('\'coll/doc/other/doc\' is not part of the query result ' +
+        'set and cannot be used as a query boundary.'));
+
+    assert.throws(() => {
+      query.orderBy(Firestore.FieldPath.documentId()).startAt(
+          firestore.doc('coll/doc/coll_suffix/doc'));
+    }, new RegExp('\'coll/doc/coll_suffix/doc\' is not part of the query ' +
+        'result set and cannot be used as a query boundary.'));
+
+    assert.throws(() => {
+      query.orderBy(Firestore.FieldPath.documentId()).startAt(
+          firestore.doc('coll/doc'));
+    }, new RegExp('\'coll/doc\' is not part of the query result set ' +
+        'and cannot be used as a query boundary.'));
   });
 
   it('requires order by', function() {
@@ -759,37 +887,23 @@ describe('startAt() interface', function() {
     query = query.orderBy('foo');
 
     assert.throws(() => {
-      query.startAt({foo: 'bar', bar: 'foo'});
-    }, /Field "bar" does not have a corresponding OrderBy constraint\./);
+      query.startAt('foo', 'bar');
+    }, new RegExp('Too many cursor values specified\\. The specified values ' +
+        'must match the orderBy\\(\\) constraints of the query\\.'));
   });
 
   it('can overspecify order by', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request,
         orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-        startAt('bar', true)
+        startAt(true, 'foo')
       );
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').orderBy('bar').startAt({foo: 'bar'});
-    return query.get();
-  });
-
-  it('accepts document', function() {
-    firestore.api.Firestore._runQuery = function(request) {
-      requestEquals(request,
-        orderBy('foo', 'ASCENDING'),
-        startAt('bar', true)
-      );
-
-      return stream();
-    };
-
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').startAt(snapshot('col/doc', {foo: 'bar'}));
+    query = query.orderBy('foo').orderBy('bar').startAt('foo');
     return query.get();
   });
 
@@ -797,21 +911,22 @@ describe('startAt() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.startAt(123);
-    }, /Specify either a valid Document or JavaScript object as your.*\./);
+    }, new RegExp('Too many cursor values specified\\. The specified values ' +
+        'must match the orderBy\\(\\) constraints of the query\\.'));
   });
 
   it('uses latest value', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request,
         orderBy('foo', 'ASCENDING'),
-        startAt('bar', true)
+        startAt(true, 'bar')
       );
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').startAt({foo: 'foo'}).startAt({foo: 'bar'});
+    query = query.orderBy('foo').startAt('foo').startAt('bar');
     return query.get();
   });
 });
@@ -823,33 +938,18 @@ describe('startAfter() interface', function() {
     firestore = createInstance();
   });
 
-  it('accepts object', function() {
+  it('accepts fields', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request,
-        orderBy('foo', 'ASCENDING'),
-        startAt('bar', false)
+        orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+        startAt(false, 'foo', 'bar')
       );
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').startAfter({foo: 'bar'});
-    return query.get();
-  });
-
-  it('accepts document', function() {
-    firestore.api.Firestore._runQuery = function(request) {
-      requestEquals(request,
-        orderBy('foo', 'ASCENDING'),
-        startAt('bar', false)
-      );
-
-      return stream();
-    };
-
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').startAfter(snapshot('col/doc', {foo: 'bar'}));
+    query = query.orderBy('foo').orderBy('bar').startAfter('foo', 'bar');
     return query.get();
   });
 
@@ -857,22 +957,22 @@ describe('startAfter() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.startAfter(123);
-    }, /Specify either a valid Document or JavaScript object as your Query.*/);
+    }, new RegExp('Too many cursor values specified\\. The specified values ' +
+        'must match the orderBy\\(\\) constraints of the query\\.'));
   });
 
   it('uses latest value', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request,
         orderBy('foo', 'ASCENDING'),
-        startAt('bar', false)
+        startAt(false, 'bar')
       );
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').startAfter({foo: 'foo'})
-      .startAfter({foo: 'bar'});
+    query = query.orderBy('foo').startAfter('foo').startAfter('bar');
     return query.get();
   });
 });
@@ -884,33 +984,18 @@ describe('endAt() interface', function() {
     firestore = createInstance();
   });
 
-  it('accepts object', function() {
+  it('accepts fields', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request,
-        orderBy('foo', 'ASCENDING'),
-        endAt('bar', false)
+        orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+        endAt(false, 'foo', 'bar')
       );
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').endAt({foo: 'bar'});
-    return query.get();
-  });
-
-  it('accepts document', function() {
-    firestore.api.Firestore._runQuery = function(request) {
-      requestEquals(request,
-        orderBy('foo', 'ASCENDING'),
-        endAt('bar', false)
-      );
-
-      return stream();
-    };
-
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').endAt(snapshot('col/doc', {foo: 'bar'}));
+    query = query.orderBy('foo').orderBy('bar').endAt('foo', 'bar');
     return query.get();
   });
 
@@ -918,21 +1003,22 @@ describe('endAt() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.endAt(123);
-    }, /Specify either a valid Document or JavaScript object as your Query.*/);
+    }, new RegExp('Too many cursor values specified\\. The specified values ' +
+        'must match the orderBy\\(\\) constraints of the query\\.'));
   });
 
   it('uses latest value', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request,
         orderBy('foo', 'ASCENDING'),
-        endAt('bar', false)
+        endAt(false, 'bar')
       );
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').endAt({foo: 'foo'}).endAt({foo: 'bar'});
+    query = query.orderBy('foo').endAt('foo').endAt('bar');
     return query.get();
   });
 });
@@ -944,33 +1030,18 @@ describe('endBefore() interface', function() {
     firestore = createInstance();
   });
 
-  it('accepts object', function() {
+  it('accepts fields', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request,
-        orderBy('foo', 'ASCENDING'),
-        endAt('bar', true)
+          orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+        endAt(true, 'foo', 'bar')
       );
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').endBefore({foo: 'bar'});
-    return query.get();
-  });
-
-  it('accepts document', function() {
-    firestore.api.Firestore._runQuery = function(request) {
-      requestEquals(request,
-        orderBy('foo', 'ASCENDING'),
-        endAt('bar', true)
-      );
-
-      return stream();
-    };
-
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').endBefore(snapshot('col/doc', {foo: 'bar'}));
+    query = query.orderBy('foo').orderBy('bar').endBefore('foo', 'bar');
     return query.get();
   });
 
@@ -978,22 +1049,22 @@ describe('endBefore() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.endBefore(123);
-    }, /Specify either a valid Document or JavaScript object as your Query.*/);
+    }, new RegExp('Too many cursor values specified\\. The specified values ' +
+        'must match the orderBy\\(\\) constraints of the query\\.'));
   });
 
   it('uses latest value', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request,
         orderBy('foo', 'ASCENDING'),
-        endAt('bar', true)
+        endAt(true, 'bar')
       );
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').endBefore({foo: 'foo'})
-      .endBefore({foo: 'bar'});
+    query = query.orderBy('foo').endBefore('foo').endBefore('bar');
     return query.get();
   });
 
@@ -1006,11 +1077,11 @@ describe('endBefore() interface', function() {
     };
 
     let query = firestore.collection('collectionId').limit(10);
-    let adjustedQuery = query.orderBy('foo').endBefore({foo: 'foo'});
+    let adjustedQuery = query.orderBy('foo').endBefore('foo');
 
     return query.get().then(() => {
       expectedResult = buildQuery(limit(10), orderBy('foo', 'ASCENDING'),
-        endAt('foo', true));
+        endAt(true, 'foo'));
       return adjustedQuery.get();
     });
   });

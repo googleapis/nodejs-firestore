@@ -20,7 +20,16 @@
 
 'use strict';
 
-let is = require('is');
+const is = require('is');
+
+/**
+ * Formats the given word as plural conditionally given the preceding number.
+ *
+ * @private
+ */
+function formatPlural(num, str) {
+  return `${num} ${str}` + (num === 1 ? '' : 's');
+}
 
 /**
  * Provides argument validation for the Firestore Public API. Exposes validators
@@ -55,7 +64,7 @@ module.exports = (validators) => {
       return is.number(value) && value >= min && value <= max;
     },
     object: is.object,
-    string: is.string,
+    string: is.string
   }, validators);
 
   let exports = {};
@@ -91,6 +100,43 @@ module.exports = (validators) => {
       register(type);
     }
   }
+
+  /**
+   * Verifies that 'args' has at least 'minSize' elements.
+   *
+   * @param {string} funcName - The function name to use in the error message.
+   * @param {Array.<*>} args - The array (or array-like structure) to verify.
+   * @param {number} minSize - The minimum number of elements to enforce.
+   * @throws if the expectation is not met.
+   * @return {boolean} 'true' when the minimum number of elements is available.
+   */
+  exports.minNumberOfArguments = (funcName, args, minSize) => {
+    if (args.length < minSize) {
+      throw new Error(`Function '${funcName}()' requires at least ` +
+          `${formatPlural(minSize, 'argument')}.`);
+    }
+
+    return true;
+  };
+
+  /**
+   * Verifies that 'args' has at most 'maxSize' elements.
+   *
+   * @param {string} funcName - The function name to use in the error message.
+   * @param {Array.<*>} args - The array (or array-like structure) to verify.
+   * @param {number} maxSize - The maximum number of elements to enforce.
+   * @throws if the expectation is not met.
+   * @return {boolean} 'true' when only the maximum number of elements is
+   * specified.
+   */
+  exports.maxNumberOfArguments = (funcName, args, maxSize) => {
+    if (args.length > maxSize) {
+      throw new Error(`Function '${funcName}()' accepts at most ` +
+          `${formatPlural(maxSize, 'argument')}.`);
+    }
+
+    return true;
+  };
 
   return exports;
 };

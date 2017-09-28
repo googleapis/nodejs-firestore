@@ -20,15 +20,14 @@
 
 'use strict';
 
-let assert = require('assert');
-let immutable = require('immutable');
-let is = require('is');
-let through = require('through2');
+const assert = require('assert');
+const rbtree = require('functional-red-black-tree');
+const is = require('is');
+const through = require('through2');
 
 /**
  * Injected.
  *
- * @private
  * @type firestore.DocumentChange
  */
 let DocumentChange;
@@ -36,7 +35,6 @@ let DocumentChange;
 /**
  * Injected.
  *
- * @private
  * @type firestore.DocumentReference
  */
 let DocumentReference;
@@ -44,16 +42,21 @@ let DocumentReference;
 /**
  * Injected.
  *
- * @private
  * @type firestore.DocumentSnapshot
  */
 let DocumentSnapshot;
 
 /**
- * @private
- * @type firestore.Path
+ * Injected.
+ *
+ * @type firestore.Firestore
  */
-let Path = require('./path');
+let Firestore;
+
+/**
+ * @type firestore.ResourcePath
+ */
+let ResourcePath = require('./path').ResourcePath;
 
 /**
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -76,19 +79,39 @@ const ChangeType =  {
 };
 
 /**
- * onSnapshot_() callback that receives a DocumentSnapshot.
+ * The comparator used for document watches (which should always get called with
+ * the same document).
+ *
+ * @package
+ */
+const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
+  assert(doc1 === doc2, 'Document watches only support one document.');
+  return 0;
+};
+
+/**
+ * @callback docsCallback
+ * @return {Array.<firestore.DocumentSnapshot>} An ordered list of documents.
+ */
+
+/**
+ * @callback changeCallback
+ * @return {Array.<firestore.DocumentChange>} An ordered list of document
+ * changes.
+ */
+
+/**
+ * onSnapshot() callback that receives a DocumentSnapshot.
  *
  * @package
  * @callback watchSnapshotCallback
  *
  * @param {string} readTime - The ISO 8601 time at which this snapshot was
  * obtained.
- * @param {Immutable.Map<string,firestore.DocumentSnapshot>} docMap - A
- * map (stored as a mapping from document key => DocumentSnapshot) of all
- * documents that match this watch.
- * @param {Map.<string,firestore.DocumentChange>} changeMap - A map
- * (stored as a mapping from document key => DocumentChange) of changed
- * documents since the last snapshot delivered for the watch.
+ * @param {docsCallback} docs - A callback that returns the ordered list of
+ * documents stored in this snapshot.
+ * @param {changeCallback} changes - A callback that returns the list of
+ * changed documents since the last snapshot delivered for this watch.
  */
 
 
@@ -105,11 +128,14 @@ class Watch {
    * @param {firestore.Firestore} firestore The Firestore Database client.
    * @param {Object} targetChange - A Firestore 'TargetChange' proto denoting
    * the target to listen on.
+   * @param {function} comparator - A comparator for DocumentSnapshots that
+   * is used to order the document snapshots returned by this watch.
    */
-  constructor(firestore, targetChange) {
+  constructor(firestore, targetChange, comparator) {
     this._firestore = firestore;
     this._api = firestore.api;
     this._targetChange = targetChange;
+    this._comparator = comparator;
   }
 
   /**
@@ -127,7 +153,7 @@ class Watch {
         documents: [documentRef.formattedName]
       },
       targetId: WATCH_TARGET_ID
-    });
+    }, DOCUMENT_WATCH_COMPARATOR);
   }
 
   /**
@@ -141,10 +167,10 @@ class Watch {
   static forQuery(query) {
     return new Watch(query.firestore, {
       query: query.toProto(),
-      targetId: WATCH_TARGET_ID
-    });
+      targetId: WATCH_TARGET_ID,
+    },
+    query.comparator());
   }
-
 
   /**
    * Starts a watch and attaches a listener for document change events.
@@ -162,16 +188,27 @@ class Watch {
   onSnapshot(onNext, onError) {
     let self = this;
 
-    // The current state of the query results.
-    let docMap = immutable.Map();
-    let current = false;
+    // The sorted tree of DocumentSnapshots as sent in the last snapshot. We
+    // only look at the keys.
+    let docTree = rbtree(this._comparator);
+    // A map of document names to DocumentSnapshots for the last sent snapshot.
+    let docMap = new Map();
+    // The accumulates map of document changes (keyed by document name) for the
+    // current snapshot.
     let changeMap = new Map();
+
+    // The current state of the query results.
+    let current = false;
     // We need this to track whether we've pushed an initial set of changes,
     // since we should push those even when there are no changes, if there \
     // aren't docs.
     let hasPushed = false;
     // The server assigns and updates the resume token.
     let resumeToken = null;
+
+    // Indicates whether we are interested in data from the stream. Set to false
+    // in the the 'unsubscribe()' callback.
+    let isActive = true;
 
     // Sentinel value for a document remove.
     const REMOVED = {};
@@ -189,12 +226,13 @@ class Watch {
 
     /** Helper to clear the docs on RESET or filter mismatch. */
     const resetDocs = function() {
+      Firestore.log('Watch.onSnapshot', 'Resetting documents');
       changeMap.clear();
 
-      docMap.forEach((value, key) => {
+      docTree.forEach((snapshot) => {
         // Mark each document as deleted. If documents are not deleted, they
         // will be send again by the server.
-        changeMap.set(key, REMOVED);
+        changeMap.set(snapshot.ref.formattedName, REMOVED);
       });
 
       current = false;
@@ -202,28 +240,43 @@ class Watch {
 
     /** Calls onError() and closes the stream. */
     const sendError = function(errMessage) {
-      stream.end();
       if (currentStream) {
         currentStream.unpipe(stream);
         currentStream.end();
         currentStream = null;
       }
+      isActive = false;
+      stream.end();
+      Firestore.log('Watch.onSnapshot', 'Invoking onError with: %s',
+          errMessage);
       onError(new Error(errMessage));
     };
 
     /** Helper to restart the outgoing stream to the backend. */
     const resetStream = function() {
+      Firestore.log('Watch.onSnapshot', 'Opening new stream');
       if (currentStream) {
         currentStream.unpipe(stream);
         currentStream.end();
         currentStream = null;
       }
+      // Note that we need to call the internal _listen API to pass additional
+      // header values in readWriteStream.
       self._firestore.readWriteStream(
-          self._api.Firestore.listen.bind(self._api.Firestore)
+          self._api.Firestore._listen.bind(self._api.Firestore),
+          request,
+          /* allowRetries= */ true
       ).then(backendStream => {
+        if (!isActive) {
+          Firestore.log('Watch.onSnapshot', 'Closing inactive stream');
+          backendStream.end();
+          return;
+        }
+
+        Firestore.log('Watch.onSnapshot', 'Opened new stream');
         currentStream = backendStream;
         currentStream.on('error', (err) => {
-          if (!is.null(resumeToken)) {
+          if (isActive && !is.null(resumeToken)) {
             request.addTarget.resumeToken = resumeToken;
             resumeToken = null;
             resetStream();
@@ -231,9 +284,20 @@ class Watch {
             sendError(err);
           }
         });
+        currentStream.on('end', () => {
+          if (isActive && !is.null(resumeToken)) {
+            Firestore.log('Watch.onSnapshot',
+                'Stream ended unexpectedly, re-opening');
+            request.addTarget.resumeToken = resumeToken;
+            resumeToken = null;
+            resetStream();
+          } else {
+            Firestore.log('Watch.onSnapshot', 'Stream ended');
+          }
+        });
         currentStream.pipe(stream);
-        currentStream.write(request);
-      });
+        currentStream.resume();
+      }).catch(sendError);
     };
 
     /**
@@ -254,36 +318,123 @@ class Watch {
       return false;
     };
 
-    /**
-     * Updates the documents in mutableMap and mutableChanges to match the
-     * current in-memory state.
-     */
-    const computeChanges = function(mutableMap, mutableChanges, readTime) {
-      mutableChanges = mutableChanges || [];
-      changeMap.forEach((value, name) => {
-        let oldDocument = mutableMap.get(name);
+    /** Splits up document changes into removals, additions, and updates. */
+    const extractChanges = function(docMap, changes, readTime) {
+      let deletes = [];
+      let adds = [];
+      let updates = [];
 
+      changes.forEach((value, name) => {
         if (value === REMOVED) {
-          if (is.defined(oldDocument)) {
-            mutableChanges.push(
-                new DocumentChange(ChangeType.removed, oldDocument));
-            mutableMap.delete(name);
+          if (docMap.has(name)) {
+            deletes.push(name);
           }
+        } else if (docMap.has(name)) {
+          value.readTime = readTime;
+          updates.push(value.build());
         } else {
           value.readTime = readTime;
-          let newDocument = value.build();
-
-          if (!is.defined(oldDocument)) {
-            mutableChanges.push(new DocumentChange(ChangeType.added,
-                newDocument));
-            mutableMap.set(name, newDocument);
-          } else if (newDocument.updateTime !== oldDocument.updateTime) {
-            mutableChanges.push(
-                new DocumentChange(ChangeType.modified, newDocument));
-            mutableMap.set(name, newDocument);
-          }
+          adds.push(value.build());
         }
       });
+
+      return { deletes, adds, updates };
+    };
+
+    /**
+     * Applies the mutations in changeMap to both the document tree and the
+     * document lookup map. Modified docMap in-place and returns the updated
+     * state.
+     */
+    const computeSnapshot = function(docTree, docMap, changes) {
+      let updatedTree = docTree;
+      let updatedMap = docMap;
+
+      assert(docTree.length === docMap.size, 'The document tree and document ' +
+          'map should have the same number of entries.');
+
+      /**
+       * Applies a document delete to the document tree and the document map.
+       * Returns the corresponding DocumentChange event.
+       */
+      const deleteDoc = function(name) {
+        assert(updatedMap.has(name), 'Document to delete does not exist');
+        let oldDocument = updatedMap.get(name);
+        let existing = updatedTree.find(oldDocument);
+        let oldIndex = existing.index;
+        updatedTree = existing.remove();
+        updatedMap.delete(name);
+        return new DocumentChange(ChangeType.removed,
+            oldDocument, oldIndex, -1);
+      };
+
+      /**
+       * Applies a document add to the document tree and the document map.
+       * Returns the corresponding DocumentChange event.
+       */
+      const addDoc = function(newDocument) {
+        let name = newDocument.ref.formattedName;
+        assert(!updatedMap.has(name), 'Document to add already exists');
+        updatedTree = updatedTree.insert(newDocument, null);
+        let newIndex = updatedTree.find(newDocument).index;
+        updatedMap.set(name, newDocument);
+        return new DocumentChange(ChangeType.added, newDocument, -1, newIndex);
+      };
+
+      /**
+       * Applies a document modification to the document tree and the document
+       * map. Returns the DocumentChange event for successful modifications.
+       */
+      const modifyDoc = function(newDocument) {
+        let name = newDocument.ref.formattedName;
+        assert(updatedMap.has(name), 'Document to modify does not exist');
+        let oldDocument = updatedMap.get(name);
+        if (oldDocument.updateTime !== newDocument.updateTime) {
+          let removeChange = deleteDoc(name);
+          let addChange = addDoc(newDocument);
+          return new DocumentChange(ChangeType.modified, newDocument,
+              removeChange.oldIndex, addChange.newIndex);
+        }
+        return null;
+      };
+
+      // Process the sorted changes in the order that is expected by our
+      // clients (removals, additions, and then modifications). We also need to
+      // sort the individual changes to assure that oldIndex/newIndex keep
+      // incrementing.
+      let appliedChanges = [];
+
+      changes.deletes.sort((name1, name2) => {
+        // Deletes are sorted based on the order of the existing document.
+        return self._comparator(updatedMap.get(name1), updatedMap.get(name2));
+      });
+      changes.deletes.forEach((name) => {
+        let change = deleteDoc(name);
+        if (change) {
+          appliedChanges.push(change);
+        }
+      });
+
+      changes.adds.sort(self._comparator);
+      changes.adds.forEach((snapshot) => {
+        let change = addDoc(snapshot);
+        if (change) {
+          appliedChanges.push(change);
+        }
+      });
+
+      changes.updates.sort(self._comparator);
+      changes.updates.forEach((snapshot) => {
+        let change = modifyDoc(snapshot);
+        if (change) {
+          appliedChanges.push(change);
+        }
+      });
+
+      assert(updatedTree.length === updatedMap.size, 'The update document ' +
+          'tree and document map should have the same number of entries.');
+
+      return { updatedTree, updatedMap, appliedChanges };
     };
 
     /**
@@ -291,17 +442,20 @@ class Watch {
      * user's callback. Clears the current changes on completion.
      */
     const push = function(readTime) {
-      let changes = [];
+      let changes = extractChanges(docMap, changeMap, readTime);
+      let diff = computeSnapshot(docTree, docMap, changes);
 
-      docMap = docMap.withMutations(mutableMap => {
-        computeChanges(mutableMap, changes, readTime);
-      });
-
-      if (!hasPushed || changes.length > 0) {
-        onNext(readTime, docMap, changes);
+      if (!hasPushed || diff.appliedChanges.length > 0) {
+        Firestore.log('Watch.onSnapshot',
+            'Sending snapshot with %d changes and %d documents',
+            diff.appliedChanges.length, diff.updatedTree.length);
+        onNext(readTime, () => diff.updatedTree.keys,
+            () => diff.appliedChanges);
         hasPushed = true;
       }
 
+      docTree = diff.updatedTree;
+      docMap = diff.updatedMap;
       changeMap.clear();
     };
 
@@ -310,15 +464,15 @@ class Watch {
      * the current changeMap.
      */
     const currentSize = function() {
-      return docMap.withMutations(mutableMap => {
-        computeChanges(mutableMap);
-      }).size;
+      let changes = extractChanges(docMap, changeMap);
+      return docMap.size + changes.adds.length - changes.deletes.length;
     };
 
     resetStream();
 
     stream.on('data', proto => {
       if (proto.targetChange) {
+        Firestore.log('Watch.onSnapshot', 'Processing target change');
         const change = proto.targetChange;
         const noTargetIds = !change.targetIds || change.targetIds.length === 0;
         if (change.targetChangeType === 'NO_CHANGE') {
@@ -356,6 +510,8 @@ class Watch {
           resumeToken = change.resumeToken;
         }
       } else if (proto.documentChange) {
+        Firestore.log('Watch.onSnapshot', 'Processing change event');
+
         // No other targetIds can show up here, but we still need to see if the
         // targetId was in the added list or removed list.
         const targetIds = proto.documentChange.targetIds || [];
@@ -377,20 +533,24 @@ class Watch {
         const name = document.name;
 
         if (changed) {
+          Firestore.log('Watch.onSnapshot', 'Received document change');
           const snapshot = new DocumentSnapshot.Builder();
           snapshot.ref = new DocumentReference(
-              self.firestore, Path.fromName(name));
+              self._firestore, ResourcePath.fromSlashSeparatedString(name));
           snapshot.fieldsProto = document.fields  || {};
           snapshot.createTime = DocumentSnapshot.toISOTime(document.createTime);
           snapshot.updateTime = DocumentSnapshot.toISOTime(document.updateTime);
           changeMap.set(name, snapshot);
         } else if (removed) {
+          Firestore.log('Watch.onSnapshot', 'Received document remove');
           changeMap.set(name, REMOVED);
         }
       } else if (proto.documentDelete || proto.documentRemove) {
+        Firestore.log('Watch.onSnapshot', 'Processing remove event');
         const name = (proto.documentDelete || proto.documentRemove).document;
         changeMap.set(name, REMOVED);
       } else if (proto.filter) {
+        Firestore.log('Watch.onSnapshot', 'Processing filter update');
         if (proto.filter.count !== currentSize()) {
           // We need to remove all the current results.
           resetDocs();
@@ -401,6 +561,8 @@ class Watch {
         sendError('Unknown listen response type: ' + JSON.stringify(proto));
       }
     }).on('end', () => {
+      Firestore.log('Watch.onSnapshot', 'Processing stream end');
+      isActive = false;
       if (currentStream) {
         // Pass the event on to the underlying stream.
         currentStream.end();
@@ -408,16 +570,19 @@ class Watch {
     });
 
     return () => {
+      Firestore.log('Watch.onSnapshot', 'Ending stream');
       // Prevent further callbacks.
+      isActive = false;
       onNext = () => {};
-      onError = console.error;
+      onError = () => {};
       stream.end();
     };
   }
 }
 
-module.exports = (DocumentChangeType, DocumentReferenceType,
+module.exports = (FirestoreType, DocumentChangeType, DocumentReferenceType,
                   DocumentSnapshotType) => {
+                    Firestore = FirestoreType;
                     DocumentChange = DocumentChangeType;
                     DocumentReference = DocumentReferenceType;
                     DocumentSnapshot = DocumentSnapshotType;

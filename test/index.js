@@ -16,22 +16,25 @@
 
 'use strict';
 
-let assert = require('assert');
-let duplexify = require('duplexify');
-let extend = require('extend');
-let grpc = require('grpc');
-let GrpcService = require('@google-cloud/common').GrpcService;
-let proxyquire = require('proxyquire');
-let util = require('@google-cloud/common').util;
-let is = require('is');
-let through = require('through2');
+const assert = require('assert');
+const duplexify = require('duplexify');
+const extend = require('extend');
+const grpc = require('grpc');
+const GrpcService = require('@google-cloud/common').GrpcService;
+const proxyquire = require('proxyquire');
+const util = require('@google-cloud/common').util;
+const is = require('is');
+const through = require('through2');
 
-let Firestore = require('../');
-let reference = require('../src/reference')(Firestore);
-let DocumentReference = reference.DocumentReference;
-let CollectionReference = reference.CollectionReference;
+const Firestore = require('../');
+const reference = require('../src/reference')(Firestore);
+const DocumentReference = reference.DocumentReference;
+const CollectionReference = reference.CollectionReference;
 
-const databaseRoot = 'projects/test-project/databases/(default)';
+const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+
+// Change the argument to 'console.log' to enable debug output.
+Firestore.setLogFunction(() => {});
 
 function createInstance() {
   return new Firestore({
@@ -43,7 +46,7 @@ function createInstance() {
 function found(name) {
   return {
     found: {
-      name: `${databaseRoot}/documents/collectionId/${name}`,
+      name: `${DATABASE_ROOT}/documents/collectionId/${name}`,
       createTime: { seconds: 1, nanos: 2},
       updateTime: { seconds: 3, nanos: 4}
     },
@@ -53,7 +56,7 @@ function found(name) {
 
 function missing(name) {
   return {
-    missing: `${databaseRoot}/documents/collectionId/${name}`,
+    missing: `${DATABASE_ROOT}/documents/collectionId/${name}`,
     readTime:  { seconds: 5, nanos: 6}
   };
 }
@@ -138,7 +141,7 @@ describe('instantiation', function() {
       'projects/{{projectId}}/databases/(default)');
 
     return firestore.doc('foo/bar').set({}).then(() => {
-      assert.equal(firestore.formattedName, databaseRoot);
+      assert.equal(firestore.formattedName, DATABASE_ROOT);
     });
   });
 
@@ -149,8 +152,8 @@ describe('instantiation', function() {
 
     firestore.api.Firestore._batchGetDocuments = function(request) {
       let expectedRequest = {
-        database: databaseRoot,
-        documents: [`${databaseRoot}/documents/collectionId/documentId`]
+        database: DATABASE_ROOT,
+        documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`]
       };
       assert.deepEqual(request, expectedRequest);
 
@@ -199,7 +202,7 @@ describe('instantiation', function() {
     let unsubscribe = collection.onSnapshot(() => {});
     readStream.on('data', data => {
       assert.equal(projectIdDetected, true);
-      assert.equal(data.database, databaseRoot);
+      assert.equal(data.database, DATABASE_ROOT);
       unsubscribe();
       done();
     });
@@ -286,7 +289,15 @@ describe('doc() method', function() {
   it('requires document path', function() {
     assert.throws(function() {
       firestore.doc();
-    }, /Argument "documentPath" is not a valid string\./);
+    }, new RegExp('Argument "documentPath" is not a valid ResourcePath. ' +
+        'Path is not a string\.'));
+  });
+
+  it('doesn\'t accept empty components', function() {
+    assert.throws(function() {
+      firestore.doc('coll//doc');
+    }, new RegExp('Argument "documentPath" is not a valid ResourcePath. ' +
+        'Paths must not contain //\.'));
   });
 
   it('must point to document', function() {
@@ -317,7 +328,8 @@ describe('collection() method', function() {
   it('requires collection id', function() {
     assert.throws(function() {
       firestore.collection();
-    }, /Argument "collectionPath" is not a valid string\./);
+    },  new RegExp('Argument "collectionPath" is not a valid ResourcePath. ' +
+        'Path is not a string\.'));
   });
 
   it('must point to a collection', function() {
@@ -331,6 +343,30 @@ describe('collection() method', function() {
     assert.ok(collection.id);
     assert.ok(collection.doc);
     assert.equal(collection.id, 'collectionId');
+  });
+});
+
+describe('getCollections() method', function() {
+  let firestore;
+
+  beforeEach(function() {
+    firestore = createInstance();
+  });
+
+  it('returns collections', function() {
+    firestore.api.Firestore._listCollectionIds = function(
+        request, options, callback) {
+      assert.deepEqual(request, {
+        parent: 'projects/test-project/databases/(default)'
+      });
+
+      callback(null, ['first', 'second']);
+    };
+
+    return firestore.getCollections().then(collections => {
+      assert.equal(collections[0].path, 'first');
+      assert.equal(collections[1].path, 'second');
+    });
   });
 });
 
@@ -387,12 +423,12 @@ describe('getAll() method', function() {
       () => {
         throw new Error('Unexpected success in Promise');
       }).catch((err) => {
-        assert.equal(err.message, 'Could not detect input order for' +
-          ' "collectionId/documentId2".');
+        assert.equal(err.message, 'Did not receive document for' +
+          ' "collectionId/documentId".');
       });
   });
 
-  it('handles stream exception', function() {
+  it('handles stream exception during initialization', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
       return stream(new Error('Expected exception'));
     };
@@ -403,6 +439,84 @@ describe('getAll() method', function() {
       }).catch((err) => {
         assert.equal(err.message, 'Expected exception');
       });
+  });
+
+  it('handles stream exception after initialization', function() {
+    firestore.api.Firestore._batchGetDocuments = function() {
+      return stream(found('documentId'), new Error('Expected exception'));
+    };
+
+    return firestore.getAll(firestore.doc('collectionId/documentId')).then(
+        () => {
+          throw new Error('Unexpected success in Promise');
+        }).catch((err) => {
+          assert.equal(err.message, 'Expected exception');
+        });
+  });
+
+  it('handles serialization error', function() {
+    firestore.api.Firestore._batchGetDocuments = function() {
+      return stream(found('documentId'));
+    };
+
+    firestore.snapshot_ = function() {
+      throw new Error('Expected exception');
+    };
+
+    return firestore.getAll(firestore.doc('collectionId/documentId')).then(
+        () => {
+          throw new Error('Unexpected success in Promise');
+        }).catch((err) => {
+          assert.equal(err.message, 'Expected exception');
+        });
+  });
+
+  it('only retries on GRPC unavailable', function() {
+    let coll = firestore.collection('collectionId');
+
+    let expectedErrorAttempts = {
+      /* Cancelled */ 1: 1,
+      /* Unknown */ 2: 1,
+      /* InvalidArgument */ 3: 1,
+      /* DeadlineExceeded */ 4: 1,
+      /* NotFound */ 5: 1,
+      /* AlreadyExists */ 6: 1,
+      /* PermissionDenied */ 7: 1,
+      /* FailedPrecondition */ 9: 1,
+      /* Aborted */ 10: 1,
+      /* OutOfRange */ 11: 1,
+      /* Unimplemented */ 12: 1,
+      /* Internal */ 13: 1,
+      /* Unavailable */ 14: 5,
+      /* DataLoss */ 15: 1,
+      /* Unauthenticated */ 16: 1,
+    };
+
+    let actualErrorAttempts = {};
+
+    firestore.api.Firestore._batchGetDocuments = function(request) {
+      let errorCode = Number(request.documents[0].split('/').pop());
+      actualErrorAttempts[errorCode] =
+          (actualErrorAttempts[errorCode] || 0) + 1;
+      let error = new Error('Expected exception');
+      error.code = errorCode;
+      return stream(error);
+    };
+
+    let promises = [];
+
+    Object.keys(expectedErrorAttempts).forEach(errorCode => {
+      promises.push(
+          firestore.getAll(coll.doc(`${errorCode}`)).then(() => {
+            throw new Error('Unexpected success in Promise');
+          }).catch((err) => {
+            assert.equal(err.code, errorCode);
+          }));
+    });
+
+    return Promise.all(promises).then(() => {
+      assert.deepEqual(actualErrorAttempts, expectedErrorAttempts);
+    });
   });
 
   it('requires document reference', function() {
@@ -451,9 +565,25 @@ describe('getAll() method', function() {
           found('first'), found('second'), found('third'), found('fourth'));
       });
   });
+
+  it('accepts same document multiple times', function() {
+    firestore.api.Firestore._batchGetDocuments = function(request) {
+      assert.equal(request.documents.length, 2);
+      return stream(found('a'), found('b'));
+    };
+
+    return firestore.getAll(
+        firestore.doc('collectionId/a'),
+        firestore.doc('collectionId/a'),
+        firestore.doc('collectionId/b'),
+        firestore.doc('collectionId/a')).then((result) => {
+          resultEquals(result,
+              found('a'), found('a'), found('b'), found('a'));
+        });
+  });
 });
 
-describe('fieldPath() method', function() {
+describe('FieldPath', function() {
   let firestore;
 
   beforeEach(function() {
@@ -462,48 +592,34 @@ describe('fieldPath() method', function() {
 
   it('encodes field names', function() {
     let components = [
-      [],
       ['foo'],
       ['foo', 'bar'],
+      ['.', '`'],
+      ['\\']
     ];
 
     let results = [
-      '',
       'foo',
-      'foo.bar'
+      'foo.bar',
+      '`.`.`\\``',
+      '`\\\\`',
     ];
 
     for (let i = 0; i < components.length; ++i) {
-      assert.equal(Firestore.fieldPath(components[i]), results[i]);
+      assert.equal(
+          new Firestore.FieldPath(...components[i]).toString(), results[i]);
     }
   });
 
-  it('accepts field name arguments', function() {
-    assert.equal(Firestore.fieldPath(), '');
-    assert.equal(Firestore.fieldPath('foo', 'bar'), 'foo.bar');
+  it('doesn\'t accept empty path', function() {
+    assert.throws(() => {
+      new Firestore.FieldPath();
+    }, /Function 'FieldPath\(\)' requires at least 1 argument\./);
   });
 
   it('only accepts strings', function() {
     assert.throws(() => {
-      Firestore.fieldPath('foo', 'bar', 0);
+      new Firestore.FieldPath('foo', 'bar', 0);
     }, /Argument at index 2 is not a valid string\./);
-  });
-
-  it('escapes field names', function() {
-    let components = [
-      ['.'],
-      ['foo', '.', '\\'],
-      ['.\\.\\.'],
-    ];
-
-    let results = [
-      '`.`',
-      'foo.`.`.`\\\\`',
-      '`.\\\\.\\\\.`'
-    ];
-
-    for (let i = 0; i < components.length; ++i) {
-      assert.equal(Firestore.fieldPath(components[i]), results[i]);
-    }
   });
 });

@@ -16,17 +16,20 @@
 
 'use strict';
 
-let assert = require('assert');
-let grpc = require('grpc');
+const assert = require('assert');
+const grpc = require('grpc');
 
-let Firestore = require('../');
-let DocumentReference =
+const Firestore = require('../');
+const DocumentReference =
     require('../src/reference')(Firestore).DocumentReference;
-let document = require('../src/document')(Firestore, DocumentReference);
-let DocumentSnapshot = document.DocumentSnapshot;
-let GeoPoint = document.GeoPoint;
-let order = require('../src/order');
-let Path = require('../src/path');
+const document = require('../src/document')(Firestore, DocumentReference);
+const DocumentSnapshot = document.DocumentSnapshot;
+const GeoPoint = document.GeoPoint;
+const order = require('../src/order');
+const ResourcePath = require('../src/path').ResourcePath;
+
+// Change the argument to 'console.log' to enable debug output.
+Firestore.setLogFunction(() => {});
 
 function createInstance() {
   return new Firestore({
@@ -52,7 +55,8 @@ describe('Order', function() {
   }
 
   function resource(pathString) {
-    return wrap(new DocumentReference(firestore, Path.fromName(pathString)));
+    return wrap(new DocumentReference(firestore,
+        ResourcePath.fromSlashSeparatedString(pathString)));
   }
 
   function geopoint(lat, lng) {

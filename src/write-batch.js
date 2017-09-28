@@ -20,10 +20,11 @@
 
 'use strict';
 
+const is = require('is');
+
 /**
  * Injected.
  *
- * @private
  * @type firestore.DocumentSnapshot
  */
 let DocumentSnapshot;
@@ -31,7 +32,6 @@ let DocumentSnapshot;
 /**
  * Injected.
  *
- * @private
  * @type firestore.DocumentMask
  */
 let DocumentMask;
@@ -39,7 +39,6 @@ let DocumentMask;
 /**
  * Injected.
  *
- * @private
  * @type firestore.DocumentReference
  */
 let DocumentReference;
@@ -47,25 +46,40 @@ let DocumentReference;
 /**
  * Injected.
  *
- * @private
  * @type firestore.DocumentTransform
  */
 let DocumentTransform;
 
-/**
- * Injected.
- *
- * @private
- * @type firestore.Precondition
+/*
+ * @type firestore.FieldPath
  */
-let Precondition;
+const FieldPath = require('./path').FieldPath;
 
 /**
  * Injected.
  *
- * @private
+ * @type firestore.Firestore
  */
+let Firestore;
+
+/**
+ * Injected.
+ *
+ * @type firestore.Precondition
+ */
+let Precondition;
+
+/** Injected. */
 let validate;
+
+/**
+ * Google Cloud Functions terminates idle connections after two minutes. After
+ * longer periods of idleness, we issue transactional commits to allow for
+ * retries.
+ *
+ * @type {number}
+ */
+const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
@@ -129,30 +143,12 @@ class WriteBatch {
     this._writes = [];
   }
 
-  /**
-   * The Firestore instance for the Firestore database (useful for performing
-   * transactions, etc.).
-   *
-   * @public
-   * @type firestore.Firestore
-   * @name firestore.WriteBatch#firestore
-   * @readonly
-   *
-   * @example
-   * let writeBatch = firestore.batch();
-   *
-   * let client = writeBatch.firestore;
-   * console.log(`Root location for document is ${client.formattedName}`);
-   */
-  get firestore() {
-    return this._firestore;
-  }
 
   /**
    * Checks if this write batch has any pending operations.
    *
-   * @return {boolean}
    * @package
+   * @return {boolean}
    */
   get isEmpty() {
     return this._writes.length === 0;
@@ -163,10 +159,11 @@ class WriteBatch {
    * if a document exists at its location.
    *
    * @public
-   * @param {firestore.DocumentReference} docRef The location of the
-   *   document.
-   * @param {Object} data - The object to serialize as the document.
-   * @return {firestore.WriteBatch} The WriteBatch instance for chaining.
+   * @param {firestore.DocumentReference} documentRef - A reference to the
+   * document to be created.
+   * @param {DocumentData} data - The object to serialize as the document.
+   * @return {firestore.WriteBatch} This WriteBatch instance. Used for chaining
+   * method calls.
    *
    * @example
    * let writeBatch = firestore.batch();
@@ -178,20 +175,24 @@ class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  create(docRef, data) {
-    validate.isDocumentReference('docRef', docRef);
+  create(documentRef, data) {
+    validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data);
 
-    let document = new DocumentSnapshot(docRef,
-        DocumentSnapshot.encodeFields(data));
-    let precondition = new Precondition({ exists: false });
+    let fields = DocumentSnapshot.encodeFields(data);
 
     let write = {
-      update: document.toProto(),
-      currentDocument: precondition.toProto()
+      update: new DocumentSnapshot(documentRef, fields).toProto(),
+      currentDocument: new Precondition({exists: false}).toProto()
     };
 
     this._writes.push(write);
+
+    let documentTransform = DocumentTransform.fromObject(documentRef, data);
+
+    if (!documentTransform.isEmpty) {
+      this._writes.push({transform: documentTransform.toProto()});
+    }
 
     return this;
   }
@@ -200,14 +201,16 @@ class WriteBatch {
    * Deletes a document from the database.
    *
    * @public
-   * @param {firestore.DocumentReference} docRef The location of the
-   *   document.
-   * @param {object=} deleteOptions - The preconditions for this delete.
-   * @param {string=} deleteOptions.lastUpdateTime If set, enforces that the
+   * @param {firestore.DocumentReference} documentRef - A reference to the
+   * document to be deleted.
+   * @param {Precondition=} precondition - A precondition to enforce for this
+   * delete.
+   * @param {string=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
    * batch if the document doesn't exist or was last updated at a different
    * time.
-   * @return {firestore.WriteBatch} The WriteBatch instance for chaining.
+   * @return {firestore.WriteBatch} This WriteBatch instance. Used for chaining
+   * method calls.
    *
    * @example
    * let writeBatch = firestore.batch();
@@ -219,18 +222,16 @@ class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  delete(docRef, deleteOptions) {
-    validate.isDocumentReference('docRef', docRef);
-    validate.isOptionalPrecondition('deleteOptions', deleteOptions);
+  delete(documentRef, precondition) {
+    validate.isDocumentReference('documentRef', documentRef);
+    validate.isOptionalPrecondition('precondition', precondition);
 
     let write = {
-      delete: docRef.formattedName,
+      delete: documentRef.formattedName,
     };
 
-    if (deleteOptions) {
-      write.currentDocument = new Precondition({
-        lastUpdateTime: deleteOptions.lastUpdateTime
-      }).toProto();
+    if (precondition) {
+      write.currentDocument = new Precondition(precondition).toProto();
     }
 
     this._writes.push(write);
@@ -239,21 +240,22 @@ class WriteBatch {
   }
 
   /**
-   * Write a document with the provided object values. By default, this will
-   * create or overwrite existing documents.
+   * Write to the document referred to by the provided
+   * [DocumentReference]{@link firestore.DocumentReference}.
+   * If the document does not exist yet, it will be created. If you pass
+   * [SetOptions]{@link firestore.SetOptions}., the provided data can be merged
+   * into the existing document.
    *
    * @public
-   * @param {firestore.DocumentReference} docRef The location of the
-   *   document.
-   * @param {Object} data - The object to serialize as the document.
-   * @param {object=} writeOptions - The preconditions for this set.
-   * @param {boolean=} writeOptions.createIfMissing Whether the document should
-   * be created if it doesn't yet exist. Defaults to true.
-   * @param {string=} writeOptions.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
-   * batch if the document doesn't exist or was last updated at a different
-   * time.
-   * @return {firestore.WriteBatch} The WriteBatch instance for chaining.
+   * @param {firestore.DocumentReference} documentRef - A reference to the
+   * document to be set.
+   * @param {DocumentData} data - The object to serialize as the document.
+   * @param {SetOptions=} options - An object to configure the set behavior.
+   * @param {boolean=} options.merge - If true, set() only replaces the
+   * values specified in its data argument. Fields omitted from this set() call
+   * remain untouched.
+   * @return {firestore.WriteBatch} This WriteBatch instance. Used for chaining
+   * method calls.
    *
    * @example
    * let writeBatch = firestore.batch();
@@ -265,34 +267,24 @@ class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  set(docRef, data, writeOptions) {
-    validate.isDocumentReference('docRef', docRef);
+  set(documentRef, data, options) {
+    validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data);
-    validate.isOptionalPrecondition('writeOptions', writeOptions);
+    validate.isOptionalSetOptions('options', options);
 
     let fields = DocumentSnapshot.encodeFields(data);
 
     let write = {
-      update: new DocumentSnapshot(docRef, fields).toProto()
+      update: new DocumentSnapshot(documentRef, fields).toProto()
     };
 
-    if (writeOptions) {
-      let options = {};
-
-      if (writeOptions.lastUpdateTime) {
-        options.lastUpdateTime = writeOptions.lastUpdateTime;
-      }
-
-      if (writeOptions.createIfMissing === false) {
-        options.exists = true;
-      }
-
-      write.currentDocument = new Precondition(options).toProto();
+    if (options && options.merge) {
+      write.updateMask = DocumentMask.fromObject(data).toProto();
     }
 
     this._writes.push(write);
 
-    let documentTransform = DocumentTransform.fromObject(docRef, data);
+    let documentTransform = DocumentTransform.fromObject(documentRef, data);
 
     if (!documentTransform.isEmpty) {
       this._writes.push({transform: documentTransform.toProto()});
@@ -302,24 +294,31 @@ class WriteBatch {
   }
 
   /**
-   * Update the fields of an existing document.
+   * Update fields of the document referred to by the provided
+   * [DocumentReference]{@link firestore.DocumentReference}. If the document
+   * doesn't yet exist, the update fails and the entire batch will be rejected.
    *
-   * Replaces the specified fields of an existing document with a new
-   * collection of field values.
+   * The update() method accepts either an object with field paths encoded as
+   * keys and field values encoded as values, or a variable number of arguments
+   * that alternate between field paths and field values. Nested fields can be
+   * updated by providing dot-separated field path strings or by providing
+   * FieldPath objects.
+   *
+   * A Precondition restricting this update can be specified as the last
+   * argument.
    *
    * @public
-   * @param {firestore.DocumentReference} docRef The location of the
-   *   document.
-   * @param {object<string, *>} data A collection of fields to modify in a
-   * document.
-   * @param {object=} updateOptions - The preconditions for this update.
-   * @param {boolean=} updateOptions.createIfMissing Whether the should be
-   * created if it doesn't yet exist. Defaults to false.
-   * @param {string=} updateOptions.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
-   * batch if the document doesn't exist or was last updated at a different
-   * time.
-   * @return {firestore.WriteBatch} The WriteBatch instance for chaining.
+   * @param {firestore.DocumentReference} documentRef - A reference to the
+   * document to be updated.
+   * @param {UpdateData|string|firestore.FieldPath} dataOrField - An object
+   * containing the fields and values with which to update the document
+   * or the path of the first field to update.
+   * @param {
+   * ...(Precondition|*|string|firestore.FieldPath)} preconditionOrValues -
+   * An alternating list of field paths and values to update or a Precondition
+   * to restrict this update.
+   * @return {firestore.WriteBatch} This WriteBatch instance. Used for chaining
+   * method calls.
    *
    * @example
    * let writeBatch = firestore.batch();
@@ -331,32 +330,66 @@ class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  update(docRef, data, updateOptions) {
-    validate.isDocumentReference('docRef', docRef);
-    validate.isDocument('data', data, true);
-    validate.isOptionalPrecondition('updateOptions', updateOptions);
+  update(documentRef, dataOrField, preconditionOrValues) {
+    validate.isDocumentReference('documentRef', documentRef);
 
-    let documentMask = DocumentMask.fromObject(data);
-    let expandedObject = DocumentSnapshot.expandObject(data);
-    let document = new DocumentSnapshot(docRef,
-        DocumentSnapshot.encodeFields(expandedObject));
-    let precondition;
+    const updateMap = new Map();
+    let precondition = new Precondition({exists: true});
 
-    if (updateOptions) {
-      let options = {};
+    const argumentError = 'Update() requires either a single JavaScript ' +
+        'object or an alternating list of field/value pairs that can be ' +
+        'followed by an optional Precondition';
 
-      if (updateOptions.lastUpdateTime) {
-        options.lastUpdateTime =  updateOptions.lastUpdateTime;
+    let usesVarargs = is.string(dataOrField) ||
+        is.instance(dataOrField, FieldPath);
+
+    if (usesVarargs) {
+      try {
+        for (let i = 1; i < arguments.length; i += 2) {
+          if (is.string(arguments[i]) || is.instance(arguments[i], FieldPath)) {
+            validate.isFieldPath(i, arguments[i]);
+            validate.minNumberOfArguments('update', arguments, i + 1);
+            updateMap.set(FieldPath.fromArgument(arguments[i]),
+                arguments[i + 1]);
+          } else {
+            validate.isPrecondition(i, arguments[i]);
+            validate.maxNumberOfArguments('update', arguments, i + 1);
+            precondition = new Precondition(arguments[i]);
+          }
+        }
+      } catch (err) {
+        Firestore.log('WriteBatch.update', 'Varargs validation failed:', err);
+        // We catch the validation error here and re-throw to provide a better
+        // error message.
+        throw new Error(`${argumentError}.`);
       }
-
-      if (updateOptions.createIfMissing !== true) {
-        options.exists = true;
-      }
-
-      precondition = new Precondition(options);
     } else {
-      precondition = new Precondition({exists: true});
+      try {
+        validate.isDocument('dataOrField', dataOrField, true);
+        validate.maxNumberOfArguments('update', arguments, 3);
+
+        Object.keys(dataOrField).forEach(key => {
+          updateMap.set(FieldPath.fromArgument(key), dataOrField[key]);
+        });
+
+        if (is.defined(preconditionOrValues)) {
+          validate.isPrecondition('preconditionOrValues',
+              preconditionOrValues);
+          precondition = new Precondition(preconditionOrValues);
+        }
+      } catch (err) {
+        Firestore.log('WriteBatch.update', 'Non-varargs validation failed:',
+            err);
+        // We catch the validation error here and prefix the error with a custom
+        // message to describe the usage of update() better.
+        throw new Error(`${argumentError}: ${err.message}`);
+      }
     }
+
+    let documentMask = DocumentMask.fromMap(updateMap);
+    let expandedObject = DocumentSnapshot.expandMap(updateMap);
+    let document = new DocumentSnapshot(documentRef,
+        DocumentSnapshot.encodeFields(expandedObject));
 
     let write = {
       update: document.toProto(),
@@ -367,7 +400,7 @@ class WriteBatch {
     this._writes.push(write);
 
     let documentTransform = DocumentTransform.fromObject(
-        docRef, expandedObject);
+        documentRef, expandedObject);
 
     if (!documentTransform.isEmpty) {
       this._writes.push({transform: documentTransform.toProto()});
@@ -377,48 +410,10 @@ class WriteBatch {
   }
 
   /**
-   * Verifies preconditions with the database and enforces constraints on the
-   * batch.
-   *
-   * @private
-   *
-   * @todo Expose when server adds support.
-   *
-   * @param {firestore.DocumentReference} docRef The location of the
-   *   document.
-   * @param {object=} verifyOptions - The preconditions for this verification.
-   * @param {boolean=} verifyOptions.exists Whether the document should exist.
-   * @param {string=} verifyOptions.lastUpdateTime If set, verifies that the
-   * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
-   * batch if the document doesn't exist or was last updated at a different
-   * time.
-   * @return {firestore.WriteBatch} The WriteBatch instance for chaining.
-   */
-  verify_(docRef, verifyOptions) {
-    validate.isDocumentReference('docRef', docRef);
-    validate.isPrecondition('verifyOptions', verifyOptions);
-
-    let write = {
-      verify: docRef.formattedName,
-      currentDocument: new Precondition({
-        exists: verifyOptions.exists,
-        lastUpdateTime: verifyOptions.lastUpdateTime
-      }).toProto()
-    };
-
-    this._writes.push(write);
-
-    return this;
-  }
-
-  /**
    * Atomically commits all pending operations to the database and verifies all
-   * preconditions. Fails the entire batch if any precondition is not met.
+   * preconditions. Fails the entire write if any precondition is not met.
    *
    * @public
-   * @param {object=} commitOptions Options to use for this commit.
-   * @param {bytes=} commitOptions.transactionId The transaction ID of this
-   * commit.
    * @return {Promise.<Array.<firestore.WriteResult>>} A Promise that resolves
    * when this batch completes.
    *
@@ -432,50 +427,107 @@ class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  commit(commitOptions) {
+  commit() {
+    return this.commit_();
+  }
+
+  /**
+   * Commit method that takes an optional transaction ID.
+   *
+   * @package
+   * @param {object=} commitOptions Options to use for this commit.
+   * @param {bytes=} commitOptions.transactionId The transaction ID of this
+   * commit.
+   * @return {Promise.<Array.<firestore.WriteResult>>} A Promise that resolves
+   * when this batch completes.
+   */
+  commit_(commitOptions) {
+    let explicitTransaction = commitOptions && commitOptions.transactionId;
+
     let request = {
       database: this._firestore.formattedName,
-      writes: this._writes
     };
 
-    if (commitOptions && commitOptions.transactionId) {
-      request.transaction = commitOptions.transactionId;
+    // On GCF, we periodically force transactional commits to allow for
+    // request retries in case GCF closes our backend connection.
+    if (!explicitTransaction && this._shouldCreateTransaction()) {
+      Firestore.log('WriteBatch.commit', 'Using transaction for commit');
+      return this._firestore.request(
+          this._api.Firestore.beginTransaction.bind(this._api.Firestore),
+          request,
+          /* allowRetries= */ true
+      ).then(resp => {
+        return this.commit_({ transactionId: resp.transaction });
+      });
     }
 
-    let self = this;
+    request.writes = this._writes;
 
-    return self.firestore.request(
-        self._api.Firestore.commit.bind(self._api.Firestore), request
+    Firestore.log('WriteBatch.commit',
+        'Sending %d writes', request.writes.length);
+
+    if (explicitTransaction) {
+      request.transaction = explicitTransaction;
+    }
+
+    return this._firestore.request(
+        this._api.Firestore.commit.bind(this._api.Firestore), request
     ).then(resp => {
       let commitTime = DocumentSnapshot.toISOTime(resp.commitTime);
       let result = {
         writeResults: []
       };
 
-      for (let writeResult of resp.writeResults) {
-        result.writeResults.push(new WriteResult(
-            DocumentSnapshot.toISOTime(writeResult.updateTime) || commitTime));
+      if (resp.writeResults) {
+        for (let writeResult of resp.writeResults) {
+          result.writeResults.push(new WriteResult(DocumentSnapshot.toISOTime(
+              writeResult.updateTime) || commitTime));
+        }
       }
 
       return result;
     });
   }
+
+  /**
+   * Determines whether we should issue a transactional commit. On GCF, this
+   * happens after two minutes of idleness.
+   *
+   * @private
+   * @returns {boolean} Whether to use a transaction.
+   */
+  _shouldCreateTransaction() {
+    if (!this._firestore._preferTransactions) {
+      return false;
+    }
+
+    if (this._firestore._lastSuccessfulRequest) {
+      let now = new Date().getTime();
+      return now - this._firestore._lastSuccessfulRequest > GCF_IDLE_TIMEOUT_MS;
+    }
+
+    return true;
+  }
 }
 
 
-module.exports = (Firestore, DocumentRef, validateDocumentReference) => {
-  let document = require('./document.js')(Firestore, DocumentRef);
-  DocumentReference = DocumentRef;
-  DocumentMask = document.DocumentMask;
-  DocumentSnapshot = document.DocumentSnapshot;
-  DocumentTransform = document.DocumentTransform;
-  Precondition = document.Precondition;
-  validate = require('./validate')({
+module.exports = (FirestoreType, DocumentReferenceType,
+    validateDocumentReference) => {
+      let document = require('./document.js')(Firestore, DocumentReferenceType);
+      Firestore = FirestoreType;
+      DocumentReference = DocumentReferenceType;
+      DocumentMask = document.DocumentMask;
+      DocumentSnapshot = document.DocumentSnapshot;
+      DocumentTransform = document.DocumentTransform;
+      Precondition = document.Precondition;
+      validate = require('./validate')({
     Document: document.validateDocumentData,
     DocumentReference: validateDocumentReference,
-    Precondition: document.validatePrecondition
+    FieldPath: FieldPath.validateFieldPath,
+    Precondition: document.validatePrecondition,
+    SetOptions: document.validateSetOptions
   });
-  return {
+      return {
     WriteBatch, WriteResult
   };
-};
+    };

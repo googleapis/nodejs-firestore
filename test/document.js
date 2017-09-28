@@ -16,18 +16,25 @@
 
 'use strict';
 
-let assert = require('assert');
-let extend = require('extend');
-let grpc = require('grpc');
-let is = require('is');
-let through = require('through2');
+const assert = require('assert');
+const extend = require('extend');
+const grpc = require('grpc');
+const is = require('is');
+const through = require('through2');
 
-let Firestore = require('../');
-let reference = require('../src/reference')(Firestore);
-let DocumentReference = reference.DocumentReference;
-let Path = require('../src/path');
+const Firestore = require('../');
+const reference = require('../src/reference')(Firestore);
+const DocumentReference = reference.DocumentReference;
+const ResourcePath = require('../src/path').ResourcePath;
 
-const databaseRoot = 'projects/test-project/databases/(default)';
+const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+
+const INVALID_ARGUMENTS_TO_UPDATE = new RegExp('Update\\(\\) requires either ' +
+    'a single JavaScript object or an alternating list of field/value pairs ' +
+    'that can be followed by an optional Precondition');
+
+// Change the argument to 'console.log' to enable debug output.
+Firestore.setLogFunction(() => {});
 
 function createInstance() {
   return new Firestore({
@@ -58,8 +65,8 @@ function buildWrite_(document, mask, transform, precondition) {
   return { writes: writes };
 }
 
-function set(document, transform, precondition) {
-  return buildWrite_(document, /* updateMask */ null, transform, precondition);
+function set(document, mask, transform, precondition) {
+  return buildWrite_(document, mask, transform, precondition);
 }
 
 function update(document, mask, transform, precondition) {
@@ -74,12 +81,12 @@ function create(document, transform) {
 }
 
 function retrieve() {
-  return { documents: [`${databaseRoot}/documents/collectionId/documentId`] };
+  return { documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`] };
 }
 
 function remove(document, precondition) {
   let writes = [
-    { delete: `${databaseRoot}/documents/collectionId/${document}` }
+    { delete: `${DATABASE_ROOT}/documents/collectionId/${document}` }
   ];
 
   if (precondition) {
@@ -91,7 +98,7 @@ function remove(document, precondition) {
 
 function document(field, value) {
   let document = {
-    name: `${databaseRoot}/documents/collectionId/documentId`,
+    name: `${DATABASE_ROOT}/documents/collectionId/documentId`,
     fields: {},
     createTime: {seconds: 1, nanos: 2},
     updateTime: {seconds: 3, nanos: 4}
@@ -140,14 +147,14 @@ function fieldTransform(field, transform) {
   }
 
   return {
-    document: `${databaseRoot}/documents/collectionId/documentId`,
+    document: `${DATABASE_ROOT}/documents/collectionId/documentId`,
     fieldTransforms: proto
   };
 }
 
 function requestEquals(actual, protoOperation) {
   let proto = {
-    database: databaseRoot,
+    database: DATABASE_ROOT,
   };
 
   for (protoOperation of Array.prototype.slice.call(arguments, 1)) {
@@ -247,7 +254,7 @@ const allSupportedTypesJson = document(
   },
   'pathValue', {
     value_type: 'referenceValue',
-    referenceValue: `${databaseRoot}/documents/collection/document`
+    referenceValue: `${DATABASE_ROOT}/documents/collection/document`
   },
   'stringValue', {
     value_type: 'stringValue',
@@ -279,11 +286,11 @@ const allSupportedTypesObject = {
   negativeInfinityValue: -Infinity,
   objectValue: {foo: 'bar'},
   dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
-  pathValue: new DocumentReference({formattedName: databaseRoot},
-    new Path('test-project', '(default)', ['collection', 'document'])),
+  pathValue: new DocumentReference({formattedName: DATABASE_ROOT},
+    new ResourcePath('test-project', '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   nilValue: null,
-  geoPointValue: Firestore.geoPoint(50.1430847, -122.9477780),
+  geoPointValue: new Firestore.GeoPoint(50.1430847, -122.9477780),
   bytesValue: new Buffer([0x1, 0x2])
 };
 
@@ -314,7 +321,8 @@ describe('DocumentReference interface', function() {
   it('has collection() method', function() {
     assert.throws(() => {
       documentRef.collection(42);
-    }, /Argument "collectionPath" is not a valid string\./);
+    }, new RegExp('Argument "collectionPath" is not a valid ResourcePath. ' +
+        'Path is not a string.'));
 
     let collection = documentRef.collection('col');
     assert.equal(collection.id, 'col');
@@ -447,7 +455,7 @@ describe('serialize document', function() {
             fields: {}
           },
           value_type: 'mapValue'
-        }),
+        }),/* updateMask= */ null,
         fieldTransform('field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
 
       callback(null, defaultWriteResult);
@@ -499,15 +507,15 @@ describe('serialize document', function() {
     const expectedErr = /Argument ".*" is not a valid number\./;
 
     assert.throws(() => {
-      Firestore.geoPoint('57.2999988','INVALID');
+      new Firestore.GeoPoint('57.2999988','INVALID');
     }, expectedErr);
 
     assert.throws(() => {
-      Firestore.geoPoint('INVALID','-4.4499982');
+      new Firestore.GeoPoint('INVALID','-4.4499982');
     }, expectedErr);
 
     assert.throws(() => {
-      Firestore.geoPoint();
+      new Firestore.GeoPoint();
     }, expectedErr);
   });
 
@@ -517,8 +525,8 @@ describe('serialize document', function() {
 
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update(obj);
-    }, new RegExp('Argument "data" is not a valid Document. Input object is ' +
-        'deeper than 20 levels or contains a cycle\.'));
+    }, new RegExp('Argument "dataOrField" is not a valid Document. Input ' +
+        'object is deeper than 20 levels or contains a cycle\.'));
   });
 });
 
@@ -548,6 +556,23 @@ describe('deserialize document', function() {
         assert.equal(50.1430847, data.geoPointValue.latitude);
         assert.equal(-122.9477780, data.geoPointValue.longitude);
       });
+  });
+
+  it('ignores intermittent stream failures', function() {
+    let attempts = 1;
+
+    firestore.api.Firestore._batchGetDocuments = function() {
+      if (attempts < 3) {
+        ++attempts;
+        throw new Error('Expected error');
+      } else {
+        return stream(found(document()));
+      }
+    };
+
+    return firestore.doc('collectionId/documentId').get().then(() => {
+      assert.equal(3, attempts);
+    });
   });
 
   it('deserializes date before 1970', function() {
@@ -673,11 +698,8 @@ describe('get document', function() {
         assert.deepEqual(result.data(), {foo: {bar: 'foobar'}});
         assert.deepEqual(result.get('foo'), {bar: 'foobar'});
         assert.equal(result.get('foo.bar'), 'foobar');
-        assert.equal(result.get('`foo`.`\\142ar`'), 'foobar');
-        assert.equal(result.get('`foo`.`\\x62ar`'), 'foobar');
-        assert.equal(result.get('`foo`.`\\u0062ar`'), 'foobar');
-        // @todo make \U work in unescape-js
-        // assert.equal(result.data('`foo`.`\\U00000062ar`'), 'foobar');
+        assert.equal(
+            result.get(new Firestore.FieldPath('foo', 'bar')), 'foobar');
         assert.equal(result.ref.id, 'documentId');
       });
   });
@@ -743,7 +765,8 @@ describe('get document', function() {
     return firestore.doc('collectionId/documentId').get().then(doc => {
       assert.throws(() => {
         doc.get();
-      }, /Argument "fieldPath" is not a valid FieldPath\./);
+      }, new RegExp('Argument "field" is not a valid FieldPath. ' +
+          'Paths must be strings or FieldPath objects\.'));
     });
   });
 });
@@ -784,6 +807,8 @@ describe('delete document', function() {
   });
 
   it('with last update time precondition', function() {
+    let docRef = firestore.doc('collectionId/documentId');
+
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, remove('documentId', {
         updateTime: {
@@ -795,16 +820,18 @@ describe('delete document', function() {
       callback(null, defaultWriteResult);
     };
 
-    return firestore.doc('collectionId/documentId').delete({
-      lastUpdateTime: '1985-03-18T07:20:00.123000000Z'
-    });
+    return Promise.all([
+      docRef.delete({ lastUpdateTime: '1985-03-18T07:20:00.123Z' }),
+      docRef.delete({ lastUpdateTime: '1985-03-18T07:20:00.123000Z' }),
+      docRef.delete({ lastUpdateTime: '1985-03-18T07:20:00.123000000Z' }),
+    ]);
   });
 
   it('with invalid last update time precondition', function() {
     assert.throws(() => {
       return firestore.doc('collectionId/documentId')
         .delete({lastUpdateTime: 1337});
-    }, new RegExp('Argument "deleteOptions" is not a valid Precondition\. ' +
+    }, new RegExp('Argument "precondition" is not a valid Precondition\. ' +
         '"lastUpdateTime" is not a string\.'));
   });
 });
@@ -825,71 +852,48 @@ describe('set document', function() {
     return firestore.doc('collectionId/documentId').set({});
   });
 
-  it('with createIfMissing set to false ', function() {
+  it('supports document merges', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, set(document(), /* transform */ null,
-        { exists: true }));
+      requestEquals(request, set(document('a', 'b', 'c', {
+          mapValue: {
+            fields: {
+              d: {
+                stringValue: 'e',
+                value_type: 'stringValue'
+              }
+            }
+          },
+          value_type: 'mapValue'
+        }), updateMask('a', 'c.d')));
       callback(null, defaultWriteResult);
     };
 
     return firestore.doc('collectionId/documentId').set(
-      {},
-      {createIfMissing: false});
+        { a: 'b' , c: { d: 'e'}},
+        { merge: true });
   });
 
-  it('with createIfMissing set to true ', function() {
+  it('doesn\'t split on dots', function()  {
     firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, set(document(), /* transform */ null, {}));
+      requestEquals(request, set(document('a.b', 'c')));
       callback(null, defaultWriteResult);
     };
 
-    return firestore.doc('collectionId/documentId').set(
-      {},
-      {createIfMissing: true}
-    );
+    return firestore.doc('collectionId/documentId').set({ 'a.b': 'c'});
   });
 
-  it('with last update time precondition', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, set(document(), /* transform */ null, {
-        updateTime: {
-          nanos: 123000000,
-          seconds: 479978400
-        }
-      }));
-      callback(null, defaultWriteResult);
-    };
-
-    return firestore.doc('collectionId/documentId').set(
-      {},
-      { lastUpdateTime: '1985-03-18T07:20:00.123000000Z' }
-    );
-  });
-
-  it('with invalid precondition', function() {
+  it('validates merge option', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set(
-        {},
-        'foo');
-    }, new RegExp('Argument "writeOptions" is not a valid Precondition. ' +
-        'Input is not an object\.'));
-  });
+          { foo: 'bar'}, 'foo');
+    }, new RegExp('Argument "options" is not a valid SetOptions. Input ' +
+        'is not an object.'));
 
-  it('with invalid createIfMissing precondition', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set(
-        {},
-        {createIfMissing: 'foo'});
-    }, new RegExp('Argument "writeOptions" is not a valid Precondition. ' +
-        '"createIfMissing" is not a boolean\.'));
-  });
-
-  it('with invalid last update time precondition', function() {
-    assert.throws(() => {
-      firestore.doc('collectionId/documentId').set(
-        {},
-        {lastUpdateTime: 'foo'});
-    }, /Specify a valid ISO 8601 timestamp for "lastUpdateTime"\./);
+          { foo: 'bar'}, { merge: 42 });
+    }, new RegExp('Argument "options" is not a valid SetOptions. "merge" ' +
+        'is not a boolean.'));
   });
 
   it('requires an object', function() {
@@ -945,6 +949,25 @@ describe('create document', function() {
 
     return firestore.doc('collectionId/documentId').create({}).then((res) => {
       assert.equal(res.writeTime, '1985-03-18T07:20:00.123000000Z');
+    });
+  });
+
+  it('supports server timestamps', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(request, create(document('map', {
+          mapValue: {
+            fields: {}
+          },
+          value_type: 'mapValue'
+        }),
+        fieldTransform('field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
+
+      callback(null, defaultWriteResult);
+    };
+
+    return firestore.doc('collectionId/documentId').create({
+      field: Firestore.FieldValue.serverTimestamp(),
+      map: {field: Firestore.FieldValue.serverTimestamp()}
     });
   });
 
@@ -1029,33 +1052,9 @@ describe('update document', function() {
     });
   });
 
-  it('with createIfMissing set to false ', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, update(document(), updateMask(), null,
-        {exists: true}));
-      callback(null, defaultWriteResult);
-    };
-
-    return firestore.doc('collectionId/documentId').update(
-      {},
-      {createIfMissing: false});
-  });
-
-  it('with createIfMissing set to true ', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, update(document(), updateMask(),
-        /*transform */ null, {}));
-      callback(null, defaultWriteResult);
-    };
-
-    return firestore.doc('collectionId/documentId').update(
-      {},
-      {createIfMissing: true});
-  });
-
   it('with last update time precondition', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, update(document(), updateMask(),
+      requestEquals(request, update(document('foo',  'bar'), updateMask('foo'),
         /*transform */ null, {
           updateTime: {
             nanos: 123000000,
@@ -1065,9 +1064,22 @@ describe('update document', function() {
       callback(null, defaultWriteResult);
     };
 
-    return firestore.doc('collectionId/documentId').update(
-      {},
-      {lastUpdateTime: '1985-03-18T07:20:00.123000000Z'});
+    return Promise.all([
+        firestore.doc('collectionId/documentId').update(
+          { foo: 'bar' },
+          {lastUpdateTime: '1985-03-18T07:20:00.123000000Z'}),
+        firestore.doc('collectionId/documentId').update(
+          'foo' ,'bar',
+          {lastUpdateTime: '1985-03-18T07:20:00.123000000Z'})
+    ]);
+  });
+
+  it('with invalid last update time precondition', function() {
+    assert.throws(() => {
+      firestore.doc('collectionId/documentId').update(
+          {},
+          {lastUpdateTime: 'foo'});
+    }, /Specify a valid ISO 8601 timestamp for "lastUpdateTime"\./);
   });
 
   it('with top-level document', function() {
@@ -1088,7 +1100,7 @@ describe('update document', function() {
           value_type: 'mapValue',
           mapValue: {
             fields: {
-              '`': {
+              b: {
                 value_type: 'mapValue',
                 mapValue: {
                   fields: {
@@ -1112,15 +1124,21 @@ describe('update document', function() {
               }
             }
           }
-        }), updateMask('foo.bar', 'a.`\\``.c')));
+        }), updateMask('foo.bar', 'a.b.c')));
 
       callback(null, defaultWriteResult);
     };
 
-    return firestore.doc('collectionId/documentId').update({
-      'foo.bar': 'foobar',
-      'a.`\\``.c': 'foobar'
-    });
+    return Promise.all([
+      firestore.doc('collectionId/documentId').update({
+        'foo.bar': 'foobar',
+        'a.b.c': 'foobar'
+      }),
+      firestore.doc('collectionId/documentId').update(
+        'foo.bar', 'foobar',
+        new Firestore.FieldPath('a', 'b', 'c'), 'foobar'
+      )
+    ]);
   });
 
   it('with two nested fields ', function() {
@@ -1159,13 +1177,33 @@ describe('update document', function() {
 
       callback(null, defaultWriteResult);
     };
+    return Promise.all([
+      firestore.doc('collectionId/documentId').update({
+        'foo.foo': 'one',
+        'foo.bar': 'two',
+        'foo.deep.foo': 'one',
+        'foo.deep.bar': 'two',
+      }),
+      firestore.doc('collectionId/documentId').update(
+        'foo.foo', 'one',
+        'foo.bar', 'two',
+        'foo.deep.foo', 'one',
+        'foo.deep.bar', 'two'
+      ),
+    ]);
+  });
 
-    return firestore.doc('collectionId/documentId').update({
-      'foo.foo': 'one',
-      'foo.bar': 'two',
-      'foo.deep.foo': 'one',
-      'foo.deep.bar': 'two',
-    });
+  it('with field with dot ', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(request, update(document(
+          'a.b', 'c'), updateMask('`a.b`')));
+
+      callback(null, defaultWriteResult);
+    };
+
+    return firestore.doc('collectionId/documentId').update(
+        new Firestore.FieldPath('a.b'), 'c'
+    );
   });
 
   it('with conflicting update', function() {
@@ -1209,95 +1247,62 @@ describe('update document', function() {
     let validFields = [
       'foo.bar',
       '_',
-      '`"`',
-      '`\'`',
-      '`\\a`',
-      '`\\b`' ,
-      '`\\f`' ,
-      '`\\n`' ,
-      '`\\r`' ,
-      '`\\t`' ,
-      '`\\v`' ,
-      '`\\\\`' ,
-      '`\\?`' ,
-      '`\\"`' ,
-      '`\\\'`',
-      '`\\\``' ,
-      '`\\123`' ,
-      '`\\xaA`' ,
-      '`\\u1234`' ,
-      '`\\U12345678`' ,
-      '`..`.`.`',
-      '`$`.foo' ,
-      'foo.`$`',
-      'foo.`\\\\`',
-      '`$`.`foo`',
       'foo.bar.foobar',
-      '`foo`.`bar`.`foobar`',
-      '`\n`'
+      '\n`'
     ];
 
-    firestore.api.Firestore._commit = function(request, options, callback) {
-      assert.ok(request);
-      callback(null, defaultWriteResult);
-    };
-
-    let promises = [];
-
     for (let i = 0; i < validFields.length; ++i) {
-      let obj = {
-        [validFields[i]]: 'foobar'
-      };
-      promises.push(firestore.doc('collectionId/documentId').update(obj));
+      firestore.collection('col').select(validFields[i]);
     }
-
-    return Promise.all(promises);
   });
 
   it('with invalid field paths', function() {
     let invalidFields = [
       '',
-      '$',
-      '0',
-      'foo.',
-      '.foo',
-      '``',
-      '`\\\`',
-      '`\\z`' ,
-      '`\\128`' ,
-      '`\\xaH`' ,
-      '`\\u123`' ,
-      '`\\U1234567`',
+      '.a',
+      'a.',
+      '.a.',
+      'a..a',
+      'a*a',
+      'a/a',
+      'a[a' ,
+      'a]a'
     ];
 
     for (let i = 0; i < invalidFields.length; ++i) {
-      const obj = {
-        [invalidFields[i]]: 'foobar'
-      };
-
       try {
-        firestore.doc('collectionId/documentId').update(obj);
-        throw new Error('Expected exception');
+        firestore.collection('col').select(invalidFields[i]);
       } catch (err) {
-        assert.ok(err.message.match(new RegExp('Argument "data" is not a ' +
-            'valid Document. Field ".*" was not encoded using ' +
-            'Firestore.fieldPath()\.')));
+        assert.ok(err.message.match(
+            /Argument at index 0 is not a valid FieldPath. .*/));
       }
     }
   });
 
-  it('requires an object', function() {
+  it('doesn\'t accept argument after precondition', function() {
+    assert.throws(() => {
+      firestore.doc('collectionId/documentId').update(
+          'foo', 'bar', {exists: true}, 'foo');
+    }, INVALID_ARGUMENTS_TO_UPDATE);
+
+    assert.throws(() => {
+      firestore.doc('collectionId/documentId').update(
+          { foo: 'bar'}, {exists: true}, 'foo');
+    }, INVALID_ARGUMENTS_TO_UPDATE);
+  });
+
+  it('accepts an object', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update(null);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a ' +
-        'JavaScript object\.'));
+    }, new RegExp('Argument "dataOrField" is not a valid Document. Input is ' +
+        'not a JavaScript object\.'));
   });
 
   it('doesn\'t accept arrays', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update([42]);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a ' +
-        'JavaScript object.'));
+    }, new RegExp('Argument "dataOrField" is not a valid Document. Input is ' +
+        'not a JavaScript object.'));
   });
 
   it('with field delete', function() {
@@ -1310,6 +1315,32 @@ describe('update document', function() {
     return firestore.doc('collectionId/documentId').update({
       foo: Firestore.FieldValue.delete(),
       bar: 'foobar'
+    });
+  });
+});
+
+describe('getCollections() method', function() {
+  let firestore;
+  let documentRef;
+
+  beforeEach(function() {
+    firestore = createInstance();
+    documentRef = firestore.doc('coll/doc');
+  });
+
+  it('sorts results', function() {
+    firestore.api.Firestore._listCollectionIds = function(
+        request, options, callback) {
+      assert.deepEqual(request, {
+        parent: 'projects/test-project/databases/(default)/documents/coll/doc',
+      });
+
+      callback(null, ['second', 'first']);
+    };
+
+    return documentRef.getCollections().then(collections => {
+      assert.equal(collections[0].path, 'coll/doc/first');
+      assert.equal(collections[1].path, 'coll/doc/second');
     });
   });
 });

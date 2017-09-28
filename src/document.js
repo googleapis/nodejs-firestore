@@ -20,20 +20,29 @@
 
 'use strict';
 
-let assert = require('assert');
-let is = require('is');
-let unescapeJs = require('unescape-js');
+const assert = require('assert');
+const is = require('is');
+
+const path = require('./path');
 
 /**
- * @private
- * @type firestore.Path
+ * @type firestore.ResourcePath
  */
-let Path = require('./path');
+const ResourcePath = path.ResourcePath;
+
+/**
+ * @type firestore.FieldPath
+ */
+const FieldPath = path.FieldPath;
+
+/**
+ * @type firestore.FieldValue
+ */
+const FieldValue = require('./field-value');
 
 /**
  * Injected.
  *
- * @private
  * @type firestore.DocumentReference
  */
 let DocumentReference;
@@ -41,61 +50,16 @@ let DocumentReference;
 /**
  * Injected.
  *
- * @private
  * @type firestore.Firestore
  */
 let Firestore;
 
-/**
- * @private
- */
+/** Injected. */
 let validate;
-
-// Regular Expressions that define a Firestore field path. Field paths are made
-// up of dot-separated field names (e.g. "foo.bar"). The individual field
-// names must be valid Datastore identifiers and either follow the
-// standard identifier guideline or be quoted in backticks. The full
-// specification can be found at
-// https://cloud.google.com/bigquery/docs/reference/standard-sql/lexical#identifiers
-const unquotedIdentifier_ = '(?:[A-Za-z_][A-Za-z_0-9]*)';
-const escapeSequences_ = '\\\\(?:a|b|f|n|r|t|v|\\\\|\\?|"|\'|`' +
-  '|[0-7]{3}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8})';
-const quotedIdentifier_ = `\`(?:[^\\\\\`]|(?:${escapeSequences_}))+\``;
-const fieldIdentifier_ = `(?:${unquotedIdentifier_}|${quotedIdentifier_})+`;
-
-/**
- * A Regular Expression that matches an unquoted field name. It matches 'foo',
- * but does not match '`foo`'.
- *
- * @private
- * @type RegExp
- */
-const unquotedIdentiferRe_ = new RegExp(`^${unquotedIdentifier_}$`);
-
-/**
- * A Regular Expression that matches a valid field path. It matches 'foo.bar'
- * in 'foo.bar'.
- *
- * @private
- * @type RegExp
- */
-const fieldPathRe =
-  new RegExp(`^(${fieldIdentifier_})(?:\\.(${fieldIdentifier_}))*$`);
-
-/**
- * A Regular Expression that extracts field components from a field path. It
- * matches 'foo' and 'bar' in 'foo.bar'.
- *
- * @private
- * @type RegExp
- */
-const fieldComponentRe =
-  new RegExp(`(?:\\.?((?:\\.?(${fieldIdentifier_}))))`, 'g');
 
 /**
  * The maximum depth of a Firestore object.
  *
- * @private
  * @type number
  */
 const MAX_DEPTH = 20;
@@ -103,7 +67,6 @@ const MAX_DEPTH = 20;
 /**
  * Number of nanoseconds in a millisecond.
  *
- * @private
  * @type number
  */
 const MS_TO_NANOS = 1000000;
@@ -111,7 +74,6 @@ const MS_TO_NANOS = 1000000;
 /**
  * Protocol constant for the ServerTimestamp transform.
  *
- * @private
  * @type string
  */
 const SERVER_TIMESTAMP = 'REQUEST_TIME';
@@ -128,8 +90,21 @@ const SERVER_TIMESTAMP = 'REQUEST_TIME';
  */
 class GeoPoint {
   /**
+   * Creates a [GeoPoint]{@link firestore.GeoPoint}.
+   *
+   * @public
    * @param {number} latitude The latitude as a number between -90 and 90.
    * @param {number} longitude The longitude as a number between -180 and 180.
+   *
+   * @example
+   * let data = {
+   *   google: new Firestore.GeoPoint(37.422, 122.084)
+   * };
+   *
+   * firestore.doc('col/doc').set(data).then(() => {
+   *   console.log(`Location is ${data.google.latitude}, ` +
+   *     `${data.google.longitude}`);
+   * });
    */
   constructor(latitude, longitude) {
     validate.isNumber('latitude', latitude);
@@ -354,7 +329,7 @@ class DocumentSnapshot {
    * Retrieves all fields in the document as an object.
    *
    * @public
-   * @return {Object} An object containing all fields in the document.
+   * @return {DocumentData} An object containing all fields in the document.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -396,8 +371,8 @@ class DocumentSnapshot {
    * Retrieves the field specified by `fieldPath`.
    *
    * @public
-   * @param {string} fieldPath - The path (e.g. 'foo' or 'foo.bar') to a
-   * specific field.
+   * @param {string|firestore.FieldPath} field - The field path
+   * (e.g. 'foo' or 'foo.bar') to a specific field.
    * @return {*} The data at the specified field location or undefined if no
    * such field exists.
    *
@@ -411,16 +386,16 @@ class DocumentSnapshot {
    *   console.log(`Retrieved field value: ${field}`);
    * });
    */
-  get(fieldPath) {
-    validate.isFieldPath('fieldPath', fieldPath);
+  get(field) {
+    validate.isFieldPath('field', field);
 
-    let field = this.protoField(fieldPath);
+    let protoField = this.protoField(field);
 
-    if (field === undefined) {
+    if (protoField === undefined) {
       return undefined;
     }
 
-    return this._decodeValue(field);
+    return this._decodeValue(protoField);
   }
 
   /**
@@ -428,15 +403,13 @@ class DocumentSnapshot {
    * representation.
    *
    * @package
-   * @param fieldPath - The path (e.g. 'foo' or 'foo.bar') to a specific
-   * field.
+   * @param {string|firestore.FieldPath} field - The path (e.g. 'foo' or
+   * 'foo.bar') to a specific field.
    * @return {*} The Protobuf-encoded data at the specified field location or
    * undefined if no such field exists.
    */
-  protoField(fieldPath) {
-    validate.isFieldPath('fieldPath', fieldPath);
-
-    let components = DocumentSnapshot._extractPathComponents(fieldPath);
+  protoField(field) {
+    let components = FieldPath.fromArgument(field).toArray();
     let fields = this.protoFields();
 
     while (components.length > 1) {
@@ -473,8 +446,8 @@ class DocumentSnapshot {
         return new Date(proto.timestampValue.seconds * 1000 +
             (proto.timestampValue.nanos / MS_TO_NANOS));
       } case 'referenceValue': {
-        return new DocumentReference(
-            this.ref.firestore, Path.fromName(proto.referenceValue));
+        return new DocumentReference(this.ref.firestore,
+            ResourcePath.fromSlashSeparatedString(proto.referenceValue));
       } case 'arrayValue': {
         let array = [];
         for (let i = 0; i < proto.arrayValue.values.length; ++i) {
@@ -548,60 +521,6 @@ class DocumentSnapshot {
   }
 
   /**
-   * Extracts the individual components of a Firestore path. It turns "foo.bar"
-   * into ["foo", "bar"].
-   *
-   * @private
-   * @param {string} fieldPath The Firestore field path.
-   * @return {Array.<string>} The individual unescaped field names.
-   */
-  static _extractPathComponents(fieldPath) {
-    /**
-     *  Unescapes a path component to be used as a field name. Turns "`$`" into
-     * "$".
-     */
-    function unescapeComponent(component) {
-      if (component.match(/^`.*`$/)) {
-        // unescapeJs does not unescape backticks.
-        let escapedStr = component.substr(1, component.length - 2).
-        replace('\\`', '`');
-        return unescapeJs(escapedStr);
-      }
-
-      return component;
-    }
-
-    let fields = [];
-    let matches;
-    while ((matches = fieldComponentRe.exec(fieldPath)) !== null) {
-      fields.push(unescapeComponent(matches[1]));
-    }
-    return fields;
-  }
-
-  /**
-   * Create an escaped field path from a list of field name components.
-   *
-   * @package
-   * @param {Array.<string>} fieldNames The unescaped components to encode into
-   * a field path.
-   * @return {string} A Firestore field path.
-   */
-  static encodeFieldPath(fieldNames) {
-    let fieldPath = '';
-
-    for (let i = 0; i < fieldNames.length; ++i) {
-      let component = fieldNames[i];
-      if (!unquotedIdentiferRe_.test(component)) {
-        component = '`' + component.replace(/[`\\]/g, '\\$&') + '`';
-      }
-      fieldPath += i !== 0 ? '.' + component : component;
-    }
-
-    return fieldPath;
-  }
-
-  /**
    * Encodes a JavaScrip object into the Firestore 'Fields' representation.
    *
    * @package
@@ -645,11 +564,11 @@ class DocumentSnapshot {
       depth = 1;
     }
 
-    if (val === Firestore.deleteSentinel) {
+    if (val === FieldValue.DELETE_SENTINEL) {
       return null;
     }
 
-    if (val === Firestore.serverTimestampSentinel) {
+    if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
       return null;
     }
 
@@ -717,7 +636,7 @@ class DocumentSnapshot {
       };
     }
 
-    if (is.instance(val, DocumentReference) || is.instance(val, Path)) {
+    if (is.instance(val, DocumentReference) || is.instance(val, ResourcePath)) {
       return {
         value_type: 'referenceValue',
         referenceValue: val.formattedName
@@ -752,16 +671,16 @@ class DocumentSnapshot {
   }
 
   /**
-   * Expands top-level field paths in a JavaScript object. This is required
+   * Expands top-level field paths in a JavaScript map. This is required
    * for storing objects in Firestore.
    *
    * This functions turns { foo.bar : foobar } into { foo { bar : foobar }}
    *
    * @package
-   * @param {Object} obj JavaScript object to expand.
-   * @return {Object} The expanded JavaScript object.
+   * @param {Map.<string|FieldPath, *>} data - The field/value map to expand.
+   * @return {DocumentData} The expanded JavaScript object.
    */
-  static expandObject(obj) {
+  static expandMap(data) {
     /**
      * Merges 'value' at the field path specified by the path array into
      * 'target'.
@@ -797,12 +716,10 @@ class DocumentSnapshot {
 
     let res = {};
 
-    for (let prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        let components = DocumentSnapshot._extractPathComponents(prop);
-        merge(res, obj[prop], components, 0);
-      }
-    }
+    data.forEach((value, key) => {
+      let components = FieldPath.fromArgument(key).toArray();
+      merge(res, value, components, 0);
+    });
 
     return res;
   }
@@ -889,7 +806,8 @@ DocumentSnapshot.Builder = class {
 class DocumentMask {
   /**
    * @package
-   * @param {Array.<string>} fieldPaths The field paths of this mask.
+   * @param {Array.<string>} fieldPaths - The canonical representation of field
+   * paths in this mask.
    */
   constructor(fieldPaths) {
     this._fieldPaths = fieldPaths;
@@ -908,21 +826,55 @@ class DocumentMask {
   }
 
   /**
-   * Creates a document mask with the fields of a document.
+   * Creates a document mask with the field paths of a document.
    *
    * @package
-   * @param {object<string, *>} data A collection of fields to modify. Only the
-   * keys are used to extract the document mask.
-   * @return {Object}
+   * @param {Map.<string|firestore.FieldPath, *>} data A map with
+   * fields to modify. Only the keys are used to extract the document mask.
+   * @return {firestore.DocumentMask}
+   */
+  static fromMap(data) {
+    let fieldPaths = [];
+
+    data.forEach((value, key) => {
+      if (value !== FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+        fieldPaths.push(FieldPath.fromArgument(key).formattedName);
+      }
+    });
+
+    return new DocumentMask(fieldPaths);
+  }
+
+  /**
+   * Creates a document mask with the field names of a document.
+   *
+   * @package
+   * @param {DocumentData} data An object with fields to modify. Only the keys
+   * are used to extract the document mask.
+   * @return {firestore.DocumentMask}
    */
   static fromObject(data) {
     let fieldPaths = [];
 
-    Object.keys(data).forEach((key) => {
-      if (data[key] !== Firestore.serverTimestampSentinel) {
-        fieldPaths.push(key);
+    const extractFieldPaths = function(currentData, currentPath) {
+      for (let key in currentData) {
+        if (currentData.hasOwnProperty(key)) {
+          // We don't split on dots since fromObject is called with
+          // DocumentData.
+          const childSegment = new FieldPath(key);
+          const childPath = currentPath ? currentPath.append(childSegment) :
+              childSegment;
+          const value = currentData[key];
+          if (is.object(value)) {
+            extractFieldPaths(value, childPath);
+          } else if (value !== FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+            fieldPaths.push(childPath.formattedName);
+          }
+        }
       }
-    });
+    };
+
+    extractFieldPaths(data);
 
     return new DocumentMask(fieldPaths);
   }
@@ -992,10 +944,10 @@ class DocumentTransform {
     function encode_(val, path, allowTransforms) {
       let transforms = [];
 
-      if (val === Firestore.serverTimestampSentinel) {
+      if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
         if (allowTransforms) {
           transforms.push({
-            fieldPath: DocumentSnapshot.encodeFieldPath(path),
+            fieldPath: new FieldPath(...path).formattedName,
             setToServerValue: SERVER_TIMESTAMP
           });
         } else {
@@ -1065,8 +1017,20 @@ class Precondition {
     if (is.defined(this._lastUpdateTime)) {
       let date = new Date(this._lastUpdateTime);
       let seconds = Math.floor(date.getTime() / 1000);
-      let nanos = parseInt(
-          this._lastUpdateTime.substring(20, this._lastUpdateTime.length - 1));
+      let nanos = null;
+
+      let nanoString = this._lastUpdateTime.substring(
+          20, this._lastUpdateTime.length - 1);
+
+      if (nanoString.length === 3) {
+        nanoString = `${nanoString}000000`;
+      } else if (nanoString.length === 6)  {
+        nanoString = `${nanoString}000`;
+      }
+
+      if (nanoString.length === 9) {
+        nanos = parseInt(nanoString);
+      }
 
       if (isNaN(seconds) || isNaN(nanos)) {
         throw new Error('Specify a valid ISO 8601 timestamp for' +
@@ -1111,10 +1075,6 @@ function validateDocumentData(obj, usesPaths, depth) {
 
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
-      if (usesPaths) {
-        validateFieldPath(prop);
-      }
-
       if (is.object(obj[prop])) {
         validateDocumentData(obj[prop], false, depth + 1);
       }
@@ -1125,34 +1085,11 @@ function validateDocumentData(obj, usesPaths, depth) {
 }
 
 /**
- * Validates the input string as a field path.
- *
- * @package
- * @param {string} fieldPath Field path to validate.
- * @return {boolean} 'true' when the input is valid.
- * @throws {Error} when the field path is invalid
- */
-function validateFieldPath(fieldPath) {
-  if (!is.string(fieldPath)) {
-    throw new Error('Input is not a string.');
-  }
-
-  if (!fieldPathRe.test(fieldPath)) {
-    throw new Error(
-        `Field "${fieldPath}" was not encoded using Firestore.fieldPath().`);
-  }
-
-  return true;
-}
-
-/**
- * Validates that 'createIfMissing', 'exists' and 'lastUpdateTime' use valid
- * types.
+ * Validates the use of 'options' as a Precondition and enforces that 'exists'
+ * and 'lastUpdateTime' use valid types.
  *
  * @package
  *
- * @param {boolean=} options.createIfMissing - Whether the referenced document
- * should be created if it doesn't yet exist.
  * @param {boolean=} options.exists - Whether the referenced document
  * should exist.
  * @param {string=} options.lastUpdateTime - The last update time
@@ -1165,13 +1102,6 @@ function validatePrecondition(options) {
   }
 
   let conditions = 0;
-
-  if (is.defined(options.createIfMissing)) {
-    ++conditions;
-    if (!is.boolean(options.createIfMissing)) {
-      throw new Error ('"createIfMissing" is not a boolean.');
-    }
-  }
 
   if (is.defined(options.exists)) {
     ++conditions;
@@ -1194,15 +1124,37 @@ function validatePrecondition(options) {
   return true;
 }
 
+/**
+ * Validates the use of 'options' as SetOptions and enforces that 'merge' is a
+ * boolean.
+ *
+ * @package
+ *
+ * @param {boolean=} options.merge - Whether set() should merge the provided
+ * data into an existing document.
+ * @return {boolean} 'true' if the input is a valid SetOptions object.
+ */
+function validateSetOptions(options) {
+  if (!is.object(options)) {
+    throw new Error('Input is not an object.');
+  }
+
+  if (is.defined(options.merge) && !is.boolean(options.merge)) {
+    throw new Error ('"merge" is not a boolean.');
+  }
+
+  return true;
+}
+
 module.exports = (FirestoreType, DocumentRefType) => {
   Firestore = FirestoreType;
   DocumentReference = DocumentRefType;
   validate = require('./validate.js')({
-    FieldPath: validateFieldPath
+    FieldPath: FieldPath.validateFieldPath
   });
   return {
     DocumentMask, DocumentSnapshot, DocumentTransform,
-    Precondition, GeoPoint, validateFieldPath, validateDocumentData,
-    validatePrecondition
+    Precondition, GeoPoint, validateDocumentData, validatePrecondition,
+    validateSetOptions
   };
 };

@@ -20,11 +20,14 @@ let assert = require('assert');
 let is = require('is');
 
 let DocumentReference = require('../src/reference').DocumentReference;
-let document = require('../src/document')(DocumentReference);
+let DocumentSnapshot = require('../src/document')(
+    DocumentReference).DocumentSnapshot;
 
 let version = require('../package.json').version;
 let env = require('../../../system-test/env.js');
 let Firestore = require('../');
+
+Firestore.setLogFunction(console.log);
 
 function getTestRoot(firestore) {
   return firestore.collection(
@@ -168,14 +171,17 @@ describe('DocumentReference class', function() {
       arrayValue: ['foo', 42, 'bar'],
       emptyArray: [],
       nilValue: null,
-      geoPointValue: Firestore.geoPoint(50.1430847, -122.9477780),
+      geoPointValue: new Firestore.GeoPoint(50.1430847, -122.9477780),
       bytesValue: new Buffer([0x01, 0x02])
     };
     let ref = randomCol.doc('doc');
     return ref.set(allSupportedTypesObject).then(() => {
       return ref.get();
     }).then((doc) => {
-      assert.deepStrictEqual(doc.data(), allSupportedTypesObject);
+      let data = doc.data();
+      assert.equal(data.pathValue.formattedName,
+          allSupportedTypesObject.pathValue.formattedName);
+      assert.deepStrictEqual(data, allSupportedTypesObject);
     });
   });
 
@@ -235,6 +241,41 @@ describe('DocumentReference class', function() {
     });
   });
 
+  it('supports set() with merge', function() {
+    let ref = randomCol.doc('doc');
+    return ref.set({ 'a.1': 'foo',  nested: { 'b.1': 'bar'}}).
+    then(() => ref.set(
+        { 'a.2': 'foo',  nested: { 'b.2': 'bar'}}, {merge: true})).
+    then(() => ref.get()).
+    then((doc) => {
+      let data = doc.data();
+      assert.deepStrictEqual(data, {
+        'a.1': 'foo',
+        'a.2': 'foo',
+        nested: {
+          'b.1': 'bar',
+          'b.2': 'bar'
+        }
+      });
+    });
+  });
+
+  it('supports server timestamps for merge', function() {
+    let ref = randomCol.doc('doc');
+    return ref.set({ 'a': 'b' }).
+    then(() => ref.set(
+        { 'c': Firestore.FieldValue.serverTimestamp()}, {merge: true})).
+    then(() => ref.get()).
+    then((doc) => {
+      let updateTimestamp = doc.get('c');
+      assert.ok(is.instanceof(updateTimestamp, Date));
+      assert.deepEqual(doc.data(), {
+        a: 'b',
+        c: updateTimestamp
+      });
+    });
+  });
+
   it('has update() method', function() {
     let ref = randomCol.doc('doc');
     return ref.set({foo: 'a'}).then((res) => {
@@ -272,17 +313,35 @@ describe('DocumentReference class', function() {
     return ref.delete();
   });
 
-  it('supports non-alpha-numeric field names', function() {
+  it('supports non-alphanumeric field names', function() {
     const ref = randomCol.doc('doc');
     return ref.set({'!.\\`': {'!.\\`': 'value'}}).then(() => {
       return ref.get();
     }).then((doc) => {
       assert.deepStrictEqual(doc.data(), {'!.\\`': {'!.\\`': 'value'}});
-      return ref.update({'`!.\\\\\\``.`!.\\\\\\``': 'new-value'});
+      return ref.update(new Firestore.FieldPath('!.\\`', '!.\\`'), 'new-value');
     }).then(() => {
       return ref.get();
     }).then((doc) => {
       assert.deepStrictEqual(doc.data(), {'!.\\`': {'!.\\`': 'new-value'}});
+    });
+  });
+
+  it('has getCollections() method', function() {
+    let collections = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+    let promises = [];
+
+    for (let collection of collections) {
+      promises.push(randomCol.doc(`doc/${collection}/doc`).create({}));
+    }
+
+    return Promise.all(promises).then(() => {
+      return randomCol.doc('doc').getCollections();
+    }).then(response => {
+      assert.equal(response.length, collections.length);
+      for (let i = 0; i < response.length; ++i) {
+        assert.equal(response[i].id, collections[i]);
+      }
     });
   });
 
@@ -486,7 +545,7 @@ describe('Query class', function() {
     });
   });
 
-  it('suports NaN and Null', function() {
+  it('supports NaN and Null', function() {
     let ref = randomCol.doc('doc');
     return ref.set({foo: NaN, bar: null}).then(() => {
       return randomCol.where('foo', '==', NaN).where('bar', '==', null).get();
@@ -512,6 +571,20 @@ describe('Query class', function() {
       }).then((res) => {
         assert.deepStrictEqual(res.docs[0].data(), {foo: 'b'});
         assert.deepStrictEqual(res.docs[1].data(), {foo: 'a'});
+      });
+  });
+
+  it('can order by FieldPath.documentId()', function() {
+    let ref1 = randomCol.doc('doc1');
+    let ref2 = randomCol.doc('doc2');
+
+    return Promise.all([
+      ref1.set({foo: 'a'}),
+      ref2.set({foo: 'b'})]).then(() => {
+        return randomCol.orderBy(Firestore.FieldPath.documentId()).get();
+      }).then((res) => {
+        assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
+        assert.deepStrictEqual(res.docs[1].data(), {foo: 'b'});
       });
   });
 
@@ -550,7 +623,7 @@ describe('Query class', function() {
     return Promise.all([
       ref1.set({foo: 'a'}),
       ref2.set({foo: 'b'})]).then(() => {
-        return randomCol.orderBy('foo').startAt({foo: 'a'}).get();
+        return randomCol.orderBy('foo').startAt('a').get();
       }).then((res) => {
         assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
       });
@@ -563,9 +636,7 @@ describe('Query class', function() {
     return Promise.all([
       ref1.set({foo: 'a'}),
       ref2.set({foo: 'b'})]).then(() => {
-        return ref1.get();
-      }).then((doc) => {
-        return randomCol.orderBy('foo').startAfter(doc).get();
+        return randomCol.orderBy('foo').startAfter('a').get();
       }).then((res) => {
         assert.deepStrictEqual(res.docs[0].data(), {foo: 'b'});
       });
@@ -578,7 +649,7 @@ describe('Query class', function() {
     return Promise.all([
       ref1.set({foo: 'a'}),
       ref2.set({foo: 'b'})]).then(() => {
-        return randomCol.orderBy('foo').endAt({foo: 'b'}).get();
+        return randomCol.orderBy('foo').endAt('b').get();
       }).then((res) => {
         assert.equal(res.size, 2);
         assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
@@ -593,9 +664,7 @@ describe('Query class', function() {
     return Promise.all([
       ref1.set({foo: 'a'}),
       ref2.set({foo: 'b'})]).then(() => {
-        return ref2.get();
-      }).then((doc) => {
-        return randomCol.orderBy('foo').endBefore(doc).get();
+        return randomCol.orderBy('foo').endBefore('b').get();
       }).then((res) => {
         assert.equal(res.size, 1);
         assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
@@ -620,17 +689,16 @@ describe('Query class', function() {
   });
 
   describe('watch', function() {
-    let DocumentSnapshot = document.DocumentSnapshot;
     let currentDeferred = { promise: null };
 
     const snapshot = function(id, data) {
       const ref = randomCol.doc(id);
-      let snapshot = new DocumentSnapshot.Builder();
-      snapshot.ref = ref;
-      snapshot.fieldsProto = DocumentSnapshot.encodeFields(data);
-      snapshot.createTime = '1970-01-01T00:00:00.000000000Z';
-      snapshot.updateTime = '1970-01-01T00:00:00.000000000Z';
-      return snapshot.build();
+      return randomCol.firestore.snapshot_({
+        name: ref.formattedName,
+        fields: DocumentSnapshot.encodeFields(data),
+        createTime: {seconds: 0, nanos: 0},
+        updateTime: {seconds: 0, nanos: 0}
+      });
     };
 
     const docChange = function(type, id, data) {

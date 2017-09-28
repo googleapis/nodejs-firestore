@@ -20,17 +20,15 @@
 
 'use strict';
 
-let bun = require('bun');
-let extend = require('extend');
-let immutable = require('immutable');
-let is = require('is');
-let order = require('./order');
-let through = require('through2');
+const bun = require('bun');
+const extend = require('extend');
+const is = require('is');
+const order = require('./order');
+const through = require('through2');
 
 /**
  * Injected.
  *
- * @private
  * @type firestore.Firestore
  */
 let Firestore;
@@ -38,22 +36,18 @@ let Firestore;
 /**
  * Injected.
  *
- * @private
  * @type firestore.DocumentSnapshot
  */
 let DocumentSnapshot;
 
 /**
  * Injected.
- *
- * @private
  */
 let validate;
 
 /**
  * Injected.
  *
- * @private
  * @type firestore.Watch
  */
 let Watch;
@@ -61,16 +55,23 @@ let Watch;
 /**
  * Injected.
  *
- * @private
  * @type firestore.WriteBatch
  */
 let WriteBatch;
 
+const path = require('./path');
+
 /**
  * @private
- * @type firestore.Path
+ * @type firestore.ResourcePath
  */
-let Path = require('./path');
+const ResourcePath = path.ResourcePath;
+
+/**
+ * @private
+ * @type firestore.FieldPath
+ */
+const FieldPath = path.FieldPath;
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -98,25 +99,6 @@ const comparisonOperators = {
   '==': 'EQUAL',
   '>': 'GREATER_THAN',
   '>=': 'GREATER_THAN_OR_EQUAL'
-};
-
-/**
- * Pseudo field name for a document's path.
- *
- * @private
- * @type string
- */
-const DOCUMENT_NAME_FIELD = '__name__';
-
-/**
- * The order in which document change events will be returned to the user.
- *
- * @private
- */
-const documentChangeOrder = {
-  removed: 0,
-  added: 1,
-  modified: 2
 };
 
 /**
@@ -157,7 +139,7 @@ class DocumentReference {
    * @hideconstructor
    *
    * @param {firestore.Firestore} firestore - The Firestore Database client.
-   * @param {firestore.Path} path - The Path of this reference.
+   * @param {firestore.ResourcePath} path - The Path of this reference.
    */
   constructor(firestore, path) {
     this._firestore = firestore;
@@ -255,6 +237,18 @@ class DocumentReference {
   }
 
   /**
+   * Returns the [ResourcePath]{@link firestore.ResourcePath} for this
+   * DocumentReference.
+   *
+   * @package
+   * @type firestore.ResourcePath
+   * @readonly
+   */
+  get ref() {
+    return this._referencePath;
+  }
+
+  /**
    * Retrieve a document from the database. Fails the Promise if the document is
    * not found.
    *
@@ -274,7 +268,7 @@ class DocumentReference {
    * });
    */
   get() {
-    return this.firestore.getAll_([this]).then((result) =>  {
+    return this._firestore.getAll_([this]).then((result) =>  {
       return result[0];
     });
   }
@@ -294,14 +288,55 @@ class DocumentReference {
    * console.log(`Path to subcollection: ${subcollection.path}`);
    */
   collection(collectionPath) {
-    validate.isString('collectionPath', collectionPath);
+    validate.isResourcePath('collectionPath', collectionPath);
 
-    let path = this._referencePath.child(collectionPath);
+    let path = this._referencePath.append(collectionPath);
     if (!path.isCollection) {
       throw new Error('Argument "collectionPath" must point to a collection.');
     }
 
-    return createCollectionReference(this.firestore, path);
+    return createCollectionReference(this._firestore, path);
+  }
+
+  /**
+   * Fetches the subcollections that are direct children of this document.
+   *
+   * @public
+   *
+   * @returns {Promise.<Array.<firestore.CollectionReference>>} A Promise that
+   * contains an array with CollectionReferences.
+   *
+   * @example
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.getCollections().then(collections => {
+   *   for (let collection of collections) {
+   *     console.log(`Found subcollection with id: ${collection.id}`);
+   *   }
+   * });
+   */
+  getCollections() {
+    let request = {
+      parent: this._referencePath.formattedName,
+    };
+
+    let api = this._firestore.api.Firestore;
+
+    return this._firestore.request(
+        api.listCollectionIds.bind(api), request
+    ).then(collectionIds => {
+      let collections = [];
+
+      // We can just sort this list using the default comparator since it will
+      // only contain collection ids.
+      collectionIds.sort();
+
+      for (let collectionId of collectionIds) {
+        collections.push(this.collection(collectionId));
+      }
+
+      return collections;
+    });
   }
 
   /**
@@ -309,10 +344,10 @@ class DocumentReference {
    * if a document exists at its location.
    *
    * @public
-   * @param {object.<string, *>} data - An object that contains the fields and
-   * data to serialize as the document.
-   * @return Promise.<firestore.WriteResult> A Promise that resolves once the
-   * document has been successfully written to the backend.
+   * @param {DocumentData} data - An object that contains the fields and data to
+   * serialize as the document.
+   * @return {Promise.<firestore.WriteResult>} A Promise that resolves with the
+   * write time of this create.
    *
    * @example
    * let documentRef = firestore.collection('col').doc();
@@ -324,9 +359,7 @@ class DocumentReference {
    * });
    */
   create(data) {
-    validate.isDocument('data', data);
-
-    let writeBatch = new WriteBatch(this.firestore);
+    let writeBatch = new WriteBatch(this._firestore);
     return writeBatch.create(this, data).commit().then((res) => {
       return Promise.resolve(res.writeResults[0]);
     });
@@ -339,12 +372,13 @@ class DocumentReference {
    * lastUptimeTime is provided).
    *
    * @public
-   * @param {object=} deleteOptions - The preconditions for this delete.
-   * @param {string=} deleteOptions.lastUpdateTime If set, enforces that the
+   * @param {Precondition=} precondition - A precondition to enforce for this
+   * delete.
+   * @param {string=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
    * delete if the document was last updated at a different time.
-   * @return Promise.<firestore.WriteResult> A Promise that resolves once the
-   * document has been successfully deleted from the backend.
+   * @return {Promise.<firestore.WriteResult>} A Promise that resolves with the
+   * delete time.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -353,32 +387,28 @@ class DocumentReference {
    *   console.log('Document successfully deleted.');
    * });
    */
-  delete(deleteOptions) {
-    validate.isOptionalPrecondition('deleteOptions', deleteOptions);
-
-    let writeBatch = new WriteBatch(this.firestore);
-    return writeBatch.delete(this, deleteOptions).commit().then((res) => {
+  delete(precondition) {
+    let writeBatch = new WriteBatch(this._firestore);
+    return writeBatch.delete(this, precondition).commit().then((res) => {
       return Promise.resolve(res.writeResults[0]);
     });
   }
 
   /**
    * Writes to the document referred to by this DocumentReference. If the
-   * document doesn't yet exist, this method creates it and then sets the
-   * data. If the document exists, this method overwrites the document data
-   * with the new value.
+   * document does not yet exist, it will be created. If you pass
+   * [SetOptions]{@link SetOptions}, the provided data can be merged into an
+   * existing document.
    *
    * @public
-   * @param {object<string, *>} data - An object that contains the fields and
-   * data to write to the document.
-   * @param {object=} writeOptions - The preconditions for this set.
-   * @param {boolean=} writeOptions.createIfMissing Whether the document should
-   * be created if it doesn't yet exist. Defaults to true.
-   * @param {string=} writeOptions.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
-   * set if the document doesn't exist or was last updated at a different time.
-   * @return Promise.<firestore.WriteResult> A Promise that resolves once the
-   * data has been successfully written to the backend.
+   * @param {DocumentData} data - A map of the fields and values for the
+   * document.
+   * @param {SetOptions=} options - An object to configure the set behavior.
+   * @param {boolean=} options.merge - If true, set() only replaces the
+   * values specified in its data argument. Fields omitted from this set() call
+   * remain untouched.
+   * @return {Promise.<firestore.WriteResult>} A Promise that resolves with the
+   * write time of this set.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -387,31 +417,33 @@ class DocumentReference {
    *   console.log(`Document written at ${res.updateTime}`);
    * });
    */
-   set(data, writeOptions) {
-    validate.isDocument('data', data);
-    validate.isOptionalPrecondition('writeOptions', writeOptions);
-
-    let writeBatch = new WriteBatch(this.firestore);
-    return writeBatch.set(this, data, writeOptions).commit().then((res) => {
+   set(data, options) {
+    let writeBatch = new WriteBatch(this._firestore);
+    return writeBatch.set(this, data, options).commit().then((res) => {
       return Promise.resolve(res.writeResults[0]);
     });
   }
 
   /**
    * Updates fields in the document referred to by this DocumentReference.
-   * If no document exists yet, the update fails and the returned Promise will
-   * be rejected.
+   * If the document doesn't yet exist, the update fails and the returned
+   * Promise will be rejected.
+   *
+   * The update() method accepts either an object with field paths encoded as
+   * keys and field values encoded as values, or a variable number of arguments
+   * that alternate between field paths and field values.
+   *
+   * A Precondition restricting this update can be specified as the last
+   * argument.
    *
    * @public
-   * @param {object<string, *>} data - An object containing the fields and
-   * values with which to update the document.
-   * @param {object=} updateOptions - The preconditions for this update.
-   * @param {boolean=} updateOptions.createIfMissing Whether the document should
-   * be created if it doesn't yet exist. Defaults to false.
-   * @param {string=} updateOptions.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
-   * update if the document doesn't exist or was last updated at a different
-   * time.
+   * @param {UpdateData|string|firestore.FieldPath} dataOrField - An object
+   * containing the fields and values with which to update the document
+   * or the path of the first field to update.
+   * @param {
+   * ...(*|string|firestore.FieldPath|Precondition)} preconditionOrValues -
+   * An alternating list of field paths and values to update or a Precondition
+   * to restrict this update.
    * @return Promise.<firestore.WriteResult> A Promise that resolves once the
    * data has been successfully written to the backend.
    *
@@ -422,14 +454,13 @@ class DocumentReference {
    *   console.log(`Document updated at ${res.updateTime}`);
    * });
    */
-  update(data, updateOptions) {
-    validate.isDocument('data', data, true);
-    validate.isOptionalPrecondition('updateOptions', updateOptions);
-
-    let writeBatch = new WriteBatch(this.firestore);
-    return writeBatch.update(this, data, updateOptions).commit().then((res) => {
-      return Promise.resolve(res.writeResults[0]);
-    });
+  update(dataOrField, preconditionOrValues) {
+    let writeBatch = new WriteBatch(this._firestore);
+    preconditionOrValues = Array.prototype.slice.call(arguments);
+    return writeBatch.update(this, ...preconditionOrValues).commit().then(
+        (res) => {
+          return Promise.resolve(res.writeResults[0]);
+        });
   }
 
   /**
@@ -470,15 +501,19 @@ class DocumentReference {
     let watch = Watch.forDocument(this);
 
     return watch.onSnapshot(
-        (readTime, docMap) => {
-          if (docMap.has(this.formattedName)) {
-            onNext(docMap.get(this.formattedName));
-          } else {
-            let document = new DocumentSnapshot.Builder();
-            document.ref = this._referencePath;
-            document.readTime = readTime;
-            onNext(document.build());
+        (readTime, docs) => {
+          for (let document of docs()) {
+            if (document.ref.formattedName === this.formattedName) {
+              onNext(document);
+              return;
+            }
           }
+
+          // The document is missing.
+          let document = new DocumentSnapshot.Builder();
+          document.ref = this._referencePath;
+          document.readTime = readTime;
+          onNext(document.build());
         }, onError);
   }
 }
@@ -497,10 +532,16 @@ class DocumentChange {
    *
    * @param {string} type - 'added' | 'removed' | 'modified'.
    * @param {firestore.DocumentSnapshot} document - The document.
+   * @param {number} oldIndex - The index in the documents array prior to this
+   * change.
+   * @param {number} newIndex - The index in the documents array after this
+   * change.
    */
-  constructor(type, document) {
+  constructor(type, document, oldIndex, newIndex) {
     this._type = type;
     this._document = document;
+    this._oldIndex = oldIndex;
+    this._newIndex = newIndex;
   }
 
   /**
@@ -510,6 +551,19 @@ class DocumentChange {
    * @type string
    * @name firestore.DocumentChange#type
    * @readonly
+   *
+   * @example
+   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   * let docsArray = [];
+   *
+   * let unsubscribe = query.onSnapshot(querySnapshot => {
+   *   for (let change of querySnapshot.docChanges) {
+   *     console.log(`Type of change is ${change.type}`);
+   *   }
+   * });
+   *
+   * // Remove this listener.
+   * unsubscribe();
    */
   get type() {
     return this._type;
@@ -522,9 +576,86 @@ class DocumentChange {
    * @type firestore.DocumentSnapshot
    * @name firestore.DocumentChange#type
    * @readonly
+   *
+   * @example
+   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   *
+   * let unsubscribe = query.onSnapshot(querySnapshot => {
+   *   for (let change of querySnapshot.docChanges) {
+   *     console.log(change.doc.data());
+   *   }
+   * });
+   *
+   * // Remove this listener.
+   * unsubscribe();
    */
   get doc() {
     return this._document;
+  }
+
+  /**
+   * The index of the changed document in the result set immediately prior to
+   * this DocumentChange (i.e. supposing that all prior DocumentChange objects
+   * have been applied). Is -1 for 'added' events.
+   *
+   * @public
+   * @type number
+   * @name firestore.DocumentChange#oldIndex
+   * @readonly
+   *
+   * @example
+   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   * let docsArray = [];
+   *
+   * let unsubscribe = query.onSnapshot(querySnapshot => {
+   *   for (let change of querySnapshot.docChanges) {
+   *     if (change.oldIndex !== -1) {
+   *       docsArray.splice(change.oldIndex, 1);
+   *     }
+   *     if (change.newIndex !== -1) {
+   *       docsArray.splice(change.newIndex, 0, change.doc);
+   *     }
+   *   }
+   * });
+   *
+   * // Remove this listener.
+   * unsubscribe();
+   */
+  get oldIndex() {
+    return this._oldIndex;
+  }
+
+  /**
+   * The index of the changed document in the result set immediately after
+   * this DocumentChange (i.e. supposing that all prior DocumentChange
+   * objects and the current DocumentChange object have been applied).
+   * Is -1 for 'removed' events.
+   *
+   * @public
+   * @type number
+   * @name firestore.DocumentChange#newIndex
+   * @readonly
+   *
+   * @example
+   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   * let docsArray = [];
+   *
+   * let unsubscribe = query.onSnapshot(querySnapshot => {
+   *   for (let change of querySnapshot.docChanges) {
+   *     if (change.oldIndex !== -1) {
+   *       docsArray.splice(change.oldIndex, 1);
+   *     }
+   *     if (change.newIndex !== -1) {
+   *       docsArray.splice(change.newIndex, 0, change.doc);
+   *     }
+   *   }
+   * });
+   *
+   * // Remove this listener.
+   * unsubscribe();
+   */
+  get newIndex() {
+    return this._newIndex;
   }
 }
 
@@ -538,26 +669,25 @@ class FieldOrder {
   /**
    * @package
    *
-   * @param {string} fieldPath The name of a document field (member) on which to
-   * order query results.
+   * @param {firestore.FieldPath} field - The name of a document field (member)
+   * on which to order query results.
    * @param {string=} direction One of 'ASCENDING' (default) or 'DESCENDING' to
    * set the ordering direction to ascending or descending, respectively.
    */
-  constructor(fieldPath, direction) {
-    this._field = fieldPath;
+  constructor(field, direction) {
+    this._field = field;
     this._direction = direction || directionOperators.ASC;
   }
 
   /**
-   * The name of a document field on which to order query results.
+   * The path of the field on which to order query results.
    *
    * @package
-   * @type string
+   * @type firestore.FieldPath
    */
   get field() {
     return this._field;
   }
-
 
   /**
    * One of 'ASCENDING' (default) or 'DESCENDING'.
@@ -578,7 +708,7 @@ class FieldOrder {
   toProto() {
     return {
       field: {
-        fieldPath: this._field
+        fieldPath: this._field.formattedName
       },
       direction: this._direction
     };
@@ -595,13 +725,14 @@ class FieldFilter {
   /**
    * @package
    *
-   * @param {string} fieldPath The path of the property value to compare.
-   * @param {string} opString A comparison operation.
+   * @param {firestore.FieldPath} field - The path of the property value to
+   * compare.
+   * @param {string} opString - A comparison operation.
    * @param {*} value The value to which to compare the
    * field for inclusion in a query.
    */
-  constructor(fieldPath, opString, value) {
-    this._field = fieldPath;
+  constructor(field, opString, value) {
+    this._field = field;
     this._opString = opString;
     this._value = value;
   }
@@ -617,7 +748,7 @@ class FieldFilter {
       return {
         unaryFilter: {
           field: {
-            fieldPath: this._field,
+            fieldPath: this._field.formattedName
           },
           op: 'IS_NAN',
         }
@@ -628,7 +759,7 @@ class FieldFilter {
       return {
         unaryFilter: {
           field: {
-            fieldPath: this._field,
+            fieldPath: this._field.formattedName
           },
           op: 'IS_NULL'
         }
@@ -638,7 +769,7 @@ class FieldFilter {
     return {
       fieldFilter: {
         field: {
-          fieldPath: this._field,
+          fieldPath: this._field.formattedName
         },
         op: this._opString,
         value: DocumentSnapshot.encodeValue(this._value)
@@ -668,17 +799,18 @@ class QuerySnapshot {
    * @param {firestore.Query} query - The originating query.
    * @param {string} readTime - The ISO 8601 time when this query snapshot was
    * current.
-   * @param {Immutable.Map<string,firestore.DocumentSnapshot>} docMap -
-   * The documents retrieved by this query keyed by their name.
-   * @param {Array.<firestore.DocumentChange>} docChanges - The changes
-   * from the previous snapshot.
+   *
+   * @param {function} docs - A callback returning a sorted array of documents
+   * matching this query
+   * @param {function} changes - A callback returning a sorted array of
+   * document change events for this snapshot.
    */
-  constructor(query, readTime, docMap, docChanges) {
+  constructor(query, readTime, docs, changes) {
     this._query = query;
     this._comparator = query.comparator();
     this._readTime = readTime;
-    this._docMap = docMap;
-    this._docChanges = docChanges;
+    this._docs = docs;
+    this._changes = changes;
   }
 
   /**
@@ -724,12 +856,11 @@ class QuerySnapshot {
    * });
    */
   get docs() {
-    if (this._docs) {
-      return this._docs;
+    if (this._materializedDocs) {
+      return this._materializedDocs;
     }
-    this._docs = this._docMap.toList().toJS();
-    this._docs.sort(this._comparator);
-    return this._docs;
+    this._materializedDocs = this._docs();
+    return this._materializedDocs;
   }
 
   /**
@@ -741,16 +872,11 @@ class QuerySnapshot {
    * @readonly
    */
   get docChanges() {
-    if (this._changes) {
-      return this._changes;
+    if (this._materializedChanges) {
+      return this._materializedChanges;
     }
-    this._changes = this._docChanges;
-    this._changes.sort((c1, c2) => {
-      let typeOrder = order.primitiveComparator(documentChangeOrder[c1.type],
-          documentChangeOrder[c2.type]);
-      return typeOrder || this._comparator(c1.doc, c2.doc);
-    });
-    return this._changes;
+    this._materializedChanges = this._changes();
+    return this._materializedChanges;
   }
 
   /**
@@ -771,7 +897,7 @@ class QuerySnapshot {
    * });
    */
   get empty() {
-    return this._docMap.size === 0;
+    return this.docs.length === 0;
   }
 
   /**
@@ -790,7 +916,7 @@ class QuerySnapshot {
    * });
    */
   get size() {
-    return this._docMap.size;
+    return this.docs.length;
   }
 
   /**
@@ -815,6 +941,7 @@ class QuerySnapshot {
    * @param {function} callback - A callback to be called with a
    * [DocumentSnapshot]{@link firestore.DocumentSnapshot} for each document in
    * the snapshot.
+   * @param {*=} thisArg The `this` binding for the callback..
    *
    * @example
    * let query = firestore.collection('col').where('foo', '==', 'bar');
@@ -825,11 +952,11 @@ class QuerySnapshot {
    *   });
    * });
    */
-  forEach(callback) {
+  forEach(callback, thisArg) {
     validate.isFunction('callback', callback);
 
     for (let doc of this.docs) {
-      callback(doc);
+      callback.call(thisArg, doc);
     }
   }
 }
@@ -847,7 +974,7 @@ class Query {
    * @hideconstructor
    *
    * @param {firestore.Firestore} firestore - The Firestore Database client.
-   * @param {firestore.Path} path Path to the collection to be queried.
+   * @param {firestore.ResourcePath} path Path of the collection to be queried.
    * @param {Array.<firestore.FieldOrder>=} fieldOrders - Sequence of fields to
    * control the order of results.
    * @param {Array.<firestore.FieldFilter>=} fieldFilters - Sequence of fields
@@ -900,11 +1027,13 @@ class Query {
    *
    * Returns a new Query that constrains the value of a Document property.
    *
-   * This function returns a new (immutable) instance of the ``Query``
-   * (rather than modify the existing ``Query``) to impose the filter.
+   * This function returns a new (immutable) instance of the
+   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * to impose the filter.
    *
    * @public
-   * @param {string} fieldPath - The name of a property value to compare.
+   * @param {string|firestore.FieldPath} fieldPath - The name of a property
+   * value to compare.
    * @param {string} opStr - A comparison operation in the form of a string
    * (e.g., "<").
    * @param {*} value - The value to which to compare the field for inclusion in
@@ -922,27 +1051,29 @@ class Query {
    */
   where(fieldPath, opStr, value) {
     validate.isFieldPath('fieldPath', fieldPath);
-    validate.isFieldFilter('fieldFilter', opStr, value);
+    validate.isFieldComparison('opStr', opStr, value);
 
     let newFilter = new FieldFilter(
-        fieldPath, comparisonOperators[opStr], value);
+        FieldPath.fromArgument(fieldPath), comparisonOperators[opStr], value);
     let combinedFilters = this._fieldFilters.concat(newFilter);
-    return new Query(this.firestore, this._referencePath, combinedFilters,
+    return new Query(this._firestore, this._referencePath, combinedFilters,
         this._fieldOrders, this._queryOptions);
   }
 
   /**
    * Creates and returns a new Query instance that applies a field mask to the
-   * result and returns the specified subset of fields. You can specify a list
-   * of field paths to return, or use an empty list to only return the
+   * result and returns only the specified subset of fields. You can specify a
+   * list of field paths to return, or use an empty list to only return the
    * references of matching documents.
    *
-   * This function returns a new (immutable) instance of the ``Query``
-   * (rather than modify the existing ``Query``) to impose the field mask.
+   * This function returns a new (immutable) instance of the
+   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * to impose the field mask.
    *
    * @public
-   * @param {Array.<string>|...string} varArgs The field paths to return.
-   * @return {firestore.Query} The new Query with the field mask applied.
+   * @param {...(string|firestore.FieldPath)} fieldPaths - The field paths to
+   * return.
+   * @return {firestore.Query} The created Query.
    *
    * @example
    * let collectionRef = firestore.collection('col');
@@ -954,25 +1085,26 @@ class Query {
    *   console.log(`y is ${res.docs[0].get('y')}.`);
    * });
    */
-  select(varArgs) {
-    varArgs = is.array(arguments[0]) ? arguments[0] : [].slice.call(arguments);
-    let fieldReferences = [];
+  select(fieldPaths) {
+    fieldPaths = [].slice.call(arguments);
 
-    if (varArgs.length === 0) {
-      fieldReferences.push({fieldPath: DOCUMENT_NAME_FIELD});
+    let result = [];
+
+    if (fieldPaths.length === 0) {
+      result.push({fieldPath: FieldPath._DOCUMENT_ID.formattedName});
     } else {
-      for (let i = 0; i < varArgs.length; ++i) {
-        validate.isFieldPath(i, varArgs[i]);
-        fieldReferences.push({
-          fieldPath: varArgs[i]
+      for (let i = 0; i < fieldPaths.length; ++i) {
+        validate.isFieldPath(i, fieldPaths[i]);
+        result.push({
+          fieldPath: FieldPath.fromArgument(fieldPaths[i]).formattedName
         });
       }
     }
 
     let options = extend(true, {}, this._queryOptions);
-    options.selectFields = {fields: fieldReferences};
+    options.selectFields = {fields: result};
 
-    return new Query(this.firestore, this._referencePath, this._fieldFilters,
+    return new Query(this._firestore, this._referencePath, this._fieldFilters,
         this._fieldOrders, options);
   }
 
@@ -980,8 +1112,12 @@ class Query {
    * Creates and returns a new Query that's additionally sorted by the
    * specified field, optionally in descending order instead of ascending.
    *
+   * This function returns a new (immutable) instance of the
+   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * to impose the field mask.
+   *
    * @public
-   * @param {string} fieldPath - The field to sort by.
+   * @param {string|firestore.FieldPath} fieldPath - The field to sort by.
    * @param {string=} directionStr - Optional direction to sort by ('asc' or
    * 'desc'). If not specified, order will be ascending.
    * @return {firestore.Query} The created Query.
@@ -999,9 +1135,15 @@ class Query {
     validate.isFieldPath('fieldPath', fieldPath);
     validate.isOptionalFieldOrder('directionStr', directionStr);
 
-    let newOrder = new FieldOrder(fieldPath, directionOperators[directionStr]);
+    if (this._queryOptions.startAt || this._queryOptions.endAt) {
+      throw new Error('Cannot specify an orderBy() constraint after calling ' +
+          'startAt(), startAfter(), endBefore() or endAt().');
+    }
+
+    let newOrder = new FieldOrder(FieldPath.fromArgument(fieldPath),
+        directionOperators[directionStr]);
     let combinedOrders = this._fieldOrders.concat(newOrder);
-    return new Query(this.firestore, this._referencePath, this._fieldFilters,
+    return new Query(this._firestore, this._referencePath, this._fieldFilters,
         combinedOrders, this._queryOptions);
   }
 
@@ -1009,8 +1151,12 @@ class Query {
    * Creates and returns a new Query that's additionally limited to only
    * return up to the specified number of documents.
    *
+   * This function returns a new (immutable) instance of the
+   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * to impose the limit.
+   *
    * @public
-   * @param {number} n - The maximum number of items to return.
+   * @param {number} limit - The maximum number of items to return.
    * @return {firestore.Query} The created Query.
    *
    * @example
@@ -1022,21 +1168,25 @@ class Query {
    *   });
    * });
    */
-  limit(n) {
-    validate.isInteger('n', n);
+  limit(limit) {
+    validate.isInteger('limit', limit);
 
     let options = extend(true, {}, this._queryOptions);
-    options.limit = n;
-    return new Query(this.firestore, this._referencePath, this._fieldFilters,
+    options.limit = limit;
+    return new Query(this._firestore, this._referencePath, this._fieldFilters,
         this._fieldOrders, options);
   }
 
   /**
-   * Specifies the offset for the returned results.
+   * Specifies the offset of the returned results.
+   *
+   * This function returns a new (immutable) instance of the
+   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * to impose the offset.
    *
    * @public
-   * @param {number} n - The offset to apply to the Query results
-   * @return {firestore.Query} A query with the offset.
+   * @param {number} offset - The offset to apply to the Query results
+   * @return {firestore.Query} The created Query.
    *
    * @example
    * let query = firestore.collection('col').where('foo', '>', 42);
@@ -1047,12 +1197,12 @@ class Query {
    *   });
    * });
    */
-  offset(n) {
-    validate.isInteger('n', n);
+  offset(offset) {
+    validate.isInteger('offset', offset);
 
     let options = extend(true, {}, this._queryOptions);
-    options.offset = n;
-    return new Query(this.firestore, this._referencePath, this._fieldFilters,
+    options.offset = offset;
+    return new Query(this._firestore, this._referencePath, this._fieldFilters,
         this._fieldOrders, options);
   }
 
@@ -1061,184 +1211,162 @@ class Query {
    *
    * @private
    *
-   * @param fieldsOrDocument fieldsOrDocument The document or
-   * set of fields to use as the boundary.
-   * @param before Whether the query boundary lies just before or after the
+   * @param {Array.<*>} fieldValues - The set of field values to use as the
+   * boundary.
+   * @param before - Whether the query boundary lies just before or after the
    * provided data.
    * @return {Object} The proto message.
    */
-  _buildPosition(fieldsOrDocument, before) {
+  _buildPosition(fieldValues, before) {
     let options = {
-      before: before
+      before: before,
+      values: []
     };
 
-    let fields;
-
-    if (is.instanceof(fieldsOrDocument, DocumentSnapshot)) {
-      fields = extend(true, {}, fieldsOrDocument.data());
-    } else if (is.object(fieldsOrDocument)) {
-      validate.isDocument('fieldsOrDocument', fieldsOrDocument);
-      fields = fieldsOrDocument;
-    } else {
-      throw new Error('Specify either a valid Document or JavaScript object ' +
-          'as your Query boundary.');
+    if (fieldValues.length > this._fieldOrders.length) {
+      throw new Error('Too many cursor values specified. The specified ' +
+          'values must match the orderBy() constraints of the query.');
     }
 
-    options.values = [];
+    for (let i = 0; i < fieldValues.length; ++i) {
+      let fieldValue = fieldValues[i];
 
-    let found = {};
-
-    for (let i = 0; i < this._fieldOrders.length; ++i) {
-      let fieldName = this._fieldOrders[i].field;
-
-      if (!is.defined(fields[fieldName])) {
-        break;
+      if (this._fieldOrders[i].field === FieldPath._DOCUMENT_ID) {
+        if (is.string(fieldValue)) {
+          fieldValue = this._referencePath.append(fieldValues[i]);
+        } else if (is.instance(fieldValue, DocumentReference)) {
+          if (!this._referencePath.isPrefixOf(fieldValue.ref)) {
+            throw new Error(`'${fieldValue.path}' is not part of the query ` +
+                'result set and cannot be used as a query boundary.');
+          }
+        } else {
+          throw new Error(
+              'The corresponding value for FieldPath.documentId() must be a ' +
+              'string or a DocumentReference.');
+        }
       }
 
-      found[fieldName] = true;
-      options.values.push(DocumentSnapshot.encodeValue(fields[fieldName]));
-    }
-
-    for (let prop in fields) {
-      if (fields.hasOwnProperty(prop) && !found[prop]) {
-        throw new Error(`Field "${prop}" does not have a corresponding ` +
-            'OrderBy constraint.');
-      }
+      options.values.push(DocumentSnapshot.encodeValue(fieldValue));
     }
 
     return options;
   }
 
   /**
-   * Creates and returns a new Query that starts at the provided document
-   * or set of fields (inclusive). The provided fields or the contents of the
-   * provided document must be a covering prefix of the
-   * [orderBy]{@link firestore.Query#orderBy}. For example, if the query is
-   * ordered by fields a, b, c and finally by key, then if the fields contain c
-   * it must also contain b and a; if they contain b, they must also contain a.
-   *
-   * The starting position is relative to the order of the query.
+   * Creates and returns a new Query that starts at the provided set of field
+   * values relative to the order of the query. The order of the provided values
+   * must match the order of the order by clauses of the query.
    *
    * @public
-   * @param {object|firestore.DocumentSnapshot} fieldsOrDocument - The
-   * document or set of fields to start the query at.
+   * @param {...*} fieldValues - The set of field values to start the query at.
    * @returns {firestore.Query} A query with the new starting point.
    *
    * @example
    * let query = firestore.collection('col');
    *
-   * query.orderBy('foo').startAt({foo: 42}).get().then(querySnapshot => {
+   * query.orderBy('foo').startAt(42).get().then(querySnapshot => {
    *   querySnapshot.forEach(documentSnapshot => {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
    */
-  startAt(fieldsOrDocument) {
+  startAt(fieldValues) {
     let options = extend(true, {}, this._queryOptions);
 
-    options.startAt = this._buildPosition(fieldsOrDocument, true);
+    fieldValues = [].slice.call(arguments);
 
-    return new Query(this.firestore, this._referencePath, this._fieldFilters,
+    options.startAt = this._buildPosition(fieldValues, true);
+
+    return new Query(this._firestore, this._referencePath, this._fieldFilters,
         this._fieldOrders, options);
   }
 
   /**
-   * Creates and returns a new Query that starts after the provided document
-   * or set of fields (exclusive). The provided fields or the contents of the
-   * provided document must be a covering prefix of the
-   * [orderBy]{@link firestore.Query#orderBy}. For example, if the query is
-   * ordered by fields a, b, c and finally by key, then if the fields contain c
-   * it must also contain b and a; if they contain b, they must also contain a.
-   *
-   * The starting position is relative to the order of the query.
+   * Creates and returns a new Query that starts after the provided set of field
+   * values relative to the order of the query. The order of the provided values
+   * must match the order of the order by clauses of the query.
    *
    * @public
-   * @param {object|firestore.DocumentSnapshot} fieldsOrDocument - The
-   * document or set of fields to start the query after.
+   * @param {...*} fieldValues - The set of field values to start the query
+   * after.
    * @returns {firestore.Query} A query with the new starting point.
    *
    * @example
    * let query = firestore.collection('col');
    *
-   * query.orderBy('foo').startAfter({foo: 42}).get().then(querySnapshot => {
+   * query.orderBy('foo').startAfter(42).get().then(querySnapshot => {
    *   querySnapshot.forEach(documentSnapshot => {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
    */
-  startAfter(fieldsOrDocument) {
+  startAfter(fieldValues) {
     let options = extend(true, {}, this._queryOptions);
 
-    options.startAt = this._buildPosition(fieldsOrDocument, false);
+    fieldValues = [].slice.call(arguments);
 
-    return new Query(this.firestore, this._referencePath, this._fieldFilters,
+    options.startAt = this._buildPosition(fieldValues, false);
+
+    return new Query(this._firestore, this._referencePath, this._fieldFilters,
         this._fieldOrders, options);
   }
 
   /**
-   * Creates and returns a new Query that ends before the provided document
-   * or set of fields (exclusive). The provided fields or the contents of the
-   * provided document must be a covering prefix of the
-   * [orderBy]{@link firestore.Query#orderBy}. For example, if the query is
-   * ordered by fields a, b, c and finally by key, then if the fields contain c
-   * it must also contain b and a; if they contain b, they must also contain a.
-   *
-   * The ending position is relative to the order of the query.
+   * Creates and returns a new Query that ends before the set of field values
+   * relative to the order of the query. The order of the provided values must
+   * match the order of the order by clauses of the query.
    *
    * @public
-   * @param {object|firestore.DocumentSnapshot} fieldsOrDocument - The
-   * document or set of fields to end the query before.
+   * @param {...*} fieldValues - The set of field values to end the query
+   * before.
    * @returns {firestore.Query} A query with the new ending point.
    *
    * @example
    * let query = firestore.collection('col');
    *
-   * query.orderBy('foo').endBefore({foo: 42}).get().then(querySnapshot => {
+   * query.orderBy('foo').endBefore(42).get().then(querySnapshot => {
    *   querySnapshot.forEach(documentSnapshot => {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
    */
-  endBefore(fieldsOrDocument) {
+  endBefore(fieldValues) {
     let options = extend(true, {}, this._queryOptions);
 
-    options.endAt = this._buildPosition(fieldsOrDocument, true);
+    fieldValues = [].slice.call(arguments);
 
-    return new Query(this.firestore, this._referencePath, this._fieldFilters,
+    options.endAt = this._buildPosition(fieldValues, true);
+
+    return new Query(this._firestore, this._referencePath, this._fieldFilters,
         this._fieldOrders, options);
   }
 
   /**
-   * Creates and returns a new Query that ends at the provided document
-   * or set of fields (inclusive). The provided fields or the contents of the
-   * provided document must be a covering prefix of the
-   * [orderBy]{@link firestore.Query#orderBy}. For example, if the query is
-   * ordered by fields a, b, c and finally by key, then if the fields contain
-   * c it must also contain b and a; if they contain b, they must also contain
-   * a.
-   *
-   * The ending position is relative to the order of the query.
+   * Creates and returns a new Query that ends at the provided set of field
+   * values relative to the order of the query. The order of the provided values
+   * must match the order of the order by clauses of the query.
    *
    * @public
-   * @param {object|firestore.DocumentSnapshot} fieldsOrDocument - The
-   * document or set of fields to end the query at.
+   * @param {...*} fieldValues - The set of field values to end the query at.
    * @returns {firestore.Query} A query with the new ending point.
    *
    * @example
    * let query = firestore.collection('col');
    *
-   * query.orderBy('foo').endAt({foo: 42}).get().then(querySnapshot => {
+   * query.orderBy('foo').endAt(42).get().then(querySnapshot => {
    *   querySnapshot.forEach(documentSnapshot => {
    *     console.log(`Found document at ${documentSnapshot.ref.path}`);
    *   });
    * });
    */
-  endAt(fieldsOrDocument) {
+  endAt(fieldValues) {
     let options = extend(true, {}, this._queryOptions);
 
-    options.endAt = this._buildPosition(fieldsOrDocument, false);
+    fieldValues = [].slice.call(arguments);
 
-    return new Query(this.firestore, this._referencePath, this._fieldFilters,
+    options.endAt = this._buildPosition(fieldValues, false);
+
+    return new Query(this._firestore, this._referencePath, this._fieldFilters,
         this._fieldOrders, options);
   }
 
@@ -1271,7 +1399,7 @@ class Query {
    */
   _get(queryOptions) {
     let self = this;
-    let docs = {};
+    let docs = [];
     let changes = [];
 
     return new Promise((resolve, reject) => {
@@ -1283,23 +1411,25 @@ class Query {
             readTime = result.readTime;
             if (result.document) {
               let document = result.document;
-              docs[document.ref.formattedName] = document;
-              changes.push(new DocumentChange(DocumentChange.ADDED, document));
+              changes.push(new DocumentChange(DocumentChange.ADDED, document,
+                  -1, docs.length));
+              docs.push(document);
             }
           })
           .on('end', () => {
             resolve(new QuerySnapshot(
-                this, readTime, immutable.Map(docs), changes));
+                this, readTime, () => docs, () => changes));
           });
     });
   }
 
   /**
    * Executes the query and streams the results as
-   * [DocumentSnapshot]{@link firestore.DocumentSnapshot}.
+   * [DocumentSnapshots]{@link firestore.DocumentSnapshot}.
    *
    * @public
-   * @return {Stream.<firestore.DocumentSnapshot>} A stream of Documents.
+   * @return {Stream.<firestore.DocumentSnapshot>} A stream of
+   * DocumentSnapshots.
    *
    * @example
    * let query = firestore.collection('col').where('foo', '==', 'bar');
@@ -1408,30 +1538,28 @@ class Query {
 
     let stream = through.obj(function(proto, enc, callback) {
       let readTime = DocumentSnapshot.toISOTime(proto.readTime);
-
       if (proto.document) {
-        let response = proto.document;
-        let document = new DocumentSnapshot.Builder();
-        document.ref = new DocumentReference(
-            self.firestore, Path.fromName(response.name));
-        document.fieldsProto = response.fields || {};
-        document.readTime = readTime ;
-        document.createTime = DocumentSnapshot.toISOTime(response.createTime);
-        document.updateTime =  DocumentSnapshot.toISOTime(response.updateTime);
-        this.push({ document: document.build(), readTime: readTime });
+        let document = self.firestore.snapshot_(proto.document, proto.readTime);
+        this.push({ document, readTime });
       } else {
-        this.push({ readTime: readTime });
+        this.push({ readTime });
       }
       callback();
     });
 
-    this.firestore.readStream(
-        this._api.Firestore.runQuery.bind(this._api.Firestore), request
+    this._firestore.readStream(
+        this._api.Firestore.runQuery.bind(this._api.Firestore),
+        request,
+        /* allowRetries= */ true
     ).then(backendStream => {
       backendStream.on('error', err => {
+        Firestore.log('Query._stream', 'Query failed with stream error:', err);
         stream.destroy(err);
       });
+      backendStream.resume();
       backendStream.pipe(stream);
+    }).catch(err => {
+      stream.destroy(err);
     });
 
     return stream;
@@ -1490,18 +1618,19 @@ class Query {
           directionOperators.ASC :
           this._fieldOrders[this._fieldOrders.length - 1].direction;
       let orderBys = this._fieldOrders.concat(
-          new FieldOrder(DOCUMENT_NAME_FIELD, lastDirection));
+          new FieldOrder(FieldPath._DOCUMENT_ID, lastDirection));
 
       for (let orderBy of orderBys) {
         let comp;
-        if (orderBy.field === DOCUMENT_NAME_FIELD) {
-          comp = Path.compare(doc1.ref._referencePath, doc2.ref._referencePath);
+        if (orderBy.field === FieldPath._DOCUMENT_ID) {
+          comp = doc1.ref._referencePath.compareTo(doc2.ref._referencePath);
         } else {
           const v1 = doc1.protoField(orderBy.field);
           const v2 = doc2.protoField(orderBy.field);
           if (!is.defined(v1) || !is.defined(v2)) {
-            throw new Error(
-                'Trying to compare documents on fields that don\'t exist.');
+            throw new Error('Trying to compare documents on fields that ' +
+                'don\'t exist. Please include the fields you are ordering on ' +
+                'in your select() call.');
           }
           comp = order.compare(v1, v2);
         }
@@ -1534,10 +1663,9 @@ class Query {
  * document references, and querying for documents (using the methods
  * inherited from [Query]{@link firestore.Query}).
  *
+ * @public
  * @alias firestore.CollectionReference
- * @hideconstructor
  * @extends firestore.Query
- *
  */
 class CollectionReference extends Query {
   /**
@@ -1545,7 +1673,7 @@ class CollectionReference extends Query {
    * @hideconstructor
    *
    * @param {firestore.Firestore} firestore - The Firestore Database client.
-   * @param {firestore.Path} path - The Path of this collection.
+   * @param {firestore.ResourcePath} path - The Path of this collection.
    */
   constructor(firestore, path) {
     super(firestore, path);
@@ -1621,13 +1749,13 @@ class CollectionReference extends Query {
    * console.log(`Reference with auto-id: ${documentRefWithAutoId.path}`);
    */
   doc(documentPath) {
-    validate.isOptionalString('documentPath', documentPath);
+    validate.isOptionalResourcePath('documentPath', documentPath);
 
     if (!is.defined(documentPath)) {
       documentPath = Firestore.autoId();
     }
 
-    let path = this._referencePath.child(documentPath);
+    let path = this._referencePath.append(documentPath);
     if (!path.isDocument) {
       throw new Error('Argument "documentPath" must point to a document.');
     }
@@ -1640,7 +1768,7 @@ class CollectionReference extends Query {
    * it a document ID automatically.
    *
    * @public
-   * @param {object<string, *>} data - An Object containing the data for the new
+   * @param {DocumentData} data - An Object containing the data for the new
    * document.
    * @return {Promise.<firestore.DocumentReference>} A Promise resolved with a
    * [DocumentReference]{@link firestore.DocumentReference} pointing to the
@@ -1665,8 +1793,9 @@ class CollectionReference extends Query {
  * Creates a new CollectionReference. Invoked by DocumentReference to avoid
  * invalid declaration order.
  *
+ * @package
  * @param {firestore.Firestore} firestore - The Firestore Database client.
- * @param {firestore.Path} path - The Path of this collection.
+ * @param {firestore.ResourcePath} path - The path of this collection.
  * @return {firestore.CollectionReference}
  */
 function createCollectionReference(firestore, path) {
@@ -1696,7 +1825,7 @@ function validateFieldOrder(str) {
  * @param {*} val Value that is used in the filter.
  * @throws {Error} when the comparison operation is invalid
  */
-function validateFieldFilter(str, val) {
+function validateComparisonOperator(str, val) {
   if (is.string(str) && comparisonOperators[str]) {
     let op = comparisonOperators[str];
 
@@ -1735,15 +1864,16 @@ module.exports = (FirestoreType) => {
   );
   DocumentSnapshot = document.DocumentSnapshot;
   Watch = require('./watch.js')(
-    DocumentChange, DocumentReference, DocumentSnapshot);
+      FirestoreType, DocumentChange, DocumentReference, DocumentSnapshot);
   WriteBatch = require('./write-batch.js')(FirestoreType, DocumentReference,
       validateDocumentReference).WriteBatch;
   validate = require('./validate')({
     Document: document.validateDocumentData,
-    FieldFilter: validateFieldFilter,
+    FieldPath: FieldPath.validateFieldPath,
+    FieldComparison: validateComparisonOperator,
     FieldOrder: validateFieldOrder,
-    FieldPath: document.validateFieldPath,
     Precondition: document.validatePrecondition,
+    ResourcePath: ResourcePath.validateResourcePath,
   });
   return {
     CollectionReference, DocumentReference, Query, QuerySnapshot,

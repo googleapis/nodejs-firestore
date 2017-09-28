@@ -20,17 +20,15 @@
 
 'use strict';
 
-let is = require('is');
+const is = require('is');
 
 /**
- * @private
- * @type firestore.Path
+ * @type firestore.ResourcePath
  */
-let Path = require('./path');
+const ResourcePath = require('./path').ResourcePath;
 
 /**
  * The type order as defined by the backend.
- * @private
  */
 const types = {
   NULL: 0,
@@ -167,9 +165,9 @@ function compareBlobs(left, right) {
  * @private
  */
 function compareReferenceProtos(left, right) {
-  const leftPath = Path.fromName(left.referenceValue);
-  const rightPath = Path.fromName(right.referenceValue);
-  return Path.compare(leftPath, rightPath);
+  const leftPath = ResourcePath.fromSlashSeparatedString(left.referenceValue);
+  const rightPath = ResourcePath.fromSlashSeparatedString(right.referenceValue);
+  return leftPath.compareTo(rightPath);
 }
 
 /**
