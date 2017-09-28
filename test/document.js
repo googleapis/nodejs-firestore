@@ -110,7 +110,7 @@ function document(field, value) {
 
     if (is.string(value)) {
       document.fields[field] = {
-        value_type: 'stringValue',
+        valueType: 'stringValue',
         stringValue: value
       };
     } else {
@@ -192,87 +192,87 @@ function stream() {
 
 const allSupportedTypesJson = document(
   'arrayValue', {
-    value_type: 'arrayValue',
+    valueType: 'arrayValue',
     arrayValue: {
       values: [
         {
-          value_type: 'stringValue',
+          valueType: 'stringValue',
           stringValue: 'foo'
         },
         {
-          value_type: 'integerValue',
+          valueType: 'integerValue',
           integerValue: 42
         },
         {
-          value_type: 'stringValue',
+          valueType: 'stringValue',
           stringValue: 'bar'
         }
       ]
     }
   },
   'dateValue', {
-    value_type: 'timestampValue',
+    valueType: 'timestampValue',
     timestampValue: {
       nanos: 123000000,
       seconds: 479978400
     }
   },
   'doubleValue', {
-    value_type: 'doubleValue',
+    valueType: 'doubleValue',
     doubleValue: 0.1
   },
   'falseValue', {
-    value_type: 'booleanValue',
+    valueType: 'booleanValue',
     booleanValue: false
   },
   'infinityValue', {
-    value_type: 'doubleValue',
+    valueType: 'doubleValue',
     doubleValue: Infinity
   },
   'integerValue', {
-    value_type: 'integerValue',
+    valueType: 'integerValue',
     integerValue: 0
   },
   'negativeInfinityValue', {
-    value_type: 'doubleValue',
+    valueType: 'doubleValue',
     doubleValue: -Infinity
   },
   'nilValue', {
-    value_type: 'nullValue',
+    valueType: 'nullValue',
     nullValue: 'NULL_VALUE'
   },
   'objectValue', {
-    value_type: 'mapValue',
+    valueType: 'mapValue',
     mapValue: {
       fields: {
         foo: {
-          value_type: 'stringValue',
+          valueType: 'stringValue',
           stringValue: 'bar'
         }
       }
     }
   },
   'pathValue', {
-    value_type: 'referenceValue',
+    valueType: 'referenceValue',
     referenceValue: `${DATABASE_ROOT}/documents/collection/document`
   },
   'stringValue', {
-    value_type: 'stringValue',
+    valueType: 'stringValue',
     stringValue: 'a'
   },
   'trueValue', {
-    value_type: 'booleanValue',
+    valueType: 'booleanValue',
     booleanValue: true
   },
   'geoPointValue', {
-    value_type: 'geoPointValue',
+    valueType: 'geoPointValue',
     geoPointValue: {
       latitude: 50.1430847,
       longitude: -122.9477780
     }
   },
   'bytesValue', {
-    value_type: 'bytesValue',
+    valueType: 'bytesValue',
     bytesValue: new Buffer([0x1, 0x2])
   });
 
@@ -386,7 +386,7 @@ describe('serialize document', function() {
   it('serializes date before 1970', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, set(document('moonLanding', {
-        value_type: 'timestampValue',
+        valueType: 'timestampValue',
         timestampValue: {
           nanos: 123000000,
           seconds: -14182920
@@ -416,9 +416,9 @@ describe('serialize document', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, set(document(
         'blob1',
-        { value_type: 'bytesValue', bytesValue: new Uint8Array([0, 1, 2]) },
+        { valueType: 'bytesValue', bytesValue: new Uint8Array([0, 1, 2]) },
         'blob2',
-        { value_type: 'bytesValue', bytesValue: new Buffer([0, 1, 2])
+        { valueType: 'bytesValue', bytesValue: new Buffer([0, 1, 2])
       })));
 
       callback(null, defaultWriteResult);
@@ -454,7 +454,7 @@ describe('serialize document', function() {
           mapValue: {
             fields: {}
           },
-          value_type: 'mapValue'
+          valueType: 'mapValue'
         }),/* updateMask= */ null,
         fieldTransform('field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
 
@@ -578,7 +578,7 @@ describe('deserialize document', function() {
   it('deserializes date before 1970', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
       return stream(found(document('moonLanding', {
-        value_type: 'timestampValue',
+        valueType: 'timestampValue',
         timestampValue: {
           nanos: 123000000,
           seconds: -14182920
@@ -606,9 +606,9 @@ describe('deserialize document', function() {
   it('supports NaN and Infinity', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
       return stream(found(document(
-        'nanValue', { value_type: 'doubleValue', doubleValue: 'NaN' },
-        'posInfinity',  { value_type: 'doubleValue', doubleValue: 'Infinity' },
-        'negInfinity',  { value_type: 'doubleValue', doubleValue: '-Infinity' }
+        'nanValue', { valueType: 'doubleValue', doubleValue: 'NaN' },
+        'posInfinity',  { valueType: 'doubleValue', doubleValue: 'Infinity' },
+        'negInfinity',  { valueType: 'doubleValue', doubleValue: '-Infinity' }
       )));
     };
 
@@ -622,20 +622,20 @@ describe('deserialize document', function() {
 
   it('doesn\'t deserialize unsupported types', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
-      return stream(found(document('moonLanding', { value_type: 'foo' })));
+      return stream(found(document('moonLanding', { valueType: 'foo' })));
     };
 
     return firestore.doc('collectionId/documentId').get().then((doc) => {
       assert.throws(() => {
         doc.data();
-      }, /Cannot decode type from Firestore Value: {"value_type":"foo"}/);
+      }, /Cannot decode type from Firestore Value: {"valueType":"foo"}/);
     });
   });
 
   it('doesn\'t deserialize invalid latitude', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
       return stream(found(document('geoPointValue', {
-        value_type: 'geoPointValue',
+        valueType: 'geoPointValue',
         geoPointValue: {
           latitude: 'foo',
           longitude: -122.9477780
@@ -653,7 +653,7 @@ describe('deserialize document', function() {
   it('doesn\'t deserialize invalid longitude', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
       return stream(found(document('geoPointValue', {
-        value_type: 'geoPointValue',
+        valueType: 'geoPointValue',
         geoPointValue: {
           latitude: 50.1430847,
           longitude: 'foo'
@@ -681,11 +681,11 @@ describe('get document', function() {
       requestEquals(request, retrieve());
 
       return stream(found(document('foo', {
-        value_type: 'mapValue',
+        valueType: 'mapValue',
         mapValue: {
           fields: {
             bar: {
-              value_type: 'stringValue',
+              valueType: 'stringValue',
               stringValue: 'foobar'
             }
           }
@@ -750,11 +750,11 @@ describe('get document', function() {
   it('requires field path', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
       return stream(found(document('foo', {
-        value_type: 'mapValue',
+        valueType: 'mapValue',
         mapValue: {
           fields: {
             bar: {
-              value_type: 'stringValue',
+              valueType: 'stringValue',
               stringValue: 'foobar'
             }
           }
@@ -859,11 +859,11 @@ describe('set document', function() {
             fields: {
               d: {
                 stringValue: 'e',
-                value_type: 'stringValue'
+                valueType: 'stringValue'
               }
             }
           },
-          value_type: 'mapValue'
+          valueType: 'mapValue'
         }), updateMask('a', 'c.d')));
       callback(null, defaultWriteResult);
     };
@@ -958,7 +958,7 @@ describe('create document', function() {
           mapValue: {
             fields: {}
           },
-          value_type: 'mapValue'
+          valueType: 'mapValue'
         }),
         fieldTransform('field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
 
@@ -1006,12 +1006,12 @@ describe('update document', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, update(
           document('a', {
-              value_type: 'mapValue',
+              valueType: 'mapValue',
               mapValue: {
                 fields: {}
               }
             }, 'c', {
-            value_type: 'mapValue',
+            valueType: 'mapValue',
             mapValue: {
               fields: {}
             }
@@ -1097,15 +1097,15 @@ describe('update document', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, update(document(
         'a', {
-          value_type: 'mapValue',
+          valueType: 'mapValue',
           mapValue: {
             fields: {
               b: {
-                value_type: 'mapValue',
+                valueType: 'mapValue',
                 mapValue: {
                   fields: {
                     c: {
-                      value_type: 'stringValue',
+                      valueType: 'stringValue',
                       stringValue: 'foobar'
                     }
                   }
@@ -1115,11 +1115,11 @@ describe('update document', function() {
           }
         },
         'foo', {
-          value_type: 'mapValue',
+          valueType: 'mapValue',
           mapValue: {
             fields: {
               bar: {
-                value_type: 'stringValue',
+                valueType: 'stringValue',
                 stringValue: 'foobar'
               }
             }
@@ -1149,30 +1149,30 @@ describe('update document', function() {
             fields: {
               bar: {
                 stringValue: 'two',
-                value_type: 'stringValue'
+                valueType: 'stringValue'
               },
               deep: {
                 mapValue: {
                   fields: {
                     bar: {
                       stringValue: 'two',
-                      value_type: 'stringValue'
+                      valueType: 'stringValue'
                     },
                     foo: {
                       stringValue: 'one',
-                      value_type: 'stringValue'
+                      valueType: 'stringValue'
                     }
                   }
                 },
-                value_type: 'mapValue'
+                valueType: 'mapValue'
               },
               foo: {
                 stringValue: 'one',
-                value_type: 'stringValue'
+                valueType: 'stringValue'
               }
             }
           },
-          value_type: 'mapValue'
+          valueType: 'mapValue'
         }), updateMask('foo.foo', 'foo.bar', 'foo.deep.foo', 'foo.deep.bar')));
 
       callback(null, defaultWriteResult);

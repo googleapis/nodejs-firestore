@@ -47,7 +47,7 @@ const types = {
  * @private
  */
 function typeOrder(val) {
-  switch (val.value_type) {
+  switch (val.valueType) {
     case 'nullValue': {
       return types.NULL;
     }
@@ -127,12 +127,12 @@ function compareNumbers(left, right) {
  */
 function compareNumberProtos(left, right) {
   let leftValue, rightValue;
-  if (left.value_type === 'integerValue') {
+  if (left.valueType === 'integerValue') {
     leftValue = parseInt(left.integerValue, 10);
   } else {
     leftValue = parseFloat(left.doubleValue, 10);
   }
-  if (right.value_type === 'integerValue') {
+  if (right.valueType === 'integerValue') {
     rightValue = parseInt(right.integerValue, 10);
   } else {
     rightValue = parseFloat(right.doubleValue, 10);

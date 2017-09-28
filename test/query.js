@@ -73,7 +73,7 @@ function fieldFilters(fieldPath, op, value) {
     } else {
       filter.value = {
         stringValue: value,
-        value_type: 'stringValue'
+        valueType: 'stringValue'
       };
     }
 
@@ -174,7 +174,7 @@ function startAt(before, value) {
     if (is.string(value)) {
       cursor.startAt.values.push({
         stringValue: value,
-        value_type: 'stringValue'
+        valueType: 'stringValue'
       });
     } else {
       cursor.startAt.values.push(value);
@@ -198,7 +198,7 @@ function endAt(before, value) {
     if (is.string(value)) {
       cursor.endAt.values.push({
         stringValue: value,
-        value_type: 'stringValue'
+        valueType: 'stringValue'
       });
     } else {
       cursor.endAt.values.push(value);
@@ -239,7 +239,7 @@ function document(name) {
 
   document.fields[name] = {
     stringValue: name,
-    value_type: 'stringValue'
+    valueType: 'stringValue'
   };
 
   document.name = `${DATABASE_ROOT}/documents/collectionId/${name}`;
@@ -502,11 +502,11 @@ describe('where() interface', function() {
               fields: {
                 foo: {
                   stringValue: 'bar',
-                  value_type: 'stringValue'
+                  valueType: 'stringValue'
                 }
               },
             },
-            value_type: 'mapValue'
+            valueType: 'mapValue'
           }
         )
       );
@@ -834,7 +834,7 @@ describe('startAt() interface', function() {
       requestEquals(request,
           orderBy('__name__', 'ASCENDING'),
           startAt(true, {
-            value_type: 'referenceValue',
+            valueType: 'referenceValue',
             referenceValue: 'projects/test-project/databases/(default)/' +
                 'documents/collectionId/doc'
           })

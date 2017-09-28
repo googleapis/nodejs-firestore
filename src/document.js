@@ -433,7 +433,7 @@ class DocumentSnapshot {
    * @return {*} The converted JS type.
    */
   _decodeValue(proto) {
-    switch (proto.value_type) {
+    switch (proto.valueType) {
       case 'stringValue': {
         return proto.stringValue;
       } case 'booleanValue': {
@@ -574,21 +574,21 @@ class DocumentSnapshot {
 
     if (is.string(val)) {
       return {
-        value_type: 'stringValue',
+        valueType: 'stringValue',
         stringValue: val
       };
     }
 
     if (is.boolean(val)) {
       return {
-        value_type: 'booleanValue',
+        valueType: 'booleanValue',
         booleanValue: val
       };
     }
 
     if (is.integer(val)) {
       return {
-        value_type: 'integerValue',
+        valueType: 'integerValue',
         integerValue: val
       };
     }
@@ -596,7 +596,7 @@ class DocumentSnapshot {
     // Integers are handled above, the remaining numbers are treated as doubles
     if (is.number(val)) {
       return {
-        value_type: 'doubleValue',
+        valueType: 'doubleValue',
         doubleValue: val
       };
     }
@@ -608,7 +608,7 @@ class DocumentSnapshot {
         nanos: (val.getTime() - epochSeconds * 1000) * MS_TO_NANOS
       };
       return {
-        value_type: 'timestampValue',
+        valueType: 'timestampValue',
         timestampValue: timestamp
       };
     }
@@ -622,7 +622,7 @@ class DocumentSnapshot {
         }
       }
       return {
-        value_type: 'arrayValue',
+        valueType: 'arrayValue',
         arrayValue: {
           values: encodedElements
         }
@@ -631,35 +631,35 @@ class DocumentSnapshot {
 
     if (is.nil(val)) {
       return {
-        value_type: 'nullValue',
+        valueType: 'nullValue',
         nullValue: 'NULL_VALUE'
       };
     }
 
     if (is.instance(val, DocumentReference) || is.instance(val, ResourcePath)) {
       return {
-        value_type: 'referenceValue',
+        valueType: 'referenceValue',
         referenceValue: val.formattedName
       };
     }
 
     if (is.instance(val, GeoPoint)) {
       return {
-        value_type: 'geoPointValue',
+        valueType: 'geoPointValue',
         geoPointValue: val.toProto()
       };
     }
 
     if (is.instanceof(val, Buffer) || is.instanceof(val, Uint8Array)) {
       return {
-        value_type: 'bytesValue',
+        valueType: 'bytesValue',
         bytesValue: val
       };
     }
 
     if (is.object(val)) {
       return {
-        value_type: 'mapValue',
+        valueType: 'mapValue',
         mapValue: {
           fields: DocumentSnapshot.encodeFields(val, depth + 1)
         }

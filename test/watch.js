@@ -512,7 +512,7 @@ describe('Query watch', function() {
                     op: 'EQUAL',
                     value: {
                       stringValue: 'yes',
-                      value_type: 'stringValue',
+                      valueType: 'stringValue',
                     },
                   },
                 }],

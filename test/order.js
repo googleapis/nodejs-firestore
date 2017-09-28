@@ -65,14 +65,14 @@ describe('Order', function() {
 
   function int(number) {
     return {
-      value_type: 'integerValue',
+      valueType: 'integerValue',
       integerValue: '' + number,
     };
   }
 
   function double(number) {
     return {
-      value_type: 'doubleValue',
+      valueType: 'doubleValue',
       doubleValue: '' + number,
     };
   }
@@ -86,10 +86,10 @@ describe('Order', function() {
   it('throws on invalid blob', function() {
     assert.throws(() => {
       order.compare({
-        value_type: 'bytesValue',
+        valueType: 'bytesValue',
         bytesValue: [1, 2, 3],
       }, {
-        value_type: 'bytesValue',
+        valueType: 'bytesValue',
         bytesValue: [1, 2, 3],
       });
     }, /Blobs can only be compared if they are Buffers/);

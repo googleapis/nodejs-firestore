@@ -30,22 +30,25 @@
 var configData = require('./firestore_client_config');
 var extend = require('extend');
 var gax = require('google-gax');
+var googleProtoFiles = require('google-proto-files');
+var path = require('path');
+var protobuf = require('protobufjs');
 
 var SERVICE_ADDRESS = 'firestore.googleapis.com';
 
 var DEFAULT_SERVICE_PORT = 443;
 
-var CODE_GEN_NAME_VERSION = 'gapic/0.7.1';
+var CODE_GEN_NAME_VERSION = 'gapic/0.0.5';
 
 var PAGE_DESCRIPTORS = {
   listDocuments: new gax.PageDescriptor(
-    'pageToken',
-    'nextPageToken',
-    'documents'),
+      'pageToken',
+      'nextPageToken',
+      'documents'),
   listCollectionIds: new gax.PageDescriptor(
-    'pageToken',
-    'nextPageToken',
-    'collectionIds')
+      'pageToken',
+      'nextPageToken',
+      'collectionIds')
 };
 
 var STREAM_DESCRIPTORS = {
@@ -65,7 +68,7 @@ var ALL_SCOPES = [
 ];
 
 /**
- * The Firestore Service.
+ * The Cloud Firestore service.
  *
  * This service exposes several types of comparable timestamps:
  *
@@ -79,22 +82,13 @@ var ALL_SCOPES = [
  *      to denote a consistent snapshot of the database or the time at which a
  *      Document was observed to not exist.
  * *    `commit_time` - The time at which the writes in a transaction were
- *      committed. Any read with an equal or greater read_time is guaranteed to
- *      see the effects of the transaction.
+ *      committed. Any read with an equal or greater `read_time` is guaranteed
+ *      to see the effects of the transaction.
  *
- * This will be created through a builder function which can be obtained by the module.
- * See the following example of how to initialize the module and how to access to the builder.
- * @see {@link firestoreClient}
- *
- * @example
- * var firestoreV1beta1 = require('firestore').v1beta1({
- *   // optional auth parameters.
- * });
- * var client = firestoreV1beta1.firestoreClient();
  *
  * @class
  */
-function FirestoreClient(gaxGrpc, grpcClients, opts) {
+function FirestoreClient(gaxGrpc, loadedProtos, opts) {
   opts = extend({
     servicePath: SERVICE_ADDRESS,
     port: DEFAULT_SERVICE_PORT,
@@ -114,17 +108,17 @@ function FirestoreClient(gaxGrpc, grpcClients, opts) {
   );
 
   var defaults = gaxGrpc.constructSettings(
-    'google.firestore.v1beta1.Firestore',
-    configData,
-    opts.clientConfig,
-    {'x-goog-api-client': googleApiClient.join(' ')});
+      'google.firestore.v1beta1.Firestore',
+      configData,
+      opts.clientConfig,
+      {'x-goog-api-client': googleApiClient.join(' ')});
 
   var self = this;
 
   this.auth = gaxGrpc.auth;
   var firestoreStub = gaxGrpc.createStub(
-    grpcClients.google.firestore.v1beta1.Firestore,
-    opts);
+      loadedProtos.google.firestore.v1beta1.Firestore,
+      opts);
   var firestoreStubMethods = [
     'getDocument',
     'listDocuments',
@@ -155,105 +149,189 @@ function FirestoreClient(gaxGrpc, grpcClients, opts) {
 
 // Path templates
 
-var DATABASE_PATH_TEMPLATE = new gax.PathTemplate(
-  'projects/{project}/databases/{database}');
+var DATABASE_ROOT_PATH_TEMPLATE = new gax.PathTemplate(
+    'projects/{project}/databases/{database}');
 
-var UNKNOWN_PATH_PATH_TEMPLATE = new gax.PathTemplate(
-  'projects/{project}/databases/{database}/documents/{document}/{unknown_path=**}');
+var DOCUMENT_ROOT_PATH_TEMPLATE = new gax.PathTemplate(
+    'projects/{project}/databases/{database}/documents');
+
+var DOCUMENT_PATH_PATH_TEMPLATE = new gax.PathTemplate(
+    'projects/{project}/databases/{database}/documents/{document_path=**}');
+
+var ANY_PATH_PATH_TEMPLATE = new gax.PathTemplate(
+    'projects/{project}/databases/{database}/documents/{document}/{any_path=**}');
 
 /**
- * Returns a fully-qualified database resource name string.
+ * Returns a fully-qualified database_root resource name string.
  * @param {String} project
  * @param {String} database
  * @returns {String}
  */
-FirestoreClient.prototype.databasePath = function(project, database) {
-  return DATABASE_PATH_TEMPLATE.render({
+FirestoreClient.prototype.databaseRootPath = function(project, database) {
+  return DATABASE_ROOT_PATH_TEMPLATE.render({
     project: project,
     database: database
   });
 };
 
 /**
- * Returns a fully-qualified unknown_path resource name string.
+ * Returns a fully-qualified document_root resource name string.
  * @param {String} project
  * @param {String} database
- * @param {String} document
- * @param {String} unknownPath
  * @returns {String}
  */
-FirestoreClient.prototype.unknownPathPath = function(project, database, document, unknownPath) {
-  return UNKNOWN_PATH_PATH_TEMPLATE.render({
+FirestoreClient.prototype.documentRootPath = function(project, database) {
+  return DOCUMENT_ROOT_PATH_TEMPLATE.render({
     project: project,
-    database: database,
-    document: document,
-    unknown_path: unknownPath
+    database: database
   });
 };
 
 /**
- * Parses the databaseName from a database resource.
- * @param {String} databaseName
- *   A fully-qualified path representing a database resources.
+ * Returns a fully-qualified document_path resource name string.
+ * @param {String} project
+ * @param {String} database
+ * @param {String} documentPath
+ * @returns {String}
+ */
+FirestoreClient.prototype.documentPathPath = function(project, database, documentPath) {
+  return DOCUMENT_PATH_PATH_TEMPLATE.render({
+    project: project,
+    database: database,
+    document_path: documentPath
+  });
+};
+
+/**
+ * Returns a fully-qualified any_path resource name string.
+ * @param {String} project
+ * @param {String} database
+ * @param {String} document
+ * @param {String} anyPath
+ * @returns {String}
+ */
+FirestoreClient.prototype.anyPathPath = function(project, database, document, anyPath) {
+  return ANY_PATH_PATH_TEMPLATE.render({
+    project: project,
+    database: database,
+    document: document,
+    any_path: anyPath
+  });
+};
+
+/**
+ * Parses the databaseRootName from a database_root resource.
+ * @param {String} databaseRootName
+ *   A fully-qualified path representing a database_root resources.
  * @returns {String} - A string representing the project.
  */
-FirestoreClient.prototype.matchProjectFromDatabaseName = function(databaseName) {
-  return DATABASE_PATH_TEMPLATE.match(databaseName).project;
+FirestoreClient.prototype.matchProjectFromDatabaseRootName = function(databaseRootName) {
+  return DATABASE_ROOT_PATH_TEMPLATE.match(databaseRootName).project;
 };
 
 /**
- * Parses the databaseName from a database resource.
- * @param {String} databaseName
- *   A fully-qualified path representing a database resources.
+ * Parses the databaseRootName from a database_root resource.
+ * @param {String} databaseRootName
+ *   A fully-qualified path representing a database_root resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreClient.prototype.matchDatabaseFromDatabaseName = function(databaseName) {
-  return DATABASE_PATH_TEMPLATE.match(databaseName).database;
+FirestoreClient.prototype.matchDatabaseFromDatabaseRootName = function(databaseRootName) {
+  return DATABASE_ROOT_PATH_TEMPLATE.match(databaseRootName).database;
 };
 
 /**
- * Parses the unknownPathName from a unknown_path resource.
- * @param {String} unknownPathName
- *   A fully-qualified path representing a unknown_path resources.
+ * Parses the documentRootName from a document_root resource.
+ * @param {String} documentRootName
+ *   A fully-qualified path representing a document_root resources.
  * @returns {String} - A string representing the project.
  */
-FirestoreClient.prototype.matchProjectFromUnknownPathName = function(unknownPathName) {
-  return UNKNOWN_PATH_PATH_TEMPLATE.match(unknownPathName).project;
+FirestoreClient.prototype.matchProjectFromDocumentRootName = function(documentRootName) {
+  return DOCUMENT_ROOT_PATH_TEMPLATE.match(documentRootName).project;
 };
 
 /**
- * Parses the unknownPathName from a unknown_path resource.
- * @param {String} unknownPathName
- *   A fully-qualified path representing a unknown_path resources.
+ * Parses the documentRootName from a document_root resource.
+ * @param {String} documentRootName
+ *   A fully-qualified path representing a document_root resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreClient.prototype.matchDatabaseFromUnknownPathName = function(unknownPathName) {
-  return UNKNOWN_PATH_PATH_TEMPLATE.match(unknownPathName).database;
+FirestoreClient.prototype.matchDatabaseFromDocumentRootName = function(documentRootName) {
+  return DOCUMENT_ROOT_PATH_TEMPLATE.match(documentRootName).database;
 };
 
 /**
- * Parses the unknownPathName from a unknown_path resource.
- * @param {String} unknownPathName
- *   A fully-qualified path representing a unknown_path resources.
+ * Parses the documentPathName from a document_path resource.
+ * @param {String} documentPathName
+ *   A fully-qualified path representing a document_path resources.
+ * @returns {String} - A string representing the project.
+ */
+FirestoreClient.prototype.matchProjectFromDocumentPathName = function(documentPathName) {
+  return DOCUMENT_PATH_PATH_TEMPLATE.match(documentPathName).project;
+};
+
+/**
+ * Parses the documentPathName from a document_path resource.
+ * @param {String} documentPathName
+ *   A fully-qualified path representing a document_path resources.
+ * @returns {String} - A string representing the database.
+ */
+FirestoreClient.prototype.matchDatabaseFromDocumentPathName = function(documentPathName) {
+  return DOCUMENT_PATH_PATH_TEMPLATE.match(documentPathName).database;
+};
+
+/**
+ * Parses the documentPathName from a document_path resource.
+ * @param {String} documentPathName
+ *   A fully-qualified path representing a document_path resources.
+ * @returns {String} - A string representing the document_path.
+ */
+FirestoreClient.prototype.matchDocumentPathFromDocumentPathName = function(documentPathName) {
+  return DOCUMENT_PATH_PATH_TEMPLATE.match(documentPathName).document_path;
+};
+
+/**
+ * Parses the anyPathName from a any_path resource.
+ * @param {String} anyPathName
+ *   A fully-qualified path representing a any_path resources.
+ * @returns {String} - A string representing the project.
+ */
+FirestoreClient.prototype.matchProjectFromAnyPathName = function(anyPathName) {
+  return ANY_PATH_PATH_TEMPLATE.match(anyPathName).project;
+};
+
+/**
+ * Parses the anyPathName from a any_path resource.
+ * @param {String} anyPathName
+ *   A fully-qualified path representing a any_path resources.
+ * @returns {String} - A string representing the database.
+ */
+FirestoreClient.prototype.matchDatabaseFromAnyPathName = function(anyPathName) {
+  return ANY_PATH_PATH_TEMPLATE.match(anyPathName).database;
+};
+
+/**
+ * Parses the anyPathName from a any_path resource.
+ * @param {String} anyPathName
+ *   A fully-qualified path representing a any_path resources.
  * @returns {String} - A string representing the document.
  */
-FirestoreClient.prototype.matchDocumentFromUnknownPathName = function(unknownPathName) {
-  return UNKNOWN_PATH_PATH_TEMPLATE.match(unknownPathName).document;
+FirestoreClient.prototype.matchDocumentFromAnyPathName = function(anyPathName) {
+  return ANY_PATH_PATH_TEMPLATE.match(anyPathName).document;
 };
 
 /**
- * Parses the unknownPathName from a unknown_path resource.
- * @param {String} unknownPathName
- *   A fully-qualified path representing a unknown_path resources.
- * @returns {String} - A string representing the unknown_path.
+ * Parses the anyPathName from a any_path resource.
+ * @param {String} anyPathName
+ *   A fully-qualified path representing a any_path resources.
+ * @returns {String} - A string representing the any_path.
  */
-FirestoreClient.prototype.matchUnknownPathFromUnknownPathName = function(unknownPathName) {
-  return UNKNOWN_PATH_PATH_TEMPLATE.match(unknownPathName).unknown_path;
+FirestoreClient.prototype.matchAnyPathFromAnyPathName = function(anyPathName) {
+  return ANY_PATH_PATH_TEMPLATE.match(anyPathName).any_path;
 };
 
 /**
  * Get the project ID used by this class.
- * @aram {function(Error, string)} callback - the callback to be called with
+ * @param {function(Error, string)} callback - the callback to be called with
  *   the current project Id.
  */
 FirestoreClient.prototype.getProjectId = function(callback) {
@@ -270,18 +348,16 @@ FirestoreClient.prototype.getProjectId = function(callback) {
  * @param {string} request.name
  *   The resource name of the Document to get. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
- * @param {Object} request.mask
+ * @param {Object=} request.mask
  *   The fields to return. If not set, returns all fields.
  *
  *   If the document has a field that is not present in this mask, that field
  *   will not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
- * @param {string} request.transaction
+ * @param {string=} request.transaction
  *   Reads the document in a transaction.
- *   Reads a version of the document that is at most `max_age` out of date.
- *   google.protobuf.Duration max_age = 4;
- * @param {Object} request.readTime
+ * @param {Object=} request.readTime
  *   Reads the version of the document at the given time.
  *   This may not be older than 60 seconds.
  *
@@ -299,21 +375,18 @@ FirestoreClient.prototype.getProjectId = function(callback) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedName = client.unknownPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[UNKNOWN_PATH]");
- * var mask = {};
- * var transaction = '';
- * var readTime = {};
- * var request = {
- *     name: formattedName,
- *     mask: mask,
- *     transaction: transaction,
- *     readTime: readTime
- * };
- * client.getDocument(request).then(function(responses) {
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedName = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
+ * client.getDocument({name: formattedName}).then(function(responses) {
  *     var response = responses[0];
  *     // doThingsWith(response)
- * }).catch(function(err) {
+ * })
+ * .catch(function(err) {
  *     console.error(err);
  * });
  */
@@ -336,33 +409,37 @@ FirestoreClient.prototype.getDocument = function(request, options, callback) {
  *   The request object that will be sent.
  * @param {string} request.parent
  *   The parent resource name. In the format:
- *   `projects/{project_id}/databases/{database_id}` or
+ *   `projects/{project_id}/databases/{database_id}/documents` or
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *   For example:
- *   `projects/my-project/databases/my-database` or
+ *   `projects/my-project/databases/my-database/documents` or
  *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
  * @param {string} request.collectionId
  *   The collection ID, relative to `parent`, to list. For example: `chatrooms`
  *   or `messages`.
- * @param {string} request.orderBy
+ * @param {number=} request.pageSize
+ *   The maximum number of resources contained in the underlying API
+ *   response. If page streaming is performed per-resource, this
+ *   parameter does not affect the return value. If page streaming is
+ *   performed per-page, this determines the maximum number of
+ *   resources in a page.
+ * @param {string=} request.orderBy
  *   The order to sort results by. For example: `priority desc, name`.
- * @param {Object} request.mask
+ * @param {Object=} request.mask
  *   The fields to return. If not set, returns all fields.
  *
  *   If a document has a field that is not present in this mask, that field
  *   will not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
- * @param {string} request.transaction
+ * @param {string=} request.transaction
  *   Reads documents in a transaction.
- *   Reads documents at a version that is at most `max_age` out of date.
- *   google.protobuf.Duration max_age = 9;
- * @param {Object} request.readTime
+ * @param {Object=} request.readTime
  *   Reads documents as they were at the given time.
  *   This may not be older than 60 seconds.
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
- * @param {boolean} request.showMissing
+ * @param {boolean=} request.showMissing
  *   If the list should show missing documents. A missing document is a
  *   document that does not exist but has sub-documents. These documents will
  *   be returned with a key but will not have fields, {@link Document.create_time},
@@ -370,12 +447,6 @@ FirestoreClient.prototype.getDocument = function(request, options, callback) {
  *
  *   Requests with `show_missing` may not specify `where` or
  *   `order_by`.
- * @param {number=} request.pageSize
- *   The maximum number of resources contained in the underlying API
- *   response. If page streaming is performed per-resource, this
- *   parameter does not affect the return value. If page streaming is
- *   performed per-page, this determines the maximum number of
- *   resources in a page.
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
@@ -401,34 +472,39 @@ FirestoreClient.prototype.getDocument = function(request, options, callback) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedParent = client.databasePath("[PROJECT]", "[DATABASE]");
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * // Iterate over all elements.
+ * var formattedParent = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
  * var collectionId = '';
- * var orderBy = '';
- * var mask = {};
- * var transaction = '';
- * var readTime = {};
- * var showMissing = false;
  * var request = {
  *     parent: formattedParent,
- *     collectionId: collectionId,
- *     orderBy: orderBy,
- *     mask: mask,
- *     transaction: transaction,
- *     readTime: readTime,
- *     showMissing: showMissing
+ *     collectionId: collectionId
  * };
- * // Iterate over all elements.
+ *
  * client.listDocuments(request).then(function(responses) {
  *     var resources = responses[0];
  *     for (var i = 0; i < resources.length; ++i) {
  *         // doThingsWith(resources[i])
  *     }
- * }).catch(function(err) {
+ * })
+ * .catch(function(err) {
  *     console.error(err);
  * });
  *
  * // Or obtain the paged response.
+ * var formattedParent = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
+ * var collectionId = '';
+ * var request = {
+ *     parent: formattedParent,
+ *     collectionId: collectionId
+ * };
+ *
+ *
  * var options = {autoPaginate: false};
  * function callback(responses) {
  *     // The actual resources in a response.
@@ -480,33 +556,37 @@ FirestoreClient.prototype.listDocuments = function(request, options, callback) {
  *   The request object that will be sent.
  * @param {string} request.parent
  *   The parent resource name. In the format:
- *   `projects/{project_id}/databases/{database_id}` or
+ *   `projects/{project_id}/databases/{database_id}/documents` or
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *   For example:
- *   `projects/my-project/databases/my-database` or
+ *   `projects/my-project/databases/my-database/documents` or
  *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
  * @param {string} request.collectionId
  *   The collection ID, relative to `parent`, to list. For example: `chatrooms`
  *   or `messages`.
- * @param {string} request.orderBy
+ * @param {number=} request.pageSize
+ *   The maximum number of resources contained in the underlying API
+ *   response. If page streaming is performed per-resource, this
+ *   parameter does not affect the return value. If page streaming is
+ *   performed per-page, this determines the maximum number of
+ *   resources in a page.
+ * @param {string=} request.orderBy
  *   The order to sort results by. For example: `priority desc, name`.
- * @param {Object} request.mask
+ * @param {Object=} request.mask
  *   The fields to return. If not set, returns all fields.
  *
  *   If a document has a field that is not present in this mask, that field
  *   will not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
- * @param {string} request.transaction
+ * @param {string=} request.transaction
  *   Reads documents in a transaction.
- *   Reads documents at a version that is at most `max_age` out of date.
- *   google.protobuf.Duration max_age = 9;
- * @param {Object} request.readTime
+ * @param {Object=} request.readTime
  *   Reads documents as they were at the given time.
  *   This may not be older than 60 seconds.
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
- * @param {boolean} request.showMissing
+ * @param {boolean=} request.showMissing
  *   If the list should show missing documents. A missing document is a
  *   document that does not exist but has sub-documents. These documents will
  *   be returned with a key but will not have fields, {@link Document.create_time},
@@ -514,12 +594,6 @@ FirestoreClient.prototype.listDocuments = function(request, options, callback) {
  *
  *   Requests with `show_missing` may not specify `where` or
  *   `order_by`.
- * @param {number=} request.pageSize
- *   The maximum number of resources contained in the underlying API
- *   response. If page streaming is performed per-resource, this
- *   parameter does not affect the return value. If page streaming is
- *   performed per-page, this determines the maximum number of
- *   resources in a page.
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
@@ -528,27 +602,23 @@ FirestoreClient.prototype.listDocuments = function(request, options, callback) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedParent = client.databasePath("[PROJECT]", "[DATABASE]");
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedParent = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
  * var collectionId = '';
- * var orderBy = '';
- * var mask = {};
- * var transaction = '';
- * var readTime = {};
- * var showMissing = false;
  * var request = {
  *     parent: formattedParent,
- *     collectionId: collectionId,
- *     orderBy: orderBy,
- *     mask: mask,
- *     transaction: transaction,
- *     readTime: readTime,
- *     showMissing: showMissing
+ *     collectionId: collectionId
  * };
- * client.listDocumentsStream(request).on('data', function(element) {
+ * client.listDocumentsStream(request)
+ * .on('data', function(element) {
  *     // doThingsWith(element)
  * }).on('error', function(err) {
- *     console.error(err);
+ *     console.log(err);
  * });
  */
 FirestoreClient.prototype.listDocumentsStream = function(request, options) {
@@ -566,7 +636,7 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  *   The request object that will be sent.
  * @param {string} request.parent
  *   The parent resource. For example:
- *   `projects/{project_id}/databases/{database_id}` or
+ *   `projects/{project_id}/databases/{database_id}/documents` or
  *   `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
  * @param {string} request.collectionId
  *   The collection ID, relative to `parent`, to list. For example: `chatrooms`.
@@ -578,7 +648,7 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  *   The document to create. `name` must not be set.
  *
  *   This object should have the same structure as [Document]{@link Document}
- * @param {Object} request.mask
+ * @param {Object=} request.mask
  *   The fields to return. If not set, returns all fields.
  *
  *   If the document has a field that is not present in this mask, that field
@@ -598,23 +668,27 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedParent = client.databasePath("[PROJECT]", "[DATABASE]");
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedParent = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
  * var collectionId = '';
  * var documentId = '';
  * var document = {};
- * var mask = {};
  * var request = {
  *     parent: formattedParent,
  *     collectionId: collectionId,
  *     documentId: documentId,
- *     document: document,
- *     mask: mask
+ *     document: document
  * };
  * client.createDocument(request).then(function(responses) {
  *     var response = responses[0];
  *     // doThingsWith(response)
- * }).catch(function(err) {
+ * })
+ * .catch(function(err) {
  *     console.error(err);
  * });
  */
@@ -646,18 +720,18 @@ FirestoreClient.prototype.createDocument = function(request, options, callback) 
  *
  *   If the document exists on the server and has fields not referenced in the
  *   mask, they are left unchanged.
- *   Fields referenced in the mask, but not present in the input document are
+ *   Fields referenced in the mask, but not present in the input document, are
  *   deleted from the document on the server.
  *
  *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
- * @param {Object} request.mask
+ * @param {Object=} request.mask
  *   The fields to return. If not set, returns all fields.
  *
  *   If the document has a field that is not present in this mask, that field
  *   will not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
- * @param {Object} request.currentDocument
+ * @param {Object=} request.currentDocument
  *   An optional precondition on the document.
  *   The request will fail if this is set and not met by the target document.
  *
@@ -675,21 +749,23 @@ FirestoreClient.prototype.createDocument = function(request, options, callback) 
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
  * var document = {};
  * var updateMask = {};
- * var mask = {};
- * var currentDocument = {};
  * var request = {
  *     document: document,
- *     updateMask: updateMask,
- *     mask: mask,
- *     currentDocument: currentDocument
+ *     updateMask: updateMask
  * };
  * client.updateDocument(request).then(function(responses) {
  *     var response = responses[0];
  *     // doThingsWith(response)
- * }).catch(function(err) {
+ * })
+ * .catch(function(err) {
  *     console.error(err);
  * });
  */
@@ -713,7 +789,7 @@ FirestoreClient.prototype.updateDocument = function(request, options, callback) 
  * @param {string} request.name
  *   The resource name of the Document to delete. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
- * @param {Object} request.currentDocument
+ * @param {Object=} request.currentDocument
  *   An optional precondition on the document.
  *   The request will fail if this is set and not met by the target document.
  *
@@ -728,14 +804,14 @@ FirestoreClient.prototype.updateDocument = function(request, options, callback) 
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedName = client.unknownPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[UNKNOWN_PATH]");
- * var currentDocument = {};
- * var request = {
- *     name: formattedName,
- *     currentDocument: currentDocument
- * };
- * client.deleteDocument(request).catch(function(err) {
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedName = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
+ * client.deleteDocument({name: formattedName}).catch(function(err) {
  *     console.error(err);
  * });
  */
@@ -754,6 +830,9 @@ FirestoreClient.prototype.deleteDocument = function(request, options, callback) 
 /**
  * Gets multiple documents.
  *
+ * Documents returned by this method are not guaranteed to be returned in the
+ * same order that they were requested.
+ *
  * @param {Object} request
  *   The request object that will be sent.
  * @param {string} request.database
@@ -763,26 +842,24 @@ FirestoreClient.prototype.deleteDocument = function(request, options, callback) 
  *   The names of the documents to retrieve. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *   The request will fail if any of the document is not a child resource of the
- *   given `database`.
- * @param {Object} request.mask
+ *   given `database`. Duplicate names will be elided.
+ * @param {Object=} request.mask
  *   The fields to return. If not set, returns all fields.
  *
  *   If a document has a field that is not present in this mask, that field will
  *   not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
- * @param {string} request.transaction
+ * @param {string=} request.transaction
  *   Reads documents in a transaction.
- * @param {Object} request.newTransaction
+ * @param {Object=} request.newTransaction
  *   Starts a new transaction and reads the documents.
  *   Defaults to a read-only transaction.
- *   The new transaction id will be returned as the first response in the
+ *   The new transaction ID will be returned as the first response in the
  *   stream.
- *   Reads documents at a version that is at most `max_age` out of date.
- *   google.protobuf.Duration max_age = 6;
  *
  *   This object should have the same structure as [TransactionOptions]{@link TransactionOptions}
- * @param {Object} request.readTime
+ * @param {Object=} request.readTime
  *   Reads documents as they were at the given time.
  *   This may not be older than 60 seconds.
  *
@@ -795,23 +872,20 @@ FirestoreClient.prototype.deleteDocument = function(request, options, callback) 
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedDatabase = client.databasePath("[PROJECT]", "[DATABASE]");
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedDatabase = client.databaseRootPath("[PROJECT]", "[DATABASE]");
  * var documents = [];
- * var mask = {};
- * var transaction = '';
- * var newTransaction = {};
- * var readTime = {};
  * var request = {
  *     database: formattedDatabase,
- *     documents: documents,
- *     mask: mask,
- *     transaction: transaction,
- *     newTransaction: newTransaction,
- *     readTime: readTime
+ *     documents: documents
  * };
  * client.batchGetDocuments(request).on('data', function(response) {
- *     // doThingsWith(response)
+ *   // doThingsWith(response)
  * });
  */
 FirestoreClient.prototype.batchGetDocuments = function(request, options) {
@@ -830,7 +904,7 @@ FirestoreClient.prototype.batchGetDocuments = function(request, options) {
  * @param {string} request.database
  *   The database name. In the format:
  *   `projects/{project_id}/databases/{database_id}`.
- * @param {Object} request.options
+ * @param {Object=} request.options
  *   The options for the transaction.
  *   Defaults to a read-write transaction.
  *
@@ -848,17 +922,18 @@ FirestoreClient.prototype.batchGetDocuments = function(request, options) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedDatabase = client.databasePath("[PROJECT]", "[DATABASE]");
- * var options = {};
- * var request = {
- *     database: formattedDatabase,
- *     options: options
- * };
- * client.beginTransaction(request).then(function(responses) {
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedDatabase = client.databaseRootPath("[PROJECT]", "[DATABASE]");
+ * client.beginTransaction({database: formattedDatabase}).then(function(responses) {
  *     var response = responses[0];
  *     // doThingsWith(response)
- * }).catch(function(err) {
+ * })
+ * .catch(function(err) {
  *     console.error(err);
  * });
  */
@@ -888,9 +963,8 @@ FirestoreClient.prototype.beginTransaction = function(request, options, callback
  *   Always executed atomically and in order.
  *
  *   This object should have the same structure as [Write]{@link Write}
- * @param {string} request.transaction
- *   If non-empty, applies all writes in this transaction, and commits it.
- *   Otherwise, applies the writes as if they were in their own transaction.
+ * @param {string=} request.transaction
+ *   If set, applies all writes in this transaction, and commits it.
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
@@ -904,19 +978,23 @@ FirestoreClient.prototype.beginTransaction = function(request, options, callback
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedDatabase = client.databasePath("[PROJECT]", "[DATABASE]");
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedDatabase = client.databaseRootPath("[PROJECT]", "[DATABASE]");
  * var writes = [];
- * var transaction = '';
  * var request = {
  *     database: formattedDatabase,
- *     writes: writes,
- *     transaction: transaction
+ *     writes: writes
  * };
  * client.commit(request).then(function(responses) {
  *     var response = responses[0];
  *     // doThingsWith(response)
- * }).catch(function(err) {
+ * })
+ * .catch(function(err) {
  *     console.error(err);
  * });
  */
@@ -941,7 +1019,7 @@ FirestoreClient.prototype.commit = function(request, options, callback) {
  *   The database name. In the format:
  *   `projects/{project_id}/databases/{database_id}`.
  * @param {string} request.transaction
- *   The transaction to rollback.
+ *   The transaction to roll back.
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
@@ -952,8 +1030,13 @@ FirestoreClient.prototype.commit = function(request, options, callback) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedDatabase = client.databasePath("[PROJECT]", "[DATABASE]");
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedDatabase = client.databaseRootPath("[PROJECT]", "[DATABASE]");
  * var transaction = '';
  * var request = {
  *     database: formattedDatabase,
@@ -982,22 +1065,25 @@ FirestoreClient.prototype.rollback = function(request, options, callback) {
  *   The request object that will be sent.
  * @param {string} request.parent
  *   The parent resource name. In the format:
- *   `projects/{project_id}/databases/{database_id}` or
+ *   `projects/{project_id}/databases/{database_id}/documents` or
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *   For example:
- *   `projects/my-project/databases/my-database` or
+ *   `projects/my-project/databases/my-database/documents` or
  *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
- * @param {Object} request.structuredQuery
+ * @param {Object=} request.structuredQuery
  *   A structured query.
  *
  *   This object should have the same structure as [StructuredQuery]{@link StructuredQuery}
- * @param {string} request.resumeToken
- *   The resume token to use.
- * @param {string} request.transaction
+ * @param {string=} request.transaction
  *   Reads documents in a transaction.
- *   Reads documents at a version that is at most `max_age` out of date.
- *   google.protobuf.Duration max_age = 6;
- * @param {Object} request.readTime
+ * @param {Object=} request.newTransaction
+ *   Starts a new transaction and reads the documents.
+ *   Defaults to a read-only transaction.
+ *   The new transaction ID will be returned as the first response in the
+ *   stream.
+ *
+ *   This object should have the same structure as [TransactionOptions]{@link TransactionOptions}
+ * @param {Object=} request.readTime
  *   Reads documents as they were at the given time.
  *   This may not be older than 60 seconds.
  *
@@ -1010,21 +1096,15 @@ FirestoreClient.prototype.rollback = function(request, options, callback) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedParent = client.databasePath("[PROJECT]", "[DATABASE]");
- * var structuredQuery = {};
- * var resumeToken = '';
- * var transaction = '';
- * var readTime = {};
- * var request = {
- *     parent: formattedParent,
- *     structuredQuery: structuredQuery,
- *     resumeToken: resumeToken,
- *     transaction: transaction,
- *     readTime: readTime
- * };
- * client.runQuery(request).on('data', function(response) {
- *     // doThingsWith(response)
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedParent = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
+ * client.runQuery({parent: formattedParent}).on('data', function(response) {
+ *   // doThingsWith(response)
  * });
  */
 FirestoreClient.prototype.runQuery = function(request, options) {
@@ -1048,22 +1128,18 @@ FirestoreClient.prototype.runQuery = function(request, options) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var stream = client.write().on('data', function(response) {
- *     // doThingsWith(response);
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
  * });
- * var formattedDatabase = client.databasePath("[PROJECT]", "[DATABASE]");
- * var streamId = '';
- * var writes = [];
- * var streamToken = '';
+ *
+ * var stream = client.write().on('data', function(response) {
+ *     // doThingsWith(response)
+ * });
+ * var formattedDatabase = client.databaseRootPath("[PROJECT]", "[DATABASE]");
  * var request = {
- *     database : formattedDatabase,
- *     streamId : streamId,
- *     writes : writes,
- *     streamToken : streamToken
- * };
- * var request = {
- *     root: request
+ *     database : formattedDatabase
  * };
  * // Write request objects.
  * stream.write(request);
@@ -1077,7 +1153,7 @@ FirestoreClient.prototype.write = function(options) {
 };
 
 /**
- * Listen to changes.
+ * Listens to changes.
  *
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
@@ -1089,20 +1165,18 @@ FirestoreClient.prototype.write = function(options) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var stream = client.listen().on('data', function(response) {
- *     // doThingsWith(response);
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
  * });
- * var formattedDatabase = client.databasePath("[PROJECT]", "[DATABASE]");
- * var addTarget = {};
- * var removeTarget = 0;
+ *
+ * var stream = client.listen().on('data', function(response) {
+ *     // doThingsWith(response)
+ * });
+ * var formattedDatabase = client.databaseRootPath("[PROJECT]", "[DATABASE]");
  * var request = {
- *     database : formattedDatabase,
- *     addTarget : addTarget,
- *     removeTarget : removeTarget
- * };
- * var request = {
- *     root: request
+ *     database : formattedDatabase
  * };
  * // Write request objects.
  * stream.write(request);
@@ -1116,7 +1190,7 @@ FirestoreClient.prototype.listen = function(options) {
 };
 
 /**
- * Lists all the collection ids underneath a document.
+ * Lists all the collection IDs underneath a document.
  *
  * @param {Object} request
  *   The request object that will be sent.
@@ -1156,19 +1230,29 @@ FirestoreClient.prototype.listen = function(options) {
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedParent = client.unknownPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[UNKNOWN_PATH]");
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
  * // Iterate over all elements.
+ * var formattedParent = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
+ *
  * client.listCollectionIds({parent: formattedParent}).then(function(responses) {
  *     var resources = responses[0];
  *     for (var i = 0; i < resources.length; ++i) {
  *         // doThingsWith(resources[i])
  *     }
- * }).catch(function(err) {
+ * })
+ * .catch(function(err) {
  *     console.error(err);
  * });
  *
  * // Or obtain the paged response.
+ * var formattedParent = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
+ *
+ *
  * var options = {autoPaginate: false};
  * function callback(responses) {
  *     // The actual resources in a response.
@@ -1237,12 +1321,18 @@ FirestoreClient.prototype.listCollectionIds = function(request, options, callbac
  *
  * @example
  *
- * var client = firestoreV1beta1.firestoreClient();
- * var formattedParent = client.unknownPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[UNKNOWN_PATH]");
- * client.listCollectionIdsStream({parent: formattedParent}).on('data', function(element) {
+ * var firestore = require('firestore.v1beta1');
+ *
+ * var client = firestore.v1beta1.firestore({
+ *   // optional auth parameters.
+ * });
+ *
+ * var formattedParent = client.anyPathPath("[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]");
+ * client.listCollectionIdsStream({parent: formattedParent})
+ * .on('data', function(element) {
  *     // doThingsWith(element)
  * }).on('error', function(err) {
- *     console.error(err);
+ *     console.log(err);
  * });
  */
 FirestoreClient.prototype.listCollectionIdsStream = function(request, options) {
@@ -1258,13 +1348,9 @@ function FirestoreClientBuilder(gaxGrpc) {
     return new FirestoreClientBuilder(gaxGrpc);
   }
 
-  // @todo: Replace with googleprotofiles once v1beta1 protos are publicly
-  // available.
-  var firestoreClient = gaxGrpc.load([{
-    root: __dirname + '/../../protos',
-    file: 'google/firestore/v1beta1/firestore.proto'
-  }]);
-  extend(this, firestoreClient.google.firestore.v1beta1);
+  var firestoreStubProtos = gaxGrpc.loadProto(
+    path.join(__dirname, '..', '..', 'protos'), 'google/firestore/v1beta1/firestore.proto');
+  extend(this, firestoreStubProtos.google.firestore.v1beta1);
 
 
   /**
@@ -1282,7 +1368,7 @@ function FirestoreClientBuilder(gaxGrpc) {
    *   {@link gax.constructSettings} for the format.
    */
   this.firestoreClient = function(opts) {
-    return new FirestoreClient(gaxGrpc, firestoreClient, opts);
+    return new FirestoreClient(gaxGrpc, firestoreStubProtos, opts);
   };
   extend(this.firestoreClient, FirestoreClient);
 }

@@ -54,13 +54,19 @@ option objc_class_prefix = "GCFS";
 //      to see the effects of the transaction.
 service Firestore {
   // Gets a single document.
-  rpc GetDocument(GetDocumentRequest) returns (Document);
+  rpc GetDocument(GetDocumentRequest) returns (Document) {
+    option (google.api.http) = { get: "/v1beta1/{name=projects/*/databases/*/documents/*/**}" };
+  }
 
   // Lists documents.
-  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse);
+  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {
+    option (google.api.http) = { get: "/v1beta1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}" };
+  }
 
   // Creates a new document.
-  rpc CreateDocument(CreateDocumentRequest) returns (Document);
+  rpc CreateDocument(CreateDocumentRequest) returns (Document) {
+    option (google.api.http) = { post: "/v1beta1/{parent=projects/*/databases/*/documents/**}/{collection_id}" body: "document" };
+  }
 
   // Updates or inserts a document.
   rpc UpdateDocument(UpdateDocumentRequest) returns (Document) {
@@ -92,12 +98,12 @@ service Firestore {
 
   // Rolls back a transaction.
   rpc Rollback(RollbackRequest) returns (google.protobuf.Empty) {
-    option (google.api.http) = { delete: "/v1beta1/{database=projects/*/databases/*}/documents:rollback" };
+    option (google.api.http) = { post: "/v1beta1/{database=projects/*/databases/*}/documents:rollback" body: "*" };
   }
 
   // Runs a query.
   rpc RunQuery(RunQueryRequest) returns (stream RunQueryResponse) {
-    option (google.api.http) = { post: "/v1beta1/{parent=projects/*/databases/*}/documents:runQuery" body: "*" };
+    option (google.api.http) = { post: "/v1beta1/{parent=projects/*/databases/*/documents}:runQuery" body: "*" };
   }
 
   // Streams batches of document updates and deletes, in order.
@@ -112,7 +118,7 @@ service Firestore {
 
   // Lists all the collection IDs underneath a document.
   rpc ListCollectionIds(ListCollectionIdsRequest) returns (ListCollectionIdsResponse) {
-    option (google.api.http) = { post: "/v1beta1/{parent=projects/*/databases/*}/documents:listCollectionIds" body: "" };
+    option (google.api.http) = { post: "/v1beta1/{parent=projects/*/databases/*/documents}:listCollectionIds" body: "*" };
   }
 }
 
@@ -143,10 +149,10 @@ message GetDocumentRequest {
 // The request for [Firestore.ListDocuments][google.firestore.v1beta1.Firestore.ListDocuments].
 message ListDocumentsRequest {
   // The parent resource name. In the format:
-  // `projects/{project_id}/databases/{database_id}` or
+  // `projects/{project_id}/databases/{database_id}/documents` or
   // `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
   // For example:
-  // `projects/my-project/databases/my-database` or
+  // `projects/my-project/databases/my-database/documents` or
   // `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
   string parent = 1;
 
@@ -202,7 +208,7 @@ message ListDocumentsResponse {
 // The request for [Firestore.CreateDocument][google.firestore.v1beta1.Firestore.CreateDocument].
 message CreateDocumentRequest {
   // The parent resource. For example:
-  // `projects/{project_id}/databases/{database_id}` or
+  // `projects/{project_id}/databases/{database_id}/documents` or
   // `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
   string parent = 1;
 
@@ -350,8 +356,7 @@ message CommitRequest {
   // Always executed atomically and in order.
   repeated Write writes = 2;
 
-  // If non-empty, applies all writes in this transaction, and commits it.
-  // Otherwise, applies the writes as if they were in their own transaction.
+  // If set, applies all writes in this transaction, and commits it.
   bytes transaction = 3;
 }
 
@@ -380,10 +385,10 @@ message RollbackRequest {
 // The request for [Firestore.RunQuery][google.firestore.v1beta1.Firestore.RunQuery].
 message RunQueryRequest {
   // The parent resource name. In the format:
-  // `projects/{project_id}/databases/{database_id}` or
+  // `projects/{project_id}/databases/{database_id}/documents` or
   // `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
   // For example:
-  // `projects/my-project/databases/my-database` or
+  // `projects/my-project/databases/my-database/documents` or
   // `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
   string parent = 1;
 
@@ -425,9 +430,11 @@ message RunQueryResponse {
 
   // The time at which the document was read. This may be monotonically
   // increasing; in this case, the previous documents in the result stream are
-  // guaranteed not to have changed between their `read_time` and this one. If
-  // the query returns no result, a response with only this field set will be
-  // sent, and it will represent the time at which the query was run.
+  // guaranteed not to have changed between their `read_time` and this one.
+  //
+  // If the query returns no results, a response with `read_time` and no
+  // `document` will be sent, and this represents the time at which the query
+  // was run.
   google.protobuf.Timestamp read_time = 3;
 
   // The number of results that have been skipped due to an offset between
@@ -479,6 +486,9 @@ message WriteRequest {
   //
   // Leave this field unset when creating a new stream.
   bytes stream_token = 4;
+
+  // Labels associated with this write request.
+  map<string, string> labels = 5;
 }
 
 // The response for [Firestore.Write][google.firestore.v1beta1.Firestore.Write].
@@ -498,6 +508,9 @@ message WriteResponse {
   // This i-th write result corresponds to the i-th write in the
   // request.
   repeated WriteResult write_results = 3;
+
+  // The time at which the commit occurred.
+  google.protobuf.Timestamp commit_time = 4;
 }
 
 // A request for [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen]
@@ -514,6 +527,9 @@ message ListenRequest {
     // The ID of a target to remove from this stream.
     int32 remove_target = 3;
   }
+
+  // Labels associated with this target change.
+  map<string, string> labels = 4;
 }
 
 // The response for [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen].
@@ -529,7 +545,7 @@ message ListenResponse {
     // A [Document][google.firestore.v1beta1.Document] has been deleted.
     DocumentDelete document_delete = 4;
 
-    // A [Document][] has been removed from a target (because it is no longer
+    // A [Document][google.firestore.v1beta1.Document] has been removed from a target (because it is no longer
     // relevant to that target).
     DocumentRemove document_remove = 6;
 
@@ -556,10 +572,10 @@ message Target {
   // A target specified by a query.
   message QueryTarget {
     // The parent resource name. In the format:
-    // `projects/{project_id}/databases/{database_id}` or
+    // `projects/{project_id}/databases/{database_id}/documents` or
     // `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
     // For example:
-    // `projects/my-project/databases/my-database` or
+    // `projects/my-project/databases/my-database/documents` or
     // `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
     string parent = 1;
 
@@ -625,6 +641,9 @@ message TargetChange {
     // The targets reflect all changes committed before the targets were added
     // to the stream.
     //
+    // This will be sent after or with a `read_time` that is greater than or
+    // equal to the time at which the targets were added.
+    //
     // Listeners can wait for this change if read-after-write semantics
     // are desired.
     CURRENT = 3;
@@ -660,11 +679,16 @@ message TargetChange {
   // Not set on every target change.
   bytes resume_token = 4;
 
-  // The consistent `read_time` for the given `target_ids`.
+  // The consistent `read_time` for the given `target_ids` (omitted when the
+  // target_ids are not at a consistent snapshot).
   //
-  // Set only when the stream reflects a the same `read_time` for the given
-  // `target_ids`. The stream is guaranteed to send a `read_time` with
-  // `target_ids` empty once the stream reaches a consistent snapshot.
+  // The stream is guaranteed to send a `read_time` with `target_ids` empty
+  // whenever the entire stream reaches a new consistent snapshot. ADD,
+  // CURRENT, and RESET messages are guaranteed to (eventually) result in a
+  // new consistent snapshot (while NO_CHANGE and REMOVE messages are not).
+  //
+  // For a given stream, `read_time` is guaranteed to be monotonically
+  // increasing.
   google.protobuf.Timestamp read_time = 6;
 }
 

@@ -46,13 +46,13 @@
           "retry_params_name": "default"
         },
         "BatchGetDocuments": {
-          "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
+          "timeout_millis": 300000,
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "BeginTransaction": {
           "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "Commit": {
@@ -66,23 +66,23 @@
           "retry_params_name": "default"
         },
         "RunQuery": {
-          "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
+          "timeout_millis": 300000,
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "Write": {
-          "timeout_millis": 60000,
+          "timeout_millis": 300000,
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
         "Listen": {
-          "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
+          "timeout_millis": 300000,
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
         "ListCollectionIds": {
           "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
+          "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         }
       }
