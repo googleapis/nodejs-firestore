@@ -303,17 +303,6 @@ class Watch {
         currentStream.on('end', () => {
           maybeReopenStream();
         });
-        currentStream.on('end', () => {
-          if (isActive && !is.null(resumeToken)) {
-            Firestore.log('Watch.onSnapshot',
-                'Stream ended unexpectedly, re-opening');
-            request.addTarget.resumeToken = resumeToken;
-            resumeToken = null;
-            resetStream();
-          } else {
-            Firestore.log('Watch.onSnapshot', 'Stream ended');
-          }
-        });
         currentStream.pipe(stream);
         currentStream.resume();
       }).catch(sendError);
