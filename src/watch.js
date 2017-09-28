@@ -213,10 +213,6 @@ class Watch {
     // Set to true when we have received a data message from the stream.
     let isHealthy = false;
 
-    // Indicates whether we are interested in data from the stream. Set to false
-    // in the the 'unsubscribe()' callback.
-    let isActive = true;
-
     // Sentinel value for a document remove.
     const REMOVED = {};
 
