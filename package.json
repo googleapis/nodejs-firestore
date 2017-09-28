@@ -24,7 +24,7 @@
     "CONTRIBUTORS",
     "COPYING"
   ],
-  "repository": "googlecloudplatform/google-cloud-node",
+  "repository": "googleapis/nodejs-firestore",
   "keywords": [
     "google apis client",
     "google api client",
