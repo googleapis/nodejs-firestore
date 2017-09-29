@@ -1,19 +1,68 @@
-# @google-cloud/firestore ([Alpha][versioning])
-> Firestore Client Library for Node.js
+<img src="https://avatars2.githubusercontent.com/u/2810941?v=3&s=96" alt="Google Cloud Platform logo" title="Google Cloud Platform" align="right" height="96" width="96"/>
 
-*Looking for more Google APIs than just Firestore? You might want to check out [`google-cloud`][google-cloud].*
+# Google Cloud Firestore: Node.js Client
 
-- [API Documentation][gcloud-firestore-docs]
-- [Official Documentation][cloud-firestore-docs]
+[![release level](https://img.shields.io/badge/release%20level-beta-yellow.svg?style&#x3D;flat)](https://cloud.google.com/terms/launch-stages)
+[![CircleCI](https://img.shields.io/circleci/project/github/googleapis/nodejs-firestore.svg?style=flat)](https://circleci.com/gh/googleapis/nodejs-firestore)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/googleapis/nodejs-firestore?svg=true)](https://ci.appveyor.com/project/googleapis/nodejs-firestore)
+[![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-firestore/repo-migration.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-firestore)
 
+> Node.js idiomatic client for [Firestore][product-docs].
 
-```sh
-$ npm install --save @google-cloud/firestore
-```
-```js
+[Google Cloud Firestore]({{docs_url}}) is a thing!
+
+* [Firestore Node.js Client API Reference][client-docs]
+* [Firestore Documentation][product-docs]
+
+Read more about the client libraries for Cloud APIs, including the older
+Google APIs Client Libraries, in [Client Libraries Explained][explained].
+
+[explained]: https://cloud.google.com/apis/docs/client-libraries-explained
+
+**Table of contents:**
+
+* [QuickStart](#quickstart)
+  * [Before you begin](#before-you-begin)
+  * [Installing the client library](#installing-the-client-library)
+  * [Using the client library](#using-the-client-library)
+* [Versioning](#versioning)
+* [Contributing](#contributing)
+* [License](#license)
+
+## Quickstart
+
+### Before you begin
+
+1.  Select or create a Cloud Platform project.
+
+    [Go to the projects page][projects]
+
+1.  Enable billing for your project.
+
+    [Enable billing][billing]
+
+1.  Enable the Google Cloud Firestore API.
+
+    [Enable the API][enable_api]
+
+1.  [Set up authentication with a service account][auth] so you can access the
+    API from your local workstation.
+
+[projects]: https://console.cloud.google.com/project
+[billing]: https://support.google.com/cloud/answer/6293499#enable-billing
+[enable_api]: https://console.cloud.google.com/flows/enableapi?apiid=firestore.googleapis.com
+[auth]: https://cloud.google.com/docs/authentication/getting-started
+
+### Installing the client library
+
+    npm install --save @google-cloud/firestore
+
+### Using the client library
+
+```javascript
 var firestore = require('@google-cloud/firestore')({
-  projectId: 'grape-spaceship-123',
-  keyFilename: '/path/to/keyfile.json'
+  projectId: 'YOUR_PROJECT_ID',
+  keyFilename: '/path/to/keyfile.json',
 });
 
 var document = firestore.doc('posts/intro-to-firestore');
@@ -21,76 +70,52 @@ var document = firestore.doc('posts/intro-to-firestore');
 // Enter new data into the document.
 document.set({
   title: 'Welcome to Firestore',
-  body: 'Hello World'
-}).then(function() {
+  body: 'Hello World',
+}).then(() => {
   // Document created successfully.
 });
 
 // Update an existing document.
 document.update({
-  body: 'My first Firestore app'
-}).then(function() {
+  body: 'My first Firestore app',
+}).then(() => {
   // Document updated successfully.
 });
 
 // Read the document.
-document.get().then(function(doc) {
+document.get().then(doc => {
   // Document read successfully.
 });
 
 // Delete the document.
-document.delete().then(function() {
+document.delete().then(() => {
   // Document deleted successfully.
 });
-
 ```
 
 
-## Authentication
+## Versioning
 
-It's incredibly easy to get authenticated and start using Google's APIs. You can set your credentials on a global basis as well as on a per-API basis. See each individual API section below to see how you can auth on a per-API-basis. This is useful if you want to use different accounts for different Google Cloud services.
+This library follows [Semantic Versioning](http://semver.org/).
 
-### On Google Cloud Platform
+This library is considered to be in **beta**. This means it is expected to be
+mostly stable while we work toward a general availability release; however,
+complete stability is not guaranteed. We will address issues and requests
+against beta libraries with a high priority.
 
-If you are running this client on Google Cloud Platform, we handle authentication for you with no configuration. You just need to make sure that when you [set up the GCE instance][gce-how-to], you add the correct scopes for the APIs you want to access.
+More Information: [Google Cloud Platform Launch Stages][launch_stages]
 
-``` js
-var firestore = require('@google-cloud/firestore')();
-// ...you're good to go!
-```
+[launch_stages]: https://cloud.google.com/terms/launch-stages
 
-### Elsewhere
+## Contributing
 
-If you are not running this client on Google Cloud Platform, you need a Google Developers service account. To create a service account:
+Contributions welcome! See the [Contributing Guide](.github/CONTRIBUTING.md).
 
-1. Visit the [Google Developers Console][dev-console].
-2. Create a new project or click on an existing project.
-3. Navigate to  **APIs & auth** > **APIs section** and turn on the following APIs (you may need to enable billing in order to use these services):
-  * Cloud Firestore API
-4. Navigate to **APIs & auth** >  **Credentials** and then:
-  * If you want to use a new service account key, click on **Create credentials** and select **Service account key**. After the account key is created, you will be prompted to download the JSON key file that the library uses to authenticate your requests.
-  * If you want to generate a new service account key for an existing service account, click on **Generate new JSON key** and download the JSON key file.
+## License
 
-``` js
-var projectId = process.env.GCLOUD_PROJECT; // E.g. 'grape-spaceship-123'
+Apache Version 2.0
 
-var firestore = require('@google-cloud/firestore')({
-  projectId: projectId,
+See [LICENSE](LICENSE)
 
-  // The path to your key file:
-  keyFilename: '/path/to/keyfile.json'
-
-  // Or the contents of the key file:
-  credentials: require('./path/to/keyfile.json')
-});
-
-// ...you're good to go!
-```
-
-
-[versioning]: https://github.com/GoogleCloudPlatform/google-cloud-node#versioning
-[google-cloud]: https://github.com/GoogleCloudPlatform/google-cloud-node/
-[gce-how-to]: https://cloud.google.com/compute/docs/authentication#using
-[dev-console]: https://console.developers.google.com/project
-[gcloud-firestore-docs]: https://googlecloudplatform.github.io/google-cloud-node/#/docs/firestore
-[cloud-firestore-docs]: https://cloud.google.com/firestore
+[client-docs]: https://cloud.google.com/nodejs/docs/reference/firestore/latest/
+[product-docs]: ??

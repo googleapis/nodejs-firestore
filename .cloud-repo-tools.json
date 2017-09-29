@@ -1,8 +1,15 @@
 {
   "requiresKeyFile": true,
   "requiresProjectId": true,
-  "product": "firestore",
-  "client_reference_url":
-    "https://cloud.google.com/nodejs/docs/reference/firestore/latest/",
-  "release_quality": "beta"
+  "client_reference_url": "https://cloud.google.com/nodejs/docs/reference/firestore/latest/",
+  "release_quality": "beta",
+  "samples": [],
+
+  "_product": "firestore",
+  "id": "firestore",
+  "name": "Google Cloud Firestore",
+  "short_name": "Firestore",
+  "docs_url": "??",
+  "description": "[Google Cloud Firestore]({{docs_url}}) is a thing!",
+  "api_id": "firestore.googleapis.com"
 }
