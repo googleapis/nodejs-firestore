@@ -43,13 +43,6 @@ const FieldValue = require('./field-value');
  */
 let DocumentReference;
 
-/**
- * Injected.
- *
- * @type firestore.Firestore
- */
-let Firestore;
-
 /** Injected. */
 let validate;
 
@@ -357,7 +350,8 @@ class DocumentSnapshot {
   protoFields() {
     if (this._fieldsProto === undefined) {
       throw new Error(
-          `The data for "${this._ref.formattedName}" does not exist.`);
+        `The data for "${this._ref.formattedName}" does not exist.`
+      );
     }
 
     return this._fieldsProto;
@@ -432,27 +426,39 @@ class DocumentSnapshot {
     switch (proto.valueType) {
       case 'stringValue': {
         return proto.stringValue;
-      } case 'booleanValue': {
+      }
+      case 'booleanValue': {
         return proto.booleanValue;
-      } case 'integerValue': {
+      }
+      case 'integerValue': {
         return parseInt(proto.integerValue, 10);
-      } case 'doubleValue': {
+      }
+      case 'doubleValue': {
         return parseFloat(proto.doubleValue, 10);
-      } case 'timestampValue': {
-        return new Date(proto.timestampValue.seconds * 1000 +
-            (proto.timestampValue.nanos / MS_TO_NANOS));
-      } case 'referenceValue': {
-        return new DocumentReference(this.ref.firestore,
-            ResourcePath.fromSlashSeparatedString(proto.referenceValue));
-      } case 'arrayValue': {
+      }
+      case 'timestampValue': {
+        return new Date(
+          proto.timestampValue.seconds * 1000 +
+            proto.timestampValue.nanos / MS_TO_NANOS
+        );
+      }
+      case 'referenceValue': {
+        return new DocumentReference(
+          this.ref.firestore,
+          ResourcePath.fromSlashSeparatedString(proto.referenceValue)
+        );
+      }
+      case 'arrayValue': {
         let array = [];
         for (let i = 0; i < proto.arrayValue.values.length; ++i) {
           array.push(this._decodeValue(proto.arrayValue.values[i]));
         }
         return array;
-      } case 'nullValue': {
+      }
+      case 'nullValue': {
         return null;
-      } case 'mapValue': {
+      }
+      case 'mapValue': {
         let obj = {};
         let fields = proto.mapValue.fields;
 
@@ -463,13 +469,17 @@ class DocumentSnapshot {
         }
 
         return obj;
-      } case 'geoPointValue': {
+      }
+      case 'geoPointValue': {
         return GeoPoint.fromProto(proto.geoPointValue);
-      } case 'bytesValue': {
+      }
+      case 'bytesValue': {
         return proto.bytesValue;
-      } default: {
-        throw new Error('Cannot decode type from Firestore Value: ' +
-            JSON.stringify(proto));
+      }
+      default: {
+        throw new Error(
+          'Cannot decode type from Firestore Value: ' + JSON.stringify(proto)
+        );
       }
     }
   }
@@ -483,7 +493,7 @@ class DocumentSnapshot {
   toProto() {
     return {
       name: this._ref.formattedName,
-      fields: this._fieldsProto
+      fields: this._fieldsProto,
     };
   }
 
@@ -571,21 +581,21 @@ class DocumentSnapshot {
     if (is.string(val)) {
       return {
         valueType: 'stringValue',
-        stringValue: val
+        stringValue: val,
       };
     }
 
     if (is.boolean(val)) {
       return {
         valueType: 'booleanValue',
-        booleanValue: val
+        booleanValue: val,
       };
     }
 
     if (is.integer(val)) {
       return {
         valueType: 'integerValue',
-        integerValue: val
+        integerValue: val,
       };
     }
 
@@ -593,7 +603,7 @@ class DocumentSnapshot {
     if (is.number(val)) {
       return {
         valueType: 'doubleValue',
-        doubleValue: val
+        doubleValue: val,
       };
     }
 
@@ -601,11 +611,11 @@ class DocumentSnapshot {
       let epochSeconds = Math.floor(val.getTime() / 1000);
       let timestamp = {
         seconds: epochSeconds,
-        nanos: (val.getTime() - epochSeconds * 1000) * MS_TO_NANOS
+        nanos: (val.getTime() - epochSeconds * 1000) * MS_TO_NANOS,
       };
       return {
         valueType: 'timestampValue',
-        timestampValue: timestamp
+        timestampValue: timestamp,
       };
     }
 
@@ -620,36 +630,36 @@ class DocumentSnapshot {
       return {
         valueType: 'arrayValue',
         arrayValue: {
-          values: encodedElements
-        }
+          values: encodedElements,
+        },
       };
     }
 
     if (is.nil(val)) {
       return {
         valueType: 'nullValue',
-        nullValue: 'NULL_VALUE'
+        nullValue: 'NULL_VALUE',
       };
     }
 
     if (is.instance(val, DocumentReference) || is.instance(val, ResourcePath)) {
       return {
         valueType: 'referenceValue',
-        referenceValue: val.formattedName
+        referenceValue: val.formattedName,
       };
     }
 
     if (is.instance(val, GeoPoint)) {
       return {
         valueType: 'geoPointValue',
-        geoPointValue: val.toProto()
+        geoPointValue: val.toProto(),
       };
     }
 
     if (is.instanceof(val, Buffer) || is.instanceof(val, Uint8Array)) {
       return {
         valueType: 'bytesValue',
-        bytesValue: val
+        bytesValue: val,
       };
     }
 
@@ -657,13 +667,16 @@ class DocumentSnapshot {
       return {
         valueType: 'mapValue',
         mapValue: {
-          fields: DocumentSnapshot.encodeFields(val, depth + 1)
-        }
+          fields: DocumentSnapshot.encodeFields(val, depth + 1),
+        },
       };
     }
 
-    throw new Error('Cannot encode type (' +
-        Object.prototype.toString.call(val) + ') to a Firestore Value');
+    throw new Error(
+      'Cannot encode type (' +
+        Object.prototype.toString.call(val) +
+        ') to a Firestore Value'
+    );
   }
 
   /**
@@ -699,14 +712,17 @@ class DocumentSnapshot {
           // The existing object has deeper nesting that the value we are trying
           // to merge.
           throw new Error(
-              `Field "${path.join('.')}" has conflicting definitions.`);
+            `Field "${path.join('.')}" has conflicting definitions.`
+          );
         } else {
           merge(target[key], value, path, pos + 1);
         }
       } else {
         // We are trying to merge an object with a primitive.
-        throw new Error(`Field "${path.slice(0, pos + 1).join('.')}" has ` +
-            `conflicting definitions.`);
+        throw new Error(
+          `Field "${path.slice(0, pos + 1).join('.')}" has ` +
+            `conflicting definitions.`
+        );
       }
     }
 
@@ -782,15 +798,23 @@ DocumentSnapshot.Builder = class {
    * @package
    */
   build() {
-    assert(is.defined(this.fieldsProto) === is.defined(this.createTime),
-        'Create time should be set iff document exists.');
-    assert(is.defined(this.fieldsProto) === is.defined(this.updateTime),
-        'Update time should be set iff document exists.');
-    return new DocumentSnapshot(this.ref, this.fieldsProto,
-        this.readTime, this.createTime, this.updateTime);
+    assert(
+      is.defined(this.fieldsProto) === is.defined(this.createTime),
+      'Create time should be set iff document exists.'
+    );
+    assert(
+      is.defined(this.fieldsProto) === is.defined(this.updateTime),
+      'Update time should be set iff document exists.'
+    );
+    return new DocumentSnapshot(
+      this.ref,
+      this.fieldsProto,
+      this.readTime,
+      this.createTime,
+      this.updateTime
+    );
   }
 };
-
 
 /**
  * A Firestore Document Mask contains the field paths affected by an update.
@@ -817,7 +841,7 @@ class DocumentMask {
    */
   toProto() {
     return {
-      fieldPaths: this._fieldPaths
+      fieldPaths: this._fieldPaths,
     };
   }
 
@@ -858,8 +882,9 @@ class DocumentMask {
           // We don't split on dots since fromObject is called with
           // DocumentData.
           const childSegment = new FieldPath(key);
-          const childPath = currentPath ? currentPath.append(childSegment) :
-              childSegment;
+          const childPath = currentPath
+            ? currentPath.append(childSegment)
+            : childSegment;
           const value = currentData[key];
           if (is.object(value)) {
             extractFieldPaths(value, childPath);
@@ -919,7 +944,7 @@ class DocumentTransform {
   toProto() {
     return {
       document: this._ref.formattedName,
-      fieldTransforms: this._transforms
+      fieldTransforms: this._transforms,
     };
   }
 
@@ -943,12 +968,13 @@ class DocumentTransform {
       if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
         if (allowTransforms) {
           transforms.push({
-            fieldPath: new FieldPath(...path).formattedName,
-            setToServerValue: SERVER_TIMESTAMP
+            fieldPath: new FieldPath(path).formattedName,
+            setToServerValue: SERVER_TIMESTAMP,
           });
         } else {
-          throw new Error('Server timestamps are not supported as array ' +
-            'values.');
+          throw new Error(
+            'Server timestamps are not supported as array ' + 'values.'
+          );
         }
       } else if (is.array(val)) {
         for (let i = 0; i < val.length; ++i) {
@@ -958,8 +984,9 @@ class DocumentTransform {
       } else if (is.object(val)) {
         for (let prop in val) {
           if (val.hasOwnProperty(prop)) {
-            transforms = transforms.concat(encode_(val[prop], path.concat(prop),
-              allowTransforms));
+            transforms = transforms.concat(
+              encode_(val[prop], path.concat(prop), allowTransforms)
+            );
           }
         }
       }
@@ -971,8 +998,9 @@ class DocumentTransform {
 
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
-        transforms = transforms.concat(encode_(obj[prop], path.concat(prop),
-          true));
+        transforms = transforms.concat(
+          encode_(obj[prop], path.concat(prop), true)
+        );
       }
     }
 
@@ -1016,11 +1044,13 @@ class Precondition {
       let nanos = null;
 
       let nanoString = this._lastUpdateTime.substring(
-          20, this._lastUpdateTime.length - 1);
+        20,
+        this._lastUpdateTime.length - 1
+      );
 
       if (nanoString.length === 3) {
         nanoString = `${nanoString}000000`;
-      } else if (nanoString.length === 6)  {
+      } else if (nanoString.length === 6) {
         nanoString = `${nanoString}000`;
       }
 
@@ -1029,13 +1059,14 @@ class Precondition {
       }
 
       if (isNaN(seconds) || isNaN(nanos)) {
-        throw new Error('Specify a valid ISO 8601 timestamp for' +
-            ' "lastUpdateTime".');
+        throw new Error(
+          'Specify a valid ISO 8601 timestamp for' + ' "lastUpdateTime".'
+        );
       }
 
       proto.updateTime = {
         seconds: seconds,
-        nanos: nanos
+        nanos: nanos,
       };
     } else if (is.defined(this._exists)) {
       proto.exists = this._exists;
@@ -1061,7 +1092,7 @@ function validateDocumentData(obj, usesPaths, depth) {
     depth = 1;
   } else if (depth > MAX_DEPTH) {
     throw new Error(
-        `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`
+      `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`
     );
   }
 
@@ -1102,7 +1133,7 @@ function validatePrecondition(options) {
   if (is.defined(options.exists)) {
     ++conditions;
     if (!is.boolean(options.exists)) {
-      throw new Error ('"exists" is not a boolean.');
+      throw new Error('"exists" is not a boolean.');
     }
   }
 
@@ -1136,21 +1167,25 @@ function validateSetOptions(options) {
   }
 
   if (is.defined(options.merge) && !is.boolean(options.merge)) {
-    throw new Error ('"merge" is not a boolean.');
+    throw new Error('"merge" is not a boolean.');
   }
 
   return true;
 }
 
 module.exports = (FirestoreType, DocumentRefType) => {
-  Firestore = FirestoreType;
   DocumentReference = DocumentRefType;
   validate = require('./validate.js')({
-    FieldPath: FieldPath.validateFieldPath
+    FieldPath: FieldPath.validateFieldPath,
   });
   return {
-    DocumentMask, DocumentSnapshot, DocumentTransform,
-    Precondition, GeoPoint, validateDocumentData, validatePrecondition,
-    validateSetOptions
+    DocumentMask,
+    DocumentSnapshot,
+    DocumentTransform,
+    Precondition,
+    GeoPoint,
+    validateDocumentData,
+    validatePrecondition,
+    validateSetOptions,
   };
 };

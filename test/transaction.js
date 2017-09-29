@@ -32,14 +32,14 @@ Firestore.setLogFunction(() => {});
 function createInstance() {
   return new Firestore({
     projectId: 'test-project',
-    sslCreds: grpc.credentials.createInsecure()
+    sslCreds: grpc.credentials.createInsecure(),
   });
 }
 
 function commit(transaction, writes, err) {
   let proto = {
     database: DATABASE_ROOT,
-    transaction: transaction || 'foo'
+    transaction: transaction || 'foo',
   };
 
   proto.writes = writes || [];
@@ -47,60 +47,60 @@ function commit(transaction, writes, err) {
   let response = {
     commitTime: {
       nanos: 0,
-      seconds: 0
+      seconds: 0,
     },
     writeResults: [
       {
         updateTime: {
           nanos: 0,
-          seconds: 0
-        }
-      }
-    ]
+          seconds: 0,
+        },
+      },
+    ],
   };
 
   return {
     type: 'commit',
     request: proto,
     error: err,
-    response: response
+    response: response,
   };
 }
 
 function rollback(transaction, err) {
   let proto = {
     database: DATABASE_ROOT,
-    transaction: transaction || 'foo'
+    transaction: transaction || 'foo',
   };
 
   return {
     type: 'rollback',
     request: proto,
     error: err,
-    response: {}
+    response: {},
   };
 }
 
 function begin(transaction, prevTransaction, err) {
-  let proto = { database: DATABASE_ROOT };
+  let proto = {database: DATABASE_ROOT};
 
   if (prevTransaction) {
     proto.options = {
       readWrite: {
-        retryTransaction: prevTransaction
-      }
+        retryTransaction: prevTransaction,
+      },
     };
   }
 
   let response = {
-    transaction: transaction || 'foo'
+    transaction: transaction || 'foo',
   };
 
   return {
     type: 'begin',
     request: proto,
     error: err,
-    response: response
+    response: response,
   };
 }
 
@@ -108,7 +108,7 @@ function getDocument(transaction) {
   let request = {
     database: DATABASE_ROOT,
     documents: [DOCUMENT_NAME],
-    transaction: transaction || 'foo'
+    transaction: transaction || 'foo',
   };
 
   let stream = through.obj();
@@ -120,7 +120,7 @@ function getDocument(transaction) {
         createTime: {seconds: 1, nanos: 2},
         updateTime: {seconds: 3, nanos: 4},
       },
-      readTime: {seconds: 5, nanos: 6}
+      readTime: {seconds: 5, nanos: 6},
     });
     stream.push(null);
   });
@@ -128,38 +128,40 @@ function getDocument(transaction) {
   return {
     type: 'getDocument',
     request: request,
-    stream: stream
+    stream: stream,
   };
 }
 
 function query(transaction) {
-  let request =  {
+  let request = {
     parent: DATABASE_ROOT,
     structuredQuery: {
-      from: [{
-        collectionId: 'col'
-      }],
+      from: [
+        {
+          collectionId: 'col',
+        },
+      ],
       where: {
         compositeFilter: {
           filters: [
             {
               fieldFilter: {
                 field: {
-                  fieldPath: 'foo'
+                  fieldPath: 'foo',
                 },
                 op: 'EQUAL',
                 value: {
                   stringValue: 'bar',
-                  valueType: 'stringValue'
-                }
-              }
-            }
+                  valueType: 'stringValue',
+                },
+              },
+            },
           ],
-          op: 'AND'
-        }
-      }
+          op: 'AND',
+        },
+      },
     },
-    transaction: transaction || 'foo'
+    transaction: transaction || 'foo',
   };
 
   let stream = through.obj();
@@ -171,7 +173,7 @@ function query(transaction) {
         createTime: {seconds: 1, nanos: 2},
         updateTime: {seconds: 3, nanos: 4},
       },
-      readTime: {seconds: 5, nanos: 6}
+      readTime: {seconds: 5, nanos: 6},
     });
 
     stream.push(null);
@@ -180,15 +182,18 @@ function query(transaction) {
   return {
     type: 'query',
     request: request,
-    stream: stream
+    stream: stream,
   };
 }
 
 function runTransaction(callback, request) {
   let requests = Array.prototype.slice.call(arguments, 1);
 
-  firestore.api.Firestore._beginTransaction = function(actual, options,
-                                                       callback) {
+  firestore.api.Firestore._beginTransaction = function(
+    actual,
+    options,
+    callback
+  ) {
     request = requests.shift();
     assert.equal(request.type, 'begin');
     assert.deepEqual(actual, request.request);
@@ -223,13 +228,16 @@ function runTransaction(callback, request) {
     return request.stream;
   };
 
-  return firestore.runTransaction(callback).then((val) => {
-    assert.equal(requests.length, 0);
-    return val;
-  }).catch((err) => {
-    assert.equal(requests.length, 0);
-    return Promise.reject(err);
-  });
+  return firestore
+    .runTransaction(callback)
+    .then(val => {
+      assert.equal(requests.length, 0);
+      return val;
+    })
+    .catch(err => {
+      assert.equal(requests.length, 0);
+      return Promise.reject(err);
+    });
 }
 
 describe('successful transactions', function() {
@@ -238,15 +246,23 @@ describe('successful transactions', function() {
   });
 
   it('empty transaction', function() {
-    return runTransaction(() => {
-      return Promise.resolve();
-    }, begin(), commit());
+    return runTransaction(
+      () => {
+        return Promise.resolve();
+      },
+      begin(),
+      commit()
+    );
   });
 
   it('returns value', function() {
-    return runTransaction(() => {
-      return Promise.resolve('bar');
-    }, begin(), commit()).then((val) => {
+    return runTransaction(
+      () => {
+        return Promise.resolve('bar');
+      },
+      begin(),
+      commit()
+    ).then(val => {
       assert.equal(val, 'bar');
     });
   });
@@ -269,21 +285,25 @@ describe('failed transactions', function() {
     };
 
     assert.throws(function() {
-      firestore.runTransaction(() => {}, { maxAttempts: 'foo' });
+      firestore.runTransaction(() => {}, {maxAttempts: 'foo'});
     }, /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
 
     assert.throws(function() {
-      firestore.runTransaction(() => {}, { maxAttempts: 0 });
+      firestore.runTransaction(() => {}, {maxAttempts: 0});
     }, /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
   });
 
   it('requires a promise', function() {
-    return runTransaction(() => {}, begin(), rollback('foo')).then(() => {
-      throw new Error('Unexpected success in Promise');
-    }).catch((err) => {
-      assert.equal(err.message,
-        'You must return a Promise in your transaction()-callback.');
-    });
+    return runTransaction(() => {}, begin(), rollback('foo'))
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(
+          err.message,
+          'You must return a Promise in your transaction()-callback.'
+        );
+      });
   });
 
   it('handles exception', function() {
@@ -293,34 +313,45 @@ describe('failed transactions', function() {
 
     return runTransaction(() => {
       return Promise.resolve();
-    }).then(() => {
-      throw new Error('Unexpected success in Promise');
-    }).catch((err) => {
-      assert.equal(err.message, 'Expected exception');
-    });
+    })
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(err.message, 'Expected exception');
+      });
   });
 
-  it('doesn\'t retry on callback failure', function() {
-    return runTransaction(() => {
-      return Promise.reject('request exception');
-    }, begin(), rollback('foo')).then(() => {
-      throw new Error('Unexpected success in Promise');
-    }).catch((err) => {
-      assert.equal(err, 'request exception');
-    });
+  it("doesn't retry on callback failure", function() {
+    return runTransaction(
+      () => {
+        return Promise.reject('request exception');
+      },
+      begin(),
+      rollback('foo')
+    )
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(err, 'request exception');
+      });
   });
 
   it('retries on commit failure', function() {
     let err = new Error('Retryable error');
 
-    return runTransaction(() => { return Promise.resolve('success'); },
+    return runTransaction(
+      () => {
+        return Promise.resolve('success');
+      },
       begin('foo1'),
       commit('foo1', [], err),
       begin('foo2', 'foo1'),
-      commit('foo2', [],  err),
+      commit('foo2', [], err),
       begin('foo3', 'foo2'),
       commit('foo3')
-    ).then((red) => {
+    ).then(red => {
       assert.equal(red, 'success');
     });
   });
@@ -328,47 +359,62 @@ describe('failed transactions', function() {
   it('limits the retry attempts', function() {
     let err = new Error('Retryable error');
 
-    return runTransaction(() => { return Promise.resolve('success'); },
+    return runTransaction(
+      () => {
+        return Promise.resolve('success');
+      },
       begin('foo1'),
       commit('foo1', [], err),
       begin('foo2', 'foo1'),
-      commit('foo2', [],  err),
+      commit('foo2', [], err),
       begin('foo3', 'foo2'),
-      commit('foo3', [],  err),
+      commit('foo3', [], err),
       begin('foo4', 'foo3'),
-      commit('foo4', [],  err),
+      commit('foo4', [], err),
       begin('foo5', 'foo4'),
-      commit('foo5', [],  new Error('Final exception'))
-    ).then(() => {
-      throw new Error('Unexpected success in Promise');
-    }).catch((err) => {
-      assert.equal(err.message, 'Final exception');
-    });
+      commit('foo5', [], new Error('Final exception'))
+    )
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(err.message, 'Final exception');
+      });
   });
 
   it('fails on beginTransaction', function() {
-    return runTransaction(() => { return Promise.resolve('success'); },
+    return runTransaction(
+      () => {
+        return Promise.resolve('success');
+      },
       begin('foo', null, new Error('Fails (1) on beginTransaction')),
       begin('foo', null, new Error('Fails (2) on beginTransaction')),
       begin('foo', null, new Error('Fails (3) on beginTransaction')),
       begin('foo', null, new Error('Fails (4) on beginTransaction')),
       begin('foo', null, new Error('Fails (5) on beginTransaction'))
-    ).then(() => {
-      throw new Error('Unexpected success in Promise');
-    }).catch((err) => {
-      assert.equal(err.message, 'Fails (5) on beginTransaction');
-    });
+    )
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(err.message, 'Fails (5) on beginTransaction');
+      });
   });
 
   it('fails on rollback', function() {
-    return runTransaction(() => { return Promise.reject(); },
+    return runTransaction(
+      () => {
+        return Promise.reject();
+      },
       begin(),
       rollback('foo', new Error('Fails on rollback'))
-    ).then(() => {
-      throw new Error('Unexpected success in Promise');
-    }).catch((err) => {
-      assert.equal(err.message, 'Fails on rollback');
-    });
+    )
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(err.message, 'Fails on rollback');
+      });
   });
 });
 
@@ -381,80 +427,92 @@ describe('transaction operations', function() {
   });
 
   it('support get with document ref', function() {
-    return runTransaction((updateFunction) => {
-      return updateFunction.get(docRef).then((doc) => {
-        assert.equal(doc.id, 'documentId');
-      });
-    },
-    begin(),
-    getDocument(),
-    commit());
+    return runTransaction(
+      updateFunction => {
+        return updateFunction.get(docRef).then(doc => {
+          assert.equal(doc.id, 'documentId');
+        });
+      },
+      begin(),
+      getDocument(),
+      commit()
+    );
   });
 
   it('requires a query or document for get', function() {
-    return runTransaction((updateFunction) => {
-      assert.throws(() => {
-        updateFunction.get();
-      }, /Argument "refOrQuery" must be a DocumentRef or a Query\./);
+    return runTransaction(
+      updateFunction => {
+        assert.throws(() => {
+          updateFunction.get();
+        }, /Argument "refOrQuery" must be a DocumentRef or a Query\./);
 
-      assert.throws(() => {
-        updateFunction.get('foo');
-      }, /Argument "refOrQuery" must be a DocumentRef or a Query\./);
+        assert.throws(() => {
+          updateFunction.get('foo');
+        }, /Argument "refOrQuery" must be a DocumentRef or a Query\./);
 
-      return Promise.resolve();
-    },
-    begin(),
-    commit());
+        return Promise.resolve();
+      },
+      begin(),
+      commit()
+    );
   });
 
   it('enforce that gets come before writes', function() {
-    return runTransaction((updateFunction) => {
+    return runTransaction(updateFunction => {
       updateFunction.set(docRef, {foo: 'bar'});
       return updateFunction.get(docRef);
-    },
-    begin()).then(() => {
-      throw new Error('Unexpected success in Promise');
-    }).catch((err) => {
-      assert.equal(err.message, 'Firestore transactions require all reads to ' +
-        'be executed before all writes.');
-    });
+    }, begin())
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(
+          err.message,
+          'Firestore transactions require all reads to ' +
+            'be executed before all writes.'
+        );
+      });
   });
 
   it('support get with query', function() {
-    return runTransaction((updateFunction) => {
-      let query = firestore.collection('col').where('foo', '==', 'bar');
-      return updateFunction.get(query).then((results) => {
-        assert.equal(results.docs[0].id, 'documentId');
-      });
-    },
-    begin(),
-    query(),
-    commit());
+    return runTransaction(
+      updateFunction => {
+        let query = firestore.collection('col').where('foo', '==', 'bar');
+        return updateFunction.get(query).then(results => {
+          assert.equal(results.docs[0].id, 'documentId');
+        });
+      },
+      begin(),
+      query(),
+      commit()
+    );
   });
 
   it('support create', function() {
     let create = {
       currentDocument: {
-        exists: false
+        exists: false,
       },
       update: {
         fields: {},
-        name: DOCUMENT_NAME
-      }
+        name: DOCUMENT_NAME,
+      },
     };
 
-    return runTransaction((updateFunction) => {
-      updateFunction.create(docRef, {});
-      return Promise.resolve();
-    },
-    begin(),
-    commit(null, [create]));
+    return runTransaction(
+      updateFunction => {
+        updateFunction.create(docRef, {});
+        return Promise.resolve();
+      },
+      begin(),
+      commit(null, [create])
+    );
   });
 
   it('support update', function() {
     let update = {
       currentDocument: {
-        exists: true
+        exists: true,
       },
       update: {
         fields: {
@@ -464,27 +522,29 @@ describe('transaction operations', function() {
               fields: {
                 b: {
                   valueType: 'stringValue',
-                  stringValue: 'c'
-                }
-              }
-            }
-          }
+                  stringValue: 'c',
+                },
+              },
+            },
+          },
         },
-        name: DOCUMENT_NAME
+        name: DOCUMENT_NAME,
       },
       updateMask: {
-        fieldPaths: ['a.b']
-      }
+        fieldPaths: ['a.b'],
+      },
     };
 
-    return runTransaction((updateFunction) => {
-      updateFunction.update(docRef, { 'a.b': 'c'});
-      updateFunction.update(docRef, 'a.b', 'c');
-      updateFunction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
-      return Promise.resolve();
-    },
-    begin(),
-    commit(null, [update, update, update]));
+    return runTransaction(
+      updateFunction => {
+        updateFunction.update(docRef, {'a.b': 'c'});
+        updateFunction.update(docRef, 'a.b', 'c');
+        updateFunction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
+        return Promise.resolve();
+      },
+      begin(),
+      commit(null, [update, update, update])
+    );
   });
 
   it('support set', function() {
@@ -493,19 +553,21 @@ describe('transaction operations', function() {
         fields: {
           'a.b': {
             valueType: 'stringValue',
-            stringValue: 'c'
-          }
+            stringValue: 'c',
+          },
         },
-        name: DOCUMENT_NAME
-      }
+        name: DOCUMENT_NAME,
+      },
     };
 
-    return runTransaction((updateFunction) => {
-      updateFunction.set(docRef, {'a.b': 'c'});
-      return Promise.resolve();
-    },
-    begin(),
-    commit(null, [set]));
+    return runTransaction(
+      updateFunction => {
+        updateFunction.set(docRef, {'a.b': 'c'});
+        return Promise.resolve();
+      },
+      begin(),
+      commit(null, [set])
+    );
   });
 
   it('support set with merge', function() {
@@ -514,51 +576,55 @@ describe('transaction operations', function() {
         fields: {
           'a.b': {
             valueType: 'stringValue',
-            stringValue: 'c'
-          }
+            stringValue: 'c',
+          },
         },
-        name: DOCUMENT_NAME
+        name: DOCUMENT_NAME,
       },
       updateMask: {
-        fieldPaths: ['`a.b`']
-      }
+        fieldPaths: ['`a.b`'],
+      },
     };
 
-    return runTransaction((updateFunction) => {
-      updateFunction.set(docRef, {'a.b': 'c'}, {merge: true});
-      return Promise.resolve();
-    },
-    begin(),
-    commit(null, [set]));
+    return runTransaction(
+      updateFunction => {
+        updateFunction.set(docRef, {'a.b': 'c'}, {merge: true});
+        return Promise.resolve();
+      },
+      begin(),
+      commit(null, [set])
+    );
   });
 
   it('support delete', function() {
     let remove = {
-      delete: DOCUMENT_NAME
+      delete: DOCUMENT_NAME,
     };
 
-    return runTransaction((updateFunction) => {
-      updateFunction.delete(docRef);
-      return Promise.resolve();
-    },
-    begin(),
-    commit(null, [remove]));
+    return runTransaction(
+      updateFunction => {
+        updateFunction.delete(docRef);
+        return Promise.resolve();
+      },
+      begin(),
+      commit(null, [remove])
+    );
   });
 
   it('support multiple writes', function() {
     let remove = {
-      delete: DOCUMENT_NAME
+      delete: DOCUMENT_NAME,
     };
 
     let set = {
       update: {
         fields: {},
-        name: DOCUMENT_NAME
-      }
+        name: DOCUMENT_NAME,
+      },
     };
 
     return runTransaction(
-      (updateFunction) => {
+      updateFunction => {
         updateFunction.delete(docRef).set(docRef, {});
         return Promise.resolve();
       },

@@ -32,10 +32,6 @@ let DocumentReference;
  */
 let Query;
 
-/** Injected. */
-let validate;
-
-
 /**
  * A reference to a transaction.
  *
@@ -86,19 +82,22 @@ class Transaction {
    */
   get(refOrQuery) {
     if (!this._writeBatch.isEmpty) {
-      throw new Error('Firestore transactions require all reads to be ' +
-          'executed before all writes.');
+      throw new Error(
+        'Firestore transactions require all reads to be ' +
+          'executed before all writes.'
+      );
     }
 
     if (is.instance(refOrQuery, DocumentReference)) {
-      return this._firestore.getAll_(
-          [refOrQuery], { transactionId: this._transactionId }).then((res) => {
-            return Promise.resolve(res[0]);
-          });
+      return this._firestore
+        .getAll_([refOrQuery], {transactionId: this._transactionId})
+        .then(res => {
+          return Promise.resolve(res[0]);
+        });
     }
 
     if (is.instance(refOrQuery, Query)) {
-      return refOrQuery._get({ transactionId: this._transactionId});
+      return refOrQuery._get({transactionId: this._transactionId});
     }
 
     throw new Error('Argument "refOrQuery" must be a DocumentRef or a Query.');
@@ -201,8 +200,11 @@ class Transaction {
    * });
    */
   update(documentRef, dataOrField, preconditionOrValues) {
-    preconditionOrValues = Array.prototype.slice.call(arguments, 1);
-    this._writeBatch.update(documentRef, ...preconditionOrValues);
+    preconditionOrValues = Array.prototype.slice.call(arguments, 2);
+    this._writeBatch.update.apply(
+      this._writeBatch,
+      [documentRef, dataOrField].concat(preconditionOrValues)
+    );
     return this;
   }
 
@@ -248,18 +250,20 @@ class Transaction {
     if (this._previousTransaction) {
       request.options = {
         readWrite: {
-          retryTransaction: this._previousTransaction._transactionId
-        }
+          retryTransaction: this._previousTransaction._transactionId,
+        },
       };
     }
 
-    return this._firestore.request(
+    return this._firestore
+      .request(
         this._api.Firestore.beginTransaction.bind(this._api.Firestore),
         request,
         /* allowRetries= */ true
-    ).then((resp) => {
-      this._transactionId = resp.transaction;
-    });
+      )
+      .then(resp => {
+        this._transactionId = resp.transaction;
+      });
   }
 
   /**
@@ -269,7 +273,7 @@ class Transaction {
    * @return {Promise} An empty Promise.
    */
   commit() {
-    return this._writeBatch.commit_({ transactionId: this._transactionId });
+    return this._writeBatch.commit_({transactionId: this._transactionId});
   }
 
   /**
@@ -281,28 +285,25 @@ class Transaction {
   rollback() {
     let request = {
       database: this._firestore.formattedName,
-      transaction: this._transactionId
+      transaction: this._transactionId,
     };
 
     return this._firestore.request(
-        this._api.Firestore.rollback.bind(this._api.Firestore),
-        request
+      this._api.Firestore.rollback.bind(this._api.Firestore),
+      request
     );
   }
 }
 
-
-module.exports = (FirestoreType) => {
+module.exports = FirestoreType => {
   let reference = require('./reference')(FirestoreType);
   DocumentReference = reference.DocumentReference;
   Query = reference.Query;
-  let document = require('./document.js')(
-      FirestoreType, DocumentReference
-  );
-  validate = require('./validate.js')({
+  let document = require('./document.js')(FirestoreType, DocumentReference);
+  require('./validate.js')({
     Document: document.validateDocumentData,
     DocumentReference: reference.validateDocumentReference,
-    Precondition: document.validatePrecondition
+    Precondition: document.validatePrecondition,
   });
   return Transaction;
 };

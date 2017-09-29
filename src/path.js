@@ -27,8 +27,7 @@ const validate = require('./validate')();
  *
  * @type {RegExp}
  */
-const RESOURCE_PATH_RE =
-    /^projects\/([^\/]*)\/databases\/([^\/]*)(?:\/documents\/)?(.*)$/;
+const RESOURCE_PATH_RE = /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?(.*)$/;
 
 /**
  * A regular expression to verify whether a field name can be passed to the
@@ -45,8 +44,7 @@ const UNESCAPED_FIELD_NAME_RE = /^[_a-zA-Z][_a-zA-Z0-9]*$/;
  *
  * @type {RegExp}
  */
-const FIELD_PATH_RE = /^[^*~/\[\]]+$/;
-
+const FIELD_PATH_RE = /^[^*~/[\]]+$/;
 
 /**
  * An abstract class representing a Firestore path.
@@ -61,10 +59,12 @@ class Path {
    * Creates a new Path with the given segments.
    *
    * @protected
-   * @param {...string} segments - Sequence of parts of a path.
+   * @param {...string|string[]} segments - Sequence of parts of a path.
    */
-  constructor(...segments) {
-    segments = Array.prototype.slice.call(arguments);
+  constructor(segments) {
+    segments = is.array(segments)
+      ? segments
+      : Array.prototype.slice.call(arguments);
 
     /**
      * @protected
@@ -204,12 +204,15 @@ class ResourcePath extends Path {
    *
    * @param {string} projectId - The Firestore project id.
    * @param {string} databaseId - The Firestore database id.
-   * @param {...string} segments - Sequence of names of the parts of the path.
+   * @param {...string|string[]} segments - Sequence of names of the parts of
+   * the path.
    */
   constructor(projectId, databaseId, segments) {
-    segments = Array.prototype.slice.call(arguments, 2);
+    segments = is.array(segments)
+      ? segments
+      : Array.prototype.slice.call(arguments, 2);
 
-    super(...segments);
+    super(segments);
 
     /**
      * @type {string}
@@ -349,8 +352,12 @@ class ResourcePath extends Path {
    * @return {string} The representation as expected by the API.
    */
   canonicalString() {
-    let components = ['projects', this._projectId, 'databases',
-      this._databaseId];
+    let components = [
+      'projects',
+      this._projectId,
+      'databases',
+      this._databaseId,
+    ];
     if (this.segments.length > 0) {
       components = components.concat('documents', this.segments);
     }
@@ -369,7 +376,7 @@ class ResourcePath extends Path {
    * @return {firestore.ResourcePath} The newly created ResourcePath.
    */
   construct(segments) {
-    return new ResourcePath(this._projectId, this._databaseId, ...segments);
+    return new ResourcePath(this._projectId, this._databaseId, segments);
   }
 
   /**
@@ -410,7 +417,8 @@ class FieldPath extends Path {
    * Constructs a Firestore Field Path.
    *
    * @public
-   * @param {...string} segments - Sequence of field names that form this path.
+   * @param {...string|string[]} segments - Sequence of field names that form
+   * this path.
    *
    * @example
    * let query = firestore.collection('col');
@@ -425,13 +433,15 @@ class FieldPath extends Path {
   constructor(segments) {
     validate.minNumberOfArguments('FieldPath', arguments, 1);
 
-    segments = Array.prototype.slice.call(arguments);
+    segments = is.array(segments)
+      ? segments
+      : Array.prototype.slice.call(arguments);
 
     for (let i = 0; i < segments.length; ++i) {
       validate.isString(i, segments[i]);
     }
 
-    super(...segments);
+    super(segments);
   }
 
   /**
@@ -487,8 +497,9 @@ class FieldPath extends Path {
   static fromArgument(fieldPath) {
     // validateFieldPath() is used in all public API entry points to validate
     // that fromArgument() is only called with a Field Path or a string.
-    return fieldPath instanceof FieldPath ? fieldPath :
-        new FieldPath(...fieldPath.split('.'));
+    return fieldPath instanceof FieldPath
+      ? fieldPath
+      : new FieldPath(fieldPath.split('.'));
   }
 
   /**
@@ -500,11 +511,12 @@ class FieldPath extends Path {
    */
   canonicalString() {
     return this.segments
-        .map((str) => {
-          return UNESCAPED_FIELD_NAME_RE.test(str) ? str :
-              '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
-        })
-        .join('.');
+      .map(str => {
+        return UNESCAPED_FIELD_NAME_RE.test(str)
+          ? str
+          : '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
+      })
+      .join('.');
   }
 
   /**
@@ -530,7 +542,7 @@ class FieldPath extends Path {
    * @return {firestore.ResourcePath} The newly created FieldPath.
    */
   construct(segments) {
-    return new FieldPath(...segments);
+    return new FieldPath(segments);
   }
 }
 
@@ -542,4 +554,4 @@ class FieldPath extends Path {
  */
 FieldPath._DOCUMENT_ID = new FieldPath('__name__');
 
-module.exports = { FieldPath, ResourcePath };
+module.exports = {FieldPath, ResourcePath};

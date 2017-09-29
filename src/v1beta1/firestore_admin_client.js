@@ -23,16 +23,12 @@
  * The only allowed edits are to method and file documentation. A 3-way
  * merge preserves those additions if the generated source changes.
  */
-/* TODO: introduce line-wrapping so that it never exceeds the limit. */
-/* jscs: disable maximumLineLength */
 'use strict';
 
 var configData = require('./firestore_admin_client_config');
 var extend = require('extend');
 var gax = require('google-gax');
-var googleProtoFiles = require('google-proto-files');
 var path = require('path');
-var protobuf = require('protobufjs');
 
 var SERVICE_ADDRESS = 'firestore.googleapis.com';
 
@@ -41,10 +37,7 @@ var DEFAULT_SERVICE_PORT = 443;
 var CODE_GEN_NAME_VERSION = 'gapic/0.0.5';
 
 var PAGE_DESCRIPTORS = {
-  listIndexes: new gax.PageDescriptor(
-      'pageToken',
-      'nextPageToken',
-      'indexes')
+  listIndexes: new gax.PageDescriptor('pageToken', 'nextPageToken', 'indexes'),
 };
 
 /**
@@ -53,7 +46,7 @@ var PAGE_DESCRIPTORS = {
  */
 var ALL_SCOPES = [
   'https://www.googleapis.com/auth/cloud-platform',
-  'https://www.googleapis.com/auth/datastore'
+  'https://www.googleapis.com/auth/datastore',
 ];
 
 /**
@@ -105,15 +98,16 @@ var ALL_SCOPES = [
  * @class
  */
 function FirestoreAdminClient(gaxGrpc, loadedProtos, opts) {
-  opts = extend({
-    servicePath: SERVICE_ADDRESS,
-    port: DEFAULT_SERVICE_PORT,
-    clientConfig: {}
-  }, opts);
+  opts = extend(
+    {
+      servicePath: SERVICE_ADDRESS,
+      port: DEFAULT_SERVICE_PORT,
+      clientConfig: {},
+    },
+    opts
+  );
 
-  var googleApiClient = [
-    'gl-node/' + process.versions.node
-  ];
+  var googleApiClient = ['gl-node/' + process.versions.node];
   if (opts.libName && opts.libVersion) {
     googleApiClient.push(opts.libName + '/' + opts.libVersion);
   }
@@ -124,22 +118,24 @@ function FirestoreAdminClient(gaxGrpc, loadedProtos, opts) {
   );
 
   var defaults = gaxGrpc.constructSettings(
-      'google.firestore.admin.v1beta1.FirestoreAdmin',
-      configData,
-      opts.clientConfig,
-      {'x-goog-api-client': googleApiClient.join(' ')});
+    'google.firestore.admin.v1beta1.FirestoreAdmin',
+    configData,
+    opts.clientConfig,
+    {'x-goog-api-client': googleApiClient.join(' ')}
+  );
 
   var self = this;
 
   this.auth = gaxGrpc.auth;
   var firestoreAdminStub = gaxGrpc.createStub(
-      loadedProtos.google.firestore.admin.v1beta1.FirestoreAdmin,
-      opts);
+    loadedProtos.google.firestore.admin.v1beta1.FirestoreAdmin,
+    opts
+  );
   var firestoreAdminStubMethods = [
     'createIndex',
     'listIndexes',
     'getIndex',
-    'deleteIndex'
+    'deleteIndex',
   ];
   firestoreAdminStubMethods.forEach(function(methodName) {
     self['_' + methodName] = gax.createApiCall(
@@ -150,17 +146,20 @@ function FirestoreAdminClient(gaxGrpc, loadedProtos, opts) {
         };
       }),
       defaults[methodName],
-      PAGE_DESCRIPTORS[methodName]);
+      PAGE_DESCRIPTORS[methodName]
+    );
   });
 }
 
 // Path templates
 
 var DATABASE_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}');
+  'projects/{project}/databases/{database}'
+);
 
 var INDEX_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}/indexes/{index}');
+  'projects/{project}/databases/{database}/indexes/{index}'
+);
 
 /**
  * Returns a fully-qualified database resource name string.
@@ -171,7 +170,7 @@ var INDEX_PATH_TEMPLATE = new gax.PathTemplate(
 FirestoreAdminClient.prototype.databasePath = function(project, database) {
   return DATABASE_PATH_TEMPLATE.render({
     project: project,
-    database: database
+    database: database,
   });
 };
 
@@ -186,7 +185,7 @@ FirestoreAdminClient.prototype.indexPath = function(project, database, index) {
   return INDEX_PATH_TEMPLATE.render({
     project: project,
     database: database,
-    index: index
+    index: index,
   });
 };
 
@@ -196,7 +195,9 @@ FirestoreAdminClient.prototype.indexPath = function(project, database, index) {
  *   A fully-qualified path representing a database resources.
  * @returns {String} - A string representing the project.
  */
-FirestoreAdminClient.prototype.matchProjectFromDatabaseName = function(databaseName) {
+FirestoreAdminClient.prototype.matchProjectFromDatabaseName = function(
+  databaseName
+) {
   return DATABASE_PATH_TEMPLATE.match(databaseName).project;
 };
 
@@ -206,7 +207,9 @@ FirestoreAdminClient.prototype.matchProjectFromDatabaseName = function(databaseN
  *   A fully-qualified path representing a database resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreAdminClient.prototype.matchDatabaseFromDatabaseName = function(databaseName) {
+FirestoreAdminClient.prototype.matchDatabaseFromDatabaseName = function(
+  databaseName
+) {
   return DATABASE_PATH_TEMPLATE.match(databaseName).database;
 };
 
@@ -226,7 +229,9 @@ FirestoreAdminClient.prototype.matchProjectFromIndexName = function(indexName) {
  *   A fully-qualified path representing a index resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreAdminClient.prototype.matchDatabaseFromIndexName = function(indexName) {
+FirestoreAdminClient.prototype.matchDatabaseFromIndexName = function(
+  indexName
+) {
   return INDEX_PATH_TEMPLATE.match(indexName).database;
 };
 
@@ -309,7 +314,11 @@ FirestoreAdminClient.prototype.getProjectId = function(callback) {
  *     console.error(err);
  * });
  */
-FirestoreAdminClient.prototype.createIndex = function(request, options, callback) {
+FirestoreAdminClient.prototype.createIndex = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -406,7 +415,11 @@ FirestoreAdminClient.prototype.createIndex = function(request, options, callback
  *         console.error(err);
  *     });
  */
-FirestoreAdminClient.prototype.listIndexes = function(request, options, callback) {
+FirestoreAdminClient.prototype.listIndexes = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -470,7 +483,11 @@ FirestoreAdminClient.prototype.listIndexesStream = function(request, options) {
     options = {};
   }
 
-  return PAGE_DESCRIPTORS.listIndexes.createStream(this._listIndexes, request, options);
+  return PAGE_DESCRIPTORS.listIndexes.createStream(
+    this._listIndexes,
+    request,
+    options
+  );
 };
 
 /**
@@ -550,7 +567,11 @@ FirestoreAdminClient.prototype.getIndex = function(request, options, callback) {
  *     console.error(err);
  * });
  */
-FirestoreAdminClient.prototype.deleteIndex = function(request, options, callback) {
+FirestoreAdminClient.prototype.deleteIndex = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -568,9 +589,10 @@ function FirestoreAdminClientBuilder(gaxGrpc) {
   }
 
   var firestoreAdminStubProtos = gaxGrpc.loadProto(
-    path.join(__dirname, '..', '..', 'protos'), 'google/firestore/admin/v1beta1/firestore_admin.proto');
+    path.join(__dirname, '..', '..', 'protos'),
+    'google/firestore/admin/v1beta1/firestore_admin.proto'
+  );
   extend(this, firestoreAdminStubProtos.google.firestore.admin.v1beta1);
-
 
   /**
    * Build a new instance of {@link FirestoreAdminClient}.

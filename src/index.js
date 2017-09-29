@@ -173,7 +173,7 @@ class Firestore extends commonGrpc.Service {
       //                'firestore.proto'),
       // }
       protoServices: {},
-      packageJson: require('../package.json')
+      packageJson: require('../package.json'),
     };
 
     options = extend({}, options, {
@@ -202,7 +202,7 @@ class Firestore extends commonGrpc.Service {
      * @package
      */
     this.api = {
-      Firestore: v1beta1(options).firestoreClient(options)
+      Firestore: v1beta1(options).firestoreClient(options),
     };
 
     this._referencePath = new ResourcePath('{{projectId}}', '(default)');
@@ -323,16 +323,22 @@ class Firestore extends commonGrpc.Service {
 
     if (is.string(documentOrName)) {
       document.ref = new DocumentReference(
-          this, ResourcePath.fromSlashSeparatedString(documentOrName));
+        this,
+        ResourcePath.fromSlashSeparatedString(documentOrName)
+      );
       document.readTime = DocumentSnapshot.toISOTime(readTime);
     } else {
       document.ref = new DocumentReference(
-          this, ResourcePath.fromSlashSeparatedString(documentOrName.name));
+        this,
+        ResourcePath.fromSlashSeparatedString(documentOrName.name)
+      );
       document.fieldsProto = documentOrName.fields || {};
-      document.createTime =
-          DocumentSnapshot.toISOTime(documentOrName.createTime);
-      document.updateTime =
-          DocumentSnapshot.toISOTime(documentOrName.updateTime);
+      document.createTime = DocumentSnapshot.toISOTime(
+        documentOrName.createTime
+      );
+      document.updateTime = DocumentSnapshot.toISOTime(
+        documentOrName.updateTime
+      );
       document.readTime = DocumentSnapshot.toISOTime(readTime);
     }
     return document.build();
@@ -392,8 +398,11 @@ class Firestore extends commonGrpc.Service {
 
     if (is.defined(transactionOptions)) {
       validate.isObject('transactionOptions', transactionOptions);
-      validate.isOptionalInteger('transactionOptions.maxAttempts',
-          transactionOptions.maxAttempts, 1);
+      validate.isOptionalInteger(
+        'transactionOptions.maxAttempts',
+        transactionOptions.maxAttempts,
+        1
+      );
 
       attemptsRemaining = transactionOptions.maxAttempts || attemptsRemaining;
       previousTransaction = transactionOptions.previousTransaction;
@@ -404,36 +413,52 @@ class Firestore extends commonGrpc.Service {
 
     --attemptsRemaining;
 
-    return transaction.begin().then(() => {
-      let promise = updateFunction(transaction);
-      result = is.instanceof(promise, Promise) ? promise : Promise.reject(
-          new Error(
-              'You must return a Promise in your transaction()-callback.'));
-      return result.catch(err => {
-        Firestore.log('Firestore.runTransaction',
-            'Rolling back transaction after callback error:', err);
-        // Rollback the transaction and return the failed result.
-        return transaction.rollback().then(() => {
-          return result;
-        });
-      });
-    }).then(() => {
-      return transaction.commit().catch(err => {
-        if (attemptsRemaining > 0) {
-          Firestore.log('Firestore.runTransaction',
-              `Retrying transaction after error: ${JSON.stringify(err)}.`);
-          return this.runTransaction(updateFunction, {
-            previousTransaction: transaction,
-            maxAttempts: attemptsRemaining
+    return transaction
+      .begin()
+      .then(() => {
+        let promise = updateFunction(transaction);
+        result = is.instanceof(promise, Promise)
+          ? promise
+          : Promise.reject(
+              new Error(
+                'You must return a Promise in your transaction()-callback.'
+              )
+            );
+        return result.catch(err => {
+          Firestore.log(
+            'Firestore.runTransaction',
+            'Rolling back transaction after callback error:',
+            err
+          );
+          // Rollback the transaction and return the failed result.
+          return transaction.rollback().then(() => {
+            return result;
           });
-        }
-        Firestore.log('Firestore.runTransaction',
-            'Exhausted transaction retries, returning error: %s', err);
-        return Promise.reject(err);
+        });
+      })
+      .then(() => {
+        return transaction.commit().catch(err => {
+          if (attemptsRemaining > 0) {
+            Firestore.log(
+              'Firestore.runTransaction',
+              `Retrying transaction after error: ${JSON.stringify(err)}.`
+            );
+            return this.runTransaction(updateFunction, {
+              previousTransaction: transaction,
+              maxAttempts: attemptsRemaining,
+            });
+          }
+          Firestore.log(
+            'Firestore.runTransaction',
+            'Exhausted transaction retries, returning error: %s',
+            err
+          );
+          return Promise.reject(err);
+        });
+      })
+      .then(() => {
+        return result;
       });
-    }).then(() => {
-      return result;
-    });
   }
 
   /**
@@ -477,8 +502,9 @@ class Firestore extends commonGrpc.Service {
    * });
    */
   getAll(documents) {
-    documents = is.array(arguments[0]) ? arguments[0].slice()
-        : Array.prototype.slice.call(arguments);
+    documents = is.array(arguments[0])
+      ? arguments[0].slice()
+      : Array.prototype.slice.call(arguments);
 
     for (let i = 0; i < documents.length; ++i) {
       validate.isDocumentReference(i, documents[i]);
@@ -506,7 +532,7 @@ class Firestore extends commonGrpc.Service {
     const retrievedDocuments = new Map();
 
     let request = {
-      database: this.formattedName
+      database: this.formattedName,
     };
 
     for (let docRef of docRefs) {
@@ -520,56 +546,81 @@ class Firestore extends commonGrpc.Service {
 
     let self = this;
 
-    return self.readStream(
+    return self
+      .readStream(
         this.api.Firestore.batchGetDocuments.bind(this.api.Firestore),
         request,
         /* allowRetries= */ true
-    ).then(stream => {
-      return new Promise((resolve, reject) => {
-        stream.on('error', (err) => {
-          Firestore.log('Firestore.getAll_', 'GetAll failed with error:', err);
-          reject(err);
-        }).on('data', response => {
-          try {
-            let document;
+      )
+      .then(stream => {
+        return new Promise((resolve, reject) => {
+          stream
+            .on('error', err => {
+              Firestore.log(
+                'Firestore.getAll_',
+                'GetAll failed with error:',
+                err
+              );
+              reject(err);
+            })
+            .on('data', response => {
+              try {
+                let document;
 
-            if (response.found) {
-              Firestore.log('Firestore.getAll_',
-                  'Received document: %s', response.found.name);
-              document = self.snapshot_(response.found, response.readTime);
-            } else {
-              Firestore.log('Firestore.getAll_',
-                  'Document missing: %s', response.missing);
-              document = self.snapshot_(response.missing, response.readTime);
-            }
+                if (response.found) {
+                  Firestore.log(
+                    'Firestore.getAll_',
+                    'Received document: %s',
+                    response.found.name
+                  );
+                  document = self.snapshot_(response.found, response.readTime);
+                } else {
+                  Firestore.log(
+                    'Firestore.getAll_',
+                    'Document missing: %s',
+                    response.missing
+                  );
+                  document = self.snapshot_(
+                    response.missing,
+                    response.readTime
+                  );
+                }
 
-            let path = document.ref.path;
-            retrievedDocuments.set(path, document);
-          } catch (err) {
-            Firestore.log('Firestore.getAll_',
-                'GetAll failed with exception:', err);
-            reject(err);
-          }
-        }).on('end', () => {
-          Firestore.log('Firestore.getAll_', 'Received %d results',
-              retrievedDocuments.size);
+                let path = document.ref.path;
+                retrievedDocuments.set(path, document);
+              } catch (err) {
+                Firestore.log(
+                  'Firestore.getAll_',
+                  'GetAll failed with exception:',
+                  err
+                );
+                reject(err);
+              }
+            })
+            .on('end', () => {
+              Firestore.log(
+                'Firestore.getAll_',
+                'Received %d results',
+                retrievedDocuments.size
+              );
 
-          // BatchGetDocuments doesn't preserve document order. We use the
-          // request order to sort the resulting documents.
-          const orderedDocuments = [];
-          for (let docRef of docRefs) {
-            let document = retrievedDocuments.get(docRef.path);
-            if (!is.defined(document)) {
-              reject(new Error(
-                  `Did not receive document for "${docRef.path}".`));
-            }
-            orderedDocuments.push(document);
-          }
-          resolve(orderedDocuments);
+              // BatchGetDocuments doesn't preserve document order. We use the
+              // request order to sort the resulting documents.
+              const orderedDocuments = [];
+              for (let docRef of docRefs) {
+                let document = retrievedDocuments.get(docRef.path);
+                if (!is.defined(document)) {
+                  reject(
+                    new Error(`Did not receive document for "${docRef.path}".`)
+                  );
+                }
+                orderedDocuments.push(document);
+              }
+              resolve(orderedDocuments);
+            });
+          stream.resume();
         });
-        stream.resume();
       });
-    });
   }
 
   /**
@@ -582,7 +633,7 @@ class Firestore extends commonGrpc.Service {
    */
   static autoId() {
     let chars =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let autoId = '';
     for (let i = 0; i < 20; i++) {
       autoId += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -601,14 +652,16 @@ class Firestore extends commonGrpc.Service {
     let self = this;
 
     function decorate() {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         let decoratedRequest = extend(true, {}, request);
-        decoratedRequest = common.util.replaceProjectIdToken(decoratedRequest,
-            self._referencePath.projectId);
+        decoratedRequest = common.util.replaceProjectIdToken(
+          decoratedRequest,
+          self._referencePath.projectId
+        );
 
         let decoratedGax = {otherArgs: {headers: {}}};
         decoratedGax.otherArgs.headers[CLOUD_RESOURCE_HEADER] =
-            self.formattedName;
+          self.formattedName;
 
         resolve({request: decoratedRequest, gax: decoratedGax});
       });
@@ -621,15 +674,25 @@ class Firestore extends commonGrpc.Service {
     return new Promise((resolve, reject) => {
       this.api.Firestore.getProjectId((err, projectId) => {
         if (err) {
-          Firestore.log('Firestore._decorateRequest',
-              'Failed to detect project ID: %s', err);
+          Firestore.log(
+            'Firestore._decorateRequest',
+            'Failed to detect project ID: %s',
+            err
+          );
           reject(err);
         } else {
-          Firestore.log('Firestore._decorateRequest',
-              'Detected project ID: %s', projectId);
+          Firestore.log(
+            'Firestore._decorateRequest',
+            'Detected project ID: %s',
+            projectId
+          );
           self._referencePath = new ResourcePath(
-              projectId, self._referencePath.databaseId);
-          decorate().then(resolve).catch(reject);
+            projectId,
+            self._referencePath.databaseId
+          );
+          decorate()
+            .then(resolve)
+            .catch(reject);
         }
       });
     });
@@ -669,25 +732,33 @@ class Firestore extends commonGrpc.Service {
 
     return new Promise(resolve => {
       setTimeout(resolve, currentDelay);
-    }).then(func).then(result => {
-      self._lastSuccessfulRequest = new Date().getTime();
-      return result;
-    }).catch(err => {
-      if (is.defined(err.code) && err.code !== GRPC_UNAVAILABLE) {
-        Firestore.log('Firestore._retry',
-            'Request failed with unrecoverable error:', err);
-        return Promise.reject(err);
-      }
-      if (attemptsRemaining === 0) {
-        Firestore.log('Firestore._retry', 'Request failed with error:', err);
-        return Promise.reject(err);
-      }
-      Firestore.log('Firestore._retry',
-          'Retrying request that failed with error:', err);
-      return self._retry(attemptsRemaining, func, nextDelay);
-    });
+    })
+      .then(func)
+      .then(result => {
+        self._lastSuccessfulRequest = new Date().getTime();
+        return result;
+      })
+      .catch(err => {
+        if (is.defined(err.code) && err.code !== GRPC_UNAVAILABLE) {
+          Firestore.log(
+            'Firestore._retry',
+            'Request failed with unrecoverable error:',
+            err
+          );
+          return Promise.reject(err);
+        }
+        if (attemptsRemaining === 0) {
+          Firestore.log('Firestore._retry', 'Request failed with error:', err);
+          return Promise.reject(err);
+        }
+        Firestore.log(
+          'Firestore._retry',
+          'Retrying request that failed with error:',
+          err
+        );
+        return self._retry(attemptsRemaining, func, nextDelay);
+      });
   }
-
 
   /**
    * Opens the provided stream and waits for it to become healthy. If an error
@@ -716,11 +787,14 @@ class Firestore extends commonGrpc.Service {
      */
     let endCalled = false;
 
-    return new Promise((resolve, reject)  => {
+    return new Promise((resolve, reject) => {
       const releaseStream = () => {
         if (errorReceived) {
-          Firestore.log('Firestore._initializeStream', 'Emit error:',
-              errorReceived);
+          Firestore.log(
+            'Firestore._initializeStream',
+            'Emit error:',
+            errorReceived
+          );
           resultStream.emit('error', errorReceived);
           errorReceived = null;
         } else if (!streamReleased) {
@@ -731,7 +805,9 @@ class Firestore extends commonGrpc.Service {
           if (endCalled) {
             setImmediate(() => {
               Firestore.log(
-                  'Firestore._initializeStream', 'Forwarding stream close');
+                'Firestore._initializeStream',
+                'Forwarding stream close'
+              );
               resultStream.emit('end');
             });
           }
@@ -753,7 +829,11 @@ class Firestore extends commonGrpc.Service {
       });
 
       resultStream.on('error', err => {
-        Firestore.log('Firestore._initializeStream', 'Received stream error:', err);
+        Firestore.log(
+          'Firestore._initializeStream',
+          'Received stream error:',
+          err
+        );
         // If we receive an error before we were able to receive any data,
         // reject this stream.
         if (!streamReleased) {
@@ -766,11 +846,16 @@ class Firestore extends commonGrpc.Service {
       });
 
       if (is.defined(request)) {
-        Firestore.log('Firestore._initializeStream', 'Sending request: %j',
-            request);
+        Firestore.log(
+          'Firestore._initializeStream',
+          'Sending request: %j',
+          request
+        );
         resultStream.write(request, 'utf-8', () => {
-          Firestore.log('Firestore.readWriteStream',
-              'Marking stream as healthy');
+          Firestore.log(
+            'Firestore.readWriteStream',
+            'Marking stream as healthy'
+          );
           releaseStream();
         });
       }
@@ -796,15 +881,21 @@ class Firestore extends commonGrpc.Service {
     return this._decorateRequest(request).then(decorated => {
       return this._retry(attempts, () => {
         return new Promise((resolve, reject) => {
-          Firestore.log('Firestore.request',
-              'Sending request: %j', decorated.request);
+          Firestore.log(
+            'Firestore.request',
+            'Sending request: %j',
+            decorated.request
+          );
           method(decorated.request, decorated.gax, (err, result) => {
             if (err) {
               Firestore.log('Firestore.request', 'Received error:', err);
               reject(err);
             } else {
-              Firestore.log('Firestore.request', 'Received response: %j',
-                  result);
+              Firestore.log(
+                'Firestore.request',
+                'Received response: %j',
+                result
+              );
               resolve(result);
             }
           });
@@ -836,12 +927,18 @@ class Firestore extends commonGrpc.Service {
       return this._retry(attempts, () => {
         return new Promise((resolve, reject) => {
           try {
-            Firestore.log('Firestore.readStream',
-                'Sending request: %j', decorated.request);
+            Firestore.log(
+              'Firestore.readStream',
+              'Sending request: %j',
+              decorated.request
+            );
             let stream = method(decorated.request, decorated.gax);
             let logger = through.obj(function(chunk, enc, callback) {
-              Firestore.log('Firestore.readStream',
-                  'Received response: %j', chunk);
+              Firestore.log(
+                'Firestore.readStream',
+                'Received response: %j',
+                chunk
+              );
               this.push(chunk);
               callback();
             });
@@ -886,17 +983,25 @@ class Firestore extends commonGrpc.Service {
 
           // The transform stream to assign the project ID.
           let transform = through.obj(function(chunk, encoding, callback) {
-                let decoratedChunk = extend(true, {}, chunk);
-                common.util.replaceProjectIdToken(decoratedChunk,
-                    self._referencePath.projectId);
-                Firestore.log('Firestore.readWriteStream',
-                        'Streaming request: %j', decoratedChunk);
-                requestStream.write(decoratedChunk, encoding, callback);
-              });
+            let decoratedChunk = extend(true, {}, chunk);
+            common.util.replaceProjectIdToken(
+              decoratedChunk,
+              self._referencePath.projectId
+            );
+            Firestore.log(
+              'Firestore.readWriteStream',
+              'Streaming request: %j',
+              decoratedChunk
+            );
+            requestStream.write(decoratedChunk, encoding, callback);
+          });
 
           let logger = through.obj(function(chunk, enc, callback) {
-            Firestore.log('Firestore.readWriteStream',
-                'Received response: %j', chunk);
+            Firestore.log(
+              'Firestore.readWriteStream',
+              'Received response: %j',
+              chunk
+            );
             this.push(chunk);
             callback();
           });
@@ -942,8 +1047,8 @@ function setLogFunction(logger) {
     let formattedMessage = util.format.apply(null, varargs);
     let time = new Date().toISOString();
     logger(
-        `Firestore (${libVersion}) ${time} [${methodName}]: ` +
-        formattedMessage);
+      `Firestore (${libVersion}) ${time} [${methodName}]: ` + formattedMessage
+    );
   };
 }
 
@@ -956,7 +1061,7 @@ DocumentSnapshot = document.DocumentSnapshot;
 GeoPoint = document.GeoPoint;
 validate = require('./validate.js')({
   DocumentReference: reference.validateDocumentReference,
-  ResourcePath: ResourcePath.validateResourcePath
+  ResourcePath: ResourcePath.validateResourcePath,
 });
 WriteBatch = require('./write-batch')(Firestore, DocumentReference).WriteBatch;
 Transaction = require('./transaction')(Firestore);

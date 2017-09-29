@@ -21,8 +21,8 @@ const grpc = require('grpc');
 const is = require('is');
 
 const Firestore = require('../');
-const DocumentReference = require('../src/reference')(Firestore).
-  DocumentReference;
+const DocumentReference = require('../src/reference')(Firestore)
+  .DocumentReference;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -30,7 +30,7 @@ Firestore.setLogFunction(() => {});
 function createInstance() {
   return new Firestore({
     projectId: 'test-project',
-    sslCreds: grpc.credentials.createInsecure()
+    sslCreds: grpc.credentials.createInsecure(),
   });
 }
 
@@ -52,8 +52,7 @@ describe('Collection interface', function() {
 
     assert.throws(() => {
       collectionRef.doc(false);
-    }, new RegExp('Argument "documentPath" is not a valid ResourcePath. ' +
-        'Path is not a string.'));
+    }, new RegExp('Argument "documentPath" is not a valid ResourcePath. ' + 'Path is not a string.'));
 
     assert.throws(() => {
       collectionRef.doc('doc/col');
@@ -84,33 +83,36 @@ describe('Collection interface', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       // Verify that the document name uses an auto-generated id.
       let docIdRe = new RegExp(
-        `${dbPrefix}/\\(default\\)/documents/collectionId/[a-zA-Z0-9]{20}`);
+        `${dbPrefix}/\\(default\\)/documents/collectionId/[a-zA-Z0-9]{20}`
+      );
       assert.ok(docIdRe.test(request.writes[0].update.name));
       delete request.writes[0].update.name;
 
       // Verify that the rest of the protobuf matches.
       assert.deepEqual(request, {
         database: dbPrefix + '/(default)',
-        writes: [{
-          update: {
-            fields: {}
-          }
-        }]
+        writes: [
+          {
+            update: {
+              fields: {},
+            },
+          },
+        ],
       });
 
       callback(null, {
         commitTime: {
           nanos: 0,
-          seconds: 0
+          seconds: 0,
         },
         writeResults: [
           {
             updateTime: {
               nanos: 0,
-              seconds: 0
-            }
-          }
-        ]
+              seconds: 0,
+            },
+          },
+        ],
       });
     };
 
@@ -119,7 +121,7 @@ describe('Collection interface', function() {
     let promise = collectionRef.add({});
     assert.ok(is.instance(promise, Promise));
 
-    return promise.then((documentRef) => {
+    return promise.then(documentRef => {
       assert.ok(is.instance(documentRef, DocumentReference));
       assert.equal(collectionRef.id, 'collectionId');
       assert.ok(documentRef.id.length, 20);
