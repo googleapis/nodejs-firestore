@@ -59,7 +59,7 @@
  *
  *   This object should have the same structure as [Precondition]{@link Precondition}
  *
- * @class
+ * @typedef Write
  * @see [google.firestore.v1beta1.Write definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var Write = {
@@ -78,7 +78,7 @@ var Write = {
  *
  *   This object should have the same structure as [FieldTransform]{@link FieldTransform}
  *
- * @class
+ * @typedef DocumentTransform
  * @see [google.firestore.v1beta1.DocumentTransform definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentTransform = {
@@ -96,7 +96,7 @@ var DocumentTransform = {
    *
    *   The number should be among the values of [ServerValue]{@link ServerValue}
    *
-   * @class
+   * @typedef FieldTransform
    * @see [google.firestore.v1beta1.DocumentTransform.FieldTransform definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
    */
   FieldTransform: {
@@ -140,7 +140,7 @@ var DocumentTransform = {
  *
  *   This object should have the same structure as [Value]{@link Value}
  *
- * @class
+ * @typedef WriteResult
  * @see [google.firestore.v1beta1.WriteResult definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var WriteResult = {
@@ -169,7 +169,7 @@ var WriteResult = {
  * @property {number[]} removedTargetIds
  *   A set of target IDs for targets that no longer match this document.
  *
- * @class
+ * @typedef DocumentChange
  * @see [google.firestore.v1beta1.DocumentChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentChange = {
@@ -198,7 +198,7 @@ var DocumentChange = {
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef DocumentDelete
  * @see [google.firestore.v1beta1.DocumentDelete definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentDelete = {
@@ -228,7 +228,7 @@ var DocumentDelete = {
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef DocumentRemove
  * @see [google.firestore.v1beta1.DocumentRemove definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentRemove = {
@@ -247,7 +247,7 @@ var DocumentRemove = {
  *   If different from the count of documents in the client that match, the
  *   client must manually determine which documents no longer match the target.
  *
- * @class
+ * @typedef ExistenceFilter
  * @see [google.firestore.v1beta1.ExistenceFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var ExistenceFilter = {

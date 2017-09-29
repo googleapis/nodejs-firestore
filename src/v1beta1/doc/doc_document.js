@@ -72,7 +72,7 @@
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef Document
  * @see [google.firestore.v1beta1.Document definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var Document = {
@@ -138,7 +138,7 @@ var Document = {
  *
  *   This object should have the same structure as [MapValue]{@link MapValue}
  *
- * @class
+ * @typedef Value
  * @see [google.firestore.v1beta1.Value definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var Value = {
@@ -153,7 +153,7 @@ var Value = {
  *
  *   This object should have the same structure as [Value]{@link Value}
  *
- * @class
+ * @typedef ArrayValue
  * @see [google.firestore.v1beta1.ArrayValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var ArrayValue = {
@@ -171,7 +171,7 @@ var ArrayValue = {
  *   in certain documented contexts. The map keys, represented as UTF-8, must
  *   not exceed 1,500 bytes and cannot be empty.
  *
- * @class
+ * @typedef MapValue
  * @see [google.firestore.v1beta1.MapValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var MapValue = {
