@@ -23,16 +23,12 @@
  * The only allowed edits are to method and file documentation. A 3-way
  * merge preserves those additions if the generated source changes.
  */
-/* TODO: introduce line-wrapping so that it never exceeds the limit. */
-/* jscs: disable maximumLineLength */
 'use strict';
 
 var configData = require('./firestore_client_config');
 var extend = require('extend');
 var gax = require('google-gax');
-var googleProtoFiles = require('google-proto-files');
 var path = require('path');
-var protobuf = require('protobufjs');
 
 var SERVICE_ADDRESS = 'firestore.googleapis.com';
 
