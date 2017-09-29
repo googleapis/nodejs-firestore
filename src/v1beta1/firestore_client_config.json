@@ -76,7 +76,7 @@
           "retry_params_name": "default"
         },
         "Listen": {
-          "timeout_millis": 300000,
+          "timeout_millis": 86400000,
           "retry_codes_name": "idempotent",
           "retry_params_name": "default"
         },
