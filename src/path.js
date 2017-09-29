@@ -31,7 +31,7 @@ const validate = require('./validate')();
  *
  * @type {RegExp}
  */
-const RESOURCE_PATH_RE = /^projects\/([^\/]*)\/databases\/([^\/]*)(?:\/documents\/)?(.*)$/;
+const RESOURCE_PATH_RE = /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?(.*)$/;
 
 /**
  * A regular expression to verify whether a field name can be passed to the
@@ -48,7 +48,7 @@ const UNESCAPED_FIELD_NAME_RE = /^[_a-zA-Z][_a-zA-Z0-9]*$/;
  *
  * @type {RegExp}
  */
-const FIELD_PATH_RE = /^[^*~/\[\]]+$/;
+const FIELD_PATH_RE = /^[^*~/[\]]+$/;
 
 /**
  * An abstract class representing a Firestore path.
