@@ -1731,15 +1731,6 @@ class Query {
         }
       }
 
-      // TODO(klimt): Add an implicit sort for any inequality filters that don't
-      // have explicit orders.
-      // The server augments the explicit sort order in certain documented
-      // cases. In these cases, the client's sort order and server's sort order
-      // may not match. This is considered acceptable behavior for now, since a)
-      // the client did not specify an explicit sort order, so the sort order is
-      // technically undefined, and b) it does not affect the actual results,
-      // because the client does not do any filtering based on sort order.
-
       return 0;
     };
   }
