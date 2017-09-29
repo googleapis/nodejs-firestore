@@ -77,7 +77,7 @@
     "lint": "repo-tools lint --cmd eslint -- src/ system-test/ test/",
     "prettier": "prettier --write src/*.js src/**/*.js test/*.js test/**/*.js system-test/*.js system-test/**/*.js",
     "publish-module": "node ../../scripts/publish.js firestore",
-    "system-test": "mocha system-test/*.js --no-timeouts",
+    "system-test": "repo-tools test run --cmd mocha -- system-test/*.js --no-timeouts",
     "test-no-cover": "repo-tools test run --cmd mocha -- test/*.js --no-timeouts",
     "test": "repo-tools test run --cmd npm -- run cover"
   },
