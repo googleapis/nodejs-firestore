@@ -141,7 +141,11 @@ jobs:
           name: Run system tests.
           command: npm run system-test
           environment:
+            # TODO: Figure out if both of these pairs are necessary.
             GOOGLE_APPLICATION_CREDENTIALS: .circleci/key.json
+            GCLOUD_PROJECT: grape-spaceship-123
+            GCLOUD_TESTS_KEY: .circleci/key.json
+            GCLOUD_TESTS_PROJECT_ID: grape-spaceship-123
       - run:
           name: Remove unencrypted key.
           command: rm .circleci/key.json
