@@ -805,7 +805,7 @@ class DocumentSnapshotBuilder {
  * @name DocumentSnapshot.DocumentSnapshotBuilder
  * @see DocumentSnapshotBuilder
  */
-DocumentSnapshot.Builder = DocumentSnapshotBuilder
+DocumentSnapshot.Builder = DocumentSnapshotBuilder;
 
 /**
  * A Firestore Document Mask contains the field paths affected by an update.
