@@ -17,6 +17,7 @@
 'use strict';
 
 let assert = require('assert');
+let Buffer = require('safe-buffer').Buffer;
 let is = require('is');
 
 let DocumentReference = require('../src/reference').DocumentReference;
@@ -177,7 +178,7 @@ describe('DocumentReference class', function() {
       emptyArray: [],
       nilValue: null,
       geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
-      bytesValue: new Buffer([0x01, 0x02]),
+      bytesValue: Buffer.from([0x01, 0x02]),
     };
     let ref = randomCol.doc('doc');
     return ref

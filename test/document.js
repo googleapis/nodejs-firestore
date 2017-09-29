@@ -17,6 +17,7 @@
 'use strict';
 
 const assert = require('assert');
+const Buffer = require('safe-buffer').Buffer;
 const extend = require('extend');
 const grpc = require('grpc');
 const is = require('is');
@@ -290,7 +291,7 @@ const allSupportedTypesJson = document(
   'bytesValue',
   {
     valueType: 'bytesValue',
-    bytesValue: new Buffer([0x1, 0x2]),
+    bytesValue: Buffer.from([0x1, 0x2]),
   }
 );
 
@@ -311,7 +312,7 @@ const allSupportedTypesObject = {
   arrayValue: ['foo', 42, 'bar'],
   nilValue: null,
   geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
-  bytesValue: new Buffer([0x1, 0x2]),
+  bytesValue: Buffer.from([0x1, 0x2]),
 };
 
 const defaultWriteResult = {
@@ -448,7 +449,7 @@ describe('serialize document', function() {
             'blob2',
             {
               valueType: 'bytesValue',
-              bytesValue: new Buffer([0, 1, 2]),
+              bytesValue: Buffer.from([0, 1, 2]),
             }
           )
         )
@@ -459,7 +460,7 @@ describe('serialize document', function() {
 
     return firestore.doc('collectionId/documentId').set({
       blob1: new Uint8Array([0, 1, 2]),
-      blob2: new Buffer([0, 1, 2]),
+      blob2: Buffer.from([0, 1, 2]),
     });
   });
 
