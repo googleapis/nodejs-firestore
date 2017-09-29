@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/*!
- * @module firestore/watch
- */
-
 'use strict';
 
 const assert = require('assert');

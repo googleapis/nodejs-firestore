@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/*!
- * @module firestore/reference
- */
-
 'use strict';
 
 const bun = require('bun');
