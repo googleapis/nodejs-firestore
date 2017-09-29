@@ -25,7 +25,6 @@ let DocumentSnapshot = require('../src/document')(DocumentReference)
   .DocumentSnapshot;
 
 let version = require('../package.json').version;
-let env = require('../../../system-test/env.js');
 let Firestore = require('../');
 
 Firestore.setLogFunction(console.log);
@@ -39,7 +38,7 @@ describe('Firestore class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -71,7 +70,7 @@ describe('CollectionReference class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -119,7 +118,7 @@ describe('DocumentReference class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -584,7 +583,7 @@ describe('Query class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -1041,7 +1040,7 @@ describe('Transaction class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -1154,7 +1153,7 @@ describe('WriteBatch class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -1251,7 +1250,7 @@ describe('QuerySnapshot class', function() {
   let querySnapshot;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
 
     let randomCol = getTestRoot(firestore);
     let ref1 = randomCol.doc('doc1');
