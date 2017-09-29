@@ -2229,25 +2229,4 @@ describe('Query comparator', function() {
       input.sort(comparator);
     }, /Trying to compare documents on fields that don't exist/);
   });
-
-  // TODO(klimt): Add this test back when we add implicit ordering.
-  /*
-   it('handles implicit ordering', function() {
-   const query = coll.where('foo', '<=', 5);
-
-   const input = [
-   snapshot(doc3, { foo: 2 }),
-   snapshot(doc4, { foo: 1 }),
-   snapshot(doc2, { foo: 2 }),
-   ];
-
-   const expected = [
-   snapshot(doc4, { foo: 1 }),
-   snapshot(doc2, { foo: 2 }),
-   snapshot(doc3, { foo: 2 }),
-   ];
-
-   testSort(query, input, expected);
-   });
-   */
 });

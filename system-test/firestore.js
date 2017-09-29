@@ -190,9 +190,11 @@ describe('DocumentReference class', function() {
       .then(doc => {
         let data = doc.data();
         assert.equal(
-          data.pathValue.formattedName,
-          allSupportedTypesObject.pathValue.formattedName
+          data.pathValue.path,
+          allSupportedTypesObject.pathValue.path
         );
+        delete data.pathValue;
+        delete allSupportedTypesObject.pathValue;
         assert.deepStrictEqual(data, allSupportedTypesObject);
       });
   });
