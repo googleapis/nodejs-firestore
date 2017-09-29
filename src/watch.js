@@ -528,7 +528,6 @@ class Watch {
               'Unexpected target ID sent by server'
             );
           } else if (change.targetChangeType === 'REMOVE') {
-            // TODO(klimt): Wrap this error up nicely.
             let code = 13;
             let message = 'internal error';
             if (change.cause) {
