@@ -1207,11 +1207,9 @@ describe('update document', function() {
           {foo: 'bar'},
           {lastUpdateTime: '1985-03-18T07:20:00.123000000Z'}
         ),
-      firestore
-        .doc('collectionId/documentId')
-        .update('foo', 'bar', {
-          lastUpdateTime: '1985-03-18T07:20:00.123000000Z',
-        }),
+      firestore.doc('collectionId/documentId').update('foo', 'bar', {
+        lastUpdateTime: '1985-03-18T07:20:00.123000000Z',
+      }),
     ]);
   });
 
