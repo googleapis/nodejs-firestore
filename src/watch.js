@@ -22,7 +22,6 @@
 
 const assert = require('assert');
 const rbtree = require('functional-red-black-tree');
-const is = require('is');
 const through = require('through2');
 
 /**

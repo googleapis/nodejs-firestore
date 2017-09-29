@@ -1143,6 +1143,7 @@ describe('Transaction class', function() {
         return ref.get();
       })
       .then(result => {
+        assert.equal(success, true);
         assert.equal(result.exists, false);
       });
   });
@@ -1239,6 +1240,7 @@ describe('WriteBatch class', function() {
         return ref.get();
       })
       .then(result => {
+        assert.equal(success, true);
         assert.equal(result.exists, false);
       });
   });
