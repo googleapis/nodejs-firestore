@@ -63,7 +63,7 @@ workflows:
               only: repo-migration
             tags:
               only: /^v[\d.]+$/
-     - publish_npm:
+      - publish_npm:
           requires:
             - system_tests
           filters:
