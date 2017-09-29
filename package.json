@@ -20,6 +20,7 @@
   "main": "./src/index.js",
   "files": [
     "src",
+    "protos",
     "AUTHORS",
     "CONTRIBUTORS",
     "COPYING"
