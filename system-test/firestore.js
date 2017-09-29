@@ -28,7 +28,7 @@ let version = require('../package.json').version;
 let Firestore = require('../');
 
 if (process.env.NODE_ENV === 'DEBUG') {
-  Firestore.setLogFunction(console.log);
+  Firestore.setLogFunction(console.log); // eslint-disable-line no-console
 }
 
 function getTestRoot(firestore) {
