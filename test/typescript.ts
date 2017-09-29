@@ -22,7 +22,6 @@ import Transaction = FirebaseFirestore.Transaction;
 import FieldPath = FirebaseFirestore.FieldPath;
 import QuerySnapshot = FirebaseFirestore.QuerySnapshot;
 import UpdateData = FirebaseFirestore.UpdateData;
-import WriteResult = FirebaseFirestore.WriteResult;
 import Query = FirebaseFirestore.Query;
 import DocumentChange = FirebaseFirestore.DocumentChange;
 import FieldValue = FirebaseFirestore.FieldValue;
@@ -98,12 +97,12 @@ xdescribe('firestore.d.ts', function() {
     batch = batch.update(docRef, new FieldPath('foo'), 'bar', precondition);
     batch = batch.delete(docRef);
     batch = batch.delete(docRef, precondition);
-    batch.commit().then((result: WriteResult[]) => {
+    batch.commit().then((result: FirebaseFirestore.WriteResult[]) => {
     });
   });
 
   it('has typings for WriteResult', () => {
-    docRef.set(documentData).then((result: WriteResult) => {
+    docRef.set(documentData).then((result: FirebaseFirestore.WriteResult) => {
       const writeTime: string = result.writeTime;
     });
   });
@@ -122,30 +121,38 @@ xdescribe('firestore.d.ts', function() {
     const subcollection: CollectionReference = docRef.collection('coll');
     docRef.get().then((snapshot: DocumentSnapshot) => {
     });
-    docRef.create(documentData).then((writeResult: WriteResult) => {
+    docRef.create(documentData).then(
+        (writeResult: FirebaseFirestore.WriteResult) => {
     });
-    docRef.set(documentData).then((writeResult: WriteResult) => {
+    docRef.set(documentData).then(
+        (writeResult: FirebaseFirestore.WriteResult) => {
     });
-    docRef.set(documentData, setOptions).then((writeResult: WriteResult) => {
+    docRef.set(documentData, setOptions).then(
+        (writeResult: FirebaseFirestore.WriteResult) => {
     });
-    docRef.update(updateData).then((writeResult: WriteResult) => {
+    docRef.update(updateData).then(
+        (writeResult: FirebaseFirestore.WriteResult) => {
     });
-    docRef.update(updateData, precondition).then((writeResult: WriteResult) => {
+    docRef.update(updateData, precondition).then(
+        (writeResult: FirebaseFirestore.WriteResult) => {
     });
-    docRef.update('foo', 'bar').then((writeResult: WriteResult) => {
+    docRef.update('foo', 'bar').then(
+        (writeResult: FirebaseFirestore.WriteResult) => {
     });
     docRef.update('foo', 'bar', precondition).then(
-        (writeResult: WriteResult) => {
+        (writeResult: FirebaseFirestore.WriteResult) => {
         });
     docRef.update(new FieldPath('foo'), 'bar').then(
-        (writeResult: WriteResult) => {
+        (writeResult: FirebaseFirestore.WriteResult) => {
         });
     docRef.update(new FieldPath('foo'), 'bar', precondition).then(
-        (writeResult: WriteResult) => {
+        (writeResult: FirebaseFirestore.WriteResult) => {
         });
-    docRef.delete().then((writeResult: WriteResult) => {
+    docRef.delete().then(
+        (writeResult: FirebaseFirestore.WriteResult) => {
     });
-    docRef.delete(precondition).then((writeResult: WriteResult) => {
+    docRef.delete(precondition).then(
+        (writeResult: FirebaseFirestore.WriteResult) => {
     });
     let unsubscribe: () => void = docRef.onSnapshot(
         (snapshot: DocumentSnapshot) => {
