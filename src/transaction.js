@@ -36,9 +36,6 @@ let DocumentReference;
  */
 let Query;
 
-/** Injected. */
-let validate;
-
 /**
  * A reference to a transaction.
  *
@@ -208,7 +205,10 @@ class Transaction {
    */
   update(documentRef, dataOrField, preconditionOrValues) {
     preconditionOrValues = Array.prototype.slice.call(arguments, 2);
-    this._writeBatch.update.apply(this._writeBatch, [documentRef, dataOrField].concat(preconditionOrValues));
+    this._writeBatch.update.apply(
+      this._writeBatch,
+      [documentRef, dataOrField].concat(preconditionOrValues)
+    );
     return this;
   }
 
@@ -304,7 +304,7 @@ module.exports = FirestoreType => {
   DocumentReference = reference.DocumentReference;
   Query = reference.Query;
   let document = require('./document.js')(FirestoreType, DocumentReference);
-  validate = require('./validate.js')({
+  require('./validate.js')({
     Document: document.validateDocumentData,
     DocumentReference: reference.validateDocumentReference,
     Precondition: document.validatePrecondition,
