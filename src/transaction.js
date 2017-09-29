@@ -18,17 +18,17 @@
 
 const is = require('is');
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.DocumentReference
+ * @see DocumentReference
  */
 let DocumentReference;
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.Query
+ * @see Query
  */
 let Query;
 
@@ -37,18 +37,17 @@ let Query;
  *
  * The Transaction object passed to a transaction's updateFunction provides
  * the methods to read and write data within the transaction context. See
- * [runTransaction()]{@link firestore.Firestore#runTransaction}.
+ * [runTransaction()]{@link Firestore#runTransaction}.
  *
- * @public
- * @alias firestore.Transaction
+ * @class
+ * @hideconstructor
  */
 class Transaction {
   /**
-   * @package
    * @hideconstructor
    *
-   * @param {firestore.Firestore} firestore - The Firestore Database client.
-   * @param {firestore.Transaction=} previousTransaction - If
+   * @param {Firestore} firestore - The Firestore Database client.
+   * @param {Transaction=} previousTransaction - If
    * available, the failed transaction that is being retried.
    */
   constructor(firestore, previousTransaction) {
@@ -63,9 +62,9 @@ class Transaction {
    * pessimistic lock on all returned documents.
    *
    * @public
-   * @param {firestore.DocumentReference|firestore.Query} refOrQuery - The
+   * @param {DocumentReference|Query} refOrQuery - The
    * document or query to return.
-   * @return {Promise} A Promise that resolves with a DocumentSnapshot or
+   * @returns {Promise} A Promise that resolves with a DocumentSnapshot or
    * QuerySnapshot for the returned documents.
    *
    * @example
@@ -105,14 +104,14 @@ class Transaction {
 
   /**
    * Create the document referred to by the provided
-   * [DocumentReference]{@link firestore.DocumentReference}. The operation will
+   * [DocumentReference]{@link DocumentReference}. The operation will
    * fail the transaction if a document exists at the specified location.
    *
    * @public
-   * @param {firestore.DocumentReference} documentRef - A reference to the
+   * @param {DocumentReference} documentRef - A reference to the
    * document to be created.
    * @param {DocumentData} data - The object data to serialize as the document.
-   * @return {firestore.Transaction} This Transaction instance. Used for
+   * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
    * @example
@@ -132,20 +131,20 @@ class Transaction {
 
   /**
    * Writes to the document referred to by the provided
-   * [DocumentReference]{@link firestore.DocumentReference}. If the document
+   * [DocumentReference]{@link DocumentReference}. If the document
    * does not exist yet, it will be created. If you pass
    * [SetOptions]{@link SetOptions}, the provided data can be merged into the
    * existing document.
    *
    * @public
-   * @param {firestore.DocumentReference} documentRef - A reference to the
+   * @param {DocumentReference} documentRef - A reference to the
    * document to be set.
    * @param {DocumentData} data - The object to serialize as the document.
    * @param {SetOptions=} options - An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() only replaces the
    * values specified in its data argument. Fields omitted from this set() call
    * remain untouched.
-   * @return {firestore.Transaction} This Transaction instance. Used for
+   * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
    * @example
@@ -162,7 +161,7 @@ class Transaction {
 
   /**
    * Updates fields in the document referred to by the provided
-   * [DocumentReference]{@link firestore.DocumentReference}. The update will
+   * [DocumentReference]{@link DocumentReference}. The update will
    * fail if applied to a document that does not exist.
    *
    * The update() method accepts either an object with field paths encoded as
@@ -175,16 +174,16 @@ class Transaction {
    * argument.
    *
    * @public
-   * @param {firestore.DocumentReference} documentRef - A reference to the
+   * @param {DocumentReference} documentRef - A reference to the
    * document to be updated.
-   * @param {UpdateData|string|firestore.FieldPath} dataOrField - An object
+   * @param {UpdateData|string|FieldPath} dataOrField - An object
    * containing the fields and values with which to update the document
    * or the path of the first field to update.
    * @param {
-   * ...(Precondition|*|string|firestore.FieldPath)} preconditionOrValues -
+   * ...(Precondition|*|string|FieldPath)} preconditionOrValues -
    * An alternating list of field paths and values to update or a Precondition
    * to to enforce on this update.
-   * @return {firestore.Transaction} This Transaction instance. Used for
+   * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
    * @example
@@ -210,10 +209,10 @@ class Transaction {
 
   /**
    * Deletes the document referred to by the provided [DocumentReference]
-   * {@link firestore.DocumentReference}.
+   * {@link DocumentReference}.
    *
    * @public
-   * @param {firestore.DocumentReference} documentRef - A reference to the
+   * @param {DocumentReference} documentRef - A reference to the
    * document to be deleted.
    * @param {Precondition=} precondition - A precondition to enforce for this
    * delete.
@@ -221,7 +220,7 @@ class Transaction {
    * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
    * transaction if the document doesn't exist or was last updated at a
    * different time.
-   * @return {firestore.Transaction} This Transaction instance. Used for
+   * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
    * @example
@@ -239,8 +238,7 @@ class Transaction {
   /**
    * Starts a transaction and obtains the transaction id from the server.
    *
-   * @package
-   * @return {Promise} An empty Promise.
+   * @returns {Promise} An empty Promise.
    */
   begin() {
     let request = {
@@ -269,8 +267,7 @@ class Transaction {
   /**
    * Commits all queued-up changes in this transaction and releases all locks.
    *
-   * @package
-   * @return {Promise} An empty Promise.
+   * @returns {Promise} An empty Promise.
    */
   commit() {
     return this._writeBatch.commit_({transactionId: this._transactionId});
@@ -279,8 +276,7 @@ class Transaction {
   /**
    * Releases all locks and rolls back this transaction.
    *
-   * @package
-   * @return {Promise} An empty Promise.
+   * @returns {Promise} An empty Promise.
    */
   rollback() {
     let request = {

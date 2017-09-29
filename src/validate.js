@@ -40,10 +40,9 @@ function formatPlural(num, str) {
  * inputs and may throw errors with custom validation messages for easier
  * diagnosis.
  *
- * @package
  * @param {Object.<string, function>} validators Mapping from types to
  * validator validators.
- * @return {Object.<string, function>} Map with validators following the naming
+ * @returns {Object.<string, function>} Map with validators following the naming
  * convention is{Type} and isOptional{Type}.
  */
 module.exports = validators => {
@@ -107,7 +106,7 @@ module.exports = validators => {
    * @param {Array.<*>} args - The array (or array-like structure) to verify.
    * @param {number} minSize - The minimum number of elements to enforce.
    * @throws if the expectation is not met.
-   * @return {boolean} 'true' when the minimum number of elements is available.
+   * @returns {boolean} 'true' when the minimum number of elements is available.
    */
   exports.minNumberOfArguments = (funcName, args, minSize) => {
     if (args.length < minSize) {
@@ -127,7 +126,7 @@ module.exports = validators => {
    * @param {Array.<*>} args - The array (or array-like structure) to verify.
    * @param {number} maxSize - The maximum number of elements to enforce.
    * @throws if the expectation is not met.
-   * @return {boolean} 'true' when only the maximum number of elements is
+   * @returns {boolean} 'true' when only the maximum number of elements is
    * specified.
    */
   exports.maxNumberOfArguments = (funcName, args, maxSize) => {

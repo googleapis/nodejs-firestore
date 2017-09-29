@@ -75,7 +75,7 @@
     "docs": "repo-tools exec -- jsdoc -c .jsdoc.js",
     "generate-scaffolding": "repo-tools generate all",
     "lint": "repo-tools lint --cmd eslint -- src/ system-test/ test/",
-    "prettier": "prettier --write src/*.js src/**/*.js test/*.js test/**/*.js system-test/*.js system-test/**/*.js",
+    "prettier": "repo-tools exec -- prettier --write src/*.js src/**/*.js test/*.js test/**/*.js system-test/*.js system-test/**/*.js",
     "publish-module": "node ../../scripts/publish.js firestore",
     "system-test": "repo-tools test run --cmd mocha -- system-test/*.js --no-timeouts",
     "test-no-cover": "repo-tools test run --cmd mocha -- test/*.js --no-timeouts",
