@@ -515,7 +515,7 @@ class DocumentReference {
 
     return watch.onSnapshot((readTime, docs) => {
       for (let document of docs()) {
-        if (document.ref.formattedName === this.formattedName) {
+        if (document.ref.path === this.path) {
           onNext(document);
           return;
         }
