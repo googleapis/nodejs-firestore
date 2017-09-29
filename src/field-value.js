@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/*!
- * @module firestore/fieldvalue
- */
-
 'use strict';
 
 /**
