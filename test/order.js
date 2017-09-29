@@ -17,6 +17,7 @@
 'use strict';
 
 const assert = require('assert');
+const Buffer = require('safe-buffer').Buffer;
 const grpc = require('grpc');
 
 const Firestore = require('../');
@@ -51,7 +52,7 @@ describe('Order', function() {
   }
 
   function blob(data) {
-    return wrap(new Buffer(data));
+    return wrap(Buffer.from(data));
   }
 
   function resource(pathString) {

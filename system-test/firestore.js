@@ -17,6 +17,7 @@
 'use strict';
 
 let assert = require('assert');
+let Buffer = require('safe-buffer').Buffer;
 let is = require('is');
 
 let DocumentReference = require('../src/reference').DocumentReference;
@@ -24,7 +25,6 @@ let DocumentSnapshot = require('../src/document')(DocumentReference)
   .DocumentSnapshot;
 
 let version = require('../package.json').version;
-let env = require('../../../system-test/env.js');
 let Firestore = require('../');
 
 Firestore.setLogFunction(console.log);
@@ -38,7 +38,7 @@ describe('Firestore class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -70,7 +70,7 @@ describe('CollectionReference class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -118,7 +118,7 @@ describe('DocumentReference class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -177,7 +177,7 @@ describe('DocumentReference class', function() {
       emptyArray: [],
       nilValue: null,
       geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
-      bytesValue: new Buffer([0x01, 0x02]),
+      bytesValue: Buffer.from([0x01, 0x02]),
     };
     let ref = randomCol.doc('doc');
     return ref
@@ -583,7 +583,7 @@ describe('Query class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -1040,7 +1040,7 @@ describe('Transaction class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -1142,6 +1142,7 @@ describe('Transaction class', function() {
         return ref.get();
       })
       .then(result => {
+        assert.equal(success, true);
         assert.equal(result.exists, false);
       });
   });
@@ -1152,7 +1153,7 @@ describe('WriteBatch class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -1238,6 +1239,7 @@ describe('WriteBatch class', function() {
         return ref.get();
       })
       .then(result => {
+        assert.equal(success, true);
         assert.equal(result.exists, false);
       });
   });
@@ -1248,7 +1250,7 @@ describe('QuerySnapshot class', function() {
   let querySnapshot;
 
   beforeEach(function() {
-    firestore = new Firestore(env);
+    firestore = new Firestore();
 
     let randomCol = getTestRoot(firestore);
     let ref1 = randomCol.doc('doc1');

@@ -642,12 +642,6 @@ describe('getAll() method', function() {
 });
 
 describe('FieldPath', function() {
-  let firestore;
-
-  beforeEach(function() {
-    firestore = createInstance();
-  });
-
   it('encodes field names', function() {
     let components = [['foo'], ['foo', 'bar'], ['.', '`'], ['\\']];
 
