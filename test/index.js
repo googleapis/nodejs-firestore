@@ -655,7 +655,7 @@ describe('FieldPath', function() {
 
     for (let i = 0; i < components.length; ++i) {
       assert.equal(
-        new Firestore.FieldPath(...components[i]).toString(),
+        new Firestore.FieldPath(components[i]).toString(),
         results[i]
       );
     }

@@ -467,9 +467,9 @@ class DocumentReference {
    */
   update(dataOrField, preconditionOrValues) {
     let writeBatch = new WriteBatch(this._firestore);
-    preconditionOrValues = Array.prototype.slice.call(arguments);
-    return writeBatch
-      .update(this, ...preconditionOrValues)
+    preconditionOrValues = Array.prototype.slice.call(arguments, 1);
+    return writeBatch.update
+      .apply(writeBatch, [this, dataOrField].concat(preconditionOrValues))
       .commit()
       .then(res => {
         return Promise.resolve(res.writeResults[0]);
@@ -1949,7 +1949,7 @@ function validateDocumentReference(value) {
 
 module.exports = FirestoreType => {
   Firestore = FirestoreType;
-  let document = require('./document.js')(FirestoreType, DocumentReference);
+  let document = require('./document.js')(DocumentReference);
   DocumentSnapshot = document.DocumentSnapshot;
   Watch = require('./watch.js')(
     FirestoreType,

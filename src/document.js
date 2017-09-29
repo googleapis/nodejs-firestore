@@ -47,13 +47,6 @@ const FieldValue = require('./field-value');
  */
 let DocumentReference;
 
-/**
- * Injected.
- *
- * @type firestore.Firestore
- */
-let Firestore;
-
 /** Injected. */
 let validate;
 
@@ -979,7 +972,7 @@ class DocumentTransform {
       if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
         if (allowTransforms) {
           transforms.push({
-            fieldPath: new FieldPath(...path).formattedName,
+            fieldPath: new FieldPath(path).formattedName,
             setToServerValue: SERVER_TIMESTAMP,
           });
         } else {
@@ -1185,7 +1178,6 @@ function validateSetOptions(options) {
 }
 
 module.exports = (FirestoreType, DocumentRefType) => {
-  Firestore = FirestoreType;
   DocumentReference = DocumentRefType;
   validate = require('./validate.js')({
     FieldPath: FieldPath.validateFieldPath,

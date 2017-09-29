@@ -207,8 +207,8 @@ class Transaction {
    * });
    */
   update(documentRef, dataOrField, preconditionOrValues) {
-    preconditionOrValues = Array.prototype.slice.call(arguments, 1);
-    this._writeBatch.update(documentRef, ...preconditionOrValues);
+    preconditionOrValues = Array.prototype.slice.call(arguments, 2);
+    this._writeBatch.update.apply(this._writeBatch, [documentRef, dataOrField].concat(preconditionOrValues));
     return this;
   }
 

@@ -39,13 +39,6 @@ let DocumentMask;
 /**
  * Injected.
  *
- * @type firestore.DocumentReference
- */
-let DocumentReference;
-
-/**
- * Injected.
- *
  * @type firestore.DocumentTransform
  */
 let DocumentTransform;
@@ -532,7 +525,6 @@ module.exports = (
 ) => {
   let document = require('./document.js')(Firestore, DocumentReferenceType);
   Firestore = FirestoreType;
-  DocumentReference = DocumentReferenceType;
   DocumentMask = document.DocumentMask;
   DocumentSnapshot = document.DocumentSnapshot;
   DocumentTransform = document.DocumentTransform;
