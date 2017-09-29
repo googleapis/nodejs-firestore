@@ -1066,7 +1066,6 @@ validate = require('./validate.js')({
 WriteBatch = require('./write-batch')(Firestore, DocumentReference).WriteBatch;
 Transaction = require('./transaction')(Firestore);
 
-
 /**
  * The default export of the `@google-cloud/firestore` package is the
  * {@link Firestore} class.
