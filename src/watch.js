@@ -20,40 +20,40 @@ const assert = require('assert');
 const rbtree = require('functional-red-black-tree');
 const through = require('through2');
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.DocumentChange
+ * @see DocumentChange
  */
 let DocumentChange;
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.DocumentReference
+ * @see DocumentReference
  */
 let DocumentReference;
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.DocumentSnapshot
+ * @see DocumentSnapshot
  */
 let DocumentSnapshot;
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.Firestore
+ * @see Firestore
  */
 let Firestore;
 
-/**
- * @type firestore.ResourcePath
+/*!
+ * @see ResourcePath
  */
 let ResourcePath = require('./path').ResourcePath;
 
-/**
+/*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
  * one target per stream.
  *
@@ -62,10 +62,8 @@ let ResourcePath = require('./path').ResourcePath;
  */
 const WATCH_TARGET_ID = 0xf0;
 
-/**
+/*!
  * The change type for document change events.
- *
- * @package
  */
 const ChangeType = {
   added: 'added',
@@ -73,11 +71,9 @@ const ChangeType = {
   removed: 'removed',
 };
 
-/**
+/*!
  * The comparator used for document watches (which should always get called with
  * the same document).
- *
- * @package
  */
 const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
   assert(doc1 === doc2, 'Document watches only support one document.');
@@ -86,19 +82,18 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
 
 /**
  * @callback docsCallback
- * @return {Array.<firestore.DocumentSnapshot>} An ordered list of documents.
+ * @returns {Array.<DocumentSnapshot>} An ordered list of documents.
  */
 
 /**
  * @callback changeCallback
- * @return {Array.<firestore.DocumentChange>} An ordered list of document
+ * @returns {Array.<DocumentChange>} An ordered list of document
  * changes.
  */
 
 /**
  * onSnapshot() callback that receives a DocumentSnapshot.
  *
- * @package
  * @callback watchSnapshotCallback
  *
  * @param {string} readTime - The ISO 8601 time at which this snapshot was
@@ -113,13 +108,13 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
  * Watch provides listen functionality and exposes the 'onSnapshot' observer. It
  * can be used with a valid Firestore Listen target.
  *
- * @package
- * @alias firestore.Watch
+ * @class
+ * @hideconstructor
  */
 class Watch {
   /*
-   * @proctected
-   * @param {firestore.Firestore} firestore The Firestore Database client.
+   * @hideconstructor
+   * @param {Firestore} firestore The Firestore Database client.
    * @param {Object} targetChange - A Firestore 'TargetChange' proto denoting
    * the target to listen on.
    * @param {function} comparator - A comparator for DocumentSnapshots that
@@ -135,11 +130,10 @@ class Watch {
   /**
    * Creates a new Watch instance to listen on DocumentReferences.
    *
-   * @package
    *
-   * @param {firestore.DocumentReference} documentRef - The document
+   * @param {DocumentReference} documentRef - The document
    * reference for this watch.
-   * @return {firestore.Watch} A newly created Watch instance.
+   * @returns {Watch} A newly created Watch instance.
    */
   static forDocument(documentRef) {
     return new Watch(
@@ -157,10 +151,9 @@ class Watch {
   /**
    * Creates a new Watch instance to listen on Queries.
    *
-   * @package
    *
-   * @param {firestore.Query} query - The query used for this watch.
-   * @return {firestore.Watch} A newly created Watch instance.
+   * @param {Query} query - The query used for this watch.
+   * @returns {Watch} A newly created Watch instance.
    */
   static forQuery(query) {
     return new Watch(
@@ -176,14 +169,13 @@ class Watch {
   /**
    * Starts a watch and attaches a listener for document change events.
    *
-   * @package
    *
    * @param {watchSnapshotCallback} onNext - A callback to be called every time
    * a new snapshot is available.
    * @param {function(Error)} onError - A callback to be called if the listen
    * fails or is cancelled. No further callbacks will occur.
    *
-   * @return {function()} An unsubscribe function that can be called to cancel
+   * @returns {function()} An unsubscribe function that can be called to cancel
    * the snapshot listener.
    */
   onSnapshot(onNext, onError) {
