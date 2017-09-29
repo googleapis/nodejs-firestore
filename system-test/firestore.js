@@ -27,7 +27,9 @@ let DocumentSnapshot = require('../src/document')(DocumentReference)
 let version = require('../package.json').version;
 let Firestore = require('../');
 
-Firestore.setLogFunction(console.log);
+if (process.env.NODE_ENV === 'DEBUG') {
+  Firestore.setLogFunction(console.log);
+}
 
 function getTestRoot(firestore) {
   return firestore.collection(`node_${version}_${Firestore.autoId(firestore)}`);
