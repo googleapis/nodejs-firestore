@@ -508,7 +508,7 @@ class DocumentReference {
     validate.isOptionalFunction('onError', onError);
 
     if (!is.defined(onError)) {
-      onError = console.error;
+      onError = console.error; // eslint-disable-line no-console
     }
 
     let watch = Watch.forDocument(this);
@@ -1680,7 +1680,7 @@ class Query {
     validate.isOptionalFunction('onError', onError);
 
     if (!is.defined(onError)) {
-      onError = console.error;
+      onError = console.error; // eslint-disable-line no-console
     }
 
     let watch = Watch.forQuery(this);
