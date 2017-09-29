@@ -43,7 +43,7 @@
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef GetDocumentRequest
  * @see [google.firestore.v1beta1.GetDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var GetDocumentRequest = {
@@ -100,7 +100,7 @@ var GetDocumentRequest = {
  *   Requests with `show_missing` may not specify `where` or
  *   `order_by`.
  *
- * @class
+ * @typedef ListDocumentsRequest
  * @see [google.firestore.v1beta1.ListDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var ListDocumentsRequest = {
@@ -118,7 +118,7 @@ var ListDocumentsRequest = {
  * @property {string} nextPageToken
  *   The next page token.
  *
- * @class
+ * @typedef ListDocumentsResponse
  * @see [google.firestore.v1beta1.ListDocumentsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var ListDocumentsResponse = {
@@ -154,7 +154,7 @@ var ListDocumentsResponse = {
  *
  *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
  *
- * @class
+ * @typedef CreateDocumentRequest
  * @see [google.firestore.v1beta1.CreateDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var CreateDocumentRequest = {
@@ -195,7 +195,7 @@ var CreateDocumentRequest = {
  *
  *   This object should have the same structure as [Precondition]{@link Precondition}
  *
- * @class
+ * @typedef UpdateDocumentRequest
  * @see [google.firestore.v1beta1.UpdateDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var UpdateDocumentRequest = {
@@ -215,7 +215,7 @@ var UpdateDocumentRequest = {
  *
  *   This object should have the same structure as [Precondition]{@link Precondition}
  *
- * @class
+ * @typedef DeleteDocumentRequest
  * @see [google.firestore.v1beta1.DeleteDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var DeleteDocumentRequest = {
@@ -260,7 +260,7 @@ var DeleteDocumentRequest = {
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef BatchGetDocumentsRequest
  * @see [google.firestore.v1beta1.BatchGetDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var BatchGetDocumentsRequest = {
@@ -292,7 +292,7 @@ var BatchGetDocumentsRequest = {
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef BatchGetDocumentsResponse
  * @see [google.firestore.v1beta1.BatchGetDocumentsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var BatchGetDocumentsResponse = {
@@ -312,7 +312,7 @@ var BatchGetDocumentsResponse = {
  *
  *   This object should have the same structure as [TransactionOptions]{@link TransactionOptions}
  *
- * @class
+ * @typedef BeginTransactionRequest
  * @see [google.firestore.v1beta1.BeginTransactionRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var BeginTransactionRequest = {
@@ -325,7 +325,7 @@ var BeginTransactionRequest = {
  * @property {string} transaction
  *   The transaction that was started.
  *
- * @class
+ * @typedef BeginTransactionResponse
  * @see [google.firestore.v1beta1.BeginTransactionResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var BeginTransactionResponse = {
@@ -349,7 +349,7 @@ var BeginTransactionResponse = {
  * @property {string} transaction
  *   If set, applies all writes in this transaction, and commits it.
  *
- * @class
+ * @typedef CommitRequest
  * @see [google.firestore.v1beta1.CommitRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var CommitRequest = {
@@ -372,7 +372,7 @@ var CommitRequest = {
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef CommitResponse
  * @see [google.firestore.v1beta1.CommitResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var CommitResponse = {
@@ -389,7 +389,7 @@ var CommitResponse = {
  * @property {string} transaction
  *   The transaction to roll back.
  *
- * @class
+ * @typedef RollbackRequest
  * @see [google.firestore.v1beta1.RollbackRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var RollbackRequest = {
@@ -429,7 +429,7 @@ var RollbackRequest = {
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef RunQueryRequest
  * @see [google.firestore.v1beta1.RunQueryRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var RunQueryRequest = {
@@ -466,7 +466,7 @@ var RunQueryRequest = {
  *   The number of results that have been skipped due to an offset between
  *   the last response and the current response.
  *
- * @class
+ * @typedef RunQueryResponse
  * @see [google.firestore.v1beta1.RunQueryResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var RunQueryResponse = {
@@ -524,7 +524,7 @@ var RunQueryResponse = {
  * @property {Object.<string, string>} labels
  *   Labels associated with this write request.
  *
- * @class
+ * @typedef WriteRequest
  * @see [google.firestore.v1beta1.WriteRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var WriteRequest = {
@@ -557,7 +557,7 @@ var WriteRequest = {
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef WriteResponse
  * @see [google.firestore.v1beta1.WriteResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var WriteResponse = {
@@ -582,7 +582,7 @@ var WriteResponse = {
  * @property {Object.<string, string>} labels
  *   Labels associated with this target change.
  *
- * @class
+ * @typedef ListenRequest
  * @see [google.firestore.v1beta1.ListenRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var ListenRequest = {
@@ -622,7 +622,7 @@ var ListenRequest = {
  *
  *   This object should have the same structure as [ExistenceFilter]{@link ExistenceFilter}
  *
- * @class
+ * @typedef ListenResponse
  * @see [google.firestore.v1beta1.ListenResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var ListenResponse = {
@@ -667,7 +667,7 @@ var ListenResponse = {
  * @property {boolean} once
  *   If the target should be removed once it is current and consistent.
  *
- * @class
+ * @typedef Target
  * @see [google.firestore.v1beta1.Target definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var Target = {
@@ -682,7 +682,7 @@ var Target = {
    *   The request will fail if any of the document is not a child resource of
    *   the given `database`. Duplicate names will be elided.
    *
-   * @class
+   * @typedef DocumentsTarget
    * @see [google.firestore.v1beta1.Target.DocumentsTarget definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
    */
   DocumentsTarget: {
@@ -705,7 +705,7 @@ var Target = {
    *
    *   This object should have the same structure as [StructuredQuery]{@link StructuredQuery}
    *
-   * @class
+   * @typedef QueryTarget
    * @see [google.firestore.v1beta1.Target.QueryTarget definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
    */
   QueryTarget: {
@@ -757,7 +757,7 @@ var Target = {
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef TargetChange
  * @see [google.firestore.v1beta1.TargetChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var TargetChange = {
@@ -824,7 +824,7 @@ var TargetChange = {
  *   A page token. Must be a value from
  *   {@link ListCollectionIdsResponse}.
  *
- * @class
+ * @typedef ListCollectionIdsRequest
  * @see [google.firestore.v1beta1.ListCollectionIdsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var ListCollectionIdsRequest = {
@@ -840,7 +840,7 @@ var ListCollectionIdsRequest = {
  * @property {string} nextPageToken
  *   A page token that may be used to continue the list.
  *
- * @class
+ * @typedef ListCollectionIdsResponse
  * @see [google.firestore.v1beta1.ListCollectionIdsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
 var ListCollectionIdsResponse = {
