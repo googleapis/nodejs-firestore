@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/*!
- * @module firestore/transaction
- */
-
 'use strict';
 
 const is = require('is');

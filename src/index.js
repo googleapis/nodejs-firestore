@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/*!
- * @module firestore
- */
-
 'use strict';
 
 const bun = require('bun');
@@ -1070,11 +1066,51 @@ validate = require('./validate.js')({
 WriteBatch = require('./write-batch')(Firestore, DocumentReference).WriteBatch;
 Transaction = require('./transaction')(Firestore);
 
+
+/**
+ * The default export of the `@google-cloud/firestore` package is the
+ * {@link Firestore} class.
+ *
+ * @module {Firestore} @google-cloud/firestore
+ * @alias nodejs-firestore
+ */
 module.exports = Firestore;
 module.exports.default = Firestore;
 module.exports.Firestore = Firestore;
-module.exports.FieldPath = FieldPath;
-module.exports.FieldValue = FieldValue;
-module.exports.GeoPoint = GeoPoint;
-module.exports.setLogFunction = setLogFunction;
 module.exports.v1beta1 = v1beta1;
+
+/**
+ * {@link FieldPath} class.
+ *
+ * @name Firestore.FieldPath
+ * @see FieldPath
+ * @type {Constructor}
+ */
+module.exports.FieldPath = FieldPath;
+
+/**
+ * {@link FieldValue} class.
+ *
+ * @name Firestore.FieldValue
+ * @see FieldValue
+ * @type {Constructor}
+ */
+module.exports.FieldValue = FieldValue;
+
+/**
+ * {@link GeoPoint} class.
+
+ * @name Firestore.GeoPoint
+ * @see GeoPoint
+ * @type {Constructor}
+ */
+module.exports.GeoPoint = GeoPoint;
+
+/**
+ * {@link setLogFunction} function.
+ *
+ * @name Firestore.setLogFunction
+ * @see setLogFunction
+ * @type {function}
+ */
+module.exports.setLogFunction = setLogFunction;
