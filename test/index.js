@@ -39,7 +39,7 @@ Firestore.setLogFunction(() => {});
 function createInstance() {
   return new Firestore({
     projectId: 'test-project',
-    sslCreds: grpc.credentials.createInsecure()
+    sslCreds: grpc.credentials.createInsecure(),
   });
 }
 
@@ -47,17 +47,17 @@ function found(name) {
   return {
     found: {
       name: `${DATABASE_ROOT}/documents/collectionId/${name}`,
-      createTime: { seconds: 1, nanos: 2},
-      updateTime: { seconds: 3, nanos: 4}
+      createTime: {seconds: 1, nanos: 2},
+      updateTime: {seconds: 3, nanos: 4},
     },
-    readTime:  { seconds: 5, nanos: 6}
+    readTime: {seconds: 5, nanos: 6},
   };
 }
 
 function missing(name) {
   return {
     missing: `${DATABASE_ROOT}/documents/collectionId/${name}`,
-    readTime:  { seconds: 5, nanos: 6}
+    readTime: {seconds: 5, nanos: 6},
   };
 }
 
@@ -92,11 +92,11 @@ describe('instantiation', function() {
   before(function() {
     Firestore = proxyquire('../', {
       '@google-cloud/common': {
-        util: fakeUtil
+        util: fakeUtil,
       },
       '@google-cloud/common-grpc': {
-        Service: FakeGrpcService
-      }
+        Service: FakeGrpcService,
+      },
     });
   });
 
@@ -107,7 +107,7 @@ describe('instantiation', function() {
   it('creates instance', function() {
     let firestore = new Firestore({
       projectId: 'test-project',
-      sslCreds: grpc.credentials.createInsecure()
+      sslCreds: grpc.credentials.createInsecure(),
     });
     assert(firestore instanceof Firestore);
     assert.strictEqual(firestore.calledWith_[1].projectId, 'test-project');
@@ -115,45 +115,52 @@ describe('instantiation', function() {
 
   it('detects project id', function() {
     let firestore = new Firestore({
-      sslCreds: grpc.credentials.createInsecure()
+      sslCreds: grpc.credentials.createInsecure(),
     });
 
     firestore.api.Firestore._commit = function(request, options, callback) {
-      callback(null, { commitTime: {
-        nanos: 0,
-        seconds: 0
-      },
+      callback(null, {
+        commitTime: {
+          nanos: 0,
+          seconds: 0,
+        },
         writeResults: [
           {
             updateTime: {
               nanos: 0,
-              seconds: 0
-            }
-          }
-        ]});
+              seconds: 0,
+            },
+          },
+        ],
+      });
     };
 
     firestore.api.Firestore.getProjectId = function(callback) {
       callback(null, 'test-project');
     };
 
-    assert.equal(firestore.formattedName,
-      'projects/{{projectId}}/databases/(default)');
+    assert.equal(
+      firestore.formattedName,
+      'projects/{{projectId}}/databases/(default)'
+    );
 
-    return firestore.doc('foo/bar').set({}).then(() => {
-      assert.equal(firestore.formattedName, DATABASE_ROOT);
-    });
+    return firestore
+      .doc('foo/bar')
+      .set({})
+      .then(() => {
+        assert.equal(firestore.formattedName, DATABASE_ROOT);
+      });
   });
 
   it('accepts get() without project ID', function() {
     let firestore = new Firestore({
-      sslCreds: grpc.credentials.createInsecure()
+      sslCreds: grpc.credentials.createInsecure(),
     });
 
     firestore.api.Firestore._batchGetDocuments = function(request) {
       let expectedRequest = {
         database: DATABASE_ROOT,
-        documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`]
+        documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`],
       };
       assert.deepEqual(request, expectedRequest);
 
@@ -170,16 +177,15 @@ describe('instantiation', function() {
     let doc = firestore.doc('collectionId/documentId');
     assert.equal(projectIdDetected, false);
 
-    return doc.get().then(
-      (result) => {
-        assert.equal(projectIdDetected, true);
-        assert.equal(result.exists, true);
-      });
+    return doc.get().then(result => {
+      assert.equal(projectIdDetected, true);
+      assert.equal(result.exists, true);
+    });
   });
 
   it('accepts onSnapshot() without project ID', function(done) {
     let firestore = new Firestore({
-      sslCreds: grpc.credentials.createInsecure()
+      sslCreds: grpc.credentials.createInsecure(),
     });
 
     let readStream = through.obj();
@@ -210,61 +216,72 @@ describe('instantiation', function() {
 
   it('errors out on project id', function() {
     let firestore = new Firestore({
-      sslCreds: grpc.credentials.createInsecure()
+      sslCreds: grpc.credentials.createInsecure(),
     });
 
     firestore.api.Firestore.getProjectId = function(callback) {
       callback(new Error('Expected error'));
     };
 
-    return firestore.doc('foo/bar').set({}).then(() => {
-      throw new Error('Unexpected success in Promise');
-    }).catch(err => {
-      assert.equal(err.message, 'Expected error');
-      return Promise.resolve();
-    });
+    return firestore
+      .doc('foo/bar')
+      .set({})
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(err.message, 'Expected error');
+        return Promise.resolve();
+      });
   });
 
   describe('handles error from project ID detection', function() {
     it('for streaming requests', function() {
       let firestore = new Firestore({
-        sslCreds: grpc.credentials.createInsecure()
+        sslCreds: grpc.credentials.createInsecure(),
       });
 
       firestore._decorateRequest = function() {
         return Promise.reject(new Error('Expected error'));
       };
 
-      return firestore.getAll(firestore.doc('foo/bar')).then(() => {
-        throw new Error('Unexpected success in Promise');
-      }).catch(err => {
-        assert.equal(err.message, 'Expected error');
-        return Promise.resolve();
-      });
+      return firestore
+        .getAll(firestore.doc('foo/bar'))
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(err.message, 'Expected error');
+          return Promise.resolve();
+        });
     });
 
     it('for non-streaming requests', function() {
       let firestore = new Firestore({
-        sslCreds: grpc.credentials.createInsecure()
+        sslCreds: grpc.credentials.createInsecure(),
       });
 
       firestore._decorateRequest = function() {
         return Promise.reject(new Error('Expected error'));
       };
 
-      return firestore.doc('foo/bar').set({}).then(() => {
-        throw new Error('Unexpected success in Promise');
-      }).catch(err => {
-        assert.equal(err.message, 'Expected error');
-        return Promise.resolve();
-      });
+      return firestore
+        .doc('foo/bar')
+        .set({})
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(err.message, 'Expected error');
+          return Promise.resolve();
+        });
     });
   });
 
   it('inherits from GrpcService', function() {
     let firestore = new Firestore({
       projectId: 'test-project',
-      sslCreds: grpc.credentials.createInsecure()
+      sslCreds: grpc.credentials.createInsecure(),
     });
     assert(firestore instanceof FakeGrpcService);
 
@@ -289,15 +306,19 @@ describe('doc() method', function() {
   it('requires document path', function() {
     assert.throws(function() {
       firestore.doc();
-    }, new RegExp('Argument "documentPath" is not a valid ResourcePath. ' +
-        'Path is not a string\.'));
+    }, new RegExp(
+      'Argument "documentPath" is not a valid ResourcePath. ' +
+        'Path is not a string.'
+    ));
   });
 
-  it('doesn\'t accept empty components', function() {
+  it("doesn't accept empty components", function() {
     assert.throws(function() {
       firestore.doc('coll//doc');
-    }, new RegExp('Argument "documentPath" is not a valid ResourcePath. ' +
-        'Paths must not contain //\.'));
+    }, new RegExp(
+      'Argument "documentPath" is not a valid ResourcePath. ' +
+        'Paths must not contain //.'
+    ));
   });
 
   it('must point to document', function() {
@@ -328,8 +349,10 @@ describe('collection() method', function() {
   it('requires collection id', function() {
     assert.throws(function() {
       firestore.collection();
-    },  new RegExp('Argument "collectionPath" is not a valid ResourcePath. ' +
-        'Path is not a string\.'));
+    }, new RegExp(
+      'Argument "collectionPath" is not a valid ResourcePath. ' +
+        'Path is not a string.'
+    ));
   });
 
   it('must point to a collection', function() {
@@ -355,9 +378,12 @@ describe('getCollections() method', function() {
 
   it('returns collections', function() {
     firestore.api.Firestore._listCollectionIds = function(
-        request, options, callback) {
+      request,
+      options,
+      callback
+    ) {
       assert.deepEqual(request, {
-        parent: 'projects/test-project/databases/(default)'
+        parent: 'projects/test-project/databases/(default)',
       });
 
       callback(null, ['first', 'second']);
@@ -398,7 +424,7 @@ describe('getAll() method', function() {
       return stream();
     };
 
-    return firestore.getAll().then((result) => {
+    return firestore.getAll().then(result => {
       resultEquals(result);
     });
   });
@@ -408,8 +434,9 @@ describe('getAll() method', function() {
       return stream(found('documentId'));
     };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId')).then(
-      (result) => {
+    return firestore
+      .getAll(firestore.doc('collectionId/documentId'))
+      .then(result => {
         resultEquals(result, found('documentId'));
       });
   });
@@ -419,12 +446,16 @@ describe('getAll() method', function() {
       return stream(found('documentId2'));
     };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId')).then(
-      () => {
+    return firestore
+      .getAll(firestore.doc('collectionId/documentId'))
+      .then(() => {
         throw new Error('Unexpected success in Promise');
-      }).catch((err) => {
-        assert.equal(err.message, 'Did not receive document for' +
-          ' "collectionId/documentId".');
+      })
+      .catch(err => {
+        assert.equal(
+          err.message,
+          'Did not receive document for' + ' "collectionId/documentId".'
+        );
       });
   });
 
@@ -433,10 +464,12 @@ describe('getAll() method', function() {
       return stream(new Error('Expected exception'));
     };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId')).then(
-      () => {
+    return firestore
+      .getAll(firestore.doc('collectionId/documentId'))
+      .then(() => {
         throw new Error('Unexpected success in Promise');
-      }).catch((err) => {
+      })
+      .catch(err => {
         assert.equal(err.message, 'Expected exception');
       });
   });
@@ -446,12 +479,14 @@ describe('getAll() method', function() {
       return stream(found('documentId'), new Error('Expected exception'));
     };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId')).then(
-        () => {
-          throw new Error('Unexpected success in Promise');
-        }).catch((err) => {
-          assert.equal(err.message, 'Expected exception');
-        });
+    return firestore
+      .getAll(firestore.doc('collectionId/documentId'))
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(err.message, 'Expected exception');
+      });
   });
 
   it('handles serialization error', function() {
@@ -463,12 +498,14 @@ describe('getAll() method', function() {
       throw new Error('Expected exception');
     };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId')).then(
-        () => {
-          throw new Error('Unexpected success in Promise');
-        }).catch((err) => {
-          assert.equal(err.message, 'Expected exception');
-        });
+    return firestore
+      .getAll(firestore.doc('collectionId/documentId'))
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(err.message, 'Expected exception');
+      });
   });
 
   it('only retries on GRPC unavailable', function() {
@@ -497,7 +534,7 @@ describe('getAll() method', function() {
     firestore.api.Firestore._batchGetDocuments = function(request) {
       let errorCode = Number(request.documents[0].split('/').pop());
       actualErrorAttempts[errorCode] =
-          (actualErrorAttempts[errorCode] || 0) + 1;
+        (actualErrorAttempts[errorCode] || 0) + 1;
       let error = new Error('Expected exception');
       error.code = errorCode;
       return stream(error);
@@ -507,11 +544,15 @@ describe('getAll() method', function() {
 
     Object.keys(expectedErrorAttempts).forEach(errorCode => {
       promises.push(
-          firestore.getAll(coll.doc(`${errorCode}`)).then(() => {
+        firestore
+          .getAll(coll.doc(`${errorCode}`))
+          .then(() => {
             throw new Error('Unexpected success in Promise');
-          }).catch((err) => {
+          })
+          .catch(err => {
             assert.equal(err.code, errorCode);
-          }));
+          })
+      );
     });
 
     return Promise.all(promises).then(() => {
@@ -530,8 +571,9 @@ describe('getAll() method', function() {
       return stream(found('documentId'));
     };
 
-    return firestore.getAll([firestore.doc('collectionId/documentId')]).then(
-      (result) => {
+    return firestore
+      .getAll([firestore.doc('collectionId/documentId')])
+      .then(result => {
         resultEquals(result, found('documentId'));
       });
   });
@@ -541,9 +583,12 @@ describe('getAll() method', function() {
       return stream(found('exists'), missing('missing'));
     };
 
-    return firestore.getAll(
-      firestore.doc('collectionId/exists'),
-      firestore.doc('collectionId/missing')).then((result) => {
+    return firestore
+      .getAll(
+        firestore.doc('collectionId/exists'),
+        firestore.doc('collectionId/missing')
+      )
+      .then(result => {
         resultEquals(result, found('exists'), missing('missing'));
       });
   });
@@ -552,17 +597,28 @@ describe('getAll() method', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
       return stream(
         // Note that these are out of order.
-        found('second'), found('first'), found('fourth'), found('third')
+        found('second'),
+        found('first'),
+        found('fourth'),
+        found('third')
       );
     };
 
-    return firestore.getAll(
-      firestore.doc('collectionId/first'),
-      firestore.doc('collectionId/second'),
-      firestore.doc('collectionId/third'),
-      firestore.doc('collectionId/fourth')).then((result) => {
-        resultEquals(result,
-          found('first'), found('second'), found('third'), found('fourth'));
+    return firestore
+      .getAll(
+        firestore.doc('collectionId/first'),
+        firestore.doc('collectionId/second'),
+        firestore.doc('collectionId/third'),
+        firestore.doc('collectionId/fourth')
+      )
+      .then(result => {
+        resultEquals(
+          result,
+          found('first'),
+          found('second'),
+          found('third'),
+          found('fourth')
+        );
       });
   });
 
@@ -572,14 +628,16 @@ describe('getAll() method', function() {
       return stream(found('a'), found('b'));
     };
 
-    return firestore.getAll(
+    return firestore
+      .getAll(
         firestore.doc('collectionId/a'),
         firestore.doc('collectionId/a'),
         firestore.doc('collectionId/b'),
-        firestore.doc('collectionId/a')).then((result) => {
-          resultEquals(result,
-              found('a'), found('a'), found('b'), found('a'));
-        });
+        firestore.doc('collectionId/a')
+      )
+      .then(result => {
+        resultEquals(result, found('a'), found('a'), found('b'), found('a'));
+      });
   });
 });
 
@@ -591,27 +649,19 @@ describe('FieldPath', function() {
   });
 
   it('encodes field names', function() {
-    let components = [
-      ['foo'],
-      ['foo', 'bar'],
-      ['.', '`'],
-      ['\\']
-    ];
+    let components = [['foo'], ['foo', 'bar'], ['.', '`'], ['\\']];
 
-    let results = [
-      'foo',
-      'foo.bar',
-      '`.`.`\\``',
-      '`\\\\`',
-    ];
+    let results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
 
     for (let i = 0; i < components.length; ++i) {
       assert.equal(
-          new Firestore.FieldPath(...components[i]).toString(), results[i]);
+        new Firestore.FieldPath(...components[i]).toString(),
+        results[i]
+      );
     }
   });
 
-  it('doesn\'t accept empty path', function() {
+  it("doesn't accept empty path", function() {
     assert.throws(() => {
       new Firestore.FieldPath();
     }, /Function 'FieldPath\(\)' requires at least 1 argument\./);

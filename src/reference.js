@@ -83,7 +83,7 @@ const directionOperators = {
   asc: 'ASCENDING',
   ASC: 'ASCENDING',
   desc: 'DESCENDING',
-  DESC: 'DESCENDING'
+  DESC: 'DESCENDING',
 };
 
 /**
@@ -98,7 +98,7 @@ const comparisonOperators = {
   '=': 'EQUAL',
   '==': 'EQUAL',
   '>': 'GREATER_THAN',
-  '>=': 'GREATER_THAN_OR_EQUAL'
+  '>=': 'GREATER_THAN_OR_EQUAL',
 };
 
 /**
@@ -233,7 +233,9 @@ class DocumentReference {
    */
   get parent() {
     return createCollectionReference(
-        this._firestore, this._referencePath.parent());
+      this._firestore,
+      this._referencePath.parent()
+    );
   }
 
   /**
@@ -268,7 +270,7 @@ class DocumentReference {
    * });
    */
   get() {
-    return this._firestore.getAll_([this]).then((result) =>  {
+    return this._firestore.getAll_([this]).then(result => {
       return result[0];
     });
   }
@@ -322,21 +324,21 @@ class DocumentReference {
 
     let api = this._firestore.api.Firestore;
 
-    return this._firestore.request(
-        api.listCollectionIds.bind(api), request
-    ).then(collectionIds => {
-      let collections = [];
+    return this._firestore
+      .request(api.listCollectionIds.bind(api), request)
+      .then(collectionIds => {
+        let collections = [];
 
-      // We can just sort this list using the default comparator since it will
-      // only contain collection ids.
-      collectionIds.sort();
+        // We can just sort this list using the default comparator since it will
+        // only contain collection ids.
+        collectionIds.sort();
 
-      for (let collectionId of collectionIds) {
-        collections.push(this.collection(collectionId));
-      }
+        for (let collectionId of collectionIds) {
+          collections.push(this.collection(collectionId));
+        }
 
-      return collections;
-    });
+        return collections;
+      });
   }
 
   /**
@@ -360,9 +362,12 @@ class DocumentReference {
    */
   create(data) {
     let writeBatch = new WriteBatch(this._firestore);
-    return writeBatch.create(this, data).commit().then((res) => {
-      return Promise.resolve(res.writeResults[0]);
-    });
+    return writeBatch
+      .create(this, data)
+      .commit()
+      .then(res => {
+        return Promise.resolve(res.writeResults[0]);
+      });
   }
 
   /**
@@ -389,9 +394,12 @@ class DocumentReference {
    */
   delete(precondition) {
     let writeBatch = new WriteBatch(this._firestore);
-    return writeBatch.delete(this, precondition).commit().then((res) => {
-      return Promise.resolve(res.writeResults[0]);
-    });
+    return writeBatch
+      .delete(this, precondition)
+      .commit()
+      .then(res => {
+        return Promise.resolve(res.writeResults[0]);
+      });
   }
 
   /**
@@ -417,11 +425,14 @@ class DocumentReference {
    *   console.log(`Document written at ${res.updateTime}`);
    * });
    */
-   set(data, options) {
+  set(data, options) {
     let writeBatch = new WriteBatch(this._firestore);
-    return writeBatch.set(this, data, options).commit().then((res) => {
-      return Promise.resolve(res.writeResults[0]);
-    });
+    return writeBatch
+      .set(this, data, options)
+      .commit()
+      .then(res => {
+        return Promise.resolve(res.writeResults[0]);
+      });
   }
 
   /**
@@ -457,10 +468,12 @@ class DocumentReference {
   update(dataOrField, preconditionOrValues) {
     let writeBatch = new WriteBatch(this._firestore);
     preconditionOrValues = Array.prototype.slice.call(arguments);
-    return writeBatch.update(this, ...preconditionOrValues).commit().then(
-        (res) => {
-          return Promise.resolve(res.writeResults[0]);
-        });
+    return writeBatch
+      .update(this, ...preconditionOrValues)
+      .commit()
+      .then(res => {
+        return Promise.resolve(res.writeResults[0]);
+      });
   }
 
   /**
@@ -500,21 +513,20 @@ class DocumentReference {
 
     let watch = Watch.forDocument(this);
 
-    return watch.onSnapshot(
-        (readTime, docs) => {
-          for (let document of docs()) {
-            if (document.ref.formattedName === this.formattedName) {
-              onNext(document);
-              return;
-            }
-          }
+    return watch.onSnapshot((readTime, docs) => {
+      for (let document of docs()) {
+        if (document.ref.formattedName === this.formattedName) {
+          onNext(document);
+          return;
+        }
+      }
 
-          // The document is missing.
-          let document = new DocumentSnapshot.Builder();
-          document.ref = this._referencePath;
-          document.readTime = readTime;
-          onNext(document.build());
-        }, onError);
+      // The document is missing.
+      let document = new DocumentSnapshot.Builder();
+      document.ref = this._referencePath;
+      document.readTime = readTime;
+      onNext(document.build());
+    }, onError);
   }
 }
 
@@ -708,9 +720,9 @@ class FieldOrder {
   toProto() {
     return {
       field: {
-        fieldPath: this._field.formattedName
+        fieldPath: this._field.formattedName,
       },
-      direction: this._direction
+      direction: this._direction,
     };
   }
 }
@@ -748,10 +760,10 @@ class FieldFilter {
       return {
         unaryFilter: {
           field: {
-            fieldPath: this._field.formattedName
+            fieldPath: this._field.formattedName,
           },
           op: 'IS_NAN',
-        }
+        },
       };
     }
 
@@ -759,21 +771,21 @@ class FieldFilter {
       return {
         unaryFilter: {
           field: {
-            fieldPath: this._field.formattedName
+            fieldPath: this._field.formattedName,
           },
-          op: 'IS_NULL'
-        }
+          op: 'IS_NULL',
+        },
       };
     }
 
     return {
       fieldFilter: {
         field: {
-          fieldPath: this._field.formattedName
+          fieldPath: this._field.formattedName,
         },
         op: this._opString,
-        value: DocumentSnapshot.encodeValue(this._value)
-      }
+        value: DocumentSnapshot.encodeValue(this._value),
+      },
     };
   }
 }
@@ -1054,10 +1066,18 @@ class Query {
     validate.isFieldComparison('opStr', opStr, value);
 
     let newFilter = new FieldFilter(
-        FieldPath.fromArgument(fieldPath), comparisonOperators[opStr], value);
+      FieldPath.fromArgument(fieldPath),
+      comparisonOperators[opStr],
+      value
+    );
     let combinedFilters = this._fieldFilters.concat(newFilter);
-    return new Query(this._firestore, this._referencePath, combinedFilters,
-        this._fieldOrders, this._queryOptions);
+    return new Query(
+      this._firestore,
+      this._referencePath,
+      combinedFilters,
+      this._fieldOrders,
+      this._queryOptions
+    );
   }
 
   /**
@@ -1096,7 +1116,7 @@ class Query {
       for (let i = 0; i < fieldPaths.length; ++i) {
         validate.isFieldPath(i, fieldPaths[i]);
         result.push({
-          fieldPath: FieldPath.fromArgument(fieldPaths[i]).formattedName
+          fieldPath: FieldPath.fromArgument(fieldPaths[i]).formattedName,
         });
       }
     }
@@ -1104,8 +1124,13 @@ class Query {
     let options = extend(true, {}, this._queryOptions);
     options.selectFields = {fields: result};
 
-    return new Query(this._firestore, this._referencePath, this._fieldFilters,
-        this._fieldOrders, options);
+    return new Query(
+      this._firestore,
+      this._referencePath,
+      this._fieldFilters,
+      this._fieldOrders,
+      options
+    );
   }
 
   /**
@@ -1136,15 +1161,24 @@ class Query {
     validate.isOptionalFieldOrder('directionStr', directionStr);
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
-      throw new Error('Cannot specify an orderBy() constraint after calling ' +
-          'startAt(), startAfter(), endBefore() or endAt().');
+      throw new Error(
+        'Cannot specify an orderBy() constraint after calling ' +
+          'startAt(), startAfter(), endBefore() or endAt().'
+      );
     }
 
-    let newOrder = new FieldOrder(FieldPath.fromArgument(fieldPath),
-        directionOperators[directionStr]);
+    let newOrder = new FieldOrder(
+      FieldPath.fromArgument(fieldPath),
+      directionOperators[directionStr]
+    );
     let combinedOrders = this._fieldOrders.concat(newOrder);
-    return new Query(this._firestore, this._referencePath, this._fieldFilters,
-        combinedOrders, this._queryOptions);
+    return new Query(
+      this._firestore,
+      this._referencePath,
+      this._fieldFilters,
+      combinedOrders,
+      this._queryOptions
+    );
   }
 
   /**
@@ -1173,8 +1207,13 @@ class Query {
 
     let options = extend(true, {}, this._queryOptions);
     options.limit = limit;
-    return new Query(this._firestore, this._referencePath, this._fieldFilters,
-        this._fieldOrders, options);
+    return new Query(
+      this._firestore,
+      this._referencePath,
+      this._fieldFilters,
+      this._fieldOrders,
+      options
+    );
   }
 
   /**
@@ -1202,8 +1241,13 @@ class Query {
 
     let options = extend(true, {}, this._queryOptions);
     options.offset = offset;
-    return new Query(this._firestore, this._referencePath, this._fieldFilters,
-        this._fieldOrders, options);
+    return new Query(
+      this._firestore,
+      this._referencePath,
+      this._fieldFilters,
+      this._fieldOrders,
+      options
+    );
   }
 
   /**
@@ -1220,12 +1264,14 @@ class Query {
   _buildPosition(fieldValues, before) {
     let options = {
       before: before,
-      values: []
+      values: [],
     };
 
     if (fieldValues.length > this._fieldOrders.length) {
-      throw new Error('Too many cursor values specified. The specified ' +
-          'values must match the orderBy() constraints of the query.');
+      throw new Error(
+        'Too many cursor values specified. The specified ' +
+          'values must match the orderBy() constraints of the query.'
+      );
     }
 
     for (let i = 0; i < fieldValues.length; ++i) {
@@ -1236,13 +1282,16 @@ class Query {
           fieldValue = this._referencePath.append(fieldValues[i]);
         } else if (is.instance(fieldValue, DocumentReference)) {
           if (!this._referencePath.isPrefixOf(fieldValue.ref)) {
-            throw new Error(`'${fieldValue.path}' is not part of the query ` +
-                'result set and cannot be used as a query boundary.');
+            throw new Error(
+              `'${fieldValue.path}' is not part of the query ` +
+                'result set and cannot be used as a query boundary.'
+            );
           }
         } else {
           throw new Error(
-              'The corresponding value for FieldPath.documentId() must be a ' +
-              'string or a DocumentReference.');
+            'The corresponding value for FieldPath.documentId() must be a ' +
+              'string or a DocumentReference.'
+          );
         }
       }
 
@@ -1277,8 +1326,13 @@ class Query {
 
     options.startAt = this._buildPosition(fieldValues, true);
 
-    return new Query(this._firestore, this._referencePath, this._fieldFilters,
-        this._fieldOrders, options);
+    return new Query(
+      this._firestore,
+      this._referencePath,
+      this._fieldFilters,
+      this._fieldOrders,
+      options
+    );
   }
 
   /**
@@ -1307,8 +1361,13 @@ class Query {
 
     options.startAt = this._buildPosition(fieldValues, false);
 
-    return new Query(this._firestore, this._referencePath, this._fieldFilters,
-        this._fieldOrders, options);
+    return new Query(
+      this._firestore,
+      this._referencePath,
+      this._fieldFilters,
+      this._fieldOrders,
+      options
+    );
   }
 
   /**
@@ -1337,8 +1396,13 @@ class Query {
 
     options.endAt = this._buildPosition(fieldValues, true);
 
-    return new Query(this._firestore, this._referencePath, this._fieldFilters,
-        this._fieldOrders, options);
+    return new Query(
+      this._firestore,
+      this._referencePath,
+      this._fieldFilters,
+      this._fieldOrders,
+      options
+    );
   }
 
   /**
@@ -1366,8 +1430,13 @@ class Query {
 
     options.endAt = this._buildPosition(fieldValues, false);
 
-    return new Query(this._firestore, this._referencePath, this._fieldFilters,
-        this._fieldOrders, options);
+    return new Query(
+      this._firestore,
+      this._referencePath,
+      this._fieldFilters,
+      this._fieldOrders,
+      options
+    );
   }
 
   /**
@@ -1405,21 +1474,29 @@ class Query {
     return new Promise((resolve, reject) => {
       let readTime;
 
-      self._stream(queryOptions)
-          .on('error', err => { reject(err); })
-          .on('data', result => {
-            readTime = result.readTime;
-            if (result.document) {
-              let document = result.document;
-              changes.push(new DocumentChange(DocumentChange.ADDED, document,
-                  -1, docs.length));
-              docs.push(document);
-            }
-          })
-          .on('end', () => {
-            resolve(new QuerySnapshot(
-                this, readTime, () => docs, () => changes));
-          });
+      self
+        ._stream(queryOptions)
+        .on('error', err => {
+          reject(err);
+        })
+        .on('data', result => {
+          readTime = result.readTime;
+          if (result.document) {
+            let document = result.document;
+            changes.push(
+              new DocumentChange(
+                DocumentChange.ADDED,
+                document,
+                -1,
+                docs.length
+              )
+            );
+            docs.push(document);
+          }
+        })
+        .on('end', () => {
+          resolve(new QuerySnapshot(this, readTime, () => docs, () => changes));
+        });
     });
   }
 
@@ -1469,10 +1546,12 @@ class Query {
     let reqOpts = {
       parent: this._referencePath.parent().formattedName,
       structuredQuery: {
-        from: [{
-          collectionId: this._referencePath.id
-        }]
-      }
+        from: [
+          {
+            collectionId: this._referencePath.id,
+          },
+        ],
+      },
     };
 
     let structuredQuery = reqOpts.structuredQuery;
@@ -1485,8 +1564,8 @@ class Query {
       structuredQuery.where = {
         compositeFilter: {
           op: 'AND',
-          filters: filters
-        }
+          filters: filters,
+        },
       };
     }
 
@@ -1499,7 +1578,7 @@ class Query {
     }
 
     if (this._queryOptions.limit) {
-      structuredQuery.limit = { value: this._queryOptions.limit };
+      structuredQuery.limit = {value: this._queryOptions.limit};
     }
 
     if (this._queryOptions.offset) {
@@ -1540,27 +1619,34 @@ class Query {
       let readTime = DocumentSnapshot.toISOTime(proto.readTime);
       if (proto.document) {
         let document = self.firestore.snapshot_(proto.document, proto.readTime);
-        this.push({ document, readTime });
+        this.push({document, readTime});
       } else {
-        this.push({ readTime });
+        this.push({readTime});
       }
       callback();
     });
 
-    this._firestore.readStream(
+    this._firestore
+      .readStream(
         this._api.Firestore.runQuery.bind(this._api.Firestore),
         request,
         /* allowRetries= */ true
-    ).then(backendStream => {
-      backendStream.on('error', err => {
-        Firestore.log('Query._stream', 'Query failed with stream error:', err);
+      )
+      .then(backendStream => {
+        backendStream.on('error', err => {
+          Firestore.log(
+            'Query._stream',
+            'Query failed with stream error:',
+            err
+          );
+          stream.destroy(err);
+        });
+        backendStream.resume();
+        backendStream.pipe(stream);
+      })
+      .catch(err => {
         stream.destroy(err);
       });
-      backendStream.resume();
-      backendStream.pipe(stream);
-    }).catch(err => {
-      stream.destroy(err);
-    });
 
     return stream;
   }
@@ -1599,10 +1685,9 @@ class Query {
 
     let watch = Watch.forQuery(this);
 
-    return watch.onSnapshot(
-        (readTime, docs, changes) => {
-          onNext(new QuerySnapshot(this, readTime, docs, changes));
-        }, onError);
+    return watch.onSnapshot((readTime, docs, changes) => {
+      onNext(new QuerySnapshot(this, readTime, docs, changes));
+    }, onError);
   }
 
   /**
@@ -1614,11 +1699,13 @@ class Query {
   comparator() {
     return (doc1, doc2) => {
       // Add implicit sorting by name, using the last specified direction.
-      let lastDirection = this._fieldOrders.length === 0 ?
-          directionOperators.ASC :
-          this._fieldOrders[this._fieldOrders.length - 1].direction;
+      let lastDirection =
+        this._fieldOrders.length === 0
+          ? directionOperators.ASC
+          : this._fieldOrders[this._fieldOrders.length - 1].direction;
       let orderBys = this._fieldOrders.concat(
-          new FieldOrder(FieldPath._DOCUMENT_ID, lastDirection));
+        new FieldOrder(FieldPath._DOCUMENT_ID, lastDirection)
+      );
 
       for (let orderBy of orderBys) {
         let comp;
@@ -1628,16 +1715,18 @@ class Query {
           const v1 = doc1.protoField(orderBy.field);
           const v2 = doc2.protoField(orderBy.field);
           if (!is.defined(v1) || !is.defined(v2)) {
-            throw new Error('Trying to compare documents on fields that ' +
-                'don\'t exist. Please include the fields you are ordering on ' +
-                'in your select() call.');
+            throw new Error(
+              'Trying to compare documents on fields that ' +
+                "don't exist. Please include the fields you are ordering on " +
+                'in your select() call.'
+            );
           }
           comp = order.compare(v1, v2);
         }
 
         if (comp !== 0) {
           const direction =
-              (orderBy.direction === directionOperators.ASC) ? 1 : -1;
+            orderBy.direction === directionOperators.ASC ? 1 : -1;
           return direction * comp;
         }
       }
@@ -1830,13 +1919,15 @@ function validateComparisonOperator(str, val) {
     let op = comparisonOperators[str];
 
     if (typeof val === 'number' && isNaN(val) && op !== 'EQUAL') {
-      throw new Error('Invalid query. You can only perform equals ' +
-          'comparisons on NaN.');
+      throw new Error(
+        'Invalid query. You can only perform equals ' + 'comparisons on NaN.'
+      );
     }
 
     if (val === null && op !== 'EQUAL') {
-      throw new Error('Invalid query. You can only perform equals ' +
-          'comparisons on Null.');
+      throw new Error(
+        'Invalid query. You can only perform equals ' + 'comparisons on Null.'
+      );
     }
 
     return true;
@@ -1856,17 +1947,21 @@ function validateDocumentReference(value) {
   return is.instanceof(value, DocumentReference);
 }
 
-
-module.exports = (FirestoreType) => {
+module.exports = FirestoreType => {
   Firestore = FirestoreType;
-  let document = require('./document.js')(
-      FirestoreType, DocumentReference
-  );
+  let document = require('./document.js')(FirestoreType, DocumentReference);
   DocumentSnapshot = document.DocumentSnapshot;
   Watch = require('./watch.js')(
-      FirestoreType, DocumentChange, DocumentReference, DocumentSnapshot);
-  WriteBatch = require('./write-batch.js')(FirestoreType, DocumentReference,
-      validateDocumentReference).WriteBatch;
+    FirestoreType,
+    DocumentChange,
+    DocumentReference,
+    DocumentSnapshot
+  );
+  WriteBatch = require('./write-batch.js')(
+    FirestoreType,
+    DocumentReference,
+    validateDocumentReference
+  ).WriteBatch;
   validate = require('./validate')({
     Document: document.validateDocumentData,
     FieldPath: FieldPath.validateFieldPath,
@@ -1876,7 +1971,10 @@ module.exports = (FirestoreType) => {
     ResourcePath: ResourcePath.validateResourcePath,
   });
   return {
-    CollectionReference, DocumentReference, Query, QuerySnapshot,
-    validateDocumentReference
+    CollectionReference,
+    DocumentReference,
+    Query,
+    QuerySnapshot,
+    validateDocumentReference,
   };
 };

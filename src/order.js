@@ -40,7 +40,7 @@ const types = {
   REF: 6,
   GEOPOINT: 7,
   ARRAY: 8,
-  OBJECT: 9
+  OBJECT: 9,
 };
 
 /**
@@ -82,8 +82,13 @@ function typeOrder(val) {
       return types.OBJECT;
     }
     default: {
-      throw new Error('Cannot use type (' + val + ': ' +
-        JSON.stringify(val) + ') as a Firestore value.');
+      throw new Error(
+        'Cannot use type (' +
+          val +
+          ': ' +
+          JSON.stringify(val) +
+          ') as a Firestore value.'
+      );
     }
   }
 }
@@ -174,8 +179,10 @@ function compareReferenceProtos(left, right) {
  * @private
  */
 function compareGeoPoints(left, right) {
-  return primitiveComparator(left.latitude, right.latitude) ||
-      primitiveComparator(left.longitude, right.longitude);
+  return (
+    primitiveComparator(left.latitude, right.latitude) ||
+    primitiveComparator(left.longitude, right.longitude)
+  );
 }
 
 /**
@@ -265,4 +272,4 @@ function compare(left, right) {
   }
 }
 
-module.exports = { compare, primitiveComparator };
+module.exports = {compare, primitiveComparator};

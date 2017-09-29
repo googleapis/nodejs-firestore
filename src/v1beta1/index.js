@@ -22,9 +22,12 @@ var extend = require('extend');
 var union = require('lodash.union');
 
 function v1beta1(options) {
-  options = extend({
-    scopes: v1beta1.ALL_SCOPES
-  }, options);
+  options = extend(
+    {
+      scopes: v1beta1.ALL_SCOPES,
+    },
+    options
+  );
   var gaxGrpc = gax.grpc(options);
   var result = {};
   extend(result, firestoreAdminClient(gaxGrpc));

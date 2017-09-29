@@ -42,20 +42,22 @@ var CODE_GEN_NAME_VERSION = 'gapic/0.0.5';
 
 var PAGE_DESCRIPTORS = {
   listDocuments: new gax.PageDescriptor(
-      'pageToken',
-      'nextPageToken',
-      'documents'),
+    'pageToken',
+    'nextPageToken',
+    'documents'
+  ),
   listCollectionIds: new gax.PageDescriptor(
-      'pageToken',
-      'nextPageToken',
-      'collectionIds')
+    'pageToken',
+    'nextPageToken',
+    'collectionIds'
+  ),
 };
 
 var STREAM_DESCRIPTORS = {
   batchGetDocuments: new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
   runQuery: new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
   write: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
-  listen: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING)
+  listen: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
 };
 
 /**
@@ -64,7 +66,7 @@ var STREAM_DESCRIPTORS = {
  */
 var ALL_SCOPES = [
   'https://www.googleapis.com/auth/cloud-platform',
-  'https://www.googleapis.com/auth/datastore'
+  'https://www.googleapis.com/auth/datastore',
 ];
 
 /**
@@ -89,15 +91,16 @@ var ALL_SCOPES = [
  * @class
  */
 function FirestoreClient(gaxGrpc, loadedProtos, opts) {
-  opts = extend({
-    servicePath: SERVICE_ADDRESS,
-    port: DEFAULT_SERVICE_PORT,
-    clientConfig: {}
-  }, opts);
+  opts = extend(
+    {
+      servicePath: SERVICE_ADDRESS,
+      port: DEFAULT_SERVICE_PORT,
+      clientConfig: {},
+    },
+    opts
+  );
 
-  var googleApiClient = [
-    'gl-node/' + process.versions.node
-  ];
+  var googleApiClient = ['gl-node/' + process.versions.node];
   if (opts.libName && opts.libVersion) {
     googleApiClient.push(opts.libName + '/' + opts.libVersion);
   }
@@ -108,17 +111,19 @@ function FirestoreClient(gaxGrpc, loadedProtos, opts) {
   );
 
   var defaults = gaxGrpc.constructSettings(
-      'google.firestore.v1beta1.Firestore',
-      configData,
-      opts.clientConfig,
-      {'x-goog-api-client': googleApiClient.join(' ')});
+    'google.firestore.v1beta1.Firestore',
+    configData,
+    opts.clientConfig,
+    {'x-goog-api-client': googleApiClient.join(' ')}
+  );
 
   var self = this;
 
   this.auth = gaxGrpc.auth;
   var firestoreStub = gaxGrpc.createStub(
-      loadedProtos.google.firestore.v1beta1.Firestore,
-      opts);
+    loadedProtos.google.firestore.v1beta1.Firestore,
+    opts
+  );
   var firestoreStubMethods = [
     'getDocument',
     'listDocuments',
@@ -132,7 +137,7 @@ function FirestoreClient(gaxGrpc, loadedProtos, opts) {
     'runQuery',
     'write',
     'listen',
-    'listCollectionIds'
+    'listCollectionIds',
   ];
   firestoreStubMethods.forEach(function(methodName) {
     self['_' + methodName] = gax.createApiCall(
@@ -143,23 +148,28 @@ function FirestoreClient(gaxGrpc, loadedProtos, opts) {
         };
       }),
       defaults[methodName],
-      PAGE_DESCRIPTORS[methodName] || STREAM_DESCRIPTORS[methodName]);
+      PAGE_DESCRIPTORS[methodName] || STREAM_DESCRIPTORS[methodName]
+    );
   });
 }
 
 // Path templates
 
 var DATABASE_ROOT_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}');
+  'projects/{project}/databases/{database}'
+);
 
 var DOCUMENT_ROOT_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}/documents');
+  'projects/{project}/databases/{database}/documents'
+);
 
 var DOCUMENT_PATH_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}/documents/{document_path=**}');
+  'projects/{project}/databases/{database}/documents/{document_path=**}'
+);
 
 var ANY_PATH_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}/documents/{document}/{any_path=**}');
+  'projects/{project}/databases/{database}/documents/{document}/{any_path=**}'
+);
 
 /**
  * Returns a fully-qualified database_root resource name string.
@@ -170,7 +180,7 @@ var ANY_PATH_PATH_TEMPLATE = new gax.PathTemplate(
 FirestoreClient.prototype.databaseRootPath = function(project, database) {
   return DATABASE_ROOT_PATH_TEMPLATE.render({
     project: project,
-    database: database
+    database: database,
   });
 };
 
@@ -183,7 +193,7 @@ FirestoreClient.prototype.databaseRootPath = function(project, database) {
 FirestoreClient.prototype.documentRootPath = function(project, database) {
   return DOCUMENT_ROOT_PATH_TEMPLATE.render({
     project: project,
-    database: database
+    database: database,
   });
 };
 
@@ -194,11 +204,15 @@ FirestoreClient.prototype.documentRootPath = function(project, database) {
  * @param {String} documentPath
  * @returns {String}
  */
-FirestoreClient.prototype.documentPathPath = function(project, database, documentPath) {
+FirestoreClient.prototype.documentPathPath = function(
+  project,
+  database,
+  documentPath
+) {
   return DOCUMENT_PATH_PATH_TEMPLATE.render({
     project: project,
     database: database,
-    document_path: documentPath
+    document_path: documentPath,
   });
 };
 
@@ -210,12 +224,17 @@ FirestoreClient.prototype.documentPathPath = function(project, database, documen
  * @param {String} anyPath
  * @returns {String}
  */
-FirestoreClient.prototype.anyPathPath = function(project, database, document, anyPath) {
+FirestoreClient.prototype.anyPathPath = function(
+  project,
+  database,
+  document,
+  anyPath
+) {
   return ANY_PATH_PATH_TEMPLATE.render({
     project: project,
     database: database,
     document: document,
-    any_path: anyPath
+    any_path: anyPath,
   });
 };
 
@@ -225,7 +244,9 @@ FirestoreClient.prototype.anyPathPath = function(project, database, document, an
  *   A fully-qualified path representing a database_root resources.
  * @returns {String} - A string representing the project.
  */
-FirestoreClient.prototype.matchProjectFromDatabaseRootName = function(databaseRootName) {
+FirestoreClient.prototype.matchProjectFromDatabaseRootName = function(
+  databaseRootName
+) {
   return DATABASE_ROOT_PATH_TEMPLATE.match(databaseRootName).project;
 };
 
@@ -235,7 +256,9 @@ FirestoreClient.prototype.matchProjectFromDatabaseRootName = function(databaseRo
  *   A fully-qualified path representing a database_root resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreClient.prototype.matchDatabaseFromDatabaseRootName = function(databaseRootName) {
+FirestoreClient.prototype.matchDatabaseFromDatabaseRootName = function(
+  databaseRootName
+) {
   return DATABASE_ROOT_PATH_TEMPLATE.match(databaseRootName).database;
 };
 
@@ -245,7 +268,9 @@ FirestoreClient.prototype.matchDatabaseFromDatabaseRootName = function(databaseR
  *   A fully-qualified path representing a document_root resources.
  * @returns {String} - A string representing the project.
  */
-FirestoreClient.prototype.matchProjectFromDocumentRootName = function(documentRootName) {
+FirestoreClient.prototype.matchProjectFromDocumentRootName = function(
+  documentRootName
+) {
   return DOCUMENT_ROOT_PATH_TEMPLATE.match(documentRootName).project;
 };
 
@@ -255,7 +280,9 @@ FirestoreClient.prototype.matchProjectFromDocumentRootName = function(documentRo
  *   A fully-qualified path representing a document_root resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreClient.prototype.matchDatabaseFromDocumentRootName = function(documentRootName) {
+FirestoreClient.prototype.matchDatabaseFromDocumentRootName = function(
+  documentRootName
+) {
   return DOCUMENT_ROOT_PATH_TEMPLATE.match(documentRootName).database;
 };
 
@@ -265,7 +292,9 @@ FirestoreClient.prototype.matchDatabaseFromDocumentRootName = function(documentR
  *   A fully-qualified path representing a document_path resources.
  * @returns {String} - A string representing the project.
  */
-FirestoreClient.prototype.matchProjectFromDocumentPathName = function(documentPathName) {
+FirestoreClient.prototype.matchProjectFromDocumentPathName = function(
+  documentPathName
+) {
   return DOCUMENT_PATH_PATH_TEMPLATE.match(documentPathName).project;
 };
 
@@ -275,7 +304,9 @@ FirestoreClient.prototype.matchProjectFromDocumentPathName = function(documentPa
  *   A fully-qualified path representing a document_path resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreClient.prototype.matchDatabaseFromDocumentPathName = function(documentPathName) {
+FirestoreClient.prototype.matchDatabaseFromDocumentPathName = function(
+  documentPathName
+) {
   return DOCUMENT_PATH_PATH_TEMPLATE.match(documentPathName).database;
 };
 
@@ -285,7 +316,9 @@ FirestoreClient.prototype.matchDatabaseFromDocumentPathName = function(documentP
  *   A fully-qualified path representing a document_path resources.
  * @returns {String} - A string representing the document_path.
  */
-FirestoreClient.prototype.matchDocumentPathFromDocumentPathName = function(documentPathName) {
+FirestoreClient.prototype.matchDocumentPathFromDocumentPathName = function(
+  documentPathName
+) {
   return DOCUMENT_PATH_PATH_TEMPLATE.match(documentPathName).document_path;
 };
 
@@ -626,7 +659,11 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
     options = {};
   }
 
-  return PAGE_DESCRIPTORS.listDocuments.createStream(this._listDocuments, request, options);
+  return PAGE_DESCRIPTORS.listDocuments.createStream(
+    this._listDocuments,
+    request,
+    options
+  );
 };
 
 /**
@@ -692,7 +729,11 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  *     console.error(err);
  * });
  */
-FirestoreClient.prototype.createDocument = function(request, options, callback) {
+FirestoreClient.prototype.createDocument = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -769,7 +810,11 @@ FirestoreClient.prototype.createDocument = function(request, options, callback) 
  *     console.error(err);
  * });
  */
-FirestoreClient.prototype.updateDocument = function(request, options, callback) {
+FirestoreClient.prototype.updateDocument = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -815,7 +860,11 @@ FirestoreClient.prototype.updateDocument = function(request, options, callback) 
  *     console.error(err);
  * });
  */
-FirestoreClient.prototype.deleteDocument = function(request, options, callback) {
+FirestoreClient.prototype.deleteDocument = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -937,7 +986,11 @@ FirestoreClient.prototype.batchGetDocuments = function(request, options) {
  *     console.error(err);
  * });
  */
-FirestoreClient.prototype.beginTransaction = function(request, options, callback) {
+FirestoreClient.prototype.beginTransaction = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -1275,7 +1328,11 @@ FirestoreClient.prototype.listen = function(options) {
  *         console.error(err);
  *     });
  */
-FirestoreClient.prototype.listCollectionIds = function(request, options, callback) {
+FirestoreClient.prototype.listCollectionIds = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -1340,7 +1397,11 @@ FirestoreClient.prototype.listCollectionIdsStream = function(request, options) {
     options = {};
   }
 
-  return PAGE_DESCRIPTORS.listCollectionIds.createStream(this._listCollectionIds, request, options);
+  return PAGE_DESCRIPTORS.listCollectionIds.createStream(
+    this._listCollectionIds,
+    request,
+    options
+  );
 };
 
 function FirestoreClientBuilder(gaxGrpc) {
@@ -1349,9 +1410,10 @@ function FirestoreClientBuilder(gaxGrpc) {
   }
 
   var firestoreStubProtos = gaxGrpc.loadProto(
-    path.join(__dirname, '..', '..', 'protos'), 'google/firestore/v1beta1/firestore.proto');
+    path.join(__dirname, '..', '..', 'protos'),
+    'google/firestore/v1beta1/firestore.proto'
+  );
   extend(this, firestoreStubProtos.google.firestore.v1beta1);
-
 
   /**
    * Build a new instance of {@link FirestoreClient}.

@@ -31,8 +31,7 @@ const validate = require('./validate')();
  *
  * @type {RegExp}
  */
-const RESOURCE_PATH_RE =
-    /^projects\/([^\/]*)\/databases\/([^\/]*)(?:\/documents\/)?(.*)$/;
+const RESOURCE_PATH_RE = /^projects\/([^\/]*)\/databases\/([^\/]*)(?:\/documents\/)?(.*)$/;
 
 /**
  * A regular expression to verify whether a field name can be passed to the
@@ -50,7 +49,6 @@ const UNESCAPED_FIELD_NAME_RE = /^[_a-zA-Z][_a-zA-Z0-9]*$/;
  * @type {RegExp}
  */
 const FIELD_PATH_RE = /^[^*~/\[\]]+$/;
-
 
 /**
  * An abstract class representing a Firestore path.
@@ -353,8 +351,12 @@ class ResourcePath extends Path {
    * @return {string} The representation as expected by the API.
    */
   canonicalString() {
-    let components = ['projects', this._projectId, 'databases',
-      this._databaseId];
+    let components = [
+      'projects',
+      this._projectId,
+      'databases',
+      this._databaseId,
+    ];
     if (this.segments.length > 0) {
       components = components.concat('documents', this.segments);
     }
@@ -491,8 +493,9 @@ class FieldPath extends Path {
   static fromArgument(fieldPath) {
     // validateFieldPath() is used in all public API entry points to validate
     // that fromArgument() is only called with a Field Path or a string.
-    return fieldPath instanceof FieldPath ? fieldPath :
-        new FieldPath(...fieldPath.split('.'));
+    return fieldPath instanceof FieldPath
+      ? fieldPath
+      : new FieldPath(...fieldPath.split('.'));
   }
 
   /**
@@ -504,11 +507,12 @@ class FieldPath extends Path {
    */
   canonicalString() {
     return this.segments
-        .map((str) => {
-          return UNESCAPED_FIELD_NAME_RE.test(str) ? str :
-              '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
-        })
-        .join('.');
+      .map(str => {
+        return UNESCAPED_FIELD_NAME_RE.test(str)
+          ? str
+          : '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
+      })
+      .join('.');
   }
 
   /**
@@ -546,4 +550,4 @@ class FieldPath extends Path {
  */
 FieldPath._DOCUMENT_ID = new FieldPath('__name__');
 
-module.exports = { FieldPath, ResourcePath };
+module.exports = {FieldPath, ResourcePath};

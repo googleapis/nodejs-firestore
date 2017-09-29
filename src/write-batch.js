@@ -120,7 +120,6 @@ class WriteResult {
   }
 }
 
-
 /**
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.
@@ -142,7 +141,6 @@ class WriteBatch {
     this._api = firestore.api;
     this._writes = [];
   }
-
 
   /**
    * Checks if this write batch has any pending operations.
@@ -183,7 +181,7 @@ class WriteBatch {
 
     let write = {
       update: new DocumentSnapshot(documentRef, fields).toProto(),
-      currentDocument: new Precondition({exists: false}).toProto()
+      currentDocument: new Precondition({exists: false}).toProto(),
     };
 
     this._writes.push(write);
@@ -275,7 +273,7 @@ class WriteBatch {
     let fields = DocumentSnapshot.encodeFields(data);
 
     let write = {
-      update: new DocumentSnapshot(documentRef, fields).toProto()
+      update: new DocumentSnapshot(documentRef, fields).toProto(),
     };
 
     if (options && options.merge) {
@@ -336,12 +334,13 @@ class WriteBatch {
     const updateMap = new Map();
     let precondition = new Precondition({exists: true});
 
-    const argumentError = 'Update() requires either a single JavaScript ' +
-        'object or an alternating list of field/value pairs that can be ' +
-        'followed by an optional Precondition';
+    const argumentError =
+      'Update() requires either a single JavaScript ' +
+      'object or an alternating list of field/value pairs that can be ' +
+      'followed by an optional Precondition';
 
-    let usesVarargs = is.string(dataOrField) ||
-        is.instance(dataOrField, FieldPath);
+    let usesVarargs =
+      is.string(dataOrField) || is.instance(dataOrField, FieldPath);
 
     if (usesVarargs) {
       try {
@@ -349,8 +348,10 @@ class WriteBatch {
           if (is.string(arguments[i]) || is.instance(arguments[i], FieldPath)) {
             validate.isFieldPath(i, arguments[i]);
             validate.minNumberOfArguments('update', arguments, i + 1);
-            updateMap.set(FieldPath.fromArgument(arguments[i]),
-                arguments[i + 1]);
+            updateMap.set(
+              FieldPath.fromArgument(arguments[i]),
+              arguments[i + 1]
+            );
           } else {
             validate.isPrecondition(i, arguments[i]);
             validate.maxNumberOfArguments('update', arguments, i + 1);
@@ -373,13 +374,15 @@ class WriteBatch {
         });
 
         if (is.defined(preconditionOrValues)) {
-          validate.isPrecondition('preconditionOrValues',
-              preconditionOrValues);
+          validate.isPrecondition('preconditionOrValues', preconditionOrValues);
           precondition = new Precondition(preconditionOrValues);
         }
       } catch (err) {
-        Firestore.log('WriteBatch.update', 'Non-varargs validation failed:',
-            err);
+        Firestore.log(
+          'WriteBatch.update',
+          'Non-varargs validation failed:',
+          err
+        );
         // We catch the validation error here and prefix the error with a custom
         // message to describe the usage of update() better.
         throw new Error(`${argumentError}: ${err.message}`);
@@ -388,19 +391,23 @@ class WriteBatch {
 
     let documentMask = DocumentMask.fromMap(updateMap);
     let expandedObject = DocumentSnapshot.expandMap(updateMap);
-    let document = new DocumentSnapshot(documentRef,
-        DocumentSnapshot.encodeFields(expandedObject));
+    let document = new DocumentSnapshot(
+      documentRef,
+      DocumentSnapshot.encodeFields(expandedObject)
+    );
 
     let write = {
       update: document.toProto(),
       updateMask: documentMask.toProto(),
-      currentDocument: precondition.toProto()
+      currentDocument: precondition.toProto(),
     };
 
     this._writes.push(write);
 
     let documentTransform = DocumentTransform.fromObject(
-        documentRef, expandedObject);
+      documentRef,
+      expandedObject
+    );
 
     if (!documentTransform.isEmpty) {
       this._writes.push({transform: documentTransform.toProto()});
@@ -452,41 +459,49 @@ class WriteBatch {
     // request retries in case GCF closes our backend connection.
     if (!explicitTransaction && this._shouldCreateTransaction()) {
       Firestore.log('WriteBatch.commit', 'Using transaction for commit');
-      return this._firestore.request(
+      return this._firestore
+        .request(
           this._api.Firestore.beginTransaction.bind(this._api.Firestore),
           request,
           /* allowRetries= */ true
-      ).then(resp => {
-        return this.commit_({ transactionId: resp.transaction });
-      });
+        )
+        .then(resp => {
+          return this.commit_({transactionId: resp.transaction});
+        });
     }
 
     request.writes = this._writes;
 
-    Firestore.log('WriteBatch.commit',
-        'Sending %d writes', request.writes.length);
+    Firestore.log(
+      'WriteBatch.commit',
+      'Sending %d writes',
+      request.writes.length
+    );
 
     if (explicitTransaction) {
       request.transaction = explicitTransaction;
     }
 
-    return this._firestore.request(
-        this._api.Firestore.commit.bind(this._api.Firestore), request
-    ).then(resp => {
-      let commitTime = DocumentSnapshot.toISOTime(resp.commitTime);
-      let result = {
-        writeResults: []
-      };
+    return this._firestore
+      .request(this._api.Firestore.commit.bind(this._api.Firestore), request)
+      .then(resp => {
+        let commitTime = DocumentSnapshot.toISOTime(resp.commitTime);
+        let result = {
+          writeResults: [],
+        };
 
-      if (resp.writeResults) {
-        for (let writeResult of resp.writeResults) {
-          result.writeResults.push(new WriteResult(DocumentSnapshot.toISOTime(
-              writeResult.updateTime) || commitTime));
+        if (resp.writeResults) {
+          for (let writeResult of resp.writeResults) {
+            result.writeResults.push(
+              new WriteResult(
+                DocumentSnapshot.toISOTime(writeResult.updateTime) || commitTime
+              )
+            );
+          }
         }
-      }
 
-      return result;
-    });
+        return result;
+      });
   }
 
   /**
@@ -510,24 +525,27 @@ class WriteBatch {
   }
 }
 
-
-module.exports = (FirestoreType, DocumentReferenceType,
-    validateDocumentReference) => {
-      let document = require('./document.js')(Firestore, DocumentReferenceType);
-      Firestore = FirestoreType;
-      DocumentReference = DocumentReferenceType;
-      DocumentMask = document.DocumentMask;
-      DocumentSnapshot = document.DocumentSnapshot;
-      DocumentTransform = document.DocumentTransform;
-      Precondition = document.Precondition;
-      validate = require('./validate')({
+module.exports = (
+  FirestoreType,
+  DocumentReferenceType,
+  validateDocumentReference
+) => {
+  let document = require('./document.js')(Firestore, DocumentReferenceType);
+  Firestore = FirestoreType;
+  DocumentReference = DocumentReferenceType;
+  DocumentMask = document.DocumentMask;
+  DocumentSnapshot = document.DocumentSnapshot;
+  DocumentTransform = document.DocumentTransform;
+  Precondition = document.Precondition;
+  validate = require('./validate')({
     Document: document.validateDocumentData,
     DocumentReference: validateDocumentReference,
     FieldPath: FieldPath.validateFieldPath,
     Precondition: document.validatePrecondition,
-    SetOptions: document.validateSetOptions
+    SetOptions: document.validateSetOptions,
   });
-      return {
-    WriteBatch, WriteResult
+  return {
+    WriteBatch,
+    WriteResult,
   };
-    };
+};
