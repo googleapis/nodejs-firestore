@@ -21,6 +21,7 @@
   "files": [
     "src",
     "protos",
+    "types",
     "AUTHORS",
     "CONTRIBUTORS",
     "COPYING"
