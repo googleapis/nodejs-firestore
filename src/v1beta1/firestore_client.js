@@ -56,7 +56,7 @@ var STREAM_DESCRIPTORS = {
   listen: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
 };
 
-/**
+/*!
  * The scopes needed to make gRPC calls to all of the methods defined in
  * this service.
  */
@@ -398,7 +398,7 @@ FirestoreClient.prototype.getProjectId = function(callback) {
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [Document]{@link Document}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [Document]{@link Document}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -406,7 +406,7 @@ FirestoreClient.prototype.getProjectId = function(callback) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -488,7 +488,7 @@ FirestoreClient.prototype.getDocument = function(request, options, callback) {
  *   in a single response. If the response indicates the next page exists, the third
  *   parameter is set to be used for the next request object. The fourth parameter keeps
  *   the raw response object of an object representing [ListDocumentsResponse]{@link ListDocumentsResponse}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is Array of [Document]{@link Document}.
  *
  *   When autoPaginate: false is specified through options, the array has three elements.
@@ -503,7 +503,7 @@ FirestoreClient.prototype.getDocument = function(request, options, callback) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -626,14 +626,14 @@ FirestoreClient.prototype.listDocuments = function(request, options, callback) {
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
- * @return {Stream}
+ * @returns {Stream}
  *   An object stream which emits an object representing [Document]{@link Document} on 'data' event.
  *
  * @example
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -695,7 +695,7 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [Document]{@link Document}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [Document]{@link Document}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -703,7 +703,7 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -780,7 +780,7 @@ FirestoreClient.prototype.createDocument = function(
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [Document]{@link Document}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [Document]{@link Document}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -788,7 +788,7 @@ FirestoreClient.prototype.createDocument = function(
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -840,14 +840,14 @@ FirestoreClient.prototype.updateDocument = function(
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @param {function(?Error)=} callback
  *   The function which will be called with the result of the API call.
- * @return {Promise} - The promise which resolves when API call finishes.
+ * @returns {Promise} - The promise which resolves when API call finishes.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
  * @example
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -919,7 +919,7 @@ FirestoreClient.prototype.deleteDocument = function(
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -961,7 +961,7 @@ FirestoreClient.prototype.batchGetDocuments = function(request, options) {
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [BeginTransactionResponse]{@link BeginTransactionResponse}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [BeginTransactionResponse]{@link BeginTransactionResponse}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -969,7 +969,7 @@ FirestoreClient.prototype.batchGetDocuments = function(request, options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1021,7 +1021,7 @@ FirestoreClient.prototype.beginTransaction = function(
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [CommitResponse]{@link CommitResponse}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [CommitResponse]{@link CommitResponse}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -1029,7 +1029,7 @@ FirestoreClient.prototype.beginTransaction = function(
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1074,14 +1074,14 @@ FirestoreClient.prototype.commit = function(request, options, callback) {
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @param {function(?Error)=} callback
  *   The function which will be called with the result of the API call.
- * @return {Promise} - The promise which resolves when API call finishes.
+ * @returns {Promise} - The promise which resolves when API call finishes.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
  * @example
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1147,7 +1147,7 @@ FirestoreClient.prototype.rollback = function(request, options, callback) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1179,7 +1179,7 @@ FirestoreClient.prototype.runQuery = function(request, options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1216,7 +1216,7 @@ FirestoreClient.prototype.write = function(options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1266,7 +1266,7 @@ FirestoreClient.prototype.listen = function(options) {
  *   in a single response. If the response indicates the next page exists, the third
  *   parameter is set to be used for the next request object. The fourth parameter keeps
  *   the raw response object of an object representing [ListCollectionIdsResponse]{@link ListCollectionIdsResponse}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is Array of string.
  *
  *   When autoPaginate: false is specified through options, the array has three elements.
@@ -1281,7 +1281,7 @@ FirestoreClient.prototype.listen = function(options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1369,14 +1369,14 @@ FirestoreClient.prototype.listCollectionIds = function(
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
- * @return {Stream}
+ * @returns {Stream}
  *   An object stream which emits a string on 'data' event.
  *
  * @example
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1400,6 +1400,10 @@ FirestoreClient.prototype.listCollectionIdsStream = function(request, options) {
   );
 };
 
+/**
+ * @class
+ * @param {*} gaxGrpc
+ */
 function FirestoreClientBuilder(gaxGrpc) {
   if (!(this instanceof FirestoreClientBuilder)) {
     return new FirestoreClientBuilder(gaxGrpc);
@@ -1414,6 +1418,7 @@ function FirestoreClientBuilder(gaxGrpc) {
   /**
    * Build a new instance of {@link FirestoreClient}.
    *
+   * @method FirestoreClientBuilder#firestoreClient
    * @param {Object=} opts - The optional parameters.
    * @param {String=} opts.servicePath
    *   The domain name of the API remote host.

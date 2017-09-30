@@ -30,7 +30,7 @@
  *   The list of field paths in the mask. See {@link Document.fields} for a field
  *   path syntax reference.
  *
- * @class
+ * @typedef DocumentMask
  * @see [google.firestore.v1beta1.DocumentMask definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
 var DocumentMask = {
@@ -50,7 +50,7 @@ var DocumentMask = {
  *
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
- * @class
+ * @typedef Precondition
  * @see [google.firestore.v1beta1.Precondition definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
 var Precondition = {
@@ -70,7 +70,7 @@ var Precondition = {
  *
  *   This object should have the same structure as [ReadWrite]{@link ReadWrite}
  *
- * @class
+ * @typedef TransactionOptions
  * @see [google.firestore.v1beta1.TransactionOptions definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
 var TransactionOptions = {
@@ -82,7 +82,7 @@ var TransactionOptions = {
    * @property {string} retryTransaction
    *   An optional transaction to retry.
    *
-   * @class
+   * @typedef ReadWrite
    * @see [google.firestore.v1beta1.TransactionOptions.ReadWrite definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
    */
   ReadWrite: {
@@ -98,7 +98,7 @@ var TransactionOptions = {
    *
    *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
    *
-   * @class
+   * @typedef ReadOnly
    * @see [google.firestore.v1beta1.TransactionOptions.ReadOnly definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
    */
   ReadOnly: {

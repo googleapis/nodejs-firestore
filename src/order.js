@@ -18,12 +18,12 @@
 
 const is = require('is');
 
-/**
- * @type firestore.ResourcePath
+/*!
+ * @see ResourcePath
  */
 const ResourcePath = require('./path').ResourcePath;
 
-/**
+/*!
  * The type order as defined by the backend.
  */
 const types = {
@@ -39,7 +39,7 @@ const types = {
   OBJECT: 9,
 };
 
-/**
+/*!
  * @private
  */
 function typeOrder(val) {
@@ -89,7 +89,7 @@ function typeOrder(val) {
   }
 }
 
-/**
+/*!
  * @private
  */
 function primitiveComparator(left, right) {
@@ -102,7 +102,7 @@ function primitiveComparator(left, right) {
   return 0;
 }
 
-/**
+/*!
  * Utility function to compare doubles (using Firestore semantics for NaN).
  * @private
  */
@@ -123,7 +123,7 @@ function compareNumbers(left, right) {
   return 1;
 }
 
-/**
+/*!
  * @private
  */
 function compareNumberProtos(left, right) {
@@ -141,7 +141,7 @@ function compareNumberProtos(left, right) {
   return compareNumbers(leftValue, rightValue);
 }
 
-/**
+/*!
  * @private
  */
 function compareTimestamps(left, right) {
@@ -152,7 +152,7 @@ function compareTimestamps(left, right) {
   return primitiveComparator(left.nanos, right.nanos);
 }
 
-/**
+/*!
  * @private
  */
 function compareBlobs(left, right) {
@@ -162,7 +162,7 @@ function compareBlobs(left, right) {
   return Buffer.compare(left, right);
 }
 
-/**
+/*!
  * @private
  */
 function compareReferenceProtos(left, right) {
@@ -171,7 +171,7 @@ function compareReferenceProtos(left, right) {
   return leftPath.compareTo(rightPath);
 }
 
-/**
+/*!
  * @private
  */
 function compareGeoPoints(left, right) {
@@ -181,7 +181,7 @@ function compareGeoPoints(left, right) {
   );
 }
 
-/**
+/*!
  * @private
  */
 function compareArrays(left, right) {
@@ -195,8 +195,8 @@ function compareArrays(left, right) {
   return primitiveComparator(left.length, right.length);
 }
 
-/**
- * @package
+/*!
+ * @private
  */
 function compareObjects(left, right) {
   // This requires iterating over the keys in the object in order and doing a
@@ -220,8 +220,8 @@ function compareObjects(left, right) {
   return primitiveComparator(leftKeys.length, rightKeys.length);
 }
 
-/**
- * @package
+/*!
+ * @private
  */
 function compare(left, right) {
   // First compare the types.

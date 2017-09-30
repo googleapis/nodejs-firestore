@@ -29,68 +29,68 @@ const libVersion = require('../package.json').version;
 
 const path = require('./path');
 
-/**
- * @type firestore.ResourcePath
+/*!
+ * @see ResourcePath
  */
 const ResourcePath = path.ResourcePath;
 
-/**
- * @type firestore.ResourcePath
+/*!
+ * @see ResourcePath
  */
 const FieldPath = path.FieldPath;
 
-/**
- * @type firestore.FieldValue
+/*!
+ * @see FieldValue
  */
 const FieldValue = require('./field-value');
 
-/**
- * @type firestore.CollectionReference
+/*!
+ * @see CollectionReference
  */
 let CollectionReference;
 
-/**
- * @type firestore.DocumentReference
+/*!
+ * @see DocumentReference
  */
 let DocumentReference;
 
-/**
- * @type firestore.DocumentSnapshot
+/*!
+ * @see DocumentSnapshot
  */
 let DocumentSnapshot;
 
-/**
- * @type firestore.GeoPoint
+/*!
+ * @see GeoPoint
  */
 let GeoPoint;
 
-/** Injected. */
+/*! Injected. */
 let validate;
 
-/**
- * @type firestore.WriteBatch
+/*!
+ * @see WriteBatch
  */
 let WriteBatch;
 
-/**
- * @type firestore.Transaction
+/*!
+ * @see Transaction
  */
 let Transaction;
 
-/**
+/*!
  * HTTP header for the resource prefix to improve routing and project isolation
  * by the backend.
  * @type string
  */
 const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 
-/**
+/*!
  * The maximum number of times to retry idempotent requests.
  * @type number
  */
 const MAX_REQUEST_RETRIES = 5;
 
-/**
+/*!
  * GRPC Error code for 'UNAVAILABLE'.
  * @type number
  */
@@ -98,16 +98,16 @@ const GRPC_UNAVAILABLE = 14;
 
 /**
  * Document data (e.g. for use with
- * [set()]{@link firestore.DocumentReference#set}) consisting of fields mapped
+ * [set()]{@link DocumentReference#set}) consisting of fields mapped
  * to values.
  *
  * @public
  * @typedef {Object.<string, *>} DocumentData
- * @alias firestore.DocumentData
+ * @alias DocumentData
  */
 
 /**
- * Update data (for use with [update]{@link firestore.DocumentReference#update})
+ * Update data (for use with [update]{@link DocumentReference#update})
  * that contains paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that
  * contain dots reference nested fields within the document.
  *
@@ -117,11 +117,11 @@ const GRPC_UNAVAILABLE = 14;
 
 /**
  * An options object that configures conditional behavior of
- * [update()]{@link firestore.DocumentReference#update} and
- * [delete()]{@link firestore.DocumentReference#delete} calls in
- * [DocumentReference]{@link firestore.DocumentReference},
- * [WriteBatch]{@link firestore.WriteBatch}, and
- * [Transaction]{@link firestore.Transaction}. Using Preconditions, these calls
+ * [update()]{@link DocumentReference#update} and
+ * [delete()]{@link DocumentReference#delete} calls in
+ * [DocumentReference]{@link DocumentReference},
+ * [WriteBatch]{@link WriteBatch}, and
+ * [Transaction]{@link Transaction}. Using Preconditions, these calls
  * can be restricted to only apply to documents that match the specified
  * conditions.
  *
@@ -133,10 +133,10 @@ const GRPC_UNAVAILABLE = 14;
 
 /**
  * An options object that configures the behavior of
- * [set()]{@link firestore.DocumentReference#set} calls in
- * [DocumentReference]{@link firestore.DocumentReference},
- * [WriteBatch]{@link firestore.WriteBatch}, and
- * [Transaction]{@link firestore.Transaction}. These calls can be
+ * [set()]{@link DocumentReference#set} calls in
+ * [DocumentReference]{@link DocumentReference},
+ * [WriteBatch]{@link WriteBatch}, and
+ * [Transaction]{@link Transaction}. These calls can be
  * configured to perform granular merges instead of overwriting the target
  * documents in their entirety by providing a SetOptions object with
  * { merge : true }.
@@ -152,10 +152,28 @@ const GRPC_UNAVAILABLE = 14;
  * The Firestore client represents a Firestore Database and is the entry point
  * for all Firestore operations.
  *
- * @resource [Firestore Documentation]{@link https://firebase.google.com/docs/firestore/}
+ * @see [Firestore Documentation]{@link https://firebase.google.com/docs/firestore/}
  *
- * @public
- * @alias firestore.Firestore
+ * @class
+ *
+ *  @example <caption>Install the client library with <a href="https://www.npmjs.com/">npm</a>:</caption>
+ * npm install --save @google-cloud/firestore
+ *
+ * @example <caption>Import the client library</caption>
+ * var Firestore = require('@google-cloud/firestore');
+ *
+ * @example <caption>Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:</caption>
+ * var firestore = Firestore();
+ *
+ * @example <caption>Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:</caption>
+ * var firestore = new Firestore({
+ *   projectId: 'your-project-id',
+ *   keyFilename: '/path/to/keyfile.json'
+ * });
+ *
+ * @example <caption>include:samples/quickstart.js</caption>
+ * region_tag:firestore_quickstart
+ * Full quickstart example:
  */
 class Firestore extends commonGrpc.Service {
   /**
@@ -198,8 +216,8 @@ class Firestore extends commonGrpc.Service {
     }
 
     /**
-     * The Firestore GAPIC client.
-     * @package
+     * @type {object}
+     * @property {FirestoreClient} Firestore The Firestore GAPIC client.
      */
     this.api = {
       Firestore: v1beta1(options).firestoreClient(options),
@@ -219,7 +237,6 @@ class Firestore extends commonGrpc.Service {
 
   /**
    * The root path to the database.
-   * @package
    * @type string
    */
   get formattedName() {
@@ -227,14 +244,14 @@ class Firestore extends commonGrpc.Service {
   }
 
   /**
-   * Gets a [DocumentReference]{@link firestore.DocumentReference} instance that
+   * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path.
    *
    * @public
    *
    * @param {string} documentPath - A slash-separated path to a document.
-   * @return {firestore.DocumentReference} The
-   * [DocumentReference]{@link firestore.DocumentReference} instance.
+   * @returns {DocumentReference} The
+   * [DocumentReference]{@link DocumentReference} instance.
    *
    * @example
    * let documentRef = firestore.doc('collection/document');
@@ -252,14 +269,14 @@ class Firestore extends commonGrpc.Service {
   }
 
   /**
-   * Gets a [CollectionReference]{@link firestore.CollectionReference} instance
+   * Gets a [CollectionReference]{@link CollectionReference} instance
    * that refers to the collection at the specified path.
    *
    * @public
    *
    * @param {string} collectionPath - A slash-separated path to a collection.
-   * @return {firestore.CollectionReference} The
-   * [CollectionReference]{@link firestore.CollectionReference} instance.
+   * @returns {CollectionReference} The
+   * [CollectionReference]{@link CollectionReference} instance.
    *
    * @example
    * let collectionRef = firestore.collection('collection');
@@ -281,12 +298,12 @@ class Firestore extends commonGrpc.Service {
   }
 
   /**
-   * Creates a [WriteBatch]{@link firestore.WriteBatch}, used for performing
+   * Creates a [WriteBatch]{@link WriteBatch}, used for performing
    * multiple writes as a single atomic operation.
    *
    * @public
    *
-   * @return {firestore.WriteBatch} A WriteBatch that operates on this Firestore
+   * @returns {WriteBatch} A WriteBatch that operates on this Firestore
    * client.
    *
    * @example
@@ -306,17 +323,17 @@ class Firestore extends commonGrpc.Service {
   }
 
   /**
-   * Creates a [DocumentSnapshot]{@link firestore.DocumentSnapshot} from a
+   * Creates a [DocumentSnapshot]{@link DocumentSnapshot} from a
    * `Document` proto (or from a resource name for missing documents).
    *
    * This API is used by Google Cloud Functions.
    *
-   * @package
+   * @private
    * @param {object} documentOrName - The Firestore `Document` proto or the
    * resource name of a missing document.
    * @param {object=} readTime - A `Timestamp` proto indicating the time this
    * document was read.
-   * @return {firestore.DocumentSnapshot} - A DocumentSnapshot.
+   * @returns {DocumentSnapshot} - A DocumentSnapshot.
    */
   snapshot_(documentOrName, readTime) {
     let document = new DocumentSnapshot.Builder();
@@ -354,13 +371,13 @@ class Firestore extends commonGrpc.Service {
    *
    * @public
    *
-   * @param {function(firestore.Transaction)} updateFunction - The
+   * @param {function(Transaction)} updateFunction - The
    * function to execute within the transaction
    * context.
    * @param {object=} transactionOptions - Transaction options.
    * @param {number=} transactionOptions.maxAttempts - The maximum number of
    * attempts for this transaction.
-   * @return {Promise} If the transaction completed successfully or was
+   * @returns {Promise} If the transaction completed successfully or was
    * explicitly aborted (by the updateFunction returning a failed Promise), the
    * Promise returned by the updateFunction will be returned here. Else if the
    * transaction failed, a rejected Promise with the corresponding failure
@@ -467,7 +484,7 @@ class Firestore extends commonGrpc.Service {
    *
    * @public
    *
-   * @returns {Promise.<Array.<firestore.CollectionReference>>} A Promise that
+   * @returns {Promise.<Array.<CollectionReference>>} A Promise that
    * contains an array with CollectionReferences.
    *
    * @example
@@ -487,9 +504,9 @@ class Firestore extends commonGrpc.Service {
    *
    * @public
    *
-   * @param {...firestore.DocumentReference} documents - The document references
+   * @param {...DocumentReference} documents - The document references
    * to receive.
-   * @return {Promise<Array.<firestore.DocumentSnapshot>>} A Promise that
+   * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
    *
    * @example
@@ -517,13 +534,13 @@ class Firestore extends commonGrpc.Service {
    * Internal method to retrieve multiple documents from Firestore, optionally
    * as part of a transaction.
    *
-   * @package
-   * @param {Array.<firestore.DocumentReference>} docRefs - The documents
+   * @private
+   * @param {Array.<DocumentReference>} docRefs - The documents
    * to receive.
    * @param {object=} readOptions - The options to use for this request.
    * @param {bytes|null} readOptions.transactionId - The transaction ID to use
    * for this read.
-   * @return {Array.<firestore.DocumentSnapshot|null>} A Promise that
+   * @returns {Array.<DocumentSnapshot|null>} A Promise that
    * contains an array with the resulting documents (or null for each missing
    * document).
    */
@@ -628,8 +645,7 @@ class Firestore extends commonGrpc.Service {
    *
    * Used for the creation of new documents.
    *
-   * @package
-   * @return {string} A unique 20-character wide identifier.
+   * @returns {string} A unique 20-character wide identifier.
    */
   static autoId() {
     let chars =
@@ -703,7 +719,7 @@ class Firestore extends commonGrpc.Service {
    *
    * @private
    * @callback retryFunction
-   * @return {Promise} A Promise indicating the function's success.
+   * @returns {Promise} A Promise indicating the function's success.
    */
 
   /**
@@ -719,7 +735,7 @@ class Firestore extends commonGrpc.Service {
    * retried.
    * @param {number=} delayMs - How long to wait before issuing a this retry.
    * Defaults to zero.
-   * @return {Promise} - A Promise with the function'ss result if successful
+   * @returns {Promise} - A Promise with the function'ss result if successful
    * within `attemptsRemaining`. Otherwise, returns the last rejected Promise.
    */
   _retry(attemptsRemaining, func, delayMs) {
@@ -769,7 +785,7 @@ class Firestore extends commonGrpc.Service {
    * @param {Stream} resultStream - The Node stream to monitor.
    * @param {Object=} request - If specified, the request that should be written
    * to the stream after it opened.
-   * @return {Promise.<Stream>} The given Stream once it is considered healthy.
+   * @returns {Promise.<Stream>} The given Stream once it is considered healthy.
    */
   _initializeStream(resultStream, request) {
     /** The last error we received and have not forwarded yet. */
@@ -866,14 +882,12 @@ class Firestore extends commonGrpc.Service {
    * A funnel for all non-streaming API requests, assigning a project ID where
    * necessary within the request options.
    *
-   * @package
-   *
    * @param {function} method - Veneer API endpoint that takes a request and
    * GAX options.
    * @param {Object} request - The Protobuf request to send.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
-   * @return {Promise.<Object>} A Promise with the request result.
+   * @returns {Promise.<Object>} A Promise with the request result.
    */
   request(method, request, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
@@ -911,14 +925,13 @@ class Firestore extends commonGrpc.Service {
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
    *
-   * @package
    *
    * @param {function} method - Streaming Veneer API endpoint that takes a
    * request and GAX options.
    * @param {Object} request - The Protobuf request to send.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
-   * @return {Promise.<Stream>} A Promise with the resulting read-only stream.
+   * @returns {Promise.<Stream>} A Promise with the resulting read-only stream.
    */
   readStream(method, request, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
@@ -959,7 +972,6 @@ class Firestore extends commonGrpc.Service {
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
    *
-   * @package
    *
    * @param {function} method - Streaming Veneer API endpoint that takes GAX
    * options.
@@ -967,7 +979,7 @@ class Firestore extends commonGrpc.Service {
    * message.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
-   * @return {Promise.<Stream>} A Promise with the resulting read/write stream.
+   * @returns {Promise.<Stream>} A Promise with the resulting read/write stream.
    */
   readWriteStream(method, request, allowRetries) {
     let self = this;
@@ -1017,8 +1029,7 @@ class Firestore extends commonGrpc.Service {
 /**
  * A logging function that takes a single string.
  *
- * @package
- * @callback firestore.logFunction
+ * @callback Firestore~logFunction
  * @param {string} Log message
  */
 
@@ -1026,19 +1037,18 @@ class Firestore extends commonGrpc.Service {
  * Log function to use for debug output. By default, we don't perform any
  * logging.
  *
- * @package
- * @type {firestore.logFunction}
+ * @type {Firestore~logFunction}
  */
 Firestore.log = function() {};
 
 /**
  * Sets the log function for all active Firestore instances.
  *
- * @public
- * @param {firestore.logFunction} logger - A log function that takes a single
+ * @method Firestore.setLogFunction
+ * @param {Firestore~logFunction} logger - A log function that takes a single
  * string.
  */
-function setLogFunction(logger) {
+Firestore.setLogFunction = function(logger) {
   validate.isFunction('logger', logger);
 
   Firestore.log = function(methodName, varargs) {
@@ -1050,7 +1060,7 @@ function setLogFunction(logger) {
       `Firestore (${libVersion}) ${time} [${methodName}]: ` + formattedMessage
     );
   };
-}
+};
 
 // Initializing dependencies that require that Firestore class type.
 let reference = require('./reference')(Firestore);
@@ -1070,12 +1080,42 @@ Transaction = require('./transaction')(Firestore);
  * The default export of the `@google-cloud/firestore` package is the
  * {@link Firestore} class.
  *
+ * See {@link Firestore} and {@link ClientConfig} for client methods and
+ * configuration options.
+ *
  * @module {Firestore} @google-cloud/firestore
  * @alias nodejs-firestore
+ *
+ * @example <caption>Install the client library with <a href="https://www.npmjs.com/">npm</a>:</caption>
+ * npm install --save @google-cloud/firestore
+ *
+ * @example <caption>Import the client library</caption>
+ * var Firestore = require('@google-cloud/firestore');
+ *
+ * @example <caption>Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:</caption>
+ * var firestore = Firestore();
+ *
+ * @example <caption>Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:</caption>
+ * var firestore = new Firestore({
+ *   projectId: 'your-project-id',
+ *   keyFilename: '/path/to/keyfile.json'
+ * });
+ *
+ * @example <caption>include:samples/quickstart.js</caption>
+ * region_tag:firestore_quickstart
+ * Full quickstart example:
  */
 module.exports = Firestore;
 module.exports.default = Firestore;
 module.exports.Firestore = Firestore;
+
+/**
+ * {@link v1beta1} factory function.
+ *
+ * @name Firestore.v1beta1
+ * @see v1beta1
+ * @type {function}
+ */
 module.exports.v1beta1 = v1beta1;
 
 /**
@@ -1104,12 +1144,3 @@ module.exports.FieldValue = FieldValue;
  * @type {Constructor}
  */
 module.exports.GeoPoint = GeoPoint;
-
-/**
- * {@link setLogFunction} function.
- *
- * @name Firestore.setLogFunction
- * @see setLogFunction
- * @type {function}
- */
-module.exports.setLogFunction = setLogFunction;

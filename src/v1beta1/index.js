@@ -30,7 +30,6 @@ function v1beta1(options) {
   return firestoreClient(gaxGrpc);
 }
 
-v1beta1.GAPIC_VERSION = '0.0.5';
 v1beta1.SERVICE_ADDRESS = firestoreClient.SERVICE_ADDRESS;
 v1beta1.ALL_SCOPES = firestoreClient.ALL_SCOPES;
 

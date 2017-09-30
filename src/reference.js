@@ -22,54 +22,54 @@ const is = require('is');
 const order = require('./order');
 const through = require('through2');
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.Firestore
+ * @see Firestore
  */
 let Firestore;
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.DocumentSnapshot
+ * @see DocumentSnapshot
  */
 let DocumentSnapshot;
 
-/**
+/*!
  * Injected.
  */
 let validate;
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.Watch
+ * @see Watch
  */
 let Watch;
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.WriteBatch
+ * @see WriteBatch
  */
 let WriteBatch;
 
 const path = require('./path');
 
-/**
+/*!
  * @private
- * @type firestore.ResourcePath
+ * @see ResourcePath
  */
 const ResourcePath = path.ResourcePath;
 
-/**
+/*!
  * @private
- * @type firestore.FieldPath
+ * @see FieldPath
  */
 const FieldPath = path.FieldPath;
 
-/**
+/*!
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
  * (descending or ascending).
  *
@@ -82,7 +82,7 @@ const directionOperators = {
   DESC: 'DESCENDING',
 };
 
-/**
+/*!
  * Filter conditions in a `Query.where()` clause are specified using the
  * strings '<', '<=', '==', '>=', and '>'.
  *
@@ -101,14 +101,14 @@ const comparisonOperators = {
  * onSnapshot() callback that receives a QuerySnapshot.
  *
  * @callback querySnapshotCallback
- * @param {firestore.QuerySnapshot} snapshot - A query snapshot.
+ * @param {QuerySnapshot} snapshot - A query snapshot.
  */
 
 /**
  * onSnapshot() callback that receives a DocumentSnapshot.
  *
  * @callback documentSnapshotCallback
- * @param {firestore.DocumentSnapshot} snapshot - A document snapshot.
+ * @param {DocumentSnapshot} snapshot - A document snapshot.
  */
 
 /**
@@ -123,19 +123,19 @@ const comparisonOperators = {
  * and can be used to write, read, or listen to the location. The document at
  * the referenced location may or may not exist. A DocumentReference can
  * also be used to create a
- * [CollectionReference]{@link firestore.CollectionReference} to a
+ * [CollectionReference]{@link CollectionReference} to a
  * subcollection.
  *
  * @public
- * @alias firestore.DocumentReference
+ * @class
  */
 class DocumentReference {
   /**
    * @protected
    * @hideconstructor
    *
-   * @param {firestore.Firestore} firestore - The Firestore Database client.
-   * @param {firestore.ResourcePath} path - The Path of this reference.
+   * @param {Firestore} firestore - The Firestore Database client.
+   * @param {ResourcePath} path - The Path of this reference.
    */
   constructor(firestore, path) {
     this._firestore = firestore;
@@ -144,20 +144,19 @@ class DocumentReference {
 
   /**
    * The string representation of the DocumentReference's location.
-   * @package
-   * @return {string}
+   * @returns {string}
    */
   get formattedName() {
     return this._referencePath.formattedName;
   }
 
   /**
-   * The [Firestore]{@link firestore.Firestore} instance for the Firestore
+   * The [Firestore]{@link Firestore} instance for the Firestore
    * database (useful for performing transactions, etc.).
    *
    * @public
-   * @name firestore.DocumentReference#firestore
-   * @type firestore.Firestore
+   * @name DocumentReference#firestore
+   * @type Firestore
    * @readonly
    *
    * @example
@@ -177,7 +176,7 @@ class DocumentReference {
    * to the root of the database).
    *
    * @public
-   * @name firestore.DocumentReference#path
+   * @name DocumentReference#path
    * @type string
    * @readonly
    *
@@ -196,7 +195,7 @@ class DocumentReference {
    * The last path document of the referenced document.
    *
    * @public
-   * @name firestore.DocumentReference#id
+   * @name DocumentReference#id
    * @type string
    * @readonly
    *
@@ -215,8 +214,8 @@ class DocumentReference {
    * A reference to the collection to which this DocumentReference belongs.
    *
    * @public
-   * @name firestore.DocumentReference#parent
-   * @type firestore.CollectionReference
+   * @name DocumentReference#parent
+   * @type CollectionReference
    * @readonly
    *
    * @example
@@ -235,11 +234,10 @@ class DocumentReference {
   }
 
   /**
-   * Returns the [ResourcePath]{@link firestore.ResourcePath} for this
+   * Returns the [ResourcePath]{@link ResourcePath} for this
    * DocumentReference.
    *
-   * @package
-   * @type firestore.ResourcePath
+   * @type ResourcePath
    * @readonly
    */
   get ref() {
@@ -251,7 +249,7 @@ class DocumentReference {
    * not found.
    *
    * @public
-   * @return {Promise.<firestore.DocumentSnapshot>} A Promise resolved with a
+   * @returns {Promise.<DocumentSnapshot>} A Promise resolved with a
    * DocumentSnapshot for the retrieved document on success. For missing
    * documents, DocumentSnapshot.exists will be false. If the get() fails for
    * other reasons, the Promise will be rejected.
@@ -272,12 +270,12 @@ class DocumentReference {
   }
 
   /**
-   * Gets a [CollectionReference]{@link firestore.CollectionReference} instance
+   * Gets a [CollectionReference]{@link CollectionReference} instance
    * that refers to the collection at the specified path.
    *
    * @public
    * @param {string} collectionPath - A slash-separated path to a collection.
-   * @return {firestore.CollectionReference} A reference to the new
+   * @returns {CollectionReference} A reference to the new
    * subcollection.
    *
    * @example
@@ -301,7 +299,7 @@ class DocumentReference {
    *
    * @public
    *
-   * @returns {Promise.<Array.<firestore.CollectionReference>>} A Promise that
+   * @returns {Promise.<Array.<CollectionReference>>} A Promise that
    * contains an array with CollectionReferences.
    *
    * @example
@@ -344,7 +342,7 @@ class DocumentReference {
    * @public
    * @param {DocumentData} data - An object that contains the fields and data to
    * serialize as the document.
-   * @return {Promise.<firestore.WriteResult>} A Promise that resolves with the
+   * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this create.
    *
    * @example
@@ -378,7 +376,7 @@ class DocumentReference {
    * @param {string=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
    * delete if the document was last updated at a different time.
-   * @return {Promise.<firestore.WriteResult>} A Promise that resolves with the
+   * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * delete time.
    *
    * @example
@@ -411,7 +409,7 @@ class DocumentReference {
    * @param {boolean=} options.merge - If true, set() only replaces the
    * values specified in its data argument. Fields omitted from this set() call
    * remain untouched.
-   * @return {Promise.<firestore.WriteResult>} A Promise that resolves with the
+   * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this set.
    *
    * @example
@@ -444,14 +442,14 @@ class DocumentReference {
    * argument.
    *
    * @public
-   * @param {UpdateData|string|firestore.FieldPath} dataOrField - An object
+   * @param {UpdateData|string|FieldPath} dataOrField - An object
    * containing the fields and values with which to update the document
    * or the path of the first field to update.
    * @param {
-   * ...(*|string|firestore.FieldPath|Precondition)} preconditionOrValues -
+   * ...(*|string|FieldPath|Precondition)} preconditionOrValues -
    * An alternating list of field paths and values to update or a Precondition
    * to restrict this update.
-   * @return Promise.<firestore.WriteResult> A Promise that resolves once the
+   * @returns Promise.<WriteResult> A Promise that resolves once the
    * data has been successfully written to the backend.
    *
    * @example
@@ -482,7 +480,7 @@ class DocumentReference {
    * fails or is cancelled. No further callbacks will occur. If unset, errors
    * will be logged to the console.
    *
-   * @return {function()} An unsubscribe function that can be called to cancel
+   * @returns {function()} An unsubscribe function that can be called to cancel
    * the snapshot listener.
    *
    * @example
@@ -530,16 +528,15 @@ class DocumentReference {
  * A DocumentChange represents a change to the documents matching a query.
  * It contains the document affected and the type of change that occurred.
  *
- * @public
- * @alias firestore.DocumentChange
+ * @class
+ * @hideconstructor
  */
 class DocumentChange {
   /**
-   * @package
    * @hideconstructor
    *
    * @param {string} type - 'added' | 'removed' | 'modified'.
-   * @param {firestore.DocumentSnapshot} document - The document.
+   * @param {DocumentSnapshot} document - The document.
    * @param {number} oldIndex - The index in the documents array prior to this
    * change.
    * @param {number} newIndex - The index in the documents array after this
@@ -557,7 +554,7 @@ class DocumentChange {
    *
    * @public
    * @type string
-   * @name firestore.DocumentChange#type
+   * @name DocumentChange#type
    * @readonly
    *
    * @example
@@ -581,8 +578,8 @@ class DocumentChange {
    * The document affected by this change.
    *
    * @public
-   * @type firestore.DocumentSnapshot
-   * @name firestore.DocumentChange#type
+   * @type DocumentSnapshot
+   * @name DocumentChange#type
    * @readonly
    *
    * @example
@@ -608,7 +605,7 @@ class DocumentChange {
    *
    * @public
    * @type number
-   * @name firestore.DocumentChange#oldIndex
+   * @name DocumentChange#oldIndex
    * @readonly
    *
    * @example
@@ -641,7 +638,7 @@ class DocumentChange {
    *
    * @public
    * @type number
-   * @name firestore.DocumentChange#newIndex
+   * @name DocumentChange#newIndex
    * @readonly
    *
    * @example
@@ -670,14 +667,14 @@ class DocumentChange {
 /**
  * A Query order-by field.
  *
- * @package
- * @alias firestore.FieldOrder
+ * @class
+ * @hideconstructor
  */
 class FieldOrder {
   /**
-   * @package
+   * @hideconstructor
    *
-   * @param {firestore.FieldPath} field - The name of a document field (member)
+   * @param {FieldPath} field - The name of a document field (member)
    * on which to order query results.
    * @param {string=} direction One of 'ASCENDING' (default) or 'DESCENDING' to
    * set the ordering direction to ascending or descending, respectively.
@@ -690,8 +687,7 @@ class FieldOrder {
   /**
    * The path of the field on which to order query results.
    *
-   * @package
-   * @type firestore.FieldPath
+   * @type FieldPath
    */
   get field() {
     return this._field;
@@ -700,7 +696,6 @@ class FieldOrder {
   /**
    * One of 'ASCENDING' (default) or 'DESCENDING'.
    *
-   * @package
    * @type string
    */
   get direction() {
@@ -710,8 +705,7 @@ class FieldOrder {
   /**
    * Generates the proto representation for this field order.
    *
-   * @package
-   * @return {Object}
+   * @returns {Object}
    */
   toProto() {
     return {
@@ -726,14 +720,12 @@ class FieldOrder {
 /**
  * A field constraint for a Query where clause.
  *
- * @package
- * @alias firestore.FieldFilter
+ * @alias FieldFilter
  */
 class FieldFilter {
   /**
-   * @package
    *
-   * @param {firestore.FieldPath} field - The path of the property value to
+   * @param {FieldPath} field - The path of the property value to
    * compare.
    * @param {string} opString - A comparison operation.
    * @param {*} value The value to which to compare the
@@ -748,8 +740,7 @@ class FieldFilter {
   /**
    * Generates the proto representation for this field filter.
    *
-   * @package
-   * @return {Object}
+   * @returns {Object}
    */
   toProto() {
     if (typeof this._value === 'number' && isNaN(this._value)) {
@@ -788,23 +779,22 @@ class FieldFilter {
 
 /**
  * A QuerySnapshot contains zero or more
- * [DocumentSnapshot]{@link firestore.DocumentSnapshot} objects
+ * [DocumentSnapshot]{@link DocumentSnapshot} objects
  * representing the results of a query. The documents can be accessed as an
- * array via the [documents]{@link firestore.QuerySnapshot#documents} property
- * or enumerated using the [forEach]{@link firestore.QuerySnapshot#forEach}
+ * array via the [documents]{@link QuerySnapshot#documents} property
+ * or enumerated using the [forEach]{@link QuerySnapshot#forEach}
  * method. The number of documents can be determined via the
- * [empty]{@link firestore.QuerySnapshot#empty} and
- * [size]{@link firestore.QuerySnapshot#size} properties.
+ * [empty]{@link QuerySnapshot#empty} and
+ * [size]{@link QuerySnapshot#size} properties.
  *
  * @public
- * @alias firestore.QuerySnapshot
+ * @alias QuerySnapshot
  */
 class QuerySnapshot {
   /**
-   * @package
    * @hideconstructor
    *
-   * @param {firestore.Query} query - The originating query.
+   * @param {Query} query - The originating query.
    * @param {string} readTime - The ISO 8601 time when this query snapshot was
    * current.
    *
@@ -826,8 +816,8 @@ class QuerySnapshot {
    * `QuerySnapshot`.
    *
    * @public
-   * @type firestore.Query
-   * @name firestore.QuerySnapshot#query
+   * @type Query
+   * @name QuerySnapshot#query
    * @readonly
    *
    * @example
@@ -849,8 +839,8 @@ class QuerySnapshot {
    * An array of all the documents in this QuerySnapshot.
    *
    * @public
-   * @type Array.<firestore.DocumentSnapshot>
-   * @name firestore.QuerySnapshot#docs
+   * @type Array.<DocumentSnapshot>
+   * @name QuerySnapshot#docs
    * @readonly
    *
    * @example
@@ -875,8 +865,8 @@ class QuerySnapshot {
    * An array of all changes in this QuerySnapshot.
    *
    * @public
-   * @type Array.<firestore.DocumentChange>
-   * @name firestore.QuerySnapshot#docChanges
+   * @type Array.<DocumentChange>
+   * @name QuerySnapshot#docChanges
    * @readonly
    */
   get docChanges() {
@@ -892,7 +882,7 @@ class QuerySnapshot {
    *
    * @public
    * @type boolean
-   * @name firestore.QuerySnapshot#empty
+   * @name QuerySnapshot#empty
    * @readonly
    *
    * @example
@@ -913,7 +903,7 @@ class QuerySnapshot {
    *
    * @public
    * @type number
-   * @name firestore.QuerySnapshot#size
+   * @name QuerySnapshot#size
    * @readonly
    *
    * @example
@@ -947,7 +937,7 @@ class QuerySnapshot {
    * Enumerates all of the documents in the QuerySnapshot.
    *
    * @param {function} callback - A callback to be called with a
-   * [DocumentSnapshot]{@link firestore.DocumentSnapshot} for each document in
+   * [DocumentSnapshot]{@link DocumentSnapshot} for each document in
    * the snapshot.
    * @param {*=} thisArg The `this` binding for the callback..
    *
@@ -974,18 +964,18 @@ class QuerySnapshot {
  * construct refined `Query` objects by adding filters and ordering.
  *
  * @public
- * @alias firestore.Query
+ * @alias Query
  */
 class Query {
   /**
    * @protected
    * @hideconstructor
    *
-   * @param {firestore.Firestore} firestore - The Firestore Database client.
-   * @param {firestore.ResourcePath} path Path of the collection to be queried.
-   * @param {Array.<firestore.FieldOrder>=} fieldOrders - Sequence of fields to
+   * @param {Firestore} firestore - The Firestore Database client.
+   * @param {ResourcePath} path Path of the collection to be queried.
+   * @param {Array.<FieldOrder>=} fieldOrders - Sequence of fields to
    * control the order of results.
-   * @param {Array.<firestore.FieldFilter>=} fieldFilters - Sequence of fields
+   * @param {Array.<FieldFilter>=} fieldFilters - Sequence of fields
    * constraining the results of the query.
    * @param {object=} queryOptions Additional query options.
    */
@@ -1000,20 +990,19 @@ class Query {
 
   /**
    * The string representation of the Query's location.
-   * @package
-   * @return {string}
+   * @returns {string}
    */
   get formattedName() {
     return this._referencePath.formattedName;
   }
 
   /**
-   * The [Firestore]{@link firestore.Firestore] instance for the Firestore
+   * The [Firestore]{@link Firestore] instance for the Firestore
    * database (useful for performing transactions, etc.).
    *
    * @public
-   * @type firestore.Firestore
-   * @name firestore.Query#firestore
+   * @type Firestore
+   * @name Query#firestore
    * @readonly
    *
    * @example
@@ -1036,17 +1025,17 @@ class Query {
    * Returns a new Query that constrains the value of a Document property.
    *
    * This function returns a new (immutable) instance of the
-   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * [Query]{@link Query} (rather than modify the existing instance)
    * to impose the filter.
    *
    * @public
-   * @param {string|firestore.FieldPath} fieldPath - The name of a property
+   * @param {string|FieldPath} fieldPath - The name of a property
    * value to compare.
    * @param {string} opStr - A comparison operation in the form of a string
    * (e.g., "<").
    * @param {*} value - The value to which to compare the field for inclusion in
    * a query.
-   * @return {firestore.Query} The created Query.
+   * @returns {Query} The created Query.
    *
    * @example
    * let collectionRef = firestore.collection('col');
@@ -1083,13 +1072,13 @@ class Query {
    * references of matching documents.
    *
    * This function returns a new (immutable) instance of the
-   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * [Query]{@link Query} (rather than modify the existing instance)
    * to impose the field mask.
    *
    * @public
-   * @param {...(string|firestore.FieldPath)} fieldPaths - The field paths to
+   * @param {...(string|FieldPath)} fieldPaths - The field paths to
    * return.
-   * @return {firestore.Query} The created Query.
+   * @returns {Query} The created Query.
    *
    * @example
    * let collectionRef = firestore.collection('col');
@@ -1134,14 +1123,14 @@ class Query {
    * specified field, optionally in descending order instead of ascending.
    *
    * This function returns a new (immutable) instance of the
-   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * [Query]{@link Query} (rather than modify the existing instance)
    * to impose the field mask.
    *
    * @public
-   * @param {string|firestore.FieldPath} fieldPath - The field to sort by.
+   * @param {string|FieldPath} fieldPath - The field to sort by.
    * @param {string=} directionStr - Optional direction to sort by ('asc' or
    * 'desc'). If not specified, order will be ascending.
-   * @return {firestore.Query} The created Query.
+   * @returns {Query} The created Query.
    *
    * @example
    * let query = firestore.collection('col').where('foo', '>', 42);
@@ -1182,12 +1171,12 @@ class Query {
    * return up to the specified number of documents.
    *
    * This function returns a new (immutable) instance of the
-   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * [Query]{@link Query} (rather than modify the existing instance)
    * to impose the limit.
    *
    * @public
    * @param {number} limit - The maximum number of items to return.
-   * @return {firestore.Query} The created Query.
+   * @returns {Query} The created Query.
    *
    * @example
    * let query = firestore.collection('col').where('foo', '>', 42);
@@ -1216,12 +1205,12 @@ class Query {
    * Specifies the offset of the returned results.
    *
    * This function returns a new (immutable) instance of the
-   * [Query]{@link firestore.Query} (rather than modify the existing instance)
+   * [Query]{@link Query} (rather than modify the existing instance)
    * to impose the offset.
    *
    * @public
    * @param {number} offset - The offset to apply to the Query results
-   * @return {firestore.Query} The created Query.
+   * @returns {Query} The created Query.
    *
    * @example
    * let query = firestore.collection('col').where('foo', '>', 42);
@@ -1255,7 +1244,7 @@ class Query {
    * boundary.
    * @param before - Whether the query boundary lies just before or after the
    * provided data.
-   * @return {Object} The proto message.
+   * @returns {Object} The proto message.
    */
   _buildPosition(fieldValues, before) {
     let options = {
@@ -1304,7 +1293,7 @@ class Query {
    *
    * @public
    * @param {...*} fieldValues - The set of field values to start the query at.
-   * @returns {firestore.Query} A query with the new starting point.
+   * @returns {Query} A query with the new starting point.
    *
    * @example
    * let query = firestore.collection('col');
@@ -1339,7 +1328,7 @@ class Query {
    * @public
    * @param {...*} fieldValues - The set of field values to start the query
    * after.
-   * @returns {firestore.Query} A query with the new starting point.
+   * @returns {Query} A query with the new starting point.
    *
    * @example
    * let query = firestore.collection('col');
@@ -1374,7 +1363,7 @@ class Query {
    * @public
    * @param {...*} fieldValues - The set of field values to end the query
    * before.
-   * @returns {firestore.Query} A query with the new ending point.
+   * @returns {Query} A query with the new ending point.
    *
    * @example
    * let query = firestore.collection('col');
@@ -1408,7 +1397,7 @@ class Query {
    *
    * @public
    * @param {...*} fieldValues - The set of field values to end the query at.
-   * @returns {firestore.Query} A query with the new ending point.
+   * @returns {Query} A query with the new ending point.
    *
    * @example
    * let query = firestore.collection('col');
@@ -1437,10 +1426,10 @@ class Query {
 
   /**
    * Executes the query and returns the results as a
-   * [QuerySnapshot]{@link firestore.QuerySnapshot}.
+   * [QuerySnapshot]{@link QuerySnapshot}.
    *
    * @public
-   * @return {Promise.<QuerySnapshot>} A Promise that resolves with the results
+   * @returns {Promise.<QuerySnapshot>} A Promise that resolves with the results
    * of the Query.
    *
    * @example
@@ -1459,7 +1448,6 @@ class Query {
   /**
    * Internal get() method that accepts an optional transaction id.
    *
-   * @package
    * @param {bytes=} queryOptions.transactionId - A transaction ID.
    */
   _get(queryOptions) {
@@ -1498,10 +1486,10 @@ class Query {
 
   /**
    * Executes the query and streams the results as
-   * [DocumentSnapshots]{@link firestore.DocumentSnapshot}.
+   * [DocumentSnapshots]{@link DocumentSnapshot}.
    *
    * @public
-   * @return {Stream.<firestore.DocumentSnapshot>} A stream of
+   * @returns {Stream.<DocumentSnapshot>} A stream of
    * DocumentSnapshots.
    *
    * @example
@@ -1534,9 +1522,8 @@ class Query {
    * Internal method for serializing a query to its RunQuery proto
    * representation with an optional transaction id.
    *
-   * @package
    * @param {bytes=} queryOptions.transactionId - A transaction ID.
-   * @return Serialized JSON for the query.
+   * @returns Serialized JSON for the query.
    */
   toProto(queryOptions) {
     let reqOpts = {
@@ -1603,9 +1590,8 @@ class Query {
   /**
    * Internal streaming method that accepts an optional transaction id.
    *
-   * @package
    * @param {bytes=} queryOptions.transactionId - A transaction ID.
-   * @return {stream} A stream of Documents.
+   * @returns {stream} A stream of Documents.
    */
   _stream(queryOptions) {
     let request = this.toProto(queryOptions);
@@ -1652,11 +1638,11 @@ class Query {
    *
    * @public
    * @param {querySnapshotCallback} onNext - A callback to be called every time
-   * a new [QuerySnapshot]{@link firestore.QuerySnapshot} is available.
+   * a new [QuerySnapshot]{@link QuerySnapshot} is available.
    * @param {errorCallback=} onError - A callback to be called if the listen
    * fails or is cancelled. No further callbacks will occur.
    *
-   * @return {function()} An unsubscribe function that can be called to cancel
+   * @returns {function()} An unsubscribe function that can be called to cancel
    * the snapshot listener.
    *
    * @example
@@ -1690,7 +1676,6 @@ class Query {
    * Returns a function that can be used to sort DocumentSnapshots according to
    * the sort criteria of this query.
    *
-   * @package
    */
   comparator() {
     return (doc1, doc2) => {
@@ -1737,19 +1722,19 @@ class Query {
  *
  * A CollectionReference object can be used for adding documents, getting
  * document references, and querying for documents (using the methods
- * inherited from [Query]{@link firestore.Query}).
+ * inherited from [Query]{@link Query}).
  *
  * @public
- * @alias firestore.CollectionReference
- * @extends firestore.Query
+ * @alias CollectionReference
+ * @extends Query
  */
 class CollectionReference extends Query {
   /**
    * @protected
    * @hideconstructor
    *
-   * @param {firestore.Firestore} firestore - The Firestore Database client.
-   * @param {firestore.ResourcePath} path - The Path of this collection.
+   * @param {Firestore} firestore - The Firestore Database client.
+   * @param {ResourcePath} path - The Path of this collection.
    */
   constructor(firestore, path) {
     super(firestore, path);
@@ -1760,7 +1745,7 @@ class CollectionReference extends Query {
    *
    * @public
    * @type string
-   * @name firestore.CollectionReference#id
+   * @name CollectionReference#id
    * @readonly
    *
    * @example
@@ -1776,8 +1761,8 @@ class CollectionReference extends Query {
    * null.
    *
    * @public
-   * @type firestore.DocumentReference
-   * @name firestore.CollectionReference#parent
+   * @type DocumentReference
+   * @name CollectionReference#parent
    * @readonly
    *
    * @example
@@ -1795,7 +1780,7 @@ class CollectionReference extends Query {
    *
    * @public
    * @type string
-   * @name firestore.CollectionReference#path
+   * @name CollectionReference#path
    * @readonly
    *
    * @example
@@ -1807,14 +1792,14 @@ class CollectionReference extends Query {
   }
 
   /**
-   * Gets a [DocumentReference]{@link firestore.DocumentReference} instance that
+   * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path. If no path is specified, an
    * automatically-generated unique ID will be used for the returned
    * DocumentReference.
    *
    * @public
    * @param {string=} documentPath - A slash-separated path to a document.
-   * @returns {firestore.DocumentReference} The `DocumentReference`
+   * @returns {DocumentReference} The `DocumentReference`
    * instance.
    *
    * @example
@@ -1846,8 +1831,8 @@ class CollectionReference extends Query {
    * @public
    * @param {DocumentData} data - An Object containing the data for the new
    * document.
-   * @return {Promise.<firestore.DocumentReference>} A Promise resolved with a
-   * [DocumentReference]{@link firestore.DocumentReference} pointing to the
+   * @returns {Promise.<DocumentReference>} A Promise resolved with a
+   * [DocumentReference]{@link DocumentReference} pointing to the
    * newly created document.
    *
    * @example
@@ -1865,23 +1850,21 @@ class CollectionReference extends Query {
     });
   }
 }
-/**
+/*!
  * Creates a new CollectionReference. Invoked by DocumentReference to avoid
  * invalid declaration order.
  *
- * @package
- * @param {firestore.Firestore} firestore - The Firestore Database client.
- * @param {firestore.ResourcePath} path - The path of this collection.
- * @return {firestore.CollectionReference}
+ * @param {Firestore} firestore - The Firestore Database client.
+ * @param {ResourcePath} path - The path of this collection.
+ * @returns {CollectionReference}
  */
 function createCollectionReference(firestore, path) {
   return new CollectionReference(firestore, path);
 }
 
-/**
+/*!
  * Validates the input string as a field order direction.
  *
- * @package
  * @param {string=} str Order direction to validate.
  * @throws {Error} when the direction is invalid
  */
@@ -1893,10 +1876,9 @@ function validateFieldOrder(str) {
   return true;
 }
 
-/**
+/*!
  * Validates the input string as a field comparison operator.
  *
- * @package
  * @param {string} str Field comparison operator to validate.
  * @param {*} val Value that is used in the filter.
  * @throws {Error} when the comparison operation is invalid
@@ -1923,12 +1905,11 @@ function validateComparisonOperator(str, val) {
   throw new Error('Operator must be one of "<", "<=", "==", ">", or ">=".');
 }
 
-/**
+/*!
  * Validates that 'value' is a DocumentReference.
  *
- * @package
  * @param {*} value The argument to validate.
- * @return 'true' is value is an instance of DocumentReference.
+ * @returns 'true' is value is an instance of DocumentReference.
  */
 function validateDocumentReference(value) {
   return is.instanceof(value, DocumentReference);
