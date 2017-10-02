@@ -75,10 +75,10 @@ const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
  * updates(), and creates().
  *
  * @class
- * @hideconstructor
  */
 class WriteResult {
   /**
+   * @private
    * @hideconstructor
    *
    * @param {string} writeTime - The ISO 8601 write time.
@@ -91,7 +91,6 @@ class WriteResult {
    * The write time as set by the Firestore servers. Formatted as an ISO-8601
    * string.
    *
-   * @public
    * @type string
    * @name WriteResult#writeTime
    * @readonly
@@ -113,10 +112,10 @@ class WriteResult {
  * operations at once.
  *
  * @class
- * @hideconstructor
  */
 class WriteBatch {
   /**
+   * @private
    * @hideconstructor
    *
    * @param {Firestore} firestore - The Firestore Database client.
@@ -140,7 +139,6 @@ class WriteBatch {
    * Create a document with the provided object values. This will fail the batch
    * if a document exists at its location.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be created.
    * @param {DocumentData} data - The object to serialize as the document.
@@ -182,7 +180,6 @@ class WriteBatch {
   /**
    * Deletes a document from the database.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be deleted.
    * @param {Precondition=} precondition - A precondition to enforce for this
@@ -228,7 +225,6 @@ class WriteBatch {
    * [SetOptions]{@link SetOptions}., the provided data can be merged
    * into the existing document.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be set.
    * @param {DocumentData} data - The object to serialize as the document.
@@ -289,7 +285,6 @@ class WriteBatch {
    * A Precondition restricting this update can be specified as the last
    * argument.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be updated.
    * @param {UpdateData|string|FieldPath} dataOrField - An object
@@ -404,7 +399,6 @@ class WriteBatch {
    * Atomically commits all pending operations to the database and verifies all
    * preconditions. Fails the entire write if any precondition is not met.
    *
-   * @public
    * @returns {Promise.<Array.<WriteResult>>} A Promise that resolves
    * when this batch completes.
    *
@@ -425,6 +419,7 @@ class WriteBatch {
   /**
    * Commit method that takes an optional transaction ID.
    *
+   * @private
    * @param {object=} commitOptions Options to use for this commit.
    * @param {bytes=} commitOptions.transactionId The transaction ID of this
    * commit.

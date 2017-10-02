@@ -40,10 +40,10 @@ let Query;
  * [runTransaction()]{@link Firestore#runTransaction}.
  *
  * @class
- * @hideconstructor
  */
 class Transaction {
   /**
+   * @private
    * @hideconstructor
    *
    * @param {Firestore} firestore - The Firestore Database client.
@@ -61,7 +61,6 @@ class Transaction {
    * Retrieve a document or a query result from the database. Holds a
    * pessimistic lock on all returned documents.
    *
-   * @public
    * @param {DocumentReference|Query} refOrQuery - The
    * document or query to return.
    * @returns {Promise} A Promise that resolves with a DocumentSnapshot or
@@ -107,7 +106,6 @@ class Transaction {
    * [DocumentReference]{@link DocumentReference}. The operation will
    * fail the transaction if a document exists at the specified location.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be created.
    * @param {DocumentData} data - The object data to serialize as the document.
@@ -136,7 +134,6 @@ class Transaction {
    * [SetOptions]{@link SetOptions}, the provided data can be merged into the
    * existing document.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be set.
    * @param {DocumentData} data - The object to serialize as the document.
@@ -173,7 +170,6 @@ class Transaction {
    * A Precondition restricting this update can be specified as the last
    * argument.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be updated.
    * @param {UpdateData|string|FieldPath} dataOrField - An object
@@ -211,7 +207,6 @@ class Transaction {
    * Deletes the document referred to by the provided [DocumentReference]
    * {@link DocumentReference}.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be deleted.
    * @param {Precondition=} precondition - A precondition to enforce for this
@@ -238,6 +233,7 @@ class Transaction {
   /**
    * Starts a transaction and obtains the transaction id from the server.
    *
+   * @private
    * @returns {Promise} An empty Promise.
    */
   begin() {
@@ -267,6 +263,7 @@ class Transaction {
   /**
    * Commits all queued-up changes in this transaction and releases all locks.
    *
+   * @private
    * @returns {Promise} An empty Promise.
    */
   commit() {
@@ -276,6 +273,7 @@ class Transaction {
   /**
    * Releases all locks and rolls back this transaction.
    *
+   * @private
    * @returns {Promise} An empty Promise.
    */
   rollback() {
