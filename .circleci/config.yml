@@ -7,6 +7,9 @@ unit_tests: &unit_tests
         name: Install modules and dependencies.
         command: npm install
     - run:
+        name: Install codecov.
+        command: npm install codecov
+    - run:
         name: Run unit tests.
         command: npm test
     - run:
