@@ -71,9 +71,6 @@ const SERVER_TIMESTAMP = 'REQUEST_TIME';
  * An immutable object representing a geographic location in Firestore. The
  * location is represented as a latitude/longitude pair.
  *
- * <p>This class be instantiated via
- * [new Firestore.GeoPoint()]{@link GeoPoint}.
- *
  * @class
  */
 class GeoPoint {
@@ -1005,7 +1002,7 @@ class DocumentTransform {
 /**
  * A Firestore Precondition encapsulates options for database writes.
  *
- * @interface
+ * @class
  */
 class Precondition {
   /**
