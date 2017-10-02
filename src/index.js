@@ -154,9 +154,11 @@ const GRPC_UNAVAILABLE = 14;
  *
  * @see [Firestore Documentation]{@link https://firebase.google.com/docs/firestore/}
  *
+ * @public
  * @class
+ * @alias firestore.Firestore
  *
- *  @example <caption>Install the client library with <a href="https://www.npmjs.com/">npm</a>:</caption>
+ * @example <caption>Install the client library with <a href="https://www.npmjs.com/">npm</a>:</caption>
  * npm install --save @google-cloud/firestore
  *
  * @example <caption>Import the client library</caption>
@@ -177,6 +179,7 @@ const GRPC_UNAVAILABLE = 14;
  */
 class Firestore extends commonGrpc.Service {
   /**
+   * @public
    * @param {Object=} options - [Configuration object](#/docs).
    */
   constructor(options) {
@@ -216,6 +219,7 @@ class Firestore extends commonGrpc.Service {
     }
 
     /**
+     * @package
      * @type {object}
      * @property {FirestoreClient} Firestore The Firestore GAPIC client.
      */
@@ -237,6 +241,8 @@ class Firestore extends commonGrpc.Service {
 
   /**
    * The root path to the database.
+   *
+   * @package
    * @type string
    */
   get formattedName() {
@@ -513,7 +519,7 @@ class Firestore extends commonGrpc.Service {
    * let documentRef1 = firestore.doc('col/doc1');
    * let documentRef2 = firestore.doc('col/doc2');
    *
-   * firestore.getAll([documentRef1, documentRef2]).then(docs => {
+   * firestore.getAll(documentRef1, documentRef2).then(docs => {
    *   console.log(`First document: ${JSON.stringify(docs[0])}`);
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
@@ -645,6 +651,7 @@ class Firestore extends commonGrpc.Service {
    *
    * Used for the creation of new documents.
    *
+   * @package
    * @returns {string} A unique 20-character wide identifier.
    */
   static autoId() {
@@ -882,6 +889,7 @@ class Firestore extends commonGrpc.Service {
    * A funnel for all non-streaming API requests, assigning a project ID where
    * necessary within the request options.
    *
+   * @package
    * @param {function} method - Veneer API endpoint that takes a request and
    * GAX options.
    * @param {Object} request - The Protobuf request to send.
@@ -925,7 +933,7 @@ class Firestore extends commonGrpc.Service {
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
    *
-   *
+   * @package
    * @param {function} method - Streaming Veneer API endpoint that takes a
    * request and GAX options.
    * @param {Object} request - The Protobuf request to send.
@@ -972,7 +980,7 @@ class Firestore extends commonGrpc.Service {
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
    *
-   *
+   * @package
    * @param {function} method - Streaming Veneer API endpoint that takes GAX
    * options.
    * @param {Object} request - The Protobuf request to send as the first stream
@@ -1029,6 +1037,7 @@ class Firestore extends commonGrpc.Service {
 /**
  * A logging function that takes a single string.
  *
+ * @public
  * @callback Firestore~logFunction
  * @param {string} Log message
  */
@@ -1037,6 +1046,7 @@ class Firestore extends commonGrpc.Service {
  * Log function to use for debug output. By default, we don't perform any
  * logging.
  *
+ * @package
  * @type {Firestore~logFunction}
  */
 Firestore.log = function() {};
@@ -1044,6 +1054,7 @@ Firestore.log = function() {};
 /**
  * Sets the log function for all active Firestore instances.
  *
+ * @public
  * @method Firestore.setLogFunction
  * @param {Firestore~logFunction} logger - A log function that takes a single
  * string.
@@ -1112,6 +1123,7 @@ module.exports.Firestore = Firestore;
 /**
  * {@link v1beta1} factory function.
  *
+ * @public
  * @name Firestore.v1beta1
  * @see v1beta1
  * @type {function}
@@ -1121,6 +1133,7 @@ module.exports.v1beta1 = v1beta1;
 /**
  * {@link FieldPath} class.
  *
+ * @public
  * @name Firestore.FieldPath
  * @see FieldPath
  * @type {Constructor}
@@ -1130,6 +1143,7 @@ module.exports.FieldPath = FieldPath;
 /**
  * {@link FieldValue} class.
  *
+ * @public
  * @name Firestore.FieldValue
  * @see FieldValue
  * @type {Constructor}
@@ -1138,7 +1152,8 @@ module.exports.FieldValue = FieldValue;
 
 /**
  * {@link GeoPoint} class.
-
+ *
+ * @public
  * @name Firestore.GeoPoint
  * @see GeoPoint
  * @type {Constructor}

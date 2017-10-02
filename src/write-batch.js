@@ -74,11 +74,12 @@ const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
  * updates(), and creates().
  *
+ * @public
  * @class
- * @hideconstructor
  */
 class WriteResult {
   /**
+   * @package
    * @hideconstructor
    *
    * @param {string} writeTime - The ISO 8601 write time.
@@ -112,11 +113,12 @@ class WriteResult {
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.
  *
+ * @public
  * @class
- * @hideconstructor
  */
 class WriteBatch {
   /**
+   * @package
    * @hideconstructor
    *
    * @param {Firestore} firestore - The Firestore Database client.
@@ -130,6 +132,7 @@ class WriteBatch {
   /**
    * Checks if this write batch has any pending operations.
    *
+   * @public
    * @returns {boolean}
    */
   get isEmpty() {
@@ -425,6 +428,7 @@ class WriteBatch {
   /**
    * Commit method that takes an optional transaction ID.
    *
+   * @package
    * @param {object=} commitOptions Options to use for this commit.
    * @param {bytes=} commitOptions.transactionId The transaction ID of this
    * commit.

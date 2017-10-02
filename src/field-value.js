@@ -33,7 +33,7 @@ const SERVER_TIMESTAMP_SENTINEL = {};
  * update().
  *
  * @class
- * @hideconstructor
+ * @public
  */
 class FieldValue {
   /**

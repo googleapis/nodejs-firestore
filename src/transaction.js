@@ -39,11 +39,12 @@ let Query;
  * the methods to read and write data within the transaction context. See
  * [runTransaction()]{@link Firestore#runTransaction}.
  *
+ * @public
  * @class
- * @hideconstructor
  */
 class Transaction {
   /**
+   * @package
    * @hideconstructor
    *
    * @param {Firestore} firestore - The Firestore Database client.
@@ -238,6 +239,7 @@ class Transaction {
   /**
    * Starts a transaction and obtains the transaction id from the server.
    *
+   * @package
    * @returns {Promise} An empty Promise.
    */
   begin() {
@@ -267,6 +269,7 @@ class Transaction {
   /**
    * Commits all queued-up changes in this transaction and releases all locks.
    *
+   * @package
    * @returns {Promise} An empty Promise.
    */
   commit() {
@@ -276,6 +279,7 @@ class Transaction {
   /**
    * Releases all locks and rolls back this transaction.
    *
+   * @package
    * @returns {Promise} An empty Promise.
    */
   rollback() {
