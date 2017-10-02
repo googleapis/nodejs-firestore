@@ -100,7 +100,8 @@
  *       "value": "1.212s"
  *     }
  *
- * @external "google.protobuf.Any"
+ * @typedef Any
+ * @memberof google.protobuf
  * @property {string} typeUrl
  *   A URL/resource name whose content describes the type of the
  *   serialized protocol buffer message.

@@ -91,7 +91,7 @@ class WriteResult {
    * The write time as set by the Firestore servers. Formatted as an ISO-8601
    * string.
    *
-   * @type string
+   * @type {string}
    * @name WriteResult#writeTime
    * @readonly
    *

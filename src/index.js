@@ -30,6 +30,22 @@ const libVersion = require('../package.json').version;
 const path = require('./path');
 
 /*!
+ * DO NOT REMOVE THE FOLLOWING NAMESPACE DEFINITIONS
+ */
+
+/**
+ * @namespace google.protobuf
+ */
+
+/**
+ * @namespace google.rpc
+ */
+
+/**
+ * @namespace google.firestore.v1beta1
+ */
+
+/*!
  * @see ResourcePath
  */
 const ResourcePath = path.ResourcePath;
@@ -80,19 +96,19 @@ let Transaction;
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
  * by the backend.
- * @type string
+ * @type {string}
  */
 const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 
 /*!
  * The maximum number of times to retry idempotent requests.
- * @type number
+ * @type {number}
  */
 const MAX_REQUEST_RETRIES = 5;
 
 /*!
  * GRPC Error code for 'UNAVAILABLE'.
- * @type number
+ * @type {number}
  */
 const GRPC_UNAVAILABLE = 14;
 
@@ -102,7 +118,6 @@ const GRPC_UNAVAILABLE = 14;
  * to values.
  *
  * @typedef {Object.<string, *>} DocumentData
- * @alias DocumentData
  */
 
 /**
@@ -151,7 +166,6 @@ const GRPC_UNAVAILABLE = 14;
  * @see [Firestore Documentation]{@link https://firebase.google.com/docs/firestore/}
  *
  * @class
- * @alias firestore.Firestore
  *
  * @example <caption>Install the client library with <a href="https://www.npmjs.com/">npm</a>:</caption>
  * npm install --save @google-cloud/firestore
@@ -160,7 +174,7 @@ const GRPC_UNAVAILABLE = 14;
  * var Firestore = require('@google-cloud/firestore');
  *
  * @example <caption>Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:</caption>
- * var firestore = Firestore();
+ * var firestore = new Firestore();
  *
  * @example <caption>Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:</caption>
  * var firestore = new Firestore({
@@ -237,7 +251,7 @@ class Firestore extends commonGrpc.Service {
    * The root path to the database.
    *
    * @private
-   * @type string
+   * @type {string}
    */
   get formattedName() {
     return this._referencePath.formattedName;
@@ -1084,7 +1098,7 @@ Transaction = require('./transaction')(Firestore);
  * var Firestore = require('@google-cloud/firestore');
  *
  * @example <caption>Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:</caption>
- * var firestore = Firestore();
+ * var firestore = new Firestore();
  *
  * @example <caption>Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:</caption>
  * var firestore = new Firestore({

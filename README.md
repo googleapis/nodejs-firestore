@@ -21,7 +21,7 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 
 **Table of contents:**
 
-* [Quickstart](#quickstart)
+* [QuickStart](#quickstart)
   * [Before you begin](#before-you-begin)
   * [Installing the client library](#installing-the-client-library)
   * [Using the client library](#using-the-client-library)
@@ -36,6 +36,10 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 1.  Select or create a Cloud Platform project.
 
     [Go to the projects page][projects]
+
+1.  Enable billing for your project.
+
+    [Enable billing][billing]
 
 1.  Enable the Google Cloud Firestore API.
 
@@ -56,12 +60,14 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 ### Using the client library
 
 ```javascript
-var firestore = require('@google-cloud/firestore')({
+const Firestore = require('@google-cloud/firestore');
+
+const firestore = new Firestore({
   projectId: 'YOUR_PROJECT_ID',
   keyFilename: '/path/to/keyfile.json',
 });
 
-var document = firestore.doc('posts/intro-to-firestore');
+const document = firestore.doc('posts/intro-to-firestore');
 
 // Enter new data into the document.
 document.set({
@@ -89,6 +95,9 @@ document.delete().then(() => {
 });
 ```
 
+
+The [Firestore Node.js Client API Reference][client-docs] documentation
+also contains samples.
 
 ## Versioning
 
