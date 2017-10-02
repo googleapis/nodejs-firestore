@@ -143,6 +143,8 @@ class DocumentReference {
 
   /**
    * The string representation of the DocumentReference's location.
+   *
+   * @private
    * @returns {string}
    */
   get formattedName() {
@@ -564,7 +566,7 @@ class DocumentChange {
    * The document affected by this change.
    *
    * @type DocumentSnapshot
-   * @name DocumentChange#type
+   * @name DocumentChange#doc
    * @readonly
    *
    * @example
@@ -975,6 +977,8 @@ class Query {
 
   /**
    * The string representation of the Query's location.
+   *
+   * @private
    * @returns {string}
    */
   get formattedName() {
@@ -1650,6 +1654,7 @@ class Query {
    * Returns a function that can be used to sort DocumentSnapshots according to
    * the sort criteria of this query.
    *
+   * @private
    */
   comparator() {
     return (doc1, doc2) => {

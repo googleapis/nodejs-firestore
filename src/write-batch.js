@@ -129,6 +129,7 @@ class WriteBatch {
   /**
    * Checks if this write batch has any pending operations.
    *
+   * @private
    * @returns {boolean}
    */
   get isEmpty() {
