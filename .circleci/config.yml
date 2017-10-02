@@ -63,7 +63,7 @@ workflows:
             - docs
           filters:
             branches:
-              only: repo-migration
+              only: master
             tags:
               only: /^v[\d.]+$/
       - publish_npm:
