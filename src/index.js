@@ -213,7 +213,7 @@ class Firestore extends commonGrpc.Service {
     }
 
     /**
-     * @package
+     * @private
      * @type {object}
      * @property {FirestoreClient} Firestore The Firestore GAPIC client.
      */
@@ -236,7 +236,7 @@ class Firestore extends commonGrpc.Service {
   /**
    * The root path to the database.
    *
-   * @package
+   * @private
    * @type string
    */
   get formattedName() {
@@ -633,7 +633,7 @@ class Firestore extends commonGrpc.Service {
    *
    * Used for the creation of new documents.
    *
-   * @package
+   * @private
    * @returns {string} A unique 20-character wide identifier.
    */
   static autoId() {
@@ -871,7 +871,7 @@ class Firestore extends commonGrpc.Service {
    * A funnel for all non-streaming API requests, assigning a project ID where
    * necessary within the request options.
    *
-   * @package
+   * @private
    * @param {function} method - Veneer API endpoint that takes a request and
    * GAX options.
    * @param {Object} request - The Protobuf request to send.
@@ -915,7 +915,7 @@ class Firestore extends commonGrpc.Service {
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
    *
-   * @package
+   * @private
    * @param {function} method - Streaming Veneer API endpoint that takes a
    * request and GAX options.
    * @param {Object} request - The Protobuf request to send.
@@ -962,7 +962,7 @@ class Firestore extends commonGrpc.Service {
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
    *
-   * @package
+   * @private
    * @param {function} method - Streaming Veneer API endpoint that takes GAX
    * options.
    * @param {Object} request - The Protobuf request to send as the first stream
@@ -1027,7 +1027,7 @@ class Firestore extends commonGrpc.Service {
  * Log function to use for debug output. By default, we don't perform any
  * logging.
  *
- * @package
+ * @private
  * @type {Firestore~logFunction}
  */
 Firestore.log = function() {};

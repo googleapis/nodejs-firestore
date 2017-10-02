@@ -43,7 +43,7 @@ let Query;
  */
 class Transaction {
   /**
-   * @package
+   * @private
    * @hideconstructor
    *
    * @param {Firestore} firestore - The Firestore Database client.
@@ -233,7 +233,7 @@ class Transaction {
   /**
    * Starts a transaction and obtains the transaction id from the server.
    *
-   * @package
+   * @private
    * @returns {Promise} An empty Promise.
    */
   begin() {
@@ -263,7 +263,7 @@ class Transaction {
   /**
    * Commits all queued-up changes in this transaction and releases all locks.
    *
-   * @package
+   * @private
    * @returns {Promise} An empty Promise.
    */
   commit() {
@@ -273,7 +273,7 @@ class Transaction {
   /**
    * Releases all locks and rolls back this transaction.
    *
-   * @package
+   * @private
    * @returns {Promise} An empty Promise.
    */
   rollback() {

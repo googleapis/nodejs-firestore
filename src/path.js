@@ -51,14 +51,14 @@ const FIELD_PATH_RE = /^[^*~/[\]]+$/;
  *
  * Subclasses have to implement `split()` and `canonicalString()`.
  *
- * @package
+ * @private
  * @class
  */
 class Path {
   /**
    * Creates a new Path with the given segments.
    *
-   * @package
+   * @private
    * @hideconstructor
    * @param {...string|string[]} segments - Sequence of parts of a path.
    */
@@ -68,13 +68,13 @@ class Path {
       : Array.prototype.slice.call(arguments);
 
     /**
-     * @protected
+     * @private
      */
     this.segments = segments;
 
     /**
-     * @type {string|undefined}
      * @private
+     * @type {string|undefined}
      */
     this._formattedName = undefined;
   }
@@ -82,7 +82,7 @@ class Path {
   /**
    * String representation as expected by the proto API.
    *
-   * @package
+   * @private
    * @type string
    */
   get formattedName() {
@@ -96,7 +96,7 @@ class Path {
   /**
    * Create a child path beneath the current level.
    *
-   * @package
+   * @private
    * @param {string|T} relativePath - Relative path to append to the current
    * path.
    * @returns {T} The new path.
@@ -112,7 +112,7 @@ class Path {
   /**
    * Returns the path of the parent node.
    *
-   * @package
+   * @private
    * @returns {T|null} The new path or null if we are already at the root.
    * @returns {T} The new path.
    * @template T
@@ -128,7 +128,7 @@ class Path {
   /**
    * Checks whether the current path is a prefix of the specified path.
    *
-   * @package
+   * @private
    * @param {Path} other - The path to check against.
    * @returns {boolean} 'true' iff the current path is a prefix match with
    * 'other'.
@@ -150,7 +150,7 @@ class Path {
   /**
    * Returns a string representation of this path.
    *
-   * @package
+   * @private
    * @returns {string} A string representing this path.
    */
   toString() {
@@ -160,7 +160,7 @@ class Path {
   /**
    * Compare the current path against another Path object.
    *
-   * @package
+   * @private
    * @param {Path} other - The path to compare to.
    * @returns {number} -1 if current < other, 1 if current > other, 0 if equal
    */
@@ -186,7 +186,7 @@ class Path {
   /**
    * Returns a copy of the underlying segments.
    *
-   * @package
+   * @private
    * @returns {Array.<string>} A copy of the segments that make up this path.
    */
   toArray() {
@@ -198,14 +198,14 @@ class Path {
  * A slash-separated path for navigating resources (documents and collections)
  * within Firestore.
  *
- * @package
+ * @private
  * @class
  */
 class ResourcePath extends Path {
   /**
    * Constructs a Firestore Resource Path.
    *
-   * @package
+   * @private
    * @hideconstructor
    *
    * @param {string} projectId - The Firestore project id.
@@ -236,7 +236,7 @@ class ResourcePath extends Path {
   /**
    * String representation of the path relative to the database root.
    *
-   * @package
+   * @private
    * @type string
    */
   get relativeName() {
@@ -246,7 +246,7 @@ class ResourcePath extends Path {
   /**
    * Indicates whether this ResourcePath points to a document.
    *
-   * @package
+   * @private
    * @type boolean
    */
   get isDocument() {
@@ -256,7 +256,7 @@ class ResourcePath extends Path {
   /**
    * Indicates whether this ResourcePath points to a collection.
    *
-   * @package
+   * @private
    * @type boolean
    */
   get isCollection() {
@@ -266,7 +266,7 @@ class ResourcePath extends Path {
   /**
    * The last component of the path.
    *
-   * @package
+   * @private
    * @type string|null
    */
   get id() {
@@ -279,7 +279,7 @@ class ResourcePath extends Path {
   /**
    * The project ID of this path.
    *
-   * @package
+   * @private
    * @type string
    */
   get projectId() {
@@ -289,7 +289,7 @@ class ResourcePath extends Path {
   /**
    * The database ID of this path.
    *
-   * @package
+   * @private
    * @type string
    */
   get databaseId() {
@@ -299,7 +299,7 @@ class ResourcePath extends Path {
    * Returns true if the given string can be used as a relative or absolute
    * resource path.
    *
-   * @package
+   * @private
    * @param {string} resourcePath - The path to validate.
    * @throws if the string can't be used as a resource path.
    * @returns {boolean} 'true' when the path is valid.
@@ -319,7 +319,7 @@ class ResourcePath extends Path {
   /**
    * Creates a resource path from an absolute Firestore path.
    *
-   * @package
+   * @private
    * @param {string} absolutePath - A string representation of a Resource Path.
    * @returns {ResourcePath} The new ResourcePath.
    */
@@ -339,7 +339,7 @@ class ResourcePath extends Path {
   /**
    * Splits a string into path segments, using slashes as separators.
    *
-   * @package
+   * @private
    * @override
    * @param {string} relativePath - The path to split.
    * @returns {Array.<string>} - The split path segments.
@@ -353,7 +353,7 @@ class ResourcePath extends Path {
   /**
    * String representation of a ResourcePath as expected by the API.
    *
-   * @package
+   * @private
    * @override
    * @returns {string} The representation as expected by the API.
    */
@@ -375,7 +375,7 @@ class ResourcePath extends Path {
    * the normal constructor because polymorphic 'this' doesn't work on static
    * methods.
    *
-   * @protected
+   * @private
    * @override
    * @param {Array.<string>} segments - Sequence of names of the parts of the
    * path.
@@ -388,7 +388,7 @@ class ResourcePath extends Path {
   /**
    * Compare the current path against another ResourcePath object.
    *
-   * @package
+   * @private
    * @override
    * @param {ResourcePath} other - The path to compare to.
    * @returns {number} -1 if current < other, 1 if current > other, 0 if equal
@@ -461,7 +461,7 @@ class FieldPath extends Path {
   /**
    * Returns true if the provided value can be used as a field path argument.
    *
-   * @package
+   * @private
    * @param {string|FieldPath} fieldPath - The value to verify.
    * @throws if the string can't be used as a field path.
    * @returns {boolean} 'true' when the path is valid.
@@ -493,7 +493,7 @@ class FieldPath extends Path {
    * Supports FieldPaths as input (which are passed through) and dot-seperated
    * strings.
    *
-   * @package
+   * @private
    * @param {string|FieldPath} fieldPath - The FieldPath to create.
    * @returns {FieldPath} A field path representation.
    */
@@ -508,7 +508,7 @@ class FieldPath extends Path {
   /**
    * String representation of a FieldPath as expected by the API.
    *
-   * @package
+   * @private
    * @override
    * @returns {string} The representation as expected by the API.
    */
@@ -525,7 +525,7 @@ class FieldPath extends Path {
   /**
    * Splits a string into path segments, using dots as separators.
    *
-   * @package
+   * @private
    * @override
    * @param {string} fieldPath - The path to split.
    * @returns {Array.<string>} - The split path segments.
@@ -539,7 +539,7 @@ class FieldPath extends Path {
    * the normal constructor because polymorphic 'this' doesn't work on static
    * methods.
    *
-   * @protected
+   * @private
    * @override
    * @param {Array.<string>} segments - Sequence of field names.
    * @returns {ResourcePath} The newly created FieldPath.

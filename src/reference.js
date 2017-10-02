@@ -130,7 +130,7 @@ const comparisonOperators = {
  */
 class DocumentReference {
   /**
-   * @protected
+   * @private
    * @hideconstructor
    *
    * @param {Firestore} firestore - The Firestore Database client.
@@ -232,7 +232,7 @@ class DocumentReference {
    * Returns the [ResourcePath]{@link ResourcePath} for this
    * DocumentReference.
    *
-   * @package
+   * @private
    * @type ResourcePath
    * @readonly
    */
@@ -519,7 +519,7 @@ class DocumentReference {
  */
 class DocumentChange {
   /**
-   * @protected
+   * @private
    * @hideconstructor
    *
    * @param {string} type - 'added' | 'removed' | 'modified'.
@@ -650,12 +650,12 @@ class DocumentChange {
 /**
  * A Query order-by field.
  *
- * @package
+ * @private
  * @class
  */
 class FieldOrder {
   /**
-   * @package
+   * @private
    * @hideconstructor
    *
    * @param {FieldPath} field - The name of a document field (member)
@@ -671,7 +671,7 @@ class FieldOrder {
   /**
    * The path of the field on which to order query results.
    *
-   * @package
+   * @private
    * @type FieldPath
    */
   get field() {
@@ -681,7 +681,7 @@ class FieldOrder {
   /**
    * One of 'ASCENDING' (default) or 'DESCENDING'.
    *
-   * @package
+   * @private
    * @type string
    */
   get direction() {
@@ -691,7 +691,7 @@ class FieldOrder {
   /**
    * Generates the proto representation for this field order.
    *
-   * @package
+   * @private
    * @returns {Object}
    */
   toProto() {
@@ -707,12 +707,12 @@ class FieldOrder {
 /**
  * A field constraint for a Query where clause.
  *
- * @package
+ * @private
  * @alias FieldFilter
  */
 class FieldFilter {
   /**
-   * @package
+   * @private
    * @hideconstructor
    *
    * @param {FieldPath} field - The path of the property value to
@@ -730,7 +730,7 @@ class FieldFilter {
   /**
    * Generates the proto representation for this field filter.
    *
-   * @package
+   * @private
    * @returns {Object}
    */
   toProto() {
@@ -782,7 +782,7 @@ class FieldFilter {
  */
 class QuerySnapshot {
   /**
-   * @package
+   * @private
    * @hideconstructor
    *
    * @param {Query} query - The originating query.
@@ -953,7 +953,7 @@ class QuerySnapshot {
  */
 class Query {
   /**
-   * @protected
+   * @private
    * @hideconstructor
    *
    * @param {Firestore} firestore - The Firestore Database client.
@@ -1422,7 +1422,7 @@ class Query {
   /**
    * Internal get() method that accepts an optional transaction id.
    *
-   * @package
+   * @private
    * @param {bytes=} queryOptions.transactionId - A transaction ID.
    */
   _get(queryOptions) {
@@ -1496,7 +1496,7 @@ class Query {
    * representation with an optional transaction id.
    *
    * @param {bytes=} queryOptions.transactionId - A transaction ID.
-   * @package
+   * @private
    * @returns Serialized JSON for the query.
    */
   toProto(queryOptions) {
@@ -1565,7 +1565,7 @@ class Query {
    * Internal streaming method that accepts an optional transaction id.
    *
    * @param {bytes=} queryOptions.transactionId - A transaction ID.
-   * @package
+   * @private
    * @returns {stream} A stream of Documents.
    */
   _stream(queryOptions) {
@@ -1702,7 +1702,7 @@ class Query {
  */
 class CollectionReference extends Query {
   /**
-   * @protected
+   * @private
    * @hideconstructor
    *
    * @param {Firestore} firestore - The Firestore Database client.

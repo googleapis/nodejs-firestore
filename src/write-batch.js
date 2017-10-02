@@ -78,7 +78,7 @@ const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
  */
 class WriteResult {
   /**
-   * @package
+   * @private
    * @hideconstructor
    *
    * @param {string} writeTime - The ISO 8601 write time.
@@ -115,7 +115,7 @@ class WriteResult {
  */
 class WriteBatch {
   /**
-   * @package
+   * @private
    * @hideconstructor
    *
    * @param {Firestore} firestore - The Firestore Database client.
@@ -419,7 +419,7 @@ class WriteBatch {
   /**
    * Commit method that takes an optional transaction ID.
    *
-   * @package
+   * @private
    * @param {object=} commitOptions Options to use for this commit.
    * @param {bytes=} commitOptions.transactionId The transaction ID of this
    * commit.

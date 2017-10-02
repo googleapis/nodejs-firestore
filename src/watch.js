@@ -109,11 +109,11 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
  * can be used with a valid Firestore Listen target.
  *
  * @class
- * @package
+ * @private
  */
 class Watch {
   /**
-   * @package
+   * @private
    * @hideconstructor
    *
    * @param {Firestore} firestore The Firestore Database client.
@@ -132,7 +132,7 @@ class Watch {
   /**
    * Creates a new Watch instance to listen on DocumentReferences.
    *
-   * @package
+   * @private
    * @param {DocumentReference} documentRef - The document
    * reference for this watch.
    * @returns {Watch} A newly created Watch instance.
@@ -153,7 +153,7 @@ class Watch {
   /**
    * Creates a new Watch instance to listen on Queries.
    *
-   * @package
+   * @private
    * @param {Query} query - The query used for this watch.
    * @returns {Watch} A newly created Watch instance.
    */
@@ -171,7 +171,7 @@ class Watch {
   /**
    * Starts a watch and attaches a listener for document change events.
    *
-   * @package
+   * @private
    * @param {watchSnapshotCallback} onNext - A callback to be called every time
    * a new snapshot is available.
    * @param {function(Error)} onError - A callback to be called if the listen
