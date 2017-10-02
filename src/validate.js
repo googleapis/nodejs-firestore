@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/*!
- * @module firestore/validate
- */
-
 'use strict';
 
 const is = require('is');
@@ -44,38 +40,40 @@ function formatPlural(num, str) {
  * inputs and may throw errors with custom validation messages for easier
  * diagnosis.
  *
- * @package
  * @param {Object.<string, function>} validators Mapping from types to
  * validator validators.
- * @return {Object.<string, function>} Map with validators following the naming
+ * @returns {Object.<string, function>} Map with validators following the naming
  * convention is{Type} and isOptional{Type}.
  */
-module.exports = (validators) => {
-  validators = Object.assign({
-    function: is.function,
-    integer:  (value, min, max) => {
-      min = is.defined(min) ? min : -Infinity;
-      max = is.defined(max) ? max : Infinity;
-      return is.integer(value) && value >= min && value <= max;
+module.exports = validators => {
+  validators = Object.assign(
+    {
+      function: is.function,
+      integer: (value, min, max) => {
+        min = is.defined(min) ? min : -Infinity;
+        max = is.defined(max) ? max : Infinity;
+        return is.integer(value) && value >= min && value <= max;
+      },
+      number: (value, min, max) => {
+        min = is.defined(min) ? min : -Infinity;
+        max = is.defined(max) ? max : Infinity;
+        return is.number(value) && value >= min && value <= max;
+      },
+      object: is.object,
+      string: is.string,
     },
-    number: (value, min, max) => {
-      min = is.defined(min) ? min : -Infinity;
-      max = is.defined(max) ? max : Infinity;
-      return is.number(value) && value >= min && value <= max;
-    },
-    object: is.object,
-    string: is.string
-  }, validators);
+    validators
+  );
 
   let exports = {};
 
-  let register = (type) => {
-    let camelCase = type.substring(0,1).toUpperCase() + type.substring(1);
+  let register = type => {
+    let camelCase = type.substring(0, 1).toUpperCase() + type.substring(1);
     exports[`is${camelCase}`] = function(argumentName, value) {
       let valid = false;
-      let message = is.number(argumentName) ?
-          `Argument at index ${argumentName} is not a valid ${type}.` :
-          `Argument "${argumentName}" is not a valid ${type}.`;
+      let message = is.number(argumentName)
+        ? `Argument at index ${argumentName} is not a valid ${type}.`
+        : `Argument "${argumentName}" is not a valid ${type}.`;
 
       try {
         value = [].slice.call(arguments, 1);
@@ -108,12 +106,14 @@ module.exports = (validators) => {
    * @param {Array.<*>} args - The array (or array-like structure) to verify.
    * @param {number} minSize - The minimum number of elements to enforce.
    * @throws if the expectation is not met.
-   * @return {boolean} 'true' when the minimum number of elements is available.
+   * @returns {boolean} 'true' when the minimum number of elements is available.
    */
   exports.minNumberOfArguments = (funcName, args, minSize) => {
     if (args.length < minSize) {
-      throw new Error(`Function '${funcName}()' requires at least ` +
-          `${formatPlural(minSize, 'argument')}.`);
+      throw new Error(
+        `Function '${funcName}()' requires at least ` +
+          `${formatPlural(minSize, 'argument')}.`
+      );
     }
 
     return true;
@@ -126,13 +126,15 @@ module.exports = (validators) => {
    * @param {Array.<*>} args - The array (or array-like structure) to verify.
    * @param {number} maxSize - The maximum number of elements to enforce.
    * @throws if the expectation is not met.
-   * @return {boolean} 'true' when only the maximum number of elements is
+   * @returns {boolean} 'true' when only the maximum number of elements is
    * specified.
    */
   exports.maxNumberOfArguments = (funcName, args, maxSize) => {
     if (args.length > maxSize) {
-      throw new Error(`Function '${funcName}()' accepts at most ` +
-          `${formatPlural(maxSize, 'argument')}.`);
+      throw new Error(
+        `Function '${funcName}()' accepts at most ` +
+          `${formatPlural(maxSize, 'argument')}.`
+      );
     }
 
     return true;

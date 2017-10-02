@@ -17,11 +17,12 @@
 'use strict';
 
 const assert = require('assert');
+const Buffer = require('safe-buffer').Buffer;
 const grpc = require('grpc');
 
 const Firestore = require('../');
-const DocumentReference =
-    require('../src/reference')(Firestore).DocumentReference;
+const DocumentReference = require('../src/reference')(Firestore)
+  .DocumentReference;
 const document = require('../src/document')(Firestore, DocumentReference);
 const DocumentSnapshot = document.DocumentSnapshot;
 const GeoPoint = document.GeoPoint;
@@ -34,7 +35,7 @@ Firestore.setLogFunction(() => {});
 function createInstance() {
   return new Firestore({
     projectId: 'test-project',
-    sslCreds: grpc.credentials.createInsecure()
+    sslCreds: grpc.credentials.createInsecure(),
   });
 }
 
@@ -51,12 +52,16 @@ describe('Order', function() {
   }
 
   function blob(data) {
-    return wrap(new Buffer(data));
+    return wrap(Buffer.from(data));
   }
 
   function resource(pathString) {
-    return wrap(new DocumentReference(firestore,
-        ResourcePath.fromSlashSeparatedString(pathString)));
+    return wrap(
+      new DocumentReference(
+        firestore,
+        ResourcePath.fromSlashSeparatedString(pathString)
+      )
+    );
   }
 
   function geopoint(lat, lng) {
@@ -85,13 +90,16 @@ describe('Order', function() {
 
   it('throws on invalid blob', function() {
     assert.throws(() => {
-      order.compare({
-        valueType: 'bytesValue',
-        bytesValue: [1, 2, 3],
-      }, {
-        valueType: 'bytesValue',
-        bytesValue: [1, 2, 3],
-      });
+      order.compare(
+        {
+          valueType: 'bytesValue',
+          bytesValue: [1, 2, 3],
+        },
+        {
+          valueType: 'bytesValue',
+          bytesValue: [1, 2, 3],
+        }
+      );
     }, /Blobs can only be compared if they are Buffers/);
   });
 
@@ -100,7 +108,7 @@ describe('Order', function() {
       new DocumentSnapshot(firestore.doc('col/doc3')),
       new DocumentSnapshot(firestore.doc('col/doc2')),
       new DocumentSnapshot(firestore.doc('col/doc2')),
-      new DocumentSnapshot(firestore.doc('col/doc1'))
+      new DocumentSnapshot(firestore.doc('col/doc1')),
     ];
 
     docs.sort(firestore.collection('col').comparator());
@@ -206,16 +214,42 @@ describe('Order', function() {
         for (let j = 0; j < groups.length; j++) {
           for (const right of groups[j]) {
             let expected = order.primitiveComparator(i, j);
-            assert.equal(order.compare(left, right), expected,
-                'comparing ' + left + ' (' + JSON.stringify(left) + ') to ' +
-                right + ' (' + JSON.stringify(right) + ') at (' +
-                i + ', ' + j + ')');
+            assert.equal(
+              order.compare(left, right),
+              expected,
+              'comparing ' +
+                left +
+                ' (' +
+                JSON.stringify(left) +
+                ') to ' +
+                right +
+                ' (' +
+                JSON.stringify(right) +
+                ') at (' +
+                i +
+                ', ' +
+                j +
+                ')'
+            );
 
             expected = order.primitiveComparator(j, i);
-            assert.equal(order.compare(right, left), expected,
-                'comparing ' + right + ' (' + JSON.stringify(right) + ') to ' +
-                left + ' (' + JSON.stringify(left) + ') at (' +
-                j + ', ' + i + ')');
+            assert.equal(
+              order.compare(right, left),
+              expected,
+              'comparing ' +
+                right +
+                ' (' +
+                JSON.stringify(right) +
+                ') to ' +
+                left +
+                ' (' +
+                JSON.stringify(left) +
+                ') at (' +
+                j +
+                ', ' +
+                i +
+                ')'
+            );
           }
         }
       }

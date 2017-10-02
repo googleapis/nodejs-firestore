@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-/*!
- * @module firestore/document
- */
-
 'use strict';
 
 const assert = require('assert');
@@ -25,53 +21,46 @@ const is = require('is');
 
 const path = require('./path');
 
-/**
- * @type firestore.ResourcePath
+/*!
+ * @see {ResourcePath}
  */
 const ResourcePath = path.ResourcePath;
 
-/**
- * @type firestore.FieldPath
+/*!
+ * @see {FieldPath}
  */
 const FieldPath = path.FieldPath;
 
-/**
- * @type firestore.FieldValue
+/*!
+ * @see {FieldValue}
  */
 const FieldValue = require('./field-value');
 
-/**
+/*!
  * Injected.
  *
- * @type firestore.DocumentReference
+ * @see {DocumentReference}
  */
 let DocumentReference;
 
-/**
- * Injected.
- *
- * @type firestore.Firestore
- */
-let Firestore;
-
-/** Injected. */
+/*! Injected. */
 let validate;
 
-/**
+/*!
  * The maximum depth of a Firestore object.
  *
  * @type number
  */
 const MAX_DEPTH = 20;
 
-/**
+/*!
  * Number of nanoseconds in a millisecond.
  *
  * @type number
  */
 const MS_TO_NANOS = 1000000;
 
-/**
+/*!
  * Protocol constant for the ServerTimestamp transform.
  *
  * @type string
@@ -83,14 +72,14 @@ const SERVER_TIMESTAMP = 'REQUEST_TIME';
  * location is represented as a latitude/longitude pair.
  *
  * <p>This class be instantiated via
- * [geoPoint()]{@link firestore.Firestore.geoPoint}.
+ * [new Firestore.GeoPoint()]{@link GeoPoint}.
  *
- * @public
- * @alias firestore.GeoPoint
+ * @class
+ * @hideconstructor
  */
 class GeoPoint {
   /**
-   * Creates a [GeoPoint]{@link firestore.GeoPoint}.
+   * Creates a [GeoPoint]{@link GeoPoint}.
    *
    * @public
    * @param {number} latitude The latitude as a number between -90 and 90.
@@ -119,7 +108,7 @@ class GeoPoint {
    *
    * @public
    * @type number
-   * @name firestore.GeoPoint#latitude
+   * @name GeoPoint#latitude
    * @readonly
    */
   get latitude() {
@@ -131,7 +120,7 @@ class GeoPoint {
    *
    * @public
    * @type number
-   * @name firestore.GeoPoint#longitude
+   * @name GeoPoint#longitude
    * @readonly
    */
   get longitude() {
@@ -151,7 +140,6 @@ class GeoPoint {
 
   /**
    * Converts a google.type.LatLng proto to its GeoPoint representation.
-   * @package
    */
   static fromProto(proto) {
     return new GeoPoint(proto.latitude, proto.longitude);
@@ -161,22 +149,21 @@ class GeoPoint {
 /**
  * A DocumentSnapshot is an immutable representation for a document in a
  * Firestore database. The data can be extracted with
- * [data()]{@link firestore.DocumentSnapshot#data} or
- * [get(fieldPath)]{@link firestore.DocumentSnapshot#get} to get a
+ * [data()]{@link DocumentSnapshot#data} or
+ * [get(fieldPath)]{@link DocumentSnapshot#get} to get a
  * specific field.
  *
  * <p>The snapshot can point to a non-existing document in which case
- * [exists]{@link firestore.DocumentSnapshot#exists} will return false.
- * Calling [data()]{@link firestore.DocumentSnapshot#data} or
- * [get(fieldPath)]{@link firestore.DocumentSnapshot#get} for such a document
+ * [exists]{@link DocumentSnapshot#exists} will return false.
+ * Calling [data()]{@link DocumentSnapshot#data} or
+ * [get(fieldPath)]{@link DocumentSnapshot#get} for such a document
  * throws an error.
  *
- * @public
- * @alias firestore.DocumentSnapshot
+ * @class
+ * @hideconstructor
  */
 class DocumentSnapshot {
   /**
-   * @package
    * @hideconstructor
    *
    * @param {firestore/DocumentReference} ref - The reference to the
@@ -203,7 +190,7 @@ class DocumentSnapshot {
    *
    * @public
    * @type boolean
-   * @name firestore.DocumentSnapshot#exists
+   * @name DocumentSnapshot#exists
    * @readonly
    *
    * @example
@@ -220,12 +207,12 @@ class DocumentSnapshot {
   }
 
   /**
-   * A [DocumentReference]{@link firestore.DocumentReference} for the document
+   * A [DocumentReference]{@link DocumentReference} for the document
    * stored in this snapshot.
    *
    * @public
-   * @type firestore.DocumentReference
-   * @name firestore.DocumentSnapshot#ref
+   * @type DocumentReference
+   * @name DocumentSnapshot#ref
    * @readonly
    *
    * @example
@@ -246,7 +233,7 @@ class DocumentSnapshot {
    *
    * @public
    * @type string
-   * @name firestore.DocumentSnapshot#id
+   * @name DocumentSnapshot#id
    * @readonly
    *
    * @example
@@ -268,7 +255,7 @@ class DocumentSnapshot {
    *
    * @public
    * @type string
-   * @name firestore.DocumentSnapshot#createTime
+   * @name DocumentSnapshot#createTime
    * @readonly
    *
    * @example
@@ -290,7 +277,7 @@ class DocumentSnapshot {
    *
    * @public
    * @type string
-   * @name firestore.DocumentSnapshot#updateTime
+   * @name DocumentSnapshot#updateTime
    * @readonly
    *
    * @example
@@ -311,7 +298,7 @@ class DocumentSnapshot {
    *
    * @public
    * @type string
-   * @name firestore.DocumentSnapshot#readTime
+   * @name DocumentSnapshot#readTime
    * @readonly
    *
    * @example
@@ -329,7 +316,7 @@ class DocumentSnapshot {
    * Retrieves all fields in the document as an object.
    *
    * @public
-   * @return {DocumentData} An object containing all fields in the document.
+   * @returns {DocumentData} An object containing all fields in the document.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -355,13 +342,13 @@ class DocumentSnapshot {
   /**
    * Returns the underlying Firestore 'Fields' Protobuf.
    *
-   * @package
-   * @return {Object} The Protobuf encoded document.
+   * @returns {Object} The Protobuf encoded document.
    */
   protoFields() {
     if (this._fieldsProto === undefined) {
       throw new Error(
-          `The data for "${this._ref.formattedName}" does not exist.`);
+        `The data for "${this._ref.formattedName}" does not exist.`
+      );
     }
 
     return this._fieldsProto;
@@ -371,9 +358,9 @@ class DocumentSnapshot {
    * Retrieves the field specified by `fieldPath`.
    *
    * @public
-   * @param {string|firestore.FieldPath} field - The field path
+   * @param {string|FieldPath} field - The field path
    * (e.g. 'foo' or 'foo.bar') to a specific field.
-   * @return {*} The data at the specified field location or undefined if no
+   * @returns {*} The data at the specified field location or undefined if no
    * such field exists.
    *
    * @example
@@ -402,10 +389,9 @@ class DocumentSnapshot {
    * Retrieves the field specified by 'fieldPath' in its Protobuf
    * representation.
    *
-   * @package
-   * @param {string|firestore.FieldPath} field - The path (e.g. 'foo' or
+   * @param {string|FieldPath} field - The path (e.g. 'foo' or
    * 'foo.bar') to a specific field.
-   * @return {*} The Protobuf-encoded data at the specified field location or
+   * @returns {*} The Protobuf-encoded data at the specified field location or
    * undefined if no such field exists.
    */
   protoField(field) {
@@ -430,33 +416,45 @@ class DocumentSnapshot {
    *
    * @private
    * @param proto - A Firestore 'Value' Protobuf.
-   * @return {*} The converted JS type.
+   * @returns {*} The converted JS type.
    */
   _decodeValue(proto) {
     switch (proto.valueType) {
       case 'stringValue': {
         return proto.stringValue;
-      } case 'booleanValue': {
+      }
+      case 'booleanValue': {
         return proto.booleanValue;
-      } case 'integerValue': {
+      }
+      case 'integerValue': {
         return parseInt(proto.integerValue, 10);
-      } case 'doubleValue': {
+      }
+      case 'doubleValue': {
         return parseFloat(proto.doubleValue, 10);
-      } case 'timestampValue': {
-        return new Date(proto.timestampValue.seconds * 1000 +
-            (proto.timestampValue.nanos / MS_TO_NANOS));
-      } case 'referenceValue': {
-        return new DocumentReference(this.ref.firestore,
-            ResourcePath.fromSlashSeparatedString(proto.referenceValue));
-      } case 'arrayValue': {
+      }
+      case 'timestampValue': {
+        return new Date(
+          proto.timestampValue.seconds * 1000 +
+            proto.timestampValue.nanos / MS_TO_NANOS
+        );
+      }
+      case 'referenceValue': {
+        return new DocumentReference(
+          this.ref.firestore,
+          ResourcePath.fromSlashSeparatedString(proto.referenceValue)
+        );
+      }
+      case 'arrayValue': {
         let array = [];
         for (let i = 0; i < proto.arrayValue.values.length; ++i) {
           array.push(this._decodeValue(proto.arrayValue.values[i]));
         }
         return array;
-      } case 'nullValue': {
+      }
+      case 'nullValue': {
         return null;
-      } case 'mapValue': {
+      }
+      case 'mapValue': {
         let obj = {};
         let fields = proto.mapValue.fields;
 
@@ -467,13 +465,17 @@ class DocumentSnapshot {
         }
 
         return obj;
-      } case 'geoPointValue': {
+      }
+      case 'geoPointValue': {
         return GeoPoint.fromProto(proto.geoPointValue);
-      } case 'bytesValue': {
+      }
+      case 'bytesValue': {
         return proto.bytesValue;
-      } default: {
-        throw new Error('Cannot decode type from Firestore Value: ' +
-            JSON.stringify(proto));
+      }
+      default: {
+        throw new Error(
+          'Cannot decode type from Firestore Value: ' + JSON.stringify(proto)
+        );
       }
     }
   }
@@ -481,23 +483,21 @@ class DocumentSnapshot {
   /**
    * Convert a document snapshot to the Firestore 'Document' Protobuf.
    *
-   * @package
-   * @return {Object} - The document in the format the API expects.
+   * @returns {Object} - The document in the format the API expects.
    */
   toProto() {
     return {
       name: this._ref.formattedName,
-      fields: this._fieldsProto
+      fields: this._fieldsProto,
     };
   }
 
   /**
    * Converts a Google Protobuf timestamp to an ISO 8601 string.
    *
-   * @package
    * @param {{seconds:number,nanos:number}=} timestamp The Google Protobuf
    * timestamp.
-   * @return {string|undefined} The representation in ISO 8601 or undefined if
+   * @returns {string|undefined} The representation in ISO 8601 or undefined if
    * the input is empty.
    */
   static toISOTime(timestamp) {
@@ -523,10 +523,9 @@ class DocumentSnapshot {
   /**
    * Encodes a JavaScrip object into the Firestore 'Fields' representation.
    *
-   * @package
    * @param {Object} obj The object to encode
    * @param {number=} depth The depth at the current encoding level
-   * @return {Object} The Firestore 'Fields' representation
+   * @returns {Object} The Firestore 'Fields' representation
    */
   static encodeFields(obj, depth) {
     if (!is.defined(depth)) {
@@ -552,11 +551,10 @@ class DocumentSnapshot {
    * Encodes a JavaScrip value into the Firestore 'Value' representation.
    * Encodes a JavaScrip value into the Firestore 'Value' represntation.
    *
-   * @package
    *
    * @param {Object} val The object to encode
    * @param {number=} depth The depth at the current encoding level
-   * @return {object|null} The Firestore Proto or null if we are deleting a
+   * @returns {object|null} The Firestore Proto or null if we are deleting a
    * field.
    */
   static encodeValue(val, depth) {
@@ -575,21 +573,21 @@ class DocumentSnapshot {
     if (is.string(val)) {
       return {
         valueType: 'stringValue',
-        stringValue: val
+        stringValue: val,
       };
     }
 
     if (is.boolean(val)) {
       return {
         valueType: 'booleanValue',
-        booleanValue: val
+        booleanValue: val,
       };
     }
 
     if (is.integer(val)) {
       return {
         valueType: 'integerValue',
-        integerValue: val
+        integerValue: val,
       };
     }
 
@@ -597,7 +595,7 @@ class DocumentSnapshot {
     if (is.number(val)) {
       return {
         valueType: 'doubleValue',
-        doubleValue: val
+        doubleValue: val,
       };
     }
 
@@ -605,11 +603,11 @@ class DocumentSnapshot {
       let epochSeconds = Math.floor(val.getTime() / 1000);
       let timestamp = {
         seconds: epochSeconds,
-        nanos: (val.getTime() - epochSeconds * 1000) * MS_TO_NANOS
+        nanos: (val.getTime() - epochSeconds * 1000) * MS_TO_NANOS,
       };
       return {
         valueType: 'timestampValue',
-        timestampValue: timestamp
+        timestampValue: timestamp,
       };
     }
 
@@ -624,36 +622,36 @@ class DocumentSnapshot {
       return {
         valueType: 'arrayValue',
         arrayValue: {
-          values: encodedElements
-        }
+          values: encodedElements,
+        },
       };
     }
 
     if (is.nil(val)) {
       return {
         valueType: 'nullValue',
-        nullValue: 'NULL_VALUE'
+        nullValue: 'NULL_VALUE',
       };
     }
 
     if (is.instance(val, DocumentReference) || is.instance(val, ResourcePath)) {
       return {
         valueType: 'referenceValue',
-        referenceValue: val.formattedName
+        referenceValue: val.formattedName,
       };
     }
 
     if (is.instance(val, GeoPoint)) {
       return {
         valueType: 'geoPointValue',
-        geoPointValue: val.toProto()
+        geoPointValue: val.toProto(),
       };
     }
 
     if (is.instanceof(val, Buffer) || is.instanceof(val, Uint8Array)) {
       return {
         valueType: 'bytesValue',
-        bytesValue: val
+        bytesValue: val,
       };
     }
 
@@ -661,13 +659,16 @@ class DocumentSnapshot {
       return {
         valueType: 'mapValue',
         mapValue: {
-          fields: DocumentSnapshot.encodeFields(val, depth + 1)
-        }
+          fields: DocumentSnapshot.encodeFields(val, depth + 1),
+        },
       };
     }
 
-    throw new Error('Cannot encode type (' +
-        Object.prototype.toString.call(val) + ') to a Firestore Value');
+    throw new Error(
+      'Cannot encode type (' +
+        Object.prototype.toString.call(val) +
+        ') to a Firestore Value'
+    );
   }
 
   /**
@@ -676,9 +677,8 @@ class DocumentSnapshot {
    *
    * This functions turns { foo.bar : foobar } into { foo { bar : foobar }}
    *
-   * @package
    * @param {Map.<string|FieldPath, *>} data - The field/value map to expand.
-   * @return {DocumentData} The expanded JavaScript object.
+   * @returns {DocumentData} The expanded JavaScript object.
    */
   static expandMap(data) {
     /**
@@ -703,14 +703,17 @@ class DocumentSnapshot {
           // The existing object has deeper nesting that the value we are trying
           // to merge.
           throw new Error(
-              `Field "${path.join('.')}" has conflicting definitions.`);
+            `Field "${path.join('.')}" has conflicting definitions.`
+          );
         } else {
           merge(target[key], value, path, pos + 1);
         }
       } else {
         // We are trying to merge an object with a primitive.
-        throw new Error(`Field "${path.slice(0, pos + 1).join('.')}" has ` +
-            `conflicting definitions.`);
+        throw new Error(
+          `Field "${path.slice(0, pos + 1).join('.')}" has ` +
+            `conflicting definitions.`
+        );
       }
     }
 
@@ -729,12 +732,12 @@ class DocumentSnapshot {
  * Returns a builder for DocumentSnapshot instances. Invoke `.build()' to
  * assemble the final snapshot.
  *
- * @package
- * @return {Object} A Builder instance for a DocumentSnapshot.
+ * @class DocumentSnapshotBuilder
+ * @returns {Object} A Builder instance for a DocumentSnapshot.
  */
-DocumentSnapshot.Builder = class {
+class DocumentSnapshotBuilder {
   /**
-   * @param {firestore.DocumentSnapshot=} snapshot An optional snapshot to
+   * @param {DocumentSnapshot=} snapshot An optional snapshot to
    * base this builder on.
    */
   constructor(snapshot) {
@@ -743,15 +746,13 @@ DocumentSnapshot.Builder = class {
     /**
      * The reference to the document.
      *
-     * @package
-     * @type {firestore.DocumentReference}
+     * @type {DocumentReference}
      */
     this.ref = snapshot._ref;
 
     /**
      * The fields of the Firestore `Document` Protobuf backing this document.
      *
-     * @package
      * @type {object}
      */
     this.fieldsProto = snapshot._fieldsProto;
@@ -759,7 +760,6 @@ DocumentSnapshot.Builder = class {
     /**
      * The ISO 8601 time when this document was read.
      *
-     * @package
      * @type {string}
      */
     this.readTime = snapshot._readTime;
@@ -767,7 +767,6 @@ DocumentSnapshot.Builder = class {
     /**
      * The ISO 8601 time when this document was created.
      *
-     * @package
      * @type {string}
      */
     this.createTime = snapshot._createTime;
@@ -775,7 +774,6 @@ DocumentSnapshot.Builder = class {
     /**
      * The ISO 8601 time when this document was last updated.
      *
-     * @package
      * @type {string}
      */
     this.updateTime = snapshot._updateTime;
@@ -783,29 +781,40 @@ DocumentSnapshot.Builder = class {
 
   /**
    * Builds the DocumentSnapshot.
-   * @package
    */
   build() {
-    assert(is.defined(this.fieldsProto) === is.defined(this.createTime),
-        'Create time should be set iff document exists.');
-    assert(is.defined(this.fieldsProto) === is.defined(this.updateTime),
-        'Update time should be set iff document exists.');
-    return new DocumentSnapshot(this.ref, this.fieldsProto,
-        this.readTime, this.createTime, this.updateTime);
+    assert(
+      is.defined(this.fieldsProto) === is.defined(this.createTime),
+      'Create time should be set iff document exists.'
+    );
+    assert(
+      is.defined(this.fieldsProto) === is.defined(this.updateTime),
+      'Update time should be set iff document exists.'
+    );
+    return new DocumentSnapshot(
+      this.ref,
+      this.fieldsProto,
+      this.readTime,
+      this.createTime,
+      this.updateTime
+    );
   }
-};
+}
 
+/**
+ * @name DocumentSnapshot.DocumentSnapshotBuilder
+ * @see DocumentSnapshotBuilder
+ */
+DocumentSnapshot.Builder = DocumentSnapshotBuilder;
 
 /**
  * A Firestore Document Mask contains the field paths affected by an update.
  *
- * @alias firestore.DocumentMask
- *
- * @package
+ * @class
+ * @hideconstructor
  */
 class DocumentMask {
   /**
-   * @package
    * @param {Array.<string>} fieldPaths - The canonical representation of field
    * paths in this mask.
    */
@@ -816,22 +825,20 @@ class DocumentMask {
   /**
    * Converts a document mask to the Firestore 'DocumentMask' Proto.
    *
-   * @package
-   * @return {Object} A Firestore 'DocumentMask' Proto.
+   * @returns {Object} A Firestore 'DocumentMask' Proto.
    */
   toProto() {
     return {
-      fieldPaths: this._fieldPaths
+      fieldPaths: this._fieldPaths,
     };
   }
 
   /**
    * Creates a document mask with the field paths of a document.
    *
-   * @package
-   * @param {Map.<string|firestore.FieldPath, *>} data A map with
+   * @param {Map.<string|FieldPath, *>} data A map with
    * fields to modify. Only the keys are used to extract the document mask.
-   * @return {firestore.DocumentMask}
+   * @returns {DocumentMask}
    */
   static fromMap(data) {
     let fieldPaths = [];
@@ -848,10 +855,9 @@ class DocumentMask {
   /**
    * Creates a document mask with the field names of a document.
    *
-   * @package
    * @param {DocumentData} data An object with fields to modify. Only the keys
    * are used to extract the document mask.
-   * @return {firestore.DocumentMask}
+   * @returns {DocumentMask}
    */
   static fromObject(data) {
     let fieldPaths = [];
@@ -862,8 +868,9 @@ class DocumentMask {
           // We don't split on dots since fromObject is called with
           // DocumentData.
           const childSegment = new FieldPath(key);
-          const childPath = currentPath ? currentPath.append(childSegment) :
-              childSegment;
+          const childPath = currentPath
+            ? currentPath.append(childSegment)
+            : childSegment;
           const value = currentData[key];
           if (is.object(value)) {
             extractFieldPaths(value, childPath);
@@ -886,14 +893,13 @@ class DocumentMask {
  * A DocumentTransform contains pending server-side transforms and their
  * corresponding field paths.
  *
- * @package
- * @alias firestore.DocumentTransform
+ * @class
+ * @hideconstructor
  */
 class DocumentTransform {
   /**
-   * @package
    *
-   * @param {firestore.DocumentReference} ref The DocumentReference for this
+   * @param {DocumentReference} ref The DocumentReference for this
    * transform.
    * @param {Array.<Object>} transforms A array with 'FieldTransform' Protobuf
    * messages.
@@ -906,7 +912,6 @@ class DocumentTransform {
   /**
    * Whether this DocumentTransform contains any actionable transformations.
    *
-   * @package
    * @type boolean
    * @readonly
    */
@@ -917,26 +922,24 @@ class DocumentTransform {
   /**
    * Converts a document transform to the Firestore 'DocumentTransform' Proto.
    *
-   * @package
-   * @return {Object} A Firestore 'DocumentTransform' Proto.
+   * @returns {Object} A Firestore 'DocumentTransform' Proto.
    */
   toProto() {
     return {
       document: this._ref.formattedName,
-      fieldTransforms: this._transforms
+      fieldTransforms: this._transforms,
     };
   }
 
   /**
    * Generates a DocumentTransform from a JavaScript object.
    *
-   * @package
    *
    * @param {firestore/DocumentReference} ref The `DocumentReference` to
    * use for the DocumentTransform.
    * @param {Object} obj The object to extract the transformations from.
    * @param {Array.<string>=} path The field path at the current depth.
-   * @return {Object} The Firestore Proto
+   * @returns {Object} The Firestore Proto
    */
   static fromObject(ref, obj, path) {
     path = path || [];
@@ -947,12 +950,13 @@ class DocumentTransform {
       if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
         if (allowTransforms) {
           transforms.push({
-            fieldPath: new FieldPath(...path).formattedName,
-            setToServerValue: SERVER_TIMESTAMP
+            fieldPath: new FieldPath(path).formattedName,
+            setToServerValue: SERVER_TIMESTAMP,
           });
         } else {
-          throw new Error('Server timestamps are not supported as array ' +
-            'values.');
+          throw new Error(
+            'Server timestamps are not supported as array ' + 'values.'
+          );
         }
       } else if (is.array(val)) {
         for (let i = 0; i < val.length; ++i) {
@@ -962,8 +966,9 @@ class DocumentTransform {
       } else if (is.object(val)) {
         for (let prop in val) {
           if (val.hasOwnProperty(prop)) {
-            transforms = transforms.concat(encode_(val[prop], path.concat(prop),
-              allowTransforms));
+            transforms = transforms.concat(
+              encode_(val[prop], path.concat(prop), allowTransforms)
+            );
           }
         }
       }
@@ -975,8 +980,9 @@ class DocumentTransform {
 
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
-        transforms = transforms.concat(encode_(obj[prop], path.concat(prop),
-          true));
+        transforms = transforms.concat(
+          encode_(obj[prop], path.concat(prop), true)
+        );
       }
     }
 
@@ -987,8 +993,8 @@ class DocumentTransform {
 /**
  * A Firestore Precondition encapsulates options for database writes.
  *
- * @package
- * @alias firestore.Precondition
+ * @class
+ * @hideconstructor
  */
 class Precondition {
   /**
@@ -1008,8 +1014,7 @@ class Precondition {
   /**
    * Generates the Protobuf `Preconditon` object for this precondition.
    *
-   * @package
-   * @return {Object} The `Preconditon` Protobuf object.
+   * @returns {Object} The `Preconditon` Protobuf object.
    */
   toProto() {
     let proto = {};
@@ -1020,11 +1025,13 @@ class Precondition {
       let nanos = null;
 
       let nanoString = this._lastUpdateTime.substring(
-          20, this._lastUpdateTime.length - 1);
+        20,
+        this._lastUpdateTime.length - 1
+      );
 
       if (nanoString.length === 3) {
         nanoString = `${nanoString}000000`;
-      } else if (nanoString.length === 6)  {
+      } else if (nanoString.length === 6) {
         nanoString = `${nanoString}000`;
       }
 
@@ -1033,13 +1040,14 @@ class Precondition {
       }
 
       if (isNaN(seconds) || isNaN(nanos)) {
-        throw new Error('Specify a valid ISO 8601 timestamp for' +
-            ' "lastUpdateTime".');
+        throw new Error(
+          'Specify a valid ISO 8601 timestamp for' + ' "lastUpdateTime".'
+        );
       }
 
       proto.updateTime = {
         seconds: seconds,
-        nanos: nanos
+        nanos: nanos,
       };
     } else if (is.defined(this._exists)) {
       proto.exists = this._exists;
@@ -1049,15 +1057,14 @@ class Precondition {
   }
 }
 
-/**
+/*!
  * Validates a JavaScript object for usage as a Firestore document.
  *
- * @package
  * @param {Object} obj JavaScript object to validate.
  * @param {boolean=} usesPaths Whether the object is keyed by field paths
  * (e.g. for document updates).
  * @param {number=} depth The current depth of the traversal.
- * @return {boolean} 'true' when the object is valid.
+ * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
 function validateDocumentData(obj, usesPaths, depth) {
@@ -1065,7 +1072,7 @@ function validateDocumentData(obj, usesPaths, depth) {
     depth = 1;
   } else if (depth > MAX_DEPTH) {
     throw new Error(
-        `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`
+      `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`
     );
   }
 
@@ -1084,17 +1091,16 @@ function validateDocumentData(obj, usesPaths, depth) {
   return true;
 }
 
-/**
+/*!
  * Validates the use of 'options' as a Precondition and enforces that 'exists'
  * and 'lastUpdateTime' use valid types.
  *
- * @package
  *
  * @param {boolean=} options.exists - Whether the referenced document
  * should exist.
  * @param {string=} options.lastUpdateTime - The last update time
  * of the referenced document in Firestore (as ISO 8601 string).
- * @return {boolean} 'true' if the input is a valid Precondition.
+ * @returns {boolean} 'true' if the input is a valid Precondition.
  */
 function validatePrecondition(options) {
   if (!is.object(options)) {
@@ -1106,7 +1112,7 @@ function validatePrecondition(options) {
   if (is.defined(options.exists)) {
     ++conditions;
     if (!is.boolean(options.exists)) {
-      throw new Error ('"exists" is not a boolean.');
+      throw new Error('"exists" is not a boolean.');
     }
   }
 
@@ -1124,15 +1130,14 @@ function validatePrecondition(options) {
   return true;
 }
 
-/**
+/*!
  * Validates the use of 'options' as SetOptions and enforces that 'merge' is a
  * boolean.
  *
- * @package
  *
  * @param {boolean=} options.merge - Whether set() should merge the provided
  * data into an existing document.
- * @return {boolean} 'true' if the input is a valid SetOptions object.
+ * @returns {boolean} 'true' if the input is a valid SetOptions object.
  */
 function validateSetOptions(options) {
   if (!is.object(options)) {
@@ -1140,21 +1145,25 @@ function validateSetOptions(options) {
   }
 
   if (is.defined(options.merge) && !is.boolean(options.merge)) {
-    throw new Error ('"merge" is not a boolean.');
+    throw new Error('"merge" is not a boolean.');
   }
 
   return true;
 }
 
 module.exports = (FirestoreType, DocumentRefType) => {
-  Firestore = FirestoreType;
   DocumentReference = DocumentRefType;
   validate = require('./validate.js')({
-    FieldPath: FieldPath.validateFieldPath
+    FieldPath: FieldPath.validateFieldPath,
   });
   return {
-    DocumentMask, DocumentSnapshot, DocumentTransform,
-    Precondition, GeoPoint, validateDocumentData, validatePrecondition,
-    validateSetOptions
+    DocumentMask,
+    DocumentSnapshot,
+    DocumentTransform,
+    Precondition,
+    GeoPoint,
+    validateDocumentData,
+    validatePrecondition,
+    validateSetOptions,
   };
 };

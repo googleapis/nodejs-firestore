@@ -23,16 +23,12 @@
  * The only allowed edits are to method and file documentation. A 3-way
  * merge preserves those additions if the generated source changes.
  */
-/* TODO: introduce line-wrapping so that it never exceeds the limit. */
-/* jscs: disable maximumLineLength */
 'use strict';
 
 var configData = require('./firestore_client_config');
 var extend = require('extend');
 var gax = require('google-gax');
-var googleProtoFiles = require('google-proto-files');
 var path = require('path');
-var protobuf = require('protobufjs');
 
 var SERVICE_ADDRESS = 'firestore.googleapis.com';
 
@@ -42,29 +38,31 @@ var CODE_GEN_NAME_VERSION = 'gapic/0.0.5';
 
 var PAGE_DESCRIPTORS = {
   listDocuments: new gax.PageDescriptor(
-      'pageToken',
-      'nextPageToken',
-      'documents'),
+    'pageToken',
+    'nextPageToken',
+    'documents'
+  ),
   listCollectionIds: new gax.PageDescriptor(
-      'pageToken',
-      'nextPageToken',
-      'collectionIds')
+    'pageToken',
+    'nextPageToken',
+    'collectionIds'
+  ),
 };
 
 var STREAM_DESCRIPTORS = {
   batchGetDocuments: new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
   runQuery: new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
   write: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
-  listen: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING)
+  listen: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
 };
 
-/**
+/*!
  * The scopes needed to make gRPC calls to all of the methods defined in
  * this service.
  */
 var ALL_SCOPES = [
   'https://www.googleapis.com/auth/cloud-platform',
-  'https://www.googleapis.com/auth/datastore'
+  'https://www.googleapis.com/auth/datastore',
 ];
 
 /**
@@ -89,15 +87,16 @@ var ALL_SCOPES = [
  * @class
  */
 function FirestoreClient(gaxGrpc, loadedProtos, opts) {
-  opts = extend({
-    servicePath: SERVICE_ADDRESS,
-    port: DEFAULT_SERVICE_PORT,
-    clientConfig: {}
-  }, opts);
+  opts = extend(
+    {
+      servicePath: SERVICE_ADDRESS,
+      port: DEFAULT_SERVICE_PORT,
+      clientConfig: {},
+    },
+    opts
+  );
 
-  var googleApiClient = [
-    'gl-node/' + process.versions.node
-  ];
+  var googleApiClient = ['gl-node/' + process.versions.node];
   if (opts.libName && opts.libVersion) {
     googleApiClient.push(opts.libName + '/' + opts.libVersion);
   }
@@ -108,17 +107,19 @@ function FirestoreClient(gaxGrpc, loadedProtos, opts) {
   );
 
   var defaults = gaxGrpc.constructSettings(
-      'google.firestore.v1beta1.Firestore',
-      configData,
-      opts.clientConfig,
-      {'x-goog-api-client': googleApiClient.join(' ')});
+    'google.firestore.v1beta1.Firestore',
+    configData,
+    opts.clientConfig,
+    {'x-goog-api-client': googleApiClient.join(' ')}
+  );
 
   var self = this;
 
   this.auth = gaxGrpc.auth;
   var firestoreStub = gaxGrpc.createStub(
-      loadedProtos.google.firestore.v1beta1.Firestore,
-      opts);
+    loadedProtos.google.firestore.v1beta1.Firestore,
+    opts
+  );
   var firestoreStubMethods = [
     'getDocument',
     'listDocuments',
@@ -132,7 +133,7 @@ function FirestoreClient(gaxGrpc, loadedProtos, opts) {
     'runQuery',
     'write',
     'listen',
-    'listCollectionIds'
+    'listCollectionIds',
   ];
   firestoreStubMethods.forEach(function(methodName) {
     self['_' + methodName] = gax.createApiCall(
@@ -143,23 +144,28 @@ function FirestoreClient(gaxGrpc, loadedProtos, opts) {
         };
       }),
       defaults[methodName],
-      PAGE_DESCRIPTORS[methodName] || STREAM_DESCRIPTORS[methodName]);
+      PAGE_DESCRIPTORS[methodName] || STREAM_DESCRIPTORS[methodName]
+    );
   });
 }
 
 // Path templates
 
 var DATABASE_ROOT_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}');
+  'projects/{project}/databases/{database}'
+);
 
 var DOCUMENT_ROOT_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}/documents');
+  'projects/{project}/databases/{database}/documents'
+);
 
 var DOCUMENT_PATH_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}/documents/{document_path=**}');
+  'projects/{project}/databases/{database}/documents/{document_path=**}'
+);
 
 var ANY_PATH_PATH_TEMPLATE = new gax.PathTemplate(
-    'projects/{project}/databases/{database}/documents/{document}/{any_path=**}');
+  'projects/{project}/databases/{database}/documents/{document}/{any_path=**}'
+);
 
 /**
  * Returns a fully-qualified database_root resource name string.
@@ -170,7 +176,7 @@ var ANY_PATH_PATH_TEMPLATE = new gax.PathTemplate(
 FirestoreClient.prototype.databaseRootPath = function(project, database) {
   return DATABASE_ROOT_PATH_TEMPLATE.render({
     project: project,
-    database: database
+    database: database,
   });
 };
 
@@ -183,7 +189,7 @@ FirestoreClient.prototype.databaseRootPath = function(project, database) {
 FirestoreClient.prototype.documentRootPath = function(project, database) {
   return DOCUMENT_ROOT_PATH_TEMPLATE.render({
     project: project,
-    database: database
+    database: database,
   });
 };
 
@@ -194,11 +200,15 @@ FirestoreClient.prototype.documentRootPath = function(project, database) {
  * @param {String} documentPath
  * @returns {String}
  */
-FirestoreClient.prototype.documentPathPath = function(project, database, documentPath) {
+FirestoreClient.prototype.documentPathPath = function(
+  project,
+  database,
+  documentPath
+) {
   return DOCUMENT_PATH_PATH_TEMPLATE.render({
     project: project,
     database: database,
-    document_path: documentPath
+    document_path: documentPath,
   });
 };
 
@@ -210,12 +220,17 @@ FirestoreClient.prototype.documentPathPath = function(project, database, documen
  * @param {String} anyPath
  * @returns {String}
  */
-FirestoreClient.prototype.anyPathPath = function(project, database, document, anyPath) {
+FirestoreClient.prototype.anyPathPath = function(
+  project,
+  database,
+  document,
+  anyPath
+) {
   return ANY_PATH_PATH_TEMPLATE.render({
     project: project,
     database: database,
     document: document,
-    any_path: anyPath
+    any_path: anyPath,
   });
 };
 
@@ -225,7 +240,9 @@ FirestoreClient.prototype.anyPathPath = function(project, database, document, an
  *   A fully-qualified path representing a database_root resources.
  * @returns {String} - A string representing the project.
  */
-FirestoreClient.prototype.matchProjectFromDatabaseRootName = function(databaseRootName) {
+FirestoreClient.prototype.matchProjectFromDatabaseRootName = function(
+  databaseRootName
+) {
   return DATABASE_ROOT_PATH_TEMPLATE.match(databaseRootName).project;
 };
 
@@ -235,7 +252,9 @@ FirestoreClient.prototype.matchProjectFromDatabaseRootName = function(databaseRo
  *   A fully-qualified path representing a database_root resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreClient.prototype.matchDatabaseFromDatabaseRootName = function(databaseRootName) {
+FirestoreClient.prototype.matchDatabaseFromDatabaseRootName = function(
+  databaseRootName
+) {
   return DATABASE_ROOT_PATH_TEMPLATE.match(databaseRootName).database;
 };
 
@@ -245,7 +264,9 @@ FirestoreClient.prototype.matchDatabaseFromDatabaseRootName = function(databaseR
  *   A fully-qualified path representing a document_root resources.
  * @returns {String} - A string representing the project.
  */
-FirestoreClient.prototype.matchProjectFromDocumentRootName = function(documentRootName) {
+FirestoreClient.prototype.matchProjectFromDocumentRootName = function(
+  documentRootName
+) {
   return DOCUMENT_ROOT_PATH_TEMPLATE.match(documentRootName).project;
 };
 
@@ -255,7 +276,9 @@ FirestoreClient.prototype.matchProjectFromDocumentRootName = function(documentRo
  *   A fully-qualified path representing a document_root resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreClient.prototype.matchDatabaseFromDocumentRootName = function(documentRootName) {
+FirestoreClient.prototype.matchDatabaseFromDocumentRootName = function(
+  documentRootName
+) {
   return DOCUMENT_ROOT_PATH_TEMPLATE.match(documentRootName).database;
 };
 
@@ -265,7 +288,9 @@ FirestoreClient.prototype.matchDatabaseFromDocumentRootName = function(documentR
  *   A fully-qualified path representing a document_path resources.
  * @returns {String} - A string representing the project.
  */
-FirestoreClient.prototype.matchProjectFromDocumentPathName = function(documentPathName) {
+FirestoreClient.prototype.matchProjectFromDocumentPathName = function(
+  documentPathName
+) {
   return DOCUMENT_PATH_PATH_TEMPLATE.match(documentPathName).project;
 };
 
@@ -275,7 +300,9 @@ FirestoreClient.prototype.matchProjectFromDocumentPathName = function(documentPa
  *   A fully-qualified path representing a document_path resources.
  * @returns {String} - A string representing the database.
  */
-FirestoreClient.prototype.matchDatabaseFromDocumentPathName = function(documentPathName) {
+FirestoreClient.prototype.matchDatabaseFromDocumentPathName = function(
+  documentPathName
+) {
   return DOCUMENT_PATH_PATH_TEMPLATE.match(documentPathName).database;
 };
 
@@ -285,7 +312,9 @@ FirestoreClient.prototype.matchDatabaseFromDocumentPathName = function(documentP
  *   A fully-qualified path representing a document_path resources.
  * @returns {String} - A string representing the document_path.
  */
-FirestoreClient.prototype.matchDocumentPathFromDocumentPathName = function(documentPathName) {
+FirestoreClient.prototype.matchDocumentPathFromDocumentPathName = function(
+  documentPathName
+) {
   return DOCUMENT_PATH_PATH_TEMPLATE.match(documentPathName).document_path;
 };
 
@@ -369,7 +398,7 @@ FirestoreClient.prototype.getProjectId = function(callback) {
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [Document]{@link Document}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [Document]{@link Document}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -377,7 +406,7 @@ FirestoreClient.prototype.getProjectId = function(callback) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -459,7 +488,7 @@ FirestoreClient.prototype.getDocument = function(request, options, callback) {
  *   in a single response. If the response indicates the next page exists, the third
  *   parameter is set to be used for the next request object. The fourth parameter keeps
  *   the raw response object of an object representing [ListDocumentsResponse]{@link ListDocumentsResponse}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is Array of [Document]{@link Document}.
  *
  *   When autoPaginate: false is specified through options, the array has three elements.
@@ -474,7 +503,7 @@ FirestoreClient.prototype.getDocument = function(request, options, callback) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -597,14 +626,14 @@ FirestoreClient.prototype.listDocuments = function(request, options, callback) {
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
- * @return {Stream}
+ * @returns {Stream}
  *   An object stream which emits an object representing [Document]{@link Document} on 'data' event.
  *
  * @example
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -626,7 +655,11 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
     options = {};
   }
 
-  return PAGE_DESCRIPTORS.listDocuments.createStream(this._listDocuments, request, options);
+  return PAGE_DESCRIPTORS.listDocuments.createStream(
+    this._listDocuments,
+    request,
+    options
+  );
 };
 
 /**
@@ -662,7 +695,7 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [Document]{@link Document}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [Document]{@link Document}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -670,7 +703,7 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -692,7 +725,11 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  *     console.error(err);
  * });
  */
-FirestoreClient.prototype.createDocument = function(request, options, callback) {
+FirestoreClient.prototype.createDocument = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -743,7 +780,7 @@ FirestoreClient.prototype.createDocument = function(request, options, callback) 
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [Document]{@link Document}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [Document]{@link Document}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -751,7 +788,7 @@ FirestoreClient.prototype.createDocument = function(request, options, callback) 
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -769,7 +806,11 @@ FirestoreClient.prototype.createDocument = function(request, options, callback) 
  *     console.error(err);
  * });
  */
-FirestoreClient.prototype.updateDocument = function(request, options, callback) {
+FirestoreClient.prototype.updateDocument = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -799,14 +840,14 @@ FirestoreClient.prototype.updateDocument = function(request, options, callback) 
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @param {function(?Error)=} callback
  *   The function which will be called with the result of the API call.
- * @return {Promise} - The promise which resolves when API call finishes.
+ * @returns {Promise} - The promise which resolves when API call finishes.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
  * @example
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -815,7 +856,11 @@ FirestoreClient.prototype.updateDocument = function(request, options, callback) 
  *     console.error(err);
  * });
  */
-FirestoreClient.prototype.deleteDocument = function(request, options, callback) {
+FirestoreClient.prototype.deleteDocument = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -874,7 +919,7 @@ FirestoreClient.prototype.deleteDocument = function(request, options, callback) 
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -916,7 +961,7 @@ FirestoreClient.prototype.batchGetDocuments = function(request, options) {
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [BeginTransactionResponse]{@link BeginTransactionResponse}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [BeginTransactionResponse]{@link BeginTransactionResponse}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -924,7 +969,7 @@ FirestoreClient.prototype.batchGetDocuments = function(request, options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -937,7 +982,11 @@ FirestoreClient.prototype.batchGetDocuments = function(request, options) {
  *     console.error(err);
  * });
  */
-FirestoreClient.prototype.beginTransaction = function(request, options, callback) {
+FirestoreClient.prototype.beginTransaction = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -972,7 +1021,7 @@ FirestoreClient.prototype.beginTransaction = function(request, options, callback
  *   The function which will be called with the result of the API call.
  *
  *   The second parameter to the callback is an object representing [CommitResponse]{@link CommitResponse}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is an object representing [CommitResponse]{@link CommitResponse}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -980,7 +1029,7 @@ FirestoreClient.prototype.beginTransaction = function(request, options, callback
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1025,14 +1074,14 @@ FirestoreClient.prototype.commit = function(request, options, callback) {
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @param {function(?Error)=} callback
  *   The function which will be called with the result of the API call.
- * @return {Promise} - The promise which resolves when API call finishes.
+ * @returns {Promise} - The promise which resolves when API call finishes.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
  * @example
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1098,7 +1147,7 @@ FirestoreClient.prototype.rollback = function(request, options, callback) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1130,7 +1179,7 @@ FirestoreClient.prototype.runQuery = function(request, options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1167,7 +1216,7 @@ FirestoreClient.prototype.write = function(options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1217,7 +1266,7 @@ FirestoreClient.prototype.listen = function(options) {
  *   in a single response. If the response indicates the next page exists, the third
  *   parameter is set to be used for the next request object. The fourth parameter keeps
  *   the raw response object of an object representing [ListCollectionIdsResponse]{@link ListCollectionIdsResponse}.
- * @return {Promise} - The promise which resolves to an array.
+ * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is Array of string.
  *
  *   When autoPaginate: false is specified through options, the array has three elements.
@@ -1232,7 +1281,7 @@ FirestoreClient.prototype.listen = function(options) {
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1275,7 +1324,11 @@ FirestoreClient.prototype.listen = function(options) {
  *         console.error(err);
  *     });
  */
-FirestoreClient.prototype.listCollectionIds = function(request, options, callback) {
+FirestoreClient.prototype.listCollectionIds = function(
+  request,
+  options,
+  callback
+) {
   if (options instanceof Function && callback === undefined) {
     callback = options;
     options = {};
@@ -1316,14 +1369,14 @@ FirestoreClient.prototype.listCollectionIds = function(request, options, callbac
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
- * @return {Stream}
+ * @returns {Stream}
  *   An object stream which emits a string on 'data' event.
  *
  * @example
  *
  * var firestore = require('firestore.v1beta1');
  *
- * var client = firestore.v1beta1.firestore({
+ * var client = firestore.v1beta1({
  *   // optional auth parameters.
  * });
  *
@@ -1340,22 +1393,32 @@ FirestoreClient.prototype.listCollectionIdsStream = function(request, options) {
     options = {};
   }
 
-  return PAGE_DESCRIPTORS.listCollectionIds.createStream(this._listCollectionIds, request, options);
+  return PAGE_DESCRIPTORS.listCollectionIds.createStream(
+    this._listCollectionIds,
+    request,
+    options
+  );
 };
 
+/**
+ * @class
+ * @param {*} gaxGrpc
+ */
 function FirestoreClientBuilder(gaxGrpc) {
   if (!(this instanceof FirestoreClientBuilder)) {
     return new FirestoreClientBuilder(gaxGrpc);
   }
 
   var firestoreStubProtos = gaxGrpc.loadProto(
-    path.join(__dirname, '..', '..', 'protos'), 'google/firestore/v1beta1/firestore.proto');
+    path.join(__dirname, '..', '..', 'protos'),
+    'google/firestore/v1beta1/firestore.proto'
+  );
   extend(this, firestoreStubProtos.google.firestore.v1beta1);
-
 
   /**
    * Build a new instance of {@link FirestoreClient}.
    *
+   * @method FirestoreClientBuilder#firestoreClient
    * @param {Object=} opts - The optional parameters.
    * @param {String=} opts.servicePath
    *   The domain name of the API remote host.

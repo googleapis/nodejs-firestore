@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-/*!
- * @module firestore/fieldvalue
- */
-
 'use strict';
 
-/**
+/*!
  * Sentinel value for a field delete.
  *
- * @package
  */
 const DELETE_SENTINEL = {};
 
-/**
+/*!
  * Sentinel value for a server timestamp.
  *
- * @package
  */
 const SERVER_TIMESTAMP_SENTINEL = {};
 
@@ -38,8 +32,8 @@ const SERVER_TIMESTAMP_SENTINEL = {};
  * Sentinel values that can be used when writing documents with set() or
  * update().
  *
- * @public
- * @alias firestore.FieldValue
+ * @class
+ * @hideconstructor
  */
 class FieldValue {
   /**
@@ -47,7 +41,7 @@ class FieldValue {
    *
    * @public
    *
-   * @return {*} The sentinel value to use in your objects.
+   * @returns {*} The sentinel value to use in your objects.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -69,7 +63,7 @@ class FieldValue {
    *
    * @public
    *
-   * @return {*} The sentinel value to use in your objects.
+   * @returns {*} The sentinel value to use in your objects.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
