@@ -73,7 +73,8 @@
  * - Logging. If some API errors are stored in logs, the message `Status` could
  *     be used directly after any stripping needed for security/privacy reasons.
  *
- * @external "google.rpc.Status"
+ * @typedef Status
+ * @memberof google.rpc
  * @property {number} code
  *   The status code, which should be an enum value of {@link google.rpc.Code}.
  *

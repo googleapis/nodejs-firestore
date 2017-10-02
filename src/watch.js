@@ -58,7 +58,7 @@ let ResourcePath = require('./path').ResourcePath;
  * one target per stream.
  *
  * @private
- * @type number
+ * @type {number}
  */
 const WATCH_TARGET_ID = 0xf0;
 

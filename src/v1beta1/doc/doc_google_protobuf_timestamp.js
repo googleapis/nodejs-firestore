@@ -97,7 +97,8 @@
  * http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime())
  * to obtain a formatter capable of generating timestamps in this format.
  *
- * @external "google.protobuf.Timestamp"
+ * @typedef Timestamp
+ * @memberof google.protobuf
  * @property {number} seconds
  *   Represents seconds of UTC time since Unix epoch
  *   1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to

@@ -24,7 +24,8 @@
  *
  * The JSON representation for `DoubleValue` is JSON number.
  *
- * @external "google.protobuf.DoubleValue"
+ * @typedef DoubleValue
+ * @memberof google.protobuf
  * @property {number} value
  *   The double value.
  *
@@ -36,7 +37,8 @@
  *
  * The JSON representation for `FloatValue` is JSON number.
  *
- * @external "google.protobuf.FloatValue"
+ * @typedef FloatValue
+ * @memberof google.protobuf
  * @property {number} value
  *   The float value.
  *
@@ -48,7 +50,8 @@
  *
  * The JSON representation for `Int64Value` is JSON string.
  *
- * @external "google.protobuf.Int64Value"
+ * @typedef Int64Value
+ * @memberof google.protobuf
  * @property {number} value
  *   The int64 value.
  *
@@ -60,7 +63,8 @@
  *
  * The JSON representation for `UInt64Value` is JSON string.
  *
- * @external "google.protobuf.UInt64Value"
+ * @typedef UInt64Value
+ * @memberof google.protobuf
  * @property {number} value
  *   The uint64 value.
  *
@@ -72,7 +76,8 @@
  *
  * The JSON representation for `Int32Value` is JSON number.
  *
- * @external "google.protobuf.Int32Value"
+ * @typedef Int32Value
+ * @memberof google.protobuf
  * @property {number} value
  *   The int32 value.
  *
@@ -84,7 +89,8 @@
  *
  * The JSON representation for `UInt32Value` is JSON number.
  *
- * @external "google.protobuf.UInt32Value"
+ * @typedef UInt32Value
+ * @memberof google.protobuf
  * @property {number} value
  *   The uint32 value.
  *
@@ -96,7 +102,8 @@
  *
  * The JSON representation for `BoolValue` is JSON `true` and `false`.
  *
- * @external "google.protobuf.BoolValue"
+ * @typedef BoolValue
+ * @memberof google.protobuf
  * @property {boolean} value
  *   The bool value.
  *
@@ -108,7 +115,8 @@
  *
  * The JSON representation for `StringValue` is JSON string.
  *
- * @external "google.protobuf.StringValue"
+ * @typedef StringValue
+ * @memberof google.protobuf
  * @property {string} value
  *   The string value.
  *
@@ -120,7 +128,8 @@
  *
  * The JSON representation for `BytesValue` is JSON string.
  *
- * @external "google.protobuf.BytesValue"
+ * @typedef BytesValue
+ * @memberof google.protobuf
  * @property {string} value
  *   The bytes value.
  *

@@ -16,12 +16,14 @@
 'use strict';
 
 // [START firestore_quickstart]
-var firestore = require('@google-cloud/firestore')({
+const Firestore = require('@google-cloud/firestore');
+
+const firestore = new Firestore({
   projectId: 'YOUR_PROJECT_ID',
   keyFilename: '/path/to/keyfile.json',
 });
 
-var document = firestore.doc('posts/intro-to-firestore');
+const document = firestore.doc('posts/intro-to-firestore');
 
 // Enter new data into the document.
 document.set({

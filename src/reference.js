@@ -143,9 +143,9 @@ class DocumentReference {
 
   /**
    * The string representation of the DocumentReference's location.
-   *
    * @private
-   * @returns {string}
+   * @type {string}
+   * @name DocumentReference#formattedName
    */
   get formattedName() {
     return this._referencePath.formattedName;
@@ -155,8 +155,8 @@ class DocumentReference {
    * The [Firestore]{@link Firestore} instance for the Firestore
    * database (useful for performing transactions, etc.).
    *
+   * @type {Firestore}
    * @name DocumentReference#firestore
-   * @type firestore.Firestore
    * @readonly
    *
    * @example
@@ -175,8 +175,8 @@ class DocumentReference {
    * A string representing the path of the referenced document (relative
    * to the root of the database).
    *
+   * @type {string}
    * @name DocumentReference#path
-   * @type string
    * @readonly
    *
    * @example
@@ -193,8 +193,8 @@ class DocumentReference {
   /**
    * The last path document of the referenced document.
    *
+   * @type {string}
    * @name DocumentReference#id
-   * @type string
    * @readonly
    *
    * @example
@@ -212,7 +212,7 @@ class DocumentReference {
    * A reference to the collection to which this DocumentReference belongs.
    *
    * @name DocumentReference#parent
-   * @type CollectionReference
+   * @type {CollectionReference}
    * @readonly
    *
    * @example
@@ -235,7 +235,7 @@ class DocumentReference {
    * DocumentReference.
    *
    * @private
-   * @type ResourcePath
+   * @type {ResourcePath}
    * @readonly
    */
   get ref() {
@@ -541,7 +541,7 @@ class DocumentChange {
   /**
    * The type of change ('added', 'modified', or 'removed').
    *
-   * @type string
+   * @type {string}
    * @name DocumentChange#type
    * @readonly
    *
@@ -565,8 +565,13 @@ class DocumentChange {
   /**
    * The document affected by this change.
    *
+<<<<<<< HEAD
    * @type DocumentSnapshot
    * @name DocumentChange#doc
+=======
+   * @type {DocumentSnapshot}
+   * @name DocumentChange#type
+>>>>>>> Improve JSDOC comments.
    * @readonly
    *
    * @example
@@ -590,7 +595,7 @@ class DocumentChange {
    * this DocumentChange (i.e. supposing that all prior DocumentChange objects
    * have been applied). Is -1 for 'added' events.
    *
-   * @type number
+   * @type {number}
    * @name DocumentChange#oldIndex
    * @readonly
    *
@@ -622,7 +627,7 @@ class DocumentChange {
    * objects and the current DocumentChange object have been applied).
    * Is -1 for 'removed' events.
    *
-   * @type number
+   * @type {number}
    * @name DocumentChange#newIndex
    * @readonly
    *
@@ -674,7 +679,7 @@ class FieldOrder {
    * The path of the field on which to order query results.
    *
    * @private
-   * @type FieldPath
+   * @type {FieldPath}
    */
   get field() {
     return this._field;
@@ -684,7 +689,7 @@ class FieldOrder {
    * One of 'ASCENDING' (default) or 'DESCENDING'.
    *
    * @private
-   * @type string
+   * @type {string}
    */
   get direction() {
     return this._direction;
@@ -706,11 +711,11 @@ class FieldOrder {
   }
 }
 
-/**
+/*!
  * A field constraint for a Query where clause.
  *
  * @private
- * @alias FieldFilter
+ * @class
  */
 class FieldFilter {
   /**
@@ -780,7 +785,7 @@ class FieldFilter {
  * [empty]{@link QuerySnapshot#empty} and
  * [size]{@link QuerySnapshot#size} properties.
  *
- * @alias QuerySnapshot
+ * @class QuerySnapshot
  */
 class QuerySnapshot {
   /**
@@ -808,7 +813,7 @@ class QuerySnapshot {
    * The query on which you called `get` or `onSnapshot` in order to get this
    * `QuerySnapshot`.
    *
-   * @type Query
+   * @type {Query}
    * @name QuerySnapshot#query
    * @readonly
    *
@@ -830,7 +835,7 @@ class QuerySnapshot {
   /**
    * An array of all the documents in this QuerySnapshot.
    *
-   * @type Array.<DocumentSnapshot>
+   * @type {Array.<DocumentSnapshot>}
    * @name QuerySnapshot#docs
    * @readonly
    *
@@ -855,7 +860,7 @@ class QuerySnapshot {
   /**
    * An array of all changes in this QuerySnapshot.
    *
-   * @type Array.<DocumentChange>
+   * @type {Array.<DocumentChange>}
    * @name QuerySnapshot#docChanges
    * @readonly
    */
@@ -870,7 +875,7 @@ class QuerySnapshot {
   /**
    * True if there are no documents in the QuerySnapshot.
    *
-   * @type boolean
+   * @type {boolean}
    * @name QuerySnapshot#empty
    * @readonly
    *
@@ -890,7 +895,7 @@ class QuerySnapshot {
   /**
    * The number of documents in the QuerySnapshot.
    *
-   * @type number
+   * @type {number}
    * @name QuerySnapshot#size
    * @readonly
    *
@@ -909,6 +914,7 @@ class QuerySnapshot {
    * The time this query snapshot was obtained.
    *
    * @type {string}
+   * @name QuerySnapshot#readTime
    *
    * @example
    * let query = firestore.collection('col').where('foo', '==', 'bar');
@@ -951,7 +957,7 @@ class QuerySnapshot {
  * A Query refers to a Query which you can read ore stream from You can also
  * construct refined `Query` objects by adding filters and ordering.
  *
- * @alias Query
+ * @class Query
  */
 class Query {
   /**
@@ -977,19 +983,24 @@ class Query {
 
   /**
    * The string representation of the Query's location.
+<<<<<<< HEAD
    *
    * @private
    * @returns {string}
+=======
+   * @type {string}
+   * @name Query#formattedName
+>>>>>>> Improve JSDOC comments.
    */
   get formattedName() {
     return this._referencePath.formattedName;
   }
 
   /**
-   * The [Firestore]{@link Firestore] instance for the Firestore
+   * The [Firestore]{@link Firestore} instance for the Firestore
    * database (useful for performing transactions, etc.).
    *
-   * @type firestore.Firestore
+   * @type {Firestore}
    * @name Query#firestore
    * @readonly
    *
@@ -1702,7 +1713,6 @@ class Query {
  * inherited from [Query]{@link Query}).
  *
  * @class
- * @alias CollectionReference
  * @extends Query
  */
 class CollectionReference extends Query {
@@ -1720,7 +1730,7 @@ class CollectionReference extends Query {
   /**
    * ID of the referenced collection.
    *
-   * @type string
+   * @type {string}
    * @name CollectionReference#id
    * @readonly
    *
@@ -1736,7 +1746,7 @@ class CollectionReference extends Query {
    * A reference to the containing Document if this is a subcollection, else
    * null.
    *
-   * @type DocumentReference
+   * @type {DocumentReference}
    * @name CollectionReference#parent
    * @readonly
    *
@@ -1753,7 +1763,7 @@ class CollectionReference extends Query {
    * A string representing the path of the referenced collection (relative
    * to the root of the database).
    *
-   * @type string
+   * @type {string}
    * @name CollectionReference#path
    * @readonly
    *

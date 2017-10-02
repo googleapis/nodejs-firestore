@@ -73,6 +73,7 @@
  *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
  *
  * @typedef Document
+ * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Document definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var Document = {
@@ -139,6 +140,7 @@ var Document = {
  *   This object should have the same structure as [MapValue]{@link MapValue}
  *
  * @typedef Value
+ * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Value definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var Value = {
@@ -154,6 +156,7 @@ var Value = {
  *   This object should have the same structure as [Value]{@link Value}
  *
  * @typedef ArrayValue
+ * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ArrayValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var ArrayValue = {
@@ -172,6 +175,7 @@ var ArrayValue = {
  *   not exceed 1,500 bytes and cannot be empty.
  *
  * @typedef MapValue
+ * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.MapValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var MapValue = {
