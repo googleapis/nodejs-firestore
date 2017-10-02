@@ -21,7 +21,7 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 
 **Table of contents:**
 
-* [QuickStart](#quickstart)
+* [Quickstart](#quickstart)
   * [Before you begin](#before-you-begin)
   * [Installing the client library](#installing-the-client-library)
   * [Using the client library](#using-the-client-library)
@@ -36,10 +36,6 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 1.  Select or create a Cloud Platform project.
 
     [Go to the projects page][projects]
-
-1.  Enable billing for your project.
-
-    [Enable billing][billing]
 
 1.  Enable the Google Cloud Firestore API.
 
