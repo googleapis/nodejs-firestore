@@ -74,14 +74,12 @@ const SERVER_TIMESTAMP = 'REQUEST_TIME';
  * <p>This class be instantiated via
  * [new Firestore.GeoPoint()]{@link GeoPoint}.
  *
- * @public
  * @class
  */
 class GeoPoint {
   /**
    * Creates a [GeoPoint]{@link GeoPoint}.
    *
-   * @public
    * @param {number} latitude The latitude as a number between -90 and 90.
    * @param {number} longitude The longitude as a number between -180 and 180.
    *
@@ -106,7 +104,6 @@ class GeoPoint {
   /**
    * The latitude as a number between -90 and 90.
    *
-   * @public
    * @type number
    * @name GeoPoint#latitude
    * @readonly
@@ -118,7 +115,6 @@ class GeoPoint {
   /**
    * The longitude as a number between -180 and 180.
    *
-   * @public
    * @type number
    * @name GeoPoint#longitude
    * @readonly
@@ -160,7 +156,6 @@ class GeoPoint {
  * [get(fieldPath)]{@link DocumentSnapshot#get} for such a document
  * throws an error.
  *
- * @public
  * @class
  */
 class DocumentSnapshot {
@@ -190,7 +185,6 @@ class DocumentSnapshot {
   /**
    * True if the document exists.
    *
-   * @public
    * @type boolean
    * @name DocumentSnapshot#exists
    * @readonly
@@ -212,7 +206,6 @@ class DocumentSnapshot {
    * A [DocumentReference]{@link DocumentReference} for the document
    * stored in this snapshot.
    *
-   * @public
    * @type DocumentReference
    * @name DocumentSnapshot#ref
    * @readonly
@@ -233,7 +226,6 @@ class DocumentSnapshot {
   /**
    * The ID of the document for which this DocumentSnapshot contains data.
    *
-   * @public
    * @type string
    * @name DocumentSnapshot#id
    * @readonly
@@ -255,7 +247,6 @@ class DocumentSnapshot {
    * The time the document was created. Undefined for documents that don't
    * exist.
    *
-   * @public
    * @type string
    * @name DocumentSnapshot#createTime
    * @readonly
@@ -277,7 +268,6 @@ class DocumentSnapshot {
    * The time the document was last updated (at the time the snapshot was
    * generated). Undefined for documents that don't exist.
    *
-   * @public
    * @type string
    * @name DocumentSnapshot#updateTime
    * @readonly
@@ -298,7 +288,6 @@ class DocumentSnapshot {
   /**
    * The time this snapshot was read.
    *
-   * @public
    * @type string
    * @name DocumentSnapshot#readTime
    * @readonly
@@ -317,7 +306,6 @@ class DocumentSnapshot {
   /**
    * Retrieves all fields in the document as an object.
    *
-   * @public
    * @returns {DocumentData} An object containing all fields in the document.
    *
    * @example
@@ -360,7 +348,6 @@ class DocumentSnapshot {
   /**
    * Retrieves the field specified by `fieldPath`.
    *
-   * @public
    * @param {string|FieldPath} field - The field path
    * (e.g. 'foo' or 'foo.bar') to a specific field.
    * @returns {*} The data at the specified field location or undefined if no
@@ -1018,7 +1005,6 @@ class DocumentTransform {
 /**
  * A Firestore Precondition encapsulates options for database writes.
  *
- * @public
  * @interface
  */
 class Precondition {

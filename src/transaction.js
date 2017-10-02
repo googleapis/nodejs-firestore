@@ -39,7 +39,6 @@ let Query;
  * the methods to read and write data within the transaction context. See
  * [runTransaction()]{@link Firestore#runTransaction}.
  *
- * @public
  * @class
  */
 class Transaction {
@@ -62,7 +61,6 @@ class Transaction {
    * Retrieve a document or a query result from the database. Holds a
    * pessimistic lock on all returned documents.
    *
-   * @public
    * @param {DocumentReference|Query} refOrQuery - The
    * document or query to return.
    * @returns {Promise} A Promise that resolves with a DocumentSnapshot or
@@ -108,7 +106,6 @@ class Transaction {
    * [DocumentReference]{@link DocumentReference}. The operation will
    * fail the transaction if a document exists at the specified location.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be created.
    * @param {DocumentData} data - The object data to serialize as the document.
@@ -137,7 +134,6 @@ class Transaction {
    * [SetOptions]{@link SetOptions}, the provided data can be merged into the
    * existing document.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be set.
    * @param {DocumentData} data - The object to serialize as the document.
@@ -174,7 +170,6 @@ class Transaction {
    * A Precondition restricting this update can be specified as the last
    * argument.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be updated.
    * @param {UpdateData|string|FieldPath} dataOrField - An object
@@ -212,7 +207,6 @@ class Transaction {
    * Deletes the document referred to by the provided [DocumentReference]
    * {@link DocumentReference}.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be deleted.
    * @param {Precondition=} precondition - A precondition to enforce for this

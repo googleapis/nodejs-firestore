@@ -415,14 +415,12 @@ class ResourcePath extends Path {
 /**
  * A dot-separated path for navigating sub-objects within a document.
  *
- * @public
  * @class
  */
 class FieldPath extends Path {
   /**
    * Constructs a Firestore Field Path.
    *
-   * @public
    * @param {...string|string[]} segments - Sequence of field names that form
    * this path.
    *
@@ -454,7 +452,6 @@ class FieldPath extends Path {
    * A special FieldPath value to refer to the ID of a document. It can be used
    * in queries to sort or filter by the document ID.
    *
-   * @public
    * @returns {FieldPath}
    */
   static documentId() {

@@ -74,7 +74,6 @@ const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
  * updates(), and creates().
  *
- * @public
  * @class
  */
 class WriteResult {
@@ -92,7 +91,6 @@ class WriteResult {
    * The write time as set by the Firestore servers. Formatted as an ISO-8601
    * string.
    *
-   * @public
    * @type string
    * @name WriteResult#writeTime
    * @readonly
@@ -113,7 +111,6 @@ class WriteResult {
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.
  *
- * @public
  * @class
  */
 class WriteBatch {
@@ -132,7 +129,6 @@ class WriteBatch {
   /**
    * Checks if this write batch has any pending operations.
    *
-   * @public
    * @returns {boolean}
    */
   get isEmpty() {
@@ -143,7 +139,6 @@ class WriteBatch {
    * Create a document with the provided object values. This will fail the batch
    * if a document exists at its location.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be created.
    * @param {DocumentData} data - The object to serialize as the document.
@@ -185,7 +180,6 @@ class WriteBatch {
   /**
    * Deletes a document from the database.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be deleted.
    * @param {Precondition=} precondition - A precondition to enforce for this
@@ -231,7 +225,6 @@ class WriteBatch {
    * [SetOptions]{@link SetOptions}., the provided data can be merged
    * into the existing document.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be set.
    * @param {DocumentData} data - The object to serialize as the document.
@@ -292,7 +285,6 @@ class WriteBatch {
    * A Precondition restricting this update can be specified as the last
    * argument.
    *
-   * @public
    * @param {DocumentReference} documentRef - A reference to the
    * document to be updated.
    * @param {UpdateData|string|FieldPath} dataOrField - An object
@@ -407,7 +399,6 @@ class WriteBatch {
    * Atomically commits all pending operations to the database and verifies all
    * preconditions. Fails the entire write if any precondition is not met.
    *
-   * @public
    * @returns {Promise.<Array.<WriteResult>>} A Promise that resolves
    * when this batch completes.
    *

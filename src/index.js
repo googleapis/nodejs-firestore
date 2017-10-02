@@ -101,7 +101,6 @@ const GRPC_UNAVAILABLE = 14;
  * [set()]{@link DocumentReference#set}) consisting of fields mapped
  * to values.
  *
- * @public
  * @typedef {Object.<string, *>} DocumentData
  * @alias DocumentData
  */
@@ -111,7 +110,6 @@ const GRPC_UNAVAILABLE = 14;
  * that contains paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that
  * contain dots reference nested fields within the document.
  *
- * @public
  * @typedef {Object.<string, *>} UpdateData
  */
 
@@ -125,7 +123,6 @@ const GRPC_UNAVAILABLE = 14;
  * can be restricted to only apply to documents that match the specified
  * conditions.
  *
- * @public
  * @property {string} lastUpdateTime - The update time to enforce (specified as
  * an ISO 8601 string).
  * @typedef {Object} Precondition
@@ -141,7 +138,6 @@ const GRPC_UNAVAILABLE = 14;
  * documents in their entirety by providing a SetOptions object with
  * { merge : true }.
  *
- * @public
  * @property {boolean} merge - Changes the behavior of a set() call to only
  * replace the values specified in its data argument. Fields omitted from the
  * set() call remain untouched.
@@ -154,7 +150,6 @@ const GRPC_UNAVAILABLE = 14;
  *
  * @see [Firestore Documentation]{@link https://firebase.google.com/docs/firestore/}
  *
- * @public
  * @class
  * @alias firestore.Firestore
  *
@@ -179,7 +174,6 @@ const GRPC_UNAVAILABLE = 14;
  */
 class Firestore extends commonGrpc.Service {
   /**
-   * @public
    * @param {Object=} options - [Configuration object](#/docs).
    */
   constructor(options) {
@@ -253,8 +247,6 @@ class Firestore extends commonGrpc.Service {
    * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path.
    *
-   * @public
-   *
    * @param {string} documentPath - A slash-separated path to a document.
    * @returns {DocumentReference} The
    * [DocumentReference]{@link DocumentReference} instance.
@@ -277,8 +269,6 @@ class Firestore extends commonGrpc.Service {
   /**
    * Gets a [CollectionReference]{@link CollectionReference} instance
    * that refers to the collection at the specified path.
-   *
-   * @public
    *
    * @param {string} collectionPath - A slash-separated path to a collection.
    * @returns {CollectionReference} The
@@ -306,8 +296,6 @@ class Firestore extends commonGrpc.Service {
   /**
    * Creates a [WriteBatch]{@link WriteBatch}, used for performing
    * multiple writes as a single atomic operation.
-   *
-   * @public
    *
    * @returns {WriteBatch} A WriteBatch that operates on this Firestore
    * client.
@@ -374,8 +362,6 @@ class Firestore extends commonGrpc.Service {
    * You can use the transaction object passed to 'updateFunction' to read and
    * modify Firestore documents under lock. Transactions are committed once
    * 'updateFunction' resolves and attempted up to five times on failure.
-   *
-   * @public
    *
    * @param {function(Transaction)} updateFunction - The
    * function to execute within the transaction
@@ -488,8 +474,6 @@ class Firestore extends commonGrpc.Service {
    * Fetches the root collections that are associated with this Firestore
    * database.
    *
-   * @public
-   *
    * @returns {Promise.<Array.<CollectionReference>>} A Promise that
    * contains an array with CollectionReferences.
    *
@@ -507,8 +491,6 @@ class Firestore extends commonGrpc.Service {
 
   /**
    * Retrieves multiple documents from Firestore.
-   *
-   * @public
    *
    * @param {...DocumentReference} documents - The document references
    * to receive.
@@ -1037,7 +1019,6 @@ class Firestore extends commonGrpc.Service {
 /**
  * A logging function that takes a single string.
  *
- * @public
  * @callback Firestore~logFunction
  * @param {string} Log message
  */
@@ -1054,7 +1035,6 @@ Firestore.log = function() {};
 /**
  * Sets the log function for all active Firestore instances.
  *
- * @public
  * @method Firestore.setLogFunction
  * @param {Firestore~logFunction} logger - A log function that takes a single
  * string.
@@ -1123,7 +1103,6 @@ module.exports.Firestore = Firestore;
 /**
  * {@link v1beta1} factory function.
  *
- * @public
  * @name Firestore.v1beta1
  * @see v1beta1
  * @type {function}
@@ -1133,7 +1112,6 @@ module.exports.v1beta1 = v1beta1;
 /**
  * {@link FieldPath} class.
  *
- * @public
  * @name Firestore.FieldPath
  * @see FieldPath
  * @type {Constructor}
@@ -1143,7 +1121,6 @@ module.exports.FieldPath = FieldPath;
 /**
  * {@link FieldValue} class.
  *
- * @public
  * @name Firestore.FieldValue
  * @see FieldValue
  * @type {Constructor}
@@ -1153,7 +1130,6 @@ module.exports.FieldValue = FieldValue;
 /**
  * {@link GeoPoint} class.
  *
- * @public
  * @name Firestore.GeoPoint
  * @see GeoPoint
  * @type {Constructor}
