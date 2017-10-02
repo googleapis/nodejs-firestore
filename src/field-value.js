@@ -33,13 +33,10 @@ const SERVER_TIMESTAMP_SENTINEL = {};
  * update().
  *
  * @class
- * @hideconstructor
  */
 class FieldValue {
   /**
    * Returns a sentinel used with update() to mark a field for deletion.
-   *
-   * @public
    *
    * @returns {*} The sentinel value to use in your objects.
    *
@@ -60,8 +57,6 @@ class FieldValue {
   /**
    * Returns a sentinel used with set(), create() or update() to include a
    * server-generated timestamp in the written data.
-   *
-   * @public
    *
    * @returns {*} The sentinel value to use in your objects.
    *
