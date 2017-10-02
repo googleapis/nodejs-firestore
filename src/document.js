@@ -49,21 +49,21 @@ let validate;
 /*!
  * The maximum depth of a Firestore object.
  *
- * @type number
+ * @type {number}
  */
 const MAX_DEPTH = 20;
 
 /*!
  * Number of nanoseconds in a millisecond.
  *
- * @type number
+ * @type {number}
  */
 const MS_TO_NANOS = 1000000;
 
 /*!
  * Protocol constant for the ServerTimestamp transform.
  *
- * @type string
+ * @type {string}
  */
 const SERVER_TIMESTAMP = 'REQUEST_TIME';
 
@@ -101,7 +101,7 @@ class GeoPoint {
   /**
    * The latitude as a number between -90 and 90.
    *
-   * @type number
+   * @type {number}
    * @name GeoPoint#latitude
    * @readonly
    */
@@ -112,7 +112,7 @@ class GeoPoint {
   /**
    * The longitude as a number between -180 and 180.
    *
-   * @type number
+   * @type {number}
    * @name GeoPoint#longitude
    * @readonly
    */
@@ -182,7 +182,7 @@ class DocumentSnapshot {
   /**
    * True if the document exists.
    *
-   * @type boolean
+   * @type {boolean}
    * @name DocumentSnapshot#exists
    * @readonly
    *
@@ -203,7 +203,7 @@ class DocumentSnapshot {
    * A [DocumentReference]{@link DocumentReference} for the document
    * stored in this snapshot.
    *
-   * @type DocumentReference
+   * @type {DocumentReference}
    * @name DocumentSnapshot#ref
    * @readonly
    *
@@ -223,7 +223,7 @@ class DocumentSnapshot {
   /**
    * The ID of the document for which this DocumentSnapshot contains data.
    *
-   * @type string
+   * @type {string}
    * @name DocumentSnapshot#id
    * @readonly
    *
@@ -244,7 +244,7 @@ class DocumentSnapshot {
    * The time the document was created. Undefined for documents that don't
    * exist.
    *
-   * @type string
+   * @type {string}
    * @name DocumentSnapshot#createTime
    * @readonly
    *
@@ -265,7 +265,7 @@ class DocumentSnapshot {
    * The time the document was last updated (at the time the snapshot was
    * generated). Undefined for documents that don't exist.
    *
-   * @type string
+   * @type {string}
    * @name DocumentSnapshot#updateTime
    * @readonly
    *
@@ -285,7 +285,7 @@ class DocumentSnapshot {
   /**
    * The time this snapshot was read.
    *
-   * @type string
+   * @type {string}
    * @name DocumentSnapshot#readTime
    * @readonly
    *
@@ -920,7 +920,7 @@ class DocumentTransform {
    * Whether this DocumentTransform contains any actionable transformations.
    *
    * @private
-   * @type boolean
+   * @type {boolean}
    * @readonly
    */
   get isEmpty() {
@@ -999,9 +999,10 @@ class DocumentTransform {
   }
 }
 
-/**
+/*!
  * A Firestore Precondition encapsulates options for database writes.
  *
+ * @private
  * @class
  */
 class Precondition {

@@ -84,7 +84,7 @@
  *   This object should have the same structure as [Int32Value]{@link google.protobuf.Int32Value}
  *
  * @typedef StructuredQuery
- * @member google.firestore.v1beta1
+ * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.StructuredQuery definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
  */
 var StructuredQuery = {
@@ -103,7 +103,7 @@ var StructuredQuery = {
    *   When true, selects all descendant collections.
    *
    * @typedef CollectionSelector
-   * @member google.firestore.v1beta1
+   * @memberof google.firestore.v1beta1
    * @see [google.firestore.v1beta1.StructuredQuery.CollectionSelector definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   CollectionSelector: {
@@ -129,7 +129,7 @@ var StructuredQuery = {
    *   This object should have the same structure as [UnaryFilter]{@link google.firestore.v1beta1.UnaryFilter}
    *
    * @typedef Filter
-   * @member google.firestore.v1beta1
+   * @memberof google.firestore.v1beta1
    * @see [google.firestore.v1beta1.StructuredQuery.Filter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   Filter: {
@@ -151,7 +151,7 @@ var StructuredQuery = {
    *   This object should have the same structure as [Filter]{@link google.firestore.v1beta1.Filter}
    *
    * @typedef CompositeFilter
-   * @member google.firestore.v1beta1
+   * @memberof google.firestore.v1beta1
    * @see [google.firestore.v1beta1.StructuredQuery.CompositeFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   CompositeFilter: {
@@ -195,7 +195,7 @@ var StructuredQuery = {
    *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
    *
    * @typedef FieldFilter
-   * @member google.firestore.v1beta1
+   * @memberof google.firestore.v1beta1
    * @see [google.firestore.v1beta1.StructuredQuery.FieldFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   FieldFilter: {
@@ -255,7 +255,7 @@ var StructuredQuery = {
    *   This object should have the same structure as [FieldReference]{@link google.firestore.v1beta1.FieldReference}
    *
    * @typedef UnaryFilter
-   * @member google.firestore.v1beta1
+   * @memberof google.firestore.v1beta1
    * @see [google.firestore.v1beta1.StructuredQuery.UnaryFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   UnaryFilter: {
@@ -299,7 +299,7 @@ var StructuredQuery = {
    *   The number should be among the values of [Direction]{@link google.firestore.v1beta1.Direction}
    *
    * @typedef Order
-   * @member google.firestore.v1beta1
+   * @memberof google.firestore.v1beta1
    * @see [google.firestore.v1beta1.StructuredQuery.Order definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   Order: {
@@ -312,7 +312,7 @@ var StructuredQuery = {
    * @property {string} fieldPath
    *
    * @typedef FieldReference
-   * @member google.firestore.v1beta1
+   * @memberof google.firestore.v1beta1
    * @see [google.firestore.v1beta1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   FieldReference: {
@@ -331,7 +331,7 @@ var StructuredQuery = {
    *   This object should have the same structure as [FieldReference]{@link google.firestore.v1beta1.FieldReference}
    *
    * @typedef Projection
-   * @member google.firestore.v1beta1
+   * @memberof google.firestore.v1beta1
    * @see [google.firestore.v1beta1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   Projection: {
@@ -378,7 +378,7 @@ var StructuredQuery = {
  *   to the sort order defined by the query.
  *
  * @typedef Cursor
- * @member google.firestore.v1beta1
+ * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Cursor definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
  */
 var Cursor = {

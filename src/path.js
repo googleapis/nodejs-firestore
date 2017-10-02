@@ -83,7 +83,7 @@ class Path {
    * String representation as expected by the proto API.
    *
    * @private
-   * @type string
+   * @type {string}
    */
   get formattedName() {
     if (is.undefined(this._formattedName)) {
@@ -237,7 +237,7 @@ class ResourcePath extends Path {
    * String representation of the path relative to the database root.
    *
    * @private
-   * @type string
+   * @type {string}
    */
   get relativeName() {
     return this.segments.join('/');
@@ -247,7 +247,7 @@ class ResourcePath extends Path {
    * Indicates whether this ResourcePath points to a document.
    *
    * @private
-   * @type boolean
+   * @type {boolean}
    */
   get isDocument() {
     return this.segments.length > 0 && this.segments.length % 2 === 0;
@@ -257,7 +257,7 @@ class ResourcePath extends Path {
    * Indicates whether this ResourcePath points to a collection.
    *
    * @private
-   * @type boolean
+   * @type {boolean}
    */
   get isCollection() {
     return this.segments.length % 2 === 1;
@@ -267,7 +267,7 @@ class ResourcePath extends Path {
    * The last component of the path.
    *
    * @private
-   * @type string|null
+   * @type {string|null}
    */
   get id() {
     if (this.segments.length > 0) {
@@ -280,7 +280,7 @@ class ResourcePath extends Path {
    * The project ID of this path.
    *
    * @private
-   * @type string
+   * @type {string}
    */
   get projectId() {
     return this._projectId;
@@ -290,7 +290,7 @@ class ResourcePath extends Path {
    * The database ID of this path.
    *
    * @private
-   * @type string
+   * @type {string}
    */
   get databaseId() {
     return this._databaseId;

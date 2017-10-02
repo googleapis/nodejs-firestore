@@ -109,7 +109,7 @@
  *   inclusive.
  *
  * @typedef Timestamp
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.Timestamp definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/timestamp.proto}
  */
 var Timestamp = {

@@ -127,7 +127,7 @@
  *   Must be a valid serialized protocol buffer of the above specified type.
  *
  * @typedef Any
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.Any definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/any.proto}
  */
 var Any = {
