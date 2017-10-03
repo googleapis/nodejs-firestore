@@ -50,7 +50,7 @@
     "through2": "^2.0.3"
   },
   "devDependencies": {
-    "@google-cloud/nodejs-repo-tools": "^2.0.5",
+    "@google-cloud/nodejs-repo-tools": "^2.0.7",
     "@types/mocha": "^2.2.43",
     "@types/node": "^8.0.31",
     "duplexify": "^3.5.0",

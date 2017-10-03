@@ -7,14 +7,14 @@
 [![release level](https://img.shields.io/badge/release%20level-beta-yellow.svg?style&#x3D;flat)](https://cloud.google.com/terms/launch-stages)
 [![CircleCI](https://img.shields.io/circleci/project/github/googleapis/nodejs-firestore.svg?style=flat)](https://circleci.com/gh/googleapis/nodejs-firestore)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/googleapis/nodejs-firestore?svg=true)](https://ci.appveyor.com/project/googleapis/nodejs-firestore)
-[![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-firestore/repo-migration.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-firestore)
+[![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-firestore/master.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-firestore)
 
-> Node.js idiomatic client for [Firestore][product-docs].
+> Node.js idiomatic client for [Cloud Firestore][product-docs].
 
-[Google Cloud Firestore](https://firebase.google.com/docs/firestore/) is a flexible, scalable database for mobile, web, and server development from Firebase and Google Cloud Platform. Like Firebase Realtime Database, it keeps your data in sync across client apps through realtime listeners and offers offline support for mobile and web so you can build responsive apps that work regardless of network latency or Internet connectivity. Cloud Firestore also offers seamless integration with other Firebase and Google Cloud Platform products, including Cloud Functions.
+[Google Cloud Firestore](https://firebase.google.com/docs/firestore/) is a NoSQL document database built for automatic scaling, high performance, and ease of application development.
 
-* [Firestore Node.js Client API Reference][client-docs]
-* [Firestore Documentation][product-docs]
+* [Cloud Firestore Node.js Client API Reference][client-docs]
+* [Cloud Firestore Documentation][product-docs]
 
 Read more about the client libraries for Cloud APIs, including the older
 Google APIs Client Libraries, in [Client Libraries Explained][explained].
@@ -23,7 +23,7 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 
 **Table of contents:**
 
-* [QuickStart](#quickstart)
+* [Quickstart](#quickstart)
   * [Before you begin](#before-you-begin)
   * [Installing the client library](#installing-the-client-library)
   * [Using the client library](#using-the-client-library)
@@ -39,10 +39,6 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 
     [Go to the projects page][projects]
 
-1.  Enable billing for your project.
-
-    [Enable billing][billing]
-
 1.  Enable the Google Cloud Firestore API.
 
     [Enable the API][enable_api]
@@ -51,7 +47,6 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
     API from your local workstation.
 
 [projects]: https://console.cloud.google.com/project
-[billing]: https://support.google.com/cloud/answer/6293499#enable-billing
 [enable_api]: https://console.cloud.google.com/flows/enableapi?apiid=firestore.googleapis.com
 [auth]: https://cloud.google.com/docs/authentication/getting-started
 
@@ -98,7 +93,7 @@ document.delete().then(() => {
 ```
 
 
-The [Firestore Node.js Client API Reference][client-docs] documentation
+The [Cloud Firestore Node.js Client API Reference][client-docs] documentation
 also contains samples.
 
 ## Versioning
