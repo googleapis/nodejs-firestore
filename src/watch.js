@@ -58,7 +58,7 @@ let ResourcePath = require('./path').ResourcePath;
  * one target per stream.
  *
  * @private
- * @type number
+ * @type {number}
  */
 const WATCH_TARGET_ID = 0xf0;
 
@@ -109,11 +109,13 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
  * can be used with a valid Firestore Listen target.
  *
  * @class
- * @hideconstructor
+ * @private
  */
 class Watch {
-  /*
+  /**
+   * @private
    * @hideconstructor
+   *
    * @param {Firestore} firestore The Firestore Database client.
    * @param {Object} targetChange - A Firestore 'TargetChange' proto denoting
    * the target to listen on.
@@ -130,7 +132,7 @@ class Watch {
   /**
    * Creates a new Watch instance to listen on DocumentReferences.
    *
-   *
+   * @private
    * @param {DocumentReference} documentRef - The document
    * reference for this watch.
    * @returns {Watch} A newly created Watch instance.
@@ -151,7 +153,7 @@ class Watch {
   /**
    * Creates a new Watch instance to listen on Queries.
    *
-   *
+   * @private
    * @param {Query} query - The query used for this watch.
    * @returns {Watch} A newly created Watch instance.
    */
@@ -169,7 +171,7 @@ class Watch {
   /**
    * Starts a watch and attaches a listener for document change events.
    *
-   *
+   * @private
    * @param {watchSnapshotCallback} onNext - A callback to be called every time
    * a new snapshot is available.
    * @param {function(Error)} onError - A callback to be called if the listen

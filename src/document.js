@@ -49,21 +49,21 @@ let validate;
 /*!
  * The maximum depth of a Firestore object.
  *
- * @type number
+ * @type {number}
  */
 const MAX_DEPTH = 20;
 
 /*!
  * Number of nanoseconds in a millisecond.
  *
- * @type number
+ * @type {number}
  */
 const MS_TO_NANOS = 1000000;
 
 /*!
  * Protocol constant for the ServerTimestamp transform.
  *
- * @type string
+ * @type {string}
  */
 const SERVER_TIMESTAMP = 'REQUEST_TIME';
 
@@ -71,17 +71,12 @@ const SERVER_TIMESTAMP = 'REQUEST_TIME';
  * An immutable object representing a geographic location in Firestore. The
  * location is represented as a latitude/longitude pair.
  *
- * <p>This class be instantiated via
- * [new Firestore.GeoPoint()]{@link GeoPoint}.
- *
  * @class
- * @hideconstructor
  */
 class GeoPoint {
   /**
    * Creates a [GeoPoint]{@link GeoPoint}.
    *
-   * @public
    * @param {number} latitude The latitude as a number between -90 and 90.
    * @param {number} longitude The longitude as a number between -180 and 180.
    *
@@ -106,8 +101,7 @@ class GeoPoint {
   /**
    * The latitude as a number between -90 and 90.
    *
-   * @public
-   * @type number
+   * @type {number}
    * @name GeoPoint#latitude
    * @readonly
    */
@@ -118,8 +112,7 @@ class GeoPoint {
   /**
    * The longitude as a number between -180 and 180.
    *
-   * @public
-   * @type number
+   * @type {number}
    * @name GeoPoint#longitude
    * @readonly
    */
@@ -129,7 +122,7 @@ class GeoPoint {
 
   /**
    * Converts the GeoPoint to a google.type.LatLng proto.
-   * @protected
+   * @private
    */
   toProto() {
     return {
@@ -140,6 +133,7 @@ class GeoPoint {
 
   /**
    * Converts a google.type.LatLng proto to its GeoPoint representation.
+   * @private
    */
   static fromProto(proto) {
     return new GeoPoint(proto.latitude, proto.longitude);
@@ -160,10 +154,10 @@ class GeoPoint {
  * throws an error.
  *
  * @class
- * @hideconstructor
  */
 class DocumentSnapshot {
   /**
+   * @private
    * @hideconstructor
    *
    * @param {firestore/DocumentReference} ref - The reference to the
@@ -188,8 +182,7 @@ class DocumentSnapshot {
   /**
    * True if the document exists.
    *
-   * @public
-   * @type boolean
+   * @type {boolean}
    * @name DocumentSnapshot#exists
    * @readonly
    *
@@ -210,8 +203,7 @@ class DocumentSnapshot {
    * A [DocumentReference]{@link DocumentReference} for the document
    * stored in this snapshot.
    *
-   * @public
-   * @type DocumentReference
+   * @type {DocumentReference}
    * @name DocumentSnapshot#ref
    * @readonly
    *
@@ -231,8 +223,7 @@ class DocumentSnapshot {
   /**
    * The ID of the document for which this DocumentSnapshot contains data.
    *
-   * @public
-   * @type string
+   * @type {string}
    * @name DocumentSnapshot#id
    * @readonly
    *
@@ -253,8 +244,7 @@ class DocumentSnapshot {
    * The time the document was created. Undefined for documents that don't
    * exist.
    *
-   * @public
-   * @type string
+   * @type {string}
    * @name DocumentSnapshot#createTime
    * @readonly
    *
@@ -275,8 +265,7 @@ class DocumentSnapshot {
    * The time the document was last updated (at the time the snapshot was
    * generated). Undefined for documents that don't exist.
    *
-   * @public
-   * @type string
+   * @type {string}
    * @name DocumentSnapshot#updateTime
    * @readonly
    *
@@ -296,8 +285,7 @@ class DocumentSnapshot {
   /**
    * The time this snapshot was read.
    *
-   * @public
-   * @type string
+   * @type {string}
    * @name DocumentSnapshot#readTime
    * @readonly
    *
@@ -315,7 +303,6 @@ class DocumentSnapshot {
   /**
    * Retrieves all fields in the document as an object.
    *
-   * @public
    * @returns {DocumentData} An object containing all fields in the document.
    *
    * @example
@@ -342,6 +329,7 @@ class DocumentSnapshot {
   /**
    * Returns the underlying Firestore 'Fields' Protobuf.
    *
+   * @private
    * @returns {Object} The Protobuf encoded document.
    */
   protoFields() {
@@ -357,7 +345,6 @@ class DocumentSnapshot {
   /**
    * Retrieves the field specified by `fieldPath`.
    *
-   * @public
    * @param {string|FieldPath} field - The field path
    * (e.g. 'foo' or 'foo.bar') to a specific field.
    * @returns {*} The data at the specified field location or undefined if no
@@ -389,6 +376,7 @@ class DocumentSnapshot {
    * Retrieves the field specified by 'fieldPath' in its Protobuf
    * representation.
    *
+   * @private
    * @param {string|FieldPath} field - The path (e.g. 'foo' or
    * 'foo.bar') to a specific field.
    * @returns {*} The Protobuf-encoded data at the specified field location or
@@ -483,6 +471,7 @@ class DocumentSnapshot {
   /**
    * Convert a document snapshot to the Firestore 'Document' Protobuf.
    *
+   * @private
    * @returns {Object} - The document in the format the API expects.
    */
   toProto() {
@@ -495,6 +484,7 @@ class DocumentSnapshot {
   /**
    * Converts a Google Protobuf timestamp to an ISO 8601 string.
    *
+   * @private
    * @param {{seconds:number,nanos:number}=} timestamp The Google Protobuf
    * timestamp.
    * @returns {string|undefined} The representation in ISO 8601 or undefined if
@@ -523,6 +513,7 @@ class DocumentSnapshot {
   /**
    * Encodes a JavaScrip object into the Firestore 'Fields' representation.
    *
+   * @private
    * @param {Object} obj The object to encode
    * @param {number=} depth The depth at the current encoding level
    * @returns {Object} The Firestore 'Fields' representation
@@ -551,7 +542,7 @@ class DocumentSnapshot {
    * Encodes a JavaScrip value into the Firestore 'Value' representation.
    * Encodes a JavaScrip value into the Firestore 'Value' represntation.
    *
-   *
+   * @private
    * @param {Object} val The object to encode
    * @param {number=} depth The depth at the current encoding level
    * @returns {object|null} The Firestore Proto or null if we are deleting a
@@ -677,6 +668,7 @@ class DocumentSnapshot {
    *
    * This functions turns { foo.bar : foobar } into { foo { bar : foobar }}
    *
+   * @private
    * @param {Map.<string|FieldPath, *>} data - The field/value map to expand.
    * @returns {DocumentData} The expanded JavaScript object.
    */
@@ -732,13 +724,16 @@ class DocumentSnapshot {
  * Returns a builder for DocumentSnapshot instances. Invoke `.build()' to
  * assemble the final snapshot.
  *
+ * @private
  * @class DocumentSnapshotBuilder
- * @returns {Object} A Builder instance for a DocumentSnapshot.
  */
 class DocumentSnapshotBuilder {
   /**
-   * @param {DocumentSnapshot=} snapshot An optional snapshot to
-   * base this builder on.
+   * @private
+   * @hideconstructor
+   *
+   * @param {DocumentSnapshot=} snapshot An optional snapshot to base this
+   * builder on.
    */
   constructor(snapshot) {
     snapshot = snapshot || {};
@@ -781,6 +776,9 @@ class DocumentSnapshotBuilder {
 
   /**
    * Builds the DocumentSnapshot.
+   *
+   * @private
+   * @returns {Object} A Builder instance for a DocumentSnapshot.
    */
   build() {
     assert(
@@ -802,6 +800,7 @@ class DocumentSnapshotBuilder {
 }
 
 /**
+ * @private
  * @name DocumentSnapshot.DocumentSnapshotBuilder
  * @see DocumentSnapshotBuilder
  */
@@ -811,10 +810,13 @@ DocumentSnapshot.Builder = DocumentSnapshotBuilder;
  * A Firestore Document Mask contains the field paths affected by an update.
  *
  * @class
- * @hideconstructor
+ * @private
  */
 class DocumentMask {
   /**
+   * @private
+   * @hideconstructor
+   *
    * @param {Array.<string>} fieldPaths - The canonical representation of field
    * paths in this mask.
    */
@@ -825,6 +827,7 @@ class DocumentMask {
   /**
    * Converts a document mask to the Firestore 'DocumentMask' Proto.
    *
+   * @private
    * @returns {Object} A Firestore 'DocumentMask' Proto.
    */
   toProto() {
@@ -836,6 +839,7 @@ class DocumentMask {
   /**
    * Creates a document mask with the field paths of a document.
    *
+   * @private
    * @param {Map.<string|FieldPath, *>} data A map with
    * fields to modify. Only the keys are used to extract the document mask.
    * @returns {DocumentMask}
@@ -855,6 +859,7 @@ class DocumentMask {
   /**
    * Creates a document mask with the field names of a document.
    *
+   * @private
    * @param {DocumentData} data An object with fields to modify. Only the keys
    * are used to extract the document mask.
    * @returns {DocumentMask}
@@ -893,11 +898,13 @@ class DocumentMask {
  * A DocumentTransform contains pending server-side transforms and their
  * corresponding field paths.
  *
+ * @private
  * @class
- * @hideconstructor
  */
 class DocumentTransform {
   /**
+   * @private
+   * @hideconstructor
    *
    * @param {DocumentReference} ref The DocumentReference for this
    * transform.
@@ -912,7 +919,8 @@ class DocumentTransform {
   /**
    * Whether this DocumentTransform contains any actionable transformations.
    *
-   * @type boolean
+   * @private
+   * @type {boolean}
    * @readonly
    */
   get isEmpty() {
@@ -922,6 +930,7 @@ class DocumentTransform {
   /**
    * Converts a document transform to the Firestore 'DocumentTransform' Proto.
    *
+   * @private
    * @returns {Object} A Firestore 'DocumentTransform' Proto.
    */
   toProto() {
@@ -934,7 +943,7 @@ class DocumentTransform {
   /**
    * Generates a DocumentTransform from a JavaScript object.
    *
-   *
+   * @private
    * @param {firestore/DocumentReference} ref The `DocumentReference` to
    * use for the DocumentTransform.
    * @param {Object} obj The object to extract the transformations from.
@@ -990,14 +999,17 @@ class DocumentTransform {
   }
 }
 
-/**
+/*!
  * A Firestore Precondition encapsulates options for database writes.
  *
+ * @private
  * @class
- * @hideconstructor
  */
 class Precondition {
   /**
+   * @private
+   * @hideconstructor
+   *
    * @param {boolean=} options.exists - Whether the referenced document should
    * exist in Firestore,
    * @param {string=} options.lastUpdateTime - The last update time

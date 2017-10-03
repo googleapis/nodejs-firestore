@@ -30,6 +30,22 @@ const libVersion = require('../package.json').version;
 const path = require('./path');
 
 /*!
+ * DO NOT REMOVE THE FOLLOWING NAMESPACE DEFINITIONS
+ */
+
+/**
+ * @namespace google.protobuf
+ */
+
+/**
+ * @namespace google.rpc
+ */
+
+/**
+ * @namespace google.firestore.v1beta1
+ */
+
+/*!
  * @see ResourcePath
  */
 const ResourcePath = path.ResourcePath;
@@ -80,19 +96,19 @@ let Transaction;
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
  * by the backend.
- * @type string
+ * @type {string}
  */
 const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 
 /*!
  * The maximum number of times to retry idempotent requests.
- * @type number
+ * @type {number}
  */
 const MAX_REQUEST_RETRIES = 5;
 
 /*!
  * GRPC Error code for 'UNAVAILABLE'.
- * @type number
+ * @type {number}
  */
 const GRPC_UNAVAILABLE = 14;
 
@@ -101,9 +117,7 @@ const GRPC_UNAVAILABLE = 14;
  * [set()]{@link DocumentReference#set}) consisting of fields mapped
  * to values.
  *
- * @public
  * @typedef {Object.<string, *>} DocumentData
- * @alias DocumentData
  */
 
 /**
@@ -111,7 +125,6 @@ const GRPC_UNAVAILABLE = 14;
  * that contains paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that
  * contain dots reference nested fields within the document.
  *
- * @public
  * @typedef {Object.<string, *>} UpdateData
  */
 
@@ -125,7 +138,6 @@ const GRPC_UNAVAILABLE = 14;
  * can be restricted to only apply to documents that match the specified
  * conditions.
  *
- * @public
  * @property {string} lastUpdateTime - The update time to enforce (specified as
  * an ISO 8601 string).
  * @typedef {Object} Precondition
@@ -141,7 +153,6 @@ const GRPC_UNAVAILABLE = 14;
  * documents in their entirety by providing a SetOptions object with
  * { merge : true }.
  *
- * @public
  * @property {boolean} merge - Changes the behavior of a set() call to only
  * replace the values specified in its data argument. Fields omitted from the
  * set() call remain untouched.
@@ -156,14 +167,14 @@ const GRPC_UNAVAILABLE = 14;
  *
  * @class
  *
- *  @example <caption>Install the client library with <a href="https://www.npmjs.com/">npm</a>:</caption>
+ * @example <caption>Install the client library with <a href="https://www.npmjs.com/">npm</a>:</caption>
  * npm install --save @google-cloud/firestore
  *
  * @example <caption>Import the client library</caption>
  * var Firestore = require('@google-cloud/firestore');
  *
  * @example <caption>Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:</caption>
- * var firestore = Firestore();
+ * var firestore = new Firestore();
  *
  * @example <caption>Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:</caption>
  * var firestore = new Firestore({
@@ -216,6 +227,7 @@ class Firestore extends commonGrpc.Service {
     }
 
     /**
+     * @private
      * @type {object}
      * @property {FirestoreClient} Firestore The Firestore GAPIC client.
      */
@@ -237,7 +249,9 @@ class Firestore extends commonGrpc.Service {
 
   /**
    * The root path to the database.
-   * @type string
+   *
+   * @private
+   * @type {string}
    */
   get formattedName() {
     return this._referencePath.formattedName;
@@ -246,8 +260,6 @@ class Firestore extends commonGrpc.Service {
   /**
    * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path.
-   *
-   * @public
    *
    * @param {string} documentPath - A slash-separated path to a document.
    * @returns {DocumentReference} The
@@ -271,8 +283,6 @@ class Firestore extends commonGrpc.Service {
   /**
    * Gets a [CollectionReference]{@link CollectionReference} instance
    * that refers to the collection at the specified path.
-   *
-   * @public
    *
    * @param {string} collectionPath - A slash-separated path to a collection.
    * @returns {CollectionReference} The
@@ -300,8 +310,6 @@ class Firestore extends commonGrpc.Service {
   /**
    * Creates a [WriteBatch]{@link WriteBatch}, used for performing
    * multiple writes as a single atomic operation.
-   *
-   * @public
    *
    * @returns {WriteBatch} A WriteBatch that operates on this Firestore
    * client.
@@ -368,8 +376,6 @@ class Firestore extends commonGrpc.Service {
    * You can use the transaction object passed to 'updateFunction' to read and
    * modify Firestore documents under lock. Transactions are committed once
    * 'updateFunction' resolves and attempted up to five times on failure.
-   *
-   * @public
    *
    * @param {function(Transaction)} updateFunction - The
    * function to execute within the transaction
@@ -482,8 +488,6 @@ class Firestore extends commonGrpc.Service {
    * Fetches the root collections that are associated with this Firestore
    * database.
    *
-   * @public
-   *
    * @returns {Promise.<Array.<CollectionReference>>} A Promise that
    * contains an array with CollectionReferences.
    *
@@ -502,8 +506,6 @@ class Firestore extends commonGrpc.Service {
   /**
    * Retrieves multiple documents from Firestore.
    *
-   * @public
-   *
    * @param {...DocumentReference} documents - The document references
    * to receive.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
@@ -513,7 +515,7 @@ class Firestore extends commonGrpc.Service {
    * let documentRef1 = firestore.doc('col/doc1');
    * let documentRef2 = firestore.doc('col/doc2');
    *
-   * firestore.getAll([documentRef1, documentRef2]).then(docs => {
+   * firestore.getAll(documentRef1, documentRef2).then(docs => {
    *   console.log(`First document: ${JSON.stringify(docs[0])}`);
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
@@ -645,6 +647,7 @@ class Firestore extends commonGrpc.Service {
    *
    * Used for the creation of new documents.
    *
+   * @private
    * @returns {string} A unique 20-character wide identifier.
    */
   static autoId() {
@@ -882,6 +885,7 @@ class Firestore extends commonGrpc.Service {
    * A funnel for all non-streaming API requests, assigning a project ID where
    * necessary within the request options.
    *
+   * @private
    * @param {function} method - Veneer API endpoint that takes a request and
    * GAX options.
    * @param {Object} request - The Protobuf request to send.
@@ -925,7 +929,7 @@ class Firestore extends commonGrpc.Service {
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
    *
-   *
+   * @private
    * @param {function} method - Streaming Veneer API endpoint that takes a
    * request and GAX options.
    * @param {Object} request - The Protobuf request to send.
@@ -972,7 +976,7 @@ class Firestore extends commonGrpc.Service {
    * The stream is returned in paused state and needs to be resumed once all
    * listeners are attached.
    *
-   *
+   * @private
    * @param {function} method - Streaming Veneer API endpoint that takes GAX
    * options.
    * @param {Object} request - The Protobuf request to send as the first stream
@@ -1037,6 +1041,7 @@ class Firestore extends commonGrpc.Service {
  * Log function to use for debug output. By default, we don't perform any
  * logging.
  *
+ * @private
  * @type {Firestore~logFunction}
  */
 Firestore.log = function() {};
@@ -1093,7 +1098,7 @@ Transaction = require('./transaction')(Firestore);
  * var Firestore = require('@google-cloud/firestore');
  *
  * @example <caption>Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:</caption>
- * var firestore = Firestore();
+ * var firestore = new Firestore();
  *
  * @example <caption>Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:</caption>
  * var firestore = new Firestore({
@@ -1138,7 +1143,7 @@ module.exports.FieldValue = FieldValue;
 
 /**
  * {@link GeoPoint} class.
-
+ *
  * @name Firestore.GeoPoint
  * @see GeoPoint
  * @type {Constructor}

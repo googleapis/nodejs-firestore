@@ -28,7 +28,7 @@
  *   The double value.
  *
  * @typedef DoubleValue
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.DoubleValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
 var DoubleValue = {
@@ -44,7 +44,7 @@ var DoubleValue = {
  *   The float value.
  *
  * @typedef FloatValue
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.FloatValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
 var FloatValue = {
@@ -60,7 +60,7 @@ var FloatValue = {
  *   The int64 value.
  *
  * @typedef Int64Value
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.Int64Value definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
 var Int64Value = {
@@ -76,7 +76,7 @@ var Int64Value = {
  *   The uint64 value.
  *
  * @typedef UInt64Value
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.UInt64Value definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
 var UInt64Value = {
@@ -92,7 +92,7 @@ var UInt64Value = {
  *   The int32 value.
  *
  * @typedef Int32Value
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.Int32Value definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
 var Int32Value = {
@@ -108,7 +108,7 @@ var Int32Value = {
  *   The uint32 value.
  *
  * @typedef UInt32Value
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.UInt32Value definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
 var UInt32Value = {
@@ -124,7 +124,7 @@ var UInt32Value = {
  *   The bool value.
  *
  * @typedef BoolValue
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.BoolValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
 var BoolValue = {
@@ -140,7 +140,7 @@ var BoolValue = {
  *   The string value.
  *
  * @typedef StringValue
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.StringValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
 var StringValue = {
@@ -156,7 +156,7 @@ var StringValue = {
  *   The bytes value.
  *
  * @typedef BytesValue
- * @member google.protobuf
+ * @memberof google.protobuf
  * @see [google.protobuf.BytesValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
 var BytesValue = {

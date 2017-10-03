@@ -88,7 +88,7 @@
  *   This object should have the same structure as [Any]{@link google.protobuf.Any}
  *
  * @typedef Status
- * @member google.rpc
+ * @memberof google.rpc
  * @see [google.rpc.Status definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto}
  */
 var Status = {
