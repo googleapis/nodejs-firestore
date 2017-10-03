@@ -383,23 +383,23 @@ FirestoreClient.prototype.getProjectId = function(callback) {
  *   If the document has a field that is not present in this mask, that field
  *   will not be returned in the response.
  *
- *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  * @param {string=} request.transaction
  *   Reads the document in a transaction.
  * @param {Object=} request.readTime
  *   Reads the version of the document at the given time.
  *   This may not be older than 60 seconds.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @param {function(?Error, ?Object)=} callback
  *   The function which will be called with the result of the API call.
  *
- *   The second parameter to the callback is an object representing [Document]{@link Document}.
+ *   The second parameter to the callback is an object representing [Document]{@link google.firestore.v1beta1.Document}.
  * @returns {Promise} - The promise which resolves to an array.
- *   The first element of the array is an object representing [Document]{@link Document}.
+ *   The first element of the array is an object representing [Document]{@link google.firestore.v1beta1.Document}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
  * @example
@@ -460,14 +460,14 @@ FirestoreClient.prototype.getDocument = function(request, options, callback) {
  *   If a document has a field that is not present in this mask, that field
  *   will not be returned in the response.
  *
- *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  * @param {string=} request.transaction
  *   Reads documents in a transaction.
  * @param {Object=} request.readTime
  *   Reads documents as they were at the given time.
  *   This may not be older than 60 seconds.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  * @param {boolean=} request.showMissing
  *   If the list should show missing documents. A missing document is a
  *   document that does not exist but has sub-documents. These documents will
@@ -482,20 +482,20 @@ FirestoreClient.prototype.getDocument = function(request, options, callback) {
  * @param {function(?Error, ?Array, ?Object, ?Object)=} callback
  *   The function which will be called with the result of the API call.
  *
- *   The second parameter to the callback is Array of [Document]{@link Document}.
+ *   The second parameter to the callback is Array of [Document]{@link google.firestore.v1beta1.Document}.
  *
  *   When autoPaginate: false is specified through options, it contains the result
  *   in a single response. If the response indicates the next page exists, the third
  *   parameter is set to be used for the next request object. The fourth parameter keeps
- *   the raw response object of an object representing [ListDocumentsResponse]{@link ListDocumentsResponse}.
+ *   the raw response object of an object representing [ListDocumentsResponse]{@link google.firestore.v1beta1.ListDocumentsResponse}.
  * @returns {Promise} - The promise which resolves to an array.
- *   The first element of the array is Array of [Document]{@link Document}.
+ *   The first element of the array is Array of [Document]{@link google.firestore.v1beta1.Document}.
  *
  *   When autoPaginate: false is specified through options, the array has three elements.
- *   The first element is Array of [Document]{@link Document} in a single response.
+ *   The first element is Array of [Document]{@link google.firestore.v1beta1.Document} in a single response.
  *   The second element is the next request object if the response
  *   indicates the next page exists, or null. The third element is
- *   an object representing [ListDocumentsResponse]{@link ListDocumentsResponse}.
+ *   an object representing [ListDocumentsResponse]{@link google.firestore.v1beta1.ListDocumentsResponse}.
  *
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
@@ -607,14 +607,14 @@ FirestoreClient.prototype.listDocuments = function(request, options, callback) {
  *   If a document has a field that is not present in this mask, that field
  *   will not be returned in the response.
  *
- *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  * @param {string=} request.transaction
  *   Reads documents in a transaction.
  * @param {Object=} request.readTime
  *   Reads documents as they were at the given time.
  *   This may not be older than 60 seconds.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  * @param {boolean=} request.showMissing
  *   If the list should show missing documents. A missing document is a
  *   document that does not exist but has sub-documents. These documents will
@@ -627,7 +627,7 @@ FirestoreClient.prototype.listDocuments = function(request, options, callback) {
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @returns {Stream}
- *   An object stream which emits an object representing [Document]{@link Document} on 'data' event.
+ *   An object stream which emits an object representing [Document]{@link google.firestore.v1beta1.Document} on 'data' event.
  *
  * @example
  *
@@ -680,23 +680,23 @@ FirestoreClient.prototype.listDocumentsStream = function(request, options) {
  * @param {Object} request.document
  *   The document to create. `name` must not be set.
  *
- *   This object should have the same structure as [Document]{@link Document}
+ *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
  * @param {Object=} request.mask
  *   The fields to return. If not set, returns all fields.
  *
  *   If the document has a field that is not present in this mask, that field
  *   will not be returned in the response.
  *
- *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @param {function(?Error, ?Object)=} callback
  *   The function which will be called with the result of the API call.
  *
- *   The second parameter to the callback is an object representing [Document]{@link Document}.
+ *   The second parameter to the callback is an object representing [Document]{@link google.firestore.v1beta1.Document}.
  * @returns {Promise} - The promise which resolves to an array.
- *   The first element of the array is an object representing [Document]{@link Document}.
+ *   The first element of the array is an object representing [Document]{@link google.firestore.v1beta1.Document}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
  * @example
@@ -750,7 +750,7 @@ FirestoreClient.prototype.createDocument = function(
  *   The updated document.
  *   Creates the document if it does not already exist.
  *
- *   This object should have the same structure as [Document]{@link Document}
+ *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
  * @param {Object} request.updateMask
  *   The fields to update.
  *   None of the field paths in the mask may contain a reserved name.
@@ -760,28 +760,28 @@ FirestoreClient.prototype.createDocument = function(
  *   Fields referenced in the mask, but not present in the input document, are
  *   deleted from the document on the server.
  *
- *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  * @param {Object=} request.mask
  *   The fields to return. If not set, returns all fields.
  *
  *   If the document has a field that is not present in this mask, that field
  *   will not be returned in the response.
  *
- *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  * @param {Object=} request.currentDocument
  *   An optional precondition on the document.
  *   The request will fail if this is set and not met by the target document.
  *
- *   This object should have the same structure as [Precondition]{@link Precondition}
+ *   This object should have the same structure as [Precondition]{@link google.firestore.v1beta1.Precondition}
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @param {function(?Error, ?Object)=} callback
  *   The function which will be called with the result of the API call.
  *
- *   The second parameter to the callback is an object representing [Document]{@link Document}.
+ *   The second parameter to the callback is an object representing [Document]{@link google.firestore.v1beta1.Document}.
  * @returns {Promise} - The promise which resolves to an array.
- *   The first element of the array is an object representing [Document]{@link Document}.
+ *   The first element of the array is an object representing [Document]{@link google.firestore.v1beta1.Document}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
  * @example
@@ -834,7 +834,7 @@ FirestoreClient.prototype.updateDocument = function(
  *   An optional precondition on the document.
  *   The request will fail if this is set and not met by the target document.
  *
- *   This object should have the same structure as [Precondition]{@link Precondition}
+ *   This object should have the same structure as [Precondition]{@link google.firestore.v1beta1.Precondition}
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
@@ -894,7 +894,7 @@ FirestoreClient.prototype.deleteDocument = function(
  *   If a document has a field that is not present in this mask, that field will
  *   not be returned in the response.
  *
- *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  * @param {string=} request.transaction
  *   Reads documents in a transaction.
  * @param {Object=} request.newTransaction
@@ -903,17 +903,17 @@ FirestoreClient.prototype.deleteDocument = function(
  *   The new transaction ID will be returned as the first response in the
  *   stream.
  *
- *   This object should have the same structure as [TransactionOptions]{@link TransactionOptions}
+ *   This object should have the same structure as [TransactionOptions]{@link google.firestore.v1beta1.TransactionOptions}
  * @param {Object=} request.readTime
  *   Reads documents as they were at the given time.
  *   This may not be older than 60 seconds.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @returns {Stream}
- *   An object stream which emits [BatchGetDocumentsResponse]{@link BatchGetDocumentsResponse} on 'data' event.
+ *   An object stream which emits [BatchGetDocumentsResponse]{@link google.firestore.v1beta1.BatchGetDocumentsResponse} on 'data' event.
  *
  * @example
  *
@@ -953,16 +953,16 @@ FirestoreClient.prototype.batchGetDocuments = function(request, options) {
  *   The options for the transaction.
  *   Defaults to a read-write transaction.
  *
- *   This object should have the same structure as [TransactionOptions]{@link TransactionOptions}
+ *   This object should have the same structure as [TransactionOptions]{@link google.firestore.v1beta1.TransactionOptions}
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @param {function(?Error, ?Object)=} callback
  *   The function which will be called with the result of the API call.
  *
- *   The second parameter to the callback is an object representing [BeginTransactionResponse]{@link BeginTransactionResponse}.
+ *   The second parameter to the callback is an object representing [BeginTransactionResponse]{@link google.firestore.v1beta1.BeginTransactionResponse}.
  * @returns {Promise} - The promise which resolves to an array.
- *   The first element of the array is an object representing [BeginTransactionResponse]{@link BeginTransactionResponse}.
+ *   The first element of the array is an object representing [BeginTransactionResponse]{@link google.firestore.v1beta1.BeginTransactionResponse}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
  * @example
@@ -1011,7 +1011,7 @@ FirestoreClient.prototype.beginTransaction = function(
  *
  *   Always executed atomically and in order.
  *
- *   This object should have the same structure as [Write]{@link Write}
+ *   This object should have the same structure as [Write]{@link google.firestore.v1beta1.Write}
  * @param {string=} request.transaction
  *   If set, applies all writes in this transaction, and commits it.
  * @param {Object=} options
@@ -1020,9 +1020,9 @@ FirestoreClient.prototype.beginTransaction = function(
  * @param {function(?Error, ?Object)=} callback
  *   The function which will be called with the result of the API call.
  *
- *   The second parameter to the callback is an object representing [CommitResponse]{@link CommitResponse}.
+ *   The second parameter to the callback is an object representing [CommitResponse]{@link google.firestore.v1beta1.CommitResponse}.
  * @returns {Promise} - The promise which resolves to an array.
- *   The first element of the array is an object representing [CommitResponse]{@link CommitResponse}.
+ *   The first element of the array is an object representing [CommitResponse]{@link google.firestore.v1beta1.CommitResponse}.
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *
  * @example
@@ -1122,7 +1122,7 @@ FirestoreClient.prototype.rollback = function(request, options, callback) {
  * @param {Object=} request.structuredQuery
  *   A structured query.
  *
- *   This object should have the same structure as [StructuredQuery]{@link StructuredQuery}
+ *   This object should have the same structure as [StructuredQuery]{@link google.firestore.v1beta1.StructuredQuery}
  * @param {string=} request.transaction
  *   Reads documents in a transaction.
  * @param {Object=} request.newTransaction
@@ -1131,17 +1131,17 @@ FirestoreClient.prototype.rollback = function(request, options, callback) {
  *   The new transaction ID will be returned as the first response in the
  *   stream.
  *
- *   This object should have the same structure as [TransactionOptions]{@link TransactionOptions}
+ *   This object should have the same structure as [TransactionOptions]{@link google.firestore.v1beta1.TransactionOptions}
  * @param {Object=} request.readTime
  *   Reads documents as they were at the given time.
  *   This may not be older than 60 seconds.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  * @param {Object=} options
  *   Optional parameters. You can override the default settings for this call, e.g, timeout,
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @returns {Stream}
- *   An object stream which emits [RunQueryResponse]{@link RunQueryResponse} on 'data' event.
+ *   An object stream which emits [RunQueryResponse]{@link google.firestore.v1beta1.RunQueryResponse} on 'data' event.
  *
  * @example
  *
@@ -1172,8 +1172,8 @@ FirestoreClient.prototype.runQuery = function(request, options) {
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @returns {Stream}
  *   An object stream which is both readable and writable. It accepts objects
- *   representing [WriteRequest]{@link WriteRequest} for write() method, and
- *   will emit objects representing [WriteResponse]{@link WriteResponse} on 'data' event asynchronously.
+ *   representing [WriteRequest]{@link google.firestore.v1beta1.WriteRequest} for write() method, and
+ *   will emit objects representing [WriteResponse]{@link google.firestore.v1beta1.WriteResponse} on 'data' event asynchronously.
  *
  * @example
  *
@@ -1209,8 +1209,8 @@ FirestoreClient.prototype.write = function(options) {
  *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
  * @returns {Stream}
  *   An object stream which is both readable and writable. It accepts objects
- *   representing [ListenRequest]{@link ListenRequest} for write() method, and
- *   will emit objects representing [ListenResponse]{@link ListenResponse} on 'data' event asynchronously.
+ *   representing [ListenRequest]{@link google.firestore.v1beta1.ListenRequest} for write() method, and
+ *   will emit objects representing [ListenResponse]{@link google.firestore.v1beta1.ListenResponse} on 'data' event asynchronously.
  *
  * @example
  *
@@ -1265,7 +1265,7 @@ FirestoreClient.prototype.listen = function(options) {
  *   When autoPaginate: false is specified through options, it contains the result
  *   in a single response. If the response indicates the next page exists, the third
  *   parameter is set to be used for the next request object. The fourth parameter keeps
- *   the raw response object of an object representing [ListCollectionIdsResponse]{@link ListCollectionIdsResponse}.
+ *   the raw response object of an object representing [ListCollectionIdsResponse]{@link google.firestore.v1beta1.ListCollectionIdsResponse}.
  * @returns {Promise} - The promise which resolves to an array.
  *   The first element of the array is Array of string.
  *
@@ -1273,7 +1273,7 @@ FirestoreClient.prototype.listen = function(options) {
  *   The first element is Array of string in a single response.
  *   The second element is the next request object if the response
  *   indicates the next page exists, or null. The third element is
- *   an object representing [ListCollectionIdsResponse]{@link ListCollectionIdsResponse}.
+ *   an object representing [ListCollectionIdsResponse]{@link google.firestore.v1beta1.ListCollectionIdsResponse}.
  *
  *   The promise has a method named "cancel" which cancels the ongoing API call.
  *

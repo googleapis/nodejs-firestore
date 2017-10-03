@@ -100,7 +100,6 @@
  *       "value": "1.212s"
  *     }
  *
- * @external "google.protobuf.Any"
  * @property {string} typeUrl
  *   A URL/resource name whose content describes the type of the
  *   serialized protocol buffer message.
@@ -127,5 +126,10 @@
  * @property {string} value
  *   Must be a valid serialized protocol buffer of the above specified type.
  *
+ * @typedef Any
+ * @member google.protobuf
  * @see [google.protobuf.Any definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/any.proto}
  */
+var Any = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};

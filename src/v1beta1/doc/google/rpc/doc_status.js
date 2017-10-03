@@ -73,7 +73,6 @@
  * - Logging. If some API errors are stored in logs, the message `Status` could
  *     be used directly after any stripping needed for security/privacy reasons.
  *
- * @external "google.rpc.Status"
  * @property {number} code
  *   The status code, which should be an enum value of {@link google.rpc.Code}.
  *
@@ -86,7 +85,12 @@
  *   A list of messages that carry the error details.  There will be a
  *   common set of message types for APIs to use.
  *
- *   This object should have the same structure as [google.protobuf.Any]{@link external:"google.protobuf.Any"}
+ *   This object should have the same structure as [Any]{@link google.protobuf.Any}
  *
+ * @typedef Status
+ * @member google.rpc
  * @see [google.rpc.Status definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto}
  */
+var Status = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};

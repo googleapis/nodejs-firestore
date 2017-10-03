@@ -97,7 +97,6 @@
  * http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime())
  * to obtain a formatter capable of generating timestamps in this format.
  *
- * @external "google.protobuf.Timestamp"
  * @property {number} seconds
  *   Represents seconds of UTC time since Unix epoch
  *   1970-01-01T00:00:00Z. Must be from 0001-01-01T00:00:00Z to
@@ -109,5 +108,10 @@
  *   that count forward in time. Must be from 0 to 999,999,999
  *   inclusive.
  *
+ * @typedef Timestamp
+ * @member google.protobuf
  * @see [google.protobuf.Timestamp definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/timestamp.proto}
  */
+var Timestamp = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};

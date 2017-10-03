@@ -31,6 +31,7 @@
  *   path syntax reference.
  *
  * @typedef DocumentMask
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentMask definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
 var DocumentMask = {
@@ -48,9 +49,10 @@ var DocumentMask = {
  *   When set, the target document must exist and have been last updated at
  *   that time.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef Precondition
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Precondition definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
 var Precondition = {
@@ -63,14 +65,15 @@ var Precondition = {
  * @property {Object} readOnly
  *   The transaction can only be used for read operations.
  *
- *   This object should have the same structure as [ReadOnly]{@link ReadOnly}
+ *   This object should have the same structure as [ReadOnly]{@link google.firestore.v1beta1.ReadOnly}
  *
  * @property {Object} readWrite
  *   The transaction can be used for both read and write operations.
  *
- *   This object should have the same structure as [ReadWrite]{@link ReadWrite}
+ *   This object should have the same structure as [ReadWrite]{@link google.firestore.v1beta1.ReadWrite}
  *
  * @typedef TransactionOptions
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.TransactionOptions definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
 var TransactionOptions = {
@@ -83,6 +86,7 @@ var TransactionOptions = {
    *   An optional transaction to retry.
    *
    * @typedef ReadWrite
+   * @member google.firestore.v1beta1
    * @see [google.firestore.v1beta1.TransactionOptions.ReadWrite definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
    */
   ReadWrite: {
@@ -96,9 +100,10 @@ var TransactionOptions = {
    *   Reads documents at the given time.
    *   This may not be older than 60 seconds.
    *
-   *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+   *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
    *
    * @typedef ReadOnly
+   * @member google.firestore.v1beta1
    * @see [google.firestore.v1beta1.TransactionOptions.ReadOnly definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
    */
   ReadOnly: {

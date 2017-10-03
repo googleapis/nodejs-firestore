@@ -25,7 +25,7 @@
  * @property {Object} update
  *   A document to write.
  *
- *   This object should have the same structure as [Document]{@link Document}
+ *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
  *
  * @property {string} delete
  *   A document name to delete. In the format:
@@ -37,7 +37,7 @@
  *   An `update` cannot follow a `transform` on the same document in a given
  *   request.
  *
- *   This object should have the same structure as [DocumentTransform]{@link DocumentTransform}
+ *   This object should have the same structure as [DocumentTransform]{@link google.firestore.v1beta1.DocumentTransform}
  *
  * @property {Object} updateMask
  *   The fields to update in this write.
@@ -50,16 +50,17 @@
  *   deleted from the document on the server.
  *   The field paths in this mask must not contain a reserved field name.
  *
- *   This object should have the same structure as [DocumentMask]{@link DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  *
  * @property {Object} currentDocument
  *   An optional precondition on the document.
  *
  *   The write will fail if this is set and not met by the target document.
  *
- *   This object should have the same structure as [Precondition]{@link Precondition}
+ *   This object should have the same structure as [Precondition]{@link google.firestore.v1beta1.Precondition}
  *
  * @typedef Write
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Write definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var Write = {
@@ -76,9 +77,10 @@ var Write = {
  *   The list of transformations to apply to the fields of the document, in
  *   order.
  *
- *   This object should have the same structure as [FieldTransform]{@link FieldTransform}
+ *   This object should have the same structure as [FieldTransform]{@link google.firestore.v1beta1.FieldTransform}
  *
  * @typedef DocumentTransform
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentTransform definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentTransform = {
@@ -94,9 +96,10 @@ var DocumentTransform = {
    * @property {number} setToServerValue
    *   Sets the field to the given server value.
    *
-   *   The number should be among the values of [ServerValue]{@link ServerValue}
+   *   The number should be among the values of [ServerValue]{@link google.firestore.v1beta1.ServerValue}
    *
    * @typedef FieldTransform
+   * @member google.firestore.v1beta1
    * @see [google.firestore.v1beta1.DocumentTransform.FieldTransform definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
    */
   FieldTransform: {
@@ -132,15 +135,16 @@ var DocumentTransform = {
  *   If the write did not actually change the document, this will be the
  *   previous update_time.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {Object[]} transformResults
  *   The results of applying each {@link DocumentTransform.FieldTransform}, in the
  *   same order.
  *
- *   This object should have the same structure as [Value]{@link Value}
+ *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
  *
  * @typedef WriteResult
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.WriteResult definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var WriteResult = {
@@ -161,7 +165,7 @@ var WriteResult = {
  *
  *   If `mask` is set, contains only fields that were updated or added.
  *
- *   This object should have the same structure as [Document]{@link Document}
+ *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
  *
  * @property {number[]} targetIds
  *   A set of target IDs of targets that match this document.
@@ -170,6 +174,7 @@ var WriteResult = {
  *   A set of target IDs for targets that no longer match this document.
  *
  * @typedef DocumentChange
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentChange = {
@@ -196,9 +201,10 @@ var DocumentChange = {
  *
  *   Greater or equal to the `commit_time` of the delete.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef DocumentDelete
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentDelete definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentDelete = {
@@ -226,9 +232,10 @@ var DocumentDelete = {
  *
  *   Greater or equal to the `commit_time` of the change/delete/remove.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef DocumentRemove
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentRemove definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentRemove = {
@@ -248,6 +255,7 @@ var DocumentRemove = {
  *   client must manually determine which documents no longer match the target.
  *
  * @typedef ExistenceFilter
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ExistenceFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var ExistenceFilter = {

@@ -61,7 +61,7 @@
  *   recreated. It can also be compared to values from other documents and
  *   the `read_time` of a query.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {Object} updateTime
  *   Output only. The time at which the document was last changed.
@@ -70,9 +70,10 @@
  *   monotonically with each change to the document. It can also be
  *   compared to values from other documents and the `read_time` of a query.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef Document
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Document definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var Document = {
@@ -85,7 +86,7 @@ var Document = {
  * @property {number} nullValue
  *   A null value.
  *
- *   The number should be among the values of [google.protobuf.NullValue]{@link external:"google.protobuf.NullValue"}
+ *   The number should be among the values of [NullValue]{@link google.protobuf.NullValue}
  *
  * @property {boolean} booleanValue
  *   A boolean value.
@@ -102,7 +103,7 @@ var Document = {
  *   Precise only to microseconds. When stored, any additional precision is
  *   rounded down.
  *
- *   This object should have the same structure as [google.protobuf.Timestamp]{@link external:"google.protobuf.Timestamp"}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {string} stringValue
  *   A string value.
@@ -124,21 +125,22 @@ var Document = {
  * @property {Object} geoPointValue
  *   A geo point value representing a point on the surface of Earth.
  *
- *   This object should have the same structure as [google.type.LatLng]{@link external:"google.type.LatLng"}
+ *   This object should have the same structure as [LatLng]{@link google.type.LatLng}
  *
  * @property {Object} arrayValue
  *   An array value.
  *
  *   Cannot contain another array value.
  *
- *   This object should have the same structure as [ArrayValue]{@link ArrayValue}
+ *   This object should have the same structure as [ArrayValue]{@link google.firestore.v1beta1.ArrayValue}
  *
  * @property {Object} mapValue
  *   A map value.
  *
- *   This object should have the same structure as [MapValue]{@link MapValue}
+ *   This object should have the same structure as [MapValue]{@link google.firestore.v1beta1.MapValue}
  *
  * @typedef Value
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Value definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var Value = {
@@ -151,9 +153,10 @@ var Value = {
  * @property {Object[]} values
  *   Values in the array.
  *
- *   This object should have the same structure as [Value]{@link Value}
+ *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
  *
  * @typedef ArrayValue
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ArrayValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var ArrayValue = {
@@ -172,6 +175,7 @@ var ArrayValue = {
  *   not exceed 1,500 bytes and cannot be empty.
  *
  * @typedef MapValue
+ * @member google.firestore.v1beta1
  * @see [google.firestore.v1beta1.MapValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var MapValue = {

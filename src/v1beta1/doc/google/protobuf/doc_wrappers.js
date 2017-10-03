@@ -24,105 +24,141 @@
  *
  * The JSON representation for `DoubleValue` is JSON number.
  *
- * @external "google.protobuf.DoubleValue"
  * @property {number} value
  *   The double value.
  *
+ * @typedef DoubleValue
+ * @member google.protobuf
  * @see [google.protobuf.DoubleValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
+var DoubleValue = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};
 
 /**
  * Wrapper message for `float`.
  *
  * The JSON representation for `FloatValue` is JSON number.
  *
- * @external "google.protobuf.FloatValue"
  * @property {number} value
  *   The float value.
  *
+ * @typedef FloatValue
+ * @member google.protobuf
  * @see [google.protobuf.FloatValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
+var FloatValue = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};
 
 /**
  * Wrapper message for `int64`.
  *
  * The JSON representation for `Int64Value` is JSON string.
  *
- * @external "google.protobuf.Int64Value"
  * @property {number} value
  *   The int64 value.
  *
+ * @typedef Int64Value
+ * @member google.protobuf
  * @see [google.protobuf.Int64Value definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
+var Int64Value = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};
 
 /**
  * Wrapper message for `uint64`.
  *
  * The JSON representation for `UInt64Value` is JSON string.
  *
- * @external "google.protobuf.UInt64Value"
  * @property {number} value
  *   The uint64 value.
  *
+ * @typedef UInt64Value
+ * @member google.protobuf
  * @see [google.protobuf.UInt64Value definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
+var UInt64Value = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};
 
 /**
  * Wrapper message for `int32`.
  *
  * The JSON representation for `Int32Value` is JSON number.
  *
- * @external "google.protobuf.Int32Value"
  * @property {number} value
  *   The int32 value.
  *
+ * @typedef Int32Value
+ * @member google.protobuf
  * @see [google.protobuf.Int32Value definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
+var Int32Value = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};
 
 /**
  * Wrapper message for `uint32`.
  *
  * The JSON representation for `UInt32Value` is JSON number.
  *
- * @external "google.protobuf.UInt32Value"
  * @property {number} value
  *   The uint32 value.
  *
+ * @typedef UInt32Value
+ * @member google.protobuf
  * @see [google.protobuf.UInt32Value definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
+var UInt32Value = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};
 
 /**
  * Wrapper message for `bool`.
  *
  * The JSON representation for `BoolValue` is JSON `true` and `false`.
  *
- * @external "google.protobuf.BoolValue"
  * @property {boolean} value
  *   The bool value.
  *
+ * @typedef BoolValue
+ * @member google.protobuf
  * @see [google.protobuf.BoolValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
+var BoolValue = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};
 
 /**
  * Wrapper message for `string`.
  *
  * The JSON representation for `StringValue` is JSON string.
  *
- * @external "google.protobuf.StringValue"
  * @property {string} value
  *   The string value.
  *
+ * @typedef StringValue
+ * @member google.protobuf
  * @see [google.protobuf.StringValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
+var StringValue = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};
 
 /**
  * Wrapper message for `bytes`.
  *
  * The JSON representation for `BytesValue` is JSON string.
  *
- * @external "google.protobuf.BytesValue"
  * @property {string} value
  *   The bytes value.
  *
+ * @typedef BytesValue
+ * @member google.protobuf
  * @see [google.protobuf.BytesValue definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
  */
+var BytesValue = {
+  // This is for documentation. Actual contents will be loaded by gRPC.
+};
