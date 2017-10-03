@@ -5,7 +5,7 @@
 [![release level](https://img.shields.io/badge/release%20level-beta-yellow.svg?style&#x3D;flat)](https://cloud.google.com/terms/launch-stages)
 [![CircleCI](https://img.shields.io/circleci/project/github/googleapis/nodejs-firestore.svg?style=flat)](https://circleci.com/gh/googleapis/nodejs-firestore)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/googleapis/nodejs-firestore?svg=true)](https://ci.appveyor.com/project/googleapis/nodejs-firestore)
-[![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-firestore/repo-migration.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-firestore)
+[![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-firestore/master.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-firestore)
 
 > Node.js idiomatic client for [Firestore][product-docs].
 
