@@ -872,7 +872,7 @@ class Firestore extends commonGrpc.Service {
         );
         resultStream.write(request, 'utf-8', () => {
           Firestore.log(
-            'Firestore.readWriteStream',
+            'Firestore._initializeStream',
             'Marking stream as healthy'
           );
           releaseStream();
