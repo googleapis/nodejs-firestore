@@ -1,0 +1,88 @@
+{
+  "name": "@google-cloud/firestore",
+  "version": "0.8.0",
+  "author": "Google Inc.",
+  "description": "Firestore Client Library for Node.js",
+  "contributors": [
+    {
+      "name": "Dave Gramlich",
+      "email": "callmehiphop@gmail.com"
+    },
+    {
+      "name": "Sebastian Schmidt",
+      "email": "mrschmidt@google.com"
+    },
+    {
+      "name": "Stephen Sawchuk",
+      "email": "sawchuk@gmail.com"
+    }
+  ],
+  "main": "./src/index.js",
+  "files": [
+    "src",
+    "protos",
+    "types",
+    "AUTHORS",
+    "CONTRIBUTORS",
+    "COPYING"
+  ],
+  "repository": "googleapis/nodejs-firestore",
+  "keywords": [
+    "google apis client",
+    "google api client",
+    "google apis",
+    "google api",
+    "google",
+    "google cloud platform",
+    "google cloud",
+    "cloud",
+    "firestore"
+  ],
+  "dependencies": {
+    "@google-cloud/common": "^0.13.5",
+    "@google-cloud/common-grpc": "^0.4.0",
+    "bun": "^0.0.11",
+    "extend": "^3.0.1",
+    "functional-red-black-tree": "^1.0.1",
+    "google-gax": "^0.14.1",
+    "grpc": "^1.6.0",
+    "is": "^3.2.0",
+    "through2": "^2.0.3"
+  },
+  "devDependencies": {
+    "@google-cloud/nodejs-repo-tools": "^2.0.5",
+    "@types/mocha": "^2.2.43",
+    "@types/node": "^8.0.31",
+    "duplexify": "^3.5.0",
+    "eslint": "^4.7.2",
+    "eslint-config-prettier": "^2.6.0",
+    "eslint-plugin-node": "^5.2.0",
+    "eslint-plugin-prettier": "^2.3.1",
+    "ink-docstrap": "git+https://github.com/docstrap/docstrap.git",
+    "intelli-espower-loader": "^1.0.1",
+    "jsdoc": "^3.5.5",
+    "mocha": "^3.5.3",
+    "nyc": "^11.2.1",
+    "power-assert": "^1.4.4",
+    "prettier": "^1.7.2",
+    "proxyquire": "^1.7.11",
+    "safe-buffer": "^5.1.1",
+    "typescript": "^2.5.2"
+  },
+  "scripts": {
+    "cover": "nyc --reporter=lcov mocha --require intelli-espower-loader test/*.js && nyc report",
+    "docs": "repo-tools exec -- jsdoc -c .jsdoc.js",
+    "generate-scaffolding": "repo-tools generate all",
+    "lint": "repo-tools lint --cmd eslint -- src/ system-test/ test/",
+    "prettier": "repo-tools exec -- prettier --write src/*.js src/**/*.js test/*.js test/**/*.js system-test/*.js system-test/**/*.js",
+    "publish-module": "node ../../scripts/publish.js firestore",
+    "system-test": "repo-tools test run --cmd mocha -- system-test/*.js --no-timeouts",
+    "test-no-cover": "repo-tools test run --cmd mocha -- test/*.js --no-timeouts",
+    "test": "repo-tools test run --cmd npm -- run cover"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "types": "./types/firestore.d.ts"
+}

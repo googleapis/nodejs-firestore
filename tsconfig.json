@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "target": "es6",
+    "moduleResolution": "node",
+    "outDir": "dist/es6",
+    "rootDir": "./",
+    "sourceMap": false,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noFallthroughCasesInSwitch": true,
+    "strictNullChecks": true,
+    "noStrictGenericChecks": true
+  },
+  "include": [
+    "src/**/*.js",
+    "src/**/*.ts",
+    "test/typescript.ts",
+    "types/firestore.d.ts"
+  ]
+}

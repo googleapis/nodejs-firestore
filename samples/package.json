@@ -1,0 +1,23 @@
+{
+  "name": "@google-cloud/firestore-samples",
+  "version": "0.0.1",
+  "private": true,
+  "license": "Apache-2.0",
+  "author": "Google Inc.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/googleapis/nodejs-firestore.git"
+  },
+  "engines": {
+    "node": ">=4"
+  },
+  "scripts": {
+    "test": "mocha --timeout 20000 main.js"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "0.1.0"
+  },
+  "devDependencies": {
+    "mocha": "^3.3.0"
+  }
+}
