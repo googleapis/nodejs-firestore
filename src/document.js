@@ -43,6 +43,13 @@ const FieldValue = require('./field-value');
  */
 let DocumentReference;
 
+/*!
+ * Injected.
+ *
+ * @see {Firestore}
+ */
+let Firestore;
+
 /*! Injected. */
 let validate;
 
@@ -646,7 +653,7 @@ class DocumentSnapshot {
       };
     }
 
-    if (is.object(val)) {
+    if (isPlainObject(val)) {
       return {
         valueType: 'mapValue',
         mapValue: {
@@ -690,7 +697,7 @@ class DocumentSnapshot {
           target[key] = {};
           merge(target[key], value, path, pos + 1);
         }
-      } else if (is.object(target[key])) {
+      } else if (isPlainObject(target[key])) {
         if (isLast) {
           // The existing object has deeper nesting that the value we are trying
           // to merge.
@@ -877,7 +884,7 @@ class DocumentMask {
             ? currentPath.append(childSegment)
             : childSegment;
           const value = currentData[key];
-          if (is.object(value)) {
+          if (isPlainObject(value)) {
             extractFieldPaths(value, childPath);
           } else if (value !== FieldValue.SERVER_TIMESTAMP_SENTINEL) {
             fieldPaths.push(childPath.formattedName);
@@ -972,7 +979,7 @@ class DocumentTransform {
           // We need to verify that no array value contains a document transform
           encode_(val[i], path.concat(i), false);
         }
-      } else if (is.object(val)) {
+      } else if (isPlainObject(val)) {
         for (let prop in val) {
           if (val.hasOwnProperty(prop)) {
             transforms = transforms.concat(
@@ -1088,13 +1095,13 @@ function validateDocumentData(obj, usesPaths, depth) {
     );
   }
 
-  if (!is.object(obj)) {
+  if (!isPlainObject(obj)) {
     throw new Error('Input is not a JavaScript object.');
   }
 
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
-      if (is.object(obj[prop])) {
+      if (isPlainObject(obj[prop])) {
         validateDocumentData(obj[prop], false, depth + 1);
       }
     }
@@ -1106,7 +1113,6 @@ function validateDocumentData(obj, usesPaths, depth) {
 /*!
  * Validates the use of 'options' as a Precondition and enforces that 'exists'
  * and 'lastUpdateTime' use valid types.
- *
  *
  * @param {boolean=} options.exists - Whether the referenced document
  * should exist.
@@ -1146,7 +1152,6 @@ function validatePrecondition(options) {
  * Validates the use of 'options' as SetOptions and enforces that 'merge' is a
  * boolean.
  *
- *
  * @param {boolean=} options.merge - Whether set() should merge the provided
  * data into an existing document.
  * @returns {boolean} 'true' if the input is a valid SetOptions object.
@@ -1163,7 +1168,30 @@ function validateSetOptions(options) {
   return true;
 }
 
+/*!
+ * Verifies that 'obj' is a plain JavaScript object that does not have a custom
+ * encoding format. Objects that pass this check are encoded as 'Maps' in
+ * Firestore.
+ *
+ * @param {*} The argument to verify.
+ * @returns {boolean} 'true' if the input can be a treated as a plain object.
+ */
+function isPlainObject(obj) {
+  return (
+    is.object(obj) &&
+    !is.array(obj) &&
+    !is.date(obj) &&
+    !is.instance(obj, Firestore) &&
+    !is.instance(obj, DocumentReference) &&
+    !is.instance(obj, ResourcePath) &&
+    !is.instance(obj, GeoPoint) &&
+    !is.instance(obj, Buffer) &&
+    !is.instance(obj, Uint8Array)
+  );
+}
+
 module.exports = (FirestoreType, DocumentRefType) => {
+  Firestore = FirestoreType;
   DocumentReference = DocumentRefType;
   validate = require('./validate.js')({
     FieldPath: FieldPath.validateFieldPath,

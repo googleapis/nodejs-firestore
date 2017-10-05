@@ -565,7 +565,28 @@ describe('serialize document', function() {
 
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update(obj);
-    }, new RegExp('Argument "dataOrField" is not a valid Document. Input ' + 'object is deeper than 20 levels or contains a cycle.'));
+    }, new RegExp('Argument "dataOrField" is not a valid Document. Input object is deeper than 20 levels or contains a cycle.'));
+  });
+
+  it("doesn't traverse cyclic references", function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        set(
+          document('ref', {
+            referenceValue:
+              'projects/test-project/databases/(default)/documents/collectionId/documentId',
+            valueType: 'referenceValue',
+          })
+        )
+      );
+
+      callback(null, defaultWriteResult);
+    };
+
+    let ref = firestore.doc('collectionId/documentId');
+    ref.firestore.firestore = firestore;
+    return ref.set({ref});
   });
 });
 
