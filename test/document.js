@@ -568,7 +568,7 @@ describe('serialize document', function() {
     }, new RegExp('Argument "dataOrField" is not a valid Document. Input object is deeper than 20 levels or contains a cycle.'));
   });
 
-  it("doesn't traverse cyclic references", function() {
+  it('is able to write a document reference with cycles', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(
         request,
@@ -584,6 +584,9 @@ describe('serialize document', function() {
       callback(null, defaultWriteResult);
     };
 
+    // The Firestore Admin SDK adds a cyclic reference to the 'Firestore' type.
+    // We emulate this behavior in this test to verify that we can properly
+    // serialize types that contain references to a cyclic Firestore type.
     let ref = firestore.doc('collectionId/documentId');
     ref.firestore.firestore = firestore;
     return ref.set({ref});
