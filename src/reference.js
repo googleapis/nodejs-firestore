@@ -949,7 +949,7 @@ class QuerySnapshot {
 }
 
 /**
- * A Query refers to a Query which you can read ore stream from You can also
+ * A Query refers to a query which you can read or stream from. You can also
  * construct refined `Query` objects by adding filters and ordering.
  *
  * @class Query
