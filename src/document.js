@@ -1096,7 +1096,7 @@ function validateDocumentData(obj, usesPaths, depth) {
   }
 
   if (!isPlainObject(obj)) {
-    throw new Error('Input is not a JavaScript object.');
+    throw new Error('Input is not a plain JavaScript object.');
   }
 
   for (let prop in obj) {
@@ -1169,24 +1169,17 @@ function validateSetOptions(options) {
 }
 
 /*!
- * Verifies that 'obj' is a plain JavaScript object that does not have a custom
- * encoding format. Objects that pass this check are encoded as 'Maps' in
- * Firestore.
+ * Verifies that 'obj' is a plain JavaScript object that can be encoded as a
+ * 'Map' in Firestore.
  *
- * @param {*} The argument to verify.
+ * @param {*} input - The argument to verify.
  * @returns {boolean} 'true' if the input can be a treated as a plain object.
  */
-function isPlainObject(obj) {
+function isPlainObject(input) {
   return (
-    is.object(obj) &&
-    !is.array(obj) &&
-    !is.date(obj) &&
-    !is.instance(obj, Firestore) &&
-    !is.instance(obj, DocumentReference) &&
-    !is.instance(obj, ResourcePath) &&
-    !is.instance(obj, GeoPoint) &&
-    !is.instance(obj, Buffer) &&
-    !is.instance(obj, Uint8Array)
+    typeof input === 'object' &&
+    input !== null &&
+    Object.getPrototypeOf(input) === Object.prototype
   );
 }
 

@@ -388,22 +388,6 @@ describe('serialize document', function() {
     }, /Cannot encode type/);
   });
 
-  it("doesn't serialize inherited properties", function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(
-        request,
-        update(document('member', 'bar'), updateMask('member'))
-      );
-      callback(null, defaultWriteResult);
-    };
-
-    let base = {inherited: 'foo'};
-    let instance = Object.create(base);
-    instance.member = 'bar';
-
-    return firestore.doc('collectionId/documentId').update(instance);
-  });
-
   it('serializes date before 1970', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(
@@ -584,9 +568,11 @@ describe('serialize document', function() {
       callback(null, defaultWriteResult);
     };
 
-    // The Firestore Admin SDK adds a cyclic reference to the 'Firestore' type.
-    // We emulate this behavior in this test to verify that we can properly
-    // serialize types that contain references to a cyclic Firestore type.
+    // The Firestore Admin SDK adds a cyclic reference to the 'Firestore' member
+    // of 'DocumentReference'. We emulate this behavior in this test to verify
+    // that we can properly serialize DocumentReference instances, even if they
+    // have cyclic references (we shouldn't try to validate them beyond the
+    // instanceof check).
     let ref = firestore.doc('collectionId/documentId');
     ref.firestore.firestore = firestore;
     return ref.set({ref});
@@ -1059,13 +1045,13 @@ describe('set document', function() {
   it('requires an object', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set(null);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a ' + 'JavaScript object.'));
+    }, new RegExp('Argument "data" is not a valid Document. Input is not a plain JavaScript object.'));
   });
 
   it("doesn't accept arrays", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set([42]);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a ' + 'JavaScript object.'));
+    }, new RegExp('Argument "data" is not a valid Document. Input is not a plain JavaScript object.'));
   });
 });
 
@@ -1140,13 +1126,13 @@ describe('create document', function() {
   it('requires an object', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').create(null);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a ' + 'JavaScript object.'));
+    }, new RegExp('Argument "data" is not a valid Document. Input is not a plain JavaScript object.'));
   });
 
   it("doesn't accept arrays", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').create([42]);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a ' + 'JavaScript object.'));
+    }, new RegExp('Argument "data" is not a valid Document. Input is not a plain JavaScript object.'));
   });
 });
 
@@ -1499,13 +1485,13 @@ describe('update document', function() {
   it('accepts an object', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update(null);
-    }, new RegExp('Argument "dataOrField" is not a valid Document. Input is ' + 'not a JavaScript object.'));
+    }, new RegExp('Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object.'));
   });
 
   it("doesn't accept arrays", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update([42]);
-    }, new RegExp('Argument "dataOrField" is not a valid Document. Input is ' + 'not a JavaScript object.'));
+    }, new RegExp('Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object.'));
   });
 
   it('with field delete', function() {
