@@ -43,13 +43,6 @@ const FieldValue = require('./field-value');
  */
 let DocumentReference;
 
-/*!
- * Injected.
- *
- * @see {Firestore}
- */
-let Firestore;
-
 /*! Injected. */
 let validate;
 
@@ -1183,10 +1176,9 @@ function isPlainObject(input) {
   );
 }
 
-module.exports = (FirestoreType, DocumentRefType) => {
-  Firestore = FirestoreType;
+module.exports = DocumentRefType => {
   DocumentReference = DocumentRefType;
-  validate = require('./validate.js')({
+  validate = require('./validate')({
     FieldPath: FieldPath.validateFieldPath,
   });
   return {

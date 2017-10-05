@@ -25,10 +25,8 @@ const through = require('through2');
 const Firestore = require('../');
 const reference = require('../src/reference')(Firestore);
 const DocumentReference = reference.DocumentReference;
-const DocumentSnapshot = require('../src/document')(
-  Firestore,
-  DocumentReference
-).DocumentSnapshot;
+const DocumentSnapshot = require('../src/document')(DocumentReference)
+  .DocumentSnapshot;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});

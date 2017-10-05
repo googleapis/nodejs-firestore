@@ -23,7 +23,7 @@ const grpc = require('grpc');
 const Firestore = require('../');
 const DocumentReference = require('../src/reference')(Firestore)
   .DocumentReference;
-const document = require('../src/document')(Firestore, DocumentReference);
+const document = require('../src/document')(DocumentReference);
 const DocumentSnapshot = document.DocumentSnapshot;
 const GeoPoint = document.GeoPoint;
 const order = require('../src/order');
