@@ -1071,10 +1071,10 @@ Firestore.setLogFunction = function(logger) {
 let reference = require('./reference')(Firestore);
 CollectionReference = reference.CollectionReference;
 DocumentReference = reference.DocumentReference;
-let document = require('./document')(Firestore, DocumentReference);
+let document = require('./document')(DocumentReference);
 DocumentSnapshot = document.DocumentSnapshot;
 GeoPoint = document.GeoPoint;
-validate = require('./validate.js')({
+validate = require('./validate')({
   DocumentReference: reference.validateDocumentReference,
   ResourcePath: ResourcePath.validateResourcePath,
 });

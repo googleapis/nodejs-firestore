@@ -293,8 +293,8 @@ module.exports = FirestoreType => {
   let reference = require('./reference')(FirestoreType);
   DocumentReference = reference.DocumentReference;
   Query = reference.Query;
-  let document = require('./document.js')(FirestoreType, DocumentReference);
-  require('./validate.js')({
+  let document = require('./document')(DocumentReference);
+  require('./validate')({
     Document: document.validateDocumentData,
     DocumentReference: reference.validateDocumentReference,
     Precondition: document.validatePrecondition,

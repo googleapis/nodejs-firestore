@@ -50,7 +50,7 @@ describe('set() method', function() {
     assert.throws(function() {
       writeBatch.set(firestore.doc('sub/doc'));
     }, new RegExp(
-      'Argument "data" is not a valid Document. Input is not a ' +
+      'Argument "data" is not a valid Document. Input is not a plain ' +
         'JavaScript object.'
     ));
   });
@@ -100,7 +100,7 @@ describe('update() method', function() {
   it('requires object', function() {
     assert.throws(() => {
       writeBatch.update(firestore.doc('sub/doc'));
-    }, new RegExp('Argument "dataOrField" is not a valid Document. ' + 'Input is not a JavaScript object.'));
+    }, new RegExp('Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object.'));
   });
 
   it('accepts preconditions', function() {
@@ -131,7 +131,7 @@ describe('create() method', function() {
     assert.throws(function() {
       writeBatch.create(firestore.doc('sub/doc'));
     }, new RegExp(
-      'Argument "data" is not a valid Document. Input is not a ' +
+      'Argument "data" is not a valid Document. Input is not a plain ' +
         'JavaScript object.'
     ));
   });

@@ -25,10 +25,8 @@ const through = require('through2');
 const Firestore = require('../');
 const reference = require('../src/reference')(Firestore);
 const DocumentReference = reference.DocumentReference;
-const DocumentSnapshot = require('../src/document')(
-  Firestore,
-  DocumentReference
-).DocumentSnapshot;
+const DocumentSnapshot = require('../src/document')(DocumentReference)
+  .DocumentSnapshot;
 const ResourcePath = require('../src/path').ResourcePath;
 
 const DATABASE_ROOT = 'projects/test-project/databases/(default)';

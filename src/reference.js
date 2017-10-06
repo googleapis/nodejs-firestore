@@ -1889,15 +1889,15 @@ function validateDocumentReference(value) {
 
 module.exports = FirestoreType => {
   Firestore = FirestoreType;
-  let document = require('./document.js')(DocumentReference);
+  let document = require('./document')(DocumentReference);
   DocumentSnapshot = document.DocumentSnapshot;
-  Watch = require('./watch.js')(
+  Watch = require('./watch')(
     FirestoreType,
     DocumentChange,
     DocumentReference,
     DocumentSnapshot
   );
-  WriteBatch = require('./write-batch.js')(
+  WriteBatch = require('./write-batch')(
     FirestoreType,
     DocumentReference,
     validateDocumentReference

@@ -509,7 +509,7 @@ module.exports = (
   DocumentReferenceType,
   validateDocumentReference
 ) => {
-  let document = require('./document.js')(Firestore, DocumentReferenceType);
+  let document = require('./document')(DocumentReferenceType);
   Firestore = FirestoreType;
   DocumentMask = document.DocumentMask;
   DocumentSnapshot = document.DocumentSnapshot;
