@@ -1,6 +1,6 @@
 {
   "name": "@google-cloud/firestore",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "author": "Google Inc.",
   "description": "Firestore Client Library for Node.js",
   "contributors": [
