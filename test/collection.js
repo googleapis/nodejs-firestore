@@ -62,6 +62,10 @@ describe('Collection interface', function() {
       collectionRef.doc(undefined);
     }, /Argument "documentPath" is not a valid ResourcePath. Path is not a string./);
 
+    assert.throws(function() {
+      collectionRef.doc('doc/coll');
+    }, /Argument "documentPath" must point to a document\./);
+
     documentRef = collectionRef.doc('docId/colId/docId');
     assert.ok(is.instance(documentRef, DocumentReference));
   });
