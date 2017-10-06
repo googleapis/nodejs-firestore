@@ -1783,10 +1783,10 @@ class CollectionReference extends Query {
    * console.log(`Reference with auto-id: ${documentRefWithAutoId.path}`);
    */
   doc(documentPath) {
-    validate.isOptionalResourcePath('documentPath', documentPath);
-
-    if (!is.defined(documentPath)) {
+    if (arguments.length === 0) {
       documentPath = Firestore.autoId();
+    } else {
+      validate.isResourcePath('documentPath', documentPath);
     }
 
     let path = this._referencePath.append(documentPath);
