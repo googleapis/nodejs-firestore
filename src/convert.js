@@ -25,10 +25,13 @@ const validate = require('./validate')();
  * Converts an ISO 8601 or Protobuf JS 'timestampValue' into Protobuf JS.
  *
  * @private
- * @param {*} timestampValue - The value to convert.
- * @return {{nanos,seconds}} The value as expected by Protobuf JS.
+ * @param {*=} timestampValue - The value to convert.
+ * @return {{nanos,seconds}|undefined} The value as expected by Protobuf JS or
+ * undefined if no input was provided.
  */
 function convertTimestamp(timestampValue) {
+  let timestampProto = undefined;
+
   if (is.string(timestampValue)) {
     let date = new Date(timestampValue);
     let seconds = Math.floor(date.getTime() / 1000);
@@ -54,17 +57,19 @@ function convertTimestamp(timestampValue) {
       );
     }
 
-    return {
+    timestampProto = {
       seconds: seconds,
       nanos: nanos,
     };
-  } else {
+  } else if (is.defined(timestampValue)) {
     validate.isObject('timestampValue', timestampValue);
-    return {
+    timestampProto = {
       seconds: timestampValue.seconds || 0,
       nanos: timestampValue.nanos || 0,
     };
   }
+
+  return timestampProto;
 }
 
 /**
