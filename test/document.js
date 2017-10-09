@@ -194,7 +194,7 @@ function stream() {
   return stream;
 }
 
-const allSupportedTypesJson = document(
+const allSupportedTypesProtobufJs = document(
   'arrayValue',
   {
     valueType: 'arrayValue',
@@ -291,7 +291,87 @@ const allSupportedTypesJson = document(
   'bytesValue',
   {
     valueType: 'bytesValue',
-    bytesValue: Buffer.from([0x1, 0x2]),
+    bytesValue: Buffer.from('AQI=', 'base64'),
+  }
+);
+
+const allSupportedTypesApiJson = document(
+  'arrayValue',
+  {
+    arrayValue: {
+      values: [
+        {
+          stringValue: 'foo',
+        },
+        {
+          integerValue: 42,
+        },
+        {
+          stringValue: 'bar',
+        },
+      ],
+    },
+  },
+  'dateValue',
+  {
+    timestampValue: '1985-03-18T07:20:00.123000000Z',
+  },
+  'doubleValue',
+  {
+    doubleValue: 0.1,
+  },
+  'falseValue',
+  {
+    booleanValue: false,
+  },
+  'infinityValue',
+  {
+    doubleValue: Infinity,
+  },
+  'integerValue',
+  {
+    integerValue: 0,
+  },
+  'negativeInfinityValue',
+  {
+    doubleValue: -Infinity,
+  },
+  'nilValue',
+  {
+    nullValue: 'NULL_VALUE',
+  },
+  'objectValue',
+  {
+    mapValue: {
+      fields: {
+        foo: {
+          stringValue: 'bar',
+        },
+      },
+    },
+  },
+  'pathValue',
+  {
+    referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
+  },
+  'stringValue',
+  {
+    stringValue: 'a',
+  },
+  'trueValue',
+  {
+    booleanValue: true,
+  },
+  'geoPointValue',
+  {
+    geoPointValue: {
+      latitude: 50.1430847,
+      longitude: -122.947778,
+    },
+  },
+  'bytesValue',
+  {
+    bytesValue: 'AQI=',
   }
 );
 
@@ -373,7 +453,7 @@ describe('serialize document', function() {
 
   it('serializes all supported types', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, set(allSupportedTypesJson));
+      requestEquals(request, set(allSupportedTypesProtobufJs));
       callback(null, defaultWriteResult);
     };
 
@@ -586,29 +666,45 @@ describe('deserialize document', function() {
     firestore = createInstance();
   });
 
-  it('deserializes all supported types', function() {
+  function verifyAllSupportedTypes(actualObject) {
+    let expected = extend(true, {}, allSupportedTypesObject);
+    // Deep Equal doesn't support matching instances of DocumentRefs, so we
+    // compare them manually and remove them from the resulting object.
+    assert.equal(
+      actualObject.get('pathValue').formattedName,
+      expected.pathValue.formattedName
+    );
+    let data = actualObject.data();
+    delete data.pathValue;
+    delete expected.pathValue;
+    assert.deepEqual(data, expected);
+
+    // We specifically test the GeoPoint properties here to get to 100% test
+    // coverage.
+    assert.equal(50.1430847, data.geoPointValue.latitude);
+    assert.equal(-122.947778, data.geoPointValue.longitude);
+  }
+
+  it('deserializes all supported types from Protobuf JS', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
-      return stream(found(allSupportedTypesJson));
+      return stream(found(allSupportedTypesProtobufJs));
     };
 
     return firestore
       .doc('collectionId/documentId')
       .get()
-      .then(result => {
-        let expected = extend(true, {}, allSupportedTypesObject);
-        // Deep Equal doesn't support matching instances of DocumentRefs, so we
-        // compare them manually and remove them from the resulting object.
-        assert.equal(
-          result.get('pathValue').formattedName,
-          expected.pathValue.formattedName
-        );
-        let data = result.data();
-        delete data.pathValue;
-        delete expected.pathValue;
-        assert.deepEqual(data, expected);
-        assert.equal(50.1430847, data.geoPointValue.latitude);
-        assert.equal(-122.947778, data.geoPointValue.longitude);
-      });
+      .then(verifyAllSupportedTypes);
+  });
+
+  it('deserializes all supported types from API JSON', function() {
+    firestore.api.Firestore._batchGetDocuments = function() {
+      return stream(found(allSupportedTypesApiJson));
+    };
+
+    return firestore
+      .doc('collectionId/documentId')
+      .get()
+      .then(verifyAllSupportedTypes);
   });
 
   it('ignores intermittent stream failures', function() {

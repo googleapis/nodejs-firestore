@@ -20,6 +20,7 @@ const assert = require('assert');
 const is = require('is');
 
 const path = require('./path');
+const convertTimestamp = require('./convert').convertTimestamp;
 
 /*!
  * @see {ResourcePath}
@@ -327,7 +328,7 @@ class DocumentSnapshot {
   }
 
   /**
-   * Returns the underlying Firestore 'Fields' Protobuf.
+   * Returns the underlying Firestore 'Fields' Protobuf in Protobuf JS format.
    *
    * @private
    * @returns {Object} The Protobuf encoded document.
@@ -373,7 +374,7 @@ class DocumentSnapshot {
   }
 
   /**
-   * Retrieves the field specified by 'fieldPath' in its Protobuf
+   * Retrieves the field specified by 'fieldPath' in its Protobuf JS
    * representation.
    *
    * @private
@@ -1053,14 +1054,11 @@ class Precondition {
 
       if (isNaN(seconds) || isNaN(nanos)) {
         throw new Error(
-          'Specify a valid ISO 8601 timestamp for' + ' "lastUpdateTime".'
+          'Specify a valid ISO 8601 timestamp for "lastUpdateTime".'
         );
       }
 
-      proto.updateTime = {
-        seconds: seconds,
-        nanos: nanos,
-      };
+      proto.updateTime = convertTimestamp(this._lastUpdateTime);
     } else if (is.defined(this._exists)) {
       proto.exists = this._exists;
     }

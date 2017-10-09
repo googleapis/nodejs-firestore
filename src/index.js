@@ -28,6 +28,7 @@ const v1beta1 = require('./v1beta1');
 const libVersion = require('../package.json').version;
 
 const path = require('./path');
+const convert = require('./convert');
 
 /*!
  * DO NOT REMOVE THE FOLLOWING NAMESPACE DEFINITIONS
@@ -59,6 +60,9 @@ const FieldPath = path.FieldPath;
  * @see FieldValue
  */
 const FieldValue = require('./field-value');
+
+const convertTimestamp = convert.convertTimestamp;
+const convertDocument = convert.convertDocument;
 
 /*!
  * @see CollectionReference
@@ -351,21 +355,24 @@ class Firestore extends commonGrpc.Service {
         this,
         ResourcePath.fromSlashSeparatedString(documentOrName)
       );
-      document.readTime = DocumentSnapshot.toISOTime(readTime);
     } else {
       document.ref = new DocumentReference(
         this,
         ResourcePath.fromSlashSeparatedString(documentOrName.name)
       );
-      document.fieldsProto = documentOrName.fields || {};
+      document.fieldsProto = documentOrName.fields
+        ? convertDocument(documentOrName.fields)
+        : {};
       document.createTime = DocumentSnapshot.toISOTime(
-        documentOrName.createTime
+        convertTimestamp(documentOrName.createTime)
       );
       document.updateTime = DocumentSnapshot.toISOTime(
-        documentOrName.updateTime
+        convertTimestamp(documentOrName.updateTime)
       );
-      document.readTime = DocumentSnapshot.toISOTime(readTime);
     }
+
+    document.readTime = DocumentSnapshot.toISOTime(convertTimestamp(readTime));
+
     return document.build();
   }
 

@@ -24,6 +24,7 @@ const GrpcService = require('@google-cloud/common').GrpcService;
 const proxyquire = require('proxyquire');
 const util = require('@google-cloud/common').util;
 const is = require('is');
+const Buffer = require('safe-buffer').Buffer;
 const through = require('through2');
 
 const Firestore = require('../');
@@ -43,13 +44,18 @@ function createInstance() {
   });
 }
 
+function document(name, fields) {
+  return {
+    name: `${DATABASE_ROOT}/documents/collectionId/${name}`,
+    fields: fields,
+    createTime: {seconds: 1, nanos: 2},
+    updateTime: {seconds: 3, nanos: 4},
+  };
+}
+
 function found(name) {
   return {
-    found: {
-      name: `${DATABASE_ROOT}/documents/collectionId/${name}`,
-      createTime: {seconds: 1, nanos: 2},
-      updateTime: {seconds: 3, nanos: 4},
-    },
+    found: document(name),
     readTime: {seconds: 5, nanos: 6},
   };
 }
@@ -288,6 +294,96 @@ describe('instantiation', function() {
     let calledWith = firestore.calledWith_[0];
 
     assert.equal(calledWith.service, 'firestore');
+  });
+});
+
+describe('snapshot_() method', function() {
+  const bytesData = Buffer.from('AQI=', 'base64');
+  let firestore;
+
+  beforeEach(function() {
+    firestore = createInstance();
+  });
+
+  it('handles ProtobufJS', function() {
+    let doc = firestore.snapshot_(
+      document('doc', {
+        foo: {valueType: 'bytesValue', bytesValue: bytesData},
+      }),
+      {seconds: 5, nanos: 6}
+    );
+
+    assert.equal(true, doc.exists);
+    assert.deepEqual({foo: bytesData}, doc.data());
+    assert.equal('1970-01-01T00:00:01.000000002Z', doc.createTime);
+    assert.equal('1970-01-01T00:00:03.000000004Z', doc.updateTime);
+    assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
+  });
+
+  it('handles API JSON', function() {
+    let doc = firestore.snapshot_(
+      {
+        name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+        fields: {foo: {bytesValue: 'AQI='}},
+        createTime: '1970-01-01T00:00:01.000000002Z',
+        updateTime: '1970-01-01T00:00:03.000000004Z',
+      },
+      '1970-01-01T00:00:05.000000006Z'
+    );
+
+    assert.equal(true, doc.exists);
+    assert.deepEqual({foo: bytesData}, doc.data());
+    assert.equal('1970-01-01T00:00:01.000000002Z', doc.createTime);
+    assert.equal('1970-01-01T00:00:03.000000004Z', doc.updateTime);
+    assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
+  });
+
+  it('handles invalid API JSON', function() {
+    assert.throws(() => {
+      firestore.snapshot_(
+        {
+          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+          fields: {foo: {}},
+          createTime: '1970-01-01T00:00:01.000000002Z',
+          updateTime: '1970-01-01T00:00:03.000000004Z',
+        },
+        '1970-01-01T00:00:05.000000006Z'
+      );
+    }, /Unable to infer type value fom '{}'./);
+
+    assert.throws(() => {
+      firestore.snapshot_(
+        {
+          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+          fields: {foo: {stringValue: 'bar', integerValue: 42}},
+          createTime: '1970-01-01T00:00:01.000000002Z',
+          updateTime: '1970-01-01T00:00:03.000000004Z',
+        },
+        '1970-01-01T00:00:05.000000006Z'
+      );
+    }, /Unable to infer type value fom '{"stringValue":"bar","integerValue":42}'./);
+
+    assert.throws(() => {
+      firestore.snapshot_(
+        {
+          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+          fields: {foo: {stringValue: 'bar'}},
+          createTime: '1970-01-01T00:00:01.NaNZ',
+          updateTime: '1970-01-01T00:00:03.000000004Z',
+        },
+        '1970-01-01T00:00:05.000000006Z'
+      );
+    }, /Specify a valid ISO 8601 timestamp for "lastUpdateTime"./);
+  });
+
+  it('handles missing document ', function() {
+    let doc = firestore.snapshot_(
+      `${DATABASE_ROOT}/documents/collectionId/doc`,
+      '1970-01-01T00:00:05.000000006Z'
+    );
+
+    assert.equal(false, doc.exists);
+    assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
   });
 });
 
