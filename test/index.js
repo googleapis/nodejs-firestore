@@ -31,6 +31,7 @@ const Firestore = require('../');
 const reference = require('../src/reference')(Firestore);
 const DocumentReference = reference.DocumentReference;
 const CollectionReference = reference.CollectionReference;
+const ResourcePath = require('../src/path').ResourcePath;
 
 const DATABASE_ROOT = 'projects/test-project/databases/(default)';
 
@@ -301,6 +302,198 @@ describe('snapshot_() method', function() {
   const bytesData = Buffer.from('AQI=', 'base64');
   let firestore;
 
+  const allSupportedTypesProtobufJs = document('documentId', {
+    arrayValue: {
+      valueType: 'arrayValue',
+      arrayValue: {
+        values: [
+          {
+            valueType: 'stringValue',
+            stringValue: 'foo',
+          },
+          {
+            valueType: 'integerValue',
+            integerValue: 42,
+          },
+          {
+            valueType: 'stringValue',
+            stringValue: 'bar',
+          },
+        ],
+      },
+    },
+    dateValue: {
+      valueType: 'timestampValue',
+      timestampValue: {
+        nanos: 123000000,
+        seconds: 479978400,
+      },
+    },
+    doubleValue: {
+      valueType: 'doubleValue',
+      doubleValue: 0.1,
+    },
+    falseValue: {
+      valueType: 'booleanValue',
+      booleanValue: false,
+    },
+    infinityValue: {
+      valueType: 'doubleValue',
+      doubleValue: Infinity,
+    },
+    integerValue: {
+      valueType: 'integerValue',
+      integerValue: 0,
+    },
+    negativeInfinityValue: {
+      valueType: 'doubleValue',
+      doubleValue: -Infinity,
+    },
+    nilValue: {
+      valueType: 'nullValue',
+      nullValue: 'NULL_VALUE',
+    },
+    objectValue: {
+      valueType: 'mapValue',
+      mapValue: {
+        fields: {
+          foo: {
+            valueType: 'stringValue',
+            stringValue: 'bar',
+          },
+        },
+      },
+    },
+    pathValue: {
+      valueType: 'referenceValue',
+      referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
+    },
+    stringValue: {
+      valueType: 'stringValue',
+      stringValue: 'a',
+    },
+    trueValue: {
+      valueType: 'booleanValue',
+      booleanValue: true,
+    },
+    geoPointValue: {
+      valueType: 'geoPointValue',
+      geoPointValue: {
+        latitude: 50.1430847,
+        longitude: -122.947778,
+      },
+    },
+    bytesValue: {
+      valueType: 'bytesValue',
+      bytesValue: Buffer.from('AQI=', 'base64'),
+    },
+  });
+
+  const allSupportedTypesJson = document('documentId', {
+    arrayValue: {
+      arrayValue: {
+        values: [
+          {
+            stringValue: 'foo',
+          },
+          {
+            integerValue: 42,
+          },
+          {
+            stringValue: 'bar',
+          },
+        ],
+      },
+    },
+    dateValue: {
+      timestampValue: '1985-03-18T07:20:00.123000000Z',
+    },
+    doubleValue: {
+      doubleValue: 0.1,
+    },
+    falseValue: {
+      booleanValue: false,
+    },
+    infinityValue: {
+      doubleValue: Infinity,
+    },
+    integerValue: {
+      integerValue: 0,
+    },
+    negativeInfinityValue: {
+      doubleValue: -Infinity,
+    },
+    nilValue: {
+      nullValue: 'NULL_VALUE',
+    },
+    objectValue: {
+      mapValue: {
+        fields: {
+          foo: {
+            stringValue: 'bar',
+          },
+        },
+      },
+    },
+    pathValue: {
+      referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
+    },
+    stringValue: {
+      stringValue: 'a',
+    },
+    trueValue: {
+      booleanValue: true,
+    },
+    geoPointValue: {
+      geoPointValue: {
+        latitude: 50.1430847,
+        longitude: -122.947778,
+      },
+    },
+    bytesValue: {
+      bytesValue: 'AQI=',
+    },
+  });
+
+  const allSupportedTypesObject = {
+    stringValue: 'a',
+    trueValue: true,
+    falseValue: false,
+    integerValue: 0,
+    doubleValue: 0.1,
+    infinityValue: Infinity,
+    negativeInfinityValue: -Infinity,
+    objectValue: {foo: 'bar'},
+    dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
+    pathValue: new DocumentReference(
+      {formattedName: DATABASE_ROOT},
+      new ResourcePath('test-project', '(default)', 'collection', 'document')
+    ),
+    arrayValue: ['foo', 42, 'bar'],
+    nilValue: null,
+    geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
+    bytesValue: Buffer.from([0x1, 0x2]),
+  };
+
+  function verifyAllSupportedTypes(actualObject) {
+    let expected = extend(true, {}, allSupportedTypesObject);
+    // Deep Equal doesn't support matching instances of DocumentRefs, so we
+    // compare them manually and remove them from the resulting object.
+    assert.equal(
+      actualObject.get('pathValue').formattedName,
+      expected.pathValue.formattedName
+    );
+    let data = actualObject.data();
+    delete data.pathValue;
+    delete expected.pathValue;
+    assert.deepEqual(data, expected);
+
+    // We specifically test the GeoPoint properties to ensure 100% test
+    // coverage.
+    assert.equal(50.1430847, data.geoPointValue.latitude);
+    assert.equal(-122.947778, data.geoPointValue.longitude);
+  }
+
   beforeEach(function() {
     firestore = createInstance();
   });
@@ -320,7 +513,7 @@ describe('snapshot_() method', function() {
     assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
   });
 
-  it('handles Proto3 JSON', function() {
+  it('handles Proto3 JSON together with existing types', function() {
     // Google Cloud Functions must be able to call snapshot_() with Proto3 JSON
     // data.
     let doc = firestore.snapshot_(
@@ -329,7 +522,10 @@ describe('snapshot_() method', function() {
         fields: {
           a: {bytesValue: 'AQI='},
           b: {timestampValue: '1985-03-18T07:20:00.000Z'},
-          c: {stringValue: 'foobar'},
+          c: {
+            valueType: 'bytesValue',
+            bytesValue: Buffer.from('AQI=', 'base64'),
+          },
         },
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
@@ -340,12 +536,35 @@ describe('snapshot_() method', function() {
 
     assert.equal(true, doc.exists);
     assert.deepEqual(
-      {a: bytesData, b: new Date('1985-03-18T07:20:00.000Z'), c: 'foobar'},
+      {
+        a: bytesData,
+        b: new Date('1985-03-18T07:20:00.000Z'),
+        c: bytesData,
+      },
       doc.data()
     );
     assert.equal('1970-01-01T00:00:01.002000000Z', doc.createTime);
     assert.equal('1970-01-01T00:00:03.000004000Z', doc.updateTime);
     assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
+  });
+
+  it('deserializes all supported types from Protobuf JS', function() {
+    let doc = firestore.snapshot_(allSupportedTypesProtobufJs, {
+      seconds: 5,
+      nanos: 6,
+    });
+
+    verifyAllSupportedTypes(doc);
+  });
+
+  it('deserializes all supported types from Proto3 JSON', function() {
+    let doc = firestore.snapshot_(
+      allSupportedTypesJson,
+      '1970-01-01T00:00:05.000000006Z',
+      'json'
+    );
+
+    verifyAllSupportedTypes(doc);
   });
 
   it('handles invalid Proto3 JSON', function() {
@@ -398,6 +617,17 @@ describe('snapshot_() method', function() {
 
     assert.equal(false, doc.exists);
     assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
+  });
+
+  it('handles invalid encoding format ', function() {
+    assert.throws(() => {
+      firestore.snapshot_(
+        `${DATABASE_ROOT}/documents/collectionId/doc`,
+        '1970-01-01T00:00:05.000000006Z',
+        'ascii'
+      );
+    }),
+      /Unsupported encoding format. Expected 'json' or 'protobufJS', but was 'ascii'./;
   });
 });
 

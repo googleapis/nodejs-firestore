@@ -363,7 +363,7 @@ class Firestore extends commonGrpc.Service {
     } else {
       throw new Error(
         `Unsupported encoding format. Expected 'json' or 'protobufJS', ` +
-          `but was ${encoding}.`
+          `but was '${encoding}'.`
       );
     }
 
