@@ -21,8 +21,20 @@ const is = require('is');
 
 const validate = require('./validate')();
 
+/*!
+ * @module firestore/convert
+ * @private
+ *
+ * This module contains utility functions to convert
+ * `firestore.v1beta1.Documents` from Proto3 JSON to their equivalent
+ * representation in Protobuf JS. Protobuf JS is the only encoding supported by
+ * this client, and dependencies that use Proto3 JSON (such as the Google Cloud
+ * Functions SDK) are supported through this conversion and its usage in
+ * {@see Firestore#snapshot_}.
+ */
+
 /**
- * Converts an ISO 8601 or Protobuf JS 'timestampValue' into Protobuf JS.
+ * Converts an ISO 8601 or google.protobuf.Timestamp proto into Protobuf JS.
  *
  * @private
  * @param {*=} timestampValue - The value to convert.
@@ -51,7 +63,8 @@ function convertTimestamp(timestampValue) {
 
     if (isNaN(seconds) || isNaN(nanos)) {
       // This error should only ever be thrown if the end-user specifies an
-      // invalid 'lastUpdateTime'.
+      // invalid 'lastUpdateTime' in a precondition (hence we use
+      // 'lastUpdateTime' here instead of the actual argument name).
       throw new Error(
         'Specify a valid ISO 8601 timestamp for "lastUpdateTime".'
       );
@@ -73,7 +86,7 @@ function convertTimestamp(timestampValue) {
 }
 
 /**
- * Converts an API JSON or Protobuf JS 'bytesValue' field into Protobuf JS.
+ * Converts a Proto3 JSON 'bytesValue' field into Protobuf JS.
  *
  * @private
  * @param {*} bytesValue - The value to convert.
@@ -88,10 +101,10 @@ function convertBytes(bytesValue) {
 }
 
 /**
- * Detects 'valueType' from an API JSON or Protobuf JS 'Field' proto.
+ * Detects 'valueType' from a Proto3 JSON `firestore.v1beta1.Value` proto.
  *
  * @private
- * @param {object} proto - The 'field' proto.
+ * @param {object} proto - The `firestore.v1beta1.Value` proto.
  * @return {string} - The string value for 'valueType'.
  */
 function detectValueType(proto) {
@@ -145,12 +158,13 @@ function detectValueType(proto) {
 }
 
 /**
- * Converts an API JSON or Protobuf JS 'Field' proto into Protobuf JS.
+ * Converts a `firestore.v1beta1.Value` in Proto3 JSON encoding into the
+ * Protobuf JS format expected by this client.
  *
  * @private
- * @param {object} fieldValue - The 'Field' value in API JSON or Protobuf JS
+ * @param {object} fieldValue - The `firestore.v1beta1.Value` in Proto3 JSON
  * format.
- * @return The 'Field' proto in Protobuf JS format.
+ * @return {object} The `firestore.v1beta1.Value` in Protobuf JS format.
  */
 function convertValue(fieldValue) {
   let valueType = detectValueType(fieldValue);
@@ -196,13 +210,16 @@ function convertValue(fieldValue) {
       return Object.assign({valueType}, fieldValue);
   }
 }
+
 /**
- * Converts an API JSON or Protobuf JS 'Document' into Protobuf JS. This
- * conversion creates a copy of underlying document.
+ * Converts a `firestore.v1beta1.Document` in Proto3 JSON encoding into the
+ * Protobuf JS format expected by this client. This conversion creates a copy of
+ * the underlying document.
  *
  * @private
- * @param {object} document - The 'Document' in API JSON or Protobuf JS format.
- * @return {object} The 'Document' in Protobuf JS format.
+ * @param {object} document - The `firestore.v1beta1.Document` in Proto3 JSON
+ * format.
+ * @return {object} The `firestore.v1beta1.Document` in Protobuf JS format.
  */
 function convertDocument(document) {
   let result = {};
@@ -217,6 +234,6 @@ function convertDocument(document) {
 }
 
 module.exports = {
-  convertDocument,
-  convertTimestamp,
+  documentFromJson: convertDocument,
+  timestampFromJson: convertTimestamp,
 };

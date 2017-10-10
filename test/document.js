@@ -295,86 +295,6 @@ const allSupportedTypesProtobufJs = document(
   }
 );
 
-const allSupportedTypesApiJson = document(
-  'arrayValue',
-  {
-    arrayValue: {
-      values: [
-        {
-          stringValue: 'foo',
-        },
-        {
-          integerValue: 42,
-        },
-        {
-          stringValue: 'bar',
-        },
-      ],
-    },
-  },
-  'dateValue',
-  {
-    timestampValue: '1985-03-18T07:20:00.123000000Z',
-  },
-  'doubleValue',
-  {
-    doubleValue: 0.1,
-  },
-  'falseValue',
-  {
-    booleanValue: false,
-  },
-  'infinityValue',
-  {
-    doubleValue: Infinity,
-  },
-  'integerValue',
-  {
-    integerValue: 0,
-  },
-  'negativeInfinityValue',
-  {
-    doubleValue: -Infinity,
-  },
-  'nilValue',
-  {
-    nullValue: 'NULL_VALUE',
-  },
-  'objectValue',
-  {
-    mapValue: {
-      fields: {
-        foo: {
-          stringValue: 'bar',
-        },
-      },
-    },
-  },
-  'pathValue',
-  {
-    referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
-  },
-  'stringValue',
-  {
-    stringValue: 'a',
-  },
-  'trueValue',
-  {
-    booleanValue: true,
-  },
-  'geoPointValue',
-  {
-    geoPointValue: {
-      latitude: 50.1430847,
-      longitude: -122.947778,
-    },
-  },
-  'bytesValue',
-  {
-    bytesValue: 'AQI=',
-  }
-);
-
 const allSupportedTypesObject = {
   stringValue: 'a',
   trueValue: true,
@@ -679,7 +599,7 @@ describe('deserialize document', function() {
     delete expected.pathValue;
     assert.deepEqual(data, expected);
 
-    // We specifically test the GeoPoint properties here to get to 100% test
+    // We specifically test the GeoPoint properties here to ensure 100% test
     // coverage.
     assert.equal(50.1430847, data.geoPointValue.latitude);
     assert.equal(-122.947778, data.geoPointValue.longitude);
@@ -688,17 +608,6 @@ describe('deserialize document', function() {
   it('deserializes all supported types from Protobuf JS', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
       return stream(found(allSupportedTypesProtobufJs));
-    };
-
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(verifyAllSupportedTypes);
-  });
-
-  it('deserializes all supported types from API JSON', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
-      return stream(found(allSupportedTypesApiJson));
     };
 
     return firestore

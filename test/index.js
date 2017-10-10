@@ -320,25 +320,35 @@ describe('snapshot_() method', function() {
     assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
   });
 
-  it('handles API JSON', function() {
+  it('handles Proto3 JSON', function() {
+    // Google Cloud Functions must be able to call snapshot_() with Proto3 JSON
+    // data.
     let doc = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc`,
-        fields: {foo: {bytesValue: 'AQI='}},
-        createTime: '1970-01-01T00:00:01.000000002Z',
-        updateTime: '1970-01-01T00:00:03.000000004Z',
+        fields: {
+          a: {bytesValue: 'AQI='},
+          b: {timestampValue: '1985-03-18T07:20:00.000Z'},
+          c: {stringValue: 'foobar'},
+        },
+        createTime: '1970-01-01T00:00:01.002Z',
+        updateTime: '1970-01-01T00:00:03.000004Z',
       },
-      '1970-01-01T00:00:05.000000006Z'
+      '1970-01-01T00:00:05.000000006Z',
+      'json'
     );
 
     assert.equal(true, doc.exists);
-    assert.deepEqual({foo: bytesData}, doc.data());
-    assert.equal('1970-01-01T00:00:01.000000002Z', doc.createTime);
-    assert.equal('1970-01-01T00:00:03.000000004Z', doc.updateTime);
+    assert.deepEqual(
+      {a: bytesData, b: new Date('1985-03-18T07:20:00.000Z'), c: 'foobar'},
+      doc.data()
+    );
+    assert.equal('1970-01-01T00:00:01.002000000Z', doc.createTime);
+    assert.equal('1970-01-01T00:00:03.000004000Z', doc.updateTime);
     assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
   });
 
-  it('handles invalid API JSON', function() {
+  it('handles invalid Proto3 JSON', function() {
     assert.throws(() => {
       firestore.snapshot_(
         {
@@ -347,7 +357,8 @@ describe('snapshot_() method', function() {
           createTime: '1970-01-01T00:00:01.000000002Z',
           updateTime: '1970-01-01T00:00:03.000000004Z',
         },
-        '1970-01-01T00:00:05.000000006Z'
+        '1970-01-01T00:00:05.000000006Z',
+        'json'
       );
     }, /Unable to infer type value fom '{}'./);
 
@@ -359,7 +370,8 @@ describe('snapshot_() method', function() {
           createTime: '1970-01-01T00:00:01.000000002Z',
           updateTime: '1970-01-01T00:00:03.000000004Z',
         },
-        '1970-01-01T00:00:05.000000006Z'
+        '1970-01-01T00:00:05.000000006Z',
+        'json'
       );
     }, /Unable to infer type value fom '{"stringValue":"bar","integerValue":42}'./);
 
@@ -371,7 +383,8 @@ describe('snapshot_() method', function() {
           createTime: '1970-01-01T00:00:01.NaNZ',
           updateTime: '1970-01-01T00:00:03.000000004Z',
         },
-        '1970-01-01T00:00:05.000000006Z'
+        '1970-01-01T00:00:05.000000006Z',
+        'json'
       );
     }, /Specify a valid ISO 8601 timestamp for "lastUpdateTime"./);
   });
@@ -379,7 +392,8 @@ describe('snapshot_() method', function() {
   it('handles missing document ', function() {
     let doc = firestore.snapshot_(
       `${DATABASE_ROOT}/documents/collectionId/doc`,
-      '1970-01-01T00:00:05.000000006Z'
+      '1970-01-01T00:00:05.000000006Z',
+      'json'
     );
 
     assert.equal(false, doc.exists);

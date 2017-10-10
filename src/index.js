@@ -61,9 +61,6 @@ const FieldPath = path.FieldPath;
  */
 const FieldValue = require('./field-value');
 
-const convertTimestamp = convert.convertTimestamp;
-const convertDocument = convert.convertDocument;
-
 /*!
  * @see CollectionReference
  */
@@ -336,19 +333,41 @@ class Firestore extends commonGrpc.Service {
 
   /**
    * Creates a [DocumentSnapshot]{@link DocumentSnapshot} from a
-   * `Document` proto (or from a resource name for missing documents).
+   * `firestore.v1beta1lDocument` proto (or from a resource name for missing
+   * documents).
    *
-   * This API is used by Google Cloud Functions.
+   * This API is used by Google Cloud Functions and can be called with both
+   * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
    * @param {object} documentOrName - The Firestore `Document` proto or the
    * resource name of a missing document.
    * @param {object=} readTime - A `Timestamp` proto indicating the time this
    * document was read.
+   * @param {string=} encoding - One of 'json' or 'protobufJS'. Applies to both
+   * the 'document' Proto and 'readTime'. Defaults to 'protobufJS'.
    * @returns {DocumentSnapshot} - A DocumentSnapshot.
    */
-  snapshot_(documentOrName, readTime) {
-    let document = new DocumentSnapshot.Builder();
+  snapshot_(documentOrName, readTime, encoding) {
+    let convertTimestamp;
+    let convertDocument;
+
+    if (!is.defined(encoding) || encoding === 'protobufJS') {
+      convertTimestamp = data => data;
+      convertDocument = data => data;
+    } else if (encoding === 'json') {
+      // Google Cloud Functions calls us with Proto3 JSON format data, which we
+      // must convert to Protobuf JS.
+      convertTimestamp = convert.timestampFromJson;
+      convertDocument = convert.documentFromJson;
+    } else {
+      throw new Error(
+        `Unsupported encoding format. Expected 'json' or 'protobufJS', ` +
+          `but was ${encoding}.`
+      );
+    }
+
+    const document = new DocumentSnapshot.Builder();
 
     if (is.string(documentOrName)) {
       document.ref = new DocumentReference(
