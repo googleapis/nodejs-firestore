@@ -38,10 +38,12 @@ const validate = require('./validate')();
  *
  * @private
  * @param {*=} timestampValue - The value to convert.
+ * @param {string=} argumentName - The argument name to use in the error message
+ * if the conversion fails. If omitted, 'timestampValue' is used.
  * @return {{nanos,seconds}|undefined} The value as expected by Protobuf JS or
  * undefined if no input was provided.
  */
-function convertTimestamp(timestampValue) {
+function convertTimestamp(timestampValue, argumentName) {
   let timestampProto = undefined;
 
   if (is.string(timestampValue)) {
@@ -62,11 +64,9 @@ function convertTimestamp(timestampValue) {
     }
 
     if (isNaN(seconds) || isNaN(nanos)) {
-      // This error should only ever be thrown if the end-user specifies an
-      // invalid 'lastUpdateTime' in a precondition (hence we use
-      // 'lastUpdateTime' here instead of the actual argument name).
+      argumentName = argumentName || 'timestampValue';
       throw new Error(
-        'Specify a valid ISO 8601 timestamp for "lastUpdateTime".'
+        `Specify a valid ISO 8601 timestamp for "${argumentName}".`
       );
     }
 

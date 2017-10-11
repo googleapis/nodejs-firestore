@@ -333,7 +333,7 @@ class Firestore extends commonGrpc.Service {
 
   /**
    * Creates a [DocumentSnapshot]{@link DocumentSnapshot} from a
-   * `firestore.v1beta1lDocument` proto (or from a resource name for missing
+   * `firestore.v1beta1.Document` proto (or from a resource name for missing
    * documents).
    *
    * This API is used by Google Cloud Functions and can be called with both
@@ -383,14 +383,16 @@ class Firestore extends commonGrpc.Service {
         ? convertDocument(documentOrName.fields)
         : {};
       document.createTime = DocumentSnapshot.toISOTime(
-        convertTimestamp(documentOrName.createTime)
+        convertTimestamp(documentOrName.createTime, 'documentOrName.createTime')
       );
       document.updateTime = DocumentSnapshot.toISOTime(
-        convertTimestamp(documentOrName.updateTime)
+        convertTimestamp(documentOrName.updateTime, 'documentOrName.updateTime')
       );
     }
 
-    document.readTime = DocumentSnapshot.toISOTime(convertTimestamp(readTime));
+    document.readTime = DocumentSnapshot.toISOTime(
+      convertTimestamp(readTime, 'readTime')
+    );
 
     return document.build();
   }

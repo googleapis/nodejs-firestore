@@ -605,7 +605,7 @@ describe('snapshot_() method', function() {
         '1970-01-01T00:00:05.000000006Z',
         'json'
       );
-    }, /Specify a valid ISO 8601 timestamp for "lastUpdateTime"./);
+    }, /Specify a valid ISO 8601 timestamp for "documentOrName.createTime"./);
   });
 
   it('handles missing document ', function() {

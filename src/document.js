@@ -1033,7 +1033,10 @@ class Precondition {
     let proto = {};
 
     if (is.defined(this._lastUpdateTime)) {
-      proto.updateTime = timestampFromJson(this._lastUpdateTime);
+      proto.updateTime = timestampFromJson(
+        this._lastUpdateTime,
+        'lastUpdateTime'
+      );
     } else if (is.defined(this._exists)) {
       proto.exists = this._exists;
     }
