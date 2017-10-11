@@ -52,10 +52,18 @@ describe('Collection interface', function() {
 
     assert.throws(() => {
       collectionRef.doc(false);
-    }, new RegExp('Argument "documentPath" is not a valid ResourcePath. ' + 'Path is not a string.'));
+    }, /Argument "documentPath" is not a valid ResourcePath. Path is not a string./);
 
     assert.throws(() => {
-      collectionRef.doc('doc/col');
+      collectionRef.doc(null);
+    }, /Argument "documentPath" is not a valid ResourcePath. Path is not a string./);
+
+    assert.throws(() => {
+      collectionRef.doc(undefined);
+    }, /Argument "documentPath" is not a valid ResourcePath. Path is not a string./);
+
+    assert.throws(function() {
+      collectionRef.doc('doc/coll');
     }, /Argument "documentPath" must point to a document\./);
 
     documentRef = collectionRef.doc('docId/colId/docId');
