@@ -28,6 +28,7 @@ const v1beta1 = require('./v1beta1');
 const libVersion = require('../package.json').version;
 
 const path = require('./path');
+const convert = require('./convert');
 
 /*!
  * DO NOT REMOVE THE FOLLOWING NAMESPACE DEFINITIONS
@@ -332,40 +333,67 @@ class Firestore extends commonGrpc.Service {
 
   /**
    * Creates a [DocumentSnapshot]{@link DocumentSnapshot} from a
-   * `Document` proto (or from a resource name for missing documents).
+   * `firestore.v1beta1.Document` proto (or from a resource name for missing
+   * documents).
    *
-   * This API is used by Google Cloud Functions.
+   * This API is used by Google Cloud Functions and can be called with both
+   * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
    * @param {object} documentOrName - The Firestore `Document` proto or the
    * resource name of a missing document.
    * @param {object=} readTime - A `Timestamp` proto indicating the time this
    * document was read.
+   * @param {string=} encoding - One of 'json' or 'protobufJS'. Applies to both
+   * the 'document' Proto and 'readTime'. Defaults to 'protobufJS'.
    * @returns {DocumentSnapshot} - A DocumentSnapshot.
    */
-  snapshot_(documentOrName, readTime) {
-    let document = new DocumentSnapshot.Builder();
+  snapshot_(documentOrName, readTime, encoding) {
+    let convertTimestamp;
+    let convertDocument;
+
+    if (!is.defined(encoding) || encoding === 'protobufJS') {
+      convertTimestamp = data => data;
+      convertDocument = data => data;
+    } else if (encoding === 'json') {
+      // Google Cloud Functions calls us with Proto3 JSON format data, which we
+      // must convert to Protobuf JS.
+      convertTimestamp = convert.timestampFromJson;
+      convertDocument = convert.documentFromJson;
+    } else {
+      throw new Error(
+        `Unsupported encoding format. Expected 'json' or 'protobufJS', ` +
+          `but was '${encoding}'.`
+      );
+    }
+
+    const document = new DocumentSnapshot.Builder();
 
     if (is.string(documentOrName)) {
       document.ref = new DocumentReference(
         this,
         ResourcePath.fromSlashSeparatedString(documentOrName)
       );
-      document.readTime = DocumentSnapshot.toISOTime(readTime);
     } else {
       document.ref = new DocumentReference(
         this,
         ResourcePath.fromSlashSeparatedString(documentOrName.name)
       );
-      document.fieldsProto = documentOrName.fields || {};
+      document.fieldsProto = documentOrName.fields
+        ? convertDocument(documentOrName.fields)
+        : {};
       document.createTime = DocumentSnapshot.toISOTime(
-        documentOrName.createTime
+        convertTimestamp(documentOrName.createTime, 'documentOrName.createTime')
       );
       document.updateTime = DocumentSnapshot.toISOTime(
-        documentOrName.updateTime
+        convertTimestamp(documentOrName.updateTime, 'documentOrName.updateTime')
       );
-      document.readTime = DocumentSnapshot.toISOTime(readTime);
     }
+
+    document.readTime = DocumentSnapshot.toISOTime(
+      convertTimestamp(readTime, 'readTime')
+    );
+
     return document.build();
   }
 

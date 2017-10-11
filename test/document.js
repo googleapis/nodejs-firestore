@@ -24,9 +24,6 @@ const is = require('is');
 const through = require('through2');
 
 const Firestore = require('../');
-const reference = require('../src/reference')(Firestore);
-const DocumentReference = reference.DocumentReference;
-const ResourcePath = require('../src/path').ResourcePath;
 
 const DATABASE_ROOT = 'projects/test-project/databases/(default)';
 
@@ -194,127 +191,6 @@ function stream() {
   return stream;
 }
 
-const allSupportedTypesJson = document(
-  'arrayValue',
-  {
-    valueType: 'arrayValue',
-    arrayValue: {
-      values: [
-        {
-          valueType: 'stringValue',
-          stringValue: 'foo',
-        },
-        {
-          valueType: 'integerValue',
-          integerValue: 42,
-        },
-        {
-          valueType: 'stringValue',
-          stringValue: 'bar',
-        },
-      ],
-    },
-  },
-  'dateValue',
-  {
-    valueType: 'timestampValue',
-    timestampValue: {
-      nanos: 123000000,
-      seconds: 479978400,
-    },
-  },
-  'doubleValue',
-  {
-    valueType: 'doubleValue',
-    doubleValue: 0.1,
-  },
-  'falseValue',
-  {
-    valueType: 'booleanValue',
-    booleanValue: false,
-  },
-  'infinityValue',
-  {
-    valueType: 'doubleValue',
-    doubleValue: Infinity,
-  },
-  'integerValue',
-  {
-    valueType: 'integerValue',
-    integerValue: 0,
-  },
-  'negativeInfinityValue',
-  {
-    valueType: 'doubleValue',
-    doubleValue: -Infinity,
-  },
-  'nilValue',
-  {
-    valueType: 'nullValue',
-    nullValue: 'NULL_VALUE',
-  },
-  'objectValue',
-  {
-    valueType: 'mapValue',
-    mapValue: {
-      fields: {
-        foo: {
-          valueType: 'stringValue',
-          stringValue: 'bar',
-        },
-      },
-    },
-  },
-  'pathValue',
-  {
-    valueType: 'referenceValue',
-    referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
-  },
-  'stringValue',
-  {
-    valueType: 'stringValue',
-    stringValue: 'a',
-  },
-  'trueValue',
-  {
-    valueType: 'booleanValue',
-    booleanValue: true,
-  },
-  'geoPointValue',
-  {
-    valueType: 'geoPointValue',
-    geoPointValue: {
-      latitude: 50.1430847,
-      longitude: -122.947778,
-    },
-  },
-  'bytesValue',
-  {
-    valueType: 'bytesValue',
-    bytesValue: Buffer.from([0x1, 0x2]),
-  }
-);
-
-const allSupportedTypesObject = {
-  stringValue: 'a',
-  trueValue: true,
-  falseValue: false,
-  integerValue: 0,
-  doubleValue: 0.1,
-  infinityValue: Infinity,
-  negativeInfinityValue: -Infinity,
-  objectValue: {foo: 'bar'},
-  dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
-  pathValue: new DocumentReference(
-    {formattedName: DATABASE_ROOT},
-    new ResourcePath('test-project', '(default)', 'collection', 'document')
-  ),
-  arrayValue: ['foo', 42, 'bar'],
-  nilValue: null,
-  geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
-  bytesValue: Buffer.from([0x1, 0x2]),
-};
-
 const defaultWriteResult = {
   commitTime: {
     nanos: 3,
@@ -371,15 +247,23 @@ describe('serialize document', function() {
     firestore = createInstance();
   });
 
-  it('serializes all supported types', function() {
+  it('serializes to Protobuf JS', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, set(allSupportedTypesJson));
+      requestEquals(
+        request,
+        set(
+          document('bytes', {
+            valueType: 'bytesValue',
+            bytesValue: Buffer.from('AG=', 'base64'),
+          })
+        )
+      );
       callback(null, defaultWriteResult);
     };
 
     return firestore
       .doc('collectionId/documentId')
-      .set(allSupportedTypesObject);
+      .set({bytes: Buffer.from('AG=', 'base64')});
   });
 
   it("doesn't serialize unsupported types", function() {
@@ -586,28 +470,23 @@ describe('deserialize document', function() {
     firestore = createInstance();
   });
 
-  it('deserializes all supported types', function() {
+  it('deserializes Protobuf JS', function() {
     firestore.api.Firestore._batchGetDocuments = function() {
-      return stream(found(allSupportedTypesJson));
+      return stream(
+        found(
+          document('foo', {
+            valueType: 'bytesValue',
+            bytesValue: Buffer.from('AG=', 'base64'),
+          })
+        )
+      );
     };
 
     return firestore
       .doc('collectionId/documentId')
       .get()
-      .then(result => {
-        let expected = extend(true, {}, allSupportedTypesObject);
-        // Deep Equal doesn't support matching instances of DocumentRefs, so we
-        // compare them manually and remove them from the resulting object.
-        assert.equal(
-          result.get('pathValue').formattedName,
-          expected.pathValue.formattedName
-        );
-        let data = result.data();
-        delete data.pathValue;
-        delete expected.pathValue;
-        assert.deepEqual(data, expected);
-        assert.equal(50.1430847, data.geoPointValue.latitude);
-        assert.equal(-122.947778, data.geoPointValue.longitude);
+      .then(res => {
+        assert.deepEqual(res.data(), {foo: Buffer.from('AG=', 'base64')});
       });
   });
 

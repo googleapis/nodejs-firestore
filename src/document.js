@@ -20,6 +20,7 @@ const assert = require('assert');
 const is = require('is');
 
 const path = require('./path');
+const timestampFromJson = require('./convert').timestampFromJson;
 
 /*!
  * @see {ResourcePath}
@@ -327,7 +328,7 @@ class DocumentSnapshot {
   }
 
   /**
-   * Returns the underlying Firestore 'Fields' Protobuf.
+   * Returns the underlying Firestore 'Fields' Protobuf in Protobuf JS format.
    *
    * @private
    * @returns {Object} The Protobuf encoded document.
@@ -373,7 +374,7 @@ class DocumentSnapshot {
   }
 
   /**
-   * Retrieves the field specified by 'fieldPath' in its Protobuf
+   * Retrieves the field specified by 'fieldPath' in its Protobuf JS
    * representation.
    *
    * @private
@@ -1032,35 +1033,10 @@ class Precondition {
     let proto = {};
 
     if (is.defined(this._lastUpdateTime)) {
-      let date = new Date(this._lastUpdateTime);
-      let seconds = Math.floor(date.getTime() / 1000);
-      let nanos = null;
-
-      let nanoString = this._lastUpdateTime.substring(
-        20,
-        this._lastUpdateTime.length - 1
+      proto.updateTime = timestampFromJson(
+        this._lastUpdateTime,
+        'lastUpdateTime'
       );
-
-      if (nanoString.length === 3) {
-        nanoString = `${nanoString}000000`;
-      } else if (nanoString.length === 6) {
-        nanoString = `${nanoString}000`;
-      }
-
-      if (nanoString.length === 9) {
-        nanos = parseInt(nanoString);
-      }
-
-      if (isNaN(seconds) || isNaN(nanos)) {
-        throw new Error(
-          'Specify a valid ISO 8601 timestamp for' + ' "lastUpdateTime".'
-        );
-      }
-
-      proto.updateTime = {
-        seconds: seconds,
-        nanos: nanos,
-      };
     } else if (is.defined(this._exists)) {
       proto.exists = this._exists;
     }
