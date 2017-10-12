@@ -37,6 +37,22 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 
     [Go to the projects page][projects]
 
+
+1.  Enable the Google Cloud Firestore API.
+
+    [Enable the API][enable_api]
+
+1.  [Set up authentication with a service account][auth] so you can access the
+    API from your local workstation.
+
+### Before you begin #2 [Optional]
+
+1.  You can select or create a Firebase project instead of cloud platform.
+
+    [Go to the firebase page][firebase]
+
+1.  Go to database section on left side menu and switch from realtime database to firestore
+
 1.  Enable the Google Cloud Firestore API.
 
     [Enable the API][enable_api]
@@ -47,6 +63,7 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 [projects]: https://console.cloud.google.com/project
 [enable_api]: https://console.cloud.google.com/flows/enableapi?apiid=firestore.googleapis.com
 [auth]: https://cloud.google.com/docs/authentication/getting-started
+[firebase]: https://console.firebase.google.com/
 
 ### Installing the client library
 
