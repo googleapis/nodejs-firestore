@@ -685,7 +685,7 @@ declare namespace FirebaseFirestore {
      *
      * @return A stream of DocumentSnapshots.
      */
-    stream(): NodeJS.ReadStream;
+    stream(): NodeJS.ReadableStream;
 
     /**
      * Attaches a listener for `QuerySnapshot `events.
