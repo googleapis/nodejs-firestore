@@ -49,18 +49,15 @@ function convertTimestamp(timestampValue, argumentName) {
   if (is.string(timestampValue)) {
     let date = new Date(timestampValue);
     let seconds = Math.floor(date.getTime() / 1000);
-    let nanos = null;
+    let nanos = 0;
 
-    let nanoString = timestampValue.substring(20, timestampValue.length - 1);
-
-    if (nanoString.length === 3) {
-      nanoString = `${nanoString}000000`;
-    } else if (nanoString.length === 6) {
-      nanoString = `${nanoString}000`;
-    }
-
-    if (nanoString.length === 9) {
-      nanos = parseInt(nanoString);
+    if (timestampValue.length > 20) {
+      const nanoString = timestampValue.substring(
+        20,
+        timestampValue.length - 1
+      );
+      const trailingZeroes = 9 - nanoString.length;
+      nanos = parseInt(nanoString, 10) * Math.pow(10, trailingZeroes);
     }
 
     if (isNaN(seconds) || isNaN(nanos)) {
@@ -70,10 +67,7 @@ function convertTimestamp(timestampValue, argumentName) {
       );
     }
 
-    timestampProto = {
-      seconds: seconds,
-      nanos: nanos,
-    };
+    timestampProto = {seconds, nanos};
   } else if (is.defined(timestampValue)) {
     validate.isObject('timestampValue', timestampValue);
     timestampProto = {
