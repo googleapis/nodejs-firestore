@@ -64,7 +64,7 @@ describe('Collection interface', function() {
 
     assert.throws(() => {
       collectionRef.doc(undefined);
-    }, /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty strin./);
+    }, /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
 
     assert.throws(function() {
       collectionRef.doc('doc/coll');
