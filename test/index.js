@@ -646,10 +646,7 @@ describe('doc() method', function() {
   it('requires document path', function() {
     assert.throws(function() {
       firestore.doc();
-    }, new RegExp(
-      'Argument "documentPath" is not a valid ResourcePath. ' +
-        'Path is not a string.'
-    ));
+    }, /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
   });
 
   it("doesn't accept empty components", function() {
@@ -689,10 +686,7 @@ describe('collection() method', function() {
   it('requires collection id', function() {
     assert.throws(function() {
       firestore.collection();
-    }, new RegExp(
-      'Argument "collectionPath" is not a valid ResourcePath. ' +
-        'Path is not a string.'
-    ));
+    }, /Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string./);
   });
 
   it('must point to a collection', function() {
