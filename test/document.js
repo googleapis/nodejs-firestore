@@ -206,6 +206,27 @@ const defaultWriteResult = {
   ],
 };
 
+const serverTimestampWriteResult = {
+  commitTime: {
+    nanos: 3,
+    seconds: 4,
+  },
+  writeResults: [
+    {
+      updateTime: {
+        nanos: 3,
+        seconds: 4,
+      },
+    },
+    {
+      updateTime: {
+        nanos: 3,
+        seconds: 4,
+      },
+    },
+  ],
+};
+
 describe('DocumentReference interface', function() {
   let firestore;
   let documentRef;
@@ -368,7 +389,7 @@ describe('serialize document', function() {
         )
       );
 
-      callback(null, defaultWriteResult);
+      callback(null, serverTimestampWriteResult);
     };
 
     return firestore.doc('collectionId/documentId').set({
@@ -993,7 +1014,7 @@ describe('create document', function() {
         )
       );
 
-      callback(null, defaultWriteResult);
+      callback(null, serverTimestampWriteResult);
     };
 
     return firestore.doc('collectionId/documentId').create({
@@ -1056,7 +1077,7 @@ describe('update document', function() {
           fieldTransform('a.b', 'REQUEST_TIME', 'c.d', 'REQUEST_TIME')
         )
       );
-      callback(null, defaultWriteResult);
+      callback(null, serverTimestampWriteResult);
     };
 
     return firestore.doc('collectionId/documentId').update(

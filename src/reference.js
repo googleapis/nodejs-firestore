@@ -352,8 +352,8 @@ class DocumentReference {
     return writeBatch
       .create(this, data)
       .commit()
-      .then(res => {
-        return Promise.resolve(res.writeResults[0]);
+      .then(writeResults => {
+        return Promise.resolve(writeResults[0]);
       });
   }
 
@@ -383,8 +383,8 @@ class DocumentReference {
     return writeBatch
       .delete(this, precondition)
       .commit()
-      .then(res => {
-        return Promise.resolve(res.writeResults[0]);
+      .then(writeResults => {
+        return Promise.resolve(writeResults[0]);
       });
   }
 
@@ -415,8 +415,8 @@ class DocumentReference {
     return writeBatch
       .set(this, data, options)
       .commit()
-      .then(res => {
-        return Promise.resolve(res.writeResults[0]);
+      .then(writeResults => {
+        return Promise.resolve(writeResults[0]);
       });
   }
 
@@ -455,8 +455,8 @@ class DocumentReference {
     return writeBatch.update
       .apply(writeBatch, [this, dataOrField].concat(preconditionOrValues))
       .commit()
-      .then(res => {
-        return Promise.resolve(res.writeResults[0]);
+      .then(writeResults => {
+        return Promise.resolve(writeResults[0]);
       });
   }
 
