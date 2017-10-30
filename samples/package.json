@@ -4,20 +4,21 @@
   "private": true,
   "license": "Apache-2.0",
   "author": "Google Inc.",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/googleapis/nodejs-firestore.git"
-  },
+  "repository": "googleapis/nodejs-firestore",
   "engines": {
     "node": ">=4"
   },
   "scripts": {
-    "test": "mocha --timeout 20000 main.js"
+    "ava": "ava -T 20s --verbose system-test/*.test.js",
+    "test": "repo-tools test run --cmd npm -- run ava"
   },
   "dependencies": {
-    "@google-cloud/firestore": "0.1.0"
+    "@google-cloud/firestore": "0.8.2"
   },
   "devDependencies": {
-    "mocha": "^3.3.0"
+    "@google-cloud/nodejs-repo-tools": "2.1.0",
+    "ava": "0.23.0",
+    "proxyquire": "1.8.0",
+    "sinon": "4.0.2"
   }
 }
