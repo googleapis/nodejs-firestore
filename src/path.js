@@ -305,8 +305,8 @@ class ResourcePath extends Path {
    * @returns {boolean} 'true' when the path is valid.
    */
   static validateResourcePath(resourcePath) {
-    if (!is.string(resourcePath)) {
-      throw new Error(`Path is not a string.`);
+    if (!is.string(resourcePath) || resourcePath === '') {
+      throw new Error(`Path must be a non-empty string.`);
     }
 
     if (resourcePath.indexOf('//') >= 0) {
