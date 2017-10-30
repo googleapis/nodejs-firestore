@@ -49,15 +49,17 @@ function commit(transaction, writes, err) {
       nanos: 0,
       seconds: 0,
     },
-    writeResults: [
-      {
-        updateTime: {
-          nanos: 0,
-          seconds: 0,
-        },
-      },
-    ],
+    writeResults: [],
   };
+
+  for (let i = 0; i < proto.writes.length; ++i) {
+    response.writeResults.push({
+      updateTime: {
+        nanos: 0,
+        seconds: 0,
+      },
+    });
+  }
 
   return {
     type: 'commit',
