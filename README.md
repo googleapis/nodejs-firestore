@@ -1,17 +1,19 @@
 <img src="https://avatars2.githubusercontent.com/u/2810941?v=3&s=96" alt="Google Cloud Platform logo" title="Google Cloud Platform" align="right" height="96" width="96"/>
 
-# Google Cloud Firestore: Node.js Client
+# [Google Cloud Firestore: Node.js Client](https://github.com/googleapis/nodejs-firestore)
 
 [![release level](https://img.shields.io/badge/release%20level-beta-yellow.svg?style&#x3D;flat)](https://cloud.google.com/terms/launch-stages)
 [![CircleCI](https://img.shields.io/circleci/project/github/googleapis/nodejs-firestore.svg?style=flat)](https://circleci.com/gh/googleapis/nodejs-firestore)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/googleapis/nodejs-firestore?svg=true)](https://ci.appveyor.com/project/googleapis/nodejs-firestore)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/googleapis/nodejs-firestore?branch=master&svg=true)](https://ci.appveyor.com/project/googleapis/nodejs-firestore)
 [![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-firestore/master.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-firestore)
 
 > Node.js idiomatic client for [Cloud Firestore][product-docs].
 
 [Google Cloud Firestore](https://firebase.google.com/docs/firestore/) is a NoSQL document database built for automatic scaling, high performance, and ease of application development.
 
+
 * [Cloud Firestore Node.js Client API Reference][client-docs]
+* [github.com/googleapis/nodejs-firestore](https://github.com/googleapis/nodejs-firestore)
 * [Cloud Firestore Documentation][product-docs]
 
 Read more about the client libraries for Cloud APIs, including the older
@@ -109,13 +111,14 @@ More Information: [Google Cloud Platform Launch Stages][launch_stages]
 
 ## Contributing
 
-Contributions welcome! See the [Contributing Guide](.github/CONTRIBUTING.md).
+Contributions welcome! See the [Contributing Guide](https://github.com/googleapis/nodejs-firestore/blob/master/.github/CONTRIBUTING.md).
 
 ## License
 
 Apache Version 2.0
 
-See [LICENSE](LICENSE)
+See [LICENSE](https://github.com/googleapis/nodejs-firestore/blob/master/LICENSE)
 
 [client-docs]: https://cloud.google.com/nodejs/docs/reference/firestore/latest/
 [product-docs]: https://firebase.google.com/docs/firestore/
+[shell_img]: http://gstatic.com/cloudssh/images/open-btn.png
