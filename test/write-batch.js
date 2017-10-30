@@ -158,6 +158,18 @@ describe('batch support', function() {
             },
           },
           {
+            transform: {
+              document:
+                'projects/test-project/databases/(default)/documents/col/doc',
+              fieldTransforms: [
+                {
+                  fieldPath: 'foo',
+                  setToServerValue: 'REQUEST_TIME',
+                },
+              ],
+            },
+          },
+          {
             currentDocument: {
               exists: true,
             },
@@ -195,6 +207,13 @@ describe('batch support', function() {
               seconds: 0,
             },
           },
+          // This write result conforms to the DocumentTransform and won't be returned in the response.
+          {
+            updateTime: {
+              nanos: 1337,
+              seconds: 1337,
+            },
+          },
           {
             updateTime: {
               nanos: 1,
@@ -207,6 +226,12 @@ describe('batch support', function() {
               seconds: 2,
             },
           },
+          {
+            updateTime: {
+              nanos: 3,
+              seconds: 3,
+            },
+          },
         ],
       });
     };
@@ -214,25 +239,17 @@ describe('batch support', function() {
     writeBatch = firestore.batch();
   });
 
-  function verifyResponse(resp) {
-    assert.equal(
-      resp.writeResults[0].writeTime,
-      '1970-01-01T00:00:00.000000000Z'
-    );
-    assert.equal(
-      resp.writeResults[1].writeTime,
-      '1970-01-01T00:00:01.000000001Z'
-    );
-    assert.equal(
-      resp.writeResults[2].writeTime,
-      '1970-01-01T00:00:02.000000002Z'
-    );
+  function verifyResponse(writeResults) {
+    assert.equal(writeResults[0].writeTime, '1970-01-01T00:00:00.000000000Z');
+    assert.equal(writeResults[1].writeTime, '1970-01-01T00:00:01.000000001Z');
+    assert.equal(writeResults[2].writeTime, '1970-01-01T00:00:02.000000002Z');
+    assert.equal(writeResults[3].writeTime, '1970-01-01T00:00:03.000000003Z');
   }
 
   it('accepts multiple operations', function() {
     let documentName = firestore.doc('col/doc');
 
-    writeBatch.set(documentName, {});
+    writeBatch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
     writeBatch.update(documentName, {});
     writeBatch.create(documentName, {});
     writeBatch.delete(documentName);
@@ -246,7 +263,7 @@ describe('batch support', function() {
     let documentName = firestore.doc('col/doc');
 
     return writeBatch
-      .set(documentName, {})
+      .set(documentName, {foo: Firestore.FieldValue.serverTimestamp()})
       .update(documentName, {})
       .create(documentName, {})
       .delete(documentName)

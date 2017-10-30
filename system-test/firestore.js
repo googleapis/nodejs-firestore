@@ -1204,6 +1204,15 @@ describe('WriteBatch class', function() {
       });
   });
 
+  it('omits document transforms from write results', function() {
+    let batch = firestore.batch();
+    batch.set(randomCol.doc(), {foo: 'a'});
+    batch.set(randomCol.doc(), {foo: Firestore.FieldValue.serverTimestamp()});
+    return batch.commit().then(writeResults => {
+      assert.equal(writeResults.length, 2);
+    });
+  });
+
   it('enforces that updated document exists', function() {
     let ref = randomCol.doc();
     let batch = firestore.batch();
@@ -1217,17 +1226,6 @@ describe('WriteBatch class', function() {
         assert.ok(err.message.match(/no entity to update/));
       });
   });
-
-  // @todo: Uncomment when server supports verify()
-  // Throws 'java.lang.UnsupportedOperationException: not implemented yet'
-  // it('has verify() method', function() {
-  //   let ref = firestore.doc('col/doc');
-  //   let batch = firestore.batch();
-  //   batch.set(ref, {foo: 'a'});
-  //   return batch.commit().then(() => {
-  //     return firestore.batch().verify_(ref, {exists:true}).commit();
-  //   });
-  // });
 
   it('has delete() method', function() {
     let success;

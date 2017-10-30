@@ -16,6 +16,7 @@
 
 'use strict';
 
+const assert = require('assert');
 const is = require('is');
 
 /*!
@@ -449,12 +450,16 @@ class WriteBatch {
         });
     }
 
-    request.writes = this._writes;
+    // We create our own copy of this array since we need to access it when
+    // processing the response.
+    let writeRequests = this._writes.slice();
+
+    request.writes = writeRequests;
 
     Firestore.log(
       'WriteBatch.commit',
       'Sending %d writes',
-      request.writes.length
+      writeRequests.length
     );
 
     if (explicitTransaction) {
@@ -464,22 +469,36 @@ class WriteBatch {
     return this._firestore
       .request(this._api.Firestore.commit.bind(this._api.Firestore), request)
       .then(resp => {
-        let commitTime = DocumentSnapshot.toISOTime(resp.commitTime);
-        let result = {
-          writeResults: [],
-        };
+        const commitTime = DocumentSnapshot.toISOTime(resp.commitTime);
+        const writeResults = [];
 
         if (resp.writeResults) {
-          for (let writeResult of resp.writeResults) {
-            result.writeResults.push(
-              new WriteResult(
-                DocumentSnapshot.toISOTime(writeResult.updateTime) || commitTime
-              )
-            );
+          assert(
+            writeRequests.length === resp.writeResults.length,
+            `Expected one write result per operation, but got ${resp
+              .writeResults
+              .length} results for ${writeRequests.length} operations.`
+          );
+
+          for (let i = 0; i < resp.writeResults.length; ++i) {
+            let writeRequest = writeRequests[i];
+            let writeResult = resp.writeResults[i];
+
+            // Don't return write results for document transforms, as the fact
+            // that we have to split one write operation into two distinct
+            // write requests is an implementation detail.
+            if (writeRequest.update || writeRequest.delete) {
+              writeResults.push(
+                new WriteResult(
+                  DocumentSnapshot.toISOTime(writeResult.updateTime) ||
+                    commitTime
+                )
+              );
+            }
           }
         }
 
-        return result;
+        return writeResults;
       });
   }
 
