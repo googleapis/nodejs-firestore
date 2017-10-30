@@ -1,22 +1,13 @@
 {
   "name": "@google-cloud/firestore",
-  "version": "0.8.2",
-  "author": "Google Inc.",
   "description": "Firestore Client Library for Node.js",
-  "contributors": [
-    {
-      "name": "Dave Gramlich",
-      "email": "callmehiphop@gmail.com"
-    },
-    {
-      "name": "Sebastian Schmidt",
-      "email": "mrschmidt@google.com"
-    },
-    {
-      "name": "Stephen Sawchuk",
-      "email": "sawchuk@gmail.com"
-    }
-  ],
+  "version": "0.8.2",
+  "license": "Apache-2.0",
+  "author": "Google Inc.",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "repository": "googleapis/nodejs-firestore",
   "main": "./src/index.js",
   "files": [
     "src",
@@ -26,7 +17,6 @@
     "CONTRIBUTORS",
     "COPYING"
   ],
-  "repository": "googleapis/nodejs-firestore",
   "keywords": [
     "google apis client",
     "google api client",
@@ -38,6 +28,26 @@
     "cloud",
     "firestore"
   ],
+  "types": "./types/firestore.d.ts",
+  "contributors": [
+    "Bond <bondz@users.noreply.github.com>",
+    "Jason Dobry <jmdobry@users.noreply.github.com>",
+    "Luke Sneeringer <luke@sneeringer.com>",
+    "Luke Sneeringer <lukesneeringer@google.com>",
+    "Sebastian Schmidt <mrschmidt@google.com>",
+    "greenkeeper[bot] <greenkeeper[bot]@users.noreply.github.com>"
+  ],
+  "scripts": {
+    "cover": "nyc --reporter=lcov mocha --require intelli-espower-loader test/*.js && nyc report",
+    "docs": "repo-tools exec -- jsdoc -c .jsdoc.js",
+    "generate-scaffolding": "repo-tools generate all",
+    "lint": "repo-tools lint --cmd eslint -- src/ system-test/ test/",
+    "prettier": "repo-tools exec -- prettier --write src/*.js src/**/*.js test/*.js test/**/*.js system-test/*.js system-test/**/*.js",
+    "publish-module": "node ../../scripts/publish.js firestore",
+    "system-test": "repo-tools test run --cmd mocha -- system-test/*.js --no-timeouts",
+    "test-no-cover": "repo-tools test run --cmd mocha -- test/*.js --no-timeouts",
+    "test": "repo-tools test run --cmd npm -- run cover"
+  },
   "dependencies": {
     "@google-cloud/common": "^0.13.5",
     "@google-cloud/common-grpc": "^0.4.0",
@@ -51,7 +61,7 @@
     "through2": "^2.0.3"
   },
   "devDependencies": {
-    "@google-cloud/nodejs-repo-tools": "^2.0.7",
+    "@google-cloud/nodejs-repo-tools": "^2.1.0",
     "@types/mocha": "^2.2.43",
     "@types/node": "^8.0.31",
     "duplexify": "^3.5.0",
@@ -68,21 +78,5 @@
     "prettier": "^1.7.2",
     "proxyquire": "^1.7.11",
     "typescript": "^2.5.2"
-  },
-  "scripts": {
-    "cover": "nyc --reporter=lcov mocha --require intelli-espower-loader test/*.js && nyc report",
-    "docs": "repo-tools exec -- jsdoc -c .jsdoc.js",
-    "generate-scaffolding": "repo-tools generate all",
-    "lint": "repo-tools lint --cmd eslint -- src/ system-test/ test/",
-    "prettier": "repo-tools exec -- prettier --write src/*.js src/**/*.js test/*.js test/**/*.js system-test/*.js system-test/**/*.js",
-    "publish-module": "node ../../scripts/publish.js firestore",
-    "system-test": "repo-tools test run --cmd mocha -- system-test/*.js --no-timeouts",
-    "test-no-cover": "repo-tools test run --cmd mocha -- test/*.js --no-timeouts",
-    "test": "repo-tools test run --cmd npm -- run cover"
-  },
-  "license": "Apache-2.0",
-  "engines": {
-    "node": ">=4.0.0"
-  },
-  "types": "./types/firestore.d.ts"
+  }
 }
