@@ -490,8 +490,12 @@ describe('snapshot_() method', function() {
 
     // We specifically test the GeoPoint properties to ensure 100% test
     // coverage.
-    assert.equal(50.1430847, data.geoPointValue.latitude);
-    assert.equal(-122.947778, data.geoPointValue.longitude);
+    assert.equal(data.geoPointValue.latitude, 50.1430847);
+    assert.equal(data.geoPointValue.longitude, -122.947778);
+    assert.equal(
+      data.geoPointValue.toString(),
+      'GeoPoint { latitude: 50.1430847, longitude: -122.947778 }'
+    );
   }
 
   beforeEach(function() {

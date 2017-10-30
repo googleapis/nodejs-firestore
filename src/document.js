@@ -122,6 +122,16 @@ class GeoPoint {
   }
 
   /**
+   * Returns a string representation for this GeoPoint.
+   *
+   * @return {string} The string representation.
+   */
+  toString() {
+    return `GeoPoint { latitude: ${this.latitude}, longitude: ${this
+      .longitude} }`;
+  }
+
+  /**
    * Converts the GeoPoint to a google.type.LatLng proto.
    * @private
    */
