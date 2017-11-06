@@ -680,7 +680,7 @@ class DocumentSnapshot {
    * This functions turns { foo.bar : foobar } into { foo { bar : foobar }}
    *
    * @private
-   * @param {Map.<string|FieldPath, *>} data - The field/value map to expand.
+   * @param {Map.<FieldPath, *>} data - The field/value map to expand.
    * @returns {DocumentData} The expanded JavaScript object.
    */
   static expandMap(data) {
@@ -701,30 +701,17 @@ class DocumentSnapshot {
           target[key] = {};
           merge(target[key], value, path, pos + 1);
         }
-      } else if (isPlainObject(target[key])) {
-        if (isLast) {
-          // The existing object has deeper nesting that the value we are trying
-          // to merge.
-          throw new Error(
-            `Field "${new FieldPath(path)}" has conflicting definitions.`
-          );
-        } else {
-          merge(target[key], value, path, pos + 1);
-        }
       } else {
-        // We are trying to merge an object with a primitive.
-        throw new Error(
-          `Field "${new FieldPath(
-            path.slice(0, pos + 1)
-          )}" has conflicting definitions.`
-        );
+        validate.isPlainObject(typeof target[key], target[key]);
+        assert(!isLast, "Can't merge current value into a nested object");
+        merge(target[key], value, path, pos + 1);
       }
     }
 
     let res = {};
 
     data.forEach((value, key) => {
-      let components = FieldPath.fromArgument(key).toArray();
+      let components = key.toArray();
       merge(res, value, components, 0);
     });
 
@@ -1167,6 +1154,7 @@ module.exports = DocumentRefType => {
   DocumentReference = DocumentRefType;
   validate = require('./validate')({
     FieldPath: FieldPath.validateFieldPath,
+    PlainObject: isPlainObject,
   });
   return {
     DocumentMask,
