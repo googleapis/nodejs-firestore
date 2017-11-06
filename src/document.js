@@ -706,7 +706,7 @@ class DocumentSnapshot {
           // The existing object has deeper nesting that the value we are trying
           // to merge.
           throw new Error(
-            `Field "${path.join('.')}" has conflicting definitions.`
+            `Field "${new FieldPath(path)}" has conflicting definitions.`
           );
         } else {
           merge(target[key], value, path, pos + 1);
@@ -714,8 +714,9 @@ class DocumentSnapshot {
       } else {
         // We are trying to merge an object with a primitive.
         throw new Error(
-          `Field "${path.slice(0, pos + 1).join('.')}" has ` +
-            `conflicting definitions.`
+          `Field "${new FieldPath(
+            path.slice(0, pos + 1)
+          )}" has conflicting definitions.`
         );
       }
     }
