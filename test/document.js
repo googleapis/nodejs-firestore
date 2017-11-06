@@ -239,7 +239,7 @@ describe('DocumentReference interface', function() {
   it('has collection() method', function() {
     assert.throws(() => {
       documentRef.collection(42);
-    }, new RegExp('Argument "collectionPath" is not a valid ResourcePath. ' + 'Path is not a string.'));
+    }, new RegExp('Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string.'));
 
     let collection = documentRef.collection('col');
     assert.equal(collection.id, 'col');
