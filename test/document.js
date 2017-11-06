@@ -1334,6 +1334,18 @@ describe('update document', function() {
         'foo.bar.foo': 'foobar',
       });
     }, /Field "foo.bar.foo" has conflicting definitions\./);
+
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .update('foo.bar', 'foobar', 'foo', 'foobar');
+    }, /Field "foo" has conflicting definitions\./);
+
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .update('foo', 'foobar', 'foo.bar', 'foobar');
+    }, /Field "foo" has conflicting definitions\./);
   });
 
   it('with valid field paths', function() {
