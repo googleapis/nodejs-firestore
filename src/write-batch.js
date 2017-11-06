@@ -533,10 +533,6 @@ class WriteBatch {
  * @returns {boolean} 'true' if the input is a valid update map.
  */
 function validateUpdateMap(data) {
-  if (!is.instance(data, Map)) {
-    throw new Error('Input is not a map.');
-  }
-
   const fields = [];
   data.forEach((value, key) => {
     fields.push(key);
