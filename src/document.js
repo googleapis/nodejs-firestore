@@ -127,8 +127,9 @@ class GeoPoint {
    * @return {string} The string representation.
    */
   toString() {
-    return `GeoPoint { latitude: ${this.latitude}, longitude: ${this
-      .longitude} }`;
+    return `GeoPoint { latitude: ${this.latitude}, longitude: ${
+      this.longitude
+    } }`;
   }
 
   /**

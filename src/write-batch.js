@@ -477,9 +477,9 @@ class WriteBatch {
         if (resp.writeResults) {
           assert(
             writeRequests.length === resp.writeResults.length,
-            `Expected one write result per operation, but got ${resp
-              .writeResults
-              .length} results for ${writeRequests.length} operations.`
+            `Expected one write result per operation, but got ${
+              resp.writeResults.length
+            } results for ${writeRequests.length} operations.`
           );
 
           for (let i = 0; i < resp.writeResults.length; ++i) {
