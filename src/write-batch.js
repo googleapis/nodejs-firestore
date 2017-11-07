@@ -370,6 +370,8 @@ class WriteBatch {
       }
     }
 
+    validate.isUpdateMap('dataOrField', updateMap);
+
     let documentMask = DocumentMask.fromMap(updateMap);
     let expandedObject = DocumentSnapshot.expandMap(updateMap);
     let document = new DocumentSnapshot(
@@ -523,6 +525,30 @@ class WriteBatch {
   }
 }
 
+/*!
+ * Validates that the update data does not contain any ambiguous field
+ * definitions (such as 'a.b' and 'a').
+ *
+ * @param {Map.<FieldPath, *>} data - An update map with field/value pairs.
+ * @returns {boolean} 'true' if the input is a valid update map.
+ */
+function validateUpdateMap(data) {
+  const fields = [];
+  data.forEach((value, key) => {
+    fields.push(key);
+  });
+
+  fields.sort((left, right) => left.compareTo(right));
+
+  for (let i = 1; i < fields.length; ++i) {
+    if (fields[i - 1].isPrefixOf(fields[i])) {
+      throw new Error(`Field "${fields[i - 1]}" has conflicting definitions.`);
+    }
+  }
+
+  return true;
+}
+
 module.exports = (
   FirestoreType,
   DocumentReferenceType,
@@ -540,6 +566,7 @@ module.exports = (
     FieldPath: FieldPath.validateFieldPath,
     Precondition: document.validatePrecondition,
     SetOptions: document.validateSetOptions,
+    UpdateMap: validateUpdateMap,
   });
   return {
     WriteBatch,
