@@ -958,6 +958,11 @@ describe('startAt() interface', function() {
         .orderBy(Firestore.FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/coll/doc/coll/doc'));
     }, new RegExp("Only a direct child can be used as a query boundary. Found: 'coll/doc/coll/doc/coll/doc'."));
+
+    // Validate that we can't pass a reference to a collection.
+    assert.throws(() => {
+      query.orderBy(Firestore.FieldPath.documentId()).startAt('doc/coll');
+    }, new RegExp("Only a direct child can be used as a query boundary. Found: 'coll/doc/coll/doc/coll'."));
   });
 
   it('requires order by', function() {
