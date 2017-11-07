@@ -293,7 +293,7 @@ class DocumentReference {
   /**
    * Fetches the subcollections that are direct children of this document.
    *
-   * @returns {Promise.<Array.<CollectionReference>>}  A Promise that resolves
+   * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
    * with an array of CollectionReferences.
    *
    * @example
