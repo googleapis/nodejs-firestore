@@ -78,6 +78,14 @@ declare namespace FirebaseFirestore {
     getAll(...documentRef: DocumentReference[]): Promise<DocumentSnapshot[]>;
 
     /**
+     * Fetches the root collections that are associated with this Firestore
+     * database.
+     *
+     * @returns A Promise that resolves with an array of CollectionReferences.
+     */
+    getCollections() : Promise<CollectionReference[]>;
+
+    /**
      * Executes the given updateFunction and commits the changes applied within
      * the transaction.
      *
@@ -399,6 +407,13 @@ declare namespace FirebaseFirestore {
      * @return The `CollectionReference` instance.
      */
     collection(collectionPath: string): CollectionReference;
+
+    /**
+     * Fetches the subcollections that are direct children of this document.
+     *
+     * @returns A Promise that resolves with an array of CollectionReferences.
+     */
+    getCollections() : Promise<CollectionReference[]>;
 
     /**
      * Creates a document referred to by this `DocumentReference` with the
