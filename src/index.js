@@ -516,8 +516,8 @@ class Firestore extends commonGrpc.Service {
    * Fetches the root collections that are associated with this Firestore
    * database.
    *
-   * @returns {Promise.<Array.<CollectionReference>>} A Promise that
-   * contains an array with CollectionReferences.
+   * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
+   * with an array of CollectionReferences.
    *
    * @example
    * firestore.getCollections().then(collections => {

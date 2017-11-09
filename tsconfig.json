@@ -17,7 +17,6 @@
     "noStrictGenericChecks": true
   },
   "include": [
-    "src/**/*.js",
     "src/**/*.ts",
     "test/typescript.ts",
     "types/firestore.d.ts"
