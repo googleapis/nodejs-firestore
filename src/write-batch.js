@@ -351,6 +351,7 @@ class WriteBatch {
         validate.maxNumberOfArguments('update', arguments, 3);
 
         Object.keys(dataOrField).forEach(key => {
+          validate.isFieldPath(key, key);
           updateMap.set(FieldPath.fromArgument(key), dataOrField[key]);
         });
 
