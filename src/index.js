@@ -195,14 +195,6 @@ class Firestore extends commonGrpc.Service {
     let config = {
       service: 'firestore',
       apiVersion: 'v1beta1',
-      // @todo: Pass in proto services via googleprotofiles once v1beta1 protos
-      // are publicly available:
-      //
-      // protoServices: {
-      //    Firestore:  googleProtoFiles('firestore', 'v1beta1',
-      //                'firestore.proto'),
-      // }
-      protoServices: {},
       packageJson: require('../package.json'),
     };
 
