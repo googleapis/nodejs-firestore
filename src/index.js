@@ -195,6 +195,7 @@ class Firestore extends commonGrpc.Service {
     let config = {
       service: 'firestore',
       apiVersion: 'v1beta1',
+      protoServices: {},
       packageJson: require('../package.json'),
     };
 
