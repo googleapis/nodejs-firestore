@@ -154,14 +154,12 @@ describe('batch support', function() {
           {
             update: {
               fields: {},
-              name:
-                'projects/test-project/databases/(default)/documents/col/doc',
+              name: documentName,
             },
           },
           {
             transform: {
-              document:
-                'projects/test-project/databases/(default)/documents/col/doc',
+              document: documentName,
               fieldTransforms: [
                 {
                   fieldPath: 'foo',
@@ -181,8 +179,7 @@ describe('batch support', function() {
                   valueType: 'stringValue',
                 },
               },
-              name:
-                'projects/test-project/databases/(default)/documents/col/doc',
+              name: documentName,
             },
             updateMask: {
               fieldPaths: ['foo'],
@@ -194,13 +191,11 @@ describe('batch support', function() {
             },
             update: {
               fields: {},
-              name:
-                'projects/test-project/databases/(default)/documents/col/doc',
+              name: documentName,
             },
           },
           {
-            delete:
-              'projects/test-project/databases/(default)/documents/col/doc',
+            delete: documentName,
           },
         ],
       });
