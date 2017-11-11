@@ -933,25 +933,36 @@ describe('startAt() interface', function() {
 
     assert.throws(() => {
       query.orderBy(Firestore.FieldPath.documentId()).startAt(42);
-    }, new RegExp('The corresponding value for FieldPath.documentId\\(\\) ' + 'must be a string or a DocumentReference\\.'));
+    }, new RegExp('The corresponding value for FieldPath.documentId\\(\\) must be a string or a DocumentReference\\.'));
 
     assert.throws(() => {
       query
         .orderBy(Firestore.FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/other/doc'));
-    }, new RegExp("'coll/doc/other/doc' is not part of the query result " + 'set and cannot be used as a query boundary.'));
+    }, new RegExp("'coll/doc/other/doc' is not part of the query result set and cannot be used as a query boundary."));
 
     assert.throws(() => {
       query
         .orderBy(Firestore.FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/coll_suffix/doc'));
-    }, new RegExp("'coll/doc/coll_suffix/doc' is not part of the query " + 'result set and cannot be used as a query boundary.'));
+    }, new RegExp("'coll/doc/coll_suffix/doc' is not part of the query result set and cannot be used as a query boundary."));
 
     assert.throws(() => {
       query
         .orderBy(Firestore.FieldPath.documentId())
         .startAt(firestore.doc('coll/doc'));
-    }, new RegExp("'coll/doc' is not part of the query result set " + 'and cannot be used as a query boundary.'));
+    }, new RegExp("'coll/doc' is not part of the query result set and cannot be used as a query boundary."));
+
+    assert.throws(() => {
+      query
+        .orderBy(Firestore.FieldPath.documentId())
+        .startAt(firestore.doc('coll/doc/coll/doc/coll/doc'));
+    }, new RegExp("Only a direct child can be used as a query boundary. Found: 'coll/doc/coll/doc/coll/doc'."));
+
+    // Validate that we can't pass a reference to a collection.
+    assert.throws(() => {
+      query.orderBy(Firestore.FieldPath.documentId()).startAt('doc/coll');
+    }, new RegExp("Only a direct child can be used as a query boundary. Found: 'coll/doc/coll/doc/coll'."));
   });
 
   it('requires order by', function() {
