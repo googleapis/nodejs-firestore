@@ -107,7 +107,7 @@ const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
 const snapshot = function(ref, data) {
   const snapshot = new DocumentSnapshot.Builder();
   snapshot.ref = ref;
-  snapshot.fieldsProto = DocumentSnapshot.encodeFields(data);
+  snapshot.fieldsProto = DocumentSnapshot.encodeFields(data, true);
   snapshot.readTime = '1970-01-01T00:00:00.000000000Z';
   snapshot.createTime = '1970-01-01T00:00:00.000000000Z';
   snapshot.updateTime = '1970-01-01T00:00:00.000000000Z';
@@ -404,7 +404,7 @@ class WatchHelper {
       documentChange: {
         document: {
           name: ref.formattedName,
-          fields: DocumentSnapshot.encodeFields(data),
+          fields: DocumentSnapshot.encodeFields(data, true),
           createTime: {seconds: 1, nanos: 2},
           updateTime: {seconds: 3, nanos: this.snapshotVersion},
         },
@@ -424,7 +424,7 @@ class WatchHelper {
       documentChange: {
         document: {
           name: ref.formattedName,
-          fields: DocumentSnapshot.encodeFields(data),
+          fields: DocumentSnapshot.encodeFields(data, true),
         },
         removedTargetIds: [this.targetId],
       },
@@ -1712,7 +1712,7 @@ describe('Query watch', function() {
             documentChange: {
               document: {
                 name: doc1.formattedName,
-                fields: DocumentSnapshot.encodeFields({foo: 'a'}),
+                fields: DocumentSnapshot.encodeFields({foo: 'a'}, true),
                 createTime: {seconds: 1, nanos: 2},
                 updateTime: {seconds: 3, nanos: 5},
               },

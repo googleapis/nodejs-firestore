@@ -161,7 +161,7 @@ class WriteBatch {
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data);
 
-    let fields = DocumentSnapshot.encodeFields(data);
+    let fields = DocumentSnapshot.encodeFields(data, /* allowDeletes= */ false);
 
     let write = {
       update: new DocumentSnapshot(documentRef, fields).toProto(),
@@ -252,7 +252,7 @@ class WriteBatch {
     validate.isDocument('data', data);
     validate.isOptionalSetOptions('options', options);
 
-    let fields = DocumentSnapshot.encodeFields(data);
+    let fields = DocumentSnapshot.encodeFields(data, /* allowDeletes= */ options && options.merge);
 
     let write = {
       update: new DocumentSnapshot(documentRef, fields).toProto(),
@@ -376,7 +376,7 @@ class WriteBatch {
     let expandedObject = DocumentSnapshot.expandMap(updateMap);
     let document = new DocumentSnapshot(
       documentRef,
-      DocumentSnapshot.encodeFields(expandedObject)
+      DocumentSnapshot.encodeFields(expandedObject, /* allowDeletes= */ true)
     );
 
     let write = {
@@ -539,6 +539,10 @@ function validateUpdateMap(data) {
   });
 
   fields.sort((left, right) => left.compareTo(right));
+
+  if (fields.length === 0) {
+    throw new Error('At least one field must be udpated.');
+  }
 
   for (let i = 1; i < fields.length; ++i) {
     if (fields[i - 1].isPrefixOf(fields[i])) {

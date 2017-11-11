@@ -443,6 +443,9 @@ class FieldPath extends Path {
 
     for (let i = 0; i < segments.length; ++i) {
       validate.isString(i, segments[i]);
+      if (segments[i].length === 0) {
+        throw new Error(`Argument at index ${i} should not be empty.`);
+      }
     }
 
     super(segments);

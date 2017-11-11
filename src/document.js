@@ -127,8 +127,9 @@ class GeoPoint {
    * @return {string} The string representation.
    */
   toString() {
-    return `GeoPoint { latitude: ${this.latitude}, longitude: ${this
-      .longitude} }`;
+    return `GeoPoint { latitude: ${this.latitude}, longitude: ${
+      this.longitude
+    } }`;
   }
 
   /**
@@ -510,7 +511,7 @@ class DocumentSnapshot {
       isoSubstring = isoSubstring.substr(0, isoSubstring.length - 4);
 
       // Append nanoseconds as per ISO 8601
-      let nanoString = timestamp.nanos + '';
+      let nanoString = (timestamp.nanos || '') + '';
       while (nanoString.length < 9) {
         nanoString = '0' + nanoString;
       }
@@ -526,10 +527,12 @@ class DocumentSnapshot {
    *
    * @private
    * @param {Object} obj The object to encode
+   * @param {boolean} allowDeletes Whether to allow the FieldValue.delete()
+   * sentinel.
    * @param {number=} depth The depth at the current encoding level
    * @returns {Object} The Firestore 'Fields' representation
    */
-  static encodeFields(obj, depth) {
+  static encodeFields(obj, allowDeletes, depth) {
     if (!is.defined(depth)) {
       depth = 1;
     }
@@ -538,7 +541,7 @@ class DocumentSnapshot {
 
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
-        let val = DocumentSnapshot.encodeValue(obj[prop], depth);
+        let val = DocumentSnapshot.encodeValue(obj[prop], allowDeletes, depth);
 
         if (val) {
           fields[prop] = val;
@@ -555,16 +558,23 @@ class DocumentSnapshot {
    *
    * @private
    * @param {Object} val The object to encode
+   * @param {boolean} allowDeletes Whether to allow the FieldValue.delete()
+   * sentinel.
    * @param {number=} depth The depth at the current encoding level
    * @returns {object|null} The Firestore Proto or null if we are deleting a
    * field.
    */
-  static encodeValue(val, depth) {
+  static encodeValue(val, allowDeletes, depth) {
     if (!is.defined(depth)) {
       depth = 1;
     }
 
     if (val === FieldValue.DELETE_SENTINEL) {
+      if (!allowDeletes) {
+        throw new Error(
+          'Deletes are only support in update() and set() with {merge:true}'
+        );
+      }
       return null;
     }
 
@@ -616,7 +626,7 @@ class DocumentSnapshot {
     if (is.array(val)) {
       let encodedElements = [];
       for (let i = 0; i < val.length; ++i) {
-        let enc = DocumentSnapshot.encodeValue(val[i], depth + 1);
+        let enc = DocumentSnapshot.encodeValue(val[i], false, depth + 1);
         if (enc) {
           encodedElements.push(enc);
         }
@@ -661,7 +671,7 @@ class DocumentSnapshot {
       return {
         valueType: 'mapValue',
         mapValue: {
-          fields: DocumentSnapshot.encodeFields(val, depth + 1),
+          fields: DocumentSnapshot.encodeFields(val, allowDeletes, depth + 1),
         },
       };
     }
@@ -887,6 +897,8 @@ class DocumentMask {
 
     extractFieldPaths(data);
 
+    fieldPaths.sort();
+
     return new DocumentMask(fieldPaths);
   }
 }
@@ -1096,9 +1108,7 @@ function validatePrecondition(options) {
 
   if (is.defined(options.exists)) {
     ++conditions;
-    if (!is.boolean(options.exists)) {
-      throw new Error('"exists" is not a boolean.');
-    }
+    throw new Error('"exists" is not supported.');
   }
 
   if (is.defined(options.lastUpdateTime)) {
