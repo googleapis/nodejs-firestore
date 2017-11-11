@@ -351,6 +351,7 @@ class WriteBatch {
         validate.maxNumberOfArguments('update', arguments, 3);
 
         Object.keys(dataOrField).forEach(key => {
+          validate.isFieldPath(key, key);
           updateMap.set(FieldPath.fromArgument(key), dataOrField[key]);
         });
 
@@ -477,9 +478,9 @@ class WriteBatch {
         if (resp.writeResults) {
           assert(
             writeRequests.length === resp.writeResults.length,
-            `Expected one write result per operation, but got ${resp
-              .writeResults
-              .length} results for ${writeRequests.length} operations.`
+            `Expected one write result per operation, but got ${
+              resp.writeResults.length
+            } results for ${writeRequests.length} operations.`
           );
 
           for (let i = 0; i < resp.writeResults.length; ++i) {

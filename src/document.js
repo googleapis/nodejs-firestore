@@ -1065,7 +1065,7 @@ class Precondition {
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
-function validateDocumentData(obj, usesPaths, depth) {
+function validateDocumentData(obj, depth) {
   if (!depth) {
     depth = 1;
   } else if (depth > MAX_DEPTH) {
@@ -1081,7 +1081,7 @@ function validateDocumentData(obj, usesPaths, depth) {
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
       if (isPlainObject(obj[prop])) {
-        validateDocumentData(obj[prop], false, depth + 1);
+        validateDocumentData(obj[prop], depth + 1);
       }
     }
   }

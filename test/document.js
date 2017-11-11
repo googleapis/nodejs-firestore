@@ -1376,13 +1376,11 @@ describe('update document', function() {
     ];
 
     for (let i = 0; i < invalidFields.length; ++i) {
-      try {
-        firestore.collection('col').select(invalidFields[i]);
-      } catch (err) {
-        assert.ok(
-          err.message.match(/Argument at index 0 is not a valid FieldPath. .*/)
-        );
-      }
+      assert.throws(() => {
+        const doc = {};
+        doc[invalidFields[i]] = 'foo';
+        firestore.doc('col/doc').update(doc);
+      }, /.*Argument ".*" is not a valid FieldPath.*/);
     }
   });
 

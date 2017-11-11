@@ -464,7 +464,7 @@ class WatchHelper {
 
   /**
    * A wrapper for writing tests that fail to run a watch.
-  */
+   */
   runFailedTest(expectedRequest, func, expectedError) {
     this.startWatch();
 
