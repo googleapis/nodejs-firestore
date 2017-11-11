@@ -80,4 +80,10 @@ describe('FieldPath', function() {
     let path = new FieldPath('f.o.o');
     assert.equal(path.formattedName, '`f.o.o`');
   });
+
+  it("doesn't allow empty components", function() {
+    assert.throws(() => {
+      new FieldPath('foo', '');
+    }, /Argument at index 1 should not be empty./);
+  });
 });

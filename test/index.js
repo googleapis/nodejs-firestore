@@ -539,14 +539,11 @@ describe('snapshot_() method', function() {
     );
 
     assert.equal(true, doc.exists);
-    assert.deepEqual(
-      {
-        a: bytesData,
-        b: new Date('1985-03-18T07:20:00.000Z'),
-        c: bytesData,
-      },
-      doc.data()
-    );
+    assert.deepEqual(doc.data(), {
+      a: bytesData,
+      b: new Date('1985-03-18T07:20:00.000Z'),
+      c: bytesData,
+    });
     assert.equal('1970-01-01T00:00:01.002000000Z', doc.createTime);
     assert.equal('1970-01-01T00:00:03.000004000Z', doc.updateTime);
     assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);

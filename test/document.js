@@ -912,7 +912,7 @@ describe('set document', function() {
             },
             valueType: 'mapValue',
           }),
-          updateMask('a', 'c.d')
+          updateMask('a', 'c.d', 'f')
         )
       );
       callback(null, defaultWriteResult);
@@ -920,7 +920,10 @@ describe('set document', function() {
 
     return firestore
       .doc('collectionId/documentId')
-      .set({a: 'b', c: {d: 'e'}}, {merge: true});
+      .set(
+        {a: 'b', c: {d: 'e'}, f: Firestore.FieldValue.delete()},
+        {merge: true}
+      );
   });
 
   it("doesn't split on dots", function() {
@@ -935,23 +938,31 @@ describe('set document', function() {
   it('validates merge option', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, 'foo');
-    }, new RegExp('Argument "options" is not a valid SetOptions. Input ' + 'is not an object.'));
+    }, /Argument "options" is not a valid SetOptions. Input is not an object./);
 
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {merge: 42});
-    }, new RegExp('Argument "options" is not a valid SetOptions. "merge" ' + 'is not a boolean.'));
+    }, /Argument "options" is not a valid SetOptions. "merge" is not a boolean./);
   });
 
   it('requires an object', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set(null);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a plain JavaScript object.'));
+    }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
+  });
+
+  it("doesn't support non-merge deletes", function() {
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .set({foo: Firestore.FieldValue.delete()});
+    }, /Deletes are only support in update\(\) and set\(\) with {merge:true}./);
   });
 
   it("doesn't accept arrays", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set([42]);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a plain JavaScript object.'));
+    }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 });
 
@@ -1045,11 +1056,11 @@ describe('update document', function() {
 
   it('generates proto', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, update(document()));
+      requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
       callback(null, defaultWriteResult);
     };
 
-    return firestore.doc('collectionId/documentId').update({});
+    return firestore.doc('collectionId/documentId').update({foo: 'bar'});
   });
 
   it('supports nested server timestamps', function() {
@@ -1080,18 +1091,15 @@ describe('update document', function() {
       callback(null, serverTimestampWriteResult);
     };
 
-    return firestore.doc('collectionId/documentId').update(
-      {
-        a: {b: Firestore.FieldValue.serverTimestamp()},
-        'c.d': Firestore.FieldValue.serverTimestamp(),
-      },
-      {exists: true}
-    );
+    return firestore.doc('collectionId/documentId').update({
+      a: {b: Firestore.FieldValue.serverTimestamp()},
+      'c.d': Firestore.FieldValue.serverTimestamp(),
+    });
   });
 
   it('returns update time', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, update(document()));
+      requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
 
       callback(null, {
         commitTime: {
@@ -1111,7 +1119,7 @@ describe('update document', function() {
 
     return firestore
       .doc('collectionId/documentId')
-      .update({})
+      .update({foo: 'bar'})
       .then(res => {
         assert.equal(res.writeTime, '1985-03-18T07:20:00.123000000Z');
       });
@@ -1148,8 +1156,22 @@ describe('update document', function() {
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
-        .update({}, {lastUpdateTime: 'foo'});
+        .update({foo: 'bar'}, {lastUpdateTime: 'foo'});
     }, /Specify a valid ISO 8601 timestamp for "lastUpdateTime"\./);
+  });
+
+  it('requires at least one field', function() {
+    assert.throws(() => {
+      firestore.doc('collectionId/documentId').update({});
+    }, /At least one field must be udpated./);
+  });
+
+  it('rejects nested delets', function() {
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .update({a: {b: Firestore.FieldValue.delete()}});
+    }, /Deletes are only allowed at the top-level of your object./);
   });
 
   it('with top-level document', function() {
@@ -1201,7 +1223,7 @@ describe('update document', function() {
               },
             }
           ),
-          updateMask('foo.bar', 'a.b.c')
+          updateMask('a.b.c', 'foo.bar')
         )
       );
 
@@ -1259,7 +1281,7 @@ describe('update document', function() {
             },
             valueType: 'mapValue',
           }),
-          updateMask('foo.foo', 'foo.bar', 'foo.deep.foo', 'foo.deep.bar')
+          updateMask('foo.bar', 'foo.deep.bar', 'foo.deep.foo', 'foo.foo')
         )
       );
 
@@ -1414,7 +1436,7 @@ describe('update document', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(
         request,
-        update(document('bar', 'foobar'), updateMask('foo', 'bar'))
+        update(document('bar', 'foobar'), updateMask('bar', 'foo'))
       );
       callback(null, defaultWriteResult);
     };

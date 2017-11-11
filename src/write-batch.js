@@ -205,7 +205,7 @@ class WriteBatch {
    */
   delete(documentRef, precondition) {
     validate.isDocumentReference('documentRef', documentRef);
-    validate.isOptionalPrecondition('precondition', precondition);
+    validate.isOptionalDeletePrecondition('precondition', precondition);
 
     let write = {
       delete: documentRef.formattedName,
@@ -252,7 +252,10 @@ class WriteBatch {
     validate.isDocument('data', data);
     validate.isOptionalSetOptions('options', options);
 
-    let fields = DocumentSnapshot.encodeFields(data, /* allowDeletes= */ options && options.merge);
+    let fields = DocumentSnapshot.encodeFields(
+      data,
+      /* allowDeletes= */ options && options.merge
+    );
 
     let write = {
       update: new DocumentSnapshot(documentRef, fields).toProto(),
@@ -334,7 +337,7 @@ class WriteBatch {
               arguments[i + 1]
             );
           } else {
-            validate.isPrecondition(i, arguments[i]);
+            validate.isUpdatePrecondition(i, arguments[i]);
             validate.maxNumberOfArguments('update', arguments, i + 1);
             precondition = new Precondition(arguments[i]);
           }
@@ -356,7 +359,10 @@ class WriteBatch {
         });
 
         if (is.defined(preconditionOrValues)) {
-          validate.isPrecondition('preconditionOrValues', preconditionOrValues);
+          validate.isUpdatePrecondition(
+            'preconditionOrValues',
+            preconditionOrValues
+          );
           precondition = new Precondition(preconditionOrValues);
         }
       } catch (err) {
@@ -569,7 +575,10 @@ module.exports = (
     Document: document.validateDocumentData,
     DocumentReference: validateDocumentReference,
     FieldPath: FieldPath.validateFieldPath,
-    Precondition: document.validatePrecondition,
+    UpdatePrecondition: precondition =>
+      document.validatePrecondition(precondition, /* allowExists= */ false),
+    DeletePrecondition: precondition =>
+      document.validatePrecondition(precondition, /* allowExists= */ true),
     SetOptions: document.validateSetOptions,
     UpdateMap: validateUpdateMap,
   });

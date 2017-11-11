@@ -19,19 +19,20 @@
 const assert = require('assert');
 const path = require('path');
 const is = require('is');
+const through = require('through2');
 const googleProtoFiles = require('google-proto-files');
 const varint = require('varint');
 const protobufjs = require('protobufjs');
 const grpc = require('grpc');
-const Firestore = require('../');
 
-let reference = require('../src/reference')(Firestore);
+const Firestore = require('../');
+const reference = require('../src/reference')(Firestore);
 const document = require('../src/document')(reference.DocumentReference);
 const DocumentSnapshot = document.DocumentSnapshot;
-
 const convert = require('../src/convert');
 const ResourcePath = require('../src/path').ResourcePath;
 
+/** Loads the Protobuf definition and the binary test data. */
 function loadTestCases() {
   const protobufRoot = new protobufjs.Root();
 
@@ -43,11 +44,11 @@ function loadTestCases() {
   };
 
   const protoDefinition = protobufRoot.loadSync(
-    path.join(__dirname, '../protos/test.proto')
+    path.join(__dirname, 'test_definition.proto')
   );
 
   const binaryProtoData = require('fs').readFileSync(
-    path.join(__dirname, 'testdata/tests.binprotos')
+    path.join(__dirname, 'test_data.binprotos')
   );
 
   const testType = protoDefinition.lookupType('tests.Test');
@@ -69,16 +70,77 @@ function loadTestCases() {
   return testCases;
 }
 
+/** Converst a JSON object into a JS Object suitable for the Node API. */
+function convertInput(json) {
+  const obj = JSON.parse(json);
+
+  function convertValue(value) {
+    if (is.object(value)) {
+      return convertObject(value);
+    } else if (is.array(value)) {
+      return convertArray(value);
+    } else if (value === 'Delete') {
+      return Firestore.FieldValue.delete();
+    } else if (value === 'ServerTimestamp') {
+      return Firestore.FieldValue.serverTimestamp();
+    }
+
+    return value;
+  }
+
+  function convertArray(arr) {
+    for (let i = 0; i < arr.length; ++i) {
+      arr[i] = convertValue(arr[i]);
+    }
+    return arr;
+  }
+
+  function convertObject(obj) {
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        obj[key] = convertValue(obj[key]);
+      }
+    }
+    return obj;
+  }
+
+  return convertValue(obj);
+}
+
+/** Converts a CommitRequest in Proto3 JSON to Protobuf JS format. */
+function convertCommit(commitRequest) {
+  const deepCopy = JSON.parse(JSON.stringify(commitRequest));
+  for (let write of deepCopy.writes) {
+    if (write.update) {
+      write.update.fields = convert.documentFromJson(write.update.fields);
+    }
+  }
+
+  return deepCopy;
+}
+
+/** Converts a Protobuf Precondition to the expected user input. */
+function convertPrecondition(precondition) {
+  const result = JSON.parse(JSON.stringify(precondition));
+  if (result.updateTime) {
+    result.lastUpdateTime = DocumentSnapshot.toISOTime(result.updateTime);
+    delete result.updateTime;
+  }
+  return result;
+}
+
+/** List of test cases that are ignored. */
 const ignored = [
+  // Firestore Node does not omit empty writes
   'ServerTimestamp alone',
   'nested ServerTimestamp field',
   'multiple ServerTimestamp fields',
-  "ServerTimestamp with dotted field",
+  'ServerTimestamp with dotted field',
 
-    // Bug:
+  // Test data doesn't allow update with {a:delete}
   'Delete cannot be nested',
 
-  // No field support
+  // Node doesn't support field masks for set().
   'Merge with a field',
   'Merge with a nested field',
   'Merge field is not a leaf',
@@ -89,237 +151,171 @@ const ignored = [
   'Merge fields must all be present in data',
 ];
 
-describe('Conformance runner', function() {
-  function createInstance() {
-    return new Firestore({
-      projectId: 'projectID',
-      sslCreds: grpc.credentials.createInsecure(),
-    });
-  }
+/** If non-empty, list the test cases to run exclusively. */
+const exclusive = [];
 
-  function runTest(spec) {
-    if (ignored.find(val => val === spec.description)) {
-      console.log(`Skipping: ${spec.description}`);
-      return Promise.resolve();
-    }
+function runTest(spec) {
+  console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`); // eslint-disable-line no-console
 
-    console.log(`Running test: ${spec.description}`);
-
-    const firestore = createInstance();
-
-    function docRef(path) {
-      const relativePath = ResourcePath.fromSlashSeparatedString(path)
-        .relativeName;
-      return firestore.doc(relativePath);
-    }
-
-    function convertInput(json) {
-      const obj = JSON.parse(json);
-
-      function convertArray(arr) {
-        for (let i = 0; i < arr.length; ++i) {
-          if (is.object(arr[i])) {
-            arr[i] = convertObject(arr[i]);
-          } else if (is.array(arr[i])) {
-            arr[i] = convertArray(arr[i]);
-          } else if (arr[i] === 'Delete') {
-            arr[i] = Firestore.FieldValue.delete();
-          } else if (arr[i] === 'ServerTimestamp') {
-            arr[i] = Firestore.FieldValue.serverTimestamp();
-          }
-        }
-        return arr;
-      }
-
-      function convertObject(obj) {
-        for (const key in obj) {
-          if (obj.hasOwnProperty(key)) {
-            if (is.object(obj[key])) {
-              obj[key] = convertObject(obj[key]);
-            } else if (is.array(obj[key])) {
-              obj[key] = convertArray(obj[key]);
-            } else if (obj[key] === 'Delete') {
-              obj[key] = Firestore.FieldValue.delete();
-            } else if (obj[key] === 'ServerTimestamp') {
-              obj[key] = Firestore.FieldValue.serverTimestamp();
-            }
-          }
-        }
-        return obj;
-      }
-
-      convertObject(obj);
-
-      return obj;
-    }
-
-    function convertCommit(commitRequest) {
-      const deepCopy = JSON.parse(JSON.stringify(commitRequest));
-      for (let write of deepCopy.writes) {
-        if (write.update) {
-          write.update.fields = convert.documentFromJson(write.update.fields);
-        }
-      }
-
-      return deepCopy;
-    }
-
-    // TODO: use second precondition from test
-
-    function convertPrecondition(precondition) {
-      const result = JSON.parse(JSON.stringify(precondition));
-      if (result.updateTime) {
-        result.lastUpdateTime = DocumentSnapshot.toISOTime(result.updateTime);
-        delete result.updateTime;
-      }
-      return result;
-      // ...
-    }
-
-    let resolve;
-    let reject;
-
-    const deferred = new Promise((res, rej) => {
-      resolve = res;
-      reject = rej;
-    });
-
-    const getSpec = spec.get;
-    const createSpec = spec.create;
-    const setSpec = spec.set;
-    const updateSpec = spec.update || spec.updatePaths;
-    const deleteSpec = spec.delete;
-
-    if (getSpec) {
-      firestore.api.Firestore._batchGetDocuments = function(request) {
-        const getDocument = getSpec.request;
-        assert.equal(request.documents[0], getDocument.name);
-        resolve();
-      };
-      docRef(getSpec.docRefPath).get();
-    } else if (createSpec) {
-      firestore.api.Firestore._commit = function(request) {
-        const expected = convertCommit(createSpec.request);
-        try {
-          assert.deepEqual(request, expected);
-        } catch (err) {
-          console.log('Expceted: ');
-          console.log(JSON.stringify(expected));
-          console.log('Actual: ');
-          console.log(JSON.stringify(request));
-          reject();
-        }
-        resolve();
-      };
-
-      if (createSpec.isError) {
-        assert.throws(() => {
-          docRef(createSpec.docRefPath).create(
-            convertInput(createSpec.jsonData)
-          );
-        });
-        resolve();
-      } else {
-        docRef(createSpec.docRefPath).create(convertInput(createSpec.jsonData));
-      }
-    } else if (setSpec) {
-      firestore.api.Firestore._commit = function(request) {
-        const expected = convertCommit(setSpec.request);
-        try {
-          assert.deepEqual(request, expected);
-        } catch (err) {
-          console.log('Expceted: ');
-          console.log(JSON.stringify(expected));
-          console.log('Actual: ');
-          console.log(JSON.stringify(request));
-          reject();
-        }
-        resolve();
-      };
-
-      const isMerge = !!(setSpec.option && setSpec.option.all);
-
-      if (setSpec.isError) {
-        assert.throws(() => {
-          docRef(setSpec.docRefPath).set(convertInput(setSpec.jsonData), {
-            merge: isMerge,
-          });
-        });
-        resolve();
-      } else {
-        docRef(setSpec.docRefPath).set(convertInput(setSpec.jsonData), {
-          merge: isMerge,
-        });
-      }
-    } else if (updateSpec) {
-      firestore.api.Firestore._commit = function(request) {
-        const expected = convertCommit(updateSpec.request);
-        try {
-          assert.deepEqual(request, expected);
-        } catch (err) {
-          console.log('Expceted: ');
-          console.log(JSON.stringify(expected));
-          console.log('Actual: ');
-          console.log(JSON.stringify(request));
-          reject();
-        }
-        resolve();
-      };
-
-      // message UpdatePathsTest {
-      //   string doc_ref_path = 1; // path of doc
-      //   google.firestore.v1beta1.Precondition precondition = 2; // precondition in call, if any
-      //   // parallel sequences: field_paths[i] corresponds to json_values[i]
-      //   repeated FieldPath field_paths = 3; // the argument field paths
-      //   repeated string json_values = 4;    // the argument values, as JSON
-      //   google.firestore.v1beta1.CommitRequest request = 5; // expected rquest
-      //   bool is_error = 6; // call signals an error
-      // }
-
-      let varargs = [];
-
-      if (updateSpec.jsonData) {
-        varargs[0] = convertInput(updateSpec.jsonData);
-      } else {
-        for (let i = 0; i < updateSpec.fieldPaths; ++i) {
-          varargs[2 * i] = new Firestore.FieldPath(
-            updateSpec.fieldPaths[i].fields
-          );
-        }
-
-        for (let i = 0; i < updateSpec.jsonValues; ++i) {
-          varargs[2 * i + 1] = convertInput(updateSpec.jsonValues[i]);
-        }
-      }
-
-      if (updateSpec.precondition) {
-        varargs.push(convertPrecondition(updateSpec.precondition));
-      }
-
-      var document = docRef(updateSpec.docRefPath);
-
-      if (updateSpec.isError) {
-        assert.throws(() => {
-          document.update.apply(document, varargs);
-        });
-        resolve();
-      } else {
-        document.update.apply(document, varargs);
-      }
-    } else {
-      reject(new Error(`Unhandled Spec: ${JSON.stringify(spec)}`));
-    }
-
-    return deferred;
-  }
-
-  it('runs all tests', function() {
-    let result = Promise.resolve();
-
-    for (let testCase of loadTestCases()) {
-      result = result.then(() => runTest(testCase));
-    }
-
-    return result;
+  const firestore = new Firestore({
+    projectId: 'projectID',
+    sslCreds: grpc.credentials.createInsecure(),
   });
+
+  const docRef = function(path) {
+    const relativePath = ResourcePath.fromSlashSeparatedString(path)
+      .relativeName;
+    return firestore.doc(relativePath);
+  };
+
+  const updateTest = function(spec) {
+    firestore.api.Firestore._commit = function(request) {
+      const expected = convertCommit(spec.request);
+      assert.deepEqual(request, expected);
+      resolve();
+    };
+
+    let varargs = [];
+
+    if (spec.jsonData) {
+      varargs[0] = convertInput(spec.jsonData);
+    } else {
+      for (let i = 0; i < spec.fieldPaths.length; ++i) {
+        varargs[2 * i] = new Firestore.FieldPath(spec.fieldPaths[i].field);
+      }
+      for (let i = 0; i < spec.jsonValues.length; ++i) {
+        varargs[2 * i + 1] = convertInput(spec.jsonValues[i]);
+      }
+    }
+
+    if (spec.precondition) {
+      varargs.push(convertPrecondition(spec.precondition));
+    }
+
+    const document = docRef(spec.docRefPath);
+    document.update.apply(document, varargs);
+  };
+
+  const deleteTest = function(spec) {
+    firestore.api.Firestore._commit = function(request) {
+      const expected = convertCommit(spec.request);
+      assert.deepEqual(request, expected);
+      resolve();
+    };
+
+    if (spec.precondition) {
+      const precondition = convertPrecondition(deleteSpec.precondition);
+      docRef(spec.docRefPath).delete(precondition);
+    } else {
+      docRef(spec.docRefPath).delete();
+    }
+  };
+
+  const setTest = function(spec) {
+    firestore.api.Firestore._commit = function(request) {
+      const expected = convertCommit(spec.request);
+      assert.deepEqual(request, expected);
+      resolve();
+    };
+
+    const isMerge = !!(spec.option && spec.option.all);
+
+    docRef(setSpec.docRefPath).set(convertInput(spec.jsonData), {
+      merge: isMerge,
+    });
+  };
+
+  const createTest = function(spec) {
+    firestore.api.Firestore._commit = function(request) {
+      const expected = convertCommit(spec.request);
+      assert.deepEqual(request, expected);
+      resolve();
+    };
+
+    docRef(spec.docRefPath).create(convertInput(spec.jsonData));
+  };
+
+  const getTest = function(spec) {
+    firestore.api.Firestore._batchGetDocuments = function(request) {
+      const getDocument = spec.request;
+      assert.equal(request.documents[0], getDocument.name);
+      resolve();
+      return through();
+    };
+
+    docRef(spec.docRefPath).get();
+  };
+
+  let resolve;
+  let reject;
+
+  const deferred = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  const getSpec = spec.get;
+  const createSpec = spec.create;
+  const setSpec = spec.set;
+  const updateSpec = spec.update || spec.updatePaths;
+  const deleteSpec = spec.delete;
+
+  if (getSpec) {
+    getTest(getSpec);
+  } else if (createSpec) {
+    if (createSpec.isError) {
+      assert.throws(() => {
+        createTest(createSpec);
+      });
+      resolve();
+    } else {
+      createTest(createSpec);
+    }
+  } else if (setSpec) {
+    if (setSpec.isError) {
+      assert.throws(() => {
+        setTest(setSpec);
+      });
+      resolve();
+    } else {
+      setTest(setSpec);
+    }
+  } else if (updateSpec) {
+    if (updateSpec.isError) {
+      assert.throws(() => {
+        updateTest(updateSpec);
+      });
+      resolve();
+    } else {
+      updateTest(updateSpec);
+    }
+  } else if (deleteSpec) {
+    if (deleteSpec.isError) {
+      assert.throws(() => {
+        deleteTest(deleteSpec);
+      });
+      resolve();
+    } else {
+      deleteTest(deleteSpec);
+    }
+  } else {
+    reject(new Error(`Unhandled Spec: ${JSON.stringify(spec)}`));
+  }
+
+  return deferred;
+}
+
+describe('Spec tests', function() {
+  let count = 0;
+
+  for (let testCase of loadTestCases()) {
+    const isIgnored = ignored.find(val => val === testCase.description);
+    const isExclusive = exclusive.find(val => val === testCase.description);
+
+    if (isIgnored || (exclusive.length > 0 && !isExclusive)) {
+      xit(`${count++}) ${testCase.description}`, () => {});
+    } else {
+      it(`${count++}) ${testCase.description}`, () => runTest(testCase));
+    }
+  }
 });
