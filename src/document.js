@@ -127,8 +127,9 @@ class GeoPoint {
    * @return {string} The string representation.
    */
   toString() {
-    return `GeoPoint { latitude: ${this.latitude}, longitude: ${this
-      .longitude} }`;
+    return `GeoPoint { latitude: ${this.latitude}, longitude: ${
+      this.longitude
+    } }`;
   }
 
   /**
@@ -680,7 +681,7 @@ class DocumentSnapshot {
    * This functions turns { foo.bar : foobar } into { foo { bar : foobar }}
    *
    * @private
-   * @param {Map.<string|FieldPath, *>} data - The field/value map to expand.
+   * @param {Map.<FieldPath, *>} data - The field/value map to expand.
    * @returns {DocumentData} The expanded JavaScript object.
    */
   static expandMap(data) {
@@ -701,29 +702,17 @@ class DocumentSnapshot {
           target[key] = {};
           merge(target[key], value, path, pos + 1);
         }
-      } else if (isPlainObject(target[key])) {
-        if (isLast) {
-          // The existing object has deeper nesting that the value we are trying
-          // to merge.
-          throw new Error(
-            `Field "${path.join('.')}" has conflicting definitions.`
-          );
-        } else {
-          merge(target[key], value, path, pos + 1);
-        }
       } else {
-        // We are trying to merge an object with a primitive.
-        throw new Error(
-          `Field "${path.slice(0, pos + 1).join('.')}" has ` +
-            `conflicting definitions.`
-        );
+        validate.isPlainObject(typeof target[key], target[key]);
+        assert(!isLast, "Can't merge current value into a nested object");
+        merge(target[key], value, path, pos + 1);
       }
     }
 
     let res = {};
 
     data.forEach((value, key) => {
-      let components = FieldPath.fromArgument(key).toArray();
+      let components = key.toArray();
       merge(res, value, components, 0);
     });
 
@@ -1065,7 +1054,7 @@ class Precondition {
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
-function validateDocumentData(obj, usesPaths, depth) {
+function validateDocumentData(obj, depth) {
   if (!depth) {
     depth = 1;
   } else if (depth > MAX_DEPTH) {
@@ -1081,7 +1070,7 @@ function validateDocumentData(obj, usesPaths, depth) {
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
       if (isPlainObject(obj[prop])) {
-        validateDocumentData(obj[prop], false, depth + 1);
+        validateDocumentData(obj[prop], depth + 1);
       }
     }
   }
@@ -1166,6 +1155,7 @@ module.exports = DocumentRefType => {
   DocumentReference = DocumentRefType;
   validate = require('./validate')({
     FieldPath: FieldPath.validateFieldPath,
+    PlainObject: isPlainObject,
   });
   return {
     DocumentMask,

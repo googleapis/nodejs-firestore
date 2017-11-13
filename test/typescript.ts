@@ -49,6 +49,8 @@ xdescribe('firestore.d.ts', function() {
     firestore.getAll(docRef1, docRef2).then(
         (docs: DocumentSnapshot[]) => {
         });
+    firestore.getCollections().then((collections:CollectionReference[]) => {
+    });
     const transactionResult: Promise<string> = firestore.runTransaction(
         (updateFunction: Transaction) => {
           return Promise.resolve("string")
@@ -119,6 +121,8 @@ xdescribe('firestore.d.ts', function() {
     const parent: CollectionReference = docRef.parent;
     const path: string = docRef.path;
     const subcollection: CollectionReference = docRef.collection('coll');
+    docRef.getCollections().then((collections:CollectionReference[]) => {
+    });
     docRef.get().then((snapshot: DocumentSnapshot) => {
     });
     docRef.create(documentData).then(

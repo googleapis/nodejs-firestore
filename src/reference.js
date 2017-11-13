@@ -293,8 +293,8 @@ class DocumentReference {
   /**
    * Fetches the subcollections that are direct children of this document.
    *
-   * @returns {Promise.<Array.<CollectionReference>>} A Promise that
-   * contains an array with CollectionReferences.
+   * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
+   * with an array of CollectionReferences.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -1248,7 +1248,10 @@ class Query {
 
       if (this._fieldOrders[i].field === FieldPath._DOCUMENT_ID) {
         if (is.string(fieldValue)) {
-          fieldValue = this._referencePath.append(fieldValues[i]);
+          fieldValue = new DocumentReference(
+            this._firestore,
+            this._referencePath.append(fieldValues[i])
+          );
         } else if (is.instance(fieldValue, DocumentReference)) {
           if (!this._referencePath.isPrefixOf(fieldValue.ref)) {
             throw new Error(
@@ -1260,6 +1263,13 @@ class Query {
           throw new Error(
             'The corresponding value for FieldPath.documentId() must be a ' +
               'string or a DocumentReference.'
+          );
+        }
+
+        if (fieldValue.ref.parent().compareTo(this._referencePath) !== 0) {
+          throw new Error(
+            'Only a direct child can be used as a query boundary. ' +
+              `Found: '${fieldValue.path}'.`
           );
         }
       }

@@ -351,6 +351,7 @@ class WriteBatch {
         validate.maxNumberOfArguments('update', arguments, 3);
 
         Object.keys(dataOrField).forEach(key => {
+          validate.isFieldPath(key, key);
           updateMap.set(FieldPath.fromArgument(key), dataOrField[key]);
         });
 
@@ -369,6 +370,8 @@ class WriteBatch {
         throw new Error(`${argumentError}: ${err.message}`);
       }
     }
+
+    validate.isUpdateMap('dataOrField', updateMap);
 
     let documentMask = DocumentMask.fromMap(updateMap);
     let expandedObject = DocumentSnapshot.expandMap(updateMap);
@@ -475,9 +478,9 @@ class WriteBatch {
         if (resp.writeResults) {
           assert(
             writeRequests.length === resp.writeResults.length,
-            `Expected one write result per operation, but got ${resp
-              .writeResults
-              .length} results for ${writeRequests.length} operations.`
+            `Expected one write result per operation, but got ${
+              resp.writeResults.length
+            } results for ${writeRequests.length} operations.`
           );
 
           for (let i = 0; i < resp.writeResults.length; ++i) {
@@ -523,6 +526,30 @@ class WriteBatch {
   }
 }
 
+/*!
+ * Validates that the update data does not contain any ambiguous field
+ * definitions (such as 'a.b' and 'a').
+ *
+ * @param {Map.<FieldPath, *>} data - An update map with field/value pairs.
+ * @returns {boolean} 'true' if the input is a valid update map.
+ */
+function validateUpdateMap(data) {
+  const fields = [];
+  data.forEach((value, key) => {
+    fields.push(key);
+  });
+
+  fields.sort((left, right) => left.compareTo(right));
+
+  for (let i = 1; i < fields.length; ++i) {
+    if (fields[i - 1].isPrefixOf(fields[i])) {
+      throw new Error(`Field "${fields[i - 1]}" has conflicting definitions.`);
+    }
+  }
+
+  return true;
+}
+
 module.exports = (
   FirestoreType,
   DocumentReferenceType,
@@ -540,6 +567,7 @@ module.exports = (
     FieldPath: FieldPath.validateFieldPath,
     Precondition: document.validatePrecondition,
     SetOptions: document.validateSetOptions,
+    UpdateMap: validateUpdateMap,
   });
   return {
     WriteBatch,
