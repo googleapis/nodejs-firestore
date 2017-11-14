@@ -529,12 +529,10 @@ class DocumentSnapshot {
    *
    * @private
    * @param {Object} obj The object to encode
-   * @param {boolean} allowDeletes Whether to allow the FieldValue.delete()
-   * sentinel.
    * @param {number=} depth The depth at the current encoding level
    * @returns {Object} The Firestore 'Fields' representation
    */
-  static encodeFields(obj, allowDeletes, depth) {
+  static encodeFields(obj, depth) {
     if (!is.defined(depth)) {
       depth = 1;
     }
@@ -543,7 +541,7 @@ class DocumentSnapshot {
 
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
-        let val = DocumentSnapshot.encodeValue(obj[prop], allowDeletes, depth);
+        let val = DocumentSnapshot.encodeValue(obj[prop], depth);
 
         if (val) {
           fields[prop] = val;
@@ -560,23 +558,16 @@ class DocumentSnapshot {
    *
    * @private
    * @param {Object} val The object to encode
-   * @param {boolean} allowDeletes Whether to allow the FieldValue.delete()
-   * sentinel.
    * @param {number=} depth The depth at the current encoding level
    * @returns {object|null} The Firestore Proto or null if we are deleting a
    * field.
    */
-  static encodeValue(val, allowDeletes, depth) {
+  static encodeValue(val, depth) {
     if (!is.defined(depth)) {
       depth = 1;
     }
 
     if (val === FieldValue.DELETE_SENTINEL) {
-      if (!allowDeletes) {
-        throw new Error(
-          'Deletes are only support in update() and set() with {merge:true}.'
-        );
-      }
       return null;
     }
 
@@ -673,7 +664,7 @@ class DocumentSnapshot {
       return {
         valueType: 'mapValue',
         mapValue: {
-          fields: DocumentSnapshot.encodeFields(val, allowDeletes, depth + 1),
+          fields: DocumentSnapshot.encodeFields(val, depth + 1),
         },
       };
     }
@@ -1069,13 +1060,38 @@ class Precondition {
  * Validates a JavaScript object for usage as a Firestore document.
  *
  * @param {Object} obj JavaScript object to validate.
- * @param {boolean=} usesPaths Whether the object is keyed by field paths
- * (e.g. for document updates).
+ * @param {boolean=} options.allowDeletes Whether field deletes are supported
+ * at the top level (e.g. for document updates).
+ * @returns {boolean} 'true' when the object is valid.
+ * @throws {Error} when the object is invalid.
+ */
+function validateDocumentData(obj, options) {
+  if (!isPlainObject(obj)) {
+    throw new Error('Input is not a plain JavaScript object.');
+  }
+
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      validateFieldData(obj[prop], options, /* depth= */ 1);
+    }
+  }
+
+  return true;
+}
+
+/*!
+ * Validates a JavaScript value for usage as a Firestore value.
+ *
+ * @param {Object} obj JavaScript value to validate.
+ * @param {boolean=} options.allowDeletes Whether field deletes are supported
+ * at the top level (e.g. for document updates).
  * @param {number=} depth The current depth of the traversal.
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
-function validateDocumentData(obj, depth) {
+function validateFieldData(obj, options, depth) {
+  options = options || {};
+
   if (!depth) {
     depth = 1;
   } else if (depth > MAX_DEPTH) {
@@ -1084,20 +1100,25 @@ function validateDocumentData(obj, depth) {
     );
   }
 
-  if (!isPlainObject(obj)) {
-    throw new Error('Input is not a plain JavaScript object.');
+  if (
+    obj === FieldValue.DELETE_SENTINEL &&
+    (!options.allowDeletes || depth > 1)
+  ) {
+    throw new Error(
+      'Deletes are only supported at the top-level for updates() or sets() with {merge:true}.'
+    );
   }
 
-  for (let prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      if (obj[prop] === FieldValue.DELETE_SENTINEL && depth > 1) {
-        throw new Error(
-          'Deletes are only allowed at the top-level of your object.'
-        );
+  if (isPlainObject(obj)) {
+    for (let prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        validateFieldData(obj[prop], options, depth + 1);
       }
-      if (isPlainObject(obj[prop])) {
-        validateDocumentData(obj[prop], depth + 1);
-      }
+    }
+  }
+  if (is.array(obj)) {
+    for (let prop of obj) {
+      validateFieldData(obj[prop], options, depth + 1);
     }
   }
 
@@ -1193,6 +1214,7 @@ module.exports = DocumentRefType => {
     DocumentTransform,
     Precondition,
     GeoPoint,
+    validateFieldData,
     validateDocumentData,
     validatePrecondition,
     validateSetOptions,

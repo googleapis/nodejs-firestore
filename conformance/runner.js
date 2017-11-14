@@ -130,29 +130,19 @@ function convertPrecondition(precondition) {
 }
 
 /** List of test cases that are ignored. */
-const ignored = [
+const ignoredRe = [
   // Firestore Node does not omit empty writes
-  'ServerTimestamp alone',
-  'nested ServerTimestamp field',
-  'multiple ServerTimestamp fields',
-  'ServerTimestamp with dotted field',
-
-  // Test data doesn't allow update with {a:delete}
-  'Delete cannot be nested',
+  /(create|set|update|update-paths): ServerTimestamp alone/,
+  /(create|set|update|update-paths): nested ServerTimestamp field/,
+  /(create|set|update|update-paths): multiple ServerTimestamp fields/,
+  /(create|set|update|update-paths): ServerTimestamp with dotted field/,
 
   // Node doesn't support field masks for set().
-  'Merge with a field',
-  'Merge with a nested field',
-  'Merge field is not a leaf',
-  'Merge with FieldPaths',
-  'ServerTimestamp with Merge of both fields',
-  'If is ServerTimestamp not in Merge, no transform',
-  'If no ordinary values in Merge, no write',
-  'Merge fields must all be present in data',
+  /^set-merge: .*$/,
 ];
 
 /** If non-empty, list the test cases to run exclusively. */
-const exclusive = [];
+const exclusiveRe = [];
 
 function runTest(spec) {
   console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`); // eslint-disable-line no-console
@@ -306,16 +296,14 @@ function runTest(spec) {
 }
 
 describe('Spec tests', function() {
-  let count = 0;
-
   for (let testCase of loadTestCases()) {
-    const isIgnored = ignored.find(val => val === testCase.description);
-    const isExclusive = exclusive.find(val => val === testCase.description);
+    const isIgnored = ignoredRe.find(re => re.test(testCase.description));
+    const isExclusive = exclusiveRe.find(re => re.test(testCase.description));
 
-    if (isIgnored || (exclusive.length > 0 && !isExclusive)) {
-      xit(`${count++}) ${testCase.description}`, () => {});
+    if (isIgnored || (exclusiveRe.length > 0 && !isExclusive)) {
+      xit(`${testCase.description}`, () => {});
     } else {
-      it(`${count++}) ${testCase.description}`, () => runTest(testCase));
+      it(`${testCase.description}`, () => runTest(testCase));
     }
   }
 });

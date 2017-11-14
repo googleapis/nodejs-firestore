@@ -30,7 +30,7 @@ const DATABASE_ROOT = 'projects/test-project/databases/(default)';
 const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
   'Update\\(\\) requires either ' +
     'a single JavaScript object or an alternating list of field/value pairs ' +
-    'that can be followed by an optional Precondition'
+    'that can be followed by an optional precondition.'
 );
 
 // Change the argument to 'console.log' to enable debug output.
@@ -956,7 +956,7 @@ describe('set document', function() {
       firestore
         .doc('collectionId/documentId')
         .set({foo: Firestore.FieldValue.delete()});
-    }, /Deletes are only support in update\(\) and set\(\) with {merge:true}./);
+    }, /Deletes are only supported at the top-level for updates\(\) or sets\(\) with {merge:true}./);
   });
 
   it("doesn't accept arrays", function() {
@@ -1166,12 +1166,18 @@ describe('update document', function() {
     }, /At least one field must be udpated./);
   });
 
-  it('rejects nested delets', function() {
+  it('rejects nested deletes', function() {
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .update({a: {b: Firestore.FieldValue.delete()}});
-    }, /Deletes are only allowed at the top-level of your object./);
+    }, /Deletes are only supported at the top-level for updates\(\) or sets\(\) with {merge:true}./);
+
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .update('a', {b: Firestore.FieldValue.delete()});
+    }, /Deletes are only supported at the top-level for updates\(\) or sets\(\) with {merge:true}./);
   });
 
   it('with top-level document', function() {

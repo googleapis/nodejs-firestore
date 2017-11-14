@@ -161,7 +161,7 @@ class WriteBatch {
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data);
 
-    let fields = DocumentSnapshot.encodeFields(data, /* allowDeletes= */ false);
+    let fields = DocumentSnapshot.encodeFields(data);
 
     let write = {
       update: new DocumentSnapshot(documentRef, fields).toProto(),
@@ -249,13 +249,12 @@ class WriteBatch {
    */
   set(documentRef, data, options) {
     validate.isDocumentReference('documentRef', documentRef);
-    validate.isDocument('data', data);
+    validate.isDocument('data', data, {
+      allowDeletes: options && options.merge,
+    });
     validate.isOptionalSetOptions('options', options);
 
-    let fields = DocumentSnapshot.encodeFields(
-      data,
-      /* allowDeletes= */ options && options.merge
-    );
+    let fields = DocumentSnapshot.encodeFields(data);
 
     let write = {
       update: new DocumentSnapshot(documentRef, fields).toProto(),
@@ -321,7 +320,7 @@ class WriteBatch {
     const argumentError =
       'Update() requires either a single JavaScript ' +
       'object or an alternating list of field/value pairs that can be ' +
-      'followed by an optional Precondition';
+      'followed by an optional precondition.';
 
     let usesVarargs =
       is.string(dataOrField) || is.instance(dataOrField, FieldPath);
@@ -332,6 +331,9 @@ class WriteBatch {
           if (is.string(arguments[i]) || is.instance(arguments[i], FieldPath)) {
             validate.isFieldPath(i, arguments[i]);
             validate.minNumberOfArguments('update', arguments, i + 1);
+            validate.isFieldData('dataOrField', arguments[i + 1], {
+              allowDeletes: true,
+            });
             updateMap.set(
               FieldPath.fromArgument(arguments[i]),
               arguments[i + 1]
@@ -346,11 +348,13 @@ class WriteBatch {
         Firestore.log('WriteBatch.update', 'Varargs validation failed:', err);
         // We catch the validation error here and re-throw to provide a better
         // error message.
-        throw new Error(`${argumentError}.`);
+        throw new Error(`${argumentError} ${err.message}`);
       }
     } else {
       try {
-        validate.isDocument('dataOrField', dataOrField, true);
+        validate.isDocument('dataOrField', dataOrField, {
+          allowDeletes: true,
+        });
         validate.maxNumberOfArguments('update', arguments, 3);
 
         Object.keys(dataOrField).forEach(key => {
@@ -373,7 +377,7 @@ class WriteBatch {
         );
         // We catch the validation error here and prefix the error with a custom
         // message to describe the usage of update() better.
-        throw new Error(`${argumentError}: ${err.message}`);
+        throw new Error(`${argumentError} ${err.message}`);
       }
     }
 
@@ -383,7 +387,7 @@ class WriteBatch {
     let expandedObject = DocumentSnapshot.expandMap(updateMap);
     let document = new DocumentSnapshot(
       documentRef,
-      DocumentSnapshot.encodeFields(expandedObject, /* allowDeletes= */ true)
+      DocumentSnapshot.encodeFields(expandedObject)
     );
 
     let write = {
@@ -574,6 +578,7 @@ module.exports = (
   validate = require('./validate')({
     Document: document.validateDocumentData,
     DocumentReference: validateDocumentReference,
+    FieldData: document.validateFieldData,
     FieldPath: FieldPath.validateFieldPath,
     UpdatePrecondition: precondition =>
       document.validatePrecondition(precondition, /* allowExists= */ false),
