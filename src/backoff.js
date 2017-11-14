@@ -50,6 +50,11 @@ const BACKOFF_MAX_DELAY_MS = 60 * 1000;
 const BACKOFF_FACTOR = 1.5;
 
 /*!
+ * The jitter to distribute the backoff attempts by.
+ */
+const JITTER_FACTOR = 1.0;
+
+/*!
  * List of GRPC Error Codes.
  *
  * This corresponds to
@@ -230,7 +235,19 @@ function isResourceExhaustedError(error) {
  * @private
  */
 class ExponentialBackoff {
-  constructor() {
+  /**
+   * @param {number=} options.initialDelayMs Optional override for the initial
+   * retry delay.
+   * @param {number=} options.backoffFactor Optional override for the
+   * exponential backoff factor.
+   * @param {number=} options.maxDelayMs Optional override for the maximum
+   * retry delay.
+   * @param {number=} options.jitterFactor Optional override to control the
+   * jitter. Supported ranges are [0,1].
+   */
+  constructor(options) {
+    options = options || {};
+
     /**
      * The initial delay (used as the base delay on the first retry attempt).
      * Note that jitter will still be applied, so the actual delay could be as
@@ -239,7 +256,10 @@ class ExponentialBackoff {
      * @type {number}
      * @private
      */
-    this._initialDelayMs = BACKOFF_INITIAL_DELAY_MS;
+    this._initialDelayMs =
+      options.initialDelayMs !== undefined
+        ? options.initialDelayMs
+        : BACKOFF_INITIAL_DELAY_MS;
 
     /**
      * The multiplier to use to determine the extended base delay after each
@@ -247,7 +267,10 @@ class ExponentialBackoff {
      * @type {number}
      * @private
      */
-    this._backoffFactor = BACKOFF_FACTOR;
+    this._backoffFactor =
+      options.backoffFactor !== undefined
+        ? options.backoffFactor
+        : BACKOFF_FACTOR;
 
     /**
      * The maximum base delay after which no further backoff is performed.
@@ -257,7 +280,20 @@ class ExponentialBackoff {
      * @type {number}
      * @private
      */
-    this._maxDelayMs = BACKOFF_MAX_DELAY_MS;
+    this._maxDelayMs =
+      options.maxDelayMs !== undefined
+        ? options.maxDelayMs
+        : BACKOFF_MAX_DELAY_MS;
+
+    /**
+     * The jitter factor that controls the random distribution of the backoff
+     * points.
+     *
+     * @type {number}
+     * @private
+     */
+    this._jitterFactor =
+      options.jitterFactor !== undefined ? options.jitterFactor : JITTER_FACTOR;
 
     /**
      * The backoff delay of the current attempt.
@@ -326,13 +362,17 @@ class ExponentialBackoff {
   }
 
   /**
-   * Returns a random value in the range [-currentBaseMs/2, currentBaseMs/2]
+   * Returns a random value for the current base as determined by the jitter
+   * factor.
    *
    * @private
    * @returns The jitter to apply based on the current delay.
    */
   _jitterDelayMs() {
-    return (Math.random() - 0.5) * this._currentBaseMs;
+    return (
+      (Math.random() * this._jitterFactor - this._jitterFactor / 2) *
+      this._currentBaseMs
+    );
   }
 }
 
