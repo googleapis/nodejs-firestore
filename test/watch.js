@@ -27,6 +27,7 @@ const reference = require('../src/reference')(Firestore);
 const DocumentReference = reference.DocumentReference;
 const DocumentSnapshot = require('../src/document')(DocumentReference)
   .DocumentSnapshot;
+const Backoff = require('../src/backoff')(Firestore);
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -260,10 +261,15 @@ class StreamHelper {
   }
 
   /**
-   * Destroys the currently active stream.
+   * Destroys the currently active stream with the optionally provided error.
+   * If omitted, the stream is closed with a GRPC Status of UNAVAILABLE.
    */
-  destroyStream() {
-    this.readStream.destroy(new Error('Server disconnect'));
+  destroyStream(err) {
+    if (!err) {
+      err = new Error('Server disconnect');
+      err.code = 14; // Unavailable
+    }
+    this.readStream.destroy(err);
   }
 }
 
@@ -296,8 +302,7 @@ class WatchHelper {
    * Creates a watch, starts a listen, and asserts that the request got
    * processed.
    *
-   * @return A Promise that will be fulfilled when the request has been
-   * acknowledged.
+   * @return The unsubscribe handler for the listener.
    */
   startWatch() {
     this.unsubscribe = this.reference.onSnapshot(
@@ -308,6 +313,7 @@ class WatchHelper {
         this.deferredListener.on('error', error);
       }
     );
+    return this.unsubscribe;
   }
 
   /**
@@ -591,6 +597,8 @@ describe('Query watch', function() {
   };
 
   beforeEach(function() {
+    Backoff.setTimeoutHandler(setImmediate);
+
     firestore = createInstance();
 
     targetId = 0xf0;
@@ -610,6 +618,10 @@ describe('Query watch', function() {
     doc4 = firestore.doc('col/doc4');
 
     lastSnapshot = EMPTY;
+  });
+
+  afterEach(function() {
+    Backoff.setTimeoutHandler(setTimeout);
   });
 
   it('with invalid callbacks', function() {
@@ -696,22 +708,110 @@ describe('Query watch', function() {
         })
         .then(() => {
           return streamHelper.awaitOpen();
+        })
+        .then(() => {
+          streamHelper.close();
+          return streamHelper.await('end');
+        })
+        .then(() => {
+          return streamHelper.awaitOpen();
+        })
+        .then(() => {
+          assert.equal(streamHelper.streamCount, 3);
         });
     });
   });
 
-  it("doesn't re-open without resume token", function() {
-    watchHelper.startWatch();
+  it("doesn't re-open inactive stream", function() {
+    // This test uses the normal timeout handler since we unsubscribe from the
+    // Watch stream while the stream is recovering from an error.
+    Backoff.setTimeoutHandler(setTimeout);
 
-    return streamHelper.awaitOpen().then(() => {
-      watchHelper.sendAddTarget();
-      watchHelper.sendCurrent();
-      watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot').then(() => {
+    const unsubscribe = watchHelper.startWatch();
+    return streamHelper
+      .awaitOpen()
+      .then(request => {
+        assert.deepEqual(request, collQueryJSON());
+        watchHelper.sendAddTarget();
+        watchHelper.sendCurrent();
+        watchHelper.sendSnapshot(1, [0xabcd]);
+        return watchHelper.await('snapshot');
+      })
+      .then(() => {
         streamHelper.close();
         return streamHelper.await('end');
+      })
+      .then(() => {
+        unsubscribe();
+        assert.equal(streamHelper.streamCount, 1);
       });
-    });
+  });
+
+  it('retries based on error code', function() {
+    const expectRetry = {
+      /* Cancelled */ 1: true,
+      /* Unknown */ 2: true,
+      /* InvalidArgument */ 3: false,
+      /* DeadlineExceeded */ 4: true,
+      /* NotFound */ 5: false,
+      /* AlreadyExists */ 6: false,
+      /* PermissionDenied */ 7: false,
+      /* ResourceExhausted */ 8: true,
+      /* FailedPrecondition */ 9: false,
+      /* Aborted */ 10: false,
+      /* OutOfRange */ 11: false,
+      /* Unimplemented */ 12: false,
+      /* Internal */ 13: true,
+      /* Unavailable */ 14: true,
+      /* DataLoss */ 15: false,
+      /* Unauthenticated */ 16: true,
+    };
+
+    let result = Promise.resolve();
+
+    for (const statusCode in expectRetry) {
+      if (expectRetry.hasOwnProperty(statusCode)) {
+        result = result.then(() => {
+          const err = new Error('GRPC Error');
+          err.code = Number(statusCode);
+
+          if (expectRetry[statusCode]) {
+            return watchHelper.runTest(collQueryJSON(), () => {
+              watchHelper.sendAddTarget();
+              watchHelper.sendCurrent();
+              watchHelper.sendSnapshot(1, [0xabcd]);
+              return watchHelper.await('snapshot').then(() => {
+                streamHelper.destroyStream(err);
+                return streamHelper.awaitReopen();
+              });
+            });
+          } else {
+            return watchHelper.runFailedTest(
+              collQueryJSON(),
+              () => {
+                watchHelper.sendAddTarget();
+                watchHelper.sendCurrent();
+                watchHelper.sendSnapshot(1, [0xabcd]);
+                return watchHelper
+                  .await('snapshot')
+                  .then(() => {
+                    streamHelper.destroyStream(err);
+                  })
+                  .then(() => {
+                    return streamHelper.await('error');
+                  })
+                  .then(() => {
+                    return streamHelper.await('close');
+                  });
+              },
+              'GRPC Error'
+            );
+          }
+        });
+      }
+    }
+
+    return result;
   });
 
   it('handles changing a doc', function() {
@@ -923,34 +1023,6 @@ describe('Query watch', function() {
     });
   });
 
-  it('only reconnects after progress', function() {
-    return watchHelper.runFailedTest(
-      collQueryJSON(),
-      () => {
-        // Mock the server responding to the query.
-        watchHelper.sendAddTarget();
-        watchHelper.sendCurrent();
-        let resumeToken = [0xabcd];
-        watchHelper.sendSnapshot(1, resumeToken);
-        return watchHelper
-          .await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
-            assert.equal(streamHelper.streamCount, 1);
-            streamHelper.destroyStream();
-            return streamHelper.awaitReopen();
-          })
-          .then(() => {
-            assert.equal(streamHelper.streamCount, 2);
-            // This second stream doesn't get re-opened because the server did not
-            // send any data.
-            streamHelper.destroyStream();
-          });
-      },
-      'Error: Server disconnect'
-    );
-  });
-
   it('reconnects with multiple attempts', function() {
     return watchHelper
       .runFailedTest(
@@ -986,7 +1058,7 @@ describe('Query watch', function() {
               streamHelper.writeStream.destroy();
             });
         },
-        'Error: Steam Error (6)'
+        'Steam Error (6)'
       )
       .then(() => {
         assert.equal(
@@ -1809,11 +1881,17 @@ describe('DocumentReference watch', function() {
   };
 
   beforeEach(function() {
+    Backoff.setTimeoutHandler(setImmediate);
+
     firestore = createInstance();
     targetId = 0xf0;
     doc = firestore.doc('col/doc');
     streamHelper = new StreamHelper(firestore);
     watchHelper = new WatchHelper(streamHelper, doc, targetId);
+  });
+
+  afterEach(function() {
+    Backoff.setTimeoutHandler(setTimeout);
   });
 
   it('with invalid callbacks', function() {

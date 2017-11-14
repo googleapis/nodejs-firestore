@@ -20,6 +20,10 @@ const assert = require('assert');
 const rbtree = require('functional-red-black-tree');
 const through = require('through2');
 
+let isPermanentError;
+let isResourceExhaustedError;
+let ExponentialBackoff;
+
 /*!
  * Injected.
  *
@@ -127,6 +131,7 @@ class Watch {
     this._api = firestore.api;
     this._targetChange = targetChange;
     this._comparator = comparator;
+    this._backoff = new ExponentialBackoff();
   }
 
   /**
@@ -202,11 +207,8 @@ class Watch {
     let resumeToken = undefined;
 
     // Indicates whether we are interested in data from the stream. Set to false
-    // in the the 'unsubscribe()' callback.
+    // in the 'unsubscribe()' callback.
     let isActive = true;
-
-    // Set to true when we have received a data message from the stream.
-    let isHealthy = false;
 
     // Sentinel value for a document remove.
     const REMOVED = {};
@@ -238,7 +240,7 @@ class Watch {
     };
 
     /** Calls onError() and closes the stream. */
-    const sendError = function(errMessage) {
+    const sendError = function(err) {
       if (currentStream) {
         currentStream.unpipe(stream);
         currentStream.end();
@@ -246,24 +248,26 @@ class Watch {
       }
       isActive = false;
       stream.end();
-      Firestore.log(
-        'Watch.onSnapshot',
-        'Invoking onError with: %s',
-        errMessage
-      );
-      onError(new Error(errMessage));
+      Firestore.log('Watch.onSnapshot', 'Invoking onError: ', err);
+      onError(err);
     };
 
     /**
-     * If the stream was previously healthy, we'll retry once and then give up.
+     * Re-opens the stream unless the specified error is considered permanent.
+     * Clears the change map.
      */
     const maybeReopenStream = function(err) {
-      if (isActive && isHealthy) {
+      if (isActive && (!err || !isPermanentError(err))) {
         Firestore.log('Watch.onSnapshot', 'Stream ended, re-opening');
         request.addTarget.resumeToken = resumeToken;
         changeMap.clear();
+
+        if (err && isResourceExhaustedError(err)) {
+          self._backoff.resetToMax();
+        }
+
         resetStream();
-      } else if (err) {
+      } else {
         Firestore.log('Watch.onSnapshot', 'Stream ended, sending error: ', err);
         sendError(err);
       }
@@ -276,37 +280,48 @@ class Watch {
         currentStream.unpipe(stream);
         currentStream.end();
         currentStream = null;
+        initStream();
       }
+    };
 
-      isHealthy = false;
+    /**
+     * Initializes a new the stream to the backend with backoff.
+     */
+    const initStream = function() {
+      self._backoff.backoffAndWait().then(() => {
+        if (!isActive) {
+          Firestore.log('Watch.onSnapshot', 'Not initializing inactive stream');
+          return;
+        }
 
-      // Note that we need to call the internal _listen API to pass additional
-      // header values in readWriteStream.
-      self._firestore
-        .readWriteStream(
-          self._api.Firestore._listen.bind(self._api.Firestore),
-          request,
-          /* allowRetries= */ true
-        )
-        .then(backendStream => {
-          if (!isActive) {
-            Firestore.log('Watch.onSnapshot', 'Closing inactive stream');
-            backendStream.end();
-            return;
-          }
-
-          Firestore.log('Watch.onSnapshot', 'Opened new stream');
-          currentStream = backendStream;
-          currentStream.on('error', err => {
-            maybeReopenStream(err);
-          });
-          currentStream.on('end', () => {
-            maybeReopenStream();
-          });
-          currentStream.pipe(stream);
-          currentStream.resume();
-        })
-        .catch(sendError);
+        // Note that we need to call the internal _listen API to pass additional
+        // header values in readWriteStream.
+        self._firestore
+          .readWriteStream(
+            self._api.Firestore._listen.bind(self._api.Firestore),
+            request,
+            /* allowRetries= */ true
+          )
+          .then(streamCallback => {
+            const backendStream = streamCallback();
+            if (!isActive) {
+              Firestore.log('Watch.onSnapshot', 'Closing inactive stream');
+              backendStream.end();
+              return;
+            }
+            Firestore.log('Watch.onSnapshot', 'Opened new stream');
+            currentStream = backendStream;
+            currentStream.on('error', err => {
+              maybeReopenStream(err);
+            });
+            currentStream.on('end', () => {
+              maybeReopenStream();
+            });
+            currentStream.pipe(stream);
+            currentStream.resume();
+          })
+          .catch(sendError);
+      });
     };
 
     /**
@@ -498,7 +513,7 @@ class Watch {
       return docMap.size + changes.adds.length - changes.deletes.length;
     };
 
-    resetStream();
+    initStream();
 
     stream
       .on('data', proto => {
@@ -529,21 +544,23 @@ class Watch {
               message = change.cause.message;
             }
             // @todo: Surface a .code property on the exception.
-            sendError('Error ' + code + ': ' + message);
+            sendError(new Error('Error ' + code + ': ' + message));
           } else if (change.targetChangeType === 'RESET') {
             // Whatever changes have happened so far no longer matter.
             resetDocs();
           } else if (change.targetChangeType === 'CURRENT') {
             current = true;
           } else {
-            sendError('Unknown target change type: ' + JSON.stringify(change));
+            sendError(
+              new Error('Unknown target change type: ' + JSON.stringify(change))
+            );
           }
 
           if (
             change.resumeToken &&
             affectsTarget(change.targetIds, WATCH_TARGET_ID)
           ) {
-            isHealthy = true;
+            this._backoff.reset();
           }
         } else if (proto.documentChange) {
           Firestore.log('Watch.onSnapshot', 'Processing change event');
@@ -600,12 +617,13 @@ class Watch {
             resetStream();
           }
         } else {
-          sendError('Unknown listen response type: ' + JSON.stringify(proto));
+          sendError(
+            new Error('Unknown listen response type: ' + JSON.stringify(proto))
+          );
         }
       })
       .on('end', () => {
         Firestore.log('Watch.onSnapshot', 'Processing stream end');
-        isActive = false;
         if (currentStream) {
           // Pass the event on to the underlying stream.
           currentStream.end();
@@ -633,5 +651,11 @@ module.exports = (
   DocumentChange = DocumentChangeType;
   DocumentReference = DocumentReferenceType;
   DocumentSnapshot = DocumentSnapshotType;
+
+  const backoff = require('./backoff')(FirestoreType);
+  isPermanentError = backoff.isPermanentError;
+  isResourceExhaustedError = backoff.isResourceExhaustedError;
+  ExponentialBackoff = backoff.ExponentialBackoff;
+
   return Watch;
 };
