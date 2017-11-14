@@ -855,8 +855,8 @@ class Firestore extends commonGrpc.Service {
 
           // Instead of simply returning the stream here, we return a callback
           // that we then use to both return the stream and to schedule work on
-          // the stream that has to happen only after API consumer registered
-          // their stream callbacks.
+          // the stream that can only happen after the API consumer registered
+          // their stream listeners.
           //
           // Note: Calling 'stream.pause()' only holds up 'data' events, not the
           // 'end' event issued in the callback.
@@ -973,8 +973,9 @@ class Firestore extends commonGrpc.Service {
    * necessary within the request options.
    *
    * The Promise returned from this method resolves with callback that needs to
-   * be invoked to obtain the underlying stream. The stream stream is returned
-   * in paused state and should to be resumed once all listeners are attached.
+   * be invoked in order to obtain the underlying stream. The stream stream is
+   * returned in paused state and should to be resumed once all listeners are
+   * attached.
    *
    * @private
    * @param {function} method - Streaming Veneer API endpoint that takes a
@@ -1022,8 +1023,9 @@ class Firestore extends commonGrpc.Service {
    * where necessary for all writes.
    *
    * The Promise returned from this method resolves with callback that needs to
-   * be invoked to obtain the underlying stream. The stream stream is returned
-   * in paused state and should to be resumed once all listeners are attached.
+   * be invoked in order to obtain the underlying stream. The stream stream is
+   * returned in paused state and should to be resumed once all listeners are
+   * attached.
    *
    * @private
    * @param {function} method - Streaming Veneer API endpoint that takes GAX
