@@ -619,7 +619,7 @@ class DocumentSnapshot {
     if (is.array(val)) {
       let encodedElements = [];
       for (let i = 0; i < val.length; ++i) {
-        let enc = DocumentSnapshot.encodeValue(val[i], false, depth + 1);
+        let enc = DocumentSnapshot.encodeValue(val[i], depth + 1);
         if (enc) {
           encodedElements.push(enc);
         }
@@ -1105,7 +1105,7 @@ function validateFieldData(obj, options, depth) {
     (!options.allowDeletes || depth > 1)
   ) {
     throw new Error(
-      'Deletes are only supported at the top-level for updates() or sets() with {merge:true}.'
+      'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
     );
   }
 

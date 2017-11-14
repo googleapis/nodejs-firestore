@@ -47,7 +47,7 @@ function snapshot(relativePath, data) {
     `${DATABASE_ROOT}/documents/${relativePath}`
   );
   snapshot.ref = new DocumentReference({}, path);
-  snapshot.fieldsProto = DocumentSnapshot.encodeFields(data, true);
+  snapshot.fieldsProto = DocumentSnapshot.encodeFields(data);
   snapshot.readTime = '1970-01-01T00:00:00.000000000Z';
   snapshot.createTime = '1970-01-01T00:00:00.000000000Z';
   snapshot.updateTime = '1970-01-01T00:00:00.000000000Z';

@@ -956,7 +956,7 @@ describe('set document', function() {
       firestore
         .doc('collectionId/documentId')
         .set({foo: Firestore.FieldValue.delete()});
-    }, /Deletes are only supported at the top-level for updates\(\) or sets\(\) with {merge:true}./);
+    }, /Deletes must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
   it("doesn't accept arrays", function() {
@@ -1171,13 +1171,13 @@ describe('update document', function() {
       firestore
         .doc('collectionId/documentId')
         .update({a: {b: Firestore.FieldValue.delete()}});
-    }, /Deletes are only supported at the top-level for updates\(\) or sets\(\) with {merge:true}./);
+    }, /Deletes must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
 
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .update('a', {b: Firestore.FieldValue.delete()});
-    }, /Deletes are only supported at the top-level for updates\(\) or sets\(\) with {merge:true}./);
+    }, /Deletes must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
   it('with top-level document', function() {

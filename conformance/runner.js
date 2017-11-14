@@ -70,7 +70,7 @@ function loadTestCases() {
   return testCases;
 }
 
-/** Converst a JSON object into a JS Object suitable for the Node API. */
+/** Converts a test object into a JS Object suitable for the Node API. */
 function convertInput(json) {
   const obj = JSON.parse(json);
 
@@ -295,7 +295,7 @@ function runTest(spec) {
   return deferred;
 }
 
-describe('Spec tests', function() {
+describe('Conformance Tests', function() {
   for (let testCase of loadTestCases()) {
     const isIgnored = ignoredRe.find(re => re.test(testCase.description));
     const isExclusive = exclusiveRe.find(re => re.test(testCase.description));
