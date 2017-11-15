@@ -27,14 +27,14 @@ const setTimeoutHandler = backoff.setTimeoutHandler;
 const nop = () => {};
 
 describe('ExponentialBackoff', function() {
-  const observedDelays = [];
+  let observedDelays = [];
 
   before(() => {
     setTimeoutHandler((callback, timeout) => observedDelays.push(timeout));
   });
 
   beforeEach(() => {
-    observedDelays.length = 0;
+    observedDelays = [];
   });
 
   after(() => {

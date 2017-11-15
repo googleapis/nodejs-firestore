@@ -161,14 +161,6 @@ const GRPC_UNAVAILABLE = 14;
  */
 
 /**
- * A callback function that creates a stream.
- *
- * @callback Firestore~StreamCallback
- * @returns {Stream} The newly created stream.
- * @private
- */
-
-/**
  * The Firestore client represents a Firestore Database and is the entry point
  * for all Firestore operations.
  *
@@ -600,10 +592,8 @@ class Firestore extends commonGrpc.Service {
         request,
         /* allowRetries= */ true
       )
-      .then(streamCallback => {
+      .then(stream => {
         return new Promise((resolve, reject) => {
-          const stream = streamCallback();
-
           stream
             .on('error', err => {
               Firestore.log(
@@ -819,8 +809,7 @@ class Firestore extends commonGrpc.Service {
    * @param {Stream} resultStream - The Node stream to monitor.
    * @param {Object=} request - If specified, the request that should be written
    * to the stream after it opened.
-   * @returns {Promise.<Firestore~StreamCallback>} A Promise that resolves with
-   * a callback that returns the resulting stream.
+   * @returns {Promise.<Stream>} The given Stream once it is considered healthy.
    */
   _initializeStream(resultStream, request) {
     /** The last error we received and have not forwarded yet. */
@@ -853,25 +842,24 @@ class Firestore extends commonGrpc.Service {
           streamReleased = true;
           resultStream.pause();
 
-          // Instead of simply returning the stream here, we return a callback
-          // that we then use to both return the stream and to schedule work on
-          // the stream that can only happen after the API consumer registered
-          // their stream listeners.
-          //
-          // Note: Calling 'stream.pause()' only holds up 'data' events, not the
-          // 'end' event issued in the callback.
-          resolve(() => {
-            setImmediate(() => {
-              if (endCalled) {
-                Firestore.log(
-                  'Firestore._initializeStream',
-                  'Forwarding stream close'
-                );
-                resultStream.emit('end');
-              }
-            });
-            return resultStream;
-          });
+          // Calling 'stream.pause()' only holds up 'data' events and not the
+          // 'end' event we intend to forward here. We therefore need to wait
+          // until the API consumer registers their listeners (in the .then()
+          // call) before emitting any further events.
+          resolve(resultStream);
+
+          // We execute the forwarding of the 'end' event via setTimeout() as
+          // V8 guarantees that the above the Promise chain is resolved before
+          // any calls invoked via setTimeout().
+          setTimeout(() => {
+            if (endCalled) {
+              Firestore.log(
+                'Firestore._initializeStream',
+                'Forwarding stream close'
+              );
+              resultStream.emit('end');
+            }
+          }, 0);
         }
       };
 
@@ -972,10 +960,8 @@ class Firestore extends commonGrpc.Service {
    * A funnel for read-only streaming API requests, assigning a project ID where
    * necessary within the request options.
    *
-   * The Promise returned from this method resolves with callback that needs to
-   * be invoked in order to obtain the underlying stream. The stream stream is
-   * returned in paused state and should to be resumed once all listeners are
-   * attached.
+   * The stream is returned in paused state and needs to be resumed once all
+   * listeners are attached.
    *
    * @private
    * @param {function} method - Streaming Veneer API endpoint that takes a
@@ -983,8 +969,7 @@ class Firestore extends commonGrpc.Service {
    * @param {Object} request - The Protobuf request to send.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
-   * @returns {Promise.<Firestore~StreamCallback>} A Promise that resolves with
-   * a callback that returns the resulting stream.
+   * @returns {Promise.<Stream>} A Promise with the resulting read-only stream.
    */
   readStream(method, request, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
@@ -1022,10 +1007,8 @@ class Firestore extends commonGrpc.Service {
    * A funnel for read-write streaming API requests, assigning a project ID
    * where necessary for all writes.
    *
-   * The Promise returned from this method resolves with callback that needs to
-   * be invoked in order to obtain the underlying stream. The stream stream is
-   * returned in paused state and should to be resumed once all listeners are
-   * attached.
+   * The stream is returned in paused state and needs to be resumed once all
+   * listeners are attached.
    *
    * @private
    * @param {function} method - Streaming Veneer API endpoint that takes GAX
@@ -1034,8 +1017,7 @@ class Firestore extends commonGrpc.Service {
    * message.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
-   * @returns {Promise.<Firestore~StreamCallback>} A Promise that resolves with
-   * a callback that returns the resulting stream.
+   * @returns {Promise.<Stream>} A Promise with the resulting read/write stream.
    */
   readWriteStream(method, request, allowRetries) {
     let self = this;

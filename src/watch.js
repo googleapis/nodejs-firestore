@@ -20,8 +20,11 @@ const assert = require('assert');
 const rbtree = require('functional-red-black-tree');
 const through = require('through2');
 
-let isPermanentError;
-let isResourceExhaustedError;
+/*!
+ * Injected.
+ *
+ * @see ExponentialBackoff
+ */
 let ExponentialBackoff;
 
 /*!
@@ -76,6 +79,123 @@ const ChangeType = {
 };
 
 /*!
+ * List of GRPC Error Codes.
+ *
+ * This corresponds to
+ * {@link https://github.com/grpc/grpc/blob/master/doc/statuscodes.md}.
+ */
+const GRPC_STATUS_CODE = {
+  // Not an error; returned on success.
+  OK: 0,
+
+  // The operation was cancelled (typically by the caller).
+  CANCELLED: 1,
+
+  // Unknown error. An example of where this error may be returned is if a
+  // Status value received from another address space belongs to an error-space
+  // that is not known in this address space. Also errors raised by APIs that
+  // do not return enough error information may be converted to this error.
+  UNKNOWN: 2,
+
+  // Client specified an invalid argument. Note that this differs from
+  // FAILED_PRECONDITION. INVALID_ARGUMENT indicates arguments that are
+  // problematic regardless of the state of the system (e.g., a malformed file
+  // name).
+  INVALID_ARGUMENT: 3,
+
+  // Deadline expired before operation could complete. For operations that
+  // change the state of the system, this error may be returned even if the
+  // operation has completed successfully. For example, a successful response
+  // from a server could have been delayed long enough for the deadline to
+  // expire.
+  DEADLINE_EXCEEDED: 4,
+
+  // Some requested entity (e.g., file or directory) was not found.
+  NOT_FOUND: 5,
+
+  // Some entity that we attempted to create (e.g., file or directory) already
+  // exists.
+  ALREADY_EXISTS: 6,
+
+  // The caller does not have permission to execute the specified operation.
+  // PERMISSION_DENIED must not be used for rejections caused by exhausting
+  // some resource (use RESOURCE_EXHAUSTED instead for those errors).
+  // PERMISSION_DENIED must not be used if the caller can not be identified
+  // (use UNAUTHENTICATED instead for those errors).
+  PERMISSION_DENIED: 7,
+
+  // The request does not have valid authentication credentials for the
+  // operation.
+  UNAUTHENTICATED: 16,
+
+  // Some resource has been exhausted, perhaps a per-user quota, or perhaps the
+  // entire file system is out of space.
+  RESOURCE_EXHAUSTED: 8,
+
+  // Operation was rejected because the system is not in a state required for
+  // the operation's execution. For example, directory to be deleted may be
+  // non-empty, an rmdir operation is applied to a non-directory, etc.
+  //
+  // A litmus test that may help a service implementor in deciding
+  // between FAILED_PRECONDITION, ABORTED, and UNAVAILABLE:
+  //  (a) Use UNAVAILABLE if the client can retry just the failing call.
+  //  (b) Use ABORTED if the client should retry at a higher-level
+  //      (e.g., restarting a read-modify-write sequence).
+  //  (c) Use FAILED_PRECONDITION if the client should not retry until
+  //      the system state has been explicitly fixed. E.g., if an "rmdir"
+  //      fails because the directory is non-empty, FAILED_PRECONDITION
+  //      should be returned since the client should not retry unless
+  //      they have first fixed up the directory by deleting files from it.
+  //  (d) Use FAILED_PRECONDITION if the client performs conditional
+  //      REST Get/Update/Delete on a resource and the resource on the
+  //      server does not match the condition. E.g., conflicting
+  //      read-modify-write on the same resource.
+  FAILED_PRECONDITION: 9,
+
+  // The operation was aborted, typically due to a concurrency issue like
+  // sequencer check failures, transaction aborts, etc.
+  //
+  // See litmus test above for deciding between FAILED_PRECONDITION, ABORTED,
+  // and UNAVAILABLE.
+  ABORTED: 10,
+
+  // Operation was attempted past the valid range. E.g., seeking or reading
+  // past end of file.
+  //
+  // Unlike INVALID_ARGUMENT, this error indicates a problem that may be fixed
+  // if the system state changes. For example, a 32-bit file system will
+  // generate INVALID_ARGUMENT if asked to read at an offset that is not in the
+  // range [0,2^32-1], but it will generate OUT_OF_RANGE if asked to read from
+  // an offset past the current file size.
+  //
+  // There is a fair bit of overlap between FAILED_PRECONDITION and
+  // OUT_OF_RANGE. We recommend using OUT_OF_RANGE (the more specific error)
+  // when it applies so that callers who are iterating through a space can
+  // easily look for an OUT_OF_RANGE error to detect when they are done.
+  OUT_OF_RANGE: 11,
+
+  // Operation is not implemented or not supported/enabled in this service.
+  UNIMPLEMENTED: 12,
+
+  // Internal errors. Means some invariants expected by underlying System has
+  // been broken. If you see one of these errors, Something is very broken.
+  INTERNAL: 13,
+
+  // The service is currently unavailable. This is a most likely a transient
+  // condition and may be corrected by retrying with a backoff.
+  //
+  // See litmus test above for deciding between FAILED_PRECONDITION, ABORTED,
+  // and UNAVAILABLE.
+  UNAVAILABLE: 14,
+
+  // Unrecoverable data loss or corruption.
+  DATA_LOSS: 15,
+
+  // Force users to include a default branch:
+  DO_NOT_USE: -1,
+};
+
+/*!
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
@@ -83,6 +203,40 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
   assert(doc1 === doc2, 'Document watches only support one document.');
   return 0;
 };
+
+/**
+ * Determines whether a GRPC Error is considered permanent and should not be
+ * retried.
+ *
+ * @private
+ * @param {Error} error A GRPC Error object that exposes an error code.
+ * @return {boolean} Whether the error is permanent.
+ */
+function isPermanentError(error) {
+  switch (error.code) {
+    case GRPC_STATUS_CODE.CANCELLED:
+    case GRPC_STATUS_CODE.UNKNOWN:
+    case GRPC_STATUS_CODE.DEADLINE_EXCEEDED:
+    case GRPC_STATUS_CODE.RESOURCE_EXHAUSTED:
+    case GRPC_STATUS_CODE.INTERNAL:
+    case GRPC_STATUS_CODE.UNAVAILABLE:
+    case GRPC_STATUS_CODE.UNAUTHENTICATED:
+      return false;
+    default:
+      return true;
+  }
+}
+
+/**
+ * Determines whether we need to initiate a longer backoff due to system
+ * overload.
+ *
+ * @param {Error} error A GRPC Error object that exposes an error code.
+ * @return {boolean} Whether we need to back off our retries.
+ */
+function isResourceExhaustedError(error) {
+  return error.code === GRPC_STATUS_CODE.RESOURCE_EXHAUSTED;
+}
 
 /**
  * @callback docsCallback
@@ -239,17 +393,20 @@ class Watch {
       current = false;
     };
 
-    /** Calls onError() and closes the stream. */
-    const sendError = function(err) {
+    /** Closes the stream and calls onError() if the stream is still active. */
+    const closeStream = function(err) {
       if (currentStream) {
         currentStream.unpipe(stream);
         currentStream.end();
         currentStream = null;
       }
-      isActive = false;
       stream.end();
-      Firestore.log('Watch.onSnapshot', 'Invoking onError: ', err);
-      onError(err);
+
+      if (isActive) {
+        isActive = false;
+        Firestore.log('Watch.onSnapshot', 'Invoking onError: ', err);
+        onError(err);
+      }
     };
 
     /**
@@ -257,19 +414,23 @@ class Watch {
      * Clears the change map.
      */
     const maybeReopenStream = function(err) {
-      if (isActive && (!err || !isPermanentError(err))) {
-        Firestore.log('Watch.onSnapshot', 'Stream ended, re-opening');
+      if (isActive && !isPermanentError(err)) {
+        Firestore.log(
+          'Watch.onSnapshot',
+          'Stream ended, re-opening after retryable error: ',
+          err
+        );
         request.addTarget.resumeToken = resumeToken;
         changeMap.clear();
 
-        if (err && isResourceExhaustedError(err)) {
+        if (isResourceExhaustedError(err)) {
           self._backoff.resetToMax();
         }
 
         resetStream();
       } else {
         Firestore.log('Watch.onSnapshot', 'Stream ended, sending error: ', err);
-        sendError(err);
+        closeStream(err);
       }
     };
 
@@ -285,7 +446,7 @@ class Watch {
     };
 
     /**
-     * Initializes a new the stream to the backend with backoff.
+     * Initializes a new stream to the backend with backoff.
      */
     const initStream = function() {
       self._backoff.backoffAndWait().then(() => {
@@ -302,8 +463,7 @@ class Watch {
             request,
             /* allowRetries= */ true
           )
-          .then(streamCallback => {
-            const backendStream = streamCallback();
+          .then(backendStream => {
             if (!isActive) {
               Firestore.log('Watch.onSnapshot', 'Closing inactive stream');
               backendStream.end();
@@ -315,12 +475,14 @@ class Watch {
               maybeReopenStream(err);
             });
             currentStream.on('end', () => {
-              maybeReopenStream();
+              const err = new Error('Stream ended unexpectedly');
+              err.code = GRPC_STATUS_CODE.UNKNOWN;
+              maybeReopenStream(err);
             });
             currentStream.pipe(stream);
             currentStream.resume();
           })
-          .catch(sendError);
+          .catch(closeStream);
       });
     };
 
@@ -544,14 +706,14 @@ class Watch {
               message = change.cause.message;
             }
             // @todo: Surface a .code property on the exception.
-            sendError(new Error('Error ' + code + ': ' + message));
+            closeStream(new Error('Error ' + code + ': ' + message));
           } else if (change.targetChangeType === 'RESET') {
             // Whatever changes have happened so far no longer matter.
             resetDocs();
           } else if (change.targetChangeType === 'CURRENT') {
             current = true;
           } else {
-            sendError(
+            closeStream(
               new Error('Unknown target change type: ' + JSON.stringify(change))
             );
           }
@@ -617,7 +779,7 @@ class Watch {
             resetStream();
           }
         } else {
-          sendError(
+          closeStream(
             new Error('Unknown listen response type: ' + JSON.stringify(proto))
           );
         }
@@ -653,8 +815,6 @@ module.exports = (
   DocumentSnapshot = DocumentSnapshotType;
 
   const backoff = require('./backoff')(FirestoreType);
-  isPermanentError = backoff.isPermanentError;
-  isResourceExhaustedError = backoff.isResourceExhaustedError;
   ExponentialBackoff = backoff.ExponentialBackoff;
 
   return Watch;

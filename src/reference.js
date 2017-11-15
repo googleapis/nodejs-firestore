@@ -1604,8 +1604,7 @@ class Query {
         request,
         /* allowRetries= */ true
       )
-      .then(streamCallback => {
-        const backendStream = streamCallback();
+      .then(backendStream => {
         backendStream.on('error', err => {
           Firestore.log(
             'Query._stream',

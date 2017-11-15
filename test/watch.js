@@ -597,6 +597,9 @@ describe('Query watch', function() {
   };
 
   beforeEach(function() {
+    // We are intentionally skipping the delays to ensure fast test execution.
+    // The retry semantics are uneffected by this, as we maintain their
+    // asynchronous behavior.
     Backoff.setTimeoutHandler(setImmediate);
 
     firestore = createInstance();
@@ -723,8 +726,10 @@ describe('Query watch', function() {
   });
 
   it("doesn't re-open inactive stream", function() {
-    // This test uses the normal timeout handler since we unsubscribe from the
-    // Watch stream while the stream is recovering from an error.
+    // This test uses the normal timeout handler since it relies on the actual
+    // backoff window during the the stream recovery. We then use this window to
+    // unsubscribe from the Watch stream and make sure that we don't
+    // re-open the stream once the backoff expires.
     Backoff.setTimeoutHandler(setTimeout);
 
     const unsubscribe = watchHelper.startWatch();
@@ -1043,7 +1048,7 @@ describe('Query watch', function() {
                 ++streamHelper.streamCount;
                 return through.obj((chunk, enc, callback) => {
                   callback(
-                    new Error(`Steam Error (${streamHelper.streamCount})`)
+                    new Error(`Stream Error (${streamHelper.streamCount})`)
                   );
                 });
               };
@@ -1058,7 +1063,7 @@ describe('Query watch', function() {
               streamHelper.writeStream.destroy();
             });
         },
-        'Steam Error (6)'
+        'Stream Error (6)'
       )
       .then(() => {
         assert.equal(
@@ -1881,6 +1886,9 @@ describe('DocumentReference watch', function() {
   };
 
   beforeEach(function() {
+    // We are intentionally skipping the delays to ensure fast test execution.
+    // The retry semantics are uneffected by this, as we maintain their
+    // asynchronous behavior.
     Backoff.setTimeoutHandler(setImmediate);
 
     firestore = createInstance();
