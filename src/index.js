@@ -759,7 +759,7 @@ class Firestore extends commonGrpc.Service {
    * retried.
    * @param {number=} delayMs - How long to wait before issuing a this retry.
    * Defaults to zero.
-   * @returns {Promise} - A Promise with the function'ss result if successful
+   * @returns {Promise} - A Promise with the function's result if successful
    * within `attemptsRemaining`. Otherwise, returns the last rejected Promise.
    */
   _retry(attemptsRemaining, func, delayMs) {
@@ -841,16 +841,25 @@ class Firestore extends commonGrpc.Service {
           Firestore.log('Firestore._initializeStream', 'Releasing stream');
           streamReleased = true;
           resultStream.pause();
+
+          // Calling 'stream.pause()' only holds up 'data' events and not the
+          // 'end' event we intend to forward here. We therefore need to wait
+          // until the API consumer registers their listeners (in the .then()
+          // call) before emitting any further events.
           resolve(resultStream);
-          if (endCalled) {
-            setImmediate(() => {
+
+          // We execute the forwarding of the 'end' event via setTimeout() as
+          // V8 guarantees that the above the Promise chain is resolved before
+          // any calls invoked via setTimeout().
+          setTimeout(() => {
+            if (endCalled) {
               Firestore.log(
                 'Firestore._initializeStream',
                 'Forwarding stream close'
               );
               resultStream.emit('end');
-            });
-          }
+            }
+          }, 0);
         }
       };
 
@@ -877,7 +886,11 @@ class Firestore extends commonGrpc.Service {
         // If we receive an error before we were able to receive any data,
         // reject this stream.
         if (!streamReleased) {
-          Firestore.log('Firestore.readStream', 'Received initial error:', err);
+          Firestore.log(
+            'Firestore._initializeStream',
+            'Received initial error:',
+            err
+          );
           streamReleased = true;
           reject(err);
         } else {
