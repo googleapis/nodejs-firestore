@@ -854,6 +854,7 @@ describe('getAll() method', function() {
       /* NotFound */ 5: 1,
       /* AlreadyExists */ 6: 1,
       /* PermissionDenied */ 7: 1,
+      /* ResourceExhausted */ 8: 1,
       /* FailedPrecondition */ 9: 1,
       /* Aborted */ 10: 1,
       /* OutOfRange */ 11: 1,
