@@ -67,12 +67,15 @@ function convertTimestamp(timestampValue, argumentName) {
       );
     }
 
-    timestampProto = {seconds, nanos};
+    timestampProto = {
+      seconds: seconds || undefined,
+      nanos: nanos || undefined,
+    };
   } else if (is.defined(timestampValue)) {
     validate.isObject('timestampValue', timestampValue);
     timestampProto = {
-      seconds: timestampValue.seconds || 0,
-      nanos: timestampValue.nanos || 0,
+      seconds: timestampValue.seconds || undefined,
+      nanos: timestampValue.nanos || undefined,
     };
   }
 

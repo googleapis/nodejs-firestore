@@ -205,7 +205,7 @@ class WriteBatch {
    */
   delete(documentRef, precondition) {
     validate.isDocumentReference('documentRef', documentRef);
-    validate.isOptionalPrecondition('precondition', precondition);
+    validate.isOptionalDeletePrecondition('precondition', precondition);
 
     let write = {
       delete: documentRef.formattedName,
@@ -249,7 +249,9 @@ class WriteBatch {
    */
   set(documentRef, data, options) {
     validate.isDocumentReference('documentRef', documentRef);
-    validate.isDocument('data', data);
+    validate.isDocument('data', data, {
+      allowDeletes: options && options.merge,
+    });
     validate.isOptionalSetOptions('options', options);
 
     let fields = DocumentSnapshot.encodeFields(data);
@@ -318,7 +320,7 @@ class WriteBatch {
     const argumentError =
       'Update() requires either a single JavaScript ' +
       'object or an alternating list of field/value pairs that can be ' +
-      'followed by an optional Precondition';
+      'followed by an optional precondition.';
 
     let usesVarargs =
       is.string(dataOrField) || is.instance(dataOrField, FieldPath);
@@ -329,12 +331,15 @@ class WriteBatch {
           if (is.string(arguments[i]) || is.instance(arguments[i], FieldPath)) {
             validate.isFieldPath(i, arguments[i]);
             validate.minNumberOfArguments('update', arguments, i + 1);
+            validate.isFieldValue(i, arguments[i + 1], {
+              allowDeletes: true,
+            });
             updateMap.set(
               FieldPath.fromArgument(arguments[i]),
               arguments[i + 1]
             );
           } else {
-            validate.isPrecondition(i, arguments[i]);
+            validate.isUpdatePrecondition(i, arguments[i]);
             validate.maxNumberOfArguments('update', arguments, i + 1);
             precondition = new Precondition(arguments[i]);
           }
@@ -343,11 +348,13 @@ class WriteBatch {
         Firestore.log('WriteBatch.update', 'Varargs validation failed:', err);
         // We catch the validation error here and re-throw to provide a better
         // error message.
-        throw new Error(`${argumentError}.`);
+        throw new Error(`${argumentError} ${err.message}`);
       }
     } else {
       try {
-        validate.isDocument('dataOrField', dataOrField, true);
+        validate.isDocument('dataOrField', dataOrField, {
+          allowDeletes: true,
+        });
         validate.maxNumberOfArguments('update', arguments, 3);
 
         Object.keys(dataOrField).forEach(key => {
@@ -356,7 +363,10 @@ class WriteBatch {
         });
 
         if (is.defined(preconditionOrValues)) {
-          validate.isPrecondition('preconditionOrValues', preconditionOrValues);
+          validate.isUpdatePrecondition(
+            'preconditionOrValues',
+            preconditionOrValues
+          );
           precondition = new Precondition(preconditionOrValues);
         }
       } catch (err) {
@@ -367,7 +377,7 @@ class WriteBatch {
         );
         // We catch the validation error here and prefix the error with a custom
         // message to describe the usage of update() better.
-        throw new Error(`${argumentError}: ${err.message}`);
+        throw new Error(`${argumentError} ${err.message}`);
       }
     }
 
@@ -541,6 +551,10 @@ function validateUpdateMap(data) {
 
   fields.sort((left, right) => left.compareTo(right));
 
+  if (fields.length === 0) {
+    throw new Error('At least one field must be udpated.');
+  }
+
   for (let i = 1; i < fields.length; ++i) {
     if (fields[i - 1].isPrefixOf(fields[i])) {
       throw new Error(`Field "${fields[i - 1]}" has conflicting definitions.`);
@@ -564,8 +578,12 @@ module.exports = (
   validate = require('./validate')({
     Document: document.validateDocumentData,
     DocumentReference: validateDocumentReference,
+    FieldValue: document.validateFieldValue,
     FieldPath: FieldPath.validateFieldPath,
-    Precondition: document.validatePrecondition,
+    UpdatePrecondition: precondition =>
+      document.validatePrecondition(precondition, /* allowExists= */ false),
+    DeletePrecondition: precondition =>
+      document.validatePrecondition(precondition, /* allowExists= */ true),
     SetOptions: document.validateSetOptions,
     UpdateMap: validateUpdateMap,
   });

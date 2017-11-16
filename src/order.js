@@ -145,11 +145,11 @@ function compareNumberProtos(left, right) {
  * @private
  */
 function compareTimestamps(left, right) {
-  let seconds = primitiveComparator(left.seconds, right.seconds);
+  let seconds = primitiveComparator(left.seconds || 0, right.seconds || 0);
   if (seconds !== 0) {
     return seconds;
   }
-  return primitiveComparator(left.nanos, right.nanos);
+  return primitiveComparator(left.nanos || 0, right.nanos || 0);
 }
 
 /*!

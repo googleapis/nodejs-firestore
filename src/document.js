@@ -434,8 +434,8 @@ class DocumentSnapshot {
       }
       case 'timestampValue': {
         return new Date(
-          proto.timestampValue.seconds * 1000 +
-            proto.timestampValue.nanos / MS_TO_NANOS
+          (proto.timestampValue.seconds || 0) * 1000 +
+            (proto.timestampValue.nanos || 0) / MS_TO_NANOS
         );
       }
       case 'referenceValue': {
@@ -497,21 +497,23 @@ class DocumentSnapshot {
    * Converts a Google Protobuf timestamp to an ISO 8601 string.
    *
    * @private
-   * @param {{seconds:number,nanos:number}=} timestamp The Google Protobuf
+   * @param {{seconds:number=,nanos:number=}=} timestamp The Google Protobuf
    * timestamp.
    * @returns {string|undefined} The representation in ISO 8601 or undefined if
    * the input is empty.
    */
   static toISOTime(timestamp) {
     if (timestamp) {
-      let isoSubstring = new Date(timestamp.seconds * 1000).toISOString();
+      let isoSubstring = new Date(
+        (timestamp.seconds || 0) * 1000
+      ).toISOString();
 
       // Strip milliseconds from JavaScript ISO representation
       // (YYYY-MM-DDTHH:mm:ss.sssZ or ±YYYYYY-MM-DDTHH:mm:ss.sssZ)
       isoSubstring = isoSubstring.substr(0, isoSubstring.length - 4);
 
       // Append nanoseconds as per ISO 8601
-      let nanoString = timestamp.nanos + '';
+      let nanoString = (timestamp.nanos || '') + '';
       while (nanoString.length < 9) {
         nanoString = '0' + nanoString;
       }
@@ -853,6 +855,9 @@ class DocumentMask {
       }
     });
 
+    // Required for testing.
+    fieldPaths.sort();
+
     return new DocumentMask(fieldPaths);
   }
 
@@ -877,9 +882,13 @@ class DocumentMask {
             ? currentPath.append(childSegment)
             : childSegment;
           const value = currentData[key];
-          if (isPlainObject(value)) {
+          if (value === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+            // Ignore.
+          } else if (value === FieldValue.DELETE_SENTINEL) {
+            fieldPaths.push(childPath.formattedName);
+          } else if (isPlainObject(value)) {
             extractFieldPaths(value, childPath);
-          } else if (value !== FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+          } else {
             fieldPaths.push(childPath.formattedName);
           }
         }
@@ -887,6 +896,9 @@ class DocumentMask {
     };
 
     extractFieldPaths(data);
+
+    // Required for testing.
+    fieldPaths.sort();
 
     return new DocumentMask(fieldPaths);
   }
@@ -1048,13 +1060,38 @@ class Precondition {
  * Validates a JavaScript object for usage as a Firestore document.
  *
  * @param {Object} obj JavaScript object to validate.
- * @param {boolean=} usesPaths Whether the object is keyed by field paths
- * (e.g. for document updates).
+ * @param {boolean=} options.allowDeletes Whether field deletes are supported
+ * at the top level (e.g. for document updates).
+ * @returns {boolean} 'true' when the object is valid.
+ * @throws {Error} when the object is invalid.
+ */
+function validateDocumentData(obj, options) {
+  if (!isPlainObject(obj)) {
+    throw new Error('Input is not a plain JavaScript object.');
+  }
+
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      validateFieldValue(obj[prop], options, /* depth= */ 1);
+    }
+  }
+
+  return true;
+}
+
+/*!
+ * Validates a JavaScript value for usage as a Firestore value.
+ *
+ * @param {Object} obj JavaScript value to validate.
+ * @param {boolean=} options.allowDeletes Whether field deletes are supported
+ * at the top level (e.g. for document updates).
  * @param {number=} depth The current depth of the traversal.
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
-function validateDocumentData(obj, depth) {
+function validateFieldValue(obj, options, depth) {
+  options = options || {};
+
   if (!depth) {
     depth = 1;
   } else if (depth > MAX_DEPTH) {
@@ -1063,15 +1100,25 @@ function validateDocumentData(obj, depth) {
     );
   }
 
-  if (!isPlainObject(obj)) {
-    throw new Error('Input is not a plain JavaScript object.');
+  if (
+    obj === FieldValue.DELETE_SENTINEL &&
+    (!options.allowDeletes || depth > 1)
+  ) {
+    throw new Error(
+      'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+    );
   }
 
-  for (let prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      if (isPlainObject(obj[prop])) {
-        validateDocumentData(obj[prop], depth + 1);
+  if (isPlainObject(obj)) {
+    for (let prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        validateFieldValue(obj[prop], options, depth + 1);
       }
+    }
+  }
+  if (is.array(obj)) {
+    for (let prop of obj) {
+      validateFieldValue(obj[prop], options, depth + 1);
     }
   }
 
@@ -1086,25 +1133,29 @@ function validateDocumentData(obj, depth) {
  * should exist.
  * @param {string=} options.lastUpdateTime - The last update time
  * of the referenced document in Firestore (as ISO 8601 string).
+ * @param {boolean} allowExist Whether to allow the 'exists' preconditions.
  * @returns {boolean} 'true' if the input is a valid Precondition.
  */
-function validatePrecondition(options) {
-  if (!is.object(options)) {
+function validatePrecondition(precondition, allowExist) {
+  if (!is.object(precondition)) {
     throw new Error('Input is not an object.');
   }
 
   let conditions = 0;
 
-  if (is.defined(options.exists)) {
+  if (is.defined(precondition.exists)) {
     ++conditions;
-    if (!is.boolean(options.exists)) {
+    if (!allowExist) {
+      throw new Error('"exists" is not an allowed condition.');
+    }
+    if (!is.boolean(precondition.exists)) {
       throw new Error('"exists" is not a boolean.');
     }
   }
 
-  if (is.defined(options.lastUpdateTime)) {
+  if (is.defined(precondition.lastUpdateTime)) {
     ++conditions;
-    if (!is.string(options.lastUpdateTime)) {
+    if (!is.string(precondition.lastUpdateTime)) {
       throw new Error('"lastUpdateTime" is not a string.');
     }
   }
@@ -1163,6 +1214,7 @@ module.exports = DocumentRefType => {
     DocumentTransform,
     Precondition,
     GeoPoint,
+    validateFieldValue,
     validateDocumentData,
     validatePrecondition,
     validateSetOptions,

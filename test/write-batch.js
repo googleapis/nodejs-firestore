@@ -106,7 +106,7 @@ describe('update() method', function() {
   it('accepts preconditions', function() {
     writeBatch.update(
       firestore.doc('sub/doc'),
-      {},
+      {foo: 'bar'},
       {lastUpdateTime: '1985-03-17T22:20:00.123000000Z'}
     );
   });
@@ -159,8 +159,7 @@ describe('batch support', function() {
           },
           {
             transform: {
-              document:
-                'projects/test-project/databases/(default)/documents/col/doc',
+              document: documentName,
               fieldTransforms: [
                 {
                   fieldPath: 'foo',
@@ -174,11 +173,16 @@ describe('batch support', function() {
               exists: true,
             },
             update: {
-              fields: {},
+              fields: {
+                foo: {
+                  stringValue: 'bar',
+                  valueType: 'stringValue',
+                },
+              },
               name: documentName,
             },
             updateMask: {
-              fieldPaths: [],
+              fieldPaths: ['foo'],
             },
           },
           {
@@ -250,7 +254,7 @@ describe('batch support', function() {
     let documentName = firestore.doc('col/doc');
 
     writeBatch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
-    writeBatch.update(documentName, {});
+    writeBatch.update(documentName, {foo: 'bar'});
     writeBatch.create(documentName, {});
     writeBatch.delete(documentName);
 
@@ -264,7 +268,7 @@ describe('batch support', function() {
 
     return writeBatch
       .set(documentName, {foo: Firestore.FieldValue.serverTimestamp()})
-      .update(documentName, {})
+      .update(documentName, {foo: 'bar'})
       .create(documentName, {})
       .delete(documentName)
       .commit()
