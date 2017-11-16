@@ -1072,7 +1072,7 @@ function validateDocumentData(obj, options) {
 
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
-      validateFieldData(obj[prop], options, /* depth= */ 1);
+      validateFieldValue(obj[prop], options, /* depth= */ 1);
     }
   }
 
@@ -1089,7 +1089,7 @@ function validateDocumentData(obj, options) {
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
-function validateFieldData(obj, options, depth) {
+function validateFieldValue(obj, options, depth) {
   options = options || {};
 
   if (!depth) {
@@ -1112,13 +1112,13 @@ function validateFieldData(obj, options, depth) {
   if (isPlainObject(obj)) {
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
-        validateFieldData(obj[prop], options, depth + 1);
+        validateFieldValue(obj[prop], options, depth + 1);
       }
     }
   }
   if (is.array(obj)) {
     for (let prop of obj) {
-      validateFieldData(obj[prop], options, depth + 1);
+      validateFieldValue(obj[prop], options, depth + 1);
     }
   }
 
@@ -1214,7 +1214,7 @@ module.exports = DocumentRefType => {
     DocumentTransform,
     Precondition,
     GeoPoint,
-    validateFieldData,
+    validateFieldValue,
     validateDocumentData,
     validatePrecondition,
     validateSetOptions,

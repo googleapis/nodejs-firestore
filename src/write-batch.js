@@ -331,7 +331,7 @@ class WriteBatch {
           if (is.string(arguments[i]) || is.instance(arguments[i], FieldPath)) {
             validate.isFieldPath(i, arguments[i]);
             validate.minNumberOfArguments('update', arguments, i + 1);
-            validate.isFieldData('dataOrField', arguments[i + 1], {
+            validate.isFieldValue(i, arguments[i + 1], {
               allowDeletes: true,
             });
             updateMap.set(
@@ -578,7 +578,7 @@ module.exports = (
   validate = require('./validate')({
     Document: document.validateDocumentData,
     DocumentReference: validateDocumentReference,
-    FieldData: document.validateFieldData,
+    FieldValue: document.validateFieldValue,
     FieldPath: FieldPath.validateFieldPath,
     UpdatePrecondition: precondition =>
       document.validatePrecondition(precondition, /* allowExists= */ false),
