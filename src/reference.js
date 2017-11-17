@@ -450,6 +450,8 @@ class DocumentReference {
    * });
    */
   update(dataOrField, preconditionOrValues) {
+    validate.minNumberOfArguments('update', arguments, 1);
+
     let writeBatch = new WriteBatch(this._firestore);
     preconditionOrValues = Array.prototype.slice.call(arguments, 1);
     return writeBatch.update

@@ -131,11 +131,8 @@ function convertPrecondition(precondition) {
 
 /** List of test cases that are ignored. */
 const ignoredRe = [
-  // Firestore Node does not omit empty writes
-  /(create|set|update|update-paths): ServerTimestamp alone/,
-  /(create|set|update|update-paths): nested ServerTimestamp field/,
-  /(create|set|update|update-paths): multiple ServerTimestamp fields/,
-  /(create|set|update|update-paths): ServerTimestamp with dotted field/,
+  // The test data fails to include an empty write request
+  /set: ServerTimestamp alone/,
 
   // Node doesn't support field masks for set().
   /^set-merge: .*$/,
@@ -161,8 +158,12 @@ function runTest(spec) {
   const updateTest = function(spec) {
     firestore.api.Firestore._commit = function(request) {
       const expected = convertCommit(spec.request);
-      assert.deepEqual(request, expected);
-      resolve();
+      try {
+        assert.deepEqual(request, expected);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
     };
 
     let varargs = [];
@@ -189,8 +190,12 @@ function runTest(spec) {
   const deleteTest = function(spec) {
     firestore.api.Firestore._commit = function(request) {
       const expected = convertCommit(spec.request);
-      assert.deepEqual(request, expected);
-      resolve();
+      try {
+        assert.deepEqual(request, expected);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
     };
 
     if (spec.precondition) {
@@ -204,8 +209,12 @@ function runTest(spec) {
   const setTest = function(spec) {
     firestore.api.Firestore._commit = function(request) {
       const expected = convertCommit(spec.request);
-      assert.deepEqual(request, expected);
-      resolve();
+      try {
+        assert.deepEqual(request, expected);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
     };
 
     const isMerge = !!(spec.option && spec.option.all);
@@ -218,8 +227,12 @@ function runTest(spec) {
   const createTest = function(spec) {
     firestore.api.Firestore._commit = function(request) {
       const expected = convertCommit(spec.request);
-      assert.deepEqual(request, expected);
-      resolve();
+      try {
+        assert.deepEqual(request, expected);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
     };
 
     docRef(spec.docRefPath).create(convertInput(spec.jsonData));

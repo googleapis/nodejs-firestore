@@ -93,13 +93,13 @@ describe('update() method', function() {
 
   it('requires document name', function() {
     assert.throws(() => {
-      writeBatch.update();
+      writeBatch.update({}, {});
     }, /Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('requires object', function() {
     assert.throws(() => {
-      writeBatch.update(firestore.doc('sub/doc'));
+      writeBatch.update(firestore.doc('sub/doc'), firestore.doc('sub/doc'));
     }, new RegExp('Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object.'));
   });
 
@@ -205,17 +205,18 @@ describe('batch support', function() {
           seconds: 0,
         },
         writeResults: [
-          {
-            updateTime: {
-              nanos: 0,
-              seconds: 0,
-            },
-          },
-          // This write result conforms to the DocumentTransform and won't be returned in the response.
+          // This write result conforms to the Write + DocumentTransform and
+          // won't be returned in the response.
           {
             updateTime: {
               nanos: 1337,
               seconds: 1337,
+            },
+          },
+          {
+            updateTime: {
+              nanos: 0,
+              seconds: 0,
             },
           },
           {

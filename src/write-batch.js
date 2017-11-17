@@ -161,20 +161,17 @@ class WriteBatch {
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data);
 
-    let fields = DocumentSnapshot.encodeFields(data);
+    const document = DocumentSnapshot.fromObject(documentRef, data, {
+      keepEmptyMaps: true,
+    });
+    const transform = DocumentTransform.fromObject(documentRef, data);
+    const precondition = new Precondition({exists: false});
 
-    let write = {
-      update: new DocumentSnapshot(documentRef, fields).toProto(),
-      currentDocument: new Precondition({exists: false}).toProto(),
-    };
-
-    this._writes.push(write);
-
-    let documentTransform = DocumentTransform.fromObject(documentRef, data);
-
-    if (!documentTransform.isEmpty) {
-      this._writes.push({transform: documentTransform.toProto()});
-    }
+    this._writes.push({
+      write: !document.isEmpty || transform.isEmpty ? document.toProto() : null,
+      transform: transform.isEmpty ? null : transform.toProto(),
+      precondition: precondition.toProto(),
+    });
 
     return this;
   }
@@ -207,15 +204,14 @@ class WriteBatch {
     validate.isDocumentReference('documentRef', documentRef);
     validate.isOptionalDeletePrecondition('precondition', precondition);
 
-    let write = {
-      delete: documentRef.formattedName,
-    };
+    const conditions = new Precondition(precondition);
 
-    if (precondition) {
-      write.currentDocument = new Precondition(precondition).toProto();
-    }
-
-    this._writes.push(write);
+    this._writes.push({
+      write: {
+        delete: documentRef.formattedName,
+      },
+      precondition: conditions.isEmpty ? null : conditions.toProto(),
+    });
 
     return this;
   }
@@ -248,29 +244,34 @@ class WriteBatch {
    * });
    */
   set(documentRef, data, options) {
+    const merge = options && options.merge;
+
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data, {
-      allowDeletes: options && options.merge,
+      allowDeletes: merge,
+      allowEmpty: !merge,
     });
     validate.isOptionalSetOptions('options', options);
 
-    let fields = DocumentSnapshot.encodeFields(data);
+    const document = DocumentSnapshot.fromObject(documentRef, data, {
+      keepEmptyMaps: !merge,
+    });
+    const transform = DocumentTransform.fromObject(documentRef, data);
+    const documentMask = DocumentMask.fromObject(data);
 
-    let write = {
-      update: new DocumentSnapshot(documentRef, fields).toProto(),
-    };
+    let write;
 
-    if (options && options.merge) {
-      write.updateMask = DocumentMask.fromObject(data).toProto();
+    if (!merge) {
+      write = document.toProto();
+    } else if (!document.isEmpty || !documentMask.isEmpty) {
+      write = document.toProto();
+      write.updateMask = documentMask.toProto();
     }
 
-    this._writes.push(write);
-
-    let documentTransform = DocumentTransform.fromObject(documentRef, data);
-
-    if (!documentTransform.isEmpty) {
-      this._writes.push({transform: documentTransform.toProto()});
-    }
+    this._writes.push({
+      write,
+      transform: transform.isEmpty ? null : transform.toProto(),
+    });
 
     return this;
   }
@@ -312,6 +313,7 @@ class WriteBatch {
    * });
    */
   update(documentRef, dataOrField, preconditionOrValues) {
+    validate.minNumberOfArguments('update', arguments, 2);
     validate.isDocumentReference('documentRef', documentRef);
 
     const updateMap = new Map();
@@ -354,11 +356,15 @@ class WriteBatch {
       try {
         validate.isDocument('dataOrField', dataOrField, {
           allowDeletes: true,
+          allowEmpty: false,
         });
         validate.maxNumberOfArguments('update', arguments, 3);
 
         Object.keys(dataOrField).forEach(key => {
           validate.isFieldPath(key, key);
+          validate.isFieldValue(key, dataOrField[key], {
+            allowDeletes: true,
+          });
           updateMap.set(FieldPath.fromArgument(key), dataOrField[key]);
         });
 
@@ -383,29 +389,23 @@ class WriteBatch {
 
     validate.isUpdateMap('dataOrField', updateMap);
 
-    let documentMask = DocumentMask.fromMap(updateMap);
-    let expandedObject = DocumentSnapshot.expandMap(updateMap);
-    let document = new DocumentSnapshot(
-      documentRef,
-      DocumentSnapshot.encodeFields(expandedObject)
-    );
+    let document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
+    let documentMask = DocumentMask.fromUpdateMap(updateMap);
 
-    let write = {
-      update: document.toProto(),
-      updateMask: documentMask.toProto(),
-      currentDocument: precondition.toProto(),
-    };
+    let write = null;
 
-    this._writes.push(write);
-
-    let documentTransform = DocumentTransform.fromObject(
-      documentRef,
-      expandedObject
-    );
-
-    if (!documentTransform.isEmpty) {
-      this._writes.push({transform: documentTransform.toProto()});
+    if (!document.isEmpty || !documentMask.isEmpty) {
+      write = document.toProto();
+      write.updateMask = documentMask.toProto();
     }
+
+    let transform = DocumentTransform.fromUpdateMap(documentRef, updateMap);
+
+    this._writes.push({
+      write: write,
+      transform: transform.isEmpty ? null : transform.toProto(),
+      precondition: precondition.toProto(),
+    });
 
     return this;
   }
@@ -463,21 +463,40 @@ class WriteBatch {
         });
     }
 
-    // We create our own copy of this array since we need to access it when
-    // processing the response.
-    let writeRequests = this._writes.slice();
+    request.writes = [];
 
-    request.writes = writeRequests;
+    for (let req of this._writes) {
+      assert(
+        req.write || req.transform,
+        'Either a write or transform must be set'
+      );
+
+      if (req.precondition) {
+        (req.write || req.transform).currentDocument = req.precondition;
+      }
+
+      if (req.write) {
+        request.writes.push(req.write);
+      }
+
+      if (req.transform) {
+        request.writes.push(req.transform);
+      }
+    }
 
     Firestore.log(
       'WriteBatch.commit',
       'Sending %d writes',
-      writeRequests.length
+      request.writes.length
     );
 
     if (explicitTransaction) {
       request.transaction = explicitTransaction;
     }
+
+    // We store the number of operations that we sent as part of this commit
+    // as the user is able to add additional operations afterwards.
+    let opCount = this._writes.length;
 
     return this._firestore
       .request(this._api.Firestore.commit.bind(this._api.Firestore), request)
@@ -487,27 +506,33 @@ class WriteBatch {
 
         if (resp.writeResults) {
           assert(
-            writeRequests.length === resp.writeResults.length,
+            request.writes.length === resp.writeResults.length,
             `Expected one write result per operation, but got ${
               resp.writeResults.length
-            } results for ${writeRequests.length} operations.`
+            } results for ${request.writes.length} operations.`
           );
 
-          for (let i = 0; i < resp.writeResults.length; ++i) {
-            let writeRequest = writeRequests[i];
-            let writeResult = resp.writeResults[i];
+          let offset = 0;
 
-            // Don't return write results for document transforms, as the fact
-            // that we have to split one write operation into two distinct
-            // write requests is an implementation detail.
-            if (writeRequest.update || writeRequest.delete) {
-              writeResults.push(
-                new WriteResult(
-                  DocumentSnapshot.toISOTime(writeResult.updateTime) ||
-                    commitTime
-                )
-              );
+          for (let i = 0; i < opCount; ++i) {
+            let writeRequest = this._writes[i];
+
+            // Don't return two write results for a write that contains a
+            // transform, as the fact that we have to split one write operation
+            // into two distinct write requests is an implementation detail.
+            if (writeRequest.write && writeRequest.transform) {
+              // The document transform is always sent last and produces the
+              // latest update time.
+              ++offset;
             }
+
+            let writeResult = resp.writeResults[i + offset];
+
+            writeResults.push(
+              new WriteResult(
+                DocumentSnapshot.toISOTime(writeResult.updateTime) || commitTime
+              )
+            );
           }
         }
 
@@ -550,10 +575,6 @@ function validateUpdateMap(data) {
   });
 
   fields.sort((left, right) => left.compareTo(right));
-
-  if (fields.length === 0) {
-    throw new Error('At least one field must be udpated.');
-  }
 
   for (let i = 1; i < fields.length; ++i) {
     if (fields[i - 1].isPrefixOf(fields[i])) {
