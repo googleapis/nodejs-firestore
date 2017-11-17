@@ -108,6 +108,9 @@ describe('Collection interface', function() {
             update: {
               fields: {},
             },
+            currentDocument: {
+              exists: false,
+            },
           },
         ],
       });
