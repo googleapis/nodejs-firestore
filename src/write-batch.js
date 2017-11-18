@@ -161,9 +161,7 @@ class WriteBatch {
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data);
 
-    const document = DocumentSnapshot.fromObject(documentRef, data, {
-      keepEmptyMaps: true,
-    });
+    const document = DocumentSnapshot.fromObject(documentRef, data);
     const transform = DocumentTransform.fromObject(documentRef, data);
     const precondition = new Precondition({exists: false});
 
@@ -253,9 +251,7 @@ class WriteBatch {
     });
     validate.isOptionalSetOptions('options', options);
 
-    const document = DocumentSnapshot.fromObject(documentRef, data, {
-      keepEmptyMaps: !merge,
-    });
+    const document = DocumentSnapshot.fromObject(documentRef, data);
     const transform = DocumentTransform.fromObject(documentRef, data);
     const documentMask = DocumentMask.fromObject(data);
 

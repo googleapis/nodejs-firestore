@@ -975,7 +975,18 @@ describe('set document', function() {
 
   it('supports nested empty merge', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, set(document(), updateMask('a')));
+      requestEquals(
+        request,
+        set(
+          document('a', {
+            mapValue: {
+              fields: {},
+            },
+            valueType: 'mapValue',
+          }),
+          updateMask('a')
+        )
+      );
       callback(null, writeResult(1));
     };
 
@@ -1151,8 +1162,13 @@ describe('update document', function() {
       requestEquals(
         request,
         update(
-          document(),
-          updateMask('a'),
+          document('foo', {
+            valueType: 'mapValue',
+            mapValue: {
+              fields: {},
+            },
+          }),
+          updateMask('a', 'foo'),
           fieldTransform('a.b', 'REQUEST_TIME', 'c.d', 'REQUEST_TIME')
         )
       );
@@ -1160,6 +1176,7 @@ describe('update document', function() {
     };
 
     return firestore.doc('collectionId/documentId').update({
+      foo: {},
       a: {b: Firestore.FieldValue.serverTimestamp()},
       'c.d': Firestore.FieldValue.serverTimestamp(),
     });
@@ -1181,11 +1198,33 @@ describe('update document', function() {
 
   it('supports nested empty map', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
-      requestEquals(request, update(document(), updateMask('a')));
+      requestEquals(
+        request,
+        update(
+          document('a', {
+            mapValue: {
+              fields: {},
+            },
+            valueType: 'mapValue',
+          }),
+          updateMask('a')
+        )
+      );
       callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').update({a: {}});
+  });
+
+  it('supports nested delete', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(request, update(document(), updateMask('a.b')));
+      callback(null, writeResult(1));
+    };
+
+    return firestore
+      .doc('collectionId/documentId')
+      .update({'a.b': Firestore.FieldValue.delete()});
   });
 
   it('returns update time', function() {

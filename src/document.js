@@ -197,15 +197,10 @@ class DocumentSnapshot {
    * @private
    * @param {firestore/DocumentReference} ref - The reference to the document.
    * @param {Object} obj - The object to store in the DocumentSnapshot.
-   * @param {boolean=} options.keepEmptyMaps - Whether to explicitly create a
-   * value entry for empty maps. This is require for set() and create().
    * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
    */
-  static fromObject(ref, obj, options) {
-    return new DocumentSnapshot(
-      ref,
-      DocumentSnapshot.encodeFields(obj, options)
-    );
+  static fromObject(ref, obj) {
+    return new DocumentSnapshot(ref, DocumentSnapshot.encodeFields(obj));
   }
 
   /**
@@ -637,9 +632,7 @@ class DocumentSnapshot {
    * Encodes a JavaScrip object into the Firestore 'Fields' representation.
    *
    * @private
-   * @param {Object} obj The object to encode
-   * @param {boolean=} options.keepEmptyMaps - Whether to explicitly create a
-   * value entry for empty maps. This is require for set() and create().
+   * @param {Object} obj The object to encode.
    * @returns {Object} The Firestore 'Fields' representation
    */
   static encodeFields(obj, options) {
@@ -667,17 +660,13 @@ class DocumentSnapshot {
    *
    * @private
    * @param {Object} val The object to encode
-   * @param {boolean=} options.keepEmptyMaps - Whether to explicitly create a
-   * value entry for empty maps. This is require for set() and create().
    * @returns {object|null} The Firestore Proto or null if we are deleting a
    * field.
    */
-  static encodeValue(val, options) {
+  static encodeValue(val) {
     if (DocumentTransform.isTransformSentinel(val)) {
       return null;
     }
-
-    options = options || {};
 
     if (is.string(val)) {
       return {
@@ -723,7 +712,7 @@ class DocumentSnapshot {
     if (is.array(val)) {
       let encodedElements = [];
       for (let i = 0; i < val.length; ++i) {
-        let enc = DocumentSnapshot.encodeValue(val[i], options);
+        let enc = DocumentSnapshot.encodeValue(val[i]);
         if (enc) {
           encodedElements.push(enc);
         }
@@ -772,8 +761,10 @@ class DocumentSnapshot {
         },
       };
 
-      if (!isEmptyObject(val) || !options.keepEmptyMaps) {
-        map.mapValue.fields = DocumentSnapshot.encodeFields(val, options);
+      // If we encounter an empty object, we always need to send it to make sure
+      // the server creates a map entry.
+      if (!isEmptyObject(val)) {
+        map.mapValue.fields = DocumentSnapshot.encodeFields(val);
         if (!map.mapValue.fields) {
           return null;
         }
