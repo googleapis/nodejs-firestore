@@ -1829,7 +1829,7 @@ class CollectionReference extends Query {
     validate.isDocument('data', data);
 
     let documentRef = this.doc();
-    return documentRef.set(data).then(() => {
+    return documentRef.create(data).then(() => {
       return Promise.resolve(documentRef);
     });
   }
