@@ -463,6 +463,114 @@ describe('DocumentReference class', function() {
     return promise;
   });
 
+  it('can add and delete fields with server timestamps', function() {
+    this.timeout(10 * 1000);
+
+    const ref = randomCol.doc('doc');
+
+    const actions = [
+      () =>
+        ref.create({
+          time: Firestore.FieldValue.serverTimestamp(),
+          a: {b: Firestore.FieldValue.serverTimestamp()},
+        }),
+      () =>
+        ref.set({
+          time: Firestore.FieldValue.serverTimestamp(),
+          a: {c: Firestore.FieldValue.serverTimestamp()},
+        }),
+      () =>
+        ref.set(
+          {
+            time: Firestore.FieldValue.serverTimestamp(),
+            a: {d: Firestore.FieldValue.serverTimestamp()},
+          },
+          {merge: true}
+        ),
+      () =>
+        ref.set(
+          {
+            time: Firestore.FieldValue.serverTimestamp(),
+            e: Firestore.FieldValue.serverTimestamp(),
+          },
+          {merge: true}
+        ),
+      () =>
+        ref.set(
+          {
+            time: Firestore.FieldValue.serverTimestamp(),
+            e: {f: Firestore.FieldValue.serverTimestamp()},
+          },
+          {merge: true}
+        ),
+      () =>
+        ref.update({
+          time: Firestore.FieldValue.serverTimestamp(),
+          'g.h': Firestore.FieldValue.serverTimestamp(),
+        }),
+      () =>
+        ref.update({
+          time: Firestore.FieldValue.serverTimestamp(),
+          'g.j': {k: Firestore.FieldValue.serverTimestamp()},
+        }),
+    ];
+
+    const expectedState = [
+      times => {
+        return {time: times[0], a: {b: times[0]}};
+      },
+      times => {
+        return {time: times[1], a: {c: times[1]}};
+      },
+      times => {
+        return {time: times[2], a: {c: times[1], d: times[2]}};
+      },
+      times => {
+        return {time: times[3], a: {c: times[1], d: times[2]}, e: times[3]};
+      },
+      times => {
+        return {
+          time: times[4],
+          a: {c: times[1], d: times[2]},
+          e: {f: times[4]},
+        };
+      },
+      times => {
+        return {
+          time: times[5],
+          a: {c: times[1], d: times[2]},
+          e: {f: times[4]},
+          g: {h: times[5]},
+        };
+      },
+      times => {
+        return {
+          time: times[6],
+          a: {c: times[1], d: times[2]},
+          e: {f: times[4]},
+          g: {h: times[5], j: {k: times[6]}},
+        };
+      },
+    ];
+
+    let promise = Promise.resolve();
+    let times = [];
+
+    for (let i = 0; i < actions.length; ++i) {
+      promise = promise
+        .then(() => actions[i]())
+        .then(() => {
+          return ref.get();
+        })
+        .then(snap => {
+          times.push(snap.get('time'));
+          assert.deepEqual(snap.data(), expectedState[i](times));
+        });
+    }
+
+    return promise;
+  });
+
   describe('watch', function() {
     let currentDeferred = {promise: null};
 
