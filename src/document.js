@@ -1179,6 +1179,8 @@ class Precondition {
  * @param {Object} obj JavaScript object to validate.
  * @param {boolean=} options.allowDeletes Whether field deletes are supported
  * at the top level (e.g. for document updates).
+ * @param {boolean=} options.allowNestedDeletes Whether field deletes are supported
+ * at any level (e.g. for document merges).
  * @param {boolean=} options.allowEmpty Whether empty documents are support.
  * Defaults to true.
  * @returns {boolean} 'true' when the object is valid.
@@ -1213,6 +1215,8 @@ function validateDocumentData(obj, options) {
  * @param {Object} obj JavaScript value to validate.
  * @param {boolean=} options.allowDeletes Whether field deletes are supported
  * at the top level (e.g. for document updates).
+ * @param {boolean=} options.allowNestedDeletes Whether field deletes are supported
+ * at any level (e.g. for document merges).
  * @param {number=} depth The current depth of the traversal.
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
@@ -1228,13 +1232,12 @@ function validateFieldValue(obj, options, depth) {
     );
   }
 
-  if (
-    obj === FieldValue.DELETE_SENTINEL &&
-    (!options.allowDeletes || depth > 1)
-  ) {
-    throw new Error(
-      'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
-    );
+  if (obj === FieldValue.DELETE_SENTINEL) {
+    if (!options.allowNestedDeletes && (!options.allowDeletes || depth > 1)) {
+      throw new Error(
+        'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+      );
+    }
   }
 
   if (isPlainObject(obj)) {

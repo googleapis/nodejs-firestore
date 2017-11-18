@@ -392,6 +392,77 @@ describe('DocumentReference class', function() {
       });
   });
 
+  it('can add and delete fields sequentially', function() {
+    this.timeout(30 * 1000);
+
+    const ref = randomCol.doc('doc');
+
+    const actions = [
+      () => ref.create({}),
+      () => ref.delete(),
+      () => ref.create({a: {b: 'c'}}),
+      () => ref.set({}),
+      () => ref.set({a: {b: 'c'}}),
+      () => ref.set({a: {d: 'e'}}, {merge: true}),
+      () => ref.set({a: {d: Firestore.FieldValue.delete()}}, {merge: true}),
+      () => ref.set({a: {b: Firestore.FieldValue.delete()}}, {merge: true}),
+      () => ref.set({a: {e: 'foo'}}, {merge: true}),
+      () => ref.set({f: 'foo'}, {merge: true}),
+      () => ref.set({f: {g: 'foo'}}, {merge: true}),
+      () => ref.update({'f.h': 'foo'}),
+      () => ref.update({'f.g': Firestore.FieldValue.delete()}),
+      () => ref.update({'f.h': Firestore.FieldValue.delete()}),
+      () => ref.update({f: Firestore.FieldValue.delete()}),
+      () => ref.update({'i.j': {}}),
+      () => ref.update({'i.j': {k: 'foo'}}),
+      () => ref.update({'i.j': {l: {}}}),
+      () => ref.update({i: Firestore.FieldValue.delete()}),
+      () => ref.update({a: Firestore.FieldValue.delete()}),
+    ];
+
+    const expectedState = [
+      {},
+      null,
+      {a: {b: 'c'}},
+      {},
+      {a: {b: 'c'}},
+      {a: {b: 'c', d: 'e'}},
+      {a: {b: 'c'}},
+      {a: {}},
+      {a: {e: 'foo'}},
+      {a: {e: 'foo'}, f: 'foo'},
+      {a: {e: 'foo'}, f: {g: 'foo'}},
+      {a: {e: 'foo'}, f: {g: 'foo', h: 'foo'}},
+      {a: {e: 'foo'}, f: {h: 'foo'}},
+      {a: {e: 'foo'}, f: {}},
+      {a: {e: 'foo'}},
+      {a: {e: 'foo'}, i: {j: {}}},
+      {a: {e: 'foo'}, i: {j: {k: 'foo'}}},
+      {a: {e: 'foo'}, i: {j: {l: {}}}},
+      {a: {e: 'foo'}},
+      {},
+    ];
+
+    let promise = Promise.resolve();
+
+    for (let i = 0; i < actions.length; ++i) {
+      promise = promise
+        .then(() => actions[i]())
+        .then(() => {
+          return ref.get();
+        })
+        .then(snap => {
+          if (!snap.exists) {
+            assert.equal(null, expectedState[i]);
+          } else {
+            assert.deepEqual(snap.data(), expectedState[i]);
+          }
+        });
+    }
+
+    return promise;
+  });
+
   describe('watch', function() {
     let currentDeferred = {promise: null};
 

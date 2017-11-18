@@ -246,7 +246,7 @@ class WriteBatch {
 
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data, {
-      allowDeletes: merge,
+      allowNestedDeletes: merge,
       allowEmpty: !merge,
     });
     validate.isOptionalSetOptions('options', options);
