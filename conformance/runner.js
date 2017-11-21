@@ -131,9 +131,6 @@ function convertPrecondition(precondition) {
 
 /** List of test cases that are ignored. */
 const ignoredRe = [
-  // The test data fails to include an empty write request
-  /set: ServerTimestamp alone/,
-
   // Node doesn't support field masks for set().
   /^set-merge: .*$/,
 ];
