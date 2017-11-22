@@ -210,7 +210,7 @@ class DocumentSnapshot {
    * turns { foo.bar : foobar } into { foo { bar : foobar }}
    *
    * @private
-   * @param {firestore/DocumentReference} ref - The reference to the documen.t
+   * @param {firestore/DocumentReference} ref - The reference to the document.
    * @param {Map.<FieldPath, *>} data - The field/value map to expand.
    * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
    */
@@ -576,11 +576,7 @@ class DocumentSnapshot {
    * @return {boolean}
    */
   get isEmpty() {
-    if (!this._fieldsProto) {
-      return true;
-    }
-
-    return isEmptyObject(this._fieldsProto);
+    return !this._fieldsProto || isEmptyObject(this._fieldsProto);
   }
   /**
    * Convert a document snapshot to the Firestore 'Document' Protobuf.

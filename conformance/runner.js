@@ -302,10 +302,7 @@ function runTest(spec) {
 
   return testPromise.then(
     () => {
-      assert.ok(
-        !testSpec.isError,
-        'Expected test to fail, but test succeeded'
-      );
+      assert.ok(!testSpec.isError, 'Expected test to fail, but test succeeded');
     },
     err => {
       assert.ok(testSpec.isError, 'Test failed unexpectedly with: ' + err);
