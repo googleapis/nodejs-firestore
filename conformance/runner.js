@@ -136,19 +136,13 @@ function commitHandler(spec) {
       assert.deepEqual(request, convertCommit(spec.request));
 
       const res = {
-        commitTime: {
-          nanos: 0,
-          seconds: 1,
-        },
+        commitTime: {},
         writeResults: [],
       };
 
       for (let i = 1; i <= request.writes.length; ++i) {
         res.writeResults.push({
-          updateTime: {
-            nanos: i * 2,
-            seconds: i * 2 + 1,
-          },
+          updateTime: {},
         });
       }
 

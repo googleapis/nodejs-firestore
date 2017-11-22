@@ -125,6 +125,7 @@ class WriteBatch {
     this._firestore = firestore;
     this._api = firestore.api;
     this._writes = [];
+    this._committed = false;
   }
 
   /**
@@ -135,6 +136,17 @@ class WriteBatch {
    */
   get isEmpty() {
     return this._writes.length === 0;
+  }
+
+  /**
+   * Throws an error if this batch has already been committed.
+   *
+   * @private
+   */
+  verifyNotCommitted() {
+    if (this._committed) {
+      throw new Error('Cannot modify a WriteBatch that has been committed.');
+    }
   }
 
   /**
@@ -160,6 +172,8 @@ class WriteBatch {
   create(documentRef, data) {
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data);
+
+    this.verifyNotCommitted();
 
     const document = DocumentSnapshot.fromObject(documentRef, data);
     const transform = DocumentTransform.fromObject(documentRef, data);
@@ -201,6 +215,8 @@ class WriteBatch {
   delete(documentRef, precondition) {
     validate.isDocumentReference('documentRef', documentRef);
     validate.isOptionalDeletePrecondition('precondition', precondition);
+
+    this.verifyNotCommitted();
 
     const conditions = new Precondition(precondition);
 
@@ -250,6 +266,8 @@ class WriteBatch {
       allowEmpty: !merge,
     });
     validate.isOptionalSetOptions('options', options);
+
+    this.verifyNotCommitted();
 
     const document = DocumentSnapshot.fromObject(documentRef, data);
     const transform = DocumentTransform.fromObject(documentRef, data);
@@ -311,6 +329,8 @@ class WriteBatch {
   update(documentRef, dataOrField, preconditionOrValues) {
     validate.minNumberOfArguments('update', arguments, 2);
     validate.isDocumentReference('documentRef', documentRef);
+
+    this.verifyNotCommitted();
 
     const updateMap = new Map();
     let precondition = new Precondition({exists: true});
@@ -490,9 +510,7 @@ class WriteBatch {
       request.transaction = explicitTransaction;
     }
 
-    // We store the number of operations that we sent as part of this commit
-    // as the user is able to add additional operations afterwards.
-    let opCount = this._writes.length;
+    this._committed = true;
 
     return this._firestore
       .request(this._api.Firestore.commit.bind(this._api.Firestore), request)
@@ -510,7 +528,7 @@ class WriteBatch {
 
           let offset = 0;
 
-          for (let i = 0; i < opCount; ++i) {
+          for (let i = 0; i < this._writes.length; ++i) {
             let writeRequest = this._writes[i];
 
             // Don't return two write results for a write that contains a

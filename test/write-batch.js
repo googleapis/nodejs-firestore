@@ -294,6 +294,21 @@ describe('batch support', function() {
       });
   });
 
+  it('cannot append to committed batch', function() {
+    let documentName = firestore.doc('col/doc');
+
+    let batch = firestore.batch();
+    batch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
+    batch.update(documentName, {foo: 'bar'});
+    batch.create(documentName, {});
+    batch.delete(documentName);
+    batch.commit();
+
+    assert.throws(() => {
+      batch.set(documentName, {});
+    }, /Cannot modify a WriteBatch that has been committed./);
+  });
+
   it('uses transactions on GCF', function() {
     // We use this environment variable during initialization to detect whether
     // we are running on GCF.
