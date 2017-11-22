@@ -302,11 +302,24 @@ describe('batch support', function() {
     batch.update(documentName, {foo: 'bar'});
     batch.create(documentName, {});
     batch.delete(documentName);
-    batch.commit();
+    let promise = batch.commit();
 
     assert.throws(() => {
       batch.set(documentName, {});
     }, /Cannot modify a WriteBatch that has been committed./);
+
+    return promise;
+  });
+
+  it('can commit an unmodified batch multiple times', function() {
+    let documentName = firestore.doc('col/doc');
+
+    let batch = firestore.batch();
+    batch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
+    batch.update(documentName, {foo: 'bar'});
+    batch.create(documentName, {});
+    batch.delete(documentName);
+    return batch.commit().then(() => batch.commit);
   });
 
   it('uses transactions on GCF', function() {

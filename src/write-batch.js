@@ -458,6 +458,8 @@ class WriteBatch {
    * when this batch completes.
    */
   commit_(commitOptions) {
+    // Note: We don't call `verifyNotCommitted()` to allow for retries.
+
     let explicitTransaction = commitOptions && commitOptions.transactionId;
 
     let request = {
