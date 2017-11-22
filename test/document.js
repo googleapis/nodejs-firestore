@@ -44,22 +44,26 @@ function createInstance() {
 }
 
 function buildWrite_(document, mask, transform, precondition) {
-  let update = extend(true, {}, document);
-  delete update.updateTime;
-  delete update.createTime;
+  let writes = [];
 
-  let writes = [{update: update}];
+  if (document) {
+    let update = extend(true, {}, document);
+    delete update.updateTime;
+    delete update.createTime;
 
-  if (mask) {
-    writes[0].updateMask = mask;
-  }
+    writes.push({update});
 
-  if (precondition) {
-    writes[0].currentDocument = precondition;
+    if (mask) {
+      writes[0].updateMask = mask;
+    }
   }
 
   if (transform) {
     writes.push({transform: transform});
+  }
+
+  if (precondition) {
+    writes[0].currentDocument = precondition;
   }
 
   return {writes: writes};
@@ -191,41 +195,29 @@ function stream() {
   return stream;
 }
 
-const defaultWriteResult = {
-  commitTime: {
-    nanos: 3,
-    seconds: 4,
-  },
-  writeResults: [
-    {
-      updateTime: {
-        nanos: 3,
-        seconds: 4,
-      },
+function writeResult(count) {
+  const res = {
+    commitTime: {
+      nanos: 0,
+      seconds: 1,
     },
-  ],
-};
+  };
 
-const serverTimestampWriteResult = {
-  commitTime: {
-    nanos: 3,
-    seconds: 4,
-  },
-  writeResults: [
-    {
-      updateTime: {
-        nanos: 3,
-        seconds: 4,
-      },
-    },
-    {
-      updateTime: {
-        nanos: 3,
-        seconds: 4,
-      },
-    },
-  ],
-};
+  if (count > 0) {
+    res.writeResults = [];
+
+    for (let i = 1; i <= count; ++i) {
+      res.writeResults.push({
+        updateTime: {
+          nanos: i * 2,
+          seconds: i * 2 + 1,
+        },
+      });
+    }
+  }
+
+  return res;
+}
 
 describe('DocumentReference interface', function() {
   let firestore;
@@ -279,7 +271,7 @@ describe('serialize document', function() {
           })
         )
       );
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore
@@ -308,7 +300,7 @@ describe('serialize document', function() {
         )
       );
 
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').set({
@@ -319,7 +311,7 @@ describe('serialize document', function() {
   it('serializes unicode keys', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, set(document('😀', '😜')));
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').set({
@@ -344,7 +336,7 @@ describe('serialize document', function() {
         )
       );
 
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').set({
@@ -363,7 +355,7 @@ describe('serialize document', function() {
       assert.equal(fields.posInfinity.doubleValue, Infinity);
       assert.equal(fields.negInfinity.doubleValue, -Infinity);
 
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').set({
@@ -378,21 +370,17 @@ describe('serialize document', function() {
       requestEquals(
         request,
         set(
-          document('map', {
-            mapValue: {
-              fields: {},
-            },
-            valueType: 'mapValue',
-          }),
+          document('foo', 'bar'),
           /* updateMask= */ null,
           fieldTransform('field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')
         )
       );
 
-      callback(null, serverTimestampWriteResult);
+      callback(null, writeResult(2));
     };
 
     return firestore.doc('collectionId/documentId').set({
+      foo: 'bar',
       field: Firestore.FieldValue.serverTimestamp(),
       map: {field: Firestore.FieldValue.serverTimestamp()},
     });
@@ -470,7 +458,7 @@ describe('serialize document', function() {
         )
       );
 
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     // The Firestore Admin SDK adds a cyclic reference to the 'Firestore' member
@@ -800,7 +788,7 @@ describe('delete document', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, remove('documentId'));
 
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').delete();
@@ -841,7 +829,7 @@ describe('delete document', function() {
         })
       );
 
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return Promise.all([
@@ -887,13 +875,72 @@ describe('set document', function() {
     firestore = createInstance();
   });
 
-  it('sets document', function() {
+  it('supports empty map', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, set(document()));
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').set({});
+  });
+
+  it('supports nested empty map', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        set(
+          document('a', {
+            mapValue: {
+              fields: {},
+            },
+            valueType: 'mapValue',
+          })
+        )
+      );
+      callback(null, writeResult(1));
+    };
+
+    return firestore.doc('collectionId/documentId').set({a: {}});
+  });
+
+  it('skips merges with just server timestamps', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        set(
+          null,
+          null,
+          fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')
+        )
+      );
+      callback(null, writeResult(1));
+    };
+    return firestore.doc('collectionId/documentId').set(
+      {
+        a: Firestore.FieldValue.serverTimestamp(),
+        b: {c: Firestore.FieldValue.serverTimestamp()},
+      },
+      {merge: true}
+    );
+  });
+
+  it('sends empty non-merge write even with just server timestamps', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        set(
+          document(), // The empty write clears the data on the server.
+          null,
+          fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')
+        )
+      );
+      callback(null, writeResult(2));
+    };
+
+    return firestore.doc('collectionId/documentId').set({
+      a: Firestore.FieldValue.serverTimestamp(),
+      b: {c: Firestore.FieldValue.serverTimestamp()},
+    });
   });
 
   it('supports document merges', function() {
@@ -915,7 +962,7 @@ describe('set document', function() {
           updateMask('a', 'c.d', 'f')
         )
       );
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore
@@ -926,10 +973,30 @@ describe('set document', function() {
       );
   });
 
+  it('supports nested empty merge', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        set(
+          document('a', {
+            mapValue: {
+              fields: {},
+            },
+            valueType: 'mapValue',
+          }),
+          updateMask('a')
+        )
+      );
+      callback(null, writeResult(1));
+    };
+
+    return firestore.doc('collectionId/documentId').set({a: {}}, {merge: true});
+  });
+
   it("doesn't split on dots", function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, set(document('a.b', 'c')));
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').set({'a.b': 'c'});
@@ -959,6 +1026,12 @@ describe('set document', function() {
     }, /Deletes must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
+  it('rejects empty merges', function() {
+    assert.throws(() => {
+      firestore.doc('collectionId/documentId').set({}, {merge: true});
+    }, /At least one field must be updated./);
+  });
+
   it("doesn't accept arrays", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set([42]);
@@ -976,7 +1049,7 @@ describe('create document', function() {
   it('creates document', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, create(document()));
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').create({});
@@ -1015,23 +1088,44 @@ describe('create document', function() {
       requestEquals(
         request,
         create(
-          document('map', {
-            mapValue: {
-              fields: {},
-            },
-            valueType: 'mapValue',
-          }),
+          null,
           fieldTransform('field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')
         )
       );
 
-      callback(null, serverTimestampWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').create({
       field: Firestore.FieldValue.serverTimestamp(),
       map: {field: Firestore.FieldValue.serverTimestamp()},
     });
+  });
+
+  it('supports nested empty map', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        create(
+          document('a', {
+            mapValue: {
+              fields: {
+                b: {
+                  mapValue: {
+                    fields: {},
+                  },
+                  valueType: 'mapValue',
+                },
+              },
+            },
+            valueType: 'mapValue',
+          })
+        )
+      );
+      callback(null, writeResult(1));
+    };
+
+    return firestore.doc('collectionId/documentId').create({a: {b: {}}});
   });
 
   it('requires an object', function() {
@@ -1057,7 +1151,7 @@ describe('update document', function() {
   it('generates proto', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').update({foo: 'bar'});
@@ -1068,33 +1162,69 @@ describe('update document', function() {
       requestEquals(
         request,
         update(
-          document(
-            'a',
-            {
-              valueType: 'mapValue',
-              mapValue: {
-                fields: {},
-              },
+          document('foo', {
+            valueType: 'mapValue',
+            mapValue: {
+              fields: {},
             },
-            'c',
-            {
-              valueType: 'mapValue',
-              mapValue: {
-                fields: {},
-              },
-            }
-          ),
-          updateMask('a'),
+          }),
+          updateMask('a', 'foo'),
           fieldTransform('a.b', 'REQUEST_TIME', 'c.d', 'REQUEST_TIME')
         )
       );
-      callback(null, serverTimestampWriteResult);
+      callback(null, writeResult(2));
     };
 
     return firestore.doc('collectionId/documentId').update({
+      foo: {},
       a: {b: Firestore.FieldValue.serverTimestamp()},
       'c.d': Firestore.FieldValue.serverTimestamp(),
     });
+  });
+
+  it('skips write for single server timestamp', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        update(null, null, fieldTransform('a', 'REQUEST_TIME'))
+      );
+      callback(null, writeResult(1));
+    };
+
+    return firestore
+      .doc('collectionId/documentId')
+      .update('a', Firestore.FieldValue.serverTimestamp());
+  });
+
+  it('supports nested empty map', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        update(
+          document('a', {
+            mapValue: {
+              fields: {},
+            },
+            valueType: 'mapValue',
+          }),
+          updateMask('a')
+        )
+      );
+      callback(null, writeResult(1));
+    };
+
+    return firestore.doc('collectionId/documentId').update({a: {}});
+  });
+
+  it('supports nested delete', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(request, update(document(), updateMask('a.b')));
+      callback(null, writeResult(1));
+    };
+
+    return firestore
+      .doc('collectionId/documentId')
+      .update({'a.b': Firestore.FieldValue.delete()});
   });
 
   it('returns update time', function() {
@@ -1136,7 +1266,7 @@ describe('update document', function() {
           },
         })
       );
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return Promise.all([
@@ -1163,7 +1293,11 @@ describe('update document', function() {
   it('requires at least one field', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update({});
-    }, /At least one field must be udpated./);
+    }, /At least one field must be updated./);
+
+    assert.throws(() => {
+      firestore.doc('collectionId/documentId').update();
+    }, /Function 'update\(\)' requires at least 1 argument./);
   });
 
   it('rejects nested deletes', function() {
@@ -1183,7 +1317,7 @@ describe('update document', function() {
   it('with top-level document', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').update({
@@ -1233,7 +1367,7 @@ describe('update document', function() {
         )
       );
 
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return Promise.all([
@@ -1291,7 +1425,7 @@ describe('update document', function() {
         )
       );
 
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
     return Promise.all([
       firestore.doc('collectionId/documentId').update({
@@ -1319,7 +1453,7 @@ describe('update document', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, update(document('a.b', 'c'), updateMask('`a.b`')));
 
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore
@@ -1444,7 +1578,7 @@ describe('update document', function() {
         request,
         update(document('bar', 'foobar'), updateMask('bar', 'foo'))
       );
-      callback(null, defaultWriteResult);
+      callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').update({
