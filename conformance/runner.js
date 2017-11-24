@@ -129,14 +129,52 @@ function convertPrecondition(precondition) {
   return result;
 }
 
+/** Request handler for _commit. */
+function commitHandler(spec) {
+  return (request, options, callback) => {
+    try {
+      assert.deepEqual(request, convertCommit(spec.request));
+
+      const res = {
+        commitTime: {},
+        writeResults: [],
+      };
+
+      for (let i = 1; i <= request.writes.length; ++i) {
+        res.writeResults.push({
+          updateTime: {},
+        });
+      }
+
+      callback(null, res);
+    } catch (err) {
+      callback(err);
+    }
+  };
+}
+
+/** Request handler for _batchGetDocuments. */
+function getHandler(spec) {
+  return request => {
+    const getDocument = spec.request;
+    assert.equal(request.documents[0], getDocument.name);
+
+    let stream = through.obj();
+
+    setImmediate(function() {
+      stream.push({
+        missing: getDocument.name,
+        readTime: {seconds: 0, nanos: 0},
+      });
+      stream.push(null);
+    });
+
+    return stream;
+  };
+}
+
 /** List of test cases that are ignored. */
 const ignoredRe = [
-  // Firestore Node does not omit empty writes
-  /(create|set|update|update-paths): ServerTimestamp alone/,
-  /(create|set|update|update-paths): nested ServerTimestamp field/,
-  /(create|set|update|update-paths): multiple ServerTimestamp fields/,
-  /(create|set|update|update-paths): ServerTimestamp with dotted field/,
-
   // Node doesn't support field masks for set().
   /^set-merge: .*$/,
 ];
@@ -159,90 +197,74 @@ function runTest(spec) {
   };
 
   const updateTest = function(spec) {
-    firestore.api.Firestore._commit = function(request) {
-      const expected = convertCommit(spec.request);
-      assert.deepEqual(request, expected);
-      resolve();
-    };
+    firestore.api.Firestore._commit = commitHandler(spec);
 
-    let varargs = [];
+    return Promise.resolve().then(() => {
+      let varargs = [];
 
-    if (spec.jsonData) {
-      varargs[0] = convertInput(spec.jsonData);
-    } else {
-      for (let i = 0; i < spec.fieldPaths.length; ++i) {
-        varargs[2 * i] = new Firestore.FieldPath(spec.fieldPaths[i].field);
+      if (spec.jsonData) {
+        varargs[0] = convertInput(spec.jsonData);
+      } else {
+        for (let i = 0; i < spec.fieldPaths.length; ++i) {
+          varargs[2 * i] = new Firestore.FieldPath(spec.fieldPaths[i].field);
+        }
+        for (let i = 0; i < spec.jsonValues.length; ++i) {
+          varargs[2 * i + 1] = convertInput(spec.jsonValues[i]);
+        }
       }
-      for (let i = 0; i < spec.jsonValues.length; ++i) {
-        varargs[2 * i + 1] = convertInput(spec.jsonValues[i]);
+
+      if (spec.precondition) {
+        varargs.push(convertPrecondition(spec.precondition));
       }
-    }
 
-    if (spec.precondition) {
-      varargs.push(convertPrecondition(spec.precondition));
-    }
-
-    const document = docRef(spec.docRefPath);
-    document.update.apply(document, varargs);
+      const document = docRef(spec.docRefPath);
+      return document.update.apply(document, varargs);
+    });
   };
 
   const deleteTest = function(spec) {
-    firestore.api.Firestore._commit = function(request) {
-      const expected = convertCommit(spec.request);
-      assert.deepEqual(request, expected);
-      resolve();
-    };
+    firestore.api.Firestore._commit = commitHandler(spec);
 
-    if (spec.precondition) {
-      const precondition = convertPrecondition(deleteSpec.precondition);
-      docRef(spec.docRefPath).delete(precondition);
-    } else {
-      docRef(spec.docRefPath).delete();
-    }
+    return Promise.resolve().then(() => {
+      if (spec.precondition) {
+        const precondition = convertPrecondition(deleteSpec.precondition);
+        return docRef(spec.docRefPath).delete(precondition);
+      } else {
+        return docRef(spec.docRefPath).delete();
+      }
+    });
   };
 
   const setTest = function(spec) {
-    firestore.api.Firestore._commit = function(request) {
-      const expected = convertCommit(spec.request);
-      assert.deepEqual(request, expected);
-      resolve();
-    };
+    firestore.api.Firestore._commit = commitHandler(spec);
 
-    const isMerge = !!(spec.option && spec.option.all);
+    return Promise.resolve().then(() => {
+      const isMerge = !!(spec.option && spec.option.all);
 
-    docRef(setSpec.docRefPath).set(convertInput(spec.jsonData), {
-      merge: isMerge,
+      return docRef(setSpec.docRefPath).set(convertInput(spec.jsonData), {
+        merge: isMerge,
+      });
     });
   };
 
   const createTest = function(spec) {
-    firestore.api.Firestore._commit = function(request) {
-      const expected = convertCommit(spec.request);
-      assert.deepEqual(request, expected);
-      resolve();
-    };
+    firestore.api.Firestore._commit = commitHandler(spec);
 
-    docRef(spec.docRefPath).create(convertInput(spec.jsonData));
+    return Promise.resolve().then(() => {
+      return docRef(spec.docRefPath).create(convertInput(spec.jsonData));
+    });
   };
 
   const getTest = function(spec) {
-    firestore.api.Firestore._batchGetDocuments = function(request) {
-      const getDocument = spec.request;
-      assert.equal(request.documents[0], getDocument.name);
-      resolve();
-      return through();
-    };
+    firestore.api.Firestore._batchGetDocuments = getHandler(spec);
 
-    docRef(spec.docRefPath).get();
+    return Promise.resolve().then(() => {
+      return docRef(spec.docRefPath).get();
+    });
   };
 
-  let resolve;
-  let reject;
-
-  const deferred = new Promise((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
+  let testSpec;
+  let testPromise;
 
   const getSpec = spec.get;
   const createSpec = spec.create;
@@ -251,48 +273,32 @@ function runTest(spec) {
   const deleteSpec = spec.delete;
 
   if (getSpec) {
-    getTest(getSpec);
+    testSpec = getSpec;
+    testPromise = getTest(getSpec);
   } else if (createSpec) {
-    if (createSpec.isError) {
-      assert.throws(() => {
-        createTest(createSpec);
-      });
-      resolve();
-    } else {
-      createTest(createSpec);
-    }
+    testSpec = createSpec;
+    testPromise = createTest(createSpec);
   } else if (setSpec) {
-    if (setSpec.isError) {
-      assert.throws(() => {
-        setTest(setSpec);
-      });
-      resolve();
-    } else {
-      setTest(setSpec);
-    }
+    testSpec = setSpec;
+    testPromise = setTest(setSpec);
   } else if (updateSpec) {
-    if (updateSpec.isError) {
-      assert.throws(() => {
-        updateTest(updateSpec);
-      });
-      resolve();
-    } else {
-      updateTest(updateSpec);
-    }
+    testSpec = updateSpec;
+    testPromise = updateTest(updateSpec);
   } else if (deleteSpec) {
-    if (deleteSpec.isError) {
-      assert.throws(() => {
-        deleteTest(deleteSpec);
-      });
-      resolve();
-    } else {
-      deleteTest(deleteSpec);
-    }
+    testSpec = deleteSpec;
+    testPromise = deleteTest(deleteSpec);
   } else {
-    reject(new Error(`Unhandled Spec: ${JSON.stringify(spec)}`));
+    return Promise.reject(new Error(`Unhandled Spec: ${JSON.stringify(spec)}`));
   }
 
-  return deferred;
+  return testPromise.then(
+    () => {
+      assert.ok(!testSpec.isError, 'Expected test to fail, but test succeeded');
+    },
+    err => {
+      assert.ok(testSpec.isError, 'Test failed unexpectedly with: ' + err);
+    }
+  );
 }
 
 describe('Conformance Tests', function() {
