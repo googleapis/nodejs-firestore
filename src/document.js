@@ -192,6 +192,95 @@ class DocumentSnapshot {
   }
 
   /**
+   * Creates a DocumentSnapshot from an object.
+   *
+   * @private
+   * @param {firestore/DocumentReference} ref - The reference to the document.
+   * @param {Object} obj - The object to store in the DocumentSnapshot.
+   * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
+   */
+  static fromObject(ref, obj) {
+    return new DocumentSnapshot(ref, DocumentSnapshot.encodeFields(obj));
+  }
+
+  /**
+   * Creates a DocumentSnapshot from an UpdateMap.
+   *
+   * This methods expands the top-level field paths in a JavaScript map and
+   * turns { foo.bar : foobar } into { foo { bar : foobar }}
+   *
+   * @private
+   * @param {firestore/DocumentReference} ref - The reference to the document.
+   * @param {Map.<FieldPath, *>} data - The field/value map to expand.
+   * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
+   */
+  static fromUpdateMap(ref, data) {
+    /**
+     * Merges 'value' at the field path specified by the path array into
+     * 'target'.
+     */
+    function merge(target, value, path, pos) {
+      let key = path[pos];
+      let isLast = pos === path.length - 1;
+
+      if (!is.defined(target[key])) {
+        if (isLast) {
+          if (DocumentTransform.isTransformSentinel(value)) {
+            return null;
+          }
+          // The merge is done.
+          const leafNode = DocumentSnapshot.encodeValue(value);
+          if (leafNode) {
+            target[key] = leafNode;
+          }
+          return target;
+        } else {
+          // We need to expand the target object.
+          const childNode = {
+            valueType: 'mapValue',
+            mapValue: {
+              fields: {},
+            },
+          };
+
+          const nestedValue = merge(
+            childNode.mapValue.fields,
+            value,
+            path,
+            pos + 1
+          );
+
+          if (nestedValue) {
+            childNode.mapValue.fields = nestedValue;
+            target[key] = childNode;
+            return target;
+          } else {
+            return null;
+          }
+        }
+      } else {
+        assert(!isLast, "Can't merge current value into a nested object");
+        target[key].mapValue.fields = merge(
+          target[key].mapValue.fields,
+          value,
+          path,
+          pos + 1
+        );
+        return target;
+      }
+    }
+
+    let res = {};
+
+    data.forEach((value, key) => {
+      let components = key.toArray();
+      merge(res, value, components, 0);
+    });
+
+    return new DocumentSnapshot(ref, res);
+  }
+
+  /**
    * True if the document exists.
    *
    * @type {boolean}
@@ -481,6 +570,15 @@ class DocumentSnapshot {
   }
 
   /**
+   * Checks whether this DocumentSnapshot contains any fields.
+   *
+   * @private
+   * @return {boolean}
+   */
+  get isEmpty() {
+    return !this._fieldsProto || isEmptyObject(this._fieldsProto);
+  }
+  /**
    * Convert a document snapshot to the Firestore 'Document' Protobuf.
    *
    * @private
@@ -488,8 +586,10 @@ class DocumentSnapshot {
    */
   toProto() {
     return {
-      name: this._ref.formattedName,
-      fields: this._fieldsProto,
+      update: {
+        name: this._ref.formattedName,
+        fields: this._fieldsProto || {},
+      },
     };
   }
 
@@ -528,22 +628,20 @@ class DocumentSnapshot {
    * Encodes a JavaScrip object into the Firestore 'Fields' representation.
    *
    * @private
-   * @param {Object} obj The object to encode
-   * @param {number=} depth The depth at the current encoding level
+   * @param {Object} obj The object to encode.
    * @returns {Object} The Firestore 'Fields' representation
    */
-  static encodeFields(obj, depth) {
-    if (!is.defined(depth)) {
-      depth = 1;
-    }
-
-    let fields = {};
+  static encodeFields(obj, options) {
+    let fields = null;
 
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
-        let val = DocumentSnapshot.encodeValue(obj[prop], depth);
+        let val = DocumentSnapshot.encodeValue(obj[prop], options);
 
         if (val) {
+          if (!fields) {
+            fields = {};
+          }
           fields[prop] = val;
         }
       }
@@ -558,20 +656,11 @@ class DocumentSnapshot {
    *
    * @private
    * @param {Object} val The object to encode
-   * @param {number=} depth The depth at the current encoding level
    * @returns {object|null} The Firestore Proto or null if we are deleting a
    * field.
    */
-  static encodeValue(val, depth) {
-    if (!is.defined(depth)) {
-      depth = 1;
-    }
-
-    if (val === FieldValue.DELETE_SENTINEL) {
-      return null;
-    }
-
-    if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+  static encodeValue(val) {
+    if (DocumentTransform.isTransformSentinel(val)) {
       return null;
     }
 
@@ -619,7 +708,7 @@ class DocumentSnapshot {
     if (is.array(val)) {
       let encodedElements = [];
       for (let i = 0; i < val.length; ++i) {
-        let enc = DocumentSnapshot.encodeValue(val[i], depth + 1);
+        let enc = DocumentSnapshot.encodeValue(val[i]);
         if (enc) {
           encodedElements.push(enc);
         }
@@ -661,12 +750,23 @@ class DocumentSnapshot {
     }
 
     if (isPlainObject(val)) {
-      return {
+      const map = {
         valueType: 'mapValue',
         mapValue: {
-          fields: DocumentSnapshot.encodeFields(val, depth + 1),
+          fields: {},
         },
       };
+
+      // If we encounter an empty object, we always need to send it to make sure
+      // the server creates a map entry.
+      if (!isEmptyObject(val)) {
+        map.mapValue.fields = DocumentSnapshot.encodeFields(val);
+        if (!map.mapValue.fields) {
+          return null;
+        }
+      }
+
+      return map;
     }
 
     throw new Error(
@@ -674,51 +774,6 @@ class DocumentSnapshot {
         Object.prototype.toString.call(val) +
         ') to a Firestore Value'
     );
-  }
-
-  /**
-   * Expands top-level field paths in a JavaScript map. This is required
-   * for storing objects in Firestore.
-   *
-   * This functions turns { foo.bar : foobar } into { foo { bar : foobar }}
-   *
-   * @private
-   * @param {Map.<FieldPath, *>} data - The field/value map to expand.
-   * @returns {DocumentData} The expanded JavaScript object.
-   */
-  static expandMap(data) {
-    /**
-     * Merges 'value' at the field path specified by the path array into
-     * 'target'.
-     */
-    function merge(target, value, path, pos) {
-      let key = path[pos];
-      let isLast = pos === path.length - 1;
-
-      if (!is.defined(target[key])) {
-        if (isLast) {
-          // The merge is done.
-          target[key] = value;
-        } else {
-          // We need to expand the target object.
-          target[key] = {};
-          merge(target[key], value, path, pos + 1);
-        }
-      } else {
-        validate.isPlainObject(typeof target[key], target[key]);
-        assert(!isLast, "Can't merge current value into a nested object");
-        merge(target[key], value, path, pos + 1);
-      }
-    }
-
-    let res = {};
-
-    data.forEach((value, key) => {
-      let components = key.toArray();
-      merge(res, value, components, 0);
-    });
-
-    return res;
   }
 }
 
@@ -827,18 +882,6 @@ class DocumentMask {
   }
 
   /**
-   * Converts a document mask to the Firestore 'DocumentMask' Proto.
-   *
-   * @private
-   * @returns {Object} A Firestore 'DocumentMask' Proto.
-   */
-  toProto() {
-    return {
-      fieldPaths: this._fieldPaths,
-    };
-  }
-
-  /**
    * Creates a document mask with the field paths of a document.
    *
    * @private
@@ -846,7 +889,7 @@ class DocumentMask {
    * fields to modify. Only the keys are used to extract the document mask.
    * @returns {DocumentMask}
    */
-  static fromMap(data) {
+  static fromUpdateMap(data) {
     let fieldPaths = [];
 
     data.forEach((value, key) => {
@@ -873,8 +916,12 @@ class DocumentMask {
     let fieldPaths = [];
 
     const extractFieldPaths = function(currentData, currentPath) {
+      let isEmpty = true;
+
       for (let key in currentData) {
         if (currentData.hasOwnProperty(key)) {
+          isEmpty = false;
+
           // We don't split on dots since fromObject is called with
           // DocumentData.
           const childSegment = new FieldPath(key);
@@ -893,6 +940,11 @@ class DocumentMask {
           }
         }
       }
+
+      // Add a field path for an explicitly updated empty map.
+      if (currentPath && isEmpty) {
+        fieldPaths.push(currentPath.formattedName);
+      }
     };
 
     extractFieldPaths(data);
@@ -901,6 +953,28 @@ class DocumentMask {
     fieldPaths.sort();
 
     return new DocumentMask(fieldPaths);
+  }
+
+  /**
+   * Returns true if this document mask contains no fields.
+   *
+   * @private
+   * @return {boolean} Whether this document mask is empty.
+   */
+  get isEmpty() {
+    return this._fieldPaths.length === 0;
+  }
+
+  /**
+   * Converts a document mask to the Firestore 'DocumentMask' Proto.
+   *
+   * @private
+   * @returns {Object} A Firestore 'DocumentMask' Proto.
+   */
+  toProto() {
+    return {
+      fieldPaths: this._fieldPaths,
+    };
   }
 }
 
@@ -927,6 +1001,90 @@ class DocumentTransform {
     this._ref = ref;
     this._transforms = transforms;
   }
+  /**
+   * Generates a DocumentTransform from a JavaScript object.
+   *
+   * @private
+   * @param {firestore/DocumentReference} ref The `DocumentReference` to
+   * use for the DocumentTransform.
+   * @param {Object} obj The object to extract the transformations from.
+   * @returns {firestore.DocumentTransform} The Document Transform.
+   */
+  static fromObject(ref, obj) {
+    let updateMap = new Map();
+
+    for (let prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        updateMap.set(new FieldPath(prop), obj[prop]);
+      }
+    }
+
+    return DocumentTransform.fromUpdateMap(ref, updateMap);
+  }
+
+  /**
+   * Generates a DocumentTransform from an Update Map.
+   *
+   * @private
+   * @param {firestore/DocumentReference} ref The `DocumentReference` to
+   * use for the DocumentTransform.
+   * @param {Map} data The map to extract the transformations from.
+   * @returns {firestore.DocumentTransform}} The Document Transform.
+   */
+  static fromUpdateMap(ref, data) {
+    let transforms = [];
+
+    function encode_(val, path, allowTransforms) {
+      if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+        if (allowTransforms) {
+          transforms.push({
+            fieldPath: path.formattedName,
+            setToServerValue: SERVER_TIMESTAMP,
+          });
+        } else {
+          throw new Error(
+            'Server timestamps are not supported as array ' + 'values.'
+          );
+        }
+      } else if (is.array(val)) {
+        for (let i = 0; i < val.length; ++i) {
+          // We need to verify that no array value contains a document transform
+          encode_(val[i], path.append(String(i)), false);
+        }
+      } else if (isPlainObject(val)) {
+        for (let prop in val) {
+          if (val.hasOwnProperty(prop)) {
+            encode_(
+              val[prop],
+              path.append(new FieldPath(prop)),
+              allowTransforms
+            );
+          }
+        }
+      }
+    }
+
+    data.forEach((value, key) => {
+      encode_(value, FieldPath.fromArgument(key), true);
+    });
+
+    return new DocumentTransform(ref, transforms);
+  }
+
+  /**
+   * Returns true if the field value is a .delete() or .serverTimestamp()
+   * sentinel.
+   *
+   * @private
+   * @param {*} val The field value to check.
+   * @return {boolean} Whether we encountered a transform sentinel.
+   */
+  static isTransformSentinel(val) {
+    return (
+      val === FieldValue.SERVER_TIMESTAMP_SENTINEL ||
+      val === FieldValue.DELETE_SENTINEL
+    );
+  }
 
   /**
    * Whether this DocumentTransform contains any actionable transformations.
@@ -947,67 +1105,11 @@ class DocumentTransform {
    */
   toProto() {
     return {
-      document: this._ref.formattedName,
-      fieldTransforms: this._transforms,
+      transform: {
+        document: this._ref.formattedName,
+        fieldTransforms: this._transforms,
+      },
     };
-  }
-
-  /**
-   * Generates a DocumentTransform from a JavaScript object.
-   *
-   * @private
-   * @param {firestore/DocumentReference} ref The `DocumentReference` to
-   * use for the DocumentTransform.
-   * @param {Object} obj The object to extract the transformations from.
-   * @param {Array.<string>=} path The field path at the current depth.
-   * @returns {Object} The Firestore Proto
-   */
-  static fromObject(ref, obj, path) {
-    path = path || [];
-
-    function encode_(val, path, allowTransforms) {
-      let transforms = [];
-
-      if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
-        if (allowTransforms) {
-          transforms.push({
-            fieldPath: new FieldPath(path).formattedName,
-            setToServerValue: SERVER_TIMESTAMP,
-          });
-        } else {
-          throw new Error(
-            'Server timestamps are not supported as array ' + 'values.'
-          );
-        }
-      } else if (is.array(val)) {
-        for (let i = 0; i < val.length; ++i) {
-          // We need to verify that no array value contains a document transform
-          encode_(val[i], path.concat(i), false);
-        }
-      } else if (isPlainObject(val)) {
-        for (let prop in val) {
-          if (val.hasOwnProperty(prop)) {
-            transforms = transforms.concat(
-              encode_(val[prop], path.concat(prop), allowTransforms)
-            );
-          }
-        }
-      }
-
-      return transforms;
-    }
-
-    let transforms = [];
-
-    for (let prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        transforms = transforms.concat(
-          encode_(obj[prop], path.concat(prop), true)
-        );
-      }
-    }
-
-    return new DocumentTransform(ref, transforms);
   }
 }
 
@@ -1054,6 +1156,17 @@ class Precondition {
 
     return proto;
   }
+
+  /**
+   * Whether this DocumentTransform contains any enforcement.
+   *
+   * @private
+   * @type {boolean} True for the empty precondition.
+   * @readonly
+   */
+  get isEmpty() {
+    return this._exists === undefined && !this._lastUpdateTime;
+  }
 }
 
 /*!
@@ -1062,6 +1175,10 @@ class Precondition {
  * @param {Object} obj JavaScript object to validate.
  * @param {boolean=} options.allowDeletes Whether field deletes are supported
  * at the top level (e.g. for document updates).
+ * @param {boolean=} options.allowNestedDeletes Whether field deletes are supported
+ * at any level (e.g. for document merges).
+ * @param {boolean=} options.allowEmpty Whether empty documents are support.
+ * Defaults to true.
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
@@ -1070,10 +1187,19 @@ function validateDocumentData(obj, options) {
     throw new Error('Input is not a plain JavaScript object.');
   }
 
+  options = options || {};
+
+  let isEmpty = true;
+
   for (let prop in obj) {
     if (obj.hasOwnProperty(prop)) {
+      isEmpty = false;
       validateFieldValue(obj[prop], options, /* depth= */ 1);
     }
+  }
+
+  if (options.allowEmpty === false && isEmpty) {
+    throw new Error('At least one field must be updated.');
   }
 
   return true;
@@ -1085,6 +1211,8 @@ function validateDocumentData(obj, options) {
  * @param {Object} obj JavaScript value to validate.
  * @param {boolean=} options.allowDeletes Whether field deletes are supported
  * at the top level (e.g. for document updates).
+ * @param {boolean=} options.allowNestedDeletes Whether field deletes are supported
+ * at any level (e.g. for document merges).
  * @param {number=} depth The current depth of the traversal.
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
@@ -1100,13 +1228,12 @@ function validateFieldValue(obj, options, depth) {
     );
   }
 
-  if (
-    obj === FieldValue.DELETE_SENTINEL &&
-    (!options.allowDeletes || depth > 1)
-  ) {
-    throw new Error(
-      'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
-    );
+  if (obj === FieldValue.DELETE_SENTINEL) {
+    if (!options.allowNestedDeletes && (!options.allowDeletes || depth > 1)) {
+      throw new Error(
+        'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+      );
+    }
   }
 
   if (isPlainObject(obj)) {
@@ -1200,6 +1327,22 @@ function isPlainObject(input) {
     input !== null &&
     Object.getPrototypeOf(input) === Object.prototype
   );
+}
+
+/*!
+ * Checks whether 'obj' has any properties
+ *
+ * @param {Object} input - The object to verify.
+ * @returns {boolean} 'true' if the object contains no keys.
+ */
+function isEmptyObject(obj) {
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 module.exports = DocumentRefType => {

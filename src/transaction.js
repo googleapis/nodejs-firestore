@@ -18,6 +18,8 @@
 
 const is = require('is');
 
+const validate = require('./validate')();
+
 /*!
  * Injected.
  *
@@ -195,6 +197,8 @@ class Transaction {
    * });
    */
   update(documentRef, dataOrField, preconditionOrValues) {
+    validate.minNumberOfArguments('update', arguments, 2);
+
     preconditionOrValues = Array.prototype.slice.call(arguments, 2);
     this._writeBatch.update.apply(
       this._writeBatch,

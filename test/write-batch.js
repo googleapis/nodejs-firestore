@@ -93,13 +93,13 @@ describe('update() method', function() {
 
   it('requires document name', function() {
     assert.throws(() => {
-      writeBatch.update();
+      writeBatch.update({}, {});
     }, /Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('requires object', function() {
     assert.throws(() => {
-      writeBatch.update(firestore.doc('sub/doc'));
+      writeBatch.update(firestore.doc('sub/doc'), firestore.doc('sub/doc'));
     }, new RegExp('Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object.'));
   });
 
@@ -205,17 +205,18 @@ describe('batch support', function() {
           seconds: 0,
         },
         writeResults: [
-          {
-            updateTime: {
-              nanos: 0,
-              seconds: 0,
-            },
-          },
-          // This write result conforms to the DocumentTransform and won't be returned in the response.
+          // This write result conforms to the Write + DocumentTransform and
+          // won't be returned in the response.
           {
             updateTime: {
               nanos: 1337,
               seconds: 1337,
+            },
+          },
+          {
+            updateTime: {
+              nanos: 0,
+              seconds: 0,
             },
           },
           {
@@ -291,6 +292,34 @@ describe('batch support', function() {
       .catch(err => {
         assert.equal(err.message, 'Expected exception');
       });
+  });
+
+  it('cannot append to committed batch', function() {
+    let documentName = firestore.doc('col/doc');
+
+    let batch = firestore.batch();
+    batch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
+    batch.update(documentName, {foo: 'bar'});
+    batch.create(documentName, {});
+    batch.delete(documentName);
+    let promise = batch.commit();
+
+    assert.throws(() => {
+      batch.set(documentName, {});
+    }, /Cannot modify a WriteBatch that has been committed./);
+
+    return promise;
+  });
+
+  it('can commit an unmodified batch multiple times', function() {
+    let documentName = firestore.doc('col/doc');
+
+    let batch = firestore.batch();
+    batch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
+    batch.update(documentName, {foo: 'bar'});
+    batch.create(documentName, {});
+    batch.delete(documentName);
+    return batch.commit().then(() => batch.commit);
   });
 
   it('uses transactions on GCF', function() {
