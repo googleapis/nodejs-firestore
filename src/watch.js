@@ -275,15 +275,15 @@ class Watch {
    * @hideconstructor
    *
    * @param {Firestore} firestore The Firestore Database client.
-   * @param {Object} targetChange - A Firestore 'TargetChange' proto denoting
-   * the target to listen on.
+   * @param {Object} target - A Firestore 'Target' proto denoting the target to
+   * listen on.
    * @param {function} comparator - A comparator for DocumentSnapshots that
    * is used to order the document snapshots returned by this watch.
    */
-  constructor(firestore, targetChange, comparator) {
+  constructor(firestore, target, comparator) {
     this._firestore = firestore;
     this._api = firestore.api;
-    this._targetChange = targetChange;
+    this._targets = target;
     this._comparator = comparator;
     this._backoff = new ExponentialBackoff();
   }
@@ -369,7 +369,7 @@ class Watch {
 
     const request = {
       database: this._firestore.formattedName,
-      addTarget: this._targetChange,
+      addTarget: this._targets,
     };
 
     // We may need to replace the underlying stream on reset events.

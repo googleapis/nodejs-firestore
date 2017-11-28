@@ -333,9 +333,9 @@ class Firestore extends commonGrpc.Service {
    * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
-   * @param {object} documentOrName - The Firestore `Document` proto or the
+   * @param {object} documentOrName - The Firestore 'Document' proto or the
    * resource name of a missing document.
-   * @param {object=} readTime - A `Timestamp` proto indicating the time this
+   * @param {object=} readTime - A 'Timestamp' proto indicating the time this
    * document was read.
    * @param {string=} encoding - One of 'json' or 'protobufJS'. Applies to both
    * the 'document' Proto and 'readTime'. Defaults to 'protobufJS'.
