@@ -205,14 +205,19 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
 };
 
 /**
- * Determines whether a GRPC Error is considered permanent and should not be
- * retried.
+ * Determines whether an error is considered permanent and should not be
+ * retried. Errors that don't provide a GRPC error code are always considered
+ * transient in this context.
  *
  * @private
- * @param {Error} error A GRPC Error object that exposes an error code.
+ * @param {Error} error An error object.
  * @return {boolean} Whether the error is permanent.
  */
 function isPermanentError(error) {
+  if (error.code === undefined) {
+    return false;
+  }
+
   switch (error.code) {
     case GRPC_STATUS_CODE.CANCELLED:
     case GRPC_STATUS_CODE.UNKNOWN:
