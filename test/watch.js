@@ -819,6 +819,18 @@ describe('Query watch', function() {
     return result;
   });
 
+  it('retries with unknown code', function() {
+    return watchHelper.runTest(collQueryJSON(), () => {
+      watchHelper.sendAddTarget();
+      watchHelper.sendCurrent();
+      watchHelper.sendSnapshot(1, [0xabcd]);
+      return watchHelper.await('snapshot').then(() => {
+        streamHelper.destroyStream(new Error('Unknown'));
+        return streamHelper.awaitReopen();
+      });
+    });
+  });
+
   it('handles changing a doc', function() {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
