@@ -215,6 +215,11 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
  */
 function isPermanentError(error) {
   if (error.code === undefined) {
+    Firestore.log(
+      'Watch.onSnapshot',
+      'Unable to determine error code: ',
+      error
+    );
     return false;
   }
 
