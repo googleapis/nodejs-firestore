@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "@google-cloud/common": "^0.15.0",
-    "@google-cloud/common-grpc": "^0.4.0",
+    "@google-cloud/common-grpc": "^0.5.0",
     "bun": "^0.0.12",
     "extend": "^3.0.1",
     "functional-red-black-tree": "^1.0.1",
