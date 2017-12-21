@@ -68,7 +68,7 @@ describe('Collection interface', function() {
 
     assert.throws(function() {
       collectionRef.doc('doc/coll');
-    }, /Argument "documentPath" must point to a document\./);
+    }, /Argument "documentPath" must point to a document, but was "doc\/coll". Your path does not contain an even number of components\./);
 
     documentRef = collectionRef.doc('docId/colId/docId');
     assert.ok(is.instance(documentRef, DocumentReference));
