@@ -662,7 +662,7 @@ describe('doc() method', function() {
   it('must point to document', function() {
     assert.throws(function() {
       firestore.doc('collectionId');
-    }, /Argument "documentPath" must point to a document\./);
+    }, /Argument "documentPath" must point to a document, but was "collectionId". Your path does not contain an even number of components\./);
   });
 
   it('exposes properties', function() {
@@ -693,7 +693,7 @@ describe('collection() method', function() {
   it('must point to a collection', function() {
     assert.throws(function() {
       firestore.collection('collectionId/documentId');
-    }, /Argument "collectionPath" must point to a collection\./);
+    }, /Argument "collectionPath" must point to a collection, but was "collectionId\/documentId". Your path does not contain an odd number of components\./);
   });
 
   it('exposes properties', function() {
