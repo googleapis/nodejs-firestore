@@ -272,7 +272,7 @@ class Firestore extends commonGrpc.Service {
         `Argument "documentPath" must point to a document, but was "${
           documentPath
         }". Your path does not contain an even number of components.`
-      )
+      );
     }
 
     return new DocumentReference(this, path);
