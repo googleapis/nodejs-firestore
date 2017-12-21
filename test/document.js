@@ -238,7 +238,7 @@ describe('DocumentReference interface', function() {
 
     assert.throws(() => {
       documentRef.collection('col/doc');
-    }, /Argument "collectionPath" must point to a collection\./);
+    }, /Argument "collectionPath" must point to a collection, but was "col\/doc". Your path does not contain an odd number of components\./);
 
     collection = documentRef.collection('col/doc/col');
     assert.equal(collection.id, 'col');
