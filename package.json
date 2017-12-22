@@ -50,16 +50,16 @@
     "test": "repo-tools test run --cmd npm -- run cover"
   },
   "dependencies": {
-    "@google-cloud/common": "~0.15.0",
-    "@google-cloud/common-grpc": "~0.5.0",
-    "bun": "~0.0.12",
-    "extend": "~3.0.1",
-    "functional-red-black-tree": "~1.0.1",
-    "google-gax": "~0.14.2",
+    "@google-cloud/common": "^0.15.0",
+    "@google-cloud/common-grpc": "^0.5.0",
+    "bun": "^0.0.12",
+    "extend": "^3.0.1",
+    "functional-red-black-tree": "^1.0.1",
+    "google-gax": "^0.14.1",
     "grpc": "~1.7.1",
-    "is": "~3.2.0",
-    "safe-buffer": "~5.1.1",
-    "through2": "~2.0.3"
+    "is": "^3.2.0",
+    "safe-buffer": "^5.1.1",
+    "through2": "^2.0.3"
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.1.0",
