@@ -578,6 +578,7 @@ class DocumentSnapshot {
   get isEmpty() {
     return !this._fieldsProto || isEmptyObject(this._fieldsProto);
   }
+
   /**
    * Convert a document snapshot to the Firestore 'Document' Protobuf.
    *
