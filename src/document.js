@@ -631,12 +631,12 @@ class DocumentSnapshot {
    * @param {Object} obj The object to encode.
    * @returns {Object} The Firestore 'Fields' representation
    */
-  static encodeFields(obj, options) {
+  static encodeFields(obj) {
     let fields = null;
 
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
-        let val = DocumentSnapshot.encodeValue(obj[prop], options);
+        let val = DocumentSnapshot.encodeValue(obj[prop]);
 
         if (val) {
           if (!fields) {
@@ -652,7 +652,6 @@ class DocumentSnapshot {
 
   /**
    * Encodes a JavaScrip value into the Firestore 'Value' representation.
-   * Encodes a JavaScrip value into the Firestore 'Value' represntation.
    *
    * @private
    * @param {Object} val The object to encode
