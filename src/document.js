@@ -576,7 +576,7 @@ class DocumentSnapshot {
    * @return {boolean}
    */
   get isEmpty() {
-    return !this._fieldsProto || isEmptyObject(this._fieldsProto);
+    return this._fieldsProto === undefined || isEmptyObject(this._fieldsProto);
   }
 
   /**
@@ -589,7 +589,7 @@ class DocumentSnapshot {
     return {
       update: {
         name: this._ref.formattedName,
-        fields: this._fieldsProto || {},
+        fields: this._fieldsProto,
       },
     };
   }
@@ -633,16 +633,13 @@ class DocumentSnapshot {
    * @returns {Object} The Firestore 'Fields' representation
    */
   static encodeFields(obj) {
-    let fields = null;
+    let fields = {};
 
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
         let val = DocumentSnapshot.encodeValue(obj[prop]);
 
         if (val) {
-          if (!fields) {
-            fields = {};
-          }
           fields[prop] = val;
         }
       }
@@ -761,7 +758,7 @@ class DocumentSnapshot {
       // the server creates a map entry.
       if (!isEmptyObject(val)) {
         map.mapValue.fields = DocumentSnapshot.encodeFields(val);
-        if (!map.mapValue.fields) {
+        if (isEmptyObject(map.mapValue.fields)) {
           return null;
         }
       }
