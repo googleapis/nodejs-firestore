@@ -722,14 +722,8 @@ describe('get document', function() {
       .then(result => {
         assert.equal(result.exists, false);
         assert.equal(result.readTime, '1970-01-01T00:00:05.000000006Z');
-
-        assert.throws(() => {
-          result.data();
-        }, /The data for ".*" does not exist./);
-
-        assert.throws(() => {
-          result.get('foo');
-        }, /The data for ".*" does not exist./);
+        assert.equal(null, result.data());
+        assert.equal(null, result.get('foo'));
       });
   });
 

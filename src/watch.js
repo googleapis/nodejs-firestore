@@ -241,6 +241,7 @@ function isPermanentError(error) {
  * Determines whether we need to initiate a longer backoff due to system
  * overload.
  *
+ * @private
  * @param {Error} error A GRPC Error object that exposes an error code.
  * @return {boolean} Whether we need to back off our retries.
  */
@@ -250,7 +251,7 @@ function isResourceExhaustedError(error) {
 
 /**
  * @callback docsCallback
- * @returns {Array.<DocumentSnapshot>} An ordered list of documents.
+ * @returns {Array.<QueryDocumentSnapshot>} An ordered list of documents.
  */
 
 /**
@@ -260,8 +261,9 @@ function isResourceExhaustedError(error) {
  */
 
 /**
- * onSnapshot() callback that receives a DocumentSnapshot.
+ * onSnapshot() callback that receives the updated query state.
  *
+ * @private
  * @callback watchSnapshotCallback
  *
  * @param {string} readTime - The ISO 8601 time at which this snapshot was
@@ -287,7 +289,7 @@ class Watch {
    * @param {Firestore} firestore The Firestore Database client.
    * @param {Object} target - A Firestore 'Target' proto denoting the target to
    * listen on.
-   * @param {function} comparator - A comparator for DocumentSnapshots that
+   * @param {function} comparator - A comparator for QueryDocumentSnapshots that
    * is used to order the document snapshots returned by this watch.
    */
   constructor(firestore, target, comparator) {
@@ -352,10 +354,11 @@ class Watch {
   onSnapshot(onNext, onError) {
     let self = this;
 
-    // The sorted tree of DocumentSnapshots as sent in the last snapshot. We
-    // only look at the keys.
+    // The sorted tree of QueryDocumentSnapshots as sent in the last snapshot.
+    // We only look at the keys.
     let docTree = rbtree(this._comparator);
-    // A map of document names to DocumentSnapshots for the last sent snapshot.
+    // A map of document names to QueryDocumentSnapshots for the last sent
+    // snapshot.
     let docMap = new Map();
     // The accumulates map of document changes (keyed by document name) for the
     // current snapshot.

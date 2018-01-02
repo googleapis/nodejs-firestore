@@ -269,7 +269,9 @@ class Firestore extends commonGrpc.Service {
     let path = this._referencePath.append(documentPath);
     if (!path.isDocument) {
       throw new Error(
-        `Argument "documentPath" must point to a document, but was "${documentPath}". Your path does not contain an even number of components.`
+        `Argument "documentPath" must point to a document, but was "${
+          documentPath
+        }". Your path does not contain an even number of components.`
       );
     }
 
@@ -298,7 +300,9 @@ class Firestore extends commonGrpc.Service {
     let path = this._referencePath.append(collectionPath);
     if (!path.isCollection) {
       throw new Error(
-        `Argument "collectionPath" must point to a collection, but was "${collectionPath}". Your path does not contain an odd number of components.`
+        `Argument "collectionPath" must point to a collection, but was "${
+          collectionPath
+        }". Your path does not contain an odd number of components.`
       );
     }
 
@@ -329,7 +333,8 @@ class Firestore extends commonGrpc.Service {
   }
 
   /**
-   * Creates a [DocumentSnapshot]{@link DocumentSnapshot} from a
+   * Creates a [DocumentSnapshot]{@link DocumentSnapshot} or a
+   * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} from a
    * `firestore.v1beta1.Document` proto (or from a resource name for missing
    * documents).
    *
@@ -343,7 +348,8 @@ class Firestore extends commonGrpc.Service {
    * document was read.
    * @param {string=} encoding - One of 'json' or 'protobufJS'. Applies to both
    * the 'document' Proto and 'readTime'. Defaults to 'protobufJS'.
-   * @returns {DocumentSnapshot} - A DocumentSnapshot.
+   * @returns {DocumentSnapshot|QueryDocumentSnapshot} - A QueryDocumentSnapshot
+   * for existing documents, otherwise a DocumentSnapshot.
    */
   snapshot_(documentOrName, readTime, encoding) {
     let convertTimestamp;
@@ -567,9 +573,8 @@ class Firestore extends commonGrpc.Service {
    * @param {object=} readOptions - The options to use for this request.
    * @param {bytes|null} readOptions.transactionId - The transaction ID to use
    * for this read.
-   * @returns {Array.<DocumentSnapshot|null>} A Promise that
-   * contains an array with the resulting documents (or null for each missing
-   * document).
+   * @returns {Array.<DocumentSnapshot>} A Promise that contains an array with
+   * the resulting documents.
    */
   getAll_(docRefs, readOptions) {
     const requestedDocuments = new Set();

@@ -101,8 +101,9 @@ declare namespace FirebaseFirestore {
      * transaction failed, a rejected Promise with the corresponding failure
      * error will be returned.
      */
-    runTransaction<T>(updateFunction: (transaction: Transaction) => Promise<T>):
-    Promise<T>;
+    runTransaction<T>(
+        updateFunction: (transaction: Transaction) => Promise<T>
+    ): Promise<T>;
 
     /**
      * Creates a write batch, used for performing multiple writes as a single
@@ -503,9 +504,13 @@ declare namespace FirebaseFirestore {
    * A `DocumentSnapshot` contains data read from a document in your Firestore
    * database. The data can be extracted with `.data()` or `.get(<field>)` to
    * get a specific field.
+   *
+   * For a `DocumentSnapshot` that points to a non-existing document, any data
+   * access will return 'undefined'. You can use the `exists` property to
+   * explicitly verify a document's existence.
    */
   export class DocumentSnapshot {
-    private constructor();
+    protected constructor();
 
     /** True if the document exists. */
     readonly exists: boolean;
@@ -536,11 +541,12 @@ declare namespace FirebaseFirestore {
     readonly readTime: string;
 
     /**
-     * Retrieves all fields in the document as an Object.
+     * Retrieves all fields in the document as an Object. Returns 'undefined' if
+     * the document doesn't exist.
      *
      * @return An Object containing all fields in the document.
      */
-    data(): DocumentData;
+    data(): DocumentData | undefined;
 
     /**
      * Retrieves the field specified by `fieldPath`.
@@ -550,6 +556,40 @@ declare namespace FirebaseFirestore {
      * field exists in the document.
      */
     get(fieldPath: string|FieldPath): any;
+  }
+
+  /**
+   * A `QueryDocumentSnapshot` contains data read from a document in your
+   * Firestore database as part of a query. The document is guaranteed to exist
+   * and its data can be extracted with `.data()` or `.get(<field>)` to get a
+   * specific field.
+   *
+   * A `QueryDocumentSnapshot` offers the same API surface as a
+   * `DocumentSnapshot`. Since query results contain only existing documents, the
+   * `exists` property will always be true and `data()` will never return
+   * 'undefined'.
+   */
+  export class QueryDocumentSnapshot extends DocumentSnapshot {
+    private constructor();
+
+    /**
+     * The time the document was created.
+     */
+    readonly createTime: string;
+
+    /**
+     * The time the document was last updated (at the time the snapshot was
+     * generated).
+     */
+    readonly updateTime: string;
+
+    /**
+     * Retrieves all fields in the document as an Object.
+     *
+     * @override
+     * @return An Object containing all fields in the document.
+     */
+    data(): DocumentData;
   }
 
   /**
@@ -579,7 +619,7 @@ declare namespace FirebaseFirestore {
 
     /**
      * Creates and returns a new Query with the additional filter that documents
-     * must contain the specified field and the value should satisfy the
+     * must contain the specified field and that its value should satisfy the
      * relation constraint provided.
      *
      * This function returns a new (immutable) instance of the Query (rather
@@ -604,8 +644,9 @@ declare namespace FirebaseFirestore {
      * not specified, order will be ascending.
      * @return The created Query.
      */
-    orderBy(fieldPath: string|FieldPath, directionStr?: OrderByDirection):
-    Query;
+    orderBy(
+        fieldPath: string|FieldPath, directionStr?: OrderByDirection
+    ): Query;
 
     /**
      * Creates and returns a new Query that's additionally limited to only
@@ -698,7 +739,7 @@ declare namespace FirebaseFirestore {
     /*
      * Executes the query and returns the results as Node Stream.
      *
-     * @return A stream of DocumentSnapshots.
+     * @return A stream of QueryDocumentSnapshot.
      */
     stream(): NodeJS.ReadableStream;
 
@@ -717,7 +758,7 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * A `QuerySnapshot` contains zero or more `DocumentSnapshot` objects
+   * A `QuerySnapshot` contains zero or more `QueryDocumentSnapshot` objects
    * representing the results of a query. The documents can be accessed as an
    * array via the `docs` property or enumerated using the `forEach` method. The
    * number of documents can be determined via the `empty` and `size`
@@ -740,7 +781,7 @@ declare namespace FirebaseFirestore {
     readonly docChanges: DocumentChange[];
 
     /** An array of all the documents in the QuerySnapshot. */
-    readonly docs: DocumentSnapshot[];
+    readonly docs: QueryDocumentSnapshot[];
 
     /** The number of documents in the QuerySnapshot. */
     readonly size: number;
@@ -758,7 +799,9 @@ declare namespace FirebaseFirestore {
      * each document in the snapshot.
      * @param thisArg The `this` binding for the callback.
      */
-    forEach(callback: (result: DocumentSnapshot) => void, thisArg?: any): void;
+    forEach(
+        callback: (result: QueryDocumentSnapshot) => void, thisArg?: any
+    ): void;
   }
 
   /**
@@ -775,7 +818,7 @@ declare namespace FirebaseFirestore {
     readonly type: DocumentChangeType;
 
     /** The document affected by this change. */
-    readonly doc: DocumentSnapshot;
+    readonly doc: QueryDocumentSnapshot;
 
     /**
      * The index of the changed document in the result set immediately prior to
