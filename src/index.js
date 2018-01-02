@@ -269,9 +269,7 @@ class Firestore extends commonGrpc.Service {
     let path = this._referencePath.append(documentPath);
     if (!path.isDocument) {
       throw new Error(
-        `Argument "documentPath" must point to a document, but was "${
-          documentPath
-        }". Your path does not contain an even number of components.`
+        `Argument "documentPath" must point to a document, but was "${documentPath}". Your path does not contain an even number of components.`
       );
     }
 
@@ -300,9 +298,7 @@ class Firestore extends commonGrpc.Service {
     let path = this._referencePath.append(collectionPath);
     if (!path.isCollection) {
       throw new Error(
-        `Argument "collectionPath" must point to a collection, but was "${
-          collectionPath
-        }". Your path does not contain an odd number of components.`
+        `Argument "collectionPath" must point to a collection, but was "${collectionPath}". Your path does not contain an odd number of components.`
       );
     }
 
