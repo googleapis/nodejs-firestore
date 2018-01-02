@@ -578,8 +578,9 @@ class DocumentSnapshot {
    * @return {boolean}
    */
   get isEmpty() {
-    return !this._fieldsProto || isEmptyObject(this._fieldsProto);
+    return is.undefined(this._fieldsProto) || is.empty(this._fieldsProto);
   }
+
   /**
    * Convert a document snapshot to the Firestore 'Document' Protobuf.
    *
@@ -590,7 +591,7 @@ class DocumentSnapshot {
     return {
       update: {
         name: this._ref.formattedName,
-        fields: this._fieldsProto || {},
+        fields: this._fieldsProto,
       },
     };
   }
@@ -633,17 +634,14 @@ class DocumentSnapshot {
    * @param {Object} obj The object to encode.
    * @returns {Object} The Firestore 'Fields' representation
    */
-  static encodeFields(obj, options) {
-    let fields = null;
+  static encodeFields(obj) {
+    let fields = {};
 
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
-        let val = DocumentSnapshot.encodeValue(obj[prop], options);
+        let val = DocumentSnapshot.encodeValue(obj[prop]);
 
         if (val) {
-          if (!fields) {
-            fields = {};
-          }
           fields[prop] = val;
         }
       }
@@ -653,8 +651,7 @@ class DocumentSnapshot {
   }
 
   /**
-   * Encodes a JavaScrip value into the Firestore 'Value' representation.
-   * Encodes a JavaScrip value into the Firestore 'Value' represntation.
+   * Encodes a JavaScript value into the Firestore 'Value' representation.
    *
    * @private
    * @param {Object} val The object to encode
@@ -761,9 +758,9 @@ class DocumentSnapshot {
 
       // If we encounter an empty object, we always need to send it to make sure
       // the server creates a map entry.
-      if (!isEmptyObject(val)) {
+      if (!is.empty(val)) {
         map.mapValue.fields = DocumentSnapshot.encodeFields(val);
-        if (!map.mapValue.fields) {
+        if (is.empty(map.mapValue.fields)) {
           return null;
         }
       }
@@ -1430,22 +1427,6 @@ function isPlainObject(input) {
     input !== null &&
     Object.getPrototypeOf(input) === Object.prototype
   );
-}
-
-/*!
- * Checks whether 'obj' has any properties
- *
- * @param {Object} input - The object to verify.
- * @returns {boolean} 'true' if the object contains no keys.
- */
-function isEmptyObject(obj) {
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 module.exports = DocumentRefType => {
