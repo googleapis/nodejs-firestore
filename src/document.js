@@ -159,11 +159,10 @@ class GeoPoint {
  * [get(fieldPath)]{@link DocumentSnapshot#get} to get a
  * specific field.
  *
- * <p>The snapshot can point to a non-existing document in which case
- * [exists]{@link DocumentSnapshot#exists} will return false.
- * Calling [data()]{@link DocumentSnapshot#data} or
- * [get(fieldPath)]{@link DocumentSnapshot#get} for such a document
- * throws an error.
+ * <p>For a DocumentSnapshot that points to a non-existing document, any data
+ * access will return 'undefined'. You can use the
+ * [exists]{@link DocumentSnapshot#exists} property to explicitly verify a
+ * document's existence.
  *
  * @class
  */
@@ -345,7 +344,7 @@ class DocumentSnapshot {
    * The time the document was created. Undefined for documents that don't
    * exist.
    *
-   * @type {string}
+   * @type {string|undefined}
    * @name DocumentSnapshot#createTime
    * @readonly
    *
@@ -366,7 +365,7 @@ class DocumentSnapshot {
    * The time the document was last updated (at the time the snapshot was
    * generated). Undefined for documents that don't exist.
    *
-   * @type {string}
+   * @type {string|undefined}
    * @name DocumentSnapshot#updateTime
    * @readonly
    *
@@ -402,9 +401,11 @@ class DocumentSnapshot {
   }
 
   /**
-   * Retrieves all fields in the document as an object.
+   * Retrieves all fields in the document as an object. Returns 'undefined' if
+   * the document doesn't exist.
    *
-   * @returns {DocumentData} An object containing all fields in the document.
+   * @returns {DocumentData|undefined} An object containing all fields in the
+   * document or 'undefined' if the document doesn't exist.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -415,15 +416,18 @@ class DocumentSnapshot {
    * });
    */
   data() {
-    let obj = {};
     let fields = this.protoFields();
 
+    if (is.undefined(fields)) {
+      return undefined;
+    }
+
+    let obj = {};
     for (let prop in fields) {
       if (fields.hasOwnProperty(prop)) {
         obj[prop] = this._decodeValue(fields[prop]);
       }
     }
-
     return obj;
   }
 
@@ -434,17 +438,11 @@ class DocumentSnapshot {
    * @returns {Object} The Protobuf encoded document.
    */
   protoFields() {
-    if (this._fieldsProto === undefined) {
-      throw new Error(
-        `The data for "${this._ref.formattedName}" does not exist.`
-      );
-    }
-
     return this._fieldsProto;
   }
 
   /**
-   * Retrieves the field specified by `fieldPath`.
+   * Retrieves the field specified by `field`.
    *
    * @param {string|FieldPath} field - The field path
    * (e.g. 'foo' or 'foo.bar') to a specific field.
@@ -484,9 +482,13 @@ class DocumentSnapshot {
    * undefined if no such field exists.
    */
   protoField(field) {
-    let components = FieldPath.fromArgument(field).toArray();
     let fields = this.protoFields();
 
+    if (is.undefined(fields)) {
+      return undefined;
+    }
+
+    let components = FieldPath.fromArgument(field).toArray();
     while (components.length > 1) {
       fields = fields[components.shift()];
 
@@ -775,11 +777,108 @@ class DocumentSnapshot {
 }
 
 /**
- * Returns a builder for DocumentSnapshot instances. Invoke `.build()' to
- * assemble the final snapshot.
+ * A QueryDocumentSnapshot contains data read from a document in your
+ * Firestore database as part of a query. The document is guaranteed to exist
+ * and its data can be extracted with [data()]{@link QueryDocumentSnapshot#data}
+ * or [get()]{@link DocumentSnapshot#get} to get a specific field.
+ *
+ * A QueryDocumentSnapshot offers the same API surface as a
+ * {#link DocumentSnapshot}. Since query results contain only existing
+ * documents, the [exists]{@link DocumentSnapshot#exists} property will
+ * always be true and [data()]{@link QueryDocumentSnapshot#data} will never
+ * return 'undefined'.
+ *
+ * @class
+ * @extends DocumentSnapshot
+ */
+class QueryDocumentSnapshot extends DocumentSnapshot {
+  /**
+   * @private
+   * @hideconstructor
+   *
+   * @param {firestore/DocumentReference} ref - The reference to the document.
+   * @param {object} fieldsProto - The fields of the Firestore `Document`
+   * Protobuf backing this document.
+   * @param {string} readTime - The ISO 8601 time when this snapshot was read.
+   * @param {string} createTime - The ISO 8601 time when the document was
+   * created.
+   * @param {string} updateTime - The ISO 8601 time when the document was last
+   * updated.
+   */
+  constructor(ref, fieldsProto, readTime, createTime, updateTime) {
+    super(ref, fieldsProto, readTime, createTime, updateTime);
+  }
+
+  /**
+   * The time the document was created.
+   *
+   * @type {string}
+   * @name QueryDocumentSnapshot#createTime
+   * @readonly
+   * @override
+   *
+   * @example
+   * let query = firestore.collection('col');
+   *
+   * query.get().forEach(documentSnapshot => {
+   *   console.log(`Document created at '${documentSnapshot.createTime}'`);
+   * });
+   */
+  get createTime() {
+    return super.createTime;
+  }
+
+  /**
+   * The time the document was last updated (at the time the snapshot was
+   * generated).
+   *
+   * @type {string}
+   * @name QueryDocumentSnapshot#updateTime
+   * @readonly
+   * @override
+   *
+   * @example
+   * let query = firestore.collection('col');
+   *
+   * query.get().forEach(documentSnapshot => {
+   *   console.log(`Document updated at '${documentSnapshot.updateTime}'`);
+   * });
+   */
+  get updateTime() {
+    return super.updateTime;
+  }
+
+  /**
+   * Retrieves all fields in the document as an object.
+   *
+   * @override
+   *
+   * @returns {DocumentData} An object containing all fields in the document.
+   *
+   * @example
+   * let query = firestore.collection('col');
+   *
+   * query.get().forEach(documentSnapshot => {
+   *   let data = documentSnapshot.data();
+   *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
+   * });
+   */
+  data() {
+    let data = super.data();
+    assert(
+      is.defined(data),
+      'The data in a QueryDocumentSnapshot should always exist.'
+    );
+    return data;
+  }
+}
+
+/**
+ * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
+ * Invoke `.build()' to assemble the final snapshot.
  *
  * @private
- * @class DocumentSnapshotBuilder
+ * @class
  */
 class DocumentSnapshotBuilder {
   /**
@@ -832,7 +931,9 @@ class DocumentSnapshotBuilder {
    * Builds the DocumentSnapshot.
    *
    * @private
-   * @returns {Object} A Builder instance for a DocumentSnapshot.
+   * @returns {QueryDocumentSnapshot|DocumentSnapshot} Returns either a
+   * QueryDocumentSnapshot (if `fieldsProto` was provided) or a
+   * DocumentSnapshot.
    */
   build() {
     assert(
@@ -843,13 +944,15 @@ class DocumentSnapshotBuilder {
       is.defined(this.fieldsProto) === is.defined(this.updateTime),
       'Update time should be set iff document exists.'
     );
-    return new DocumentSnapshot(
-      this.ref,
-      this.fieldsProto,
-      this.readTime,
-      this.createTime,
-      this.updateTime
-    );
+    return this.fieldsProto
+      ? new QueryDocumentSnapshot(
+          this.ref,
+          this.fieldsProto,
+          this.readTime,
+          this.createTime,
+          this.updateTime
+        )
+      : new DocumentSnapshot(this.ref, undefined, this.readTime);
   }
 }
 
@@ -1158,7 +1261,7 @@ class Precondition {
    * Whether this DocumentTransform contains any enforcement.
    *
    * @private
-   * @type {boolean} True for the empty precondition.
+   * @type {boolean}
    * @readonly
    */
   get isEmpty() {
@@ -1338,6 +1441,7 @@ module.exports = DocumentRefType => {
     DocumentTransform,
     Precondition,
     GeoPoint,
+    QueryDocumentSnapshot,
     validateFieldValue,
     validateDocumentData,
     validatePrecondition,

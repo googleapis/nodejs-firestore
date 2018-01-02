@@ -21,6 +21,7 @@ import WriteBatch = FirebaseFirestore.WriteBatch;
 import Transaction = FirebaseFirestore.Transaction;
 import FieldPath = FirebaseFirestore.FieldPath;
 import QuerySnapshot = FirebaseFirestore.QuerySnapshot;
+import QueryDocumentSnapshot = FirebaseFirestore.QueryDocumentSnapshot;
 import UpdateData = FirebaseFirestore.UpdateData;
 import Query = FirebaseFirestore.Query;
 import DocumentChange = FirebaseFirestore.DocumentChange;
@@ -174,6 +175,21 @@ xdescribe('firestore.d.ts', function() {
       const readTime: string = snapshot.readTime;
       const updateTime: string = snapshot.updateTime!;
       const createTime: string = snapshot.createTime!;
+      const data: DocumentData = snapshot.data()!;
+      let value = snapshot.get('foo');
+      value = snapshot.get(new FieldPath('foo'));
+    });
+  });
+
+  it('has typings for QueryDocumentSnapshot', () => {
+    collRef.get().then((querySnapshot: QuerySnapshot) => {
+      const snapshot: QueryDocumentSnapshot = querySnapshot.docs[0];
+      const exists: boolean = snapshot.exists;
+      const ref: DocumentReference = snapshot.ref;
+      const id: string = snapshot.id;
+      const readTime: string = snapshot.readTime;
+      const updateTime: string = snapshot.updateTime;
+      const createTime: string = snapshot.createTime;
       const data: DocumentData = snapshot.data();
       let value = snapshot.get('foo');
       value = snapshot.get(new FieldPath('foo'));
@@ -218,13 +234,13 @@ xdescribe('firestore.d.ts', function() {
     collRef.get().then((snapshot: QuerySnapshot) => {
       const query: Query = snapshot.query;
       const docChanges: DocumentChange[] = snapshot.docChanges;
-      const docs: DocumentSnapshot[] = snapshot.docs;
+      const docs: QueryDocumentSnapshot[] = snapshot.docs;
       const size: number = snapshot.size;
       const empty: boolean = snapshot.empty;
       const readTime: string = snapshot.readTime;
-      snapshot.forEach((result: DocumentSnapshot) => {
+      snapshot.forEach((result: QueryDocumentSnapshot) => {
       });
-      snapshot.forEach((result: DocumentSnapshot) => {
+      snapshot.forEach((result: QueryDocumentSnapshot) => {
       }, this);
     });
   });
@@ -232,7 +248,7 @@ xdescribe('firestore.d.ts', function() {
   it('has typings for DocumentChange', () => {
     collRef.get().then((snapshot: QuerySnapshot) => {
       const docChange: DocumentChange = snapshot.docChanges[0];
-      const doc: DocumentSnapshot = docChange.doc;
+      const doc: QueryDocumentSnapshot = docChange.doc;
       const oldIndex: number = docChange.oldIndex;
       const newIndex: number = docChange.newIndex;
     });

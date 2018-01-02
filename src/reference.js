@@ -529,7 +529,7 @@ class DocumentChange {
    * @hideconstructor
    *
    * @param {string} type - 'added' | 'removed' | 'modified'.
-   * @param {DocumentSnapshot} document - The document.
+   * @param {QueryDocumentSnapshot} document - The document.
    * @param {number} oldIndex - The index in the documents array prior to this
    * change.
    * @param {number} newIndex - The index in the documents array after this
@@ -569,7 +569,7 @@ class DocumentChange {
   /**
    * The document affected by this change.
    *
-   * @type {DocumentSnapshot}
+   * @type {QueryDocumentSnapshot}
    * @name DocumentChange#doc
    * @readonly
    *
@@ -776,7 +776,7 @@ class FieldFilter {
 
 /**
  * A QuerySnapshot contains zero or more
- * [DocumentSnapshot]{@link DocumentSnapshot} objects
+ * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} objects
  * representing the results of a query. The documents can be accessed as an
  * array via the [documents]{@link QuerySnapshot#documents} property
  * or enumerated using the [forEach]{@link QuerySnapshot#forEach}
@@ -809,8 +809,8 @@ class QuerySnapshot {
   }
 
   /**
-   * The query on which you called `get` or `onSnapshot` in order to get this
-   * `QuerySnapshot`.
+   * The query on which you called get() or onSnapshot() in order to get this
+   * QuerySnapshot.
    *
    * @type {Query}
    * @name QuerySnapshot#query
@@ -834,7 +834,7 @@ class QuerySnapshot {
   /**
    * An array of all the documents in this QuerySnapshot.
    *
-   * @type {Array.<DocumentSnapshot>}
+   * @type {Array.<QueryDocumentSnapshot>}
    * @name QuerySnapshot#docs
    * @readonly
    *
@@ -930,7 +930,7 @@ class QuerySnapshot {
    * Enumerates all of the documents in the QuerySnapshot.
    *
    * @param {function} callback - A callback to be called with a
-   * [DocumentSnapshot]{@link DocumentSnapshot} for each document in
+   * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} for each document in
    * the snapshot.
    * @param {*=} thisArg The `this` binding for the callback..
    *
@@ -954,7 +954,7 @@ class QuerySnapshot {
 
 /**
  * A Query refers to a query which you can read or stream from. You can also
- * construct refined `Query` objects by adding filters and ordering.
+ * construct refined Query objects by adding filters and ordering.
  *
  * @class Query
  */
@@ -1011,15 +1011,14 @@ class Query {
   }
 
   /**
-   * Creates and returns a new Query with the additional filter that documents
-   * must contain the specified field and the value should satisfy the
-   * relation constraint provided.
+   * Creates and returns a new [Query]{@link Query} with the additional filter
+   * that documents must contain the specified field and that its value should
+   * satisfy the relation constraint provided.
    *
    * Returns a new Query that constrains the value of a Document property.
    *
-   * This function returns a new (immutable) instance of the
-   * [Query]{@link Query} (rather than modify the existing instance)
-   * to impose the filter.
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the filter.
    *
    * @param {string|FieldPath} fieldPath - The name of a property
    * value to compare.
@@ -1058,14 +1057,13 @@ class Query {
   }
 
   /**
-   * Creates and returns a new Query instance that applies a field mask to the
-   * result and returns only the specified subset of fields. You can specify a
-   * list of field paths to return, or use an empty list to only return the
-   * references of matching documents.
+   * Creates and returns a new [Query]{@link Query} instance that applies a
+   * field mask to the result and returns only the specified subset of fields.
+   * You can specify a list of field paths to return, or use an empty list to
+   * only return the references of matching documents.
    *
-   * This function returns a new (immutable) instance of the
-   * [Query]{@link Query} (rather than modify the existing instance)
-   * to impose the field mask.
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the field mask.
    *
    * @param {...(string|FieldPath)} fieldPaths - The field paths to
    * return.
@@ -1110,12 +1108,12 @@ class Query {
   }
 
   /**
-   * Creates and returns a new Query that's additionally sorted by the
-   * specified field, optionally in descending order instead of ascending.
+   * Creates and returns a new [Query]{@link Query} that's additionally sorted
+   * by the specified field, optionally in descending order instead of
+   * ascending.
    *
-   * This function returns a new (immutable) instance of the
-   * [Query]{@link Query} (rather than modify the existing instance)
-   * to impose the field mask.
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the field mask.
    *
    * @param {string|FieldPath} fieldPath - The field to sort by.
    * @param {string=} directionStr - Optional direction to sort by ('asc' or
@@ -1157,12 +1155,11 @@ class Query {
   }
 
   /**
-   * Creates and returns a new Query that's additionally limited to only
-   * return up to the specified number of documents.
+   * Creates and returns a new [Query]{@link Query} that's additionally limited
+   * to only return up to the specified number of documents.
    *
-   * This function returns a new (immutable) instance of the
-   * [Query]{@link Query} (rather than modify the existing instance)
-   * to impose the limit.
+   * This function returns a new (immutable) instance of the Query (rather than
+   * modify the existing instance) to impose the limit.
    *
    * @param {number} limit - The maximum number of items to return.
    * @returns {Query} The created Query.
@@ -1285,9 +1282,9 @@ class Query {
   }
 
   /**
-   * Creates and returns a new Query that starts at the provided set of field
-   * values relative to the order of the query. The order of the provided values
-   * must match the order of the order by clauses of the query.
+   * Creates and returns a new [Query]{@link Query} that starts at the provided
+   * set of field values relative to the order of the query. The order of the
+   * provided values must match the order of the order by clauses of the query.
    *
    * @param {...*} fieldValues - The set of field values to start the query at.
    * @returns {Query} A query with the new starting point.
@@ -1318,9 +1315,10 @@ class Query {
   }
 
   /**
-   * Creates and returns a new Query that starts after the provided set of field
-   * values relative to the order of the query. The order of the provided values
-   * must match the order of the order by clauses of the query.
+   * Creates and returns a new [Query]{@link Query} that starts after the
+   * provided set of field values relative to the order of the query. The order
+   * of the provided values must match the order of the order by clauses of the
+   * query.
    *
    * @param {...*} fieldValues - The set of field values to start the query
    * after.
@@ -1352,9 +1350,9 @@ class Query {
   }
 
   /**
-   * Creates and returns a new Query that ends before the set of field values
-   * relative to the order of the query. The order of the provided values must
-   * match the order of the order by clauses of the query.
+   * Creates and returns a new [Query]{@link Query} that ends before the set of
+   * field values relative to the order of the query. The order of the provided
+   * values must match the order of the order by clauses of the query.
    *
    * @param {...*} fieldValues - The set of field values to end the query
    * before.
@@ -1386,9 +1384,9 @@ class Query {
   }
 
   /**
-   * Creates and returns a new Query that ends at the provided set of field
-   * values relative to the order of the query. The order of the provided values
-   * must match the order of the order by clauses of the query.
+   * Creates and returns a new [Query]{@link Query} that ends at the provided
+   * set of field values relative to the order of the query. The order of the
+   * provided values must match the order of the order by clauses of the query.
    *
    * @param {...*} fieldValues - The set of field values to end the query at.
    * @returns {Query} A query with the new ending point.
@@ -1480,9 +1478,10 @@ class Query {
 
   /**
    * Executes the query and streams the results as
-   * [DocumentSnapshots]{@link DocumentSnapshot}.
+   * [QueryDocumentSnapshots]{@link QueryDocumentSnapshot}.
    *
-   * @returns {Stream.<DocumentSnapshot>} A stream of DocumentSnapshots.
+   * @returns {Stream.<QueryDocumentSnapshot>} A stream of
+   * QueryDocumentSnapshots.
    *
    * @example
    * let query = firestore.collection('col').where('foo', '==', 'bar');
@@ -1585,7 +1584,7 @@ class Query {
    *
    * @param {bytes=} queryOptions.transactionId - A transaction ID.
    * @private
-   * @returns {stream} A stream of Documents.
+   * @returns {stream} A stream of document results.
    */
   _stream(queryOptions) {
     let request = this.toProto(queryOptions);
@@ -1666,8 +1665,8 @@ class Query {
   }
 
   /**
-   * Returns a function that can be used to sort DocumentSnapshots according to
-   * the sort criteria of this query.
+   * Returns a function that can be used to sort QueryDocumentSnapshots
+   * according to the sort criteria of this query.
    *
    * @private
    */
