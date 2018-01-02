@@ -576,7 +576,7 @@ class DocumentSnapshot {
    * @return {boolean}
    */
   get isEmpty() {
-    return this._fieldsProto === undefined || isEmptyObject(this._fieldsProto);
+    return is.undefined(this._fieldsProto) || is.empty(this._fieldsProto);
   }
 
   /**
@@ -649,7 +649,7 @@ class DocumentSnapshot {
   }
 
   /**
-   * Encodes a JavaScrip value into the Firestore 'Value' representation.
+   * Encodes a JavaScript value into the Firestore 'Value' representation.
    *
    * @private
    * @param {Object} val The object to encode
@@ -756,9 +756,9 @@ class DocumentSnapshot {
 
       // If we encounter an empty object, we always need to send it to make sure
       // the server creates a map entry.
-      if (!isEmptyObject(val)) {
+      if (!is.empty(val)) {
         map.mapValue.fields = DocumentSnapshot.encodeFields(val);
-        if (isEmptyObject(map.mapValue.fields)) {
+        if (is.empty(map.mapValue.fields)) {
           return null;
         }
       }
@@ -1324,22 +1324,6 @@ function isPlainObject(input) {
     input !== null &&
     Object.getPrototypeOf(input) === Object.prototype
   );
-}
-
-/*!
- * Checks whether 'obj' has any properties
- *
- * @param {Object} input - The object to verify.
- * @returns {boolean} 'true' if the object contains no keys.
- */
-function isEmptyObject(obj) {
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 module.exports = DocumentRefType => {
