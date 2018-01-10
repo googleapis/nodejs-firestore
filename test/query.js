@@ -702,11 +702,31 @@ describe('orderBy() interface', function() {
 
     assert.throws(function() {
       query = query
+        .where('foo', '>', 'bar')
+        .startAt(snapshot('collectionId/doc', {foo: 'bar'}))
+        .where('foo', '>', 'bar');
+    }, new RegExp(
+      'Cannot specify a where\\(\\) filter after calling ' +
+        'startAt\\(\\), startAfter\\(\\), endBefore\\(\\) or endAt\\(\\)\\.'
+    ));
+
+    assert.throws(function() {
+      query = query
         .orderBy('foo')
         .endAt('foo')
         .orderBy('foo');
     }, new RegExp(
       'Cannot specify an orderBy\\(\\) constraint after calling ' +
+        'startAt\\(\\), startAfter\\(\\), endBefore\\(\\) or endAt\\(\\)\\.'
+    ));
+
+    assert.throws(function() {
+      query = query
+        .where('foo', '>', 'bar')
+        .endAt(snapshot('collectionId/doc', {foo: 'bar'}))
+        .where('foo', '>', 'bar');
+    }, new RegExp(
+      'Cannot specify a where\\(\\) filter after calling ' +
         'startAt\\(\\), startAfter\\(\\), endBefore\\(\\) or endAt\\(\\)\\.'
     ));
   });
@@ -1052,12 +1072,72 @@ describe('startAt() interface', function() {
     return query.get();
   });
 
+  it('can specify document snapshot with inequality filter', function() {
+    firestore.api.Firestore._runQuery = function(request) {
+      requestEquals(
+        request,
+        orderBy('b', 'ASCENDING', '__name__', 'ASCENDING'),
+        startAt(true, 'b', {
+          valueType: 'referenceValue',
+          referenceValue:
+            'projects/test-project/databases/(default)/' +
+            'documents/collectionId/doc',
+        }),
+        fieldFilters(
+          'a',
+          'EQUAL',
+          'a',
+          'b',
+          'GREATER_THAN_OR_EQUAL',
+          'b',
+          'c',
+          'EQUAL',
+          'c'
+        )
+      );
+
+      return stream();
+    };
+
+    let query = firestore
+      .collection('collectionId')
+      .where('a', '=', 'a')
+      .where('b', '>=', 'b')
+      .where('c', '=', 'c')
+      .startAt(snapshot('collectionId/doc', {b: 'b'}));
+    return query.get();
+  });
+
+  it('ignores equality filter with document snapshot cursor', function() {
+    firestore.api.Firestore._runQuery = function(request) {
+      requestEquals(
+        request,
+        orderBy('__name__', 'ASCENDING'),
+        startAt(true, {
+          valueType: 'referenceValue',
+          referenceValue:
+            'projects/test-project/databases/(default)/' +
+            'documents/collectionId/doc',
+        }),
+        fieldFilters('foo', 'EQUAL', 'bar')
+      );
+
+      return stream();
+    };
+
+    let query = firestore
+      .collection('collectionId')
+      .where('foo', '=', 'bar')
+      .startAt(snapshot('collectionId/doc', {foo: 'bar'}));
+    return query.get();
+  });
+
   it('validates field exists in document snapshot', function() {
     let query = firestore.collection('collectionId').orderBy('foo', 'desc');
 
     assert.throws(() => {
       query.startAt(snapshot('collectionId/doc'));
-    }, new RegExp("Field 'foo' is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy\\(\\) constraints."));
+    }, new RegExp("Field 'foo' is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy\\(\\) and where\\(\\) constraints."));
   });
 
   it('does not accept field transforms', function() {

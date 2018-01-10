@@ -741,6 +741,26 @@ class FieldFilter {
   }
 
   /**
+   * Returns the field path of this filter.
+   *
+   * @private
+   * @return {FieldPath}
+   */
+  get field() {
+    return this._field;
+  }
+
+  /**
+   * Returns whether this FieldFilter uses an equals comparison.
+   *
+   * @private
+   * @return {boolean}
+   */
+  isEqualsFilter() {
+    return this._opString === 'EQUAL';
+  }
+
+  /**
    * Generates the proto representation for this field filter.
    *
    * @private
@@ -988,6 +1008,57 @@ class Query {
   }
 
   /**
+   * Detects the argument type for Firestore cursors.
+   *
+   * @private
+   * @param {Array.<DocumentSnapshot|*>} fieldValuesOrDocumentSnapshot - A
+   * snapshot of the document or a set of field values.
+   * @returns {boolean} 'true' if the input is a single DocumentSnapshot..
+   */
+  static _isDocumentSnapshot(fieldValuesOrDocumentSnapshot) {
+    return (
+      fieldValuesOrDocumentSnapshot.length === 1 &&
+      is.instance(fieldValuesOrDocumentSnapshot[0], DocumentSnapshot)
+    );
+  }
+
+  /**
+   * Extracts field values from the DocumentSnapshot based on the provided
+   * field order.
+   *
+   * @private
+   * @param {DocumentSnapshot} documentSnapshot - The document to extract the
+   * fields from.
+   * @param {Array.<FieldOrder>} fieldOrders - The field order that defines what
+   * fields we should extract.
+   * @return {Array.<*>} The field values to use.
+   * @private
+   */
+  static _extractFieldValues(documentSnapshot, fieldOrders) {
+    let fieldValues = [];
+
+    for (let fieldOrder of fieldOrders) {
+      if (fieldOrder.field === FieldPath._DOCUMENT_ID) {
+        fieldValues.push(documentSnapshot.ref);
+      } else {
+        let fieldValue = documentSnapshot.get(fieldOrder.field);
+        if (is.undefined(fieldValue)) {
+          throw new Error(
+            `Field '${
+              fieldOrder.field
+            }' is missing in the provided DocumentSnapshot. Please provide a ` +
+              'document that contains values for all specified orderBy() and ' +
+              'where() constraints.'
+          );
+        } else {
+          fieldValues.push(fieldValue);
+        }
+      }
+    }
+    return fieldValues;
+  }
+
+  /**
    * The string representation of the Query's location.
    * @private
    * @type {string}
@@ -1047,6 +1118,13 @@ class Query {
   where(fieldPath, opStr, value) {
     validate.isFieldPath('fieldPath', fieldPath);
     validate.isFieldComparison('opStr', opStr, value);
+
+    if (this._queryOptions.startAt || this._queryOptions.endAt) {
+      throw new Error(
+        'Cannot specify a where() filter after calling startAt(), ' +
+          'startAfter(), endBefore() or endAt().'
+      );
+    }
 
     let newFilter = new FieldFilter(
       FieldPath.fromArgument(fieldPath),
@@ -1228,78 +1306,92 @@ class Query {
   }
 
   /**
+   * Computes the backend ordering semantics for DocumentSnapshot cursors.
+   *
+   * @private
+   * @param {Array.<DocumentSnapshot|*>} cursorValuesOrDocumentSnapshot - The
+   * snapshot of the document or the set of field values to use as the boundary.
+   * @returns {Array.<FieldOrder>} The implicit ordering semantics.
+   */
+  _createImplicitOrderBy(cursorValuesOrDocumentSnapshot) {
+    if (!Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
+      return this._fieldOrders;
+    }
+
+    let fieldOrders = this._fieldOrders.slice();
+    let hasDocumentId = false;
+
+    if (fieldOrders.length === 0) {
+      // If no explicit ordering is specified, use the first inequality to
+      // define an implicit order.
+      for (let fieldFilter of this._fieldFilters) {
+        if (!fieldFilter.isEqualsFilter()) {
+          fieldOrders.push(new FieldOrder(fieldFilter.field, 'ASCENDING'));
+          break;
+        }
+      }
+    } else {
+      for (let fieldOrder of fieldOrders) {
+        if (fieldOrder.field === FieldPath._DOCUMENT_ID) {
+          hasDocumentId = true;
+        }
+      }
+    }
+
+    if (!hasDocumentId) {
+      // Add implicit sorting by name, using the last specified direction.
+      let lastDirection =
+        fieldOrders.length === 0
+          ? directionOperators.ASC
+          : fieldOrders[fieldOrders.length - 1].direction;
+
+      fieldOrders.push(new FieldOrder(FieldPath.documentId(), lastDirection));
+    }
+
+    return fieldOrders;
+  }
+
+  /**
    * Builds a Firestore 'Position' proto message.
    *
    * @private
-   * @param {Array.<DocumentSnapshot|*>} fieldValues - The snapshot of the
-   * document or the set of field values to use as the boundary.
+   * @param {Array.<FieldOrder>} fieldOrders - The field orders to use for this
+   * cursor.
+   * @param {Array.<DocumentSnapshot|*>} cursorValuesOrDocumentSnapshot - The
+   * snapshot of the document or the set of field values to use as the
+   * boundary.
    * @param before - Whether the query boundary lies just before or after the
    * provided data.
    * @returns {Object} The proto message.
    */
-  _buildPosition(fieldValuesOrDocumentSnapshot, before) {
-    let options = {
-      before: before,
-      values: [],
-    };
-
+  _createCursor(fieldOrders, cursorValuesOrDocumentSnapshot, before) {
     let fieldValues;
-    if (
-      fieldValuesOrDocumentSnapshot.length === 1 &&
-      is.instance(fieldValuesOrDocumentSnapshot[0], DocumentSnapshot)
-    ) {
-      const documentSnapshot = fieldValuesOrDocumentSnapshot[0];
 
-      fieldValues = [];
-      let hasDocumentId = false;
-
-      for (let fieldOrder of this._fieldOrders) {
-        if (fieldOrder.field === FieldPath._DOCUMENT_ID) {
-          hasDocumentId = true;
-          fieldValues.push(documentSnapshot.ref);
-        } else {
-          let fieldValue = documentSnapshot.get(fieldOrder.field);
-          if (is.undefined(fieldValue)) {
-            throw new Error(
-              `Field '${
-                fieldOrder.field
-              }' is missing in the provided DocumentSnapshot. Please provide a ` +
-                'document that contains values for all specified orderBy() ' +
-                'constraints.'
-            );
-          } else {
-            fieldValues.push(fieldValue);
-          }
-        }
-      }
-
-      if (!hasDocumentId) {
-        // Add implicit sorting by name, using the last specified direction.
-        let lastDirection =
-          this._fieldOrders.length === 0
-            ? directionOperators.ASC
-            : this._fieldOrders[this._fieldOrders.length - 1].direction;
-
-        this._fieldOrders.push(
-          new FieldOrder(FieldPath.documentId(), lastDirection)
-        );
-        fieldValues.push(documentSnapshot.ref);
-      }
+    if (Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
+      fieldValues = Query._extractFieldValues(
+        cursorValuesOrDocumentSnapshot[0],
+        fieldOrders
+      );
     } else {
-      fieldValues = fieldValuesOrDocumentSnapshot;
+      fieldValues = cursorValuesOrDocumentSnapshot;
     }
 
-    if (fieldValues.length > this._fieldOrders.length) {
+    if (fieldValues.length > fieldOrders.length) {
       throw new Error(
         'Too many cursor values specified. The specified ' +
           'values must match the orderBy() constraints of the query.'
       );
     }
 
+    let options = {
+      before: before,
+      values: [],
+    };
+
     for (let i = 0; i < fieldValues.length; ++i) {
       let fieldValue = fieldValues[i];
 
-      if (this._fieldOrders[i].field === FieldPath._DOCUMENT_ID) {
+      if (fieldOrders[i].field === FieldPath._DOCUMENT_ID) {
         if (is.string(fieldValue)) {
           fieldValue = new DocumentReference(
             this._firestore,
@@ -1364,13 +1456,20 @@ class Query {
 
     fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
 
-    options.startAt = this._buildPosition(fieldValuesOrDocumentSnapshot, true);
+    let fieldOrders = this._createImplicitOrderBy(
+      fieldValuesOrDocumentSnapshot
+    );
+    options.startAt = this._createCursor(
+      fieldOrders,
+      fieldValuesOrDocumentSnapshot,
+      true
+    );
 
     return new Query(
       this._firestore,
       this._referencePath,
       this._fieldFilters,
-      this._fieldOrders,
+      fieldOrders,
       options
     );
   }
@@ -1400,13 +1499,20 @@ class Query {
 
     fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
 
-    options.startAt = this._buildPosition(fieldValuesOrDocumentSnapshot, false);
+    let fieldOrders = this._createImplicitOrderBy(
+      fieldValuesOrDocumentSnapshot
+    );
+    options.startAt = this._createCursor(
+      fieldOrders,
+      fieldValuesOrDocumentSnapshot,
+      false
+    );
 
     return new Query(
       this._firestore,
       this._referencePath,
       this._fieldFilters,
-      this._fieldOrders,
+      fieldOrders,
       options
     );
   }
@@ -1435,13 +1541,20 @@ class Query {
 
     fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
 
-    options.endAt = this._buildPosition(fieldValuesOrDocumentSnapshot, true);
+    let fieldOrders = this._createImplicitOrderBy(
+      fieldValuesOrDocumentSnapshot
+    );
+    options.endAt = this._createCursor(
+      fieldOrders,
+      fieldValuesOrDocumentSnapshot,
+      true
+    );
 
     return new Query(
       this._firestore,
       this._referencePath,
       this._fieldFilters,
-      this._fieldOrders,
+      fieldOrders,
       options
     );
   }
@@ -1470,13 +1583,20 @@ class Query {
 
     fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
 
-    options.endAt = this._buildPosition(fieldValuesOrDocumentSnapshot, false);
+    let fieldOrders = this._createImplicitOrderBy(
+      fieldValuesOrDocumentSnapshot
+    );
+    options.endAt = this._createCursor(
+      fieldOrders,
+      fieldValuesOrDocumentSnapshot,
+      false
+    );
 
     return new Query(
       this._firestore,
       this._referencePath,
       this._fieldFilters,
-      this._fieldOrders,
+      fieldOrders,
       options
     );
   }
