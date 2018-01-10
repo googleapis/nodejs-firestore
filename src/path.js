@@ -394,11 +394,20 @@ class ResourcePath extends Path {
    * @returns {number} -1 if current < other, 1 if current > other, 0 if equal
    */
   compareTo(other) {
-    if (this._projectId < other._projectId) {
-      return -1;
-    }
-    if (this._projectId > other._projectId) {
-      return 1;
+    // Ignore DocumentReference with {{projectId}} placeholders and assume that
+    // the resolved IDs match the provided ResourcePath. We could alternatively
+    // try to resolve the Project ID here, but this is asynchronous as it
+    // requires Disk I/O.
+    if (
+      this._projectId !== '{{projectId}}' &&
+      other._projectId !== '{{projectId}}'
+    ) {
+      if (this._projectId < other._projectId) {
+        return -1;
+      }
+      if (this._projectId > other._projectId) {
+        return 1;
+      }
     }
 
     if (this._databaseId < other._databaseId) {

@@ -38,6 +38,13 @@ let DocumentSnapshot;
 
 /*!
  * Injected.
+ *
+ * @see DocumentTransform
+ */
+let DocumentTransform;
+
+/*!
+ * Injected.
  */
 let validate;
 
@@ -1224,18 +1231,63 @@ class Query {
    * Builds a Firestore 'Position' proto message.
    *
    * @private
-   *
-   * @param {Array.<*>} fieldValues - The set of field values to use as the
-   * boundary.
+   * @param {Array.<DocumentSnapshot|*>} fieldValues - The snapshot of the
+   * document or the set of field values to use as the boundary.
    * @param before - Whether the query boundary lies just before or after the
    * provided data.
    * @returns {Object} The proto message.
    */
-  _buildPosition(fieldValues, before) {
+  _buildPosition(fieldValuesOrDocumentSnapshot, before) {
     let options = {
       before: before,
       values: [],
     };
+
+    let fieldValues;
+    if (
+      fieldValuesOrDocumentSnapshot.length === 1 &&
+      is.instance(fieldValuesOrDocumentSnapshot[0], DocumentSnapshot)
+    ) {
+      const documentSnapshot = fieldValuesOrDocumentSnapshot[0];
+
+      fieldValues = [];
+      let hasDocumentId = false;
+
+      for (let fieldOrder of this._fieldOrders) {
+        if (fieldOrder.field === FieldPath._DOCUMENT_ID) {
+          hasDocumentId = true;
+          fieldValues.push(documentSnapshot.ref);
+        } else {
+          let fieldValue = documentSnapshot.get(fieldOrder.field);
+          if (is.undefined(fieldValue)) {
+            throw new Error(
+              `Field '${
+                fieldOrder.field
+              }' is missing in the provided DocumentSnapshot. Please provide a ` +
+                'document that contains values for all specified orderBy() ' +
+                'constraints.'
+            );
+          } else {
+            fieldValues.push(fieldValue);
+          }
+        }
+      }
+
+      if (!hasDocumentId) {
+        // Add implicit sorting by name, using the last specified direction.
+        let lastDirection =
+          this._fieldOrders.length === 0
+            ? directionOperators.ASC
+            : this._fieldOrders[this._fieldOrders.length - 1].direction;
+
+        this._fieldOrders.push(
+          new FieldOrder(FieldPath.documentId(), lastDirection)
+        );
+        fieldValues.push(documentSnapshot.ref);
+      }
+    } else {
+      fieldValues = fieldValuesOrDocumentSnapshot;
+    }
 
     if (fieldValues.length > this._fieldOrders.length) {
       throw new Error(
@@ -1251,7 +1303,7 @@ class Query {
         if (is.string(fieldValue)) {
           fieldValue = new DocumentReference(
             this._firestore,
-            this._referencePath.append(fieldValues[i])
+            this._referencePath.append(fieldValue)
           );
         } else if (is.instance(fieldValue, DocumentReference)) {
           if (!this._referencePath.isPrefixOf(fieldValue.ref)) {
@@ -1275,6 +1327,13 @@ class Query {
         }
       }
 
+      if (DocumentTransform.isTransformSentinel(fieldValue)) {
+        throw new Error(
+          `Cannot use FieldValue.delete() or FieldValue.serverTimestamp() in ` +
+            `a query boundary. Found at index ${i}.`
+        );
+      }
+
       options.values.push(DocumentSnapshot.encodeValue(fieldValue));
     }
 
@@ -1286,7 +1345,9 @@ class Query {
    * set of field values relative to the order of the query. The order of the
    * provided values must match the order of the order by clauses of the query.
    *
-   * @param {...*} fieldValues - The set of field values to start the query at.
+   * @param {...*|DocumentSnapshot} fieldValuesOrDocumentSnapshot - The snapshot
+   * of the document the query results should start at or the field values to
+   * start this query at, in order of the query's order by.
    * @returns {Query} A query with the new starting point.
    *
    * @example
@@ -1298,12 +1359,12 @@ class Query {
    *   });
    * });
    */
-  startAt(fieldValues) {
+  startAt(fieldValuesOrDocumentSnapshot) {
     let options = extend(true, {}, this._queryOptions);
 
-    fieldValues = [].slice.call(arguments);
+    fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
 
-    options.startAt = this._buildPosition(fieldValues, true);
+    options.startAt = this._buildPosition(fieldValuesOrDocumentSnapshot, true);
 
     return new Query(
       this._firestore,
@@ -1320,8 +1381,9 @@ class Query {
    * of the provided values must match the order of the order by clauses of the
    * query.
    *
-   * @param {...*} fieldValues - The set of field values to start the query
-   * after.
+   * @param {...*|DocumentSnapshot} fieldValuesOrDocumentSnapshot - The snapshot
+   * of the document the query results should start after or the field values to
+   * start this query after, in order of the query's order by.
    * @returns {Query} A query with the new starting point.
    *
    * @example
@@ -1333,12 +1395,12 @@ class Query {
    *   });
    * });
    */
-  startAfter(fieldValues) {
+  startAfter(fieldValuesOrDocumentSnapshot) {
     let options = extend(true, {}, this._queryOptions);
 
-    fieldValues = [].slice.call(arguments);
+    fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
 
-    options.startAt = this._buildPosition(fieldValues, false);
+    options.startAt = this._buildPosition(fieldValuesOrDocumentSnapshot, false);
 
     return new Query(
       this._firestore,
@@ -1354,8 +1416,9 @@ class Query {
    * field values relative to the order of the query. The order of the provided
    * values must match the order of the order by clauses of the query.
    *
-   * @param {...*} fieldValues - The set of field values to end the query
-   * before.
+   * @param {...*|DocumentSnapshot} fieldValuesOrDocumentSnapshot - The snapshot
+   * of the document the query results should end before or the field values to
+   * end this query before, in order of the query's order by.
    * @returns {Query} A query with the new ending point.
    *
    * @example
@@ -1367,12 +1430,12 @@ class Query {
    *   });
    * });
    */
-  endBefore(fieldValues) {
+  endBefore(fieldValuesOrDocumentSnapshot) {
     let options = extend(true, {}, this._queryOptions);
 
-    fieldValues = [].slice.call(arguments);
+    fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
 
-    options.endAt = this._buildPosition(fieldValues, true);
+    options.endAt = this._buildPosition(fieldValuesOrDocumentSnapshot, true);
 
     return new Query(
       this._firestore,
@@ -1388,7 +1451,9 @@ class Query {
    * set of field values relative to the order of the query. The order of the
    * provided values must match the order of the order by clauses of the query.
    *
-   * @param {...*} fieldValues - The set of field values to end the query at.
+   * @param {...*|DocumentSnapshot} fieldValuesOrDocumentSnapshot - The snapshot
+   * of the document the query results should end at or the field values to end
+   * this query at, in order of the query's order by.
    * @returns {Query} A query with the new ending point.
    *
    * @example
@@ -1400,12 +1465,12 @@ class Query {
    *   });
    * });
    */
-  endAt(fieldValues) {
+  endAt(fieldValuesOrDocumentSnapshot) {
     let options = extend(true, {}, this._queryOptions);
 
-    fieldValues = [].slice.call(arguments);
+    fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
 
-    options.endAt = this._buildPosition(fieldValues, false);
+    options.endAt = this._buildPosition(fieldValuesOrDocumentSnapshot, false);
 
     return new Query(
       this._firestore,
@@ -1906,6 +1971,7 @@ module.exports = FirestoreType => {
   Firestore = FirestoreType;
   let document = require('./document')(DocumentReference);
   DocumentSnapshot = document.DocumentSnapshot;
+  DocumentTransform = document.DocumentTransform;
   Watch = require('./watch')(
     FirestoreType,
     DocumentChange,

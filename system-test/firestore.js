@@ -914,6 +914,45 @@ describe('Query class', function() {
       });
   });
 
+  it('supports pagination', function() {
+    let batch = firestore.batch();
+
+    let expectedDocs = [];
+    let actualDocs = [];
+
+    for (let i = 0; i < 9; ++i) {
+      batch.set(randomCol.doc('doc' + i), {val: i});
+      expectedDocs.push('doc' + i);
+    }
+
+    let gatherDocs = snapshot => {
+      let cursorDoc;
+      snapshot.forEach(doc => {
+        cursorDoc = doc;
+        actualDocs.push(doc.id);
+      });
+      return cursorDoc;
+    };
+
+    let query = randomCol.orderBy('val').limit(3);
+
+    return batch
+      .commit()
+      .then(() => query.get())
+      .then(snapshot => {
+        let cursorDoc = gatherDocs(snapshot);
+        return query.startAfter(cursorDoc).get();
+      })
+      .then(snapshot => {
+        let cursorDoc = gatherDocs(snapshot);
+        return query.startAfter(cursorDoc).get();
+      })
+      .then(snapshot => {
+        gatherDocs(snapshot);
+        assert.deepEqual(actualDocs, expectedDocs);
+      });
+  });
+
   it('has startAfter() method', function() {
     let ref1 = randomCol.doc('doc1');
     let ref2 = randomCol.doc('doc2');
