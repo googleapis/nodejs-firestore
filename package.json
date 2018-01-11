@@ -80,7 +80,6 @@
     "prettier": "^1.9.2",
     "protobufjs": "^6.8.0",
     "proxyquire": "^1.7.11",
-    "typescript": "^2.5.2",
-    "varint": "^5.0.0"
+    "typescript": "^2.5.2"
   }
 }

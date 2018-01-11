@@ -21,7 +21,6 @@ const path = require('path');
 const is = require('is');
 const through = require('through2');
 const googleProtoFiles = require('google-proto-files');
-const varint = require('varint');
 const protobufjs = require('protobufjs');
 const grpc = require('grpc');
 
@@ -44,30 +43,17 @@ function loadTestCases() {
   };
 
   const protoDefinition = protobufRoot.loadSync(
-    path.join(__dirname, 'test_definition.proto')
+    path.join(__dirname, 'test-definition.proto')
   );
 
   const binaryProtoData = require('fs').readFileSync(
-    path.join(__dirname, 'test_data.binprotos')
+    path.join(__dirname, 'test-suite.binproto')
   );
 
-  const testType = protoDefinition.lookupType('tests.Test');
+  const testType = protoDefinition.lookupType('tests.TestSuite');
+  const testSuite = testType.decode(binaryProtoData);
 
-  const testCases = [];
-
-  for (let offset = 0; offset < binaryProtoData.length; ) {
-    const messageLength = varint.decode(binaryProtoData, offset);
-    offset += varint.encodingLength(messageLength);
-
-    let testCase = testType.decode(
-      binaryProtoData.slice(offset, offset + messageLength)
-    );
-    testCases.push(testCase);
-
-    offset = offset + messageLength;
-  }
-
-  return testCases;
+  return testSuite.tests;
 }
 
 /** Converts a test object into a JS Object suitable for the Node API. */
