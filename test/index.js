@@ -322,6 +322,10 @@ describe('snapshot_() method', function() {
         ],
       },
     },
+    emptyArray: {
+      valueType: 'arrayValue',
+      arrayValue: {},
+    },
     dateValue: {
       valueType: 'timestampValue',
       timestampValue: {
@@ -364,6 +368,10 @@ describe('snapshot_() method', function() {
         },
       },
     },
+    emptyObject: {
+      valueType: 'mapValue',
+      mapValue: {},
+    },
     pathValue: {
       valueType: 'referenceValue',
       referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
@@ -405,6 +413,9 @@ describe('snapshot_() method', function() {
         ],
       },
     },
+    emptyArray: {
+      arrayValue: {},
+    },
     dateValue: {
       timestampValue: '1985-03-18T07:20:00.123000000Z',
     },
@@ -435,6 +446,9 @@ describe('snapshot_() method', function() {
         },
       },
     },
+    emptyObject: {
+      mapValue: {},
+    },
     pathValue: {
       referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
     },
@@ -464,12 +478,14 @@ describe('snapshot_() method', function() {
     infinityValue: Infinity,
     negativeInfinityValue: -Infinity,
     objectValue: {foo: 'bar'},
+    emptyObject: {},
     dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
     pathValue: new DocumentReference(
       {formattedName: DATABASE_ROOT},
       new ResourcePath('test-project', '(default)', 'collection', 'document')
     ),
     arrayValue: ['foo', 42, 'bar'],
+    emptyArray: [],
     nilValue: null,
     geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
     bytesValue: Buffer.from([0x1, 0x2]),
