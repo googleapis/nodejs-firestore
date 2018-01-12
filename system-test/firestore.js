@@ -765,6 +765,29 @@ describe('Query class', function() {
   let firestore;
   let randomCol;
 
+  let paginateResults = (query, startAfter) => {
+    return (startAfter ? query.startAfter(startAfter) : query)
+      .get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          return {pages: 0, docs: []};
+        } else {
+          let docs = [];
+          snapshot.forEach(doc => {
+            docs.push(doc);
+          });
+          return paginateResults(query, docs[docs.length - 1]).then(
+            nextPage => {
+              return {
+                pages: nextPage.pages + 1,
+                docs: docs.concat(nextPage.docs),
+              };
+            }
+          );
+        }
+      });
+  };
+
   beforeEach(function() {
     firestore = new Firestore();
     randomCol = getTestRoot(firestore);
@@ -911,6 +934,42 @@ describe('Query class', function() {
       })
       .then(res => {
         assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
+      });
+  });
+
+  it('supports pagination', function() {
+    let batch = firestore.batch();
+
+    for (let i = 0; i < 10; ++i) {
+      batch.set(randomCol.doc('doc' + i), {val: i});
+    }
+
+    let query = randomCol.orderBy('val').limit(3);
+
+    return batch
+      .commit()
+      .then(() => paginateResults(query))
+      .then(results => {
+        assert.equal(results.pages, 4);
+        assert.equal(results.docs.length, 10);
+      });
+  });
+
+  it('supports pagination with where() clauses', function() {
+    let batch = firestore.batch();
+
+    for (let i = 0; i < 10; ++i) {
+      batch.set(randomCol.doc('doc' + i), {val: i});
+    }
+
+    let query = randomCol.where('val', '>=', 1).limit(3);
+
+    return batch
+      .commit()
+      .then(() => paginateResults(query))
+      .then(results => {
+        assert.equal(results.pages, 3);
+        assert.equal(results.docs.length, 9);
       });
   });
 
