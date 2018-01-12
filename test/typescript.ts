@@ -198,35 +198,41 @@ xdescribe('firestore.d.ts', function() {
 
   it('has typings for Query', () => {
     let query: Query = collRef;
-    const firestore: FirebaseFirestore.Firestore = docRef.firestore;
-    query = query.where('foo', '==', 'bar');
-    query = query.where(new FieldPath('foo'), '==', 'bar');
-    query = query.orderBy('foo');
-    query = query.orderBy('foo', 'asc');
-    query = query.orderBy(new FieldPath('foo'));
-    query = query.orderBy(new FieldPath('foo'), 'desc');
-    query = query.limit(42);
-    query = query.offset(42);
-    query = query.select('foo');
-    query = query.select('foo', 'bar');
-    query = query.select(new FieldPath('foo'));
-    query = query.select(new FieldPath('foo'), new FieldPath('bar'));
-    query = query.startAt('foo');
-    query = query.startAt('foo', 'bar');
-    query = query.startAfter('foo');
-    query = query.startAfter('foo', 'bar');
-    query = query.endAt('foo');
-    query = query.endAt('foo', 'bar');
-    query = query.endBefore('foo');
-    query = query.endBefore('foo', 'bar');
-    query.get().then((results: QuerySnapshot) => {
-    });
-    query.stream().on('data', () => {
-    });
-    let unsubscribe: () => void = query.onSnapshot((snapshot: QuerySnapshot) => {
-    });
-    unsubscribe = query.onSnapshot((snapshot: QuerySnapshot) => {
-    }, (error: Error) => {
+    const firestore: FirebaseFirestore.Firestore = collRef.firestore;
+    docRef.get().then((snapshot:DocumentSnapshot) => {
+      query = query.where('foo', '==', 'bar');
+      query = query.where(new FieldPath('foo'), '==', 'bar');
+      query = query.orderBy('foo');
+      query = query.orderBy('foo', 'asc');
+      query = query.orderBy(new FieldPath('foo'));
+      query = query.orderBy(new FieldPath('foo'), 'desc');
+      query = query.limit(42);
+      query = query.offset(42);
+      query = query.select('foo');
+      query = query.select('foo', 'bar');
+      query = query.select(new FieldPath('foo'));
+      query = query.select(new FieldPath('foo'), new FieldPath('bar'));
+      query = query.startAt(snapshot);
+      query = query.startAt('foo');
+      query = query.startAt('foo', 'bar');
+      query = query.startAfter(snapshot);
+      query = query.startAfter('foo');
+      query = query.startAfter('foo', 'bar');
+      query = query.endAt(snapshot);
+      query = query.endAt('foo');
+      query = query.endAt('foo', 'bar');
+      query = query.endBefore(snapshot);
+      query = query.endBefore('foo');
+      query = query.endBefore('foo', 'bar');
+      query.get().then((results: QuerySnapshot) => {
+      });
+      query.stream().on('data', () => {
+      });
+      let unsubscribe: () => void = query.onSnapshot((snapshot: QuerySnapshot) => {
+      });
+      unsubscribe = query.onSnapshot((snapshot: QuerySnapshot) => {
+      }, (error: Error) => {
+      });
     });
   });
 
