@@ -179,8 +179,10 @@ function convertValue(fieldValue) {
       };
     case 'arrayValue': {
       let arrayValue = [];
-      for (let value of fieldValue.arrayValue.values) {
-        arrayValue.push(convertValue(value));
+      if (is.array(fieldValue.arrayValue.values)) {
+        for (let value of fieldValue.arrayValue.values) {
+          arrayValue.push(convertValue(value));
+        }
       }
       return {
         valueType: 'arrayValue',

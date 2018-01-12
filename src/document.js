@@ -537,8 +537,10 @@ class DocumentSnapshot {
       }
       case 'arrayValue': {
         let array = [];
-        for (let i = 0; i < proto.arrayValue.values.length; ++i) {
-          array.push(this._decodeValue(proto.arrayValue.values[i]));
+        if (is.array(proto.arrayValue.values)) {
+          for (let value of proto.arrayValue.values) {
+            array.push(this._decodeValue(value));
+          }
         }
         return array;
       }
