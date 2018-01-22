@@ -341,16 +341,17 @@ describe('failed transactions', function() {
   });
 
   it('retries on commit failure', function() {
-    let err = new Error('Retryable error');
+    let userResult = ['failure', 'failure', 'success'];
+    let serverError = new Error('Retryable error');
 
     return runTransaction(
       () => {
-        return Promise.resolve('success');
+        return Promise.resolve(userResult.shift());
       },
       begin('foo1'),
-      commit('foo1', [], err),
+      commit('foo1', [], serverError),
       begin('foo2', 'foo1'),
-      commit('foo2', [], err),
+      commit('foo2', [], serverError),
       begin('foo3', 'foo2'),
       commit('foo3')
     ).then(red => {
