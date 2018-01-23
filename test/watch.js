@@ -16,7 +16,7 @@
 
 'use strict';
 
-const assert = require('assert');
+const assert = require('power-assert');
 const duplexify = require('duplexify');
 const grpc = require('grpc');
 const is = require('is');

@@ -16,7 +16,7 @@
 
 'use strict';
 
-let assert = require('assert');
+let assert = require('power-assert');
 let Buffer = require('safe-buffer').Buffer;
 let is = require('is');
 
