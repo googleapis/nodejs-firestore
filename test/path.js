@@ -16,7 +16,7 @@
 
 'use strict';
 
-const assert = require('assert');
+const assert = require('power-assert');
 
 const path = require('../src/path');
 const ResourcePath = path.ResourcePath;
