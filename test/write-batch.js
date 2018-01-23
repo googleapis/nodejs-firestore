@@ -16,7 +16,7 @@
 
 'use strict';
 
-const assert = require('assert');
+const assert = require('power-assert');
 const grpc = require('grpc');
 
 const Firestore = require('../');
