@@ -16,7 +16,7 @@
 
 'use strict';
 
-const assert = require('assert');
+const assert = require('power-assert');
 
 const Firestore = require('../src');
 const backoff = require('../src/backoff')(Firestore);
