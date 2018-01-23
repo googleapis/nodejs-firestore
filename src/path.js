@@ -27,7 +27,9 @@ const validate = require('./validate')();
  *
  * @type {RegExp}
  */
-const RESOURCE_PATH_RE = /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?([\s\S]*)$/;
+const RESOURCE_PATH_RE =
+  // Note: [\s\S] matches all characters including newlines.
+  /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?([\s\S]*)$/;
 
 /*!
  * A regular expression to verify whether a field name can be passed to the
