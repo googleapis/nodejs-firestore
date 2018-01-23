@@ -338,8 +338,8 @@ class Firestore extends commonGrpc.Service {
    * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
-   * @param {object} documentOrName - The Firestore 'Document' proto or the
-   * resource name of a missing document.
+   * @param {object|string} documentOrName - The Firestore 'Document' proto or
+   * the resource name of a missing document.
    * @param {object=} readTime - A 'Timestamp' proto indicating the time this
    * document was read.
    * @param {string=} encoding - One of 'json' or 'protobufJS'. Applies to both
@@ -487,27 +487,27 @@ class Firestore extends commonGrpc.Service {
         });
       })
       .then(() => {
-        return transaction.commit().catch(err => {
-          if (attemptsRemaining > 0) {
+        return transaction
+          .commit()
+          .then(() => result)
+          .catch(err => {
+            if (attemptsRemaining > 0) {
+              Firestore.log(
+                'Firestore.runTransaction',
+                `Retrying transaction after error: ${JSON.stringify(err)}.`
+              );
+              return this.runTransaction(updateFunction, {
+                previousTransaction: transaction,
+                maxAttempts: attemptsRemaining,
+              });
+            }
             Firestore.log(
               'Firestore.runTransaction',
-              `Retrying transaction after error: ${JSON.stringify(err)}.`
+              'Exhausted transaction retries, returning error: %s',
+              err
             );
-            return this.runTransaction(updateFunction, {
-              previousTransaction: transaction,
-              maxAttempts: attemptsRemaining,
-            });
-          }
-          Firestore.log(
-            'Firestore.runTransaction',
-            'Exhausted transaction retries, returning error: %s',
-            err
-          );
-          return Promise.reject(err);
-        });
-      })
-      .then(() => {
-        return result;
+            return Promise.reject(err);
+          });
       });
   }
 
