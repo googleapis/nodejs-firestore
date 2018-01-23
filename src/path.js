@@ -27,7 +27,7 @@ const validate = require('./validate')();
  *
  * @type {RegExp}
  */
-const RESOURCE_PATH_RE = /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?(.*)$/;
+const RESOURCE_PATH_RE = /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?([\s\S]*)$/;
 
 /*!
  * A regular expression to verify whether a field name can be passed to the
@@ -295,6 +295,7 @@ class ResourcePath extends Path {
   get databaseId() {
     return this._databaseId;
   }
+
   /**
    * Returns true if the given string can be used as a relative or absolute
    * resource path.
