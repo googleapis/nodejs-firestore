@@ -322,7 +322,7 @@ describe('DocumentReference class', function() {
       .doc()
       .update({foo: 'b'})
       .catch(err => {
-        assert.ok(err.message.match(/no entity to update/));
+        assert.ok(err.message.match(/No document to update/));
       });
   });
 
@@ -1364,7 +1364,7 @@ describe('Transaction class', function() {
         assert.fail();
       })
       .catch(err => {
-        assert.ok(err.message.match(/no entity to update/));
+        assert.ok(err.message.match(/No document to update/));
       });
   });
 
@@ -1461,7 +1461,7 @@ describe('WriteBatch class', function() {
         assert.fail();
       })
       .catch(err => {
-        assert.ok(err.message.match(/no entity to update/));
+        assert.ok(err.message.match(/No document to update/));
       });
   });
 
