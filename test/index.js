@@ -16,7 +16,7 @@
 
 'use strict';
 
-const assert = require('assert');
+const assert = require('power-assert');
 const duplexify = require('duplexify');
 const extend = require('extend');
 const grpc = require('google-gax').grpc().grpc;
