@@ -61,6 +61,13 @@ describe('ResourcePath', function() {
       );
     }, /Resource name 'projects\/project\/databases' is not valid\./);
   });
+
+  it('accepts newlines', function() {
+    const path = ResourcePath.fromSlashSeparatedString(
+      `${DATABASE_ROOT}/documents/foo\nbar`
+    );
+    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo\nbar`);
+  });
 });
 
 describe('FieldPath', function() {
