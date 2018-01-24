@@ -19,7 +19,7 @@
 const assert = require('assert');
 const Buffer = require('safe-buffer').Buffer;
 const extend = require('extend');
-const grpc = require('grpc');
+const grpc = require('google-gax').grpc().grpc;
 const is = require('is');
 const through = require('through2');
 
