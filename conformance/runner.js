@@ -22,7 +22,7 @@ const is = require('is');
 const through = require('through2');
 const googleProtoFiles = require('google-proto-files');
 const protobufjs = require('protobufjs');
-const grpc = require('grpc');
+const grpc = require('google-gax').grpc().grpc;
 
 const Firestore = require('../');
 const reference = require('../src/reference')(Firestore);

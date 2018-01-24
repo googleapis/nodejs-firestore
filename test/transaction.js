@@ -17,7 +17,7 @@
 'use strict';
 
 const assert = require('power-assert');
-const grpc = require('grpc');
+const grpc = require('google-gax').grpc().grpc;
 const through = require('through2');
 
 const Firestore = require('../');

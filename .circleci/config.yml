@@ -5,7 +5,8 @@ unit_tests: &unit_tests
     - checkout
     - run:
         name: Install modules and dependencies.
-        command: npm install
+# '--unsafe-perm' required as per https://github.com/grpc/grpc/issues/8941
+        command: npm install  --unsafe-perm
     - run:
         name: Install codecov.
         command: npm install codecov

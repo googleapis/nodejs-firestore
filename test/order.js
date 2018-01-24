@@ -18,7 +18,7 @@
 
 const assert = require('power-assert');
 const Buffer = require('safe-buffer').Buffer;
-const grpc = require('grpc');
+const grpc = require('google-gax').grpc().grpc;
 
 const Firestore = require('../');
 const DocumentReference = require('../src/reference')(Firestore)
