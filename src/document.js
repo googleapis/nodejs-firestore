@@ -225,7 +225,9 @@ class DocumentSnapshot {
       if (!is.defined(target[key])) {
         if (isLast) {
           if (DocumentTransform.isTransformSentinel(value)) {
-            return null;
+            // If there is already data at this path, we need to retain it.
+            // Otherwise, we don't include it in the DocumentSnapshot.
+            return !is.empty(target) ? target : null;
           }
           // The merge is done.
           const leafNode = DocumentSnapshot.encodeValue(value);
