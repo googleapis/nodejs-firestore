@@ -81,14 +81,22 @@ function fieldFilters(fieldPath, op, value) {
     filters.push({fieldFilter: filter});
   }
 
-  return {
-    where: {
-      compositeFilter: {
-        op: 'AND',
-        filters: filters,
+  if (filters.length === 1) {
+    return {
+      where: {
+        fieldFilter: filters[0].fieldFilter,
       },
-    },
-  };
+    };
+  } else {
+    return {
+      where: {
+        compositeFilter: {
+          op: 'AND',
+          filters: filters,
+        },
+      },
+    };
+  }
 }
 
 function unaryFilters(fieldPath, equals) {
@@ -108,14 +116,22 @@ function unaryFilters(fieldPath, equals) {
     });
   }
 
-  return {
-    where: {
-      compositeFilter: {
-        op: 'AND',
-        filters: filters,
+  if (filters.length === 1) {
+    return {
+      where: {
+        unaryFilter: filters[0].unaryFilter,
       },
-    },
-  };
+    };
+  } else {
+    return {
+      where: {
+        compositeFilter: {
+          op: 'AND',
+          filters: filters,
+        },
+      },
+    };
+  }
 }
 
 function orderBy(fieldPath, direction) {
@@ -164,10 +180,13 @@ function select(field) {
 function startAt(before, value) {
   let cursor = {
     startAt: {
-      before: before,
       values: [],
     },
   };
+
+  if (before) {
+    cursor.startAt.before = true;
+  }
 
   let values = [].slice.call(arguments, 1);
 
@@ -188,10 +207,13 @@ function startAt(before, value) {
 function endAt(before, value) {
   let cursor = {
     endAt: {
-      before: before,
       values: [],
     },
   };
+
+  if (before) {
+    cursor.endAt.before = true;
+  }
 
   let values = [].slice.call(arguments, 1);
 
