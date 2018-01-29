@@ -235,4 +235,5 @@ function convertDocument(document) {
 module.exports = {
   documentFromJson: convertDocument,
   timestampFromJson: convertTimestamp,
+  valueFromJson: convertValue,
 };

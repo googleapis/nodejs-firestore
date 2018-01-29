@@ -505,7 +505,7 @@ class FieldPath extends Path {
 
   /**
    * Turns a field path argument into a [FieldPath]{@link FieldPath}.
-   * Supports FieldPaths as input (which are passed through) and dot-seperated
+   * Supports FieldPaths as input (which are passed through) and dot-separated
    * strings.
    *
    * @private
