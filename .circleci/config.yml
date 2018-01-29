@@ -69,8 +69,8 @@ workflows:
             - lint
             - docs
           filters:
-            branches:
-              only: master
+#           branches:
+#             only: master
             tags:
               only: /^v[\d.]+$/
       - publish_npm:
@@ -86,27 +86,33 @@ jobs:
   node4:
     docker:
       - image: node:4
+        user: node
     <<: *unit_tests
   node6:
     docker:
       - image: node:6
+        user: node
     <<: *unit_tests
   node7:
     docker:
       - image: node:7
+        user: node
     <<: *unit_tests
   node8:
     docker:
       - image: node:8
+        user: node
     <<: *unit_tests
   node9:
     docker:
       - image: node:9
+        user: node
     <<: *unit_tests
 
   lint:
     docker:
       - image: node:8
+        user: node
     steps:
       - checkout
       - run:
@@ -119,6 +125,7 @@ jobs:
   docs:
     docker:
       - image: node:8
+        user: node
     steps:
       - checkout
       - run:
@@ -131,6 +138,7 @@ jobs:
   system_tests:
     docker:
       - image: node:8
+        user: node
     steps:
       - checkout
       - run:
@@ -159,6 +167,7 @@ jobs:
   publish_npm:
     docker:
       - image: node:8
+        user: node
     steps:
       - checkout
       - run:
