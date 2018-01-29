@@ -144,22 +144,15 @@ function query(transaction) {
         },
       ],
       where: {
-        compositeFilter: {
-          filters: [
-            {
-              fieldFilter: {
-                field: {
-                  fieldPath: 'foo',
-                },
-                op: 'EQUAL',
-                value: {
-                  stringValue: 'bar',
-                  valueType: 'stringValue',
-                },
-              },
-            },
-          ],
-          op: 'AND',
+        fieldFilter: {
+          field: {
+            fieldPath: 'foo',
+          },
+          op: 'EQUAL',
+          value: {
+            stringValue: 'bar',
+            valueType: 'stringValue',
+          },
         },
       },
     },
