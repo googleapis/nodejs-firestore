@@ -533,22 +533,15 @@ describe('Query watch', function() {
           structuredQuery: {
             from: [{collectionId: 'col'}],
             where: {
-              compositeFilter: {
-                filters: [
-                  {
-                    fieldFilter: {
-                      field: {
-                        fieldPath: 'included',
-                      },
-                      op: 'EQUAL',
-                      value: {
-                        stringValue: 'yes',
-                        valueType: 'stringValue',
-                      },
-                    },
-                  },
-                ],
-                op: 'AND',
+              fieldFilter: {
+                field: {
+                  fieldPath: 'included',
+                },
+                op: 'EQUAL',
+                value: {
+                  stringValue: 'yes',
+                  valueType: 'stringValue',
+                },
               },
             },
           },

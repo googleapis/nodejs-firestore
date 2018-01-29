@@ -1384,9 +1384,12 @@ class Query {
     }
 
     let options = {
-      before: before,
       values: [],
     };
+
+    if (before) {
+      options.before = true;
+    }
 
     for (let i = 0; i < fieldValues.length; ++i) {
       let fieldValue = fieldValues[i];
@@ -1716,7 +1719,9 @@ class Query {
 
     let structuredQuery = reqOpts.structuredQuery;
 
-    if (this._fieldFilters.length) {
+    if (this._fieldFilters.length === 1) {
+      structuredQuery.where = this._fieldFilters[0].toProto();
+    } else if (this._fieldFilters.length > 1) {
       let filters = [];
       for (let fieldFilter of this._fieldFilters) {
         filters.push(fieldFilter.toProto());
