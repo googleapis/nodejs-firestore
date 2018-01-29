@@ -36,30 +36,14 @@ const firestore = new Firestore({
   sslCreds: grpc.credentials.createInsecure(),
 });
 
-/** Loads the Protobuf definition and the binary test data. */
-function loadTestCases() {
-  const protobufRoot = new protobufjs.Root();
+/** List of test cases that are ignored. */
+const ignoredRe = [
+  // Node doesn't support field masks for set().
+  /^set-merge: .*$/,
+];
 
-  protobufRoot.resolvePath = function(origin, target) {
-    if (/^google\/.*/.test(target)) {
-      target = path.join(googleProtoFiles(), target.substr('google/'.length));
-    }
-    return target;
-  };
-
-  const protoDefinition = protobufRoot.loadSync(
-    path.join(__dirname, 'test-definition.proto')
-  );
-
-  const binaryProtoData = require('fs').readFileSync(
-    path.join(__dirname, 'test-suite.binproto')
-  );
-
-  const testType = protoDefinition.lookupType('tests.TestSuite');
-  const testSuite = testType.decode(binaryProtoData);
-
-  return testSuite.tests;
-}
+/** If non-empty, list the test cases to run exclusively. */
+const exclusiveRe = [];
 
 const docRef = function(path) {
   const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
@@ -71,143 +55,132 @@ const collRef = function(path) {
   return firestore.collection(relativePath);
 };
 
-/** Converts a test object into a JS Object suitable for the Node API. */
-function convertInput(json) {
-  const obj = JSON.parse(json);
+/** Converts JSON test data into JavaScript types suitable for the Node API. */
+const convertInput = {
+  argument: json => {
+    const obj = JSON.parse(json);
+    function convertValue(value) {
+      if (is.object(value)) {
+        return convertObject(value);
+      } else if (is.array(value)) {
+        return convertArray(value);
+      } else if (value === 'Delete') {
+        return Firestore.FieldValue.delete();
+      } else if (value === 'ServerTimestamp') {
+        return Firestore.FieldValue.serverTimestamp();
+      }
 
-  function convertValue(value) {
-    if (is.object(value)) {
-      return convertObject(value);
-    } else if (is.array(value)) {
-      return convertArray(value);
-    } else if (value === 'Delete') {
-      return Firestore.FieldValue.delete();
-    } else if (value === 'ServerTimestamp') {
-      return Firestore.FieldValue.serverTimestamp();
+      return value;
     }
-
-    return value;
-  }
-
-  function convertArray(arr) {
-    for (let i = 0; i < arr.length; ++i) {
-      arr[i] = convertValue(arr[i]);
+    function convertArray(arr) {
+      for (let i = 0; i < arr.length; ++i) {
+        arr[i] = convertValue(arr[i]);
+      }
+      return arr;
     }
-    return arr;
-  }
-
-  function convertObject(obj) {
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        obj[key] = convertValue(obj[key]);
+    function convertObject(obj) {
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          obj[key] = convertValue(obj[key]);
+        }
+      }
+      return obj;
+    }
+    return convertValue(obj);
+  },
+  precondition: precondition => {
+    const deepCopy = JSON.parse(JSON.stringify(precondition));
+    if (deepCopy.updateTime) {
+      deepCopy.lastUpdateTime = DocumentSnapshot.toISOTime(deepCopy.updateTime);
+      delete deepCopy.updateTime;
+    }
+    return deepCopy;
+  },
+  path: path => {
+    if (path.field.length === 1 && path.field[0] === '__name__') {
+      return Firestore.FieldPath.documentId();
+    }
+    return new Firestore.FieldPath(path.field);
+  },
+  paths: fields => {
+    const convertedPaths = [];
+    if (fields) {
+      for (let field of fields) {
+        convertedPaths.push(convertInput.path(field));
+      }
+    } else {
+      convertedPaths.push(Firestore.FieldPath.documentId());
+    }
+    return convertedPaths;
+  },
+  cursor: cursor => {
+    const args = [];
+    if (cursor.docSnapshot) {
+      args.push(
+        DocumentSnapshot.fromObject(
+          docRef(cursor.docSnapshot.path),
+          convertInput.argument(cursor.docSnapshot.jsonData)
+        )
+      );
+    } else {
+      for (let jsonValue of cursor.jsonValues) {
+        args.push(convertInput.argument(jsonValue));
       }
     }
-    return obj;
-  }
+    return args;
+  },
+};
 
-  return convertValue(obj);
-}
-
-/** Converts a CommitRequest in Proto3 JSON to Protobuf JS format. */
-function convertCommit(commitRequest) {
-  const deepCopy = JSON.parse(JSON.stringify(commitRequest));
-  for (let write of deepCopy.writes) {
-    if (write.update) {
-      write.update.fields = convert.documentFromJson(write.update.fields);
+/** Converts Firestore Protobuf types in Proto3 JSON format to Protobuf JS. */
+const convertProto = {
+  commitRequest: commitRequest => {
+    const deepCopy = JSON.parse(JSON.stringify(commitRequest));
+    for (let write of deepCopy.writes) {
+      if (write.update) {
+        write.update.fields = convert.documentFromJson(write.update.fields);
+      }
     }
-  }
 
-  return deepCopy;
-}
-
-/** Converts a Position in Proto3 JSON to Protobuf JS format. */
-function convertPosition(position) {
-  const values = [];
-  for (let value of position.values) {
-    values.push(convert.valueFromJson(value));
-  }
-  position.values = values;
-  return position;
-}
-
-/** Converts a RunQueryRequest in Proto3 JSON to Protobuf JS format. */
-function convertQuery(queryRequest) {
-  const deepCopy = JSON.parse(JSON.stringify(queryRequest));
-  if (deepCopy.where && deepCopy.where.fieldFilter) {
-    deepCopy.where.fieldFilter.value = convert.valueFromJson(
-      deepCopy.where.fieldFilter.value
-    );
-  }
-  if (deepCopy.where && deepCopy.where.compositeFilter) {
-    for (let filter of deepCopy.where.compositeFilter.filters) {
-      filter.fieldFilter.value = convert.valueFromJson(
-        filter.fieldFilter.value
+    return deepCopy;
+  },
+  position: position => {
+    const deepCopy = JSON.parse(JSON.stringify(position));
+    const values = [];
+    for (let value of position.values) {
+      values.push(convert.valueFromJson(value));
+    }
+    deepCopy.values = values;
+    return deepCopy;
+  },
+  structuredQuery: queryRequest => {
+    const deepCopy = JSON.parse(JSON.stringify(queryRequest));
+    if (deepCopy.where && deepCopy.where.fieldFilter) {
+      deepCopy.where.fieldFilter.value = convert.valueFromJson(
+        deepCopy.where.fieldFilter.value
       );
     }
-  }
-  if (deepCopy.startAt) {
-    deepCopy.startAt = convertPosition(deepCopy.startAt);
-  }
-  if (deepCopy.endAt) {
-    deepCopy.endAt = convertPosition(deepCopy.endAt);
-  }
-  return deepCopy;
-}
-
-/** Converts a `Precondition` to its API counterpart. */
-function convertPrecondition(precondition) {
-  const deepCopy = JSON.parse(JSON.stringify(precondition));
-  if (deepCopy.updateTime) {
-    deepCopy.lastUpdateTime = DocumentSnapshot.toISOTime(deepCopy.updateTime);
-    delete deepCopy.updateTime;
-  }
-  return deepCopy;
-}
-
-/** Converts a list of `FieldPaths` to their API counterpart. */
-function convertPaths(fields) {
-  const convertedPaths = [];
-  if (fields) {
-    for (let field of fields) {
-      convertedPaths.push(convertPath(field));
+    if (deepCopy.where && deepCopy.where.compositeFilter) {
+      for (let filter of deepCopy.where.compositeFilter.filters) {
+        filter.fieldFilter.value = convert.valueFromJson(
+          filter.fieldFilter.value
+        );
+      }
     }
-  } else {
-    convertedPaths.push(Firestore.FieldPath.documentId());
-  }
-  return convertedPaths;
-}
-
-/** Converts a `FieldPath` to its API counterpart. */
-function convertPath(path) {
-  if (path.field.length === 1 && path.field[0] === '__name__') {
-    return Firestore.FieldPath.documentId();
-  }
-  return new Firestore.FieldPath(path.field);
-}
-
-/** Converts a list of `Cursors` to their API counterpart. */
-function convertCursor(cursor) {
-  const args = [];
-  if (cursor.docSnapshot) {
-    args.push(
-      DocumentSnapshot.fromObject(
-        docRef(cursor.docSnapshot.path),
-        convertInput(cursor.docSnapshot.jsonData)
-      )
-    );
-  } else {
-    for (let jsonValue of cursor.jsonValues) {
-      args.push(convertInput(jsonValue));
+    if (deepCopy.startAt) {
+      deepCopy.startAt = convertProto.position(deepCopy.startAt);
     }
-  }
-  return args;
-}
+    if (deepCopy.endAt) {
+      deepCopy.endAt = convertProto.position(deepCopy.endAt);
+    }
+    return deepCopy;
+  },
+};
 
 /** Request handler for _commit. */
 function commitHandler(spec) {
   return (request, options, callback) => {
     try {
-      assert.deepEqual(request, convertCommit(spec.request));
+      assert.deepEqual(request, convertProto.commitRequest(spec.request));
 
       const res = {
         commitTime: {},
@@ -230,7 +203,10 @@ function commitHandler(spec) {
 /** Request handler for _runQuery. */
 function queryHandler(spec) {
   return request => {
-    assert.deepEqual(request.structuredQuery, convertQuery(spec.query));
+    assert.deepEqual(
+      request.structuredQuery,
+      convertProto.structuredQuery(spec.query)
+    );
 
     let stream = through.obj();
     setImmediate(function() {
@@ -260,15 +236,6 @@ function getHandler(spec) {
   };
 }
 
-/** List of test cases that are ignored. */
-const ignoredRe = [
-  // Node doesn't support field masks for set().
-  /^set-merge: .*$/,
-];
-
-/** If non-empty, list the test cases to run exclusively. */
-const exclusiveRe = [];
-
 function runTest(spec) {
   console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`); // eslint-disable-line no-console
 
@@ -279,18 +246,18 @@ function runTest(spec) {
       let varargs = [];
 
       if (spec.jsonData) {
-        varargs[0] = convertInput(spec.jsonData);
+        varargs[0] = convertInput.argument(spec.jsonData);
       } else {
         for (let i = 0; i < spec.fieldPaths.length; ++i) {
           varargs[2 * i] = new Firestore.FieldPath(spec.fieldPaths[i].field);
         }
         for (let i = 0; i < spec.jsonValues.length; ++i) {
-          varargs[2 * i + 1] = convertInput(spec.jsonValues[i]);
+          varargs[2 * i + 1] = convertInput.argument(spec.jsonValues[i]);
         }
       }
 
       if (spec.precondition) {
-        varargs.push(convertPrecondition(spec.precondition));
+        varargs.push(convertInput.precondition(spec.precondition));
       }
 
       const document = docRef(spec.docRefPath);
@@ -303,26 +270,35 @@ function runTest(spec) {
 
     const applyClause = function(query, clause) {
       if (clause.select) {
-        query = query.select.apply(query, convertPaths(clause.select.fields));
+        query = query.select.apply(
+          query,
+          convertInput.paths(clause.select.fields)
+        );
       } else if (clause.where) {
-        let fieldPath = convertPath(clause.where.path);
-        let value = convertInput(clause.where.jsonValue);
+        let fieldPath = convertInput.path(clause.where.path);
+        let value = convertInput.argument(clause.where.jsonValue);
         query = query.where(fieldPath, clause.where.op, value);
       } else if (clause.orderBy) {
-        let fieldPath = convertPath(clause.orderBy.path);
+        let fieldPath = convertInput.path(clause.orderBy.path);
         query = query.orderBy(fieldPath, clause.orderBy.direction);
       } else if (clause.offset) {
         query = query.offset(clause.offset);
       } else if (clause.limit) {
         query = query.limit(clause.limit);
       } else if (clause.startAt) {
-        query = query.startAt.apply(query, convertCursor(clause.startAt));
+        query = query.startAt.apply(query, convertInput.cursor(clause.startAt));
       } else if (clause.startAfter) {
-        query = query.startAfter.apply(query, convertCursor(clause.startAfter));
+        query = query.startAfter.apply(
+          query,
+          convertInput.cursor(clause.startAfter)
+        );
       } else if (clause.endAt) {
-        query = query.endAt.apply(query, convertCursor(clause.endAt));
+        query = query.endAt.apply(query, convertInput.cursor(clause.endAt));
       } else if (clause.endBefore) {
-        query = query.endBefore.apply(query, convertCursor(clause.endBefore));
+        query = query.endBefore.apply(
+          query,
+          convertInput.cursor(clause.endBefore)
+        );
       }
 
       return query;
@@ -343,7 +319,7 @@ function runTest(spec) {
 
     return Promise.resolve().then(() => {
       if (spec.precondition) {
-        const precondition = convertPrecondition(deleteSpec.precondition);
+        const precondition = convertInput.precondition(deleteSpec.precondition);
         return docRef(spec.docRefPath).delete(precondition);
       } else {
         return docRef(spec.docRefPath).delete();
@@ -357,9 +333,12 @@ function runTest(spec) {
     return Promise.resolve().then(() => {
       const isMerge = !!(spec.option && spec.option.all);
 
-      return docRef(setSpec.docRefPath).set(convertInput(spec.jsonData), {
-        merge: isMerge,
-      });
+      return docRef(setSpec.docRefPath).set(
+        convertInput.argument(spec.jsonData),
+        {
+          merge: isMerge,
+        }
+      );
     });
   };
 
@@ -367,7 +346,9 @@ function runTest(spec) {
     firestore.api.Firestore._commit = commitHandler(spec);
 
     return Promise.resolve().then(() => {
-      return docRef(spec.docRefPath).create(convertInput(spec.jsonData));
+      return docRef(spec.docRefPath).create(
+        convertInput.argument(spec.jsonData)
+      );
     });
   };
 
@@ -424,6 +405,30 @@ function runTest(spec) {
 }
 
 describe('Conformance Tests', function() {
+  const loadTestCases = () => {
+    const protobufRoot = new protobufjs.Root();
+
+    protobufRoot.resolvePath = function(origin, target) {
+      if (/^google\/.*/.test(target)) {
+        target = path.join(googleProtoFiles(), target.substr('google/'.length));
+      }
+      return target;
+    };
+
+    const protoDefinition = protobufRoot.loadSync(
+      path.join(__dirname, 'test-definition.proto')
+    );
+
+    const binaryProtoData = require('fs').readFileSync(
+      path.join(__dirname, 'test-suite.binproto')
+    );
+
+    const testType = protoDefinition.lookupType('tests.TestSuite');
+    const testSuite = testType.decode(binaryProtoData);
+
+    return testSuite.tests;
+  };
+
   for (let testCase of loadTestCases()) {
     const isIgnored = ignoredRe.find(re => re.test(testCase.description));
     const isExclusive = exclusiveRe.find(re => re.test(testCase.description));
