@@ -1443,6 +1443,38 @@ describe('update document', function() {
     ]);
   });
 
+  it('with nested field and document transform ', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        update(
+          document('foo', {
+            mapValue: {
+              fields: {
+                bar: {
+                  stringValue: 'include',
+                  valueType: 'stringValue',
+                },
+              },
+            },
+            valueType: 'mapValue',
+          }),
+          updateMask('foo.bar', 'foo.delete')
+        )
+      );
+
+      callback(null, writeResult(1));
+    };
+    return firestore
+      .doc('collectionId/documentId')
+      .update(
+        'foo.bar',
+        'include',
+        'foo.delete',
+        Firestore.FieldValue.delete()
+      );
+  });
+
   it('with field with dot ', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, update(document('a.b', 'c'), updateMask('`a.b`')));
