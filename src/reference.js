@@ -2118,6 +2118,7 @@ module.exports = FirestoreType => {
   });
   return {
     CollectionReference,
+    DocumentChange,
     DocumentReference,
     Query,
     QuerySnapshot,

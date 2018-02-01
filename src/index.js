@@ -1107,17 +1107,18 @@ Firestore.setLogFunction = function(logger) {
 };
 
 // Initializing dependencies that require that Firestore class type.
-let reference = require('./reference')(Firestore);
+const reference = require('./reference')(Firestore);
 CollectionReference = reference.CollectionReference;
 DocumentReference = reference.DocumentReference;
-let document = require('./document')(DocumentReference);
+const document = require('./document')(DocumentReference);
 DocumentSnapshot = document.DocumentSnapshot;
 GeoPoint = document.GeoPoint;
 validate = require('./validate')({
   DocumentReference: reference.validateDocumentReference,
   ResourcePath: ResourcePath.validateResourcePath,
 });
-WriteBatch = require('./write-batch')(Firestore, DocumentReference).WriteBatch;
+const batch = require('./write-batch')(Firestore, DocumentReference);
+WriteBatch = batch.WriteBatch;
 Transaction = require('./transaction')(Firestore);
 
 /**
@@ -1163,24 +1164,6 @@ module.exports.Firestore = Firestore;
 module.exports.v1beta1 = v1beta1;
 
 /**
- * {@link FieldPath} class.
- *
- * @name Firestore.FieldPath
- * @see FieldPath
- * @type {Constructor}
- */
-module.exports.FieldPath = FieldPath;
-
-/**
- * {@link FieldValue} class.
- *
- * @name Firestore.FieldValue
- * @see FieldValue
- * @type {Constructor}
- */
-module.exports.FieldValue = FieldValue;
-
-/**
  * {@link GeoPoint} class.
  *
  * @name Firestore.GeoPoint
@@ -1188,3 +1171,129 @@ module.exports.FieldValue = FieldValue;
  * @type {Constructor}
  */
 module.exports.GeoPoint = GeoPoint;
+
+/**
+ * {@link Transaction} class.
+ *
+ * @name Firestore.Transaction
+ * @see Transaction
+ * @type Transaction
+ */
+module.exports.Transaction = Transaction;
+
+/**
+ * {@link WriteBatch} class.
+ *
+ * @name Firestore.WriteBatch
+ * @see WriteBatch
+ * @type WriteBatch
+ */
+module.exports.WriteBatch = WriteBatch;
+
+/**
+ * {@link DocumentReference} class.
+ *
+ * @name Firestore.DocumentReference
+ * @see DocumentReference
+ * @type DocumentReference
+ */
+module.exports.DocumentReference = DocumentReference;
+
+/**
+ * {@link WriteResult} class.
+ *
+ * @name Firestore.WriteResult
+ * @see WriteResult
+ * @type WriteResult
+ */
+module.exports.WriteResult = batch.WriteResult;
+
+/**
+ * {@link DocumentSnapshot} DocumentSnapshot.
+ *
+ * @name Firestore.DocumentSnapshot
+ * @see DocumentSnapshot
+ * @type DocumentSnapshot
+ */
+module.exports.DocumentSnapshot = DocumentSnapshot;
+
+/**
+ * {@link QueryDocumentSnapshot} class.
+ *
+ * @name Firestore.QueryDocumentSnapshot
+ * @see QueryDocumentSnapshot
+ * @type QueryDocumentSnapshot
+ */
+module.exports.QueryDocumentSnapshot = document.QueryDocumentSnapshot;
+
+/**
+ * {@link Query} class.
+ *
+ * @name Firestore.Query
+ * @see Query
+ * @type Query
+ */
+module.exports.Query = document.Query;
+
+/**
+ * {@link CollectionReference} class.
+ *
+ * @name Firestore.CollectionReference
+ * @see CollectionReference
+ * @type CollectionReference
+ */
+module.exports.CollectionReference = CollectionReference;
+
+/**
+ * {@link QuerySnapshot} class.
+ *
+ * @name Firestore.QuerySnapshot
+ * @see QuerySnapshot
+ * @type QuerySnapshot
+ */
+module.exports.QuerySnapshot = reference.QuerySnapshot;
+
+/**
+ * {@link DocumentChange} class.
+ *
+ * @name Firestore.DocumentChange
+ * @see DocumentChange
+ * @type DocumentChange
+ */
+module.exports.DocumentChange = document.DocumentChange;
+
+/**
+ * {@link Query} class.
+ *
+ * @name Firestore.Query
+ * @see Query
+ * @type Query
+ */
+module.exports.Query = reference.Query;
+
+/**
+ * {@link CollectionReference} class.
+ *
+ * @name Firestore.CollectionReference
+ * @see CollectionReference
+ * @type CollectionReference
+ */
+module.exports.Query = CollectionReference;
+
+/**
+ * {@link FieldValue} class.
+ *
+ * @name Firestore.FieldValue
+ * @see FieldValue
+ * @type FieldValue
+ */
+module.exports.FieldValue = FieldValue;
+
+/**
+ * {@link FieldPath} class.
+ *
+ * @name Firestore.FieldPath
+ * @see FieldPath
+ * @type {Constructor}
+ */
+module.exports.FieldPath = FieldPath;
