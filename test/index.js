@@ -296,6 +296,23 @@ describe('instantiation', function() {
 
     assert.equal(calledWith.service, 'firestore');
   });
+
+  it('exports all types', function() {
+    // Ordering as per firestore.d.ts
+    assert.ok(is.defined(Firestore.Firestore));
+    assert.ok(is.defined(Firestore.GeoPoint));
+    assert.ok(is.defined(Firestore.Transaction));
+    assert.ok(is.defined(Firestore.WriteBatch));
+    assert.ok(is.defined(Firestore.DocumentReference));
+    assert.ok(is.defined(Firestore.WriteResult));
+    assert.ok(is.defined(Firestore.DocumentSnapshot));
+    assert.ok(is.defined(Firestore.QueryDocumentSnapshot));
+    assert.ok(is.defined(Firestore.Query));
+    assert.ok(is.defined(Firestore.QuerySnapshot));
+    assert.ok(is.defined(Firestore.CollectionReference));
+    assert.ok(is.defined(Firestore.FieldValue));
+    assert.ok(is.defined(Firestore.FieldPath));
+  });
 });
 
 describe('snapshot_() method', function() {
