@@ -539,6 +539,23 @@ describe('transaction operations', function() {
     );
   });
 
+  it('enforce that getAll come before writes', function() {
+    return runTransaction(transaction => {
+      transaction.set(docRef, {foo: 'bar'});
+      return transaction.getAll(docRef);
+    }, begin())
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        assert.equal(
+          err.message,
+          'Firestore transactions require all reads to ' +
+            'be executed before all writes.'
+        );
+      });
+  });
+
   it('support create', function() {
     let create = {
       currentDocument: {
