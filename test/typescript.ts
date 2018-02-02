@@ -67,9 +67,11 @@ xdescribe('firestore.d.ts', function() {
 
   it('has typings for Transaction', () => {
     return firestore.runTransaction((transaction: Transaction) => {
+      transaction.get(collRef).then((snapshot: QuerySnapshot) => {
+      });
       transaction.get(docRef).then((doc: DocumentSnapshot) => {
       });
-      transaction.get(collRef).then((snapshot: QuerySnapshot) => {
+      transaction.getAll(docRef, docRef).then((docs: DocumentSnapshot[]) => {
       });
       transaction = transaction.create(docRef, documentData);
       transaction = transaction.set(docRef, documentData);

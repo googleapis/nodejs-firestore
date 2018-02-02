@@ -18,7 +18,8 @@
 
 const is = require('is');
 
-const validate = require('./validate')();
+/*! Injected. */
+let validate;
 
 /*!
  * Injected.
@@ -90,7 +91,7 @@ class Transaction {
 
     if (is.instance(refOrQuery, DocumentReference)) {
       return this._firestore
-        .getAll_([refOrQuery], {transactionId: this._transactionId})
+        .getAll_([refOrQuery], this._transactionId)
         .then(res => {
           return Promise.resolve(res[0]);
         });
@@ -101,6 +102,40 @@ class Transaction {
     }
 
     throw new Error('Argument "refOrQuery" must be a DocumentRef or a Query.');
+  }
+
+  /**
+   * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
+   * all returned documents.
+   *
+   * @param {...DocumentReference} documents - The document references
+   * to receive.
+   * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
+   * contains an array with the resulting document snapshots.
+   *
+   * @example
+   * let firstDoc = firestore.doc('col/doc1');
+   * let secondDoc = firestore.doc('col/doc2');
+   * let resultDoc = firestore.doc('col/doc2');
+   *
+   * firestore.runTransaction(transaction => {
+   *   return transaction.getAll(firstDoc, secondDoc).then(docs => {
+   *     transaction.set(resultDoc, {
+   *       sum: docs[1].get('count') + docs[2].get('count')
+   *     });
+   *   });
+   * });
+   */
+  getAll(documents) {
+    documents = is.array(arguments[0])
+      ? arguments[0].slice()
+      : Array.prototype.slice.call(arguments);
+
+    for (let i = 0; i < documents.length; ++i) {
+      validate.isDocumentReference(i, documents[i]);
+    }
+
+    return this._firestore.getAll_(documents, this._transactionId );
   }
 
   /**
@@ -297,11 +332,8 @@ module.exports = FirestoreType => {
   let reference = require('./reference')(FirestoreType);
   DocumentReference = reference.DocumentReference;
   Query = reference.Query;
-  let document = require('./document')(DocumentReference);
-  require('./validate')({
-    Document: document.validateDocumentData,
+  validate = require('./validate')({
     DocumentReference: reference.validateDocumentReference,
-    Precondition: document.validatePrecondition,
   });
   return Transaction;
 };

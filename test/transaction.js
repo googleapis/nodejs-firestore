@@ -24,7 +24,8 @@ const Firestore = require('../');
 let firestore;
 
 const DATABASE_ROOT = 'projects/test-project/databases/(default)';
-const DOCUMENT_NAME = `${DATABASE_ROOT}/documents/collectionId/documentId`;
+const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
+const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -124,6 +125,42 @@ function getDocument(transaction) {
       },
       readTime: {seconds: 5, nanos: 6},
     });
+    stream.push(null);
+  });
+
+  return {
+    type: 'getDocument',
+    request: request,
+    stream: stream,
+  };
+}
+
+function getAll(docs) {
+  let request = {
+    database: DATABASE_ROOT,
+    documents: [],
+    transaction: 'foo',
+  };
+
+  let stream = through.obj();
+
+  for (const doc of docs) {
+    const name = `${COLLECTION_ROOT}/${doc}`;
+    request.documents.push(name);
+
+    setImmediate(() => {
+      stream.push({
+        found: {
+          name: name,
+          createTime: {seconds: 1, nanos: 2},
+          updateTime: {seconds: 3, nanos: 4},
+        },
+        readTime: {seconds: 5, nanos: 6},
+      });
+    });
+  }
+
+  setImmediate(function() {
     stream.push(null);
   });
 
@@ -424,8 +461,8 @@ describe('transaction operations', function() {
 
   it('support get with document ref', function() {
     return runTransaction(
-      updateFunction => {
-        return updateFunction.get(docRef).then(doc => {
+      transaction => {
+        return transaction.get(docRef).then(doc => {
           assert.equal(doc.id, 'documentId');
         });
       },
@@ -437,13 +474,13 @@ describe('transaction operations', function() {
 
   it('requires a query or document for get', function() {
     return runTransaction(
-      updateFunction => {
+      transaction => {
         assert.throws(() => {
-          updateFunction.get();
+          transaction.get();
         }, /Argument "refOrQuery" must be a DocumentRef or a Query\./);
 
         assert.throws(() => {
-          updateFunction.get('foo');
+          transaction.get('foo');
         }, /Argument "refOrQuery" must be a DocumentRef or a Query\./);
 
         return Promise.resolve();
@@ -454,9 +491,9 @@ describe('transaction operations', function() {
   });
 
   it('enforce that gets come before writes', function() {
-    return runTransaction(updateFunction => {
-      updateFunction.set(docRef, {foo: 'bar'});
-      return updateFunction.get(docRef);
+    return runTransaction(transaction => {
+      transaction.set(docRef, {foo: 'bar'});
+      return transaction.get(docRef);
     }, begin())
       .then(() => {
         throw new Error('Unexpected success in Promise');
@@ -472,14 +509,32 @@ describe('transaction operations', function() {
 
   it('support get with query', function() {
     return runTransaction(
-      updateFunction => {
+      transaction => {
         let query = firestore.collection('col').where('foo', '==', 'bar');
-        return updateFunction.get(query).then(results => {
+        return transaction.get(query).then(results => {
           assert.equal(results.docs[0].id, 'documentId');
         });
       },
       begin(),
       query(),
+      commit()
+    );
+  });
+
+  it('support getAll', function() {
+    const firstDoc = firestore.doc('collectionId/firstDocument');
+    const secondDoc = firestore.doc('collectionId/secondDocument');
+
+    return runTransaction(
+      transaction => {
+        return transaction.getAll(firstDoc, secondDoc).then(docs => {
+          assert.equal(docs.length, 2);
+          assert.equal(docs[0].id, 'firstDocument');
+          assert.equal(docs[1].id, 'secondDocument');
+        });
+      },
+      begin(),
+      getAll(['firstDocument', 'secondDocument']),
       commit()
     );
   });
@@ -496,8 +551,8 @@ describe('transaction operations', function() {
     };
 
     return runTransaction(
-      updateFunction => {
-        updateFunction.create(docRef, {});
+      transaction => {
+        transaction.create(docRef, {});
         return Promise.resolve();
       },
       begin(),
@@ -532,10 +587,10 @@ describe('transaction operations', function() {
     };
 
     return runTransaction(
-      updateFunction => {
-        updateFunction.update(docRef, {'a.b': 'c'});
-        updateFunction.update(docRef, 'a.b', 'c');
-        updateFunction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
+      transaction => {
+        transaction.update(docRef, {'a.b': 'c'});
+        transaction.update(docRef, 'a.b', 'c');
+        transaction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
         return Promise.resolve();
       },
       begin(),
@@ -557,8 +612,8 @@ describe('transaction operations', function() {
     };
 
     return runTransaction(
-      updateFunction => {
-        updateFunction.set(docRef, {'a.b': 'c'});
+      transaction => {
+        transaction.set(docRef, {'a.b': 'c'});
         return Promise.resolve();
       },
       begin(),
@@ -583,8 +638,8 @@ describe('transaction operations', function() {
     };
 
     return runTransaction(
-      updateFunction => {
-        updateFunction.set(docRef, {'a.b': 'c'}, {merge: true});
+      transaction => {
+        transaction.set(docRef, {'a.b': 'c'}, {merge: true});
         return Promise.resolve();
       },
       begin(),
@@ -598,8 +653,8 @@ describe('transaction operations', function() {
     };
 
     return runTransaction(
-      updateFunction => {
-        updateFunction.delete(docRef);
+      transaction => {
+        transaction.delete(docRef);
         return Promise.resolve();
       },
       begin(),
@@ -620,8 +675,8 @@ describe('transaction operations', function() {
     };
 
     return runTransaction(
-      updateFunction => {
-        updateFunction.delete(docRef).set(docRef, {});
+      transaction => {
+        transaction.delete(docRef).set(docRef, {});
         return Promise.resolve();
       },
       begin(),
