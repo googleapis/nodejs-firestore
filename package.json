@@ -69,7 +69,7 @@
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-prettier": "^2.5.0",
-    "google-proto-files": "^0.14.1",
+    "google-proto-files": "^0.15.0",
     "ink-docstrap": "git+https://github.com/docstrap/docstrap.git",
     "intelli-espower-loader": "^1.0.1",
     "jsdoc": "^3.5.5",
