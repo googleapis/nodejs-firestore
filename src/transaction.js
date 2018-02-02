@@ -135,7 +135,7 @@ class Transaction {
       validate.isDocumentReference(i, documents[i]);
     }
 
-    return this._firestore.getAll_(documents, this._transactionId );
+    return this._firestore.getAll_(documents, this._transactionId);
   }
 
   /**
