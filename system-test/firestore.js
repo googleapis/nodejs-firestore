@@ -1302,6 +1302,22 @@ describe('Transaction class', function() {
       });
   });
 
+  it('has getAll() method', function() {
+    let ref1 = randomCol.doc('doc1');
+    let ref2 = randomCol.doc('doc2');
+    return Promise.all([ref1.set({}), ref2.set({})])
+      .then(() => {
+        return firestore.runTransaction(updateFunction => {
+          return updateFunction.getAll(ref1, ref2).then(docs => {
+            return Promise.resolve(docs.length);
+          });
+        });
+      })
+      .then(res => {
+        assert.equal(2, res);
+      });
+  });
+
   it('has get() with query', function() {
     let ref = randomCol.doc('doc');
     let query = randomCol.where('foo', '==', 'bar');

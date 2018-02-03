@@ -566,28 +566,25 @@ class Firestore extends commonGrpc.Service {
    * @private
    * @param {Array.<DocumentReference>} docRefs - The documents
    * to receive.
-   * @param {object=} readOptions - The options to use for this request.
-   * @param {bytes|null} readOptions.transactionId - The transaction ID to use
+   * @param {bytes=} transactionId - transactionId - The transaction ID to use
    * for this read.
-   * @returns {Array.<DocumentSnapshot>} A Promise that contains an array with
+   * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that contains an array with
    * the resulting documents.
    */
-  getAll_(docRefs, readOptions) {
+  getAll_(docRefs, transactionId) {
     const requestedDocuments = new Set();
     const retrievedDocuments = new Map();
 
     let request = {
       database: this.formattedName,
+      transaction: transactionId,
     };
 
     for (let docRef of docRefs) {
       requestedDocuments.add(docRef.formattedName);
     }
-    request.documents = Array.from(requestedDocuments);
 
-    if (readOptions && readOptions.transactionId) {
-      request.transaction = readOptions.transactionId;
-    }
+    request.documents = Array.from(requestedDocuments);
 
     let self = this;
 

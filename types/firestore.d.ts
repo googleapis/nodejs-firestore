@@ -141,6 +141,16 @@ declare namespace FirebaseFirestore {
   export class Transaction {
     private constructor();
 
+
+    /**
+     * Retrieves a query result. Holds a pessimistic lock on all returned
+     * documents.
+     *
+     * @param query A query to execute.
+     * @return A QuerySnapshot for the retrieved data.
+     */
+    get(query: Query): Promise<QuerySnapshot>;
+
     /**
      * Reads the document referenced by the provided `DocumentReference.`
      * Holds a pessimistic lock on the returned document.
@@ -151,13 +161,14 @@ declare namespace FirebaseFirestore {
     get(documentRef: DocumentReference): Promise<DocumentSnapshot>;
 
     /**
-     * Retrieves a query result. Holds a pessimistic lock on the returned
-     * documents.
+     * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
+     * all returned documents.
      *
-     * @param query A query to execute.
-     * @return A QuerySnapshot for the retrieved data.
+     * @param documentRef The `DocumentReferences` to receive.
+     * @return A Promise that resolves with an array of resulting document
+     * snapshots.
      */
-    get(query: Query): Promise<QuerySnapshot>;
+    getAll(...documentRef: DocumentReference[]): Promise<DocumentSnapshot[]>;
 
     /**
      * Create the document referred to by the provided `DocumentReference`.
