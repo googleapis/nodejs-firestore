@@ -577,7 +577,7 @@ class Firestore extends commonGrpc.Service {
 
     let request = {
       database: this.formattedName,
-      transaction: transactionId
+      transaction: transactionId,
     };
 
     for (let docRef of docRefs) {
