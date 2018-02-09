@@ -20,13 +20,13 @@
  * Sentinel value for a field delete.
  *
  */
-const DELETE_SENTINEL = {};
+let DELETE_SENTINEL;
 
 /*!
  * Sentinel value for a server timestamp.
  *
  */
-const SERVER_TIMESTAMP_SENTINEL = {};
+let SERVER_TIMESTAMP_SENTINEL;
 
 /**
  * Sentinel values that can be used when writing documents with set() or
@@ -35,6 +35,7 @@ const SERVER_TIMESTAMP_SENTINEL = {};
  * @class
  */
 class FieldValue {
+  constructor() {}
   /**
    * Returns a sentinel used with update() to mark a field for deletion.
    *
@@ -75,6 +76,18 @@ class FieldValue {
     return SERVER_TIMESTAMP_SENTINEL;
   }
 }
+
+/*!
+ * Sentinel value for a field delete.
+ *
+ */
+ DELETE_SENTINEL = new FieldValue();
+
+/*!
+ * Sentinel value for a server timestamp.
+ *
+ */
+ SERVER_TIMESTAMP_SENTINEL = new FieldValue();
 
 module.exports = FieldValue;
 module.exports.DELETE_SENTINEL = DELETE_SENTINEL;
