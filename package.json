@@ -50,7 +50,7 @@
     "test": "repo-tools test run --cmd npm -- run cover"
   },
   "dependencies": {
-    "@google-cloud/common": "^0.15.1",
+    "@google-cloud/common": "^0.16.0",
     "@google-cloud/common-grpc": "^0.5.3",
     "bun": "^0.0.12",
     "extend": "^3.0.1",
@@ -67,7 +67,7 @@
     "duplexify": "^3.5.3",
     "eslint": "^4.16.0",
     "eslint-config-prettier": "^2.9.0",
-    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-node": "^6.0.0",
     "eslint-plugin-prettier": "^2.5.0",
     "google-proto-files": "^0.15.0",
     "ink-docstrap": "git+https://github.com/docstrap/docstrap.git",
