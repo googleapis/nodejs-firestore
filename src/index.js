@@ -204,6 +204,22 @@ class Firestore extends commonGrpc.Service {
       libVersion: libVersion,
     });
 
+    const version = config.packageJson.version;
+
+    if (
+      is.defined(global.FIRESTORE_VERSION) &&
+      global.FIRESTORE_VERSION !== version
+    ) {
+      throw new Error(
+        'Only one version of @google-cloud/firestore can be included in your ' +
+          'project at a time. If you are using Firestore through a transitive ' +
+          'dependency (such as Firebase Admin), please ensure that your ' +
+          'dependency versions match (found ${global.FIRESTORE_VERSION} and ' +
+          '${version})'
+      );
+    }
+    global.FIRESTORE_VERSION = version;
+
     super(config, options);
 
     // GCF currently tears down idle connections after two minutes. Requests
