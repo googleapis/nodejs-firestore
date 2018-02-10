@@ -47,7 +47,9 @@
     "system-test": "repo-tools test run --cmd mocha -- system-test/*.js --no-timeouts",
     "conformance": "repo-tools test run --cmd mocha -- conformance/*.js --no-timeouts",
     "test-no-cover": "repo-tools test run --cmd mocha -- test/*.js --no-timeouts",
-    "test": "repo-tools test run --cmd npm -- run cover"
+    "test": "repo-tools test run --cmd npm -- run cover",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "dependencies": {
     "@google-cloud/common": "^0.16.0",
@@ -58,7 +60,8 @@
     "google-gax": "^0.14.3",
     "is": "^3.2.1",
     "safe-buffer": "^5.1.1",
-    "through2": "^2.0.3"
+    "through2": "^2.0.3",
+    "snyk": "^1.69.7"
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.1.4",
@@ -80,5 +83,6 @@
     "protobufjs": "^6.8.4",
     "proxyquire": "^1.8.0",
     "typescript": "^2.6.2"
-  }
+  },
+  "snyk": true
 }
