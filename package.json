@@ -63,7 +63,7 @@
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.1.4",
     "@types/mocha": "^2.2.46",
-    "@types/node": "^9.3.0",
+    "@types/node": "^9.4.5",
     "duplexify": "^3.5.3",
     "eslint": "^4.16.0",
     "eslint-config-prettier": "^2.9.0",
