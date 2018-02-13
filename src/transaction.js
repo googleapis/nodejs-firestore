@@ -39,7 +39,7 @@ let Query;
  * Error message for transactional reads that were executed after performing
  * writes.
  */
-const WRITE_AFTER_READ_ERR_MSG =
+const READ_AFTER_WRITE_ERROR_MSG =
   'Firestore transactions require all reads to be executed before all writes.';
 
 /**
@@ -90,7 +90,7 @@ class Transaction {
    */
   get(refOrQuery) {
     if (!this._writeBatch.isEmpty) {
-      throw new Error(WRITE_AFTER_READ_ERR_MSG);
+      throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
     if (is.instance(refOrQuery, DocumentReference)) {
@@ -132,7 +132,7 @@ class Transaction {
    */
   getAll(documents) {
     if (!this._writeBatch.isEmpty) {
-      throw new Error(WRITE_AFTER_READ_ERR_MSG);
+      throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
     documents = is.array(arguments[0])
