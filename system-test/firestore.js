@@ -854,6 +854,21 @@ describe('Query class', function() {
       });
   });
 
+  it('can query by FieldPath.documentId()', function() {
+    let ref = randomCol.doc('foo');
+
+    return ref
+      .set({})
+      .then(() => {
+        return randomCol
+          .where(Firestore.FieldPath.documentId(), '>=', 'bar')
+          .get();
+      })
+      .then(res => {
+        assert.equal(res.docs.length, 1);
+      });
+  });
+
   it('has orderBy() method', function() {
     let ref1 = randomCol.doc('doc1');
     let ref2 = randomCol.doc('doc2');
