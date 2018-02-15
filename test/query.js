@@ -591,6 +591,25 @@ describe('where() interface', function() {
     return query.get();
   });
 
+  it('supports strings for FieldPath.documentId()', function() {
+    firestore.api.Firestore._runQuery = function(request) {
+      requestEquals(
+        request,
+        fieldFilters('__name__', 'EQUAL', {
+          valueType: 'referenceValue',
+          referenceValue:
+            'projects/test-project/databases/(default)/' +
+            'documents/collectionId/foo',
+        })
+      );
+      return stream();
+    };
+
+    let query = firestore.collection('collectionId');
+    query = query.where(Firestore.FieldPath.documentId(), '==', 'foo');
+    return query.get();
+  });
+
   it('supports unary filters', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(request, unaryFilters('foo', 'IS_NAN', 'bar', 'IS_NULL'));
