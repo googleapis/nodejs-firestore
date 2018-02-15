@@ -140,5 +140,15 @@ module.exports = validators => {
     return true;
   };
 
+  exports.throwVersionMismatchErrorIfType = (obj, classType) => {
+    if (is.object(obj) && obj.constructor.name === classType.name) {
+      throw new Error(
+        `Detected an object of type '${
+          obj.constructor.name
+        }' that doesn't match the expected version for this Firestore instance. For more information, please visit: http://go...`
+      );
+    }
+  };
+
   return exports;
 };

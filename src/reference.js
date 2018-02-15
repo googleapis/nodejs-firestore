@@ -2110,7 +2110,11 @@ function validateComparisonOperator(str, val) {
  * @returns 'true' is value is an instance of DocumentReference.
  */
 function validateDocumentReference(value) {
-  return is.instanceof(value, DocumentReference);
+  if (is.instanceof(value, DocumentReference)) {
+    return true;
+  }
+  validate.verifyConstructorName(value, DocumentReference);
+  return false;
 }
 
 module.exports = FirestoreType => {

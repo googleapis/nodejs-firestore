@@ -1332,25 +1332,39 @@ function validateFieldValue(obj, options, depth) {
     );
   }
 
-  if (obj === FieldValue.DELETE_SENTINEL) {
-    if (!options.allowNestedDeletes && (!options.allowDeletes || depth > 1)) {
-      throw new Error(
-        'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
-      );
+  if (DocumentTransform.isTransformSentinel(obj)) {
+    if (obj === FieldValue.DELETE_SENTINEL) {
+      if (!options.allowNestedDeletes && (!options.allowDeletes || depth > 1)) {
+        throw new Error(
+          'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+        );
+      }
     }
-  }
-
-  if (isPlainObject(obj)) {
+  } else if (is.array(obj)) {
+    for (let prop of obj) {
+      validateFieldValue(obj[prop], options, depth + 1);
+    }
+  } else if (isPlainObject(obj)) {
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
         validateFieldValue(obj[prop], options, depth + 1);
       }
     }
-  }
-  if (is.array(obj)) {
-    for (let prop of obj) {
-      validateFieldValue(obj[prop], options, depth + 1);
+  } else if (is.object(obj)) {
+    if (is.instanceof(obj, DocumentReference)) {
+      return true;
+    } else if (is.instanceof(obj, FieldValue)) {
+      return true;
     }
+
+    validate.throwVersionMismatchErrorIfType(obj, DocumentReference);
+    validate.throwVersionMismatchErrorIfType(obj, FieldValue);
+
+    throw new Error(
+      'Cannot use type (' +
+        Object.prototype.toString.call(obj) +
+        ') as a Firestore Value'
+    );
   }
 
   return true;
