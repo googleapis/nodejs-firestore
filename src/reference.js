@@ -1118,6 +1118,10 @@ class Query {
   where(fieldPath, opStr, value) {
     validate.isFieldPath('fieldPath', fieldPath);
     validate.isFieldComparison('opStr', opStr, value);
+    validate.isFieldValue('value', value, {
+      allowDeletes: 'none',
+      allowServerTimestamps: false,
+    });
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
@@ -1422,12 +1426,10 @@ class Query {
         }
       }
 
-      if (DocumentTransform.isTransformSentinel(fieldValue)) {
-        throw new Error(
-          `Cannot use FieldValue.delete() or FieldValue.serverTimestamp() in ` +
-            `a query boundary. Found at index ${i}.`
-        );
-      }
+      validate.isFieldValue(i, fieldValue, {
+        allowDeletes: 'none',
+        allowServerTimestamps: false,
+      });
 
       options.values.push(DocumentSnapshot.encodeValue(fieldValue));
     }
@@ -2019,7 +2021,11 @@ class CollectionReference extends Query {
    * });
    */
   add(data) {
-    validate.isDocument('data', data);
+    validate.isDocument('data', data, {
+      allowEmpty: true,
+      allowDeletes: 'none',
+      allowServerTimestamps: true,
+    });
 
     let documentRef = this.doc();
     return documentRef.create(data).then(() => {
@@ -2092,8 +2098,7 @@ function validateDocumentReference(value) {
   if (is.instanceof(value, DocumentReference)) {
     return true;
   }
-  validate.verifyConstructorName(value, DocumentReference);
-  return false;
+  validate.throwCustomObjectError(value);
 }
 
 module.exports = FirestoreType => {
@@ -2117,6 +2122,7 @@ module.exports = FirestoreType => {
     FieldPath: FieldPath.validateFieldPath,
     FieldComparison: validateComparisonOperator,
     FieldOrder: validateFieldOrder,
+    FieldValue: document.validateFieldValue,
     Precondition: document.validatePrecondition,
     ResourcePath: ResourcePath.validateResourcePath,
   });

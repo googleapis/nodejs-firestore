@@ -1147,31 +1147,6 @@ Transaction = require('./transaction')(Firestore);
  * region_tag:firestore_quickstart
  * Full quickstart example:
  */
-
-const version = require('../package.json').version;
-
-if (!is.defined(global.__FIRESTORE_DATA)) {
-  global.__FIRESTORE_DATA = {
-    version: version,
-    path: __dirname,
-  };
-} else if (is.defined(global.__FIRESTORE_DATA)) {
-  if (global.__FIRESTORE_DATA.version !== version) {
-    console.warn(
-      `Importing multiple versions @google-cloud/firestore can cause unexpected ` +
-        `behavior. If you are using Firestore through a transitive ` +
-        `dependency (such as the Firebase Admin SDK), please ensure that your ` +
-        `dependency versions match (found ${
-          global.__FIRESTORE_DATA.version
-        } and ` +
-        `${version}). For more information, see http://goo.gl/...`
-    );
-  } else if (__dirname !== global.__FIRESTORE_DATA.path) {
-    module.exports = require(global.__FIRESTORE_DATA.path);
-    return;
-  }
-}
-
 module.exports = Firestore;
 module.exports.default = Firestore;
 module.exports.Firestore = Firestore;

@@ -282,7 +282,13 @@ describe('serialize document', function() {
   it("doesn't serialize unsupported types", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
-    }, /Cannot encode type/);
+    }, /Cannot use custom type 'undefined' as a Firestore type./);
+
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .set({foo: Firestore.FieldPath.documentId()});
+    }, /Cannot use 'FieldPath' as a Firestore type./);
   });
 
   it('serializes date before 1970', function() {
@@ -766,7 +772,7 @@ describe('get document', function() {
       .then(doc => {
         assert.throws(() => {
           doc.get();
-        }, new RegExp('Argument "field" is not a valid FieldPath. ' + 'Paths must be strings or FieldPath objects.'));
+        }, /Argument "field" is not a valid FieldPath. Cannot use custom type 'undefined' as a Firestore type./);
       });
   });
 });
@@ -884,9 +890,7 @@ describe('set document', function() {
         request,
         set(
           document('a', {
-            mapValue: {
-              fields: {},
-            },
+            mapValue: {},
             valueType: 'mapValue',
           })
         )
@@ -973,9 +977,7 @@ describe('set document', function() {
         request,
         set(
           document('a', {
-            mapValue: {
-              fields: {},
-            },
+            mapValue: {},
             valueType: 'mapValue',
           }),
           updateMask('a')
@@ -1105,9 +1107,7 @@ describe('create document', function() {
             mapValue: {
               fields: {
                 b: {
-                  mapValue: {
-                    fields: {},
-                  },
+                  mapValue: {},
                   valueType: 'mapValue',
                 },
               },
@@ -1158,9 +1158,7 @@ describe('update document', function() {
         update(
           document('foo', {
             valueType: 'mapValue',
-            mapValue: {
-              fields: {},
-            },
+            mapValue: {},
           }),
           updateMask('a', 'foo'),
           fieldTransform('a.b', 'REQUEST_TIME', 'c.d', 'REQUEST_TIME')
@@ -1196,9 +1194,7 @@ describe('update document', function() {
         request,
         update(
           document('a', {
-            mapValue: {
-              fields: {},
-            },
+            mapValue: {},
             valueType: 'mapValue',
           }),
           updateMask('a')

@@ -140,13 +140,22 @@ module.exports = validators => {
     return true;
   };
 
-  exports.throwVersionMismatchErrorIfType = (obj, classType) => {
-    if (is.object(obj) && obj.constructor.name === classType.name) {
-      throw new Error(
-        `Detected an object of type '${
-          obj.constructor.name
-        }' that doesn't match the expected version for this Firestore instance. For more information, please visit: http://go...`
-      );
+  exports.throwCustomObjectError = val => {
+    let typeName = is.object(val) ? val.constructor.name : typeof val;
+
+    switch (typeName) {
+      case 'DocumentReference':
+      case 'FieldPath':
+      case 'FieldValue':
+      case 'GeoPoint':
+        throw new Error(
+          `Detected an object of type '${typeName}' that doesn't match the expected instance. Please ensure that ` +
+            'the Firestore types you are using are from the same NPM package.'
+        );
+      default:
+        throw new Error(
+          `Cannot use custom type '${typeName}' as a Firestore type.`
+        );
     }
   };
 
