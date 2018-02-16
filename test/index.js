@@ -38,6 +38,197 @@ const DATABASE_ROOT = 'projects/test-project/databases/(default)';
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
+const bytesData = Buffer.from('AQI=', 'base64');
+
+const allSupportedTypesProtobufJs = document('documentId', {
+  arrayValue: {
+    valueType: 'arrayValue',
+    arrayValue: {
+      values: [
+        {
+          valueType: 'stringValue',
+          stringValue: 'foo',
+        },
+        {
+          valueType: 'integerValue',
+          integerValue: 42,
+        },
+        {
+          valueType: 'stringValue',
+          stringValue: 'bar',
+        },
+      ],
+    },
+  },
+  emptyArray: {
+    valueType: 'arrayValue',
+    arrayValue: {},
+  },
+  dateValue: {
+    valueType: 'timestampValue',
+    timestampValue: {
+      nanos: 123000000,
+      seconds: 479978400,
+    },
+  },
+  doubleValue: {
+    valueType: 'doubleValue',
+    doubleValue: 0.1,
+  },
+  falseValue: {
+    valueType: 'booleanValue',
+    booleanValue: false,
+  },
+  infinityValue: {
+    valueType: 'doubleValue',
+    doubleValue: Infinity,
+  },
+  integerValue: {
+    valueType: 'integerValue',
+    integerValue: 0,
+  },
+  negativeInfinityValue: {
+    valueType: 'doubleValue',
+    doubleValue: -Infinity,
+  },
+  nilValue: {
+    valueType: 'nullValue',
+    nullValue: 'NULL_VALUE',
+  },
+  objectValue: {
+    valueType: 'mapValue',
+    mapValue: {
+      fields: {
+        foo: {
+          valueType: 'stringValue',
+          stringValue: 'bar',
+        },
+      },
+    },
+  },
+  emptyObject: {
+    valueType: 'mapValue',
+    mapValue: {},
+  },
+  pathValue: {
+    valueType: 'referenceValue',
+    referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
+  },
+  stringValue: {
+    valueType: 'stringValue',
+    stringValue: 'a',
+  },
+  trueValue: {
+    valueType: 'booleanValue',
+    booleanValue: true,
+  },
+  geoPointValue: {
+    valueType: 'geoPointValue',
+    geoPointValue: {
+      latitude: 50.1430847,
+      longitude: -122.947778,
+    },
+  },
+  bytesValue: {
+    valueType: 'bytesValue',
+    bytesValue: Buffer.from('AQI=', 'base64'),
+  },
+});
+
+const allSupportedTypesJson = document('documentId', {
+  arrayValue: {
+    arrayValue: {
+      values: [
+        {
+          stringValue: 'foo',
+        },
+        {
+          integerValue: 42,
+        },
+        {
+          stringValue: 'bar',
+        },
+      ],
+    },
+  },
+  emptyArray: {
+    arrayValue: {},
+  },
+  dateValue: {
+    timestampValue: '1985-03-18T07:20:00.123000000Z',
+  },
+  doubleValue: {
+    doubleValue: 0.1,
+  },
+  falseValue: {
+    booleanValue: false,
+  },
+  infinityValue: {
+    doubleValue: Infinity,
+  },
+  integerValue: {
+    integerValue: 0,
+  },
+  negativeInfinityValue: {
+    doubleValue: -Infinity,
+  },
+  nilValue: {
+    nullValue: 'NULL_VALUE',
+  },
+  objectValue: {
+    mapValue: {
+      fields: {
+        foo: {
+          stringValue: 'bar',
+        },
+      },
+    },
+  },
+  emptyObject: {
+    mapValue: {},
+  },
+  pathValue: {
+    referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
+  },
+  stringValue: {
+    stringValue: 'a',
+  },
+  trueValue: {
+    booleanValue: true,
+  },
+  geoPointValue: {
+    geoPointValue: {
+      latitude: 50.1430847,
+      longitude: -122.947778,
+    },
+  },
+  bytesValue: {
+    bytesValue: 'AQI=',
+  },
+});
+
+const allSupportedTypesObject = {
+  stringValue: 'a',
+  trueValue: true,
+  falseValue: false,
+  integerValue: 0,
+  doubleValue: 0.1,
+  infinityValue: Infinity,
+  negativeInfinityValue: -Infinity,
+  objectValue: {foo: 'bar'},
+  emptyObject: {},
+  dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
+  pathValue: new DocumentReference(
+    {formattedName: DATABASE_ROOT},
+    new ResourcePath('test-project', '(default)', 'collection', 'document')
+  ),
+  arrayValue: ['foo', 42, 'bar'],
+  emptyArray: [],
+  nilValue: null,
+  geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
+  bytesValue: Buffer.from([0x1, 0x2]),
+};
+
 function createInstance() {
   return new Firestore({
     projectId: 'test-project',
@@ -316,197 +507,7 @@ describe('instantiation', function() {
 });
 
 describe('snapshot_() method', function() {
-  const bytesData = Buffer.from('AQI=', 'base64');
   let firestore;
-
-  const allSupportedTypesProtobufJs = document('documentId', {
-    arrayValue: {
-      valueType: 'arrayValue',
-      arrayValue: {
-        values: [
-          {
-            valueType: 'stringValue',
-            stringValue: 'foo',
-          },
-          {
-            valueType: 'integerValue',
-            integerValue: 42,
-          },
-          {
-            valueType: 'stringValue',
-            stringValue: 'bar',
-          },
-        ],
-      },
-    },
-    emptyArray: {
-      valueType: 'arrayValue',
-      arrayValue: {},
-    },
-    dateValue: {
-      valueType: 'timestampValue',
-      timestampValue: {
-        nanos: 123000000,
-        seconds: 479978400,
-      },
-    },
-    doubleValue: {
-      valueType: 'doubleValue',
-      doubleValue: 0.1,
-    },
-    falseValue: {
-      valueType: 'booleanValue',
-      booleanValue: false,
-    },
-    infinityValue: {
-      valueType: 'doubleValue',
-      doubleValue: Infinity,
-    },
-    integerValue: {
-      valueType: 'integerValue',
-      integerValue: 0,
-    },
-    negativeInfinityValue: {
-      valueType: 'doubleValue',
-      doubleValue: -Infinity,
-    },
-    nilValue: {
-      valueType: 'nullValue',
-      nullValue: 'NULL_VALUE',
-    },
-    objectValue: {
-      valueType: 'mapValue',
-      mapValue: {
-        fields: {
-          foo: {
-            valueType: 'stringValue',
-            stringValue: 'bar',
-          },
-        },
-      },
-    },
-    emptyObject: {
-      valueType: 'mapValue',
-      mapValue: {},
-    },
-    pathValue: {
-      valueType: 'referenceValue',
-      referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
-    },
-    stringValue: {
-      valueType: 'stringValue',
-      stringValue: 'a',
-    },
-    trueValue: {
-      valueType: 'booleanValue',
-      booleanValue: true,
-    },
-    geoPointValue: {
-      valueType: 'geoPointValue',
-      geoPointValue: {
-        latitude: 50.1430847,
-        longitude: -122.947778,
-      },
-    },
-    bytesValue: {
-      valueType: 'bytesValue',
-      bytesValue: Buffer.from('AQI=', 'base64'),
-    },
-  });
-
-  const allSupportedTypesJson = document('documentId', {
-    arrayValue: {
-      arrayValue: {
-        values: [
-          {
-            stringValue: 'foo',
-          },
-          {
-            integerValue: 42,
-          },
-          {
-            stringValue: 'bar',
-          },
-        ],
-      },
-    },
-    emptyArray: {
-      arrayValue: {},
-    },
-    dateValue: {
-      timestampValue: '1985-03-18T07:20:00.123000000Z',
-    },
-    doubleValue: {
-      doubleValue: 0.1,
-    },
-    falseValue: {
-      booleanValue: false,
-    },
-    infinityValue: {
-      doubleValue: Infinity,
-    },
-    integerValue: {
-      integerValue: 0,
-    },
-    negativeInfinityValue: {
-      doubleValue: -Infinity,
-    },
-    nilValue: {
-      nullValue: 'NULL_VALUE',
-    },
-    objectValue: {
-      mapValue: {
-        fields: {
-          foo: {
-            stringValue: 'bar',
-          },
-        },
-      },
-    },
-    emptyObject: {
-      mapValue: {},
-    },
-    pathValue: {
-      referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
-    },
-    stringValue: {
-      stringValue: 'a',
-    },
-    trueValue: {
-      booleanValue: true,
-    },
-    geoPointValue: {
-      geoPointValue: {
-        latitude: 50.1430847,
-        longitude: -122.947778,
-      },
-    },
-    bytesValue: {
-      bytesValue: 'AQI=',
-    },
-  });
-
-  const allSupportedTypesObject = {
-    stringValue: 'a',
-    trueValue: true,
-    falseValue: false,
-    integerValue: 0,
-    doubleValue: 0.1,
-    infinityValue: Infinity,
-    negativeInfinityValue: -Infinity,
-    objectValue: {foo: 'bar'},
-    emptyObject: {},
-    dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
-    pathValue: new DocumentReference(
-      {formattedName: DATABASE_ROOT},
-      new ResourcePath('test-project', '(default)', 'collection', 'document')
-    ),
-    arrayValue: ['foo', 42, 'bar'],
-    emptyArray: [],
-    nilValue: null,
-    geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
-    bytesValue: Buffer.from([0x1, 0x2]),
-  };
 
   function verifyAllSupportedTypes(actualObject) {
     let expected = extend(true, {}, allSupportedTypesObject);
