@@ -1130,12 +1130,16 @@ class Query {
       );
     }
 
-    let newFilter = new FieldFilter(
-      FieldPath.fromArgument(fieldPath),
-      comparisonOperators[opStr],
-      value
+    fieldPath = FieldPath.fromArgument(fieldPath);
+
+    if (fieldPath === FieldPath._DOCUMENT_ID) {
+      value = this._convertReference(value);
+    }
+
+    let combinedFilters = this._fieldFilters.concat(
+      new FieldFilter(fieldPath, comparisonOperators[opStr], value)
     );
-    let combinedFilters = this._fieldFilters.concat(newFilter);
+
     return new Query(
       this._firestore,
       this._referencePath,
@@ -1399,31 +1403,7 @@ class Query {
       let fieldValue = fieldValues[i];
 
       if (fieldOrders[i].field === FieldPath._DOCUMENT_ID) {
-        if (is.string(fieldValue)) {
-          fieldValue = new DocumentReference(
-            this._firestore,
-            this._referencePath.append(fieldValue)
-          );
-        } else if (is.instance(fieldValue, DocumentReference)) {
-          if (!this._referencePath.isPrefixOf(fieldValue.ref)) {
-            throw new Error(
-              `'${fieldValue.path}' is not part of the query ` +
-                'result set and cannot be used as a query boundary.'
-            );
-          }
-        } else {
-          throw new Error(
-            'The corresponding value for FieldPath.documentId() must be a ' +
-              'string or a DocumentReference.'
-          );
-        }
-
-        if (fieldValue.ref.parent().compareTo(this._referencePath) !== 0) {
-          throw new Error(
-            'Only a direct child can be used as a query boundary. ' +
-              `Found: '${fieldValue.path}'.`
-          );
-        }
+        fieldValue = this._convertReference(fieldValue);
       }
 
       validate.isFieldValue(i, fieldValue, {
@@ -1435,6 +1415,47 @@ class Query {
     }
 
     return options;
+  }
+
+  /**
+   * Validates that a value used with FieldValue.documentId() is either a
+   * string or a DocumentReference that is part of the query`s result set.
+   * Throws a validation error or returns a DocumentReference that can
+   * directly be used in the Query.
+   *
+   * @param {*} reference - The value to validate.
+   * @throws If the value cannot be used for this query.
+   * @return {DocumentReference} If valid, returns a DocumentReference that
+   * can be used with the query.
+   * @private
+   */
+  _convertReference(reference) {
+    if (is.string(reference)) {
+      reference = new DocumentReference(
+        this._firestore,
+        this._referencePath.append(reference)
+      );
+    } else if (is.instance(reference, DocumentReference)) {
+      if (!this._referencePath.isPrefixOf(reference.ref)) {
+        throw new Error(
+          `'${reference.path}' is not part of the query result set and ` +
+            'cannot be used as a query boundary.'
+        );
+      }
+    } else {
+      throw new Error(
+        'The corresponding value for FieldPath.documentId() must be a ' +
+          'string or a DocumentReference.'
+      );
+    }
+
+    if (reference.ref.parent().compareTo(this._referencePath) !== 0) {
+      throw new Error(
+        'Only a direct child can be used as a query boundary. ' +
+          `Found: '${reference.path}'.`
+      );
+    }
+    return reference;
   }
 
   /**

@@ -576,7 +576,7 @@ describe('where() interface', function() {
     return query.get();
   });
 
-  it('accepts field path objects for field paths', function() {
+  it('supports field path objects for field paths', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(
         request,
@@ -588,6 +588,25 @@ describe('where() interface', function() {
     let query = firestore.collection('collectionId');
     query = query.where('foo.bar', '=', 'foobar');
     query = query.where(new Firestore.FieldPath('bar', 'foo'), '=', 'foobar');
+    return query.get();
+  });
+
+  it('supports strings for FieldPath.documentId()', function() {
+    firestore.api.Firestore._runQuery = function(request) {
+      requestEquals(
+          request,
+          fieldFilters('__name__', 'EQUAL', {
+            valueType: 'referenceValue',
+            referenceValue:
+            'projects/test-project/databases/(default)/' +
+            'documents/collectionId/foo',
+          })
+      );
+      return stream();
+    };
+
+    let query = firestore.collection('collectionId');
+    query = query.where(Firestore.FieldPath.documentId(), '==', 'foo');
     return query.get();
   });
 
