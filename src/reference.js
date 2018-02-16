@@ -38,13 +38,6 @@ let DocumentSnapshot;
 
 /*!
  * Injected.
- *
- * @see DocumentTransform
- */
-let DocumentTransform;
-
-/*!
- * Injected.
  */
 let validate;
 
@@ -2126,7 +2119,6 @@ module.exports = FirestoreType => {
   Firestore = FirestoreType;
   let document = require('./document')(DocumentReference);
   DocumentSnapshot = document.DocumentSnapshot;
-  DocumentTransform = document.DocumentTransform;
   Watch = require('./watch')(
     FirestoreType,
     DocumentChange,
