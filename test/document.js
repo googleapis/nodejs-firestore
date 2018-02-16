@@ -282,13 +282,13 @@ describe('serialize document', function() {
   it("doesn't serialize unsupported types", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
-    }, /Cannot use custom type 'undefined' as a Firestore type./);
+    }, /Cannot use custom type "undefined" as a Firestore type./);
 
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .set({foo: Firestore.FieldPath.documentId()});
-    }, /Cannot use 'FieldPath' as a Firestore type./);
+    }, /Cannot use "FieldPath" as a Firestore type./);
   });
 
   it('serializes date before 1970', function() {
@@ -772,7 +772,7 @@ describe('get document', function() {
       .then(doc => {
         assert.throws(() => {
           doc.get();
-        }, /Argument "field" is not a valid FieldPath. Cannot use custom type 'undefined' as a Firestore type./);
+        }, /Argument "field" is not a valid FieldPath. Cannot use custom type "undefined" as a Firestore type./);
       });
   });
 });
@@ -1019,7 +1019,7 @@ describe('set document', function() {
       firestore
         .doc('collectionId/documentId')
         .set({foo: Firestore.FieldValue.delete()});
-    }, /Deletes must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
+    }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
   it('rejects empty merges', function() {
@@ -1295,13 +1295,13 @@ describe('update document', function() {
       firestore
         .doc('collectionId/documentId')
         .update({a: {b: Firestore.FieldValue.delete()}});
-    }, /Deletes must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
+    }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
 
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .update('a', {b: Firestore.FieldValue.delete()});
-    }, /Deletes must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
+    }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
   it('with top-level document', function() {

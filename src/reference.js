@@ -2119,7 +2119,7 @@ function validateDocumentReference(value) {
   if (is.instanceof(value, DocumentReference)) {
     return true;
   }
-  validate.throwCustomObjectError(value);
+  throw validate.customObjectError(value);
 }
 
 module.exports = FirestoreType => {

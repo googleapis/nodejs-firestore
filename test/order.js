@@ -85,7 +85,7 @@ describe('Order', function() {
   it('throws on invalid value', function() {
     assert.throws(() => {
       order.compare({}, {});
-    }, /Cannot use custom type 'Object' as a Firestore type/);
+    }, /Cannot use custom type "Object" as a Firestore type/);
   });
 
   it('throws on invalid blob', function() {

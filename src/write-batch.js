@@ -351,7 +351,11 @@ class WriteBatch {
     if (usesVarargs) {
       try {
         for (let i = 1; i < arguments.length; i += 2) {
-          if (is.string(arguments[i]) || is.instance(arguments[i], FieldPath)) {
+          if (i === arguments.length - 1) {
+            validate.isUpdatePrecondition(i, arguments[i]);
+            validate.maxNumberOfArguments('update', arguments, i + 1);
+            precondition = new Precondition(arguments[i]);
+          } else {
             validate.isFieldPath(i, arguments[i]);
             validate.minNumberOfArguments('update', arguments, i + 1);
             validate.isFieldValue(i, arguments[i + 1], {
@@ -362,10 +366,6 @@ class WriteBatch {
               FieldPath.fromArgument(arguments[i]),
               arguments[i + 1]
             );
-          } else {
-            validate.isUpdatePrecondition(i, arguments[i]);
-            validate.maxNumberOfArguments('update', arguments, i + 1);
-            precondition = new Precondition(arguments[i]);
           }
         }
       } catch (err) {

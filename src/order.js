@@ -79,7 +79,7 @@ function typeOrder(val) {
       return types.OBJECT;
     }
     default: {
-      validate.throwCustomObjectError(val);
+      throw validate.customObjectError(val);
     }
   }
 }

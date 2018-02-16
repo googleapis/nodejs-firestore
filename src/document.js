@@ -773,7 +773,7 @@ class DocumentSnapshot {
       return map;
     }
 
-    validate.throwCustomObjectError(val);
+    throw validate.customObjectError(val);
   }
 }
 
@@ -1353,13 +1353,13 @@ function validateFieldValue(obj, options, depth) {
       options.allowDeletes === 'none'
     ) {
       throw new Error(
-        'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+        'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.'
       );
     }
   } else if (obj === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
     if (!options.allowServerTimestamps) {
       throw new Error(
-        'ServerTimestamps can only be used in update(), set() and create().'
+        'FieldValue.serverTimestamp() can only be used in update(), set() and create().'
       );
     }
   } else if (is.instanceof(obj, DocumentReference)) {
@@ -1367,9 +1367,9 @@ function validateFieldValue(obj, options, depth) {
   } else if (is.instanceof(obj, GeoPoint)) {
     return true;
   } else if (is.instanceof(obj, FieldPath)) {
-    throw new Error("Cannot use 'FieldPath' as a Firestore type.");
+    throw new Error('Cannot use "FieldPath" as a Firestore type.');
   } else if (is.object(obj)) {
-    validate.throwCustomObjectError(obj);
+    throw validate.customObjectError(obj);
   }
 
   return true;
