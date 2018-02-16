@@ -17,6 +17,7 @@
 'use strict';
 
 const is = require('is');
+const validate = require('./validate')();
 
 /*!
  * @see ResourcePath
@@ -78,13 +79,7 @@ function typeOrder(val) {
       return types.OBJECT;
     }
     default: {
-      throw new Error(
-        'Cannot use type (' +
-          val +
-          ': ' +
-          JSON.stringify(val) +
-          ') as a Firestore value.'
-      );
+      throw validate.customObjectError(val);
     }
   }
 }
@@ -260,10 +255,16 @@ function compare(left, right) {
       return compareGeoPoints(left.geoPointValue, right.geoPointValue);
     }
     case types.ARRAY: {
-      return compareArrays(left.arrayValue.values, right.arrayValue.values);
+      return compareArrays(
+        left.arrayValue.values || [],
+        right.arrayValue.values || []
+      );
     }
     case types.OBJECT: {
-      return compareObjects(left.mapValue.fields, right.mapValue.fields);
+      return compareObjects(
+        left.mapValue.fields || {},
+        right.mapValue.fields || {}
+      );
     }
   }
 }

@@ -709,19 +709,22 @@ class DocumentSnapshot {
     }
 
     if (is.array(val)) {
-      let encodedElements = [];
-      for (let i = 0; i < val.length; ++i) {
-        let enc = DocumentSnapshot.encodeValue(val[i]);
-        if (enc) {
-          encodedElements.push(enc);
+      const array = {
+        valueType: 'arrayValue',
+        arrayValue: {},
+      };
+
+      if (val.length > 0) {
+        array.arrayValue.values = [];
+        for (let i = 0; i < val.length; ++i) {
+          let enc = DocumentSnapshot.encodeValue(val[i]);
+          if (enc) {
+            array.arrayValue.values.push(enc);
+          }
         }
       }
-      return {
-        valueType: 'arrayValue',
-        arrayValue: {
-          values: encodedElements,
-        },
-      };
+
+      return array;
     }
 
     if (is.nil(val)) {
@@ -755,9 +758,7 @@ class DocumentSnapshot {
     if (isPlainObject(val)) {
       const map = {
         valueType: 'mapValue',
-        mapValue: {
-          fields: {},
-        },
+        mapValue: {},
       };
 
       // If we encounter an empty object, we always need to send it to make sure
@@ -772,11 +773,7 @@ class DocumentSnapshot {
       return map;
     }
 
-    throw new Error(
-      'Cannot encode type (' +
-        Object.prototype.toString.call(val) +
-        ') to a Firestore Value'
-    );
+    throw validate.customObjectError(val);
   }
 }
 
@@ -1184,10 +1181,7 @@ class DocumentTransform {
    * @return {boolean} Whether we encountered a transform sentinel.
    */
   static isTransformSentinel(val) {
-    return (
-      val === FieldValue.SERVER_TIMESTAMP_SENTINEL ||
-      val === FieldValue.DELETE_SENTINEL
-    );
+    return is.instanceof(val, FieldValue);
   }
 
   /**
@@ -1277,16 +1271,20 @@ class Precondition {
  * Validates a JavaScript object for usage as a Firestore document.
  *
  * @param {Object} obj JavaScript object to validate.
- * @param {boolean=} options.allowDeletes Whether field deletes are supported
- * at the top level (e.g. for document updates).
- * @param {boolean=} options.allowNestedDeletes Whether field deletes are supported
- * at any level (e.g. for document merges).
- * @param {boolean=} options.allowEmpty Whether empty documents are support.
- * Defaults to true.
+  *@param {string} options.allowDeletes At what level field deletes are
+ * supported (acceptable values are 'none', 'root' or 'all').
+ * @param {boolean} options.allowServerTimestamps Whether server timestamps
+ * are supported.
+ * @param {boolean} options.allowEmpty Whether empty documents are supported.
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
 function validateDocumentData(obj, options) {
+  assert(
+    typeof options.allowEmpty === 'boolean',
+    "Expected boolean for 'options.allowEmpty'"
+  );
+
   if (!isPlainObject(obj)) {
     throw new Error('Input is not a plain JavaScript object.');
   }
@@ -1313,16 +1311,23 @@ function validateDocumentData(obj, options) {
  * Validates a JavaScript value for usage as a Firestore value.
  *
  * @param {Object} obj JavaScript value to validate.
- * @param {boolean=} options.allowDeletes Whether field deletes are supported
- * at the top level (e.g. for document updates).
- * @param {boolean=} options.allowNestedDeletes Whether field deletes are supported
- * at any level (e.g. for document merges).
+ * @param {string} options.allowDeletes At what level field deletes are
+ * supported (acceptable values are 'none', 'root' or 'all').
+ * @param {boolean} options.allowServerTimestamps Whether server timestamps
+ * are supported.
  * @param {number=} depth The current depth of the traversal.
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
 function validateFieldValue(obj, options, depth) {
-  options = options || {};
+  assert(
+    ['none', 'root', 'all'].indexOf(options.allowDeletes) !== -1,
+    "Expected 'none', 'root', or 'all' for 'options.allowDeletes'"
+  );
+  assert(
+    typeof options.allowServerTimestamps === 'boolean',
+    "Expected boolean for 'options.allowServerTimestamps'"
+  );
 
   if (!depth) {
     depth = 1;
@@ -1332,25 +1337,39 @@ function validateFieldValue(obj, options, depth) {
     );
   }
 
-  if (obj === FieldValue.DELETE_SENTINEL) {
-    if (!options.allowNestedDeletes && (!options.allowDeletes || depth > 1)) {
-      throw new Error(
-        'Deletes must appear at the top-level and can only be used in update() or set() with {merge:true}.'
-      );
+  if (is.array(obj)) {
+    for (let prop of obj) {
+      validateFieldValue(obj[prop], options, depth + 1);
     }
-  }
-
-  if (isPlainObject(obj)) {
+  } else if (isPlainObject(obj)) {
     for (let prop in obj) {
       if (obj.hasOwnProperty(prop)) {
         validateFieldValue(obj[prop], options, depth + 1);
       }
     }
-  }
-  if (is.array(obj)) {
-    for (let prop of obj) {
-      validateFieldValue(obj[prop], options, depth + 1);
+  } else if (obj === FieldValue.DELETE_SENTINEL) {
+    if (
+      (options.allowDeletes === 'root' && depth > 1) ||
+      options.allowDeletes === 'none'
+    ) {
+      throw new Error(
+        'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+      );
     }
+  } else if (obj === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+    if (!options.allowServerTimestamps) {
+      throw new Error(
+        'FieldValue.serverTimestamp() can only be used in update(), set() and create().'
+      );
+    }
+  } else if (is.instanceof(obj, DocumentReference)) {
+    return true;
+  } else if (is.instanceof(obj, GeoPoint)) {
+    return true;
+  } else if (is.instanceof(obj, FieldPath)) {
+    throw new Error('Cannot use "FieldPath" as a Firestore type.');
+  } else if (is.object(obj)) {
+    throw validate.customObjectError(obj);
   }
 
   return true;

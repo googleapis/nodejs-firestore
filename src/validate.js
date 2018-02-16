@@ -140,5 +140,24 @@ module.exports = validators => {
     return true;
   };
 
+  exports.customObjectError = val => {
+    let typeName = is.object(val) ? val.constructor.name : typeof val;
+
+    switch (typeName) {
+      case 'DocumentReference':
+      case 'FieldPath':
+      case 'FieldValue':
+      case 'GeoPoint':
+        return new Error(
+          `Detected an object of type "${typeName}" that doesn't match the expected instance. Please ensure that ` +
+            'the Firestore types you are using are from the same NPM package.'
+        );
+      default:
+        return new Error(
+          `Cannot use custom type "${typeName}" as a Firestore type.`
+        );
+    }
+  };
+
   return exports;
 };

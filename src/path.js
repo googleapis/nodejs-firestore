@@ -484,7 +484,7 @@ class FieldPath extends Path {
   static validateFieldPath(fieldPath) {
     if (!is.instanceof(fieldPath, FieldPath)) {
       if (!is.string(fieldPath)) {
-        throw new Error(`Paths must be strings or FieldPath objects.`);
+        throw validate.customObjectError(fieldPath);
       }
 
       if (fieldPath.indexOf('..') >= 0) {

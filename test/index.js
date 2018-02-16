@@ -506,6 +506,32 @@ describe('instantiation', function() {
   });
 });
 
+describe('serializer', function() {
+  it('supports all types', function() {
+    let firestore = new Firestore({
+      projectId: 'test-project',
+      sslCreds: grpc.credentials.createInsecure(),
+    });
+
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      assert.deepEqual(
+        allSupportedTypesProtobufJs.fields,
+        request.writes[0].update.fields
+      );
+      callback(null, {
+        commitTime: {},
+        writeResults: [
+          {
+            updateTime: {},
+          },
+        ],
+      });
+    };
+
+    return firestore.collection('coll').add(allSupportedTypesObject);
+  });
+});
+
 describe('snapshot_() method', function() {
   let firestore;
 
@@ -661,8 +687,7 @@ describe('snapshot_() method', function() {
         '1970-01-01T00:00:05.000000006Z',
         'ascii'
       );
-    }),
-      /Unsupported encoding format. Expected 'json' or 'protobufJS', but was 'ascii'./;
+    }, /Unsupported encoding format. Expected 'json' or 'protobufJS', but was 'ascii'./);
   });
 });
 
