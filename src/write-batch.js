@@ -171,7 +171,11 @@ class WriteBatch {
    */
   create(documentRef, data) {
     validate.isDocumentReference('documentRef', documentRef);
-    validate.isDocument('data', data);
+    validate.isDocument('data', data, {
+      allowEmpty: true,
+      allowDeletes: 'none',
+      allowServerTimestamps: true,
+    });
 
     this.verifyNotCommitted();
 
@@ -258,12 +262,13 @@ class WriteBatch {
    * });
    */
   set(documentRef, data, options) {
-    const merge = options && options.merge;
+    const merge = (options && options.merge) === true;
 
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data, {
-      allowNestedDeletes: merge,
       allowEmpty: !merge,
+      allowDeletes: merge ? 'all' : 'none',
+      allowServerTimestamps: true,
     });
     validate.isOptionalSetOptions('options', options);
 
@@ -346,20 +351,21 @@ class WriteBatch {
     if (usesVarargs) {
       try {
         for (let i = 1; i < arguments.length; i += 2) {
-          if (is.string(arguments[i]) || is.instance(arguments[i], FieldPath)) {
+          if (i === arguments.length - 1) {
+            validate.isUpdatePrecondition(i, arguments[i]);
+            validate.maxNumberOfArguments('update', arguments, i + 1);
+            precondition = new Precondition(arguments[i]);
+          } else {
             validate.isFieldPath(i, arguments[i]);
             validate.minNumberOfArguments('update', arguments, i + 1);
             validate.isFieldValue(i, arguments[i + 1], {
-              allowDeletes: true,
+              allowDeletes: 'root',
+              allowServerTimestamps: true,
             });
             updateMap.set(
               FieldPath.fromArgument(arguments[i]),
               arguments[i + 1]
             );
-          } else {
-            validate.isUpdatePrecondition(i, arguments[i]);
-            validate.maxNumberOfArguments('update', arguments, i + 1);
-            precondition = new Precondition(arguments[i]);
           }
         }
       } catch (err) {
@@ -371,16 +377,14 @@ class WriteBatch {
     } else {
       try {
         validate.isDocument('dataOrField', dataOrField, {
-          allowDeletes: true,
           allowEmpty: false,
+          allowDeletes: 'root',
+          allowServerTimestamps: true,
         });
         validate.maxNumberOfArguments('update', arguments, 3);
 
         Object.keys(dataOrField).forEach(key => {
           validate.isFieldPath(key, key);
-          validate.isFieldValue(key, dataOrField[key], {
-            allowDeletes: true,
-          });
           updateMap.set(FieldPath.fromArgument(key), dataOrField[key]);
         });
 

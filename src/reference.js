@@ -38,13 +38,6 @@ let DocumentSnapshot;
 
 /*!
  * Injected.
- *
- * @see DocumentTransform
- */
-let DocumentTransform;
-
-/*!
- * Injected.
  */
 let validate;
 
@@ -1118,6 +1111,10 @@ class Query {
   where(fieldPath, opStr, value) {
     validate.isFieldPath('fieldPath', fieldPath);
     validate.isFieldComparison('opStr', opStr, value);
+    validate.isFieldValue('value', value, {
+      allowDeletes: 'none',
+      allowServerTimestamps: false,
+    });
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
@@ -1402,12 +1399,10 @@ class Query {
         fieldValue = this._convertReference(fieldValue);
       }
 
-      if (DocumentTransform.isTransformSentinel(fieldValue)) {
-        throw new Error(
-          `Cannot use FieldValue.delete() or FieldValue.serverTimestamp() in ` +
-            `a query boundary. Found at index ${i}.`
-        );
-      }
+      validate.isFieldValue(i, fieldValue, {
+        allowDeletes: 'none',
+        allowServerTimestamps: false,
+      });
 
       options.values.push(DocumentSnapshot.encodeValue(fieldValue));
     }
@@ -2040,7 +2035,11 @@ class CollectionReference extends Query {
    * });
    */
   add(data) {
-    validate.isDocument('data', data);
+    validate.isDocument('data', data, {
+      allowEmpty: true,
+      allowDeletes: 'none',
+      allowServerTimestamps: true,
+    });
 
     let documentRef = this.doc();
     return documentRef.create(data).then(() => {
@@ -2110,14 +2109,16 @@ function validateComparisonOperator(str, val) {
  * @returns 'true' is value is an instance of DocumentReference.
  */
 function validateDocumentReference(value) {
-  return is.instanceof(value, DocumentReference);
+  if (is.instanceof(value, DocumentReference)) {
+    return true;
+  }
+  throw validate.customObjectError(value);
 }
 
 module.exports = FirestoreType => {
   Firestore = FirestoreType;
   let document = require('./document')(DocumentReference);
   DocumentSnapshot = document.DocumentSnapshot;
-  DocumentTransform = document.DocumentTransform;
   Watch = require('./watch')(
     FirestoreType,
     DocumentChange,
@@ -2134,6 +2135,7 @@ module.exports = FirestoreType => {
     FieldPath: FieldPath.validateFieldPath,
     FieldComparison: validateComparisonOperator,
     FieldOrder: validateFieldOrder,
+    FieldValue: document.validateFieldValue,
     Precondition: document.validatePrecondition,
     ResourcePath: ResourcePath.validateResourcePath,
   });

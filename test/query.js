@@ -576,7 +576,7 @@ describe('where() interface', function() {
     return query.get();
   });
 
-  it('accepts field path', function() {
+  it('supports field path objects for field paths', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(
         request,
@@ -608,6 +608,73 @@ describe('where() interface', function() {
     let query = firestore.collection('collectionId');
     query = query.where(Firestore.FieldPath.documentId(), '==', 'foo');
     return query.get();
+  });
+
+  it('rejects custom objects for field paths', function() {
+    assert.throws(() => {
+      let query = firestore.collection('collectionId');
+      query = query.where({}, '=', 'bar');
+      return query.get();
+    }, /Argument "fieldPath" is not a valid FieldPath. Cannot use custom type "Object" as a Firestore type./);
+
+    class FieldPath {}
+    assert.throws(() => {
+      let query = firestore.collection('collectionId');
+      query = query.where(new FieldPath(), '=', 'bar');
+      return query.get();
+    }, /Detected an object of type "FieldPath" that doesn't match the expected instance./);
+  });
+
+  it('rejects field paths as value', function() {
+    assert.throws(() => {
+      let query = firestore.collection('collectionId');
+      query = query.where('foo', '=', new Firestore.FieldPath('bar'));
+      return query.get();
+    }, /Argument "value" is not a valid FieldValue. Cannot use "FieldPath" as a Firestore type./);
+  });
+
+  it('rejects field transforms as value', function() {
+    assert.throws(() => {
+      let query = firestore.collection('collectionId');
+      query = query.where('foo', '=', Firestore.FieldValue.delete());
+      return query.get();
+    }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
+
+    assert.throws(() => {
+      let query = firestore.collection('collectionId');
+      query = query.where('foo', '=', Firestore.FieldValue.serverTimestamp());
+      return query.get();
+    }, /FieldValue.serverTimestamp\(\) can only be used in update\(\), set\(\) and create\(\)./);
+  });
+
+  it('rejects custom classes as value', function() {
+    class Foo {}
+    class FieldPath {}
+    class FieldValue {}
+    class GeoPoint {}
+    class DocumentReference {}
+
+    let query = firestore.collection('collectionId');
+
+    assert.throws(() => {
+      query.where('foo', '=', new Foo()).get();
+    }, /Argument "value" is not a valid FieldValue. Cannot use custom type "Foo" as a Firestore type./);
+
+    assert.throws(() => {
+      query.where('foo', '=', new FieldPath()).get();
+    }, /Detected an object of type "FieldPath" that doesn't match the expected instance./);
+
+    assert.throws(() => {
+      query.where('foo', '=', new FieldValue()).get();
+    }, /Detected an object of type "FieldValue" that doesn't match the expected instance./);
+
+    assert.throws(() => {
+      query.where('foo', '=', new DocumentReference()).get();
+    }, /Detected an object of type "DocumentReference" that doesn't match the expected instance./);
+
+    assert.throws(() => {
+      query.where('foo', '=', new GeoPoint()).get();
+    }, /Detected an object of type "GeoPoint" that doesn't match the expected instance./);
   });
 
   it('supports unary filters', function() {
@@ -896,10 +963,7 @@ describe('select() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.select(1);
-    }, new RegExp(
-      'Argument at index 0 is not a valid FieldPath. ' +
-        'Paths must be strings or FieldPath objects.'
-    ));
+    }, /Argument at index 0 is not a valid FieldPath. Cannot use custom type "number" as a Firestore type./);
 
     assert.throws(function() {
       query.select('.');
@@ -1178,7 +1242,7 @@ describe('startAt() interface', function() {
 
     assert.throws(() => {
       query.startAt(snapshot('collectionId/doc'));
-    }, new RegExp("Field 'foo' is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy\\(\\) and where\\(\\) constraints."));
+    }, /Field 'foo' is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy\(\) and where\(\) constraints./);
   });
 
   it('does not accept field transforms', function() {
@@ -1189,11 +1253,11 @@ describe('startAt() interface', function() {
 
     assert.throws(() => {
       query.startAt(Firestore.FieldValue.serverTimestamp());
-    }, new RegExp('Cannot use FieldValue.delete\\(\\) or FieldValue.serverTimestamp\\(\\) in a query boundary. Found at index 0.'));
+    }, /Argument at index 0 is not a valid FieldValue. FieldValue.serverTimestamp\(\) can only be used in update\(\), set\(\) and create\(\)./);
 
     assert.throws(() => {
       query.startAt('foo', Firestore.FieldValue.delete());
-    }, new RegExp('Cannot use FieldValue.delete\\(\\) or FieldValue.serverTimestamp\\(\\) in a query boundary. Found at index 1.'));
+    }, /Argument at index 1 is not a valid FieldValue. FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
   it('requires order by', function() {
@@ -1202,7 +1266,7 @@ describe('startAt() interface', function() {
 
     assert.throws(() => {
       query.startAt('foo', 'bar');
-    }, new RegExp('Too many cursor values specified\\. The specified values must match the orderBy\\(\\) constraints of the query\\.'));
+    }, /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
   });
 
   it('can overspecify order by', function() {
