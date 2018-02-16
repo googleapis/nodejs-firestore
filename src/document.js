@@ -1321,7 +1321,7 @@ function validateDocumentData(obj, options) {
  */
 function validateFieldValue(obj, options, depth) {
   assert(
-    ['none', 'root', 'all'].includes(options.allowDeletes),
+    ['none', 'root', 'all'].indexOf(options.allowDeletes) !== -1,
     "Expected 'none', 'root', or 'all' for 'options.allowDeletes'"
   );
   assert(
