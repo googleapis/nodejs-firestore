@@ -2086,13 +2086,13 @@ function validateComparisonOperator(str, val) {
 
     if (typeof val === 'number' && isNaN(val) && op !== 'EQUAL') {
       throw new Error(
-        'Invalid query. You can only perform equals ' + 'comparisons on NaN.'
+        'Invalid query. You can only perform equals comparisons on NaN.'
       );
     }
 
     if (val === null && op !== 'EQUAL') {
       throw new Error(
-        'Invalid query. You can only perform equals ' + 'comparisons on Null.'
+        'Invalid query. You can only perform equals comparisons on Null.'
       );
     }
 

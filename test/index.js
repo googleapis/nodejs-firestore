@@ -712,10 +712,7 @@ describe('doc() method', function() {
   it("doesn't accept empty components", function() {
     assert.throws(function() {
       firestore.doc('coll//doc');
-    }, new RegExp(
-      'Argument "documentPath" is not a valid ResourcePath. ' +
-        'Paths must not contain //.'
-    ));
+    }, /Argument "documentPath" is not a valid ResourcePath. Paths must not contain \/\/./);
   });
 
   it('must point to document', function() {
@@ -848,7 +845,7 @@ describe('getAll() method', function() {
       .catch(err => {
         assert.equal(
           err.message,
-          'Did not receive document for' + ' "collectionId/documentId".'
+          'Did not receive document for "collectionId/documentId".'
         );
       });
   });
