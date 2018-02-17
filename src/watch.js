@@ -665,9 +665,18 @@ class Watch {
           diff.appliedChanges.length,
           diff.updatedTree.length
         );
+
+        let materializedDocs;
+
         onNext(
           readTime,
-          () => diff.updatedTree.keys,
+          () => {
+            if (!materializedDocs) {
+              return diff.updatedTree.keys;
+            }
+
+            return materializedDocs;
+          },
           () => diff.appliedChanges
         );
         hasPushed = true;

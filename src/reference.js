@@ -852,7 +852,6 @@ class QuerySnapshot {
    * @param {Query} query - The originating query.
    * @param {string} readTime - The ISO 8601 time when this query snapshot was
    * current.
-   *
    * @param {function} docs - A callback returning a sorted array of documents
    * matching this query
    * @param {function} changes - A callback returning a sorted array of
@@ -906,11 +905,7 @@ class QuerySnapshot {
    * });
    */
   get docs() {
-    if (this._materializedDocs) {
-      return this._materializedDocs;
-    }
-    this._materializedDocs = this._docs();
-    return this._materializedDocs;
+    return this._docs();
   }
 
   /**
@@ -921,11 +916,7 @@ class QuerySnapshot {
    * @readonly
    */
   get docChanges() {
-    if (this._materializedChanges) {
-      return this._materializedChanges;
-    }
-    this._materializedChanges = this._changes();
-    return this._materializedChanges;
+    return this._changes();
   }
 
   /**
@@ -1036,9 +1027,11 @@ class QuerySnapshot {
       return false;
     }
 
-    for (let i = 0; i < thisChanges.length; ++i) {
-      if (!thisChanges[i].isEqual(otherChanges[i])) {
-        return false;
+    if (thisChanges !== otherChanges) {
+      for (let i = 0; i < thisChanges.length; ++i) {
+        if (!thisChanges[i].isEqual(otherChanges[i])) {
+          return false;
+        }
       }
     }
 
@@ -1049,9 +1042,11 @@ class QuerySnapshot {
       return false;
     }
 
-    for (let i = 0; i < thisDocs.length; ++i) {
-      if (!thisDocs[i].isEqual(otherDocs[i])) {
-        return false;
+    if (thisDocs !== otherDocs) {
+      for (let i = 0; i < thisDocs.length; ++i) {
+        if (!thisDocs[i].isEqual(otherDocs[i])) {
+          return false;
+        }
       }
     }
 
@@ -1756,7 +1751,6 @@ class Query {
   _get(queryOptions) {
     let self = this;
     let docs = [];
-    let changes = [];
 
     return new Promise((resolve, reject) => {
       let readTime;
@@ -1770,19 +1764,30 @@ class Query {
           readTime = result.readTime;
           if (result.document) {
             let document = result.document;
-            changes.push(
-              new DocumentChange(
-                DocumentChange.ADDED,
-                document,
-                -1,
-                docs.length
-              )
-            );
             docs.push(document);
           }
         })
         .on('end', () => {
-          resolve(new QuerySnapshot(this, readTime, () => docs, () => changes));
+          let materializedChanges;
+
+          resolve(
+            new QuerySnapshot(
+              this,
+              readTime,
+              () => docs,
+              () => {
+                if (!materializedChanges) {
+                  materializedChanges = [];
+                  for (let i = 0; i < docs.length; ++i) {
+                    materializedChanges.push(
+                      new DocumentChange(DocumentChange.ADDED, docs[i], -1, i)
+                    );
+                  }
+                }
+                return materializedChanges;
+              }
+            )
+          );
         });
     });
   }
