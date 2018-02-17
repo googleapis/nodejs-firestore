@@ -367,7 +367,6 @@ class WriteBatch {
         for (let i = 1; i < arguments.length; i += 2) {
           if (i === arguments.length - 1) {
             validate.isUpdatePrecondition(i, arguments[i]);
-            validate.maxNumberOfArguments('update', arguments, i + 1);
             precondition = new Precondition(arguments[i]);
           } else {
             validate.isFieldPath(i, arguments[i]);

@@ -1975,7 +1975,7 @@ class Query {
     let watch = Watch.forQuery(this);
 
     return watch.onSnapshot((readTime, size, docs, changes) => {
-      onNext(new QuerySnapshot(this, readTime, docs.length, docs, changes));
+      onNext(new QuerySnapshot(this, readTime, size, docs, changes));
     }, onError);
   }
 
@@ -2209,13 +2209,13 @@ function validateComparisonOperator(str, val) {
 
     if (typeof val === 'number' && isNaN(val) && op !== 'EQUAL') {
       throw new Error(
-        'Invalid query. You can only perform equals ' + 'comparisons on NaN.'
+        'Invalid query. You can only perform equals comparisons on NaN.'
       );
     }
 
     if (val === null && op !== 'EQUAL') {
       throw new Error(
-        'Invalid query. You can only perform equals ' + 'comparisons on Null.'
+        'Invalid query. You can only perform equals comparisons on Null.'
       );
     }
 
@@ -2246,13 +2246,11 @@ function validateDocumentReference(value) {
  * @return {boolean} True if arrays are equal.
  */
 function isArrayEqual(left, right) {
-  if (left.length !== right.length) {
-    return false;
-  }
-
-  for (let i = 0; i < left.length; ++i) {
-    if (!left[i].isEqual(right[i])) {
-      return false;
+  if (left.length === right.length) {
+    for (let i = 0; i < left.length; ++i) {
+      if (!left[i].isEqual(right[i])) {
+        return false;
+      }
     }
   }
 

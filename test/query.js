@@ -803,10 +803,7 @@ describe('where() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query = query.orderBy('foo.', '=', 'foobar');
-    }, new RegExp(
-      'Argument "fieldPath" is not a valid FieldPath. Paths must ' +
-        "not start or end with '.'."
-    ));
+    }, /Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with '.'./);
   });
 
   it('verifies operator', function() {
@@ -883,10 +880,7 @@ describe('orderBy() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query = query.orderBy('foo.');
-    }, new RegExp(
-      'Argument "fieldPath" is not a valid FieldPath. Paths must ' +
-        "not start or end with '.'."
-    ));
+    }, /Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with '.'./);
   });
 
   it('rejects call after cursor', function() {
@@ -897,40 +891,28 @@ describe('orderBy() interface', function() {
         .orderBy('foo')
         .startAt('foo')
         .orderBy('foo');
-    }, new RegExp(
-      'Cannot specify an orderBy\\(\\) constraint after calling ' +
-        'startAt\\(\\), startAfter\\(\\), endBefore\\(\\) or endAt\\(\\)\\.'
-    ));
+    }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
     assert.throws(function() {
       query = query
         .where('foo', '>', 'bar')
         .startAt(snapshot('collectionId/doc', {foo: 'bar'}))
         .where('foo', '>', 'bar');
-    }, new RegExp(
-      'Cannot specify a where\\(\\) filter after calling ' +
-        'startAt\\(\\), startAfter\\(\\), endBefore\\(\\) or endAt\\(\\)\\.'
-    ));
+    }, /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
     assert.throws(function() {
       query = query
         .orderBy('foo')
         .endAt('foo')
         .orderBy('foo');
-    }, new RegExp(
-      'Cannot specify an orderBy\\(\\) constraint after calling ' +
-        'startAt\\(\\), startAfter\\(\\), endBefore\\(\\) or endAt\\(\\)\\.'
-    ));
+    }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
     assert.throws(function() {
       query = query
         .where('foo', '>', 'bar')
         .endAt(snapshot('collectionId/doc', {foo: 'bar'}))
         .where('foo', '>', 'bar');
-    }, new RegExp(
-      'Cannot specify a where\\(\\) filter after calling ' +
-        'startAt\\(\\), startAfter\\(\\), endBefore\\(\\) or endAt\\(\\)\\.'
-    ));
+    }, /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
   });
 
   it('concatenates orders', function() {
@@ -1061,10 +1043,7 @@ describe('select() interface', function() {
 
     assert.throws(function() {
       query.select('.');
-    }, new RegExp(
-      'Argument at index 0 is not a valid FieldPath. Paths must ' +
-        "not start or end with '.'."
-    ));
+    }, /Argument at index 0 is not a valid FieldPath. Paths must not start or end with '.'./);
   });
 
   it('uses latest field mask', function() {
@@ -1152,36 +1131,36 @@ describe('startAt() interface', function() {
 
     assert.throws(() => {
       query.orderBy(Firestore.FieldPath.documentId()).startAt(42);
-    }, new RegExp('The corresponding value for FieldPath.documentId\\(\\) must be a string or a DocumentReference\\.'));
+    }, /The corresponding value for FieldPath.documentId\(\) must be a string or a DocumentReference./);
 
     assert.throws(() => {
       query
         .orderBy(Firestore.FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/other/doc'));
-    }, new RegExp("'coll/doc/other/doc' is not part of the query result set and cannot be used as a query boundary."));
+    }, /'coll\/doc\/other\/doc' is not part of the query result set and cannot be used as a query boundary./);
 
     assert.throws(() => {
       query
         .orderBy(Firestore.FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/coll_suffix/doc'));
-    }, new RegExp("'coll/doc/coll_suffix/doc' is not part of the query result set and cannot be used as a query boundary."));
+    }, /'coll\/doc\/coll_suffix\/doc' is not part of the query result set and cannot be used as a query boundary./);
 
     assert.throws(() => {
       query
         .orderBy(Firestore.FieldPath.documentId())
         .startAt(firestore.doc('coll/doc'));
-    }, new RegExp("'coll/doc' is not part of the query result set and cannot be used as a query boundary."));
+    }, /'coll\/doc' is not part of the query result set and cannot be used as a query boundary./);
 
     assert.throws(() => {
       query
         .orderBy(Firestore.FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/coll/doc/coll/doc'));
-    }, new RegExp("Only a direct child can be used as a query boundary. Found: 'coll/doc/coll/doc/coll/doc'."));
+    }, /Only a direct child can be used as a query boundary. Found: 'coll\/doc\/coll\/doc\/coll\/doc'./);
 
     // Validate that we can't pass a reference to a collection.
     assert.throws(() => {
       query.orderBy(Firestore.FieldPath.documentId()).startAt('doc/coll');
-    }, new RegExp("Only a direct child can be used as a query boundary. Found: 'coll/doc/coll/doc/coll'."));
+    }, /Only a direct child can be used as a query boundary. Found: 'coll\/doc\/coll\/doc\/coll'./);
   });
 
   it('can specify document snapshot', function() {
@@ -1386,10 +1365,7 @@ describe('startAt() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.startAt(123);
-    }, new RegExp(
-      'Too many cursor values specified\\. The specified values ' +
-        'must match the orderBy\\(\\) constraints of the query\\.'
-    ));
+    }, /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
   });
 
   it('uses latest value', function() {
@@ -1438,10 +1414,7 @@ describe('startAfter() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.startAfter(123);
-    }, new RegExp(
-      'Too many cursor values specified\\. The specified values ' +
-        'must match the orderBy\\(\\) constraints of the query\\.'
-    ));
+    }, /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
   });
 
   it('uses latest value', function() {
@@ -1494,10 +1467,7 @@ describe('endAt() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.endAt(123);
-    }, new RegExp(
-      'Too many cursor values specified\\. The specified values ' +
-        'must match the orderBy\\(\\) constraints of the query\\.'
-    ));
+    }, /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
   });
 
   it('uses latest value', function() {
@@ -1546,10 +1516,7 @@ describe('endBefore() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.endBefore(123);
-    }, new RegExp(
-      'Too many cursor values specified\\. The specified values ' +
-        'must match the orderBy\\(\\) constraints of the query\\.'
-    ));
+    }, /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
   });
 
   it('uses latest value', function() {

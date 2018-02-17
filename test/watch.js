@@ -1930,6 +1930,7 @@ describe('Query watch', function() {
         })
       )
       .then(() => {
+        assert.ok(!firstSnapshot.isEqual(secondSnapshot));
         assert.ok(firstSnapshot.isEqual(fourthSnapshot));
         assert.ok(!secondSnapshot.isEqual(fourthSnapshot));
         assert.ok(!thirdSnapshot.isEqual(sixthSnapshot));
