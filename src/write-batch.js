@@ -106,6 +106,20 @@ class WriteResult {
   get writeTime() {
     return this._writeTime;
   }
+
+  /**
+   * Returns true if this `WriteResult` is equal to the provided one.
+   *
+   * @param {*} other The value to compare against.
+   * @return true if this `WriteResult` is equal to the provided value.
+   */
+  isEqual(other) {
+    return (
+      this === other ||
+      (is.instanceof(other, WriteResult) &&
+        this._writeTime === other._writeTime)
+    );
+  }
 }
 
 /**

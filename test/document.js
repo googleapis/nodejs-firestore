@@ -251,6 +251,14 @@ describe('DocumentReference interface', function() {
   it('has parent property', function() {
     assert.equal(documentRef.parent.path, 'collectionId');
   });
+
+  it('has equals() method', function() {
+    let doc1 = firestore.doc('coll/doc1');
+    let doc1Equals = firestore.doc('coll/doc1');
+    let doc2 = firestore.doc('coll/doc1/coll/doc1');
+    assert.ok(doc1.isEqual(doc1Equals));
+    assert.ok(!doc1.isEqual(doc2));
+  });
 });
 
 describe('serialize document', function() {

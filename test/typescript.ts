@@ -63,6 +63,7 @@ xdescribe('firestore.d.ts', function() {
     const geoPoint: GeoPoint = new GeoPoint(90.0, 90.0);
     const latitude = geoPoint.latitude;
     const longitude = geoPoint.longitude;
+    const equals: boolean = geoPoint.isEqual(geoPoint);
   });
 
   it('has typings for Transaction', () => {
@@ -109,6 +110,7 @@ xdescribe('firestore.d.ts', function() {
   it('has typings for WriteResult', () => {
     docRef.set(documentData).then((result: FirebaseFirestore.WriteResult) => {
       const writeTime: string = result.writeTime;
+      const equals: boolean = result.isEqual(result);
     });
   });
 
@@ -116,6 +118,7 @@ xdescribe('firestore.d.ts', function() {
     const path1: FieldPath = new FieldPath('a');
     const path2: FieldPath = new FieldPath('a', 'b');
     const path3: FieldPath = FieldPath.documentId();
+    const equals: boolean = path1.isEqual(path2);
   });
 
   it('has typings for DocumentReference', () => {
@@ -167,6 +170,7 @@ xdescribe('firestore.d.ts', function() {
     unsubscribe = docRef.onSnapshot((snapshot: DocumentSnapshot) => {
     }, (error: Error) => {
     });
+    const equals: boolean = docRef.isEqual(docRef);
   });
 
   it('has typings for DocumentSnapshot', () => {
@@ -180,6 +184,7 @@ xdescribe('firestore.d.ts', function() {
       const data: DocumentData = snapshot.data()!;
       let value = snapshot.get('foo');
       value = snapshot.get(new FieldPath('foo'));
+      const equals: boolean = snapshot.isEqual(snapshot);
     });
   });
 
@@ -195,6 +200,7 @@ xdescribe('firestore.d.ts', function() {
       const data: DocumentData = snapshot.data();
       let value = snapshot.get('foo');
       value = snapshot.get(new FieldPath('foo'));
+      const equals: boolean = snapshot.isEqual(snapshot);
     });
   });
 
@@ -235,6 +241,7 @@ xdescribe('firestore.d.ts', function() {
       unsubscribe = query.onSnapshot((snapshot: QuerySnapshot) => {
       }, (error: Error) => {
       });
+      const equals: boolean = query.isEqual(query);
     });
   });
 
@@ -250,6 +257,7 @@ xdescribe('firestore.d.ts', function() {
       });
       snapshot.forEach((result: QueryDocumentSnapshot) => {
       }, this);
+      const equals: boolean = snapshot.isEqual(snapshot);
     });
   });
 
@@ -259,6 +267,7 @@ xdescribe('firestore.d.ts', function() {
       const doc: QueryDocumentSnapshot = docChange.doc;
       const oldIndex: number = docChange.oldIndex;
       const newIndex: number = docChange.newIndex;
+      const equals: boolean = docChange.isEqual(docChange);
     });
   });
 
@@ -271,12 +280,14 @@ xdescribe('firestore.d.ts', function() {
     const docRef2: DocumentReference = collRef.doc('doc');
     collRef.add(documentData).then((docRef: DocumentReference) => {
     });
+    const equals: boolean = collRef.isEqual(collRef);
   });
 
   it('has typings for FieldValue', () => {
     const documentData: UpdateData = {
       'foo': FieldValue.serverTimestamp(),
       'bar': FieldValue.delete()
-    }
+    };
+    const equals: boolean = FieldValue.serverTimestamp().isEqual(FieldValue.serverTimestamp());
   });
 });

@@ -1813,6 +1813,160 @@ describe('Query watch', function() {
     });
   });
 
+  it('support semantic equality', function() {
+    let firstSnapshot; // Changes:[+doc1] Docs:[doc1]
+    let secondSnapshot; // Changes:[-doc1] Docs:[]
+    let thirdSnapshot; // Changes:[+doc1] Docs:[doc1]
+    let fourthSnapshot; // Changes:[+doc2,+doc3'] Docs:[doc1,doc2,doc3]
+    let fifthSnapshot; // Changes:[-doc1] Docs:[doc2,doc3]
+
+    return watchHelper.runTest(collQueryJSON(), () => {
+      watchHelper.sendAddTarget();
+      watchHelper.sendDoc(doc1, {foo: 'a'});
+      watchHelper.sendCurrent();
+      watchHelper.sendSnapshot(1);
+      return watchHelper
+        .await('snapshot')
+        .then(snapshot => {
+          firstSnapshot = snapshot;
+          assert.ok(
+            firstSnapshot.docChanges[0].isEqual(firstSnapshot.docChanges[0])
+          );
+          watchHelper.sendDocDelete(doc1);
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          secondSnapshot = snapshot;
+          assert.ok(!firstSnapshot.isEqual(secondSnapshot));
+          assert.ok(
+            !firstSnapshot.docChanges[0].isEqual(secondSnapshot.docChanges[0])
+          );
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          thirdSnapshot = snapshot;
+          assert.ok(firstSnapshot.isEqual(firstSnapshot));
+          assert.ok(firstSnapshot.isEqual(thirdSnapshot));
+          assert.ok(
+            firstSnapshot.docChanges[0].isEqual(thirdSnapshot.docChanges[0])
+          );
+          watchHelper.sendDoc(doc2, {foo: 'a'});
+          watchHelper.sendDoc(doc3, {foo: 'a'});
+          watchHelper.sendSnapshot(4);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          fourthSnapshot = snapshot;
+          assert.ok(!thirdSnapshot.isEqual(fourthSnapshot));
+          watchHelper.sendDocDelete(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(5);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          fifthSnapshot = snapshot;
+          assert.ok(!secondSnapshot.isEqual(fifthSnapshot));
+        });
+    });
+  });
+
+  it('support equals for snapshot with same query', function() {
+    let firstSnapshot; // Changes:[+doc1] Docs:[doc1]
+    let secondSnapshot; // Changes:[+doc2] Docs:[doc1,doc2]
+    let thirdSnapshot; // Changes:[-doc1] Docs:[doc2]
+    let fourthSnapshot; // Changes:[+doc1] Docs:[doc1]
+    let fifthSnapshot; // Changes:[+doc3] Docs:[doc1,doc3]
+    let sixthSnapshot; // Changes:[-doc1] Docs:[doc3]
+
+    return watchHelper
+      .runTest(collQueryJSON(), () => {
+        watchHelper.sendAddTarget();
+        watchHelper.sendDoc(doc1, {foo: 'a'});
+        watchHelper.sendCurrent();
+        watchHelper.sendSnapshot(1);
+        return watchHelper
+          .await('snapshot')
+          .then(snapshot => {
+            firstSnapshot = snapshot;
+            watchHelper.sendDoc(doc2, {foo: 'a'});
+            watchHelper.sendSnapshot(2);
+            return watchHelper.await('snapshot');
+          })
+          .then(snapshot => {
+            secondSnapshot = snapshot;
+            watchHelper.sendDocDelete(doc1);
+            watchHelper.sendSnapshot(3);
+            return watchHelper.await('snapshot');
+          })
+          .then(snapshot => {
+            thirdSnapshot = snapshot;
+          });
+      })
+      .then(() =>
+        watchHelper.runTest(collQueryJSON(), () => {
+          watchHelper.sendAddTarget();
+          watchHelper.sendCurrent();
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(4);
+          return watchHelper
+            .await('snapshot')
+            .then(snapshot => {
+              fourthSnapshot = snapshot;
+              watchHelper.sendDoc(doc3, {foo: 'a'});
+              watchHelper.sendSnapshot(5);
+              return watchHelper.await('snapshot');
+            })
+            .then(snapshot => {
+              fifthSnapshot = snapshot;
+              watchHelper.sendDocDelete(doc1);
+              watchHelper.sendSnapshot(6);
+              return watchHelper.await('snapshot');
+            })
+            .then(snapshot => {
+              sixthSnapshot = snapshot;
+            });
+        })
+      )
+      .then(() => {
+        assert.ok(firstSnapshot.isEqual(fourthSnapshot));
+        assert.ok(!secondSnapshot.isEqual(fourthSnapshot));
+        assert.ok(!thirdSnapshot.isEqual(sixthSnapshot));
+
+        // For test coverage.
+        assert.ok(!fifthSnapshot.isEqual(new Firestore.GeoPoint(0, 0)));
+      });
+  });
+
+  it('support equals for snapshot with different query', function() {
+    let firstSnapshot;
+    let secondSnapshot;
+
+    return watchHelper
+      .runTest(collQueryJSON(), () => {
+        watchHelper.sendAddTarget();
+        watchHelper.sendCurrent();
+        watchHelper.sendSnapshot(1);
+        return watchHelper.await('snapshot').then(snapshot => {
+          firstSnapshot = snapshot;
+        });
+      })
+      .then(() => {
+        watchHelper = new WatchHelper(streamHelper, includeQuery(), targetId);
+        return watchHelper
+          .runTest(includeQueryJSON(), () => {
+            watchHelper.sendAddTarget();
+            watchHelper.sendCurrent();
+            watchHelper.sendSnapshot(1);
+            return watchHelper.await('snapshot').then(snapshot => {
+              secondSnapshot = snapshot;
+            });
+          })
+          .then(() => assert.ok(!firstSnapshot.isEqual(secondSnapshot)));
+      });
+  });
+
   it('handles delete and re-add in same snapshot', function() {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.

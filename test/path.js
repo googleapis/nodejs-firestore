@@ -71,6 +71,28 @@ describe('ResourcePath', function() {
 });
 
 describe('FieldPath', function() {
+  it('encodes field names', function() {
+    let components = [['foo'], ['foo', 'bar'], ['.', '`'], ['\\']];
+
+    let results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
+
+    for (let i = 0; i < components.length; ++i) {
+      assert.equal(new FieldPath(components[i]).toString(), results[i]);
+    }
+  });
+
+  it("doesn't accept empty path", function() {
+    assert.throws(() => {
+      new FieldPath();
+    }, /Function 'FieldPath\(\)' requires at least 1 argument\./);
+  });
+
+  it('only accepts strings', function() {
+    assert.throws(() => {
+      new FieldPath('foo', 'bar', 0);
+    }, /Argument at index 2 is not a valid string\./);
+  });
+
   it('has append() method', function() {
     let path = new FieldPath('foo');
     path = path.append('bar');
@@ -92,5 +114,13 @@ describe('FieldPath', function() {
     assert.throws(() => {
       new FieldPath('foo', '');
     }, /Argument at index 1 should not be empty./);
+  });
+
+  it('has equals() method', function() {
+    let path1 = new FieldPath('a');
+    let path1Equals = new FieldPath('a');
+    let path2 = new FieldPath('a', 'b', 'a');
+    assert.ok(path1.isEqual(path1Equals));
+    assert.ok(!path1.isEqual(path2));
   });
 });

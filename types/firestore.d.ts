@@ -388,6 +388,14 @@ declare namespace FirebaseFirestore {
      * string.
      */
     readonly writeTime: string;
+
+    /**
+     * Returns true if this `WriteResult` is equal to the provided one.
+     *
+     * @param other The `WriteResult` to compare against.
+     * @return true if this `WriteResult` is equal to the provided one.
+     */
+    isEqual(other: WriteResult): boolean;
   }
 
   /**
@@ -585,8 +593,8 @@ declare namespace FirebaseFirestore {
     get(fieldPath: string|FieldPath): any;
 
     /**
-     * Returns true if the data and document path in this `DocumentSnapshot` is
-     * equal to the provided one.
+     * Returns true if the document's data and path in this `DocumentSnapshot`
+     * is equal to the provided one.
      *
      * @param other The `DocumentSnapshot` to compare against.
      * @return true if this `DocumentSnapshot` is equal to the provided one.
@@ -892,8 +900,8 @@ declare namespace FirebaseFirestore {
     ): void;
 
     /**
-     * Returns true if the data in this `QuerySnapshot` is equal to the provided
-     * one.
+     * Returns true if the document data in this `QuerySnapshot` is equal to the
+     * provided one.
      *
      * @param other The `QuerySnapshot` to compare against.
      * @return true if this `QuerySnapshot` is equal to the provided one.
@@ -931,6 +939,15 @@ declare namespace FirebaseFirestore {
      * Is -1 for 'removed' events.
      */
     readonly newIndex: number;
+
+    /**
+     * Returns true if the data in this `DocumentChange` is equal to the
+     * provided one.
+     *
+     * @param other The `DocumentChange` to compare against.
+     * @return true if this `DocumentChange` is equal to the provided one.
+     */
+    isEqual(other: DocumentChange): boolean;
   }
 
   /**

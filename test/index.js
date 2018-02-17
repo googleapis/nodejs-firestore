@@ -503,6 +503,11 @@ describe('instantiation', function() {
     assert.ok(is.defined(Firestore.CollectionReference));
     assert.ok(is.defined(Firestore.FieldValue));
     assert.ok(is.defined(Firestore.FieldPath));
+    assert.ok(
+      !Firestore.FieldValue.serverTimestamp().isEqual(
+        Firestore.FieldValue.delete()
+      )
+    );
   });
 });
 
@@ -555,6 +560,11 @@ describe('snapshot_() method', function() {
     assert.equal(
       data.geoPointValue.toString(),
       'GeoPoint { latitude: 50.1430847, longitude: -122.947778 }'
+    );
+    assert.ok(
+      data.geoPointValue.isEqual(
+        new Firestore.GeoPoint(50.1430847, -122.947778)
+      )
     );
   }
 
@@ -1033,32 +1043,5 @@ describe('getAll() method', function() {
       .then(result => {
         resultEquals(result, found('a'), found('a'), found('b'), found('a'));
       });
-  });
-});
-
-describe('FieldPath', function() {
-  it('encodes field names', function() {
-    let components = [['foo'], ['foo', 'bar'], ['.', '`'], ['\\']];
-
-    let results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
-
-    for (let i = 0; i < components.length; ++i) {
-      assert.equal(
-        new Firestore.FieldPath(components[i]).toString(),
-        results[i]
-      );
-    }
-  });
-
-  it("doesn't accept empty path", function() {
-    assert.throws(() => {
-      new Firestore.FieldPath();
-    }, /Function 'FieldPath\(\)' requires at least 1 argument\./);
-  });
-
-  it('only accepts strings', function() {
-    assert.throws(() => {
-      new Firestore.FieldPath('foo', 'bar', 0);
-    }, /Argument at index 2 is not a valid string\./);
   });
 });
