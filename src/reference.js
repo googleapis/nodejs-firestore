@@ -501,7 +501,7 @@ class DocumentReference {
 
     let watch = Watch.forDocument(this);
 
-    return watch.onSnapshot((readTime, docs) => {
+    return watch.onSnapshot((readTime, size, docs) => {
       for (let document of docs()) {
         if (document.ref.path === this.path) {
           onNext(document);
@@ -852,17 +852,20 @@ class QuerySnapshot {
    * @param {Query} query - The originating query.
    * @param {string} readTime - The ISO 8601 time when this query snapshot was
    * current.
-   *
+   * @param {number} size - The number of documents in the result set.
    * @param {function} docs - A callback returning a sorted array of documents
    * matching this query
    * @param {function} changes - A callback returning a sorted array of
    * document change events for this snapshot.
    */
-  constructor(query, readTime, docs, changes) {
+  constructor(query, readTime, size, docs, changes) {
     this._query = query;
     this._readTime = readTime;
+    this._size = size;
     this._docs = docs;
+    this._materializedDocs = null;
     this._changes = changes;
+    this._materializedChanges = null;
   }
 
   /**
@@ -910,6 +913,7 @@ class QuerySnapshot {
       return this._materializedDocs;
     }
     this._materializedDocs = this._docs();
+    this._docs = null;
     return this._materializedDocs;
   }
 
@@ -925,6 +929,7 @@ class QuerySnapshot {
       return this._materializedChanges;
     }
     this._materializedChanges = this._changes();
+    this._changes = null;
     return this._materializedChanges;
   }
 
@@ -945,7 +950,7 @@ class QuerySnapshot {
    * });
    */
   get empty() {
-    return this.docs.length === 0;
+    return this._size === 0;
   }
 
   /**
@@ -963,7 +968,7 @@ class QuerySnapshot {
    * });
    */
   get size() {
-    return this.docs.length;
+    return this._size;
   }
 
   /**
@@ -1025,37 +1030,27 @@ class QuerySnapshot {
       return false;
     }
 
+    if (this._size !== other._size) {
+      return false;
+    }
+
     if (!this._query.isEqual(other._query)) {
       return false;
     }
 
-    const thisChanges = this.docChanges;
-    const otherChanges = other.docChanges;
-
-    if (thisChanges.length !== otherChanges.length) {
-      return false;
+    if (this._materializedChanges) {
+      // If we have already materialized the document changes, we compare
+      // them first as they are expected to be much smaller.
+      return (
+        isArrayEqual(this.docChanges, other.docChanges) &&
+        isArrayEqual(this.docs, other.docs)
+      );
     }
 
-    for (let i = 0; i < thisChanges.length; ++i) {
-      if (!thisChanges[i].isEqual(otherChanges[i])) {
-        return false;
-      }
-    }
-
-    const thisDocs = this.docs;
-    const otherDocs = other.docs;
-
-    if (thisDocs.length !== otherDocs.length) {
-      return false;
-    }
-
-    for (let i = 0; i < thisDocs.length; ++i) {
-      if (!thisDocs[i].isEqual(otherDocs[i])) {
-        return false;
-      }
-    }
-
-    return true;
+    return (
+      isArrayEqual(this.docs, other.docs) &&
+      isArrayEqual(this.docChanges, other.docChanges)
+    );
   }
 }
 
@@ -1756,7 +1751,6 @@ class Query {
   _get(queryOptions) {
     let self = this;
     let docs = [];
-    let changes = [];
 
     return new Promise((resolve, reject) => {
       let readTime;
@@ -1770,19 +1764,27 @@ class Query {
           readTime = result.readTime;
           if (result.document) {
             let document = result.document;
-            changes.push(
-              new DocumentChange(
-                DocumentChange.ADDED,
-                document,
-                -1,
-                docs.length
-              )
-            );
             docs.push(document);
           }
         })
         .on('end', () => {
-          resolve(new QuerySnapshot(this, readTime, () => docs, () => changes));
+          resolve(
+            new QuerySnapshot(
+              this,
+              readTime,
+              docs.length,
+              () => docs,
+              () => {
+                let changes = [];
+                for (let i = 0; i < docs.length; ++i) {
+                  changes.push(
+                    new DocumentChange(DocumentChange.ADDED, docs[i], -1, i)
+                  );
+                }
+                return changes;
+              }
+            )
+          );
         });
     });
   }
@@ -1972,8 +1974,8 @@ class Query {
 
     let watch = Watch.forQuery(this);
 
-    return watch.onSnapshot((readTime, docs, changes) => {
-      onNext(new QuerySnapshot(this, readTime, docs, changes));
+    return watch.onSnapshot((readTime, size, docs, changes) => {
+      onNext(new QuerySnapshot(this, readTime, docs.length, docs, changes));
     }, onError);
   }
 
@@ -2234,6 +2236,27 @@ function validateDocumentReference(value) {
     return true;
   }
   throw validate.customObjectError(value);
+}
+
+/**
+ * Verifies euqality for an array of objects using the `isEqual` interface.
+ *
+ * @param {Array.<Object>} left Array of objects supporting `isEqual`.
+ * @param {Array.<Object>} right Array of objects supporting `isEqual`.
+ * @return {boolean} True if arrays are equal.
+ */
+function isArrayEqual(left, right) {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  for (let i = 0; i < left.length; ++i) {
+    if (!left[i].isEqual(right[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 module.exports = FirestoreType => {

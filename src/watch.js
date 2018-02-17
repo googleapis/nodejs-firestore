@@ -268,6 +268,7 @@ function isResourceExhaustedError(error) {
  *
  * @param {string} readTime - The ISO 8601 time at which this snapshot was
  * obtained.
+ * @param {number} size - The number of documents in the result set.
  * @param {docsCallback} docs - A callback that returns the ordered list of
  * documents stored in this snapshot.
  * @param {changeCallback} changes - A callback that returns the list of
@@ -667,6 +668,7 @@ class Watch {
         );
         onNext(
           readTime,
+          diff.updatedTree.length,
           () => diff.updatedTree.keys,
           () => diff.appliedChanges
         );
