@@ -844,19 +844,19 @@ describe('delete document', function() {
       return firestore
         .doc('collectionId/documentId')
         .delete({lastUpdateTime: 1337});
-    }, new RegExp('"lastUpdateTime" is not a string.$'));
+    }, /"lastUpdateTime" is not a string./);
   });
 
   it('throws if "exists" is not a boolean', () => {
     assert.throws(() => {
       return firestore.doc('collectionId/documentId').delete({exists: 42});
-    }, new RegExp('"exists" is not a boolean.$'));
+    }, /"exists" is not a boolean./);
   });
 
   it('throws if no delete conditions are provided', () => {
     assert.throws(() => {
       return firestore.doc('collectionId/documentId').delete(42);
-    }, new RegExp('Input is not an object.'));
+    }, /Input is not an object./);
   });
 
   it('throws if more than one condition is provided', () => {
@@ -864,7 +864,7 @@ describe('delete document', function() {
       return firestore
         .doc('collectionId/documentId')
         .delete({exists: false, lastUpdateTime: '1985-03-18T07:20:00.123Z'});
-    }, new RegExp('Input contains more than one condition.'));
+    }, /Input contains more than one condition./);
   });
 });
 
@@ -1572,7 +1572,7 @@ describe('update document', function() {
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
-        .update('foo', 'bar', {exists: true}, 'foo');
+        .update('foo', 'bar', {exists: true});
     }, INVALID_ARGUMENTS_TO_UPDATE);
 
     assert.throws(() => {
