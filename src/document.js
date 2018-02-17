@@ -1144,7 +1144,7 @@ class DocumentTransform {
           });
         } else {
           throw new Error(
-            'Server timestamps are not supported as array ' + 'values.'
+            'Server timestamps are not supported as array values.'
           );
         }
       } else if (is.array(val)) {
@@ -1319,7 +1319,7 @@ function validateDocumentData(obj, options) {
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
-function validateFieldValue(obj, options, depth) {
+function validateFieldValue(val, options, depth) {
   assert(
     ['none', 'root', 'all'].indexOf(options.allowDeletes) !== -1,
     "Expected 'none', 'root', or 'all' for 'options.allowDeletes'"
@@ -1337,17 +1337,17 @@ function validateFieldValue(obj, options, depth) {
     );
   }
 
-  if (is.array(obj)) {
-    for (let prop of obj) {
-      validateFieldValue(obj[prop], options, depth + 1);
+  if (is.array(val)) {
+    for (let prop of val) {
+      validateFieldValue(val[prop], options, depth + 1);
     }
-  } else if (isPlainObject(obj)) {
-    for (let prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        validateFieldValue(obj[prop], options, depth + 1);
+  } else if (isPlainObject(val)) {
+    for (let prop in val) {
+      if (val.hasOwnProperty(prop)) {
+        validateFieldValue(val[prop], options, depth + 1);
       }
     }
-  } else if (obj === FieldValue.DELETE_SENTINEL) {
+  } else if (val === FieldValue.DELETE_SENTINEL) {
     if (
       (options.allowDeletes === 'root' && depth > 1) ||
       options.allowDeletes === 'none'
@@ -1356,20 +1356,20 @@ function validateFieldValue(obj, options, depth) {
         'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.'
       );
     }
-  } else if (obj === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+  } else if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
     if (!options.allowServerTimestamps) {
       throw new Error(
         'FieldValue.serverTimestamp() can only be used in update(), set() and create().'
       );
     }
-  } else if (is.instanceof(obj, DocumentReference)) {
+  } else if (is.instanceof(val, DocumentReference)) {
     return true;
-  } else if (is.instanceof(obj, GeoPoint)) {
+  } else if (is.instanceof(val, GeoPoint)) {
     return true;
-  } else if (is.instanceof(obj, FieldPath)) {
+  } else if (is.instanceof(val, FieldPath)) {
     throw new Error('Cannot use "FieldPath" as a Firestore type.');
-  } else if (is.object(obj)) {
-    throw validate.customObjectError(obj);
+  } else if (is.object(val)) {
+    throw validate.customObjectError(val);
   }
 
   return true;

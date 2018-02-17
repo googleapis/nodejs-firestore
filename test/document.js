@@ -231,7 +231,7 @@ describe('DocumentReference interface', function() {
   it('has collection() method', function() {
     assert.throws(() => {
       documentRef.collection(42);
-    }, new RegExp('Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string.'));
+    }, /Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string./);
 
     let collection = documentRef.collection('col');
     assert.equal(collection.id, 'col');
@@ -448,7 +448,7 @@ describe('serialize document', function() {
 
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update(obj);
-    }, new RegExp('Argument "dataOrField" is not a valid Document. Input object is deeper than 20 levels or contains a cycle.'));
+    }, /Argument "dataOrField" is not a valid Document. Input object is deeper than 20 levels or contains a cycle./);
   });
 
   it('is able to write a document reference with cycles', function() {
@@ -844,19 +844,19 @@ describe('delete document', function() {
       return firestore
         .doc('collectionId/documentId')
         .delete({lastUpdateTime: 1337});
-    }, new RegExp('"lastUpdateTime" is not a string.$'));
+    }, /"lastUpdateTime" is not a string./);
   });
 
   it('throws if "exists" is not a boolean', () => {
     assert.throws(() => {
       return firestore.doc('collectionId/documentId').delete({exists: 42});
-    }, new RegExp('"exists" is not a boolean.$'));
+    }, /"exists" is not a boolean./);
   });
 
   it('throws if no delete conditions are provided', () => {
     assert.throws(() => {
       return firestore.doc('collectionId/documentId').delete(42);
-    }, new RegExp('Input is not an object.'));
+    }, /Input is not an object./);
   });
 
   it('throws if more than one condition is provided', () => {
@@ -864,7 +864,7 @@ describe('delete document', function() {
       return firestore
         .doc('collectionId/documentId')
         .delete({exists: false, lastUpdateTime: '1985-03-18T07:20:00.123Z'});
-    }, new RegExp('Input contains more than one condition.'));
+    }, /Input contains more than one condition./);
   });
 });
 
@@ -1125,13 +1125,13 @@ describe('create document', function() {
   it('requires an object', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').create(null);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a plain JavaScript object.'));
+    }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
   it("doesn't accept arrays", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').create([42]);
-    }, new RegExp('Argument "data" is not a valid Document. Input is not a plain JavaScript object.'));
+    }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 });
 
@@ -1572,7 +1572,7 @@ describe('update document', function() {
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
-        .update('foo', 'bar', {exists: true}, 'foo');
+        .update('foo', 'bar', {exists: true});
     }, INVALID_ARGUMENTS_TO_UPDATE);
 
     assert.throws(() => {
@@ -1585,13 +1585,13 @@ describe('update document', function() {
   it('accepts an object', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update(null);
-    }, new RegExp('Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object.'));
+    }, /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
   it("doesn't accept arrays", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update([42]);
-    }, new RegExp('Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object.'));
+    }, /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
   it('with field delete', function() {

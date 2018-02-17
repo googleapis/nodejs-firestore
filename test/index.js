@@ -712,10 +712,7 @@ describe('doc() method', function() {
   it("doesn't accept empty components", function() {
     assert.throws(function() {
       firestore.doc('coll//doc');
-    }, new RegExp(
-      'Argument "documentPath" is not a valid ResourcePath. ' +
-        'Paths must not contain //.'
-    ));
+    }, /Argument "documentPath" is not a valid ResourcePath. Paths must not contain \/\/./);
   });
 
   it('must point to document', function() {
@@ -848,7 +845,7 @@ describe('getAll() method', function() {
       .catch(err => {
         assert.equal(
           err.message,
-          'Did not receive document for' + ' "collectionId/documentId".'
+          'Did not receive document for "collectionId/documentId".'
         );
       });
   });
@@ -1033,32 +1030,5 @@ describe('getAll() method', function() {
       .then(result => {
         resultEquals(result, found('a'), found('a'), found('b'), found('a'));
       });
-  });
-});
-
-describe('FieldPath', function() {
-  it('encodes field names', function() {
-    let components = [['foo'], ['foo', 'bar'], ['.', '`'], ['\\']];
-
-    let results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
-
-    for (let i = 0; i < components.length; ++i) {
-      assert.equal(
-        new Firestore.FieldPath(components[i]).toString(),
-        results[i]
-      );
-    }
-  });
-
-  it("doesn't accept empty path", function() {
-    assert.throws(() => {
-      new Firestore.FieldPath();
-    }, /Function 'FieldPath\(\)' requires at least 1 argument\./);
-  });
-
-  it('only accepts strings', function() {
-    assert.throws(() => {
-      new Firestore.FieldPath('foo', 'bar', 0);
-    }, /Argument at index 2 is not a valid string\./);
   });
 });
