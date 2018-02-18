@@ -98,6 +98,7 @@ const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
   docsEqual(localDocs, expected.docs);
 
   assert.equal(actual.readTime, `1970-01-01T00:00:00.00000000${version}Z`);
+  assert.equal(actual.size, expected.docs.length);
 
   return {docs: actual.docs, docChanges: actual.docChanges};
 };
@@ -1817,8 +1818,8 @@ describe('Query watch', function() {
     let firstSnapshot; // Changes:[+doc1] Docs:[doc1]
     let secondSnapshot; // Changes:[-doc1] Docs:[]
     let thirdSnapshot; // Changes:[+doc1] Docs:[doc1]
-    let fourthSnapshot; // Changes:[+doc2,+doc3'] Docs:[doc1,doc2,doc3]
-    let fifthSnapshot; // Changes:[-doc1] Docs:[doc2,doc3]
+    let fourthSnapshot; // Changes:[+doc2,+doc3] Docs:[doc1,doc2,doc3]
+    let fifthSnapshot; // Changes:[-doc2,-doc3] Docs:[doc1]
 
     return watchHelper.runTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget();
@@ -1861,13 +1862,15 @@ describe('Query watch', function() {
         .then(snapshot => {
           fourthSnapshot = snapshot;
           assert.ok(!thirdSnapshot.isEqual(fourthSnapshot));
-          watchHelper.sendDocDelete(doc1, {foo: 'a'});
+          watchHelper.sendDocDelete(doc2, {foo: 'a'});
+          watchHelper.sendDocDelete(doc3, {foo: 'a'});
           watchHelper.sendSnapshot(5);
           return watchHelper.await('snapshot');
         })
         .then(snapshot => {
           fifthSnapshot = snapshot;
-          assert.ok(!secondSnapshot.isEqual(fifthSnapshot));
+          assert.equal(fifthSnapshot.docs.length, thirdSnapshot.docs.length);
+          assert.ok(!fifthSnapshot.isEqual(thirdSnapshot));
         });
     });
   });
@@ -1876,9 +1879,9 @@ describe('Query watch', function() {
     let firstSnapshot; // Changes:[+doc1] Docs:[doc1]
     let secondSnapshot; // Changes:[+doc2] Docs:[doc1,doc2]
     let thirdSnapshot; // Changes:[-doc1] Docs:[doc2]
-    let fourthSnapshot; // Changes:[+doc1] Docs:[doc1]
-    let fifthSnapshot; // Changes:[+doc3] Docs:[doc1,doc3]
-    let sixthSnapshot; // Changes:[-doc1] Docs:[doc3]
+    let fourthSnapshot; // Changes:[+doc1] Docs:[doc1,doc2]
+    let fifthSnapshot; // Changes:[+doc3] Docs:[doc1,doc2,doc3]
+    let sixthSnapshot; // Changes:[-doc1] Docs:[doc2,doc3]
 
     return watchHelper
       .runTest(collQueryJSON(), () => {

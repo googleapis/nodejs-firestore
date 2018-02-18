@@ -1038,18 +1038,19 @@ class QuerySnapshot {
       return false;
     }
 
-    if (this._materializedChanges) {
-      // If we have already materialized the document changes, we compare
-      // them first as they are expected to be much smaller.
+    if (this._materializedDocs && !this._materializedChanges) {
+      // If we have only materialized the documents, we compare them first.
       return (
-        isArrayEqual(this.docChanges, other.docChanges) &&
-        isArrayEqual(this.docs, other.docs)
+        isArrayEqual(this.docs, other.docs) &&
+        isArrayEqual(this.docChanges, other.docChanges)
       );
     }
 
+    // Otherwise, we compare the changes first as we expect them to be much
+    // smaller.
     return (
-      isArrayEqual(this.docs, other.docs) &&
-      isArrayEqual(this.docChanges, other.docChanges)
+      isArrayEqual(this.docChanges, other.docChanges) &&
+      isArrayEqual(this.docs, other.docs)
     );
   }
 }
@@ -2246,11 +2247,13 @@ function validateDocumentReference(value) {
  * @return {boolean} True if arrays are equal.
  */
 function isArrayEqual(left, right) {
-  if (left.length === right.length) {
-    for (let i = 0; i < left.length; ++i) {
-      if (!left[i].isEqual(right[i])) {
-        return false;
-      }
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  for (let i = 0; i < left.length; ++i) {
+    if (!left[i].isEqual(right[i])) {
+      return false;
     }
   }
 
