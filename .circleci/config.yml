@@ -1,7 +1,5 @@
----
-# "Include" for unit tests definition.
-unit_tests: &unit_tests
-  steps:
+unit_tests:
+  steps: &ref_0
     - checkout
     - run:
         name: Install modules and dependencies.
@@ -16,9 +14,7 @@ unit_tests: &unit_tests
         name: Submit coverage data to codecov.
         command: node_modules/.bin/codecov
         when: always
-
-
-version: 2.0
+version: 2
 workflows:
   version: 2
   tests:
@@ -28,10 +24,6 @@ workflows:
             tags:
               only: /.*/
       - node6:
-          filters:
-            tags:
-              only: /.*/
-      - node7:
           filters:
             tags:
               only: /.*/
@@ -47,7 +39,6 @@ workflows:
           requires:
             - node4
             - node6
-            - node7
             - node8
             - node9
           filters:
@@ -57,7 +48,6 @@ workflows:
           requires:
             - node4
             - node6
-            - node7
             - node8
             - node9
           filters:
@@ -71,7 +61,7 @@ workflows:
             branches:
               only: master
             tags:
-              only: /^v[\d.]+$/
+              only: '/^v[\d.]+$/'
       - publish_npm:
           requires:
             - system_tests
@@ -79,38 +69,31 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /^v[\d.]+$/
-
+              only: '/^v[\d.]+$/'
 jobs:
   node4:
     docker:
-      - image: node:4
+      - image: 'node:4'
         user: node
-    <<: *unit_tests
+    steps: *ref_0
   node6:
     docker:
-      - image: node:6
+      - image: 'node:6'
         user: node
-    <<: *unit_tests
-  node7:
-    docker:
-      - image: node:7
-        user: node
-    <<: *unit_tests
+    steps: *ref_0
   node8:
     docker:
-      - image: node:8
+      - image: 'node:8'
         user: node
-    <<: *unit_tests
+    steps: *ref_0
   node9:
     docker:
-      - image: node:9
+      - image: 'node:9'
         user: node
-    <<: *unit_tests
-
+    steps: *ref_0
   lint:
     docker:
-      - image: node:8
+      - image: 'node:8'
         user: node
     steps:
       - checkout
@@ -120,10 +103,9 @@ jobs:
       - run:
           name: Run linting.
           command: npm run lint
-
   docs:
     docker:
-      - image: node:8
+      - image: 'node:8'
         user: node
     steps:
       - checkout
@@ -133,10 +115,9 @@ jobs:
       - run:
           name: Build documentation.
           command: npm run docs
-
   system_tests:
     docker:
-      - image: node:8
+      - image: 'node:8'
         user: node
     steps:
       - checkout
@@ -153,7 +134,6 @@ jobs:
           name: Run system tests.
           command: npm run system-test
           environment:
-            # TODO: Figure out if both of these pairs are necessary.
             GOOGLE_APPLICATION_CREDENTIALS: .circleci/key.json
             GCLOUD_PROJECT: node-gcloud-ci
             GCLOUD_TESTS_KEY: .circleci/key.json
@@ -162,16 +142,15 @@ jobs:
           name: Remove unencrypted key.
           command: rm .circleci/key.json
           when: always
-
   publish_npm:
     docker:
-      - image: node:8
+      - image: 'node:8'
         user: node
     steps:
       - checkout
       - run:
           name: Set NPM authentication.
-          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
       - run:
-         name: Publish the module to npm.
-         command: npm publish
+          name: Publish the module to npm.
+          command: npm publish
