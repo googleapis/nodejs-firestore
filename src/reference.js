@@ -671,7 +671,7 @@ class DocumentChange {
 
   /**
    * Returns true if the data in this `DocumentChange` is equal to the provided
-   * one.
+   * value.
    *
    * @param {*} other The value to compare against.
    * @return true if this `DocumentChange` is equal to the provided value.
@@ -1015,7 +1015,7 @@ class QuerySnapshot {
 
   /**
    * Returns true if the document data in this `QuerySnapshot` is equal to the
-   * provided one.
+   * provided value.
    *
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `QuerySnapshot` is equal to the provided
@@ -1046,8 +1046,7 @@ class QuerySnapshot {
       );
     }
 
-    // Otherwise, we compare the changes first as we expect them to be much
-    // smaller.
+    // Otherwise, we compare the changes first as we expect there to be fewer.
     return (
       isArrayEqual(this.docChanges, other.docChanges) &&
       isArrayEqual(this.docs, other.docs)
@@ -1390,7 +1389,7 @@ class Query {
   }
 
   /**
-   * Returns true if this `Query` is equal to the provided one.
+   * Returns true if this `Query` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `Query` is equal to the provided value.
@@ -2158,7 +2157,7 @@ class CollectionReference extends Query {
   }
 
   /**
-   * Returns true if this `CollectionReference` is equal to the provided one.
+   * Returns true if this `CollectionReference` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `CollectionReference` is equal to the

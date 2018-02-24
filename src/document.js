@@ -137,7 +137,7 @@ class GeoPoint {
    * Returns true if this `GeoPoint` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `GeoPoint` is equal to the provided one.
+   * @return {boolean} true if this `GeoPoint` is equal to the provided value.
    */
   isEqual(other) {
     return (
@@ -618,7 +618,7 @@ class DocumentSnapshot {
 
   /**
    * Returns true if the document's data and path in this `DocumentSnapshot` is
-   * equal to the provided one.
+   * equal to the provided value.
    *
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `DocumentSnapshot` is equal to the provided

@@ -117,10 +117,10 @@ describe('FieldPath', function() {
   });
 
   it('has equals() method', function() {
-    let path1 = new FieldPath('a');
-    let path1Equals = new FieldPath('a');
-    let path2 = new FieldPath('a', 'b', 'a');
-    assert.ok(path1.isEqual(path1Equals));
-    assert.ok(!path1.isEqual(path2));
+    let path = new FieldPath('a');
+    let equals = new FieldPath('a');
+    let notEquals = new FieldPath('a', 'b', 'a');
+    assert.ok(path.isEqual(equals));
+    assert.ok(!path.isEqual(notEquals));
   });
 });

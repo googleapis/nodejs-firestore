@@ -82,7 +82,7 @@ class FieldValue {
   }
 
   /**
-   * Returns true if this `FieldValue` is equal to the provided one.
+   * Returns true if this `FieldValue` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `FieldValue` is equal to the provided value.

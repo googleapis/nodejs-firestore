@@ -1821,19 +1821,19 @@ describe('Query watch', function() {
       snapshotVersion = 0;
     });
 
-    function initialSnapshot(testCallback) {
+    function initialSnapshot(watchTest) {
       return watchHelper.runTest(collQueryJSON(), () => {
         watchHelper.sendAddTarget();
         watchHelper.sendCurrent();
         watchHelper.sendSnapshot(++snapshotVersion);
         return watchHelper
           .await('snapshot')
-          .then(snapshot => testCallback(snapshot));
+          .then(snapshot => watchTest(snapshot));
       });
     }
 
-    function nextSnapshot(baseSnapshot, stepCallback) {
-      stepCallback(baseSnapshot);
+    function nextSnapshot(baseSnapshot, watchStep) {
+      watchStep(baseSnapshot);
       watchHelper.sendSnapshot(++snapshotVersion);
       return watchHelper.await('snapshot');
     }

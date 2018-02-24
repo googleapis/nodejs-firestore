@@ -325,7 +325,7 @@ describe('query interface', function() {
   it('has equals() method', function() {
     const query = firestore.collection('collectionId');
 
-    const equalAssert = (equals, notEquals) => {
+    const queryEquals = (equals, notEquals) => {
       for (let i = 0; i < equals.length; ++i) {
         for (const equal of equals) {
           assert.ok(equals[i].isEqual(equal));
@@ -339,12 +339,12 @@ describe('query interface', function() {
       }
     };
 
-    equalAssert(
+    queryEquals(
       [query.where('a', '=', 'a'), query.where('a', '=', 'a')],
       [query.where('a', '=', 'b')]
     );
 
-    equalAssert(
+    queryEquals(
       [
         query.orderBy('__name__'),
         query.orderBy('__name__', 'asc'),
@@ -357,17 +357,17 @@ describe('query interface', function() {
       ]
     );
 
-    equalAssert(
+    queryEquals(
       [query.limit(0), query.limit(0).limit(0)],
       [query, query.limit(10)]
     );
 
-    equalAssert(
+    queryEquals(
       [query.offset(0), query.offset(0).offset(0)],
       [query, query.offset(10)]
     );
 
-    equalAssert(
+    queryEquals(
       [query.orderBy('foo').startAt('a'), query.orderBy('foo').startAt('a')],
       [
         query.orderBy('foo').startAfter('a'),
@@ -378,7 +378,7 @@ describe('query interface', function() {
       ]
     );
 
-    equalAssert(
+    queryEquals(
       [
         query.orderBy('foo').startAfter('a'),
         query.orderBy('foo').startAfter('a'),
@@ -389,7 +389,7 @@ describe('query interface', function() {
       ]
     );
 
-    equalAssert(
+    queryEquals(
       [
         query.orderBy('foo').endBefore('a'),
         query.orderBy('foo').endBefore('a'),
@@ -397,12 +397,12 @@ describe('query interface', function() {
       [query.orderBy('foo').endBefore('b'), query.orderBy('bar').endBefore('a')]
     );
 
-    equalAssert(
+    queryEquals(
       [query.orderBy('foo').endAt('a'), query.orderBy('foo').endAt('a')],
       [query.orderBy('foo').endAt('b'), query.orderBy('bar').endAt('a')]
     );
 
-    equalAssert(
+    queryEquals(
       [
         query
           .orderBy('foo')

@@ -442,7 +442,8 @@ class ResourcePath extends Path {
    *
    * @private
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `Path` is equal to the provided value.
+   * @return {boolean} true if this `ResourcePath` is equal to the provided
+   * value.
    */
   isEqual(other) {
     return (
