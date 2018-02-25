@@ -266,7 +266,7 @@ class WriteBatch {
 
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data, {
-      allowEmpty: !merge,
+      allowEmpty: true,
       allowDeletes: merge ? 'all' : 'none',
       allowServerTimestamps: true,
     });
@@ -278,11 +278,13 @@ class WriteBatch {
     const transform = DocumentTransform.fromObject(documentRef, data);
     const documentMask = DocumentMask.fromObject(data);
 
+    const hasDocumentData = !document.isEmpty || !documentMask.isEmpty;
+
     let write;
 
     if (!merge) {
       write = document.toProto();
-    } else if (!document.isEmpty || !documentMask.isEmpty) {
+    } else if (hasDocumentData || transform.isEmpty) {
       write = document.toProto();
       write.updateMask = documentMask.toProto();
     }

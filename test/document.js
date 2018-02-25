@@ -971,6 +971,15 @@ describe('set document', function() {
       );
   });
 
+  it('supports empty merge', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(request, set(document(), updateMask()));
+      callback(null, writeResult(1));
+    };
+
+    return firestore.doc('collectionId/documentId').set({}, {merge: true});
+  });
+
   it('supports nested empty merge', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(
@@ -1020,12 +1029,6 @@ describe('set document', function() {
         .doc('collectionId/documentId')
         .set({foo: Firestore.FieldValue.delete()});
     }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
-  });
-
-  it('rejects empty merges', function() {
-    assert.throws(() => {
-      firestore.doc('collectionId/documentId').set({}, {merge: true});
-    }, /At least one field must be updated./);
   });
 
   it("doesn't accept arrays", function() {
