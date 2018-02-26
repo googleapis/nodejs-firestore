@@ -116,7 +116,7 @@ describe('FieldPath', function() {
     }, /Argument at index 1 should not be empty./);
   });
 
-  it('has equals() method', function() {
+  it('has isEqual() method', function() {
     let path = new FieldPath('a');
     let equals = new FieldPath('a');
     let notEquals = new FieldPath('a', 'b', 'a');

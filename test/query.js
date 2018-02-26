@@ -322,7 +322,7 @@ describe('query interface', function() {
     assert.ok(query.get);
   });
 
-  it('has equals() method', function() {
+  it('has isEqual() method', function() {
     const query = firestore.collection('collectionId');
 
     const queryEquals = (equals, notEquals) => {

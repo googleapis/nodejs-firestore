@@ -205,7 +205,7 @@ class Path {
   isEqual(other) {
     return (
       this === other ||
-      (is.instanceof(other, Path) && this.compareTo(other) === 0)
+      (is.instanceof(other, this.constructor) && this.compareTo(other) === 0)
     );
   }
 }
@@ -436,21 +436,6 @@ class ResourcePath extends Path {
 
     return super.compareTo(other);
   }
-
-  /**
-   * Returns true if this `ResourcePath` is equal to the provided value.
-   *
-   * @private
-   * @param {*} other The value to compare against.
-   * @return {boolean} true if this `ResourcePath` is equal to the provided
-   * value.
-   */
-  isEqual(other) {
-    return (
-      this === other ||
-      (is.instanceof(other, ResourcePath) && this.compareTo(other) === 0)
-    );
-  }
 }
 
 /**
@@ -595,15 +580,11 @@ class FieldPath extends Path {
   /**
    * Returns true if this `FieldPath` is equal to the provided value.
    *
-   * @private
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `FieldPath` is equal to the provided value.
    */
   isEqual(other) {
-    return (
-      this === other ||
-      (is.instanceof(other, FieldPath) && super.isEqual(other))
-    );
+    return super.isEqual(other);
   }
 }
 

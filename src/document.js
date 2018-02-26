@@ -629,7 +629,7 @@ class DocumentSnapshot {
       this === other ||
       (is.instance(other, DocumentSnapshot) &&
         this._ref.isEqual(other._ref) &&
-        deepEqual(this._fieldsProto, other._fieldsProto))
+        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
     );
   }
 

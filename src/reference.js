@@ -1402,9 +1402,9 @@ class Query {
     return (
       is.instanceof(other, Query) &&
       this._referencePath.isEqual(other._referencePath) &&
-      deepEqual(this._fieldFilters, other._fieldFilters) &&
-      deepEqual(this._fieldOrders, other._fieldOrders) &&
-      deepEqual(this._queryOptions, other._queryOptions)
+      deepEqual(this._fieldFilters, other._fieldFilters, {strict: true}) &&
+      deepEqual(this._fieldOrders, other._fieldOrders, {strict: true}) &&
+      deepEqual(this._queryOptions, other._queryOptions, {strict: true})
     );
   }
 

@@ -143,7 +143,7 @@ describe('Collection interface', function() {
     });
   });
 
-  it('has equals() method', function() {
+  it('has isEqual() method', function() {
     let coll1 = firestore.collection('coll1');
     let coll1Equals = firestore.collection('coll1');
     let coll2 = firestore.collection('coll2');

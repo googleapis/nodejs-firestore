@@ -1994,6 +1994,26 @@ describe('Query watch', function() {
       );
     });
 
+    it('for snapshots with different data types', function() {
+      let originalSnapshot;
+
+      return initialSnapshot(snapshot => {
+        return nextSnapshot(snapshot, () => {
+          watchHelper.sendDoc(doc1, {foo: '1'});
+        }).then(snapshot => {
+          originalSnapshot = snapshot;
+        });
+      }).then(() =>
+        initialSnapshot(snapshot => {
+          return nextSnapshot(snapshot, () => {
+            watchHelper.sendDoc(doc1, {foo: 1});
+          }).then(snapshot => {
+            assert.ok(!snapshot.isEqual(originalSnapshot));
+          });
+        })
+      );
+    });
+
     it('for snapshots with different queries', function() {
       let firstSnapshot;
 
