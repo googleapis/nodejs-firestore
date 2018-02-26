@@ -17,6 +17,7 @@
 'use strict';
 
 const assert = require('assert');
+const deepEqual = require('deep-equal');
 const is = require('is');
 
 const path = require('./path');
@@ -130,6 +131,21 @@ class GeoPoint {
     return `GeoPoint { latitude: ${this.latitude}, longitude: ${
       this.longitude
     } }`;
+  }
+
+  /**
+   * Returns true if this `GeoPoint` is equal to the provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `GeoPoint` is equal to the provided value.
+   */
+  isEqual(other) {
+    return (
+      this === other ||
+      (is.instanceof(other, GeoPoint) &&
+        this.latitude === other.latitude &&
+        this.longitude === other.longitude)
+    );
   }
 
   /**
@@ -598,6 +614,23 @@ class DocumentSnapshot {
         fields: this._fieldsProto,
       },
     };
+  }
+
+  /**
+   * Returns true if the document's data and path in this `DocumentSnapshot` is
+   * equal to the provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `DocumentSnapshot` is equal to the provided
+   * value.
+   */
+  isEqual(other) {
+    return (
+      this === other ||
+      (is.instance(other, DocumentSnapshot) &&
+        this._ref.isEqual(other._ref) &&
+        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
+    );
   }
 
   /**

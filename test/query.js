@@ -322,6 +322,100 @@ describe('query interface', function() {
     assert.ok(query.get);
   });
 
+  it('has isEqual() method', function() {
+    const query = firestore.collection('collectionId');
+
+    const queryEquals = (equals, notEquals) => {
+      for (let i = 0; i < equals.length; ++i) {
+        for (const equal of equals) {
+          assert.ok(equals[i].isEqual(equal));
+          assert.ok(equal.isEqual(equals[i]));
+        }
+
+        for (const notEqual of notEquals) {
+          assert.ok(!equals[i].isEqual(notEqual));
+          assert.ok(!notEqual.isEqual(equals[i]));
+        }
+      }
+    };
+
+    queryEquals(
+      [query.where('a', '=', '1'), query.where('a', '=', '1')],
+      [query.where('a', '=', 1)]
+    );
+
+    queryEquals(
+      [
+        query.orderBy('__name__'),
+        query.orderBy('__name__', 'asc'),
+        query.orderBy('__name__', 'ASC'),
+        query.orderBy(Firestore.FieldPath.documentId()),
+      ],
+      [
+        query.orderBy('foo'),
+        query.orderBy(Firestore.FieldPath.documentId(), 'desc'),
+      ]
+    );
+
+    queryEquals(
+      [query.limit(0), query.limit(0).limit(0)],
+      [query, query.limit(10)]
+    );
+
+    queryEquals(
+      [query.offset(0), query.offset(0).offset(0)],
+      [query, query.offset(10)]
+    );
+
+    queryEquals(
+      [query.orderBy('foo').startAt('a'), query.orderBy('foo').startAt('a')],
+      [
+        query.orderBy('foo').startAfter('a'),
+        query.orderBy('foo').endAt('a'),
+        query.orderBy('foo').endBefore('a'),
+        query.orderBy('foo').startAt('b'),
+        query.orderBy('bar').startAt('a'),
+      ]
+    );
+
+    queryEquals(
+      [
+        query.orderBy('foo').startAfter('a'),
+        query.orderBy('foo').startAfter('a'),
+      ],
+      [
+        query.orderBy('foo').startAfter('b'),
+        query.orderBy('bar').startAfter('a'),
+      ]
+    );
+
+    queryEquals(
+      [
+        query.orderBy('foo').endBefore('a'),
+        query.orderBy('foo').endBefore('a'),
+      ],
+      [query.orderBy('foo').endBefore('b'), query.orderBy('bar').endBefore('a')]
+    );
+
+    queryEquals(
+      [query.orderBy('foo').endAt('a'), query.orderBy('foo').endAt('a')],
+      [query.orderBy('foo').endAt('b'), query.orderBy('bar').endAt('a')]
+    );
+
+    queryEquals(
+      [
+        query
+          .orderBy('foo')
+          .orderBy('__name__')
+          .startAt('foo', 'foo'),
+        query
+          .orderBy('foo')
+          .startAt(firestore.snapshot_(document('foo').document, {})),
+      ],
+      []
+    );
+  });
+
   it('accepts all variations', function() {
     firestore.api.Firestore._runQuery = function(request) {
       requestEquals(

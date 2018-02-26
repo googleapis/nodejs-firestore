@@ -115,4 +115,12 @@ describe('FieldPath', function() {
       new FieldPath('foo', '');
     }, /Argument at index 1 should not be empty./);
   });
+
+  it('has isEqual() method', function() {
+    let path = new FieldPath('a');
+    let equals = new FieldPath('a');
+    let notEquals = new FieldPath('a', 'b', 'a');
+    assert.ok(path.isEqual(equals));
+    assert.ok(!path.isEqual(notEquals));
+  });
 });

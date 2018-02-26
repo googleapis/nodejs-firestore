@@ -17,6 +17,7 @@
 'use strict';
 
 const bun = require('bun');
+const deepEqual = require('deep-equal');
 const extend = require('extend');
 const is = require('is');
 const order = require('./order');
@@ -500,7 +501,7 @@ class DocumentReference {
 
     let watch = Watch.forDocument(this);
 
-    return watch.onSnapshot((readTime, docs) => {
+    return watch.onSnapshot((readTime, size, docs) => {
       for (let document of docs()) {
         if (document.ref.path === this.path) {
           onNext(document);
@@ -514,6 +515,22 @@ class DocumentReference {
       document.readTime = readTime;
       onNext(document.build());
     }, onError);
+  }
+
+  /**
+   * Returns true if this `DocumentReference` is equal to the provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `DocumentReference` is equal to the provided
+   * value.
+   */
+  isEqual(other) {
+    return (
+      this === other ||
+      (is.instanceof(other, DocumentReference) &&
+        this._firestore === other._firestore &&
+        this._referencePath.isEqual(other._referencePath))
+    );
   }
 }
 
@@ -650,6 +667,27 @@ class DocumentChange {
    */
   get newIndex() {
     return this._newIndex;
+  }
+
+  /**
+   * Returns true if the data in this `DocumentChange` is equal to the provided
+   * value.
+   *
+   * @param {*} other The value to compare against.
+   * @return true if this `DocumentChange` is equal to the provided value.
+   */
+  isEqual(other) {
+    if (this === other) {
+      return true;
+    }
+
+    return (
+      is.instanceof(other, DocumentChange) &&
+      this._type === other._type &&
+      this._oldIndex === other._oldIndex &&
+      this._newIndex === other._newIndex &&
+      this._document.isEqual(other._document)
+    );
   }
 }
 
@@ -814,18 +852,20 @@ class QuerySnapshot {
    * @param {Query} query - The originating query.
    * @param {string} readTime - The ISO 8601 time when this query snapshot was
    * current.
-   *
+   * @param {number} size - The number of documents in the result set.
    * @param {function} docs - A callback returning a sorted array of documents
    * matching this query
    * @param {function} changes - A callback returning a sorted array of
    * document change events for this snapshot.
    */
-  constructor(query, readTime, docs, changes) {
+  constructor(query, readTime, size, docs, changes) {
     this._query = query;
-    this._comparator = query.comparator();
     this._readTime = readTime;
+    this._size = size;
     this._docs = docs;
+    this._materializedDocs = null;
     this._changes = changes;
+    this._materializedChanges = null;
   }
 
   /**
@@ -873,6 +913,7 @@ class QuerySnapshot {
       return this._materializedDocs;
     }
     this._materializedDocs = this._docs();
+    this._docs = null;
     return this._materializedDocs;
   }
 
@@ -888,6 +929,7 @@ class QuerySnapshot {
       return this._materializedChanges;
     }
     this._materializedChanges = this._changes();
+    this._changes = null;
     return this._materializedChanges;
   }
 
@@ -908,7 +950,7 @@ class QuerySnapshot {
    * });
    */
   get empty() {
-    return this.docs.length === 0;
+    return this._size === 0;
   }
 
   /**
@@ -926,7 +968,7 @@ class QuerySnapshot {
    * });
    */
   get size() {
-    return this.docs.length;
+    return this._size;
   }
 
   /**
@@ -969,6 +1011,46 @@ class QuerySnapshot {
     for (let doc of this.docs) {
       callback.call(thisArg, doc);
     }
+  }
+
+  /**
+   * Returns true if the document data in this `QuerySnapshot` is equal to the
+   * provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `QuerySnapshot` is equal to the provided
+   * value.
+   */
+  isEqual(other) {
+    if (this === other) {
+      return true;
+    }
+
+    if (!is.instanceof(other, QuerySnapshot)) {
+      return false;
+    }
+
+    if (this._size !== other._size) {
+      return false;
+    }
+
+    if (!this._query.isEqual(other._query)) {
+      return false;
+    }
+
+    if (this._materializedDocs && !this._materializedChanges) {
+      // If we have only materialized the documents, we compare them first.
+      return (
+        isArrayEqual(this.docs, other.docs) &&
+        isArrayEqual(this.docChanges, other.docChanges)
+      );
+    }
+
+    // Otherwise, we compare the changes first as we expect there to be fewer.
+    return (
+      isArrayEqual(this.docChanges, other.docChanges) &&
+      isArrayEqual(this.docs, other.docs)
+    );
   }
 }
 
@@ -1031,7 +1113,7 @@ class Query {
     let fieldValues = [];
 
     for (let fieldOrder of fieldOrders) {
-      if (fieldOrder.field === FieldPath._DOCUMENT_ID) {
+      if (FieldPath._DOCUMENT_ID.isEqual(fieldOrder.field)) {
         fieldValues.push(documentSnapshot.ref);
       } else {
         let fieldValue = documentSnapshot.get(fieldOrder.field);
@@ -1125,7 +1207,7 @@ class Query {
 
     fieldPath = FieldPath.fromArgument(fieldPath);
 
-    if (fieldPath === FieldPath._DOCUMENT_ID) {
+    if (FieldPath._DOCUMENT_ID.isEqual(fieldPath)) {
       value = this._convertReference(value);
     }
 
@@ -1307,6 +1389,26 @@ class Query {
   }
 
   /**
+   * Returns true if this `Query` is equal to the provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `Query` is equal to the provided value.
+   */
+  isEqual(other) {
+    if (this === other) {
+      return true;
+    }
+
+    return (
+      is.instanceof(other, Query) &&
+      this._referencePath.isEqual(other._referencePath) &&
+      deepEqual(this._fieldFilters, other._fieldFilters, {strict: true}) &&
+      deepEqual(this._fieldOrders, other._fieldOrders, {strict: true}) &&
+      deepEqual(this._queryOptions, other._queryOptions, {strict: true})
+    );
+  }
+
+  /**
    * Computes the backend ordering semantics for DocumentSnapshot cursors.
    *
    * @private
@@ -1333,7 +1435,7 @@ class Query {
       }
     } else {
       for (let fieldOrder of fieldOrders) {
-        if (fieldOrder.field === FieldPath._DOCUMENT_ID) {
+        if (FieldPath._DOCUMENT_ID.isEqual(fieldOrder.field)) {
           hasDocumentId = true;
         }
       }
@@ -1395,7 +1497,7 @@ class Query {
     for (let i = 0; i < fieldValues.length; ++i) {
       let fieldValue = fieldValues[i];
 
-      if (fieldOrders[i].field === FieldPath._DOCUMENT_ID) {
+      if (FieldPath._DOCUMENT_ID.isEqual(fieldOrders[i].field)) {
         fieldValue = this._convertReference(fieldValue);
       }
 
@@ -1649,7 +1751,6 @@ class Query {
   _get(queryOptions) {
     let self = this;
     let docs = [];
-    let changes = [];
 
     return new Promise((resolve, reject) => {
       let readTime;
@@ -1663,19 +1764,27 @@ class Query {
           readTime = result.readTime;
           if (result.document) {
             let document = result.document;
-            changes.push(
-              new DocumentChange(
-                DocumentChange.ADDED,
-                document,
-                -1,
-                docs.length
-              )
-            );
             docs.push(document);
           }
         })
         .on('end', () => {
-          resolve(new QuerySnapshot(this, readTime, () => docs, () => changes));
+          resolve(
+            new QuerySnapshot(
+              this,
+              readTime,
+              docs.length,
+              () => docs,
+              () => {
+                let changes = [];
+                for (let i = 0; i < docs.length; ++i) {
+                  changes.push(
+                    new DocumentChange(DocumentChange.ADDED, docs[i], -1, i)
+                  );
+                }
+                return changes;
+              }
+            )
+          );
         });
     });
   }
@@ -1865,8 +1974,8 @@ class Query {
 
     let watch = Watch.forQuery(this);
 
-    return watch.onSnapshot((readTime, docs, changes) => {
-      onNext(new QuerySnapshot(this, readTime, docs, changes));
+    return watch.onSnapshot((readTime, size, docs, changes) => {
+      onNext(new QuerySnapshot(this, readTime, size, docs, changes));
     }, onError);
   }
 
@@ -1889,7 +1998,7 @@ class Query {
 
       for (let orderBy of orderBys) {
         let comp;
-        if (orderBy.field === FieldPath._DOCUMENT_ID) {
+        if (FieldPath._DOCUMENT_ID.isEqual(orderBy.field)) {
           comp = doc1.ref._referencePath.compareTo(doc2.ref._referencePath);
         } else {
           const v1 = doc1.protoField(orderBy.field);
@@ -2046,6 +2155,20 @@ class CollectionReference extends Query {
       return Promise.resolve(documentRef);
     });
   }
+
+  /**
+   * Returns true if this `CollectionReference` is equal to the provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `CollectionReference` is equal to the
+   * provided value.
+   */
+  isEqual(other) {
+    return (
+      this === other ||
+      (is.instanceof(other, CollectionReference) && super.isEqual(other))
+    );
+  }
 }
 /*!
  * Creates a new CollectionReference. Invoked by DocumentReference to avoid
@@ -2113,6 +2236,27 @@ function validateDocumentReference(value) {
     return true;
   }
   throw validate.customObjectError(value);
+}
+
+/**
+ * Verifies euqality for an array of objects using the `isEqual` interface.
+ *
+ * @param {Array.<Object>} left Array of objects supporting `isEqual`.
+ * @param {Array.<Object>} right Array of objects supporting `isEqual`.
+ * @return {boolean} True if arrays are equal.
+ */
+function isArrayEqual(left, right) {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  for (let i = 0; i < left.length; ++i) {
+    if (!left[i].isEqual(right[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 module.exports = FirestoreType => {

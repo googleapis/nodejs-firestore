@@ -316,6 +316,38 @@ describe('batch support', function() {
     return batch.commit().then(() => batch.commit);
   });
 
+  it('can return same write result', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      callback(null, {
+        commitTime: {
+          nanos: 0,
+          seconds: 0,
+        },
+        writeResults: [
+          {
+            updateTime: {
+              nanos: 0,
+              seconds: 0,
+            },
+          },
+          {
+            updateTime: {},
+          },
+        ],
+      });
+    };
+
+    let documentName = firestore.doc('col/doc');
+
+    let batch = firestore.batch();
+    batch.set(documentName, {});
+    batch.set(documentName, {});
+
+    return batch.commit().then(results => {
+      assert.ok(results[0].isEqual(results[1]));
+    });
+  });
+
   it('uses transactions on GCF', function() {
     // We use this environment variable during initialization to detect whether
     // we are running on GCF.
