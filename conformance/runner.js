@@ -43,7 +43,9 @@ const ignoredRe = [
 ];
 
 /** If non-empty, list the test cases to run exclusively. */
-const exclusiveRe = [];
+const exclusiveRe = [
+  /set: MergeAll cannot be specified with empty data./, // b/73495873
+];
 
 const docRef = function(path) {
   const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
