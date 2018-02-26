@@ -340,8 +340,8 @@ describe('query interface', function() {
     };
 
     queryEquals(
-      [query.where('a', '=', 'a'), query.where('a', '=', 'a')],
-      [query.where('a', '=', 'b')]
+      [query.where('a', '=', '1'), query.where('a', '=', '1')],
+      [query.where('a', '=', 1)]
     );
 
     queryEquals(
