@@ -130,6 +130,14 @@ declare namespace FirebaseFirestore {
 
     readonly latitude: number;
     readonly longitude: number;
+
+    /**
+     * Returns true if this `GeoPoint` is equal to the provided one.
+     *
+     * @param other The `GeoPoint` to compare against.
+     * @return true if this `GeoPoint` is equal to the provided one.
+     */
+    isEqual(other: GeoPoint): boolean;
   }
 
   /**
@@ -380,6 +388,14 @@ declare namespace FirebaseFirestore {
      * string.
      */
     readonly writeTime: string;
+
+    /**
+     * Returns true if this `WriteResult` is equal to the provided one.
+     *
+     * @param other The `WriteResult` to compare against.
+     * @return true if this `WriteResult` is equal to the provided one.
+     */
+    isEqual(other: WriteResult): boolean;
   }
 
   /**
@@ -509,6 +525,14 @@ declare namespace FirebaseFirestore {
      */
     onSnapshot(onNext: (snapshot: DocumentSnapshot) => void,
                onError?: (error: Error) => void): () => void;
+
+    /**
+     * Returns true if this `DocumentReference` is equal to the provided one.
+     *
+     * @param other The `DocumentReference` to compare against.
+     * @return true if this `DocumentReference` is equal to the provided one.
+     */
+    isEqual(other: DocumentReference): boolean;
   }
 
   /**
@@ -567,6 +591,15 @@ declare namespace FirebaseFirestore {
      * field exists in the document.
      */
     get(fieldPath: string|FieldPath): any;
+
+    /**
+     * Returns true if the document's data and path in this `DocumentSnapshot`
+     * is equal to the provided one.
+     *
+     * @param other The `DocumentSnapshot` to compare against.
+     * @return true if this `DocumentSnapshot` is equal to the provided one.
+     */
+    isEqual(other: DocumentSnapshot): boolean;
   }
 
   /**
@@ -810,6 +843,14 @@ declare namespace FirebaseFirestore {
      */
     onSnapshot(onNext: (snapshot: QuerySnapshot) => void,
                onError?: (error: Error) => void) : () => void;
+
+    /**
+     * Returns true if this `Query` is equal to the provided one.
+     *
+     * @param other The `Query` to compare against.
+     * @return true if this `Query` is equal to the provided one.
+     */
+    isEqual(other: Query): boolean;
   }
 
   /**
@@ -857,6 +898,15 @@ declare namespace FirebaseFirestore {
     forEach(
         callback: (result: QueryDocumentSnapshot) => void, thisArg?: any
     ): void;
+
+    /**
+     * Returns true if the document data in this `QuerySnapshot` is equal to the
+     * provided one.
+     *
+     * @param other The `QuerySnapshot` to compare against.
+     * @return true if this `QuerySnapshot` is equal to the provided one.
+     */
+    isEqual(other: QuerySnapshot): boolean;
   }
 
   /**
@@ -889,6 +939,15 @@ declare namespace FirebaseFirestore {
      * Is -1 for 'removed' events.
      */
     readonly newIndex: number;
+
+    /**
+     * Returns true if the data in this `DocumentChange` is equal to the
+     * provided one.
+     *
+     * @param other The `DocumentChange` to compare against.
+     * @return true if this `DocumentChange` is equal to the provided one.
+     */
+    isEqual(other: DocumentChange): boolean;
   }
 
   /**
@@ -933,6 +992,14 @@ declare namespace FirebaseFirestore {
      * newly created document after it has been written to the backend.
      */
     add(data: DocumentData): Promise<DocumentReference>;
+
+    /**
+     * Returns true if this `CollectionReference` is equal to the provided one.
+     *
+     * @param other The `CollectionReference` to compare against.
+     * @return true if this `CollectionReference` is equal to the provided one.
+     */
+    isEqual(other: CollectionReference): boolean;
   }
 
   /**
@@ -952,6 +1019,14 @@ declare namespace FirebaseFirestore {
      * Returns a sentinel for use with update() to mark a field for deletion.
      */
     static delete(): FieldValue;
+
+    /**
+     * Returns true if this `FieldValue` is equal to the provided one.
+     *
+     * @param other The `FieldValue` to compare against.
+     * @return true if this `FieldValue` is equal to the provided one.
+     */
+    isEqual(other: FieldValue): boolean;
   }
 
   /**
@@ -973,6 +1048,14 @@ declare namespace FirebaseFirestore {
      * It can be used in queries to sort or filter by the document ID.
      */
     static documentId(): FieldPath;
+
+    /**
+     * Returns true if this `FieldPath` is equal to the provided one.
+     *
+     * @param other The `FieldPath` to compare against.
+     * @return true if this `FieldPath` is equal to the provided one.
+     */
+    isEqual(other: FieldPath): boolean;
   }
 }
 

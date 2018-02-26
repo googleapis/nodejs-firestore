@@ -503,6 +503,11 @@ describe('instantiation', function() {
     assert.ok(is.defined(Firestore.CollectionReference));
     assert.ok(is.defined(Firestore.FieldValue));
     assert.ok(is.defined(Firestore.FieldPath));
+    assert.ok(
+      !Firestore.FieldValue.serverTimestamp().isEqual(
+        Firestore.FieldValue.delete()
+      )
+    );
   });
 });
 
@@ -555,6 +560,11 @@ describe('snapshot_() method', function() {
     assert.equal(
       data.geoPointValue.toString(),
       'GeoPoint { latitude: 50.1430847, longitude: -122.947778 }'
+    );
+    assert.ok(
+      data.geoPointValue.isEqual(
+        new Firestore.GeoPoint(50.1430847, -122.947778)
+      )
     );
   }
 

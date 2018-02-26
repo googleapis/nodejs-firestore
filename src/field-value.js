@@ -80,6 +80,16 @@ class FieldValue {
   static serverTimestamp() {
     return SERVER_TIMESTAMP_SENTINEL;
   }
+
+  /**
+   * Returns true if this `FieldValue` is equal to the provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `FieldValue` is equal to the provided value.
+   */
+  isEqual(other) {
+    return this === other;
+  }
 }
 
 DELETE_SENTINEL = new FieldValue();

@@ -194,6 +194,20 @@ class Path {
   toArray() {
     return this.segments.slice();
   }
+
+  /**
+   * Returns true if this `Path` is equal to the provided value.
+   *
+   * @private
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `Path` is equal to the provided value.
+   */
+  isEqual(other) {
+    return (
+      this === other ||
+      (is.instanceof(other, this.constructor) && this.compareTo(other) === 0)
+    );
+  }
 }
 
 /**
@@ -561,6 +575,16 @@ class FieldPath extends Path {
    */
   construct(segments) {
     return new FieldPath(segments);
+  }
+
+  /**
+   * Returns true if this `FieldPath` is equal to the provided value.
+   *
+   * @param {*} other The value to compare against.
+   * @return {boolean} true if this `FieldPath` is equal to the provided value.
+   */
+  isEqual(other) {
+    return super.isEqual(other);
   }
 }
 

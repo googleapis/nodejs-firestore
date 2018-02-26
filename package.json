@@ -53,6 +53,7 @@
     "@google-cloud/common": "^0.16.0",
     "@google-cloud/common-grpc": "^0.5.3",
     "bun": "^0.0.12",
+    "deep-equal": "^1.0.1",
     "extend": "^3.0.1",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^0.14.3",

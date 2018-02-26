@@ -142,4 +142,12 @@ describe('Collection interface', function() {
       assert.ok(documentRef.id.length, 20);
     });
   });
+
+  it('has isEqual() method', function() {
+    let coll1 = firestore.collection('coll1');
+    let coll1Equals = firestore.collection('coll1');
+    let coll2 = firestore.collection('coll2');
+    assert.ok(coll1.isEqual(coll1Equals));
+    assert.ok(!coll1.isEqual(coll2));
+  });
 });
