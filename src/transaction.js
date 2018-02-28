@@ -120,7 +120,7 @@ class Transaction {
    * @example
    * let firstDoc = firestore.doc('col/doc1');
    * let secondDoc = firestore.doc('col/doc2');
-   * let resultDoc = firestore.doc('col/doc2');
+   * let resultDoc = firestore.doc('col/doc3');
    *
    * firestore.runTransaction(transaction => {
    *   return transaction.getAll(firstDoc, secondDoc).then(docs => {
