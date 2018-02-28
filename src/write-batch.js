@@ -613,7 +613,7 @@ function validateUpdateMap(data) {
 
   for (let i = 1; i < fields.length; ++i) {
     if (fields[i - 1].isPrefixOf(fields[i])) {
-      throw new Error(`Field "${fields[i - 1]}" has conflicting definitions.`);
+      throw new Error(`Field "${fields[i - 1]}" was specified multiple times.`);
     }
   }
 

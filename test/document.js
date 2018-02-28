@@ -1500,53 +1500,53 @@ describe('update document', function() {
         foo: 'foobar',
         'foo.bar': 'foobar',
       });
-    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" has conflicting definitions\./);
+    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
 
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update({
         foo: 'foobar',
         'foo.bar.foobar': 'foobar',
       });
-    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" has conflicting definitions\./);
+    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
 
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update({
         'foo.bar': 'foobar',
         foo: 'foobar',
       });
-    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" has conflicting definitions\./);
+    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
 
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update({
         'foo.bar': 'foobar',
         'foo.bar.foo': 'foobar',
       });
-    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo.bar" has conflicting definitions\./);
+    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo.bar" was specified multiple times\./);
 
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update({
         'foo.bar': {foo: 'foobar'},
         'foo.bar.foo': 'foobar',
       });
-    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo.bar" has conflicting definitions\./);
+    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo.bar" was specified multiple times\./);
 
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .update('foo.bar', 'foobar', 'foo', 'foobar');
-    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" has conflicting definitions\./);
+    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
 
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
-    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" has conflicting definitions\./);
+    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
 
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
-    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" has conflicting definitions\./);
+    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
   });
 
   it('with valid field paths', function() {
