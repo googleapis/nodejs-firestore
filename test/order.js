@@ -177,7 +177,7 @@ describe('Order', function() {
       [resource('projects/p1/databases/d1/documents/c10/doc1')],
       [resource('projects/p1/databases/dkkkkklkjnjkkk1/documents/c2/doc1')],
       [resource('projects/p2/databases/d2/documents/c1/doc1')],
-      [resource('projects/p2/databases/d2/documents/cl1-/doc1')],
+      [resource('projects/p2/databases/d2/documents/cl-/doc1')],
 
       // geo points
       [geopoint(-90, -180)],
