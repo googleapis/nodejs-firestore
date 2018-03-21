@@ -217,7 +217,6 @@ class DocumentSnapshot {
   static fromObject(ref, obj) {
     return new DocumentSnapshot(ref, DocumentSnapshot.encodeFields(obj));
   }
-
   /**
    * Creates a DocumentSnapshot from an UpdateMap.
    *
@@ -272,7 +271,7 @@ class DocumentSnapshot {
             target[key] = childNode;
             return target;
           } else {
-            return null;
+            return !is.empty(target) ? target : null;
           }
         }
       } else {
