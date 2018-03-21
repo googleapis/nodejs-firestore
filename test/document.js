@@ -290,13 +290,13 @@ describe('serialize document', function() {
   it("doesn't serialize unsupported types", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
-    }, /Cannot use custom type "undefined" as a Firestore type./);
+    }, /Invalid use of type "undefined" as a Firestore argument./);
 
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .set({foo: Firestore.FieldPath.documentId()});
-    }, /Cannot use "FieldPath" as a Firestore type./);
+    }, /Cannot use object of type "FieldPath" as a Firestore value./);
   });
 
   it('serializes date before 1970', function() {
@@ -780,7 +780,7 @@ describe('get document', function() {
       .then(doc => {
         assert.throws(() => {
           doc.get();
-        }, /Argument "field" is not a valid FieldPath. Cannot use custom type "undefined" as a Firestore type./);
+        }, /Argument "field" is not a valid FieldPath. Invalid use of type "undefined" as a Firestore argument./);
       });
   });
 });
