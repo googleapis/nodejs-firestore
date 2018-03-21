@@ -192,7 +192,7 @@ class DocumentReference {
   }
 
   /**
-   * The last path document of the referenced document.
+   * The last path element of the referenced document.
    *
    * @type {string}
    * @name DocumentReference#id
@@ -2046,7 +2046,7 @@ class CollectionReference extends Query {
   }
 
   /**
-   * ID of the referenced collection.
+   * The last path element of the referenced collection.
    *
    * @type {string}
    * @name CollectionReference#id
