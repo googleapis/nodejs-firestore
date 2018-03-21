@@ -272,7 +272,7 @@ class DocumentSnapshot {
             target[key] = childNode;
             return target;
           } else {
-            return null;
+            return !is.empty(target) ? target : null;
           }
         }
       } else {

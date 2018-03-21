@@ -1455,31 +1455,47 @@ describe('update document', function() {
       requestEquals(
         request,
         update(
-          document('foo', {
+          document('a', {
             mapValue: {
               fields: {
-                bar: {
-                  stringValue: 'include',
-                  valueType: 'stringValue',
+                b: {
+                  valueType: 'mapValue',
+                  mapValue: {
+                    fields: {
+                      keep: {
+                        stringValue: 'keep',
+                        valueType: 'stringValue',
+                      },
+                    },
+                  },
+                },
+                c: {
+                  valueType: 'mapValue',
+                  mapValue: {
+                    fields: {
+                      keep: {
+                        stringValue: 'keep',
+                        valueType: 'stringValue',
+                      },
+                    },
+                  },
                 },
               },
             },
             valueType: 'mapValue',
           }),
-          updateMask('foo.bar', 'foo.delete')
+          updateMask('a.b.delete', 'a.b.keep', 'a.c.delete', 'a.c.keep')
         )
       );
 
       callback(null, writeResult(1));
     };
-    return firestore
-      .doc('collectionId/documentId')
-      .update(
-        'foo.bar',
-        'include',
-        'foo.delete',
-        Firestore.FieldValue.delete()
-      );
+    return firestore.doc('collectionId/documentId').update({
+      'a.b.delete': Firestore.FieldValue.delete(),
+      'a.b.keep': 'keep',
+      'a.c.delete': Firestore.FieldValue.delete(),
+      'a.c.keep': 'keep',
+    });
   });
 
   it('with field with dot ', function() {
