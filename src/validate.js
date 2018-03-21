@@ -142,21 +142,22 @@ module.exports = validators => {
 
   exports.customObjectError = val => {
     if (is.object(val) && val.constructor.name !== 'Object') {
-      switch (val.constructor.name) {
+      const typeName = val.constructor.name;
+      switch (typeName) {
         case 'DocumentReference':
         case 'FieldPath':
         case 'FieldValue':
         case 'GeoPoint':
           return new Error(
-            `Detected an object of type "${
-              val.constructor.name
-            }" that doesn't match the expected instance. Please ensure that ` +
-              'the Firestore types you are using are from the same NPM package.'
+            `Detected an object of type "${typeName}" that doesn't match the ` +
+              'expected instance. Please ensure that the Firestore types you ' +
+              'are using are from the same NPM package.'
           );
         default:
           return new Error(
-            "Firestore doesn't support serialization of JavaScript objects " +
-              "that were constructed using the 'new' operator."
+            `Couldn't serialize object of type "${typeName}". Firestore ` +
+              "doesn't support JavaScript objects with custom prototypes " +
+              "(i.e. objects that were created via the 'new' operator)."
           );
       }
     } else {

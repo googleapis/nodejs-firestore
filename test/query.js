@@ -752,7 +752,7 @@ describe('where() interface', function() {
 
     assert.throws(() => {
       query.where('foo', '=', new Foo()).get();
-    }, /Argument "value" is not a valid FieldValue. Firestore doesn't support serialization of JavaScript objects that were constructed using the 'new' operator./);
+    }, /Argument "value" is not a valid FieldValue. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
 
     assert.throws(() => {
       query.where('foo', '=', new FieldPath()).get();

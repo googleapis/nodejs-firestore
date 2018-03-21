@@ -297,6 +297,11 @@ describe('serialize document', function() {
         .doc('collectionId/documentId')
         .set({foo: Firestore.FieldPath.documentId()});
     }, /Cannot use object of type "FieldPath" as a Firestore value./);
+
+    assert.throws(() => {
+      class Foo {}
+      firestore.doc('collectionId/documentId').set({foo: new Foo()});
+    }, /Argument "data" is not a valid Document. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
   });
 
   it('serializes date before 1970', function() {
