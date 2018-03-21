@@ -217,7 +217,6 @@ class DocumentSnapshot {
   static fromObject(ref, obj) {
     return new DocumentSnapshot(ref, DocumentSnapshot.encodeFields(obj));
   }
-
   /**
    * Creates a DocumentSnapshot from an UpdateMap.
    *
