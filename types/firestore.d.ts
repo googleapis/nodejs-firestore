@@ -1000,6 +1000,41 @@ declare namespace FirebaseFirestore {
      * @return true if this `CollectionReference` is equal to the provided one.
      */
     isEqual(other: CollectionReference): boolean;
+
+    /**
+     * Creates and returns a new CollectionReference instance that applies a
+     * field mask and only returns the specified subset of fields for calls to
+     * `get()`, `stream()`, `getAll()` and `streamAll()`. You can specify a list
+     * of field paths to return, or use an empty list to only return the
+     * references of matching documents.
+     *
+     * This function returns a new (immutable) instance of the
+     * CollectionReference (rather than modify the existing instance) to impose
+     * the field mask.
+     *
+     * @param field The field paths to return.
+     * @return The created Query.
+     */
+    select(...field: (string | FieldPath)[]): CollectionReference;
+
+    /**
+     * Retrieves all documents in this CollectionReference.  Documents with
+     * subcollections that contain no other data are returned as
+     * `DocumentSnapshots` whose `exists` property returns false.
+     *
+     * @return A Promise that will be resolved with the contents of of this
+     * collection.
+     */
+    getAll(): Promise<DocumentSnapshot>;
+
+    /*
+     * Retrieves all documents in this CollectionReference in a Node Stream.
+     * Documents with subcollections that contain no other data are returned as
+     * `DocumentSnapshots` whose `exists` property returns false.
+     *
+     * @return A stream of DocumentSnapshot.
+     */
+    streamAll(): NodeJS.ReadableStream;
   }
 
   /**
