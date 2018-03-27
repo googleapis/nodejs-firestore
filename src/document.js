@@ -1399,7 +1399,9 @@ function validateFieldValue(val, options, depth) {
   } else if (is.instanceof(val, GeoPoint)) {
     return true;
   } else if (is.instanceof(val, FieldPath)) {
-    throw new Error('Cannot use "FieldPath" as a Firestore type.');
+    throw new Error(
+      'Cannot use object of type "FieldPath" as a Firestore value.'
+    );
   } else if (is.object(val)) {
     throw validate.customObjectError(val);
   }

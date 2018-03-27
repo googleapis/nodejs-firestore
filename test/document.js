@@ -290,13 +290,18 @@ describe('serialize document', function() {
   it("doesn't serialize unsupported types", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
-    }, /Cannot use custom type "undefined" as a Firestore type./);
+    }, /Invalid use of type "undefined" as a Firestore argument./);
 
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .set({foo: Firestore.FieldPath.documentId()});
-    }, /Cannot use "FieldPath" as a Firestore type./);
+    }, /Cannot use object of type "FieldPath" as a Firestore value./);
+
+    assert.throws(() => {
+      class Foo {}
+      firestore.doc('collectionId/documentId').set({foo: new Foo()});
+    }, /Argument "data" is not a valid Document. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
   });
 
   it('serializes date before 1970', function() {
@@ -780,7 +785,7 @@ describe('get document', function() {
       .then(doc => {
         assert.throws(() => {
           doc.get();
-        }, /Argument "field" is not a valid FieldPath. Cannot use custom type "undefined" as a Firestore type./);
+        }, /Argument "field" is not a valid FieldPath. Invalid use of type "undefined" as a Firestore argument./);
       });
   });
 });

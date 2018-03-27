@@ -141,21 +141,29 @@ module.exports = validators => {
   };
 
   exports.customObjectError = val => {
-    let typeName = is.object(val) ? val.constructor.name : typeof val;
-
-    switch (typeName) {
-      case 'DocumentReference':
-      case 'FieldPath':
-      case 'FieldValue':
-      case 'GeoPoint':
-        return new Error(
-          `Detected an object of type "${typeName}" that doesn't match the expected instance. Please ensure that ` +
-            'the Firestore types you are using are from the same NPM package.'
-        );
-      default:
-        return new Error(
-          `Cannot use custom type "${typeName}" as a Firestore type.`
-        );
+    if (is.object(val) && val.constructor.name !== 'Object') {
+      const typeName = val.constructor.name;
+      switch (typeName) {
+        case 'DocumentReference':
+        case 'FieldPath':
+        case 'FieldValue':
+        case 'GeoPoint':
+          return new Error(
+            `Detected an object of type "${typeName}" that doesn't match the ` +
+              'expected instance. Please ensure that the Firestore types you ' +
+              'are using are from the same NPM package.'
+          );
+        default:
+          return new Error(
+            `Couldn't serialize object of type "${typeName}". Firestore ` +
+              "doesn't support JavaScript objects with custom prototypes " +
+              "(i.e. objects that were created via the 'new' operator)."
+          );
+      }
+    } else {
+      return new Error(
+        `Invalid use of type "${typeof val}" as a Firestore argument.`
+      );
     }
   };
 
