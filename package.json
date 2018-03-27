@@ -51,7 +51,7 @@
     "test": "repo-tools test run --cmd npm -- run cover"
   },
   "dependencies": {
-    "@google-cloud/common": "^0.16.0",
+    "@google-cloud/common": "^0.17.0",
     "@google-cloud/common-grpc": "^0.6.0",
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
