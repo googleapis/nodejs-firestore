@@ -65,6 +65,8 @@ const convertInput = {
         return convertObject(value);
       } else if (is.array(value)) {
         return convertArray(value);
+      } else if (value === 'NaN') {
+        return NaN;
       } else if (value === 'Delete') {
         return Firestore.FieldValue.delete();
       } else if (value === 'ServerTimestamp') {
