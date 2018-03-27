@@ -217,7 +217,6 @@ class DocumentSnapshot {
   static fromObject(ref, obj) {
     return new DocumentSnapshot(ref, DocumentSnapshot.encodeFields(obj));
   }
-
   /**
    * Creates a DocumentSnapshot from an UpdateMap.
    *
@@ -272,7 +271,7 @@ class DocumentSnapshot {
             target[key] = childNode;
             return target;
           } else {
-            return null;
+            return !is.empty(target) ? target : null;
           }
         }
       } else {
@@ -1400,7 +1399,9 @@ function validateFieldValue(val, options, depth) {
   } else if (is.instanceof(val, GeoPoint)) {
     return true;
   } else if (is.instanceof(val, FieldPath)) {
-    throw new Error('Cannot use "FieldPath" as a Firestore type.');
+    throw new Error(
+      'Cannot use object of type "FieldPath" as a Firestore value.'
+    );
   } else if (is.object(val)) {
     throw validate.customObjectError(val);
   }

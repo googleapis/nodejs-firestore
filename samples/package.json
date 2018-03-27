@@ -13,10 +13,10 @@
     "test": "repo-tools test run --cmd npm -- run ava"
   },
   "dependencies": {
-    "@google-cloud/firestore": "0.13.0"
+    "@google-cloud/firestore": "0.13.1"
   },
   "devDependencies": {
-    "@google-cloud/nodejs-repo-tools": "2.1.0",
+    "@google-cloud/nodejs-repo-tools": "2.2.3",
     "ava": "0.23.0",
     "proxyquire": "1.8.0",
     "sinon": "4.0.2"

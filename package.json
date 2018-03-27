@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -30,11 +30,12 @@
   ],
   "types": "./types/firestore.d.ts",
   "contributors": [
+    "Alexander Fenster <github@fenster.name>",
     "Bond <bondz@users.noreply.github.com>",
-    "Jason Dobry <jmdobry@users.noreply.github.com>",
-    "Luke Sneeringer <luke@sneeringer.com>",
+    "Jason Dobry <jdobry@google.com>",
     "Luke Sneeringer <lukesneeringer@google.com>",
     "Sebastian Schmidt <mrschmidt@google.com>",
+    "Stephen Sawchuk <sawchuk@gmail.com>",
     "greenkeeper[bot] <greenkeeper[bot]@users.noreply.github.com>"
   ],
   "scripts": {
@@ -62,7 +63,7 @@
     "through2": "^2.0.3"
   },
   "devDependencies": {
-    "@google-cloud/nodejs-repo-tools": "^2.1.4",
+    "@google-cloud/nodejs-repo-tools": "^2.2.3",
     "@types/mocha": "^2.2.46",
     "@types/node": "^9.4.5",
     "duplexify": "^3.5.3",

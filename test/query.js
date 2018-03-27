@@ -709,7 +709,7 @@ describe('where() interface', function() {
       let query = firestore.collection('collectionId');
       query = query.where({}, '=', 'bar');
       return query.get();
-    }, /Argument "fieldPath" is not a valid FieldPath. Cannot use custom type "Object" as a Firestore type./);
+    }, /Argument "fieldPath" is not a valid FieldPath. Invalid use of type "object" as a Firestore argument/);
 
     class FieldPath {}
     assert.throws(() => {
@@ -724,7 +724,7 @@ describe('where() interface', function() {
       let query = firestore.collection('collectionId');
       query = query.where('foo', '=', new Firestore.FieldPath('bar'));
       return query.get();
-    }, /Argument "value" is not a valid FieldValue. Cannot use "FieldPath" as a Firestore type./);
+    }, /Argument "value" is not a valid FieldValue. Cannot use object of type "FieldPath" as a Firestore value./);
   });
 
   it('rejects field transforms as value', function() {
@@ -752,7 +752,7 @@ describe('where() interface', function() {
 
     assert.throws(() => {
       query.where('foo', '=', new Foo()).get();
-    }, /Argument "value" is not a valid FieldValue. Cannot use custom type "Foo" as a Firestore type./);
+    }, /Argument "value" is not a valid FieldValue. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
 
     assert.throws(() => {
       query.where('foo', '=', new FieldPath()).get();
@@ -1039,7 +1039,7 @@ describe('select() interface', function() {
     let query = firestore.collection('collectionId');
     assert.throws(function() {
       query.select(1);
-    }, /Argument at index 0 is not a valid FieldPath. Cannot use custom type "number" as a Firestore type./);
+    }, /Argument at index 0 is not a valid FieldPath. Invalid use of type "number" as a Firestore argument./);
 
     assert.throws(function() {
       query.select('.');

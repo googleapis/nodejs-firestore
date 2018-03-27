@@ -121,4 +121,4 @@ See [LICENSE](https://github.com/googleapis/nodejs-firestore/blob/master/LICENSE
 
 [client-docs]: https://cloud.google.com/nodejs/docs/reference/firestore/latest/
 [product-docs]: https://firebase.google.com/docs/firestore/
-[shell_img]: http://gstatic.com/cloudssh/images/open-btn.png
+[shell_img]: //gstatic.com/cloudssh/images/open-btn.png

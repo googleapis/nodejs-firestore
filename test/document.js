@@ -290,13 +290,18 @@ describe('serialize document', function() {
   it("doesn't serialize unsupported types", function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
-    }, /Cannot use custom type "undefined" as a Firestore type./);
+    }, /Invalid use of type "undefined" as a Firestore argument./);
 
     assert.throws(() => {
       firestore
         .doc('collectionId/documentId')
         .set({foo: Firestore.FieldPath.documentId()});
-    }, /Cannot use "FieldPath" as a Firestore type./);
+    }, /Cannot use object of type "FieldPath" as a Firestore value./);
+
+    assert.throws(() => {
+      class Foo {}
+      firestore.doc('collectionId/documentId').set({foo: new Foo()});
+    }, /Argument "data" is not a valid Document. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
   });
 
   it('serializes date before 1970', function() {
@@ -780,7 +785,7 @@ describe('get document', function() {
       .then(doc => {
         assert.throws(() => {
           doc.get();
-        }, /Argument "field" is not a valid FieldPath. Cannot use custom type "undefined" as a Firestore type./);
+        }, /Argument "field" is not a valid FieldPath. Invalid use of type "undefined" as a Firestore argument./);
       });
   });
 });
@@ -1455,31 +1460,47 @@ describe('update document', function() {
       requestEquals(
         request,
         update(
-          document('foo', {
+          document('a', {
             mapValue: {
               fields: {
-                bar: {
-                  stringValue: 'include',
-                  valueType: 'stringValue',
+                b: {
+                  valueType: 'mapValue',
+                  mapValue: {
+                    fields: {
+                      keep: {
+                        stringValue: 'keep',
+                        valueType: 'stringValue',
+                      },
+                    },
+                  },
+                },
+                c: {
+                  valueType: 'mapValue',
+                  mapValue: {
+                    fields: {
+                      keep: {
+                        stringValue: 'keep',
+                        valueType: 'stringValue',
+                      },
+                    },
+                  },
                 },
               },
             },
             valueType: 'mapValue',
           }),
-          updateMask('foo.bar', 'foo.delete')
+          updateMask('a.b.delete', 'a.b.keep', 'a.c.delete', 'a.c.keep')
         )
       );
 
       callback(null, writeResult(1));
     };
-    return firestore
-      .doc('collectionId/documentId')
-      .update(
-        'foo.bar',
-        'include',
-        'foo.delete',
-        Firestore.FieldValue.delete()
-      );
+    return firestore.doc('collectionId/documentId').update({
+      'a.b.delete': Firestore.FieldValue.delete(),
+      'a.b.keep': 'keep',
+      'a.c.delete': Firestore.FieldValue.delete(),
+      'a.c.keep': 'keep',
+    });
   });
 
   it('with field with dot ', function() {
