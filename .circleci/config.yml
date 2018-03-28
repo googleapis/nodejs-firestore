@@ -90,7 +90,12 @@ jobs:
             fi
       - run:
           name: Install codecov.
-          command: npm install codecov
+          command: |-
+            npm install
+            repo_tools="node_modules/@google-cloud/nodejs-repo-tools/bin/tools"
+            if ! test -x "$repo_tools"; then
+              chmod +x "$repo_tools"
+            fi codecov
       - run:
           name: Run unit tests.
           command: npm test
@@ -164,7 +169,12 @@ jobs:
                 -k "${SYSTEM_TESTS_ENCRYPTION_KEY}"
       - run:
           name: Install modules and dependencies.
-          command: npm install
+          command: |-
+            npm install
+            repo_tools="node_modules/@google-cloud/nodejs-repo-tools/bin/tools"
+            if ! test -x "$repo_tools"; then
+              chmod +x "$repo_tools"
+            fi
       - run:
           name: Run system tests.
           command: npm run system-test
