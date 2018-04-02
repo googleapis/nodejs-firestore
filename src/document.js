@@ -1105,9 +1105,11 @@ class DocumentMask {
    * @returns {Object} A Firestore 'DocumentMask' Proto.
    */
   toProto() {
-    return {
-      fieldPaths: this._fieldPaths,
-    };
+    return this.isEmpty
+      ? {}
+      : {
+          fieldPaths: this._fieldPaths,
+        };
   }
 }
 
