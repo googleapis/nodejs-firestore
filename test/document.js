@@ -127,7 +127,9 @@ function document(field, value) {
 }
 
 function updateMask(/* field */) {
-  return {fieldPaths: Array.prototype.slice.call(arguments)};
+  return arguments.length === 0
+    ? {}
+    : {fieldPaths: Array.prototype.slice.call(arguments)};
 }
 
 function found(document) {

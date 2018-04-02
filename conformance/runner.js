@@ -40,7 +40,6 @@ const firestore = new Firestore({
 const ignoredRe = [
   // Node doesn't support field masks for set().
   /^set-merge: .*$/,
-  /set: MergeAll cannot be specified with empty data./, // b/73495873
 ];
 
 /** If non-empty, list the test cases to run exclusively. */

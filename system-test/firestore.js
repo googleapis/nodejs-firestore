@@ -401,6 +401,7 @@ describe('DocumentReference class', function() {
       () => ref.create({}),
       () => ref.delete(),
       () => ref.create({a: {b: 'c'}}),
+      () => ref.set({}, {merge: true}),
       () => ref.set({}),
       () => ref.set({a: {b: 'c'}}),
       () => ref.set({a: {d: 'e'}}, {merge: true}),
@@ -423,6 +424,7 @@ describe('DocumentReference class', function() {
     const expectedState = [
       {},
       null,
+      {a: {b: 'c'}},
       {a: {b: 'c'}},
       {},
       {a: {b: 'c'}},
