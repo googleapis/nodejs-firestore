@@ -78,6 +78,17 @@ declare namespace FirebaseFirestore {
     getAll(...documentRef: DocumentReference[]): Promise<DocumentSnapshot[]>;
 
     /**
+     * Retrieves multiple documents from Firestore.
+     *
+     * @param options An object to configure the behavior of this `getAll` call
+     * (i.e. the set of fields to return).
+     * @param documentRef The `DocumentReferences` to receive.
+     * @return A Promise that resolves with an array of resulting document
+     * snapshots.
+     */
+    getAll(options:GetOptions, ...documentRef: DocumentReference[]): Promise<DocumentSnapshot[]>;
+
+    /**
      * Fetches the root collections that are associated with this Firestore
      * database.
      *
@@ -148,7 +159,6 @@ declare namespace FirebaseFirestore {
    */
   export class Transaction {
     private constructor();
-
 
     /**
      * Retrieves a query result. Holds a pessimistic lock on all returned
@@ -377,6 +387,19 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * An options object that configures the behavior of document reads within
+   * Firestore.
+   */
+  export interface GetOptions {
+    /**
+     * If set, configures a read operation to only include the provided fields.
+     * You can specify a list of field paths to return or use an empty list to
+     * only return the document metadata.
+     */
+    readonly fieldMask?: (string|FieldPath)[];
+  }
+
+  /**
    * A WriteResult wraps the write time set by the Firestore servers on `sets()`,
    * `updates()`, and `creates()`.
    */
@@ -508,10 +531,12 @@ declare namespace FirebaseFirestore {
     /**
      * Reads the document referred to by this `DocumentReference`.
      *
+     * @param options An object to configure the behavior of this `get` call
+     * (i.e. the set of fields to return).
      * @return A Promise resolved with a DocumentSnapshot containing the
      * current document contents.
      */
-    get(): Promise<DocumentSnapshot>;
+    get(options?: GetOptions): Promise<DocumentSnapshot>;
 
     /**
      * Attaches a listener for DocumentSnapshot events.
@@ -526,6 +551,22 @@ declare namespace FirebaseFirestore {
     onSnapshot(onNext: (snapshot: DocumentSnapshot) => void,
                onError?: (error: Error) => void): () => void;
 
+
+    /**
+     * Attaches a listener for DocumentSnapshot events.
+     *
+     * @param options An object to configure the behavior of this snapshot
+     * listener (i.e. the set of fields to return).
+     * @param onNext A callback to be called every time a new `DocumentSnapshot`
+     * is available.
+     * @param onError A callback to be called if the listen fails or is
+     * cancelled. No further callbacks will occur.
+     * @return An unsubscribe function that can be called to cancel
+     * the snapshot listener.
+     */
+    onSnapshot(options: GetOptions,
+               onNext: (snapshot: DocumentSnapshot) => void,
+               onError?: (error: Error) => void): () => void;
     /**
      * Returns true if this `DocumentReference` is equal to the provided one.
      *
@@ -724,6 +765,10 @@ declare namespace FirebaseFirestore {
      * This function returns a new (immutable) instance of the Query (rather
      * than modify the existing instance) to impose the field mask.
      *
+     * @deprecated Use `get(options:GetOptions)` or `stream(options:GetOptions)`
+     * to specify a field mask. The field mask specified via `select()` does not
+     * apply to `getAll()`/`streamAll()`.
+     *
      * @param field The field paths to return.
      * @return The created Query.
      */
@@ -820,16 +865,20 @@ declare namespace FirebaseFirestore {
     /**
      * Executes the query and returns the results as a `QuerySnapshot`.
      *
+     * @param options An object to configure the behavior of this `get` call
+     * (i.e. the set of fields to return).
      * @return A Promise that will be resolved with the results of the Query.
      */
-    get(): Promise<QuerySnapshot>;
+    get(options?:GetOptions): Promise<QuerySnapshot>;
 
     /*
      * Executes the query and returns the results as Node Stream.
      *
+     * @param options An object to configure the behavior of this `stream` call
+     * (i.e. the set of fields to return).
      * @return A stream of QueryDocumentSnapshot.
      */
-    stream(): NodeJS.ReadableStream;
+    stream(options?:GetOptions): NodeJS.ReadableStream;
 
     /**
      * Attaches a listener for `QuerySnapshot `events.
@@ -842,6 +891,22 @@ declare namespace FirebaseFirestore {
      * the snapshot listener.
      */
     onSnapshot(onNext: (snapshot: QuerySnapshot) => void,
+               onError?: (error: Error) => void) : () => void;
+
+    /**
+     * Attaches a listener for `QuerySnapshot `events.
+     *
+     * @param options An object to configure the behavior of this snapshot
+     * listener (i.e. the set of fields to return).
+     * @param onNext A callback to be called every time a new `QuerySnapshot`
+     * is available.
+     * @param onError A callback to be called if the listen fails or is
+     * cancelled. No further callbacks will occur.
+     * @return An unsubscribe function that can be called to cancel
+     * the snapshot listener.
+     */
+    onSnapshot(options: GetOptions,
+               onNext: (snapshot: QuerySnapshot) => void,
                onError?: (error: Error) => void) : () => void;
 
     /**
@@ -1000,6 +1065,29 @@ declare namespace FirebaseFirestore {
      * @return true if this `CollectionReference` is equal to the provided one.
      */
     isEqual(other: CollectionReference): boolean;
+
+    /**
+     * Retrieves all documents in this CollectionReference.  Documents with
+     * subcollections that contain no other data are returned as
+     * `DocumentSnapshots` whose `exists` property is set to false.
+     *
+     * @param options An object to configure the behavior of this `getAll` call
+     * (i.e. the set of fields to return).
+     * @return A Promise that will be resolved with the contents of of this
+     * collection.
+     */
+    getAll(options?:GetOptions): Promise<DocumentSnapshot>;
+
+    /*
+     * Retrieves all documents in this CollectionReference in a Node Stream.
+     * Documents with subcollections that contain no other data are returned as
+     * `DocumentSnapshots` whose `exists` property is set to false.
+     *
+     * @param options An object to configure the behavior of this `streamAll`
+     * call (i.e. the set of fields to return).
+     * @return A stream of DocumentSnapshots.
+     */
+    streamAll(options?:GetOptions): NodeJS.ReadableStream;
   }
 
   /**
