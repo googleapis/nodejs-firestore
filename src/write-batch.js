@@ -259,9 +259,12 @@ class WriteBatch {
    * document to be set.
    * @param {DocumentData} data - The object to serialize as the document.
    * @param {SetOptions=} options - An object to configure the set behavior.
-   * @param {boolean=} options.merge - If true, set() only replaces the
-   * values specified in its data argument. Fields omitted from this set() call
+   * @param {boolean=} options.merge - If true, set() merges the values
+   * specified in its data argument. Fields omitted from this set() call
    * remain untouched.
+   * @param {Array.<string|FieldPath>=} options.mergeFields - If provided,
+   * set() only replaces the specified field paths. All data at the specified
+   * field paths is fully replaced, while the remaining fields remain untouched.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -276,27 +279,40 @@ class WriteBatch {
    * });
    */
   set(documentRef, data, options) {
-    const merge = (options && options.merge) === true;
+    validate.isOptionalSetOptions('options', options);
+    const mergeLeaves = options && options.merge === true;
+    const mergePaths = options && options.mergeFields;
 
     validate.isDocumentReference('documentRef', documentRef);
     validate.isDocument('data', data, {
       allowEmpty: true,
-      allowDeletes: merge ? 'all' : 'none',
+      allowDeletes: mergePaths || mergeLeaves ? 'all' : 'none',
       allowServerTimestamps: true,
     });
-    validate.isOptionalSetOptions('options', options);
 
     this.verifyNotCommitted();
 
+    let documentMask;
+
+    if (mergePaths) {
+      documentMask = DocumentMask.fromFieldMask(options.mergeFields);
+      data = documentMask.applyTo(data);
+    }
+
     const document = DocumentSnapshot.fromObject(documentRef, data);
     const transform = DocumentTransform.fromObject(documentRef, data);
-    const documentMask = DocumentMask.fromObject(data);
+
+    if (mergePaths) {
+      documentMask.removeFields(transform.fields);
+    } else {
+      documentMask = DocumentMask.fromObject(data);
+    }
 
     const hasDocumentData = !document.isEmpty || !documentMask.isEmpty;
 
     let write;
 
-    if (!merge) {
+    if (!mergePaths && !mergeLeaves) {
       write = document.toProto();
     } else if (hasDocumentData || transform.isEmpty) {
       write = document.toProto();

@@ -400,9 +400,12 @@ class DocumentReference {
    * @param {DocumentData} data - A map of the fields and values for the
    * document.
    * @param {SetOptions=} options - An object to configure the set behavior.
-   * @param {boolean=} options.merge - If true, set() only replaces the
-   * values specified in its data argument. Fields omitted from this set() call
+   * @param {boolean=} options.merge - If true, set() merges the values
+   * specified in its data argument. Fields omitted from this set() call
    * remain untouched.
+   * @param {Array.<string|FieldPath>=} options.mergeFields - If provided,
+   * set() only replaces the specified field paths. All data at the specified
+   * field paths is fully replaced, while the remaining fields remain untouched.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * write time of this set.
    *

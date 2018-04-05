@@ -369,11 +369,18 @@ declare namespace FirebaseFirestore {
    */
   export interface SetOptions {
     /**
-     * Changes the behavior of a set() call to only replace the values specified
+     * Changes the behavior of a set() call to deeply merge the values specified
      * in its data argument. Fields omitted from the set() call remain
      * untouched.
      */
     readonly merge?: boolean;
+
+    /**
+     * Changes the behavior of set() calls to only replace the specified
+     * field paths. All data at the specified field paths is fully replaced, 
+     * while the remaining fields remain untouched.
+     */
+    readonly mergeFields?: (string|FieldPath)[];
   }
 
   /**

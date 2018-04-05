@@ -986,6 +986,140 @@ describe('set document', function() {
       );
   });
 
+  it('supports document merges with field mask', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        set(
+          document(
+            'a',
+            'foo',
+            'b',
+            {
+              mapValue: {
+                fields: {
+                  c: {
+                    stringValue: 'foo',
+                    valueType: 'stringValue',
+                  },
+                },
+              },
+              valueType: 'mapValue',
+            },
+            'd',
+            {
+              mapValue: {
+                fields: {
+                  e: {
+                    stringValue: 'foo',
+                    valueType: 'stringValue',
+                  },
+                },
+              },
+              valueType: 'mapValue',
+            }
+          ),
+          updateMask('a', 'b', 'd.e', 'f')
+        )
+      );
+      callback(null, writeResult(1));
+    };
+
+    return firestore.doc('collectionId/documentId').set(
+      {
+        a: 'foo',
+        b: {c: 'foo'},
+        d: {e: 'foo', ignore: 'foo'},
+        f: Firestore.FieldValue.delete(),
+        ignore: 'foo',
+        ignoreMap: {a: 'foo'},
+      },
+      {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']}
+    );
+  });
+
+  it('supports document merges with field mask and empty maps', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        set(
+          document(
+            'a',
+            {
+              mapValue: {
+                fields: {
+                  b: {
+                    mapValue: {},
+                    valueType: 'mapValue',
+                  },
+                },
+              },
+              valueType: 'mapValue',
+            },
+            'c',
+            {
+              mapValue: {
+                fields: {
+                  d: {
+                    mapValue: {},
+                    valueType: 'mapValue',
+                  },
+                },
+              },
+              valueType: 'mapValue',
+            }
+          ),
+          updateMask('a', 'c.d')
+        )
+      );
+      callback(null, writeResult(1));
+    };
+
+    return firestore.doc('collectionId/documentId').set(
+      {
+        a: {b: {}},
+        c: {d: {}},
+      },
+      {mergeFields: ['a', new Firestore.FieldPath('c', 'd')]}
+    );
+  });
+
+  it('supports document merges with field mask and server timestamps', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(
+        request,
+        set(
+          document(),
+          updateMask('b', 'f'),
+          fieldTransform(
+            'a',
+            'REQUEST_TIME',
+            'b.c',
+            'REQUEST_TIME',
+            'd.e',
+            'REQUEST_TIME'
+          )
+        )
+      );
+      callback(null, writeResult(2));
+    };
+
+    return firestore.doc('collectionId/documentId').set(
+      {
+        a: Firestore.FieldValue.serverTimestamp(),
+        b: {c: Firestore.FieldValue.serverTimestamp()},
+        d: {
+          e: Firestore.FieldValue.serverTimestamp(),
+          ignore: Firestore.FieldValue.serverTimestamp(),
+        },
+        f: Firestore.FieldValue.delete(),
+        ignore: Firestore.FieldValue.serverTimestamp(),
+        ignoreMap: {a: Firestore.FieldValue.serverTimestamp()},
+      },
+      {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']}
+    );
+  });
+
   it('supports empty merge', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(request, set(document(), updateMask()));
@@ -1030,6 +1164,30 @@ describe('set document', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {merge: 42});
     }, /Argument "options" is not a valid SetOptions. "merge" is not a boolean./);
+
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .set({foo: 'bar'}, {mergeFields: 42});
+    }, /Argument "options" is not a valid SetOptions. "mergeFields" is not an array./);
+
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .set({foo: 'bar'}, {mergeFields: [null]});
+    }, /Argument "options" is not a valid SetOptions. Argument at index 0 is not a valid FieldPath./);
+
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .set({foo: 'bar'}, {mergeFields: ['foobar']});
+    }, /Input data is missing for field 'foobar'./);
+
+    assert.throws(() => {
+      firestore
+        .doc('collectionId/documentId')
+        .set({foo: 'bar'}, {merge: true, mergeFields: []});
+    }, /Argument "options" is not a valid SetOptions. You cannot specify both "merge" and "mergeFields"./);
   });
 
   it('requires an object', function() {
