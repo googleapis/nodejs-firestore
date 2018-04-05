@@ -16,18 +16,6 @@
 
 'use strict';
 
-/*!
- * Sentinel value for a field delete.
- *
- */
-let DELETE_SENTINEL;
-
-/*!
- * Sentinel value for a server timestamp.
- *
- */
-let SERVER_TIMESTAMP_SENTINEL;
-
 /**
  * Sentinel values that can be used when writing documents with set() or
  * update().
@@ -57,7 +45,7 @@ class FieldValue {
    * });
    */
   static delete() {
-    return DELETE_SENTINEL;
+    return new DeleteTransform();
   }
 
   /**
@@ -78,7 +66,7 @@ class FieldValue {
    * });
    */
   static serverTimestamp() {
-    return SERVER_TIMESTAMP_SENTINEL;
+    return new ServerTimestampTransform();
   }
 
   /**
@@ -92,9 +80,86 @@ class FieldValue {
   }
 }
 
-DELETE_SENTINEL = new FieldValue();
-SERVER_TIMESTAMP_SENTINEL = new FieldValue();
+/**
+ * An internal interface shared by all field transforms.
+ *
+ * A 'FieldTransform` subclass should implement '.includeInDocumentMask',
+ * '.includeInDocumentTransform' and 'toProto' (if '.includeInDocumentTransform'
+ * is 'true').
+ *
+ * @private
+ * @abstract
+ */
+class FieldTransform extends FieldValue {}
 
-module.exports = FieldValue;
-module.exports.DELETE_SENTINEL = DELETE_SENTINEL;
-module.exports.SERVER_TIMESTAMP_SENTINEL = SERVER_TIMESTAMP_SENTINEL;
+/**
+ * A transform that deletes a field from a Firestore document.
+ *
+ * @private
+ */
+class DeleteTransform extends FieldTransform {
+  /**
+   * Deletes are included in document masks.
+   *
+   * @private
+   */
+  get includeInDocumentMask() {
+    return true;
+  }
+
+  /**
+   * Deletes are are omitted from document transforms.
+   *
+   * @private
+   */
+  get includeInDocumentTransform() {
+    return false;
+  }
+}
+
+/**
+ * A transform that sets a field to the Firestore server time.
+ *
+ * @private
+ */
+class ServerTimestampTransform extends FieldTransform {
+  /**
+   * Server timestamps are omitted from document masks.
+   *
+   * @private
+   */
+  get includeInDocumentMask() {
+    return false;
+  }
+
+  /**
+   * Server timestamps are included in document transforms.
+   *
+   * @private
+   */
+  get includeInDocumentTransform() {
+    return true;
+  }
+
+  /**
+   * The proto representation for this field transform.
+   *
+   * @private
+   * @param {FieldPath} fieldPath The field path to apply this transformation
+   * to.
+   * @return {object} The 'FieldTransform' proto message.
+   */
+  toProto(fieldPath) {
+    return {
+      fieldPath: fieldPath.formattedName,
+      setToServerValue: 'REQUEST_TIME',
+    };
+  }
+}
+
+module.exports = {
+  FieldValue: FieldValue,
+  FieldTransform: FieldTransform,
+  DeleteTransform: DeleteTransform,
+  ServerTimestampTransform: ServerTimestampTransform,
+};

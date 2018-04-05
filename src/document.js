@@ -20,6 +20,7 @@ const assert = require('assert');
 const deepEqual = require('deep-equal');
 const is = require('is');
 
+const fieldValue = require('./field-value');
 const path = require('./path');
 const timestampFromJson = require('./convert').timestampFromJson;
 
@@ -34,9 +35,20 @@ const ResourcePath = path.ResourcePath;
 const FieldPath = path.FieldPath;
 
 /*!
- * @see {FieldValue}
+ * @see {FieldTransform}
  */
-const FieldValue = require('./field-value');
+
+const FieldTransform = fieldValue.FieldTransform;
+
+/*!
+ * @see {DeleteTransform}
+ */
+const DeleteTransform = fieldValue.DeleteTransform;
+
+/*!
+ * @see {ServerTimestampTransform}
+ */
+const ServerTimestampTransform = fieldValue.ServerTimestampTransform;
 
 /*!
  * Injected.
@@ -61,13 +73,6 @@ const MAX_DEPTH = 20;
  * @type {number}
  */
 const MS_TO_NANOS = 1000000;
-
-/*!
- * Protocol constant for the ServerTimestamp transform.
- *
- * @type {string}
- */
-const SERVER_TIMESTAMP = 'REQUEST_TIME';
 
 /**
  * An immutable object representing a geographic location in Firestore. The
@@ -239,7 +244,7 @@ class DocumentSnapshot {
 
       if (!is.defined(target[key])) {
         if (isLast) {
-          if (DocumentTransform.isTransformSentinel(value)) {
+          if (value instanceof FieldTransform) {
             // If there is already data at this path, we need to retain it.
             // Otherwise, we don't include it in the DocumentSnapshot.
             return !is.empty(target) ? target : null;
@@ -695,7 +700,7 @@ class DocumentSnapshot {
    * field.
    */
   static encodeValue(val) {
-    if (DocumentTransform.isTransformSentinel(val)) {
+    if (val instanceof FieldTransform) {
       return null;
     }
 
@@ -1007,11 +1012,11 @@ class DocumentMask {
    * @private
    * @hideconstructor
    *
-   * @param {Array.<string>} fieldPaths - The canonical representation of field
-   * paths in this mask.
+   * @param {Array.<FieldPath>} fieldPaths - The field paths in this mask.
    */
   constructor(fieldPaths) {
-    this._fieldPaths = fieldPaths;
+    this._sortedPaths = fieldPaths;
+    this._sortedPaths.sort((a, b) => a.compareTo(b));
   }
 
   /**
@@ -1026,13 +1031,10 @@ class DocumentMask {
     let fieldPaths = [];
 
     data.forEach((value, key) => {
-      if (value !== FieldValue.SERVER_TIMESTAMP_SENTINEL) {
-        fieldPaths.push(FieldPath.fromArgument(key).formattedName);
+      if (!(value instanceof FieldTransform) || value.includeInDocumentMask) {
+        fieldPaths.push(FieldPath.fromArgument(key));
       }
     });
-
-    // Required for testing.
-    fieldPaths.sort();
 
     return new DocumentMask(fieldPaths);
   }
@@ -1062,28 +1064,25 @@ class DocumentMask {
             ? currentPath.append(childSegment)
             : childSegment;
           const value = currentData[key];
-          if (value === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
-            // Ignore.
-          } else if (value === FieldValue.DELETE_SENTINEL) {
-            fieldPaths.push(childPath.formattedName);
+          if (value instanceof FieldTransform) {
+            if (value.includeInDocumentMask) {
+              fieldPaths.push(childPath);
+            }
           } else if (isPlainObject(value)) {
             extractFieldPaths(value, childPath);
           } else {
-            fieldPaths.push(childPath.formattedName);
+            fieldPaths.push(childPath);
           }
         }
       }
 
       // Add a field path for an explicitly updated empty map.
       if (currentPath && isEmpty) {
-        fieldPaths.push(currentPath.formattedName);
+        fieldPaths.push(currentPath);
       }
     };
 
     extractFieldPaths(data);
-
-    // Required for testing.
-    fieldPaths.sort();
 
     return new DocumentMask(fieldPaths);
   }
@@ -1095,7 +1094,7 @@ class DocumentMask {
    * @return {boolean} Whether this document mask is empty.
    */
   get isEmpty() {
-    return this._fieldPaths.length === 0;
+    return this._sortedPaths.length === 0;
   }
 
   /**
@@ -1105,11 +1104,18 @@ class DocumentMask {
    * @returns {Object} A Firestore 'DocumentMask' Proto.
    */
   toProto() {
-    return this.isEmpty
-      ? {}
-      : {
-          fieldPaths: this._fieldPaths,
-        };
+    if (this.isEmpty) {
+      return {};
+    }
+
+    let encodedPaths = [];
+    for (const fieldPath of this._sortedPaths) {
+      encodedPaths.push(fieldPath.formattedName);
+    }
+
+    return {
+      fieldPaths: encodedPaths,
+    };
   }
 }
 
@@ -1129,8 +1135,8 @@ class DocumentTransform {
    *
    * @param {DocumentReference} ref The DocumentReference for this
    * transform.
-   * @param {Array.<Object>} transforms A array with 'FieldTransform' Protobuf
-   * messages.
+   * @param {Map.<FieldPath, FieldTransforms>} transforms A Map of FieldPaths to
+   * FieldTransforms.
    */
   constructor(ref, transforms) {
     this._ref = ref;
@@ -1167,15 +1173,12 @@ class DocumentTransform {
    * @returns {firestore.DocumentTransform}} The Document Transform.
    */
   static fromUpdateMap(ref, data) {
-    let transforms = [];
+    let transforms = new Map();
 
     function encode_(val, path, allowTransforms) {
-      if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+      if (val instanceof FieldTransform && val.includeInDocumentTransform) {
         if (allowTransforms) {
-          transforms.push({
-            fieldPath: path.formattedName,
-            setToServerValue: SERVER_TIMESTAMP,
-          });
+          transforms.set(path, val);
         } else {
           throw new Error(
             'Server timestamps are not supported as array values.'
@@ -1207,18 +1210,6 @@ class DocumentTransform {
   }
 
   /**
-   * Returns true if the field value is a .delete() or .serverTimestamp()
-   * sentinel.
-   *
-   * @private
-   * @param {*} val The field value to check.
-   * @return {boolean} Whether we encountered a transform sentinel.
-   */
-  static isTransformSentinel(val) {
-    return is.instanceof(val, FieldValue);
-  }
-
-  /**
    * Whether this DocumentTransform contains any actionable transformations.
    *
    * @private
@@ -1226,20 +1217,29 @@ class DocumentTransform {
    * @readonly
    */
   get isEmpty() {
-    return this._transforms.length === 0;
+    return this._transforms.size === 0;
   }
-
   /**
    * Converts a document transform to the Firestore 'DocumentTransform' Proto.
    *
    * @private
-   * @returns {Object} A Firestore 'DocumentTransform' Proto.
+   * @returns {Object|null} A Firestore 'DocumentTransform' Proto or 'null' if
+   * this transform is empty.
    */
   toProto() {
+    if (this.isEmpty) {
+      return null;
+    }
+
+    const protoTransforms = [];
+    this._transforms.forEach((transform, path) => {
+      protoTransforms.push(transform.toProto(path));
+    });
+
     return {
       transform: {
         document: this._ref.formattedName,
-        fieldTransforms: this._transforms,
+        fieldTransforms: protoTransforms,
       },
     };
   }
@@ -1272,9 +1272,14 @@ class Precondition {
   /**
    * Generates the Protobuf `Preconditon` object for this precondition.
    *
-   * @returns {Object} The `Preconditon` Protobuf object.
+   * @returns {Object|null} The `Preconditon` Protobuf object or 'null' if there
+   * are no preconditions.
    */
   toProto() {
+    if (this.isEmpty) {
+      return null;
+    }
+
     let proto = {};
 
     if (is.defined(this._lastUpdateTime)) {
@@ -1282,7 +1287,7 @@ class Precondition {
         this._lastUpdateTime,
         'lastUpdateTime'
       );
-    } else if (is.defined(this._exists)) {
+    } else {
       proto.exists = this._exists;
     }
 
@@ -1381,7 +1386,7 @@ function validateFieldValue(val, options, depth) {
         validateFieldValue(val[prop], options, depth + 1);
       }
     }
-  } else if (val === FieldValue.DELETE_SENTINEL) {
+  } else if (val instanceof DeleteTransform) {
     if (
       (options.allowDeletes === 'root' && depth > 1) ||
       options.allowDeletes === 'none'
@@ -1390,7 +1395,7 @@ function validateFieldValue(val, options, depth) {
         'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.'
       );
     }
-  } else if (val === FieldValue.SERVER_TIMESTAMP_SENTINEL) {
+  } else if (val instanceof ServerTimestampTransform) {
     if (!options.allowServerTimestamps) {
       throw new Error(
         'FieldValue.serverTimestamp() can only be used in update(), set() and create().'

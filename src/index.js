@@ -59,7 +59,7 @@ const FieldPath = path.FieldPath;
 /*!
  * @see FieldValue
  */
-const FieldValue = require('./field-value');
+const FieldValue = require('./field-value').FieldValue;
 
 /*!
  * @see CollectionReference
