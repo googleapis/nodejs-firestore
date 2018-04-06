@@ -1181,7 +1181,7 @@ class DocumentTransform {
           transforms.set(path, val);
         } else {
           throw new Error(
-            'Server timestamps are not supported as array values.'
+            'FieldValue transformations are not supported inside of array values.'
           );
         }
       } else if (is.array(val)) {
