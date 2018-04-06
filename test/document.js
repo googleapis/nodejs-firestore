@@ -408,7 +408,7 @@ describe('serialize document', function() {
   });
 
   it("doesn't support server timestamp in array", function() {
-    const expectedErr = /Server timestamps are not supported as array values./;
+    const expectedErr = /FieldValue transformations are not supported inside of array values./;
 
     assert.throws(() => {
       return firestore.doc('collectionId/documentId').set({

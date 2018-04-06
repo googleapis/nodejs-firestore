@@ -16,6 +16,18 @@
 
 'use strict';
 
+/*!
+ * Sentinel value for a field delete.
+ *
+ */
+let DELETE_SENTINEL;
+
+/*!
+ * Sentinel value for a server timestamp.
+ *
+ */
+let SERVER_TIMESTAMP_SENTINEL;
+
 /**
  * Sentinel values that can be used when writing documents with set() or
  * update().
@@ -45,7 +57,7 @@ class FieldValue {
    * });
    */
   static delete() {
-    return new DeleteTransform();
+    return DELETE_SENTINEL;
   }
 
   /**
@@ -66,7 +78,7 @@ class FieldValue {
    * });
    */
   static serverTimestamp() {
-    return new ServerTimestampTransform();
+    return SERVER_TIMESTAMP_SENTINEL;
   }
 
   /**
@@ -117,6 +129,8 @@ class DeleteTransform extends FieldTransform {
   }
 }
 
+DELETE_SENTINEL = new DeleteTransform();
+
 /**
  * A transform that sets a field to the Firestore server time.
  *
@@ -156,6 +170,8 @@ class ServerTimestampTransform extends FieldTransform {
     };
   }
 }
+
+SERVER_TIMESTAMP_SENTINEL = new ServerTimestampTransform();
 
 module.exports = {
   FieldValue: FieldValue,

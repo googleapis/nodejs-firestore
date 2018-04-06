@@ -1121,7 +1121,7 @@ class DocumentMask {
    * @param {Array.<FieldPath>} input - A sorted array of FieldPaths.
    * @param {Array.<FieldPath>} values - An array of FieldPaths to remove.
    */
-  static removeFromSortedInput(input, values) {
+  static removeFromSortedArray(input, values) {
     for (let i = 0; i < input.length; ) {
       let removed = false;
 
@@ -1146,7 +1146,7 @@ class DocumentMask {
    * @param {Array.<FieldPath>} fieldPaths An array of FieldPaths.
    */
   removeFields(fieldPaths) {
-    DocumentMask.removeFromSortedInput(this._sortedPaths, fieldPaths);
+    DocumentMask.removeFromSortedArray(this._sortedPaths, fieldPaths);
   }
 
   /**
@@ -1195,7 +1195,7 @@ class DocumentMask {
             ? currentPath.append(key)
             : new FieldPath(key);
           if (this.contains(childPath)) {
-            DocumentMask.removeFromSortedInput(remainingPaths, [childPath]);
+            DocumentMask.removeFromSortedArray(remainingPaths, [childPath]);
             result = result || {};
             result[key] = currentData[key];
           } else if (is.object(currentData[key])) {
@@ -1314,7 +1314,7 @@ class DocumentTransform {
           transforms.set(path, val);
         } else {
           throw new Error(
-            'Server timestamps are not supported as array values.'
+            'FieldValue transformations are not supported inside of array values.'
           );
         }
       } else if (is.array(val)) {
