@@ -16,15 +16,14 @@
 
 'use strict';
 
-
 /*!
- *  * Sentinel value for a field delete.
+ * Sentinel value for a field delete.
  *
  */
 let DELETE_SENTINEL;
 
 /*!
-* Sentinel value for a server timestamp.
+ * Sentinel value for a server timestamp.
  *
  */
 let SERVER_TIMESTAMP_SENTINEL;
@@ -173,7 +172,6 @@ class ServerTimestampTransform extends FieldTransform {
 }
 
 SERVER_TIMESTAMP_SENTINEL = new ServerTimestampTransform();
-
 
 module.exports = {
   FieldValue: FieldValue,
