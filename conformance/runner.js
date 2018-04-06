@@ -37,10 +37,7 @@ const firestore = new Firestore({
 });
 
 /** List of test cases that are ignored. */
-const ignoredRe = [
-  // Node doesn't support field masks for set().
-  /^set-merge: .*$/,
-];
+const ignoredRe = [];
 
 /** If non-empty, list the test cases to run exclusively. */
 const exclusiveRe = [];
@@ -333,13 +330,20 @@ function runTest(spec) {
     firestore.api.Firestore._commit = commitHandler(spec);
 
     return Promise.resolve().then(() => {
-      const isMerge = !!(spec.option && spec.option.all);
+      const setOption = {};
+
+      if (spec.option && spec.option.all) {
+        setOption.merge = true;
+      } else if (spec.option && spec.option.fields) {
+        setOption.mergeFields = [];
+        for (const fieldPath of spec.option.fields) {
+          setOption.mergeFields.push(new Firestore.FieldPath(fieldPath.field));
+        }
+      }
 
       return docRef(setSpec.docRefPath).set(
         convertInput.argument(spec.jsonData),
-        {
-          merge: isMerge,
-        }
+        setOption
       );
     });
   };
