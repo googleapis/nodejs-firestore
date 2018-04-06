@@ -1038,6 +1038,15 @@ describe('set document', function() {
     );
   });
 
+  it('supports document merges with empty field mask', function() {
+    firestore.api.Firestore._commit = function(request, options, callback) {
+      requestEquals(request, set(document(), updateMask()));
+      callback(null, writeResult(1));
+    };
+
+    return firestore.doc('collectionId/documentId').set({}, {mergeFields: []});
+  });
+
   it('supports document merges with field mask and empty maps', function() {
     firestore.api.Firestore._commit = function(request, options, callback) {
       requestEquals(

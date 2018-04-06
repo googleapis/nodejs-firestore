@@ -1182,7 +1182,7 @@ class DocumentMask {
   applyTo(data) {
     /*!
      * Applies this DocumentMask to 'data' and computes the list of field paths
-     * that were specified in the mask but not present in 'data'.
+     * that were specified in the mask but are not present in 'data'.
      */
     const applyDocumentMask = data => {
       const remainingPaths = this._sortedPaths.slice(0);
@@ -1210,7 +1210,8 @@ class DocumentMask {
         return result;
       };
 
-      const filteredData = processObject(data);
+      // processObject() returns 'null' if the DocumentMask is empty.
+      const filteredData = processObject(data) || {};
 
       return {
         filteredData: filteredData,
