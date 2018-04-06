@@ -199,7 +199,7 @@ class WriteBatch {
 
     this._writes.push({
       write: !document.isEmpty || transform.isEmpty ? document.toProto() : null,
-      transform: transform.isEmpty ? null : transform.toProto(),
+      transform: transform.toProto(),
       precondition: precondition.toProto(),
     });
 
@@ -242,7 +242,7 @@ class WriteBatch {
       write: {
         delete: documentRef.formattedName,
       },
-      precondition: conditions.isEmpty ? null : conditions.toProto(),
+      precondition: conditions.toProto(),
     });
 
     return this;
@@ -305,7 +305,7 @@ class WriteBatch {
 
     this._writes.push({
       write,
-      transform: transform.isEmpty ? null : transform.toProto(),
+      transform: transform.toProto(),
     });
 
     return this;
@@ -438,7 +438,7 @@ class WriteBatch {
 
     this._writes.push({
       write: write,
-      transform: transform.isEmpty ? null : transform.toProto(),
+      transform: transform.toProto(),
       precondition: precondition.toProto(),
     });
 
