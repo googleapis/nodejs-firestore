@@ -177,8 +177,7 @@ class GeoPoint {
  * A DocumentSnapshot is an immutable representation for a document in a
  * Firestore database. The data can be extracted with
  * [data()]{@link DocumentSnapshot#data} or
- * [get(fieldPath)]{@link DocumentSnapshot#get} to get a
- * specific field.
+ * [get(fieldPath)]{@link DocumentSnapshot#get} (to get a specific field).
  *
  * <p>For a DocumentSnapshot that points to a non-existing document, any data
  * access will return 'undefined'. You can use the
@@ -818,10 +817,10 @@ class DocumentSnapshot {
  * A QueryDocumentSnapshot contains data read from a document in your
  * Firestore database as part of a query. The document is guaranteed to exist
  * and its data can be extracted with [data()]{@link QueryDocumentSnapshot#data}
- * or [get()]{@link DocumentSnapshot#get} to get a specific field.
+ * or [get()]{@link DocumentSnapshot#get} (to get a specific field).
  *
  * A QueryDocumentSnapshot offers the same API surface as a
- * {#link DocumentSnapshot}. Since query results contain only existing
+ * {@link DocumentSnapshot}. Since query results contain only existing
  * documents, the [exists]{@link DocumentSnapshot#exists} property will
  * always be true and [data()]{@link QueryDocumentSnapshot#data} will never
  * return 'undefined'.
