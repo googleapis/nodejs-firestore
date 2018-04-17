@@ -29,13 +29,16 @@ import FieldValue = FirebaseFirestore.FieldValue;
 import Firestore = FirebaseFirestore.Firestore;
 import DocumentData = FirebaseFirestore.DocumentData;
 import GeoPoint = FirebaseFirestore.GeoPoint;
+import Precondition = FirebaseFirestore.Precondition;
+import SetOptions = FirebaseFirestore.SetOptions;
 
 // This test verifies the Typescript typings and is not meant for execution.
 xdescribe('firestore.d.ts', function() {
   const firestore: Firestore = new Firestore();
 
-  const precondition = {lastUpdateTime: "1970-01-01T00:00:00.000Z"};
-  const setOptions = {merge: true};
+  const precondition: Precondition = {lastUpdateTime: "1970-01-01T00:00:00.000Z"};
+  const setOptions: SetOptions = {merge: true};
+  const fieldPath: FieldPath = new FieldPath('foo');
   const docRef: DocumentReference = firestore.doc('coll/doc');
   const collRef: CollectionReference = firestore.collection('coll');
   const updateData: UpdateData = {};
@@ -289,5 +292,15 @@ xdescribe('firestore.d.ts', function() {
       'bar': FieldValue.delete()
     };
     const equals: boolean = FieldValue.serverTimestamp().isEqual(FieldValue.serverTimestamp());
+  });
+
+  it('has typings for FieldPath', () => {
+    const fieldPath = new FieldPath('foo');
+    const equals: boolean = FieldPath.documentId().isEqual(fieldPath);
+  });
+
+  it('has typings for SetOptions', () => {
+    const merge: SetOptions = { merge: true};
+    const mergeFields: SetOptions = { mergeFields: ['foo', fieldPath]};
   });
 });

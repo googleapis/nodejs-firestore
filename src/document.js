@@ -1040,6 +1040,23 @@ class DocumentMask {
   }
 
   /**
+   * Creates a document mask from an array of field paths.
+   *
+   * @private
+   * @param {Array.<string|FieldPath>} fieldMask A list of field paths.
+   * @returns {DocumentMask}
+   */
+  static fromFieldMask(fieldMask) {
+    let fieldPaths = [];
+
+    for (const fieldPath of fieldMask) {
+      fieldPaths.push(FieldPath.fromArgument(fieldPath));
+    }
+
+    return new DocumentMask(fieldPaths);
+  }
+
+  /**
    * Creates a document mask with the field names of a document.
    *
    * @private
@@ -1095,6 +1112,122 @@ class DocumentMask {
    */
   get isEmpty() {
     return this._sortedPaths.length === 0;
+  }
+
+  /**
+   * Removes the specified values from a sorted field path array.
+   *
+   * @private
+   * @param {Array.<FieldPath>} input - A sorted array of FieldPaths.
+   * @param {Array.<FieldPath>} values - An array of FieldPaths to remove.
+   */
+  static removeFromSortedArray(input, values) {
+    for (let i = 0; i < input.length; ) {
+      let removed = false;
+
+      for (const fieldPath of values) {
+        if (input[i].isEqual(fieldPath)) {
+          input.splice(i, 1);
+          removed = true;
+          break;
+        }
+      }
+
+      if (!removed) {
+        ++i;
+      }
+    }
+  }
+
+  /**
+   * Removes the field path specified in 'fieldPaths' from this document mask.
+   *
+   * @private
+   * @param {Array.<FieldPath>} fieldPaths An array of FieldPaths.
+   */
+  removeFields(fieldPaths) {
+    DocumentMask.removeFromSortedArray(this._sortedPaths, fieldPaths);
+  }
+
+  /**
+   * Returns whether this document mask contains 'fieldPath'.
+   *
+   * @private
+   * @param {FieldPath} fieldPath The field path to test.
+   * @return {boolean} Whether this document mask contains 'fieldPath'.
+   */
+  contains(fieldPath) {
+    for (const sortedPath of this._sortedPaths) {
+      const cmp = sortedPath.compareTo(fieldPath);
+
+      if (cmp === 0) {
+        return true;
+      } else if (cmp > 0) {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Removes all properties from 'data' that are not contained in this document
+   * mask.
+   *
+   * @private
+   * @param {Object} data - An object to filter.
+   * @return {Object} A shallow copy of the object filtered by this document
+   * mask.
+   */
+  applyTo(data) {
+    /*!
+     * Applies this DocumentMask to 'data' and computes the list of field paths
+     * that were specified in the mask but are not present in 'data'.
+     */
+    const applyDocumentMask = data => {
+      const remainingPaths = this._sortedPaths.slice(0);
+
+      const processObject = (currentData, currentPath) => {
+        let result = null;
+
+        Object.keys(currentData).forEach(key => {
+          const childPath = currentPath
+            ? currentPath.append(key)
+            : new FieldPath(key);
+          if (this.contains(childPath)) {
+            DocumentMask.removeFromSortedArray(remainingPaths, [childPath]);
+            result = result || {};
+            result[key] = currentData[key];
+          } else if (is.object(currentData[key])) {
+            const childObject = processObject(currentData[key], childPath);
+            if (childObject) {
+              result = result || {};
+              result[key] = childObject;
+            }
+          }
+        });
+
+        return result;
+      };
+
+      // processObject() returns 'null' if the DocumentMask is empty.
+      const filteredData = processObject(data) || {};
+
+      return {
+        filteredData: filteredData,
+        remainingPaths: remainingPaths,
+      };
+    };
+
+    const result = applyDocumentMask(data);
+
+    if (result.remainingPaths.length !== 0) {
+      throw new Error(
+        `Input data is missing for field '${result.remainingPaths[0].toString()}'.`
+      );
+    }
+
+    return result.filteredData;
   }
 
   /**
@@ -1219,6 +1352,18 @@ class DocumentTransform {
   get isEmpty() {
     return this._transforms.size === 0;
   }
+
+  /**
+   * Returns the array of fields in this DocumentTransform.
+   *
+   * @private
+   * @type {Array.<FieldPath>} The fields specified in this DocumentTransform.
+   * @readonly
+   */
+  get fields() {
+    return Array.from(this._transforms.keys());
+  }
+
   /**
    * Converts a document transform to the Firestore 'DocumentTransform' Proto.
    *
@@ -1464,6 +1609,8 @@ function validatePrecondition(precondition, allowExist) {
  *
  * @param {boolean=} options.merge - Whether set() should merge the provided
  * data into an existing document.
+ * @param {boolean=} options.mergeFields - Whether set() should only merge the
+ * specified set of fields.
  * @returns {boolean} 'true' if the input is a valid SetOptions object.
  */
 function validateSetOptions(options) {
@@ -1473,6 +1620,20 @@ function validateSetOptions(options) {
 
   if (is.defined(options.merge) && !is.boolean(options.merge)) {
     throw new Error('"merge" is not a boolean.');
+  }
+
+  if (is.defined(options.mergeFields)) {
+    if (!is.array(options.mergeFields)) {
+      throw new Error('"mergeFields" is not an array.');
+    }
+
+    for (let i = 0; i < options.mergeFields.length; ++i) {
+      validate.isFieldPath(i, options.mergeFields[i]);
+    }
+  }
+
+  if (is.defined(options.merge) && is.defined(options.mergeFields)) {
+    throw new Error('You cannot specify both "merge" and "mergeFields".');
   }
 
   return true;
