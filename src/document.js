@@ -821,7 +821,7 @@ class DocumentSnapshot {
  * or [get()]{@link DocumentSnapshot#get} to get a specific field.
  *
  * A QueryDocumentSnapshot offers the same API surface as a
- * {#link DocumentSnapshot}. Since query results contain only existing
+ * {@link DocumentSnapshot}. Since query results contain only existing
  * documents, the [exists]{@link DocumentSnapshot#exists} property will
  * always be true and [data()]{@link QueryDocumentSnapshot#data} will never
  * return 'undefined'.
