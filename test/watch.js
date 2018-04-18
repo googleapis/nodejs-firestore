@@ -598,7 +598,7 @@ describe('Query watch', function() {
 
     firestore = createInstance();
 
-    targetId = 0xf0;
+    targetId = 0x1;
 
     streamHelper = new StreamHelper(firestore);
     watchHelper = new WatchHelper(
@@ -2125,7 +2125,7 @@ describe('DocumentReference watch', function() {
     Backoff.setTimeoutHandler(setImmediate);
 
     firestore = createInstance();
-    targetId = 0xf0;
+    targetId = 0x1;
     doc = firestore.doc('col/doc');
     streamHelper = new StreamHelper(firestore);
     watchHelper = new WatchHelper(streamHelper, doc, targetId);

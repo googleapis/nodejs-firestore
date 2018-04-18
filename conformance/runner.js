@@ -22,6 +22,7 @@ const is = require('is');
 const through = require('through2');
 const googleProtoFiles = require('google-proto-files');
 const protobufjs = require('protobufjs');
+const duplexify = require('duplexify');
 const grpc = require('google-gax').grpc().grpc;
 
 const Firestore = require('../');
@@ -51,6 +52,10 @@ const collRef = function(path) {
   const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
   return firestore.collection(relativePath);
 };
+
+const watchQuery = collRef(
+  'projects/projectID/databases/(default)/documents/C'
+).orderBy('a');
 
 /** Converts JSON test data into JavaScript types suitable for the Node API. */
 const convertInput = {
@@ -128,6 +133,40 @@ const convertInput = {
     }
     return args;
   },
+  snapshot: snapshot => {
+    const docs = [];
+    const changes = [];
+    const readTime = DocumentSnapshot.toISOTime(snapshot.readTime);
+
+    for (const doc of snapshot.docs) {
+      const deepCopy = JSON.parse(JSON.stringify(doc));
+      deepCopy.fields = convert.documentFromJson(deepCopy.fields);
+      docs.push(firestore.snapshot_(deepCopy, readTime, 'json'));
+    }
+
+    for (const change of snapshot.changes) {
+      const deepCopy = JSON.parse(JSON.stringify(change.doc));
+      deepCopy.fields = convert.documentFromJson(deepCopy.fields);
+      const doc = firestore.snapshot_(deepCopy, readTime, 'json');
+      const type = ['unspecified', 'added', 'removed', 'modified'][change.kind];
+      changes.push(
+        new Firestore.DocumentChange(
+          type,
+          doc,
+          change.oldIndex,
+          change.newIndex
+        )
+      );
+    }
+
+    return new Firestore.QuerySnapshot(
+      watchQuery,
+      readTime,
+      docs.length,
+      () => docs,
+      () => changes
+    );
+  },
 };
 
 /** Converts Firestore Protobuf types in Proto3 JSON format to Protobuf JS. */
@@ -171,6 +210,23 @@ const convertProto = {
     if (deepCopy.endAt) {
       deepCopy.endAt = convertProto.position(deepCopy.endAt);
     }
+    return deepCopy;
+  },
+  listenRequest: listenRequest => {
+    const deepCopy = JSON.parse(JSON.stringify(listenRequest));
+
+    if (deepCopy.targetChange) {
+      if (deepCopy.targetChange.targetChangeType === undefined) {
+        deepCopy.targetChange.targetChangeType = 'NO_CHANGE';
+      }
+    }
+
+    if (deepCopy.documentChange) {
+      deepCopy.documentChange.document.fields = convert.documentFromJson(
+        deepCopy.documentChange.document.fields
+      );
+    }
+
     return deepCopy;
   },
 };
@@ -366,6 +422,38 @@ function runTest(spec) {
     });
   };
 
+  const watchTest = function(spec) {
+    let expectedSnapshots = spec.snapshots;
+
+    const writeStream = through.obj();
+
+    firestore.api.Firestore._listen = () => {
+      return duplexify.obj(through.obj(), writeStream);
+    };
+
+    return new Promise((resolve, reject) => {
+      const unlisten = watchQuery.onSnapshot(acutalSnap => {
+        const expectedSnapshot = expectedSnapshots.shift();
+        if (expectedSnapshot) {
+          if (!acutalSnap.isEqual(convertInput.snapshot(expectedSnapshot))) {
+            reject(new Error('Expected and actual snapshots do not match.'));
+          }
+
+          if (expectedSnapshots.length === 0) {
+            unlisten();
+            resolve();
+          }
+        } else {
+          reject(new Error('Received unexpected snapshot'));
+        }
+      });
+
+      for (const response of spec.responses) {
+        writeStream.write(convertProto.listenRequest(response));
+      }
+    });
+  };
+
   let testSpec;
   let testPromise;
 
@@ -375,6 +463,7 @@ function runTest(spec) {
   const updateSpec = spec.update || spec.updatePaths;
   const deleteSpec = spec.delete;
   const querySpec = spec.query;
+  const listenSpec = spec.listen;
 
   if (getSpec) {
     testSpec = getSpec;
@@ -394,6 +483,9 @@ function runTest(spec) {
   } else if (querySpec) {
     testSpec = querySpec;
     testPromise = queryTest(querySpec);
+  } else if (listenSpec) {
+    testSpec = listenSpec;
+    testPromise = watchTest(listenSpec);
   } else {
     return Promise.reject(new Error(`Unhandled Spec: ${JSON.stringify(spec)}`));
   }
