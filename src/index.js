@@ -1257,7 +1257,7 @@ module.exports.QuerySnapshot = reference.QuerySnapshot;
  * @see DocumentChange
  * @type DocumentChange
  */
-module.exports.DocumentChange = document.DocumentChange;
+module.exports.DocumentChange = reference.DocumentChange;
 
 /**
  * {@link Query} class.

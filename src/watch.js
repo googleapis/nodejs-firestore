@@ -67,7 +67,7 @@ let ResourcePath = require('./path').ResourcePath;
  * @private
  * @type {number}
  */
-const WATCH_TARGET_ID = 0xf0;
+const WATCH_TARGET_ID = 0x1;
 
 /*!
  * The change type for document change events.
