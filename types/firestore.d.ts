@@ -380,7 +380,7 @@ declare namespace FirebaseFirestore {
      * paths. Any field path that is not specified is ignored and remains
      * untouched.
      *
-     * <p>It is an error to pass a SetOptions object to a set() call that is
+     * It is an error to pass a SetOptions object to a set() call that is
      * missing a value for any of the fields specified here.
      */
     readonly mergeFields?: (string|FieldPath)[];
