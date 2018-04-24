@@ -263,8 +263,8 @@ class WriteBatch {
    * specified in its data argument. Fields omitted from this set() call
    * remain untouched.
    * @param {Array.<string|FieldPath>=} options.mergeFields - If provided,
-   * set() only replaces the specified field paths. All data at the specified
-   * field paths is fully replaced, while the remaining fields remain untouched.
+   * set() only replaces the specified field paths. Any field path that is not
+   * specified is ignored and remains untouched.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
