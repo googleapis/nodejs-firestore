@@ -432,21 +432,28 @@ function runTest(spec) {
     };
 
     return new Promise((resolve, reject) => {
-      const unlisten = watchQuery.onSnapshot(acutalSnap => {
-        const expectedSnapshot = expectedSnapshots.shift();
-        if (expectedSnapshot) {
-          if (!acutalSnap.isEqual(convertInput.snapshot(expectedSnapshot))) {
-            reject(new Error('Expected and actual snapshots do not match.'));
-          }
+      const unlisten = watchQuery.onSnapshot(
+        actualSnap => {
+          const expectedSnapshot = expectedSnapshots.shift();
+          if (expectedSnapshot) {
+            if (!actualSnap.isEqual(convertInput.snapshot(expectedSnapshot))) {
+              reject(new Error('Expected and actual snapshots do not match.'));
+            }
 
-          if (expectedSnapshots.length === 0) {
-            unlisten();
-            resolve();
+            if (expectedSnapshots.length === 0 || !spec.isError) {
+              unlisten();
+              resolve();
+            }
+          } else {
+            reject(new Error('Received unexpected snapshot'));
           }
-        } else {
-          reject(new Error('Received unexpected snapshot'));
+        },
+        err => {
+          assert.equal(expectedSnapshots.length, 0);
+          unlisten();
+          reject(err);
         }
-      });
+      );
 
       for (const response of spec.responses) {
         writeStream.write(convertProto.listenRequest(response));
