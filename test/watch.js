@@ -329,12 +329,15 @@ class WatchHelper {
 
   /**
    * Sends a target change from the backend simulating adding the query target.
+   *
+   * @param {number=} targetId The target ID to send. If omitted, uses the
+   * default target ID.
    */
-  sendAddTarget() {
+  sendAddTarget(targetId) {
     this.streamHelper.write({
       targetChange: {
         targetChangeType: 'ADD',
-        targetIds: [this.targetId],
+        targetIds: [targetId !== undefined ? targetId : this.targetId],
       },
     });
   }
@@ -342,7 +345,7 @@ class WatchHelper {
   /**
    * Sends a target change from the backend simulating removing a query target.
    *
-   * @param cause The optional code indicating why the target was removed.
+   * @param {number} cause The optional code indicating why the target was removed.
    */
   sendRemoveTarget(cause) {
     const proto = {
@@ -689,6 +692,16 @@ describe('Query watch', function() {
         watchHelper.sendRemoveTarget(7);
       },
       'Error 7: test remove'
+    );
+  });
+
+  it('rejects an unknown target', function() {
+    return watchHelper.runFailedTest(
+      collQueryJSON(),
+      () => {
+        watchHelper.sendAddTarget(2);
+      },
+      'Unexpected target ID sent by server'
     );
   });
 
