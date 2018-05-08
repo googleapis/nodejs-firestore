@@ -28,7 +28,6 @@
 var configData = require('./firestore_client_config');
 var extend = require('extend');
 var gax = require('google-gax');
-var path = require('path');
 
 var SERVICE_ADDRESS = 'firestore.googleapis.com';
 
@@ -1410,8 +1409,8 @@ function FirestoreClientBuilder(gaxGrpc) {
   }
 
   var firestoreStubProtos = gaxGrpc.loadProto(
-    path.join(__dirname, '..', '..', 'protos'),
-    'google/firestore/v1beta1/firestore.proto'
+    require('google-proto-files')(),
+    'firestore/v1beta1/firestore.proto'
   );
   extend(this, firestoreStubProtos.google.firestore.v1beta1);
 
