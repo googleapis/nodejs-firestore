@@ -1410,8 +1410,8 @@ function FirestoreClientBuilder(gaxGrpc) {
   }
 
   var firestoreStubProtos = gaxGrpc.loadProto(
-    path.join(__dirname, '..', '..', 'protos'),
-    'google/firestore/v1beta1/firestore.proto'
+    require('google-proto-files')(),
+    'firestore/v1beta1/firestore.proto'
   );
   extend(this, firestoreStubProtos.google.firestore.v1beta1);
 
