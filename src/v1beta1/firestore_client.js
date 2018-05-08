@@ -28,7 +28,6 @@
 var configData = require('./firestore_client_config');
 var extend = require('extend');
 var gax = require('google-gax');
-var path = require('path');
 
 var SERVICE_ADDRESS = 'firestore.googleapis.com';
 
