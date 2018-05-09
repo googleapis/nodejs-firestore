@@ -221,7 +221,7 @@ function query(transaction) {
 function runTransaction(callback, request) {
   let requests = Array.prototype.slice.call(arguments, 1);
 
-  firestore.api.Firestore._beginTransaction = function(
+  firestore._firestoreClient._beginTransaction = function(
     actual,
     options,
     callback
@@ -232,28 +232,28 @@ function runTransaction(callback, request) {
     callback(request.error, request.response);
   };
 
-  firestore.api.Firestore._commit = function(actual, options, callback) {
+  firestore._firestoreClient._commit = function(actual, options, callback) {
     request = requests.shift();
     assert.equal(request.type, 'commit');
     assert.deepEqual(actual, request.request);
     callback(request.error, request.response);
   };
 
-  firestore.api.Firestore._rollback = function(actual, options, callback) {
+  firestore._firestoreClient._rollback = function(actual, options, callback) {
     request = requests.shift();
     assert.equal(request.type, 'rollback');
     assert.deepEqual(actual, request.request);
     callback(request.error, request.response);
   };
 
-  firestore.api.Firestore._batchGetDocuments = function(actual) {
+  firestore._firestoreClient._batchGetDocuments = function(actual) {
     request = requests.shift();
     assert.equal(request.type, 'getDocument');
     assert.deepEqual(actual, request.request);
     return request.stream;
   };
 
-  firestore.api.Firestore._runQuery = function(actual) {
+  firestore._firestoreClient._runQuery = function(actual) {
     request = requests.shift();
     assert.equal(request.type, 'query');
     assert.deepEqual(actual, request.request);
@@ -312,7 +312,7 @@ describe('failed transactions', function() {
   });
 
   it('requires valid retry number', function() {
-    firestore.api.Firestore._beginTransaction = function() {
+    firestore._firestoreClient._beginTransaction = function() {
       assert.fail();
     };
 

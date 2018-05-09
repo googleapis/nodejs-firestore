@@ -203,7 +203,7 @@ class StreamHelper {
     this.deferredListener = new DeferredListener();
 
     // Create a mock backend whose stream we can return.
-    firestore.api.Firestore._listen = () => {
+    firestore._firestoreClient._listen = () => {
       ++this.streamCount;
 
       this.readStream = through.obj();
@@ -1050,7 +1050,7 @@ describe('Query watch', function() {
               lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
               // Return a stream that always errors on write
-              firestore.api.Firestore._listen = () => {
+              firestore._firestoreClient._listen = () => {
                 ++streamHelper.streamCount;
                 return through.obj((chunk, enc, callback) => {
                   callback(

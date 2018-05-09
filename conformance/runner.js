@@ -295,7 +295,7 @@ function runTest(spec) {
   console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`); // eslint-disable-line no-console
 
   const updateTest = function(spec) {
-    firestore.api.Firestore._commit = commitHandler(spec);
+    firestore._firestoreClient._commit = commitHandler(spec);
 
     return Promise.resolve().then(() => {
       let varargs = [];
@@ -321,7 +321,7 @@ function runTest(spec) {
   };
 
   const queryTest = function(spec) {
-    firestore.api.Firestore._runQuery = queryHandler(spec);
+    firestore._firestoreClient._runQuery = queryHandler(spec);
 
     const applyClause = function(query, clause) {
       if (clause.select) {
@@ -370,7 +370,7 @@ function runTest(spec) {
   };
 
   const deleteTest = function(spec) {
-    firestore.api.Firestore._commit = commitHandler(spec);
+    firestore._firestoreClient._commit = commitHandler(spec);
 
     return Promise.resolve().then(() => {
       if (spec.precondition) {
@@ -383,7 +383,7 @@ function runTest(spec) {
   };
 
   const setTest = function(spec) {
-    firestore.api.Firestore._commit = commitHandler(spec);
+    firestore._firestoreClient._commit = commitHandler(spec);
 
     return Promise.resolve().then(() => {
       const setOption = {};
@@ -405,7 +405,7 @@ function runTest(spec) {
   };
 
   const createTest = function(spec) {
-    firestore.api.Firestore._commit = commitHandler(spec);
+    firestore._firestoreClient._commit = commitHandler(spec);
 
     return Promise.resolve().then(() => {
       return docRef(spec.docRefPath).create(
@@ -415,7 +415,7 @@ function runTest(spec) {
   };
 
   const getTest = function(spec) {
-    firestore.api.Firestore._batchGetDocuments = getHandler(spec);
+    firestore._firestoreClient._batchGetDocuments = getHandler(spec);
 
     return Promise.resolve().then(() => {
       return docRef(spec.docRefPath).get();
@@ -427,7 +427,7 @@ function runTest(spec) {
 
     const writeStream = through.obj();
 
-    firestore.api.Firestore._listen = () => {
+    firestore._firestoreClient._listen = () => {
       return duplexify.obj(through.obj(), writeStream);
     };
 

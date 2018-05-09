@@ -141,7 +141,7 @@ describe('batch support', function() {
   beforeEach(function() {
     firestore = createInstance();
 
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       assert.deepEqual(request, {
         database: 'projects/test-project/databases/(default)',
         writes: [
@@ -317,7 +317,7 @@ describe('batch support', function() {
   });
 
   it('can return same write result', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       callback(null, {
         commitTime: {
           nanos: 0,
@@ -361,7 +361,7 @@ describe('batch support', function() {
     let beginCalled = 0;
     let commitCalled = 0;
 
-    firestore.api.Firestore._beginTransaction = function(
+    firestore._firestoreClient._beginTransaction = function(
       actual,
       options,
       callback
@@ -370,7 +370,7 @@ describe('batch support', function() {
       callback(null, {transaction: 'foo'});
     };
 
-    firestore.api.Firestore._commit = function(actual, options, callback) {
+    firestore._firestoreClient._commit = function(actual, options, callback) {
       ++commitCalled;
       callback(null, {
         commitTime: {

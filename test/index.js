@@ -316,7 +316,7 @@ describe('instantiation', function() {
       sslCreds: grpc.credentials.createInsecure(),
     });
 
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       callback(null, {
         commitTime: {
           nanos: 0,
@@ -355,7 +355,7 @@ describe('instantiation', function() {
       sslCreds: grpc.credentials.createInsecure(),
     });
 
-    firestore.api.Firestore._batchGetDocuments = function(request) {
+    firestore._firestoreClient._batchGetDocuments = function(request) {
       let expectedRequest = {
         database: DATABASE_ROOT,
         documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`],
@@ -389,7 +389,7 @@ describe('instantiation', function() {
     let readStream = through.obj();
     let writeStream = through.obj();
 
-    firestore.api.Firestore._listen = function() {
+    firestore._firestoreClient._listen = function() {
       return duplexify.obj(readStream, writeStream);
     };
 
@@ -518,7 +518,7 @@ describe('serializer', function() {
       sslCreds: grpc.credentials.createInsecure(),
     });
 
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       assert.deepEqual(
         allSupportedTypesProtobufJs.fields,
         request.writes[0].update.fields
@@ -778,7 +778,7 @@ describe('getCollections() method', function() {
   });
 
   it('returns collections', function() {
-    firestore.api.Firestore._listCollectionIds = function(
+    firestore._firestoreClient._listCollectionIds = function(
       request,
       options,
       callback
@@ -821,7 +821,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts empty list', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream();
     };
 
@@ -831,7 +831,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts single document', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId'));
     };
 
@@ -843,7 +843,7 @@ describe('getAll() method', function() {
   });
 
   it('verifies response', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId2'));
     };
 
@@ -861,7 +861,7 @@ describe('getAll() method', function() {
   });
 
   it('handles stream exception during initialization', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(new Error('Expected exception'));
     };
 
@@ -876,7 +876,7 @@ describe('getAll() method', function() {
   });
 
   it('handles stream exception after initialization', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId'), new Error('Expected exception'));
     };
 
@@ -891,7 +891,7 @@ describe('getAll() method', function() {
   });
 
   it('handles serialization error', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId'));
     };
 
@@ -933,7 +933,7 @@ describe('getAll() method', function() {
 
     let actualErrorAttempts = {};
 
-    firestore.api.Firestore._batchGetDocuments = function(request) {
+    firestore._firestoreClient._batchGetDocuments = function(request) {
       let errorCode = Number(request.documents[0].split('/').pop());
       actualErrorAttempts[errorCode] =
         (actualErrorAttempts[errorCode] || 0) + 1;
@@ -969,7 +969,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts array', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId'));
     };
 
@@ -981,7 +981,7 @@ describe('getAll() method', function() {
   });
 
   it('returns not found for missing documents', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('exists'), missing('missing'));
     };
 
@@ -996,7 +996,7 @@ describe('getAll() method', function() {
   });
 
   it('returns results in order', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(
         // Note that these are out of order.
         found('second'),
@@ -1025,7 +1025,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts same document multiple times', function() {
-    firestore.api.Firestore._batchGetDocuments = function(request) {
+    firestore._firestoreClient._batchGetDocuments = function(request) {
       assert.equal(request.documents.length, 2);
       return stream(found('a'), found('b'));
     };
