@@ -313,10 +313,8 @@ class DocumentReference {
       parent: this._referencePath.formattedName,
     };
 
-    let api = this._firestore.api.Firestore;
-
     return this._firestore
-      .request(api.listCollectionIds.bind(api), request)
+      .request('listCollectionIds', request)
       .then(collectionIds => {
         let collections = [];
 
@@ -1078,7 +1076,6 @@ class Query {
    */
   constructor(firestore, path, fieldFilters, fieldOrders, queryOptions) {
     this._firestore = firestore;
-    this._api = firestore.api;
     this._referencePath = path;
     this._fieldFilters = fieldFilters || [];
     this._fieldOrders = fieldOrders || [];
@@ -1920,11 +1917,7 @@ class Query {
     });
 
     this._firestore
-      .readStream(
-        this._api.Firestore.runQuery.bind(this._api.Firestore),
-        request,
-        /* allowRetries= */ true
-      )
+      .readStream('runQuery', request, /* allowRetries= */ true)
       .then(backendStream => {
         backendStream.on('error', err => {
           Firestore.log(

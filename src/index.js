@@ -206,6 +206,28 @@ class Firestore extends commonGrpc.Service {
 
     super(config, options);
 
+    /**
+     * @private
+     * @type {object|null}
+     * @property {FirestoreClient} Firestore The Firestore GAPIC client.
+     */
+    this._firestoreClient = null;
+
+    /**
+     * The configuration options for the GAPIC client.
+     * @private
+     * @type {Object}
+     */
+    this._initalizationOptions = options;
+
+    /**
+     * A Promise that resolves when client initialization completes. Can be
+     * 'null' if initialization hasn't started yet.
+     * @private
+     * @type {Promise|null}
+     */
+    this._clientInitialized = null;
+
     // GCF currently tears down idle connections after two minutes. Requests
     // that are issued after this period may fail. On GCF, we therefore issue
     // these requests as part of a transaction so that we can safely retry until
@@ -220,22 +242,13 @@ class Firestore extends commonGrpc.Service {
       Firestore.log('Firestore', 'Detected GCF environment');
     }
 
-    /**
-     * @private
-     * @type {object}
-     * @property {FirestoreClient} Firestore The Firestore GAPIC client.
-     */
-    this.api = {
-      Firestore: v1beta1(options).firestoreClient(options),
-    };
-
-    this._referencePath = new ResourcePath('{{projectId}}', '(default)');
-
-    if (options) {
-      if (options.projectId) {
-        validate.isString('options.projectId', options.projectId);
-        this._referencePath = new ResourcePath(options.projectId, '(default)');
-      }
+    if (options && options.projectId) {
+      validate.isString('options.projectId', options.projectId);
+      this._referencePath = new ResourcePath(options.projectId, '(default)');
+    } else {
+      // Initialize a temporary reference path that will be overwritten during
+      // project ID detection.
+      this._referencePath = new ResourcePath('{{projectId}}', '(default)');
     }
 
     Firestore.log('Firestore', 'Initialized Firestore');
@@ -589,11 +602,7 @@ class Firestore extends commonGrpc.Service {
     let self = this;
 
     return self
-      .readStream(
-        this.api.Firestore.batchGetDocuments.bind(this.api.Firestore),
-        request,
-        /* allowRetries= */ true
-      )
+      .readStream('batchGetDocuments', request, /* allowRetries= */ true)
       .then(stream => {
         return new Promise((resolve, reject) => {
           stream
@@ -684,60 +693,70 @@ class Firestore extends commonGrpc.Service {
   }
 
   /**
-   * Decorate all request options before being sent with to an API request. This
-   * is used to replace any `{{projectId}}` placeholders with the value detected
-   * from the user's environment, if one wasn't provided manually.
+   * Initializes the client and detects the Firestore Project ID. Returns a
+   * Promise on completion. If the client is already initialized, the returned
+   * Promise resolves immediately.
+   *
+   * @private
+   */
+  _ensureClient() {
+    if (!this._clientInitialized) {
+      this._clientInitialized = new Promise((resolve, reject) => {
+        this._firestoreClient = v1beta1(
+          this._initalizationOptions
+        ).firestoreClient(this._initalizationOptions);
+
+        Firestore.log('Firestore', 'Initialized Firestore GAPIC Client');
+
+        // We schedule Project ID detection using `setImmediate` to allow the
+        // testing framework to provide its own implementation of
+        // `getProjectId`.
+        setImmediate(() => {
+          this._firestoreClient.getProjectId((err, projectId) => {
+            if (err) {
+              Firestore.log(
+                'Firestore._ensureClient',
+                'Failed to detect project ID: %s',
+                err
+              );
+              reject(err);
+            } else {
+              Firestore.log(
+                'Firestore._ensureClient',
+                'Detected project ID: %s',
+                projectId
+              );
+              this._referencePath = new ResourcePath(
+                projectId,
+                this._referencePath.databaseId
+              );
+              resolve();
+            }
+          });
+        });
+      });
+    }
+    return this._clientInitialized;
+  }
+
+  /**
+   * Decorate the request options of an API request. This is used to replace
+   * any `{{projectId}}` placeholders with the value detected from the user's
+   * environment, if one wasn't provided manually.
    *
    * @private
    */
   _decorateRequest(request) {
-    let self = this;
+    let decoratedRequest = extend(true, {}, request);
+    decoratedRequest = common.util.replaceProjectIdToken(
+      decoratedRequest,
+      this._referencePath.projectId
+    );
 
-    function decorate() {
-      return new Promise(resolve => {
-        let decoratedRequest = extend(true, {}, request);
-        decoratedRequest = common.util.replaceProjectIdToken(
-          decoratedRequest,
-          self._referencePath.projectId
-        );
+    let decoratedGax = {otherArgs: {headers: {}}};
+    decoratedGax.otherArgs.headers[CLOUD_RESOURCE_HEADER] = this.formattedName;
 
-        let decoratedGax = {otherArgs: {headers: {}}};
-        decoratedGax.otherArgs.headers[CLOUD_RESOURCE_HEADER] =
-          self.formattedName;
-
-        resolve({request: decoratedRequest, gax: decoratedGax});
-      });
-    }
-
-    if (this._referencePath.projectId !== '{{projectId}}') {
-      return decorate();
-    }
-
-    return new Promise((resolve, reject) => {
-      this.api.Firestore.getProjectId((err, projectId) => {
-        if (err) {
-          Firestore.log(
-            'Firestore._decorateRequest',
-            'Failed to detect project ID: %s',
-            err
-          );
-          reject(err);
-        } else {
-          Firestore.log(
-            'Firestore._decorateRequest',
-            'Detected project ID: %s',
-            projectId
-          );
-          self._referencePath = new ResourcePath(
-            projectId,
-            self._referencePath.databaseId
-          );
-          decorate()
-            .then(resolve)
-            .catch(reject);
-        }
-      });
-    });
+    return {request: decoratedRequest, gax: decoratedGax};
   }
 
   /**
@@ -922,17 +941,18 @@ class Firestore extends commonGrpc.Service {
    * necessary within the request options.
    *
    * @private
-   * @param {function} method - Veneer API endpoint that takes a request and
-   * GAX options.
+   * @param {function} methodName - Name of the veneer API endpoint that takes a
+   * request and GAX options.
    * @param {Object} request - The Protobuf request to send.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
    * @returns {Promise.<Object>} A Promise with the request result.
    */
-  request(method, request, allowRetries) {
+  request(methodName, request, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._decorateRequest(request).then(decorated => {
+    return this._ensureClient().then(() => {
+      const decorated = this._decorateRequest(request);
       return this._retry(attempts, () => {
         return new Promise((resolve, reject) => {
           Firestore.log(
@@ -940,19 +960,23 @@ class Firestore extends commonGrpc.Service {
             'Sending request: %j',
             decorated.request
           );
-          method(decorated.request, decorated.gax, (err, result) => {
-            if (err) {
-              Firestore.log('Firestore.request', 'Received error:', err);
-              reject(err);
-            } else {
-              Firestore.log(
-                'Firestore.request',
-                'Received response: %j',
-                result
-              );
-              resolve(result);
+          this._firestoreClient[methodName](
+            decorated.request,
+            decorated.gax,
+            (err, result) => {
+              if (err) {
+                Firestore.log('Firestore.request', 'Received error:', err);
+                reject(err);
+              } else {
+                Firestore.log(
+                  'Firestore.request',
+                  'Received response: %j',
+                  result
+                );
+                resolve(result);
+              }
             }
-          });
+          );
         });
       });
     });
@@ -966,17 +990,18 @@ class Firestore extends commonGrpc.Service {
    * listeners are attached.
    *
    * @private
-   * @param {function} method - Streaming Veneer API endpoint that takes a
-   * request and GAX options.
+   * @param {string} methodName - Name of the streaming Veneer API endpoint that
+   * takes a request and GAX options.
    * @param {Object} request - The Protobuf request to send.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
    * @returns {Promise.<Stream>} A Promise with the resulting read-only stream.
    */
-  readStream(method, request, allowRetries) {
+  readStream(methodName, request, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._decorateRequest(request).then(decorated => {
+    return this._ensureClient().then(() => {
+      const decorated = this._decorateRequest(request);
       return this._retry(attempts, () => {
         return new Promise((resolve, reject) => {
           try {
@@ -985,7 +1010,10 @@ class Firestore extends commonGrpc.Service {
               'Sending request: %j',
               decorated.request
             );
-            let stream = method(decorated.request, decorated.gax);
+            let stream = this._firestoreClient[methodName](
+              decorated.request,
+              decorated.gax
+            );
             let logger = through.obj(function(chunk, enc, callback) {
               Firestore.log(
                 'Firestore.readStream',
@@ -1013,25 +1041,29 @@ class Firestore extends commonGrpc.Service {
    * listeners are attached.
    *
    * @private
-   * @param {function} method - Streaming Veneer API endpoint that takes GAX
-   * options.
+   * @param {string} methodName - Name of the streaming Veneer API endpoint that
+   * takes GAX options.
    * @param {Object} request - The Protobuf request to send as the first stream
    * message.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
    * @returns {Promise.<Stream>} A Promise with the resulting read/write stream.
    */
-  readWriteStream(method, request, allowRetries) {
+  readWriteStream(methodName, request, allowRetries) {
     let self = this;
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._decorateRequest({}).then(decorated => {
+    return this._ensureClient().then(() => {
+      const decorated = this._decorateRequest(request);
       return this._retry(attempts, () => {
         return Promise.resolve().then(() => {
           Firestore.log('Firestore.readWriteStream', 'Opening stream');
           // The generated bi-directional streaming API takes the list of GAX
           // headers as its second argument.
-          let requestStream = method({}, decorated.gax);
+          let requestStream = this._firestoreClient[methodName](
+            {},
+            decorated.gax
+          );
 
           // The transform stream to assign the project ID.
           let transform = through.obj(function(chunk, encoding, callback) {

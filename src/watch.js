@@ -295,7 +295,6 @@ class Watch {
    */
   constructor(firestore, target, comparator) {
     this._firestore = firestore;
-    this._api = firestore.api;
     this._targets = target;
     this._comparator = comparator;
     this._backoff = new ExponentialBackoff();
@@ -472,11 +471,7 @@ class Watch {
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
         self._firestore
-          .readWriteStream(
-            self._api.Firestore._listen.bind(self._api.Firestore),
-            request,
-            /* allowRetries= */ true
-          )
+          .readWriteStream('listen', request, /* allowRetries= */ true)
           .then(backendStream => {
             if (!isActive) {
               Firestore.log('Watch.onSnapshot', 'Closing inactive stream');
@@ -709,10 +704,9 @@ class Watch {
               );
             }
           } else if (change.targetChangeType === 'ADD') {
-            assert(
-              WATCH_TARGET_ID === change.targetIds[0],
-              'Unexpected target ID sent by server'
-            );
+            if (WATCH_TARGET_ID !== change.targetIds[0]) {
+              closeStream(Error('Unexpected target ID sent by server'));
+            }
           } else if (change.targetChangeType === 'REMOVE') {
             let code = 13;
             let message = 'internal error';

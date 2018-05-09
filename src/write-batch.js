@@ -137,7 +137,6 @@ class WriteBatch {
    */
   constructor(firestore) {
     this._firestore = firestore;
-    this._api = firestore.api;
     this._writes = [];
     this._committed = false;
   }
@@ -506,11 +505,7 @@ class WriteBatch {
     if (!explicitTransaction && this._shouldCreateTransaction()) {
       Firestore.log('WriteBatch.commit', 'Using transaction for commit');
       return this._firestore
-        .request(
-          this._api.Firestore.beginTransaction.bind(this._api.Firestore),
-          request,
-          /* allowRetries= */ true
-        )
+        .request('beginTransaction', request, /* allowRetries= */ true)
         .then(resp => {
           return this.commit_({transactionId: resp.transaction});
         });
@@ -549,46 +544,44 @@ class WriteBatch {
 
     this._committed = true;
 
-    return this._firestore
-      .request(this._api.Firestore.commit.bind(this._api.Firestore), request)
-      .then(resp => {
-        const commitTime = DocumentSnapshot.toISOTime(resp.commitTime);
-        const writeResults = [];
+    return this._firestore.request('commit', request).then(resp => {
+      const commitTime = DocumentSnapshot.toISOTime(resp.commitTime);
+      const writeResults = [];
 
-        if (resp.writeResults) {
-          assert(
-            request.writes.length === resp.writeResults.length,
-            `Expected one write result per operation, but got ${
-              resp.writeResults.length
-            } results for ${request.writes.length} operations.`
-          );
+      if (resp.writeResults) {
+        assert(
+          request.writes.length === resp.writeResults.length,
+          `Expected one write result per operation, but got ${
+            resp.writeResults.length
+          } results for ${request.writes.length} operations.`
+        );
 
-          let offset = 0;
+        let offset = 0;
 
-          for (let i = 0; i < this._writes.length; ++i) {
-            let writeRequest = this._writes[i];
+        for (let i = 0; i < this._writes.length; ++i) {
+          let writeRequest = this._writes[i];
 
-            // Don't return two write results for a write that contains a
-            // transform, as the fact that we have to split one write operation
-            // into two distinct write requests is an implementation detail.
-            if (writeRequest.write && writeRequest.transform) {
-              // The document transform is always sent last and produces the
-              // latest update time.
-              ++offset;
-            }
-
-            let writeResult = resp.writeResults[i + offset];
-
-            writeResults.push(
-              new WriteResult(
-                DocumentSnapshot.toISOTime(writeResult.updateTime) || commitTime
-              )
-            );
+          // Don't return two write results for a write that contains a
+          // transform, as the fact that we have to split one write operation
+          // into two distinct write requests is an implementation detail.
+          if (writeRequest.write && writeRequest.transform) {
+            // The document transform is always sent last and produces the
+            // latest update time.
+            ++offset;
           }
-        }
 
-        return writeResults;
-      });
+          let writeResult = resp.writeResults[i + offset];
+
+          writeResults.push(
+            new WriteResult(
+              DocumentSnapshot.toISOTime(writeResult.updateTime) || commitTime
+            )
+          );
+        }
+      }
+
+      return writeResults;
+    });
   }
 
   /**

@@ -35,10 +35,12 @@ const DATABASE_ROOT = 'projects/test-project/databases/(default)';
 Firestore.setLogFunction(() => {});
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 function snapshot(relativePath, data) {
@@ -293,8 +295,10 @@ function stream() {
 describe('query interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('has limit() method', function() {
@@ -417,7 +421,7 @@ describe('query interface', function() {
   });
 
   it('accepts all variations', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         fieldFilters('foo', 'EQUAL', 'bar'),
@@ -440,7 +444,7 @@ describe('query interface', function() {
   });
 
   it('supports empty gets', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request);
       return stream({readTime: {seconds: 5, nanos: 6}});
     };
@@ -455,7 +459,7 @@ describe('query interface', function() {
 
   it('retries on stream failure', function() {
     let attempts = 0;
-    firestore.api.Firestore._runQuery = function() {
+    firestore._firestoreClient._runQuery = function() {
       ++attempts;
       throw new Error('Expected error');
     };
@@ -472,7 +476,7 @@ describe('query interface', function() {
   });
 
   it('supports empty streams', function(callback) {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request);
       return stream({readTime: {seconds: 5, nanos: 6}});
     };
@@ -489,7 +493,7 @@ describe('query interface', function() {
   });
 
   it('returns results', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request);
       return stream(document('first'), document('second'));
     };
@@ -535,7 +539,7 @@ describe('query interface', function() {
   });
 
   it('handles stream exception during initialization', function() {
-    firestore.api.Firestore._runQuery = function() {
+    firestore._firestoreClient._runQuery = function() {
       return stream(new Error('Expected error'));
     };
 
@@ -551,7 +555,7 @@ describe('query interface', function() {
   });
 
   it('handles stream exception after initialization', function() {
-    firestore.api.Firestore._runQuery = function() {
+    firestore._firestoreClient._runQuery = function() {
       return stream(document('first'), new Error('Expected error'));
     };
 
@@ -567,7 +571,7 @@ describe('query interface', function() {
   });
 
   it('streams results', function(callback) {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request);
       return stream(document('first'), document('second'));
     };
@@ -591,12 +595,14 @@ describe('query interface', function() {
 describe('where() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, fieldFilters('foo', 'EQUAL', 'bar'));
       return stream();
     };
@@ -607,7 +613,7 @@ describe('where() interface', function() {
   });
 
   it('concatenates all accepted filters', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         fieldFilters(
@@ -646,7 +652,7 @@ describe('where() interface', function() {
   });
 
   it('accepts object', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         fieldFilters('foo', 'EQUAL', {
@@ -671,7 +677,7 @@ describe('where() interface', function() {
   });
 
   it('supports field path objects for field paths', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         fieldFilters('foo.bar', 'EQUAL', 'foobar', 'bar.foo', 'EQUAL', 'foobar')
@@ -686,7 +692,7 @@ describe('where() interface', function() {
   });
 
   it('supports strings for FieldPath.documentId()', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         fieldFilters('__name__', 'EQUAL', {
@@ -772,7 +778,7 @@ describe('where() interface', function() {
   });
 
   it('supports unary filters', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, unaryFilters('foo', 'IS_NAN', 'bar', 'IS_NULL'));
       return stream();
     };
@@ -817,12 +823,14 @@ describe('where() interface', function() {
 describe('orderBy() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts empty string', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, orderBy('foo', 'ASCENDING'));
       return stream();
     };
@@ -833,7 +841,7 @@ describe('orderBy() interface', function() {
   });
 
   it('accepts asc', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, orderBy('foo', 'ASCENDING'));
       return stream();
     };
@@ -844,7 +852,7 @@ describe('orderBy() interface', function() {
   });
 
   it('accepts desc', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, orderBy('foo', 'DESCENDING'));
       return stream();
     };
@@ -862,7 +870,7 @@ describe('orderBy() interface', function() {
   });
 
   it('accepts field path', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING')
@@ -916,7 +924,7 @@ describe('orderBy() interface', function() {
   });
 
   it('concatenates orders', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo', 'ASCENDING', 'bar', 'DESCENDING', 'foobar', 'ASCENDING')
@@ -937,12 +945,14 @@ describe('orderBy() interface', function() {
 describe('limit() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, limit(10));
       return stream();
     };
@@ -960,7 +970,7 @@ describe('limit() interface', function() {
   });
 
   it('uses latest limit', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, limit(3));
       return stream();
     };
@@ -977,12 +987,14 @@ describe('limit() interface', function() {
 describe('offset() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, offset(10));
       return stream();
     };
@@ -1000,7 +1012,7 @@ describe('offset() interface', function() {
   });
 
   it('uses latest offset', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, offset(3));
       return stream();
     };
@@ -1017,12 +1029,14 @@ describe('offset() interface', function() {
 describe('select() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, select('a', 'b.c'));
       return stream();
     };
@@ -1047,7 +1061,7 @@ describe('select() interface', function() {
   });
 
   it('uses latest field mask', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, select('bar'));
       return stream();
     };
@@ -1058,7 +1072,7 @@ describe('select() interface', function() {
   });
 
   it('implicitly adds FieldPath.documentId()', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, select('__name__'));
       return stream();
     };
@@ -1072,12 +1086,14 @@ describe('select() interface', function() {
 describe('startAt() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts fields', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
@@ -1096,7 +1112,7 @@ describe('startAt() interface', function() {
   });
 
   it('accepts FieldPath.documentId()', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('__name__', 'ASCENDING'),
@@ -1164,7 +1180,7 @@ describe('startAt() interface', function() {
   });
 
   it('can specify document snapshot', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('__name__', 'ASCENDING'),
@@ -1186,7 +1202,7 @@ describe('startAt() interface', function() {
   });
 
   it("doesn't append documentId() twice", function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('__name__', 'ASCENDING'),
@@ -1209,7 +1225,7 @@ describe('startAt() interface', function() {
   });
 
   it('can extract implicit direction for document snapshot', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo', 'ASCENDING', '__name__', 'ASCENDING'),
@@ -1230,7 +1246,7 @@ describe('startAt() interface', function() {
   });
 
   it('can extract explicit direction for document snapshot', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo', 'DESCENDING', '__name__', 'DESCENDING'),
@@ -1251,7 +1267,7 @@ describe('startAt() interface', function() {
   });
 
   it('can specify document snapshot with inequality filter', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('b', 'ASCENDING', '__name__', 'ASCENDING'),
@@ -1287,7 +1303,7 @@ describe('startAt() interface', function() {
   });
 
   it('ignores equality filter with document snapshot cursor', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('__name__', 'ASCENDING'),
@@ -1343,7 +1359,7 @@ describe('startAt() interface', function() {
   });
 
   it('can overspecify order by', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
@@ -1369,7 +1385,7 @@ describe('startAt() interface', function() {
   });
 
   it('uses latest value', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, orderBy('foo', 'ASCENDING'), startAt(true, 'bar'));
 
       return stream();
@@ -1387,12 +1403,14 @@ describe('startAt() interface', function() {
 describe('startAfter() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts fields', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
@@ -1418,7 +1436,7 @@ describe('startAfter() interface', function() {
   });
 
   it('uses latest value', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo', 'ASCENDING'),
@@ -1440,12 +1458,14 @@ describe('startAfter() interface', function() {
 describe('endAt() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts fields', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
@@ -1471,7 +1491,7 @@ describe('endAt() interface', function() {
   });
 
   it('uses latest value', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, orderBy('foo', 'ASCENDING'), endAt(false, 'bar'));
 
       return stream();
@@ -1489,12 +1509,14 @@ describe('endAt() interface', function() {
 describe('endBefore() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts fields', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(
         request,
         orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
@@ -1520,7 +1542,7 @@ describe('endBefore() interface', function() {
   });
 
   it('uses latest value', function() {
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       requestEquals(request, orderBy('foo', 'ASCENDING'), endAt(true, 'bar'));
 
       return stream();
@@ -1537,7 +1559,7 @@ describe('endBefore() interface', function() {
   it('is immutable', function() {
     let expectedResult = buildQuery(limit(10));
 
-    firestore.api.Firestore._runQuery = function(request) {
+    firestore._firestoreClient._runQuery = function(request) {
       assert.deepEqual(request, expectedResult);
       return stream();
     };
