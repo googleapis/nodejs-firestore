@@ -212,7 +212,21 @@ class Firestore extends commonGrpc.Service {
      * @property {FirestoreClient} Firestore The Firestore GAPIC client.
      */
     this._firestoreClient = null;
+
+    /**
+     * The configuration options for the GAPIC client.
+     * @private
+     * @type {Object}
+     */
     this._initalizationOptions = options;
+
+    /**
+     * A Promise that resolves when client initialization completes. Can be
+     * 'null' if initialization hasn't started yet.
+     * @private
+     * @type {Promise|null}
+     */
+    this._clientInitialized = null;
 
     // GCF currently tears down idle connections after two minutes. Requests
     // that are issued after this period may fail. On GCF, we therefore issue
@@ -228,12 +242,12 @@ class Firestore extends commonGrpc.Service {
       Firestore.log('Firestore', 'Detected GCF environment');
     }
 
-    this._deferredInitialization = null;
-
     if (options && options.projectId) {
       validate.isString('options.projectId', options.projectId);
       this._referencePath = new ResourcePath(options.projectId, '(default)');
     } else {
+      // Initialize a temporary reference path that will be overwritten during
+      // project ID detection.
       this._referencePath = new ResourcePath('{{projectId}}', '(default)');
     }
 
@@ -686,8 +700,8 @@ class Firestore extends commonGrpc.Service {
    * @private
    */
   _ensureClient() {
-    if (!this._deferredInitialization) {
-      this._deferredInitialization = new Promise((resolve, reject) => {
+    if (!this._clientInitialized) {
+      this._clientInitialized = new Promise((resolve, reject) => {
         this._firestoreClient = v1beta1(
           this._initalizationOptions
         ).firestoreClient(this._initalizationOptions);
@@ -722,7 +736,7 @@ class Firestore extends commonGrpc.Service {
         });
       });
     }
-    return this._deferredInitialization;
+    return this._clientInitialized;
   }
 
   /**
