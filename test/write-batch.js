@@ -25,19 +25,23 @@ const Firestore = require('../');
 Firestore.setLogFunction(() => {});
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 describe('set() method', function() {
   let firestore;
   let writeBatch;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    writeBatch = firestore.batch();
+  beforeEach(() => {
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
+      writeBatch = firestore.batch();
+    });
   });
 
   it('requires document name', function() {
@@ -61,9 +65,11 @@ describe('delete() method', function() {
   let firestore;
   let writeBatch;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    writeBatch = firestore.batch();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+      writeBatch = firestore.batch();
+    });
   });
 
   it('requires document name', function() {
@@ -83,9 +89,11 @@ describe('update() method', function() {
   let firestore;
   let writeBatch;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    writeBatch = firestore.batch();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+      writeBatch = firestore.batch();
+    });
   });
 
   it('requires document name', function() {
@@ -113,9 +121,11 @@ describe('create() method', function() {
   let firestore;
   let writeBatch;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    writeBatch = firestore.batch();
+  beforeEach(() => {
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
+      writeBatch = firestore.batch();
+    });
   });
 
   it('requires document name', function() {
@@ -138,104 +148,109 @@ describe('batch support', function() {
   let firestore;
   let writeBatch;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
+      writeBatch = firestore.batch();
 
-    firestore._firestoreClient._commit = function(request, options, callback) {
-      assert.deepEqual(request, {
-        database: 'projects/test-project/databases/(default)',
-        writes: [
-          {
-            update: {
-              fields: {},
-              name: documentName,
-            },
-          },
-          {
-            transform: {
-              document: documentName,
-              fieldTransforms: [
-                {
-                  fieldPath: 'foo',
-                  setToServerValue: 'REQUEST_TIME',
-                },
-              ],
-            },
-          },
-          {
-            currentDocument: {
-              exists: true,
-            },
-            update: {
-              fields: {
-                foo: {
-                  stringValue: 'bar',
-                  valueType: 'stringValue',
-                },
+      firestore._firestoreClient._commit = function(
+        request,
+        options,
+        callback
+      ) {
+        assert.deepEqual(request, {
+          database: 'projects/test-project/databases/(default)',
+          writes: [
+            {
+              update: {
+                fields: {},
+                name: documentName,
               },
-              name: documentName,
             },
-            updateMask: {
-              fieldPaths: ['foo'],
+            {
+              transform: {
+                document: documentName,
+                fieldTransforms: [
+                  {
+                    fieldPath: 'foo',
+                    setToServerValue: 'REQUEST_TIME',
+                  },
+                ],
+              },
             },
+            {
+              currentDocument: {
+                exists: true,
+              },
+              update: {
+                fields: {
+                  foo: {
+                    stringValue: 'bar',
+                    valueType: 'stringValue',
+                  },
+                },
+                name: documentName,
+              },
+              updateMask: {
+                fieldPaths: ['foo'],
+              },
+            },
+            {
+              currentDocument: {
+                exists: false,
+              },
+              update: {
+                fields: {},
+                name: documentName,
+              },
+            },
+            {
+              delete: documentName,
+            },
+          ],
+        });
+        callback(null, {
+          commitTime: {
+            nanos: 0,
+            seconds: 0,
           },
-          {
-            currentDocument: {
-              exists: false,
+          writeResults: [
+            // This write result conforms to the Write + DocumentTransform and
+            // won't be returned in the response.
+            {
+              updateTime: {
+                nanos: 1337,
+                seconds: 1337,
+              },
             },
-            update: {
-              fields: {},
-              name: documentName,
+            {
+              updateTime: {
+                nanos: 0,
+                seconds: 0,
+              },
             },
-          },
-          {
-            delete: documentName,
-          },
-        ],
-      });
-      callback(null, {
-        commitTime: {
-          nanos: 0,
-          seconds: 0,
-        },
-        writeResults: [
-          // This write result conforms to the Write + DocumentTransform and
-          // won't be returned in the response.
-          {
-            updateTime: {
-              nanos: 1337,
-              seconds: 1337,
+            {
+              updateTime: {
+                nanos: 1,
+                seconds: 1,
+              },
             },
-          },
-          {
-            updateTime: {
-              nanos: 0,
-              seconds: 0,
+            {
+              updateTime: {
+                nanos: 2,
+                seconds: 2,
+              },
             },
-          },
-          {
-            updateTime: {
-              nanos: 1,
-              seconds: 1,
+            {
+              updateTime: {
+                nanos: 3,
+                seconds: 3,
+              },
             },
-          },
-          {
-            updateTime: {
-              nanos: 2,
-              seconds: 2,
-            },
-          },
-          {
-            updateTime: {
-              nanos: 3,
-              seconds: 3,
-            },
-          },
-        ],
-      });
-    };
-
-    writeBatch = firestore.batch();
+          ],
+        });
+      };
+    });
   });
 
   function verifyResponse(writeResults) {
@@ -353,54 +368,54 @@ describe('batch support', function() {
     // we are running on GCF.
     process.env.FUNCTION_TRIGGER_TYPE = 'http-trigger';
 
-    const firestore = createInstance();
+    return createInstance().then(firestore => {
+      firestore._preferTransactions = true;
+      firestore._lastSuccessfulRequest = null;
 
-    firestore._preferTransactions = true;
-    firestore._lastSuccessfulRequest = null;
+      let beginCalled = 0;
+      let commitCalled = 0;
 
-    let beginCalled = 0;
-    let commitCalled = 0;
+      firestore._firestoreClient._beginTransaction = function(
+        actual,
+        options,
+        callback
+      ) {
+        ++beginCalled;
+        callback(null, {transaction: 'foo'});
+      };
 
-    firestore._firestoreClient._beginTransaction = function(
-      actual,
-      options,
-      callback
-    ) {
-      ++beginCalled;
-      callback(null, {transaction: 'foo'});
-    };
+      firestore._firestoreClient._commit = function(actual, options, callback) {
+        ++commitCalled;
+        callback(null, {
+          commitTime: {
+            nanos: 0,
+            seconds: 0,
+          },
+        });
+      };
 
-    firestore._firestoreClient._commit = function(actual, options, callback) {
-      ++commitCalled;
-      callback(null, {
-        commitTime: {
-          nanos: 0,
-          seconds: 0,
-        },
-      });
-    };
-
-    return firestore
-      .batch()
-      .commit()
-      .then(() => {
-        // The first commit always uses a transcation.
-        assert.equal(1, beginCalled);
-        assert.equal(1, commitCalled);
-        return firestore.batch().commit();
-      })
-      .then(() => {
-        // The following commits don't use transactions if they happen within two
-        // minutes.
-        assert.equal(1, beginCalled);
-        assert.equal(2, commitCalled);
-        firestore._lastSuccessfulRequest = new Date(1337);
-        return firestore.batch().commit();
-      })
-      .then(() => {
-        assert.equal(2, beginCalled);
-        assert.equal(3, commitCalled);
-        delete process.env.FUNCTION_TRIGGER_TYPE;
-      });
+      return firestore
+        .batch()
+        .commit()
+        .then(() => {
+          // The first commit always uses a transcation.
+          assert.equal(1, beginCalled);
+          assert.equal(1, commitCalled);
+          return firestore.batch().commit();
+        })
+        .then(() => {
+          // The following commits don't use transactions if they happen within two
+          // minutes.
+          assert.equal(1, beginCalled);
+          assert.equal(2, commitCalled);
+          firestore._lastSuccessfulRequest = new Date(1337);
+          return firestore.batch().commit();
+        })
+        .then(() => {
+          assert.equal(2, beginCalled);
+          assert.equal(3, commitCalled);
+          delete process.env.FUNCTION_TRIGGER_TYPE;
+        });
+    });
   });
 });

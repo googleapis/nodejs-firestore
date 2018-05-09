@@ -37,10 +37,12 @@ const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
 Firestore.setLogFunction(() => {});
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 function buildWrite_(document, mask, transform, precondition) {
@@ -225,9 +227,11 @@ describe('DocumentReference interface', function() {
   let firestore;
   let documentRef;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    documentRef = firestore.doc('collectionId/documentId');
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+      documentRef = firestore.doc('collectionId/documentId');
+    });
   });
 
   it('has collection() method', function() {
@@ -266,8 +270,10 @@ describe('DocumentReference interface', function() {
 describe('serialize document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('serializes to Protobuf JS', function() {
@@ -496,8 +502,10 @@ describe('serialize document', function() {
 describe('deserialize document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('deserializes Protobuf JS', function() {
@@ -677,8 +685,10 @@ describe('deserialize document', function() {
 describe('get document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('returns document', function() {
@@ -795,8 +805,10 @@ describe('get document', function() {
 describe('delete document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
@@ -886,8 +898,10 @@ describe('delete document', function() {
 describe('set document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('supports empty map', function() {
@@ -1223,8 +1237,10 @@ describe('set document', function() {
 describe('create document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('creates document', function() {
@@ -1323,8 +1339,10 @@ describe('create document', function() {
 describe('update document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
@@ -1815,9 +1833,11 @@ describe('getCollections() method', function() {
   let firestore;
   let documentRef;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    documentRef = firestore.doc('coll/doc');
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+      documentRef = firestore.doc('coll/doc');
+    });
   });
 
   it('sorts results', function() {

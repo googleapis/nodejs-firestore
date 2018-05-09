@@ -31,10 +31,12 @@ const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 Firestore.setLogFunction(() => {});
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 function commit(transaction, writes, err) {
@@ -273,8 +275,10 @@ function runTransaction(callback, request) {
 }
 
 describe('successful transactions', function() {
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('empty transaction', function() {
@@ -301,8 +305,10 @@ describe('successful transactions', function() {
 });
 
 describe('failed transactions', function() {
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('requires update function', function() {
@@ -454,9 +460,11 @@ describe('failed transactions', function() {
 describe('transaction operations', function() {
   let docRef;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    docRef = firestore.doc('collectionId/documentId');
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+      docRef = firestore.doc('collectionId/documentId');
+    });
   });
 
   it('support get with document ref', function() {

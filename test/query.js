@@ -35,10 +35,12 @@ const DATABASE_ROOT = 'projects/test-project/databases/(default)';
 Firestore.setLogFunction(() => {});
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 function snapshot(relativePath, data) {
@@ -293,8 +295,10 @@ function stream() {
 describe('query interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('has limit() method', function() {
@@ -591,8 +595,10 @@ describe('query interface', function() {
 describe('where() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
@@ -817,8 +823,10 @@ describe('where() interface', function() {
 describe('orderBy() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts empty string', function() {
@@ -937,8 +945,10 @@ describe('orderBy() interface', function() {
 describe('limit() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
@@ -977,8 +987,10 @@ describe('limit() interface', function() {
 describe('offset() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
@@ -1017,8 +1029,10 @@ describe('offset() interface', function() {
 describe('select() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
@@ -1072,8 +1086,10 @@ describe('select() interface', function() {
 describe('startAt() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts fields', function() {
@@ -1387,8 +1403,10 @@ describe('startAt() interface', function() {
 describe('startAfter() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts fields', function() {
@@ -1440,8 +1458,10 @@ describe('startAfter() interface', function() {
 describe('endAt() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts fields', function() {
@@ -1489,8 +1509,10 @@ describe('endAt() interface', function() {
 describe('endBefore() interface', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts fields', function() {

@@ -527,6 +527,10 @@ describe('Conformance Tests', function() {
     return testSuite.tests;
   };
 
+  before(() => {
+    firestore._ensureClient();
+  });
+
   for (let testCase of loadTestCases()) {
     const isIgnored = ignoredRe.find(re => re.test(testCase.description));
     const isExclusive = exclusiveRe.find(re => re.test(testCase.description));
