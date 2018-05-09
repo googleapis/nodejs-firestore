@@ -704,10 +704,9 @@ class Watch {
               );
             }
           } else if (change.targetChangeType === 'ADD') {
-            assert(
-              WATCH_TARGET_ID === change.targetIds[0],
-              'Unexpected target ID sent by server'
-            );
+            if (WATCH_TARGET_ID !== change.targetIds[0]) {
+              closeStream(Error('Unexpected target ID sent by server'));
+            }
           } else if (change.targetChangeType === 'REMOVE') {
             let code = 13;
             let message = 'internal error';
