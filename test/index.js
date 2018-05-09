@@ -17,7 +17,6 @@
 'use strict';
 
 const assert = require('power-assert');
-const duplexify = require('duplexify');
 const extend = require('extend');
 const grpc = require('google-gax').grpc().grpc;
 const GrpcService = require('@google-cloud/common').GrpcService;
@@ -230,10 +229,12 @@ const allSupportedTypesObject = {
 };
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 function document(name, fields) {
@@ -298,7 +299,7 @@ describe('instantiation', function() {
     });
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     extend(FakeGrpcService, GrpcService);
   });
 
@@ -316,164 +317,52 @@ describe('instantiation', function() {
       sslCreds: grpc.credentials.createInsecure(),
     });
 
-    firestore.api.Firestore._commit = function(request, options, callback) {
-      callback(null, {
-        commitTime: {
-          nanos: 0,
-          seconds: 0,
-        },
-        writeResults: [
-          {
-            updateTime: {
-              nanos: 0,
-              seconds: 0,
-            },
-          },
-        ],
-      });
-    };
-
-    firestore.api.Firestore.getProjectId = function(callback) {
-      callback(null, 'test-project');
-    };
-
     assert.equal(
       firestore.formattedName,
       'projects/{{projectId}}/databases/(default)'
     );
 
-    return firestore
-      .doc('foo/bar')
-      .set({})
-      .then(() => {
-        assert.equal(firestore.formattedName, DATABASE_ROOT);
-      });
-  });
+    let initialized = firestore._ensureClient();
 
-  it('accepts get() without project ID', function() {
-    let firestore = new Firestore({
-      sslCreds: grpc.credentials.createInsecure(),
-    });
+    let projectIdDetected = false;
 
-    firestore.api.Firestore._batchGetDocuments = function(request) {
+    firestore._firestoreClient.getProjectId = function(callback) {
+      projectIdDetected = true;
+      callback(null, 'test-project');
+    };
+
+    firestore._firestoreClient._batchGetDocuments = function(request) {
       let expectedRequest = {
         database: DATABASE_ROOT,
         documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`],
       };
       assert.deepEqual(request, expectedRequest);
-
       return stream(found('documentId'));
     };
 
-    let projectIdDetected = false;
-
-    firestore.api.Firestore.getProjectId = function(callback) {
-      projectIdDetected = true;
-      callback(null, 'test-project');
-    };
-
-    let doc = firestore.doc('collectionId/documentId');
-    assert.equal(projectIdDetected, false);
-
-    return doc.get().then(result => {
+    return initialized.then(() => {
       assert.equal(projectIdDetected, true);
-      assert.equal(result.exists, true);
+      return firestore.doc('collectionId/documentId').get();
     });
   });
 
-  it('accepts onSnapshot() without project ID', function(done) {
+  it('handles error from project ID detection', function() {
     let firestore = new Firestore({
       sslCreds: grpc.credentials.createInsecure(),
     });
 
-    let readStream = through.obj();
-    let writeStream = through.obj();
+    let initialized = firestore._ensureClient();
 
-    firestore.api.Firestore._listen = function() {
-      return duplexify.obj(readStream, writeStream);
+    firestore._firestoreClient.getProjectId = function(callback) {
+      callback(new Error('Project ID error'));
     };
 
-    let projectIdDetected = false;
-
-    firestore.api.Firestore.getProjectId = function(callback) {
-      projectIdDetected = true;
-      callback(null, 'test-project');
-    };
-
-    let collection = firestore.collection('collectionId');
-    assert.equal(projectIdDetected, false);
-
-    let unsubscribe = collection.onSnapshot(() => {});
-    readStream.on('data', data => {
-      assert.equal(projectIdDetected, true);
-      assert.equal(data.database, DATABASE_ROOT);
-      unsubscribe();
-      done();
-    });
-  });
-
-  it('errors out on project id', function() {
-    let firestore = new Firestore({
-      sslCreds: grpc.credentials.createInsecure(),
-    });
-
-    firestore.api.Firestore.getProjectId = function(callback) {
-      callback(new Error('Expected error'));
-    };
-
-    return firestore
-      .doc('foo/bar')
-      .set({})
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        assert.equal(err.message, 'Expected error');
-        return Promise.resolve();
-      });
-  });
-
-  describe('handles error from project ID detection', function() {
-    it('for streaming requests', function() {
-      let firestore = new Firestore({
-        sslCreds: grpc.credentials.createInsecure(),
-      });
-
-      firestore._decorateRequest = function() {
-        return Promise.reject(new Error('Expected error'));
-      };
-
-      return firestore
-        .getAll(firestore.doc('foo/bar'))
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          assert.equal(err.message, 'Expected error');
-          return Promise.resolve();
-        });
-    });
-
-    it('for non-streaming requests', function() {
-      let firestore = new Firestore({
-        sslCreds: grpc.credentials.createInsecure(),
-      });
-
-      firestore._decorateRequest = function() {
-        return Promise.reject(new Error('Expected error'));
-      };
-
-      return firestore
-        .doc('foo/bar')
-        .set({})
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          assert.equal(err.message, 'Expected error');
-          return Promise.resolve();
-        });
-    });
+    return initialized.then(
+      () => assert.fail('Expected error missing'),
+      err => {
+        assert.equal(err.message, 'Project ID error');
+      }
+    );
   });
 
   it('inherits from GrpcService', function() {
@@ -484,7 +373,6 @@ describe('instantiation', function() {
     assert(firestore instanceof FakeGrpcService);
 
     let calledWith = firestore.calledWith_[0];
-
     assert.equal(calledWith.service, 'firestore');
   });
 
@@ -512,13 +400,16 @@ describe('instantiation', function() {
 });
 
 describe('serializer', function() {
-  it('supports all types', function() {
-    let firestore = new Firestore({
-      projectId: 'test-project',
-      sslCreds: grpc.credentials.createInsecure(),
-    });
+  let firestore;
 
-    firestore.api.Firestore._commit = function(request, options, callback) {
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
+  });
+
+  it('supports all types', function() {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       assert.deepEqual(
         allSupportedTypesProtobufJs.fields,
         request.writes[0].update.fields
@@ -568,8 +459,13 @@ describe('snapshot_() method', function() {
     );
   }
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    // Unlike most other tests, we don't call `ensureClient` since the
+    // `snapshot_` method does not require a GAPIC client.
+    firestore = new Firestore({
+      projectId: 'test-project',
+      sslCreds: grpc.credentials.createInsecure(),
+    });
   });
 
   it('handles ProtobufJS', function() {
@@ -704,8 +600,10 @@ describe('snapshot_() method', function() {
 describe('doc() method', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('returns DocumentReference', function() {
@@ -741,8 +639,10 @@ describe('doc() method', function() {
 describe('collection() method', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('returns collection', function() {
@@ -773,12 +673,14 @@ describe('collection() method', function() {
 describe('getCollections() method', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('returns collections', function() {
-    firestore.api.Firestore._listCollectionIds = function(
+    firestore._firestoreClient._listCollectionIds = function(
       request,
       options,
       callback
@@ -816,12 +718,14 @@ describe('getAll() method', function() {
     }
   }
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('accepts empty list', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream();
     };
 
@@ -831,7 +735,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts single document', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId'));
     };
 
@@ -843,7 +747,7 @@ describe('getAll() method', function() {
   });
 
   it('verifies response', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId2'));
     };
 
@@ -861,7 +765,7 @@ describe('getAll() method', function() {
   });
 
   it('handles stream exception during initialization', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(new Error('Expected exception'));
     };
 
@@ -876,7 +780,7 @@ describe('getAll() method', function() {
   });
 
   it('handles stream exception after initialization', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId'), new Error('Expected exception'));
     };
 
@@ -891,7 +795,7 @@ describe('getAll() method', function() {
   });
 
   it('handles serialization error', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId'));
     };
 
@@ -933,7 +837,7 @@ describe('getAll() method', function() {
 
     let actualErrorAttempts = {};
 
-    firestore.api.Firestore._batchGetDocuments = function(request) {
+    firestore._firestoreClient._batchGetDocuments = function(request) {
       let errorCode = Number(request.documents[0].split('/').pop());
       actualErrorAttempts[errorCode] =
         (actualErrorAttempts[errorCode] || 0) + 1;
@@ -969,7 +873,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts array', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('documentId'));
     };
 
@@ -981,7 +885,7 @@ describe('getAll() method', function() {
   });
 
   it('returns not found for missing documents', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found('exists'), missing('missing'));
     };
 
@@ -996,7 +900,7 @@ describe('getAll() method', function() {
   });
 
   it('returns results in order', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(
         // Note that these are out of order.
         found('second'),
@@ -1025,7 +929,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts same document multiple times', function() {
-    firestore.api.Firestore._batchGetDocuments = function(request) {
+    firestore._firestoreClient._batchGetDocuments = function(request) {
       assert.equal(request.documents.length, 2);
       return stream(found('a'), found('b'));
     };

@@ -33,17 +33,21 @@ const ResourcePath = require('../src/path').ResourcePath;
 Firestore.setLogFunction(() => {});
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 describe('Order', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   /** Converts a value into its proto representation. */

@@ -31,10 +31,12 @@ const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 Firestore.setLogFunction(() => {});
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 function commit(transaction, writes, err) {
@@ -221,7 +223,7 @@ function query(transaction) {
 function runTransaction(callback, request) {
   let requests = Array.prototype.slice.call(arguments, 1);
 
-  firestore.api.Firestore._beginTransaction = function(
+  firestore._firestoreClient._beginTransaction = function(
     actual,
     options,
     callback
@@ -232,28 +234,28 @@ function runTransaction(callback, request) {
     callback(request.error, request.response);
   };
 
-  firestore.api.Firestore._commit = function(actual, options, callback) {
+  firestore._firestoreClient._commit = function(actual, options, callback) {
     request = requests.shift();
     assert.equal(request.type, 'commit');
     assert.deepEqual(actual, request.request);
     callback(request.error, request.response);
   };
 
-  firestore.api.Firestore._rollback = function(actual, options, callback) {
+  firestore._firestoreClient._rollback = function(actual, options, callback) {
     request = requests.shift();
     assert.equal(request.type, 'rollback');
     assert.deepEqual(actual, request.request);
     callback(request.error, request.response);
   };
 
-  firestore.api.Firestore._batchGetDocuments = function(actual) {
+  firestore._firestoreClient._batchGetDocuments = function(actual) {
     request = requests.shift();
     assert.equal(request.type, 'getDocument');
     assert.deepEqual(actual, request.request);
     return request.stream;
   };
 
-  firestore.api.Firestore._runQuery = function(actual) {
+  firestore._firestoreClient._runQuery = function(actual) {
     request = requests.shift();
     assert.equal(request.type, 'query');
     assert.deepEqual(actual, request.request);
@@ -273,8 +275,10 @@ function runTransaction(callback, request) {
 }
 
 describe('successful transactions', function() {
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('empty transaction', function() {
@@ -301,8 +305,10 @@ describe('successful transactions', function() {
 });
 
 describe('failed transactions', function() {
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('requires update function', function() {
@@ -312,7 +318,7 @@ describe('failed transactions', function() {
   });
 
   it('requires valid retry number', function() {
-    firestore.api.Firestore._beginTransaction = function() {
+    firestore._firestoreClient._beginTransaction = function() {
       assert.fail();
     };
 
@@ -454,9 +460,11 @@ describe('failed transactions', function() {
 describe('transaction operations', function() {
   let docRef;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    docRef = firestore.doc('collectionId/documentId');
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+      docRef = firestore.doc('collectionId/documentId');
+    });
   });
 
   it('support get with document ref', function() {

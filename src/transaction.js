@@ -62,7 +62,6 @@ class Transaction {
    */
   constructor(firestore, previousTransaction) {
     this._firestore = firestore;
-    this._api = firestore.api;
     this._previousTransaction = previousTransaction;
     this._writeBatch = firestore.batch();
   }
@@ -300,11 +299,7 @@ class Transaction {
     }
 
     return this._firestore
-      .request(
-        this._api.Firestore.beginTransaction.bind(this._api.Firestore),
-        request,
-        /* allowRetries= */ true
-      )
+      .request('beginTransaction', request, /* allowRetries= */ true)
       .then(resp => {
         this._transactionId = resp.transaction;
       });
@@ -332,10 +327,7 @@ class Transaction {
       transaction: this._transactionId,
     };
 
-    return this._firestore.request(
-      this._api.Firestore.rollback.bind(this._api.Firestore),
-      request
-    );
+    return this._firestore.request('rollback', request);
   }
 }
 

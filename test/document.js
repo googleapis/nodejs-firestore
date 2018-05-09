@@ -37,10 +37,12 @@ const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
 Firestore.setLogFunction(() => {});
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 function buildWrite_(document, mask, transform, precondition) {
@@ -225,9 +227,11 @@ describe('DocumentReference interface', function() {
   let firestore;
   let documentRef;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    documentRef = firestore.doc('collectionId/documentId');
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+      documentRef = firestore.doc('collectionId/documentId');
+    });
   });
 
   it('has collection() method', function() {
@@ -266,12 +270,14 @@ describe('DocumentReference interface', function() {
 describe('serialize document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('serializes to Protobuf JS', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -307,7 +313,7 @@ describe('serialize document', function() {
   });
 
   it('serializes date before 1970', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -330,7 +336,7 @@ describe('serialize document', function() {
   });
 
   it('serializes unicode keys', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, set(document('😀', '😜')));
       callback(null, writeResult(1));
     };
@@ -341,7 +347,7 @@ describe('serialize document', function() {
   });
 
   it('accepts both blob formats', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -367,7 +373,7 @@ describe('serialize document', function() {
   });
 
   it('supports NaN and Infinity', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       let fields = request.writes[0].update.fields;
       assert.ok(
         typeof fields.nanValue.doubleValue === 'number' &&
@@ -387,7 +393,7 @@ describe('serialize document', function() {
   });
 
   it('supports server timestamps', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -467,7 +473,7 @@ describe('serialize document', function() {
   });
 
   it('is able to write a document reference with cycles', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -496,12 +502,14 @@ describe('serialize document', function() {
 describe('deserialize document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('deserializes Protobuf JS', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(
         found(
           document('foo', {
@@ -523,7 +531,7 @@ describe('deserialize document', function() {
   it('ignores intermittent stream failures', function() {
     let attempts = 1;
 
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       if (attempts < 3) {
         ++attempts;
         throw new Error('Expected error');
@@ -541,7 +549,7 @@ describe('deserialize document', function() {
   });
 
   it('deserializes date before 1970', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(
         found(
           document('moonLanding', {
@@ -567,7 +575,7 @@ describe('deserialize document', function() {
   });
 
   it('returns undefined for unknown fields', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found(document()));
     };
 
@@ -581,7 +589,7 @@ describe('deserialize document', function() {
   });
 
   it('supports NaN and Infinity', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(
         found(
           document(
@@ -609,7 +617,7 @@ describe('deserialize document', function() {
   });
 
   it("doesn't deserialize unsupported types", function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found(document('moonLanding', {valueType: 'foo'})));
     };
 
@@ -624,7 +632,7 @@ describe('deserialize document', function() {
   });
 
   it("doesn't deserialize invalid latitude", function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(
         found(
           document('geoPointValue', {
@@ -649,7 +657,7 @@ describe('deserialize document', function() {
   });
 
   it("doesn't deserialize invalid longitude", function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(
         found(
           document('geoPointValue', {
@@ -677,12 +685,14 @@ describe('deserialize document', function() {
 describe('get document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('returns document', function() {
-    firestore.api.Firestore._batchGetDocuments = function(request) {
+    firestore._firestoreClient._batchGetDocuments = function(request) {
       requestEquals(request, retrieve());
 
       return stream(
@@ -718,7 +728,7 @@ describe('get document', function() {
   });
 
   it('returns read, update and create times', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(found(document()));
     };
 
@@ -733,7 +743,7 @@ describe('get document', function() {
   });
 
   it('returns not found', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(missing(document()));
     };
 
@@ -749,7 +759,7 @@ describe('get document', function() {
   });
 
   it('throws error', function(done) {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(new Error('RPC Error'));
     };
 
@@ -763,7 +773,7 @@ describe('get document', function() {
   });
 
   it('requires field path', function() {
-    firestore.api.Firestore._batchGetDocuments = function() {
+    firestore._firestoreClient._batchGetDocuments = function() {
       return stream(
         found(
           document('foo', {
@@ -795,12 +805,14 @@ describe('get document', function() {
 describe('delete document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, remove('documentId'));
 
       callback(null, writeResult(1));
@@ -810,7 +822,7 @@ describe('delete document', function() {
   });
 
   it('returns update time', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, remove('documentId'));
 
       callback(null, {
@@ -833,7 +845,7 @@ describe('delete document', function() {
   it('with last update time precondition', function() {
     let docRef = firestore.doc('collectionId/documentId');
 
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         remove('documentId', {
@@ -886,12 +898,14 @@ describe('delete document', function() {
 describe('set document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('supports empty map', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, set(document()));
       callback(null, writeResult(1));
     };
@@ -900,7 +914,7 @@ describe('set document', function() {
   });
 
   it('supports nested empty map', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -917,7 +931,7 @@ describe('set document', function() {
   });
 
   it('skips merges with just server timestamps', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -938,7 +952,7 @@ describe('set document', function() {
   });
 
   it('sends empty non-merge write even with just server timestamps', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -957,7 +971,7 @@ describe('set document', function() {
   });
 
   it('supports document merges', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -987,7 +1001,7 @@ describe('set document', function() {
   });
 
   it('supports document merges with field mask', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -1039,7 +1053,7 @@ describe('set document', function() {
   });
 
   it('supports document merges with empty field mask', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, set(document(), updateMask()));
       callback(null, writeResult(1));
     };
@@ -1048,7 +1062,7 @@ describe('set document', function() {
   });
 
   it('supports document merges with field mask and empty maps', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -1094,7 +1108,7 @@ describe('set document', function() {
   });
 
   it('supports document merges with field mask and server timestamps', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -1130,7 +1144,7 @@ describe('set document', function() {
   });
 
   it('supports empty merge', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, set(document(), updateMask()));
       callback(null, writeResult(1));
     };
@@ -1139,7 +1153,7 @@ describe('set document', function() {
   });
 
   it('supports nested empty merge', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         set(
@@ -1157,7 +1171,7 @@ describe('set document', function() {
   });
 
   it("doesn't split on dots", function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, set(document('a.b', 'c')));
       callback(null, writeResult(1));
     };
@@ -1223,12 +1237,14 @@ describe('set document', function() {
 describe('create document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('creates document', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, create(document()));
       callback(null, writeResult(1));
     };
@@ -1237,7 +1253,7 @@ describe('create document', function() {
   });
 
   it('returns update time', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, create(document()));
 
       callback(null, {
@@ -1265,7 +1281,7 @@ describe('create document', function() {
   });
 
   it('supports server timestamps', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         create(
@@ -1284,7 +1300,7 @@ describe('create document', function() {
   });
 
   it('supports nested empty map', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         create(
@@ -1323,12 +1339,14 @@ describe('create document', function() {
 describe('update document', function() {
   let firestore;
 
-  beforeEach(function() {
-    firestore = createInstance();
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
   });
 
   it('generates proto', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
       callback(null, writeResult(1));
     };
@@ -1337,7 +1355,7 @@ describe('update document', function() {
   });
 
   it('supports nested server timestamps', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         update(
@@ -1360,7 +1378,7 @@ describe('update document', function() {
   });
 
   it('skips write for single server timestamp', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         update(null, null, fieldTransform('a', 'REQUEST_TIME'))
@@ -1374,7 +1392,7 @@ describe('update document', function() {
   });
 
   it('supports nested empty map', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         update(
@@ -1392,7 +1410,7 @@ describe('update document', function() {
   });
 
   it('supports nested delete', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, update(document(), updateMask('a.b')));
       callback(null, writeResult(1));
     };
@@ -1403,7 +1421,7 @@ describe('update document', function() {
   });
 
   it('returns update time', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
 
       callback(null, {
@@ -1431,7 +1449,7 @@ describe('update document', function() {
   });
 
   it('with last update time precondition', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         update(document('foo', 'bar'), updateMask('foo'), /*transform */ null, {
@@ -1490,7 +1508,7 @@ describe('update document', function() {
   });
 
   it('with top-level document', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
       callback(null, writeResult(1));
     };
@@ -1501,7 +1519,7 @@ describe('update document', function() {
   });
 
   it('with nested document', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         update(
@@ -1562,7 +1580,7 @@ describe('update document', function() {
   });
 
   it('with two nested fields ', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         update(
@@ -1625,7 +1643,7 @@ describe('update document', function() {
   });
 
   it('with nested field and document transform ', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         update(
@@ -1673,7 +1691,7 @@ describe('update document', function() {
   });
 
   it('with field with dot ', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(request, update(document('a.b', 'c'), updateMask('`a.b`')));
 
       callback(null, writeResult(1));
@@ -1796,7 +1814,7 @@ describe('update document', function() {
   });
 
   it('with field delete', function() {
-    firestore.api.Firestore._commit = function(request, options, callback) {
+    firestore._firestoreClient._commit = function(request, options, callback) {
       requestEquals(
         request,
         update(document('bar', 'foobar'), updateMask('bar', 'foo'))
@@ -1815,13 +1833,15 @@ describe('getCollections() method', function() {
   let firestore;
   let documentRef;
 
-  beforeEach(function() {
-    firestore = createInstance();
-    documentRef = firestore.doc('coll/doc');
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+      documentRef = firestore.doc('coll/doc');
+    });
   });
 
   it('sorts results', function() {
-    firestore.api.Firestore._listCollectionIds = function(
+    firestore._firestoreClient._listCollectionIds = function(
       request,
       options,
       callback

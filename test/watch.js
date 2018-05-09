@@ -33,10 +33,12 @@ const Backoff = require('../src/backoff')(Firestore);
 Firestore.setLogFunction(() => {});
 
 function createInstance() {
-  return new Firestore({
+  let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
   });
+
+  return firestore._ensureClient().then(() => firestore);
 }
 
 /**
@@ -203,7 +205,7 @@ class StreamHelper {
     this.deferredListener = new DeferredListener();
 
     // Create a mock backend whose stream we can return.
-    firestore.api.Firestore._listen = () => {
+    firestore._firestoreClient._listen = () => {
       ++this.streamCount;
 
       this.readStream = through.obj();
@@ -599,25 +601,27 @@ describe('Query watch', function() {
     // asynchronous behavior.
     Backoff.setTimeoutHandler(setImmediate);
 
-    firestore = createInstance();
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
 
-    targetId = 0x1;
+      targetId = 0x1;
 
-    streamHelper = new StreamHelper(firestore);
-    watchHelper = new WatchHelper(
-      streamHelper,
-      firestore.collection('col'),
-      targetId
-    );
+      streamHelper = new StreamHelper(firestore);
+      watchHelper = new WatchHelper(
+        streamHelper,
+        firestore.collection('col'),
+        targetId
+      );
 
-    colRef = firestore.collection('col');
+      colRef = firestore.collection('col');
 
-    doc1 = firestore.doc('col/doc1');
-    doc2 = firestore.doc('col/doc2');
-    doc3 = firestore.doc('col/doc3');
-    doc4 = firestore.doc('col/doc4');
+      doc1 = firestore.doc('col/doc1');
+      doc2 = firestore.doc('col/doc2');
+      doc3 = firestore.doc('col/doc3');
+      doc4 = firestore.doc('col/doc4');
 
-    lastSnapshot = EMPTY;
+      lastSnapshot = EMPTY;
+    });
   });
 
   afterEach(function() {
@@ -1063,7 +1067,7 @@ describe('Query watch', function() {
               lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
               // Return a stream that always errors on write
-              firestore.api.Firestore._listen = () => {
+              firestore._firestoreClient._listen = () => {
                 ++streamHelper.streamCount;
                 return through.obj((chunk, enc, callback) => {
                   callback(
@@ -2137,11 +2141,13 @@ describe('DocumentReference watch', function() {
     // asynchronous behavior.
     Backoff.setTimeoutHandler(setImmediate);
 
-    firestore = createInstance();
-    targetId = 0x1;
-    doc = firestore.doc('col/doc');
-    streamHelper = new StreamHelper(firestore);
-    watchHelper = new WatchHelper(streamHelper, doc, targetId);
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
+      targetId = 0x1;
+      doc = firestore.doc('col/doc');
+      streamHelper = new StreamHelper(firestore);
+      watchHelper = new WatchHelper(streamHelper, doc, targetId);
+    });
   });
 
   afterEach(function() {
@@ -2475,14 +2481,16 @@ describe('Query comparator', function() {
   let doc1, doc2, doc3, doc4;
 
   beforeEach(function() {
-    firestore = createInstance();
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
 
-    colRef = firestore.collection('col');
+      colRef = firestore.collection('col');
 
-    doc1 = firestore.doc('col/doc1');
-    doc2 = firestore.doc('col/doc2');
-    doc3 = firestore.doc('col/doc3');
-    doc4 = firestore.doc('col/doc4');
+      doc1 = firestore.doc('col/doc1');
+      doc2 = firestore.doc('col/doc2');
+      doc3 = firestore.doc('col/doc3');
+      doc4 = firestore.doc('col/doc4');
+    });
   });
 
   function testSort(query, input, expected) {
