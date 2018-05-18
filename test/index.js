@@ -19,9 +19,6 @@
 const assert = require('power-assert');
 const extend = require('extend');
 const grpc = require('google-gax').grpc().grpc;
-const GrpcService = require('@google-cloud/common').GrpcService;
-const proxyquire = require('proxyquire');
-const util = require('@google-cloud/common').util;
 const is = require('is');
 const Buffer = require('safe-buffer').Buffer;
 const through = require('through2');
@@ -279,37 +276,12 @@ function stream() {
 }
 
 describe('instantiation', function() {
-  function FakeGrpcService() {
-    this.calledWith_ = arguments;
-  }
-
-  let fakeUtil = extend({}, util, {});
-  extend(FakeGrpcService, GrpcService);
-
-  let Firestore;
-
-  before(function() {
-    Firestore = proxyquire('../', {
-      '@google-cloud/common': {
-        util: fakeUtil,
-      },
-      '@google-cloud/common-grpc': {
-        Service: FakeGrpcService,
-      },
-    });
-  });
-
-  beforeEach(() => {
-    extend(FakeGrpcService, GrpcService);
-  });
-
   it('creates instance', function() {
     let firestore = new Firestore({
       projectId: 'test-project',
       sslCreds: grpc.credentials.createInsecure(),
     });
     assert(firestore instanceof Firestore);
-    assert.strictEqual(firestore.calledWith_[1].projectId, 'test-project');
   });
 
   it('detects project id', function() {
@@ -363,17 +335,6 @@ describe('instantiation', function() {
         assert.equal(err.message, 'Project ID error');
       }
     );
-  });
-
-  it('inherits from GrpcService', function() {
-    let firestore = new Firestore({
-      projectId: 'test-project',
-      sslCreds: grpc.credentials.createInsecure(),
-    });
-    assert(firestore instanceof FakeGrpcService);
-
-    let calledWith = firestore.calledWith_[0];
-    assert.equal(calledWith.service, 'firestore');
   });
 
   it('exports all types', function() {
