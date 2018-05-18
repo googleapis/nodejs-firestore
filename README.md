@@ -13,7 +13,9 @@ This Cloud Firestore Server SDK uses Google’s [Cloud Identity and Access Manag
 
 The Cloud Firestore Server SDKs are designed to manage the full set of data in your Cloud Firestore project and work best with reliable network connectivity.  Data operations performed via these SDKs directly access the Cloud Firestore backend and all document reads and writes are optimized for high throughput.
 
-Applications that use these Server SDKs should **not be used in end-user environments**, such as on phones or on publicly hosted websites. If you are developing a Web or Node.js application that accesses Cloud Firestore on behalf of end users, use the [`firebase`](https://www.npmjs.com/package/firebase) Client SDK.
+Applications that use these Google's Server SDKs should **not be used in end-user environments**, such as on phones or on publicly hosted websites. If you are developing a Web or Node.js application that accesses Cloud Firestore on behalf of end users, use the [`firebase`](https://www.npmjs.com/package/firebase) Client SDK.
+
+
 
 **Table of contents:**
 
