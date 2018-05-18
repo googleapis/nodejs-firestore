@@ -9,24 +9,11 @@
 
 This is the Node.js Server SDK for [Google Cloud Firestore](https://firebase.google.com/docs/firestore/). Google Cloud Firestore is a NoSQL document database built for automatic scaling, high performance, and ease of application development.
 
-Cloud Firestore Node.js Client API Reference
-github.com/googleapis/nodejs-firestore
-Cloud Firestore Documentation
-Read more about the client libraries for Cloud APIs, including the older Google APIs Client Libraries, in Client Libraries Explained.
-
 This Cloud Firestore Server SDK uses Google’s [Cloud Identity and Access Management](https://cloud.google.com/firestore/docs/security/iam) for authentication and should only be used in trusted environments. Your Cloud Identity credentials allow you bypass all access restrictions and provide read and write access to all data in your Cloud Firestore project. 
 
 The Cloud Firestore Server SDKs are designed to manage the full set of data in your Cloud Firestore project and work best with reliable network connectivity.  Data operations performed via these SDKs directly access the Cloud Firestore backend and all document reads and writes are optimized for high throughput.
 
 Applications that use these Server SDKs should **not be used in end-user environments**, such as on phones or on publicly hosted websites. If you are developing a Web or Node.js application that accesses Cloud Firestore on behalf of end users, use the [`firebase`](https://www.npmjs.com/package/firebase) Client SDK.
-
-
-* [Cloud Firestore Node.js Client API Reference][client-docs]
-* [github.com/googleapis/nodejs-firestore](https://github.com/googleapis/nodejs-firestore)
-* [Cloud Firestore Documentation][product-docs]
-
-Read more about the client libraries for Cloud APIs, including the older
-Google APIs Client Libraries, in [Client Libraries Explained][explained].
 
 **Table of contents:**
 
@@ -40,7 +27,14 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 
 ## Quickstart
 
+Read more about the client libraries for Cloud APIs, including the older
+Google APIs Client Libraries, in [Client Libraries Explained][explained].
+
 [explained]: https://cloud.google.com/apis/docs/client-libraries-explained
+
+* [Cloud Firestore Node.js Client API Reference][client-docs]
+* [github.com/googleapis/nodejs-firestore](https://github.com/googleapis/nodejs-firestore)
+* [Cloud Firestore Documentation][product-docs]
 
 ### Before you begin
 
