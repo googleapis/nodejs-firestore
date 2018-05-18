@@ -24,7 +24,6 @@ const is = require('is');
 const through = require('through2');
 const util = require('util');
 
-const v1beta1 = require('./v1beta1');
 const libVersion = require('../package.json').version;
 
 const path = require('./path');
@@ -702,7 +701,7 @@ class Firestore extends commonGrpc.Service {
   _ensureClient() {
     if (!this._clientInitialized) {
       this._clientInitialized = new Promise((resolve, reject) => {
-        this._firestoreClient = v1beta1(
+        this._firestoreClient = module.exports.v1beta1(
           this._initalizationOptions
         ).firestoreClient(this._initalizationOptions);
 
@@ -1183,6 +1182,9 @@ module.exports = Firestore;
 module.exports.default = Firestore;
 module.exports.Firestore = Firestore;
 
+// The v1beta1 module is very large; to avoid pulling it in from static scope we will use a caching implementation.
+let v1beta1 = null;
+
 /**
  * {@link v1beta1} factory function.
  *
@@ -1190,7 +1192,14 @@ module.exports.Firestore = Firestore;
  * @see v1beta1
  * @type {function}
  */
-module.exports.v1beta1 = v1beta1;
+Object.defineProperty(module.exports, 'v1beta1', {
+  get: () => {
+    if (!v1beta1) {
+      v1beta1 = require('./v1beta1');
+   }
+   return v1beta1;
+ }
+});
 
 /**
  * {@link GeoPoint} class.
