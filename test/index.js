@@ -379,18 +379,31 @@ describe('instantiation', function() {
   it('exports all types', function() {
     // Ordering as per firestore.d.ts
     assert.ok(is.defined(Firestore.Firestore));
+    assert.equal(Firestore.Firestore.name, 'Firestore');
     assert.ok(is.defined(Firestore.GeoPoint));
+    assert.equal(Firestore.GeoPoint.name, 'GeoPoint');
     assert.ok(is.defined(Firestore.Transaction));
+    assert.equal(Firestore.Transaction.name, 'Transaction');
     assert.ok(is.defined(Firestore.WriteBatch));
+    assert.equal(Firestore.WriteBatch.name, 'WriteBatch');
     assert.ok(is.defined(Firestore.DocumentReference));
+    assert.equal(Firestore.DocumentReference.name, 'DocumentReference');
     assert.ok(is.defined(Firestore.WriteResult));
+    assert.equal(Firestore.WriteResult.name, 'WriteResult');
     assert.ok(is.defined(Firestore.DocumentSnapshot));
+    assert.equal(Firestore.DocumentSnapshot.name, 'DocumentSnapshot');
     assert.ok(is.defined(Firestore.QueryDocumentSnapshot));
+    assert.equal(Firestore.QueryDocumentSnapshot.name, 'QueryDocumentSnapshot');
     assert.ok(is.defined(Firestore.Query));
+    assert.equal(Firestore.Query.name, 'Query');
     assert.ok(is.defined(Firestore.QuerySnapshot));
+    assert.equal(Firestore.QuerySnapshot.name, 'QuerySnapshot');
     assert.ok(is.defined(Firestore.CollectionReference));
+    assert.equal(Firestore.CollectionReference.name, 'CollectionReference');
     assert.ok(is.defined(Firestore.FieldValue));
+    assert.equal(Firestore.FieldValue.name, 'FieldValue');
     assert.ok(is.defined(Firestore.FieldPath));
+    assert.equal(Firestore.Firestore.name, 'Firestore');
     assert.ok(
       !Firestore.FieldValue.serverTimestamp().isEqual(
         Firestore.FieldValue.delete()
