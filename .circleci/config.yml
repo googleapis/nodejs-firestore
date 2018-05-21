@@ -95,9 +95,6 @@ jobs:
               chmod +x "$repo_tools"
             fi
       - run:
-          name: Install codecov.
-          command: npm install codecov
-      - run:
           name: Run unit tests.
           command: npm test
       - run:
