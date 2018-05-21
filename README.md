@@ -1,25 +1,33 @@
 <img src="https://avatars2.githubusercontent.com/u/2810941?v=3&s=96" alt="Google Cloud Platform logo" title="Google Cloud Platform" align="right" height="96" width="96"/>
 
-# [Google Cloud Firestore: Node.js Client](https://github.com/googleapis/nodejs-firestore)
+# [Google Cloud Firestore: Node.js Server SDK](https://github.com/googleapis/nodejs-firestore)
 
 [![release level](https://img.shields.io/badge/release%20level-beta-yellow.svg?style&#x3D;flat)](https://cloud.google.com/terms/launch-stages)
 [![CircleCI](https://img.shields.io/circleci/project/github/googleapis/nodejs-firestore.svg?style=flat)](https://circleci.com/gh/googleapis/nodejs-firestore)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/googleapis/nodejs-firestore?branch=master&svg=true)](https://ci.appveyor.com/project/googleapis/nodejs-firestore)
 [![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-firestore/master.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-firestore)
 
-> Node.js idiomatic client for [Cloud Firestore][product-docs].
+This is the Node.js Server SDK for 
+[Google Cloud Firestore](https://firebase.google.com/docs/firestore/). Google
+Cloud Firestore is a NoSQL document database built for automatic scaling, high
+performance, and ease of application development.
 
-[Google Cloud Firestore](https://firebase.google.com/docs/firestore/) is a NoSQL document database built for automatic scaling, high performance, and ease of application development.
+This Cloud Firestore Server SDK uses Google’s [Cloud Identity and Access
+Management](https://cloud.google.com/firestore/docs/security/iam) for
+authentication and should only be used **in trusted environments**. Your Cloud
+Identity credentials allow you bypass all access restrictions and provide read
+and write access to all data in your Cloud Firestore project.
 
+The Cloud Firestore Server SDKs are designed to manage the full set of data in
+your Cloud Firestore project and work best with reliable network connectivity.
+Data operations performed via these SDKs directly access the Cloud Firestore
+backend and all document reads and writes are optimized for high throughput.
 
-* [Cloud Firestore Node.js Client API Reference][client-docs]
-* [github.com/googleapis/nodejs-firestore](https://github.com/googleapis/nodejs-firestore)
-* [Cloud Firestore Documentation][product-docs]
-
-Read more about the client libraries for Cloud APIs, including the older
-Google APIs Client Libraries, in [Client Libraries Explained][explained].
-
-[explained]: https://cloud.google.com/apis/docs/client-libraries-explained
+Applications that use Google's Server SDKs should not be used in end-user
+environments, such as on phones or on publicly hosted websites. If you are
+developing a Web or Node.js application that accesses Cloud Firestore on behalf
+of end users, use the [`firebase`](https://www.npmjs.com/package/firebase)
+Client SDK.
 
 **Table of contents:**
 
@@ -32,6 +40,15 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
 * [License](#license)
 
 ## Quickstart
+
+Read more about the client libraries for Cloud APIs, including the older
+Google APIs Client Libraries, in [Client Libraries Explained][explained].
+
+[explained]: https://cloud.google.com/apis/docs/client-libraries-explained
+
+* [Cloud Firestore Node.js Client API Reference][client-docs]
+* [github.com/googleapis/nodejs-firestore](https://github.com/googleapis/nodejs-firestore)
+* [Cloud Firestore Documentation][product-docs]
 
 ### Before you begin
 
