@@ -2,27 +2,19 @@ version: 2
 workflows:
   version: 2
   tests:
-    jobs: &workflow_jobs
+    jobs: &releases
       - node4:
-          filters:
+          filters: &all_commits
             tags:
               only: /.*/
       - node6:
-          filters:
-            tags:
-              only: /.*/
+          filters: *all_commits
       - node8:
-          filters:
-            tags:
-              only: /.*/
+          filters: *all_commits
       - node9:
-          filters:
-            tags:
-              only: /.*/
+          filters: *all_commits
       - node10:
-          filters:
-            tags:
-              only: /.*/
+          filters: *all_commits
       - lint:
           requires:
             - node4
@@ -30,9 +22,7 @@ workflows:
             - node8
             - node9
             - node10
-          filters:
-            tags:
-              only: /.*/
+          filters: *all_commits
       - docs:
           requires:
             - node4
@@ -40,9 +30,7 @@ workflows:
             - node8
             - node9
             - node10
-          filters:
-            tags:
-              only: /.*/
+          filters: *all_commits
       - system_tests:
           requires:
             - lint
@@ -50,7 +38,7 @@ workflows:
           filters:
             branches:
               only: master
-            tags:
+            tags: &master_and_releases
               only: '/^v[\d.]+$/'
       - publish_npm:
           requires:
@@ -58,8 +46,7 @@ workflows:
           filters:
             branches:
               ignore: /.*/
-            tags:
-              only: '/^v[\d.]+$/'
+            tags: *master_and_releases
   nightly:
     triggers:
       - schedule:
@@ -67,15 +54,15 @@ workflows:
           filters:
             branches:
               only: master
-    jobs: *workflow_jobs
+    jobs: *releases
 jobs:
   node4:
     docker:
       - image: 'node:4'
         user: node
-    steps: &unit_tests_steps
+    steps: &workflow_jobs
       - checkout
-      - run: &remove_package_lock
+      - run: &unit_tests_steps
           name: Remove package-lock.json if needed.
           command: |
             WORKFLOW_NAME=`python .circleci/get_workflow_name.py`
@@ -86,14 +73,15 @@ jobs:
             else
               echo "Not a nightly build, skipping this step."
             fi
-      - run:
-          name: Install modules and dependencies.
+      - run: &remove_package_lock
+          name: Install and link the module
           command: |-
+            mkdir -p /home/node/.npm-global
             npm install
-            repo_tools="node_modules/@google-cloud/nodejs-repo-tools/bin/tools"
-            if ! test -x "$repo_tools"; then
-              chmod +x "$repo_tools"
-            fi
+            npm link
+            chmod +x node_modules/@google-cloud/nodejs-repo-tools/bin/tools
+          environment:
+            NPM_CONFIG_PREFIX: /home/node/.npm-global
       - run:
           name: Run unit tests.
           command: npm test
@@ -105,37 +93,30 @@ jobs:
     docker:
       - image: 'node:6'
         user: node
-    steps: *unit_tests_steps
+    steps: *workflow_jobs
   node8:
     docker:
       - image: 'node:8'
         user: node
-    steps: *unit_tests_steps
+    steps: *workflow_jobs
   node9:
     docker:
       - image: 'node:9'
         user: node
-    steps: *unit_tests_steps
+    steps: *workflow_jobs
   node10:
     docker:
       - image: 'node:10'
         user: node
-    steps: *unit_tests_steps
+    steps: *workflow_jobs
   lint:
     docker:
       - image: 'node:8'
         user: node
     steps:
       - checkout
+      - run: *unit_tests_steps
       - run: *remove_package_lock
-      - run:
-          name: Install modules and dependencies.
-          command: |-
-            npm install
-            repo_tools="node_modules/@google-cloud/nodejs-repo-tools/bin/tools"
-            if ! test -x "$repo_tools"; then
-              chmod +x "$repo_tools"
-            fi
       - run:
           name: Run linting.
           command: npm run lint
@@ -145,15 +126,8 @@ jobs:
         user: node
     steps:
       - checkout
+      - run: *unit_tests_steps
       - run: *remove_package_lock
-      - run:
-          name: Install modules and dependencies.
-          command: |-
-            npm install
-            repo_tools="node_modules/@google-cloud/nodejs-repo-tools/bin/tools"
-            if ! test -x "$repo_tools"; then
-              chmod +x "$repo_tools"
-            fi
       - run:
           name: Build documentation.
           command: npm run docs
@@ -163,16 +137,14 @@ jobs:
         user: node
     steps:
       - checkout
-      - run: *remove_package_lock
+      - run: *unit_tests_steps
       - run:
           name: Decrypt credentials.
           command: |
             openssl aes-256-cbc -d -in .circleci/key.json.enc \
                 -out .circleci/key.json \
                 -k "${SYSTEM_TESTS_ENCRYPTION_KEY}"
-      - run:
-          name: Install modules and dependencies.
-          command: npm install
+      - run: *remove_package_lock
       - run:
           name: Run system tests.
           command: npm run system-test
