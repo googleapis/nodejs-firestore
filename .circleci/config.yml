@@ -2,7 +2,7 @@ version: 2
 workflows:
   version: 2
   tests:
-    jobs: &releases
+    jobs: &workflow_jobs
       - node4:
           filters: &all_commits
             tags:
@@ -38,7 +38,7 @@ workflows:
           filters:
             branches:
               only: master
-            tags: &master_and_releases
+            tags: &releases
               only: '/^v[\d.]+$/'
       - publish_npm:
           requires:
@@ -46,7 +46,7 @@ workflows:
           filters:
             branches:
               ignore: /.*/
-            tags: *master_and_releases
+            tags: *releases
   nightly:
     triggers:
       - schedule:
@@ -54,15 +54,15 @@ workflows:
           filters:
             branches:
               only: master
-    jobs: *releases
+    jobs: *workflow_jobs
 jobs:
   node4:
     docker:
       - image: 'node:4'
         user: node
-    steps: &workflow_jobs
+    steps: &unit_tests_steps
       - checkout
-      - run: &unit_tests_steps
+      - run: &remove_package_lock
           name: Remove package-lock.json if needed.
           command: |
             WORKFLOW_NAME=`python .circleci/get_workflow_name.py`
@@ -73,7 +73,7 @@ jobs:
             else
               echo "Not a nightly build, skipping this step."
             fi
-      - run: &remove_package_lock
+      - run: &npm_install_and_link
           name: Install and link the module
           command: |-
             mkdir -p /home/node/.npm-global
@@ -93,30 +93,30 @@ jobs:
     docker:
       - image: 'node:6'
         user: node
-    steps: *workflow_jobs
+    steps: *unit_tests_steps
   node8:
     docker:
       - image: 'node:8'
         user: node
-    steps: *workflow_jobs
+    steps: *unit_tests_steps
   node9:
     docker:
       - image: 'node:9'
         user: node
-    steps: *workflow_jobs
+    steps: *unit_tests_steps
   node10:
     docker:
       - image: 'node:10'
         user: node
-    steps: *workflow_jobs
+    steps: *unit_tests_steps
   lint:
     docker:
       - image: 'node:8'
         user: node
     steps:
       - checkout
-      - run: *unit_tests_steps
       - run: *remove_package_lock
+      - run: *npm_install_and_link
       - run:
           name: Run linting.
           command: npm run lint
@@ -126,8 +126,8 @@ jobs:
         user: node
     steps:
       - checkout
-      - run: *unit_tests_steps
       - run: *remove_package_lock
+      - run: *npm_install_and_link
       - run:
           name: Build documentation.
           command: npm run docs
@@ -137,14 +137,14 @@ jobs:
         user: node
     steps:
       - checkout
-      - run: *unit_tests_steps
+      - run: *remove_package_lock
       - run:
           name: Decrypt credentials.
           command: |
             openssl aes-256-cbc -d -in .circleci/key.json.enc \
                 -out .circleci/key.json \
                 -k "${SYSTEM_TESTS_ENCRYPTION_KEY}"
-      - run: *remove_package_lock
+      - run: *npm_install_and_link
       - run:
           name: Run system tests.
           command: npm run system-test
