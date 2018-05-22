@@ -1191,8 +1191,8 @@ module.exports.Firestore = Firestore;
  * @type {function}
  */
 Object.defineProperty(module.exports, 'v1beta1', {
-  // The v1beta1 module is very large; to avoid pulling it in from static
-  // scope we lazy-load and cache the module.
+  // The v1beta1 module is very large. To avoid pulling it in from static
+  // scope, we lazy-load and cache the module.
   get: () => {
     if (!v1beta1) {
       v1beta1 = require('./v1beta1');
