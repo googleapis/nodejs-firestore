@@ -1265,15 +1265,6 @@ module.exports.DocumentSnapshot = DocumentSnapshot;
 module.exports.QueryDocumentSnapshot = document.QueryDocumentSnapshot;
 
 /**
- * {@link Query} class.
- *
- * @name Firestore.Query
- * @see Query
- * @type Query
- */
-module.exports.Query = document.Query;
-
-/**
  * {@link CollectionReference} class.
  *
  * @name Firestore.CollectionReference
@@ -1308,15 +1299,6 @@ module.exports.DocumentChange = reference.DocumentChange;
  * @type Query
  */
 module.exports.Query = reference.Query;
-
-/**
- * {@link CollectionReference} class.
- *
- * @name Firestore.CollectionReference
- * @see CollectionReference
- * @type CollectionReference
- */
-module.exports.Query = CollectionReference;
 
 /**
  * {@link FieldValue} class.
