@@ -17,14 +17,11 @@
 'use strict';
 
 const bun = require('bun');
-const common = require('@google-cloud/common');
-const commonGrpc = require('@google-cloud/common-grpc');
 const extend = require('extend');
 const is = require('is');
 const through = require('through2');
 const util = require('util');
 
-const v1beta1 = require('./v1beta1');
 const libVersion = require('../package.json').version;
 
 const path = require('./path');
@@ -93,6 +90,16 @@ let WriteBatch;
  * @see Transaction
  */
 let Transaction;
+
+/*!
+ * @see v1beta1
+ */
+let v1beta1; // Lazy-loaded in `_ensureClient()`
+
+/*!
+ * @see @google-cloud/common
+ */
+let common; // Lazy-loaded in `_ensureClient()`
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -187,24 +194,15 @@ const GRPC_UNAVAILABLE = 14;
  * region_tag:firestore_quickstart
  * Full quickstart example:
  */
-class Firestore extends commonGrpc.Service {
+class Firestore {
   /**
    * @param {Object=} options - [Configuration object](#/docs).
    */
   constructor(options) {
-    let config = {
-      service: 'firestore',
-      apiVersion: 'v1beta1',
-      protoServices: {},
-      packageJson: require('../package.json'),
-    };
-
     options = extend({}, options, {
       libName: 'gccl',
       libVersion: libVersion,
     });
-
-    super(config, options);
 
     /**
      * @private
@@ -701,10 +699,12 @@ class Firestore extends commonGrpc.Service {
    */
   _ensureClient() {
     if (!this._clientInitialized) {
+      common = require('@google-cloud/common');
+
       this._clientInitialized = new Promise((resolve, reject) => {
-        this._firestoreClient = v1beta1(
-          this._initalizationOptions
-        ).firestoreClient(this._initalizationOptions);
+        this._firestoreClient = module.exports
+          .v1beta1(this._initalizationOptions)
+          .firestoreClient(this._initalizationOptions);
 
         Firestore.log('Firestore', 'Initialized Firestore GAPIC Client');
 
@@ -1190,7 +1190,16 @@ module.exports.Firestore = Firestore;
  * @see v1beta1
  * @type {function}
  */
-module.exports.v1beta1 = v1beta1;
+Object.defineProperty(module.exports, 'v1beta1', {
+  // The v1beta1 module is very large. To avoid pulling it in from static
+  // scope, we lazy-load and cache the module.
+  get: () => {
+    if (!v1beta1) {
+      v1beta1 = require('./v1beta1');
+    }
+    return v1beta1;
+  },
+});
 
 /**
  * {@link GeoPoint} class.
