@@ -16,7 +16,6 @@
 
 'use strict';
 
-const Buffer = require('safe-buffer').Buffer;
 const is = require('is');
 
 const validate = require('./validate')();

@@ -17,7 +17,6 @@
 'use strict';
 
 let assert = require('power-assert');
-let Buffer = require('safe-buffer').Buffer;
 let is = require('is');
 
 let DocumentReference = require('../src/reference').DocumentReference;
