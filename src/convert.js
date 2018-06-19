@@ -17,7 +17,6 @@
 'use strict';
 
 const is = require('is');
-
 const validate = require('./validate')();
 
 /*!
