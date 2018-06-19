@@ -16,9 +16,9 @@
     "@google-cloud/firestore": "0.14.1"
   },
   "devDependencies": {
-    "@google-cloud/nodejs-repo-tools": "2.2.3",
-    "ava": "0.23.0",
-    "proxyquire": "1.8.0",
-    "sinon": "4.0.2"
+    "@google-cloud/nodejs-repo-tools": "2.3.0",
+    "ava": "0.25.0",
+    "proxyquire": "2.0.1",
+    "sinon": "6.0.0"
   }
 }

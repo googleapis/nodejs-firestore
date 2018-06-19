@@ -57,15 +57,15 @@
     "extend": "^3.0.1",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^0.16.1",
-    "google-proto-files": "^0.15.1",
+    "google-proto-files": "^0.16.1",
     "is": "^3.2.1",
     "safe-buffer": "^5.1.2",
     "through2": "^2.0.3"
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.3.0",
-    "@types/mocha": "^5.0.0",
-    "@types/node": "^10.0.5",
+    "@types/mocha": "^5.2.2",
+    "@types/node": "^10.3.4",
     "codecov": "^3.0.2",
     "duplexify": "^3.6.0",
     "eslint": "^4.19.1",
@@ -75,12 +75,12 @@
     "ink-docstrap": "git+https://github.com/docstrap/docstrap.git",
     "intelli-espower-loader": "^1.0.1",
     "jsdoc": "^3.5.5",
-    "mocha": "^5.1.1",
+    "mocha": "^5.2.0",
     "nyc": "^12.0.2",
-    "power-assert": "^1.5.0",
-    "prettier": "^1.12.1",
+    "power-assert": "^1.6.0",
+    "prettier": "^1.13.5",
     "protobufjs": "^6.8.6",
     "proxyquire": "^2.0.1",
-    "typescript": "^2.8.3"
+    "typescript": "^2.9.2"
   }
 }
