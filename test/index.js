@@ -20,7 +20,6 @@ const assert = require('power-assert');
 const extend = require('extend');
 const grpc = require('google-gax').grpc().grpc;
 const is = require('is');
-const Buffer = require('safe-buffer').Buffer;
 const through = require('through2');
 
 const Firestore = require('../');
