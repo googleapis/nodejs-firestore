@@ -1,26 +1,22 @@
-/*
- * Copyright 2017, Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2018 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-/*
- * Note: this file is purely for documentation. Any contents are not expected
- * to be loaded as the JS file.
- */
+// Note: this file is purely for documentation. Any contents are not expected
+// to be loaded as the JS file.
 
 /**
- * The request for {@link Firestore.GetDocument}.
+ * The request for Firestore.GetDocument.
  *
  * @property {string} name
  *   The resource name of the Document to get. In the format:
@@ -52,7 +48,7 @@ var GetDocumentRequest = {
 };
 
 /**
- * The request for {@link Firestore.ListDocuments}.
+ * The request for Firestore.ListDocuments.
  *
  * @property {string} parent
  *   The parent resource name. In the format:
@@ -95,8 +91,8 @@ var GetDocumentRequest = {
  * @property {boolean} showMissing
  *   If the list should show missing documents. A missing document is a
  *   document that does not exist but has sub-documents. These documents will
- *   be returned with a key but will not have fields, {@link Document.create_time},
- *   or {@link Document.update_time} set.
+ *   be returned with a key but will not have fields, Document.create_time,
+ *   or Document.update_time set.
  *
  *   Requests with `show_missing` may not specify `where` or
  *   `order_by`.
@@ -110,7 +106,7 @@ var ListDocumentsRequest = {
 };
 
 /**
- * The response for {@link Firestore.ListDocuments}.
+ * The response for Firestore.ListDocuments.
  *
  * @property {Object[]} documents
  *   The Documents found.
@@ -129,7 +125,7 @@ var ListDocumentsResponse = {
 };
 
 /**
- * The request for {@link Firestore.CreateDocument}.
+ * The request for Firestore.CreateDocument.
  *
  * @property {string} parent
  *   The parent resource. For example:
@@ -166,7 +162,7 @@ var CreateDocumentRequest = {
 };
 
 /**
- * The request for {@link Firestore.UpdateDocument}.
+ * The request for Firestore.UpdateDocument.
  *
  * @property {Object} document
  *   The updated document.
@@ -208,7 +204,7 @@ var UpdateDocumentRequest = {
 };
 
 /**
- * The request for {@link Firestore.DeleteDocument}.
+ * The request for Firestore.DeleteDocument.
  *
  * @property {string} name
  *   The resource name of the Document to delete. In the format:
@@ -229,7 +225,7 @@ var DeleteDocumentRequest = {
 };
 
 /**
- * The request for {@link Firestore.BatchGetDocuments}.
+ * The request for Firestore.BatchGetDocuments.
  *
  * @property {string} database
  *   The database name. In the format:
@@ -275,7 +271,7 @@ var BatchGetDocumentsRequest = {
 };
 
 /**
- * The streamed response for {@link Firestore.BatchGetDocuments}.
+ * The streamed response for Firestore.BatchGetDocuments.
  *
  * @property {Object} found
  *   A document that was requested.
@@ -289,7 +285,7 @@ var BatchGetDocumentsRequest = {
  * @property {string} transaction
  *   The transaction that was started as part of this request.
  *   Will only be set in the first response, and only if
- *   {@link BatchGetDocumentsRequest.new_transaction} was set in the request.
+ *   BatchGetDocumentsRequest.new_transaction was set in the request.
  *
  * @property {Object} readTime
  *   The time at which the document was read.
@@ -308,7 +304,7 @@ var BatchGetDocumentsResponse = {
 };
 
 /**
- * The request for {@link Firestore.BeginTransaction}.
+ * The request for Firestore.BeginTransaction.
  *
  * @property {string} database
  *   The database name. In the format:
@@ -329,7 +325,7 @@ var BeginTransactionRequest = {
 };
 
 /**
- * The response for {@link Firestore.BeginTransaction}.
+ * The response for Firestore.BeginTransaction.
  *
  * @property {string} transaction
  *   The transaction that was started.
@@ -343,7 +339,7 @@ var BeginTransactionResponse = {
 };
 
 /**
- * The request for {@link Firestore.Commit}.
+ * The request for Firestore.Commit.
  *
  * @property {string} database
  *   The database name. In the format:
@@ -368,7 +364,7 @@ var CommitRequest = {
 };
 
 /**
- * The response for {@link Firestore.Commit}.
+ * The response for Firestore.Commit.
  *
  * @property {Object[]} writeResults
  *   The result of applying the writes.
@@ -392,7 +388,7 @@ var CommitResponse = {
 };
 
 /**
- * The request for {@link Firestore.Rollback}.
+ * The request for Firestore.Rollback.
  *
  * @property {string} database
  *   The database name. In the format:
@@ -410,7 +406,7 @@ var RollbackRequest = {
 };
 
 /**
- * The request for {@link Firestore.RunQuery}.
+ * The request for Firestore.RunQuery.
  *
  * @property {string} parent
  *   The parent resource name. In the format:
@@ -451,12 +447,12 @@ var RunQueryRequest = {
 };
 
 /**
- * The response for {@link Firestore.RunQuery}.
+ * The response for Firestore.RunQuery.
  *
  * @property {string} transaction
  *   The transaction that was started as part of this request.
  *   Can only be set in the first response, and only if
- *   {@link RunQueryRequest.new_transaction} was set in the request.
+ *   RunQueryRequest.new_transaction was set in the request.
  *   If set, no other fields will be set in this response.
  *
  * @property {Object} document
@@ -489,7 +485,7 @@ var RunQueryResponse = {
 };
 
 /**
- * The request for {@link Firestore.Write}.
+ * The request for Firestore.Write.
  *
  * The first request creates a stream, or resumes an existing one from a token.
  *
@@ -524,7 +520,7 @@ var RunQueryResponse = {
  *   A stream token that was previously sent by the server.
  *
  *   The client should set this field to the token from the most recent
- *   {@link WriteResponse} it has received. This acknowledges that the client has
+ *   WriteResponse it has received. This acknowledges that the client has
  *   received responses up to this token. After sending this token, earlier
  *   tokens may not be used anymore.
  *
@@ -548,7 +544,7 @@ var WriteRequest = {
 };
 
 /**
- * The response for {@link Firestore.Write}.
+ * The response for Firestore.Write.
  *
  * @property {string} streamId
  *   The ID of the stream.
@@ -582,7 +578,7 @@ var WriteResponse = {
 };
 
 /**
- * A request for {@link Firestore.Listen}
+ * A request for Firestore.Listen
  *
  * @property {string} database
  *   The database name. In the format:
@@ -608,7 +604,7 @@ var ListenRequest = {
 };
 
 /**
- * The response for {@link Firestore.Listen}.
+ * The response for Firestore.Listen.
  *
  * @property {Object} targetChange
  *   Targets have changed.
@@ -616,17 +612,17 @@ var ListenRequest = {
  *   This object should have the same structure as [TargetChange]{@link google.firestore.v1beta1.TargetChange}
  *
  * @property {Object} documentChange
- *   A {@link Document} has changed.
+ *   A Document has changed.
  *
  *   This object should have the same structure as [DocumentChange]{@link google.firestore.v1beta1.DocumentChange}
  *
  * @property {Object} documentDelete
- *   A {@link Document} has been deleted.
+ *   A Document has been deleted.
  *
  *   This object should have the same structure as [DocumentDelete]{@link google.firestore.v1beta1.DocumentDelete}
  *
  * @property {Object} documentRemove
- *   A {@link Document} has been removed from a target (because it is no longer
+ *   A Document has been removed from a target (because it is no longer
  *   relevant to that target).
  *
  *   This object should have the same structure as [DocumentRemove]{@link google.firestore.v1beta1.DocumentRemove}
@@ -662,7 +658,7 @@ var ListenResponse = {
  *   This object should have the same structure as [DocumentsTarget]{@link google.firestore.v1beta1.DocumentsTarget}
  *
  * @property {string} resumeToken
- *   A resume token from a prior {@link TargetChange} for an identical target.
+ *   A resume token from a prior TargetChange for an identical target.
  *
  *   Using a resume token with a different target is unsupported and may fail.
  *
@@ -790,6 +786,7 @@ var TargetChange = {
    * The type of change.
    *
    * @enum {number}
+   * @memberof google.firestore.v1beta1
    */
   TargetChangeType: {
 
@@ -832,7 +829,7 @@ var TargetChange = {
 };
 
 /**
- * The request for {@link Firestore.ListCollectionIds}.
+ * The request for Firestore.ListCollectionIds.
  *
  * @property {string} parent
  *   The parent document. In the format:
@@ -845,7 +842,7 @@ var TargetChange = {
  *
  * @property {string} pageToken
  *   A page token. Must be a value from
- *   {@link ListCollectionIdsResponse}.
+ *   ListCollectionIdsResponse.
  *
  * @typedef ListCollectionIdsRequest
  * @memberof google.firestore.v1beta1
@@ -856,7 +853,7 @@ var ListCollectionIdsRequest = {
 };
 
 /**
- * The response from {@link Firestore.ListCollectionIds}.
+ * The response from Firestore.ListCollectionIds.
  *
  * @property {string[]} collectionIds
  *   The collection ids.

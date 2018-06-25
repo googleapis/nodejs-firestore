@@ -26,8 +26,8 @@ function v1beta1(options) {
     },
     options
   );
-  var gaxGrpc = gax.grpc(options);
-  return firestoreClient(gaxGrpc);
+  var gaxGrpc = new gax.GrpcClient(options);
+  return new firestoreClient(gaxGrpc);
 }
 
 v1beta1.SERVICE_ADDRESS = firestoreClient.SERVICE_ADDRESS;
