@@ -39,7 +39,7 @@ describe('Firestore class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore();
+    firestore = new Firestore({timestampsInSnapshots: true});
     randomCol = getTestRoot(firestore);
   });
 
@@ -71,7 +71,7 @@ describe('CollectionReference class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore();
+    firestore = new Firestore({timestampsInSnapshots: true});
     randomCol = getTestRoot(firestore);
   });
 
@@ -119,7 +119,7 @@ describe('DocumentReference class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore();
+    firestore = new Firestore({timestampsInSnapshots: true});
     randomCol = getTestRoot(firestore);
   });
 
@@ -790,7 +790,7 @@ describe('Query class', function() {
   };
 
   beforeEach(function() {
-    firestore = new Firestore();
+    firestore = new Firestore({timestampsInSnapshots: true});
     randomCol = getTestRoot(firestore);
   });
 
@@ -1298,7 +1298,7 @@ describe('Transaction class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore();
+    firestore = new Firestore({timestampsInSnapshots: true});
     randomCol = getTestRoot(firestore);
   });
 
@@ -1427,7 +1427,7 @@ describe('WriteBatch class', function() {
   let randomCol;
 
   beforeEach(function() {
-    firestore = new Firestore();
+    firestore = new Firestore({timestampsInSnapshots: true});
     randomCol = getTestRoot(firestore);
   });
 
@@ -1522,7 +1522,7 @@ describe('QuerySnapshot class', function() {
   let querySnapshot;
 
   beforeEach(function() {
-    firestore = new Firestore();
+    firestore = new Firestore({timestampsInSnapshots: true});
 
     let randomCol = getTestRoot(firestore);
     let ref1 = randomCol.doc('doc1');

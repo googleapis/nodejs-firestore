@@ -38,6 +38,7 @@ function createInstance() {
   let firestore = new Firestore({
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
+    timestampsInSnapshots: true,
   });
 
   return firestore._ensureClient().then(() => firestore);

@@ -31,10 +31,16 @@ import DocumentData = FirebaseFirestore.DocumentData;
 import GeoPoint = FirebaseFirestore.GeoPoint;
 import Precondition = FirebaseFirestore.Precondition;
 import SetOptions = FirebaseFirestore.SetOptions;
+import Timestamp = FirebaseFirestore.Timestamp;
 
 // This test verifies the Typescript typings and is not meant for execution.
 xdescribe('firestore.d.ts', function() {
-  const firestore: Firestore = new Firestore();
+  const firestore: Firestore = new Firestore({
+    keyFilename: 'foo',
+    projectId: 'foo',
+    timestampsInSnapshots: true,
+    otherOption: 'foo'
+  });
 
   const precondition: Precondition = {lastUpdateTime: "1970-01-01T00:00:00.000Z"};
   const setOptions: SetOptions = {merge: true};
@@ -64,8 +70,8 @@ xdescribe('firestore.d.ts', function() {
 
   it('has typings for GeoPoint', () => {
     const geoPoint: GeoPoint = new GeoPoint(90.0, 90.0);
-    const latitude = geoPoint.latitude;
-    const longitude = geoPoint.longitude;
+    const latitude: number = geoPoint.latitude;
+    const longitude: number = geoPoint.longitude;
     const equals: boolean = geoPoint.isEqual(geoPoint);
   });
 
@@ -302,5 +308,14 @@ xdescribe('firestore.d.ts', function() {
   it('has typings for SetOptions', () => {
     const merge: SetOptions = { merge: true};
     const mergeFields: SetOptions = { mergeFields: ['foo', fieldPath]};
+  });
+
+  it('has typings for Timestamp', () => {
+    let timestamp: Timestamp = new Timestamp(0,0);
+    timestamp = Timestamp.now();
+    timestamp = Timestamp.fromDate(new Date());
+    timestamp = Timestamp.fromMillis(0);
+    const seconds : number = timestamp.seconds;
+    const nanoseconds : number = timestamp.nanoseconds;
   });
 });
