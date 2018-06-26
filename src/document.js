@@ -195,10 +195,10 @@ class DocumentSnapshot {
    * @param {object=} fieldsProto - The fields of the Firestore `Document`
    * Protobuf backing this document (or undefined if the document does not
    * exist).
-   * @param {string} readTime - The ISO 8601 time when this snapshot was read.
-   * @param {string=} createTime - The ISO 8601 time when the document was
-   * created (or undefined if the document does not exist).
-   * @param {string=} updateTime - The ISO 8601 time when the document was last
+   * @param {Timestamp} readTime - The time when this snapshot was read.
+   * @param {Timestamp=} createTime - The time when the document was created
+   * (or undefined if the document does not exist).
+   * @param {Timestamp=} updateTime - The time when the document was last
    * updated (or undefined if the document does not exist).
    */
   constructor(ref, fieldsProto, readTime, createTime, updateTime) {
@@ -364,16 +364,17 @@ class DocumentSnapshot {
    * The time the document was created. Undefined for documents that don't
    * exist.
    *
-   * @type {string|undefined}
+   * @type {Timestamp|undefined}
    * @name DocumentSnapshot#createTime
    * @readonly
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
    *
-   * documentRef.get().then((documentSnapshot) => {
+   * documentRef.get().then(documentSnapshot => {
    *   if (documentSnapshot.exists) {
-   *     console.log(`Document created at '${documentSnapshot.createTime}'`);
+   *     let createTime = documentSnapshot.createTime;
+   *     console.log(`Document created at '${createTime.toDate()}'`);
    *   }
    * });
    */
@@ -385,16 +386,17 @@ class DocumentSnapshot {
    * The time the document was last updated (at the time the snapshot was
    * generated). Undefined for documents that don't exist.
    *
-   * @type {string|undefined}
+   * @type {Timestamp|undefined}
    * @name DocumentSnapshot#updateTime
    * @readonly
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
    *
-   * documentRef.get().then((documentSnapshot) => {
+   * documentRef.get().then(documentSnapshot => {
    *   if (documentSnapshot.exists) {
-   *     console.log(`Document updated at '${documentSnapshot.updateTime}'`);
+   *     let updateTime = documentSnapshot.updateTime;
+   *     console.log(`Document updated at '${updateTime.toDate()}'`);
    *   }
    * });
    */
@@ -405,15 +407,16 @@ class DocumentSnapshot {
   /**
    * The time this snapshot was read.
    *
-   * @type {string}
+   * @type {Timestamp}
    * @name DocumentSnapshot#readTime
    * @readonly
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
    *
-   * documentRef.get().then((documentSnapshot) => {
-   *   console.log(`Document read at '${documentSnapshot.readTime}'`);
+   * documentRef.get().then(documentSnapshot => {
+   *   let readTime = documentSnapshot.readTime;
+   *   console.log(`Document read at '${readTime.toDate()}'`);
    * });
    */
   get readTime() {
@@ -547,10 +550,7 @@ class DocumentSnapshot {
         return parseFloat(proto.doubleValue, 10);
       }
       case 'timestampValue': {
-        const timestamp = new Timestamp(
-          Number(proto.timestampValue.seconds || 0),
-          Number(proto.timestampValue.nanos || 0)
-        );
+        const timestamp = Timestamp.fromProto(proto.timestampValue);
         return timestampsInSnapshotsEnabled ? timestamp : timestamp.toDate();
       }
       case 'referenceValue': {
@@ -631,43 +631,14 @@ class DocumentSnapshot {
    * value.
    */
   isEqual(other) {
+    // Since the read time is different on every document read, we explicitly
+    // ignore all document metadata in this comparison.
     return (
       this === other ||
       (is.instance(other, DocumentSnapshot) &&
         this._ref.isEqual(other._ref) &&
         deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
     );
-  }
-
-  /**
-   * Converts a Google Protobuf timestamp to an ISO 8601 string.
-   *
-   * @private
-   * @param {{seconds:number=,nanos:number=}=} timestamp The Google Protobuf
-   * timestamp.
-   * @returns {string|undefined} The representation in ISO 8601 or undefined if
-   * the input is empty.
-   */
-  static toISOTime(timestamp) {
-    if (timestamp) {
-      let isoSubstring = new Date(
-        (timestamp.seconds || 0) * 1000
-      ).toISOString();
-
-      // Strip milliseconds from JavaScript ISO representation
-      // (YYYY-MM-DDTHH:mm:ss.sssZ or ±YYYYYY-MM-DDTHH:mm:ss.sssZ)
-      isoSubstring = isoSubstring.substr(0, isoSubstring.length - 4);
-
-      // Append nanoseconds as per ISO 8601
-      let nanoString = (timestamp.nanos || '') + '';
-      while (nanoString.length < 9) {
-        nanoString = '0' + nanoString;
-      }
-
-      return isoSubstring + nanoString + 'Z';
-    }
-
-    return undefined;
   }
 
   /**
@@ -845,10 +816,9 @@ class QueryDocumentSnapshot extends DocumentSnapshot {
    * @param {firestore/DocumentReference} ref - The reference to the document.
    * @param {object} fieldsProto - The fields of the Firestore `Document`
    * Protobuf backing this document.
-   * @param {string} readTime - The ISO 8601 time when this snapshot was read.
-   * @param {string} createTime - The ISO 8601 time when the document was
-   * created.
-   * @param {string} updateTime - The ISO 8601 time when the document was last
+   * @param {Timestamp} readTime - The time when this snapshot was read.
+   * @param {Timestamp} createTime - The time when the document was created.
+   * @param {Timestamp} updateTime - The time when the document was last
    * updated.
    */
   constructor(ref, fieldsProto, readTime, createTime, updateTime) {
@@ -858,7 +828,7 @@ class QueryDocumentSnapshot extends DocumentSnapshot {
   /**
    * The time the document was created.
    *
-   * @type {string}
+   * @type {Timestamp}
    * @name QueryDocumentSnapshot#createTime
    * @readonly
    * @override
@@ -866,8 +836,8 @@ class QueryDocumentSnapshot extends DocumentSnapshot {
    * @example
    * let query = firestore.collection('col');
    *
-   * query.get().forEach(documentSnapshot => {
-   *   console.log(`Document created at '${documentSnapshot.createTime}'`);
+   * query.get().forEach(snapshot => {
+   *   console.log(`Document created at '${snapshot.createTime.toDate()}'`);
    * });
    */
   get createTime() {
@@ -878,7 +848,7 @@ class QueryDocumentSnapshot extends DocumentSnapshot {
    * The time the document was last updated (at the time the snapshot was
    * generated).
    *
-   * @type {string}
+   * @type {Timestamp}
    * @name QueryDocumentSnapshot#updateTime
    * @readonly
    * @override
@@ -886,8 +856,8 @@ class QueryDocumentSnapshot extends DocumentSnapshot {
    * @example
    * let query = firestore.collection('col');
    *
-   * query.get().forEach(documentSnapshot => {
-   *   console.log(`Document updated at '${documentSnapshot.updateTime}'`);
+   * query.get().forEach(snapshot => {
+   *   console.log(`Document updated at '${snapshot.updateTime.toDate()}'`);
    * });
    */
   get updateTime() {
@@ -952,23 +922,23 @@ class DocumentSnapshotBuilder {
     this.fieldsProto = snapshot._fieldsProto;
 
     /**
-     * The ISO 8601 time when this document was read.
+     * The time when this document was read.
      *
-     * @type {string}
+     * @type {Timestamp}
      */
     this.readTime = snapshot._readTime;
 
     /**
-     * The ISO 8601 time when this document was created.
+     * The time when this document was created.
      *
-     * @type {string}
+     * @type {Timestamp}
      */
     this.createTime = snapshot._createTime;
 
     /**
-     * The ISO 8601 time when this document was last updated.
+     * The time when this document was last updated.
      *
-     * @type {string}
+     * @type {Timestamp}
      */
     this.updateTime = snapshot._updateTime;
   }
@@ -1411,8 +1381,8 @@ class Precondition {
    *
    * @param {boolean=} options.exists - Whether the referenced document should
    * exist in Firestore,
-   * @param {string=} options.lastUpdateTime - The last update time
-   * of the referenced document in Firestore (as ISO 8601 string).
+   * @param {Timestamp=} options.lastUpdateTime - The last update time of the
+   * referenced document in Firestore.
    * @param options
    */
   constructor(options) {
@@ -1425,6 +1395,7 @@ class Precondition {
   /**
    * Generates the Protobuf `Preconditon` object for this precondition.
    *
+   * @private
    * @returns {Object|null} The `Preconditon` Protobuf object or 'null' if there
    * are no preconditions.
    */
@@ -1436,10 +1407,7 @@ class Precondition {
     let proto = {};
 
     if (is.defined(this._lastUpdateTime)) {
-      proto.updateTime = timestampFromJson(
-        this._lastUpdateTime,
-        'lastUpdateTime'
-      );
+      proto.updateTime = this._lastUpdateTime.toProto();
     } else {
       proto.exists = this._exists;
     }
@@ -1577,8 +1545,8 @@ function validateFieldValue(val, options, depth) {
  *
  * @param {boolean=} options.exists - Whether the referenced document
  * should exist.
- * @param {string=} options.lastUpdateTime - The last update time
- * of the referenced document in Firestore (as ISO 8601 string).
+ * @param {Timestamp=} options.lastUpdateTime - The last update time
+ * of the referenced document in Firestore.
  * @param {boolean} allowExist Whether to allow the 'exists' preconditions.
  * @returns {boolean} 'true' if the input is a valid Precondition.
  */
@@ -1601,8 +1569,8 @@ function validatePrecondition(precondition, allowExist) {
 
   if (is.defined(precondition.lastUpdateTime)) {
     ++conditions;
-    if (!is.string(precondition.lastUpdateTime)) {
-      throw new Error('"lastUpdateTime" is not a string.');
+    if (!is.instance(precondition.lastUpdateTime, Timestamp)) {
+      throw new Error('"lastUpdateTime" is not a Firestore Timestamp.');
     }
   }
 

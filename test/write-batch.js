@@ -81,7 +81,7 @@ describe('delete() method', function() {
 
   it('accepts preconditions', function() {
     writeBatch.delete(firestore.doc('sub/doc'), {
-      lastUpdateTime: '1985-03-17T22:20:00.123000000Z',
+      lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
     });
   });
 });
@@ -113,7 +113,7 @@ describe('update() method', function() {
     writeBatch.update(
       firestore.doc('sub/doc'),
       {foo: 'bar'},
-      {lastUpdateTime: '1985-03-17T22:20:00.123000000Z'}
+      {lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)}
     );
   });
 });

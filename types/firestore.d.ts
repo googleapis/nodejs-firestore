@@ -395,10 +395,9 @@ declare namespace FirebaseFirestore {
    */
   export interface Precondition {
     /**
-     * If set, the last update time to enforce (specified as an ISO 8601
-     * string).
+     * If set, the last update time to enforce.
      */
-    readonly lastUpdateTime?: string;
+    readonly lastUpdateTime?: Timestamp;
   }
 
   /**
@@ -434,10 +433,9 @@ declare namespace FirebaseFirestore {
     private constructor();
 
     /**
-     * The write time as set by the Firestore servers. Formatted as an ISO-8601
-     * string.
+     * The write time as set by the Firestore servers.
      */
-    readonly writeTime: string;
+    readonly writeTime: Timestamp;
 
     /**
      * Returns true if this `WriteResult` is equal to the provided one.
@@ -612,18 +610,18 @@ declare namespace FirebaseFirestore {
      * The time the document was created. Not set for documents that don't
      * exist.
      */
-    readonly createTime?: string;
+    readonly createTime?: Timestamp;
 
     /**
      * The time the document was last updated (at the time the snapshot was
      * generated). Not set for documents that don't exist.
      */
-    readonly updateTime?: string;
+    readonly updateTime?: Timestamp;
 
     /**
      * The time this snapshot was read.
      */
-    readonly readTime: string;
+    readonly readTime: Timestamp;
 
     /**
      * Retrieves all fields in the document as an Object. Returns 'undefined' if
@@ -669,13 +667,13 @@ declare namespace FirebaseFirestore {
     /**
      * The time the document was created.
      */
-    readonly createTime: string;
+    readonly createTime: Timestamp;
 
     /**
      * The time the document was last updated (at the time the snapshot was
      * generated).
      */
-    readonly updateTime: string;
+    readonly updateTime: Timestamp;
 
     /**
      * Retrieves all fields in the document as an Object.
@@ -936,7 +934,7 @@ declare namespace FirebaseFirestore {
     readonly empty: boolean;
 
     /** The time this query snapshot was obtained. */
-    readonly readTime: string;
+    readonly readTime: Timestamp;
 
     /**
      * Enumerates all of the documents in the QuerySnapshot.
