@@ -24,16 +24,21 @@ const through = require('through2');
 const Firestore = require('../');
 let firestore;
 
-const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+const DATABASE_ROOT = 'projects/' + PROJECT_ID + '/databases/(default)';
 const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
 const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
+var PROJECT_ID = process.env.PROJECT_ID;
+if (!PROJECT_ID) {
+  PROJECT_ID = 'test-project';
+}
+
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
   });
 

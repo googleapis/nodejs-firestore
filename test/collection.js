@@ -28,9 +28,14 @@ const DocumentReference = require('../src/reference')(Firestore)
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
+var PROJECT_ID = process.env.PROJECT_ID;
+if (!PROJECT_ID) {
+  PROJECT_ID = 'test-project';
+}
+
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
   });
 
@@ -95,7 +100,7 @@ describe('Collection interface', function() {
   });
 
   it('has add() method', function() {
-    const dbPrefix = 'projects/test-project/databases';
+    const dbPrefix = 'projects/' + PROJECT_ID + '/databases';
 
     firestore._firestoreClient._commit = function(request, options, callback) {
       // Verify that the document name uses an auto-generated id.

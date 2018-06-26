@@ -25,9 +25,14 @@ const Firestore = require('../');
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
+var PROJECT_ID = process.env.PROJECT_ID;
+if (!PROJECT_ID) {
+  PROJECT_ID = 'test-project';
+}
+
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
   });
 
@@ -144,7 +149,7 @@ describe('create() method', function() {
 
 describe('batch support', function() {
   const documentName =
-    'projects/test-project/databases/(default)/documents/col/doc';
+    'projects/' + PROJECT_ID + '/databases/(default)/documents/col/doc';
 
   let firestore;
   let writeBatch;
@@ -160,7 +165,7 @@ describe('batch support', function() {
         callback
       ) {
         assert.deepEqual(request, {
-          database: 'projects/test-project/databases/(default)',
+          database: 'projects/' + PROJECT_ID + '/databases/(default)',
           writes: [
             {
               update: {

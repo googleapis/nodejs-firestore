@@ -22,26 +22,31 @@ const path = require('../src/path');
 const ResourcePath = path.ResourcePath;
 const FieldPath = path.FieldPath;
 
-const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+var PROJECT_ID = process.env.PROJECT_ID;
+if (!PROJECT_ID) {
+  PROJECT_ID = 'test-project';
+}
+
+const DATABASE_ROOT = 'projects/' + PROJECT_ID + '/databases/(default)';
 
 describe('ResourcePath', function() {
   it('has id property', function() {
     assert.equal(
-      new ResourcePath('test-project', '(default)', 'foo').id,
+      new ResourcePath(PROJECT_ID, '(default)', 'foo').id,
       'foo'
     );
-    assert.equal(new ResourcePath('test-project', '(default)').id, null);
+    assert.equal(new ResourcePath(PROJECT_ID, '(default)').id, null);
   });
 
   it('has append() method', function() {
-    let path = new ResourcePath('test-project', '(default)');
+    let path = new ResourcePath(PROJECT_ID, '(default)');
     assert.equal(path.formattedName, DATABASE_ROOT);
     path = path.append('foo');
     assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
   });
 
   it('has parent() method', function() {
-    let path = new ResourcePath('test-project', '(default)', 'foo');
+    let path = new ResourcePath(PROJECT_ID, '(default)', 'foo');
     assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
     path = path.parent();
     assert.equal(path.formattedName, DATABASE_ROOT);

@@ -25,7 +25,12 @@ const through = require('through2');
 
 const Firestore = require('../');
 
-const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+var PROJECT_ID = process.env.PROJECT_ID;
+if (!PROJECT_ID) {
+  PROJECT_ID = 'test-project';
+}
+
+const DATABASE_ROOT = 'projects/' + PROJECT_ID + '/databases/(default)';
 
 const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
   'Update\\(\\) requires either ' +
@@ -38,7 +43,7 @@ Firestore.setLogFunction(() => {});
 
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
   });
 
@@ -479,7 +484,7 @@ describe('serialize document', function() {
         set(
           document('ref', {
             referenceValue:
-              'projects/test-project/databases/(default)/documents/collectionId/documentId',
+              'projects/' + PROJECT_ID + '/databases/(default)/documents/collectionId/documentId',
             valueType: 'referenceValue',
           })
         )
@@ -1847,7 +1852,7 @@ describe('getCollections() method', function() {
       callback
     ) {
       assert.deepEqual(request, {
-        parent: 'projects/test-project/databases/(default)/documents/coll/doc',
+        parent: 'projects/' + PROJECT_ID + '/databases/(default)/documents/coll/doc',
       });
 
       callback(null, ['second', 'first']);

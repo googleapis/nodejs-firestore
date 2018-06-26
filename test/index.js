@@ -29,7 +29,12 @@ const DocumentReference = reference.DocumentReference;
 const CollectionReference = reference.CollectionReference;
 const ResourcePath = require('../src/path').ResourcePath;
 
-const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+var PROJECT_ID = process.env.PROJECT_ID;
+if (!PROJECT_ID) {
+  PROJECT_ID = 'test-project';
+}
+
+const DATABASE_ROOT = 'projects/' + PROJECT_ID + '/databases/(default)';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -216,7 +221,7 @@ const allSupportedTypesObject = {
   dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
   pathValue: new DocumentReference(
     {formattedName: DATABASE_ROOT},
-    new ResourcePath('test-project', '(default)', 'collection', 'document')
+    new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
@@ -227,7 +232,7 @@ const allSupportedTypesObject = {
 
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
   });
 
@@ -278,7 +283,7 @@ function stream() {
 describe('instantiation', function() {
   it('creates instance', function() {
     let firestore = new Firestore({
-      projectId: 'test-project',
+      projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
     });
     assert(firestore instanceof Firestore);
@@ -300,7 +305,7 @@ describe('instantiation', function() {
 
     firestore._firestoreClient.getProjectId = function(callback) {
       projectIdDetected = true;
-      callback(null, 'test-project');
+      callback(null, PROJECT_ID);
     };
 
     firestore._firestoreClient._batchGetDocuments = function(request) {
@@ -437,7 +442,7 @@ describe('snapshot_() method', function() {
     // Unlike most other tests, we don't call `ensureClient` since the
     // `snapshot_` method does not require a GAPIC client.
     firestore = new Firestore({
-      projectId: 'test-project',
+      projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
     });
   });
@@ -660,7 +665,7 @@ describe('getCollections() method', function() {
       callback
     ) {
       assert.deepEqual(request, {
-        parent: 'projects/test-project/databases/(default)',
+        parent: 'projects/' + PROJECT_ID + '/databases/(default)',
       });
 
       callback(null, ['first', 'second']);

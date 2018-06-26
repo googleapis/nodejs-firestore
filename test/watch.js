@@ -33,9 +33,15 @@ const Backoff = require('../src/backoff')(Firestore);
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
+var PROJECT_ID = process.env.PROJECT_ID;
+if (!PROJECT_ID) {
+  PROJECT_ID = 'test-project';
+}
+
+
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
   });
 
@@ -513,10 +519,10 @@ describe('Query watch', function() {
   // The proto JSON that should be sent for the query.
   const collQueryJSON = () => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: 'projects/' + PROJECT_ID + '/databases/(default)',
       addTarget: {
         query: {
-          parent: 'projects/test-project/databases/(default)',
+          parent: 'projects/' + PROJECT_ID + '/databases/(default)',
           structuredQuery: {
             from: [{collectionId: 'col'}],
           },
@@ -533,10 +539,10 @@ describe('Query watch', function() {
   // The proto JSON that should be sent for the query.
   const includeQueryJSON = () => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: 'projects/' + PROJECT_ID + '/databases/(default)',
       addTarget: {
         query: {
-          parent: 'projects/test-project/databases/(default)',
+          parent: 'projects/' + PROJECT_ID + '/databases/(default)',
           structuredQuery: {
             from: [{collectionId: 'col'}],
             where: {
@@ -561,10 +567,10 @@ describe('Query watch', function() {
   // The proto JSON that should be sent for a resumed query.
   const resumeTokenQuery = resumeToken => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: 'projects/' + PROJECT_ID + '/databases/(default)',
       addTarget: {
         query: {
-          parent: 'projects/test-project/databases/(default)',
+          parent: 'projects/' + PROJECT_ID + '/databases/(default)',
           structuredQuery: {
             from: [{collectionId: 'col'}],
           },
@@ -582,10 +588,10 @@ describe('Query watch', function() {
   // The proto JSON that should be sent for the query.
   const sortedQueryJSON = () => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: 'projects/' + PROJECT_ID + '/databases/(default)',
       addTarget: {
         query: {
-          parent: 'projects/test-project/databases/(default)',
+          parent: 'projects/' + PROJECT_ID + '/databases/(default)',
           structuredQuery: {
             from: [{collectionId: 'col'}],
             orderBy: [{direction: 'DESCENDING', field: {fieldPath: 'foo'}}],
@@ -2112,7 +2118,7 @@ describe('DocumentReference watch', function() {
   // The proto JSON that should be sent for the watch.
   const watchJSON = () => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: 'projects/' + PROJECT_ID + '/databases/(default)',
       addTarget: {
         documents: {
           documents: [doc.formattedName],
@@ -2125,7 +2131,7 @@ describe('DocumentReference watch', function() {
   // The proto JSON that should be sent for a resumed query.
   const resumeTokenJSON = resumeToken => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: 'projects/' + PROJECT_ID + '/databases/(default)',
       addTarget: {
         documents: {
           documents: [doc.formattedName],
