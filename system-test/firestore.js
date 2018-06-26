@@ -172,7 +172,7 @@ describe('DocumentReference class', function() {
       negativeInfinityValue: -Infinity,
       objectValue: {foo: 'bar', '😀': '😜'},
       emptyObject: {},
-      dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+1000 (CET)'),
+      dateValue: new Firestore.Timestamp(479978400, 123000000),
       pathValue: firestore.doc('col1/ref1'),
       arrayValue: ['foo', 42, 'bar'],
       emptyArray: [],
@@ -238,7 +238,7 @@ describe('DocumentReference class', function() {
       })
       .then(doc => {
         setTimestamp = doc.get('f');
-        assert.ok(is.instanceof(setTimestamp, Date));
+        assert.ok(is.instanceof(setTimestamp, Firestore.Timestamp));
         assert.deepEqual(doc.data(), {
           a: 'bar',
           b: {remove: 'bar'},
@@ -252,7 +252,7 @@ describe('DocumentReference class', function() {
       })
       .then(doc => {
         let updateTimestamp = doc.get('a');
-        assert.ok(is.instanceof(updateTimestamp, Date));
+        assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
         assert.deepEqual(doc.data(), {
           a: updateTimestamp,
           b: {c: updateTimestamp},
@@ -293,7 +293,7 @@ describe('DocumentReference class', function() {
       .then(() => ref.get())
       .then(doc => {
         let updateTimestamp = doc.get('c');
-        assert.ok(is.instanceof(updateTimestamp, Date));
+        assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
         assert.deepEqual(doc.data(), {
           a: 'b',
           c: updateTimestamp,
