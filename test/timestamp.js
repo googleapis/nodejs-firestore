@@ -16,7 +16,8 @@
 
 'use strict';
 
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 const Firestore = require('../');
 const is = require('is');
 const through = require('through2');

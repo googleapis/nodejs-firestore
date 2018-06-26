@@ -42,7 +42,7 @@ Firestore.setLogFunction(() => {});
 
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
     timestampsInSnapshots: true,
   });
