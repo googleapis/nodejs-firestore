@@ -51,6 +51,11 @@ const DeleteTransform = fieldValue.DeleteTransform;
 const ServerTimestampTransform = fieldValue.ServerTimestampTransform;
 
 /*!
+ * @see {Timestamp}
+ */
+const Timestamp = require('./timestamp');
+
+/*!
  * Injected.
  *
  * @see {DocumentReference}
@@ -66,13 +71,6 @@ let validate;
  * @type {number}
  */
 const MAX_DEPTH = 20;
-
-/*!
- * Number of nanoseconds in a millisecond.
- *
- * @type {number}
- */
-const MS_TO_NANOS = 1000000;
 
 /**
  * An immutable object representing a geographic location in Firestore. The
@@ -98,8 +96,8 @@ class GeoPoint {
    * });
    */
   constructor(latitude, longitude) {
-    validate.isNumber('latitude', latitude);
-    validate.isNumber('longitude', longitude);
+    validate.isNumber('latitude', latitude, -90, 90);
+    validate.isNumber('longitude', longitude, -180, 180);
 
     this._latitude = latitude;
     this._longitude = longitude;
@@ -532,6 +530,9 @@ class DocumentSnapshot {
    * @returns {*} The converted JS type.
    */
   _decodeValue(proto) {
+    const timestampsInSnapshotsEnabled = this._ref.firestore
+      ._timestampsInSnapshotsEnabled;
+
     switch (proto.valueType) {
       case 'stringValue': {
         return proto.stringValue;
@@ -546,10 +547,11 @@ class DocumentSnapshot {
         return parseFloat(proto.doubleValue, 10);
       }
       case 'timestampValue': {
-        return new Date(
-          (proto.timestampValue.seconds || 0) * 1000 +
-            (proto.timestampValue.nanos || 0) / MS_TO_NANOS
+        const timestamp = new Timestamp(
+          Number(proto.timestampValue.seconds || 0),
+          Number(proto.timestampValue.nanos || 0)
         );
+        return timestampsInSnapshotsEnabled ? timestamp : timestamp.toDate();
       }
       case 'referenceValue': {
         return new DocumentReference(
@@ -733,15 +735,21 @@ class DocumentSnapshot {
       };
     }
 
-    if (is.date(val)) {
-      let epochSeconds = Math.floor(val.getTime() / 1000);
-      let timestamp = {
-        seconds: epochSeconds,
-        nanos: (val.getTime() - epochSeconds * 1000) * MS_TO_NANOS,
-      };
+    if (is.instance(val, Timestamp)) {
       return {
         valueType: 'timestampValue',
-        timestampValue: timestamp,
+        timestampValue: {seconds: val.seconds, nanos: val.nanoseconds},
+      };
+    }
+
+    if (is.date(val)) {
+      let timestamp = Timestamp.fromDate(val);
+      return {
+        valueType: 'timestampValue',
+        timestampValue: {
+          seconds: timestamp.seconds,
+          nanos: timestamp.nanoseconds,
+        },
       };
     }
 
@@ -1357,7 +1365,7 @@ class DocumentTransform {
    * Returns the array of fields in this DocumentTransform.
    *
    * @private
-   * @type {Array.<FieldPath>} The fields specified in this DocumentTransform.
+   * @type {Array.<FieldPath>}
    * @readonly
    */
   get fields() {
@@ -1549,6 +1557,8 @@ function validateFieldValue(val, options, depth) {
   } else if (is.instanceof(val, DocumentReference)) {
     return true;
   } else if (is.instanceof(val, GeoPoint)) {
+    return true;
+  } else if (is.instanceof(val, Timestamp)) {
     return true;
   } else if (is.instanceof(val, FieldPath)) {
     throw new Error(

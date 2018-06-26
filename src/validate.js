@@ -52,12 +52,28 @@ module.exports = validators => {
       integer: (value, min, max) => {
         min = is.defined(min) ? min : -Infinity;
         max = is.defined(max) ? max : Infinity;
-        return is.integer(value) && value >= min && value <= max;
+        if (!is.integer(value)) {
+          return false;
+        }
+        if (value < min || value > max) {
+          throw new Error(
+            `Value must be within [${min}, ${max}] inclusive, but was: ${value}`
+          );
+        }
+        return true;
       },
       number: (value, min, max) => {
         min = is.defined(min) ? min : -Infinity;
         max = is.defined(max) ? max : Infinity;
-        return is.number(value) && value >= min && value <= max;
+        if (!is.number(value) || is.nan(value)) {
+          return false;
+        }
+        if (value < min || value > max) {
+          throw new Error(
+            `Value must be within [${min}, ${max}] inclusive, but was: ${value}`
+          );
+        }
+        return true;
       },
       object: is.object,
       string: is.string,
@@ -148,6 +164,7 @@ module.exports = validators => {
         case 'FieldPath':
         case 'FieldValue':
         case 'GeoPoint':
+        case 'Timestamp':
           return new Error(
             `Detected an object of type "${typeName}" that doesn't match the ` +
               'expected instance. Please ensure that the Firestore types you ' +
