@@ -216,7 +216,7 @@ class Firestore {
    * `Timestamp` instead.
    * <br/>NOTE: in the future `timestampsInSnapshots: true` will become the
    * default and this option will be removed so you should change your code to
-   * use Timestamp now and opt-in to this new behavior as soon as you can.
+   * use `Timestamp` now and opt-in to this new behavior as soon as you can.
    */
   constructor(options) {
     options = extend({}, options, {

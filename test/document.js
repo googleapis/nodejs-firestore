@@ -470,11 +470,11 @@ describe('serialize document', function() {
 
     assert.throws(() => {
       new Firestore.GeoPoint(91, 0);
-    }, /Argument "latitude" is not a valid number. Value must be within \[-90, 90] inclusive/);
+    }, /Argument "latitude" is not a valid number. Value must be within \[-90, 90] inclusive, but was: 91/);
 
     assert.throws(() => {
       new Firestore.GeoPoint(90, 181);
-    }, /Argument "longitude" is not a valid number. Value must be within \[-180, 180] inclusive/);
+    }, /Argument "longitude" is not a valid number. Value must be within \[-180, 180] inclusive, but was: 181/);
   });
 
   it('resolves infinite nesting', function() {

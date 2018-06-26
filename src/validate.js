@@ -56,7 +56,9 @@ module.exports = validators => {
           return false;
         }
         if (value < min || value > max) {
-          throw new Error(`Value must be within [${min}, ${max}] inclusive.`);
+          throw new Error(
+            `Value must be within [${min}, ${max}] inclusive, but was: ${value}`
+          );
         }
         return true;
       },
@@ -67,7 +69,9 @@ module.exports = validators => {
           return false;
         }
         if (value < min || value > max) {
-          throw new Error(`Value must be within [${min}, ${max}] inclusive.`);
+          throw new Error(
+            `Value must be within [${min}, ${max}] inclusive, but was: ${value}`
+          );
         }
         return true;
       },

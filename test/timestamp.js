@@ -209,12 +209,12 @@ describe('timestamps', function() {
 
     assert.throws(
       () => new Firestore.Timestamp(0, -1),
-      /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive/
+      /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1/
     );
 
     assert.throws(
       () => new Firestore.Timestamp(0, 1000000000),
-      /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive/
+      /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000/
     );
   });
 });
