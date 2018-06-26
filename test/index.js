@@ -234,7 +234,7 @@ const allSupportedTypesInput = {
   ),
   pathValue: new DocumentReference(
     {formattedName: DATABASE_ROOT},
-    new ResourcePath('test-project', '(default)', 'collection', 'document')
+    new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
