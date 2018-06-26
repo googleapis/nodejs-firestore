@@ -29,7 +29,7 @@ const DocumentReference = reference.DocumentReference;
 const CollectionReference = reference.CollectionReference;
 const ResourcePath = require('../src/path').ResourcePath;
 
-var PROJECT_ID = process.env.PROJECT_ID;
+let PROJECT_ID = process.env.PROJECT_ID;
 if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
 }

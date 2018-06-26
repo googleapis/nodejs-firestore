@@ -31,7 +31,7 @@ const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-var PROJECT_ID = process.env.PROJECT_ID;
+let PROJECT_ID = process.env.PROJECT_ID;
 if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
 }

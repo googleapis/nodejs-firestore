@@ -22,7 +22,7 @@ const path = require('../src/path');
 const ResourcePath = path.ResourcePath;
 const FieldPath = path.FieldPath;
 
-var PROJECT_ID = process.env.PROJECT_ID;
+let PROJECT_ID = process.env.PROJECT_ID;
 if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
 }
