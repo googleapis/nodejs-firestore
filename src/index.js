@@ -702,8 +702,9 @@ class Firestore {
       common = require('@google-cloud/common');
 
       this._clientInitialized = new Promise((resolve, reject) => {
-        this._firestoreClient = module.exports
-          .v1beta1(this._initalizationOptions);
+        this._firestoreClient = module.exports.v1beta1(
+          this._initalizationOptions
+        );
 
         Firestore.log('Firestore', 'Initialized Firestore GAPIC Client');
 
