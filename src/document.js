@@ -22,7 +22,6 @@ const is = require('is');
 
 const fieldValue = require('./field-value');
 const path = require('./path');
-const timestampFromJson = require('./convert').timestampFromJson;
 
 /*!
  * @see {ResourcePath}
