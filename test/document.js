@@ -45,6 +45,7 @@ function createInstance() {
   let firestore = new Firestore({
     projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
+    timestampsInSnapshots: true,
   });
 
   return firestore._ensureClient().then(() => firestore);
@@ -453,19 +454,33 @@ describe('serialize document', function() {
   });
 
   it('with invalid geopoint', function() {
-    const expectedErr = /Argument ".*" is not a valid number\./;
+    assert.throws(() => {
+      new Firestore.GeoPoint(57.2999988, 'INVALID');
+    }, /Argument "longitude" is not a valid number/);
 
     assert.throws(() => {
-      new Firestore.GeoPoint('57.2999988', 'INVALID');
-    }, expectedErr);
-
-    assert.throws(() => {
-      new Firestore.GeoPoint('INVALID', '-4.4499982');
-    }, expectedErr);
+      new Firestore.GeoPoint('INVALID', -4.4499982);
+    }, /Argument "latitude" is not a valid number/);
 
     assert.throws(() => {
       new Firestore.GeoPoint();
-    }, expectedErr);
+    }, /Argument "latitude" is not a valid number/);
+
+    assert.throws(() => {
+      new Firestore.GeoPoint(NaN);
+    }, /Argument "latitude" is not a valid number/);
+
+    assert.throws(() => {
+      new Firestore.GeoPoint(Infinity);
+    }, /Argument "latitude" is not a valid number/);
+
+    assert.throws(() => {
+      new Firestore.GeoPoint(91, 0);
+    }, /Argument "latitude" is not a valid number. Value must be within \[-90, 90] inclusive, but was: 91/);
+
+    assert.throws(() => {
+      new Firestore.GeoPoint(90, 181);
+    }, /Argument "longitude" is not a valid number. Value must be within \[-180, 180] inclusive, but was: 181/);
   });
 
   it('resolves infinite nesting', function() {
@@ -573,7 +588,7 @@ describe('deserialize document', function() {
       .get()
       .then(res => {
         assert.equal(
-          res.get('moonLanding').getTime(),
+          res.get('moonLanding').toMillis(),
           new Date('Jul 20 1969 20:18:00.123 UTC').getTime()
         );
       });

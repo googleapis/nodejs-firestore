@@ -197,6 +197,26 @@ const GRPC_UNAVAILABLE = 14;
 class Firestore {
   /**
    * @param {Object=} options - [Configuration object](#/docs).
+   * @param {string=} options.projectId The Firestore Project ID. Can be
+   * omitted in environments that support `Application Default Credentials`
+   * {@see https://cloud.google.com/docs/authentication}
+   * @param {string=} options.keyFilename Local file containing the Service
+   * Account credentials. Can be omitted in environments that support
+   * `Application Default Credentials`
+   * {@see https://cloud.google.com/docs/authentication}
+   * @param {boolean=} options.timestampsInSnapshots Enables the use of
+   * `Timestamp`s for timestamp fields in `DocumentSnapshots`.<br/>
+   * Currently, Firestore returns timestamp fields as `Date` but `Date` only
+   * supports millisecond precision, which leads to truncation and causes
+   * unexpected behavior when using a timestamp from a snapshot as a part
+   * of a subsequent query.
+   * <br/>Setting `timestampsInSnapshots` to true will cause Firestore to return
+   * `Timestamp` values instead of `Date` avoiding this kind of problem. To
+   * make this work you must also change any code that uses `Date` to use
+   * `Timestamp` instead.
+   * <br/>NOTE: in the future `timestampsInSnapshots: true` will become the
+   * default and this option will be removed so you should change your code to
+   * use `Timestamp` now and opt-in to this new behavior as soon as you can.
    */
   constructor(options) {
     options = extend({}, options, {
@@ -238,6 +258,34 @@ class Firestore {
 
     if (this._preferTransactions) {
       Firestore.log('Firestore', 'Detected GCF environment');
+    }
+
+    this._timestampsInSnapshotsEnabled = !!options.timestampsInSnapshots;
+
+    if (!this._timestampsInSnapshotsEnabled) {
+      // eslint-disable-next-line no-console
+      console.error(`
+The behavior for Date objects stored in Firestore is going to change
+AND YOUR APP MAY BREAK.
+To hide this warning and ensure your app does not break, you need to add the
+following code to your app before calling any other Cloud Firestore methods:
+
+  const settings = {/* your settings... */ timestampsInSnapshots: true};
+  const firestore = new Firestore(settings);
+
+With this change, timestamps stored in Cloud Firestore will be read back as
+Firebase Timestamp objects instead of as system Date objects. So you will also
+need to update code expecting a Date to instead expect a Timestamp. For example:
+
+  // Old:
+  const date = snapshot.get('created_at');
+  // New:
+  const timestamp = snapshot.get('created_at');
+  const date = timestamp.toDate();
+
+Please audit all existing usages of Date when you enable the new behavior. In a
+future release, the behavior will change to the new behavior, so if you do not
+follow these steps, YOUR APP MAY BREAK.`);
     }
 
     if (options && options.projectId) {
@@ -1317,3 +1365,12 @@ module.exports.FieldValue = FieldValue;
  * @type {Constructor}
  */
 module.exports.FieldPath = FieldPath;
+
+/**
+ * {@link Timestamp} class.
+ *
+ * @name Firestore.Timestamp
+ * @see Timestamp
+ * @type Timestamp
+ */
+module.exports.Timestamp = require('./timestamp');

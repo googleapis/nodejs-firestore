@@ -72,6 +72,13 @@ const allSupportedTypesProtobufJs = document('documentId', {
       seconds: 479978400,
     },
   },
+  timestampValue: {
+    valueType: 'timestampValue',
+    timestampValue: {
+      nanos: 123000000,
+      seconds: 479978400,
+    },
+  },
   doubleValue: {
     valueType: 'doubleValue',
     doubleValue: 0.1,
@@ -158,6 +165,9 @@ const allSupportedTypesJson = document('documentId', {
   dateValue: {
     timestampValue: '1985-03-18T07:20:00.123000000Z',
   },
+  timestampValue: {
+    timestampValue: '1985-03-18T07:20:00.123000000Z',
+  },
   doubleValue: {
     doubleValue: 0.1,
   },
@@ -208,7 +218,7 @@ const allSupportedTypesJson = document('documentId', {
   },
 });
 
-const allSupportedTypesObject = {
+const allSupportedTypesInput = {
   stringValue: 'a',
   trueValue: true,
   falseValue: false,
@@ -219,6 +229,36 @@ const allSupportedTypesObject = {
   objectValue: {foo: 'bar'},
   emptyObject: {},
   dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
+  timestampValue: Firestore.Timestamp.fromDate(
+    new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
+  ),
+  pathValue: new DocumentReference(
+    {formattedName: DATABASE_ROOT},
+    new ResourcePath('test-project', '(default)', 'collection', 'document')
+  ),
+  arrayValue: ['foo', 42, 'bar'],
+  emptyArray: [],
+  nilValue: null,
+  geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
+  bytesValue: Buffer.from([0x1, 0x2]),
+};
+
+const allSupportedTypesOutput = {
+  stringValue: 'a',
+  trueValue: true,
+  falseValue: false,
+  integerValue: 0,
+  doubleValue: 0.1,
+  infinityValue: Infinity,
+  negativeInfinityValue: -Infinity,
+  objectValue: {foo: 'bar'},
+  emptyObject: {},
+  dateValue: Firestore.Timestamp.fromDate(
+    new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
+  ),
+  timestampValue: Firestore.Timestamp.fromDate(
+    new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
+  ),
   pathValue: new DocumentReference(
     {formattedName: DATABASE_ROOT},
     new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
@@ -234,6 +274,7 @@ function createInstance() {
   let firestore = new Firestore({
     projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
+    timestampsInSnapshots: true,
   });
 
   return firestore._ensureClient().then(() => firestore);
@@ -285,6 +326,7 @@ describe('instantiation', function() {
     let firestore = new Firestore({
       projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
+      timestampsInSnapshots: true,
     });
     assert(firestore instanceof Firestore);
   });
@@ -292,6 +334,7 @@ describe('instantiation', function() {
   it('detects project id', function() {
     let firestore = new Firestore({
       sslCreds: grpc.credentials.createInsecure(),
+      timestampsInSnapshots: true,
     });
 
     assert.equal(
@@ -326,6 +369,7 @@ describe('instantiation', function() {
   it('handles error from project ID detection', function() {
     let firestore = new Firestore({
       sslCreds: grpc.credentials.createInsecure(),
+      timestampsInSnapshots: true,
     });
 
     let initialized = firestore._ensureClient();
@@ -346,6 +390,8 @@ describe('instantiation', function() {
     // Ordering as per firestore.d.ts
     assert.ok(is.defined(Firestore.Firestore));
     assert.equal(Firestore.Firestore.name, 'Firestore');
+    assert.ok(is.defined(Firestore.Timestamp));
+    assert.equal(Firestore.Timestamp.name, 'Timestamp');
     assert.ok(is.defined(Firestore.GeoPoint));
     assert.equal(Firestore.GeoPoint.name, 'GeoPoint');
     assert.ok(is.defined(Firestore.Transaction));
@@ -403,7 +449,7 @@ describe('serializer', function() {
       });
     };
 
-    return firestore.collection('coll').add(allSupportedTypesObject);
+    return firestore.collection('coll').add(allSupportedTypesInput);
   });
 });
 
@@ -411,7 +457,7 @@ describe('snapshot_() method', function() {
   let firestore;
 
   function verifyAllSupportedTypes(actualObject) {
-    let expected = extend(true, {}, allSupportedTypesObject);
+    let expected = extend(true, {}, allSupportedTypesOutput);
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
     assert.equal(
@@ -444,6 +490,7 @@ describe('snapshot_() method', function() {
     firestore = new Firestore({
       projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
+      timestampsInSnapshots: true,
     });
   });
 
@@ -486,7 +533,7 @@ describe('snapshot_() method', function() {
     assert.equal(true, doc.exists);
     assert.deepEqual(doc.data(), {
       a: bytesData,
-      b: new Date('1985-03-18T07:20:00.000Z'),
+      b: Firestore.Timestamp.fromDate(new Date('1985-03-18T07:20:00.000Z')),
       c: bytesData,
     });
     assert.equal('1970-01-01T00:00:01.002000000Z', doc.createTime);
