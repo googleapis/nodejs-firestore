@@ -34,7 +34,7 @@ if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
 }
 
-const DATABASE_ROOT = 'projects/' + PROJECT_ID + '/databases/(default)';
+const DATABASE_ROOT = 'projects/${PROJECT_ID}/databases/(default)';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -665,7 +665,7 @@ describe('getCollections() method', function() {
       callback
     ) {
       assert.deepEqual(request, {
-        parent: 'projects/' + PROJECT_ID + '/databases/(default)',
+        parent: 'projects/${PROJECT_ID}/databases/(default)',
       });
 
       callback(null, ['first', 'second']);

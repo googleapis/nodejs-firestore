@@ -149,7 +149,7 @@ describe('create() method', function() {
 
 describe('batch support', function() {
   const documentName =
-    'projects/' + PROJECT_ID + '/databases/(default)/documents/col/doc';
+    'projects/${PROJECT_ID}/databases/(default)/documents/col/doc';
 
   let firestore;
   let writeBatch;
@@ -165,7 +165,7 @@ describe('batch support', function() {
         callback
       ) {
         assert.deepEqual(request, {
-          database: 'projects/' + PROJECT_ID + '/databases/(default)',
+          database: 'projects/${PROJECT_ID}/databases/(default)',
           writes: [
             {
               update: {

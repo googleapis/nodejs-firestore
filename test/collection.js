@@ -100,7 +100,7 @@ describe('Collection interface', function() {
   });
 
   it('has add() method', function() {
-    const dbPrefix = 'projects/' + PROJECT_ID + '/databases';
+    const dbPrefix = 'projects/${PROJECT_ID}/databases';
 
     firestore._firestoreClient._commit = function(request, options, callback) {
       // Verify that the document name uses an auto-generated id.

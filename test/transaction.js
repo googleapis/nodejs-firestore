@@ -24,7 +24,7 @@ const through = require('through2');
 const Firestore = require('../');
 let firestore;
 
-const DATABASE_ROOT = 'projects/' + PROJECT_ID + '/databases/(default)';
+const DATABASE_ROOT = 'projects/${PROJECT_ID}/databases/(default)';
 const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
 const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 

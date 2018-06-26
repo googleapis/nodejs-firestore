@@ -27,7 +27,7 @@ if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
 }
 
-const DATABASE_ROOT = 'projects/' + PROJECT_ID + '/databases/(default)';
+const DATABASE_ROOT = 'projects/${PROJECT_ID}/databases/(default)';
 
 describe('ResourcePath', function() {
   it('has id property', function() {

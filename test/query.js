@@ -35,7 +35,7 @@ if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
 }
 
-const DATABASE_ROOT = 'projects/' + PROJECT_ID + '/databases/(default)';
+const DATABASE_ROOT = 'projects/${PROJECT_ID}/databases/(default)';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -704,7 +704,7 @@ describe('where() interface', function() {
         fieldFilters('__name__', 'EQUAL', {
           valueType: 'referenceValue',
           referenceValue:
-            'projects/' + PROJECT_ID + '/databases/(default)/' +
+            'projects/${PROJECT_ID}/databases/(default)/' +
             'documents/collectionId/foo',
         })
       );
@@ -1125,7 +1125,7 @@ describe('startAt() interface', function() {
         startAt(true, {
           valueType: 'referenceValue',
           referenceValue:
-            'projects/' + PROJECT_ID + '/databases/(default)/' +
+            'projects/${PROJECT_ID}/databases/(default)/' +
             'documents/collectionId/doc',
         })
       );
@@ -1193,7 +1193,7 @@ describe('startAt() interface', function() {
         startAt(true, {
           valueType: 'referenceValue',
           referenceValue:
-            'projects/' + PROJECT_ID + '/databases/(default)/' +
+            'projects/${PROJECT_ID}/databases/(default)/' +
             'documents/collectionId/doc',
         })
       );
@@ -1215,7 +1215,7 @@ describe('startAt() interface', function() {
         startAt(true, {
           valueType: 'referenceValue',
           referenceValue:
-            'projects/' + PROJECT_ID + '/databases/(default)/' +
+            'projects/${PROJECT_ID}/databases/(default)/' +
             'documents/collectionId/doc',
         })
       );
@@ -1238,7 +1238,7 @@ describe('startAt() interface', function() {
         startAt(true, 'bar', {
           valueType: 'referenceValue',
           referenceValue:
-            'projects/' + PROJECT_ID + '/databases/(default)/' +
+            'projects/${PROJECT_ID}/databases/(default)/' +
             'documents/collectionId/doc',
         })
       );
@@ -1259,7 +1259,7 @@ describe('startAt() interface', function() {
         startAt(true, 'bar', {
           valueType: 'referenceValue',
           referenceValue:
-            'projects/' + PROJECT_ID + '/databases/(default)/' +
+            'projects/${PROJECT_ID}/databases/(default)/' +
             'documents/collectionId/doc',
         })
       );
@@ -1280,7 +1280,7 @@ describe('startAt() interface', function() {
         startAt(true, 'b', {
           valueType: 'referenceValue',
           referenceValue:
-            'projects/' + PROJECT_ID + '/databases/(default)/' +
+            'projects/${PROJECT_ID}/databases/(default)/' +
             'documents/collectionId/doc',
         }),
         fieldFilters(
@@ -1316,7 +1316,7 @@ describe('startAt() interface', function() {
         startAt(true, {
           valueType: 'referenceValue',
           referenceValue:
-            'projects/' + PROJECT_ID + '/databases/(default)/' +
+            'projects/${PROJECT_ID}/databases/(default)/' +
             'documents/collectionId/doc',
         }),
         fieldFilters('foo', 'EQUAL', 'bar')

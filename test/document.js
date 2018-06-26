@@ -30,7 +30,7 @@ if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
 }
 
-const DATABASE_ROOT = 'projects/' + PROJECT_ID + '/databases/(default)';
+const DATABASE_ROOT = 'projects/${PROJECT_ID}/databases/(default)';
 
 const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
   'Update\\(\\) requires either ' +
@@ -484,7 +484,7 @@ describe('serialize document', function() {
         set(
           document('ref', {
             referenceValue:
-              'projects/' + PROJECT_ID + '/databases/(default)/documents/collectionId/documentId',
+              'projects/${PROJECT_ID}/databases/(default)/documents/collectionId/documentId',
             valueType: 'referenceValue',
           })
         )
@@ -1852,7 +1852,7 @@ describe('getCollections() method', function() {
       callback
     ) {
       assert.deepEqual(request, {
-        parent: 'projects/' + PROJECT_ID + '/databases/(default)/documents/coll/doc',
+        parent: 'projects/${PROJECT_ID}/databases/(default)/documents/coll/doc',
       });
 
       callback(null, ['second', 'first']);
