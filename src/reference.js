@@ -372,8 +372,8 @@ class DocumentReference {
    * @param {Precondition=} precondition - A precondition to enforce for this
    * delete.
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime. Fails the elete if the
-   * ddocument was last updated at a different time.
+   * document was last updated at lastUpdateTime. Fails the delete if the
+   * document was last updated at a different time.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * delete time.
    *
