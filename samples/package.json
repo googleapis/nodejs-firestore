@@ -10,7 +10,7 @@
   },
   "scripts": {
     "ava": "ava -T 20s --verbose system-test/*.test.js",
-    "test": "repo-tools test run --cmd npm -- run ava"
+    "test": "npm run ava"
   },
   "dependencies": {
     "@google-cloud/firestore": "0.14.1"
