@@ -24,18 +24,13 @@ const through = require('through2');
 const Firestore = require('../');
 let firestore;
 
-let PROJECT_ID = process.env.PROJECT_ID;
-if (!PROJECT_ID) {
-  PROJECT_ID = 'test-project';
-}
-
+const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
 const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
-
 
 function createInstance() {
   let firestore = new Firestore({
@@ -242,21 +237,31 @@ function runTransaction(callback, request) {
     callback(request.error, request.response);
   };
 
-  firestore._firestoreClient._innerApiCalls.commit = function(actual, options, callback) {
+  firestore._firestoreClient._innerApiCalls.commit = function(
+    actual,
+    options,
+    callback
+  ) {
     request = requests.shift();
     assert.equal(request.type, 'commit');
     assert.deepEqual(actual, request.request);
     callback(request.error, request.response);
   };
 
-  firestore._firestoreClient._innerApiCalls.rollback = function(actual, options, callback) {
+  firestore._firestoreClient._innerApiCalls.rollback = function(
+    actual,
+    options,
+    callback
+  ) {
     request = requests.shift();
     assert.equal(request.type, 'rollback');
     assert.deepEqual(actual, request.request);
     callback(request.error, request.response);
   };
 
-  firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(actual) {
+  firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
+    actual
+  ) {
     request = requests.shift();
     assert.equal(request.type, 'getDocument');
     assert.deepEqual(actual, request.request);

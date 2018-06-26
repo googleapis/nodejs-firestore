@@ -25,11 +25,7 @@ const through = require('through2');
 
 const Firestore = require('../');
 
-let PROJECT_ID = process.env.PROJECT_ID;
-if (!PROJECT_ID) {
-  PROJECT_ID = 'test-project';
-}
-PROJECT_ID = 'test-project';
+const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
@@ -283,7 +279,11 @@ describe('serialize document', function() {
   });
 
   it('serializes to Protobuf JS', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -319,7 +319,11 @@ describe('serialize document', function() {
   });
 
   it('serializes date before 1970', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -342,7 +346,11 @@ describe('serialize document', function() {
   });
 
   it('serializes unicode keys', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, set(document('😀', '😜')));
       callback(null, writeResult(1));
     };
@@ -353,7 +361,11 @@ describe('serialize document', function() {
   });
 
   it('accepts both blob formats', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -379,7 +391,11 @@ describe('serialize document', function() {
   });
 
   it('supports NaN and Infinity', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       let fields = request.writes[0].update.fields;
       assert.ok(
         typeof fields.nanValue.doubleValue === 'number' &&
@@ -399,7 +415,11 @@ describe('serialize document', function() {
   });
 
   it('supports server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -493,13 +513,16 @@ describe('serialize document', function() {
   });
 
   it('is able to write a document reference with cycles', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
           document('ref', {
-            referenceValue:
-              `projects/${PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
+            referenceValue: `projects/${PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
             valueType: 'referenceValue',
           })
         )
@@ -712,7 +735,9 @@ describe('get document', function() {
   });
 
   it('returns document', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(request) {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
+      request
+    ) {
       requestEquals(request, retrieve());
 
       return stream(
@@ -832,7 +857,11 @@ describe('delete document', function() {
   });
 
   it('generates proto', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, remove('documentId'));
 
       callback(null, writeResult(1));
@@ -842,7 +871,11 @@ describe('delete document', function() {
   });
 
   it('returns update time', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, remove('documentId'));
 
       callback(null, {
@@ -865,7 +898,11 @@ describe('delete document', function() {
   it('with last update time precondition', function() {
     let docRef = firestore.doc('collectionId/documentId');
 
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         remove('documentId', {
@@ -925,7 +962,11 @@ describe('set document', function() {
   });
 
   it('supports empty map', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, set(document()));
       callback(null, writeResult(1));
     };
@@ -934,7 +975,11 @@ describe('set document', function() {
   });
 
   it('supports nested empty map', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -951,7 +996,11 @@ describe('set document', function() {
   });
 
   it('skips merges with just server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -972,7 +1021,11 @@ describe('set document', function() {
   });
 
   it('sends empty non-merge write even with just server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -991,7 +1044,11 @@ describe('set document', function() {
   });
 
   it('supports document merges', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -1021,7 +1078,11 @@ describe('set document', function() {
   });
 
   it('supports document merges with field mask', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -1073,7 +1134,11 @@ describe('set document', function() {
   });
 
   it('supports document merges with empty field mask', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, set(document(), updateMask()));
       callback(null, writeResult(1));
     };
@@ -1082,7 +1147,11 @@ describe('set document', function() {
   });
 
   it('supports document merges with field mask and empty maps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -1128,7 +1197,11 @@ describe('set document', function() {
   });
 
   it('supports document merges with field mask and server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -1164,7 +1237,11 @@ describe('set document', function() {
   });
 
   it('supports empty merge', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, set(document(), updateMask()));
       callback(null, writeResult(1));
     };
@@ -1173,7 +1250,11 @@ describe('set document', function() {
   });
 
   it('supports nested empty merge', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         set(
@@ -1191,7 +1272,11 @@ describe('set document', function() {
   });
 
   it("doesn't split on dots", function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, set(document('a.b', 'c')));
       callback(null, writeResult(1));
     };
@@ -1264,7 +1349,11 @@ describe('create document', function() {
   });
 
   it('creates document', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, create(document()));
       callback(null, writeResult(1));
     };
@@ -1273,7 +1362,11 @@ describe('create document', function() {
   });
 
   it('returns update time', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, create(document()));
 
       callback(null, {
@@ -1301,7 +1394,11 @@ describe('create document', function() {
   });
 
   it('supports server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         create(
@@ -1320,7 +1417,11 @@ describe('create document', function() {
   });
 
   it('supports nested empty map', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         create(
@@ -1366,7 +1467,11 @@ describe('update document', function() {
   });
 
   it('generates proto', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
       callback(null, writeResult(1));
     };
@@ -1375,7 +1480,11 @@ describe('update document', function() {
   });
 
   it('supports nested server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         update(
@@ -1398,7 +1507,11 @@ describe('update document', function() {
   });
 
   it('skips write for single server timestamp', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         update(null, null, fieldTransform('a', 'REQUEST_TIME'))
@@ -1412,7 +1525,11 @@ describe('update document', function() {
   });
 
   it('supports nested empty map', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         update(
@@ -1430,7 +1547,11 @@ describe('update document', function() {
   });
 
   it('supports nested delete', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, update(document(), updateMask('a.b')));
       callback(null, writeResult(1));
     };
@@ -1441,7 +1562,11 @@ describe('update document', function() {
   });
 
   it('returns update time', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
 
       callback(null, {
@@ -1469,7 +1594,11 @@ describe('update document', function() {
   });
 
   it('with last update time precondition', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         update(document('foo', 'bar'), updateMask('foo'), /*transform */ null, {
@@ -1528,7 +1657,11 @@ describe('update document', function() {
   });
 
   it('with top-level document', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
       callback(null, writeResult(1));
     };
@@ -1539,7 +1672,11 @@ describe('update document', function() {
   });
 
   it('with nested document', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         update(
@@ -1600,7 +1737,11 @@ describe('update document', function() {
   });
 
   it('with two nested fields ', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         update(
@@ -1663,7 +1804,11 @@ describe('update document', function() {
   });
 
   it('with nested field and document transform ', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         update(
@@ -1711,7 +1856,11 @@ describe('update document', function() {
   });
 
   it('with field with dot ', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(request, update(document('a.b', 'c'), updateMask('`a.b`')));
 
       callback(null, writeResult(1));
@@ -1834,7 +1983,11 @@ describe('update document', function() {
   });
 
   it('with field delete', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       requestEquals(
         request,
         update(document('bar', 'foobar'), updateMask('bar', 'foo'))

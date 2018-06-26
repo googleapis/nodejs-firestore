@@ -416,7 +416,9 @@ function runTest(spec) {
   };
 
   const getTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = getHandler(spec);
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = getHandler(
+      spec
+    );
 
     return Promise.resolve().then(() => {
       return docRef(spec.docRefPath).get();

@@ -25,10 +25,7 @@ const Firestore = require('../');
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-let PROJECT_ID = process.env.PROJECT_ID;
-if (!PROJECT_ID) {
-  PROJECT_ID = 'test-project';
-}
+const PROJECT_ID = 'test-project';
 
 function createInstance() {
   let firestore = new Firestore({
@@ -149,8 +146,7 @@ describe('create() method', function() {
 });
 
 describe('batch support', function() {
-  const documentName =
-    `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
+  const documentName = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
 
   let firestore;
   let writeBatch;
@@ -339,7 +335,11 @@ describe('batch support', function() {
   });
 
   it('can return same write result', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       callback(null, {
         commitTime: {
           nanos: 0,
@@ -391,7 +391,11 @@ describe('batch support', function() {
         callback(null, {transaction: 'foo'});
       };
 
-      firestore._firestoreClient._innerApiCalls.commit = function(actual, options, callback) {
+      firestore._firestoreClient._innerApiCalls.commit = function(
+        actual,
+        options,
+        callback
+      ) {
         ++commitCalled;
         callback(null, {
           commitTime: {

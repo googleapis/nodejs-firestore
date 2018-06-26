@@ -22,19 +22,12 @@ const path = require('../src/path');
 const ResourcePath = path.ResourcePath;
 const FieldPath = path.FieldPath;
 
-let PROJECT_ID = process.env.PROJECT_ID;
-if (!PROJECT_ID) {
-  PROJECT_ID = 'test-project';
-}
-
+const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 describe('ResourcePath', function() {
   it('has id property', function() {
-    assert.equal(
-      new ResourcePath(PROJECT_ID, '(default)', 'foo').id,
-      'foo'
-    );
+    assert.equal(new ResourcePath(PROJECT_ID, '(default)', 'foo').id, 'foo');
     assert.equal(new ResourcePath(PROJECT_ID, '(default)').id, null);
   });
 

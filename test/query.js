@@ -30,11 +30,7 @@ const DocumentSnapshot = require('../src/document')(DocumentReference)
   .DocumentSnapshot;
 const ResourcePath = require('../src/path').ResourcePath;
 
-let PROJECT_ID = process.env.PROJECT_ID;
-if (!PROJECT_ID) {
-  PROJECT_ID = 'test-project';
-}
-
+const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 // Change the argument to 'console.log' to enable debug output.

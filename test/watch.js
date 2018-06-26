@@ -38,7 +38,6 @@ if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
 }
 
-
 function createInstance() {
   let firestore = new Firestore({
     projectId: PROJECT_ID,

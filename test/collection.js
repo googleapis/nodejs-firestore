@@ -28,10 +28,7 @@ const DocumentReference = require('../src/reference')(Firestore)
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-let PROJECT_ID = process.env.PROJECT_ID;
-if (!PROJECT_ID) {
-  PROJECT_ID = 'test-project';
-}
+const PROJECT_ID = 'test-project';
 
 function createInstance() {
   let firestore = new Firestore({
@@ -103,7 +100,11 @@ describe('Collection interface', function() {
   it('has add() method', function() {
     const dbPrefix = `projects/${PROJECT_ID}/databases`;
 
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       // Verify that the document name uses an auto-generated id.
       let docIdRe = new RegExp(
         `${dbPrefix}/\\(default\\)/documents/collectionId/[a-zA-Z0-9]{20}`

@@ -29,11 +29,7 @@ const DocumentReference = reference.DocumentReference;
 const CollectionReference = reference.CollectionReference;
 const ResourcePath = require('../src/path').ResourcePath;
 
-let PROJECT_ID = process.env.PROJECT_ID;
-if (!PROJECT_ID) {
-  PROJECT_ID = 'test-project';
-}
-
+const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 // Change the argument to 'console.log' to enable debug output.
@@ -351,7 +347,9 @@ describe('instantiation', function() {
       callback(null, PROJECT_ID);
     };
 
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(request) {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
+      request
+    ) {
       let expectedRequest = {
         database: DATABASE_ROOT,
         documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`],
@@ -434,7 +432,11 @@ describe('serializer', function() {
   });
 
   it('supports all types', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       assert.deepEqual(
         allSupportedTypesProtobufJs.fields,
         request.writes[0].update.fields
@@ -863,7 +865,9 @@ describe('getAll() method', function() {
 
     let actualErrorAttempts = {};
 
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(request) {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
+      request
+    ) {
       let errorCode = Number(request.documents[0].split('/').pop());
       actualErrorAttempts[errorCode] =
         (actualErrorAttempts[errorCode] || 0) + 1;
@@ -955,7 +959,9 @@ describe('getAll() method', function() {
   });
 
   it('accepts same document multiple times', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(request) {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
+      request
+    ) {
       assert.equal(request.documents.length, 2);
       return stream(found('a'), found('b'));
     };
