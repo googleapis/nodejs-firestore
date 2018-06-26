@@ -32,7 +32,7 @@ function createInstance(opts, document) {
   );
 
   return firestore._ensureClient().then(() => {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       const stream = through.obj();
       setImmediate(function() {
         stream.push({found: document, readTime: {seconds: 5, nanos: 6}});

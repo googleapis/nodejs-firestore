@@ -101,9 +101,9 @@ describe('Collection interface', function() {
   });
 
   it('has add() method', function() {
-    const dbPrefix = 'projects/${PROJECT_ID}/databases';
+    const dbPrefix = `projects/${PROJECT_ID}/databases`;
 
-    firestore._firestoreClient._commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(request, options, callback) {
       // Verify that the document name uses an auto-generated id.
       let docIdRe = new RegExp(
         `${dbPrefix}/\\(default\\)/documents/collectionId/[a-zA-Z0-9]{20}`
