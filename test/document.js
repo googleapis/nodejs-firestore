@@ -18,7 +18,8 @@
 
 const assert = require('power-assert');
 const extend = require('extend');
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 const is = require('is');
 const through = require('through2');
 

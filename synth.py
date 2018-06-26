@@ -16,7 +16,7 @@ library = gapic.node_library(
 s.copy(
     library,
     excludes=['package.json', 'README.md', 'src/index.js',
-              'src/v1beta1/index.js', 'protos/google/firestore/v1beta1'])
+              'src/v1beta1/index.js'])
 
 #
 # Node.js specific cleanup

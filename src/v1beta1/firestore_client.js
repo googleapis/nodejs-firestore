@@ -148,7 +148,9 @@ class FirestoreClient {
     // Some of the methods on this service provide streaming responses.
     // Provide descriptors for these.
     this._descriptors.stream = {
-      batchGetDocuments: new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
+      batchGetDocuments: new gax.StreamDescriptor(
+        gax.StreamType.SERVER_STREAMING
+      ),
       runQuery: new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
       write: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
       listen: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
@@ -201,7 +203,8 @@ class FirestoreClient {
             }
         ),
         defaults[methodName],
-        this._descriptors.page[methodName] || this._descriptors.stream[methodName]
+        this._descriptors.page[methodName] ||
+          this._descriptors.stream[methodName]
       );
     }
   }
@@ -531,7 +534,7 @@ class FirestoreClient {
       request,
       options
     );
-  };
+  }
 
   /**
    * Creates a new document.
@@ -1230,7 +1233,7 @@ class FirestoreClient {
       request,
       options
     );
-  };
+  }
 
   // --------------------
   // -- Path templates --
@@ -1306,8 +1309,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the project.
    */
   matchProjectFromDatabaseRootName(databaseRootName) {
-    return this._pathTemplates.databaseRootPathTemplate
-      .match(databaseRootName)
+    return this._pathTemplates.databaseRootPathTemplate.match(databaseRootName)
       .project;
   }
 
@@ -1319,8 +1321,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the database.
    */
   matchDatabaseFromDatabaseRootName(databaseRootName) {
-    return this._pathTemplates.databaseRootPathTemplate
-      .match(databaseRootName)
+    return this._pathTemplates.databaseRootPathTemplate.match(databaseRootName)
       .database;
   }
 
@@ -1332,8 +1333,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the project.
    */
   matchProjectFromDocumentRootName(documentRootName) {
-    return this._pathTemplates.documentRootPathTemplate
-      .match(documentRootName)
+    return this._pathTemplates.documentRootPathTemplate.match(documentRootName)
       .project;
   }
 
@@ -1345,8 +1345,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the database.
    */
   matchDatabaseFromDocumentRootName(documentRootName) {
-    return this._pathTemplates.documentRootPathTemplate
-      .match(documentRootName)
+    return this._pathTemplates.documentRootPathTemplate.match(documentRootName)
       .database;
   }
 
@@ -1358,8 +1357,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the project.
    */
   matchProjectFromDocumentPathName(documentPathName) {
-    return this._pathTemplates.documentPathPathTemplate
-      .match(documentPathName)
+    return this._pathTemplates.documentPathPathTemplate.match(documentPathName)
       .project;
   }
 
@@ -1371,8 +1369,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the database.
    */
   matchDatabaseFromDocumentPathName(documentPathName) {
-    return this._pathTemplates.documentPathPathTemplate
-      .match(documentPathName)
+    return this._pathTemplates.documentPathPathTemplate.match(documentPathName)
       .database;
   }
 
@@ -1384,8 +1381,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the document_path.
    */
   matchDocumentPathFromDocumentPathName(documentPathName) {
-    return this._pathTemplates.documentPathPathTemplate
-      .match(documentPathName)
+    return this._pathTemplates.documentPathPathTemplate.match(documentPathName)
       .document_path;
   }
 
@@ -1397,9 +1393,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the project.
    */
   matchProjectFromAnyPathName(anyPathName) {
-    return this._pathTemplates.anyPathPathTemplate
-      .match(anyPathName)
-      .project;
+    return this._pathTemplates.anyPathPathTemplate.match(anyPathName).project;
   }
 
   /**
@@ -1410,9 +1404,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the database.
    */
   matchDatabaseFromAnyPathName(anyPathName) {
-    return this._pathTemplates.anyPathPathTemplate
-      .match(anyPathName)
-      .database;
+    return this._pathTemplates.anyPathPathTemplate.match(anyPathName).database;
   }
 
   /**
@@ -1423,9 +1415,7 @@ class FirestoreClient {
    * @returns {String} - A string representing the document.
    */
   matchDocumentFromAnyPathName(anyPathName) {
-    return this._pathTemplates.anyPathPathTemplate
-      .match(anyPathName)
-      .document;
+    return this._pathTemplates.anyPathPathTemplate.match(anyPathName).document;
   }
 
   /**
@@ -1436,11 +1426,8 @@ class FirestoreClient {
    * @returns {String} - A string representing the any_path.
    */
   matchAnyPathFromAnyPathName(anyPathName) {
-    return this._pathTemplates.anyPathPathTemplate
-      .match(anyPathName)
-      .any_path;
+    return this._pathTemplates.anyPathPathTemplate.match(anyPathName).any_path;
   }
 }
-
 
 module.exports = FirestoreClient;

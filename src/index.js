@@ -703,8 +703,7 @@ class Firestore {
 
       this._clientInitialized = new Promise((resolve, reject) => {
         this._firestoreClient = module.exports
-          .v1beta1(this._initalizationOptions)
-          .firestoreClient(this._initalizationOptions);
+          .v1beta1(this._initalizationOptions);
 
         Firestore.log('Firestore', 'Initialized Firestore GAPIC Client');
 

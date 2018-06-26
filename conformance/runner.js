@@ -23,7 +23,8 @@ const through = require('through2');
 const googleProtoFiles = require('google-proto-files');
 const protobufjs = require('protobufjs');
 const duplexify = require('duplexify');
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 
 const Firestore = require('../');
 const reference = require('../src/reference')(Firestore);
