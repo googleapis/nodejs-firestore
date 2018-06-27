@@ -59,6 +59,7 @@
     "google-gax": "^0.17.1",
     "google-proto-files": "^0.16.1",
     "is": "^3.2.1",
+    "lodash.merge": "^4.6.1",
     "through2": "^2.0.3"
   },
   "devDependencies": {
