@@ -6,19 +6,19 @@
   "author": "Google Inc.",
   "repository": "googleapis/nodejs-firestore",
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
   "scripts": {
     "ava": "ava -T 20s --verbose system-test/*.test.js",
     "test": "npm run ava"
   },
   "dependencies": {
-    "@google-cloud/firestore": "0.14.1"
+    "@google-cloud/firestore": "^0.14.1"
   },
   "devDependencies": {
-    "@google-cloud/nodejs-repo-tools": "2.3.0",
-    "ava": "0.25.0",
-    "proxyquire": "2.0.1",
-    "sinon": "6.0.1"
+    "@google-cloud/nodejs-repo-tools": "^2.3.0",
+    "ava": "^0.25.0",
+    "proxyquire": "^2.0.1",
+    "sinon": "^6.0.1"
   }
 }
