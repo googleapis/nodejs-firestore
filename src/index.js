@@ -257,7 +257,7 @@ class Firestore {
     this._lastSuccessfulRequest = null;
 
     if (this._preferTransactions) {
-      Firestore.log('Firestore', 'Detected GCF environment');
+      Firestore.log('Firestore', null, 'Detected GCF environment');
     }
 
     this._timestampsInSnapshotsEnabled = !!options.timestampsInSnapshots;
@@ -297,7 +297,7 @@ follow these steps, YOUR APP MAY BREAK.`);
       this._referencePath = new ResourcePath('{{projectId}}', '(default)');
     }
 
-    Firestore.log('Firestore', 'Initialized Firestore');
+    Firestore.log('Firestore', null, 'Initialized Firestore');
   }
 
   /**
@@ -518,6 +518,7 @@ follow these steps, YOUR APP MAY BREAK.`);
     }
 
     let transaction = new Transaction(this, previousTransaction);
+    let requestTag = transaction.requestTag;
     let result;
 
     --attemptsRemaining;
@@ -536,6 +537,7 @@ follow these steps, YOUR APP MAY BREAK.`);
         return result.catch(err => {
           Firestore.log(
             'Firestore.runTransaction',
+            requestTag,
             'Rolling back transaction after callback error:',
             err
           );
@@ -553,6 +555,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             if (attemptsRemaining > 0) {
               Firestore.log(
                 'Firestore.runTransaction',
+                requestTag,
                 `Retrying transaction after error: ${JSON.stringify(err)}.`
               );
               return this.runTransaction(updateFunction, {
@@ -562,6 +565,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             }
             Firestore.log(
               'Firestore.runTransaction',
+              requestTag,
               'Exhausted transaction retries, returning error: %s',
               err
             );
@@ -615,7 +619,7 @@ follow these steps, YOUR APP MAY BREAK.`);
       validate.isDocumentReference(i, documents[i]);
     }
 
-    return this.getAll_(documents, null);
+    return this.getAll_(documents, Firestore.requestTag());
   }
 
   /**
@@ -625,12 +629,14 @@ follow these steps, YOUR APP MAY BREAK.`);
    * @private
    * @param {Array.<DocumentReference>} docRefs - The documents
    * to receive.
+   * @param {string} requestTag A unique client-assigned identifier for this
+   * request.
    * @param {bytes=} transactionId - transactionId - The transaction ID to use
    * for this read.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that contains an array with
    * the resulting documents.
    */
-  getAll_(docRefs, transactionId) {
+  getAll_(docRefs, requestTag, transactionId) {
     const requestedDocuments = new Set();
     const retrievedDocuments = new Map();
 
@@ -645,16 +651,17 @@ follow these steps, YOUR APP MAY BREAK.`);
 
     request.documents = Array.from(requestedDocuments);
 
-    let self = this;
+    const self = this;
 
     return self
-      .readStream('batchGetDocuments', request, /* allowRetries= */ true)
+      .readStream('batchGetDocuments', request, requestTag, true)
       .then(stream => {
         return new Promise((resolve, reject) => {
           stream
             .on('error', err => {
               Firestore.log(
                 'Firestore.getAll_',
+                requestTag,
                 'GetAll failed with error:',
                 err
               );
@@ -667,6 +674,7 @@ follow these steps, YOUR APP MAY BREAK.`);
                 if (response.found) {
                   Firestore.log(
                     'Firestore.getAll_',
+                    requestTag,
                     'Received document: %s',
                     response.found.name
                   );
@@ -674,6 +682,7 @@ follow these steps, YOUR APP MAY BREAK.`);
                 } else {
                   Firestore.log(
                     'Firestore.getAll_',
+                    requestTag,
                     'Document missing: %s',
                     response.missing
                   );
@@ -688,6 +697,7 @@ follow these steps, YOUR APP MAY BREAK.`);
               } catch (err) {
                 Firestore.log(
                   'Firestore.getAll_',
+                  requestTag,
                   'GetAll failed with exception:',
                   err
                 );
@@ -697,6 +707,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             .on('end', () => {
               Firestore.log(
                 'Firestore.getAll_',
+                requestTag,
                 'Received %d results',
                 retrievedDocuments.size
               );
@@ -739,6 +750,18 @@ follow these steps, YOUR APP MAY BREAK.`);
   }
 
   /**
+   * Generate a short and semi-random client-side identifier.
+   *
+   * Used for the creation of request tags.
+   *
+   * @private
+   * @returns {string} A random 5-character wide identifier.
+   */
+  static requestTag() {
+    return Firestore.autoId().substr(0, 5);
+  }
+
+  /**
    * Initializes the client and detects the Firestore Project ID. Returns a
    * Promise on completion. If the client is already initialized, the returned
    * Promise resolves immediately.
@@ -754,7 +777,7 @@ follow these steps, YOUR APP MAY BREAK.`);
           .v1beta1(this._initalizationOptions)
           .firestoreClient(this._initalizationOptions);
 
-        Firestore.log('Firestore', 'Initialized Firestore GAPIC Client');
+        Firestore.log('Firestore', null, 'Initialized Firestore GAPIC Client');
 
         // We schedule Project ID detection using `setImmediate` to allow the
         // testing framework to provide its own implementation of
@@ -764,6 +787,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             if (err) {
               Firestore.log(
                 'Firestore._ensureClient',
+                null,
                 'Failed to detect project ID: %s',
                 err
               );
@@ -771,6 +795,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             } else {
               Firestore.log(
                 'Firestore._ensureClient',
+                null,
                 'Detected project ID: %s',
                 projectId
               );
@@ -824,6 +849,8 @@ follow these steps, YOUR APP MAY BREAK.`);
    *
    * @private
    * @param {number} attemptsRemaining - The number of available attempts.
+   * @param {string} requestTag A unique client-assigned identifier for this
+   * request.
    * @param {retryFunction} func - Method returning a Promise than can be
    * retried.
    * @param {number=} delayMs - How long to wait before issuing a this retry.
@@ -831,7 +858,7 @@ follow these steps, YOUR APP MAY BREAK.`);
    * @returns {Promise} - A Promise with the function's result if successful
    * within `attemptsRemaining`. Otherwise, returns the last rejected Promise.
    */
-  _retry(attemptsRemaining, func, delayMs) {
+  _retry(attemptsRemaining, requestTag, func, delayMs) {
     let self = this;
 
     let currentDelay = delayMs || 0;
@@ -851,21 +878,28 @@ follow these steps, YOUR APP MAY BREAK.`);
         if (is.defined(err.code) && err.code !== GRPC_UNAVAILABLE) {
           Firestore.log(
             'Firestore._retry',
+            requestTag,
             'Request failed with unrecoverable error:',
             err
           );
           return Promise.reject(err);
         }
         if (attemptsRemaining === 0) {
-          Firestore.log('Firestore._retry', 'Request failed with error:', err);
+          Firestore.log(
+            'Firestore._retry',
+            requestTag,
+            'Request failed with error:',
+            err
+          );
           return Promise.reject(err);
         }
         Firestore.log(
           'Firestore._retry',
+          requestTag,
           'Retrying request that failed with error:',
           err
         );
-        return self._retry(attemptsRemaining, func, nextDelay);
+        return self._retry(attemptsRemaining, requestTag, func, nextDelay);
       });
   }
 
@@ -876,11 +910,13 @@ follow these steps, YOUR APP MAY BREAK.`);
    *
    * @private
    * @param {Stream} resultStream - The Node stream to monitor.
+   * @param {string} requestTag A unique client-assigned identifier for this
+   * request.
    * @param {Object=} request - If specified, the request that should be written
    * to the stream after it opened.
    * @returns {Promise.<Stream>} The given Stream once it is considered healthy.
    */
-  _initializeStream(resultStream, request) {
+  _initializeStream(resultStream, requestTag, request) {
     /** The last error we received and have not forwarded yet. */
     let errorReceived = null;
 
@@ -901,13 +937,18 @@ follow these steps, YOUR APP MAY BREAK.`);
         if (errorReceived) {
           Firestore.log(
             'Firestore._initializeStream',
+            requestTag,
             'Emit error:',
             errorReceived
           );
           resultStream.emit('error', errorReceived);
           errorReceived = null;
         } else if (!streamReleased) {
-          Firestore.log('Firestore._initializeStream', 'Releasing stream');
+          Firestore.log(
+            'Firestore._initializeStream',
+            requestTag,
+            'Releasing stream'
+          );
           streamReleased = true;
           resultStream.pause();
 
@@ -924,6 +965,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             if (endCalled) {
               Firestore.log(
                 'Firestore._initializeStream',
+                requestTag,
                 'Forwarding stream close'
               );
               resultStream.emit('end');
@@ -941,7 +983,11 @@ follow these steps, YOUR APP MAY BREAK.`);
       });
 
       resultStream.on('end', () => {
-        Firestore.log('Firestore._initializeStream', 'Received stream end');
+        Firestore.log(
+          'Firestore._initializeStream',
+          requestTag,
+          'Received stream end'
+        );
         endCalled = true;
         releaseStream();
       });
@@ -949,6 +995,7 @@ follow these steps, YOUR APP MAY BREAK.`);
       resultStream.on('error', err => {
         Firestore.log(
           'Firestore._initializeStream',
+          requestTag,
           'Received stream error:',
           err
         );
@@ -957,6 +1004,7 @@ follow these steps, YOUR APP MAY BREAK.`);
         if (!streamReleased) {
           Firestore.log(
             'Firestore._initializeStream',
+            requestTag,
             'Received initial error:',
             err
           );
@@ -970,12 +1018,14 @@ follow these steps, YOUR APP MAY BREAK.`);
       if (is.defined(request)) {
         Firestore.log(
           'Firestore._initializeStream',
+          requestTag,
           'Sending request: %j',
           request
         );
         resultStream.write(request, 'utf-8', () => {
           Firestore.log(
             'Firestore._initializeStream',
+            requestTag,
             'Marking stream as healthy'
           );
           releaseStream();
@@ -992,19 +1042,22 @@ follow these steps, YOUR APP MAY BREAK.`);
    * @param {function} methodName - Name of the veneer API endpoint that takes a
    * request and GAX options.
    * @param {Object} request - The Protobuf request to send.
+   * @param {string} requestTag A unique client-assigned identifier for this
+   * request.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
    * @returns {Promise.<Object>} A Promise with the request result.
    */
-  request(methodName, request, allowRetries) {
+  request(methodName, request, requestTag, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
     return this._ensureClient().then(() => {
       const decorated = this._decorateRequest(request);
-      return this._retry(attempts, () => {
+      return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
           Firestore.log(
             'Firestore.request',
+            requestTag,
             'Sending request: %j',
             decorated.request
           );
@@ -1013,11 +1066,17 @@ follow these steps, YOUR APP MAY BREAK.`);
             decorated.gax,
             (err, result) => {
               if (err) {
-                Firestore.log('Firestore.request', 'Received error:', err);
+                Firestore.log(
+                  'Firestore.request',
+                  requestTag,
+                  'Received error:',
+                  err
+                );
                 reject(err);
               } else {
                 Firestore.log(
                   'Firestore.request',
+                  requestTag,
                   'Received response: %j',
                   result
                 );
@@ -1041,20 +1100,23 @@ follow these steps, YOUR APP MAY BREAK.`);
    * @param {string} methodName - Name of the streaming Veneer API endpoint that
    * takes a request and GAX options.
    * @param {Object} request - The Protobuf request to send.
+   * @param {string} requestTag A unique client-assigned identifier for this
+   * request.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
    * @returns {Promise.<Stream>} A Promise with the resulting read-only stream.
    */
-  readStream(methodName, request, allowRetries) {
+  readStream(methodName, request, requestTag, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
     return this._ensureClient().then(() => {
       const decorated = this._decorateRequest(request);
-      return this._retry(attempts, () => {
+      return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
           try {
             Firestore.log(
               'Firestore.readStream',
+              requestTag,
               'Sending request: %j',
               decorated.request
             );
@@ -1065,6 +1127,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             let logger = through.obj(function(chunk, enc, callback) {
               Firestore.log(
                 'Firestore.readStream',
+                requestTag,
                 'Received response: %j',
                 chunk
               );
@@ -1073,10 +1136,15 @@ follow these steps, YOUR APP MAY BREAK.`);
             });
             resolve(bun([stream, logger]));
           } catch (err) {
-            Firestore.log('Firestore.readStream', 'Received error:', err);
+            Firestore.log(
+              'Firestore.readStream',
+              requestTag,
+              'Received error:',
+              err
+            );
             reject(err);
           }
-        }).then(stream => this._initializeStream(stream));
+        }).then(stream => this._initializeStream(stream, requestTag));
       });
     });
   }
@@ -1093,19 +1161,25 @@ follow these steps, YOUR APP MAY BREAK.`);
    * takes GAX options.
    * @param {Object} request - The Protobuf request to send as the first stream
    * message.
+   * @param {string} requestTag A unique client-assigned identifier for this
+   * request.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
    * @returns {Promise.<Stream>} A Promise with the resulting read/write stream.
    */
-  readWriteStream(methodName, request, allowRetries) {
+  readWriteStream(methodName, request, requestTag, allowRetries) {
     let self = this;
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
     return this._ensureClient().then(() => {
       const decorated = this._decorateRequest(request);
-      return this._retry(attempts, () => {
+      return this._retry(attempts, requestTag, () => {
         return Promise.resolve().then(() => {
-          Firestore.log('Firestore.readWriteStream', 'Opening stream');
+          Firestore.log(
+            'Firestore.readWriteStream',
+            requestTag,
+            'Opening stream'
+          );
           // The generated bi-directional streaming API takes the list of GAX
           // headers as its second argument.
           let requestStream = this._firestoreClient[methodName](
@@ -1122,6 +1196,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             );
             Firestore.log(
               'Firestore.readWriteStream',
+              requestTag,
               'Streaming request: %j',
               decoratedChunk
             );
@@ -1131,6 +1206,7 @@ follow these steps, YOUR APP MAY BREAK.`);
           let logger = through.obj(function(chunk, enc, callback) {
             Firestore.log(
               'Firestore.readWriteStream',
+              requestTag,
               'Received response: %j',
               chunk
             );
@@ -1139,7 +1215,7 @@ follow these steps, YOUR APP MAY BREAK.`);
           });
 
           let resultStream = bun([transform, requestStream, logger]);
-          return this._initializeStream(resultStream, request);
+          return this._initializeStream(resultStream, requestTag, request);
         });
       });
     });
@@ -1160,7 +1236,7 @@ follow these steps, YOUR APP MAY BREAK.`);
  * @private
  * @type {Firestore~logFunction}
  */
-Firestore.log = function() {};
+Firestore.log = function(methodName, logMessage, varargs) {};
 
 /**
  * Sets the log function for all active Firestore instances.
@@ -1172,13 +1248,15 @@ Firestore.log = function() {};
 Firestore.setLogFunction = function(logger) {
   validate.isFunction('logger', logger);
 
-  Firestore.log = function(methodName, varargs) {
-    varargs = Array.prototype.slice.call(arguments, 1);
+  Firestore.log = function(methodName, requestTag, varargs) {
+    varargs = Array.prototype.slice.call(arguments, 2);
+    requestTag = requestTag || '#####';
 
     let formattedMessage = util.format.apply(null, varargs);
     let time = new Date().toISOString();
     logger(
-      `Firestore (${libVersion}) ${time} [${methodName}]: ` + formattedMessage
+      `Firestore (${libVersion}) ${time} ${requestTag} [${methodName}]: ` +
+        formattedMessage
     );
   };
 };

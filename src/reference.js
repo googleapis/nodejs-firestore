@@ -262,7 +262,7 @@ class DocumentReference {
    * });
    */
   get() {
-    return this._firestore.getAll_([this]).then(result => {
+    return this._firestore.getAll([this]).then(result => {
       return result[0];
     });
   }
@@ -309,12 +309,13 @@ class DocumentReference {
    * });
    */
   getCollections() {
-    let request = {
+    const request = {
       parent: this._referencePath.formattedName,
     };
+    const requestTag = Firestore.requestTag();
 
     return this._firestore
-      .request('listCollectionIds', request)
+      .request('listCollectionIds', request, requestTag)
       .then(collectionIds => {
         let collections = [];
 
@@ -1902,10 +1903,11 @@ class Query {
    * @returns {stream} A stream of document results.
    */
   _stream(queryOptions) {
-    let request = this.toProto(queryOptions);
-    let self = this;
+    const request = this.toProto(queryOptions);
+    const requestTag = Firestore.requestTag();
+    const self = this;
 
-    let stream = through.obj(function(proto, enc, callback) {
+    const stream = through.obj(function(proto, enc, callback) {
       let readTime = DocumentSnapshot.toISOTime(proto.readTime);
       if (proto.document) {
         let document = self.firestore.snapshot_(proto.document, proto.readTime);
@@ -1917,11 +1919,12 @@ class Query {
     });
 
     this._firestore
-      .readStream('runQuery', request, /* allowRetries= */ true)
+      .readStream('runQuery', request, requestTag, true)
       .then(backendStream => {
         backendStream.on('error', err => {
           Firestore.log(
             'Query._stream',
+            requestTag,
             'Query failed with stream error:',
             err
           );

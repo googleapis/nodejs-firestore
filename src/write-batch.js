@@ -399,7 +399,12 @@ class WriteBatch {
           }
         }
       } catch (err) {
-        Firestore.log('WriteBatch.update', 'Varargs validation failed:', err);
+        Firestore.log(
+          'WriteBatch.update',
+          null,
+          'Varargs validation failed:',
+          err
+        );
         // We catch the validation error here and re-throw to provide a better
         // error message.
         throw new Error(`${argumentError} ${err.message}`);
@@ -428,6 +433,7 @@ class WriteBatch {
       } catch (err) {
         Firestore.log(
           'WriteBatch.update',
+          null,
           'Non-varargs validation failed:',
           err
         );
@@ -488,6 +494,8 @@ class WriteBatch {
    * @param {object=} commitOptions Options to use for this commit.
    * @param {bytes=} commitOptions.transactionId The transaction ID of this
    * commit.
+   * @param {string=} commitOptions.requestTag A unique client-assigned
+   * identifier for this request.
    * @returns {Promise.<Array.<WriteResult>>} A Promise that resolves
    * when this batch completes.
    */
@@ -496,6 +504,8 @@ class WriteBatch {
 
     let explicitTransaction = commitOptions && commitOptions.transactionId;
 
+    let requestTag =
+      (commitOptions && commitOptions.requestTag) || Firestore.requestTag();
     let request = {
       database: this._firestore.formattedName,
     };
@@ -503,9 +513,13 @@ class WriteBatch {
     // On GCF, we periodically force transactional commits to allow for
     // request retries in case GCF closes our backend connection.
     if (!explicitTransaction && this._shouldCreateTransaction()) {
-      Firestore.log('WriteBatch.commit', 'Using transaction for commit');
+      Firestore.log(
+        'WriteBatch.commit',
+        requestTag,
+        'Using transaction for commit'
+      );
       return this._firestore
-        .request('beginTransaction', request, /* allowRetries= */ true)
+        .request('beginTransaction', request, requestTag, true)
         .then(resp => {
           return this.commit_({transactionId: resp.transaction});
         });
@@ -534,6 +548,7 @@ class WriteBatch {
 
     Firestore.log(
       'WriteBatch.commit',
+      requestTag,
       'Sending %d writes',
       request.writes.length
     );
@@ -544,7 +559,7 @@ class WriteBatch {
 
     this._committed = true;
 
-    return this._firestore.request('commit', request).then(resp => {
+    return this._firestore.request('commit', request, requestTag).then(resp => {
       const commitTime = DocumentSnapshot.toISOTime(resp.commitTime);
       const writeResults = [];
 
