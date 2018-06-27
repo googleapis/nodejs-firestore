@@ -517,8 +517,8 @@ follow these steps, YOUR APP MAY BREAK.`);
       previousTransaction = transactionOptions.previousTransaction;
     }
 
-    let transaction = new Transaction(this, previousTransaction);
-    let requestTag = transaction.requestTag;
+    const transaction = new Transaction(this, previousTransaction);
+    const requestTag = transaction.requestTag;
     let result;
 
     --attemptsRemaining;
@@ -1236,7 +1236,7 @@ follow these steps, YOUR APP MAY BREAK.`);
  * @private
  * @type {Firestore~logFunction}
  */
-Firestore.log = function(methodName, logMessage, varargs) {};
+Firestore.log = function() {};
 
 /**
  * Sets the log function for all active Firestore instances.
@@ -1248,7 +1248,7 @@ Firestore.log = function(methodName, logMessage, varargs) {};
 Firestore.setLogFunction = function(logger) {
   validate.isFunction('logger', logger);
 
-  Firestore.log = function(methodName, requestTag, varargs) {
+  Firestore.log = function(methodName, requestTag, logMessage, varargs) {
     varargs = Array.prototype.slice.call(arguments, 2);
     requestTag = requestTag || '#####';
 

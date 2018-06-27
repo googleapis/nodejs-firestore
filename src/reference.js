@@ -312,10 +312,9 @@ class DocumentReference {
     const request = {
       parent: this._referencePath.formattedName,
     };
-    const requestTag = Firestore.requestTag();
 
     return this._firestore
-      .request('listCollectionIds', request, requestTag)
+      .request('listCollectionIds', request, Firestore.requestTag())
       .then(collectionIds => {
         let collections = [];
 
