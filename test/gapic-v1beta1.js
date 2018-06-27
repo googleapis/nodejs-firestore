@@ -26,7 +26,7 @@ error.code = FAKE_STATUS_CODE;
 describe('FirestoreClient', () => {
   describe('getDocument', () => {
     it('invokes getDocument without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -62,7 +62,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes getDocument with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -96,7 +96,7 @@ describe('FirestoreClient', () => {
 
   describe('listDocuments', () => {
     it('invokes listDocuments without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -141,7 +141,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes listDocuments with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -177,7 +177,7 @@ describe('FirestoreClient', () => {
 
   describe('createDocument', () => {
     it('invokes createDocument without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -219,7 +219,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes createDocument with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -259,7 +259,7 @@ describe('FirestoreClient', () => {
 
   describe('updateDocument', () => {
     it('invokes updateDocument without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -292,7 +292,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes updateDocument with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -323,7 +323,7 @@ describe('FirestoreClient', () => {
 
   describe('deleteDocument', () => {
     it('invokes deleteDocument without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -349,7 +349,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes deleteDocument with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -382,7 +382,7 @@ describe('FirestoreClient', () => {
 
   describe('batchGetDocuments', () => {
     it('invokes batchGetDocuments without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -425,7 +425,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes batchGetDocuments with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -464,7 +464,7 @@ describe('FirestoreClient', () => {
 
   describe('beginTransaction', () => {
     it('invokes beginTransaction without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -498,7 +498,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes beginTransaction with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -530,7 +530,7 @@ describe('FirestoreClient', () => {
 
   describe('commit', () => {
     it('invokes commit without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -563,7 +563,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes commit with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -593,7 +593,7 @@ describe('FirestoreClient', () => {
 
   describe('rollback', () => {
     it('invokes rollback without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -619,7 +619,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes rollback with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -652,7 +652,7 @@ describe('FirestoreClient', () => {
 
   describe('runQuery', () => {
     it('invokes runQuery without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -695,7 +695,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes runQuery with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -734,7 +734,7 @@ describe('FirestoreClient', () => {
 
   describe('write', () => {
     it('invokes write without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -776,7 +776,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes write with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -814,7 +814,7 @@ describe('FirestoreClient', () => {
 
   describe('listen', () => {
     it('invokes listen without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -851,7 +851,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes listen with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -889,7 +889,7 @@ describe('FirestoreClient', () => {
 
   describe('listCollectionIds', () => {
     it('invokes listCollectionIds without error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
@@ -932,7 +932,7 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes listCollectionIds with error', done => {
-      var client = new firestoreModule.v1beta1.FirestoreClient({
+      var client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });

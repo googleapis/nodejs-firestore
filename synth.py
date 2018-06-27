@@ -18,6 +18,11 @@ s.copy(
     excludes=['package.json', 'README.md', 'src/index.js',
               'src/v1beta1/index.js'])
 
+s.replace(
+    'test/gapic-v1beta1.js',
+    'new firestoreModule.v1beta1.FirestoreClient\(',
+    'new firestoreModule.v1beta1(')
+
 #
 # Node.js specific cleanup
 #
