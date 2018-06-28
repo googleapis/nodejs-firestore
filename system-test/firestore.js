@@ -632,9 +632,9 @@ describe('DocumentReference class', function() {
         .then(snapshot => {
           assert.equal(snapshot.exists, true);
           assert.equal(snapshot.get('foo'), 'b');
-          assert.equal(snapshot.createTime, createTime);
-          assert.ok(snapshot.readTime > readTime);
-          assert.ok(snapshot.updateTime > updateTime);
+          assert.ok(snapshot.createTime.isEqual(createTime));
+          assert.ok(snapshot.readTime.toMillis() > readTime.toMillis());
+          assert.ok(snapshot.updateTime.toMillis() > updateTime.toMillis());
           unsubscribe();
         });
     });

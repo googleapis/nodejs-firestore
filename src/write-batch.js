@@ -40,10 +40,15 @@ let DocumentMask;
  */
 let DocumentTransform;
 
-/*
+/*!
  * @see FieldPath
  */
 const FieldPath = require('./path').FieldPath;
+
+/*!
+ * @see Timestamp
+ */
+const Timestamp = require('./timestamp');
 
 /*!
  * Injected.
@@ -82,17 +87,17 @@ class WriteResult {
    * @private
    * @hideconstructor
    *
-   * @param {string} writeTime - The ISO 8601 write time.
+   * @param {Timestamp} writeTime - The time of the corresponding document
+   * write.
    */
   constructor(writeTime) {
     this._writeTime = writeTime;
   }
 
   /**
-   * The write time as set by the Firestore servers. Formatted as an ISO-8601
-   * string.
+   * The write time as set by the Firestore servers.
    *
-   * @type {string}
+   * @type {Timestamp}
    * @name WriteResult#writeTime
    * @readonly
    *
@@ -100,7 +105,7 @@ class WriteResult {
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.set({foo: 'bar'}).then(writeResult => {
-   *   console.log(`Document written at: ${writeResult.writeTime}`);
+   *   console.log(`Document written at: ${writeResult.toDate()}`);
    * });
    */
   get writeTime() {
@@ -117,7 +122,7 @@ class WriteResult {
     return (
       this === other ||
       (is.instanceof(other, WriteResult) &&
-        this._writeTime === other._writeTime)
+        this._writeTime.isEqual(other._writeTime))
     );
   }
 }
@@ -212,10 +217,9 @@ class WriteBatch {
    * document to be deleted.
    * @param {Precondition=} precondition - A precondition to enforce for this
    * delete.
-   * @param {string=} precondition.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
-   * batch if the document doesn't exist or was last updated at a different
-   * time.
+   * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
+   * document was last updated at lastUpdateTime. Fails the batch if the
+   * document doesn't exist or was last updated at a different time.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -545,7 +549,7 @@ class WriteBatch {
     this._committed = true;
 
     return this._firestore.request('commit', request).then(resp => {
-      const commitTime = DocumentSnapshot.toISOTime(resp.commitTime);
+      const commitTime = Timestamp.fromProto(resp.commitTime);
       const writeResults = [];
 
       if (resp.writeResults) {
@@ -574,7 +578,9 @@ class WriteBatch {
 
           writeResults.push(
             new WriteResult(
-              DocumentSnapshot.toISOTime(writeResult.updateTime) || commitTime
+              writeResult.updateTime
+                ? Timestamp.fromProto(writeResult.updateTime)
+                : commitTime
             )
           );
         }

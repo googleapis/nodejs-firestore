@@ -85,9 +85,10 @@ const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
     );
     let readVersion =
       actual.docChanges[i].type === 'removed' ? version - 1 : version;
-    assert.equal(
-      actual.docChanges[i].doc.readTime,
-      `1970-01-01T00:00:00.00000000${readVersion}Z`
+    assert.ok(
+      actual.docChanges[i].doc.readTime.isEqual(
+        new Firestore.Timestamp(0, readVersion)
+      )
     );
 
     if (actual.docChanges[i].oldIndex !== -1) {
@@ -105,8 +106,7 @@ const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
 
   docsEqual(actual.docs, expected.docs);
   docsEqual(localDocs, expected.docs);
-
-  assert.equal(actual.readTime, `1970-01-01T00:00:00.00000000${version}Z`);
+  assert.ok(actual.readTime.isEqual(new Firestore.Timestamp(0, version)));
   assert.equal(actual.size, expected.docs.length);
 
   return {docs: actual.docs, docChanges: actual.docChanges};
@@ -119,9 +119,9 @@ const snapshot = function(ref, data) {
   const snapshot = new DocumentSnapshot.Builder();
   snapshot.ref = ref;
   snapshot.fieldsProto = DocumentSnapshot.encodeFields(data);
-  snapshot.readTime = '1970-01-01T00:00:00.000000000Z';
-  snapshot.createTime = '1970-01-01T00:00:00.000000000Z';
-  snapshot.updateTime = '1970-01-01T00:00:00.000000000Z';
+  snapshot.readTime = new Firestore.Timestamp(0, 0);
+  snapshot.createTime = new Firestore.Timestamp(0, 0);
+  snapshot.updateTime = new Firestore.Timestamp(0, 0);
   return snapshot.build();
 };
 
@@ -2250,8 +2250,8 @@ describe('DocumentReference watch', function() {
         })
         .then(snapshot => {
           assert.equal(snapshot.exists, true);
-          assert.equal(snapshot.createTime, '1970-01-01T00:00:01.000000002Z');
-          assert.equal(snapshot.updateTime, '1970-01-01T00:00:03.000000001Z');
+          assert.ok(snapshot.createTime.isEqual(new Firestore.Timestamp(1, 2)));
+          assert.ok(snapshot.updateTime.isEqual(new Firestore.Timestamp(3, 1)));
           assert.equal(snapshot.get('foo'), 'a');
 
           // Change the document.

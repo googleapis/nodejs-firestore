@@ -781,9 +781,9 @@ describe('get document', function() {
       .doc('collectionId/documentId')
       .get()
       .then(result => {
-        assert.equal(result.createTime, '1970-01-01T00:00:01.000000002Z');
-        assert.equal(result.updateTime, '1970-01-01T00:00:03.000000004Z');
-        assert.equal(result.readTime, '1970-01-01T00:00:05.000000006Z');
+        assert.ok(result.createTime.isEqual(new Firestore.Timestamp(1, 2)));
+        assert.ok(result.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
+        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
       });
   });
 
@@ -797,7 +797,7 @@ describe('get document', function() {
       .get()
       .then(result => {
         assert.equal(result.exists, false);
-        assert.equal(result.readTime, '1970-01-01T00:00:05.000000006Z');
+        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
         assert.equal(null, result.data());
         assert.equal(null, result.get('foo'));
       });
@@ -891,7 +891,9 @@ describe('delete document', function() {
       .doc('collectionId/documentId')
       .delete()
       .then(res => {
-        assert.equal(res.writeTime, '1985-03-18T07:20:00.123000000Z');
+        assert.ok(
+          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000))
+        );
       });
   });
 
@@ -917,9 +919,15 @@ describe('delete document', function() {
     };
 
     return Promise.all([
-      docRef.delete({lastUpdateTime: '1985-03-18T07:20:00.123Z'}),
-      docRef.delete({lastUpdateTime: '1985-03-18T07:20:00.123000Z'}),
-      docRef.delete({lastUpdateTime: '1985-03-18T07:20:00.123000000Z'}),
+      docRef.delete({
+        lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
+      }),
+      docRef.delete({
+        lastUpdateTime: Firestore.Timestamp.fromMillis(479978400123),
+      }),
+      docRef.delete({
+        lastUpdateTime: Firestore.Timestamp.fromDate(new Date(479978400123)),
+      }),
     ]);
   });
 
@@ -928,7 +936,7 @@ describe('delete document', function() {
       return firestore
         .doc('collectionId/documentId')
         .delete({lastUpdateTime: 1337});
-    }, /"lastUpdateTime" is not a string./);
+    }, /"lastUpdateTime" is not a Firestore Timestamp./);
   });
 
   it('throws if "exists" is not a boolean', () => {
@@ -947,7 +955,7 @@ describe('delete document', function() {
     assert.throws(() => {
       return firestore
         .doc('collectionId/documentId')
-        .delete({exists: false, lastUpdateTime: '1985-03-18T07:20:00.123Z'});
+        .delete({exists: false, lastUpdateTime: Firestore.Timestamp.now()});
     }, /Input contains more than one condition./);
   });
 });
@@ -1389,7 +1397,9 @@ describe('create document', function() {
       .doc('collectionId/documentId')
       .create({})
       .then(res => {
-        assert.equal(res.writeTime, '1985-03-18T07:20:00.123000000Z');
+        assert.ok(
+          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000))
+        );
       });
   });
 
@@ -1589,7 +1599,9 @@ describe('update document', function() {
       .doc('collectionId/documentId')
       .update({foo: 'bar'})
       .then(res => {
-        assert.equal(res.writeTime, '1985-03-18T07:20:00.123000000Z');
+        assert.ok(
+          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000))
+        );
       });
   });
 
@@ -1616,10 +1628,10 @@ describe('update document', function() {
         .doc('collectionId/documentId')
         .update(
           {foo: 'bar'},
-          {lastUpdateTime: '1985-03-18T07:20:00.123000000Z'}
+          {lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)}
         ),
       firestore.doc('collectionId/documentId').update('foo', 'bar', {
-        lastUpdateTime: '1985-03-18T07:20:00.123000000Z',
+        lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
       }),
     ]);
   });
@@ -1629,7 +1641,7 @@ describe('update document', function() {
       firestore
         .doc('collectionId/documentId')
         .update({foo: 'bar'}, {lastUpdateTime: 'foo'});
-    }, /Specify a valid ISO 8601 timestamp for "lastUpdateTime"\./);
+    }, /"lastUpdateTime" is not a Firestore Timestamp\./);
   });
 
   it('requires at least one field', function() {

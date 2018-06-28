@@ -506,9 +506,9 @@ describe('snapshot_() method', function() {
 
     assert.equal(true, doc.exists);
     assert.deepEqual({foo: bytesData}, doc.data());
-    assert.equal('1970-01-01T00:00:01.000000002Z', doc.createTime);
-    assert.equal('1970-01-01T00:00:03.000000004Z', doc.updateTime);
-    assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
+    assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)));
+    assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
+    assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
   });
 
   it('handles Proto3 JSON together with existing types', function() {
@@ -538,9 +538,9 @@ describe('snapshot_() method', function() {
       b: Firestore.Timestamp.fromDate(new Date('1985-03-18T07:20:00.000Z')),
       c: bytesData,
     });
-    assert.equal('1970-01-01T00:00:01.002000000Z', doc.createTime);
-    assert.equal('1970-01-01T00:00:03.000004000Z', doc.updateTime);
-    assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
+    assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2000000)));
+    assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4000)));
+    assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
   });
 
   it('deserializes all supported types from Protobuf JS', function() {
@@ -611,7 +611,7 @@ describe('snapshot_() method', function() {
     );
 
     assert.equal(false, doc.exists);
-    assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
+    assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
   });
 
   it('handles invalid encoding format ', function() {

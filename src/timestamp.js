@@ -89,6 +89,19 @@ class Timestamp {
   }
 
   /**
+   * Generates a `Timestamp` object from a Timestamp proto.
+   *
+   * @private
+   * @param {Object} timestamp The `Timestamp` Protobuf object.
+   */
+  static fromProto(timestamp) {
+    return new Timestamp(
+      Number(timestamp.seconds || 0),
+      Number(timestamp.nanos || 0)
+    );
+  }
+
+  /**
    * Creates a new timestamp.
    *
    * @example
@@ -208,6 +221,26 @@ class Timestamp {
         this._seconds === other.seconds &&
         this._nanoseconds === other.nanoseconds)
     );
+  }
+
+  /**
+   * Generates the Protobuf `Timestamp` object for this timestamp.
+   *
+   * @private
+   * @returns {Object} The `Timestamp` Protobuf object.
+   */
+  toProto() {
+    const timestamp = {};
+
+    if (this.seconds) {
+      timestamp.seconds = this.seconds;
+    }
+
+    if (this.nanoseconds) {
+      timestamp.nanos = this.nanoseconds;
+    }
+
+    return timestamp;
   }
 }
 

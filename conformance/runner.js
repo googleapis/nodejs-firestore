@@ -96,7 +96,9 @@ const convertInput = {
   precondition: precondition => {
     const deepCopy = JSON.parse(JSON.stringify(precondition));
     if (deepCopy.updateTime) {
-      deepCopy.lastUpdateTime = DocumentSnapshot.toISOTime(deepCopy.updateTime);
+      deepCopy.lastUpdateTime = Firestore.Timestamp.fromProto(
+        deepCopy.updateTime
+      );
       delete deepCopy.updateTime;
     }
     return deepCopy;
@@ -137,7 +139,7 @@ const convertInput = {
   snapshot: snapshot => {
     const docs = [];
     const changes = [];
-    const readTime = DocumentSnapshot.toISOTime(snapshot.readTime);
+    const readTime = Firestore.Timestamp.fromProto(snapshot.readTime);
 
     for (const doc of snapshot.docs) {
       const deepCopy = JSON.parse(JSON.stringify(doc));

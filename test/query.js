@@ -456,7 +456,7 @@ describe('query interface', function() {
     return query.get().then(results => {
       assert.equal(0, results.size);
       assert.equal(true, results.empty);
-      assert.equal('1970-01-01T00:00:05.000000006Z', results.readTime);
+      assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
     });
   });
 
@@ -505,7 +505,7 @@ describe('query interface', function() {
     return query.get().then(results => {
       assert.equal(2, results.size);
       assert.equal(false, results.empty);
-      assert.equal('1970-01-01T00:00:05.000000006Z', results.readTime);
+      assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
       assert.equal('first', results.docs[0].get('first'));
       assert.equal('second', results.docs[1].get('second'));
       assert.equal(2, results.docChanges.length);
@@ -514,9 +514,9 @@ describe('query interface', function() {
 
       results.forEach(doc => {
         assert.ok(is.instanceof(doc, DocumentSnapshot));
-        assert.equal('1970-01-01T00:00:01.000000002Z', doc.createTime);
-        assert.equal('1970-01-01T00:00:03.000000004Z', doc.updateTime);
-        assert.equal('1970-01-01T00:00:05.000000006Z', doc.readTime);
+        assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)));
+        assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
+        assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
         ++count;
       });
 

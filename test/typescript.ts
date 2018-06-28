@@ -42,7 +42,7 @@ xdescribe('firestore.d.ts', function() {
     otherOption: 'foo'
   });
 
-  const precondition: Precondition = {lastUpdateTime: "1970-01-01T00:00:00.000Z"};
+  const precondition: Precondition = {lastUpdateTime: Timestamp.now()};
   const setOptions: SetOptions = {merge: true};
   const fieldPath: FieldPath = new FieldPath('foo');
   const docRef: DocumentReference = firestore.doc('coll/doc');
@@ -118,7 +118,7 @@ xdescribe('firestore.d.ts', function() {
 
   it('has typings for WriteResult', () => {
     docRef.set(documentData).then((result: FirebaseFirestore.WriteResult) => {
-      const writeTime: string = result.writeTime;
+      const writeTime: Timestamp = result.writeTime;
       const equals: boolean = result.isEqual(result);
     });
   });
@@ -187,9 +187,9 @@ xdescribe('firestore.d.ts', function() {
       const exists: boolean = snapshot.exists;
       const ref: DocumentReference = snapshot.ref;
       const id: string = snapshot.id;
-      const readTime: string = snapshot.readTime;
-      const updateTime: string = snapshot.updateTime!;
-      const createTime: string = snapshot.createTime!;
+      const readTime: Timestamp = snapshot.readTime;
+      const updateTime: Timestamp = snapshot.updateTime!;
+      const createTime: Timestamp = snapshot.createTime!;
       const data: DocumentData = snapshot.data()!;
       let value = snapshot.get('foo');
       value = snapshot.get(new FieldPath('foo'));
@@ -203,9 +203,9 @@ xdescribe('firestore.d.ts', function() {
       const exists: boolean = snapshot.exists;
       const ref: DocumentReference = snapshot.ref;
       const id: string = snapshot.id;
-      const readTime: string = snapshot.readTime;
-      const updateTime: string = snapshot.updateTime;
-      const createTime: string = snapshot.createTime;
+      const readTime: Timestamp = snapshot.readTime;
+      const updateTime: Timestamp = snapshot.updateTime;
+      const createTime: Timestamp = snapshot.createTime;
       const data: DocumentData = snapshot.data();
       let value = snapshot.get('foo');
       value = snapshot.get(new FieldPath('foo'));
@@ -261,7 +261,7 @@ xdescribe('firestore.d.ts', function() {
       const docs: QueryDocumentSnapshot[] = snapshot.docs;
       const size: number = snapshot.size;
       const empty: boolean = snapshot.empty;
-      const readTime: string = snapshot.readTime;
+      const readTime: Timestamp = snapshot.readTime;
       snapshot.forEach((result: QueryDocumentSnapshot) => {
       });
       snapshot.forEach((result: QueryDocumentSnapshot) => {
