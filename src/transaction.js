@@ -260,10 +260,9 @@ class Transaction {
    * document to be deleted.
    * @param {Precondition=} precondition - A precondition to enforce for this
    * delete.
-   * @param {string=} precondition.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
-   * transaction if the document doesn't exist or was last updated at a
-   * different time.
+   * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
+   * document was last updated at lastUpdateTime. Fails the transaction if the
+   * document doesn't exist or was last updated at a different time.
    * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *

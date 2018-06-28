@@ -81,7 +81,7 @@ describe('delete() method', function() {
 
   it('accepts preconditions', function() {
     writeBatch.delete(firestore.doc('sub/doc'), {
-      lastUpdateTime: '1985-03-17T22:20:00.123000000Z',
+      lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
     });
   });
 });
@@ -113,7 +113,7 @@ describe('update() method', function() {
     writeBatch.update(
       firestore.doc('sub/doc'),
       {foo: 'bar'},
-      {lastUpdateTime: '1985-03-17T22:20:00.123000000Z'}
+      {lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)}
     );
   });
 });
@@ -255,10 +255,10 @@ describe('batch support', function() {
   });
 
   function verifyResponse(writeResults) {
-    assert.equal(writeResults[0].writeTime, '1970-01-01T00:00:00.000000000Z');
-    assert.equal(writeResults[1].writeTime, '1970-01-01T00:00:01.000000001Z');
-    assert.equal(writeResults[2].writeTime, '1970-01-01T00:00:02.000000002Z');
-    assert.equal(writeResults[3].writeTime, '1970-01-01T00:00:03.000000003Z');
+    assert.ok(writeResults[0].writeTime.isEqual(new Firestore.Timestamp(0, 0)));
+    assert.ok(writeResults[1].writeTime.isEqual(new Firestore.Timestamp(1, 1)));
+    assert.ok(writeResults[2].writeTime.isEqual(new Firestore.Timestamp(2, 2)));
+    assert.ok(writeResults[3].writeTime.isEqual(new Firestore.Timestamp(3, 3)));
   }
 
   it('accepts multiple operations', function() {
