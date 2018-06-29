@@ -71,6 +71,11 @@ const ResourcePath = path.ResourcePath;
 const FieldPath = path.FieldPath;
 
 /*!
+ * @see Timestamp
+ */
+const Timestamp = require('./timestamp');
+
+/*!
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
  * (descending or ascending).
  *
@@ -366,9 +371,9 @@ class DocumentReference {
    *
    * @param {Precondition=} precondition - A precondition to enforce for this
    * delete.
-   * @param {string=} precondition.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime (as ISO 8601 string). Fails the
-   * delete if the document was last updated at a different time.
+   * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
+   * document was last updated at lastUpdateTime. Fails the delete if the
+   * document was last updated at a different time.
    * @returns {Promise.<WriteResult>} A Promise that resolves with the
    * delete time.
    *
@@ -851,8 +856,8 @@ class QuerySnapshot {
    * @hideconstructor
    *
    * @param {Query} query - The originating query.
-   * @param {string} readTime - The ISO 8601 time when this query snapshot was
-   * current.
+   * @param {Timestamp} readTime - The time when this query snapshot was
+   * obtained.
    * @param {number} size - The number of documents in the result set.
    * @param {function} docs - A callback returning a sorted array of documents
    * matching this query
@@ -975,14 +980,15 @@ class QuerySnapshot {
   /**
    * The time this query snapshot was obtained.
    *
-   * @type {string}
+   * @type {Timestamp}
    * @name QuerySnapshot#readTime
    *
    * @example
    * let query = firestore.collection('col').where('foo', '==', 'bar');
    *
    * query.get().then((querySnapshot) => {
-   *   console.log(`Query results returned at '${querySnapshot.readTime}'`);
+   *   let readTime = querySnapshot.readTime;
+   *   console.log(`Query results returned at '${readTime.toDate()}'`);
    * });
    */
   get readTime() {
@@ -1023,6 +1029,9 @@ class QuerySnapshot {
    * value.
    */
   isEqual(other) {
+    // Since the read time is different on every query read, we explicitly
+    // ignore all metadata in this comparison.
+
     if (this === other) {
       return true;
     }
@@ -1907,7 +1916,7 @@ class Query {
     const self = this;
 
     const stream = through.obj(function(proto, enc, callback) {
-      let readTime = DocumentSnapshot.toISOTime(proto.readTime);
+      const readTime = Timestamp.fromProto(proto.readTime);
       if (proto.document) {
         let document = self.firestore.snapshot_(proto.document, proto.readTime);
         this.push({document, readTime});

@@ -61,6 +61,11 @@ let Firestore;
 let ResourcePath = require('./path').ResourcePath;
 
 /*!
+ * @see Timestamp
+ */
+const Timestamp = require('./timestamp');
+
+/*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
  * one target per stream.
  *
@@ -221,8 +226,7 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
  * @private
  * @callback watchSnapshotCallback
  *
- * @param {string} readTime - The ISO 8601 time at which this snapshot was
- * obtained.
+ * @param {Timestamp} readTime - The time at which this snapshot was obtained.
  * @param {number} size - The number of documents in the result set.
  * @param {docsCallback} docs - A callback that returns the ordered list of
  * documents stored in this snapshot.
@@ -614,7 +618,7 @@ class Watch {
         let name = newDocument.ref.formattedName;
         assert(updatedMap.has(name), 'Document to modify does not exist');
         let oldDocument = updatedMap.get(name);
-        if (oldDocument.updateTime !== newDocument.updateTime) {
+        if (!oldDocument.updateTime.isEqual(newDocument.updateTime)) {
           let removeChange = deleteDoc(name);
           let addChange = addDoc(newDocument);
           return new DocumentChange(
@@ -726,10 +730,7 @@ class Watch {
             if (noTargetIds && change.readTime && current) {
               // This means everything is up-to-date, so emit the current set of
               // docs as a snapshot, if there were changes.
-              push(
-                DocumentSnapshot.toISOTime(change.readTime),
-                change.resumeToken
-              );
+              push(Timestamp.fromProto(change.readTime), change.resumeToken);
             }
           } else if (change.targetChangeType === 'ADD') {
             if (WATCH_TARGET_ID !== change.targetIds[0]) {
@@ -800,12 +801,8 @@ class Watch {
               ResourcePath.fromSlashSeparatedString(name)
             );
             snapshot.fieldsProto = document.fields || {};
-            snapshot.createTime = DocumentSnapshot.toISOTime(
-              document.createTime
-            );
-            snapshot.updateTime = DocumentSnapshot.toISOTime(
-              document.updateTime
-            );
+            snapshot.createTime = Timestamp.fromProto(document.createTime);
+            snapshot.updateTime = Timestamp.fromProto(document.updateTime);
             changeMap.set(name, snapshot);
           } else if (removed) {
             Firestore.log(

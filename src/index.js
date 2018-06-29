@@ -59,6 +59,11 @@ const FieldPath = path.FieldPath;
 const FieldValue = require('./field-value').FieldValue;
 
 /*!
+ * @see Timestamp
+ */
+const Timestamp = require('./timestamp');
+
+/*!
  * @see CollectionReference
  */
 let CollectionReference;
@@ -440,17 +445,19 @@ follow these steps, YOUR APP MAY BREAK.`);
       document.fieldsProto = documentOrName.fields
         ? convertDocument(documentOrName.fields)
         : {};
-      document.createTime = DocumentSnapshot.toISOTime(
+      document.createTime = Timestamp.fromProto(
         convertTimestamp(documentOrName.createTime, 'documentOrName.createTime')
       );
-      document.updateTime = DocumentSnapshot.toISOTime(
+      document.updateTime = Timestamp.fromProto(
         convertTimestamp(documentOrName.updateTime, 'documentOrName.updateTime')
       );
     }
 
-    document.readTime = DocumentSnapshot.toISOTime(
-      convertTimestamp(readTime, 'readTime')
-    );
+    if (readTime) {
+      document.readTime = Timestamp.fromProto(
+        convertTimestamp(readTime, 'readTime')
+      );
+    }
 
     return document.build();
   }
@@ -1451,4 +1458,4 @@ module.exports.FieldPath = FieldPath;
  * @see Timestamp
  * @type Timestamp
  */
-module.exports.Timestamp = require('./timestamp');
+module.exports.Timestamp = Timestamp;
