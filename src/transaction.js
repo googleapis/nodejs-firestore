@@ -31,6 +31,13 @@ let DocumentReference;
 /*!
  * Injected.
  *
+ * @see Firestore
+ */
+let Firestore;
+
+/*!
+ * Injected.
+ *
  * @see Query
  */
 let Query;
@@ -41,6 +48,11 @@ let Query;
  */
 const READ_AFTER_WRITE_ERROR_MSG =
   'Firestore transactions require all reads to be executed before all writes.';
+
+/*!
+ * Transactions can be retried if the initial stream opening errors out.
+ */
+const ALLOW_RETRIES = true;
 
 /**
  * A reference to a transaction.
@@ -64,6 +76,10 @@ class Transaction {
     this._firestore = firestore;
     this._previousTransaction = previousTransaction;
     this._writeBatch = firestore.batch();
+
+    this._requestTag = previousTransaction
+      ? previousTransaction.requestTag
+      : Firestore.requestTag();
   }
 
   /**
@@ -94,7 +110,7 @@ class Transaction {
 
     if (is.instance(refOrQuery, DocumentReference)) {
       return this._firestore
-        .getAll_([refOrQuery], this._transactionId)
+        .getAll_([refOrQuery], this._requestTag, this._transactionId)
         .then(res => {
           return Promise.resolve(res[0]);
         });
@@ -142,7 +158,11 @@ class Transaction {
       validate.isDocumentReference(i, documents[i]);
     }
 
-    return this._firestore.getAll_(documents, this._transactionId);
+    return this._firestore.getAll_(
+      documents,
+      this._requestTag,
+      this._transactionId
+    );
   }
 
   /**
@@ -298,7 +318,7 @@ class Transaction {
     }
 
     return this._firestore
-      .request('beginTransaction', request, /* allowRetries= */ true)
+      .request('beginTransaction', request, this._requestTag, ALLOW_RETRIES)
       .then(resp => {
         this._transactionId = resp.transaction;
       });
@@ -311,7 +331,10 @@ class Transaction {
    * @returns {Promise} An empty Promise.
    */
   commit() {
-    return this._writeBatch.commit_({transactionId: this._transactionId});
+    return this._writeBatch.commit_({
+      transactionId: this._transactionId,
+      requestTag: this._requestTag,
+    });
   }
 
   /**
@@ -326,7 +349,16 @@ class Transaction {
       transaction: this._transactionId,
     };
 
-    return this._firestore.request('rollback', request);
+    return this._firestore.request('rollback', request, this._requestTag);
+  }
+
+  /**
+   * Returns the tag to use with with all request for this Transaction.
+   * @private
+   * @return {string} A unique client-generated identifier for this transaction.
+   */
+  get requestTag() {
+    return this._requestTag;
   }
 }
 
@@ -334,6 +366,7 @@ module.exports = FirestoreType => {
   let reference = require('./reference')(FirestoreType);
   DocumentReference = reference.DocumentReference;
   Query = reference.Query;
+  Firestore = FirestoreType;
   validate = require('./validate')({
     DocumentReference: reference.validateDocumentReference,
   });
