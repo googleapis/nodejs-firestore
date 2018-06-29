@@ -49,6 +49,11 @@ let Query;
 const READ_AFTER_WRITE_ERROR_MSG =
   'Firestore transactions require all reads to be executed before all writes.';
 
+/*!
+ * Transactions can be retried if the initial stream opening errors out.
+ */
+const ALLOW_RETRIES = true;
+
 /**
  * A reference to a transaction.
  *
@@ -313,7 +318,7 @@ class Transaction {
     }
 
     return this._firestore
-      .request('beginTransaction', request, this._requestTag, true)
+      .request('beginTransaction', request, this._requestTag, ALLOW_RETRIES)
       .then(resp => {
         this._transactionId = resp.transaction;
       });
