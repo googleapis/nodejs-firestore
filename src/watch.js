@@ -210,51 +210,6 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
 };
 
 /**
- * Determines whether an error is considered permanent and should not be
- * retried. Errors that don't provide a GRPC error code are always considered
- * transient in this context.
- *
- * @private
- * @param {Error} error An error object.
- * @return {boolean} Whether the error is permanent.
- */
-function isPermanentError(error) {
-  if (error.code === undefined) {
-    Firestore.log(
-      'Watch.onSnapshot',
-      'Unable to determine error code: ',
-      error
-    );
-    return false;
-  }
-
-  switch (error.code) {
-    case GRPC_STATUS_CODE.CANCELLED:
-    case GRPC_STATUS_CODE.UNKNOWN:
-    case GRPC_STATUS_CODE.DEADLINE_EXCEEDED:
-    case GRPC_STATUS_CODE.RESOURCE_EXHAUSTED:
-    case GRPC_STATUS_CODE.INTERNAL:
-    case GRPC_STATUS_CODE.UNAVAILABLE:
-    case GRPC_STATUS_CODE.UNAUTHENTICATED:
-      return false;
-    default:
-      return true;
-  }
-}
-
-/**
- * Determines whether we need to initiate a longer backoff due to system
- * overload.
- *
- * @private
- * @param {Error} error A GRPC Error object that exposes an error code.
- * @return {boolean} Whether we need to back off our retries.
- */
-function isResourceExhaustedError(error) {
-  return error.code === GRPC_STATUS_CODE.RESOURCE_EXHAUSTED;
-}
-
-/**
  * @callback docsCallback
  * @returns {Array.<QueryDocumentSnapshot>} An ordered list of documents.
  */
@@ -302,6 +257,7 @@ class Watch {
     this._targets = target;
     this._comparator = comparator;
     this._backoff = new ExponentialBackoff();
+    this._requestTag = Firestore.requestTag();
   }
 
   /**
@@ -341,6 +297,52 @@ class Watch {
       },
       query.comparator()
     );
+  }
+
+  /**
+   * Determines whether an error is considered permanent and should not be
+   * retried. Errors that don't provide a GRPC error code are always considered
+   * transient in this context.
+   *
+   * @private
+   * @param {Error} error An error object.
+   * @return {boolean} Whether the error is permanent.
+   */
+  isPermanentError(error) {
+    if (error.code === undefined) {
+      Firestore.log(
+        'Watch.onSnapshot',
+        this._requestTag,
+        'Unable to determine error code: ',
+        error
+      );
+      return false;
+    }
+
+    switch (error.code) {
+      case GRPC_STATUS_CODE.CANCELLED:
+      case GRPC_STATUS_CODE.UNKNOWN:
+      case GRPC_STATUS_CODE.DEADLINE_EXCEEDED:
+      case GRPC_STATUS_CODE.RESOURCE_EXHAUSTED:
+      case GRPC_STATUS_CODE.INTERNAL:
+      case GRPC_STATUS_CODE.UNAVAILABLE:
+      case GRPC_STATUS_CODE.UNAUTHENTICATED:
+        return false;
+      default:
+        return true;
+    }
+  }
+
+  /**
+   * Determines whether we need to initiate a longer backoff due to system
+   * overload.
+   *
+   * @private
+   * @param {Error} error A GRPC Error object that exposes an error code.
+   * @return {boolean} Whether we need to back off our retries.
+   */
+  isResourceExhaustedError(error) {
+    return error.code === GRPC_STATUS_CODE.RESOURCE_EXHAUSTED;
   }
 
   /**
@@ -397,7 +399,11 @@ class Watch {
 
     /** Helper to clear the docs on RESET or filter mismatch. */
     const resetDocs = function() {
-      Firestore.log('Watch.onSnapshot', 'Resetting documents');
+      Firestore.log(
+        'Watch.onSnapshot',
+        self._requestTag,
+        'Resetting documents'
+      );
       changeMap.clear();
       resumeToken = undefined;
 
@@ -421,7 +427,12 @@ class Watch {
 
       if (isActive) {
         isActive = false;
-        Firestore.log('Watch.onSnapshot', 'Invoking onError: ', err);
+        Firestore.log(
+          'Watch.onSnapshot',
+          self._requestTag,
+          'Invoking onError: ',
+          err
+        );
         onError(err);
       }
     };
@@ -431,29 +442,29 @@ class Watch {
      * Clears the change map.
      */
     const maybeReopenStream = function(err) {
-      if (isActive && !isPermanentError(err)) {
+      if (isActive && !self.isPermanentError(err)) {
         Firestore.log(
           'Watch.onSnapshot',
+          self._requestTag,
           'Stream ended, re-opening after retryable error: ',
           err
         );
         request.addTarget.resumeToken = resumeToken;
         changeMap.clear();
 
-        if (isResourceExhaustedError(err)) {
+        if (self.isResourceExhaustedError(err)) {
           self._backoff.resetToMax();
         }
 
         resetStream();
       } else {
-        Firestore.log('Watch.onSnapshot', 'Stream ended, sending error: ', err);
         closeStream(err);
       }
     };
 
     /** Helper to restart the outgoing stream to the backend. */
     const resetStream = function() {
-      Firestore.log('Watch.onSnapshot', 'Opening new stream');
+      Firestore.log('Watch.onSnapshot', self._requestTag, 'Opening new stream');
       if (currentStream) {
         currentStream.unpipe(stream);
         currentStream.end();
@@ -468,21 +479,33 @@ class Watch {
     const initStream = function() {
       self._backoff.backoffAndWait().then(() => {
         if (!isActive) {
-          Firestore.log('Watch.onSnapshot', 'Not initializing inactive stream');
+          Firestore.log(
+            'Watch.onSnapshot',
+            self._requestTag,
+            'Not initializing inactive stream'
+          );
           return;
         }
 
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
         self._firestore
-          .readWriteStream('listen', request, /* allowRetries= */ true)
+          .readWriteStream('listen', request, self._requestTag, true)
           .then(backendStream => {
             if (!isActive) {
-              Firestore.log('Watch.onSnapshot', 'Closing inactive stream');
+              Firestore.log(
+                'Watch.onSnapshot',
+                self._requestTag,
+                'Closing inactive stream'
+              );
               backendStream.end();
               return;
             }
-            Firestore.log('Watch.onSnapshot', 'Opened new stream');
+            Firestore.log(
+              'Watch.onSnapshot',
+              self._requestTag,
+              'Opened new stream'
+            );
             currentStream = backendStream;
             currentStream.on('error', err => {
               maybeReopenStream(err);
@@ -661,6 +684,7 @@ class Watch {
       if (!hasPushed || diff.appliedChanges.length > 0) {
         Firestore.log(
           'Watch.onSnapshot',
+          self._requestTag,
           'Sending snapshot with %d changes and %d documents',
           diff.appliedChanges.length,
           diff.updatedTree.length
@@ -694,7 +718,11 @@ class Watch {
     stream
       .on('data', proto => {
         if (proto.targetChange) {
-          Firestore.log('Watch.onSnapshot', 'Processing target change');
+          Firestore.log(
+            'Watch.onSnapshot',
+            self._requestTag,
+            'Processing target change'
+          );
           const change = proto.targetChange;
           const noTargetIds =
             !change.targetIds || change.targetIds.length === 0;
@@ -735,7 +763,11 @@ class Watch {
             this._backoff.reset();
           }
         } else if (proto.documentChange) {
-          Firestore.log('Watch.onSnapshot', 'Processing change event');
+          Firestore.log(
+            'Watch.onSnapshot',
+            self._requestTag,
+            'Processing change event'
+          );
 
           // No other targetIds can show up here, but we still need to see if the
           // targetId was in the added list or removed list.
@@ -758,7 +790,11 @@ class Watch {
           const name = document.name;
 
           if (changed) {
-            Firestore.log('Watch.onSnapshot', 'Received document change');
+            Firestore.log(
+              'Watch.onSnapshot',
+              self._requestTag,
+              'Received document change'
+            );
             const snapshot = new DocumentSnapshot.Builder();
             snapshot.ref = new DocumentReference(
               self._firestore,
@@ -769,15 +805,27 @@ class Watch {
             snapshot.updateTime = Timestamp.fromProto(document.updateTime);
             changeMap.set(name, snapshot);
           } else if (removed) {
-            Firestore.log('Watch.onSnapshot', 'Received document remove');
+            Firestore.log(
+              'Watch.onSnapshot',
+              self._requestTag,
+              'Received document remove'
+            );
             changeMap.set(name, REMOVED);
           }
         } else if (proto.documentDelete || proto.documentRemove) {
-          Firestore.log('Watch.onSnapshot', 'Processing remove event');
+          Firestore.log(
+            'Watch.onSnapshot',
+            self._requestTag,
+            'Processing remove event'
+          );
           const name = (proto.documentDelete || proto.documentRemove).document;
           changeMap.set(name, REMOVED);
         } else if (proto.filter) {
-          Firestore.log('Watch.onSnapshot', 'Processing filter update');
+          Firestore.log(
+            'Watch.onSnapshot',
+            self._requestTag,
+            'Processing filter update'
+          );
           if (proto.filter.count !== currentSize()) {
             // We need to remove all the current results.
             resetDocs();
@@ -791,7 +839,11 @@ class Watch {
         }
       })
       .on('end', () => {
-        Firestore.log('Watch.onSnapshot', 'Processing stream end');
+        Firestore.log(
+          'Watch.onSnapshot',
+          self._requestTag,
+          'Processing stream end'
+        );
         if (currentStream) {
           // Pass the event on to the underlying stream.
           currentStream.end();
@@ -799,7 +851,7 @@ class Watch {
       });
 
     return () => {
-      Firestore.log('Watch.onSnapshot', 'Ending stream');
+      Firestore.log('Watch.onSnapshot', self._requestTag, 'Ending stream');
       // Prevent further callbacks.
       isActive = false;
       onNext = () => {};
