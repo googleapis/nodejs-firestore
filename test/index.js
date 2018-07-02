@@ -18,7 +18,8 @@
 
 const assert = require('power-assert');
 const extend = require('extend');
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 const is = require('is');
 const through = require('through2');
 
@@ -28,7 +29,8 @@ const DocumentReference = reference.DocumentReference;
 const CollectionReference = reference.CollectionReference;
 const ResourcePath = require('../src/path').ResourcePath;
 
-const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+const PROJECT_ID = 'test-project';
+const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -228,7 +230,7 @@ const allSupportedTypesInput = {
   ),
   pathValue: new DocumentReference(
     {formattedName: DATABASE_ROOT},
-    new ResourcePath('test-project', '(default)', 'collection', 'document')
+    new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
@@ -255,7 +257,7 @@ const allSupportedTypesOutput = {
   ),
   pathValue: new DocumentReference(
     {formattedName: DATABASE_ROOT},
-    new ResourcePath('test-project', '(default)', 'collection', 'document')
+    new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
@@ -266,7 +268,7 @@ const allSupportedTypesOutput = {
 
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
     timestampsInSnapshots: true,
   });
@@ -318,7 +320,7 @@ function stream() {
 describe('instantiation', function() {
   it('creates instance', function() {
     let firestore = new Firestore({
-      projectId: 'test-project',
+      projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
     });
@@ -342,10 +344,12 @@ describe('instantiation', function() {
 
     firestore._firestoreClient.getProjectId = function(callback) {
       projectIdDetected = true;
-      callback(null, 'test-project');
+      callback(null, PROJECT_ID);
     };
 
-    firestore._firestoreClient._batchGetDocuments = function(request) {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
+      request
+    ) {
       let expectedRequest = {
         database: DATABASE_ROOT,
         documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`],
@@ -428,7 +432,11 @@ describe('serializer', function() {
   });
 
   it('supports all types', function() {
-    firestore._firestoreClient._commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       assert.deepEqual(
         allSupportedTypesProtobufJs.fields,
         request.writes[0].update.fields
@@ -482,7 +490,7 @@ describe('snapshot_() method', function() {
     // Unlike most other tests, we don't call `ensureClient` since the
     // `snapshot_` method does not require a GAPIC client.
     firestore = new Firestore({
-      projectId: 'test-project',
+      projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
     });
@@ -700,13 +708,13 @@ describe('getCollections() method', function() {
   });
 
   it('returns collections', function() {
-    firestore._firestoreClient._listCollectionIds = function(
+    firestore._firestoreClient._innerApiCalls.listCollectionIds = function(
       request,
       options,
       callback
     ) {
       assert.deepEqual(request, {
-        parent: 'projects/test-project/databases/(default)',
+        parent: `projects/${PROJECT_ID}/databases/(default)`,
       });
 
       callback(null, ['first', 'second']);
@@ -745,7 +753,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts empty list', function() {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream();
     };
 
@@ -755,7 +763,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts single document', function() {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(found('documentId'));
     };
 
@@ -767,7 +775,7 @@ describe('getAll() method', function() {
   });
 
   it('verifies response', function() {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(found('documentId2'));
     };
 
@@ -785,7 +793,7 @@ describe('getAll() method', function() {
   });
 
   it('handles stream exception during initialization', function() {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(new Error('Expected exception'));
     };
 
@@ -800,7 +808,7 @@ describe('getAll() method', function() {
   });
 
   it('handles stream exception after initialization', function() {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(found('documentId'), new Error('Expected exception'));
     };
 
@@ -815,7 +823,7 @@ describe('getAll() method', function() {
   });
 
   it('handles serialization error', function() {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(found('documentId'));
     };
 
@@ -857,7 +865,9 @@ describe('getAll() method', function() {
 
     let actualErrorAttempts = {};
 
-    firestore._firestoreClient._batchGetDocuments = function(request) {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
+      request
+    ) {
       let errorCode = Number(request.documents[0].split('/').pop());
       actualErrorAttempts[errorCode] =
         (actualErrorAttempts[errorCode] || 0) + 1;
@@ -893,7 +903,7 @@ describe('getAll() method', function() {
   });
 
   it('accepts array', function() {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(found('documentId'));
     };
 
@@ -905,7 +915,7 @@ describe('getAll() method', function() {
   });
 
   it('returns not found for missing documents', function() {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(found('exists'), missing('missing'));
     };
 
@@ -920,7 +930,7 @@ describe('getAll() method', function() {
   });
 
   it('returns results in order', function() {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(
         // Note that these are out of order.
         found('second'),
@@ -949,7 +959,9 @@ describe('getAll() method', function() {
   });
 
   it('accepts same document multiple times', function() {
-    firestore._firestoreClient._batchGetDocuments = function(request) {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
+      request
+    ) {
       assert.equal(request.documents.length, 2);
       return stream(found('a'), found('b'));
     };

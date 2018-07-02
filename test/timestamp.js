@@ -16,7 +16,8 @@
 
 'use strict';
 
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 const Firestore = require('../');
 const is = require('is');
 const through = require('through2');
@@ -31,7 +32,7 @@ function createInstance(opts, document) {
   );
 
   return firestore._ensureClient().then(() => {
-    firestore._firestoreClient._batchGetDocuments = function() {
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       const stream = through.obj();
       setImmediate(function() {
         stream.push({found: document, readTime: {seconds: 5, nanos: 6}});

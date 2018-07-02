@@ -17,16 +17,19 @@
 'use strict';
 
 const assert = require('power-assert');
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 
 const Firestore = require('../');
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
+const PROJECT_ID = 'test-project';
+
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
     timestampsInSnapshots: true,
   });
@@ -143,8 +146,7 @@ describe('create() method', function() {
 });
 
 describe('batch support', function() {
-  const documentName =
-    'projects/test-project/databases/(default)/documents/col/doc';
+  const documentName = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
 
   let firestore;
   let writeBatch;
@@ -154,13 +156,13 @@ describe('batch support', function() {
       firestore = firestoreClient;
       writeBatch = firestore.batch();
 
-      firestore._firestoreClient._commit = function(
+      firestore._firestoreClient._innerApiCalls.commit = function(
         request,
         options,
         callback
       ) {
         assert.deepEqual(request, {
-          database: 'projects/test-project/databases/(default)',
+          database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
             {
               update: {
@@ -333,7 +335,11 @@ describe('batch support', function() {
   });
 
   it('can return same write result', function() {
-    firestore._firestoreClient._commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       callback(null, {
         commitTime: {
           nanos: 0,
@@ -376,7 +382,7 @@ describe('batch support', function() {
       let beginCalled = 0;
       let commitCalled = 0;
 
-      firestore._firestoreClient._beginTransaction = function(
+      firestore._firestoreClient._innerApiCalls.beginTransaction = function(
         actual,
         options,
         callback
@@ -385,7 +391,11 @@ describe('batch support', function() {
         callback(null, {transaction: 'foo'});
       };
 
-      firestore._firestoreClient._commit = function(actual, options, callback) {
+      firestore._firestoreClient._innerApiCalls.commit = function(
+        actual,
+        options,
+        callback
+      ) {
         ++commitCalled;
         callback(null, {
           commitTime: {

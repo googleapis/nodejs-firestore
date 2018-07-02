@@ -17,7 +17,8 @@
 'use strict';
 
 const assert = require('power-assert');
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 
 const Firestore = require('../');
 const DocumentReference = require('../src/reference')(Firestore)
@@ -31,9 +32,11 @@ const ResourcePath = require('../src/path').ResourcePath;
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
+const PROJECT_ID = 'test-project';
+
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
     timestampsInSnapshots: true,
   });

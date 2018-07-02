@@ -17,7 +17,8 @@
 'use strict';
 
 const assert = require('power-assert');
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 const is = require('is');
 
 const Firestore = require('../');
@@ -27,9 +28,11 @@ const DocumentReference = require('../src/reference')(Firestore)
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
+const PROJECT_ID = 'test-project';
+
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
     timestampsInSnapshots: true,
   });
@@ -95,9 +98,13 @@ describe('Collection interface', function() {
   });
 
   it('has add() method', function() {
-    const dbPrefix = 'projects/test-project/databases';
+    const dbPrefix = `projects/${PROJECT_ID}/databases`;
 
-    firestore._firestoreClient._commit = function(request, options, callback) {
+    firestore._firestoreClient._innerApiCalls.commit = function(
+      request,
+      options,
+      callback
+    ) {
       // Verify that the document name uses an auto-generated id.
       let docIdRe = new RegExp(
         `${dbPrefix}/\\(default\\)/documents/collectionId/[a-zA-Z0-9]{20}`

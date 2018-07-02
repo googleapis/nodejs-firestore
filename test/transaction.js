@@ -17,13 +17,15 @@
 'use strict';
 
 const assert = require('power-assert');
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 const through = require('through2');
 
 const Firestore = require('../');
 let firestore;
 
-const DATABASE_ROOT = 'projects/test-project/databases/(default)';
+const PROJECT_ID = 'test-project';
+const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
 const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
@@ -32,7 +34,7 @@ Firestore.setLogFunction(() => {});
 
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
     timestampsInSnapshots: true,
   });
@@ -224,7 +226,7 @@ function query(transaction) {
 function runTransaction(callback, request) {
   let requests = Array.prototype.slice.call(arguments, 1);
 
-  firestore._firestoreClient._beginTransaction = function(
+  firestore._firestoreClient._innerApiCalls.beginTransaction = function(
     actual,
     options,
     callback
@@ -235,28 +237,38 @@ function runTransaction(callback, request) {
     callback(request.error, request.response);
   };
 
-  firestore._firestoreClient._commit = function(actual, options, callback) {
+  firestore._firestoreClient._innerApiCalls.commit = function(
+    actual,
+    options,
+    callback
+  ) {
     request = requests.shift();
     assert.equal(request.type, 'commit');
     assert.deepEqual(actual, request.request);
     callback(request.error, request.response);
   };
 
-  firestore._firestoreClient._rollback = function(actual, options, callback) {
+  firestore._firestoreClient._innerApiCalls.rollback = function(
+    actual,
+    options,
+    callback
+  ) {
     request = requests.shift();
     assert.equal(request.type, 'rollback');
     assert.deepEqual(actual, request.request);
     callback(request.error, request.response);
   };
 
-  firestore._firestoreClient._batchGetDocuments = function(actual) {
+  firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
+    actual
+  ) {
     request = requests.shift();
     assert.equal(request.type, 'getDocument');
     assert.deepEqual(actual, request.request);
     return request.stream;
   };
 
-  firestore._firestoreClient._runQuery = function(actual) {
+  firestore._firestoreClient._innerApiCalls.runQuery = function(actual) {
     request = requests.shift();
     assert.equal(request.type, 'query');
     assert.deepEqual(actual, request.request);
@@ -319,7 +331,7 @@ describe('failed transactions', function() {
   });
 
   it('requires valid retry number', function() {
-    firestore._firestoreClient._beginTransaction = function() {
+    firestore._firestoreClient._innerApiCalls.beginTransaction = function() {
       assert.fail();
     };
 

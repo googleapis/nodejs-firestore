@@ -1,23 +1,19 @@
-/*
- * Copyright 2017, Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2018 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-/*
- * Note: this file is purely for documentation. Any contents are not expected
- * to be loaded as the JS file.
- */
+// Note: this file is purely for documentation. Any contents are not expected
+// to be loaded as the JS file.
 
 /**
  * A write on a document.
@@ -76,6 +72,7 @@ var Write = {
  * @property {Object[]} fieldTransforms
  *   The list of transformations to apply to the fields of the document, in
  *   order.
+ *   This must not be empty.
  *
  *   This object should have the same structure as [FieldTransform]{@link google.firestore.v1beta1.FieldTransform}
  *
@@ -90,7 +87,7 @@ var DocumentTransform = {
    * A transformation of a field of the document.
    *
    * @property {string} fieldPath
-   *   The path of the field. See {@link Document.fields} for the field path syntax
+   *   The path of the field. See Document.fields for the field path syntax
    *   reference.
    *
    * @property {number} setToServerValue
@@ -109,6 +106,7 @@ var DocumentTransform = {
      * A value that is calculated by the server.
      *
      * @enum {number}
+     * @memberof google.firestore.v1beta1
      */
     ServerValue: {
 
@@ -118,7 +116,8 @@ var DocumentTransform = {
       SERVER_VALUE_UNSPECIFIED: 0,
 
       /**
-       * The time at which the server processed the request.
+       * The time at which the server processed the request, with millisecond
+       * precision.
        */
       REQUEST_TIME: 1
     }
@@ -138,7 +137,7 @@ var DocumentTransform = {
  *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {Object[]} transformResults
- *   The results of applying each {@link DocumentTransform.FieldTransform}, in the
+ *   The results of applying each DocumentTransform.FieldTransform, in the
  *   same order.
  *
  *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
@@ -152,16 +151,16 @@ var WriteResult = {
 };
 
 /**
- * A {@link Document} has changed.
+ * A Document has changed.
  *
- * May be the result of multiple {@link writes}, including deletes, that
- * ultimately resulted in a new value for the {@link Document}.
+ * May be the result of multiple writes, including deletes, that
+ * ultimately resulted in a new value for the Document.
  *
- * Multiple {@link DocumentChange} messages may be returned for the same logical
+ * Multiple DocumentChange messages may be returned for the same logical
  * change, if multiple targets are affected.
  *
  * @property {Object} document
- *   The new state of the {@link Document}.
+ *   The new state of the Document.
  *
  *   If `mask` is set, contains only fields that were updated or added.
  *
@@ -182,16 +181,16 @@ var DocumentChange = {
 };
 
 /**
- * A {@link Document} has been deleted.
+ * A Document has been deleted.
  *
- * May be the result of multiple {@link writes}, including updates, the
- * last of which deleted the {@link Document}.
+ * May be the result of multiple writes, including updates, the
+ * last of which deleted the Document.
  *
- * Multiple {@link DocumentDelete} messages may be returned for the same logical
+ * Multiple DocumentDelete messages may be returned for the same logical
  * delete, if multiple targets are affected.
  *
  * @property {string} document
- *   The resource name of the {@link Document} that was deleted.
+ *   The resource name of the Document that was deleted.
  *
  * @property {number[]} removedTargetIds
  *   A set of target IDs for targets that previously matched this entity.
@@ -212,17 +211,17 @@ var DocumentDelete = {
 };
 
 /**
- * A {@link Document} has been removed from the view of the targets.
+ * A Document has been removed from the view of the targets.
  *
  * Sent if the document is no longer relevant to a target and is out of view.
  * Can be sent instead of a DocumentDelete or a DocumentChange if the server
  * can not send the new value of the document.
  *
- * Multiple {@link DocumentRemove} messages may be returned for the same logical
+ * Multiple DocumentRemove messages may be returned for the same logical
  * write or delete, if multiple targets are affected.
  *
  * @property {string} document
- *   The resource name of the {@link Document} that has gone out of view.
+ *   The resource name of the Document that has gone out of view.
  *
  * @property {number[]} removedTargetIds
  *   A set of target IDs for targets that previously matched this document.
@@ -249,7 +248,7 @@ var DocumentRemove = {
  *   The target ID to which this filter applies.
  *
  * @property {number} count
- *   The total count of documents that match {@link target_id}.
+ *   The total count of documents that match target_id.
  *
  *   If different from the count of documents in the client that match, the
  *   client must manually determine which documents no longer match the target.

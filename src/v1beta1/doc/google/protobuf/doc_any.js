@@ -1,23 +1,19 @@
-/*
- * Copyright 2017, Google Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2018 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-/*
- * Note: this file is purely for documentation. Any contents are not expected
- * to be loaded as the JS file.
- */
+// Note: this file is purely for documentation. Any contents are not expected
+// to be loaded as the JS file.
 
 /**
  * `Any` contains an arbitrary serialized protocol buffer message along with a
@@ -93,7 +89,7 @@
  * If the embedded message type is well-known and has a custom JSON
  * representation, that representation will be embedded adding a field
  * `value` which holds the custom JSON in addition to the `@type`
- * field. Example (for message {@link google.protobuf.Duration}):
+ * field. Example (for message google.protobuf.Duration):
  *
  *     {
  *       "@type": "type.googleapis.com/google.protobuf.Duration",
@@ -112,7 +108,7 @@
  *     qualified name of the type (as in `path/google.protobuf.Duration`).
  *     The name should be in a canonical form (e.g., leading "." is
  *     not accepted).
- *   * An HTTP GET on the URL must yield a {@link google.protobuf.Type}
+ *   * An HTTP GET on the URL must yield a google.protobuf.Type
  *     value in binary format, or produce an error.
  *   * Applications are allowed to cache lookup results based on the
  *     URL, or have them precompiled into a binary to avoid any

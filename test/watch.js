@@ -18,7 +18,8 @@
 
 const assert = require('power-assert');
 const duplexify = require('duplexify');
-const grpc = require('google-gax').grpc().grpc;
+const gax = require('google-gax');
+const grpc = new gax.GrpcClient().grpc;
 const is = require('is');
 const through = require('through2');
 
@@ -32,9 +33,14 @@ const Backoff = require('../src/backoff')(Firestore);
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
+let PROJECT_ID = process.env.PROJECT_ID;
+if (!PROJECT_ID) {
+  PROJECT_ID = 'test-project';
+}
+
 function createInstance() {
   let firestore = new Firestore({
-    projectId: 'test-project',
+    projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
     timestampsInSnapshots: true,
   });
@@ -206,7 +212,7 @@ class StreamHelper {
     this.deferredListener = new DeferredListener();
 
     // Create a mock backend whose stream we can return.
-    firestore._firestoreClient._listen = () => {
+    firestore._firestoreClient._innerApiCalls.listen = () => {
       ++this.streamCount;
 
       this.readStream = through.obj();
@@ -513,10 +519,10 @@ describe('Query watch', function() {
   // The proto JSON that should be sent for the query.
   const collQueryJSON = () => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: 'projects/test-project/databases/(default)',
+          parent: `projects/${PROJECT_ID}/databases/(default)`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
           },
@@ -533,10 +539,10 @@ describe('Query watch', function() {
   // The proto JSON that should be sent for the query.
   const includeQueryJSON = () => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: 'projects/test-project/databases/(default)',
+          parent: `projects/${PROJECT_ID}/databases/(default)`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
             where: {
@@ -561,10 +567,10 @@ describe('Query watch', function() {
   // The proto JSON that should be sent for a resumed query.
   const resumeTokenQuery = resumeToken => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: 'projects/test-project/databases/(default)',
+          parent: `projects/${PROJECT_ID}/databases/(default)`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
           },
@@ -582,10 +588,10 @@ describe('Query watch', function() {
   // The proto JSON that should be sent for the query.
   const sortedQueryJSON = () => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: 'projects/test-project/databases/(default)',
+          parent: `projects/${PROJECT_ID}/databases/(default)`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
             orderBy: [{direction: 'DESCENDING', field: {fieldPath: 'foo'}}],
@@ -1068,7 +1074,7 @@ describe('Query watch', function() {
               lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
               // Return a stream that always errors on write
-              firestore._firestoreClient._listen = () => {
+              firestore._firestoreClient._innerApiCalls.listen = () => {
                 ++streamHelper.streamCount;
                 return through.obj((chunk, enc, callback) => {
                   callback(
@@ -2112,7 +2118,7 @@ describe('DocumentReference watch', function() {
   // The proto JSON that should be sent for the watch.
   const watchJSON = () => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         documents: {
           documents: [doc.formattedName],
@@ -2125,7 +2131,7 @@ describe('DocumentReference watch', function() {
   // The proto JSON that should be sent for a resumed query.
   const resumeTokenJSON = resumeToken => {
     return {
-      database: 'projects/test-project/databases/(default)',
+      database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         documents: {
           documents: [doc.formattedName],

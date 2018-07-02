@@ -51,14 +51,15 @@
     "test": "npm run cover"
   },
   "dependencies": {
-    "@google-cloud/common": "^0.20.0",
+    "@google-cloud/common": "^0.20.1",
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
     "extend": "^3.0.1",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^0.16.1",
+    "google-gax": "^0.17.1",
     "google-proto-files": "^0.16.1",
     "is": "^3.2.1",
+    "lodash.merge": "^4.6.1",
     "through2": "^2.0.3"
   },
   "devDependencies": {
