@@ -32,6 +32,7 @@ function createInstance() {
     projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
     timestampsInSnapshots: true,
+    keyFilename: './test/fake.json'
   });
 
   return firestore._ensureClient().then(() => firestore);

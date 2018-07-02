@@ -79,7 +79,8 @@ const DOCUMENT_WITH_EMPTY_TIMESTAMP = document('moonLanding', {
 describe('timestamps', function() {
   it('returned when enabled', function() {
     return createInstance(
-      {timestampsInSnapshots: true},
+      {timestampsInSnapshots: true,
+        keyFilename: './test/fake.json'},
       DOCUMENT_WITH_TIMESTAMP
     ).then(firestore => {
       const expected = new Firestore.Timestamp(-14182920, 123000123);
@@ -122,7 +123,8 @@ describe('timestamps', function() {
 
   it('retain seconds and nanoseconds', function() {
     return createInstance(
-      {timestampsInSnapshots: true},
+      {timestampsInSnapshots: true,
+        keyFilename: './test/fake.json'},
       DOCUMENT_WITH_TIMESTAMP
     ).then(firestore => {
       return firestore
@@ -138,7 +140,8 @@ describe('timestamps', function() {
 
   it('convert to date', function() {
     return createInstance(
-      {timestampsInSnapshots: true},
+      {timestampsInSnapshots: true,
+        keyFilename: './test/fake.json'},
       DOCUMENT_WITH_TIMESTAMP
     ).then(firestore => {
       return firestore
@@ -156,7 +159,8 @@ describe('timestamps', function() {
 
   it('convert to millis', function() {
     return createInstance(
-      {timestampsInSnapshots: true},
+      {timestampsInSnapshots: true,
+        keyFilename: './test/fake.json'},
       DOCUMENT_WITH_TIMESTAMP
     ).then(firestore => {
       return firestore
@@ -171,7 +175,8 @@ describe('timestamps', function() {
 
   it('support missing values', function() {
     return createInstance(
-      {timestampsInSnapshots: true},
+      {timestampsInSnapshots: true,
+        keyFilename: './test/fake.json'},
       DOCUMENT_WITH_EMPTY_TIMESTAMP
     ).then(firestore => {
       const expected = new Firestore.Timestamp(0, 0);
