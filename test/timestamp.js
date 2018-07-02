@@ -79,8 +79,10 @@ const DOCUMENT_WITH_EMPTY_TIMESTAMP = document('moonLanding', {
 describe('timestamps', function() {
   it('returned when enabled', function() {
     return createInstance(
-      {timestampsInSnapshots: true,
-        keyFilename: './test/fake.json'},
+      {
+        timestampsInSnapshots: true,
+        keyFilename: './test/fake-certificate.json',
+      },
       DOCUMENT_WITH_TIMESTAMP
     ).then(firestore => {
       const expected = new Firestore.Timestamp(-14182920, 123000123);
@@ -96,10 +98,10 @@ describe('timestamps', function() {
 
   it('converted to dates when disabled', function() {
     /* eslint-disable no-console */
-   const oldErrorLog = console.error;
+    const oldErrorLog = console.error;
     // Prevent error message that prompts to enable `timestampsInSnapshots`
     // behavior.
-    console.error = () => {}
+    console.error = () => {};
 
     return createInstance(
       {timestampsInSnapshots: false},
@@ -119,8 +121,10 @@ describe('timestamps', function() {
 
   it('retain seconds and nanoseconds', function() {
     return createInstance(
-      {timestampsInSnapshots: true,
-        keyFilename: './test/fake.json'},
+      {
+        timestampsInSnapshots: true,
+        keyFilename: './test/fake-certificate.json',
+      },
       DOCUMENT_WITH_TIMESTAMP
     ).then(firestore => {
       return firestore
@@ -136,8 +140,10 @@ describe('timestamps', function() {
 
   it('convert to date', function() {
     return createInstance(
-      {timestampsInSnapshots: true,
-        keyFilename: './test/fake.json'},
+      {
+        timestampsInSnapshots: true,
+        keyFilename: './test/fake-certificate.json',
+      },
       DOCUMENT_WITH_TIMESTAMP
     ).then(firestore => {
       return firestore
@@ -155,8 +161,10 @@ describe('timestamps', function() {
 
   it('convert to millis', function() {
     return createInstance(
-      {timestampsInSnapshots: true,
-        keyFilename: './test/fake.json'},
+      {
+        timestampsInSnapshots: true,
+        keyFilename: './test/fake-certificate.json',
+      },
       DOCUMENT_WITH_TIMESTAMP
     ).then(firestore => {
       return firestore
@@ -171,8 +179,10 @@ describe('timestamps', function() {
 
   it('support missing values', function() {
     return createInstance(
-      {timestampsInSnapshots: true,
-        keyFilename: './test/fake.json'},
+      {
+        timestampsInSnapshots: true,
+        keyFilename: './test/fake-certificate.json',
+      },
       DOCUMENT_WITH_EMPTY_TIMESTAMP
     ).then(firestore => {
       const expected = new Firestore.Timestamp(0, 0);

@@ -37,7 +37,7 @@ const firestore = new Firestore({
   projectId: 'projectID',
   sslCreds: grpc.credentials.createInsecure(),
   timestampsInSnapshots: true,
-  keyFilename: './test/fake.json'
+  keyFilename: './test/fake-certificate.json',
 });
 
 /** List of test cases that are ignored. */
