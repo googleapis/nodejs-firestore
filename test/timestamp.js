@@ -96,13 +96,10 @@ describe('timestamps', function() {
 
   it('converted to dates when disabled', function() {
     /* eslint-disable no-console */
-    const oldErrorLog = console.error;
-    let errorMsg = null;
+   const oldErrorLog = console.error;
     // Prevent error message that prompts to enable `timestampsInSnapshots`
     // behavior.
-    console.error = msg => {
-      errorMsg = msg;
-    };
+    console.error = () => {}
 
     return createInstance(
       {timestampsInSnapshots: false},
@@ -114,7 +111,6 @@ describe('timestamps', function() {
         .then(res => {
           assert.ok(is.date(res.data()['moonLanding']));
           assert.ok(is.date(res.get('moonLanding')));
-          assert.ok(errorMsg.indexOf('timestampsInSnapshots') !== -1);
           console.error = oldErrorLog;
         });
     });
