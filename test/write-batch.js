@@ -20,7 +20,7 @@ const assert = require('power-assert');
 const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
 
-const Firestore = require('../');
+const Firestore = require('../src');
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});

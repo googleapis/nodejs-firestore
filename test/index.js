@@ -23,7 +23,7 @@ const grpc = new gax.GrpcClient().grpc;
 const is = require('is');
 const through = require('through2');
 
-const Firestore = require('../');
+const Firestore = require('../src');
 const reference = require('../src/reference')(Firestore);
 const DocumentReference = reference.DocumentReference;
 const CollectionReference = reference.CollectionReference;

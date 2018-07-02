@@ -21,7 +21,7 @@ const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
 const is = require('is');
 
-const Firestore = require('../');
+const Firestore = require('../src');
 const DocumentReference = require('../src/reference')(Firestore)
   .DocumentReference;
 

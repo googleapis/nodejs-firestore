@@ -1,24 +1,20 @@
 {
+  "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
     "allowJs": true,
-    "target": "es6",
-    "moduleResolution": "node",
-    "outDir": "dist/es6",
-    "rootDir": "./",
+    "declaration": false,
     "sourceMap": false,
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noFallthroughCasesInSwitch": true,
-    "strictNullChecks": true,
-    "noStrictGenericChecks": true
+    "rootDir": ".",
+    "outDir": "build",
+    "target": "es6",
+    "noImplicitAny": false
   },
   "include": [
-    "src/**/*.ts",
-    "test/typescript.ts",
-    "types/firestore.d.ts"
+    "src/*.js",
+    "src/*.ts",
+    "src/**/*.js",
+    "test/*.js",
+    "system-test/*.js",
+    "conformance/*.js"
   ]
 }

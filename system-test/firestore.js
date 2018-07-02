@@ -23,8 +23,8 @@ let DocumentReference = require('../src/reference').DocumentReference;
 let DocumentSnapshot = require('../src/document')(DocumentReference)
   .DocumentSnapshot;
 
-let version = require('../package.json').version;
-let Firestore = require('../');
+let version = require('../../package.json').version;
+let Firestore = require('../src');
 
 if (process.env.NODE_ENV === 'DEBUG') {
   Firestore.setLogFunction(console.log); // eslint-disable-line no-console
