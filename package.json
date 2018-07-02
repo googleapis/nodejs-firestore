@@ -11,6 +11,7 @@
   "main": "./build/src/index.js",
   "types": "./types/firestore.d.ts",
   "files": [
+    "build/protos",
     "build/src",
     "types"
   ],
@@ -42,8 +43,8 @@
     "prettier": "prettier --write src/*.js src/**/*.js test/*.js test/**/*.js system-test/*.js system-test/**/*.js conformance/*.js conformance/**/*.js",
     "publish-module": "node ../../scripts/publish.js firestore",
     "system-test": "mocha build/system-test/*.js --timeout 600000",
-    "conformance": "mocha build/conformance/*.js --no-timeouts",
-    "test-no-cover": "mocha build/test/*.js --no-timeouts",
+    "conformance": "mocha build/conformance/*.js --timeout 2000",
+    "test-no-cover": "mocha build/test/*.js --timeout 2000",
     "test": "npm run cover",
     "check": "gts check",
     "clean": "gts clean",

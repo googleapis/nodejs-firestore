@@ -63,9 +63,10 @@ abstract class Path<T> {
    *
    * @private
    * @hideconstructor
-   * @param {...string|string[]} segments - Sequence of parts of a path.
+   * @param {string[]} segments - Sequence of parts of a path.
    */
-  constructor(protected readonly segments: string[]) {}
+  constructor( protected readonly segments: string[]) {
+  }
 
   /**
    * String representation as expected by the proto API.
@@ -81,7 +82,7 @@ abstract class Path<T> {
     return this._formattedName!;
   }
 
-  abstract construct(segments: string[]): T;
+  abstract construct(segments: string[]|string): T;
   abstract canonicalString(): string;
   abstract split(relativePath: string): string[];
 
@@ -216,13 +217,12 @@ export class ResourcePath extends Path<ResourcePath> {
    *
    * @param {string} projectId - The Firestore project id.
    * @param {string} databaseId - The Firestore database id.
-   * @param {...string|string[]} segments - Sequence of names of the parts of
+   * @param {string[]} segments - Sequence of names of the parts of
    * the path.
    */
   constructor(
-      private readonly projectId: string, private readonly databaseId: string,
-      ...segments: string[]) {
-    super(segments);
+      private readonly projectId: string, private readonly databaseId: string, ...segments: string[]) {
+     super(segments);
   }
 
   /**
@@ -419,21 +419,20 @@ export class FieldPath extends Path<FieldPath> {
    *   });
    * });
    */
-  constructor(...segments: string[]) {
+  constructor(segments: string[]|string) {
     validate.minNumberOfArguments('FieldPath', arguments, 1);
 
-    segments = segments.length === 1 && is.array(segments[0]) ?
-        segments[0] :
-        Array.prototype.slice.call(arguments);
+    const elements =  segments instanceof Array ? segments
+              : Array.prototype.slice.call(arguments);
 
-    for (let i = 0; i < segments.length; ++i) {
-      validate.isString(i, segments[i]);
-      if (segments[i].length === 0) {
+    for (let i = 0; i < elements.length; ++i) {
+      validate.isString(i, elements[i]);
+      if (elements[i].length === 0) {
         throw new Error(`Argument at index ${i} should not be empty.`);
       }
     }
 
-    super(segments);
+    super(elements);
   }
 
   /**
@@ -490,7 +489,7 @@ export class FieldPath extends Path<FieldPath> {
     // that fromArgument() is only called with a Field Path or a string.
     return fieldPath instanceof FieldPath ?
         fieldPath :
-        new FieldPath(...fieldPath.split('.'));
+        new FieldPath(fieldPath.split('.'));
   }
 
   /**
@@ -533,7 +532,7 @@ export class FieldPath extends Path<FieldPath> {
    * @returns {ResourcePath} The newly created FieldPath.
    */
   construct(segments: string[]) {
-    return new FieldPath(...segments);
+    return new FieldPath(segments);
   }
 
   /**
