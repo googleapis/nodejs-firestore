@@ -271,6 +271,7 @@ function createInstance() {
     projectId: PROJECT_ID,
     sslCreds: grpc.credentials.createInsecure(),
     timestampsInSnapshots: true,
+    keyFilename: './test/fake-certificate.json',
   });
 
   return firestore._ensureClient().then(() => firestore);
@@ -323,6 +324,7 @@ describe('instantiation', function() {
       projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
+      keyFilename: './test/fake-certificate.json',
     });
     assert(firestore instanceof Firestore);
   });
@@ -331,6 +333,7 @@ describe('instantiation', function() {
     let firestore = new Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
+      keyFilename: './test/fake-certificate.json',
     });
 
     assert.equal(
@@ -368,6 +371,7 @@ describe('instantiation', function() {
     let firestore = new Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
+      keyFilename: './test/fake-certificate.json',
     });
 
     let initialized = firestore._ensureClient();
@@ -493,6 +497,7 @@ describe('snapshot_() method', function() {
       projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
+      keyFilename: './test/fake-certificate.json',
     });
   });
 
