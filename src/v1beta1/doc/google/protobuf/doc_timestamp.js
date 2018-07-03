@@ -26,7 +26,8 @@
  * 0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z.
  * By restricting to that range, we ensure that we can convert to
  * and from  RFC 3339 date strings.
- * See [https://www.ietf.org/rfc/rfc3339.txt](https://www.ietf.org/rfc/rfc3339.txt).
+ * See
+ * [https://www.ietf.org/rfc/rfc3339.txt](https://www.ietf.org/rfc/rfc3339.txt).
  *
  * # Examples
  *
@@ -85,11 +86,13 @@
  * 01:30 UTC on January 15, 2017.
  *
  * In JavaScript, one can convert a Date object to this format using the
- * standard [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString]
+ * standard
+ * [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString]
  * method. In Python, a standard `datetime.datetime` object can be converted
- * to this format using [`strftime`](https://docs.python.org/2/library/time.html#time.strftime)
- * with the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one
- * can use the Joda Time's [`ISODateTimeFormat.dateTime()`](https://cloud.google.com
+ * to this format using
+ * [`strftime`](https://docs.python.org/2/library/time.html#time.strftime) with
+ * the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one can use
+ * the Joda Time's [`ISODateTimeFormat.dateTime()`](https://cloud.google.com
  * http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime())
  * to obtain a formatter capable of generating timestamps in this format.
  *
@@ -109,5 +112,5 @@
  * @see [google.protobuf.Timestamp definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/timestamp.proto}
  */
 var Timestamp = {
-  // This is for documentation. Actual contents will be loaded by gRPC.
+    // This is for documentation. Actual contents will be loaded by gRPC.
 };

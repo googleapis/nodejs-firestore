@@ -226,12 +226,10 @@ const allSupportedTypesInput = {
   emptyObject: {},
   dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
   timestampValue: Firestore.Timestamp.fromDate(
-    new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
-  ),
+      new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new DocumentReference(
-    {formattedName: DATABASE_ROOT},
-    new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
-  ),
+      {formattedName: DATABASE_ROOT},
+      new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
   nilValue: null,
@@ -250,15 +248,12 @@ const allSupportedTypesOutput = {
   objectValue: {foo: 'bar'},
   emptyObject: {},
   dateValue: Firestore.Timestamp.fromDate(
-    new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
-  ),
+      new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   timestampValue: Firestore.Timestamp.fromDate(
-    new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
-  ),
+      new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new DocumentReference(
-    {formattedName: DATABASE_ROOT},
-    new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
-  ),
+      {formattedName: DATABASE_ROOT},
+      new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
   nilValue: null,
@@ -337,9 +332,7 @@ describe('instantiation', function() {
     });
 
     assert.equal(
-      firestore.formattedName,
-      'projects/{{projectId}}/databases/(default)'
-    );
+        firestore.formattedName, 'projects/{{projectId}}/databases/(default)');
 
     let initialized = firestore._ensureClient();
 
@@ -351,8 +344,7 @@ describe('instantiation', function() {
     };
 
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
-      request
-    ) {
+        request) {
       let expectedRequest = {
         database: DATABASE_ROOT,
         documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`],
@@ -381,11 +373,9 @@ describe('instantiation', function() {
     };
 
     return initialized.then(
-      () => assert.fail('Expected error missing'),
-      err => {
-        assert.equal(err.message, 'Project ID error');
-      }
-    );
+        () => assert.fail('Expected error missing'), err => {
+          assert.equal(err.message, 'Project ID error');
+        });
   });
 
   it('exports all types', function() {
@@ -418,11 +408,8 @@ describe('instantiation', function() {
     assert.equal(Firestore.FieldValue.name, 'FieldValue');
     assert.ok(is.defined(Firestore.FieldPath));
     assert.equal(Firestore.Firestore.name, 'Firestore');
-    assert.ok(
-      !Firestore.FieldValue.serverTimestamp().isEqual(
-        Firestore.FieldValue.delete()
-      )
-    );
+    assert.ok(!Firestore.FieldValue.serverTimestamp().isEqual(
+        Firestore.FieldValue.delete()));
   });
 });
 
@@ -437,14 +424,9 @@ describe('serializer', function() {
 
   it('supports all types', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       assert.deepEqual(
-        allSupportedTypesProtobufJs.fields,
-        request.writes[0].update.fields
-      );
+          allSupportedTypesProtobufJs.fields, request.writes[0].update.fields);
       callback(null, {
         commitTime: {},
         writeResults: [
@@ -467,9 +449,8 @@ describe('snapshot_() method', function() {
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
     assert.equal(
-      actualObject.get('pathValue').formattedName,
-      expected.pathValue.formattedName
-    );
+        actualObject.get('pathValue').formattedName,
+        expected.pathValue.formattedName);
     let data = actualObject.data();
     delete data.pathValue;
     delete expected.pathValue;
@@ -480,14 +461,10 @@ describe('snapshot_() method', function() {
     assert.equal(data.geoPointValue.latitude, 50.1430847);
     assert.equal(data.geoPointValue.longitude, -122.947778);
     assert.equal(
-      data.geoPointValue.toString(),
-      'GeoPoint { latitude: 50.1430847, longitude: -122.947778 }'
-    );
-    assert.ok(
-      data.geoPointValue.isEqual(
-        new Firestore.GeoPoint(50.1430847, -122.947778)
-      )
-    );
+        data.geoPointValue.toString(),
+        'GeoPoint { latitude: 50.1430847, longitude: -122.947778 }');
+    assert.ok(data.geoPointValue.isEqual(
+        new Firestore.GeoPoint(50.1430847, -122.947778)));
   }
 
   beforeEach(() => {
@@ -503,11 +480,10 @@ describe('snapshot_() method', function() {
 
   it('handles ProtobufJS', function() {
     let doc = firestore.snapshot_(
-      document('doc', {
-        foo: {valueType: 'bytesValue', bytesValue: bytesData},
-      }),
-      {seconds: 5, nanos: 6}
-    );
+        document('doc', {
+          foo: {valueType: 'bytesValue', bytesValue: bytesData},
+        }),
+        {seconds: 5, nanos: 6});
 
     assert.equal(true, doc.exists);
     assert.deepEqual({foo: bytesData}, doc.data());
@@ -520,22 +496,20 @@ describe('snapshot_() method', function() {
     // Google Cloud Functions must be able to call snapshot_() with Proto3 JSON
     // data.
     let doc = firestore.snapshot_(
-      {
-        name: `${DATABASE_ROOT}/documents/collectionId/doc`,
-        fields: {
-          a: {bytesValue: 'AQI='},
-          b: {timestampValue: '1985-03-18T07:20:00.000Z'},
-          c: {
-            valueType: 'bytesValue',
-            bytesValue: Buffer.from('AQI=', 'base64'),
+        {
+          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+          fields: {
+            a: {bytesValue: 'AQI='},
+            b: {timestampValue: '1985-03-18T07:20:00.000Z'},
+            c: {
+              valueType: 'bytesValue',
+              bytesValue: Buffer.from('AQI=', 'base64'),
+            },
           },
+          createTime: '1970-01-01T00:00:01.002Z',
+          updateTime: '1970-01-01T00:00:03.000004Z',
         },
-        createTime: '1970-01-01T00:00:01.002Z',
-        updateTime: '1970-01-01T00:00:03.000004Z',
-      },
-      '1970-01-01T00:00:05.000000006Z',
-      'json'
-    );
+        '1970-01-01T00:00:05.000000006Z', 'json');
 
     assert.equal(true, doc.exists);
     assert.deepEqual(doc.data(), {
@@ -559,10 +533,7 @@ describe('snapshot_() method', function() {
 
   it('deserializes all supported types from Proto3 JSON', function() {
     let doc = firestore.snapshot_(
-      allSupportedTypesJson,
-      '1970-01-01T00:00:05.000000006Z',
-      'json'
-    );
+        allSupportedTypesJson, '1970-01-01T00:00:05.000000006Z', 'json');
 
     verifyAllSupportedTypes(doc);
   });
@@ -570,50 +541,42 @@ describe('snapshot_() method', function() {
   it('handles invalid Proto3 JSON', function() {
     assert.throws(() => {
       firestore.snapshot_(
-        {
-          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
-          fields: {foo: {}},
-          createTime: '1970-01-01T00:00:01.000000002Z',
-          updateTime: '1970-01-01T00:00:03.000000004Z',
-        },
-        '1970-01-01T00:00:05.000000006Z',
-        'json'
-      );
+          {
+            name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+            fields: {foo: {}},
+            createTime: '1970-01-01T00:00:01.000000002Z',
+            updateTime: '1970-01-01T00:00:03.000000004Z',
+          },
+          '1970-01-01T00:00:05.000000006Z', 'json');
     }, /Unable to infer type value fom '{}'./);
 
     assert.throws(() => {
       firestore.snapshot_(
-        {
-          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
-          fields: {foo: {stringValue: 'bar', integerValue: 42}},
-          createTime: '1970-01-01T00:00:01.000000002Z',
-          updateTime: '1970-01-01T00:00:03.000000004Z',
-        },
-        '1970-01-01T00:00:05.000000006Z',
-        'json'
-      );
+          {
+            name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+            fields: {foo: {stringValue: 'bar', integerValue: 42}},
+            createTime: '1970-01-01T00:00:01.000000002Z',
+            updateTime: '1970-01-01T00:00:03.000000004Z',
+          },
+          '1970-01-01T00:00:05.000000006Z', 'json');
     }, /Unable to infer type value fom '{"stringValue":"bar","integerValue":42}'./);
 
     assert.throws(() => {
       firestore.snapshot_(
-        {
-          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
-          fields: {foo: {stringValue: 'bar'}},
-          createTime: '1970-01-01T00:00:01.NaNZ',
-          updateTime: '1970-01-01T00:00:03.000000004Z',
-        },
-        '1970-01-01T00:00:05.000000006Z',
-        'json'
-      );
+          {
+            name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+            fields: {foo: {stringValue: 'bar'}},
+            createTime: '1970-01-01T00:00:01.NaNZ',
+            updateTime: '1970-01-01T00:00:03.000000004Z',
+          },
+          '1970-01-01T00:00:05.000000006Z', 'json');
     }, /Specify a valid ISO 8601 timestamp for "documentOrName.createTime"./);
   });
 
   it('handles missing document ', function() {
     let doc = firestore.snapshot_(
-      `${DATABASE_ROOT}/documents/collectionId/doc`,
-      '1970-01-01T00:00:05.000000006Z',
-      'json'
-    );
+        `${DATABASE_ROOT}/documents/collectionId/doc`,
+        '1970-01-01T00:00:05.000000006Z', 'json');
 
     assert.equal(false, doc.exists);
     assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
@@ -622,10 +585,8 @@ describe('snapshot_() method', function() {
   it('handles invalid encoding format ', function() {
     assert.throws(() => {
       firestore.snapshot_(
-        `${DATABASE_ROOT}/documents/collectionId/doc`,
-        '1970-01-01T00:00:05.000000006Z',
-        'ascii'
-      );
+          `${DATABASE_ROOT}/documents/collectionId/doc`,
+          '1970-01-01T00:00:05.000000006Z', 'ascii');
     }, /Unsupported encoding format. Expected 'json' or 'protobufJS', but was 'ascii'./);
   });
 });
@@ -650,7 +611,7 @@ describe('doc() method', function() {
     }, /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
   });
 
-  it("doesn't accept empty components", function() {
+  it('doesn\'t accept empty components', function() {
     assert.throws(function() {
       firestore.doc('coll//doc');
     }, /Argument "documentPath" is not a valid ResourcePath. Paths must not contain \/\/./);
@@ -714,10 +675,7 @@ describe('getCollections() method', function() {
 
   it('returns collections', function() {
     firestore._firestoreClient._innerApiCalls.listCollectionIds = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       assert.deepEqual(request, {
         parent: `projects/${PROJECT_ID}/databases/(default)`,
       });
@@ -772,11 +730,10 @@ describe('getAll() method', function() {
       return stream(found('documentId'));
     };
 
-    return firestore
-      .getAll(firestore.doc('collectionId/documentId'))
-      .then(result => {
-        resultEquals(result, found('documentId'));
-      });
+    return firestore.getAll(firestore.doc('collectionId/documentId'))
+        .then(result => {
+          resultEquals(result, found('documentId'));
+        });
   });
 
   it('verifies response', function() {
@@ -784,17 +741,15 @@ describe('getAll() method', function() {
       return stream(found('documentId2'));
     };
 
-    return firestore
-      .getAll(firestore.doc('collectionId/documentId'))
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        assert.equal(
-          err.message,
-          'Did not receive document for "collectionId/documentId".'
-        );
-      });
+    return firestore.getAll(firestore.doc('collectionId/documentId'))
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(
+              err.message,
+              'Did not receive document for "collectionId/documentId".');
+        });
   });
 
   it('handles stream exception during initialization', function() {
@@ -802,14 +757,13 @@ describe('getAll() method', function() {
       return stream(new Error('Expected exception'));
     };
 
-    return firestore
-      .getAll(firestore.doc('collectionId/documentId'))
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        assert.equal(err.message, 'Expected exception');
-      });
+    return firestore.getAll(firestore.doc('collectionId/documentId'))
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(err.message, 'Expected exception');
+        });
   });
 
   it('handles stream exception after initialization', function() {
@@ -817,14 +771,13 @@ describe('getAll() method', function() {
       return stream(found('documentId'), new Error('Expected exception'));
     };
 
-    return firestore
-      .getAll(firestore.doc('collectionId/documentId'))
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        assert.equal(err.message, 'Expected exception');
-      });
+    return firestore.getAll(firestore.doc('collectionId/documentId'))
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(err.message, 'Expected exception');
+        });
   });
 
   it('handles serialization error', function() {
@@ -836,14 +789,13 @@ describe('getAll() method', function() {
       throw new Error('Expected exception');
     };
 
-    return firestore
-      .getAll(firestore.doc('collectionId/documentId'))
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        assert.equal(err.message, 'Expected exception');
-      });
+    return firestore.getAll(firestore.doc('collectionId/documentId'))
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(err.message, 'Expected exception');
+        });
   });
 
   it('only retries on GRPC unavailable', function() {
@@ -871,11 +823,10 @@ describe('getAll() method', function() {
     let actualErrorAttempts = {};
 
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
-      request
-    ) {
+        request) {
       let errorCode = Number(request.documents[0].split('/').pop());
       actualErrorAttempts[errorCode] =
-        (actualErrorAttempts[errorCode] || 0) + 1;
+          (actualErrorAttempts[errorCode] || 0) + 1;
       let error = new Error('Expected exception');
       error.code = errorCode;
       return stream(error);
@@ -884,16 +835,13 @@ describe('getAll() method', function() {
     let promises = [];
 
     Object.keys(expectedErrorAttempts).forEach(errorCode => {
-      promises.push(
-        firestore
-          .getAll(coll.doc(`${errorCode}`))
-          .then(() => {
-            throw new Error('Unexpected success in Promise');
-          })
-          .catch(err => {
-            assert.equal(err.code, errorCode);
-          })
-      );
+      promises.push(firestore.getAll(coll.doc(`${errorCode}`))
+                        .then(() => {
+                          throw new Error('Unexpected success in Promise');
+                        })
+                        .catch(err => {
+                          assert.equal(err.code, errorCode);
+                        }));
     });
 
     return Promise.all(promises).then(() => {
@@ -912,11 +860,10 @@ describe('getAll() method', function() {
       return stream(found('documentId'));
     };
 
-    return firestore
-      .getAll([firestore.doc('collectionId/documentId')])
-      .then(result => {
-        resultEquals(result, found('documentId'));
-      });
+    return firestore.getAll([firestore.doc('collectionId/documentId')])
+        .then(result => {
+          resultEquals(result, found('documentId'));
+        });
   });
 
   it('returns not found for missing documents', function() {
@@ -925,61 +872,47 @@ describe('getAll() method', function() {
     };
 
     return firestore
-      .getAll(
-        firestore.doc('collectionId/exists'),
-        firestore.doc('collectionId/missing')
-      )
-      .then(result => {
-        resultEquals(result, found('exists'), missing('missing'));
-      });
+        .getAll(
+            firestore.doc('collectionId/exists'),
+            firestore.doc('collectionId/missing'))
+        .then(result => {
+          resultEquals(result, found('exists'), missing('missing'));
+        });
   });
 
   it('returns results in order', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(
-        // Note that these are out of order.
-        found('second'),
-        found('first'),
-        found('fourth'),
-        found('third')
-      );
+          // Note that these are out of order.
+          found('second'), found('first'), found('fourth'), found('third'));
     };
 
     return firestore
-      .getAll(
-        firestore.doc('collectionId/first'),
-        firestore.doc('collectionId/second'),
-        firestore.doc('collectionId/third'),
-        firestore.doc('collectionId/fourth')
-      )
-      .then(result => {
-        resultEquals(
-          result,
-          found('first'),
-          found('second'),
-          found('third'),
-          found('fourth')
-        );
-      });
+        .getAll(
+            firestore.doc('collectionId/first'),
+            firestore.doc('collectionId/second'),
+            firestore.doc('collectionId/third'),
+            firestore.doc('collectionId/fourth'))
+        .then(result => {
+          resultEquals(
+              result, found('first'), found('second'), found('third'),
+              found('fourth'));
+        });
   });
 
   it('accepts same document multiple times', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
-      request
-    ) {
+        request) {
       assert.equal(request.documents.length, 2);
       return stream(found('a'), found('b'));
     };
 
     return firestore
-      .getAll(
-        firestore.doc('collectionId/a'),
-        firestore.doc('collectionId/a'),
-        firestore.doc('collectionId/b'),
-        firestore.doc('collectionId/a')
-      )
-      .then(result => {
-        resultEquals(result, found('a'), found('a'), found('b'), found('a'));
-      });
+        .getAll(
+            firestore.doc('collectionId/a'), firestore.doc('collectionId/a'),
+            firestore.doc('collectionId/b'), firestore.doc('collectionId/a'))
+        .then(result => {
+          resultEquals(result, found('a'), found('a'), found('b'), found('a'));
+        });
   });
 });

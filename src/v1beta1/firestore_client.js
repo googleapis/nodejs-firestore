@@ -63,8 +63,10 @@ class FirestoreClient {
    *     Developer's Console, e.g. 'grape-spaceship-123'. We will also check
    *     the environment variable GCLOUD_PROJECT for your project ID. If your
    *     app is running in an environment which supports
-   *     {@link https://developers.google.com/identity/protocols/application-default-credentials Application Default Credentials},
-   *     your project ID will be detected automatically.
+   *     {@link
+   * https://developers.google.com/identity/protocols/application-default-credentials
+   * Application Default Credentials}, your project ID will be detected
+   * automatically.
    * @param {function} [options.promise] - Custom promise module to use instead
    *     of native Promises.
    * @param {string} [options.servicePath] - The domain name of the
@@ -75,13 +77,12 @@ class FirestoreClient {
 
     // Ensure that options include the service address and port.
     opts = Object.assign(
-      {
-        clientConfig: {},
-        port: this.constructor.port,
-        servicePath: this.constructor.servicePath,
-      },
-      opts
-    );
+        {
+          clientConfig: {},
+          port: this.constructor.port,
+          servicePath: this.constructor.servicePath,
+        },
+        opts);
 
     // Create a `gaxGrpc` object, with any grpc-specific options
     // sent to the client.
@@ -104,53 +105,40 @@ class FirestoreClient {
 
     // Load the applicable protos.
     var protos = merge(
-      {},
-      gaxGrpc.loadProto(
-        path.join(__dirname, '..', '..', 'protos'),
-        'google/firestore/v1beta1/firestore.proto'
-      )
-    );
+        {},
+        gaxGrpc.loadProto(
+            path.join(__dirname, '..', '..', 'protos'),
+            'google/firestore/v1beta1/firestore.proto'));
 
     // This API contains "path templates"; forward-slash-separated
     // identifiers to uniquely identify resources within the API.
     // Create useful helper objects for these.
     this._pathTemplates = {
-      databaseRootPathTemplate: new gax.PathTemplate(
-        'projects/{project}/databases/{database}'
-      ),
+      databaseRootPathTemplate:
+          new gax.PathTemplate('projects/{project}/databases/{database}'),
       documentRootPathTemplate: new gax.PathTemplate(
-        'projects/{project}/databases/{database}/documents'
-      ),
+          'projects/{project}/databases/{database}/documents'),
       documentPathPathTemplate: new gax.PathTemplate(
-        'projects/{project}/databases/{database}/documents/{document_path=**}'
-      ),
+          'projects/{project}/databases/{database}/documents/{document_path=**}'),
       anyPathPathTemplate: new gax.PathTemplate(
-        'projects/{project}/databases/{database}/documents/{document}/{any_path=**}'
-      ),
+          'projects/{project}/databases/{database}/documents/{document}/{any_path=**}'),
     };
 
     // Some of the methods on this service return "paged" results,
     // (e.g. 50 results at a time, with tokens to get subsequent
     // pages). Denote the keys used for pagination and results.
     this._descriptors.page = {
-      listDocuments: new gax.PageDescriptor(
-        'pageToken',
-        'nextPageToken',
-        'documents'
-      ),
-      listCollectionIds: new gax.PageDescriptor(
-        'pageToken',
-        'nextPageToken',
-        'collectionIds'
-      ),
+      listDocuments:
+          new gax.PageDescriptor('pageToken', 'nextPageToken', 'documents'),
+      listCollectionIds:
+          new gax.PageDescriptor('pageToken', 'nextPageToken', 'collectionIds'),
     };
 
     // Some of the methods on this service provide streaming responses.
     // Provide descriptors for these.
     this._descriptors.stream = {
-      batchGetDocuments: new gax.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING
-      ),
+      batchGetDocuments:
+          new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
       runQuery: new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
       write: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
       listen: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
@@ -158,11 +146,8 @@ class FirestoreClient {
 
     // Put together the default options sent with requests.
     var defaults = gaxGrpc.constructSettings(
-      'google.firestore.v1beta1.Firestore',
-      gapicConfig,
-      opts.clientConfig,
-      {'x-goog-api-client': clientHeader.join(' ')}
-    );
+        'google.firestore.v1beta1.Firestore', gapicConfig, opts.clientConfig,
+        {'x-goog-api-client': clientHeader.join(' ')});
 
     // Set up a dictionary of "inner API calls"; the core implementation
     // of calling the API is handled in `google-gax`, with this code
@@ -171,10 +156,8 @@ class FirestoreClient {
 
     // Put together the "service stub" for
     // google.firestore.v1beta1.Firestore.
-    var firestoreStub = gaxGrpc.createStub(
-      protos.google.firestore.v1beta1.Firestore,
-      opts
-    );
+    var firestoreStub =
+        gaxGrpc.createStub(protos.google.firestore.v1beta1.Firestore, opts);
 
     // Iterate over each of the methods that the service provides
     // and create an API call method for each.
@@ -195,17 +178,13 @@ class FirestoreClient {
     ];
     for (let methodName of firestoreStubMethods) {
       this._innerApiCalls[methodName] = gax.createApiCall(
-        firestoreStub.then(
-          stub =>
-            function() {
-              var args = Array.prototype.slice.call(arguments, 0);
-              return stub[methodName].apply(stub, args);
-            }
-        ),
-        defaults[methodName],
-        this._descriptors.page[methodName] ||
-          this._descriptors.stream[methodName]
-      );
+          firestoreStub.then(stub => function() {
+            var args = Array.prototype.slice.call(arguments, 0);
+            return stub[methodName].apply(stub, args);
+          }),
+          defaults[methodName],
+          this._descriptors.page[methodName] ||
+              this._descriptors.stream[methodName]);
     }
   }
 
@@ -261,24 +240,30 @@ class FirestoreClient {
    *   If the document has a field that is not present in this mask, that field
    *   will not be returned in the response.
    *
-   *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
+   *   This object should have the same structure as [DocumentMask]{@link
+   * google.firestore.v1beta1.DocumentMask}
    * @param {string} [request.transaction]
    *   Reads the document in a transaction.
    * @param {Object} [request.readTime]
    *   Reads the version of the document at the given time.
    *   This may not be older than 60 seconds.
    *
-   *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
+   *   This object should have the same structure as [Timestamp]{@link
+   * google.protobuf.Timestamp}
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing [Document]{@link google.firestore.v1beta1.Document}.
+   *   The second parameter to the callback is an object representing
+   * [Document]{@link google.firestore.v1beta1.Document}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Document]{@link google.firestore.v1beta1.Document}.
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   *   The first element of the array is an object representing [Document]{@link
+   * google.firestore.v1beta1.Document}. The promise has a method named "cancel"
+   * which cancels the ongoing API call.
    *
    * @example
    *
@@ -288,8 +273,8 @@ class FirestoreClient {
    *   // optional auth parameters.
    * });
    *
-   * var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-   * client.getDocument({name: formattedName})
+   * var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); client.getDocument({name: formattedName})
    *   .then(responses => {
    *     var response = responses[0];
    *     // doThingsWith(response)
@@ -321,8 +306,8 @@ class FirestoreClient {
    *   `projects/my-project/databases/my-database/documents` or
    *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
    * @param {string} request.collectionId
-   *   The collection ID, relative to `parent`, to list. For example: `chatrooms`
-   *   or `messages`.
+   *   The collection ID, relative to `parent`, to list. For example:
+   * `chatrooms` or `messages`.
    * @param {number} [request.pageSize]
    *   The maximum number of resources contained in the underlying API
    *   response. If page streaming is performed per-resource, this
@@ -337,14 +322,16 @@ class FirestoreClient {
    *   If a document has a field that is not present in this mask, that field
    *   will not be returned in the response.
    *
-   *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
+   *   This object should have the same structure as [DocumentMask]{@link
+   * google.firestore.v1beta1.DocumentMask}
    * @param {string} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.readTime]
    *   Reads documents as they were at the given time.
    *   This may not be older than 60 seconds.
    *
-   *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
+   *   This object should have the same structure as [Timestamp]{@link
+   * google.protobuf.Timestamp}
    * @param {boolean} [request.showMissing]
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -354,27 +341,36 @@ class FirestoreClient {
    *   Requests with `show_missing` may not specify `where` or
    *   `order_by`.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @param {function(?Error, ?Array, ?Object, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is Array of [Document]{@link google.firestore.v1beta1.Document}.
+   *   The second parameter to the callback is Array of [Document]{@link
+   * google.firestore.v1beta1.Document}.
    *
-   *   When autoPaginate: false is specified through options, it contains the result
-   *   in a single response. If the response indicates the next page exists, the third
-   *   parameter is set to be used for the next request object. The fourth parameter keeps
-   *   the raw response object of an object representing [ListDocumentsResponse]{@link google.firestore.v1beta1.ListDocumentsResponse}.
+   *   When autoPaginate: false is specified through options, it contains the
+   * result in a single response. If the response indicates the next page
+   * exists, the third parameter is set to be used for the next request object.
+   * The fourth parameter keeps the raw response object of an object
+   * representing [ListDocumentsResponse]{@link
+   * google.firestore.v1beta1.ListDocumentsResponse}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is Array of [Document]{@link google.firestore.v1beta1.Document}.
+   *   The first element of the array is Array of [Document]{@link
+   * google.firestore.v1beta1.Document}.
    *
-   *   When autoPaginate: false is specified through options, the array has three elements.
-   *   The first element is Array of [Document]{@link google.firestore.v1beta1.Document} in a single response.
-   *   The second element is the next request object if the response
-   *   indicates the next page exists, or null. The third element is
-   *   an object representing [ListDocumentsResponse]{@link google.firestore.v1beta1.ListDocumentsResponse}.
+   *   When autoPaginate: false is specified through options, the array has
+   * three elements. The first element is Array of [Document]{@link
+   * google.firestore.v1beta1.Document} in a single response. The second element
+   * is the next request object if the response indicates the next page exists,
+   * or null. The third element is an object representing
+   * [ListDocumentsResponse]{@link
+   * google.firestore.v1beta1.ListDocumentsResponse}.
    *
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   *   The promise has a method named "cancel" which cancels the ongoing API
+   * call.
    *
    * @example
    *
@@ -385,11 +381,9 @@ class FirestoreClient {
    * });
    *
    * // Iterate over all elements.
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-   * var collectionId = '';
-   * var request = {
-   *   parent: formattedParent,
-   *   collectionId: collectionId,
+   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); var collectionId = ''; var request = { parent:
+   * formattedParent, collectionId: collectionId,
    * };
    *
    * client.listDocuments(request)
@@ -404,11 +398,9 @@ class FirestoreClient {
    *   });
    *
    * // Or obtain the paged response.
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-   * var collectionId = '';
-   * var request = {
-   *   parent: formattedParent,
-   *   collectionId: collectionId,
+   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); var collectionId = ''; var request = { parent:
+   * formattedParent, collectionId: collectionId,
    * };
    *
    *
@@ -448,8 +440,8 @@ class FirestoreClient {
    * Equivalent to {@link listDocuments}, but returns a NodeJS Stream object.
    *
    * This fetches the paged responses for {@link listDocuments} continuously
-   * and invokes the callback registered for 'data' event for each element in the
-   * responses.
+   * and invokes the callback registered for 'data' event for each element in
+   * the responses.
    *
    * The returned object has 'end' method when no more elements are required.
    *
@@ -467,8 +459,8 @@ class FirestoreClient {
    *   `projects/my-project/databases/my-database/documents` or
    *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
    * @param {string} request.collectionId
-   *   The collection ID, relative to `parent`, to list. For example: `chatrooms`
-   *   or `messages`.
+   *   The collection ID, relative to `parent`, to list. For example:
+   * `chatrooms` or `messages`.
    * @param {number} [request.pageSize]
    *   The maximum number of resources contained in the underlying API
    *   response. If page streaming is performed per-resource, this
@@ -483,14 +475,16 @@ class FirestoreClient {
    *   If a document has a field that is not present in this mask, that field
    *   will not be returned in the response.
    *
-   *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
+   *   This object should have the same structure as [DocumentMask]{@link
+   * google.firestore.v1beta1.DocumentMask}
    * @param {string} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.readTime]
    *   Reads documents as they were at the given time.
    *   This may not be older than 60 seconds.
    *
-   *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
+   *   This object should have the same structure as [Timestamp]{@link
+   * google.protobuf.Timestamp}
    * @param {boolean} [request.showMissing]
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -500,10 +494,13 @@ class FirestoreClient {
    *   Requests with `show_missing` may not specify `where` or
    *   `order_by`.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @returns {Stream}
-   *   An object stream which emits an object representing [Document]{@link google.firestore.v1beta1.Document} on 'data' event.
+   *   An object stream which emits an object representing [Document]{@link
+   * google.firestore.v1beta1.Document} on 'data' event.
    *
    * @example
    *
@@ -513,11 +510,9 @@ class FirestoreClient {
    *   // optional auth parameters.
    * });
    *
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-   * var collectionId = '';
-   * var request = {
-   *   parent: formattedParent,
-   *   collectionId: collectionId,
+   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); var collectionId = ''; var request = { parent:
+   * formattedParent, collectionId: collectionId,
    * };
    * client.listDocumentsStream(request)
    *   .on('data', element => {
@@ -530,10 +525,7 @@ class FirestoreClient {
     options = options || {};
 
     return this._descriptors.page.listDocuments.createStream(
-      this._innerApiCalls.listDocuments,
-      request,
-      options
-    );
+        this._innerApiCalls.listDocuments, request, options);
   }
 
   /**
@@ -546,7 +538,8 @@ class FirestoreClient {
    *   `projects/{project_id}/databases/{database_id}/documents` or
    *   `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
    * @param {string} request.collectionId
-   *   The collection ID, relative to `parent`, to list. For example: `chatrooms`.
+   *   The collection ID, relative to `parent`, to list. For example:
+   * `chatrooms`.
    * @param {string} request.documentId
    *   The client-assigned document ID to use for this document.
    *
@@ -554,24 +547,30 @@ class FirestoreClient {
    * @param {Object} request.document
    *   The document to create. `name` must not be set.
    *
-   *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
+   *   This object should have the same structure as [Document]{@link
+   * google.firestore.v1beta1.Document}
    * @param {Object} [request.mask]
    *   The fields to return. If not set, returns all fields.
    *
    *   If the document has a field that is not present in this mask, that field
    *   will not be returned in the response.
    *
-   *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
+   *   This object should have the same structure as [DocumentMask]{@link
+   * google.firestore.v1beta1.DocumentMask}
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing [Document]{@link google.firestore.v1beta1.Document}.
+   *   The second parameter to the callback is an object representing
+   * [Document]{@link google.firestore.v1beta1.Document}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Document]{@link google.firestore.v1beta1.Document}.
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   *   The first element of the array is an object representing [Document]{@link
+   * google.firestore.v1beta1.Document}. The promise has a method named "cancel"
+   * which cancels the ongoing API call.
    *
    * @example
    *
@@ -581,9 +580,8 @@ class FirestoreClient {
    *   // optional auth parameters.
    * });
    *
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-   * var collectionId = '';
-   * var documentId = '';
+   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); var collectionId = ''; var documentId = '';
    * var document = {};
    * var request = {
    *   parent: formattedParent,
@@ -619,7 +617,8 @@ class FirestoreClient {
    *   The updated document.
    *   Creates the document if it does not already exist.
    *
-   *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
+   *   This object should have the same structure as [Document]{@link
+   * google.firestore.v1beta1.Document}
    * @param {Object} request.updateMask
    *   The fields to update.
    *   None of the field paths in the mask may contain a reserved name.
@@ -629,29 +628,36 @@ class FirestoreClient {
    *   Fields referenced in the mask, but not present in the input document, are
    *   deleted from the document on the server.
    *
-   *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
+   *   This object should have the same structure as [DocumentMask]{@link
+   * google.firestore.v1beta1.DocumentMask}
    * @param {Object} [request.mask]
    *   The fields to return. If not set, returns all fields.
    *
    *   If the document has a field that is not present in this mask, that field
    *   will not be returned in the response.
    *
-   *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
+   *   This object should have the same structure as [DocumentMask]{@link
+   * google.firestore.v1beta1.DocumentMask}
    * @param {Object} [request.currentDocument]
    *   An optional precondition on the document.
    *   The request will fail if this is set and not met by the target document.
    *
-   *   This object should have the same structure as [Precondition]{@link google.firestore.v1beta1.Precondition}
+   *   This object should have the same structure as [Precondition]{@link
+   * google.firestore.v1beta1.Precondition}
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing [Document]{@link google.firestore.v1beta1.Document}.
+   *   The second parameter to the callback is an object representing
+   * [Document]{@link google.firestore.v1beta1.Document}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Document]{@link google.firestore.v1beta1.Document}.
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   *   The first element of the array is an object representing [Document]{@link
+   * google.firestore.v1beta1.Document}. The promise has a method named "cancel"
+   * which cancels the ongoing API call.
    *
    * @example
    *
@@ -698,14 +704,18 @@ class FirestoreClient {
    *   An optional precondition on the document.
    *   The request will fail if this is set and not met by the target document.
    *
-   *   This object should have the same structure as [Precondition]{@link google.firestore.v1beta1.Precondition}
+   *   This object should have the same structure as [Precondition]{@link
+   * google.firestore.v1beta1.Precondition}
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @param {function(?Error)} [callback]
    *   The function which will be called with the result of the API call.
    * @returns {Promise} - The promise which resolves when API call finishes.
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   *   The promise has a method named "cancel" which cancels the ongoing API
+   * call.
    *
    * @example
    *
@@ -715,9 +725,9 @@ class FirestoreClient {
    *   // optional auth parameters.
    * });
    *
-   * var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-   * client.deleteDocument({name: formattedName}).catch(err => {
-   *   console.error(err);
+   * var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); client.deleteDocument({name:
+   * formattedName}).catch(err => { console.error(err);
    * });
    */
   deleteDocument(request, options, callback) {
@@ -744,15 +754,16 @@ class FirestoreClient {
    * @param {string[]} request.documents
    *   The names of the documents to retrieve. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
-   *   The request will fail if any of the document is not a child resource of the
-   *   given `database`. Duplicate names will be elided.
+   *   The request will fail if any of the document is not a child resource of
+   * the given `database`. Duplicate names will be elided.
    * @param {Object} [request.mask]
    *   The fields to return. If not set, returns all fields.
    *
-   *   If a document has a field that is not present in this mask, that field will
-   *   not be returned in the response.
+   *   If a document has a field that is not present in this mask, that field
+   * will not be returned in the response.
    *
-   *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
+   *   This object should have the same structure as [DocumentMask]{@link
+   * google.firestore.v1beta1.DocumentMask}
    * @param {string} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.newTransaction]
@@ -761,17 +772,22 @@ class FirestoreClient {
    *   The new transaction ID will be returned as the first response in the
    *   stream.
    *
-   *   This object should have the same structure as [TransactionOptions]{@link google.firestore.v1beta1.TransactionOptions}
+   *   This object should have the same structure as [TransactionOptions]{@link
+   * google.firestore.v1beta1.TransactionOptions}
    * @param {Object} [request.readTime]
    *   Reads documents as they were at the given time.
    *   This may not be older than 60 seconds.
    *
-   *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
+   *   This object should have the same structure as [Timestamp]{@link
+   * google.protobuf.Timestamp}
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @returns {Stream}
-   *   An object stream which emits [BatchGetDocumentsResponse]{@link google.firestore.v1beta1.BatchGetDocumentsResponse} on 'data' event.
+   *   An object stream which emits [BatchGetDocumentsResponse]{@link
+   * google.firestore.v1beta1.BatchGetDocumentsResponse} on 'data' event.
    *
    * @example
    *
@@ -809,17 +825,24 @@ class FirestoreClient {
    *   The options for the transaction.
    *   Defaults to a read-write transaction.
    *
-   *   This object should have the same structure as [TransactionOptions]{@link google.firestore.v1beta1.TransactionOptions}
+   *   This object should have the same structure as [TransactionOptions]{@link
+   * google.firestore.v1beta1.TransactionOptions}
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing [BeginTransactionResponse]{@link google.firestore.v1beta1.BeginTransactionResponse}.
+   *   The second parameter to the callback is an object representing
+   * [BeginTransactionResponse]{@link
+   * google.firestore.v1beta1.BeginTransactionResponse}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [BeginTransactionResponse]{@link google.firestore.v1beta1.BeginTransactionResponse}.
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   *   The first element of the array is an object representing
+   * [BeginTransactionResponse]{@link
+   * google.firestore.v1beta1.BeginTransactionResponse}. The promise has a
+   * method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -862,19 +885,24 @@ class FirestoreClient {
    *
    *   Always executed atomically and in order.
    *
-   *   This object should have the same structure as [Write]{@link google.firestore.v1beta1.Write}
+   *   This object should have the same structure as [Write]{@link
+   * google.firestore.v1beta1.Write}
    * @param {string} [request.transaction]
    *   If set, applies all writes in this transaction, and commits it.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing [CommitResponse]{@link google.firestore.v1beta1.CommitResponse}.
+   *   The second parameter to the callback is an object representing
+   * [CommitResponse]{@link google.firestore.v1beta1.CommitResponse}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [CommitResponse]{@link google.firestore.v1beta1.CommitResponse}.
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   *   The first element of the array is an object representing
+   * [CommitResponse]{@link google.firestore.v1beta1.CommitResponse}. The
+   * promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -920,12 +948,15 @@ class FirestoreClient {
    * @param {string} request.transaction
    *   The transaction to roll back.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @param {function(?Error)} [callback]
    *   The function which will be called with the result of the API call.
    * @returns {Promise} - The promise which resolves when API call finishes.
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   *   The promise has a method named "cancel" which cancels the ongoing API
+   * call.
    *
    * @example
    *
@@ -970,7 +1001,8 @@ class FirestoreClient {
    * @param {Object} [request.structuredQuery]
    *   A structured query.
    *
-   *   This object should have the same structure as [StructuredQuery]{@link google.firestore.v1beta1.StructuredQuery}
+   *   This object should have the same structure as [StructuredQuery]{@link
+   * google.firestore.v1beta1.StructuredQuery}
    * @param {string} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.newTransaction]
@@ -979,17 +1011,22 @@ class FirestoreClient {
    *   The new transaction ID will be returned as the first response in the
    *   stream.
    *
-   *   This object should have the same structure as [TransactionOptions]{@link google.firestore.v1beta1.TransactionOptions}
+   *   This object should have the same structure as [TransactionOptions]{@link
+   * google.firestore.v1beta1.TransactionOptions}
    * @param {Object} [request.readTime]
    *   Reads documents as they were at the given time.
    *   This may not be older than 60 seconds.
    *
-   *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
+   *   This object should have the same structure as [Timestamp]{@link
+   * google.protobuf.Timestamp}
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @returns {Stream}
-   *   An object stream which emits [RunQueryResponse]{@link google.firestore.v1beta1.RunQueryResponse} on 'data' event.
+   *   An object stream which emits [RunQueryResponse]{@link
+   * google.firestore.v1beta1.RunQueryResponse} on 'data' event.
    *
    * @example
    *
@@ -999,8 +1036,9 @@ class FirestoreClient {
    *   // optional auth parameters.
    * });
    *
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-   * client.runQuery({parent: formattedParent}).on('data', response => {
+   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); client.runQuery({parent:
+   * formattedParent}).on('data', response => {
    *   // doThingsWith(response)
    * });
    */
@@ -1014,12 +1052,16 @@ class FirestoreClient {
    * Streams batches of document updates and deletes, in order.
    *
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @returns {Stream}
    *   An object stream which is both readable and writable. It accepts objects
-   *   representing [WriteRequest]{@link google.firestore.v1beta1.WriteRequest} for write() method, and
-   *   will emit objects representing [WriteResponse]{@link google.firestore.v1beta1.WriteResponse} on 'data' event asynchronously.
+   *   representing [WriteRequest]{@link google.firestore.v1beta1.WriteRequest}
+   * for write() method, and will emit objects representing
+   * [WriteResponse]{@link google.firestore.v1beta1.WriteResponse} on 'data'
+   * event asynchronously.
    *
    * @example
    *
@@ -1049,12 +1091,16 @@ class FirestoreClient {
    * Listens to changes.
    *
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @returns {Stream}
    *   An object stream which is both readable and writable. It accepts objects
-   *   representing [ListenRequest]{@link google.firestore.v1beta1.ListenRequest} for write() method, and
-   *   will emit objects representing [ListenResponse]{@link google.firestore.v1beta1.ListenResponse} on 'data' event asynchronously.
+   *   representing [ListenRequest]{@link
+   * google.firestore.v1beta1.ListenRequest} for write() method, and will emit
+   * objects representing [ListenResponse]{@link
+   * google.firestore.v1beta1.ListenResponse} on 'data' event asynchronously.
    *
    * @example
    *
@@ -1097,27 +1143,33 @@ class FirestoreClient {
    *   performed per-page, this determines the maximum number of
    *   resources in a page.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @param {function(?Error, ?Array, ?Object, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
    *   The second parameter to the callback is Array of string.
    *
-   *   When autoPaginate: false is specified through options, it contains the result
-   *   in a single response. If the response indicates the next page exists, the third
-   *   parameter is set to be used for the next request object. The fourth parameter keeps
-   *   the raw response object of an object representing [ListCollectionIdsResponse]{@link google.firestore.v1beta1.ListCollectionIdsResponse}.
+   *   When autoPaginate: false is specified through options, it contains the
+   * result in a single response. If the response indicates the next page
+   * exists, the third parameter is set to be used for the next request object.
+   * The fourth parameter keeps the raw response object of an object
+   * representing [ListCollectionIdsResponse]{@link
+   * google.firestore.v1beta1.ListCollectionIdsResponse}.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is Array of string.
    *
-   *   When autoPaginate: false is specified through options, the array has three elements.
-   *   The first element is Array of string in a single response.
+   *   When autoPaginate: false is specified through options, the array has
+   * three elements. The first element is Array of string in a single response.
    *   The second element is the next request object if the response
    *   indicates the next page exists, or null. The third element is
-   *   an object representing [ListCollectionIdsResponse]{@link google.firestore.v1beta1.ListCollectionIdsResponse}.
+   *   an object representing [ListCollectionIdsResponse]{@link
+   * google.firestore.v1beta1.ListCollectionIdsResponse}.
    *
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   *   The promise has a method named "cancel" which cancels the ongoing API
+   * call.
    *
    * @example
    *
@@ -1128,7 +1180,8 @@ class FirestoreClient {
    * });
    *
    * // Iterate over all elements.
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]');
    *
    * client.listCollectionIds({parent: formattedParent})
    *   .then(responses => {
@@ -1142,7 +1195,8 @@ class FirestoreClient {
    *   });
    *
    * // Or obtain the paged response.
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]');
    *
    *
    * var options = {autoPaginate: false};
@@ -1178,11 +1232,12 @@ class FirestoreClient {
   }
 
   /**
-   * Equivalent to {@link listCollectionIds}, but returns a NodeJS Stream object.
+   * Equivalent to {@link listCollectionIds}, but returns a NodeJS Stream
+   * object.
    *
    * This fetches the paged responses for {@link listCollectionIds} continuously
-   * and invokes the callback registered for 'data' event for each element in the
-   * responses.
+   * and invokes the callback registered for 'data' event for each element in
+   * the responses.
    *
    * The returned object has 'end' method when no more elements are required.
    *
@@ -1204,8 +1259,10 @@ class FirestoreClient {
    *   performed per-page, this determines the maximum number of
    *   resources in a page.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
-   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
+   *   Optional parameters. You can override the default settings for this call,
+   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
+   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
+   * details.
    * @returns {Stream}
    *   An object stream which emits a string on 'data' event.
    *
@@ -1217,9 +1274,9 @@ class FirestoreClient {
    *   // optional auth parameters.
    * });
    *
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-   * client.listCollectionIdsStream({parent: formattedParent})
-   *   .on('data', element => {
+   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); client.listCollectionIdsStream({parent:
+   * formattedParent}) .on('data', element => {
    *     // doThingsWith(element)
    *   }).on('error', err => {
    *     console.log(err);
@@ -1229,10 +1286,7 @@ class FirestoreClient {
     options = options || {};
 
     return this._descriptors.page.listCollectionIds.createStream(
-      this._innerApiCalls.listCollectionIds,
-      request,
-      options
-    );
+        this._innerApiCalls.listCollectionIds, request, options);
   }
 
   // --------------------
@@ -1310,7 +1364,7 @@ class FirestoreClient {
    */
   matchProjectFromDatabaseRootName(databaseRootName) {
     return this._pathTemplates.databaseRootPathTemplate.match(databaseRootName)
-      .project;
+        .project;
   }
 
   /**
@@ -1322,7 +1376,7 @@ class FirestoreClient {
    */
   matchDatabaseFromDatabaseRootName(databaseRootName) {
     return this._pathTemplates.databaseRootPathTemplate.match(databaseRootName)
-      .database;
+        .database;
   }
 
   /**
@@ -1334,7 +1388,7 @@ class FirestoreClient {
    */
   matchProjectFromDocumentRootName(documentRootName) {
     return this._pathTemplates.documentRootPathTemplate.match(documentRootName)
-      .project;
+        .project;
   }
 
   /**
@@ -1346,7 +1400,7 @@ class FirestoreClient {
    */
   matchDatabaseFromDocumentRootName(documentRootName) {
     return this._pathTemplates.documentRootPathTemplate.match(documentRootName)
-      .database;
+        .database;
   }
 
   /**
@@ -1358,7 +1412,7 @@ class FirestoreClient {
    */
   matchProjectFromDocumentPathName(documentPathName) {
     return this._pathTemplates.documentPathPathTemplate.match(documentPathName)
-      .project;
+        .project;
   }
 
   /**
@@ -1370,7 +1424,7 @@ class FirestoreClient {
    */
   matchDatabaseFromDocumentPathName(documentPathName) {
     return this._pathTemplates.documentPathPathTemplate.match(documentPathName)
-      .database;
+        .database;
   }
 
   /**
@@ -1382,7 +1436,7 @@ class FirestoreClient {
    */
   matchDocumentPathFromDocumentPathName(documentPathName) {
     return this._pathTemplates.documentPathPathTemplate.match(documentPathName)
-      .document_path;
+        .document_path;
   }
 
   /**

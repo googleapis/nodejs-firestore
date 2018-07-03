@@ -270,15 +270,13 @@ class Watch {
    */
   static forDocument(documentRef) {
     return new Watch(
-      documentRef.firestore,
-      {
-        documents: {
-          documents: [documentRef.formattedName],
+        documentRef.firestore, {
+          documents: {
+            documents: [documentRef.formattedName],
+          },
+          targetId: WATCH_TARGET_ID,
         },
-        targetId: WATCH_TARGET_ID,
-      },
-      DOCUMENT_WATCH_COMPARATOR
-    );
+        DOCUMENT_WATCH_COMPARATOR);
   }
 
   /**
@@ -290,13 +288,11 @@ class Watch {
    */
   static forQuery(query) {
     return new Watch(
-      query.firestore,
-      {
-        query: query.toProto(),
-        targetId: WATCH_TARGET_ID,
-      },
-      query.comparator()
-    );
+        query.firestore, {
+          query: query.toProto(),
+          targetId: WATCH_TARGET_ID,
+        },
+        query.comparator());
   }
 
   /**
@@ -311,11 +307,8 @@ class Watch {
   isPermanentError(error) {
     if (error.code === undefined) {
       Firestore.log(
-        'Watch.onSnapshot',
-        this._requestTag,
-        'Unable to determine error code: ',
-        error
-      );
+          'Watch.onSnapshot', this._requestTag,
+          'Unable to determine error code: ', error);
       return false;
     }
 
@@ -400,10 +393,7 @@ class Watch {
     /** Helper to clear the docs on RESET or filter mismatch. */
     const resetDocs = function() {
       Firestore.log(
-        'Watch.onSnapshot',
-        self._requestTag,
-        'Resetting documents'
-      );
+          'Watch.onSnapshot', self._requestTag, 'Resetting documents');
       changeMap.clear();
       resumeToken = undefined;
 
@@ -428,11 +418,7 @@ class Watch {
       if (isActive) {
         isActive = false;
         Firestore.log(
-          'Watch.onSnapshot',
-          self._requestTag,
-          'Invoking onError: ',
-          err
-        );
+            'Watch.onSnapshot', self._requestTag, 'Invoking onError: ', err);
         onError(err);
       }
     };
@@ -444,11 +430,8 @@ class Watch {
     const maybeReopenStream = function(err) {
       if (isActive && !self.isPermanentError(err)) {
         Firestore.log(
-          'Watch.onSnapshot',
-          self._requestTag,
-          'Stream ended, re-opening after retryable error: ',
-          err
-        );
+            'Watch.onSnapshot', self._requestTag,
+            'Stream ended, re-opening after retryable error: ', err);
         request.addTarget.resumeToken = resumeToken;
         changeMap.clear();
 
@@ -480,45 +463,38 @@ class Watch {
       self._backoff.backoffAndWait().then(() => {
         if (!isActive) {
           Firestore.log(
-            'Watch.onSnapshot',
-            self._requestTag,
-            'Not initializing inactive stream'
-          );
+              'Watch.onSnapshot', self._requestTag,
+              'Not initializing inactive stream');
           return;
         }
 
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
         self._firestore
-          .readWriteStream('listen', request, self._requestTag, true)
-          .then(backendStream => {
-            if (!isActive) {
+            .readWriteStream('listen', request, self._requestTag, true)
+            .then(backendStream => {
+              if (!isActive) {
+                Firestore.log(
+                    'Watch.onSnapshot', self._requestTag,
+                    'Closing inactive stream');
+                backendStream.end();
+                return;
+              }
               Firestore.log(
-                'Watch.onSnapshot',
-                self._requestTag,
-                'Closing inactive stream'
-              );
-              backendStream.end();
-              return;
-            }
-            Firestore.log(
-              'Watch.onSnapshot',
-              self._requestTag,
-              'Opened new stream'
-            );
-            currentStream = backendStream;
-            currentStream.on('error', err => {
-              maybeReopenStream(err);
-            });
-            currentStream.on('end', () => {
-              const err = new Error('Stream ended unexpectedly');
-              err.code = GRPC_STATUS_CODE.UNKNOWN;
-              maybeReopenStream(err);
-            });
-            currentStream.pipe(stream);
-            currentStream.resume();
-          })
-          .catch(closeStream);
+                  'Watch.onSnapshot', self._requestTag, 'Opened new stream');
+              currentStream = backendStream;
+              currentStream.on('error', err => {
+                maybeReopenStream(err);
+              });
+              currentStream.on('end', () => {
+                const err = new Error('Stream ended unexpectedly');
+                err.code = GRPC_STATUS_CODE.UNKNOWN;
+                maybeReopenStream(err);
+              });
+              currentStream.pipe(stream);
+              currentStream.resume();
+            })
+            .catch(closeStream);
       });
     };
 
@@ -573,10 +549,9 @@ class Watch {
       let updatedMap = docMap;
 
       assert(
-        docTree.length === docMap.size,
-        'The document tree and document ' +
-          'map should have the same number of entries.'
-      );
+          docTree.length === docMap.size,
+          'The document tree and document ' +
+              'map should have the same number of entries.');
 
       /**
        * Applies a document delete to the document tree and the document map.
@@ -590,11 +565,7 @@ class Watch {
         updatedTree = existing.remove();
         updatedMap.delete(name);
         return new DocumentChange(
-          ChangeType.removed,
-          oldDocument,
-          oldIndex,
-          -1
-        );
+            ChangeType.removed, oldDocument, oldIndex, -1);
       };
 
       /**
@@ -622,11 +593,8 @@ class Watch {
           let removeChange = deleteDoc(name);
           let addChange = addDoc(newDocument);
           return new DocumentChange(
-            ChangeType.modified,
-            newDocument,
-            removeChange.oldIndex,
-            addChange.newIndex
-          );
+              ChangeType.modified, newDocument, removeChange.oldIndex,
+              addChange.newIndex);
         }
         return null;
       };
@@ -665,10 +633,9 @@ class Watch {
       });
 
       assert(
-        updatedTree.length === updatedMap.size,
-        'The update document ' +
-          'tree and document map should have the same number of entries.'
-      );
+          updatedTree.length === updatedMap.size,
+          'The update document ' +
+              'tree and document map should have the same number of entries.');
 
       return {updatedTree, updatedMap, appliedChanges};
     };
@@ -683,18 +650,12 @@ class Watch {
 
       if (!hasPushed || diff.appliedChanges.length > 0) {
         Firestore.log(
-          'Watch.onSnapshot',
-          self._requestTag,
-          'Sending snapshot with %d changes and %d documents',
-          diff.appliedChanges.length,
-          diff.updatedTree.length
-        );
+            'Watch.onSnapshot', self._requestTag,
+            'Sending snapshot with %d changes and %d documents',
+            diff.appliedChanges.length, diff.updatedTree.length);
         onNext(
-          readTime,
-          diff.updatedTree.length,
-          () => diff.updatedTree.keys,
-          () => diff.appliedChanges
-        );
+            readTime, diff.updatedTree.length, () => diff.updatedTree.keys,
+            () => diff.appliedChanges);
         hasPushed = true;
       }
 
@@ -716,139 +677,126 @@ class Watch {
     initStream();
 
     stream
-      .on('data', proto => {
-        if (proto.targetChange) {
-          Firestore.log(
-            'Watch.onSnapshot',
-            self._requestTag,
-            'Processing target change'
-          );
-          const change = proto.targetChange;
-          const noTargetIds =
-            !change.targetIds || change.targetIds.length === 0;
-          if (change.targetChangeType === 'NO_CHANGE') {
-            if (noTargetIds && change.readTime && current) {
-              // This means everything is up-to-date, so emit the current set of
-              // docs as a snapshot, if there were changes.
-              push(Timestamp.fromProto(change.readTime), change.resumeToken);
-            }
-          } else if (change.targetChangeType === 'ADD') {
-            if (WATCH_TARGET_ID !== change.targetIds[0]) {
-              closeStream(Error('Unexpected target ID sent by server'));
-            }
-          } else if (change.targetChangeType === 'REMOVE') {
-            let code = 13;
-            let message = 'internal error';
-            if (change.cause) {
-              code = change.cause.code;
-              message = change.cause.message;
-            }
-            // @todo: Surface a .code property on the exception.
-            closeStream(new Error('Error ' + code + ': ' + message));
-          } else if (change.targetChangeType === 'RESET') {
-            // Whatever changes have happened so far no longer matter.
-            resetDocs();
-          } else if (change.targetChangeType === 'CURRENT') {
-            current = true;
-          } else {
-            closeStream(
-              new Error('Unknown target change type: ' + JSON.stringify(change))
-            );
-          }
+        .on('data',
+            proto => {
+              if (proto.targetChange) {
+                Firestore.log(
+                    'Watch.onSnapshot', self._requestTag,
+                    'Processing target change');
+                const change = proto.targetChange;
+                const noTargetIds =
+                    !change.targetIds || change.targetIds.length === 0;
+                if (change.targetChangeType === 'NO_CHANGE') {
+                  if (noTargetIds && change.readTime && current) {
+                    // This means everything is up-to-date, so emit the current
+                    // set of docs as a snapshot, if there were changes.
+                    push(
+                        Timestamp.fromProto(change.readTime),
+                        change.resumeToken);
+                  }
+                } else if (change.targetChangeType === 'ADD') {
+                  if (WATCH_TARGET_ID !== change.targetIds[0]) {
+                    closeStream(Error('Unexpected target ID sent by server'));
+                  }
+                } else if (change.targetChangeType === 'REMOVE') {
+                  let code = 13;
+                  let message = 'internal error';
+                  if (change.cause) {
+                    code = change.cause.code;
+                    message = change.cause.message;
+                  }
+                  // @todo: Surface a .code property on the exception.
+                  closeStream(new Error('Error ' + code + ': ' + message));
+                } else if (change.targetChangeType === 'RESET') {
+                  // Whatever changes have happened so far no longer matter.
+                  resetDocs();
+                } else if (change.targetChangeType === 'CURRENT') {
+                  current = true;
+                } else {
+                  closeStream(new Error(
+                      'Unknown target change type: ' + JSON.stringify(change)));
+                }
 
-          if (
-            change.resumeToken &&
-            affectsTarget(change.targetIds, WATCH_TARGET_ID)
-          ) {
-            this._backoff.reset();
-          }
-        } else if (proto.documentChange) {
-          Firestore.log(
-            'Watch.onSnapshot',
-            self._requestTag,
-            'Processing change event'
-          );
+                if (change.resumeToken &&
+                    affectsTarget(change.targetIds, WATCH_TARGET_ID)) {
+                  this._backoff.reset();
+                }
+              } else if (proto.documentChange) {
+                Firestore.log(
+                    'Watch.onSnapshot', self._requestTag,
+                    'Processing change event');
 
-          // No other targetIds can show up here, but we still need to see if the
-          // targetId was in the added list or removed list.
-          const targetIds = proto.documentChange.targetIds || [];
-          const removedTargetIds = proto.documentChange.removedTargetIds || [];
-          let changed = false;
-          let removed = false;
-          for (let i = 0; i < targetIds.length; i++) {
-            if (targetIds[i] === WATCH_TARGET_ID) {
-              changed = true;
-            }
-          }
-          for (let i = 0; i < removedTargetIds.length; i++) {
-            if (removedTargetIds[i] === WATCH_TARGET_ID) {
-              removed = true;
-            }
-          }
+                // No other targetIds can show up here, but we still need to see
+                // if the targetId was in the added list or removed list.
+                const targetIds = proto.documentChange.targetIds || [];
+                const removedTargetIds =
+                    proto.documentChange.removedTargetIds || [];
+                let changed = false;
+                let removed = false;
+                for (let i = 0; i < targetIds.length; i++) {
+                  if (targetIds[i] === WATCH_TARGET_ID) {
+                    changed = true;
+                  }
+                }
+                for (let i = 0; i < removedTargetIds.length; i++) {
+                  if (removedTargetIds[i] === WATCH_TARGET_ID) {
+                    removed = true;
+                  }
+                }
 
-          const document = proto.documentChange.document;
-          const name = document.name;
+                const document = proto.documentChange.document;
+                const name = document.name;
 
-          if (changed) {
-            Firestore.log(
-              'Watch.onSnapshot',
-              self._requestTag,
-              'Received document change'
-            );
-            const snapshot = new DocumentSnapshot.Builder();
-            snapshot.ref = new DocumentReference(
-              self._firestore,
-              ResourcePath.fromSlashSeparatedString(name)
-            );
-            snapshot.fieldsProto = document.fields || {};
-            snapshot.createTime = Timestamp.fromProto(document.createTime);
-            snapshot.updateTime = Timestamp.fromProto(document.updateTime);
-            changeMap.set(name, snapshot);
-          } else if (removed) {
-            Firestore.log(
-              'Watch.onSnapshot',
-              self._requestTag,
-              'Received document remove'
-            );
-            changeMap.set(name, REMOVED);
-          }
-        } else if (proto.documentDelete || proto.documentRemove) {
+                if (changed) {
+                  Firestore.log(
+                      'Watch.onSnapshot', self._requestTag,
+                      'Received document change');
+                  const snapshot = new DocumentSnapshot.Builder();
+                  snapshot.ref = new DocumentReference(
+                      self._firestore,
+                      ResourcePath.fromSlashSeparatedString(name));
+                  snapshot.fieldsProto = document.fields || {};
+                  snapshot.createTime =
+                      Timestamp.fromProto(document.createTime);
+                  snapshot.updateTime =
+                      Timestamp.fromProto(document.updateTime);
+                  changeMap.set(name, snapshot);
+                } else if (removed) {
+                  Firestore.log(
+                      'Watch.onSnapshot', self._requestTag,
+                      'Received document remove');
+                  changeMap.set(name, REMOVED);
+                }
+              } else if (proto.documentDelete || proto.documentRemove) {
+                Firestore.log(
+                    'Watch.onSnapshot', self._requestTag,
+                    'Processing remove event');
+                const name =
+                    (proto.documentDelete || proto.documentRemove).document;
+                changeMap.set(name, REMOVED);
+              } else if (proto.filter) {
+                Firestore.log(
+                    'Watch.onSnapshot', self._requestTag,
+                    'Processing filter update');
+                if (proto.filter.count !== currentSize()) {
+                  // We need to remove all the current results.
+                  resetDocs();
+                  // The filter didn't match, so re-issue the query.
+                  resetStream();
+                }
+              } else {
+                closeStream(new Error(
+                    'Unknown listen response type: ' + JSON.stringify(proto)));
+              }
+            })
+        .on('end', () => {
           Firestore.log(
-            'Watch.onSnapshot',
-            self._requestTag,
-            'Processing remove event'
-          );
-          const name = (proto.documentDelete || proto.documentRemove).document;
-          changeMap.set(name, REMOVED);
-        } else if (proto.filter) {
-          Firestore.log(
-            'Watch.onSnapshot',
-            self._requestTag,
-            'Processing filter update'
-          );
-          if (proto.filter.count !== currentSize()) {
-            // We need to remove all the current results.
-            resetDocs();
-            // The filter didn't match, so re-issue the query.
-            resetStream();
+              'Watch.onSnapshot', self._requestTag, 'Processing stream end');
+          if (currentStream) {
+            // Pass the event on to the underlying stream.
+            currentStream.end();
           }
-        } else {
-          closeStream(
-            new Error('Unknown listen response type: ' + JSON.stringify(proto))
-          );
-        }
-      })
-      .on('end', () => {
-        Firestore.log(
-          'Watch.onSnapshot',
-          self._requestTag,
-          'Processing stream end'
-        );
-        if (currentStream) {
-          // Pass the event on to the underlying stream.
-          currentStream.end();
-        }
-      });
+        });
 
     return () => {
       Firestore.log('Watch.onSnapshot', self._requestTag, 'Ending stream');
@@ -861,19 +809,16 @@ class Watch {
   }
 }
 
-module.exports = (
-  FirestoreType,
-  DocumentChangeType,
-  DocumentReferenceType,
-  DocumentSnapshotType
-) => {
-  Firestore = FirestoreType;
-  DocumentChange = DocumentChangeType;
-  DocumentReference = DocumentReferenceType;
-  DocumentSnapshot = DocumentSnapshotType;
+module.exports =
+    (FirestoreType, DocumentChangeType, DocumentReferenceType,
+     DocumentSnapshotType) => {
+      Firestore = FirestoreType;
+      DocumentChange = DocumentChangeType;
+      DocumentReference = DocumentReferenceType;
+      DocumentSnapshot = DocumentSnapshotType;
 
-  const backoff = require('./backoff')(FirestoreType);
-  ExponentialBackoff = backoff.ExponentialBackoff;
+      const backoff = require('./backoff')(FirestoreType);
+      ExponentialBackoff = backoff.ExponentialBackoff;
 
-  return Watch;
-};
+      return Watch;
+    };

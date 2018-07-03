@@ -56,9 +56,8 @@ const collRef = function(path) {
   return firestore.collection(relativePath);
 };
 
-const watchQuery = collRef(
-  'projects/projectID/databases/(default)/documents/C'
-).orderBy('a');
+const watchQuery =
+    collRef('projects/projectID/databases/(default)/documents/C').orderBy('a');
 
 /** Converts JSON test data into JavaScript types suitable for the Node API. */
 const convertInput = {
@@ -98,9 +97,8 @@ const convertInput = {
   precondition: precondition => {
     const deepCopy = JSON.parse(JSON.stringify(precondition));
     if (deepCopy.updateTime) {
-      deepCopy.lastUpdateTime = Firestore.Timestamp.fromProto(
-        deepCopy.updateTime
-      );
+      deepCopy.lastUpdateTime =
+          Firestore.Timestamp.fromProto(deepCopy.updateTime);
       delete deepCopy.updateTime;
     }
     return deepCopy;
@@ -125,12 +123,9 @@ const convertInput = {
   cursor: cursor => {
     const args = [];
     if (cursor.docSnapshot) {
-      args.push(
-        DocumentSnapshot.fromObject(
+      args.push(DocumentSnapshot.fromObject(
           docRef(cursor.docSnapshot.path),
-          convertInput.argument(cursor.docSnapshot.jsonData)
-        )
-      );
+          convertInput.argument(cursor.docSnapshot.jsonData)));
     } else {
       for (let jsonValue of cursor.jsonValues) {
         args.push(convertInput.argument(jsonValue));
@@ -154,23 +149,12 @@ const convertInput = {
       deepCopy.fields = convert.documentFromJson(deepCopy.fields);
       const doc = firestore.snapshot_(deepCopy, readTime, 'json');
       const type = ['unspecified', 'added', 'removed', 'modified'][change.kind];
-      changes.push(
-        new Firestore.DocumentChange(
-          type,
-          doc,
-          change.oldIndex,
-          change.newIndex
-        )
-      );
+      changes.push(new Firestore.DocumentChange(
+          type, doc, change.oldIndex, change.newIndex));
     }
 
     return new Firestore.QuerySnapshot(
-      watchQuery,
-      readTime,
-      docs.length,
-      () => docs,
-      () => changes
-    );
+        watchQuery, readTime, docs.length, () => docs, () => changes);
   },
 };
 
@@ -198,15 +182,13 @@ const convertProto = {
   structuredQuery: queryRequest => {
     const deepCopy = JSON.parse(JSON.stringify(queryRequest));
     if (deepCopy.where && deepCopy.where.fieldFilter) {
-      deepCopy.where.fieldFilter.value = convert.valueFromJson(
-        deepCopy.where.fieldFilter.value
-      );
+      deepCopy.where.fieldFilter.value =
+          convert.valueFromJson(deepCopy.where.fieldFilter.value);
     }
     if (deepCopy.where && deepCopy.where.compositeFilter) {
       for (let filter of deepCopy.where.compositeFilter.filters) {
-        filter.fieldFilter.value = convert.valueFromJson(
-          filter.fieldFilter.value
-        );
+        filter.fieldFilter.value =
+            convert.valueFromJson(filter.fieldFilter.value);
       }
     }
     if (deepCopy.startAt) {
@@ -227,9 +209,8 @@ const convertProto = {
     }
 
     if (deepCopy.documentChange) {
-      deepCopy.documentChange.document.fields = convert.documentFromJson(
-        deepCopy.documentChange.document.fields
-      );
+      deepCopy.documentChange.document.fields =
+          convert.documentFromJson(deepCopy.documentChange.document.fields);
     }
 
     return deepCopy;
@@ -264,9 +245,7 @@ function commitHandler(spec) {
 function queryHandler(spec) {
   return request => {
     assert.deepEqual(
-      request.structuredQuery,
-      convertProto.structuredQuery(spec.query)
-    );
+        request.structuredQuery, convertProto.structuredQuery(spec.query));
 
     let stream = through.obj();
     setImmediate(function() {
@@ -330,10 +309,8 @@ function runTest(spec) {
 
     const applyClause = function(query, clause) {
       if (clause.select) {
-        query = query.select.apply(
-          query,
-          convertInput.paths(clause.select.fields)
-        );
+        query =
+            query.select.apply(query, convertInput.paths(clause.select.fields));
       } else if (clause.where) {
         let fieldPath = convertInput.path(clause.where.path);
         let value = convertInput.argument(clause.where.jsonValue);
@@ -349,16 +326,12 @@ function runTest(spec) {
         query = query.startAt.apply(query, convertInput.cursor(clause.startAt));
       } else if (clause.startAfter) {
         query = query.startAfter.apply(
-          query,
-          convertInput.cursor(clause.startAfter)
-        );
+            query, convertInput.cursor(clause.startAfter));
       } else if (clause.endAt) {
         query = query.endAt.apply(query, convertInput.cursor(clause.endAt));
       } else if (clause.endBefore) {
-        query = query.endBefore.apply(
-          query,
-          convertInput.cursor(clause.endBefore)
-        );
+        query =
+            query.endBefore.apply(query, convertInput.cursor(clause.endBefore));
       }
 
       return query;
@@ -402,10 +375,8 @@ function runTest(spec) {
         }
       }
 
-      return docRef(setSpec.docRefPath).set(
-        convertInput.argument(spec.jsonData),
-        setOption
-      );
+      return docRef(setSpec.docRefPath)
+          .set(convertInput.argument(spec.jsonData), setOption);
     });
   };
 
@@ -413,16 +384,14 @@ function runTest(spec) {
     firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
 
     return Promise.resolve().then(() => {
-      return docRef(spec.docRefPath).create(
-        convertInput.argument(spec.jsonData)
-      );
+      return docRef(spec.docRefPath)
+          .create(convertInput.argument(spec.jsonData));
     });
   };
 
   const getTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = getHandler(
-      spec
-    );
+    firestore._firestoreClient._innerApiCalls.batchGetDocuments =
+        getHandler(spec);
 
     return Promise.resolve().then(() => {
       return docRef(spec.docRefPath).get();
@@ -440,27 +409,28 @@ function runTest(spec) {
 
     return new Promise((resolve, reject) => {
       const unlisten = watchQuery.onSnapshot(
-        actualSnap => {
-          const expectedSnapshot = expectedSnapshots.shift();
-          if (expectedSnapshot) {
-            if (!actualSnap.isEqual(convertInput.snapshot(expectedSnapshot))) {
-              reject(new Error('Expected and actual snapshots do not match.'));
-            }
+          actualSnap => {
+            const expectedSnapshot = expectedSnapshots.shift();
+            if (expectedSnapshot) {
+              if (!actualSnap.isEqual(
+                      convertInput.snapshot(expectedSnapshot))) {
+                reject(
+                    new Error('Expected and actual snapshots do not match.'));
+              }
 
-            if (expectedSnapshots.length === 0 || !spec.isError) {
-              unlisten();
-              resolve();
+              if (expectedSnapshots.length === 0 || !spec.isError) {
+                unlisten();
+                resolve();
+              }
+            } else {
+              reject(new Error('Received unexpected snapshot'));
             }
-          } else {
-            reject(new Error('Received unexpected snapshot'));
-          }
-        },
-        err => {
-          assert.equal(expectedSnapshots.length, 0);
-          unlisten();
-          reject(err);
-        }
-      );
+          },
+          err => {
+            assert.equal(expectedSnapshots.length, 0);
+            unlisten();
+            reject(err);
+          });
 
       for (const response of spec.responses) {
         writeStream.write(convertProto.listenRequest(response));
@@ -505,15 +475,15 @@ function runTest(spec) {
   }
 
   return testPromise.then(
-    () => {
-      assert.ok(!testSpec.isError, 'Expected test to fail, but test succeeded');
-    },
-    err => {
-      if (!testSpec.isError) {
-        throw err;
-      }
-    }
-  );
+      () => {
+        assert.ok(
+            !testSpec.isError, 'Expected test to fail, but test succeeded');
+      },
+      err => {
+        if (!testSpec.isError) {
+          throw err;
+        }
+      });
 }
 
 describe('Conformance Tests', function() {
@@ -527,13 +497,11 @@ describe('Conformance Tests', function() {
       return target;
     };
 
-    const protoDefinition = protobufRoot.loadSync(
-      path.join(__dirname, 'test-definition.proto')
-    );
+    const protoDefinition =
+        protobufRoot.loadSync(path.join(__dirname, 'test-definition.proto'));
 
-    const binaryProtoData = require('fs').readFileSync(
-      path.join(__dirname, 'test-suite.binproto')
-    );
+    const binaryProtoData =
+        require('fs').readFileSync(path.join(__dirname, 'test-suite.binproto'));
 
     const testType = protoDefinition.lookupType('tests.TestSuite');
     const testSuite = testType.decode(binaryProtoData);

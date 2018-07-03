@@ -120,10 +120,9 @@ class WriteResult {
    */
   isEqual(other) {
     return (
-      this === other ||
-      (is.instanceof(other, WriteResult) &&
-        this._writeTime.isEqual(other._writeTime))
-    );
+        this === other ||
+        (is.instanceof(other, WriteResult) &&
+         this._writeTime.isEqual(other._writeTime)));
   }
 }
 
@@ -375,13 +374,12 @@ class WriteBatch {
     const updateMap = new Map();
     let precondition = new Precondition({exists: true});
 
-    const argumentError =
-      'Update() requires either a single JavaScript ' +
-      'object or an alternating list of field/value pairs that can be ' +
-      'followed by an optional precondition.';
+    const argumentError = 'Update() requires either a single JavaScript ' +
+        'object or an alternating list of field/value pairs that can be ' +
+        'followed by an optional precondition.';
 
-    let usesVarargs =
-      is.string(dataOrField) || is.instance(dataOrField, FieldPath);
+    let usesVarargs = is.string(
+                          dataOrField) || is.instance(dataOrField, FieldPath);
 
     if (usesVarargs) {
       try {
@@ -397,18 +395,12 @@ class WriteBatch {
               allowServerTimestamps: true,
             });
             updateMap.set(
-              FieldPath.fromArgument(arguments[i]),
-              arguments[i + 1]
-            );
+                FieldPath.fromArgument(arguments[i]), arguments[i + 1]);
           }
         }
       } catch (err) {
         Firestore.log(
-          'WriteBatch.update',
-          null,
-          'Varargs validation failed:',
-          err
-        );
+            'WriteBatch.update', null, 'Varargs validation failed:', err);
         // We catch the validation error here and re-throw to provide a better
         // error message.
         throw new Error(`${argumentError} ${err.message}`);
@@ -429,18 +421,12 @@ class WriteBatch {
 
         if (is.defined(preconditionOrValues)) {
           validate.isUpdatePrecondition(
-            'preconditionOrValues',
-            preconditionOrValues
-          );
+              'preconditionOrValues', preconditionOrValues);
           precondition = new Precondition(preconditionOrValues);
         }
       } catch (err) {
         Firestore.log(
-          'WriteBatch.update',
-          null,
-          'Non-varargs validation failed:',
-          err
-        );
+            'WriteBatch.update', null, 'Non-varargs validation failed:', err);
         // We catch the validation error here and prefix the error with a custom
         // message to describe the usage of update() better.
         throw new Error(`${argumentError} ${err.message}`);
@@ -509,7 +495,7 @@ class WriteBatch {
     let explicitTransaction = commitOptions && commitOptions.transactionId;
 
     let requestTag =
-      (commitOptions && commitOptions.requestTag) || Firestore.requestTag();
+        (commitOptions && commitOptions.requestTag) || Firestore.requestTag();
     let request = {
       database: this._firestore.formattedName,
     };
@@ -518,24 +504,20 @@ class WriteBatch {
     // request retries in case GCF closes our backend connection.
     if (!explicitTransaction && this._shouldCreateTransaction()) {
       Firestore.log(
-        'WriteBatch.commit',
-        requestTag,
-        'Using transaction for commit'
-      );
+          'WriteBatch.commit', requestTag, 'Using transaction for commit');
       return this._firestore
-        .request('beginTransaction', request, requestTag, true)
-        .then(resp => {
-          return this.commit_({transactionId: resp.transaction});
-        });
+          .request('beginTransaction', request, requestTag, true)
+          .then(resp => {
+            return this.commit_({transactionId: resp.transaction});
+          });
     }
 
     request.writes = [];
 
     for (let req of this._writes) {
       assert(
-        req.write || req.transform,
-        'Either a write or transform must be set'
-      );
+          req.write || req.transform,
+          'Either a write or transform must be set');
 
       if (req.precondition) {
         (req.write || req.transform).currentDocument = req.precondition;
@@ -551,11 +533,8 @@ class WriteBatch {
     }
 
     Firestore.log(
-      'WriteBatch.commit',
-      requestTag,
-      'Sending %d writes',
-      request.writes.length
-    );
+        'WriteBatch.commit', requestTag, 'Sending %d writes',
+        request.writes.length);
 
     if (explicitTransaction) {
       request.transaction = explicitTransaction;
@@ -569,11 +548,10 @@ class WriteBatch {
 
       if (resp.writeResults) {
         assert(
-          request.writes.length === resp.writeResults.length,
-          `Expected one write result per operation, but got ${
-            resp.writeResults.length
-          } results for ${request.writes.length} operations.`
-        );
+            request.writes.length === resp.writeResults.length,
+            `Expected one write result per operation, but got ${
+                resp.writeResults.length} results for ${
+                request.writes.length} operations.`);
 
         let offset = 0;
 
@@ -591,13 +569,10 @@ class WriteBatch {
 
           let writeResult = resp.writeResults[i + offset];
 
-          writeResults.push(
-            new WriteResult(
-              writeResult.updateTime
-                ? Timestamp.fromProto(writeResult.updateTime)
-                : commitTime
-            )
-          );
+          writeResults.push(new WriteResult(
+              writeResult.updateTime ?
+                  Timestamp.fromProto(writeResult.updateTime) :
+                  commitTime));
         }
       }
 
@@ -650,31 +625,28 @@ function validateUpdateMap(data) {
   return true;
 }
 
-module.exports = (
-  FirestoreType,
-  DocumentReferenceType,
-  validateDocumentReference
-) => {
-  let document = require('./document')(DocumentReferenceType);
-  Firestore = FirestoreType;
-  DocumentMask = document.DocumentMask;
-  DocumentSnapshot = document.DocumentSnapshot;
-  DocumentTransform = document.DocumentTransform;
-  Precondition = document.Precondition;
-  validate = require('./validate')({
-    Document: document.validateDocumentData,
-    DocumentReference: validateDocumentReference,
-    FieldValue: document.validateFieldValue,
-    FieldPath: FieldPath.validateFieldPath,
-    UpdatePrecondition: precondition =>
-      document.validatePrecondition(precondition, /* allowExists= */ false),
-    DeletePrecondition: precondition =>
-      document.validatePrecondition(precondition, /* allowExists= */ true),
-    SetOptions: document.validateSetOptions,
-    UpdateMap: validateUpdateMap,
-  });
-  return {
-    WriteBatch,
-    WriteResult,
-  };
-};
+module.exports =
+    (FirestoreType, DocumentReferenceType, validateDocumentReference) => {
+      let document = require('./document')(DocumentReferenceType);
+      Firestore = FirestoreType;
+      DocumentMask = document.DocumentMask;
+      DocumentSnapshot = document.DocumentSnapshot;
+      DocumentTransform = document.DocumentTransform;
+      Precondition = document.Precondition;
+      validate = require('./validate')({
+        Document: document.validateDocumentData,
+        DocumentReference: validateDocumentReference,
+        FieldValue: document.validateFieldValue,
+        FieldPath: FieldPath.validateFieldPath,
+        UpdatePrecondition: precondition => document.validatePrecondition(
+            precondition, /* allowExists= */ false),
+        DeletePrecondition: precondition => document.validatePrecondition(
+            precondition, /* allowExists= */ true),
+        SetOptions: document.validateSetOptions,
+        UpdateMap: validateUpdateMap,
+      });
+      return {
+        WriteBatch,
+        WriteResult,
+      };
+    };

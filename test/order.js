@@ -21,8 +21,8 @@ const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
 
 const Firestore = require('../src');
-const DocumentReference = require('../src/reference')(Firestore)
-  .DocumentReference;
+const DocumentReference =
+    require('../src/reference')(Firestore).DocumentReference;
 const document = require('../src/document')(DocumentReference);
 const DocumentSnapshot = document.DocumentSnapshot;
 const GeoPoint = document.GeoPoint;
@@ -64,12 +64,8 @@ describe('Order', function() {
   }
 
   function resource(pathString) {
-    return wrap(
-      new DocumentReference(
-        firestore,
-        ResourcePath.fromSlashSeparatedString(pathString)
-      )
-    );
+    return wrap(new DocumentReference(
+        firestore, ResourcePath.fromSlashSeparatedString(pathString)));
   }
 
   function geopoint(lat, lng) {
@@ -99,15 +95,14 @@ describe('Order', function() {
   it('throws on invalid blob', function() {
     assert.throws(() => {
       order.compare(
-        {
-          valueType: 'bytesValue',
-          bytesValue: [1, 2, 3],
-        },
-        {
-          valueType: 'bytesValue',
-          bytesValue: [1, 2, 3],
-        }
-      );
+          {
+            valueType: 'bytesValue',
+            bytesValue: [1, 2, 3],
+          },
+          {
+            valueType: 'bytesValue',
+            bytesValue: [1, 2, 3],
+          });
     }, /Blobs can only be compared if they are Buffers/);
   });
 
@@ -224,41 +219,17 @@ describe('Order', function() {
           for (const right of groups[j]) {
             let expected = order.primitiveComparator(i, j);
             assert.equal(
-              order.compare(left, right),
-              expected,
-              'comparing ' +
-                left +
-                ' (' +
-                JSON.stringify(left) +
-                ') to ' +
-                right +
-                ' (' +
-                JSON.stringify(right) +
-                ') at (' +
-                i +
-                ', ' +
-                j +
-                ')'
-            );
+                order.compare(left, right), expected,
+                'comparing ' + left + ' (' + JSON.stringify(left) + ') to ' +
+                    right + ' (' + JSON.stringify(right) + ') at (' + i + ', ' +
+                    j + ')');
 
             expected = order.primitiveComparator(j, i);
             assert.equal(
-              order.compare(right, left),
-              expected,
-              'comparing ' +
-                right +
-                ' (' +
-                JSON.stringify(right) +
-                ') to ' +
-                left +
-                ' (' +
-                JSON.stringify(left) +
-                ') at (' +
-                j +
-                ', ' +
-                i +
-                ')'
-            );
+                order.compare(right, left), expected,
+                'comparing ' + right + ' (' + JSON.stringify(right) + ') to ' +
+                    left + ' (' + JSON.stringify(left) + ') at (' + j + ', ' +
+                    i + ')');
           }
         }
       }

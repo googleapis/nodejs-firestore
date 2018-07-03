@@ -65,7 +65,7 @@ abstract class Path<T> {
    * @hideconstructor
    * @param {string[]} segments - Sequence of parts of a path.
    */
-  constructor( protected readonly segments: string[]) {}
+  constructor(protected readonly segments: string[]) {}
 
   /**
    * String representation as expected by the proto API.
@@ -232,11 +232,13 @@ export class ResourcePath extends Path<ResourcePath> {
    * the path.
    */
   constructor(projectId: string, databaseId: string, segments?: string[]) {
-     const elements = segments instanceof Array ? segments : Array.prototype.slice.call(arguments, 2);
-     super(elements);
+    const elements = segments instanceof Array ?
+        segments :
+        Array.prototype.slice.call(arguments, 2);
+    super(elements);
 
-     this.projectId = projectId;
-     this.databaseId = databaseId;
+    this.projectId = projectId;
+    this.databaseId = databaseId;
   }
 
   /**
@@ -436,8 +438,9 @@ export class FieldPath extends Path<FieldPath> {
   constructor(segments: string[]|string) {
     validate.minNumberOfArguments('FieldPath', arguments, 1);
 
-    const elements =  segments instanceof Array ? segments
-              : Array.prototype.slice.call(arguments);
+    const elements = segments instanceof Array ?
+        segments :
+        Array.prototype.slice.call(arguments);
 
     for (let i = 0; i < elements.length; ++i) {
       validate.isString(i, elements[i]);
@@ -501,9 +504,8 @@ export class FieldPath extends Path<FieldPath> {
   static fromArgument(fieldPath: string|FieldPath) {
     // validateFieldPath() is used in all public API entry points to validate
     // that fromArgument() is only called with a Field Path or a string.
-    return fieldPath instanceof FieldPath ?
-        fieldPath :
-        new FieldPath(fieldPath.split('.'));
+    return fieldPath instanceof FieldPath ? fieldPath :
+                                            new FieldPath(fieldPath.split('.'));
   }
 
   /**
