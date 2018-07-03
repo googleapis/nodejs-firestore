@@ -209,6 +209,18 @@ abstract class Path<T> {
  */
 export class ResourcePath extends Path<ResourcePath> {
   /**
+   * The project ID of this path.
+   * @type {string}
+   */
+  readonly projectId;
+
+  /**
+   * The database ID of this path.
+   * @type {string}
+   */
+  readonly databaseId;
+
+  /**
    * Constructs a Firestore Resource Path.
    *
    * @private
@@ -216,12 +228,15 @@ export class ResourcePath extends Path<ResourcePath> {
    *
    * @param {string} projectId - The Firestore project id.
    * @param {string} databaseId - The Firestore database id.
-   * @param {string[]} segments - Sequence of names of the parts of
+   * @param {string[]=} segments - Sequence of names of the parts of
    * the path.
    */
-  constructor(private readonly projectId: string, private readonly databaseId: string, segments: string[]) {
-     segments = segments instanceof Array ? segments : Array.prototype.slice(arguments, 2);
-     super(segments);
+  constructor(projectId: string, databaseId: string, segments?: string[]) {
+     const elements = segments instanceof Array ? segments : Array.prototype.slice.call(arguments, 2);
+     super(elements);
+
+     this.projectId = projectId;
+     this.databaseId = databaseId;
   }
 
   /**
