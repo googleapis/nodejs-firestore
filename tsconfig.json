@@ -2,12 +2,12 @@
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
     "allowJs": true,
-    "declaration": false,
+    "declaration": false, // TODO: Remove when all source are migrated to TS
     "sourceMap": false,
     "rootDir": ".",
     "outDir": "build",
     "target": "es6",
-    "noImplicitAny": false
+    "noImplicitAny": false // TODO: Remove when all source are migrated to TS
   },
   "include": [
     "src/*.js",
