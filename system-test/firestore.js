@@ -23,6 +23,7 @@ let DocumentReference = require('../src/reference').DocumentReference;
 let DocumentSnapshot = require('../src/document')(DocumentReference)
   .DocumentSnapshot;
 
+// eslint-disable-next-line node/no-missing-require
 let version = require('../../package.json').version;
 let Firestore = require('../src');
 
