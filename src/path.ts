@@ -65,8 +65,7 @@ abstract class Path<T> {
    * @hideconstructor
    * @param {string[]} segments - Sequence of parts of a path.
    */
-  constructor( protected readonly segments: string[]) {
-  }
+  constructor( protected readonly segments: string[]) {}
 
   /**
    * String representation as expected by the proto API.
@@ -220,8 +219,8 @@ export class ResourcePath extends Path<ResourcePath> {
    * @param {string[]} segments - Sequence of names of the parts of
    * the path.
    */
-  constructor(
-      private readonly projectId: string, private readonly databaseId: string, ...segments: string[]) {
+  constructor(private readonly projectId: string, private readonly databaseId: string, segments: string[]) {
+     segments = segments instanceof Array ? segments : Array.prototype.slice(arguments, 2);
      super(segments);
   }
 
@@ -355,7 +354,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * @returns {ResourcePath} The newly created ResourcePath.
    */
   construct(segments: string[]): ResourcePath {
-    return new ResourcePath(this.projectId, this.databaseId, ...segments);
+    return new ResourcePath(this.projectId, this.databaseId, segments);
   }
 
   /**
