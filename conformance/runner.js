@@ -26,7 +26,7 @@ const duplexify = require('duplexify');
 const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
 
-const Firestore = require('../');
+const Firestore = require('../src');
 const reference = require('../src/reference')(Firestore);
 const document = require('../src/document')(reference.DocumentReference);
 const DocumentSnapshot = document.DocumentSnapshot;

@@ -22,7 +22,8 @@ const is = require('is');
 const through = require('through2');
 const util = require('util');
 
-const libVersion = require('../package.json').version;
+// eslint-disable-next-line node/no-missing-require
+const libVersion = require('../../package.json').version;
 
 const path = require('./path');
 const convert = require('./convert');

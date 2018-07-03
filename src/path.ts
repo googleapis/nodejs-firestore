@@ -28,8 +28,8 @@ const validate = require('./validate')();
  * @type {RegExp}
  */
 const RESOURCE_PATH_RE =
-  // Note: [\s\S] matches all characters including newlines.
-  /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?([\s\S]*)$/;
+    // Note: [\s\S] matches all characters including newlines.
+    /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?([\s\S]*)$/;
 
 /*!
  * A regular expression to verify whether a field name can be passed to the
@@ -56,30 +56,16 @@ const FIELD_PATH_RE = /^[^*~/[\]]+$/;
  * @private
  * @class
  */
-class Path {
+abstract class Path<T> {
+  private _formattedName: string|undefined = undefined;
   /**
    * Creates a new Path with the given segments.
    *
    * @private
    * @hideconstructor
-   * @param {...string|string[]} segments - Sequence of parts of a path.
+   * @param {string[]} segments - Sequence of parts of a path.
    */
-  constructor(segments) {
-    segments = is.array(segments)
-      ? segments
-      : Array.prototype.slice.call(arguments);
-
-    /**
-     * @private
-     */
-    this.segments = segments;
-
-    /**
-     * @private
-     * @type {string|undefined}
-     */
-    this._formattedName = undefined;
-  }
+  constructor( protected readonly segments: string[]) {}
 
   /**
    * String representation as expected by the proto API.
@@ -87,13 +73,17 @@ class Path {
    * @private
    * @type {string}
    */
-  get formattedName() {
-    if (is.undefined(this._formattedName)) {
+  get formattedName(): string {
+    if (this._formattedName === undefined) {
       this._formattedName = this.canonicalString();
     }
 
-    return this._formattedName;
+    return this._formattedName!;
   }
+
+  abstract construct(segments: string[]|string): T;
+  abstract canonicalString(): string;
+  abstract split(relativePath: string): string[];
 
   /**
    * Create a child path beneath the current level.
@@ -104,8 +94,8 @@ class Path {
    * @returns {T} The new path.
    * @template T
    */
-  append(relativePath) {
-    if (is.instanceof(relativePath, Path)) {
+  append(relativePath: Path<T>|string): T {
+    if (relativePath instanceof Path) {
       return this.construct(this.segments.concat(relativePath.segments));
     }
     return this.construct(this.segments.concat(this.split(relativePath)));
@@ -119,7 +109,7 @@ class Path {
    * @returns {T} The new path.
    * @template T
    */
-  parent() {
+  parent(): T|null {
     if (this.segments.length === 0) {
       return null;
     }
@@ -135,7 +125,7 @@ class Path {
    * @returns {boolean} 'true' iff the current path is a prefix match with
    * 'other'.
    */
-  isPrefixOf(other) {
+  isPrefixOf(other: Path<T>): boolean {
     if (other.segments.length < this.segments.length) {
       return false;
     }
@@ -155,7 +145,7 @@ class Path {
    * @private
    * @returns {string} A string representing this path.
    */
-  toString() {
+  toString(): string {
     return this.formattedName;
   }
 
@@ -166,7 +156,7 @@ class Path {
    * @param {Path} other - The path to compare to.
    * @returns {number} -1 if current < other, 1 if current > other, 0 if equal
    */
-  compareTo(other) {
+  compareTo(other: Path<T>): number {
     const len = Math.min(this.segments.length, other.segments.length);
     for (let i = 0; i < len; i++) {
       if (this.segments[i] < other.segments[i]) {
@@ -191,7 +181,7 @@ class Path {
    * @private
    * @returns {Array.<string>} A copy of the segments that make up this path.
    */
-  toArray() {
+  toArray(): string[] {
     return this.segments.slice();
   }
 
@@ -202,11 +192,11 @@ class Path {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `Path` is equal to the provided value.
    */
-  isEqual(other) {
+  isEqual(other: Path<T>): boolean {
     return (
-      this === other ||
-      (is.instanceof(other, this.constructor) && this.compareTo(other) === 0)
-    );
+        this === other ||
+        (is.instanceof(other, this.constructor) &&
+         this.compareTo(other) === 0));
   }
 }
 
@@ -217,7 +207,19 @@ class Path {
  * @private
  * @class
  */
-class ResourcePath extends Path {
+export class ResourcePath extends Path<ResourcePath> {
+  /**
+   * The project ID of this path.
+   * @type {string}
+   */
+  readonly projectId;
+
+  /**
+   * The database ID of this path.
+   * @type {string}
+   */
+  readonly databaseId;
+
   /**
    * Constructs a Firestore Resource Path.
    *
@@ -226,27 +228,15 @@ class ResourcePath extends Path {
    *
    * @param {string} projectId - The Firestore project id.
    * @param {string} databaseId - The Firestore database id.
-   * @param {...string|string[]} segments - Sequence of names of the parts of
+   * @param {string[]=} segments - Sequence of names of the parts of
    * the path.
    */
-  constructor(projectId, databaseId, segments) {
-    segments = is.array(segments)
-      ? segments
-      : Array.prototype.slice.call(arguments, 2);
+  constructor(projectId: string, databaseId: string, segments?: string[]) {
+     const elements = segments instanceof Array ? segments : Array.prototype.slice.call(arguments, 2);
+     super(elements);
 
-    super(segments);
-
-    /**
-     * @type {string}
-     * @private
-     */
-    this._projectId = projectId;
-
-    /**
-     * @type {string}
-     * @private
-     */
-    this._databaseId = databaseId;
+     this.projectId = projectId;
+     this.databaseId = databaseId;
   }
 
   /**
@@ -255,7 +245,7 @@ class ResourcePath extends Path {
    * @private
    * @type {string}
    */
-  get relativeName() {
+  get relativeName(): string {
     return this.segments.join('/');
   }
 
@@ -265,7 +255,7 @@ class ResourcePath extends Path {
    * @private
    * @type {boolean}
    */
-  get isDocument() {
+  get isDocument(): boolean {
     return this.segments.length > 0 && this.segments.length % 2 === 0;
   }
 
@@ -275,7 +265,7 @@ class ResourcePath extends Path {
    * @private
    * @type {boolean}
    */
-  get isCollection() {
+  get isCollection(): boolean {
     return this.segments.length % 2 === 1;
   }
 
@@ -285,31 +275,11 @@ class ResourcePath extends Path {
    * @private
    * @type {string|null}
    */
-  get id() {
+  get id(): string|null {
     if (this.segments.length > 0) {
       return this.segments[this.segments.length - 1];
     }
     return null;
-  }
-
-  /**
-   * The project ID of this path.
-   *
-   * @private
-   * @type {string}
-   */
-  get projectId() {
-    return this._projectId;
-  }
-
-  /**
-   * The database ID of this path.
-   *
-   * @private
-   * @type {string}
-   */
-  get databaseId() {
-    return this._databaseId;
   }
 
   /**
@@ -321,7 +291,7 @@ class ResourcePath extends Path {
    * @throws if the string can't be used as a resource path.
    * @returns {boolean} 'true' when the path is valid.
    */
-  static validateResourcePath(resourcePath) {
+  static validateResourcePath(resourcePath: string): boolean {
     if (!is.string(resourcePath) || resourcePath === '') {
       throw new Error(`Path must be a non-empty string.`);
     }
@@ -340,8 +310,8 @@ class ResourcePath extends Path {
    * @param {string} absolutePath - A string representation of a Resource Path.
    * @returns {ResourcePath} The new ResourcePath.
    */
-  static fromSlashSeparatedString(absolutePath) {
-    let elements = RESOURCE_PATH_RE.exec(absolutePath);
+  static fromSlashSeparatedString(absolutePath: string): ResourcePath {
+    const elements = RESOURCE_PATH_RE.exec(absolutePath);
 
     if (elements) {
       const project = elements[1];
@@ -361,7 +331,7 @@ class ResourcePath extends Path {
    * @param {string} relativePath - The path to split.
    * @returns {Array.<string>} - The split path segments.
    */
-  split(relativePath) {
+  split(relativePath: string): string[] {
     // We may have an empty segment at the beginning or end if they had a
     // leading or trailing slash (which we allow).
     return relativePath.split('/').filter(segment => segment.length > 0);
@@ -374,12 +344,12 @@ class ResourcePath extends Path {
    * @override
    * @returns {string} The representation as expected by the API.
    */
-  canonicalString() {
+  canonicalString(): string {
     let components = [
       'projects',
-      this._projectId,
+      this.projectId,
       'databases',
-      this._databaseId,
+      this.databaseId,
     ];
     if (this.segments.length > 0) {
       components = components.concat('documents', this.segments);
@@ -398,8 +368,8 @@ class ResourcePath extends Path {
    * path.
    * @returns {ResourcePath} The newly created ResourcePath.
    */
-  construct(segments) {
-    return new ResourcePath(this._projectId, this._databaseId, segments);
+  construct(segments: string[]): ResourcePath {
+    return new ResourcePath(this.projectId, this.databaseId, segments);
   }
 
   /**
@@ -410,27 +380,25 @@ class ResourcePath extends Path {
    * @param {ResourcePath} other - The path to compare to.
    * @returns {number} -1 if current < other, 1 if current > other, 0 if equal
    */
-  compareTo(other) {
+  compareTo(other: ResourcePath): number {
     // Ignore DocumentReference with {{projectId}} placeholders and assume that
     // the resolved IDs match the provided ResourcePath. We could alternatively
     // try to resolve the Project ID here, but this is asynchronous as it
     // requires Disk I/O.
-    if (
-      this._projectId !== '{{projectId}}' &&
-      other._projectId !== '{{projectId}}'
-    ) {
-      if (this._projectId < other._projectId) {
+    if (this.projectId !== '{{projectId}}' &&
+        other.projectId !== '{{projectId}}') {
+      if (this.projectId < other.projectId) {
         return -1;
       }
-      if (this._projectId > other._projectId) {
+      if (this.projectId > other.projectId) {
         return 1;
       }
     }
 
-    if (this._databaseId < other._databaseId) {
+    if (this.databaseId < other.databaseId) {
       return -1;
     }
-    if (this._databaseId > other._databaseId) {
+    if (this.databaseId > other.databaseId) {
       return 1;
     }
 
@@ -443,7 +411,12 @@ class ResourcePath extends Path {
  *
  * @class
  */
-class FieldPath extends Path {
+export class FieldPath extends Path<FieldPath> {
+  /**
+   * A special sentinel value to refer to the ID of a document.
+   */
+  private static _DOCUMENT_ID = new FieldPath('__name__');
+
   /**
    * Constructs a Firestore Field Path.
    *
@@ -460,21 +433,20 @@ class FieldPath extends Path {
    *   });
    * });
    */
-  constructor(segments) {
+  constructor(segments: string[]|string) {
     validate.minNumberOfArguments('FieldPath', arguments, 1);
 
-    segments = is.array(segments)
-      ? segments
-      : Array.prototype.slice.call(arguments);
+    const elements =  segments instanceof Array ? segments
+              : Array.prototype.slice.call(arguments);
 
-    for (let i = 0; i < segments.length; ++i) {
-      validate.isString(i, segments[i]);
-      if (segments[i].length === 0) {
+    for (let i = 0; i < elements.length; ++i) {
+      validate.isString(i, elements[i]);
+      if (elements[i].length === 0) {
         throw new Error(`Argument at index ${i} should not be empty.`);
       }
     }
 
-    super(segments);
+    super(elements);
   }
 
   /**
@@ -495,8 +467,8 @@ class FieldPath extends Path {
    * @throws if the string can't be used as a field path.
    * @returns {boolean} 'true' when the path is valid.
    */
-  static validateFieldPath(fieldPath) {
-    if (!is.instanceof(fieldPath, FieldPath)) {
+  static validateFieldPath(fieldPath: string|FieldPath) {
+    if (!(fieldPath instanceof FieldPath)) {
       if (!is.string(fieldPath)) {
         throw validate.customObjectError(fieldPath);
       }
@@ -526,12 +498,12 @@ class FieldPath extends Path {
    * @param {string|FieldPath} fieldPath - The FieldPath to create.
    * @returns {FieldPath} A field path representation.
    */
-  static fromArgument(fieldPath) {
+  static fromArgument(fieldPath: string|FieldPath) {
     // validateFieldPath() is used in all public API entry points to validate
     // that fromArgument() is only called with a Field Path or a string.
-    return fieldPath instanceof FieldPath
-      ? fieldPath
-      : new FieldPath(fieldPath.split('.'));
+    return fieldPath instanceof FieldPath ?
+        fieldPath :
+        new FieldPath(fieldPath.split('.'));
   }
 
   /**
@@ -541,14 +513,14 @@ class FieldPath extends Path {
    * @override
    * @returns {string} The representation as expected by the API.
    */
-  canonicalString() {
+  canonicalString(): string {
     return this.segments
-      .map(str => {
-        return UNESCAPED_FIELD_NAME_RE.test(str)
-          ? str
-          : '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
-      })
-      .join('.');
+        .map(str => {
+          return UNESCAPED_FIELD_NAME_RE.test(str) ?
+              str :
+              '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
+        })
+        .join('.');
   }
 
   /**
@@ -559,7 +531,7 @@ class FieldPath extends Path {
    * @param {string} fieldPath - The path to split.
    * @returns {Array.<string>} - The split path segments.
    */
-  split(fieldPath) {
+  split(fieldPath: string): string[] {
     return fieldPath.split('.');
   }
 
@@ -573,7 +545,7 @@ class FieldPath extends Path {
    * @param {Array.<string>} segments - Sequence of field names.
    * @returns {ResourcePath} The newly created FieldPath.
    */
-  construct(segments) {
+  construct(segments: string[]) {
     return new FieldPath(segments);
   }
 
@@ -583,17 +555,7 @@ class FieldPath extends Path {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `FieldPath` is equal to the provided value.
    */
-  isEqual(other) {
+  isEqual(other: FieldPath): boolean {
     return super.isEqual(other);
   }
 }
-
-/**
- * A special sentinel value to refer to the ID of a document.
- *
- * @type {FieldPath}
- * @private
- */
-FieldPath._DOCUMENT_ID = new FieldPath('__name__');
-
-module.exports = {FieldPath, ResourcePath};

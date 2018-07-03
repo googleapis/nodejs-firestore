@@ -23,7 +23,7 @@ const grpc = new gax.GrpcClient().grpc;
 const is = require('is');
 const through = require('through2');
 
-const Firestore = require('../');
+const Firestore = require('../src');
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;

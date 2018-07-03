@@ -8,14 +8,12 @@
     "node": ">=4.0.0"
   },
   "repository": "googleapis/nodejs-firestore",
-  "main": "./src/index.js",
+  "main": "./build/src/index.js",
+  "types": "./types/firestore.d.ts",
   "files": [
-    "src",
-    "protos",
-    "types",
-    "AUTHORS",
-    "CONTRIBUTORS",
-    "COPYING"
+    "build/protos",
+    "build/src",
+    "types"
   ],
   "keywords": [
     "google apis client",
@@ -28,7 +26,6 @@
     "cloud",
     "firestore"
   ],
-  "types": "./types/firestore.d.ts",
   "contributors": [
     "Alexander Fenster <github@fenster.name>",
     "Bond <bondz@users.noreply.github.com>",
@@ -39,16 +36,22 @@
     "greenkeeper[bot] <greenkeeper[bot]@users.noreply.github.com>"
   ],
   "scripts": {
-    "cover": "nyc --reporter=lcov mocha --require intelli-espower-loader test/*.js && nyc report",
+    "cover": "nyc --reporter=lcov mocha --require intelli-espower-loader build/test/*.js && nyc report",
     "docs": "jsdoc -c .jsdoc.js",
     "generate-scaffolding": "repo-tools generate all",
     "lint": "eslint src/ system-test/ test/ conformance/",
     "prettier": "prettier --write src/*.js src/**/*.js test/*.js test/**/*.js system-test/*.js system-test/**/*.js conformance/*.js conformance/**/*.js",
     "publish-module": "node ../../scripts/publish.js firestore",
-    "system-test": "mocha system-test/*.js --timeout 600000",
-    "conformance": "mocha conformance/*.js --no-timeouts",
-    "test-no-cover": "mocha test/*.js --no-timeouts",
-    "test": "npm run cover"
+    "system-test": "mocha build/system-test/*.js --timeout 600000",
+    "conformance": "mocha build/conformance/*.js --timeout 2000",
+    "test-no-cover": "mocha build/test/*.js --timeout 2000",
+    "test": "npm run cover",
+    "check": "gts check",
+    "clean": "gts clean",
+    "compile": "tsc -p . && cp -r protos build/protos && cp -r test/fake-certificate.json build/test/fake-certificate.json  && cp src/v1beta1/firestore_client_config.json build/src/v1beta1/ && cp conformance/test-definition.proto build/conformance && cp conformance/test-suite.binproto build/conformance",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile"
   },
   "dependencies": {
     "@google-cloud/common": "^0.20.3",
@@ -81,6 +84,7 @@
     "prettier": "^1.13.6",
     "protobufjs": "^6.8.6",
     "proxyquire": "^2.0.1",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "gts": "^0.7.1"
   }
 }

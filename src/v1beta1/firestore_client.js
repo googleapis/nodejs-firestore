@@ -19,7 +19,8 @@ const gax = require('google-gax');
 const merge = require('lodash.merge');
 const path = require('path');
 
-const VERSION = require('../../package.json').version;
+// eslint-disable-next-line node/no-missing-require
+const VERSION = require('../../../package.json').version;
 
 /**
  * The Cloud Firestore service.
