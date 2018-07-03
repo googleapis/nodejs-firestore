@@ -22,7 +22,6 @@ const is = require('is');
 const through = require('through2');
 const util = require('util');
 
-// eslint-disable-next-line node/no-missing-require
 const libVersion = require('../../package.json').version;
 
 const path = require('./path');
@@ -269,7 +268,6 @@ class Firestore {
     this._timestampsInSnapshotsEnabled = !!options.timestampsInSnapshots;
 
     if (!this._timestampsInSnapshotsEnabled) {
-      // eslint-disable-next-line no-console
       console.error(`
 The behavior for Date objects stored in Firestore is going to change
 AND YOUR APP MAY BREAK.

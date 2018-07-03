@@ -23,12 +23,11 @@ let DocumentReference = require('../src/reference').DocumentReference;
 let DocumentSnapshot = require('../src/document')(DocumentReference)
   .DocumentSnapshot;
 
-// eslint-disable-next-line node/no-missing-require
 let version = require('../../package.json').version;
 let Firestore = require('../src');
 
 if (process.env.NODE_ENV === 'DEBUG') {
-  Firestore.setLogFunction(console.log); // eslint-disable-line no-console
+  Firestore.setLogFunction(console.log);
 }
 
 function getTestRoot(firestore) {

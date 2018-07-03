@@ -19,7 +19,6 @@ const gax = require('google-gax');
 const merge = require('lodash.merge');
 const path = require('path');
 
-// eslint-disable-next-line node/no-missing-require
 const VERSION = require('../../../package.json').version;
 
 /**

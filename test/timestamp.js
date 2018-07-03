@@ -97,7 +97,6 @@ describe('timestamps', function() {
   });
 
   it('converted to dates when disabled', function() {
-    /* eslint-disable no-console */
     const oldErrorLog = console.error;
     // Prevent error message that prompts to enable `timestampsInSnapshots`
     // behavior.
@@ -116,7 +115,6 @@ describe('timestamps', function() {
           console.error = oldErrorLog;
         });
     });
-    /* eslint-enable no-console */
   });
 
   it('retain seconds and nanoseconds', function() {

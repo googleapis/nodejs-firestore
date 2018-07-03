@@ -297,7 +297,7 @@ function getHandler(spec) {
 }
 
 function runTest(spec) {
-  console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`); // eslint-disable-line no-console
+  console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`);
 
   const updateTest = function(spec) {
     firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
