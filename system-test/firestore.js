@@ -27,9 +27,9 @@ let DocumentSnapshot = require('../src/document')(DocumentReference)
 let version = require('../../package.json').version;
 let Firestore = require('../src');
 
-if (process.env.NODE_ENV === 'DEBUG') {
+//if (process.env.NODE_ENV === 'DEBUG') {
   Firestore.setLogFunction(console.log); // eslint-disable-line no-console
-}
+//}
 
 function getTestRoot(firestore) {
   return firestore.collection(`node_${version}_${Firestore.autoId(firestore)}`);
@@ -282,6 +282,12 @@ describe('DocumentReference class', function() {
           },
         });
       });
+  });
+
+  it.only('supports set() with merge', function(done) {
+    let ref = randomCol.doc('doc').onSnapshot(() => {
+      console.log("snapshot");
+    });
   });
 
   it('supports server timestamps for merge', function() {
