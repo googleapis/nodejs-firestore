@@ -3,18 +3,29 @@ workflows:
   version: 2
   tests:
     jobs: &workflow_jobs
-      - node6:
+      - node4:
           filters: &all_commits
             tags:
               only: /.*/
+      - node6:
+          filters: *all_commits
       - node8:
           filters: *all_commits
       - node9:
           filters: *all_commits
       - node10:
           filters: *all_commits
+      - lint:
+          requires:
+            - node4
+            - node6
+            - node8
+            - node9
+            - node10
+          filters: *all_commits
       - docs:
           requires:
+            - node4
             - node6
             - node8
             - node9
@@ -22,6 +33,7 @@ workflows:
           filters: *all_commits
       - system_tests:
           requires:
+            - lint
             - docs
           filters:
             branches:
@@ -44,9 +56,9 @@ workflows:
               only: master
     jobs: *workflow_jobs
 jobs:
-  node6:
+  node4:
     docker:
-      - image: 'node:6'
+      - image: 'node:4'
         user: node
     steps: &unit_tests_steps
       - checkout
@@ -75,6 +87,11 @@ jobs:
           name: Submit coverage data to codecov.
           command: node_modules/.bin/codecov
           when: always
+  node6:
+    docker:
+      - image: 'node:6'
+        user: node
+    steps: *unit_tests_steps
   node8:
     docker:
       - image: 'node:8'
@@ -90,6 +107,17 @@ jobs:
       - image: 'node:10'
         user: node
     steps: *unit_tests_steps
+  lint:
+    docker:
+      - image: 'node:8'
+        user: node
+    steps:
+      - checkout
+      - run: *remove_package_lock
+      - run: *npm_install_and_link
+      - run:
+          name: Run linting.
+          command: npm run lint
   docs:
     docker:
       - image: 'node:8'
