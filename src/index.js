@@ -21,6 +21,7 @@ const extend = require('extend');
 const is = require('is');
 const through = require('through2');
 const util = require('util');
+const {replaceProjectIdToken} = require('@google-cloud/projectify');
 
 // eslint-disable-next-line node/no-missing-require
 const libVersion = require('../../package.json').version;
@@ -101,11 +102,6 @@ let Transaction;
  * @see v1beta1
  */
 let v1beta1; // Lazy-loaded in `_ensureClient()`
-
-/*!
- * @see @google-cloud/common
- */
-let common; // Lazy-loaded in `_ensureClient()`
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -778,8 +774,6 @@ follow these steps, YOUR APP MAY BREAK.`);
    */
   _ensureClient() {
     if (!this._clientInitialized) {
-      common = require('@google-cloud/common');
-
       this._clientInitialized = new Promise((resolve, reject) => {
         this._firestoreClient = module.exports.v1beta1(
           this._initalizationOptions
@@ -829,7 +823,7 @@ follow these steps, YOUR APP MAY BREAK.`);
    */
   _decorateRequest(request) {
     let decoratedRequest = extend(true, {}, request);
-    decoratedRequest = common.util.replaceProjectIdToken(
+    decoratedRequest = replaceProjectIdToken(
       decoratedRequest,
       this._referencePath.projectId
     );
@@ -1198,7 +1192,7 @@ follow these steps, YOUR APP MAY BREAK.`);
           // The transform stream to assign the project ID.
           let transform = through.obj(function(chunk, encoding, callback) {
             let decoratedChunk = extend(true, {}, chunk);
-            common.util.replaceProjectIdToken(
+            replaceProjectIdToken(
               decoratedChunk,
               self._referencePath.projectId
             );
