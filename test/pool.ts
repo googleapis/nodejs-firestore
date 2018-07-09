@@ -24,10 +24,10 @@ import {Deferred} from './util/helpers';
 
 use(chaiAsPromised.default);
 
-function deferredPromises(count: number): Array<Deferred<{}>> {
-  const deferred: Array<Deferred<{}>> = [];
+function deferredPromises(count: number): Array<Deferred<void>> {
+  const deferred: Array<Deferred<void>> = [];
   for (let i = 0; i < count; ++i) {
-    deferred.push(new Deferred<{}>());
+    deferred.push(new Deferred<void>());
   }
   return deferred;
 }
@@ -71,7 +71,7 @@ describe('Client pool', () => {
     clientPool.run(() => deferred[3].promise);
     expect(clientPool.size).to.eq(2);
 
-    deferred[0].resolve({});
+    deferred[0].resolve();
 
     return operationComplete.then(() => {
       clientPool.run(() => deferred[4].promise);
@@ -86,22 +86,22 @@ describe('Client pool', () => {
 
     expect(clientPool.size).to.eq(0);
 
-    const deferredPromises = deferredPromises(4);
-    const completionPromises: Array<Promise<{}>> = [];
+    const operationPromises = deferredPromises(4);
+    const completionPromises: Array<Promise<void>> = [];
 
-    completionPromises.push(clientPool.run(() => deferredPromises[0].promise));
+    completionPromises.push(clientPool.run(() => operationPromises[0].promise));
     expect(clientPool.size).to.eq(1);
-    completionPromises.push(clientPool.run(() => deferredPromises[1].promise));
+    completionPromises.push(clientPool.run(() => operationPromises[1].promise));
     expect(clientPool.size).to.eq(1);
-    completionPromises.push(clientPool.run(() => deferredPromises[2].promise));
+    completionPromises.push(clientPool.run(() => operationPromises[2].promise));
     expect(clientPool.size).to.eq(2);
-    completionPromises.push(clientPool.run(() => deferredPromises[3].promise));
+    completionPromises.push(clientPool.run(() => operationPromises[3].promise));
     expect(clientPool.size).to.eq(2);
 
-    deferredPromises[0].resolve({});
-    deferredPromises[1].resolve({});
-    deferredPromises[2].resolve({});
-    deferredPromises[3].resolve({});
+    operationPromises[0].resolve();
+    operationPromises[1].resolve();
+    operationPromises[2].resolve();
+    operationPromises[3].resolve();
 
     return Promise.all(completionPromises).then(() => {
       expect(clientPool.size).to.eq(1);
@@ -115,22 +115,22 @@ describe('Client pool', () => {
 
     expect(clientPool.size).to.eq(0);
 
-    const deferredPromises = deferrredPromises(4);
-    const completionPromises: Array<Promise<{}>> = [];
+    const operationPromises = deferredPromises(4);
+    const completionPromises: Array<Promise<void>> = [];
 
-    completionPromises.push(clientPool.run(() => deferredPromises[0].promise));
+    completionPromises.push(clientPool.run(() => operationPromises[0].promise));
     expect(clientPool.size).to.eq(1);
-    completionPromises.push(clientPool.run(() => deferredPromises[1].promise));
+    completionPromises.push(clientPool.run(() => operationPromises[1].promise));
     expect(clientPool.size).to.eq(1);
-    completionPromises.push(clientPool.run(() => deferredPromises[2].promise));
+    completionPromises.push(clientPool.run(() => operationPromises[2].promise));
     expect(clientPool.size).to.eq(2);
-    completionPromises.push(clientPool.run(() => deferredPromises[3].promise));
+    completionPromises.push(clientPool.run(() => operationPromises[3].promise));
     expect(clientPool.size).to.eq(2);
 
-    deferredPromises[0].reject();
-    deferredPromises[1].reject();
-    deferredPromises[2].reject();
-    deferredPromises[3].reject();
+    operationPromises[0].reject();
+    operationPromises[1].reject();
+    operationPromises[2].reject();
+    operationPromises[3].reject();
 
     return Promise.all(completionPromises.map(p => p.catch(() => {})))
         .then(() => {
