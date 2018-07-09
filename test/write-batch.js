@@ -21,32 +21,20 @@ const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
 
 const Firestore = require('../src');
+const createInstance = require('../test/util/helpers').createInstance;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
 const PROJECT_ID = 'test-project';
 
-function createInstance() {
-  let firestore = new Firestore({
-    projectId: PROJECT_ID,
-    sslCreds: grpc.credentials.createInsecure(),
-    timestampsInSnapshots: true,
-    keyFilename: './test/fake-certificate.json',
-  });
-
-  return firestore._ensureClient().then(() => firestore);
-}
-
 describe('set() method', function() {
   let firestore;
   let writeBatch;
 
   beforeEach(() => {
-    return createInstance().then(firestoreClient => {
-      firestore = firestoreClient;
-      writeBatch = firestore.batch();
-    });
+    firestore = createInstance();
+    writeBatch = firestore.batch();
   });
 
   it('requires document name', function() {
@@ -71,10 +59,8 @@ describe('delete() method', function() {
   let writeBatch;
 
   beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-      writeBatch = firestore.batch();
-    });
+    firestore = createInstance();
+    writeBatch = firestore.batch();
   });
 
   it('requires document name', function() {
@@ -95,10 +81,8 @@ describe('update() method', function() {
   let writeBatch;
 
   beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-      writeBatch = firestore.batch();
-    });
+    firestore = createInstance();
+    writeBatch = firestore.batch();
   });
 
   it('requires document name', function() {
@@ -125,10 +109,8 @@ describe('create() method', function() {
   let writeBatch;
 
   beforeEach(() => {
-    return createInstance().then(firestoreClient => {
-      firestore = firestoreClient;
-      writeBatch = firestore.batch();
-    });
+    firestore = createInstance();
+    writeBatch = firestore.batch();
   });
 
   it('requires document name', function() {
@@ -152,12 +134,8 @@ describe('batch support', function() {
   let writeBatch;
 
   beforeEach(() => {
-    return createInstance().then(firestoreClient => {
-      firestore = firestoreClient;
-      writeBatch = firestore.batch();
-
-      firestore._firestoreClient._innerApiCalls.commit = function(
-          request, options, callback) {
+    firestore = createInstance({
+      commit: (request, options, callback) => {
         assert.deepEqual(request, {
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
@@ -249,8 +227,10 @@ describe('batch support', function() {
             },
           ],
         });
-      };
+      }
     });
+
+    writeBatch = firestore.batch();
   });
 
   function verifyResponse(writeResults) {
@@ -331,26 +311,27 @@ describe('batch support', function() {
   });
 
   it('can return same write result', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      callback(null, {
-        commitTime: {
-          nanos: 0,
-          seconds: 0,
-        },
-        writeResults: [
-          {
-            updateTime: {
-              nanos: 0,
-              seconds: 0,
+    firestore = createInstance({
+      commit: (request, options, callback) => {
+        callback(null, {
+          commitTime: {
+            nanos: 0,
+            seconds: 0,
+          },
+          writeResults: [
+            {
+              updateTime: {
+                nanos: 0,
+                seconds: 0,
+              },
             },
-          },
-          {
-            updateTime: {},
-          },
-        ],
-      });
-    };
+            {
+              updateTime: {},
+            },
+          ],
+        });
+      }
+    });
 
     let documentName = firestore.doc('col/doc');
 
@@ -368,51 +349,48 @@ describe('batch support', function() {
     // we are running on GCF.
     process.env.FUNCTION_TRIGGER_TYPE = 'http-trigger';
 
-    return createInstance().then(firestore => {
-      firestore._preferTransactions = true;
-      firestore._lastSuccessfulRequest = null;
-
-      let beginCalled = 0;
-      let commitCalled = 0;
-
-      firestore._firestoreClient._innerApiCalls.beginTransaction = function(
-          actual, options, callback) {
+    firestore = createInstance({
+      beginTransaction: (actual, options, callback) => {
         ++beginCalled;
         callback(null, {transaction: 'foo'});
-      };
-
-      firestore._firestoreClient._innerApiCalls.commit = function(
-          actual, options, callback) {
+      },
+      commit: (actual, options, callback) => {
         ++commitCalled;
         callback(null, {
           commitTime: {
             nanos: 0,
             seconds: 0,
           },
-        });
-      };
-
-      return firestore.batch()
-          .commit()
-          .then(() => {
-            // The first commit always uses a transcation.
-            assert.equal(1, beginCalled);
-            assert.equal(1, commitCalled);
-            return firestore.batch().commit();
-          })
-          .then(() => {
-            // The following commits don't use transactions if they happen
-            // within two minutes.
-            assert.equal(1, beginCalled);
-            assert.equal(2, commitCalled);
-            firestore._lastSuccessfulRequest = new Date(1337);
-            return firestore.batch().commit();
-          })
-          .then(() => {
-            assert.equal(2, beginCalled);
-            assert.equal(3, commitCalled);
-            delete process.env.FUNCTION_TRIGGER_TYPE;
-          });
+        })
+      }
     });
+
+    firestore._preferTransactions = true;
+    firestore._lastSuccessfulRequest = null;
+
+    let beginCalled = 0;
+    let commitCalled = 0;
+
+    return firestore.batch()
+        .commit()
+        .then(() => {
+          // The first commit always uses a transcation.
+          assert.equal(1, beginCalled);
+          assert.equal(1, commitCalled);
+          return firestore.batch().commit();
+        })
+        .then(() => {
+          // The following commits don't use transactions if they happen
+          // within two minutes.
+          assert.equal(1, beginCalled);
+          assert.equal(2, commitCalled);
+          firestore._lastSuccessfulRequest = new Date(1337);
+          return firestore.batch().commit();
+        })
+        .then(() => {
+          assert.equal(2, beginCalled);
+          assert.equal(3, commitCalled);
+          delete process.env.FUNCTION_TRIGGER_TYPE;
+        });
   });
 });

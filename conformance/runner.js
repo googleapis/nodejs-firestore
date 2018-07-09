@@ -32,19 +32,17 @@ const document = require('../src/document')(reference.DocumentReference);
 const DocumentSnapshot = document.DocumentSnapshot;
 const convert = require('../src/convert');
 const ResourcePath = require('../src/path').ResourcePath;
-
-const firestore = new Firestore({
-  projectId: 'projectID',
-  sslCreds: grpc.credentials.createInsecure(),
-  timestampsInSnapshots: true,
-  keyFilename: './test/fake-certificate.json',
-});
+const createInstance = require('../test/util/helpers').createInstance;
 
 /** List of test cases that are ignored. */
 const ignoredRe = [];
 
 /** If non-empty, list the test cases to run exclusively. */
 const exclusiveRe = [];
+
+const PROJECT_ID = 'projectID';
+
+let firestore;
 
 const docRef = function(path) {
   const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
@@ -56,8 +54,9 @@ const collRef = function(path) {
   return firestore.collection(relativePath);
 };
 
-const watchQuery =
-    collRef('projects/projectID/databases/(default)/documents/C').orderBy('a');
+const watchQuery = function() {
+  return firestore.collection('C').orderBy('a');
+};
 
 /** Converts JSON test data into JavaScript types suitable for the Node API. */
 const convertInput = {
@@ -154,7 +153,7 @@ const convertInput = {
     }
 
     return new Firestore.QuerySnapshot(
-        watchQuery, readTime, docs.length, () => docs, () => changes);
+        watchQuery(), readTime, docs.length, () => docs, () => changes);
   },
 };
 
@@ -279,7 +278,8 @@ function runTest(spec) {
   console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`);
 
   const updateTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
+    firestore =
+        createInstance({commit: commitHandler(spec)}, {projectId: PROJECT_ID});
 
     return Promise.resolve().then(() => {
       let varargs = [];
@@ -305,7 +305,8 @@ function runTest(spec) {
   };
 
   const queryTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.runQuery = queryHandler(spec);
+    firestore =
+        createInstance({runQuery: queryHandler(spec)}, {projectId: PROJECT_ID});
 
     const applyClause = function(query, clause) {
       if (clause.select) {
@@ -348,7 +349,8 @@ function runTest(spec) {
   };
 
   const deleteTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
+    firestore =
+        createInstance({commit: commitHandler(spec)}, {projectId: PROJECT_ID});
 
     return Promise.resolve().then(() => {
       if (spec.precondition) {
@@ -361,7 +363,8 @@ function runTest(spec) {
   };
 
   const setTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
+    firestore =
+        createInstance({commit: commitHandler(spec)}, {projectId: PROJECT_ID});
 
     return Promise.resolve().then(() => {
       const setOption = {};
@@ -381,7 +384,8 @@ function runTest(spec) {
   };
 
   const createTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
+    firestore =
+        createInstance({commit: commitHandler(spec)}, {projectId: PROJECT_ID});
 
     return Promise.resolve().then(() => {
       return docRef(spec.docRefPath)
@@ -390,8 +394,8 @@ function runTest(spec) {
   };
 
   const getTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments =
-        getHandler(spec);
+    firestore = createInstance(
+        {batchGetDocuments: getHandler(spec)}, {projectId: PROJECT_ID});
 
     return Promise.resolve().then(() => {
       return docRef(spec.docRefPath).get();
@@ -403,12 +407,12 @@ function runTest(spec) {
 
     const writeStream = through.obj();
 
-    firestore._firestoreClient._innerApiCalls.listen = () => {
-      return duplexify.obj(through.obj(), writeStream);
-    };
+    firestore = createInstance(
+        {listen: () => duplexify.obj(through.obj(), writeStream)},
+        {projectId: PROJECT_ID});
 
     return new Promise((resolve, reject) => {
-      const unlisten = watchQuery.onSnapshot(
+      const unlisten = watchQuery().onSnapshot(
           actualSnap => {
             const expectedSnapshot = expectedSnapshots.shift();
             if (expectedSnapshot) {
@@ -508,10 +512,6 @@ describe('Conformance Tests', function() {
 
     return testSuite.tests;
   };
-
-  before(() => {
-    firestore._ensureClient();
-  });
 
   for (let testCase of loadTestCases()) {
     const isIgnored = ignoredRe.find(re => re.test(testCase.description));

@@ -22,7 +22,14 @@ const is = require('is');
 const through = require('through2');
 const util = require('util');
 
-const libVersion = require('../../package.json').version;
+let libVersion;
+
+// Allow Firestore to be run both from 'src' and 'build/src'.
+try {
+  libVersion = require('../package.json').version;
+} catch (err) {
+  libVersion = require('../../package.json').version;
+}
 
 const path = require('./path');
 const convert = require('./convert');
@@ -64,6 +71,11 @@ const FieldValue = require('./field-value').FieldValue;
 const Timestamp = require('./timestamp');
 
 /*!
+ * @see ClientPool
+ */
+const ClientPool = require('./pool').ClientPool;
+
+/*!
  * @see CollectionReference
  */
 let CollectionReference;
@@ -99,12 +111,12 @@ let Transaction;
 /*!
  * @see v1beta1
  */
-let v1beta1;  // Lazy-loaded in `_ensureClient()`
+let v1beta1;  // Lazy-loaded in `_runRequest()`
 
 /*!
  * @see @google-cloud/common
  */
-let common;  // Lazy-loaded in `_ensureClient()`
+let common;  // Lazy-loaded in `_runRequest()`
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -118,6 +130,12 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
  * @type {number}
  */
 const MAX_REQUEST_RETRIES = 5;
+
+/*!
+ * The maximum number of concurrent requests supported by a GAPIC client.
+ * @type {number}
+ */
+const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
 
 /*!
  * GRPC Error code for 'UNAVAILABLE'.
@@ -232,11 +250,11 @@ class Firestore {
     });
 
     /**
+     * A client pool to distribute requests over multiple GAPIC clients.
      * @private
-     * @type {object|null}
-     * @property {FirestoreClient} Firestore The Firestore GAPIC client.
+     * @type {ClientPool|null}
      */
-    this._firestoreClient = null;
+    this._clientPool = null;
 
     /**
      * The configuration options for the GAPIC client.
@@ -724,47 +742,69 @@ follow these steps, YOUR APP MAY BREAK.`);
   }
 
   /**
-   * Initializes the client and detects the Firestore Project ID. Returns a
-   * Promise on completion. If the client is already initialized, the returned
-   * Promise resolves immediately.
+   * Initializes the client pool and invokes Project ID detection. Returns a
+   * Promise on completion. If the client pool is already initialized, the
+   * returned Promise resolves immediately.
    *
    * @private
    */
-  _ensureClient() {
+  _runRequest(op) {
     if (!this._clientInitialized) {
       common = require('@google-cloud/common');
+      this._clientPool = this._initClientPool();
 
-      this._clientInitialized = new Promise((resolve, reject) => {
-        this._firestoreClient =
-            module.exports.v1beta1(this._initalizationOptions);
+      const projectIdProvided =
+          this._referencePath.projectId !== '{{projectId}}';
 
-        Firestore.log('Firestore', null, 'Initialized Firestore GAPIC Client');
-
-        // We schedule Project ID detection using `setImmediate` to allow the
-        // testing framework to provide its own implementation of
-        // `getProjectId`.
-        setImmediate(() => {
-          this._firestoreClient.getProjectId((err, projectId) => {
-            if (err) {
-              Firestore.log(
-                  'Firestore._ensureClient', null,
-                  'Failed to detect project ID: %s', err);
-              reject(err);
-            } else {
-              Firestore.log(
-                  'Firestore._ensureClient', null, 'Detected project ID: %s',
-                  projectId);
-              this._referencePath =
-                  new ResourcePath(projectId, this._referencePath.databaseId);
-              resolve();
-            }
-          });
-        });
-      });
+      this._clientInitialized = projectIdProvided ?
+          Promise.resolve() :
+          this._clientPool.run(client => this._detectProjectId(client))
+              .then(projectId => {
+                this._referencePath =
+                    new ResourcePath(projectId, this._referencePath.databaseId);
+              });
     }
-    return this._clientInitialized;
+
+    return this._clientInitialized.then(() => this._clientPool.run(op));
   }
 
+  /**
+   * Initialized a new ClientPool that manages the Firestore GAPIC clients.
+   *
+   * @private
+   * @return {ClientPool}
+   */
+  _initClientPool() {
+    return new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
+      const client = module.exports.v1beta1(this._initalizationOptions);
+      Firestore.log('Firestore', null, 'Initialized Firestore GAPIC Client');
+      return client;
+    });
+  }
+
+  /**
+   * Auto-detects the Firestore Project ID.
+   *
+   * @private
+   * @param {object} gapicClient - The Firestore GAPIC client.
+   * @return {Promise<string>} A Promise that resolves with the Project ID.
+   */
+  _detectProjectId(gapicClient) {
+    return new Promise(
+        (resolve, reject) => {gapicClient.getProjectId((err, projectId) => {
+          if (err) {
+            Firestore.log(
+                'Firestore._detectProjectId', null,
+                'Failed to detect project ID: %s', err);
+            reject(err);
+          } else {
+            Firestore.log(
+                'Firestore._detectProjectId', null, 'Detected project ID: %s',
+                projectId);
+            resolve(projectId);
+          }
+        })});
+  }
   /**
    * Decorate the request options of an API request. This is used to replace
    * any `{{projectId}}` placeholders with the value detected from the user's
@@ -971,14 +1011,14 @@ follow these steps, YOUR APP MAY BREAK.`);
   request(methodName, request, requestTag, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._ensureClient().then(() => {
+    return this._runRequest(veneerClient => {
       const decorated = this._decorateRequest(request);
       return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
           Firestore.log(
               'Firestore.request', requestTag, 'Sending request: %j',
               decorated.request);
-          this._firestoreClient[methodName](
+          veneerClient[methodName](
               decorated.request, decorated.gax, (err, result) => {
                 if (err) {
                   Firestore.log(
@@ -1016,7 +1056,7 @@ follow these steps, YOUR APP MAY BREAK.`);
   readStream(methodName, request, requestTag, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._ensureClient().then(() => {
+    return this._runRequest(veneerClient => {
       const decorated = this._decorateRequest(request);
       return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
@@ -1024,7 +1064,7 @@ follow these steps, YOUR APP MAY BREAK.`);
                    Firestore.log(
                        'Firestore.readStream', requestTag,
                        'Sending request: %j', decorated.request);
-                   let stream = this._firestoreClient[methodName](
+                   let stream = veneerClient[methodName](
                        decorated.request, decorated.gax);
                    let logger = through.obj(function(chunk, enc, callback) {
                      Firestore.log(
@@ -1068,7 +1108,7 @@ follow these steps, YOUR APP MAY BREAK.`);
     let self = this;
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._ensureClient().then(() => {
+    return this._runRequest(veneerClient => {
       const decorated = this._decorateRequest(request);
       return this._retry(attempts, requestTag, () => {
         return Promise.resolve().then(() => {
@@ -1076,8 +1116,7 @@ follow these steps, YOUR APP MAY BREAK.`);
               'Firestore.readWriteStream', requestTag, 'Opening stream');
           // The generated bi-directional streaming API takes the list of GAX
           // headers as its second argument.
-          let requestStream =
-              this._firestoreClient[methodName]({}, decorated.gax);
+          let requestStream = veneerClient[methodName]({}, decorated.gax);
 
           // The transform stream to assign the project ID.
           let transform = through.obj(function(chunk, encoding, callback) {

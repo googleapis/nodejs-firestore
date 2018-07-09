@@ -24,30 +24,18 @@ const is = require('is');
 const Firestore = require('../src');
 const DocumentReference =
     require('../src/reference')(Firestore).DocumentReference;
+const createInstance = require('../test/util/helpers').createInstance;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
 const PROJECT_ID = 'test-project';
 
-function createInstance() {
-  let firestore = new Firestore({
-    projectId: PROJECT_ID,
-    sslCreds: grpc.credentials.createInsecure(),
-    timestampsInSnapshots: true,
-    keyFilename: './test/fake-certificate.json',
-  });
-
-  return firestore._ensureClient().then(() => firestore);
-}
-
 describe('Collection interface', function() {
   let firestore;
 
   beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+    firestore = createInstance();
   });
 
   it('has doc() method', function() {
@@ -101,44 +89,45 @@ describe('Collection interface', function() {
   it('has add() method', function() {
     const dbPrefix = `projects/${PROJECT_ID}/databases`;
 
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      // Verify that the document name uses an auto-generated id.
-      let docIdRe = new RegExp(
-          `${dbPrefix}/\\(default\\)/documents/collectionId/[a-zA-Z0-9]{20}`);
-      assert.ok(docIdRe.test(request.writes[0].update.name));
-      delete request.writes[0].update.name;
+    firestore = createInstance({
+      commit: (request, options, callback) => {
+        // Verify that the document name uses an auto-generated id.
+        let docIdRe = new RegExp(
+            `${dbPrefix}/\\(default\\)/documents/collectionId/[a-zA-Z0-9]{20}`);
+        assert.ok(docIdRe.test(request.writes[0].update.name));
+        delete request.writes[0].update.name;
 
-      // Verify that the rest of the protobuf matches.
-      assert.deepEqual(request, {
-        database: dbPrefix + '/(default)',
-        writes: [
-          {
-            update: {
-              fields: {},
+        // Verify that the rest of the protobuf matches.
+        assert.deepEqual(request, {
+          database: dbPrefix + '/(default)',
+          writes: [
+            {
+              update: {
+                fields: {},
+              },
+              currentDocument: {
+                exists: false,
+              },
             },
-            currentDocument: {
-              exists: false,
-            },
-          },
-        ],
-      });
+          ],
+        });
 
-      callback(null, {
-        commitTime: {
-          nanos: 0,
-          seconds: 0,
-        },
-        writeResults: [
-          {
-            updateTime: {
-              nanos: 0,
-              seconds: 0,
-            },
+        callback(null, {
+          commitTime: {
+            nanos: 0,
+            seconds: 0,
           },
-        ],
-      });
-    };
+          writeResults: [
+            {
+              updateTime: {
+                nanos: 0,
+                seconds: 0,
+              },
+            },
+          ],
+        });
+      }
+    });
 
     let collectionRef = firestore.collection('collectionId');
     assert.ok(collectionRef.add);

@@ -28,30 +28,18 @@ const DocumentSnapshot = document.DocumentSnapshot;
 const GeoPoint = document.GeoPoint;
 const order = require('../src/order');
 const ResourcePath = require('../src/path').ResourcePath;
+const createInstance = require('../test/util/helpers').createInstance;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
 const PROJECT_ID = 'test-project';
 
-function createInstance() {
-  let firestore = new Firestore({
-    projectId: PROJECT_ID,
-    sslCreds: grpc.credentials.createInsecure(),
-    timestampsInSnapshots: true,
-    keyFilename: './test/fake-certificate.json',
-  });
-
-  return firestore._ensureClient().then(() => firestore);
-}
-
 describe('Order', function() {
   let firestore;
 
   beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+    firestore = createInstance();
   });
 
   /** Converts a value into its proto representation. */
