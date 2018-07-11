@@ -21,8 +21,7 @@
  * @property {Object} update
  *   A document to write.
  *
- *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
  *
  * @property {string} delete
  *   A document name to delete. In the format:
@@ -34,8 +33,7 @@
  *   An `update` cannot follow a `transform` on the same document in a given
  *   request.
  *
- *   This object should have the same structure as [DocumentTransform]{@link
- * google.firestore.v1beta1.DocumentTransform}
+ *   This object should have the same structure as [DocumentTransform]{@link google.firestore.v1beta1.DocumentTransform}
  *
  * @property {Object} updateMask
  *   The fields to update in this write.
@@ -48,23 +46,21 @@
  *   deleted from the document on the server.
  *   The field paths in this mask must not contain a reserved field name.
  *
- *   This object should have the same structure as [DocumentMask]{@link
- * google.firestore.v1beta1.DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  *
  * @property {Object} currentDocument
  *   An optional precondition on the document.
  *
  *   The write will fail if this is set and not met by the target document.
  *
- *   This object should have the same structure as [Precondition]{@link
- * google.firestore.v1beta1.Precondition}
+ *   This object should have the same structure as [Precondition]{@link google.firestore.v1beta1.Precondition}
  *
  * @typedef Write
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Write definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var Write = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -78,8 +74,7 @@ var Write = {
  *   order.
  *   This must not be empty.
  *
- *   This object should have the same structure as [FieldTransform]{@link
- * google.firestore.v1beta1.FieldTransform}
+ *   This object should have the same structure as [FieldTransform]{@link google.firestore.v1beta1.FieldTransform}
  *
  * @typedef DocumentTransform
  * @memberof google.firestore.v1beta1
@@ -98,8 +93,7 @@ var DocumentTransform = {
    * @property {number} setToServerValue
    *   Sets the field to the given server value.
    *
-   *   The number should be among the values of [ServerValue]{@link
-   * google.firestore.v1beta1.ServerValue}
+   *   The number should be among the values of [ServerValue]{@link google.firestore.v1beta1.ServerValue}
    *
    * @typedef FieldTransform
    * @memberof google.firestore.v1beta1
@@ -140,22 +134,20 @@ var DocumentTransform = {
  *   If the write did not actually change the document, this will be the
  *   previous update_time.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {Object[]} transformResults
  *   The results of applying each DocumentTransform.FieldTransform, in the
  *   same order.
  *
- *   This object should have the same structure as [Value]{@link
- * google.firestore.v1beta1.Value}
+ *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
  *
  * @typedef WriteResult
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.WriteResult definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var WriteResult = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -172,8 +164,7 @@ var WriteResult = {
  *
  *   If `mask` is set, contains only fields that were updated or added.
  *
- *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
  *
  * @property {number[]} targetIds
  *   A set of target IDs of targets that match this document.
@@ -186,7 +177,7 @@ var WriteResult = {
  * @see [google.firestore.v1beta1.DocumentChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentChange = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -209,15 +200,14 @@ var DocumentChange = {
  *
  *   Greater or equal to the `commit_time` of the delete.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef DocumentDelete
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentDelete definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentDelete = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -241,15 +231,14 @@ var DocumentDelete = {
  *
  *   Greater or equal to the `commit_time` of the change/delete/remove.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef DocumentRemove
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentRemove definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var DocumentRemove = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -269,5 +258,5 @@ var DocumentRemove = {
  * @see [google.firestore.v1beta1.ExistenceFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
 var ExistenceFilter = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };

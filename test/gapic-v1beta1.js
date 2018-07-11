@@ -32,8 +32,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedName = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var request = {
         name: formattedName,
       };
@@ -45,8 +44,10 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.getDocument =
-          mockSimpleGrpcMethod(request, expectedResponse);
+      client._innerApiCalls.getDocument = mockSimpleGrpcMethod(
+        request,
+        expectedResponse
+      );
 
       client.getDocument(request, (err, response) => {
         assert.ifError(err);
@@ -62,15 +63,17 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedName = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var request = {
         name: formattedName,
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.getDocument =
-          mockSimpleGrpcMethod(request, null, error);
+      client._innerApiCalls.getDocument = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
 
       client.getDocument(request, (err, response) => {
         assert(err instanceof Error);
@@ -89,8 +92,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var collectionId = 'collectionId-821242276';
       var request = {
         parent: formattedParent,
@@ -107,11 +109,10 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.listDocuments =
-          (actualRequest, options, callback) => {
-            assert.deepStrictEqual(actualRequest, request);
-            callback(null, expectedResponse.documents);
-          };
+      client._innerApiCalls.listDocuments = (actualRequest, options, callback) => {
+        assert.deepStrictEqual(actualRequest, request);
+        callback(null, expectedResponse.documents);
+      };
 
       client.listDocuments(request, (err, response) => {
         assert.ifError(err);
@@ -127,8 +128,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var collectionId = 'collectionId-821242276';
       var request = {
         parent: formattedParent,
@@ -136,8 +136,11 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.listDocuments =
-          mockSimpleGrpcMethod(request, null, error);
+      client._innerApiCalls.listDocuments = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
 
       client.listDocuments(request, (err, response) => {
         assert(err instanceof Error);
@@ -156,8 +159,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var collectionId = 'collectionId-821242276';
       var documentId = 'documentId506676927';
       var document = {};
@@ -175,8 +177,10 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.createDocument =
-          mockSimpleGrpcMethod(request, expectedResponse);
+      client._innerApiCalls.createDocument = mockSimpleGrpcMethod(
+        request,
+        expectedResponse
+      );
 
       client.createDocument(request, (err, response) => {
         assert.ifError(err);
@@ -192,8 +196,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var collectionId = 'collectionId-821242276';
       var documentId = 'documentId506676927';
       var document = {};
@@ -205,8 +208,11 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.createDocument =
-          mockSimpleGrpcMethod(request, null, error);
+      client._innerApiCalls.createDocument = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
 
       client.createDocument(request, (err, response) => {
         assert(err instanceof Error);
@@ -239,8 +245,10 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.updateDocument =
-          mockSimpleGrpcMethod(request, expectedResponse);
+      client._innerApiCalls.updateDocument = mockSimpleGrpcMethod(
+        request,
+        expectedResponse
+      );
 
       client.updateDocument(request, (err, response) => {
         assert.ifError(err);
@@ -264,8 +272,11 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.updateDocument =
-          mockSimpleGrpcMethod(request, null, error);
+      client._innerApiCalls.updateDocument = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
 
       client.updateDocument(request, (err, response) => {
         assert(err instanceof Error);
@@ -284,8 +295,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedName = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var request = {
         name: formattedName,
       };
@@ -306,15 +316,17 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedName = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var request = {
         name: formattedName,
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.deleteDocument =
-          mockSimpleGrpcMethod(request, null, error);
+      client._innerApiCalls.deleteDocument = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
 
       client.deleteDocument(request, err => {
         assert(err instanceof Error);
@@ -332,8 +344,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var documents = [];
       var request = {
         database: formattedDatabase,
@@ -349,8 +360,7 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.batchGetDocuments =
-          mockServerStreamingGrpcMethod(request, expectedResponse);
+      client._innerApiCalls.batchGetDocuments = mockServerStreamingGrpcMethod(request, expectedResponse);
 
       var stream = client.batchGetDocuments(request);
       stream.on('data', response => {
@@ -371,8 +381,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var documents = [];
       var request = {
         database: formattedDatabase,
@@ -380,8 +389,7 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.batchGetDocuments =
-          mockServerStreamingGrpcMethod(request, null, error);
+      client._innerApiCalls.batchGetDocuments = mockServerStreamingGrpcMethod(request, null, error);
 
       var stream = client.batchGetDocuments(request);
       stream.on('data', () => {
@@ -405,8 +413,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var request = {
         database: formattedDatabase,
       };
@@ -418,8 +425,10 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.beginTransaction =
-          mockSimpleGrpcMethod(request, expectedResponse);
+      client._innerApiCalls.beginTransaction = mockSimpleGrpcMethod(
+        request,
+        expectedResponse
+      );
 
       client.beginTransaction(request, (err, response) => {
         assert.ifError(err);
@@ -435,15 +444,17 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var request = {
         database: formattedDatabase,
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.beginTransaction =
-          mockSimpleGrpcMethod(request, null, error);
+      client._innerApiCalls.beginTransaction = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
 
       client.beginTransaction(request, (err, response) => {
         assert(err instanceof Error);
@@ -462,8 +473,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var writes = [];
       var request = {
         database: formattedDatabase,
@@ -474,8 +484,10 @@ describe('FirestoreClient', () => {
       var expectedResponse = {};
 
       // Mock Grpc layer
-      client._innerApiCalls.commit =
-          mockSimpleGrpcMethod(request, expectedResponse);
+      client._innerApiCalls.commit = mockSimpleGrpcMethod(
+        request,
+        expectedResponse
+      );
 
       client.commit(request, (err, response) => {
         assert.ifError(err);
@@ -491,8 +503,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var writes = [];
       var request = {
         database: formattedDatabase,
@@ -500,7 +511,11 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.commit = mockSimpleGrpcMethod(request, null, error);
+      client._innerApiCalls.commit = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
 
       client.commit(request, (err, response) => {
         assert(err instanceof Error);
@@ -519,8 +534,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var transaction = '-34';
       var request = {
         database: formattedDatabase,
@@ -543,8 +557,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var transaction = '-34';
       var request = {
         database: formattedDatabase,
@@ -552,8 +565,11 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.rollback =
-          mockSimpleGrpcMethod(request, null, error);
+      client._innerApiCalls.rollback = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
 
       client.rollback(request, err => {
         assert(err instanceof Error);
@@ -571,8 +587,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var request = {
         parent: formattedParent,
       };
@@ -586,8 +601,7 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.runQuery =
-          mockServerStreamingGrpcMethod(request, expectedResponse);
+      client._innerApiCalls.runQuery = mockServerStreamingGrpcMethod(request, expectedResponse);
 
       var stream = client.runQuery(request);
       stream.on('data', response => {
@@ -608,15 +622,13 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var request = {
         parent: formattedParent,
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.runQuery =
-          mockServerStreamingGrpcMethod(request, null, error);
+      client._innerApiCalls.runQuery = mockServerStreamingGrpcMethod(request, null, error);
 
       var stream = client.runQuery(request);
       stream.on('data', () => {
@@ -640,8 +652,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var request = {
         database: formattedDatabase,
       };
@@ -655,18 +666,14 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.write =
-          mockBidiStreamingGrpcMethod(request, expectedResponse);
+      client._innerApiCalls.write = mockBidiStreamingGrpcMethod(request, expectedResponse);
 
-      var stream = client.write()
-                       .on('data',
-                           response => {
-                             assert.deepStrictEqual(response, expectedResponse);
-                             done();
-                           })
-                       .on('error', err => {
-                         done(err);
-                       });
+      var stream = client.write().on('data', response => {
+        assert.deepStrictEqual(response, expectedResponse);
+        done();
+      }).on('error', err => {
+        done(err);
+      });
 
       stream.write(request);
     });
@@ -678,26 +685,21 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var request = {
         database: formattedDatabase,
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.write =
-          mockBidiStreamingGrpcMethod(request, null, error);
+      client._innerApiCalls.write = mockBidiStreamingGrpcMethod(request, null, error);
 
-      var stream = client.write()
-                       .on('data',
-                           () => {
-                             assert.fail();
-                           })
-                       .on('error', err => {
-                         assert(err instanceof Error);
-                         assert.equal(err.code, FAKE_STATUS_CODE);
-                         done();
-                       });
+      var stream = client.write().on('data', () => {
+        assert.fail();
+      }).on('error', err => {
+        assert(err instanceof Error);
+        assert.equal(err.code, FAKE_STATUS_CODE);
+        done();
+      });
 
       stream.write(request);
     });
@@ -711,8 +713,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var request = {
         database: formattedDatabase,
       };
@@ -721,18 +722,14 @@ describe('FirestoreClient', () => {
       var expectedResponse = {};
 
       // Mock Grpc layer
-      client._innerApiCalls.listen =
-          mockBidiStreamingGrpcMethod(request, expectedResponse);
+      client._innerApiCalls.listen = mockBidiStreamingGrpcMethod(request, expectedResponse);
 
-      var stream = client.listen()
-                       .on('data',
-                           response => {
-                             assert.deepStrictEqual(response, expectedResponse);
-                             done();
-                           })
-                       .on('error', err => {
-                         done(err);
-                       });
+      var stream = client.listen().on('data', response => {
+        assert.deepStrictEqual(response, expectedResponse);
+        done();
+      }).on('error', err => {
+        done(err);
+      });
 
       stream.write(request);
     });
@@ -744,26 +741,21 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedDatabase =
-          client.databaseRootPath('[PROJECT]', '[DATABASE]');
+      var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
       var request = {
         database: formattedDatabase,
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.listen =
-          mockBidiStreamingGrpcMethod(request, null, error);
+      client._innerApiCalls.listen = mockBidiStreamingGrpcMethod(request, null, error);
 
-      var stream = client.listen()
-                       .on('data',
-                           () => {
-                             assert.fail();
-                           })
-                       .on('error', err => {
-                         assert(err instanceof Error);
-                         assert.equal(err.code, FAKE_STATUS_CODE);
-                         done();
-                       });
+      var stream = client.listen().on('data', () => {
+        assert.fail();
+      }).on('error', err => {
+        assert(err instanceof Error);
+        assert.equal(err.code, FAKE_STATUS_CODE);
+        done();
+      });
 
       stream.write(request);
     });
@@ -777,8 +769,7 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var request = {
         parent: formattedParent,
       };
@@ -793,11 +784,10 @@ describe('FirestoreClient', () => {
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.listCollectionIds =
-          (actualRequest, options, callback) => {
-            assert.deepStrictEqual(actualRequest, request);
-            callback(null, expectedResponse.collectionIds);
-          };
+      client._innerApiCalls.listCollectionIds = (actualRequest, options, callback) => {
+        assert.deepStrictEqual(actualRequest, request);
+        callback(null, expectedResponse.collectionIds);
+      };
 
       client.listCollectionIds(request, (err, response) => {
         assert.ifError(err);
@@ -813,15 +803,17 @@ describe('FirestoreClient', () => {
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
-          '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
+      var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
       var request = {
         parent: formattedParent,
       };
 
       // Mock Grpc layer
-      client._innerApiCalls.listCollectionIds =
-          mockSimpleGrpcMethod(request, null, error);
+      client._innerApiCalls.listCollectionIds = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
 
       client.listCollectionIds(request, (err, response) => {
         assert(err instanceof Error);
@@ -831,6 +823,7 @@ describe('FirestoreClient', () => {
       });
     });
   });
+
 });
 
 function mockSimpleGrpcMethod(expectedRequest, response, error) {
@@ -852,7 +845,8 @@ function mockServerStreamingGrpcMethod(expectedRequest, response, error) {
     var mockStream = through2.obj((chunk, enc, callback) => {
       if (error) {
         callback(error);
-      } else {
+      }
+      else {
         callback(null, response);
       }
     });
@@ -866,10 +860,11 @@ function mockBidiStreamingGrpcMethod(expectedRequest, response, error) {
       assert.deepStrictEqual(chunk, expectedRequest);
       if (error) {
         callback(error);
-      } else {
+      }
+      else {
         callback(null, response);
       }
     });
     return mockStream;
-  };
+  }
 }
