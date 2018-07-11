@@ -24,12 +24,10 @@ const through = require('through2');
 const assert = require('assert');
 
 function createInstance(opts, document) {
-  let firestore = new Firestore(
-    Object.assign({}, opts, {
-      projectId: 'test-project',
-      sslCreds: grpc.credentials.createInsecure(),
-    })
-  );
+  let firestore = new Firestore(Object.assign({}, opts, {
+    projectId: 'test-project',
+    sslCreds: grpc.credentials.createInsecure(),
+  }));
 
   return firestore._ensureClient().then(() => {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
@@ -79,121 +77,99 @@ const DOCUMENT_WITH_EMPTY_TIMESTAMP = document('moonLanding', {
 describe('timestamps', function() {
   it('returned when enabled', function() {
     return createInstance(
-      {
-        timestampsInSnapshots: true,
-        keyFilename: './test/fake-certificate.json',
-      },
-      DOCUMENT_WITH_TIMESTAMP
-    ).then(firestore => {
-      const expected = new Firestore.Timestamp(-14182920, 123000123);
-      return firestore
-        .doc('coll/doc')
-        .get()
-        .then(res => {
-          assert.ok(res.data()['moonLanding'].isEqual(expected));
-          assert.ok(res.get('moonLanding').isEqual(expected));
+               {
+                 timestampsInSnapshots: true,
+                 keyFilename: './test/fake-certificate.json',
+               },
+               DOCUMENT_WITH_TIMESTAMP)
+        .then(firestore => {
+          const expected = new Firestore.Timestamp(-14182920, 123000123);
+          return firestore.doc('coll/doc').get().then(res => {
+            assert.ok(res.data()['moonLanding'].isEqual(expected));
+            assert.ok(res.get('moonLanding').isEqual(expected));
+          });
         });
-    });
   });
 
   it('converted to dates when disabled', function() {
-    /* eslint-disable no-console */
     const oldErrorLog = console.error;
     // Prevent error message that prompts to enable `timestampsInSnapshots`
     // behavior.
     console.error = () => {};
 
     return createInstance(
-      {timestampsInSnapshots: false},
-      DOCUMENT_WITH_TIMESTAMP
-    ).then(firestore => {
-      return firestore
-        .doc('coll/doc')
-        .get()
-        .then(res => {
-          assert.ok(is.date(res.data()['moonLanding']));
-          assert.ok(is.date(res.get('moonLanding')));
-          console.error = oldErrorLog;
+               {timestampsInSnapshots: false}, DOCUMENT_WITH_TIMESTAMP)
+        .then(firestore => {
+          return firestore.doc('coll/doc').get().then(res => {
+            assert.ok(is.date(res.data()['moonLanding']));
+            assert.ok(is.date(res.get('moonLanding')));
+            console.error = oldErrorLog;
+          });
         });
-    });
-    /* eslint-enable no-console */
   });
 
   it('retain seconds and nanoseconds', function() {
     return createInstance(
-      {
-        timestampsInSnapshots: true,
-        keyFilename: './test/fake-certificate.json',
-      },
-      DOCUMENT_WITH_TIMESTAMP
-    ).then(firestore => {
-      return firestore
-        .doc('coll/doc')
-        .get()
-        .then(res => {
-          const timestamp = res.get('moonLanding');
-          assert.equal(timestamp.seconds, -14182920);
-          assert.equal(timestamp.nanoseconds, 123000123);
+               {
+                 timestampsInSnapshots: true,
+                 keyFilename: './test/fake-certificate.json',
+               },
+               DOCUMENT_WITH_TIMESTAMP)
+        .then(firestore => {
+          return firestore.doc('coll/doc').get().then(res => {
+            const timestamp = res.get('moonLanding');
+            assert.equal(timestamp.seconds, -14182920);
+            assert.equal(timestamp.nanoseconds, 123000123);
+          });
         });
-    });
   });
 
   it('convert to date', function() {
     return createInstance(
-      {
-        timestampsInSnapshots: true,
-        keyFilename: './test/fake-certificate.json',
-      },
-      DOCUMENT_WITH_TIMESTAMP
-    ).then(firestore => {
-      return firestore
-        .doc('coll/doc')
-        .get()
-        .then(res => {
-          const timestamp = res.get('moonLanding');
-          assert.equal(
-            new Date(-14182920 * 1000 + 123).getTime(),
-            timestamp.toDate().getTime()
-          );
+               {
+                 timestampsInSnapshots: true,
+                 keyFilename: './test/fake-certificate.json',
+               },
+               DOCUMENT_WITH_TIMESTAMP)
+        .then(firestore => {
+          return firestore.doc('coll/doc').get().then(res => {
+            const timestamp = res.get('moonLanding');
+            assert.equal(
+                new Date(-14182920 * 1000 + 123).getTime(),
+                timestamp.toDate().getTime());
+          });
         });
-    });
   });
 
   it('convert to millis', function() {
     return createInstance(
-      {
-        timestampsInSnapshots: true,
-        keyFilename: './test/fake-certificate.json',
-      },
-      DOCUMENT_WITH_TIMESTAMP
-    ).then(firestore => {
-      return firestore
-        .doc('coll/doc')
-        .get()
-        .then(res => {
-          const timestamp = res.get('moonLanding');
-          assert.equal(-14182920 * 1000 + 123, timestamp.toMillis());
+               {
+                 timestampsInSnapshots: true,
+                 keyFilename: './test/fake-certificate.json',
+               },
+               DOCUMENT_WITH_TIMESTAMP)
+        .then(firestore => {
+          return firestore.doc('coll/doc').get().then(res => {
+            const timestamp = res.get('moonLanding');
+            assert.equal(-14182920 * 1000 + 123, timestamp.toMillis());
+          });
         });
-    });
   });
 
   it('support missing values', function() {
     return createInstance(
-      {
-        timestampsInSnapshots: true,
-        keyFilename: './test/fake-certificate.json',
-      },
-      DOCUMENT_WITH_EMPTY_TIMESTAMP
-    ).then(firestore => {
-      const expected = new Firestore.Timestamp(0, 0);
+               {
+                 timestampsInSnapshots: true,
+                 keyFilename: './test/fake-certificate.json',
+               },
+               DOCUMENT_WITH_EMPTY_TIMESTAMP)
+        .then(firestore => {
+          const expected = new Firestore.Timestamp(0, 0);
 
-      return firestore
-        .doc('coll/doc')
-        .get()
-        .then(res => {
-          assert.ok(res.get('moonLanding').isEqual(expected));
+          return firestore.doc('coll/doc').get().then(res => {
+            assert.ok(res.get('moonLanding').isEqual(expected));
+          });
         });
-    });
   });
 
   it('constructed using helper', function() {
@@ -210,23 +186,19 @@ describe('timestamps', function() {
 
   it('validates nanoseconds', function() {
     assert.throws(
-      () => new Firestore.Timestamp(0.1, 0),
-      /Argument "seconds" is not a valid integer./
-    );
+        () => new Firestore.Timestamp(0.1, 0),
+        /Argument "seconds" is not a valid integer./);
 
     assert.throws(
-      () => new Firestore.Timestamp(0, 0.1),
-      /Argument "nanoseconds" is not a valid integer./
-    );
+        () => new Firestore.Timestamp(0, 0.1),
+        /Argument "nanoseconds" is not a valid integer./);
 
     assert.throws(
-      () => new Firestore.Timestamp(0, -1),
-      /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1/
-    );
+        () => new Firestore.Timestamp(0, -1),
+        /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1/);
 
     assert.throws(
-      () => new Firestore.Timestamp(0, 1000000000),
-      /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000/
-    );
+        () => new Firestore.Timestamp(0, 1000000000),
+        /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000/);
   });
 });

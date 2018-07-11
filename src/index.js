@@ -22,7 +22,6 @@ const is = require('is');
 const through = require('through2');
 const util = require('util');
 
-// eslint-disable-next-line node/no-missing-require
 const libVersion = require('../../package.json').version;
 
 const path = require('./path');
@@ -100,12 +99,12 @@ let Transaction;
 /*!
  * @see v1beta1
  */
-let v1beta1; // Lazy-loaded in `_ensureClient()`
+let v1beta1;  // Lazy-loaded in `_ensureClient()`
 
 /*!
  * @see @google-cloud/common
  */
-let common; // Lazy-loaded in `_ensureClient()`
+let common;  // Lazy-loaded in `_ensureClient()`
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -181,19 +180,21 @@ const GRPC_UNAVAILABLE = 14;
  *
  * @class
  *
- * @example <caption>Install the client library with <a href="https://www.npmjs.com/">npm</a>:</caption>
- * npm install --save @google-cloud/firestore
+ * @example <caption>Install the client library with <a
+ * href="https://www.npmjs.com/">npm</a>:</caption> npm install --save
+ * @google-cloud/firestore
  *
  * @example <caption>Import the client library</caption>
  * var Firestore = require('@google-cloud/firestore');
  *
- * @example <caption>Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:</caption>
- * var firestore = new Firestore();
+ * @example <caption>Create a client that uses <a
+ * href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application
+ * Default Credentials (ADC)</a>:</caption> var firestore = new Firestore();
  *
- * @example <caption>Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:</caption>
- * var firestore = new Firestore({
- *   projectId: 'your-project-id',
- *   keyFilename: '/path/to/keyfile.json'
+ * @example <caption>Create a client with <a
+ * href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit
+ * credentials</a>:</caption> var firestore = new Firestore({ projectId:
+ * 'your-project-id', keyFilename: '/path/to/keyfile.json'
  * });
  *
  * @example <caption>include:samples/quickstart.js</caption>
@@ -269,7 +270,6 @@ class Firestore {
     this._timestampsInSnapshotsEnabled = !!options.timestampsInSnapshots;
 
     if (!this._timestampsInSnapshotsEnabled) {
-      // eslint-disable-next-line no-console
       console.error(`
 The behavior for Date objects stored in Firestore is going to change
 AND YOUR APP MAY BREAK.
@@ -333,9 +333,8 @@ follow these steps, YOUR APP MAY BREAK.`);
 
     let path = this._referencePath.append(documentPath);
     if (!path.isDocument) {
-      throw new Error(
-        `Argument "documentPath" must point to a document, but was "${documentPath}". Your path does not contain an even number of components.`
-      );
+      throw new Error(`Argument "documentPath" must point to a document, but was "${
+          documentPath}". Your path does not contain an even number of components.`);
     }
 
     return new DocumentReference(this, path);
@@ -362,9 +361,8 @@ follow these steps, YOUR APP MAY BREAK.`);
 
     let path = this._referencePath.append(collectionPath);
     if (!path.isCollection) {
-      throw new Error(
-        `Argument "collectionPath" must point to a collection, but was "${collectionPath}". Your path does not contain an odd number of components.`
-      );
+      throw new Error(`Argument "collectionPath" must point to a collection, but was "${
+          collectionPath}". Your path does not contain an odd number of components.`);
     }
 
     return new CollectionReference(this, path);
@@ -426,38 +424,29 @@ follow these steps, YOUR APP MAY BREAK.`);
       convertDocument = convert.documentFromJson;
     } else {
       throw new Error(
-        `Unsupported encoding format. Expected 'json' or 'protobufJS', ` +
-          `but was '${encoding}'.`
-      );
+          `Unsupported encoding format. Expected 'json' or 'protobufJS', ` +
+          `but was '${encoding}'.`);
     }
 
     const document = new DocumentSnapshot.Builder();
 
     if (is.string(documentOrName)) {
       document.ref = new DocumentReference(
-        this,
-        ResourcePath.fromSlashSeparatedString(documentOrName)
-      );
+          this, ResourcePath.fromSlashSeparatedString(documentOrName));
     } else {
       document.ref = new DocumentReference(
-        this,
-        ResourcePath.fromSlashSeparatedString(documentOrName.name)
-      );
-      document.fieldsProto = documentOrName.fields
-        ? convertDocument(documentOrName.fields)
-        : {};
-      document.createTime = Timestamp.fromProto(
-        convertTimestamp(documentOrName.createTime, 'documentOrName.createTime')
-      );
-      document.updateTime = Timestamp.fromProto(
-        convertTimestamp(documentOrName.updateTime, 'documentOrName.updateTime')
-      );
+          this, ResourcePath.fromSlashSeparatedString(documentOrName.name));
+      document.fieldsProto =
+          documentOrName.fields ? convertDocument(documentOrName.fields) : {};
+      document.createTime = Timestamp.fromProto(convertTimestamp(
+          documentOrName.createTime, 'documentOrName.createTime'));
+      document.updateTime = Timestamp.fromProto(convertTimestamp(
+          documentOrName.updateTime, 'documentOrName.updateTime'));
     }
 
     if (readTime) {
-      document.readTime = Timestamp.fromProto(
-        convertTimestamp(readTime, 'readTime')
-      );
+      document.readTime =
+          Timestamp.fromProto(convertTimestamp(readTime, 'readTime'));
     }
 
     return document.build();
@@ -516,10 +505,7 @@ follow these steps, YOUR APP MAY BREAK.`);
     if (is.defined(transactionOptions)) {
       validate.isObject('transactionOptions', transactionOptions);
       validate.isOptionalInteger(
-        'transactionOptions.maxAttempts',
-        transactionOptions.maxAttempts,
-        1
-      );
+          'transactionOptions.maxAttempts', transactionOptions.maxAttempts, 1);
 
       attemptsRemaining = transactionOptions.maxAttempts || attemptsRemaining;
       previousTransaction = transactionOptions.previousTransaction;
@@ -531,55 +517,40 @@ follow these steps, YOUR APP MAY BREAK.`);
 
     --attemptsRemaining;
 
-    return transaction
-      .begin()
-      .then(() => {
-        let promise = updateFunction(transaction);
-        result = is.instanceof(promise, Promise)
-          ? promise
-          : Promise.reject(
-              new Error(
-                'You must return a Promise in your transaction()-callback.'
-              )
-            );
-        return result.catch(err => {
-          Firestore.log(
-            'Firestore.runTransaction',
-            requestTag,
-            'Rolling back transaction after callback error:',
-            err
-          );
-          // Rollback the transaction and return the failed result.
-          return transaction.rollback().then(() => {
-            return result;
+    return transaction.begin()
+        .then(() => {
+          let promise = updateFunction(transaction);
+          result = is.instanceof(promise, Promise) ?
+              promise :
+              Promise.reject(new Error(
+                  'You must return a Promise in your transaction()-callback.'));
+          return result.catch(err => {
+            Firestore.log(
+                'Firestore.runTransaction', requestTag,
+                'Rolling back transaction after callback error:', err);
+            // Rollback the transaction and return the failed result.
+            return transaction.rollback().then(() => {
+              return result;
+            });
           });
-        });
-      })
-      .then(() => {
-        return transaction
-          .commit()
-          .then(() => result)
-          .catch(err => {
+        })
+        .then(() => {
+          return transaction.commit().then(() => result).catch(err => {
             if (attemptsRemaining > 0) {
               Firestore.log(
-                'Firestore.runTransaction',
-                requestTag,
-                `Retrying transaction after error: ${JSON.stringify(err)}.`
-              );
+                  'Firestore.runTransaction', requestTag,
+                  `Retrying transaction after error: ${JSON.stringify(err)}.`);
               return this.runTransaction(updateFunction, {
                 previousTransaction: transaction,
                 maxAttempts: attemptsRemaining,
               });
             }
             Firestore.log(
-              'Firestore.runTransaction',
-              requestTag,
-              'Exhausted transaction retries, returning error: %s',
-              err
-            );
+                'Firestore.runTransaction', requestTag,
+                'Exhausted transaction retries, returning error: %s', err);
             return Promise.reject(err);
           });
-      });
+        });
   }
 
   /**
@@ -619,9 +590,8 @@ follow these steps, YOUR APP MAY BREAK.`);
    * });
    */
   getAll(documents) {
-    documents = is.array(arguments[0])
-      ? arguments[0].slice()
-      : Array.prototype.slice.call(arguments);
+    documents = is.array(arguments[0]) ? arguments[0].slice() :
+                                         Array.prototype.slice.call(arguments);
 
     for (let i = 0; i < documents.length; ++i) {
       validate.isDocumentReference(i, documents[i]);
@@ -661,82 +631,66 @@ follow these steps, YOUR APP MAY BREAK.`);
 
     const self = this;
 
-    return self
-      .readStream('batchGetDocuments', request, requestTag, true)
-      .then(stream => {
-        return new Promise((resolve, reject) => {
-          stream
-            .on('error', err => {
-              Firestore.log(
-                'Firestore.getAll_',
-                requestTag,
-                'GetAll failed with error:',
-                err
-              );
-              reject(err);
-            })
-            .on('data', response => {
-              try {
-                let document;
+    return self.readStream('batchGetDocuments', request, requestTag, true)
+        .then(stream => {
+          return new Promise((resolve, reject) => {
+            stream
+                .on('error',
+                    err => {
+                      Firestore.log(
+                          'Firestore.getAll_', requestTag,
+                          'GetAll failed with error:', err);
+                      reject(err);
+                    })
+                .on('data',
+                    response => {
+                      try {
+                        let document;
 
-                if (response.found) {
+                        if (response.found) {
+                          Firestore.log(
+                              'Firestore.getAll_', requestTag,
+                              'Received document: %s', response.found.name);
+                          document =
+                              self.snapshot_(response.found, response.readTime);
+                        } else {
+                          Firestore.log(
+                              'Firestore.getAll_', requestTag,
+                              'Document missing: %s', response.missing);
+                          document = self.snapshot_(
+                              response.missing, response.readTime);
+                        }
+
+                        let path = document.ref.path;
+                        retrievedDocuments.set(path, document);
+                      } catch (err) {
+                        Firestore.log(
+                            'Firestore.getAll_', requestTag,
+                            'GetAll failed with exception:', err);
+                        reject(err);
+                      }
+                    })
+                .on('end', () => {
                   Firestore.log(
-                    'Firestore.getAll_',
-                    requestTag,
-                    'Received document: %s',
-                    response.found.name
-                  );
-                  document = self.snapshot_(response.found, response.readTime);
-                } else {
-                  Firestore.log(
-                    'Firestore.getAll_',
-                    requestTag,
-                    'Document missing: %s',
-                    response.missing
-                  );
-                  document = self.snapshot_(
-                    response.missing,
-                    response.readTime
-                  );
-                }
+                      'Firestore.getAll_', requestTag, 'Received %d results',
+                      retrievedDocuments.size);
 
-                let path = document.ref.path;
-                retrievedDocuments.set(path, document);
-              } catch (err) {
-                Firestore.log(
-                  'Firestore.getAll_',
-                  requestTag,
-                  'GetAll failed with exception:',
-                  err
-                );
-                reject(err);
-              }
-            })
-            .on('end', () => {
-              Firestore.log(
-                'Firestore.getAll_',
-                requestTag,
-                'Received %d results',
-                retrievedDocuments.size
-              );
-
-              // BatchGetDocuments doesn't preserve document order. We use the
-              // request order to sort the resulting documents.
-              const orderedDocuments = [];
-              for (let docRef of docRefs) {
-                let document = retrievedDocuments.get(docRef.path);
-                if (!is.defined(document)) {
-                  reject(
-                    new Error(`Did not receive document for "${docRef.path}".`)
-                  );
-                }
-                orderedDocuments.push(document);
-              }
-              resolve(orderedDocuments);
-            });
-          stream.resume();
+                  // BatchGetDocuments doesn't preserve document order. We use
+                  // the request order to sort the resulting documents.
+                  const orderedDocuments = [];
+                  for (let docRef of docRefs) {
+                    let document = retrievedDocuments.get(docRef.path);
+                    if (!is.defined(document)) {
+                      reject(new Error(
+                          `Did not receive document for "${docRef.path}".`));
+                    }
+                    orderedDocuments.push(document);
+                  }
+                  resolve(orderedDocuments);
+                });
+            stream.resume();
+          });
         });
-      });
   }
 
   /**
@@ -749,7 +703,7 @@ follow these steps, YOUR APP MAY BREAK.`);
    */
   static autoId() {
     let chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let autoId = '';
     for (let i = 0; i < 20; i++) {
       autoId += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -781,9 +735,8 @@ follow these steps, YOUR APP MAY BREAK.`);
       common = require('@google-cloud/common');
 
       this._clientInitialized = new Promise((resolve, reject) => {
-        this._firestoreClient = module.exports.v1beta1(
-          this._initalizationOptions
-        );
+        this._firestoreClient =
+            module.exports.v1beta1(this._initalizationOptions);
 
         Firestore.log('Firestore', null, 'Initialized Firestore GAPIC Client');
 
@@ -794,23 +747,15 @@ follow these steps, YOUR APP MAY BREAK.`);
           this._firestoreClient.getProjectId((err, projectId) => {
             if (err) {
               Firestore.log(
-                'Firestore._ensureClient',
-                null,
-                'Failed to detect project ID: %s',
-                err
-              );
+                  'Firestore._ensureClient', null,
+                  'Failed to detect project ID: %s', err);
               reject(err);
             } else {
               Firestore.log(
-                'Firestore._ensureClient',
-                null,
-                'Detected project ID: %s',
-                projectId
-              );
-              this._referencePath = new ResourcePath(
-                projectId,
-                this._referencePath.databaseId
-              );
+                  'Firestore._ensureClient', null, 'Detected project ID: %s',
+                  projectId);
+              this._referencePath =
+                  new ResourcePath(projectId, this._referencePath.databaseId);
               resolve();
             }
           });
@@ -830,9 +775,7 @@ follow these steps, YOUR APP MAY BREAK.`);
   _decorateRequest(request) {
     let decoratedRequest = extend(true, {}, request);
     decoratedRequest = common.util.replaceProjectIdToken(
-      decoratedRequest,
-      this._referencePath.projectId
-    );
+        decoratedRequest, this._referencePath.projectId);
 
     let decoratedGax = {otherArgs: {headers: {}}};
     decoratedGax.otherArgs.headers[CLOUD_RESOURCE_HEADER] = this.formattedName;
@@ -875,40 +818,31 @@ follow these steps, YOUR APP MAY BREAK.`);
     --attemptsRemaining;
 
     return new Promise(resolve => {
-      setTimeout(resolve, currentDelay);
-    })
-      .then(func)
-      .then(result => {
-        self._lastSuccessfulRequest = new Date().getTime();
-        return result;
-      })
-      .catch(err => {
-        if (is.defined(err.code) && err.code !== GRPC_UNAVAILABLE) {
+             setTimeout(resolve, currentDelay);
+           })
+        .then(func)
+        .then(result => {
+          self._lastSuccessfulRequest = new Date().getTime();
+          return result;
+        })
+        .catch(err => {
+          if (is.defined(err.code) && err.code !== GRPC_UNAVAILABLE) {
+            Firestore.log(
+                'Firestore._retry', requestTag,
+                'Request failed with unrecoverable error:', err);
+            return Promise.reject(err);
+          }
+          if (attemptsRemaining === 0) {
+            Firestore.log(
+                'Firestore._retry', requestTag,
+                'Request failed with error:', err);
+            return Promise.reject(err);
+          }
           Firestore.log(
-            'Firestore._retry',
-            requestTag,
-            'Request failed with unrecoverable error:',
-            err
-          );
-          return Promise.reject(err);
-        }
-        if (attemptsRemaining === 0) {
-          Firestore.log(
-            'Firestore._retry',
-            requestTag,
-            'Request failed with error:',
-            err
-          );
-          return Promise.reject(err);
-        }
-        Firestore.log(
-          'Firestore._retry',
-          requestTag,
-          'Retrying request that failed with error:',
-          err
-        );
-        return self._retry(attemptsRemaining, requestTag, func, nextDelay);
-      });
+              'Firestore._retry', requestTag,
+              'Retrying request that failed with error:', err);
+          return self._retry(attemptsRemaining, requestTag, func, nextDelay);
+        });
   }
 
   /**
@@ -944,19 +878,13 @@ follow these steps, YOUR APP MAY BREAK.`);
       const releaseStream = () => {
         if (errorReceived) {
           Firestore.log(
-            'Firestore._initializeStream',
-            requestTag,
-            'Emit error:',
-            errorReceived
-          );
+              'Firestore._initializeStream', requestTag,
+              'Emit error:', errorReceived);
           resultStream.emit('error', errorReceived);
           errorReceived = null;
         } else if (!streamReleased) {
           Firestore.log(
-            'Firestore._initializeStream',
-            requestTag,
-            'Releasing stream'
-          );
+              'Firestore._initializeStream', requestTag, 'Releasing stream');
           streamReleased = true;
           resultStream.pause();
 
@@ -972,10 +900,8 @@ follow these steps, YOUR APP MAY BREAK.`);
           setTimeout(() => {
             if (endCalled) {
               Firestore.log(
-                'Firestore._initializeStream',
-                requestTag,
-                'Forwarding stream close'
-              );
+                  'Firestore._initializeStream', requestTag,
+                  'Forwarding stream close');
               resultStream.emit('end');
             }
           }, 0);
@@ -992,30 +918,21 @@ follow these steps, YOUR APP MAY BREAK.`);
 
       resultStream.on('end', () => {
         Firestore.log(
-          'Firestore._initializeStream',
-          requestTag,
-          'Received stream end'
-        );
+            'Firestore._initializeStream', requestTag, 'Received stream end');
         endCalled = true;
         releaseStream();
       });
 
       resultStream.on('error', err => {
         Firestore.log(
-          'Firestore._initializeStream',
-          requestTag,
-          'Received stream error:',
-          err
-        );
+            'Firestore._initializeStream', requestTag,
+            'Received stream error:', err);
         // If we receive an error before we were able to receive any data,
         // reject this stream.
         if (!streamReleased) {
           Firestore.log(
-            'Firestore._initializeStream',
-            requestTag,
-            'Received initial error:',
-            err
-          );
+              'Firestore._initializeStream', requestTag,
+              'Received initial error:', err);
           streamReleased = true;
           reject(err);
         } else {
@@ -1025,17 +942,12 @@ follow these steps, YOUR APP MAY BREAK.`);
 
       if (is.defined(request)) {
         Firestore.log(
-          'Firestore._initializeStream',
-          requestTag,
-          'Sending request: %j',
-          request
-        );
+            'Firestore._initializeStream', requestTag, 'Sending request: %j',
+            request);
         resultStream.write(request, 'utf-8', () => {
           Firestore.log(
-            'Firestore._initializeStream',
-            requestTag,
-            'Marking stream as healthy'
-          );
+              'Firestore._initializeStream', requestTag,
+              'Marking stream as healthy');
           releaseStream();
         });
       }
@@ -1064,34 +976,21 @@ follow these steps, YOUR APP MAY BREAK.`);
       return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
           Firestore.log(
-            'Firestore.request',
-            requestTag,
-            'Sending request: %j',
-            decorated.request
-          );
+              'Firestore.request', requestTag, 'Sending request: %j',
+              decorated.request);
           this._firestoreClient[methodName](
-            decorated.request,
-            decorated.gax,
-            (err, result) => {
-              if (err) {
-                Firestore.log(
-                  'Firestore.request',
-                  requestTag,
-                  'Received error:',
-                  err
-                );
-                reject(err);
-              } else {
-                Firestore.log(
-                  'Firestore.request',
-                  requestTag,
-                  'Received response: %j',
-                  result
-                );
-                resolve(result);
-              }
-            }
-          );
+              decorated.request, decorated.gax, (err, result) => {
+                if (err) {
+                  Firestore.log(
+                      'Firestore.request', requestTag, 'Received error:', err);
+                  reject(err);
+                } else {
+                  Firestore.log(
+                      'Firestore.request', requestTag, 'Received response: %j',
+                      result);
+                  resolve(result);
+                }
+              });
         });
       });
     });
@@ -1121,38 +1020,28 @@ follow these steps, YOUR APP MAY BREAK.`);
       const decorated = this._decorateRequest(request);
       return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
-          try {
-            Firestore.log(
-              'Firestore.readStream',
-              requestTag,
-              'Sending request: %j',
-              decorated.request
-            );
-            let stream = this._firestoreClient[methodName](
-              decorated.request,
-              decorated.gax
-            );
-            let logger = through.obj(function(chunk, enc, callback) {
-              Firestore.log(
-                'Firestore.readStream',
-                requestTag,
-                'Received response: %j',
-                chunk
-              );
-              this.push(chunk);
-              callback();
-            });
-            resolve(bun([stream, logger]));
-          } catch (err) {
-            Firestore.log(
-              'Firestore.readStream',
-              requestTag,
-              'Received error:',
-              err
-            );
-            reject(err);
-          }
-        }).then(stream => this._initializeStream(stream, requestTag));
+                 try {
+                   Firestore.log(
+                       'Firestore.readStream', requestTag,
+                       'Sending request: %j', decorated.request);
+                   let stream = this._firestoreClient[methodName](
+                       decorated.request, decorated.gax);
+                   let logger = through.obj(function(chunk, enc, callback) {
+                     Firestore.log(
+                         'Firestore.readStream', requestTag,
+                         'Received response: %j', chunk);
+                     this.push(chunk);
+                     callback();
+                   });
+                   resolve(bun([stream, logger]));
+                 } catch (err) {
+                   Firestore.log(
+                       'Firestore.readStream', requestTag,
+                       'Received error:', err);
+                   reject(err);
+                 }
+               })
+            .then(stream => this._initializeStream(stream, requestTag));
       });
     });
   }
@@ -1184,40 +1073,27 @@ follow these steps, YOUR APP MAY BREAK.`);
       return this._retry(attempts, requestTag, () => {
         return Promise.resolve().then(() => {
           Firestore.log(
-            'Firestore.readWriteStream',
-            requestTag,
-            'Opening stream'
-          );
+              'Firestore.readWriteStream', requestTag, 'Opening stream');
           // The generated bi-directional streaming API takes the list of GAX
           // headers as its second argument.
-          let requestStream = this._firestoreClient[methodName](
-            {},
-            decorated.gax
-          );
+          let requestStream =
+              this._firestoreClient[methodName]({}, decorated.gax);
 
           // The transform stream to assign the project ID.
           let transform = through.obj(function(chunk, encoding, callback) {
             let decoratedChunk = extend(true, {}, chunk);
             common.util.replaceProjectIdToken(
-              decoratedChunk,
-              self._referencePath.projectId
-            );
+                decoratedChunk, self._referencePath.projectId);
             Firestore.log(
-              'Firestore.readWriteStream',
-              requestTag,
-              'Streaming request: %j',
-              decoratedChunk
-            );
+                'Firestore.readWriteStream', requestTag,
+                'Streaming request: %j', decoratedChunk);
             requestStream.write(decoratedChunk, encoding, callback);
           });
 
           let logger = through.obj(function(chunk, enc, callback) {
             Firestore.log(
-              'Firestore.readWriteStream',
-              requestTag,
-              'Received response: %j',
-              chunk
-            );
+                'Firestore.readWriteStream', requestTag,
+                'Received response: %j', chunk);
             this.push(chunk);
             callback();
           });
@@ -1263,9 +1139,8 @@ Firestore.setLogFunction = function(logger) {
     let formattedMessage = util.format.apply(null, varargs);
     let time = new Date().toISOString();
     logger(
-      `Firestore (${libVersion}) ${time} ${requestTag} [${methodName}]: ` +
-        formattedMessage
-    );
+        `Firestore (${libVersion}) ${time} ${requestTag} [${methodName}]: ` +
+        formattedMessage);
   };
 };
 
@@ -1294,19 +1169,21 @@ Transaction = require('./transaction')(Firestore);
  * @module {Firestore} @google-cloud/firestore
  * @alias nodejs-firestore
  *
- * @example <caption>Install the client library with <a href="https://www.npmjs.com/">npm</a>:</caption>
- * npm install --save @google-cloud/firestore
+ * @example <caption>Install the client library with <a
+ * href="https://www.npmjs.com/">npm</a>:</caption> npm install --save
+ * @google-cloud/firestore
  *
  * @example <caption>Import the client library</caption>
  * var Firestore = require('@google-cloud/firestore');
  *
- * @example <caption>Create a client that uses <a href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application Default Credentials (ADC)</a>:</caption>
- * var firestore = new Firestore();
+ * @example <caption>Create a client that uses <a
+ * href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application
+ * Default Credentials (ADC)</a>:</caption> var firestore = new Firestore();
  *
- * @example <caption>Create a client with <a href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit credentials</a>:</caption>
- * var firestore = new Firestore({
- *   projectId: 'your-project-id',
- *   keyFilename: '/path/to/keyfile.json'
+ * @example <caption>Create a client with <a
+ * href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit
+ * credentials</a>:</caption> var firestore = new Firestore({ projectId:
+ * 'your-project-id', keyFilename: '/path/to/keyfile.json'
  * });
  *
  * @example <caption>include:samples/quickstart.js</caption>

@@ -21,11 +21,10 @@ var extend = require('extend');
 
 function v1beta1(options) {
   options = extend(
-    {
-      scopes: v1beta1.ALL_SCOPES,
-    },
-    options
-  );
+      {
+        scopes: v1beta1.ALL_SCOPES,
+      },
+      options);
   var gaxGrpc = new gax.GrpcClient(options);
   return new firestoreClient(gaxGrpc);
 }

@@ -50,10 +50,8 @@ function convertTimestamp(timestampValue, argumentName) {
     let nanos = 0;
 
     if (timestampValue.length > 20) {
-      const nanoString = timestampValue.substring(
-        20,
-        timestampValue.length - 1
-      );
+      const nanoString =
+          timestampValue.substring(20, timestampValue.length - 1);
       const trailingZeroes = 9 - nanoString.length;
       nanos = parseInt(nanoString, 10) * Math.pow(10, trailingZeroes);
     }
@@ -61,8 +59,7 @@ function convertTimestamp(timestampValue, argumentName) {
     if (isNaN(seconds) || isNaN(nanos)) {
       argumentName = argumentName || 'timestampValue';
       throw new Error(
-        `Specify a valid ISO 8601 timestamp for "${argumentName}".`
-      );
+          `Specify a valid ISO 8601 timestamp for "${argumentName}".`);
     }
 
     timestampProto = {
@@ -145,8 +142,7 @@ function detectValueType(proto) {
 
   if (detectedValues.length !== 1) {
     throw new Error(
-      `Unable to infer type value fom '${JSON.stringify(proto)}'.`
-    );
+        `Unable to infer type value fom '${JSON.stringify(proto)}'.`);
   }
 
   return detectedValues[0];

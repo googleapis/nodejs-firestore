@@ -96,9 +96,7 @@ class Timestamp {
    */
   static fromProto(timestamp) {
     return new Timestamp(
-      Number(timestamp.seconds || 0),
-      Number(timestamp.nanos || 0)
-    );
+        Number(timestamp.seconds || 0), Number(timestamp.nanos || 0));
   }
 
   /**
@@ -175,8 +173,7 @@ class Timestamp {
    */
   toDate() {
     return new Date(
-      this._seconds * 1000 + Math.round(this._nanoseconds / MS_TO_NANOS)
-    );
+        this._seconds * 1000 + Math.round(this._nanoseconds / MS_TO_NANOS));
   }
 
   /**
@@ -216,11 +213,9 @@ class Timestamp {
    */
   isEqual(other) {
     return (
-      this === other ||
-      (is.instanceof(other, Timestamp) &&
-        this._seconds === other.seconds &&
-        this._nanoseconds === other.nanoseconds)
-    );
+        this === other ||
+        (is.instanceof(other, Timestamp) && this._seconds === other.seconds &&
+         this._nanoseconds === other.nanoseconds));
   }
 
   /**

@@ -26,8 +26,8 @@ const through = require('through2');
 const Firestore = require('../src');
 const reference = require('../src/reference')(Firestore);
 const DocumentReference = reference.DocumentReference;
-const DocumentSnapshot = require('../src/document')(DocumentReference)
-  .DocumentSnapshot;
+const DocumentSnapshot =
+    require('../src/document')(DocumentReference).DocumentSnapshot;
 const ResourcePath = require('../src/path').ResourcePath;
 
 const PROJECT_ID = 'test-project';
@@ -50,8 +50,7 @@ function createInstance() {
 function snapshot(relativePath, data) {
   const snapshot = new DocumentSnapshot.Builder();
   let path = ResourcePath.fromSlashSeparatedString(
-    `${DATABASE_ROOT}/documents/${relativePath}`
-  );
+      `${DATABASE_ROOT}/documents/${relativePath}`);
   snapshot.ref = new DocumentReference({}, path);
   snapshot.fieldsProto = DocumentSnapshot.encodeFields(data);
   snapshot.readTime = '1970-01-01T00:00:00.000000000Z';
@@ -348,90 +347,76 @@ describe('query interface', function() {
     };
 
     queryEquals(
-      [query.where('a', '=', '1'), query.where('a', '=', '1')],
-      [query.where('a', '=', 1)]
-    );
+        [query.where('a', '=', '1'), query.where('a', '=', '1')],
+        [query.where('a', '=', 1)]);
 
     queryEquals(
-      [
-        query.orderBy('__name__'),
-        query.orderBy('__name__', 'asc'),
-        query.orderBy('__name__', 'ASC'),
-        query.orderBy(Firestore.FieldPath.documentId()),
-      ],
-      [
-        query.orderBy('foo'),
-        query.orderBy(Firestore.FieldPath.documentId(), 'desc'),
-      ]
-    );
+        [
+          query.orderBy('__name__'),
+          query.orderBy('__name__', 'asc'),
+          query.orderBy('__name__', 'ASC'),
+          query.orderBy(Firestore.FieldPath.documentId()),
+        ],
+        [
+          query.orderBy('foo'),
+          query.orderBy(Firestore.FieldPath.documentId(), 'desc'),
+        ]);
 
     queryEquals(
-      [query.limit(0), query.limit(0).limit(0)],
-      [query, query.limit(10)]
-    );
+        [query.limit(0), query.limit(0).limit(0)], [query, query.limit(10)]);
 
     queryEquals(
-      [query.offset(0), query.offset(0).offset(0)],
-      [query, query.offset(10)]
-    );
+        [query.offset(0), query.offset(0).offset(0)],
+        [query, query.offset(10)]);
 
     queryEquals(
-      [query.orderBy('foo').startAt('a'), query.orderBy('foo').startAt('a')],
-      [
-        query.orderBy('foo').startAfter('a'),
-        query.orderBy('foo').endAt('a'),
-        query.orderBy('foo').endBefore('a'),
-        query.orderBy('foo').startAt('b'),
-        query.orderBy('bar').startAt('a'),
-      ]
-    );
+        [query.orderBy('foo').startAt('a'), query.orderBy('foo').startAt('a')],
+        [
+          query.orderBy('foo').startAfter('a'),
+          query.orderBy('foo').endAt('a'),
+          query.orderBy('foo').endBefore('a'),
+          query.orderBy('foo').startAt('b'),
+          query.orderBy('bar').startAt('a'),
+        ]);
 
     queryEquals(
-      [
-        query.orderBy('foo').startAfter('a'),
-        query.orderBy('foo').startAfter('a'),
-      ],
-      [
-        query.orderBy('foo').startAfter('b'),
-        query.orderBy('bar').startAfter('a'),
-      ]
-    );
+        [
+          query.orderBy('foo').startAfter('a'),
+          query.orderBy('foo').startAfter('a'),
+        ],
+        [
+          query.orderBy('foo').startAfter('b'),
+          query.orderBy('bar').startAfter('a'),
+        ]);
 
     queryEquals(
-      [
-        query.orderBy('foo').endBefore('a'),
-        query.orderBy('foo').endBefore('a'),
-      ],
-      [query.orderBy('foo').endBefore('b'), query.orderBy('bar').endBefore('a')]
-    );
+        [
+          query.orderBy('foo').endBefore('a'),
+          query.orderBy('foo').endBefore('a'),
+        ],
+        [
+          query.orderBy('foo').endBefore('b'),
+          query.orderBy('bar').endBefore('a')
+        ]);
 
     queryEquals(
-      [query.orderBy('foo').endAt('a'), query.orderBy('foo').endAt('a')],
-      [query.orderBy('foo').endAt('b'), query.orderBy('bar').endAt('a')]
-    );
+        [query.orderBy('foo').endAt('a'), query.orderBy('foo').endAt('a')],
+        [query.orderBy('foo').endAt('b'), query.orderBy('bar').endAt('a')]);
 
     queryEquals(
-      [
-        query
-          .orderBy('foo')
-          .orderBy('__name__')
-          .startAt('foo', 'foo'),
-        query
-          .orderBy('foo')
-          .startAt(firestore.snapshot_(document('foo').document, {})),
-      ],
-      []
-    );
+        [
+          query.orderBy('foo').orderBy('__name__').startAt('foo', 'foo'),
+          query.orderBy('foo').startAt(
+              firestore.snapshot_(document('foo').document, {})),
+        ],
+        []);
   });
 
   it('accepts all variations', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        fieldFilters('foo', 'EQUAL', 'bar'),
-        orderBy('foo', 'ASCENDING'),
-        limit(10)
-      );
+          request, fieldFilters('foo', 'EQUAL', 'bar'),
+          orderBy('foo', 'ASCENDING'), limit(10));
 
       return stream();
     };
@@ -469,14 +454,13 @@ describe('query interface', function() {
     };
 
     let query = firestore.collection('collectionId');
-    return query
-      .get()
-      .then(() => {
-        throw new Error('Unexpected success');
-      })
-      .catch(() => {
-        assert.equal(5, attempts);
-      });
+    return query.get()
+        .then(() => {
+          throw new Error('Unexpected success');
+        })
+        .catch(() => {
+          assert.equal(5, attempts);
+        });
   });
 
   it('supports empty streams', function(callback) {
@@ -486,14 +470,14 @@ describe('query interface', function() {
     };
 
     let query = firestore.collection('collectionId');
-    query
-      .stream()
-      .on('data', () => {
-        throw new Error('Unexpected document');
-      })
-      .on('end', () => {
-        callback();
-      });
+    query.stream()
+        .on('data',
+            () => {
+              throw new Error('Unexpected document');
+            })
+        .on('end', () => {
+          callback();
+        });
   });
 
   it('returns results', function() {
@@ -532,14 +516,13 @@ describe('query interface', function() {
       throw new Error('Expected error');
     };
 
-    return query
-      .get()
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        assert.equal(err.message, 'Expected error');
-      });
+    return query.get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(err.message, 'Expected error');
+        });
   });
 
   it('handles stream exception during initialization', function() {
@@ -547,15 +530,14 @@ describe('query interface', function() {
       return stream(new Error('Expected error'));
     };
 
-    return firestore
-      .collection('collectionId')
-      .get()
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        assert.equal(err.message, 'Expected error');
-      });
+    return firestore.collection('collectionId')
+        .get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(err.message, 'Expected error');
+        });
   });
 
   it('handles stream exception after initialization', function() {
@@ -563,15 +545,14 @@ describe('query interface', function() {
       return stream(document('first'), new Error('Expected error'));
     };
 
-    return firestore
-      .collection('collectionId')
-      .get()
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        assert.equal(err.message, 'Expected error');
-      });
+    return firestore.collection('collectionId')
+        .get()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(err.message, 'Expected error');
+        });
   });
 
   it('streams results', function(callback) {
@@ -583,16 +564,16 @@ describe('query interface', function() {
     let query = firestore.collection('collectionId');
     let received = 0;
 
-    query
-      .stream()
-      .on('data', doc => {
-        assert.ok(is.instanceof(doc, DocumentSnapshot));
-        ++received;
-      })
-      .on('end', () => {
-        assert.equal(received, 2);
-        callback();
-      });
+    query.stream()
+        .on('data',
+            doc => {
+              assert.ok(is.instanceof(doc, DocumentSnapshot));
+              ++received;
+            })
+        .on('end', () => {
+          assert.equal(received, 2);
+          callback();
+        });
   });
 });
 
@@ -619,28 +600,14 @@ describe('where() interface', function() {
   it('concatenates all accepted filters', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        fieldFilters(
-          'fooSmaller',
-          'LESS_THAN',
-          'barSmaller',
-          'fooSmallerOrEquals',
-          'LESS_THAN_OR_EQUAL',
-          'barSmallerOrEquals',
-          'fooEquals',
-          'EQUAL',
-          'barEquals',
-          'fooEqualsLong',
-          'EQUAL',
-          'barEqualsLong',
-          'fooGreaterOrEquals',
-          'GREATER_THAN_OR_EQUAL',
-          'barGreaterOrEquals',
-          'fooGreater',
-          'GREATER_THAN',
-          'barGreater'
-        )
-      );
+          request,
+          fieldFilters(
+              'fooSmaller', 'LESS_THAN', 'barSmaller', 'fooSmallerOrEquals',
+              'LESS_THAN_OR_EQUAL', 'barSmallerOrEquals', 'fooEquals', 'EQUAL',
+              'barEquals', 'fooEqualsLong', 'EQUAL', 'barEqualsLong',
+              'fooGreaterOrEquals', 'GREATER_THAN_OR_EQUAL',
+              'barGreaterOrEquals', 'fooGreater', 'GREATER_THAN',
+              'barGreater'));
 
       return stream();
     };
@@ -657,20 +624,17 @@ describe('where() interface', function() {
 
   it('accepts object', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-        request,
-        fieldFilters('foo', 'EQUAL', {
-          mapValue: {
-            fields: {
-              foo: {
-                stringValue: 'bar',
-                valueType: 'stringValue',
-              },
-            },
-          },
-          valueType: 'mapValue',
-        })
-      );
+      requestEquals(request, fieldFilters('foo', 'EQUAL', {
+                      mapValue: {
+                        fields: {
+                          foo: {
+                            stringValue: 'bar',
+                            valueType: 'stringValue',
+                          },
+                        },
+                      },
+                      valueType: 'mapValue',
+                    }));
 
       return stream();
     };
@@ -683,9 +647,9 @@ describe('where() interface', function() {
   it('supports field path objects for field paths', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        fieldFilters('foo.bar', 'EQUAL', 'foobar', 'bar.foo', 'EQUAL', 'foobar')
-      );
+          request,
+          fieldFilters(
+              'foo.bar', 'EQUAL', 'foobar', 'bar.foo', 'EQUAL', 'foobar'));
       return stream();
     };
 
@@ -698,14 +662,11 @@ describe('where() interface', function() {
   it('supports strings for FieldPath.documentId()', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        fieldFilters('__name__', 'EQUAL', {
-          valueType: 'referenceValue',
-          referenceValue:
-            `projects/${PROJECT_ID}/databases/(default)/` +
-            'documents/collectionId/foo',
-        })
-      );
+          request, fieldFilters('__name__', 'EQUAL', {
+            valueType: 'referenceValue',
+            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/foo',
+          }));
       return stream();
     };
 
@@ -876,9 +837,7 @@ describe('orderBy() interface', function() {
   it('accepts field path', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING')
-      );
+          request, orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING'));
       return stream();
     };
 
@@ -899,49 +858,39 @@ describe('orderBy() interface', function() {
     let query = firestore.collection('collectionId');
 
     assert.throws(function() {
-      query = query
-        .orderBy('foo')
-        .startAt('foo')
-        .orderBy('foo');
+      query = query.orderBy('foo').startAt('foo').orderBy('foo');
     }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
     assert.throws(function() {
-      query = query
-        .where('foo', '>', 'bar')
-        .startAt(snapshot('collectionId/doc', {foo: 'bar'}))
-        .where('foo', '>', 'bar');
+      query = query.where('foo', '>', 'bar')
+                  .startAt(snapshot('collectionId/doc', {foo: 'bar'}))
+                  .where('foo', '>', 'bar');
     }, /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
     assert.throws(function() {
-      query = query
-        .orderBy('foo')
-        .endAt('foo')
-        .orderBy('foo');
+      query = query.orderBy('foo').endAt('foo').orderBy('foo');
     }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
     assert.throws(function() {
-      query = query
-        .where('foo', '>', 'bar')
-        .endAt(snapshot('collectionId/doc', {foo: 'bar'}))
-        .where('foo', '>', 'bar');
+      query = query.where('foo', '>', 'bar')
+                  .endAt(snapshot('collectionId/doc', {foo: 'bar'}))
+                  .where('foo', '>', 'bar');
     }, /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
   });
 
   it('concatenates orders', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo', 'ASCENDING', 'bar', 'DESCENDING', 'foobar', 'ASCENDING')
-      );
+          request,
+          orderBy(
+              'foo', 'ASCENDING', 'bar', 'DESCENDING', 'foobar', 'ASCENDING'));
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo', 'asc')
-      .orderBy('bar', 'desc')
-      .orderBy('foobar');
+    query =
+        query.orderBy('foo', 'asc').orderBy('bar', 'desc').orderBy('foobar');
     return query.get();
   });
 });
@@ -980,10 +929,7 @@ describe('limit() interface', function() {
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .limit(1)
-      .limit(2)
-      .limit(3);
+    query = query.limit(1).limit(2).limit(3);
     return query.get();
   });
 });
@@ -1022,10 +968,7 @@ describe('offset() interface', function() {
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .offset(1)
-      .offset(2)
-      .offset(3);
+    query = query.offset(1).offset(2).offset(3);
     return query.get();
   });
 });
@@ -1099,34 +1042,25 @@ describe('startAt() interface', function() {
   it('accepts fields', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-        startAt(true, 'foo', 'bar')
-      );
+          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+          startAt(true, 'foo', 'bar'));
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo')
-      .orderBy('bar')
-      .startAt('foo', 'bar');
+    query = query.orderBy('foo').orderBy('bar').startAt('foo', 'bar');
     return query.get();
   });
 
   it('accepts FieldPath.documentId()', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('__name__', 'ASCENDING'),
-        startAt(true, {
-          valueType: 'referenceValue',
-          referenceValue:
-            `projects/${PROJECT_ID}/databases/(default)/` +
-            'documents/collectionId/doc',
-        })
-      );
+          request, orderBy('__name__', 'ASCENDING'), startAt(true, {
+            valueType: 'referenceValue',
+            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+          }));
 
       return stream();
     };
@@ -1135,14 +1069,8 @@ describe('startAt() interface', function() {
     let query = firestore.collection('collectionId');
 
     return Promise.all([
-      query
-        .orderBy(Firestore.FieldPath.documentId())
-        .startAt(doc.id)
-        .get(),
-      query
-        .orderBy(Firestore.FieldPath.documentId())
-        .startAt(doc.ref)
-        .get(),
+      query.orderBy(Firestore.FieldPath.documentId()).startAt(doc.id).get(),
+      query.orderBy(Firestore.FieldPath.documentId()).startAt(doc.ref).get(),
     ]);
   });
 
@@ -1154,27 +1082,23 @@ describe('startAt() interface', function() {
     }, /The corresponding value for FieldPath.documentId\(\) must be a string or a DocumentReference./);
 
     assert.throws(() => {
-      query
-        .orderBy(Firestore.FieldPath.documentId())
-        .startAt(firestore.doc('coll/doc/other/doc'));
+      query.orderBy(Firestore.FieldPath.documentId())
+          .startAt(firestore.doc('coll/doc/other/doc'));
     }, /'coll\/doc\/other\/doc' is not part of the query result set and cannot be used as a query boundary./);
 
     assert.throws(() => {
-      query
-        .orderBy(Firestore.FieldPath.documentId())
-        .startAt(firestore.doc('coll/doc/coll_suffix/doc'));
+      query.orderBy(Firestore.FieldPath.documentId())
+          .startAt(firestore.doc('coll/doc/coll_suffix/doc'));
     }, /'coll\/doc\/coll_suffix\/doc' is not part of the query result set and cannot be used as a query boundary./);
 
     assert.throws(() => {
-      query
-        .orderBy(Firestore.FieldPath.documentId())
-        .startAt(firestore.doc('coll/doc'));
+      query.orderBy(Firestore.FieldPath.documentId())
+          .startAt(firestore.doc('coll/doc'));
     }, /'coll\/doc' is not part of the query result set and cannot be used as a query boundary./);
 
     assert.throws(() => {
-      query
-        .orderBy(Firestore.FieldPath.documentId())
-        .startAt(firestore.doc('coll/doc/coll/doc/coll/doc'));
+      query.orderBy(Firestore.FieldPath.documentId())
+          .startAt(firestore.doc('coll/doc/coll/doc/coll/doc'));
     }, /Only a direct child can be used as a query boundary. Found: 'coll\/doc\/coll\/doc\/coll\/doc'./);
 
     // Validate that we can't pass a reference to a collection.
@@ -1186,60 +1110,47 @@ describe('startAt() interface', function() {
   it('can specify document snapshot', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('__name__', 'ASCENDING'),
-        startAt(true, {
-          valueType: 'referenceValue',
-          referenceValue:
-            `projects/${PROJECT_ID}/databases/(default)/` +
-            'documents/collectionId/doc',
-        })
-      );
+          request, orderBy('__name__', 'ASCENDING'), startAt(true, {
+            valueType: 'referenceValue',
+            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+          }));
 
       return stream();
     };
 
-    let query = firestore
-      .collection('collectionId')
-      .startAt(snapshot('collectionId/doc', {}));
+    let query = firestore.collection('collectionId')
+                    .startAt(snapshot('collectionId/doc', {}));
     return query.get();
   });
 
-  it("doesn't append documentId() twice", function() {
+  it('doesn\'t append documentId() twice', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('__name__', 'ASCENDING'),
-        startAt(true, {
-          valueType: 'referenceValue',
-          referenceValue:
-            `projects/${PROJECT_ID}/databases/(default)/` +
-            'documents/collectionId/doc',
-        })
-      );
+          request, orderBy('__name__', 'ASCENDING'), startAt(true, {
+            valueType: 'referenceValue',
+            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+          }));
 
       return stream();
     };
 
-    let query = firestore
-      .collection('collectionId')
-      .orderBy(Firestore.FieldPath.documentId())
-      .startAt(snapshot('collectionId/doc', {}));
+    let query = firestore.collection('collectionId')
+                    .orderBy(Firestore.FieldPath.documentId())
+                    .startAt(snapshot('collectionId/doc', {}));
     return query.get();
   });
 
   it('can extract implicit direction for document snapshot', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo', 'ASCENDING', '__name__', 'ASCENDING'),
-        startAt(true, 'bar', {
-          valueType: 'referenceValue',
-          referenceValue:
-            `projects/${PROJECT_ID}/databases/(default)/` +
-            'documents/collectionId/doc',
-        })
-      );
+          request, orderBy('foo', 'ASCENDING', '__name__', 'ASCENDING'),
+          startAt(true, 'bar', {
+            valueType: 'referenceValue',
+            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+          }));
 
       return stream();
     };
@@ -1252,15 +1163,12 @@ describe('startAt() interface', function() {
   it('can extract explicit direction for document snapshot', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo', 'DESCENDING', '__name__', 'DESCENDING'),
-        startAt(true, 'bar', {
-          valueType: 'referenceValue',
-          referenceValue:
-            `projects/${PROJECT_ID}/databases/(default)/` +
-            'documents/collectionId/doc',
-        })
-      );
+          request, orderBy('foo', 'DESCENDING', '__name__', 'DESCENDING'),
+          startAt(true, 'bar', {
+            valueType: 'referenceValue',
+            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+          }));
 
       return stream();
     };
@@ -1273,60 +1181,43 @@ describe('startAt() interface', function() {
   it('can specify document snapshot with inequality filter', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('b', 'ASCENDING', '__name__', 'ASCENDING'),
-        startAt(true, 'b', {
-          valueType: 'referenceValue',
-          referenceValue:
-            `projects/${PROJECT_ID}/databases/(default)/` +
-            'documents/collectionId/doc',
-        }),
-        fieldFilters(
-          'a',
-          'EQUAL',
-          'a',
-          'b',
-          'GREATER_THAN_OR_EQUAL',
-          'b',
-          'c',
-          'EQUAL',
-          'c'
-        )
-      );
+          request, orderBy('b', 'ASCENDING', '__name__', 'ASCENDING'),
+          startAt(true, 'b', {
+            valueType: 'referenceValue',
+            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+          }),
+          fieldFilters(
+              'a', 'EQUAL', 'a', 'b', 'GREATER_THAN_OR_EQUAL', 'b', 'c',
+              'EQUAL', 'c'));
 
       return stream();
     };
 
-    let query = firestore
-      .collection('collectionId')
-      .where('a', '=', 'a')
-      .where('b', '>=', 'b')
-      .where('c', '=', 'c')
-      .startAt(snapshot('collectionId/doc', {b: 'b'}));
+    let query = firestore.collection('collectionId')
+                    .where('a', '=', 'a')
+                    .where('b', '>=', 'b')
+                    .where('c', '=', 'c')
+                    .startAt(snapshot('collectionId/doc', {b: 'b'}));
     return query.get();
   });
 
   it('ignores equality filter with document snapshot cursor', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('__name__', 'ASCENDING'),
-        startAt(true, {
-          valueType: 'referenceValue',
-          referenceValue:
-            `projects/${PROJECT_ID}/databases/(default)/` +
-            'documents/collectionId/doc',
-        }),
-        fieldFilters('foo', 'EQUAL', 'bar')
-      );
+          request, orderBy('__name__', 'ASCENDING'), startAt(true, {
+            valueType: 'referenceValue',
+            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                'documents/collectionId/doc',
+          }),
+          fieldFilters('foo', 'EQUAL', 'bar'));
 
       return stream();
     };
 
-    let query = firestore
-      .collection('collectionId')
-      .where('foo', '=', 'bar')
-      .startAt(snapshot('collectionId/doc', {foo: 'bar'}));
+    let query = firestore.collection('collectionId')
+                    .where('foo', '=', 'bar')
+                    .startAt(snapshot('collectionId/doc', {foo: 'bar'}));
     return query.get();
   });
 
@@ -1339,10 +1230,9 @@ describe('startAt() interface', function() {
   });
 
   it('does not accept field transforms', function() {
-    let query = firestore
-      .collection('collectionId')
-      .orderBy('foo', 'desc')
-      .orderBy('bar', 'asc');
+    let query = firestore.collection('collectionId')
+                    .orderBy('foo', 'desc')
+                    .orderBy('bar', 'asc');
 
     assert.throws(() => {
       query.startAt(Firestore.FieldValue.serverTimestamp());
@@ -1365,19 +1255,14 @@ describe('startAt() interface', function() {
   it('can overspecify order by', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-        startAt(true, 'foo')
-      );
+          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+          startAt(true, 'foo'));
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo')
-      .orderBy('bar')
-      .startAt('foo');
+    query = query.orderBy('foo').orderBy('bar').startAt('foo');
     return query.get();
   });
 
@@ -1396,10 +1281,7 @@ describe('startAt() interface', function() {
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo')
-      .startAt('foo')
-      .startAt('bar');
+    query = query.orderBy('foo').startAt('foo').startAt('bar');
     return query.get();
   });
 });
@@ -1416,19 +1298,14 @@ describe('startAfter() interface', function() {
   it('accepts fields', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-        startAt(false, 'foo', 'bar')
-      );
+          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+          startAt(false, 'foo', 'bar'));
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo')
-      .orderBy('bar')
-      .startAfter('foo', 'bar');
+    query = query.orderBy('foo').orderBy('bar').startAfter('foo', 'bar');
     return query.get();
   });
 
@@ -1442,19 +1319,13 @@ describe('startAfter() interface', function() {
   it('uses latest value', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo', 'ASCENDING'),
-        startAt(false, 'bar')
-      );
+          request, orderBy('foo', 'ASCENDING'), startAt(false, 'bar'));
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo')
-      .startAfter('foo')
-      .startAfter('bar');
+    query = query.orderBy('foo').startAfter('foo').startAfter('bar');
     return query.get();
   });
 });
@@ -1471,19 +1342,14 @@ describe('endAt() interface', function() {
   it('accepts fields', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-        endAt(false, 'foo', 'bar')
-      );
+          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+          endAt(false, 'foo', 'bar'));
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo')
-      .orderBy('bar')
-      .endAt('foo', 'bar');
+    query = query.orderBy('foo').orderBy('bar').endAt('foo', 'bar');
     return query.get();
   });
 
@@ -1502,10 +1368,7 @@ describe('endAt() interface', function() {
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo')
-      .endAt('foo')
-      .endAt('bar');
+    query = query.orderBy('foo').endAt('foo').endAt('bar');
     return query.get();
   });
 });
@@ -1522,19 +1385,14 @@ describe('endBefore() interface', function() {
   it('accepts fields', function() {
     firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
       requestEquals(
-        request,
-        orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-        endAt(true, 'foo', 'bar')
-      );
+          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+          endAt(true, 'foo', 'bar'));
 
       return stream();
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo')
-      .orderBy('bar')
-      .endBefore('foo', 'bar');
+    query = query.orderBy('foo').orderBy('bar').endBefore('foo', 'bar');
     return query.get();
   });
 
@@ -1553,10 +1411,7 @@ describe('endBefore() interface', function() {
     };
 
     let query = firestore.collection('collectionId');
-    query = query
-      .orderBy('foo')
-      .endBefore('foo')
-      .endBefore('bar');
+    query = query.orderBy('foo').endBefore('foo').endBefore('bar');
     return query.get();
   });
 
@@ -1573,10 +1428,7 @@ describe('endBefore() interface', function() {
 
     return query.get().then(() => {
       expectedResult = buildQuery(
-        limit(10),
-        orderBy('foo', 'ASCENDING'),
-        endAt(true, 'foo')
-      );
+          limit(10), orderBy('foo', 'ASCENDING'), endAt(true, 'foo'));
       return adjustedQuery.get();
     });
   });
