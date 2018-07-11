@@ -23,11 +23,7 @@ s.replace(
     'new firestoreModule.v1beta1.FirestoreClient\(',
     'new firestoreModule.v1beta1(')
 
-#
 # Node.js specific cleanup
-#
-subprocess.run(['npm', 'install'])
-
-# prettify and lint
+subprocess.run(['npm', 'ci'])
 subprocess.run(['npm', 'run', 'prettier'])
 subprocess.run(['npm', 'run', 'lint'])
