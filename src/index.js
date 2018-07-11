@@ -22,7 +22,14 @@ const is = require('is');
 const through = require('through2');
 const util = require('util');
 
-const libVersion = require('../../package.json').version;
+let libVersion;
+
+// Allow Firestore to be run both from 'src' and 'build/src'.
+try {
+  libVersion = require('../package.json').version;
+} catch (err) {
+  libVersion = require('../../package.json').version;
+}
 
 const path = require('./path');
 const convert = require('./convert');
