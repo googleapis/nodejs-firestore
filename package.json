@@ -36,20 +36,19 @@
     "greenkeeper[bot] <greenkeeper[bot]@users.noreply.github.com>"
   ],
   "scripts": {
-    "cover": "nyc --reporter=lcov mocha --require intelli-espower-loader build/test/*.js && nyc report",
+    "codecov": "nyc report --reporter=json && codecov -f .coverage/*.json",
     "docs": "jsdoc -c .jsdoc.js",
     "generate-scaffolding": "repo-tools generate all",
-    "publish-module": "node ../../scripts/publish.js firestore",
-    "system-test": "mocha build/system-test/*.js --timeout 600000",
-    "conformance": "mocha build/conformance/*.js --timeout 2000",
-    "test-no-cover": "mocha build/test/*.js --timeout 2000",
-    "test": "npm run cover",
+    "system-test": "mocha build/system-test --timeout 600000",
+    "conformance": "mocha build/conformance",
+    "test-only": "nyc mocha build/test",
+    "test": "npm run test-only",
     "check": "gts check",
     "clean": "gts clean",
     "compile": "tsc -p . && cp -r protos build/protos && cp -r test/fake-certificate.json build/test/fake-certificate.json  && cp src/v1beta1/firestore_client_config.json build/src/v1beta1/ && cp conformance/test-definition.proto build/conformance && cp conformance/test-suite.binproto build/conformance",
     "fix": "gts fix",
     "prepare": "npm run compile",
-    "pretest": "npm run compile",
+    "pretest-only": "npm run compile",
     "posttest": "npm run check"
   },
   "dependencies": {
@@ -70,6 +69,8 @@
     "@types/node": "^10.3.5",
     "codecov": "^3.0.2",
     "duplexify": "^3.6.0",
+    "gts": "^0.7.1",
+    "hard-rejection": "^1.0.0",
     "ink-docstrap": "git+https://github.com/docstrap/docstrap.git",
     "intelli-espower-loader": "^1.0.1",
     "jsdoc": "^3.5.5",
@@ -78,7 +79,7 @@
     "power-assert": "^1.6.0",
     "protobufjs": "^6.8.6",
     "proxyquire": "^2.0.1",
-    "typescript": "^2.9.2",
-    "gts": "^0.7.1"
+    "source-map-support": "^0.5.6",
+    "typescript": "^2.9.2"
   }
 }

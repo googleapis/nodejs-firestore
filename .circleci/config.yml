@@ -12,14 +12,10 @@ workflows:
       - node10:
           filters: *all_commits
       - docs:
-          requires:
-            - node6
-            - node8
-            - node10
+          filters: *all_commits
+      - lint:
           filters: *all_commits
       - system_tests:
-          requires:
-            - docs
           filters:
             branches:
               only: master
@@ -27,7 +23,11 @@ workflows:
               only: '/^v[\d.]+$/'
       - publish_npm:
           requires:
+            - node6
+            - node8
+            - node10
             - system_tests
+            - docs
           filters:
             branches:
               ignore: /.*/
@@ -65,8 +65,8 @@ jobs:
             npm install
           environment:
             NPM_CONFIG_PREFIX: /home/node/.npm-global
-      - run: npm test
-      - run: node_modules/.bin/codecov
+      - run: npm run test-only
+      - run: npm run codecov
   node8:
     docker:
       - image: 'node:8'
@@ -77,6 +77,14 @@ jobs:
       - image: 'node:10'
         user: node
     steps: *unit_tests_steps
+  lint:
+    docker:
+      - image: 'node:10'
+        user: node
+    steps:
+      - checkout
+      - run: *npm_install_and_link
+      - run: npm run check
   docs:
     docker:
       - image: 'node:10'
@@ -85,9 +93,7 @@ jobs:
       - checkout
       - run: *remove_package_lock
       - run: *npm_install_and_link
-      - run:
-          name: Build documentation.
-          command: npm run docs
+      - run: npm run docs
   system_tests:
     docker:
       - image: 'node:10'
@@ -120,5 +126,5 @@ jobs:
         user: node
     steps:
       - checkout
-      - run: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
+      - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
       - run: npm publish
