@@ -131,8 +131,7 @@ class GeoPoint {
    */
   toString() {
     return `GeoPoint { latitude: ${this.latitude}, longitude: ${
-      this.longitude
-    } }`;
+        this.longitude} }`;
   }
 
   /**
@@ -143,11 +142,9 @@ class GeoPoint {
    */
   isEqual(other) {
     return (
-      this === other ||
-      (is.instanceof(other, GeoPoint) &&
-        this.latitude === other.latitude &&
-        this.longitude === other.longitude)
-    );
+        this === other ||
+        (is.instanceof(other, GeoPoint) && this.latitude === other.latitude &&
+         this.longitude === other.longitude));
   }
 
   /**
@@ -261,12 +258,8 @@ class DocumentSnapshot {
             },
           };
 
-          const nestedValue = merge(
-            childNode.mapValue.fields,
-            value,
-            path,
-            pos + 1
-          );
+          const nestedValue =
+              merge(childNode.mapValue.fields, value, path, pos + 1);
 
           if (nestedValue) {
             childNode.mapValue.fields = nestedValue;
@@ -277,13 +270,9 @@ class DocumentSnapshot {
           }
         }
       } else {
-        assert(!isLast, "Can't merge current value into a nested object");
-        target[key].mapValue.fields = merge(
-          target[key].mapValue.fields,
-          value,
-          path,
-          pos + 1
-        );
+        assert(!isLast, 'Can\'t merge current value into a nested object');
+        target[key].mapValue.fields =
+            merge(target[key].mapValue.fields, value, path, pos + 1);
         return target;
       }
     }
@@ -532,8 +521,8 @@ class DocumentSnapshot {
    * @returns {*} The converted JS type.
    */
   _decodeValue(proto) {
-    const timestampsInSnapshotsEnabled = this._ref.firestore
-      ._timestampsInSnapshotsEnabled;
+    const timestampsInSnapshotsEnabled =
+        this._ref.firestore._timestampsInSnapshotsEnabled;
 
     switch (proto.valueType) {
       case 'stringValue': {
@@ -554,9 +543,8 @@ class DocumentSnapshot {
       }
       case 'referenceValue': {
         return new DocumentReference(
-          this.ref.firestore,
-          ResourcePath.fromSlashSeparatedString(proto.referenceValue)
-        );
+            this.ref.firestore,
+            ResourcePath.fromSlashSeparatedString(proto.referenceValue));
       }
       case 'arrayValue': {
         let array = [];
@@ -590,8 +578,8 @@ class DocumentSnapshot {
       }
       default: {
         throw new Error(
-          'Cannot decode type from Firestore Value: ' + JSON.stringify(proto)
-        );
+            'Cannot decode type from Firestore Value: ' +
+            JSON.stringify(proto));
       }
     }
   }
@@ -633,11 +621,10 @@ class DocumentSnapshot {
     // Since the read time is different on every document read, we explicitly
     // ignore all document metadata in this comparison.
     return (
-      this === other ||
-      (is.instance(other, DocumentSnapshot) &&
-        this._ref.isEqual(other._ref) &&
-        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
-    );
+        this === other ||
+        (is.instance(other, DocumentSnapshot) &&
+         this._ref.isEqual(other._ref) &&
+         deepEqual(this._fieldsProto, other._fieldsProto, {strict: true})));
   }
 
   /**
@@ -881,9 +868,8 @@ class QueryDocumentSnapshot extends DocumentSnapshot {
   data() {
     let data = super.data();
     assert(
-      is.defined(data),
-      'The data in a QueryDocumentSnapshot should always exist.'
-    );
+        is.defined(data),
+        'The data in a QueryDocumentSnapshot should always exist.');
     return data;
   }
 }
@@ -952,22 +938,16 @@ class DocumentSnapshotBuilder {
    */
   build() {
     assert(
-      is.defined(this.fieldsProto) === is.defined(this.createTime),
-      'Create time should be set iff document exists.'
-    );
+        is.defined(this.fieldsProto) === is.defined(this.createTime),
+        'Create time should be set iff document exists.');
     assert(
-      is.defined(this.fieldsProto) === is.defined(this.updateTime),
-      'Update time should be set iff document exists.'
-    );
-    return this.fieldsProto
-      ? new QueryDocumentSnapshot(
-          this.ref,
-          this.fieldsProto,
-          this.readTime,
-          this.createTime,
-          this.updateTime
-        )
-      : new DocumentSnapshot(this.ref, undefined, this.readTime);
+        is.defined(this.fieldsProto) === is.defined(this.updateTime),
+        'Update time should be set iff document exists.');
+    return this.fieldsProto ?
+        new QueryDocumentSnapshot(
+            this.ref, this.fieldsProto, this.readTime, this.createTime,
+            this.updateTime) :
+        new DocumentSnapshot(this.ref, undefined, this.readTime);
   }
 }
 
@@ -1054,9 +1034,8 @@ class DocumentMask {
           // We don't split on dots since fromObject is called with
           // DocumentData.
           const childSegment = new FieldPath(key);
-          const childPath = currentPath
-            ? currentPath.append(childSegment)
-            : childSegment;
+          const childPath =
+              currentPath ? currentPath.append(childSegment) : childSegment;
           const value = currentData[key];
           if (value instanceof FieldTransform) {
             if (value.includeInDocumentMask) {
@@ -1099,7 +1078,7 @@ class DocumentMask {
    * @param {Array.<FieldPath>} values - An array of FieldPaths to remove.
    */
   static removeFromSortedArray(input, values) {
-    for (let i = 0; i < input.length; ) {
+    for (let i = 0; i < input.length;) {
       let removed = false;
 
       for (const fieldPath of values) {
@@ -1168,9 +1147,8 @@ class DocumentMask {
         let result = null;
 
         Object.keys(currentData).forEach(key => {
-          const childPath = currentPath
-            ? currentPath.append(key)
-            : new FieldPath(key);
+          const childPath =
+              currentPath ? currentPath.append(key) : new FieldPath(key);
           if (this.contains(childPath)) {
             DocumentMask.removeFromSortedArray(remainingPaths, [childPath]);
             result = result || {};
@@ -1199,9 +1177,8 @@ class DocumentMask {
     const result = applyDocumentMask(data);
 
     if (result.remainingPaths.length !== 0) {
-      throw new Error(
-        `Input data is missing for field '${result.remainingPaths[0].toString()}'.`
-      );
+      throw new Error(`Input data is missing for field '${
+          result.remainingPaths[0].toString()}'.`);
     }
 
     return result.filteredData;
@@ -1291,8 +1268,7 @@ class DocumentTransform {
           transforms.set(path, val);
         } else {
           throw new Error(
-            'FieldValue transformations are not supported inside of array values.'
-          );
+              'FieldValue transformations are not supported inside of array values.');
         }
       } else if (is.array(val)) {
         for (let i = 0; i < val.length; ++i) {
@@ -1303,10 +1279,7 @@ class DocumentTransform {
         for (let prop in val) {
           if (val.hasOwnProperty(prop)) {
             encode_(
-              val[prop],
-              path.append(new FieldPath(prop)),
-              allowTransforms
-            );
+                val[prop], path.append(new FieldPath(prop)), allowTransforms);
           }
         }
       }
@@ -1430,7 +1403,7 @@ class Precondition {
  * Validates a JavaScript object for usage as a Firestore document.
  *
  * @param {Object} obj JavaScript object to validate.
-  *@param {string} options.allowDeletes At what level field deletes are
+ *@param {string} options.allowDeletes At what level field deletes are
  * supported (acceptable values are 'none', 'root' or 'all').
  * @param {boolean} options.allowServerTimestamps Whether server timestamps
  * are supported.
@@ -1440,9 +1413,8 @@ class Precondition {
  */
 function validateDocumentData(obj, options) {
   assert(
-    typeof options.allowEmpty === 'boolean',
-    "Expected boolean for 'options.allowEmpty'"
-  );
+      typeof options.allowEmpty === 'boolean',
+      'Expected boolean for \'options.allowEmpty\'');
 
   if (!isPlainObject(obj)) {
     throw new Error('Input is not a plain JavaScript object.');
@@ -1480,20 +1452,17 @@ function validateDocumentData(obj, options) {
  */
 function validateFieldValue(val, options, depth) {
   assert(
-    ['none', 'root', 'all'].indexOf(options.allowDeletes) !== -1,
-    "Expected 'none', 'root', or 'all' for 'options.allowDeletes'"
-  );
+      ['none', 'root', 'all'].indexOf(options.allowDeletes) !== -1,
+      'Expected \'none\', \'root\', or \'all\' for \'options.allowDeletes\'');
   assert(
-    typeof options.allowServerTimestamps === 'boolean',
-    "Expected boolean for 'options.allowServerTimestamps'"
-  );
+      typeof options.allowServerTimestamps === 'boolean',
+      'Expected boolean for \'options.allowServerTimestamps\'');
 
   if (!depth) {
     depth = 1;
   } else if (depth > MAX_DEPTH) {
     throw new Error(
-      `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`
-    );
+        `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`);
   }
 
   if (is.array(val)) {
@@ -1507,19 +1476,15 @@ function validateFieldValue(val, options, depth) {
       }
     }
   } else if (val instanceof DeleteTransform) {
-    if (
-      (options.allowDeletes === 'root' && depth > 1) ||
-      options.allowDeletes === 'none'
-    ) {
+    if ((options.allowDeletes === 'root' && depth > 1) ||
+        options.allowDeletes === 'none') {
       throw new Error(
-        'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.'
-      );
+          'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.');
     }
   } else if (val instanceof ServerTimestampTransform) {
     if (!options.allowServerTimestamps) {
       throw new Error(
-        'FieldValue.serverTimestamp() can only be used in update(), set() and create().'
-      );
+          'FieldValue.serverTimestamp() can only be used in update(), set() and create().');
     }
   } else if (is.instanceof(val, DocumentReference)) {
     return true;
@@ -1529,8 +1494,7 @@ function validateFieldValue(val, options, depth) {
     return true;
   } else if (is.instanceof(val, FieldPath)) {
     throw new Error(
-      'Cannot use object of type "FieldPath" as a Firestore value.'
-    );
+        'Cannot use object of type "FieldPath" as a Firestore value.');
   } else if (is.object(val)) {
     throw validate.customObjectError(val);
   }
@@ -1625,11 +1589,9 @@ function validateSetOptions(options) {
  */
 function isPlainObject(input) {
   return (
-    typeof input === 'object' &&
-    input !== null &&
-    (Object.getPrototypeOf(input) === Object.prototype ||
-      Object.getPrototypeOf(input) === null)
-  );
+      typeof input === 'object' && input !== null &&
+      (Object.getPrototypeOf(input) === Object.prototype ||
+       Object.getPrototypeOf(input) === null));
 }
 
 module.exports = DocumentRefType => {

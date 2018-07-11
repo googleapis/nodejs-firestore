@@ -49,21 +49,18 @@ describe('ResourcePath', function() {
   it('parses strings', function() {
     let path = ResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
     assert.equal(path.formattedName, DATABASE_ROOT);
-    path = ResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/foo`
-    );
+    path =
+        ResourcePath.fromSlashSeparatedString(`${DATABASE_ROOT}/documents/foo`);
     assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
     assert.throws(() => {
-      path = ResourcePath.fromSlashSeparatedString(
-        'projects/project/databases'
-      );
+      path =
+          ResourcePath.fromSlashSeparatedString('projects/project/databases');
     }, /Resource name 'projects\/project\/databases' is not valid\./);
   });
 
   it('accepts newlines', function() {
     const path = ResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/foo\nbar`
-    );
+        `${DATABASE_ROOT}/documents/foo\nbar`);
     assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo\nbar`);
   });
 });
@@ -79,7 +76,7 @@ describe('FieldPath', function() {
     }
   });
 
-  it("doesn't accept empty path", function() {
+  it('doesn\'t accept empty path', function() {
     assert.throws(() => {
       new FieldPath();
     }, /Function 'FieldPath\(\)' requires at least 1 argument\./);
@@ -108,7 +105,7 @@ describe('FieldPath', function() {
     assert.equal(path.formattedName, '`f.o.o`');
   });
 
-  it("doesn't allow empty components", function() {
+  it('doesn\'t allow empty components', function() {
     assert.throws(() => {
       new FieldPath('foo', '');
     }, /Argument at index 1 should not be empty./);

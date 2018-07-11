@@ -29,10 +29,9 @@ const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
-  'Update\\(\\) requires either ' +
+    'Update\\(\\) requires either ' +
     'a single JavaScript object or an alternating list of field/value pairs ' +
-    'that can be followed by an optional precondition.'
-);
+    'that can be followed by an optional precondition.');
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -132,9 +131,9 @@ function document(field, value) {
 }
 
 function updateMask(/* field */) {
-  return arguments.length === 0
-    ? {}
-    : {fieldPaths: Array.prototype.slice.call(arguments)};
+  return arguments.length === 0 ?
+      {} :
+      {fieldPaths: Array.prototype.slice.call(arguments)};
 }
 
 function found(document) {
@@ -281,36 +280,28 @@ describe('serialize document', function() {
 
   it('serializes to Protobuf JS', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
-      requestEquals(
-        request,
-        set(
-          document('bytes', {
-            valueType: 'bytesValue',
-            bytesValue: Buffer.from('AG=', 'base64'),
-          })
-        )
-      );
+        request, options, callback) {
+      requestEquals(request, set(document('bytes', {
+                      valueType: 'bytesValue',
+                      bytesValue: Buffer.from('AG=', 'base64'),
+                    })));
       callback(null, writeResult(1));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .set({bytes: Buffer.from('AG=', 'base64')});
+    return firestore.doc('collectionId/documentId').set({
+      bytes: Buffer.from('AG=', 'base64')
+    });
   });
 
-  it("doesn't serialize unsupported types", function() {
+  it('doesn\'t serialize unsupported types', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
     }, /Invalid use of type "undefined" as a Firestore argument./);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .set({foo: Firestore.FieldPath.documentId()});
+      firestore.doc('collectionId/documentId').set({
+        foo: Firestore.FieldPath.documentId()
+      });
     }, /Cannot use object of type "FieldPath" as a Firestore value./);
 
     assert.throws(() => {
@@ -321,22 +312,14 @@ describe('serialize document', function() {
 
   it('serializes date before 1970', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
-      requestEquals(
-        request,
-        set(
-          document('moonLanding', {
-            valueType: 'timestampValue',
-            timestampValue: {
-              nanos: 123000000,
-              seconds: -14182920,
-            },
-          })
-        )
-      );
+        request, options, callback) {
+      requestEquals(request, set(document('moonLanding', {
+                      valueType: 'timestampValue',
+                      timestampValue: {
+                        nanos: 123000000,
+                        seconds: -14182920,
+                      },
+                    })));
 
       callback(null, writeResult(1));
     };
@@ -348,10 +331,7 @@ describe('serialize document', function() {
 
   it('serializes unicode keys', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, set(document('😀', '😜')));
       callback(null, writeResult(1));
     };
@@ -363,24 +343,16 @@ describe('serialize document', function() {
 
   it('accepts both blob formats', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        set(
-          document(
-            'blob1',
-            {valueType: 'bytesValue', bytesValue: new Uint8Array([0, 1, 2])},
-            'blob2',
-            {
-              valueType: 'bytesValue',
-              bytesValue: Buffer.from([0, 1, 2]),
-            }
-          )
-        )
-      );
+          request,
+          set(document(
+              'blob1',
+              {valueType: 'bytesValue', bytesValue: new Uint8Array([0, 1, 2])},
+              'blob2', {
+                valueType: 'bytesValue',
+                bytesValue: Buffer.from([0, 1, 2]),
+              })));
 
       callback(null, writeResult(1));
     };
@@ -393,15 +365,11 @@ describe('serialize document', function() {
 
   it('supports NaN and Infinity', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       let fields = request.writes[0].update.fields;
       assert.ok(
-        typeof fields.nanValue.doubleValue === 'number' &&
-          isNaN(fields.nanValue.doubleValue)
-      );
+          typeof fields.nanValue.doubleValue === 'number' &&
+          isNaN(fields.nanValue.doubleValue));
       assert.equal(fields.posInfinity.doubleValue, Infinity);
       assert.equal(fields.negInfinity.doubleValue, -Infinity);
 
@@ -417,18 +385,13 @@ describe('serialize document', function() {
 
   it('supports server timestamps', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        set(
-          document('foo', 'bar'),
-          /* updateMask= */ null,
-          fieldTransform('field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')
-        )
-      );
+          request,
+          set(document('foo', 'bar'),
+              /* updateMask= */ null,
+              fieldTransform(
+                  'field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
 
       callback(null, writeResult(2));
     };
@@ -440,8 +403,9 @@ describe('serialize document', function() {
     });
   });
 
-  it("doesn't support server timestamp in array", function() {
-    const expectedErr = /FieldValue transformations are not supported inside of array values./;
+  it('doesn\'t support server timestamp in array', function() {
+    const expectedErr =
+        /FieldValue transformations are not supported inside of array values./;
 
     assert.throws(() => {
       return firestore.doc('collectionId/documentId').set({
@@ -515,19 +479,13 @@ describe('serialize document', function() {
 
   it('is able to write a document reference with cycles', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        set(
-          document('ref', {
-            referenceValue: `projects/${PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
+          request, set(document('ref', {
+            referenceValue: `projects/${
+                PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
             valueType: 'referenceValue',
-          })
-        )
-      );
+          })));
 
       callback(null, writeResult(1));
     };
@@ -554,22 +512,15 @@ describe('deserialize document', function() {
 
   it('deserializes Protobuf JS', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(
-        found(
-          document('foo', {
-            valueType: 'bytesValue',
-            bytesValue: Buffer.from('AG=', 'base64'),
-          })
-        )
-      );
+      return stream(found(document('foo', {
+        valueType: 'bytesValue',
+        bytesValue: Buffer.from('AG=', 'base64'),
+      })));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(res => {
-        assert.deepEqual(res.data(), {foo: Buffer.from('AG=', 'base64')});
-      });
+    return firestore.doc('collectionId/documentId').get().then(res => {
+      assert.deepEqual(res.data(), {foo: Buffer.from('AG=', 'base64')});
+    });
   });
 
   it('ignores intermittent stream failures', function() {
@@ -584,38 +535,27 @@ describe('deserialize document', function() {
       }
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(() => {
-        assert.equal(3, attempts);
-      });
+    return firestore.doc('collectionId/documentId').get().then(() => {
+      assert.equal(3, attempts);
+    });
   });
 
   it('deserializes date before 1970', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(
-        found(
-          document('moonLanding', {
-            valueType: 'timestampValue',
-            timestampValue: {
-              nanos: 123000000,
-              seconds: -14182920,
-            },
-          })
-        )
-      );
+      return stream(found(document('moonLanding', {
+        valueType: 'timestampValue',
+        timestampValue: {
+          nanos: 123000000,
+          seconds: -14182920,
+        },
+      })));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(res => {
-        assert.equal(
+    return firestore.doc('collectionId/documentId').get().then(res => {
+      assert.equal(
           res.get('moonLanding').toMillis(),
-          new Date('Jul 20 1969 20:18:00.123 UTC').getTime()
-        );
-      });
+          new Date('Jul 20 1969 20:18:00.123 UTC').getTime());
+    });
   });
 
   it('returns undefined for unknown fields', function() {
@@ -623,106 +563,76 @@ describe('deserialize document', function() {
       return stream(found(document()));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(res => {
-        assert.equal(res.get('bar'), undefined);
-        assert.equal(res.get('bar.foo'), undefined);
-      });
+    return firestore.doc('collectionId/documentId').get().then(res => {
+      assert.equal(res.get('bar'), undefined);
+      assert.equal(res.get('bar.foo'), undefined);
+    });
   });
 
   it('supports NaN and Infinity', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(
-        found(
-          document(
-            'nanValue',
-            {valueType: 'doubleValue', doubleValue: 'NaN'},
-            'posInfinity',
-            {valueType: 'doubleValue', doubleValue: 'Infinity'},
-            'negInfinity',
-            {valueType: 'doubleValue', doubleValue: '-Infinity'}
-          )
-        )
-      );
+      return stream(found(document(
+          'nanValue', {valueType: 'doubleValue', doubleValue: 'NaN'},
+          'posInfinity', {valueType: 'doubleValue', doubleValue: 'Infinity'},
+          'negInfinity',
+          {valueType: 'doubleValue', doubleValue: '-Infinity'})));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(res => {
-        assert.ok(
-          typeof res.get('nanValue') === 'number' && isNaN(res.get('nanValue'))
-        );
-        assert.equal(res.get('posInfinity'), Infinity);
-        assert.equal(res.get('negInfinity'), -Infinity);
-      });
+    return firestore.doc('collectionId/documentId').get().then(res => {
+      assert.ok(
+          typeof res.get('nanValue') === 'number' &&
+          isNaN(res.get('nanValue')));
+      assert.equal(res.get('posInfinity'), Infinity);
+      assert.equal(res.get('negInfinity'), -Infinity);
+    });
   });
 
-  it("doesn't deserialize unsupported types", function() {
+  it('doesn\'t deserialize unsupported types', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
       return stream(found(document('moonLanding', {valueType: 'foo'})));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(doc => {
-        assert.throws(() => {
-          doc.data();
-        }, /Cannot decode type from Firestore Value: {"valueType":"foo"}/);
-      });
+    return firestore.doc('collectionId/documentId').get().then(doc => {
+      assert.throws(() => {
+        doc.data();
+      }, /Cannot decode type from Firestore Value: {"valueType":"foo"}/);
+    });
   });
 
-  it("doesn't deserialize invalid latitude", function() {
+  it('doesn\'t deserialize invalid latitude', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(
-        found(
-          document('geoPointValue', {
-            valueType: 'geoPointValue',
-            geoPointValue: {
-              latitude: 'foo',
-              longitude: -122.947778,
-            },
-          })
-        )
-      );
+      return stream(found(document('geoPointValue', {
+        valueType: 'geoPointValue',
+        geoPointValue: {
+          latitude: 'foo',
+          longitude: -122.947778,
+        },
+      })));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(doc => {
-        assert.throws(() => {
-          doc.data();
-        }, /Argument "latitude" is not a valid number\./);
-      });
+    return firestore.doc('collectionId/documentId').get().then(doc => {
+      assert.throws(() => {
+        doc.data();
+      }, /Argument "latitude" is not a valid number\./);
+    });
   });
 
-  it("doesn't deserialize invalid longitude", function() {
+  it('doesn\'t deserialize invalid longitude', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(
-        found(
-          document('geoPointValue', {
-            valueType: 'geoPointValue',
-            geoPointValue: {
-              latitude: 50.1430847,
-              longitude: 'foo',
-            },
-          })
-        )
-      );
+      return stream(found(document('geoPointValue', {
+        valueType: 'geoPointValue',
+        geoPointValue: {
+          latitude: 50.1430847,
+          longitude: 'foo',
+        },
+      })));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(doc => {
-        assert.throws(() => {
-          doc.data();
-        }, /Argument "longitude" is not a valid number\./);
-      });
+    return firestore.doc('collectionId/documentId').get().then(doc => {
+      assert.throws(() => {
+        doc.data();
+      }, /Argument "longitude" is not a valid number\./);
+    });
   });
 });
 
@@ -737,40 +647,29 @@ describe('get document', function() {
 
   it('returns document', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
-      request
-    ) {
+        request) {
       requestEquals(request, retrieve());
 
-      return stream(
-        found(
-          document('foo', {
-            valueType: 'mapValue',
-            mapValue: {
-              fields: {
-                bar: {
-                  valueType: 'stringValue',
-                  stringValue: 'foobar',
-                },
-              },
+      return stream(found(document('foo', {
+        valueType: 'mapValue',
+        mapValue: {
+          fields: {
+            bar: {
+              valueType: 'stringValue',
+              stringValue: 'foobar',
             },
-          })
-        )
-      );
+          },
+        },
+      })));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(result => {
-        assert.deepEqual(result.data(), {foo: {bar: 'foobar'}});
-        assert.deepEqual(result.get('foo'), {bar: 'foobar'});
-        assert.equal(result.get('foo.bar'), 'foobar');
-        assert.equal(
-          result.get(new Firestore.FieldPath('foo', 'bar')),
-          'foobar'
-        );
-        assert.equal(result.ref.id, 'documentId');
-      });
+    return firestore.doc('collectionId/documentId').get().then(result => {
+      assert.deepEqual(result.data(), {foo: {bar: 'foobar'}});
+      assert.deepEqual(result.get('foo'), {bar: 'foobar'});
+      assert.equal(result.get('foo.bar'), 'foobar');
+      assert.equal(result.get(new Firestore.FieldPath('foo', 'bar')), 'foobar');
+      assert.equal(result.ref.id, 'documentId');
+    });
   });
 
   it('returns read, update and create times', function() {
@@ -778,14 +677,11 @@ describe('get document', function() {
       return stream(found(document()));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(result => {
-        assert.ok(result.createTime.isEqual(new Firestore.Timestamp(1, 2)));
-        assert.ok(result.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
-        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
-      });
+    return firestore.doc('collectionId/documentId').get().then(result => {
+      assert.ok(result.createTime.isEqual(new Firestore.Timestamp(1, 2)));
+      assert.ok(result.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
+      assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+    });
   });
 
   it('returns not found', function() {
@@ -793,15 +689,12 @@ describe('get document', function() {
       return stream(missing(document()));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(result => {
-        assert.equal(result.exists, false);
-        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
-        assert.equal(null, result.data());
-        assert.equal(null, result.get('foo'));
-      });
+    return firestore.doc('collectionId/documentId').get().then(result => {
+      assert.equal(result.exists, false);
+      assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+      assert.equal(null, result.data());
+      assert.equal(null, result.get('foo'));
+    });
   });
 
   it('throws error', function(done) {
@@ -809,42 +702,32 @@ describe('get document', function() {
       return stream(new Error('RPC Error'));
     };
 
-    firestore
-      .doc('collectionId/documentId')
-      .get()
-      .catch(err => {
-        assert.equal(err.message, 'RPC Error');
-        done();
-      });
+    firestore.doc('collectionId/documentId').get().catch(err => {
+      assert.equal(err.message, 'RPC Error');
+      done();
+    });
   });
 
   it('requires field path', function() {
     firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(
-        found(
-          document('foo', {
-            valueType: 'mapValue',
-            mapValue: {
-              fields: {
-                bar: {
-                  valueType: 'stringValue',
-                  stringValue: 'foobar',
-                },
-              },
+      return stream(found(document('foo', {
+        valueType: 'mapValue',
+        mapValue: {
+          fields: {
+            bar: {
+              valueType: 'stringValue',
+              stringValue: 'foobar',
             },
-          })
-        )
-      );
+          },
+        },
+      })));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .get()
-      .then(doc => {
-        assert.throws(() => {
-          doc.get();
-        }, /Argument "field" is not a valid FieldPath. Invalid use of type "undefined" as a Firestore argument./);
-      });
+    return firestore.doc('collectionId/documentId').get().then(doc => {
+      assert.throws(() => {
+        doc.get();
+      }, /Argument "field" is not a valid FieldPath. Invalid use of type "undefined" as a Firestore argument./);
+    });
   });
 });
 
@@ -859,10 +742,7 @@ describe('delete document', function() {
 
   it('generates proto', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, remove('documentId'));
 
       callback(null, writeResult(1));
@@ -873,10 +753,7 @@ describe('delete document', function() {
 
   it('returns update time', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, remove('documentId'));
 
       callback(null, {
@@ -888,33 +765,23 @@ describe('delete document', function() {
       });
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .delete()
-      .then(res => {
-        assert.ok(
-          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000))
-        );
-      });
+    return firestore.doc('collectionId/documentId').delete().then(res => {
+      assert.ok(
+          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000)));
+    });
   });
 
   it('with last update time precondition', function() {
     let docRef = firestore.doc('collectionId/documentId');
 
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
-      requestEquals(
-        request,
-        remove('documentId', {
-          updateTime: {
-            nanos: 123000000,
-            seconds: 479978400,
-          },
-        })
-      );
+        request, options, callback) {
+      requestEquals(request, remove('documentId', {
+                      updateTime: {
+                        nanos: 123000000,
+                        seconds: 479978400,
+                      },
+                    }));
 
       callback(null, writeResult(1));
     };
@@ -934,9 +801,9 @@ describe('delete document', function() {
 
   it('with invalid last update time precondition', function() {
     assert.throws(() => {
-      return firestore
-        .doc('collectionId/documentId')
-        .delete({lastUpdateTime: 1337});
+      return firestore.doc('collectionId/documentId').delete({
+        lastUpdateTime: 1337
+      });
     }, /"lastUpdateTime" is not a Firestore Timestamp./);
   });
 
@@ -954,9 +821,8 @@ describe('delete document', function() {
 
   it('throws if more than one condition is provided', () => {
     assert.throws(() => {
-      return firestore
-        .doc('collectionId/documentId')
-        .delete({exists: false, lastUpdateTime: Firestore.Timestamp.now()});
+      return firestore.doc('collectionId/documentId')
+          .delete({exists: false, lastUpdateTime: Firestore.Timestamp.now()});
     }, /Input contains more than one condition./);
   });
 });
@@ -972,10 +838,7 @@ describe('set document', function() {
 
   it('supports empty map', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, set(document()));
       callback(null, writeResult(1));
     };
@@ -985,19 +848,11 @@ describe('set document', function() {
 
   it('supports nested empty map', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
-      requestEquals(
-        request,
-        set(
-          document('a', {
-            mapValue: {},
-            valueType: 'mapValue',
-          })
-        )
-      );
+        request, options, callback) {
+      requestEquals(request, set(document('a', {
+                      mapValue: {},
+                      valueType: 'mapValue',
+                    })));
       callback(null, writeResult(1));
     };
 
@@ -1006,148 +861,114 @@ describe('set document', function() {
 
   it('skips merges with just server timestamps', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        set(
-          null,
-          null,
-          fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')
-        )
-      );
+          request,
+          set(null, null,
+              fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')));
       callback(null, writeResult(1));
     };
-    return firestore.doc('collectionId/documentId').set(
-      {
-        a: Firestore.FieldValue.serverTimestamp(),
-        b: {c: Firestore.FieldValue.serverTimestamp()},
-      },
-      {merge: true}
-    );
+    return firestore.doc('collectionId/documentId')
+        .set(
+            {
+              a: Firestore.FieldValue.serverTimestamp(),
+              b: {c: Firestore.FieldValue.serverTimestamp()},
+            },
+            {merge: true});
   });
 
-  it('sends empty non-merge write even with just server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
-      requestEquals(
-        request,
-        set(
-          document(), // The empty write clears the data on the server.
-          null,
-          fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')
-        )
-      );
-      callback(null, writeResult(2));
-    };
+  it('sends empty non-merge write even with just server timestamps',
+     function() {
+       firestore._firestoreClient._innerApiCalls.commit = function(
+           request, options, callback) {
+         requestEquals(
+             request,
+             set(document(),  // The empty write clears the data on the server.
+                 null,
+                 fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')));
+         callback(null, writeResult(2));
+       };
 
-    return firestore.doc('collectionId/documentId').set({
-      a: Firestore.FieldValue.serverTimestamp(),
-      b: {c: Firestore.FieldValue.serverTimestamp()},
-    });
-  });
+       return firestore.doc('collectionId/documentId').set({
+         a: Firestore.FieldValue.serverTimestamp(),
+         b: {c: Firestore.FieldValue.serverTimestamp()},
+       });
+     });
 
   it('supports document merges', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        set(
-          document('a', 'b', 'c', {
-            mapValue: {
-              fields: {
-                d: {
-                  stringValue: 'e',
-                  valueType: 'stringValue',
+          request,
+          set(document('a', 'b', 'c', {
+                mapValue: {
+                  fields: {
+                    d: {
+                      stringValue: 'e',
+                      valueType: 'stringValue',
+                    },
+                  },
                 },
-              },
-            },
-            valueType: 'mapValue',
-          }),
-          updateMask('a', 'c.d', 'f')
-        )
-      );
+                valueType: 'mapValue',
+              }),
+              updateMask('a', 'c.d', 'f')));
       callback(null, writeResult(1));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .set(
-        {a: 'b', c: {d: 'e'}, f: Firestore.FieldValue.delete()},
-        {merge: true}
-      );
+    return firestore.doc('collectionId/documentId')
+        .set(
+            {a: 'b', c: {d: 'e'}, f: Firestore.FieldValue.delete()},
+            {merge: true});
   });
 
   it('supports document merges with field mask', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        set(
-          document(
-            'a',
-            'foo',
-            'b',
-            {
-              mapValue: {
-                fields: {
-                  c: {
-                    stringValue: 'foo',
-                    valueType: 'stringValue',
+          request,
+          set(document(
+                  'a', 'foo', 'b', {
+                    mapValue: {
+                      fields: {
+                        c: {
+                          stringValue: 'foo',
+                          valueType: 'stringValue',
+                        },
+                      },
+                    },
+                    valueType: 'mapValue',
                   },
-                },
-              },
-              valueType: 'mapValue',
-            },
-            'd',
-            {
-              mapValue: {
-                fields: {
-                  e: {
-                    stringValue: 'foo',
-                    valueType: 'stringValue',
-                  },
-                },
-              },
-              valueType: 'mapValue',
-            }
-          ),
-          updateMask('a', 'b', 'd.e', 'f')
-        )
-      );
+                  'd', {
+                    mapValue: {
+                      fields: {
+                        e: {
+                          stringValue: 'foo',
+                          valueType: 'stringValue',
+                        },
+                      },
+                    },
+                    valueType: 'mapValue',
+                  }),
+              updateMask('a', 'b', 'd.e', 'f')));
       callback(null, writeResult(1));
     };
 
-    return firestore.doc('collectionId/documentId').set(
-      {
-        a: 'foo',
-        b: {c: 'foo'},
-        d: {e: 'foo', ignore: 'foo'},
-        f: Firestore.FieldValue.delete(),
-        ignore: 'foo',
-        ignoreMap: {a: 'foo'},
-      },
-      {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']}
-    );
+    return firestore.doc('collectionId/documentId')
+        .set(
+            {
+              a: 'foo',
+              b: {c: 'foo'},
+              d: {e: 'foo', ignore: 'foo'},
+              f: Firestore.FieldValue.delete(),
+              ignore: 'foo',
+              ignoreMap: {a: 'foo'},
+            },
+            {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']});
   });
 
   it('supports document merges with empty field mask', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, set(document(), updateMask()));
       callback(null, writeResult(1));
     };
@@ -1157,100 +978,77 @@ describe('set document', function() {
 
   it('supports document merges with field mask and empty maps', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        set(
-          document(
-            'a',
-            {
-              mapValue: {
-                fields: {
-                  b: {
-                    mapValue: {},
+          request,
+          set(document(
+                  'a', {
+                    mapValue: {
+                      fields: {
+                        b: {
+                          mapValue: {},
+                          valueType: 'mapValue',
+                        },
+                      },
+                    },
                     valueType: 'mapValue',
                   },
-                },
-              },
-              valueType: 'mapValue',
-            },
-            'c',
-            {
-              mapValue: {
-                fields: {
-                  d: {
-                    mapValue: {},
+                  'c', {
+                    mapValue: {
+                      fields: {
+                        d: {
+                          mapValue: {},
+                          valueType: 'mapValue',
+                        },
+                      },
+                    },
                     valueType: 'mapValue',
-                  },
-                },
-              },
-              valueType: 'mapValue',
-            }
-          ),
-          updateMask('a', 'c.d')
-        )
-      );
+                  }),
+              updateMask('a', 'c.d')));
       callback(null, writeResult(1));
     };
 
-    return firestore.doc('collectionId/documentId').set(
-      {
-        a: {b: {}},
-        c: {d: {}},
-      },
-      {mergeFields: ['a', new Firestore.FieldPath('c', 'd')]}
-    );
+    return firestore.doc('collectionId/documentId')
+        .set(
+            {
+              a: {b: {}},
+              c: {d: {}},
+            },
+            {mergeFields: ['a', new Firestore.FieldPath('c', 'd')]});
   });
 
-  it('supports document merges with field mask and server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
-      requestEquals(
-        request,
-        set(
-          document(),
-          updateMask('b', 'f'),
-          fieldTransform(
-            'a',
-            'REQUEST_TIME',
-            'b.c',
-            'REQUEST_TIME',
-            'd.e',
-            'REQUEST_TIME'
-          )
-        )
-      );
-      callback(null, writeResult(2));
-    };
+  it('supports document merges with field mask and server timestamps',
+     function() {
+       firestore._firestoreClient._innerApiCalls.commit = function(
+           request, options, callback) {
+         requestEquals(
+             request,
+             set(document(), updateMask('b', 'f'),
+                 fieldTransform(
+                     'a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME', 'd.e',
+                     'REQUEST_TIME')));
+         callback(null, writeResult(2));
+       };
 
-    return firestore.doc('collectionId/documentId').set(
-      {
-        a: Firestore.FieldValue.serverTimestamp(),
-        b: {c: Firestore.FieldValue.serverTimestamp()},
-        d: {
-          e: Firestore.FieldValue.serverTimestamp(),
-          ignore: Firestore.FieldValue.serverTimestamp(),
-        },
-        f: Firestore.FieldValue.delete(),
-        ignore: Firestore.FieldValue.serverTimestamp(),
-        ignoreMap: {a: Firestore.FieldValue.serverTimestamp()},
-      },
-      {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']}
-    );
-  });
+       return firestore.doc('collectionId/documentId')
+           .set(
+               {
+                 a: Firestore.FieldValue.serverTimestamp(),
+                 b: {c: Firestore.FieldValue.serverTimestamp()},
+                 d: {
+                   e: Firestore.FieldValue.serverTimestamp(),
+                   ignore: Firestore.FieldValue.serverTimestamp(),
+                 },
+                 f: Firestore.FieldValue.delete(),
+                 ignore: Firestore.FieldValue.serverTimestamp(),
+                 ignoreMap: {a: Firestore.FieldValue.serverTimestamp()},
+               },
+               {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']});
+     });
 
   it('supports empty merge', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, set(document(), updateMask()));
       callback(null, writeResult(1));
     };
@@ -1260,32 +1058,23 @@ describe('set document', function() {
 
   it('supports nested empty merge', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        set(
-          document('a', {
-            mapValue: {},
-            valueType: 'mapValue',
-          }),
-          updateMask('a')
-        )
-      );
+          request,
+          set(document('a', {
+                mapValue: {},
+                valueType: 'mapValue',
+              }),
+              updateMask('a')));
       callback(null, writeResult(1));
     };
 
     return firestore.doc('collectionId/documentId').set({a: {}}, {merge: true});
   });
 
-  it("doesn't split on dots", function() {
+  it('doesn\'t split on dots', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, set(document('a.b', 'c')));
       callback(null, writeResult(1));
     };
@@ -1303,27 +1092,26 @@ describe('set document', function() {
     }, /Argument "options" is not a valid SetOptions. "merge" is not a boolean./);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .set({foo: 'bar'}, {mergeFields: 42});
+      firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
+        mergeFields: 42
+      });
     }, /Argument "options" is not a valid SetOptions. "mergeFields" is not an array./);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .set({foo: 'bar'}, {mergeFields: [null]});
+      firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
+        mergeFields: [null]
+      });
     }, /Argument "options" is not a valid SetOptions. Argument at index 0 is not a valid FieldPath./);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .set({foo: 'bar'}, {mergeFields: ['foobar']});
+      firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
+        mergeFields: ['foobar']
+      });
     }, /Input data is missing for field 'foobar'./);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .set({foo: 'bar'}, {merge: true, mergeFields: []});
+      firestore.doc('collectionId/documentId')
+          .set({foo: 'bar'}, {merge: true, mergeFields: []});
     }, /Argument "options" is not a valid SetOptions. You cannot specify both "merge" and "mergeFields"./);
   });
 
@@ -1333,15 +1121,15 @@ describe('set document', function() {
     }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
-  it("doesn't support non-merge deletes", function() {
+  it('doesn\'t support non-merge deletes', function() {
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .set({foo: Firestore.FieldValue.delete()});
+      firestore.doc('collectionId/documentId').set({
+        foo: Firestore.FieldValue.delete()
+      });
     }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
-  it("doesn't accept arrays", function() {
+  it('doesn\'t accept arrays', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set([42]);
     }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
@@ -1359,10 +1147,7 @@ describe('create document', function() {
 
   it('creates document', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, create(document()));
       callback(null, writeResult(1));
     };
@@ -1372,10 +1157,7 @@ describe('create document', function() {
 
   it('returns update time', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, create(document()));
 
       callback(null, {
@@ -1394,29 +1176,21 @@ describe('create document', function() {
       });
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .create({})
-      .then(res => {
-        assert.ok(
-          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000))
-        );
-      });
+    return firestore.doc('collectionId/documentId').create({}).then(res => {
+      assert.ok(
+          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000)));
+    });
   });
 
   it('supports server timestamps', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        create(
-          null,
-          fieldTransform('field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')
-        )
-      );
+          request,
+          create(
+              null,
+              fieldTransform(
+                  'field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
 
       callback(null, writeResult(1));
     };
@@ -1429,26 +1203,18 @@ describe('create document', function() {
 
   it('supports nested empty map', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
-      requestEquals(
-        request,
-        create(
-          document('a', {
-            mapValue: {
-              fields: {
-                b: {
-                  mapValue: {},
-                  valueType: 'mapValue',
-                },
-              },
-            },
-            valueType: 'mapValue',
-          })
-        )
-      );
+        request, options, callback) {
+      requestEquals(request, create(document('a', {
+                      mapValue: {
+                        fields: {
+                          b: {
+                            mapValue: {},
+                            valueType: 'mapValue',
+                          },
+                        },
+                      },
+                      valueType: 'mapValue',
+                    })));
       callback(null, writeResult(1));
     };
 
@@ -1461,7 +1227,7 @@ describe('create document', function() {
     }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
-  it("doesn't accept arrays", function() {
+  it('doesn\'t accept arrays', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').create([42]);
     }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
@@ -1479,10 +1245,7 @@ describe('update document', function() {
 
   it('generates proto', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
       callback(null, writeResult(1));
     };
@@ -1492,21 +1255,16 @@ describe('update document', function() {
 
   it('supports nested server timestamps', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        update(
-          document('foo', {
-            valueType: 'mapValue',
-            mapValue: {},
-          }),
-          updateMask('a', 'foo'),
-          fieldTransform('a.b', 'REQUEST_TIME', 'c.d', 'REQUEST_TIME')
-        )
-      );
+          request,
+          update(
+              document('foo', {
+                valueType: 'mapValue',
+                mapValue: {},
+              }),
+              updateMask('a', 'foo'),
+              fieldTransform('a.b', 'REQUEST_TIME', 'c.d', 'REQUEST_TIME')));
       callback(null, writeResult(2));
     };
 
@@ -1519,38 +1277,27 @@ describe('update document', function() {
 
   it('skips write for single server timestamp', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        update(null, null, fieldTransform('a', 'REQUEST_TIME'))
-      );
+          request, update(null, null, fieldTransform('a', 'REQUEST_TIME')));
       callback(null, writeResult(1));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .update('a', Firestore.FieldValue.serverTimestamp());
+    return firestore.doc('collectionId/documentId')
+        .update('a', Firestore.FieldValue.serverTimestamp());
   });
 
   it('supports nested empty map', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        update(
-          document('a', {
-            mapValue: {},
-            valueType: 'mapValue',
-          }),
-          updateMask('a')
-        )
-      );
+          request,
+          update(
+              document('a', {
+                mapValue: {},
+                valueType: 'mapValue',
+              }),
+              updateMask('a')));
       callback(null, writeResult(1));
     };
 
@@ -1559,25 +1306,19 @@ describe('update document', function() {
 
   it('supports nested delete', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, update(document(), updateMask('a.b')));
       callback(null, writeResult(1));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .update({'a.b': Firestore.FieldValue.delete()});
+    return firestore.doc('collectionId/documentId').update({
+      'a.b': Firestore.FieldValue.delete()
+    });
   });
 
   it('returns update time', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
 
       callback(null, {
@@ -1596,41 +1337,33 @@ describe('update document', function() {
       });
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .update({foo: 'bar'})
-      .then(res => {
-        assert.ok(
-          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000))
-        );
-      });
+    return firestore.doc('collectionId/documentId')
+        .update({foo: 'bar'})
+        .then(res => {
+          assert.ok(res.writeTime.isEqual(
+              new Firestore.Timestamp(479978400, 123000000)));
+        });
   });
 
   it('with last update time precondition', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        update(document('foo', 'bar'), updateMask('foo'), /*transform */ null, {
-          updateTime: {
-            nanos: 123000000,
-            seconds: 479978400,
-          },
-        })
-      );
+          request,
+          update(
+              document('foo', 'bar'), updateMask('foo'), /*transform */ null, {
+                updateTime: {
+                  nanos: 123000000,
+                  seconds: 479978400,
+                },
+              }));
       callback(null, writeResult(1));
     };
 
     return Promise.all([
-      firestore
-        .doc('collectionId/documentId')
-        .update(
-          {foo: 'bar'},
-          {lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)}
-        ),
+      firestore.doc('collectionId/documentId').update({foo: 'bar'}, {
+        lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)
+      }),
       firestore.doc('collectionId/documentId').update('foo', 'bar', {
         lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
       }),
@@ -1639,9 +1372,9 @@ describe('update document', function() {
 
   it('with invalid last update time precondition', function() {
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .update({foo: 'bar'}, {lastUpdateTime: 'foo'});
+      firestore.doc('collectionId/documentId').update({foo: 'bar'}, {
+        lastUpdateTime: 'foo'
+      });
     }, /"lastUpdateTime" is not a Firestore Timestamp\./);
   });
 
@@ -1657,24 +1390,21 @@ describe('update document', function() {
 
   it('rejects nested deletes', function() {
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .update({a: {b: Firestore.FieldValue.delete()}});
+      firestore.doc('collectionId/documentId').update({
+        a: {b: Firestore.FieldValue.delete()}
+      });
     }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .update('a', {b: Firestore.FieldValue.delete()});
+      firestore.doc('collectionId/documentId').update('a', {
+        b: Firestore.FieldValue.delete()
+      });
     }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
   it('with top-level document', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
       callback(null, writeResult(1));
     };
@@ -1686,49 +1416,41 @@ describe('update document', function() {
 
   it('with nested document', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        update(
-          document(
-            'a',
-            {
-              valueType: 'mapValue',
-              mapValue: {
-                fields: {
-                  b: {
+          request,
+          update(
+              document(
+                  'a', {
                     valueType: 'mapValue',
                     mapValue: {
                       fields: {
-                        c: {
+                        b: {
+                          valueType: 'mapValue',
+                          mapValue: {
+                            fields: {
+                              c: {
+                                valueType: 'stringValue',
+                                stringValue: 'foobar',
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  'foo', {
+                    valueType: 'mapValue',
+                    mapValue: {
+                      fields: {
+                        bar: {
                           valueType: 'stringValue',
                           stringValue: 'foobar',
                         },
                       },
                     },
-                  },
-                },
-              },
-            },
-            'foo',
-            {
-              valueType: 'mapValue',
-              mapValue: {
-                fields: {
-                  bar: {
-                    valueType: 'stringValue',
-                    stringValue: 'foobar',
-                  },
-                },
-              },
-            }
-          ),
-          updateMask('a.b.c', 'foo.bar')
-        )
-      );
+                  }),
+              updateMask('a.b.c', 'foo.bar')));
 
       callback(null, writeResult(1));
     };
@@ -1738,59 +1460,51 @@ describe('update document', function() {
         'foo.bar': 'foobar',
         'a.b.c': 'foobar',
       }),
-      firestore
-        .doc('collectionId/documentId')
-        .update(
-          'foo.bar',
-          'foobar',
-          new Firestore.FieldPath('a', 'b', 'c'),
-          'foobar'
-        ),
+      firestore.doc('collectionId/documentId')
+          .update(
+              'foo.bar', 'foobar', new Firestore.FieldPath('a', 'b', 'c'),
+              'foobar'),
     ]);
   });
 
   it('with two nested fields ', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        update(
-          document('foo', {
-            mapValue: {
-              fields: {
-                bar: {
-                  stringValue: 'two',
-                  valueType: 'stringValue',
-                },
-                deep: {
-                  mapValue: {
-                    fields: {
-                      bar: {
-                        stringValue: 'two',
-                        valueType: 'stringValue',
+          request,
+          update(
+              document('foo', {
+                mapValue: {
+                  fields: {
+                    bar: {
+                      stringValue: 'two',
+                      valueType: 'stringValue',
+                    },
+                    deep: {
+                      mapValue: {
+                        fields: {
+                          bar: {
+                            stringValue: 'two',
+                            valueType: 'stringValue',
+                          },
+                          foo: {
+                            stringValue: 'one',
+                            valueType: 'stringValue',
+                          },
+                        },
                       },
-                      foo: {
-                        stringValue: 'one',
-                        valueType: 'stringValue',
-                      },
+                      valueType: 'mapValue',
+                    },
+                    foo: {
+                      stringValue: 'one',
+                      valueType: 'stringValue',
                     },
                   },
-                  valueType: 'mapValue',
                 },
-                foo: {
-                  stringValue: 'one',
-                  valueType: 'stringValue',
-                },
-              },
-            },
-            valueType: 'mapValue',
-          }),
-          updateMask('foo.bar', 'foo.deep.bar', 'foo.deep.foo', 'foo.foo')
-        )
-      );
+                valueType: 'mapValue',
+              }),
+              updateMask(
+                  'foo.bar', 'foo.deep.bar', 'foo.deep.foo', 'foo.foo')));
 
       callback(null, writeResult(1));
     };
@@ -1801,62 +1515,49 @@ describe('update document', function() {
         'foo.deep.foo': 'one',
         'foo.deep.bar': 'two',
       }),
-      firestore
-        .doc('collectionId/documentId')
-        .update(
-          'foo.foo',
-          'one',
-          'foo.bar',
-          'two',
-          'foo.deep.foo',
-          'one',
-          'foo.deep.bar',
-          'two'
-        ),
+      firestore.doc('collectionId/documentId')
+          .update(
+              'foo.foo', 'one', 'foo.bar', 'two', 'foo.deep.foo', 'one',
+              'foo.deep.bar', 'two'),
     ]);
   });
 
   it('with nested field and document transform ', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        update(
-          document('a', {
-            mapValue: {
-              fields: {
-                b: {
-                  valueType: 'mapValue',
-                  mapValue: {
-                    fields: {
-                      keep: {
-                        stringValue: 'keep',
-                        valueType: 'stringValue',
+          request,
+          update(
+              document('a', {
+                mapValue: {
+                  fields: {
+                    b: {
+                      valueType: 'mapValue',
+                      mapValue: {
+                        fields: {
+                          keep: {
+                            stringValue: 'keep',
+                            valueType: 'stringValue',
+                          },
+                        },
+                      },
+                    },
+                    c: {
+                      valueType: 'mapValue',
+                      mapValue: {
+                        fields: {
+                          keep: {
+                            stringValue: 'keep',
+                            valueType: 'stringValue',
+                          },
+                        },
                       },
                     },
                   },
                 },
-                c: {
-                  valueType: 'mapValue',
-                  mapValue: {
-                    fields: {
-                      keep: {
-                        stringValue: 'keep',
-                        valueType: 'stringValue',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            valueType: 'mapValue',
-          }),
-          updateMask('a.b.delete', 'a.b.keep', 'a.c.delete', 'a.c.keep')
-        )
-      );
+                valueType: 'mapValue',
+              }),
+              updateMask('a.b.delete', 'a.b.keep', 'a.c.delete', 'a.c.keep')));
 
       callback(null, writeResult(1));
     };
@@ -1870,18 +1571,14 @@ describe('update document', function() {
 
   it('with field with dot ', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(request, update(document('a.b', 'c'), updateMask('`a.b`')));
 
       callback(null, writeResult(1));
     };
 
-    return firestore
-      .doc('collectionId/documentId')
-      .update(new Firestore.FieldPath('a.b'), 'c');
+    return firestore.doc('collectionId/documentId')
+        .update(new Firestore.FieldPath('a.b'), 'c');
   });
 
   it('with conflicting update', function() {
@@ -1921,21 +1618,18 @@ describe('update document', function() {
     }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo.bar" was specified multiple times\./);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .update('foo.bar', 'foobar', 'foo', 'foobar');
+      firestore.doc('collectionId/documentId')
+          .update('foo.bar', 'foobar', 'foo', 'foobar');
     }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
+      firestore.doc('collectionId/documentId')
+          .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
+      firestore.doc('collectionId/documentId')
+          .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
   });
 
@@ -1969,17 +1663,16 @@ describe('update document', function() {
     }
   });
 
-  it("doesn't accept argument after precondition", function() {
+  it('doesn\'t accept argument after precondition', function() {
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .update('foo', 'bar', {exists: true});
+      firestore.doc('collectionId/documentId').update('foo', 'bar', {
+        exists: true
+      });
     }, INVALID_ARGUMENTS_TO_UPDATE);
 
     assert.throws(() => {
-      firestore
-        .doc('collectionId/documentId')
-        .update({foo: 'bar'}, {exists: true}, 'foo');
+      firestore.doc('collectionId/documentId')
+          .update({foo: 'bar'}, {exists: true}, 'foo');
     }, INVALID_ARGUMENTS_TO_UPDATE);
   });
 
@@ -1989,7 +1682,7 @@ describe('update document', function() {
     }, /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
-  it("doesn't accept arrays", function() {
+  it('doesn\'t accept arrays', function() {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update([42]);
     }, /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
@@ -1997,14 +1690,9 @@ describe('update document', function() {
 
   it('with field delete', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       requestEquals(
-        request,
-        update(document('bar', 'foobar'), updateMask('bar', 'foo'))
-      );
+          request, update(document('bar', 'foobar'), updateMask('bar', 'foo')));
       callback(null, writeResult(1));
     };
 
@@ -2028,10 +1716,7 @@ describe('getCollections() method', function() {
 
   it('sorts results', function() {
     firestore._firestoreClient._innerApiCalls.listCollectionIds = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       assert.deepEqual(request, {
         parent: `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
       });

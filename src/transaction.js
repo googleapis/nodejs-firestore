@@ -47,7 +47,7 @@ let Query;
  * writes.
  */
 const READ_AFTER_WRITE_ERROR_MSG =
-  'Firestore transactions require all reads to be executed before all writes.';
+    'Firestore transactions require all reads to be executed before all writes.';
 
 /*!
  * Transactions can be retried if the initial stream opening errors out.
@@ -77,9 +77,8 @@ class Transaction {
     this._previousTransaction = previousTransaction;
     this._writeBatch = firestore.batch();
 
-    this._requestTag = previousTransaction
-      ? previousTransaction.requestTag
-      : Firestore.requestTag();
+    this._requestTag = previousTransaction ? previousTransaction.requestTag :
+                                             Firestore.requestTag();
   }
 
   /**
@@ -110,10 +109,10 @@ class Transaction {
 
     if (is.instance(refOrQuery, DocumentReference)) {
       return this._firestore
-        .getAll_([refOrQuery], this._requestTag, this._transactionId)
-        .then(res => {
-          return Promise.resolve(res[0]);
-        });
+          .getAll_([refOrQuery], this._requestTag, this._transactionId)
+          .then(res => {
+            return Promise.resolve(res[0]);
+          });
     }
 
     if (is.instance(refOrQuery, Query)) {
@@ -150,19 +149,15 @@ class Transaction {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
-    documents = is.array(arguments[0])
-      ? arguments[0].slice()
-      : Array.prototype.slice.call(arguments);
+    documents = is.array(arguments[0]) ? arguments[0].slice() :
+                                         Array.prototype.slice.call(arguments);
 
     for (let i = 0; i < documents.length; ++i) {
       validate.isDocumentReference(i, documents[i]);
     }
 
     return this._firestore.getAll_(
-      documents,
-      this._requestTag,
-      this._transactionId
-    );
+        documents, this._requestTag, this._transactionId);
   }
 
   /**
@@ -266,9 +261,8 @@ class Transaction {
 
     preconditionOrValues = Array.prototype.slice.call(arguments, 2);
     this._writeBatch.update.apply(
-      this._writeBatch,
-      [documentRef, dataOrField].concat(preconditionOrValues)
-    );
+        this._writeBatch,
+        [documentRef, dataOrField].concat(preconditionOrValues));
     return this;
   }
 
@@ -318,10 +312,10 @@ class Transaction {
     }
 
     return this._firestore
-      .request('beginTransaction', request, this._requestTag, ALLOW_RETRIES)
-      .then(resp => {
-        this._transactionId = resp.transaction;
-      });
+        .request('beginTransaction', request, this._requestTag, ALLOW_RETRIES)
+        .then(resp => {
+          this._transactionId = resp.transaction;
+        });
   }
 
   /**

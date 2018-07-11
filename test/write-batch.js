@@ -115,10 +115,8 @@ describe('update() method', function() {
 
   it('accepts preconditions', function() {
     writeBatch.update(
-      firestore.doc('sub/doc'),
-      {foo: 'bar'},
-      {lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)}
-    );
+        firestore.doc('sub/doc'), {foo: 'bar'},
+        {lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)});
   });
 });
 
@@ -147,7 +145,8 @@ describe('create() method', function() {
 });
 
 describe('batch support', function() {
-  const documentName = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
+  const documentName =
+      `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
 
   let firestore;
   let writeBatch;
@@ -158,10 +157,7 @@ describe('batch support', function() {
       writeBatch = firestore.batch();
 
       firestore._firestoreClient._innerApiCalls.commit = function(
-        request,
-        options,
-        callback
-      ) {
+          request, options, callback) {
         assert.deepEqual(request, {
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
@@ -281,14 +277,14 @@ describe('batch support', function() {
     let documentName = firestore.doc('col/doc');
 
     return writeBatch
-      .set(documentName, {foo: Firestore.FieldValue.serverTimestamp()})
-      .update(documentName, {foo: 'bar'})
-      .create(documentName, {})
-      .delete(documentName)
-      .commit()
-      .then(resp => {
-        verifyResponse(resp);
-      });
+        .set(documentName, {foo: Firestore.FieldValue.serverTimestamp()})
+        .update(documentName, {foo: 'bar'})
+        .create(documentName, {})
+        .delete(documentName)
+        .commit()
+        .then(resp => {
+          verifyResponse(resp);
+        });
   });
 
   it('handles exception', function() {
@@ -296,15 +292,14 @@ describe('batch support', function() {
       return Promise.reject(new Error('Expected exception'));
     };
 
-    return firestore
-      .batch()
-      .commit()
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        assert.equal(err.message, 'Expected exception');
-      });
+    return firestore.batch()
+        .commit()
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          assert.equal(err.message, 'Expected exception');
+        });
   });
 
   it('cannot append to committed batch', function() {
@@ -337,10 +332,7 @@ describe('batch support', function() {
 
   it('can return same write result', function() {
     firestore._firestoreClient._innerApiCalls.commit = function(
-      request,
-      options,
-      callback
-    ) {
+        request, options, callback) {
       callback(null, {
         commitTime: {
           nanos: 0,
@@ -384,19 +376,13 @@ describe('batch support', function() {
       let commitCalled = 0;
 
       firestore._firestoreClient._innerApiCalls.beginTransaction = function(
-        actual,
-        options,
-        callback
-      ) {
+          actual, options, callback) {
         ++beginCalled;
         callback(null, {transaction: 'foo'});
       };
 
       firestore._firestoreClient._innerApiCalls.commit = function(
-        actual,
-        options,
-        callback
-      ) {
+          actual, options, callback) {
         ++commitCalled;
         callback(null, {
           commitTime: {
@@ -406,28 +392,27 @@ describe('batch support', function() {
         });
       };
 
-      return firestore
-        .batch()
-        .commit()
-        .then(() => {
-          // The first commit always uses a transcation.
-          assert.equal(1, beginCalled);
-          assert.equal(1, commitCalled);
-          return firestore.batch().commit();
-        })
-        .then(() => {
-          // The following commits don't use transactions if they happen within two
-          // minutes.
-          assert.equal(1, beginCalled);
-          assert.equal(2, commitCalled);
-          firestore._lastSuccessfulRequest = new Date(1337);
-          return firestore.batch().commit();
-        })
-        .then(() => {
-          assert.equal(2, beginCalled);
-          assert.equal(3, commitCalled);
-          delete process.env.FUNCTION_TRIGGER_TYPE;
-        });
+      return firestore.batch()
+          .commit()
+          .then(() => {
+            // The first commit always uses a transcation.
+            assert.equal(1, beginCalled);
+            assert.equal(1, commitCalled);
+            return firestore.batch().commit();
+          })
+          .then(() => {
+            // The following commits don't use transactions if they happen
+            // within two minutes.
+            assert.equal(1, beginCalled);
+            assert.equal(2, commitCalled);
+            firestore._lastSuccessfulRequest = new Date(1337);
+            return firestore.batch().commit();
+          })
+          .then(() => {
+            assert.equal(2, beginCalled);
+            assert.equal(3, commitCalled);
+            delete process.env.FUNCTION_TRIGGER_TYPE;
+          });
     });
   });
 });

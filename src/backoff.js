@@ -107,10 +107,9 @@ class ExponentialBackoff {
      * @type {number}
      * @private
      */
-    this._initialDelayMs =
-      options.initialDelayMs !== undefined
-        ? options.initialDelayMs
-        : DEFAULT_BACKOFF_INITIAL_DELAY_MS;
+    this._initialDelayMs = options.initialDelayMs !== undefined ?
+        options.initialDelayMs :
+        DEFAULT_BACKOFF_INITIAL_DELAY_MS;
 
     /**
      * The multiplier to use to determine the extended base delay after each
@@ -118,10 +117,9 @@ class ExponentialBackoff {
      * @type {number}
      * @private
      */
-    this._backoffFactor =
-      options.backoffFactor !== undefined
-        ? options.backoffFactor
-        : DEFAULT_BACKOFF_FACTOR;
+    this._backoffFactor = options.backoffFactor !== undefined ?
+        options.backoffFactor :
+        DEFAULT_BACKOFF_FACTOR;
 
     /**
      * The maximum base delay after which no further backoff is performed.
@@ -131,10 +129,9 @@ class ExponentialBackoff {
      * @type {number}
      * @private
      */
-    this._maxDelayMs =
-      options.maxDelayMs !== undefined
-        ? options.maxDelayMs
-        : DEFAULT_BACKOFF_MAX_DELAY_MS;
+    this._maxDelayMs = options.maxDelayMs !== undefined ?
+        options.maxDelayMs :
+        DEFAULT_BACKOFF_MAX_DELAY_MS;
 
     /**
      * The jitter factor that controls the random distribution of the backoff
@@ -143,10 +140,9 @@ class ExponentialBackoff {
      * @type {number}
      * @private
      */
-    this._jitterFactor =
-      options.jitterFactor !== undefined
-        ? options.jitterFactor
-        : DEFAULT_JITTER_FACTOR;
+    this._jitterFactor = options.jitterFactor !== undefined ?
+        options.jitterFactor :
+        DEFAULT_JITTER_FACTOR;
 
     /**
      * The backoff delay of the current attempt.
@@ -193,10 +189,9 @@ class ExponentialBackoff {
     const delayWithJitterMs = this._currentBaseMs + this._jitterDelayMs();
     if (this._currentBaseMs > 0) {
       Firestore.log(
-        'ExponentialBackoff.backoffAndWait',
-        `Backing off for ${delayWithJitterMs} ms ` +
-          `(base delay: ${this._currentBaseMs} ms)`
-      );
+          'ExponentialBackoff.backoffAndWait',
+          `Backing off for ${delayWithJitterMs} ms ` +
+              `(base delay: ${this._currentBaseMs} ms)`);
     }
 
     // Apply backoff factor to determine next delay and ensure it is within

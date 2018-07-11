@@ -78,9 +78,7 @@ function typeOrder(val) {
     case 'mapValue': {
       return types.OBJECT;
     }
-    default: {
-      throw validate.customObjectError(val);
-    }
+    default: { throw validate.customObjectError(val); }
   }
 }
 
@@ -171,9 +169,8 @@ function compareReferenceProtos(left, right) {
  */
 function compareGeoPoints(left, right) {
   return (
-    primitiveComparator(left.latitude, right.latitude) ||
-    primitiveComparator(left.longitude, right.longitude)
-  );
+      primitiveComparator(left.latitude, right.latitude) ||
+      primitiveComparator(left.longitude, right.longitude));
 }
 
 /*!
@@ -256,17 +253,16 @@ function compare(left, right) {
     }
     case types.ARRAY: {
       return compareArrays(
-        left.arrayValue.values || [],
-        right.arrayValue.values || []
-      );
+          left.arrayValue.values || [], right.arrayValue.values || []);
     }
     case types.OBJECT: {
       return compareObjects(
-        left.mapValue.fields || {},
-        right.mapValue.fields || {}
-      );
+          left.mapValue.fields || {}, right.mapValue.fields || {});
     }
   }
 }
 
-module.exports = {compare, primitiveComparator};
+module.exports = {
+  compare,
+  primitiveComparator
+};

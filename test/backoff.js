@@ -51,7 +51,7 @@ describe('ExponentialBackoff', function() {
     assert.ok(actual <= high);
   }
 
-  it("doesn't delay first attempt", () => {
+  it('doesn\'t delay first attempt', () => {
     const backoff = new ExponentialBackoff();
     backoff.backoffAndWait(nop);
     assertDelayEquals(0);

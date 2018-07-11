@@ -20,15 +20,14 @@ let assert = require('power-assert');
 let is = require('is');
 
 let DocumentReference = require('../src/reference').DocumentReference;
-let DocumentSnapshot = require('../src/document')(DocumentReference)
-  .DocumentSnapshot;
+let DocumentSnapshot =
+    require('../src/document')(DocumentReference).DocumentSnapshot;
 
-// eslint-disable-next-line node/no-missing-require
 let version = require('../../package.json').version;
 let Firestore = require('../src');
 
 if (process.env.NODE_ENV === 'DEBUG') {
-  Firestore.setLogFunction(console.log); // eslint-disable-line no-console
+  Firestore.setLogFunction(console.log);
 }
 
 function getTestRoot(firestore) {
@@ -58,12 +57,12 @@ describe('Firestore class', function() {
     let ref1 = randomCol.doc('doc1');
     let ref2 = randomCol.doc('doc2');
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'a'})])
-      .then(() => {
-        return firestore.getAll(ref1, ref2);
-      })
-      .then(docs => {
-        assert.equal(docs.length, 2);
-      });
+        .then(() => {
+          return firestore.getAll(ref1, ref2);
+        })
+        .then(docs => {
+          assert.equal(docs.length, 2);
+        });
   });
 });
 
@@ -104,14 +103,13 @@ describe('CollectionReference class', function() {
   });
 
   it('has add() method', function() {
-    return randomCol
-      .add({foo: 'a'})
-      .then(ref => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.equal(doc.get('foo'), 'a');
-      });
+    return randomCol.add({foo: 'a'})
+        .then(ref => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.equal(doc.get('foo'), 'a');
+        });
   });
 });
 
@@ -151,14 +149,13 @@ describe('DocumentReference class', function() {
 
   it('has create()/get() method', function() {
     let ref = randomCol.doc();
-    return ref
-      .create({foo: 'a'})
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.equal(doc.get('foo'), 'a');
-      });
+    return ref.create({foo: 'a'})
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.equal(doc.get('foo'), 'a');
+        });
   });
 
   it('has set() method', function() {
@@ -182,21 +179,18 @@ describe('DocumentReference class', function() {
       bytesValue: Buffer.from([0x01, 0x02]),
     };
     let ref = randomCol.doc('doc');
-    return ref
-      .set(allSupportedTypesObject)
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        let data = doc.data();
-        assert.equal(
-          data.pathValue.path,
-          allSupportedTypesObject.pathValue.path
-        );
-        delete data.pathValue;
-        delete allSupportedTypesObject.pathValue;
-        assert.deepStrictEqual(data, allSupportedTypesObject);
-      });
+    return ref.set(allSupportedTypesObject)
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          let data = doc.data();
+          assert.equal(
+              data.pathValue.path, allSupportedTypesObject.pathValue.path);
+          delete data.pathValue;
+          delete allSupportedTypesObject.pathValue;
+          assert.deepStrictEqual(data, allSupportedTypesObject);
+        });
   });
 
   it('supports NaNs', function() {
@@ -204,16 +198,15 @@ describe('DocumentReference class', function() {
       nanValue: NaN,
     };
     let ref = randomCol.doc('doc');
-    return ref
-      .set(nanObject)
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        const actualValue = doc.data().nanValue;
-        assert.equal(typeof actualValue, 'number');
-        assert(isNaN(actualValue));
-      });
+    return ref.set(nanObject)
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          const actualValue = doc.data().nanValue;
+          assert.equal(typeof actualValue, 'number');
+          assert(isNaN(actualValue));
+        });
   });
 
   it('supports server timestamps', function() {
@@ -232,117 +225,109 @@ describe('DocumentReference class', function() {
     let ref = randomCol.doc('doc');
     let setTimestamp;
 
-    return ref
-      .set(baseObject)
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        setTimestamp = doc.get('f');
-        assert.ok(is.instanceof(setTimestamp, Firestore.Timestamp));
-        assert.deepEqual(doc.data(), {
-          a: 'bar',
-          b: {remove: 'bar'},
-          d: {keep: 'bar'},
-          f: setTimestamp,
+    return ref.set(baseObject)
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          setTimestamp = doc.get('f');
+          assert.ok(is.instanceof(setTimestamp, Firestore.Timestamp));
+          assert.deepEqual(doc.data(), {
+            a: 'bar',
+            b: {remove: 'bar'},
+            d: {keep: 'bar'},
+            f: setTimestamp,
+          });
+          return ref.update(updateObject);
+        })
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          let updateTimestamp = doc.get('a');
+          assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
+          assert.deepEqual(doc.data(), {
+            a: updateTimestamp,
+            b: {c: updateTimestamp},
+            d: {e: updateTimestamp, keep: 'bar'},
+            f: setTimestamp,
+          });
         });
-        return ref.update(updateObject);
-      })
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        let updateTimestamp = doc.get('a');
-        assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
-        assert.deepEqual(doc.data(), {
-          a: updateTimestamp,
-          b: {c: updateTimestamp},
-          d: {e: updateTimestamp, keep: 'bar'},
-          f: setTimestamp,
-        });
-      });
   });
 
   it('supports set() with merge', function() {
     let ref = randomCol.doc('doc');
-    return ref
-      .set({'a.1': 'foo', nested: {'b.1': 'bar'}})
-      .then(() =>
-        ref.set({'a.2': 'foo', nested: {'b.2': 'bar'}}, {merge: true})
-      )
-      .then(() => ref.get())
-      .then(doc => {
-        let data = doc.data();
-        assert.deepStrictEqual(data, {
-          'a.1': 'foo',
-          'a.2': 'foo',
-          nested: {
-            'b.1': 'bar',
-            'b.2': 'bar',
-          },
+    return ref.set({'a.1': 'foo', nested: {'b.1': 'bar'}})
+        .then(
+            () =>
+                ref.set({'a.2': 'foo', nested: {'b.2': 'bar'}}, {merge: true}))
+        .then(() => ref.get())
+        .then(doc => {
+          let data = doc.data();
+          assert.deepStrictEqual(data, {
+            'a.1': 'foo',
+            'a.2': 'foo',
+            nested: {
+              'b.1': 'bar',
+              'b.2': 'bar',
+            },
+          });
         });
-      });
   });
 
   it('supports server timestamps for merge', function() {
     let ref = randomCol.doc('doc');
-    return ref
-      .set({a: 'b'})
-      .then(() =>
-        ref.set({c: Firestore.FieldValue.serverTimestamp()}, {merge: true})
-      )
-      .then(() => ref.get())
-      .then(doc => {
-        let updateTimestamp = doc.get('c');
-        assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
-        assert.deepEqual(doc.data(), {
-          a: 'b',
-          c: updateTimestamp,
+    return ref.set({a: 'b'})
+        .then(
+            () => ref.set(
+                {c: Firestore.FieldValue.serverTimestamp()}, {merge: true}))
+        .then(() => ref.get())
+        .then(doc => {
+          let updateTimestamp = doc.get('c');
+          assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
+          assert.deepEqual(doc.data(), {
+            a: 'b',
+            c: updateTimestamp,
+          });
         });
-      });
   });
 
   it('has update() method', function() {
     let ref = randomCol.doc('doc');
-    return ref
-      .set({foo: 'a'})
-      .then(res => {
-        return ref.update({foo: 'b'}, {lastUpdateTime: res.updateTime});
-      })
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.equal(doc.get('foo'), 'b');
-      });
+    return ref.set({foo: 'a'})
+        .then(res => {
+          return ref.update({foo: 'b'}, {lastUpdateTime: res.updateTime});
+        })
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.equal(doc.get('foo'), 'b');
+        });
   });
 
   it('enforces that updated document exists', function() {
-    return randomCol
-      .doc()
-      .update({foo: 'b'})
-      .catch(err => {
-        assert.ok(err.message.match(/No document to update/));
-      });
+    return randomCol.doc().update({foo: 'b'}).catch(err => {
+      assert.ok(err.message.match(/No document to update/));
+    });
   });
 
   it('has delete() method', function() {
     let deleted = false;
 
     let ref = randomCol.doc('doc');
-    return ref
-      .set({foo: 'a'})
-      .then(() => {
-        return ref.delete();
-      })
-      .then(() => {
-        deleted = true;
-        return ref.get();
-      })
-      .then(result => {
-        assert.equal(deleted, true);
-        assert.equal(result.exists, false);
-      });
+    return ref.set({foo: 'a'})
+        .then(() => {
+          return ref.delete();
+        })
+        .then(() => {
+          deleted = true;
+          return ref.get();
+        })
+        .then(result => {
+          assert.equal(deleted, true);
+          assert.equal(result.exists, false);
+        });
   });
 
   it('can delete() a non-existing document', function() {
@@ -352,24 +337,21 @@ describe('DocumentReference class', function() {
 
   it('supports non-alphanumeric field names', function() {
     const ref = randomCol.doc('doc');
-    return ref
-      .set({'!.\\`': {'!.\\`': 'value'}})
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.deepStrictEqual(doc.data(), {'!.\\`': {'!.\\`': 'value'}});
-        return ref.update(
-          new Firestore.FieldPath('!.\\`', '!.\\`'),
-          'new-value'
-        );
-      })
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.deepStrictEqual(doc.data(), {'!.\\`': {'!.\\`': 'new-value'}});
-      });
+    return ref.set({'!.\\`': {'!.\\`': 'value'}})
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.deepStrictEqual(doc.data(), {'!.\\`': {'!.\\`': 'value'}});
+          return ref.update(
+              new Firestore.FieldPath('!.\\`', '!.\\`'), 'new-value');
+        })
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.deepStrictEqual(doc.data(), {'!.\\`': {'!.\\`': 'new-value'}});
+        });
   });
 
   it('has getCollections() method', function() {
@@ -381,15 +363,15 @@ describe('DocumentReference class', function() {
     }
 
     return Promise.all(promises)
-      .then(() => {
-        return randomCol.doc('doc').getCollections();
-      })
-      .then(response => {
-        assert.equal(response.length, collections.length);
-        for (let i = 0; i < response.length; ++i) {
-          assert.equal(response[i].id, collections[i]);
-        }
-      });
+        .then(() => {
+          return randomCol.doc('doc').getCollections();
+        })
+        .then(response => {
+          assert.equal(response.length, collections.length);
+          for (let i = 0; i < response.length; ++i) {
+            assert.equal(response[i].id, collections[i]);
+          }
+        });
   });
 
   it('can add and delete fields sequentially', function() {
@@ -448,18 +430,17 @@ describe('DocumentReference class', function() {
     let promise = Promise.resolve();
 
     for (let i = 0; i < actions.length; ++i) {
-      promise = promise
-        .then(() => actions[i]())
-        .then(() => {
-          return ref.get();
-        })
-        .then(snap => {
-          if (!snap.exists) {
-            assert.equal(null, expectedState[i]);
-          } else {
-            assert.deepEqual(snap.data(), expectedState[i]);
-          }
-        });
+      promise = promise.then(() => actions[i]())
+                    .then(() => {
+                      return ref.get();
+                    })
+                    .then(snap => {
+                      if (!snap.exists) {
+                        assert.equal(null, expectedState[i]);
+                      } else {
+                        assert.deepEqual(snap.data(), expectedState[i]);
+                      }
+                    });
     }
 
     return promise;
@@ -471,50 +452,40 @@ describe('DocumentReference class', function() {
     const ref = randomCol.doc('doc');
 
     const actions = [
-      () =>
-        ref.create({
-          time: Firestore.FieldValue.serverTimestamp(),
-          a: {b: Firestore.FieldValue.serverTimestamp()},
-        }),
-      () =>
-        ref.set({
-          time: Firestore.FieldValue.serverTimestamp(),
-          a: {c: Firestore.FieldValue.serverTimestamp()},
-        }),
-      () =>
-        ref.set(
+      () => ref.create({
+        time: Firestore.FieldValue.serverTimestamp(),
+        a: {b: Firestore.FieldValue.serverTimestamp()},
+      }),
+      () => ref.set({
+        time: Firestore.FieldValue.serverTimestamp(),
+        a: {c: Firestore.FieldValue.serverTimestamp()},
+      }),
+      () => ref.set(
           {
             time: Firestore.FieldValue.serverTimestamp(),
             a: {d: Firestore.FieldValue.serverTimestamp()},
           },
-          {merge: true}
-        ),
-      () =>
-        ref.set(
+          {merge: true}),
+      () => ref.set(
           {
             time: Firestore.FieldValue.serverTimestamp(),
             e: Firestore.FieldValue.serverTimestamp(),
           },
-          {merge: true}
-        ),
-      () =>
-        ref.set(
+          {merge: true}),
+      () => ref.set(
           {
             time: Firestore.FieldValue.serverTimestamp(),
             e: {f: Firestore.FieldValue.serverTimestamp()},
           },
-          {merge: true}
-        ),
-      () =>
-        ref.update({
-          time: Firestore.FieldValue.serverTimestamp(),
-          'g.h': Firestore.FieldValue.serverTimestamp(),
-        }),
-      () =>
-        ref.update({
-          time: Firestore.FieldValue.serverTimestamp(),
-          'g.j': {k: Firestore.FieldValue.serverTimestamp()},
-        }),
+          {merge: true}),
+      () => ref.update({
+        time: Firestore.FieldValue.serverTimestamp(),
+        'g.h': Firestore.FieldValue.serverTimestamp(),
+      }),
+      () => ref.update({
+        time: Firestore.FieldValue.serverTimestamp(),
+        'g.j': {k: Firestore.FieldValue.serverTimestamp()},
+      }),
     ];
 
     const expectedState = [
@@ -559,15 +530,14 @@ describe('DocumentReference class', function() {
     let times = [];
 
     for (let i = 0; i < actions.length; ++i) {
-      promise = promise
-        .then(() => actions[i]())
-        .then(() => {
-          return ref.get();
-        })
-        .then(snap => {
-          times.push(snap.get('time'));
-          assert.deepEqual(snap.data(), expectedState[i](times));
-        });
+      promise = promise.then(() => actions[i]())
+                    .then(() => {
+                      return ref.get();
+                    })
+                    .then(snap => {
+                      times.push(snap.get('time'));
+                      assert.deepEqual(snap.data(), expectedState[i](times));
+                    });
     }
 
     return promise;
@@ -599,82 +569,80 @@ describe('DocumentReference class', function() {
       let readTime, createTime, updateTime;
 
       let unsubscribe = ref.onSnapshot(
-        snapshot => {
-          currentDeferred.resolve(snapshot);
-        },
-        err => {
-          currentDeferred.reject(err);
-        }
-      );
+          snapshot => {
+            currentDeferred.resolve(snapshot);
+          },
+          err => {
+            currentDeferred.reject(err);
+          });
 
       return waitForSnapshot()
-        .then(snapshot => {
-          assert.equal(snapshot.exists, false);
+          .then(snapshot => {
+            assert.equal(snapshot.exists, false);
 
-          // Add the document.
-          return ref.set({foo: 'a'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(snapshot => {
-          assert.equal(snapshot.exists, true);
-          assert.equal(snapshot.get('foo'), 'a');
-          readTime = snapshot.readTime;
-          createTime = snapshot.createTime;
-          updateTime = snapshot.updateTime;
+            // Add the document.
+            return ref.set({foo: 'a'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(snapshot => {
+            assert.equal(snapshot.exists, true);
+            assert.equal(snapshot.get('foo'), 'a');
+            readTime = snapshot.readTime;
+            createTime = snapshot.createTime;
+            updateTime = snapshot.updateTime;
 
-          // Update documents.
-          return ref.set({foo: 'b'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(snapshot => {
-          assert.equal(snapshot.exists, true);
-          assert.equal(snapshot.get('foo'), 'b');
-          assert.ok(snapshot.createTime.isEqual(createTime));
-          assert.ok(snapshot.readTime.toMillis() > readTime.toMillis());
-          assert.ok(snapshot.updateTime.toMillis() > updateTime.toMillis());
-          unsubscribe();
-        });
+            // Update documents.
+            return ref.set({foo: 'b'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(snapshot => {
+            assert.equal(snapshot.exists, true);
+            assert.equal(snapshot.get('foo'), 'b');
+            assert.ok(snapshot.createTime.isEqual(createTime));
+            assert.ok(snapshot.readTime.toMillis() > readTime.toMillis());
+            assert.ok(snapshot.updateTime.toMillis() > updateTime.toMillis());
+            unsubscribe();
+          });
     });
 
     it('handles deleting a doc', function() {
       let ref = randomCol.doc('doc');
 
       let unsubscribe = ref.onSnapshot(
-        snapshot => {
-          currentDeferred.resolve(snapshot);
-        },
-        err => {
-          currentDeferred.reject(err);
-        }
-      );
+          snapshot => {
+            currentDeferred.resolve(snapshot);
+          },
+          err => {
+            currentDeferred.reject(err);
+          });
 
       return waitForSnapshot()
-        .then(snapshot => {
-          assert.equal(snapshot.exists, false);
+          .then(snapshot => {
+            assert.equal(snapshot.exists, false);
 
-          // Add the document.
-          return ref.set({foo: 'a'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(snapshot => {
-          assert.equal(snapshot.exists, true);
+            // Add the document.
+            return ref.set({foo: 'a'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(snapshot => {
+            assert.equal(snapshot.exists, true);
 
-          // Delete the document.
-          return ref.delete();
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(snapshot => {
-          assert.equal(snapshot.exists, false);
-          unsubscribe();
-        });
+            // Delete the document.
+            return ref.delete();
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(snapshot => {
+            assert.equal(snapshot.exists, false);
+            unsubscribe();
+          });
     });
 
     it('handles multiple docs', function(done) {
@@ -769,25 +737,24 @@ describe('Query class', function() {
 
   let paginateResults = (query, startAfter) => {
     return (startAfter ? query.startAfter(startAfter) : query)
-      .get()
-      .then(snapshot => {
-        if (snapshot.empty) {
-          return {pages: 0, docs: []};
-        } else {
-          let docs = [];
-          snapshot.forEach(doc => {
-            docs.push(doc);
-          });
-          return paginateResults(query, docs[docs.length - 1]).then(
-            nextPage => {
-              return {
-                pages: nextPage.pages + 1,
-                docs: docs.concat(nextPage.docs),
-              };
-            }
-          );
-        }
-      });
+        .get()
+        .then(snapshot => {
+          if (snapshot.empty) {
+            return {pages: 0, docs: []};
+          } else {
+            let docs = [];
+            snapshot.forEach(doc => {
+              docs.push(doc);
+            });
+            return paginateResults(query, docs[docs.length - 1])
+                .then(nextPage => {
+                  return {
+                    pages: nextPage.pages + 1,
+                    docs: docs.concat(nextPage.docs),
+                  };
+                });
+          }
+        });
   };
 
   beforeEach(function() {
@@ -802,73 +769,65 @@ describe('Query class', function() {
 
   it('has select() method', function() {
     let ref = randomCol.doc('doc');
-    return ref
-      .set({foo: 'bar', bar: 'foo'})
-      .then(() => {
-        return randomCol.select('foo').get();
-      })
-      .then(res => {
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'bar'});
-      });
+    return ref.set({foo: 'bar', bar: 'foo'})
+        .then(() => {
+          return randomCol.select('foo').get();
+        })
+        .then(res => {
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'bar'});
+        });
   });
 
   it('select() supports empty fields', function() {
     let ref = randomCol.doc('doc');
-    return ref
-      .set({foo: 'bar', bar: 'foo'})
-      .then(() => {
-        return randomCol.select().get();
-      })
-      .then(res => {
-        assert.deepStrictEqual(res.docs[0].ref.id, 'doc');
-        assert.deepStrictEqual(res.docs[0].data(), {});
-      });
+    return ref.set({foo: 'bar', bar: 'foo'})
+        .then(() => {
+          return randomCol.select().get();
+        })
+        .then(res => {
+          assert.deepStrictEqual(res.docs[0].ref.id, 'doc');
+          assert.deepStrictEqual(res.docs[0].data(), {});
+        });
   });
 
   it('has where() method', function() {
     let ref = randomCol.doc('doc');
-    return ref
-      .set({foo: 'bar'})
-      .then(() => {
-        return randomCol.where('foo', '==', 'bar').get();
-      })
-      .then(res => {
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'bar'});
-      });
+    return ref.set({foo: 'bar'})
+        .then(() => {
+          return randomCol.where('foo', '==', 'bar').get();
+        })
+        .then(res => {
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'bar'});
+        });
   });
 
   it('supports NaN and Null', function() {
     let ref = randomCol.doc('doc');
-    return ref
-      .set({foo: NaN, bar: null})
-      .then(() => {
-        return randomCol
-          .where('foo', '==', NaN)
-          .where('bar', '==', null)
-          .get();
-      })
-      .then(res => {
-        assert.ok(
-          typeof res.docs[0].get('foo') === 'number' &&
-            isNaN(res.docs[0].get('foo'))
-        );
-        assert.equal(res.docs[0].get('bar'), null);
-      });
+    return ref.set({foo: NaN, bar: null})
+        .then(() => {
+          return randomCol.where('foo', '==', NaN)
+              .where('bar', '==', null)
+              .get();
+        })
+        .then(res => {
+          assert.ok(
+              typeof res.docs[0].get('foo') === 'number' &&
+              isNaN(res.docs[0].get('foo')));
+          assert.equal(res.docs[0].get('bar'), null);
+        });
   });
 
   it('can query by FieldPath.documentId()', function() {
     let ref = randomCol.doc('foo');
 
-    return ref
-      .set({})
-      .then(() => {
-        return randomCol
-          .where(Firestore.FieldPath.documentId(), '>=', 'bar')
-          .get();
-      })
-      .then(res => {
-        assert.equal(res.docs.length, 1);
-      });
+    return ref.set({})
+        .then(() => {
+          return randomCol.where(Firestore.FieldPath.documentId(), '>=', 'bar')
+              .get();
+        })
+        .then(res => {
+          assert.equal(res.docs.length, 1);
+        });
   });
 
   it('has orderBy() method', function() {
@@ -876,18 +835,18 @@ describe('Query class', function() {
     let ref2 = randomCol.doc('doc2');
 
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol.orderBy('foo').get();
-      })
-      .then(res => {
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
-        assert.deepStrictEqual(res.docs[1].data(), {foo: 'b'});
-        return randomCol.orderBy('foo', 'desc').get();
-      })
-      .then(res => {
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'b'});
-        assert.deepStrictEqual(res.docs[1].data(), {foo: 'a'});
-      });
+        .then(() => {
+          return randomCol.orderBy('foo').get();
+        })
+        .then(res => {
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
+          assert.deepStrictEqual(res.docs[1].data(), {foo: 'b'});
+          return randomCol.orderBy('foo', 'desc').get();
+        })
+        .then(res => {
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'b'});
+          assert.deepStrictEqual(res.docs[1].data(), {foo: 'a'});
+        });
   });
 
   it('can order by FieldPath.documentId()', function() {
@@ -895,13 +854,13 @@ describe('Query class', function() {
     let ref2 = randomCol.doc('doc2');
 
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol.orderBy(Firestore.FieldPath.documentId()).get();
-      })
-      .then(res => {
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
-        assert.deepStrictEqual(res.docs[1].data(), {foo: 'b'});
-      });
+        .then(() => {
+          return randomCol.orderBy(Firestore.FieldPath.documentId()).get();
+        })
+        .then(res => {
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
+          assert.deepStrictEqual(res.docs[1].data(), {foo: 'b'});
+        });
   });
 
   it('has limit() method', function() {
@@ -909,16 +868,13 @@ describe('Query class', function() {
     let ref2 = randomCol.doc('doc2');
 
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .limit(1)
-          .get();
-      })
-      .then(res => {
-        assert.equal(res.size, 1);
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
-      });
+        .then(() => {
+          return randomCol.orderBy('foo').limit(1).get();
+        })
+        .then(res => {
+          assert.equal(res.size, 1);
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
+        });
   });
 
   it('has offset() method', function() {
@@ -926,16 +882,13 @@ describe('Query class', function() {
     let ref2 = randomCol.doc('doc2');
 
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .offset(1)
-          .get();
-      })
-      .then(res => {
-        assert.equal(res.size, 1);
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'b'});
-      });
+        .then(() => {
+          return randomCol.orderBy('foo').offset(1).get();
+        })
+        .then(res => {
+          assert.equal(res.size, 1);
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'b'});
+        });
   });
 
   it('has startAt() method', function() {
@@ -943,15 +896,12 @@ describe('Query class', function() {
     let ref2 = randomCol.doc('doc2');
 
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .startAt('a')
-          .get();
-      })
-      .then(res => {
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
-      });
+        .then(() => {
+          return randomCol.orderBy('foo').startAt('a').get();
+        })
+        .then(res => {
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
+        });
   });
 
   it('supports pagination', function() {
@@ -963,13 +913,10 @@ describe('Query class', function() {
 
     let query = randomCol.orderBy('val').limit(3);
 
-    return batch
-      .commit()
-      .then(() => paginateResults(query))
-      .then(results => {
-        assert.equal(results.pages, 4);
-        assert.equal(results.docs.length, 10);
-      });
+    return batch.commit().then(() => paginateResults(query)).then(results => {
+      assert.equal(results.pages, 4);
+      assert.equal(results.docs.length, 10);
+    });
   });
 
   it('supports pagination with where() clauses', function() {
@@ -981,13 +928,10 @@ describe('Query class', function() {
 
     let query = randomCol.where('val', '>=', 1).limit(3);
 
-    return batch
-      .commit()
-      .then(() => paginateResults(query))
-      .then(results => {
-        assert.equal(results.pages, 3);
-        assert.equal(results.docs.length, 9);
-      });
+    return batch.commit().then(() => paginateResults(query)).then(results => {
+      assert.equal(results.pages, 3);
+      assert.equal(results.docs.length, 9);
+    });
   });
 
   it('has startAfter() method', function() {
@@ -995,15 +939,12 @@ describe('Query class', function() {
     let ref2 = randomCol.doc('doc2');
 
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .startAfter('a')
-          .get();
-      })
-      .then(res => {
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'b'});
-      });
+        .then(() => {
+          return randomCol.orderBy('foo').startAfter('a').get();
+        })
+        .then(res => {
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'b'});
+        });
   });
 
   it('has endAt() method', function() {
@@ -1011,17 +952,14 @@ describe('Query class', function() {
     let ref2 = randomCol.doc('doc2');
 
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .endAt('b')
-          .get();
-      })
-      .then(res => {
-        assert.equal(res.size, 2);
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
-        assert.deepStrictEqual(res.docs[1].data(), {foo: 'b'});
-      });
+        .then(() => {
+          return randomCol.orderBy('foo').endAt('b').get();
+        })
+        .then(res => {
+          assert.equal(res.size, 2);
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
+          assert.deepStrictEqual(res.docs[1].data(), {foo: 'b'});
+        });
   });
 
   it('has endBefore() method', function() {
@@ -1029,16 +967,13 @@ describe('Query class', function() {
     let ref2 = randomCol.doc('doc2');
 
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .endBefore('b')
-          .get();
-      })
-      .then(res => {
-        assert.equal(res.size, 1);
-        assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
-      });
+        .then(() => {
+          return randomCol.orderBy('foo').endBefore('b').get();
+        })
+        .then(res => {
+          assert.equal(res.size, 1);
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
+        });
   });
 
   it('has stream() method', function(done) {
@@ -1047,15 +982,15 @@ describe('Query class', function() {
     let ref2 = randomCol.doc('doc2');
 
     Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})]).then(() => {
-      return randomCol
-        .stream()
-        .on('data', () => {
-          ++received;
-        })
-        .on('end', () => {
-          assert.equal(received, 2);
-          done();
-        });
+      return randomCol.stream()
+          .on('data',
+              () => {
+                ++received;
+              })
+          .on('end', () => {
+            assert.equal(received, 2);
+            done();
+          });
     });
   });
 
@@ -1108,13 +1043,9 @@ describe('Query class', function() {
       for (i = 0; i < expected.docChanges.length; i++) {
         assert.equal(actual.docChanges[i].type, expected.docChanges[i].type);
         assert.equal(
-          actual.docChanges[i].doc.ref.id,
-          expected.docChanges[i].doc.ref.id
-        );
+            actual.docChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
         assert.deepEqual(
-          actual.docChanges[i].doc.data(),
-          expected.docChanges[i].doc.data()
-        );
+            actual.docChanges[i].doc.data(), expected.docChanges[i].doc.data());
         assert.ok(is.defined(actual.docChanges[i].doc.readTime));
         assert.ok(is.defined(actual.docChanges[i].doc.createTime));
         assert.ok(is.defined(actual.docChanges[i].doc.updateTime));
@@ -1131,109 +1062,109 @@ describe('Query class', function() {
       let ref2 = randomCol.doc('doc2');
 
       let unsubscribe = randomCol.onSnapshot(
-        snapshot => {
-          currentDeferred.resolve(snapshot);
-        },
-        err => {
-          currentDeferred.reject(err);
-        }
-      );
+          snapshot => {
+            currentDeferred.resolve(snapshot);
+          },
+          err => {
+            currentDeferred.reject(err);
+          });
 
       return waitForSnapshot()
-        .then(results => {
-          snapshotsEqual(results, {docs: [], docChanges: []});
-          // Add a result.
-          return ref1.set({foo: 'a'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(results => {
-          snapshotsEqual(results, {
-            docs: [snapshot('doc1', {foo: 'a'})],
-            docChanges: [added('doc1', {foo: 'a'})],
+          .then(results => {
+            snapshotsEqual(results, {docs: [], docChanges: []});
+            // Add a result.
+            return ref1.set({foo: 'a'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(results => {
+            snapshotsEqual(results, {
+              docs: [snapshot('doc1', {foo: 'a'})],
+              docChanges: [added('doc1', {foo: 'a'})],
+            });
+            // Add another result.
+            return ref2.set({foo: 'b'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(results => {
+            snapshotsEqual(results, {
+              docs:
+                  [snapshot('doc1', {foo: 'a'}), snapshot('doc2', {foo: 'b'})],
+              docChanges: [added('doc2', {foo: 'b'})],
+            });
+            // Change a result.
+            return ref2.set({bar: 'c'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(results => {
+            snapshotsEqual(results, {
+              docs:
+                  [snapshot('doc1', {foo: 'a'}), snapshot('doc2', {bar: 'c'})],
+              docChanges: [modified('doc2', {bar: 'c'})],
+            });
+            unsubscribe();
           });
-          // Add another result.
-          return ref2.set({foo: 'b'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(results => {
-          snapshotsEqual(results, {
-            docs: [snapshot('doc1', {foo: 'a'}), snapshot('doc2', {foo: 'b'})],
-            docChanges: [added('doc2', {foo: 'b'})],
-          });
-          // Change a result.
-          return ref2.set({bar: 'c'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(results => {
-          snapshotsEqual(results, {
-            docs: [snapshot('doc1', {foo: 'a'}), snapshot('doc2', {bar: 'c'})],
-            docChanges: [modified('doc2', {bar: 'c'})],
-          });
-          unsubscribe();
-        });
     });
 
-    it("handles changing a doc so it doesn't match", function() {
+    it('handles changing a doc so it doesn\'t match', function() {
       let ref1 = randomCol.doc('doc1');
       let ref2 = randomCol.doc('doc2');
 
       let query = randomCol.where('included', '==', 'yes');
       let unsubscribe = query.onSnapshot(
-        snapshot => {
-          currentDeferred.resolve(snapshot);
-        },
-        err => {
-          currentDeferred.reject(err);
-        }
-      );
+          snapshot => {
+            currentDeferred.resolve(snapshot);
+          },
+          err => {
+            currentDeferred.reject(err);
+          });
 
       return waitForSnapshot()
-        .then(results => {
-          snapshotsEqual(results, {docs: [], docChanges: []});
-          // Add a result.
-          return ref1.set({included: 'yes'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(results => {
-          snapshotsEqual(results, {
-            docs: [snapshot('doc1', {included: 'yes'})],
-            docChanges: [added('doc1', {included: 'yes'})],
+          .then(results => {
+            snapshotsEqual(results, {docs: [], docChanges: []});
+            // Add a result.
+            return ref1.set({included: 'yes'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(results => {
+            snapshotsEqual(results, {
+              docs: [snapshot('doc1', {included: 'yes'})],
+              docChanges: [added('doc1', {included: 'yes'})],
+            });
+            // Add another result.
+            return ref2.set({included: 'yes'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(results => {
+            snapshotsEqual(results, {
+              docs: [
+                snapshot('doc1', {included: 'yes'}),
+                snapshot('doc2', {included: 'yes'}),
+              ],
+              docChanges: [added('doc2', {included: 'yes'})],
+            });
+            // Change a result.
+            return ref2.set({included: 'no'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(results => {
+            snapshotsEqual(results, {
+              docs: [snapshot('doc1', {included: 'yes'})],
+              docChanges: [removed('doc2', {included: 'yes'})],
+            });
+            unsubscribe();
           });
-          // Add another result.
-          return ref2.set({included: 'yes'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(results => {
-          snapshotsEqual(results, {
-            docs: [
-              snapshot('doc1', {included: 'yes'}),
-              snapshot('doc2', {included: 'yes'}),
-            ],
-            docChanges: [added('doc2', {included: 'yes'})],
-          });
-          // Change a result.
-          return ref2.set({included: 'no'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(results => {
-          snapshotsEqual(results, {
-            docs: [snapshot('doc1', {included: 'yes'})],
-            docChanges: [removed('doc2', {included: 'yes'})],
-          });
-          unsubscribe();
-        });
     });
 
     it('handles deleting a doc', function() {
@@ -1241,55 +1172,54 @@ describe('Query class', function() {
       let ref2 = randomCol.doc('doc2');
 
       let unsubscribe = randomCol.onSnapshot(
-        snapshot => {
-          currentDeferred.resolve(snapshot);
-        },
-        err => {
-          currentDeferred.reject(err);
-        }
-      );
+          snapshot => {
+            currentDeferred.resolve(snapshot);
+          },
+          err => {
+            currentDeferred.reject(err);
+          });
 
       return waitForSnapshot()
-        .then(results => {
-          snapshotsEqual(results, {docs: [], docChanges: []});
-          // Add a result.
-          return ref1.set({included: 'yes'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(results => {
-          snapshotsEqual(results, {
-            docs: [snapshot('doc1', {included: 'yes'})],
-            docChanges: [added('doc1', {included: 'yes'})],
+          .then(results => {
+            snapshotsEqual(results, {docs: [], docChanges: []});
+            // Add a result.
+            return ref1.set({included: 'yes'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(results => {
+            snapshotsEqual(results, {
+              docs: [snapshot('doc1', {included: 'yes'})],
+              docChanges: [added('doc1', {included: 'yes'})],
+            });
+            // Add another result.
+            return ref2.set({included: 'yes'});
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(results => {
+            snapshotsEqual(results, {
+              docs: [
+                snapshot('doc1', {included: 'yes'}),
+                snapshot('doc2', {included: 'yes'}),
+              ],
+              docChanges: [added('doc2', {included: 'yes'})],
+            });
+            // Delete a result.
+            return ref2.delete();
+          })
+          .then(() => {
+            return waitForSnapshot();
+          })
+          .then(results => {
+            snapshotsEqual(results, {
+              docs: [snapshot('doc1', {included: 'yes'})],
+              docChanges: [removed('doc2', {included: 'yes'})],
+            });
+            unsubscribe();
           });
-          // Add another result.
-          return ref2.set({included: 'yes'});
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(results => {
-          snapshotsEqual(results, {
-            docs: [
-              snapshot('doc1', {included: 'yes'}),
-              snapshot('doc2', {included: 'yes'}),
-            ],
-            docChanges: [added('doc2', {included: 'yes'})],
-          });
-          // Delete a result.
-          return ref2.delete();
-        })
-        .then(() => {
-          return waitForSnapshot();
-        })
-        .then(results => {
-          snapshotsEqual(results, {
-            docs: [snapshot('doc1', {included: 'yes'})],
-            docChanges: [removed('doc2', {included: 'yes'})],
-          });
-          unsubscribe();
-        });
     });
   });
 });
@@ -1305,121 +1235,117 @@ describe('Transaction class', function() {
 
   it('has get() method', function() {
     let ref = randomCol.doc('doc');
-    return ref
-      .set({foo: 'bar'})
-      .then(() => {
-        return firestore.runTransaction(updateFunction => {
-          return updateFunction.get(ref).then(doc => {
-            return Promise.resolve(doc.get('foo'));
+    return ref.set({foo: 'bar'})
+        .then(() => {
+          return firestore.runTransaction(updateFunction => {
+            return updateFunction.get(ref).then(doc => {
+              return Promise.resolve(doc.get('foo'));
+            });
           });
+        })
+        .then(res => {
+          assert.equal('bar', res);
         });
-      })
-      .then(res => {
-        assert.equal('bar', res);
-      });
   });
 
   it('has getAll() method', function() {
     let ref1 = randomCol.doc('doc1');
     let ref2 = randomCol.doc('doc2');
     return Promise.all([ref1.set({}), ref2.set({})])
-      .then(() => {
-        return firestore.runTransaction(updateFunction => {
-          return updateFunction.getAll(ref1, ref2).then(docs => {
-            return Promise.resolve(docs.length);
+        .then(() => {
+          return firestore.runTransaction(updateFunction => {
+            return updateFunction.getAll(ref1, ref2).then(docs => {
+              return Promise.resolve(docs.length);
+            });
           });
+        })
+        .then(res => {
+          assert.equal(2, res);
         });
-      })
-      .then(res => {
-        assert.equal(2, res);
-      });
   });
 
   it('has get() with query', function() {
     let ref = randomCol.doc('doc');
     let query = randomCol.where('foo', '==', 'bar');
-    return ref
-      .set({foo: 'bar'})
-      .then(() => {
-        return firestore.runTransaction(updateFunction => {
-          return updateFunction.get(query).then(res => {
-            return Promise.resolve(res.docs[0].get('foo'));
+    return ref.set({foo: 'bar'})
+        .then(() => {
+          return firestore.runTransaction(updateFunction => {
+            return updateFunction.get(query).then(res => {
+              return Promise.resolve(res.docs[0].get('foo'));
+            });
           });
+        })
+        .then(res => {
+          assert.equal('bar', res);
         });
-      })
-      .then(res => {
-        assert.equal('bar', res);
-      });
   });
 
   it('has set() method', function() {
     let ref = randomCol.doc('doc');
     return firestore
-      .runTransaction(updateFunction => {
-        updateFunction.set(ref, {foo: 'foobar'});
-        return Promise.resolve();
-      })
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.equal('foobar', doc.get('foo'));
-      });
+        .runTransaction(updateFunction => {
+          updateFunction.set(ref, {foo: 'foobar'});
+          return Promise.resolve();
+        })
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.equal('foobar', doc.get('foo'));
+        });
   });
 
   it('has update() method', function() {
     let ref = randomCol.doc('doc');
-    return ref
-      .set({foo: 'bar'})
-      .then(() => {
-        return firestore.runTransaction(updateFunction => {
-          return updateFunction.get(ref).then(() => {
-            updateFunction.update(ref, {foo: 'foobar'});
+    return ref.set({foo: 'bar'})
+        .then(() => {
+          return firestore.runTransaction(updateFunction => {
+            return updateFunction.get(ref).then(() => {
+              updateFunction.update(ref, {foo: 'foobar'});
+            });
           });
+        })
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.equal('foobar', doc.get('foo'));
         });
-      })
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.equal('foobar', doc.get('foo'));
-      });
   });
 
   it('enforces that updated document exists', function() {
     let ref = firestore.collection('col').doc();
     return firestore
-      .runTransaction(updateFunction => {
-        updateFunction.update(ref, {foo: 'b'});
-        return Promise.resolve();
-      })
-      .then(() => {
-        assert.fail();
-      })
-      .catch(err => {
-        assert.ok(err.message.match(/No document to update/));
-      });
+        .runTransaction(updateFunction => {
+          updateFunction.update(ref, {foo: 'b'});
+          return Promise.resolve();
+        })
+        .then(() => {
+          assert.fail();
+        })
+        .catch(err => {
+          assert.ok(err.message.match(/No document to update/));
+        });
   });
 
   it('has delete() method', function() {
     let success;
     let ref = randomCol.doc('doc');
-    return ref
-      .set({foo: 'bar'})
-      .then(() => {
-        return firestore.runTransaction(updateFunction => {
-          updateFunction.delete(ref);
-          return Promise.resolve();
+    return ref.set({foo: 'bar'})
+        .then(() => {
+          return firestore.runTransaction(updateFunction => {
+            updateFunction.delete(ref);
+            return Promise.resolve();
+          });
+        })
+        .then(() => {
+          success = true;
+          return ref.get();
+        })
+        .then(result => {
+          assert.equal(success, true);
+          assert.equal(result.exists, false);
         });
-      })
-      .then(() => {
-        success = true;
-        return ref.get();
-      })
-      .then(result => {
-        assert.equal(success, true);
-        assert.equal(result.exists, false);
-      });
   });
 });
 
@@ -1436,28 +1362,26 @@ describe('WriteBatch class', function() {
     let ref = randomCol.doc();
     let batch = firestore.batch();
     batch.create(ref, {foo: 'a'});
-    return batch
-      .commit()
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.equal(doc.get('foo'), 'a');
-      });
+    return batch.commit()
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.equal(doc.get('foo'), 'a');
+        });
   });
 
   it('has set() method', function() {
     let ref = randomCol.doc('doc');
     let batch = firestore.batch();
     batch.set(ref, {foo: 'a'});
-    return batch
-      .commit()
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.equal(doc.get('foo'), 'a');
-      });
+    return batch.commit()
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.equal(doc.get('foo'), 'a');
+        });
   });
 
   it('has update() method', function() {
@@ -1465,14 +1389,13 @@ describe('WriteBatch class', function() {
     let batch = firestore.batch();
     batch.set(ref, {foo: 'a'});
     batch.update(ref, {foo: 'b'});
-    return batch
-      .commit()
-      .then(() => {
-        return ref.get();
-      })
-      .then(doc => {
-        assert.equal(doc.get('foo'), 'b');
-      });
+    return batch.commit()
+        .then(() => {
+          return ref.get();
+        })
+        .then(doc => {
+          assert.equal(doc.get('foo'), 'b');
+        });
   });
 
   it('omits document transforms from write results', function() {
@@ -1488,14 +1411,13 @@ describe('WriteBatch class', function() {
     let ref = randomCol.doc();
     let batch = firestore.batch();
     batch.update(ref, {foo: 'b'});
-    return batch
-      .commit()
-      .then(() => {
-        assert.fail();
-      })
-      .catch(err => {
-        assert.ok(err.message.match(/No document to update/));
-      });
+    return batch.commit()
+        .then(() => {
+          assert.fail();
+        })
+        .catch(err => {
+          assert.ok(err.message.match(/No document to update/));
+        });
   });
 
   it('has delete() method', function() {
@@ -1505,16 +1427,15 @@ describe('WriteBatch class', function() {
     let batch = firestore.batch();
     batch.set(ref, {foo: 'a'});
     batch.delete(ref);
-    return batch
-      .commit()
-      .then(() => {
-        success = true;
-        return ref.get();
-      })
-      .then(result => {
-        assert.equal(success, true);
-        assert.equal(result.exists, false);
-      });
+    return batch.commit()
+        .then(() => {
+          success = true;
+          return ref.get();
+        })
+        .then(result => {
+          assert.equal(success, true);
+          assert.equal(result.exists, false);
+        });
   });
 });
 
@@ -1529,35 +1450,37 @@ describe('QuerySnapshot class', function() {
     let ref1 = randomCol.doc('doc1');
     let ref2 = randomCol.doc('doc2');
 
-    querySnapshot = Promise.all([
-      ref1.set({foo: 'a'}),
-      ref2.set({foo: 'a'}),
-    ]).then(() => {
-      return randomCol.get();
-    });
+    querySnapshot = Promise
+                        .all([
+                          ref1.set({foo: 'a'}),
+                          ref2.set({foo: 'a'}),
+                        ])
+                        .then(() => {
+                          return randomCol.get();
+                        });
   });
 
   it('has query property', function() {
     return querySnapshot
-      .then(snapshot => {
-        return snapshot.query.get();
-      })
-      .then(snapshot => {
-        assert.equal(snapshot.size, 2);
-      });
+        .then(snapshot => {
+          return snapshot.query.get();
+        })
+        .then(snapshot => {
+          assert.equal(snapshot.size, 2);
+        });
   });
 
   it('has empty property', function() {
     return querySnapshot
-      .then(snapshot => {
-        assert.ok(!snapshot.empty);
-        assert.ok(is.defined(snapshot.readTime));
-        return snapshot.query.where('foo', '==', 'bar').get();
-      })
-      .then(snapshot => {
-        assert.ok(snapshot.empty);
-        assert.ok(is.defined(snapshot.readTime));
-      });
+        .then(snapshot => {
+          assert.ok(!snapshot.empty);
+          assert.ok(is.defined(snapshot.readTime));
+          return snapshot.query.where('foo', '==', 'bar').get();
+        })
+        .then(snapshot => {
+          assert.ok(snapshot.empty);
+          assert.ok(is.defined(snapshot.readTime));
+        });
   });
 
   it('has size property', function() {

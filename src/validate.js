@@ -47,39 +47,36 @@ function formatPlural(num, str) {
  */
 module.exports = validators => {
   validators = Object.assign(
-    {
-      function: is.function,
-      integer: (value, min, max) => {
-        min = is.defined(min) ? min : -Infinity;
-        max = is.defined(max) ? max : Infinity;
-        if (!is.integer(value)) {
-          return false;
-        }
-        if (value < min || value > max) {
-          throw new Error(
-            `Value must be within [${min}, ${max}] inclusive, but was: ${value}`
-          );
-        }
-        return true;
+      {
+        function: is.function,
+        integer: (value, min, max) => {
+          min = is.defined(min) ? min : -Infinity;
+          max = is.defined(max) ? max : Infinity;
+          if (!is.integer(value)) {
+            return false;
+          }
+          if (value < min || value > max) {
+            throw new Error(`Value must be within [${min}, ${
+                max}] inclusive, but was: ${value}`);
+          }
+          return true;
+        },
+        number: (value, min, max) => {
+          min = is.defined(min) ? min : -Infinity;
+          max = is.defined(max) ? max : Infinity;
+          if (!is.number(value) || is.nan(value)) {
+            return false;
+          }
+          if (value < min || value > max) {
+            throw new Error(`Value must be within [${min}, ${
+                max}] inclusive, but was: ${value}`);
+          }
+          return true;
+        },
+        object: is.object,
+        string: is.string,
       },
-      number: (value, min, max) => {
-        min = is.defined(min) ? min : -Infinity;
-        max = is.defined(max) ? max : Infinity;
-        if (!is.number(value) || is.nan(value)) {
-          return false;
-        }
-        if (value < min || value > max) {
-          throw new Error(
-            `Value must be within [${min}, ${max}] inclusive, but was: ${value}`
-          );
-        }
-        return true;
-      },
-      object: is.object,
-      string: is.string,
-    },
-    validators
-  );
+      validators);
 
   let exports = {};
 
@@ -87,9 +84,9 @@ module.exports = validators => {
     let camelCase = type.substring(0, 1).toUpperCase() + type.substring(1);
     exports[`is${camelCase}`] = function(argumentName, value) {
       let valid = false;
-      let message = is.number(argumentName)
-        ? `Argument at index ${argumentName} is not a valid ${type}.`
-        : `Argument "${argumentName}" is not a valid ${type}.`;
+      let message = is.number(argumentName) ?
+          `Argument at index ${argumentName} is not a valid ${type}.` :
+          `Argument "${argumentName}" is not a valid ${type}.`;
 
       try {
         value = [].slice.call(arguments, 1);
@@ -127,9 +124,8 @@ module.exports = validators => {
   exports.minNumberOfArguments = (funcName, args, minSize) => {
     if (args.length < minSize) {
       throw new Error(
-        `Function '${funcName}()' requires at least ` +
-          `${formatPlural(minSize, 'argument')}.`
-      );
+          `Function '${funcName}()' requires at least ` +
+          `${formatPlural(minSize, 'argument')}.`);
     }
 
     return true;
@@ -148,9 +144,8 @@ module.exports = validators => {
   exports.maxNumberOfArguments = (funcName, args, maxSize) => {
     if (args.length > maxSize) {
       throw new Error(
-        `Function '${funcName}()' accepts at most ` +
-          `${formatPlural(maxSize, 'argument')}.`
-      );
+          `Function '${funcName}()' accepts at most ` +
+          `${formatPlural(maxSize, 'argument')}.`);
     }
 
     return true;
@@ -166,21 +161,19 @@ module.exports = validators => {
         case 'GeoPoint':
         case 'Timestamp':
           return new Error(
-            `Detected an object of type "${typeName}" that doesn't match the ` +
+              `Detected an object of type "${
+                  typeName}" that doesn't match the ` +
               'expected instance. Please ensure that the Firestore types you ' +
-              'are using are from the same NPM package.'
-          );
+              'are using are from the same NPM package.');
         default:
           return new Error(
-            `Couldn't serialize object of type "${typeName}". Firestore ` +
-              "doesn't support JavaScript objects with custom prototypes " +
-              "(i.e. objects that were created via the 'new' operator)."
-          );
+              `Couldn't serialize object of type "${typeName}". Firestore ` +
+              'doesn\'t support JavaScript objects with custom prototypes ' +
+              '(i.e. objects that were created via the \'new\' operator).');
       }
     } else {
       return new Error(
-        `Invalid use of type "${typeof val}" as a Firestore argument.`
-      );
+          `Invalid use of type "${typeof val}" as a Firestore argument.`);
     }
   };
 
