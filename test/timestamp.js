@@ -27,6 +27,7 @@ function createInstance(opts, document) {
   let firestore = new Firestore(Object.assign({}, opts, {
     projectId: 'test-project',
     sslCreds: grpc.credentials.createInsecure(),
+    keyFilename: './test/fake-certificate.json',
   }));
 
   return firestore._ensureClient().then(() => {
@@ -79,7 +80,6 @@ describe('timestamps', function() {
     return createInstance(
                {
                  timestampsInSnapshots: true,
-                 keyFilename: './test/fake-certificate.json',
                },
                DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
@@ -110,11 +110,7 @@ describe('timestamps', function() {
 
   it('retain seconds and nanoseconds', function() {
     return createInstance(
-               {
-                 timestampsInSnapshots: true,
-                 keyFilename: './test/fake-certificate.json',
-               },
-               DOCUMENT_WITH_TIMESTAMP)
+               {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
@@ -126,11 +122,7 @@ describe('timestamps', function() {
 
   it('convert to date', function() {
     return createInstance(
-               {
-                 timestampsInSnapshots: true,
-                 keyFilename: './test/fake-certificate.json',
-               },
-               DOCUMENT_WITH_TIMESTAMP)
+               {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
@@ -143,11 +135,7 @@ describe('timestamps', function() {
 
   it('convert to millis', function() {
     return createInstance(
-               {
-                 timestampsInSnapshots: true,
-                 keyFilename: './test/fake-certificate.json',
-               },
-               DOCUMENT_WITH_TIMESTAMP)
+               {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
@@ -158,11 +146,7 @@ describe('timestamps', function() {
 
   it('support missing values', function() {
     return createInstance(
-               {
-                 timestampsInSnapshots: true,
-                 keyFilename: './test/fake-certificate.json',
-               },
-               DOCUMENT_WITH_EMPTY_TIMESTAMP)
+               {timestampsInSnapshots: true}, DOCUMENT_WITH_EMPTY_TIMESTAMP)
         .then(firestore => {
           const expected = new Firestore.Timestamp(0, 0);
 
