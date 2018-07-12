@@ -61,6 +61,7 @@
     "google-proto-files": "^0.16.1",
     "is": "^3.2.1",
     "lodash.merge": "^4.6.1",
+    "pkg-up": "^2.0.0",
     "through2": "^2.0.3"
   },
   "devDependencies": {

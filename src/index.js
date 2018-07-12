@@ -19,17 +19,11 @@
 const bun = require('bun');
 const extend = require('extend');
 const is = require('is');
+const pkgUp = require('pkg-up');
 const through = require('through2');
 const util = require('util');
 
-let libVersion;
-
-// Allow Firestore to be run both from 'src' and 'build/src'.
-try {
-  libVersion = require('../package.json').version;
-} catch (err) {
-  libVersion = require('../../package.json').version;
-}
+const libVersion = require(pkgUp.sync()).version;
 
 const path = require('./path');
 const convert = require('./convert');
