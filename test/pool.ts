@@ -125,7 +125,6 @@ describe('Client pool', () => {
     completionPromises.push(clientPool.run(() => operationPromises[3].promise));
     expect(clientPool.size).to.eq(2);
 
-
     operationPromises.forEach(deferred => deferred.reject());
 
     return Promise.all(completionPromises.map(p => p.catch(() => {})))

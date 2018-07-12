@@ -133,7 +133,11 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 const MAX_REQUEST_RETRIES = 5;
 
 /*!
- * The maximum number of concurrent requests supported by a GAPIC client.
+ * The maximum number of concurrent requests supported by a single GRPC channel,
+ * as enforced by Google's Frontend. If the SDK issues more than 100 concurrent
+ * operations, we need to use more than one GAPIC client since these client
+ * multiplex all requests over a single channel.
+ *
  * @type {number}
  */
 const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
@@ -251,7 +255,8 @@ class Firestore {
     });
 
     /**
-     * A client pool to distribute requests over multiple GAPIC clients.
+     * A client pool to distribute requests over multiple GAPIC clients in order
+     * to work around a connection limit of 100 concurrent requests per client.
      * @private
      * @type {ClientPool|null}
      */

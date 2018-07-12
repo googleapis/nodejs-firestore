@@ -27,6 +27,7 @@ import assert from 'assert';
  * concurrent operations.
  */
 export class ClientPool<T> {
+  /** Stores each active clients and how many operations it has outstanding. */
   private activeClients: Map<T, number> = new Map();
 
   /**
@@ -45,12 +46,12 @@ export class ClientPool<T> {
    */
   private acquire(): T {
     let selectedClient: T|null = null;
-    let currentRequestCount = 0;
+    let selectedRequestCount = 0;
 
     this.activeClients.forEach((requestCount, client) => {
       if (!selectedClient && requestCount < this.concurrentOperationLimit) {
         selectedClient = client;
-        currentRequestCount = requestCount;
+        selectedRequestCount = requestCount;
       }
     });
 
@@ -61,7 +62,7 @@ export class ClientPool<T> {
           'The provided client factory returned an existing instance');
     }
 
-    this.activeClients.set(selectedClient, currentRequestCount + 1);
+    this.activeClients.set(selectedClient, selectedRequestCount + 1);
 
     return selectedClient!;
   }
@@ -71,13 +72,13 @@ export class ClientPool<T> {
    * removing it from the pool of active clients.
    */
   private release(client: T): void {
-    let currentRequestCount = this.activeClients.get(client);
-    assert(currentRequestCount! > 0, 'Active client not found');
+    let requestCount = this.activeClients.get(client) || 0;
+    assert(requestCount > 0, 'No active request');
 
-    currentRequestCount = currentRequestCount! - 1;
-    this.activeClients.set(client, currentRequestCount);
+    requestCount = requestCount! - 1;
+    this.activeClients.set(client, requestCount);
 
-    if (currentRequestCount === 0) {
+    if (requestCount === 0) {
       this.garbageCollect();
     }
   }
