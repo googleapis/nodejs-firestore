@@ -62,7 +62,8 @@ describe('Client pool', () => {
 
     const operationPromises = deferredPromises(5);
 
-    const completionPromise = clientPool.run(() => operationPromises[0].promise);
+    const completionPromise =
+        clientPool.run(() => operationPromises[0].promise);
     expect(clientPool.size).to.eq(1);
     clientPool.run(() => operationPromises[1].promise);
     expect(clientPool.size).to.eq(1);
