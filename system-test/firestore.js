@@ -23,7 +23,13 @@ let DocumentReference = require('../src/reference').DocumentReference;
 let DocumentSnapshot =
     require('../src/document')(DocumentReference).DocumentSnapshot;
 
-let version = require('../../package.json').version;
+let version;
+try {
+  version = require('../../package.json').version;
+} catch (e) {
+  version = require('../package.json').version;
+}
+
 let Firestore = require('../src');
 
 if (process.env.NODE_ENV === 'DEBUG') {

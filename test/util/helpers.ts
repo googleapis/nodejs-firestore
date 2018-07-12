@@ -19,13 +19,32 @@
 import {GrpcClient} from 'google-gax';
 
 import Firestore from '../../src';
+import {ClientPool} from '../../src/pool';
+import v1beta1 from '../../src/v1beta1';
 
 /* tslint:disable:no-any */
+type GapicClient = any;
 const grpc = new GrpcClient({} as any).grpc;
 const SSL_CREDENTIALS = (grpc.credentials as any).createInsecure();
 /* tslint:enable:no-any */
 
 const PROJECT_ID = 'test-project';
+
+/** A Promise implementation that supports deferred resolution. */
+export class Deferred<R> {
+  promise: Promise<R>;
+  resolve: (value?: R|Promise<R>) => void = () => {};
+  reject: (reason?: Error) => void = () => {};
+
+  constructor() {
+    this.promise = new Promise(
+        (resolve: (value?: R|Promise<R>) => void,
+         reject: (reason?: Error) => void) => {
+          this.resolve = resolve;
+          this.reject = reject;
+        });
+  }
+}
 
 /**
  * Interface that defines the request handlers used by Firestore.
@@ -47,7 +66,8 @@ export interface ApiOverride {
  * @param {ApiOverride} apiOverrides An object with the request handlers to
  * override.
  * @param {Object} firestoreSettings Firestore Settings to configure the client.
- * @return {Firestore} A new Firestore client.
+ * @return {Promise<Firestore>} A Promise that resolves with the new Firestore
+ * client.
  */
 export function createInstance(
     apiOverrides?: ApiOverride, firestoreSettings?: {}): Promise<Firestore> {
@@ -62,13 +82,17 @@ export function createInstance(
 
   const firestore = new Firestore(initializationOptions);
 
-  return firestore._ensureClient().then(() => {
+  const clientPool = new ClientPool(/* concurrentRequestLimit= */ 1, () => {
+    const gapicClient: GapicClient = v1beta1(initializationOptions);
     if (apiOverrides) {
       Object.keys(apiOverrides).forEach(override => {
-        firestore._firestoreClient._innerApiCalls[override] =
-            apiOverrides[override];
+        gapicClient._innerApiCalls[override] = apiOverrides[override];
       });
     }
-    return firestore;
+    return gapicClient;
   });
+
+  firestore._initClientPool = () => Promise.resolve(clientPool);
+
+  return Promise.resolve(firestore);
 }
