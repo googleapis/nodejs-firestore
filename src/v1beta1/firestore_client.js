@@ -18,8 +18,9 @@ const gapicConfig = require('./firestore_client_config');
 const gax = require('google-gax');
 const merge = require('lodash.merge');
 const path = require('path');
+const pkgUp = require('pkg-up');
 
-const VERSION = require('../../../package.json').version;
+const VERSION = require(pkgUp.sync()).version;
 
 /**
  * The Cloud Firestore service.
