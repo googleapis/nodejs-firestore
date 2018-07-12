@@ -28,6 +28,7 @@ const reference = require('../src/reference')(Firestore);
 const DocumentReference = reference.DocumentReference;
 const CollectionReference = reference.CollectionReference;
 const ResourcePath = require('../src/path').ResourcePath;
+const createInstance = require('../test/util/helpers').createInstance;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -261,17 +262,6 @@ const allSupportedTypesOutput = {
   bytesValue: Buffer.from([0x1, 0x2]),
 };
 
-function createInstance() {
-  let firestore = new Firestore({
-    projectId: PROJECT_ID,
-    sslCreds: grpc.credentials.createInsecure(),
-    timestampsInSnapshots: true,
-    keyFilename: './test/fake-certificate.json',
-  });
-
-  return firestore._ensureClient().then(() => firestore);
-}
-
 function document(name, fields) {
   return {
     name: `${DATABASE_ROOT}/documents/collectionId/${name}`,
@@ -414,30 +404,26 @@ describe('instantiation', function() {
 });
 
 describe('serializer', function() {
-  let firestore;
-
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
-  });
-
   it('supports all types', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      assert.deepEqual(
-          allSupportedTypesProtobufJs.fields, request.writes[0].update.fields);
-      callback(null, {
-        commitTime: {},
-        writeResults: [
-          {
-            updateTime: {},
-          },
-        ],
-      });
+    const overrides = {
+      commit: (request, options, callback) => {
+        assert.deepEqual(
+            allSupportedTypesProtobufJs.fields,
+            request.writes[0].update.fields);
+        callback(null, {
+          commitTime: {},
+          writeResults: [
+            {
+              updateTime: {},
+            },
+          ],
+        });
+      }
     };
 
-    return firestore.collection('coll').add(allSupportedTypesInput);
+    return createInstance(overrides).then(firestore => {
+      return firestore.collection('coll').add(allSupportedTypesInput);
+    });
   });
 });
 
@@ -665,34 +651,27 @@ describe('collection() method', function() {
 });
 
 describe('getCollections() method', function() {
-  let firestore;
-
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
-  });
-
   it('returns collections', function() {
-    firestore._firestoreClient._innerApiCalls.listCollectionIds = function(
-        request, options, callback) {
-      assert.deepEqual(request, {
-        parent: `projects/${PROJECT_ID}/databases/(default)`,
-      });
+    const overrides = {
+      listCollectionIds: (request, options, callback) => {
+        assert.deepEqual(request, {
+          parent: `projects/${PROJECT_ID}/databases/(default)`,
+        });
 
-      callback(null, ['first', 'second']);
+        callback(null, ['first', 'second']);
+      }
     };
 
-    return firestore.getCollections().then(collections => {
-      assert.equal(collections[0].path, 'first');
-      assert.equal(collections[1].path, 'second');
+    return createInstance(overrides).then(firestore => {
+      return firestore.getCollections().then(collections => {
+        assert.equal(collections[0].path, 'first');
+        assert.equal(collections[1].path, 'second');
+      });
     });
   });
 });
 
 describe('getAll() method', function() {
-  let firestore;
-
   function resultEquals(result, doc) {
     assert.equal(result.length, arguments.length - 1);
 
@@ -709,98 +688,114 @@ describe('getAll() method', function() {
     }
   }
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
-  });
-
   it('accepts empty list', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream();
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream();
+      }
     };
 
-    return firestore.getAll().then(result => {
-      resultEquals(result);
+    return createInstance(overrides).then(firestore => {
+      return firestore.getAll().then(result => {
+        resultEquals(result);
+      });
     });
   });
 
   it('accepts single document', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found('documentId'));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found('documentId'));
+      }
     };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId'))
-        .then(result => {
-          resultEquals(result, found('documentId'));
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore.getAll(firestore.doc('collectionId/documentId'))
+          .then(result => {
+            resultEquals(result, found('documentId'));
+          });
+    });
   });
 
   it('verifies response', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found('documentId2'));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found('documentId2'));
+      }
     };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId'))
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          assert.equal(
-              err.message,
-              'Did not receive document for "collectionId/documentId".');
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore.getAll(firestore.doc('collectionId/documentId'))
+          .then(() => {
+            throw new Error('Unexpected success in Promise');
+          })
+          .catch(err => {
+            assert.equal(
+                err.message,
+                'Did not receive document for "collectionId/documentId".');
+          });
+    });
   });
 
   it('handles stream exception during initialization', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(new Error('Expected exception'));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(new Error('Expected exception'));
+      }
     };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId'))
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          assert.equal(err.message, 'Expected exception');
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore.getAll(firestore.doc('collectionId/documentId'))
+          .then(() => {
+            throw new Error('Unexpected success in Promise');
+          })
+          .catch(err => {
+            assert.equal(err.message, 'Expected exception');
+          });
+    });
   });
 
   it('handles stream exception after initialization', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found('documentId'), new Error('Expected exception'));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found('documentId'), new Error('Expected exception'));
+      }
     };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId'))
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          assert.equal(err.message, 'Expected exception');
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore.getAll(firestore.doc('collectionId/documentId'))
+          .then(() => {
+            throw new Error('Unexpected success in Promise');
+          })
+          .catch(err => {
+            assert.equal(err.message, 'Expected exception');
+          });
+    });
   });
 
   it('handles serialization error', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found('documentId'));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found('documentId'));
+      }
     };
 
-    firestore.snapshot_ = function() {
-      throw new Error('Expected exception');
-    };
+    return createInstance(overrides).then(firestore => {
+      firestore.snapshot_ = function() {
+        throw new Error('Expected exception');
+      };
 
-    return firestore.getAll(firestore.doc('collectionId/documentId'))
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          assert.equal(err.message, 'Expected exception');
-        });
+      return firestore.getAll(firestore.doc('collectionId/documentId'))
+          .then(() => {
+            throw new Error('Unexpected success in Promise');
+          })
+          .catch(err => {
+            assert.equal(err.message, 'Expected exception');
+          });
+    });
   });
 
   it('only retries on GRPC unavailable', function() {
-    let coll = firestore.collection('collectionId');
-
     let expectedErrorAttempts = {
       /* Cancelled */ 1: 1,
       /* Unknown */ 2: 1,
@@ -822,97 +817,114 @@ describe('getAll() method', function() {
 
     let actualErrorAttempts = {};
 
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
-        request) {
-      let errorCode = Number(request.documents[0].split('/').pop());
-      actualErrorAttempts[errorCode] =
-          (actualErrorAttempts[errorCode] || 0) + 1;
-      let error = new Error('Expected exception');
-      error.code = errorCode;
-      return stream(error);
+    const overrides = {
+      batchGetDocuments: request => {
+        let errorCode = Number(request.documents[0].split('/').pop());
+        actualErrorAttempts[errorCode] =
+            (actualErrorAttempts[errorCode] || 0) + 1;
+        let error = new Error('Expected exception');
+        error.code = errorCode;
+        return stream(error);
+      }
     };
 
-    let promises = [];
+    return createInstance(overrides).then(firestore => {
+      let coll = firestore.collection('collectionId');
 
-    Object.keys(expectedErrorAttempts).forEach(errorCode => {
-      promises.push(firestore.getAll(coll.doc(`${errorCode}`))
-                        .then(() => {
-                          throw new Error('Unexpected success in Promise');
-                        })
-                        .catch(err => {
-                          assert.equal(err.code, errorCode);
-                        }));
-    });
+      let promises = [];
 
-    return Promise.all(promises).then(() => {
-      assert.deepEqual(actualErrorAttempts, expectedErrorAttempts);
+      Object.keys(expectedErrorAttempts).forEach(errorCode => {
+        promises.push(firestore.getAll(coll.doc(`${errorCode}`))
+                          .then(() => {
+                            throw new Error('Unexpected success in Promise');
+                          })
+                          .catch(err => {
+                            assert.equal(err.code, errorCode);
+                          }));
+      });
+
+      return Promise.all(promises).then(() => {
+        assert.deepEqual(actualErrorAttempts, expectedErrorAttempts);
+      });
     });
   });
 
   it('requires document reference', function() {
-    assert.throws(() => {
-      firestore.getAll({});
-    }, /Argument at index 0 is not a valid DocumentReference\./);
+    return createInstance().then(firestore => {
+      assert.throws(() => {
+        firestore.getAll({});
+      }, /Argument at index 0 is not a valid DocumentReference\./);
+    });
   });
 
   it('accepts array', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found('documentId'));
-    };
+    const overrides = {batchGetDocuments: () => stream(found('documentId'))};
 
-    return firestore.getAll([firestore.doc('collectionId/documentId')])
-        .then(result => {
-          resultEquals(result, found('documentId'));
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore.getAll([firestore.doc('collectionId/documentId')])
+          .then(result => {
+            resultEquals(result, found('documentId'));
+          });
+    });
   });
 
   it('returns not found for missing documents', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found('exists'), missing('missing'));
+    const overrides = {
+      batchGetDocuments: () => stream(found('exists'), missing('missing'))
     };
 
-    return firestore
-        .getAll(
-            firestore.doc('collectionId/exists'),
-            firestore.doc('collectionId/missing'))
-        .then(result => {
-          resultEquals(result, found('exists'), missing('missing'));
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore
+          .getAll(
+              firestore.doc('collectionId/exists'),
+              firestore.doc('collectionId/missing'))
+          .then(result => {
+            resultEquals(result, found('exists'), missing('missing'));
+          });
+    });
   });
 
   it('returns results in order', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(
-          // Note that these are out of order.
-          found('second'), found('first'), found('fourth'), found('third'));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(
+            // Note that these are out of order.
+            found('second'), found('first'), found('fourth'), found('third'));
+      }
     };
 
-    return firestore
-        .getAll(
-            firestore.doc('collectionId/first'),
-            firestore.doc('collectionId/second'),
-            firestore.doc('collectionId/third'),
-            firestore.doc('collectionId/fourth'))
-        .then(result => {
-          resultEquals(
-              result, found('first'), found('second'), found('third'),
-              found('fourth'));
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore
+          .getAll(
+              firestore.doc('collectionId/first'),
+              firestore.doc('collectionId/second'),
+              firestore.doc('collectionId/third'),
+              firestore.doc('collectionId/fourth'))
+          .then(result => {
+            resultEquals(
+                result, found('first'), found('second'), found('third'),
+                found('fourth'));
+          });
+    });
   });
 
   it('accepts same document multiple times', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
-        request) {
-      assert.equal(request.documents.length, 2);
-      return stream(found('a'), found('b'));
+    const overrides = {
+      batchGetDocuments: request => {
+        assert.equal(request.documents.length, 2);
+        return stream(found('a'), found('b'));
+      }
     };
 
-    return firestore
-        .getAll(
-            firestore.doc('collectionId/a'), firestore.doc('collectionId/a'),
-            firestore.doc('collectionId/b'), firestore.doc('collectionId/a'))
-        .then(result => {
-          resultEquals(result, found('a'), found('a'), found('b'), found('a'));
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore
+          .getAll(
+              firestore.doc('collectionId/a'), firestore.doc('collectionId/a'),
+              firestore.doc('collectionId/b'), firestore.doc('collectionId/a'))
+          .then(result => {
+            resultEquals(
+                result, found('a'), found('a'), found('b'), found('a'));
+          });
+    });
   });
 });

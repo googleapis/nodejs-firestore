@@ -24,6 +24,7 @@ const is = require('is');
 const through = require('through2');
 
 const Firestore = require('../src');
+const createInstance = require('../test/util/helpers').createInstance;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -35,17 +36,6 @@ const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
-
-function createInstance() {
-  let firestore = new Firestore({
-    projectId: PROJECT_ID,
-    sslCreds: grpc.credentials.createInsecure(),
-    timestampsInSnapshots: true,
-    keyFilename: './test/fake-certificate.json',
-  });
-
-  return firestore._ensureClient().then(() => firestore);
-}
 
 function buildWrite_(document, mask, transform, precondition) {
   let writes = [];
@@ -279,17 +269,20 @@ describe('serialize document', function() {
   });
 
   it('serializes to Protobuf JS', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, set(document('bytes', {
-                      valueType: 'bytesValue',
-                      bytesValue: Buffer.from('AG=', 'base64'),
-                    })));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, set(document('bytes', {
+                        valueType: 'bytesValue',
+                        bytesValue: Buffer.from('AG=', 'base64'),
+                      })));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({
-      bytes: Buffer.from('AG=', 'base64')
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        bytes: Buffer.from('AG=', 'base64')
+      });
     });
   });
 
@@ -311,95 +304,112 @@ describe('serialize document', function() {
   });
 
   it('serializes date before 1970', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, set(document('moonLanding', {
-                      valueType: 'timestampValue',
-                      timestampValue: {
-                        nanos: 123000000,
-                        seconds: -14182920,
-                      },
-                    })));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, set(document('moonLanding', {
+                        valueType: 'timestampValue',
+                        timestampValue: {
+                          nanos: 123000000,
+                          seconds: -14182920,
+                        },
+                      })));
 
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({
-      moonLanding: new Date('Jul 20 1969 20:18:00.123 UTC'),
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        moonLanding: new Date('Jul 20 1969 20:18:00.123 UTC'),
+      });
     });
   });
 
   it('serializes unicode keys', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, set(document('😀', '😜')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, set(document('😀', '😜')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({
-      '😀': '😜',
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        '😀': '😜',
+      });
     });
   });
 
   it('accepts both blob formats', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          set(document(
-              'blob1',
-              {valueType: 'bytesValue', bytesValue: new Uint8Array([0, 1, 2])},
-              'blob2', {
-                valueType: 'bytesValue',
-                bytesValue: Buffer.from([0, 1, 2]),
-              })));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            set(document(
+                'blob1', {
+                  valueType: 'bytesValue',
+                  bytesValue: new Uint8Array([0, 1, 2])
+                },
+                'blob2', {
+                  valueType: 'bytesValue',
+                  bytesValue: Buffer.from([0, 1, 2]),
+                })));
 
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({
-      blob1: new Uint8Array([0, 1, 2]),
-      blob2: Buffer.from([0, 1, 2]),
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        blob1: new Uint8Array([0, 1, 2]),
+        blob2: Buffer.from([0, 1, 2]),
+      });
     });
   });
 
   it('supports NaN and Infinity', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      let fields = request.writes[0].update.fields;
-      assert.ok(
-          typeof fields.nanValue.doubleValue === 'number' &&
-          isNaN(fields.nanValue.doubleValue));
-      assert.equal(fields.posInfinity.doubleValue, Infinity);
-      assert.equal(fields.negInfinity.doubleValue, -Infinity);
+    const overrides = {
+      commit: (request, options, callback) => {
+        let fields = request.writes[0].update.fields;
+        assert.ok(
+            typeof fields.nanValue.doubleValue === 'number' &&
+            isNaN(fields.nanValue.doubleValue));
+        assert.equal(fields.posInfinity.doubleValue, Infinity);
+        assert.equal(fields.negInfinity.doubleValue, -Infinity);
 
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({
-      nanValue: NaN,
-      posInfinity: Infinity,
-      negInfinity: -Infinity,
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        nanValue: NaN,
+        posInfinity: Infinity,
+        negInfinity: -Infinity,
+      });
     });
   });
 
   it('supports server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          set(document('foo', 'bar'),
-              /* updateMask= */ null,
-              fieldTransform(
-                  'field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            set(document('foo', 'bar'),
+                /* updateMask= */ null,
+                fieldTransform(
+                    'field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
 
-      callback(null, writeResult(2));
+        callback(null, writeResult(2));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({
-      foo: 'bar',
-      field: Firestore.FieldValue.serverTimestamp(),
-      map: {field: Firestore.FieldValue.serverTimestamp()},
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        foo: 'bar',
+        field: Firestore.FieldValue.serverTimestamp(),
+        map: {field: Firestore.FieldValue.serverTimestamp()},
+      });
     });
   });
 
@@ -478,255 +488,294 @@ describe('serialize document', function() {
   });
 
   it('is able to write a document reference with cycles', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request, set(document('ref', {
-            referenceValue: `projects/${
-                PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
-            valueType: 'referenceValue',
-          })));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request, set(document('ref', {
+              referenceValue: `projects/${
+                  PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
+              valueType: 'referenceValue',
+            })));
 
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
 
-    // The Firestore Admin SDK adds a cyclic reference to the 'Firestore' member
-    // of 'DocumentReference'. We emulate this behavior in this test to verify
-    // that we can properly serialize DocumentReference instances, even if they
-    // have cyclic references (we shouldn't try to validate them beyond the
-    // instanceof check).
-    let ref = firestore.doc('collectionId/documentId');
-    ref.firestore.firestore = firestore;
-    return ref.set({ref});
+    return createInstance(overrides).then(firestore => {
+      // The Firestore Admin SDK adds a cyclic reference to the 'Firestore'
+      // member of 'DocumentReference'. We emulate this behavior in this
+      // test to verify that we can properly serialize DocumentReference
+      // instances, even if they have cyclic references (we shouldn't try to
+      // validate them beyond the instanceof check).
+      let ref = firestore.doc('collectionId/documentId');
+      ref.firestore.firestore = firestore;
+      return ref.set({ref});
+    });
   });
 });
 
 describe('deserialize document', function() {
-  let firestore;
-
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
-  });
-
   it('deserializes Protobuf JS', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found(document('foo', {
-        valueType: 'bytesValue',
-        bytesValue: Buffer.from('AG=', 'base64'),
-      })));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found(document('foo', {
+          valueType: 'bytesValue',
+          bytesValue: Buffer.from('AG=', 'base64'),
+        })));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(res => {
-      assert.deepEqual(res.data(), {foo: Buffer.from('AG=', 'base64')});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(res => {
+        assert.deepEqual(res.data(), {foo: Buffer.from('AG=', 'base64')});
+      });
     });
   });
 
   it('ignores intermittent stream failures', function() {
     let attempts = 1;
 
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      if (attempts < 3) {
-        ++attempts;
-        throw new Error('Expected error');
-      } else {
-        return stream(found(document()));
+    const overrides = {
+      batchGetDocuments: () => {
+        if (attempts < 3) {
+          ++attempts;
+          throw new Error('Expected error');
+        } else {
+          return stream(found(document()));
+        }
       }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(() => {
-      assert.equal(3, attempts);
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(() => {
+        assert.equal(3, attempts);
+      });
     });
   });
 
   it('deserializes date before 1970', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found(document('moonLanding', {
-        valueType: 'timestampValue',
-        timestampValue: {
-          nanos: 123000000,
-          seconds: -14182920,
-        },
-      })));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found(document('moonLanding', {
+          valueType: 'timestampValue',
+          timestampValue: {
+            nanos: 123000000,
+            seconds: -14182920,
+          },
+        })));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(res => {
-      assert.equal(
-          res.get('moonLanding').toMillis(),
-          new Date('Jul 20 1969 20:18:00.123 UTC').getTime());
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(res => {
+        assert.equal(
+            res.get('moonLanding').toMillis(),
+            new Date('Jul 20 1969 20:18:00.123 UTC').getTime());
+      });
     });
   });
 
   it('returns undefined for unknown fields', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found(document()));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found(document()));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(res => {
-      assert.equal(res.get('bar'), undefined);
-      assert.equal(res.get('bar.foo'), undefined);
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(res => {
+        assert.equal(res.get('bar'), undefined);
+        assert.equal(res.get('bar.foo'), undefined);
+      });
     });
   });
 
   it('supports NaN and Infinity', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found(document(
-          'nanValue', {valueType: 'doubleValue', doubleValue: 'NaN'},
-          'posInfinity', {valueType: 'doubleValue', doubleValue: 'Infinity'},
-          'negInfinity',
-          {valueType: 'doubleValue', doubleValue: '-Infinity'})));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found(document(
+            'nanValue', {valueType: 'doubleValue', doubleValue: 'NaN'},
+            'posInfinity', {valueType: 'doubleValue', doubleValue: 'Infinity'},
+            'negInfinity',
+            {valueType: 'doubleValue', doubleValue: '-Infinity'})));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(res => {
-      assert.ok(
-          typeof res.get('nanValue') === 'number' &&
-          isNaN(res.get('nanValue')));
-      assert.equal(res.get('posInfinity'), Infinity);
-      assert.equal(res.get('negInfinity'), -Infinity);
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(res => {
+        assert.ok(
+            typeof res.get('nanValue') === 'number' &&
+            isNaN(res.get('nanValue')));
+        assert.equal(res.get('posInfinity'), Infinity);
+        assert.equal(res.get('negInfinity'), -Infinity);
+      });
     });
   });
 
   it('doesn\'t deserialize unsupported types', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found(document('moonLanding', {valueType: 'foo'})));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found(document('moonLanding', {valueType: 'foo'})));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(doc => {
-      assert.throws(() => {
-        doc.data();
-      }, /Cannot decode type from Firestore Value: {"valueType":"foo"}/);
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(doc => {
+        assert.throws(() => {
+          doc.data();
+        }, /Cannot decode type from Firestore Value: {"valueType":"foo"}/);
+      });
     });
   });
 
   it('doesn\'t deserialize invalid latitude', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found(document('geoPointValue', {
-        valueType: 'geoPointValue',
-        geoPointValue: {
-          latitude: 'foo',
-          longitude: -122.947778,
-        },
-      })));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found(document('geoPointValue', {
+          valueType: 'geoPointValue',
+          geoPointValue: {
+            latitude: 'foo',
+            longitude: -122.947778,
+          },
+        })));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(doc => {
-      assert.throws(() => {
-        doc.data();
-      }, /Argument "latitude" is not a valid number\./);
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(doc => {
+        assert.throws(() => {
+          doc.data();
+        }, /Argument "latitude" is not a valid number\./);
+      });
     });
   });
 
   it('doesn\'t deserialize invalid longitude', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found(document('geoPointValue', {
-        valueType: 'geoPointValue',
-        geoPointValue: {
-          latitude: 50.1430847,
-          longitude: 'foo',
-        },
-      })));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found(document('geoPointValue', {
+          valueType: 'geoPointValue',
+          geoPointValue: {
+            latitude: 50.1430847,
+            longitude: 'foo',
+          },
+        })));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(doc => {
-      assert.throws(() => {
-        doc.data();
-      }, /Argument "longitude" is not a valid number\./);
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(doc => {
+        assert.throws(() => {
+          doc.data();
+        }, /Argument "longitude" is not a valid number\./);
+      });
     });
   });
 });
 
 describe('get document', function() {
-  let firestore;
-
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
-  });
-
   it('returns document', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
-        request) {
-      requestEquals(request, retrieve());
+    const overrides = {
+      batchGetDocuments: request => {
+        requestEquals(request, retrieve());
 
-      return stream(found(document('foo', {
-        valueType: 'mapValue',
-        mapValue: {
-          fields: {
-            bar: {
-              valueType: 'stringValue',
-              stringValue: 'foobar',
+        return stream(found(document('foo', {
+          valueType: 'mapValue',
+          mapValue: {
+            fields: {
+              bar: {
+                valueType: 'stringValue',
+                stringValue: 'foobar',
+              },
             },
           },
-        },
-      })));
+        })));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(result => {
-      assert.deepEqual(result.data(), {foo: {bar: 'foobar'}});
-      assert.deepEqual(result.get('foo'), {bar: 'foobar'});
-      assert.equal(result.get('foo.bar'), 'foobar');
-      assert.equal(result.get(new Firestore.FieldPath('foo', 'bar')), 'foobar');
-      assert.equal(result.ref.id, 'documentId');
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(result => {
+        assert.deepEqual(result.data(), {foo: {bar: 'foobar'}});
+        assert.deepEqual(result.get('foo'), {bar: 'foobar'});
+        assert.equal(result.get('foo.bar'), 'foobar');
+        assert.equal(
+            result.get(new Firestore.FieldPath('foo', 'bar')), 'foobar');
+        assert.equal(result.ref.id, 'documentId');
+      });
     });
   });
 
   it('returns read, update and create times', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found(document()));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found(document()));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(result => {
-      assert.ok(result.createTime.isEqual(new Firestore.Timestamp(1, 2)));
-      assert.ok(result.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
-      assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(result => {
+        assert.ok(result.createTime.isEqual(new Firestore.Timestamp(1, 2)));
+        assert.ok(result.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
+        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+      });
     });
   });
 
   it('returns not found', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(missing(document()));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(missing(document()));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(result => {
-      assert.equal(result.exists, false);
-      assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
-      assert.equal(null, result.data());
-      assert.equal(null, result.get('foo'));
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(result => {
+        assert.equal(result.exists, false);
+        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+        assert.equal(null, result.data());
+        assert.equal(null, result.get('foo'));
+      });
     });
   });
 
   it('throws error', function(done) {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(new Error('RPC Error'));
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(new Error('RPC Error'));
+      }
     };
 
-    firestore.doc('collectionId/documentId').get().catch(err => {
-      assert.equal(err.message, 'RPC Error');
-      done();
+    createInstance(overrides).then(firestore => {
+      firestore.doc('collectionId/documentId').get().catch(err => {
+        assert.equal(err.message, 'RPC Error');
+        done();
+      });
     });
   });
 
   it('requires field path', function() {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
-      return stream(found(document('foo', {
-        valueType: 'mapValue',
-        mapValue: {
-          fields: {
-            bar: {
-              valueType: 'stringValue',
-              stringValue: 'foobar',
+    const overrides = {
+      batchGetDocuments: () => {
+        return stream(found(document('foo', {
+          valueType: 'mapValue',
+          mapValue: {
+            fields: {
+              bar: {
+                valueType: 'stringValue',
+                stringValue: 'foobar',
+              },
             },
           },
-        },
-      })));
+        })));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').get().then(doc => {
-      assert.throws(() => {
-        doc.get();
-      }, /Argument "field" is not a valid FieldPath. Invalid use of type "undefined" as a Firestore argument./);
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(doc => {
+        assert.throws(() => {
+          doc.get();
+        }, /Argument "field" is not a valid FieldPath. Invalid use of type "undefined" as a Firestore argument./);
+      });
     });
   });
 });
@@ -735,68 +784,77 @@ describe('delete document', function() {
   let firestore;
 
   beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
     });
   });
 
   it('generates proto', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, remove('documentId'));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, remove('documentId'));
 
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').delete();
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').delete();
+    });
   });
 
   it('returns update time', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, remove('documentId'));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, remove('documentId'));
 
-      callback(null, {
-        commitTime: {
-          nanos: 123000000,
-          seconds: 479978400,
-        },
-        writeResults: [{}],
-      });
+        callback(null, {
+          commitTime: {
+            nanos: 123000000,
+            seconds: 479978400,
+          },
+          writeResults: [{}],
+        });
+      }
     };
 
-    return firestore.doc('collectionId/documentId').delete().then(res => {
-      assert.ok(
-          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000)));
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').delete().then(res => {
+        assert.ok(res.writeTime.isEqual(
+            new Firestore.Timestamp(479978400, 123000000)));
+      });
     });
   });
 
   it('with last update time precondition', function() {
-    let docRef = firestore.doc('collectionId/documentId');
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, remove('documentId', {
+                        updateTime: {
+                          nanos: 123000000,
+                          seconds: 479978400,
+                        },
+                      }));
 
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, remove('documentId', {
-                      updateTime: {
-                        nanos: 123000000,
-                        seconds: 479978400,
-                      },
-                    }));
-
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
 
-    return Promise.all([
-      docRef.delete({
-        lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
-      }),
-      docRef.delete({
-        lastUpdateTime: Firestore.Timestamp.fromMillis(479978400123),
-      }),
-      docRef.delete({
-        lastUpdateTime: Firestore.Timestamp.fromDate(new Date(479978400123)),
-      }),
-    ]);
+    return createInstance(overrides).then(firestore => {
+      let docRef = firestore.doc('collectionId/documentId');
+
+      return Promise.all([
+        docRef.delete({
+          lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
+        }),
+        docRef.delete({
+          lastUpdateTime: Firestore.Timestamp.fromMillis(479978400123),
+        }),
+        docRef.delete({
+          lastUpdateTime: Firestore.Timestamp.fromDate(new Date(479978400123)),
+        }),
+      ]);
+    });
   });
 
   it('with invalid last update time precondition', function() {
@@ -831,255 +889,296 @@ describe('set document', function() {
   let firestore;
 
   beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
     });
   });
 
   it('supports empty map', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, set(document()));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, set(document()));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({});
+    });
   });
 
   it('supports nested empty map', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, set(document('a', {
-                      mapValue: {},
-                      valueType: 'mapValue',
-                    })));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, set(document('a', {
+                        mapValue: {},
+                        valueType: 'mapValue',
+                      })));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({a: {}});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({a: {}});
+    });
   });
 
   it('skips merges with just server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          set(null, null,
-              fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            set(null, null,
+                fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')));
+        callback(null, writeResult(1));
+      }
     };
-    return firestore.doc('collectionId/documentId')
-        .set(
-            {
-              a: Firestore.FieldValue.serverTimestamp(),
-              b: {c: Firestore.FieldValue.serverTimestamp()},
-            },
-            {merge: true});
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId')
+          .set(
+              {
+                a: Firestore.FieldValue.serverTimestamp(),
+                b: {c: Firestore.FieldValue.serverTimestamp()},
+              },
+              {merge: true});
+    });
   });
 
-  it('sends empty non-merge write even with just server timestamps',
-     function() {
-       firestore._firestoreClient._innerApiCalls.commit = function(
-           request, options, callback) {
-         requestEquals(
-             request,
-             set(document(),  // The empty write clears the data on the server.
-                 null,
-                 fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')));
-         callback(null, writeResult(2));
-       };
-
-       return firestore.doc('collectionId/documentId').set({
-         a: Firestore.FieldValue.serverTimestamp(),
-         b: {c: Firestore.FieldValue.serverTimestamp()},
-       });
-     });
-
-  it('supports document merges', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          set(document('a', 'b', 'c', {
-                mapValue: {
-                  fields: {
-                    d: {
-                      stringValue: 'e',
-                      valueType: 'stringValue',
-                    },
-                  },
-                },
-                valueType: 'mapValue',
-              }),
-              updateMask('a', 'c.d', 'f')));
-      callback(null, writeResult(1));
+  it('sends empty non-merge write even with just server timestamps', () => {
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            set(document(),  // The empty write clears the data on the
+                             // server.
+                null,
+                fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')));
+        callback(null, writeResult(2));
+      }
     };
 
-    return firestore.doc('collectionId/documentId')
-        .set(
-            {a: 'b', c: {d: 'e'}, f: Firestore.FieldValue.delete()},
-            {merge: true});
+    firestore = createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        a: Firestore.FieldValue.serverTimestamp(),
+        b: {c: Firestore.FieldValue.serverTimestamp()},
+      });
+    });
+  });
+
+  it('supports document merges', function() {
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            set(document('a', 'b', 'c', {
+                  mapValue: {
+                    fields: {
+                      d: {
+                        stringValue: 'e',
+                        valueType: 'stringValue',
+                      },
+                    },
+                  },
+                  valueType: 'mapValue',
+                }),
+                updateMask('a', 'c.d', 'f')));
+        callback(null, writeResult(1));
+      }
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId')
+          .set(
+              {a: 'b', c: {d: 'e'}, f: Firestore.FieldValue.delete()},
+              {merge: true});
+    });
   });
 
   it('supports document merges with field mask', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          set(document(
-                  'a', 'foo', 'b', {
-                    mapValue: {
-                      fields: {
-                        c: {
-                          stringValue: 'foo',
-                          valueType: 'stringValue',
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            set(document(
+                    'a', 'foo', 'b', {
+                      mapValue: {
+                        fields: {
+                          c: {
+                            stringValue: 'foo',
+                            valueType: 'stringValue',
+                          },
                         },
                       },
+                      valueType: 'mapValue',
                     },
-                    valueType: 'mapValue',
-                  },
-                  'd', {
-                    mapValue: {
-                      fields: {
-                        e: {
-                          stringValue: 'foo',
-                          valueType: 'stringValue',
+                    'd', {
+                      mapValue: {
+                        fields: {
+                          e: {
+                            stringValue: 'foo',
+                            valueType: 'stringValue',
+                          },
                         },
                       },
-                    },
-                    valueType: 'mapValue',
-                  }),
-              updateMask('a', 'b', 'd.e', 'f')));
-      callback(null, writeResult(1));
+                      valueType: 'mapValue',
+                    }),
+                updateMask('a', 'b', 'd.e', 'f')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId')
-        .set(
-            {
-              a: 'foo',
-              b: {c: 'foo'},
-              d: {e: 'foo', ignore: 'foo'},
-              f: Firestore.FieldValue.delete(),
-              ignore: 'foo',
-              ignoreMap: {a: 'foo'},
-            },
-            {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId')
+          .set(
+              {
+                a: 'foo',
+                b: {c: 'foo'},
+                d: {e: 'foo', ignore: 'foo'},
+                f: Firestore.FieldValue.delete(),
+                ignore: 'foo',
+                ignoreMap: {a: 'foo'},
+              },
+              {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']});
+    });
   });
 
   it('supports document merges with empty field mask', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, set(document(), updateMask()));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, set(document(), updateMask()));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({}, {mergeFields: []});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({}, {
+        mergeFields: []
+      });
+    });
   });
 
   it('supports document merges with field mask and empty maps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          set(document(
-                  'a', {
-                    mapValue: {
-                      fields: {
-                        b: {
-                          mapValue: {},
-                          valueType: 'mapValue',
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            set(document(
+                    'a', {
+                      mapValue: {
+                        fields: {
+                          b: {
+                            mapValue: {},
+                            valueType: 'mapValue',
+                          },
                         },
                       },
+                      valueType: 'mapValue',
                     },
-                    valueType: 'mapValue',
-                  },
-                  'c', {
-                    mapValue: {
-                      fields: {
-                        d: {
-                          mapValue: {},
-                          valueType: 'mapValue',
+                    'c', {
+                      mapValue: {
+                        fields: {
+                          d: {
+                            mapValue: {},
+                            valueType: 'mapValue',
+                          },
                         },
                       },
-                    },
-                    valueType: 'mapValue',
-                  }),
-              updateMask('a', 'c.d')));
-      callback(null, writeResult(1));
+                      valueType: 'mapValue',
+                    }),
+                updateMask('a', 'c.d')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId')
-        .set(
-            {
-              a: {b: {}},
-              c: {d: {}},
-            },
-            {mergeFields: ['a', new Firestore.FieldPath('c', 'd')]});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId')
+          .set(
+              {
+                a: {b: {}},
+                c: {d: {}},
+              },
+              {mergeFields: ['a', new Firestore.FieldPath('c', 'd')]});
+    });
   });
 
-  it('supports document merges with field mask and server timestamps',
-     function() {
-       firestore._firestoreClient._innerApiCalls.commit = function(
-           request, options, callback) {
-         requestEquals(
-             request,
-             set(document(), updateMask('b', 'f'),
-                 fieldTransform(
-                     'a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME', 'd.e',
-                     'REQUEST_TIME')));
-         callback(null, writeResult(2));
-       };
-
-       return firestore.doc('collectionId/documentId')
-           .set(
-               {
-                 a: Firestore.FieldValue.serverTimestamp(),
-                 b: {c: Firestore.FieldValue.serverTimestamp()},
-                 d: {
-                   e: Firestore.FieldValue.serverTimestamp(),
-                   ignore: Firestore.FieldValue.serverTimestamp(),
-                 },
-                 f: Firestore.FieldValue.delete(),
-                 ignore: Firestore.FieldValue.serverTimestamp(),
-                 ignoreMap: {a: Firestore.FieldValue.serverTimestamp()},
-               },
-               {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']});
-     });
-
-  it('supports empty merge', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, set(document(), updateMask()));
-      callback(null, writeResult(1));
+  it('supports document merges with field mask and server timestamps', () => {
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            set(document(), updateMask('b', 'f'),
+                fieldTransform(
+                    'a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME', 'd.e',
+                    'REQUEST_TIME')));
+        callback(null, writeResult(2));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({}, {merge: true});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId')
+          .set(
+              {
+                a: Firestore.FieldValue.serverTimestamp(),
+                b: {c: Firestore.FieldValue.serverTimestamp()},
+                d: {
+                  e: Firestore.FieldValue.serverTimestamp(),
+                  ignore: Firestore.FieldValue.serverTimestamp(),
+                },
+                f: Firestore.FieldValue.delete(),
+                ignore: Firestore.FieldValue.serverTimestamp(),
+                ignoreMap: {a: Firestore.FieldValue.serverTimestamp()},
+              },
+              {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']});
+    });
+  });
+
+
+  it('supports empty merge', function() {
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, set(document(), updateMask()));
+        callback(null, writeResult(1));
+      }
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({}, {merge: true});
+    });
   });
 
   it('supports nested empty merge', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          set(document('a', {
-                mapValue: {},
-                valueType: 'mapValue',
-              }),
-              updateMask('a')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            set(document('a', {
+                  mapValue: {},
+                  valueType: 'mapValue',
+                }),
+                updateMask('a')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({a: {}}, {merge: true});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({a: {}}, {
+        merge: true
+      });
+    });
   });
 
   it('doesn\'t split on dots', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, set(document('a.b', 'c')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, set(document('a.b', 'c')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').set({'a.b': 'c'});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({'a.b': 'c'});
+    });
   });
 
   it('validates merge option', function() {
@@ -1140,85 +1239,97 @@ describe('create document', function() {
   let firestore;
 
   beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
     });
   });
 
   it('creates document', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, create(document()));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, create(document()));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').create({});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').create({});
+    });
   });
 
   it('returns update time', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, create(document()));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, create(document()));
 
-      callback(null, {
-        commitTime: {
-          nanos: 0,
-          seconds: 0,
-        },
-        writeResults: [
-          {
-            updateTime: {
-              nanos: 123000000,
-              seconds: 479978400,
-            },
+        callback(null, {
+          commitTime: {
+            nanos: 0,
+            seconds: 0,
           },
-        ],
-      });
+          writeResults: [
+            {
+              updateTime: {
+                nanos: 123000000,
+                seconds: 479978400,
+              },
+            },
+          ],
+        });
+      }
     };
 
-    return firestore.doc('collectionId/documentId').create({}).then(res => {
-      assert.ok(
-          res.writeTime.isEqual(new Firestore.Timestamp(479978400, 123000000)));
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').create({}).then(res => {
+        assert.ok(res.writeTime.isEqual(
+            new Firestore.Timestamp(479978400, 123000000)));
+      });
     });
   });
 
   it('supports server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          create(
-              null,
-              fieldTransform(
-                  'field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            create(
+                null,
+                fieldTransform(
+                    'field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
 
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').create({
-      field: Firestore.FieldValue.serverTimestamp(),
-      map: {field: Firestore.FieldValue.serverTimestamp()},
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').create({
+        field: Firestore.FieldValue.serverTimestamp(),
+        map: {field: Firestore.FieldValue.serverTimestamp()},
+      });
     });
   });
 
   it('supports nested empty map', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, create(document('a', {
-                      mapValue: {
-                        fields: {
-                          b: {
-                            mapValue: {},
-                            valueType: 'mapValue',
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, create(document('a', {
+                        mapValue: {
+                          fields: {
+                            b: {
+                              mapValue: {},
+                              valueType: 'mapValue',
+                            },
                           },
                         },
-                      },
-                      valueType: 'mapValue',
-                    })));
-      callback(null, writeResult(1));
+                        valueType: 'mapValue',
+                      })));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').create({a: {b: {}}});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').create({a: {b: {}}});
+    });
   });
 
   it('requires an object', function() {
@@ -1238,136 +1349,160 @@ describe('update document', function() {
   let firestore;
 
   beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
+    return createInstance().then(firestoreClient => {
+      firestore = firestoreClient;
     });
   });
 
   it('generates proto', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request, update(document('foo', 'bar'), updateMask('foo')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').update({foo: 'bar'});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').update({foo: 'bar'});
+    });
   });
 
   it('supports nested server timestamps', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          update(
-              document('foo', {
-                valueType: 'mapValue',
-                mapValue: {},
-              }),
-              updateMask('a', 'foo'),
-              fieldTransform('a.b', 'REQUEST_TIME', 'c.d', 'REQUEST_TIME')));
-      callback(null, writeResult(2));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            update(
+                document('foo', {
+                  valueType: 'mapValue',
+                  mapValue: {},
+                }),
+                updateMask('a', 'foo'),
+                fieldTransform('a.b', 'REQUEST_TIME', 'c.d', 'REQUEST_TIME')));
+        callback(null, writeResult(2));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').update({
-      foo: {},
-      a: {b: Firestore.FieldValue.serverTimestamp()},
-      'c.d': Firestore.FieldValue.serverTimestamp(),
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').update({
+        foo: {},
+        a: {b: Firestore.FieldValue.serverTimestamp()},
+        'c.d': Firestore.FieldValue.serverTimestamp(),
+      });
     });
   });
 
   it('skips write for single server timestamp', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request, update(null, null, fieldTransform('a', 'REQUEST_TIME')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request, update(null, null, fieldTransform('a', 'REQUEST_TIME')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId')
-        .update('a', Firestore.FieldValue.serverTimestamp());
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId')
+          .update('a', Firestore.FieldValue.serverTimestamp());
+    });
   });
 
   it('supports nested empty map', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          update(
-              document('a', {
-                mapValue: {},
-                valueType: 'mapValue',
-              }),
-              updateMask('a')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            update(
+                document('a', {
+                  mapValue: {},
+                  valueType: 'mapValue',
+                }),
+                updateMask('a')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').update({a: {}});
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').update({a: {}});
+    });
   });
 
   it('supports nested delete', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, update(document(), updateMask('a.b')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(request, update(document(), updateMask('a.b')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').update({
-      'a.b': Firestore.FieldValue.delete()
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').update({
+        'a.b': Firestore.FieldValue.delete()
+      });
     });
   });
 
   it('returns update time', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request, update(document('foo', 'bar'), updateMask('foo')));
 
-      callback(null, {
-        commitTime: {
-          nanos: 0,
-          seconds: 0,
-        },
-        writeResults: [
-          {
-            updateTime: {
-              nanos: 123000000,
-              seconds: 479978400,
-            },
+        callback(null, {
+          commitTime: {
+            nanos: 0,
+            seconds: 0,
           },
-        ],
-      });
+          writeResults: [
+            {
+              updateTime: {
+                nanos: 123000000,
+                seconds: 479978400,
+              },
+            },
+          ],
+        });
+      }
     };
 
-    return firestore.doc('collectionId/documentId')
-        .update({foo: 'bar'})
-        .then(res => {
-          assert.ok(res.writeTime.isEqual(
-              new Firestore.Timestamp(479978400, 123000000)));
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId')
+          .update({foo: 'bar'})
+          .then(res => {
+            assert.ok(res.writeTime.isEqual(
+                new Firestore.Timestamp(479978400, 123000000)));
+          });
+    });
   });
 
   it('with last update time precondition', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          update(
-              document('foo', 'bar'), updateMask('foo'), /*transform */ null, {
-                updateTime: {
-                  nanos: 123000000,
-                  seconds: 479978400,
-                },
-              }));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            update(
+                document('foo', 'bar'), updateMask('foo'),
+                /*transform */ null, {
+                  updateTime: {
+                    nanos: 123000000,
+                    seconds: 479978400,
+                  },
+                }));
+        callback(null, writeResult(1));
+      }
     };
 
-    return Promise.all([
-      firestore.doc('collectionId/documentId').update({foo: 'bar'}, {
-        lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)
-      }),
-      firestore.doc('collectionId/documentId').update('foo', 'bar', {
-        lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
-      }),
-    ]);
+    return createInstance(overrides).then(firestore => {
+      return Promise.all([
+        firestore.doc('collectionId/documentId').update({foo: 'bar'}, {
+          lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)
+        }),
+        firestore.doc('collectionId/documentId').update('foo', 'bar', {
+          lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
+        }),
+      ]);
+    });
   });
 
   it('with invalid last update time precondition', function() {
@@ -1403,182 +1538,201 @@ describe('update document', function() {
   });
 
   it('with top-level document', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, update(document('foo', 'bar'), updateMask('foo')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request, update(document('foo', 'bar'), updateMask('foo')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').update({
-      foo: 'bar',
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').update({
+        foo: 'bar',
+      });
     });
   });
 
   it('with nested document', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          update(
-              document(
-                  'a', {
-                    valueType: 'mapValue',
-                    mapValue: {
-                      fields: {
-                        b: {
-                          valueType: 'mapValue',
-                          mapValue: {
-                            fields: {
-                              c: {
-                                valueType: 'stringValue',
-                                stringValue: 'foobar',
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            update(
+                document(
+                    'a', {
+                      valueType: 'mapValue',
+                      mapValue: {
+                        fields: {
+                          b: {
+                            valueType: 'mapValue',
+                            mapValue: {
+                              fields: {
+                                c: {
+                                  valueType: 'stringValue',
+                                  stringValue: 'foobar',
+                                },
                               },
                             },
                           },
                         },
                       },
                     },
-                  },
-                  'foo', {
-                    valueType: 'mapValue',
-                    mapValue: {
-                      fields: {
-                        bar: {
-                          valueType: 'stringValue',
-                          stringValue: 'foobar',
-                        },
-                      },
-                    },
-                  }),
-              updateMask('a.b.c', 'foo.bar')));
-
-      callback(null, writeResult(1));
-    };
-
-    return Promise.all([
-      firestore.doc('collectionId/documentId').update({
-        'foo.bar': 'foobar',
-        'a.b.c': 'foobar',
-      }),
-      firestore.doc('collectionId/documentId')
-          .update(
-              'foo.bar', 'foobar', new Firestore.FieldPath('a', 'b', 'c'),
-              'foobar'),
-    ]);
-  });
-
-  it('with two nested fields ', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          update(
-              document('foo', {
-                mapValue: {
-                  fields: {
-                    bar: {
-                      stringValue: 'two',
-                      valueType: 'stringValue',
-                    },
-                    deep: {
+                    'foo', {
+                      valueType: 'mapValue',
                       mapValue: {
                         fields: {
                           bar: {
-                            stringValue: 'two',
                             valueType: 'stringValue',
-                          },
-                          foo: {
-                            stringValue: 'one',
-                            valueType: 'stringValue',
+                            stringValue: 'foobar',
                           },
                         },
                       },
-                      valueType: 'mapValue',
-                    },
-                    foo: {
-                      stringValue: 'one',
-                      valueType: 'stringValue',
+                    }),
+                updateMask('a.b.c', 'foo.bar')));
+
+        callback(null, writeResult(1));
+      }
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return Promise.all([
+        firestore.doc('collectionId/documentId').update({
+          'foo.bar': 'foobar',
+          'a.b.c': 'foobar',
+        }),
+        firestore.doc('collectionId/documentId')
+            .update(
+                'foo.bar', 'foobar', new Firestore.FieldPath('a', 'b', 'c'),
+                'foobar'),
+      ]);
+    });
+  });
+
+  it('with two nested fields ', function() {
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            update(
+                document('foo', {
+                  mapValue: {
+                    fields: {
+                      bar: {
+                        stringValue: 'two',
+                        valueType: 'stringValue',
+                      },
+                      deep: {
+                        mapValue: {
+                          fields: {
+                            bar: {
+                              stringValue: 'two',
+                              valueType: 'stringValue',
+                            },
+                            foo: {
+                              stringValue: 'one',
+                              valueType: 'stringValue',
+                            },
+                          },
+                        },
+                        valueType: 'mapValue',
+                      },
+                      foo: {
+                        stringValue: 'one',
+                        valueType: 'stringValue',
+                      },
                     },
                   },
-                },
-                valueType: 'mapValue',
-              }),
-              updateMask(
-                  'foo.bar', 'foo.deep.bar', 'foo.deep.foo', 'foo.foo')));
+                  valueType: 'mapValue',
+                }),
+                updateMask(
+                    'foo.bar', 'foo.deep.bar', 'foo.deep.foo', 'foo.foo')));
 
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
-    return Promise.all([
-      firestore.doc('collectionId/documentId').update({
-        'foo.foo': 'one',
-        'foo.bar': 'two',
-        'foo.deep.foo': 'one',
-        'foo.deep.bar': 'two',
-      }),
-      firestore.doc('collectionId/documentId')
-          .update(
-              'foo.foo', 'one', 'foo.bar', 'two', 'foo.deep.foo', 'one',
-              'foo.deep.bar', 'two'),
-    ]);
+
+    return createInstance(overrides).then(firestore => {
+      return Promise.all([
+        firestore.doc('collectionId/documentId').update({
+          'foo.foo': 'one',
+          'foo.bar': 'two',
+          'foo.deep.foo': 'one',
+          'foo.deep.bar': 'two',
+        }),
+        firestore.doc('collectionId/documentId')
+            .update(
+                'foo.foo', 'one', 'foo.bar', 'two', 'foo.deep.foo', 'one',
+                'foo.deep.bar', 'two'),
+      ]);
+    });
   });
 
   it('with nested field and document transform ', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request,
-          update(
-              document('a', {
-                mapValue: {
-                  fields: {
-                    b: {
-                      valueType: 'mapValue',
-                      mapValue: {
-                        fields: {
-                          keep: {
-                            stringValue: 'keep',
-                            valueType: 'stringValue',
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            update(
+                document('a', {
+                  mapValue: {
+                    fields: {
+                      b: {
+                        valueType: 'mapValue',
+                        mapValue: {
+                          fields: {
+                            keep: {
+                              stringValue: 'keep',
+                              valueType: 'stringValue',
+                            },
                           },
                         },
                       },
-                    },
-                    c: {
-                      valueType: 'mapValue',
-                      mapValue: {
-                        fields: {
-                          keep: {
-                            stringValue: 'keep',
-                            valueType: 'stringValue',
+                      c: {
+                        valueType: 'mapValue',
+                        mapValue: {
+                          fields: {
+                            keep: {
+                              stringValue: 'keep',
+                              valueType: 'stringValue',
+                            },
                           },
                         },
                       },
                     },
                   },
-                },
-                valueType: 'mapValue',
-              }),
-              updateMask('a.b.delete', 'a.b.keep', 'a.c.delete', 'a.c.keep')));
+                  valueType: 'mapValue',
+                }),
+                updateMask(
+                    'a.b.delete', 'a.b.keep', 'a.c.delete', 'a.c.keep')));
 
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
-    return firestore.doc('collectionId/documentId').update({
-      'a.b.delete': Firestore.FieldValue.delete(),
-      'a.b.keep': 'keep',
-      'a.c.delete': Firestore.FieldValue.delete(),
-      'a.c.keep': 'keep',
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').update({
+        'a.b.delete': Firestore.FieldValue.delete(),
+        'a.b.keep': 'keep',
+        'a.c.delete': Firestore.FieldValue.delete(),
+        'a.c.keep': 'keep',
+      });
     });
   });
 
   it('with field with dot ', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(request, update(document('a.b', 'c'), updateMask('`a.b`')));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request, update(document('a.b', 'c'), updateMask('`a.b`')));
 
-      callback(null, writeResult(1));
+        callback(null, writeResult(1));
+      }
     };
-
-    return firestore.doc('collectionId/documentId')
-        .update(new Firestore.FieldPath('a.b'), 'c');
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId')
+          .update(new Firestore.FieldPath('a.b'), 'c');
+    });
   });
 
   it('with conflicting update', function() {
@@ -1689,44 +1843,42 @@ describe('update document', function() {
   });
 
   it('with field delete', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      requestEquals(
-          request, update(document('bar', 'foobar'), updateMask('bar', 'foo')));
-      callback(null, writeResult(1));
+    const overrides = {
+      commit: (request, options, callback) => {
+        requestEquals(
+            request,
+            update(document('bar', 'foobar'), updateMask('bar', 'foo')));
+        callback(null, writeResult(1));
+      }
     };
 
-    return firestore.doc('collectionId/documentId').update({
-      foo: Firestore.FieldValue.delete(),
-      bar: 'foobar',
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').update({
+        foo: Firestore.FieldValue.delete(),
+        bar: 'foobar',
+      });
     });
   });
 });
 
 describe('getCollections() method', function() {
-  let firestore;
-  let documentRef;
-
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-      documentRef = firestore.doc('coll/doc');
-    });
-  });
-
   it('sorts results', function() {
-    firestore._firestoreClient._innerApiCalls.listCollectionIds = function(
-        request, options, callback) {
-      assert.deepEqual(request, {
-        parent: `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
-      });
+    const overrides = {
+      listCollectionIds: (request, options, callback) => {
+        assert.deepEqual(request, {
+          parent:
+              `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
+        });
 
-      callback(null, ['second', 'first']);
+        callback(null, ['second', 'first']);
+      }
     };
 
-    return documentRef.getCollections().then(collections => {
-      assert.equal(collections[0].path, 'coll/doc/first');
-      assert.equal(collections[1].path, 'coll/doc/second');
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('coll/doc').getCollections().then(collections => {
+        assert.equal(collections[0].path, 'coll/doc/first');
+        assert.equal(collections[1].path, 'coll/doc/second');
+      });
     });
   });
 });

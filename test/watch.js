@@ -29,6 +29,7 @@ const DocumentReference = reference.DocumentReference;
 const DocumentSnapshot =
     require('../src/document')(DocumentReference).DocumentSnapshot;
 const Backoff = require('../src/backoff')(Firestore);
+const createInstance = require('../test/util/helpers').createInstance;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -37,18 +38,6 @@ let PROJECT_ID = process.env.PROJECT_ID;
 if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
 }
-
-function createInstance() {
-  let firestore = new Firestore({
-    projectId: PROJECT_ID,
-    sslCreds: grpc.credentials.createInsecure(),
-    timestampsInSnapshots: true,
-    keyFilename: './test/fake-certificate.json',
-  });
-
-  return firestore._ensureClient().then(() => firestore);
-}
-
 /**
  * Asserts that the given list of docs match.
  * @param actual The computed docs array.
@@ -192,15 +181,15 @@ class DeferredListener {
  * sequential invocations of the Listen API.
  */
 class StreamHelper {
-  /**
-   * @param firestore The Firestore client.
-   */
-  constructor(firestore) {
+  constructor() {
     this.streamCount = 0;
     this.deferredListener = new DeferredListener();
+  }
 
-    // Create a mock backend whose stream we can return.
-    firestore._firestoreClient._innerApiCalls.listen = () => {
+  /** Returns the GAPIC callback to use with this stream helper. */
+  getListenCallback() {
+    return () => {
+      // Create a mock backend whose stream we can return.
       ++this.streamCount;
 
       this.readStream = through.obj();
@@ -585,30 +574,36 @@ describe('Query watch', function() {
     };
   };
 
+  /** The GAPIC callback that executes the listen. */
+  let listenCallback;
+
   beforeEach(function() {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are uneffected by this, as we maintain their
     // asynchronous behavior.
     Backoff.setTimeoutHandler(setImmediate);
 
-    return createInstance().then(firestoreClient => {
-      firestore = firestoreClient;
+    targetId = 0x1;
 
-      targetId = 0x1;
+    streamHelper = new StreamHelper();
+    listenCallback = streamHelper.getListenCallback();
 
-      streamHelper = new StreamHelper(firestore);
-      watchHelper =
-          new WatchHelper(streamHelper, firestore.collection('col'), targetId);
+    return createInstance({listen: () => listenCallback()})
+        .then(firestoreClient => {
+          firestore = firestoreClient;
 
-      colRef = firestore.collection('col');
+          watchHelper = new WatchHelper(
+              streamHelper, firestore.collection('col'), targetId);
 
-      doc1 = firestore.doc('col/doc1');
-      doc2 = firestore.doc('col/doc2');
-      doc3 = firestore.doc('col/doc3');
-      doc4 = firestore.doc('col/doc4');
+          colRef = firestore.collection('col');
 
-      lastSnapshot = EMPTY;
-    });
+          doc1 = firestore.doc('col/doc1');
+          doc2 = firestore.doc('col/doc2');
+          doc3 = firestore.doc('col/doc3');
+          doc4 = firestore.doc('col/doc4');
+
+          lastSnapshot = EMPTY;
+        });
   });
 
   afterEach(function() {
@@ -1026,8 +1021,8 @@ describe('Query watch', function() {
                     lastSnapshot =
                         snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-                    // Return a stream that always errors on write
-                    firestore._firestoreClient._innerApiCalls.listen = () => {
+                    listenCallback = () => {
+                      // Return a stream that always errors on write
                       ++streamHelper.streamCount;
                       return through.obj((chunk, enc, callback) => {
                         callback(new Error(
@@ -2085,11 +2080,13 @@ describe('DocumentReference watch', function() {
     // asynchronous behavior.
     Backoff.setTimeoutHandler(setImmediate);
 
-    return createInstance().then(firestoreClient => {
+    targetId = 0x1;
+    streamHelper = new StreamHelper(firestore);
+
+    const overrides = {listen: streamHelper.getListenCallback()};
+    return createInstance(overrides).then(firestoreClient => {
       firestore = firestoreClient;
-      targetId = 0x1;
       doc = firestore.doc('col/doc');
-      streamHelper = new StreamHelper(firestore);
       watchHelper = new WatchHelper(streamHelper, doc, targetId);
     });
   });

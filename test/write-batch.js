@@ -21,22 +21,12 @@ const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
 
 const Firestore = require('../src');
+const createInstance = require('../test/util/helpers').createInstance;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
 const PROJECT_ID = 'test-project';
-
-function createInstance() {
-  let firestore = new Firestore({
-    projectId: PROJECT_ID,
-    sslCreds: grpc.credentials.createInsecure(),
-    timestampsInSnapshots: true,
-    keyFilename: './test/fake-certificate.json',
-  });
-
-  return firestore._ensureClient().then(() => firestore);
-}
 
 describe('set() method', function() {
   let firestore;
@@ -152,12 +142,8 @@ describe('batch support', function() {
   let writeBatch;
 
   beforeEach(() => {
-    return createInstance().then(firestoreClient => {
-      firestore = firestoreClient;
-      writeBatch = firestore.batch();
-
-      firestore._firestoreClient._innerApiCalls.commit = function(
-          request, options, callback) {
+    const overrides = {
+      commit: (request, options, callback) => {
         assert.deepEqual(request, {
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
@@ -215,8 +201,8 @@ describe('batch support', function() {
             seconds: 0,
           },
           writeResults: [
-            // This write result conforms to the Write + DocumentTransform and
-            // won't be returned in the response.
+            // This write result conforms to the Write +
+            // DocumentTransform and won't be returned in the response.
             {
               updateTime: {
                 nanos: 1337,
@@ -249,7 +235,11 @@ describe('batch support', function() {
             },
           ],
         });
-      };
+      }
+    };
+    return createInstance(overrides).then(firestoreClient => {
+      firestore = firestoreClient;
+      writeBatch = firestore.batch();
     });
   });
 
@@ -331,35 +321,38 @@ describe('batch support', function() {
   });
 
   it('can return same write result', function() {
-    firestore._firestoreClient._innerApiCalls.commit = function(
-        request, options, callback) {
-      callback(null, {
-        commitTime: {
-          nanos: 0,
-          seconds: 0,
-        },
-        writeResults: [
-          {
-            updateTime: {
-              nanos: 0,
-              seconds: 0,
+    const overrides = {
+      commit: (request, options, callback) => {
+        callback(null, {
+          commitTime: {
+            nanos: 0,
+            seconds: 0,
+          },
+          writeResults: [
+            {
+              updateTime: {
+                nanos: 0,
+                seconds: 0,
+              },
             },
-          },
-          {
-            updateTime: {},
-          },
-        ],
-      });
+            {
+              updateTime: {},
+            },
+          ],
+        });
+      }
     };
 
-    let documentName = firestore.doc('col/doc');
+    return createInstance(overrides).then(firestore => {
+      let documentName = firestore.doc('col/doc');
 
-    let batch = firestore.batch();
-    batch.set(documentName, {});
-    batch.set(documentName, {});
+      let batch = firestore.batch();
+      batch.set(documentName, {});
+      batch.set(documentName, {});
 
-    return batch.commit().then(results => {
-      assert.ok(results[0].isEqual(results[1]));
+      return batch.commit().then(results => {
+        assert.ok(results[0].isEqual(results[1]));
+      });
     });
   });
 
@@ -368,29 +361,28 @@ describe('batch support', function() {
     // we are running on GCF.
     process.env.FUNCTION_TRIGGER_TYPE = 'http-trigger';
 
-    return createInstance().then(firestore => {
-      firestore._preferTransactions = true;
-      firestore._lastSuccessfulRequest = null;
+    let beginCalled = 0;
+    let commitCalled = 0;
 
-      let beginCalled = 0;
-      let commitCalled = 0;
-
-      firestore._firestoreClient._innerApiCalls.beginTransaction = function(
-          actual, options, callback) {
+    const overrides = {
+      beginTransaction: (actual, options, callback) => {
         ++beginCalled;
         callback(null, {transaction: 'foo'});
-      };
-
-      firestore._firestoreClient._innerApiCalls.commit = function(
-          actual, options, callback) {
+      },
+      commit: (actual, options, callback) => {
         ++commitCalled;
         callback(null, {
           commitTime: {
             nanos: 0,
             seconds: 0,
           },
-        });
-      };
+        })
+      }
+    };
+
+    return createInstance(overrides).then(firestore => {
+      firestore._preferTransactions = true;
+      firestore._lastSuccessfulRequest = null;
 
       return firestore.batch()
           .commit()

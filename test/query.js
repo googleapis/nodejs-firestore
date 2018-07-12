@@ -29,23 +29,13 @@ const DocumentReference = reference.DocumentReference;
 const DocumentSnapshot =
     require('../src/document')(DocumentReference).DocumentSnapshot;
 const ResourcePath = require('../src/path').ResourcePath;
+const createInstance = require('../test/util/helpers').createInstance;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
-
-function createInstance() {
-  let firestore = new Firestore({
-    projectId: PROJECT_ID,
-    sslCreds: grpc.credentials.createInsecure(),
-    timestampsInSnapshots: true,
-    keyFilename: './test/fake-certificate.json',
-  });
-
-  return firestore._ensureClient().then(() => firestore);
-}
 
 function snapshot(relativePath, data) {
   const snapshot = new DocumentSnapshot.Builder();
@@ -413,99 +403,119 @@ describe('query interface', function() {
   });
 
   it('accepts all variations', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, fieldFilters('foo', 'EQUAL', 'bar'),
-          orderBy('foo', 'ASCENDING'), limit(10));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, fieldFilters('foo', 'EQUAL', 'bar'),
+            orderBy('foo', 'ASCENDING'), limit(10));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.where('foo', '=', 'bar');
-    query = query.orderBy('foo');
-    query = query.limit(10);
-    return query.get().then(results => {
-      assert.equal(query, results.query);
-      assert.equal(0, results.size);
-      assert.equal(true, results.empty);
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.where('foo', '=', 'bar');
+      query = query.orderBy('foo');
+      query = query.limit(10);
+      return query.get().then(results => {
+        assert.equal(query, results.query);
+        assert.equal(0, results.size);
+        assert.equal(true, results.empty);
+      });
     });
   });
 
   it('supports empty gets', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request);
-      return stream({readTime: {seconds: 5, nanos: 6}});
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request);
+        return stream({readTime: {seconds: 5, nanos: 6}});
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    return query.get().then(results => {
-      assert.equal(0, results.size);
-      assert.equal(true, results.empty);
-      assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      return query.get().then(results => {
+        assert.equal(0, results.size);
+        assert.equal(true, results.empty);
+        assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+      });
     });
   });
 
   it('retries on stream failure', function() {
     let attempts = 0;
-    firestore._firestoreClient._innerApiCalls.runQuery = function() {
-      ++attempts;
-      throw new Error('Expected error');
+    const overrides = {
+      runQuery: (request) => {
+        ++attempts;
+        throw new Error('Expected error');
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    return query.get()
-        .then(() => {
-          throw new Error('Unexpected success');
-        })
-        .catch(() => {
-          assert.equal(5, attempts);
-        });
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      return query.get()
+          .then(() => {
+            throw new Error('Unexpected success');
+          })
+          .catch(() => {
+            assert.equal(5, attempts);
+          });
+    });
   });
 
   it('supports empty streams', function(callback) {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request);
-      return stream({readTime: {seconds: 5, nanos: 6}});
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request);
+        return stream({readTime: {seconds: 5, nanos: 6}});
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query.stream()
-        .on('data',
-            () => {
-              throw new Error('Unexpected document');
-            })
-        .on('end', () => {
-          callback();
-        });
+    createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query.stream()
+          .on('data',
+              () => {
+                throw new Error('Unexpected document');
+              })
+          .on('end', () => {
+            callback();
+          });
+    });
   });
 
   it('returns results', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request);
-      return stream(document('first'), document('second'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request);
+        return stream(document('first'), document('second'));
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    return query.get().then(results => {
-      assert.equal(2, results.size);
-      assert.equal(false, results.empty);
-      assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
-      assert.equal('first', results.docs[0].get('first'));
-      assert.equal('second', results.docs[1].get('second'));
-      assert.equal(2, results.docChanges.length);
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      return query.get().then(results => {
+        assert.equal(2, results.size);
+        assert.equal(false, results.empty);
+        assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+        assert.equal('first', results.docs[0].get('first'));
+        assert.equal('second', results.docs[1].get('second'));
+        assert.equal(2, results.docChanges.length);
 
-      let count = 0;
+        let count = 0;
 
-      results.forEach(doc => {
-        assert.ok(is.instanceof(doc, DocumentSnapshot));
-        assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)));
-        assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
-        assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
-        ++count;
+        results.forEach(doc => {
+          assert.ok(is.instanceof(doc, DocumentSnapshot));
+          assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)));
+          assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
+          assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+          ++count;
+        });
+
+        assert.equal(2, count);
       });
-
-      assert.equal(2, count);
     });
   });
 
@@ -526,54 +536,66 @@ describe('query interface', function() {
   });
 
   it('handles stream exception during initialization', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function() {
-      return stream(new Error('Expected error'));
+    const overrides = {
+      runQuery: () => {
+        return stream(new Error('Expected error'));
+      }
     };
 
-    return firestore.collection('collectionId')
-        .get()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          assert.equal(err.message, 'Expected error');
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore.collection('collectionId')
+          .get()
+          .then(() => {
+            throw new Error('Unexpected success in Promise');
+          })
+          .catch(err => {
+            assert.equal(err.message, 'Expected error');
+          });
+    });
   });
 
   it('handles stream exception after initialization', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function() {
-      return stream(document('first'), new Error('Expected error'));
+    const overrides = {
+      runQuery: () => {
+        return stream(document('first'), new Error('Expected error'));
+      }
     };
 
-    return firestore.collection('collectionId')
-        .get()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          assert.equal(err.message, 'Expected error');
-        });
+    return createInstance(overrides).then(firestore => {
+      return firestore.collection('collectionId')
+          .get()
+          .then(() => {
+            throw new Error('Unexpected success in Promise');
+          })
+          .catch(err => {
+            assert.equal(err.message, 'Expected error');
+          });
+    });
   });
 
   it('streams results', function(callback) {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request);
-      return stream(document('first'), document('second'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request);
+        return stream(document('first'), document('second'));
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    let received = 0;
+    createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      let received = 0;
 
-    query.stream()
-        .on('data',
-            doc => {
-              assert.ok(is.instanceof(doc, DocumentSnapshot));
-              ++received;
-            })
-        .on('end', () => {
-          assert.equal(received, 2);
-          callback();
-        });
+      query.stream()
+          .on('data',
+              doc => {
+                assert.ok(is.instanceof(doc, DocumentSnapshot));
+                ++received;
+              })
+          .on('end', () => {
+            assert.equal(received, 2);
+            callback();
+          });
+    });
   });
 });
 
@@ -587,92 +609,112 @@ describe('where() interface', function() {
   });
 
   it('generates proto', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, fieldFilters('foo', 'EQUAL', 'bar'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, fieldFilters('foo', 'EQUAL', 'bar'));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.where('foo', '==', 'bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.where('foo', '==', 'bar');
+      return query.get();
+    });
   });
 
   it('concatenates all accepted filters', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request,
-          fieldFilters(
-              'fooSmaller', 'LESS_THAN', 'barSmaller', 'fooSmallerOrEquals',
-              'LESS_THAN_OR_EQUAL', 'barSmallerOrEquals', 'fooEquals', 'EQUAL',
-              'barEquals', 'fooEqualsLong', 'EQUAL', 'barEqualsLong',
-              'fooGreaterOrEquals', 'GREATER_THAN_OR_EQUAL',
-              'barGreaterOrEquals', 'fooGreater', 'GREATER_THAN',
-              'barGreater'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request,
+            fieldFilters(
+                'fooSmaller', 'LESS_THAN', 'barSmaller', 'fooSmallerOrEquals',
+                'LESS_THAN_OR_EQUAL', 'barSmallerOrEquals', 'fooEquals',
+                'EQUAL', 'barEquals', 'fooEqualsLong', 'EQUAL', 'barEqualsLong',
+                'fooGreaterOrEquals', 'GREATER_THAN_OR_EQUAL',
+                'barGreaterOrEquals', 'fooGreater', 'GREATER_THAN',
+                'barGreater'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.where('fooSmaller', '<', 'barSmaller');
-    query = query.where('fooSmallerOrEquals', '<=', 'barSmallerOrEquals');
-    query = query.where('fooEquals', '=', 'barEquals');
-    query = query.where('fooEqualsLong', '==', 'barEqualsLong');
-    query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
-    query = query.where('fooGreater', '>', 'barGreater');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.where('fooSmaller', '<', 'barSmaller');
+      query = query.where('fooSmallerOrEquals', '<=', 'barSmallerOrEquals');
+      query = query.where('fooEquals', '=', 'barEquals');
+      query = query.where('fooEqualsLong', '==', 'barEqualsLong');
+      query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
+      query = query.where('fooGreater', '>', 'barGreater');
+      return query.get();
+    });
   });
 
   it('accepts object', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, fieldFilters('foo', 'EQUAL', {
-                      mapValue: {
-                        fields: {
-                          foo: {
-                            stringValue: 'bar',
-                            valueType: 'stringValue',
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, fieldFilters('foo', 'EQUAL', {
+                        mapValue: {
+                          fields: {
+                            foo: {
+                              stringValue: 'bar',
+                              valueType: 'stringValue',
+                            },
                           },
                         },
-                      },
-                      valueType: 'mapValue',
-                    }));
+                        valueType: 'mapValue',
+                      }));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.where('foo', '=', {foo: 'bar'});
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.where('foo', '=', {foo: 'bar'});
+      return query.get();
+    });
   });
 
   it('supports field path objects for field paths', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request,
-          fieldFilters(
-              'foo.bar', 'EQUAL', 'foobar', 'bar.foo', 'EQUAL', 'foobar'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request,
+            fieldFilters(
+                'foo.bar', 'EQUAL', 'foobar', 'bar.foo', 'EQUAL', 'foobar'));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.where('foo.bar', '=', 'foobar');
-    query = query.where(new Firestore.FieldPath('bar', 'foo'), '=', 'foobar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.where('foo.bar', '=', 'foobar');
+      query = query.where(new Firestore.FieldPath('bar', 'foo'), '=', 'foobar');
+      return query.get();
+    });
   });
 
   it('supports strings for FieldPath.documentId()', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, fieldFilters('__name__', 'EQUAL', {
-            valueType: 'referenceValue',
-            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
-                'documents/collectionId/foo',
-          }));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, fieldFilters('__name__', 'EQUAL', {
+              valueType: 'referenceValue',
+              referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/foo',
+            }));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.where(Firestore.FieldPath.documentId(), '==', 'foo');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.where(Firestore.FieldPath.documentId(), '==', 'foo');
+      return query.get();
+    });
   });
 
   it('rejects custom objects for field paths', function() {
@@ -743,15 +785,19 @@ describe('where() interface', function() {
   });
 
   it('supports unary filters', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, unaryFilters('foo', 'IS_NAN', 'bar', 'IS_NULL'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, unaryFilters('foo', 'IS_NAN', 'bar', 'IS_NULL'));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.where('foo', '==', NaN);
-    query = query.where('bar', '=', null);
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.where('foo', '==', NaN);
+      query = query.where('bar', '=', null);
+      return query.get();
+    });
   });
 
   it('rejects invalid NaN filter', function() {
@@ -795,36 +841,48 @@ describe('orderBy() interface', function() {
   });
 
   it('accepts empty string', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, orderBy('foo', 'ASCENDING'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, orderBy('foo', 'ASCENDING'));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo');
+      return query.get();
+    });
   });
 
   it('accepts asc', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, orderBy('foo', 'ASCENDING'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, orderBy('foo', 'ASCENDING'));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo', 'asc');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo', 'asc');
+      return query.get();
+    });
   });
 
   it('accepts desc', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, orderBy('foo', 'DESCENDING'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, orderBy('foo', 'DESCENDING'));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo', 'desc');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo', 'desc');
+      return query.get();
+    });
   });
 
   it('verifies order', function() {
@@ -835,16 +893,20 @@ describe('orderBy() interface', function() {
   });
 
   it('accepts field path', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING'));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo.bar');
-    query = query.orderBy(new Firestore.FieldPath('bar', 'foo'));
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo.bar');
+      query = query.orderBy(new Firestore.FieldPath('bar', 'foo'));
+      return query.get();
+    });
   });
 
   it('verifies field path', function() {
@@ -879,19 +941,24 @@ describe('orderBy() interface', function() {
   });
 
   it('concatenates orders', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request,
-          orderBy(
-              'foo', 'ASCENDING', 'bar', 'DESCENDING', 'foobar', 'ASCENDING'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request,
+            orderBy(
+                'foo', 'ASCENDING', 'bar', 'DESCENDING', 'foobar',
+                'ASCENDING'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query =
-        query.orderBy('foo', 'asc').orderBy('bar', 'desc').orderBy('foobar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query =
+          query.orderBy('foo', 'asc').orderBy('bar', 'desc').orderBy('foobar');
+      return query.get();
+    });
   });
 });
 
@@ -905,14 +972,18 @@ describe('limit() interface', function() {
   });
 
   it('generates proto', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, limit(10));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, limit(10));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.limit(10);
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.limit(10);
+      return query.get();
+    });
   });
 
   it('expects number', function() {
@@ -923,14 +994,18 @@ describe('limit() interface', function() {
   });
 
   it('uses latest limit', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, limit(3));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, limit(3));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.limit(1).limit(2).limit(3);
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.limit(1).limit(2).limit(3);
+      return query.get();
+    });
   });
 });
 
@@ -944,14 +1019,18 @@ describe('offset() interface', function() {
   });
 
   it('generates proto', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, offset(10));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, offset(10));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.offset(10);
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.offset(10);
+      return query.get();
+    });
   });
 
   it('expects number', function() {
@@ -962,14 +1041,18 @@ describe('offset() interface', function() {
   });
 
   it('uses latest offset', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, offset(3));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, offset(3));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.offset(1).offset(2).offset(3);
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.offset(1).offset(2).offset(3);
+      return query.get();
+    });
   });
 });
 
@@ -983,16 +1066,20 @@ describe('select() interface', function() {
   });
 
   it('generates proto', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, select('a', 'b.c'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, select('a', 'b.c'));
+        return stream();
+      }
     };
 
-    let collection = firestore.collection('collectionId');
-    let query = collection.select('a', new Firestore.FieldPath('b', 'c'));
+    return createInstance(overrides).then(firestore => {
+      let collection = firestore.collection('collectionId');
+      let query = collection.select('a', new Firestore.FieldPath('b', 'c'));
 
-    return query.get().then(() => {
-      return collection.select('a', 'b.c').get();
+      return query.get().then(() => {
+        return collection.select('a', 'b.c').get();
+      });
     });
   });
 
@@ -1008,25 +1095,33 @@ describe('select() interface', function() {
   });
 
   it('uses latest field mask', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, select('bar'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, select('bar'));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.select('foo').select('bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.select('foo').select('bar');
+      return query.get();
+    });
   });
 
   it('implicitly adds FieldPath.documentId()', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, select('__name__'));
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, select('__name__'));
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.select();
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.select();
+      return query.get();
+    });
   });
 });
 
@@ -1040,38 +1135,46 @@ describe('startAt() interface', function() {
   });
 
   it('accepts fields', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          startAt(true, 'foo', 'bar'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+            startAt(true, 'foo', 'bar'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').orderBy('bar').startAt('foo', 'bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo').orderBy('bar').startAt('foo', 'bar');
+      return query.get();
+    });
   });
 
   it('accepts FieldPath.documentId()', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('__name__', 'ASCENDING'), startAt(true, {
-            valueType: 'referenceValue',
-            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
-                'documents/collectionId/doc',
-          }));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('__name__', 'ASCENDING'), startAt(true, {
+              valueType: 'referenceValue',
+              referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+            }));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let doc = snapshot('collectionId/doc', {foo: 'bar'});
-    let query = firestore.collection('collectionId');
+    return createInstance(overrides).then(firestore => {
+      let doc = snapshot('collectionId/doc', {foo: 'bar'});
+      let query = firestore.collection('collectionId');
 
-    return Promise.all([
-      query.orderBy(Firestore.FieldPath.documentId()).startAt(doc.id).get(),
-      query.orderBy(Firestore.FieldPath.documentId()).startAt(doc.ref).get(),
-    ]);
+      return Promise.all([
+        query.orderBy(Firestore.FieldPath.documentId()).startAt(doc.id).get(),
+        query.orderBy(Firestore.FieldPath.documentId()).startAt(doc.ref).get(),
+      ]);
+    });
   });
 
   it('validates value for FieldPath.documentId()', function() {
@@ -1108,117 +1211,141 @@ describe('startAt() interface', function() {
   });
 
   it('can specify document snapshot', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('__name__', 'ASCENDING'), startAt(true, {
-            valueType: 'referenceValue',
-            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
-                'documents/collectionId/doc',
-          }));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('__name__', 'ASCENDING'), startAt(true, {
+              valueType: 'referenceValue',
+              referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+            }));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId')
-                    .startAt(snapshot('collectionId/doc', {}));
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId')
+                      .startAt(snapshot('collectionId/doc', {}));
+      return query.get();
+    });
   });
 
   it('doesn\'t append documentId() twice', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('__name__', 'ASCENDING'), startAt(true, {
-            valueType: 'referenceValue',
-            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
-                'documents/collectionId/doc',
-          }));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('__name__', 'ASCENDING'), startAt(true, {
+              valueType: 'referenceValue',
+              referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+            }));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId')
-                    .orderBy(Firestore.FieldPath.documentId())
-                    .startAt(snapshot('collectionId/doc', {}));
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId')
+                      .orderBy(Firestore.FieldPath.documentId())
+                      .startAt(snapshot('collectionId/doc', {}));
+      return query.get();
+    });
   });
 
   it('can extract implicit direction for document snapshot', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('foo', 'ASCENDING', '__name__', 'ASCENDING'),
-          startAt(true, 'bar', {
-            valueType: 'referenceValue',
-            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
-                'documents/collectionId/doc',
-          }));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'ASCENDING', '__name__', 'ASCENDING'),
+            startAt(true, 'bar', {
+              valueType: 'referenceValue',
+              referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+            }));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId').orderBy('foo');
-    query = query.startAt(snapshot('collectionId/doc', {foo: 'bar'}));
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId').orderBy('foo');
+      query = query.startAt(snapshot('collectionId/doc', {foo: 'bar'}));
+      return query.get();
+    });
   });
 
   it('can extract explicit direction for document snapshot', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('foo', 'DESCENDING', '__name__', 'DESCENDING'),
-          startAt(true, 'bar', {
-            valueType: 'referenceValue',
-            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
-                'documents/collectionId/doc',
-          }));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'DESCENDING', '__name__', 'DESCENDING'),
+            startAt(true, 'bar', {
+              valueType: 'referenceValue',
+              referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+            }));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId').orderBy('foo', 'desc');
-    query = query.startAt(snapshot('collectionId/doc', {foo: 'bar'}));
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId').orderBy('foo', 'desc');
+      query = query.startAt(snapshot('collectionId/doc', {foo: 'bar'}));
+      return query.get();
+    });
   });
 
   it('can specify document snapshot with inequality filter', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('b', 'ASCENDING', '__name__', 'ASCENDING'),
-          startAt(true, 'b', {
-            valueType: 'referenceValue',
-            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
-                'documents/collectionId/doc',
-          }),
-          fieldFilters(
-              'a', 'EQUAL', 'a', 'b', 'GREATER_THAN_OR_EQUAL', 'b', 'c',
-              'EQUAL', 'c'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('b', 'ASCENDING', '__name__', 'ASCENDING'),
+            startAt(true, 'b', {
+              valueType: 'referenceValue',
+              referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+            }),
+            fieldFilters(
+                'a', 'EQUAL', 'a', 'b', 'GREATER_THAN_OR_EQUAL', 'b', 'c',
+                'EQUAL', 'c'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId')
-                    .where('a', '=', 'a')
-                    .where('b', '>=', 'b')
-                    .where('c', '=', 'c')
-                    .startAt(snapshot('collectionId/doc', {b: 'b'}));
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId')
+                      .where('a', '=', 'a')
+                      .where('b', '>=', 'b')
+                      .where('c', '=', 'c')
+                      .startAt(snapshot('collectionId/doc', {b: 'b'}));
+      return query.get();
+    });
   });
 
   it('ignores equality filter with document snapshot cursor', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('__name__', 'ASCENDING'), startAt(true, {
-            valueType: 'referenceValue',
-            referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
-                'documents/collectionId/doc',
-          }),
-          fieldFilters('foo', 'EQUAL', 'bar'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('__name__', 'ASCENDING'), startAt(true, {
+              valueType: 'referenceValue',
+              referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
+                  'documents/collectionId/doc',
+            }),
+            fieldFilters('foo', 'EQUAL', 'bar'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId')
-                    .where('foo', '=', 'bar')
-                    .startAt(snapshot('collectionId/doc', {foo: 'bar'}));
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId')
+                      .where('foo', '=', 'bar')
+                      .startAt(snapshot('collectionId/doc', {foo: 'bar'}));
+      return query.get();
+    });
   });
 
   it('validates field exists in document snapshot', function() {
@@ -1253,17 +1380,21 @@ describe('startAt() interface', function() {
   });
 
   it('can overspecify order by', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          startAt(true, 'foo'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+            startAt(true, 'foo'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').orderBy('bar').startAt('foo');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo').orderBy('bar').startAt('foo');
+      return query.get();
+    });
   });
 
   it('validates input', function() {
@@ -1274,15 +1405,20 @@ describe('startAt() interface', function() {
   });
 
   it('uses latest value', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, orderBy('foo', 'ASCENDING'), startAt(true, 'bar'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'ASCENDING'), startAt(true, 'bar'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').startAt('foo').startAt('bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo').startAt('foo').startAt('bar');
+      return query.get();
+    });
   });
 });
 
@@ -1296,17 +1432,21 @@ describe('startAfter() interface', function() {
   });
 
   it('accepts fields', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          startAt(false, 'foo', 'bar'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+            startAt(false, 'foo', 'bar'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').orderBy('bar').startAfter('foo', 'bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo').orderBy('bar').startAfter('foo', 'bar');
+      return query.get();
+    });
   });
 
   it('validates input', function() {
@@ -1317,16 +1457,20 @@ describe('startAfter() interface', function() {
   });
 
   it('uses latest value', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('foo', 'ASCENDING'), startAt(false, 'bar'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'ASCENDING'), startAt(false, 'bar'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').startAfter('foo').startAfter('bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo').startAfter('foo').startAfter('bar');
+      return query.get();
+    });
   });
 });
 
@@ -1340,17 +1484,21 @@ describe('endAt() interface', function() {
   });
 
   it('accepts fields', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          endAt(false, 'foo', 'bar'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+            endAt(false, 'foo', 'bar'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').orderBy('bar').endAt('foo', 'bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo').orderBy('bar').endAt('foo', 'bar');
+      return query.get();
+    });
   });
 
   it('validates input', function() {
@@ -1361,15 +1509,20 @@ describe('endAt() interface', function() {
   });
 
   it('uses latest value', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, orderBy('foo', 'ASCENDING'), endAt(false, 'bar'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'ASCENDING'), endAt(false, 'bar'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').endAt('foo').endAt('bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo').endAt('foo').endAt('bar');
+      return query.get();
+    });
   });
 });
 
@@ -1383,17 +1536,21 @@ describe('endBefore() interface', function() {
   });
 
   it('accepts fields', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(
-          request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          endAt(true, 'foo', 'bar'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(
+            request, orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
+            endAt(true, 'foo', 'bar'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').orderBy('bar').endBefore('foo', 'bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo').orderBy('bar').endBefore('foo', 'bar');
+      return query.get();
+    });
   });
 
   it('validates input', function() {
@@ -1404,32 +1561,39 @@ describe('endBefore() interface', function() {
   });
 
   it('uses latest value', function() {
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      requestEquals(request, orderBy('foo', 'ASCENDING'), endAt(true, 'bar'));
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request, orderBy('foo', 'ASCENDING'), endAt(true, 'bar'));
 
-      return stream();
+        return stream();
+      }
     };
 
-    let query = firestore.collection('collectionId');
-    query = query.orderBy('foo').endBefore('foo').endBefore('bar');
-    return query.get();
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      query = query.orderBy('foo').endBefore('foo').endBefore('bar');
+      return query.get();
+    });
   });
 
   it('is immutable', function() {
     let expectedResult = buildQuery(limit(10));
 
-    firestore._firestoreClient._innerApiCalls.runQuery = function(request) {
-      assert.deepEqual(request, expectedResult);
-      return stream();
+    const overrides = {
+      runQuery: (request) => {
+        assert.deepEqual(request, expectedResult);
+        return stream();
+      }
     };
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId').limit(10);
+      let adjustedQuery = query.orderBy('foo').endBefore('foo');
 
-    let query = firestore.collection('collectionId').limit(10);
-    let adjustedQuery = query.orderBy('foo').endBefore('foo');
-
-    return query.get().then(() => {
-      expectedResult = buildQuery(
-          limit(10), orderBy('foo', 'ASCENDING'), endAt(true, 'foo'));
-      return adjustedQuery.get();
+      return query.get().then(() => {
+        expectedResult = buildQuery(
+            limit(10), orderBy('foo', 'ASCENDING'), endAt(true, 'foo'));
+        return adjustedQuery.get();
+      });
     });
   });
 });

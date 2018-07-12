@@ -32,19 +32,19 @@ const document = require('../src/document')(reference.DocumentReference);
 const DocumentSnapshot = document.DocumentSnapshot;
 const convert = require('../src/convert');
 const ResourcePath = require('../src/path').ResourcePath;
-
-const firestore = new Firestore({
-  projectId: 'projectID',
-  sslCreds: grpc.credentials.createInsecure(),
-  timestampsInSnapshots: true,
-  keyFilename: './test/fake-certificate.json',
-});
+const createInstanceHelper = require('../test/util/helpers').createInstance;
 
 /** List of test cases that are ignored. */
 const ignoredRe = [];
 
 /** If non-empty, list the test cases to run exclusively. */
 const exclusiveRe = [];
+
+// The project ID used in the conformance test protos.
+const CONFORMANCE_TEST_PROJECT_ID = 'projectID';
+
+// Firestore instance initialized by the test runner.
+let firestore;
 
 const docRef = function(path) {
   const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
@@ -56,8 +56,18 @@ const collRef = function(path) {
   return firestore.collection(relativePath);
 };
 
-const watchQuery =
-    collRef('projects/projectID/databases/(default)/documents/C').orderBy('a');
+const watchQuery = function() {
+  return firestore.collection('C').orderBy('a');
+};
+
+const createInstance = function(overrides) {
+  return createInstanceHelper(
+             overrides, {projectId: CONFORMANCE_TEST_PROJECT_ID})
+      .then(firestoreClient => {
+        firestore = firestoreClient;
+      });
+};
+
 
 /** Converts JSON test data into JavaScript types suitable for the Node API. */
 const convertInput = {
@@ -154,7 +164,7 @@ const convertInput = {
     }
 
     return new Firestore.QuerySnapshot(
-        watchQuery, readTime, docs.length, () => docs, () => changes);
+        watchQuery(), readTime, docs.length, () => docs, () => changes);
   },
 };
 
@@ -279,9 +289,9 @@ function runTest(spec) {
   console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`);
 
   const updateTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
+    const overrides = {commit: commitHandler(spec)};
 
-    return Promise.resolve().then(() => {
+    return createInstance(overrides).then(() => {
       let varargs = [];
 
       if (spec.jsonData) {
@@ -305,7 +315,7 @@ function runTest(spec) {
   };
 
   const queryTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.runQuery = queryHandler(spec);
+    const overrides = {runQuery: queryHandler(spec)};
 
     const applyClause = function(query, clause) {
       if (clause.select) {
@@ -337,9 +347,8 @@ function runTest(spec) {
       return query;
     };
 
-    let query = collRef(spec.collPath);
-
-    return Promise.resolve().then(() => {
+    return createInstance(overrides).then(() => {
+      let query = collRef(spec.collPath);
       for (let clause of spec.clauses) {
         query = applyClause(query, clause);
       }
@@ -348,9 +357,9 @@ function runTest(spec) {
   };
 
   const deleteTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
+    const overrides = {commit: commitHandler(spec)};
 
-    return Promise.resolve().then(() => {
+    return createInstance(overrides).then(() => {
       if (spec.precondition) {
         const precondition = convertInput.precondition(deleteSpec.precondition);
         return docRef(spec.docRefPath).delete(precondition);
@@ -361,9 +370,9 @@ function runTest(spec) {
   };
 
   const setTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
+    const overrides = {commit: commitHandler(spec)};
 
-    return Promise.resolve().then(() => {
+    return createInstance(overrides).then(() => {
       const setOption = {};
 
       if (spec.option && spec.option.all) {
@@ -381,19 +390,18 @@ function runTest(spec) {
   };
 
   const createTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.commit = commitHandler(spec);
+    const overrides = {commit: commitHandler(spec)};
 
-    return Promise.resolve().then(() => {
+    return createInstance(overrides).then(() => {
       return docRef(spec.docRefPath)
           .create(convertInput.argument(spec.jsonData));
     });
   };
 
   const getTest = function(spec) {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments =
-        getHandler(spec);
+    const overrides = {batchGetDocuments: getHandler(spec)};
 
-    return Promise.resolve().then(() => {
+    return createInstance(overrides).then(() => {
       return docRef(spec.docRefPath).get();
     });
   };
@@ -403,38 +411,38 @@ function runTest(spec) {
 
     const writeStream = through.obj();
 
-    firestore._firestoreClient._innerApiCalls.listen = () => {
-      return duplexify.obj(through.obj(), writeStream);
-    };
+    const overrides = {listen: () => duplexify.obj(through.obj(), writeStream)};
 
-    return new Promise((resolve, reject) => {
-      const unlisten = watchQuery.onSnapshot(
-          actualSnap => {
-            const expectedSnapshot = expectedSnapshots.shift();
-            if (expectedSnapshot) {
-              if (!actualSnap.isEqual(
-                      convertInput.snapshot(expectedSnapshot))) {
-                reject(
-                    new Error('Expected and actual snapshots do not match.'));
+    return createInstance(overrides).then(() => {
+      return new Promise((resolve, reject) => {
+        const unlisten = watchQuery().onSnapshot(
+            actualSnap => {
+              const expectedSnapshot = expectedSnapshots.shift();
+              if (expectedSnapshot) {
+                if (!actualSnap.isEqual(
+                        convertInput.snapshot(expectedSnapshot))) {
+                  reject(
+                      new Error('Expected and actual snapshots do not match.'));
+                }
+
+                if (expectedSnapshots.length === 0 || !spec.isError) {
+                  unlisten();
+                  resolve();
+                }
+              } else {
+                reject(new Error('Received unexpected snapshot'));
               }
+            },
+            err => {
+              assert.equal(expectedSnapshots.length, 0);
+              unlisten();
+              reject(err);
+            });
 
-              if (expectedSnapshots.length === 0 || !spec.isError) {
-                unlisten();
-                resolve();
-              }
-            } else {
-              reject(new Error('Received unexpected snapshot'));
-            }
-          },
-          err => {
-            assert.equal(expectedSnapshots.length, 0);
-            unlisten();
-            reject(err);
-          });
-
-      for (const response of spec.responses) {
-        writeStream.write(convertProto.listenRequest(response));
-      }
+        for (const response of spec.responses) {
+          writeStream.write(convertProto.listenRequest(response));
+        }
+      });
     });
   };
 
@@ -508,10 +516,6 @@ describe('Conformance Tests', function() {
 
     return testSuite.tests;
   };
-
-  before(() => {
-    firestore._ensureClient();
-  });
 
   for (let testCase of loadTestCases()) {
     const isIgnored = ignoredRe.find(re => re.test(testCase.description));
