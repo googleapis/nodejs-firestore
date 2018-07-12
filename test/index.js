@@ -323,8 +323,8 @@ describe('instantiation', function() {
       timestampsInSnapshots: true,
     });
 
-    assert.equal(firestore._initalizationOptions.projectId, PROJECT_ID);
-    assert.equal(firestore._initalizationOptions.timestampsInSnapshots, true);
+    assert.equal(firestore._initalizationSettings.projectId, PROJECT_ID);
+    assert.equal(firestore._initalizationSettings.timestampsInSnapshots, true);
   });
 
   it('can only call settings() once', function() {
@@ -355,6 +355,19 @@ describe('instantiation', function() {
       new Firestore().settings({projectId: 1337});
     }, /Argument "settings.projectId" is not a valid string/);
   });
+
+  it('validates timestampsInSnapshots is boolean', function() {
+    assert.throws(() => {
+      new Firestore({
+        timestampsInSnapshots: 1337,
+      });
+    }, /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
+
+    assert.throws(() => {
+      new Firestore().settings({timestampsInSnapshots: 1337});
+    }, /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
+  });
+
 
   it('detects project id', function() {
     let firestore = new Firestore({

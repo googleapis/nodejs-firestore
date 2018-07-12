@@ -250,7 +250,7 @@ class Firestore {
      * @private
      * @type {Object}
      */
-    this._initalizationOptions = settings;
+    this._initalizationSettings = settings;
 
     /**
      * Whether the initialization settings can still be changed by invoking
@@ -282,6 +282,8 @@ class Firestore {
       Firestore.log('Firestore', null, 'Detected GCF environment');
     }
 
+    validate.isOptionalBoolean(
+        'settings.timestampsInSnapshots', settings.timestampsInSnapshots);
     this._timestampsInSnapshotsEnabled = !!settings.timestampsInSnapshots;
 
     if (settings && settings.projectId) {
@@ -300,7 +302,7 @@ class Firestore {
    * Specifies custom settings to be used to configure the `Firestore`
    * instance. Can only be invoked once and before any other Firestore method.
    *
-   * If settings are provided via both `settings()` and the Firestore
+   * If settings are provided via both `settings()` and the `Firestore`
    * constructor, both settings objects are merged and any settings provided via
    * `settings()` take precedence.
    *
@@ -326,10 +328,10 @@ class Firestore {
           'Firestore object.');
     }
 
-    this._initalizationOptions =
-        extend({}, this._initalizationOptions, settings);
+    this._initalizationSettings =
+        extend({}, this._initalizationSettings, settings);
     this._timestampsInSnapshotsEnabled =
-        !!this._initalizationOptions.timestampsInSnapshots;
+        !!this._initalizationSettings.timestampsInSnapshots;
     this._settingsFrozen = true;
   }
 
@@ -795,13 +797,13 @@ follow these steps, YOUR APP MAY BREAK.`);
 
       this._clientInitialized = new Promise((resolve, reject) => {
         this._firestoreClient =
-            module.exports.v1beta1(this._initalizationOptions);
+            module.exports.v1beta1(this._initalizationSettings);
 
         Firestore.log('Firestore', null, 'Initialized Firestore GAPIC Client');
 
-        if (this._initalizationOptions.projectId) {
+        if (this._initalizationSettings.projectId) {
           this._referencePath = new ResourcePath(
-              this._initalizationOptions.projectId,
+              this._initalizationSettings.projectId,
               this._referencePath.databaseId);
           resolve();
         } else {
