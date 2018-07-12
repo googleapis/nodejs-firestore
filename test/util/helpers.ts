@@ -60,7 +60,8 @@ export function createInstance(
       },
       firestoreSettings);
 
-  const firestore = new Firestore(initializationOptions);
+  const firestore = new Firestore();
+  firestore.settings(initializationOptions);
 
   return firestore._ensureClient().then(() => {
     if (apiOverrides) {
