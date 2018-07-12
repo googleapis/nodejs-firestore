@@ -22,7 +22,7 @@ const grpc = new gax.GrpcClient().grpc;
 const through = require('through2');
 
 const Firestore = require('../src');
-let firestore;
+const createInstance = require('../test/util/helpers').createInstance;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -31,17 +31,6 @@ const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
-
-function createInstance() {
-  let firestore = new Firestore({
-    projectId: PROJECT_ID,
-    sslCreds: grpc.credentials.createInsecure(),
-    timestampsInSnapshots: true,
-    keyFilename: './test/fake-certificate.json',
-  });
-
-  return firestore._ensureClient().then(() => firestore);
-}
 
 function commit(transaction, writes, err) {
   let proto = {
@@ -183,7 +172,7 @@ function query(transaction) {
     structuredQuery: {
       from: [
         {
-          collectionId: 'col',
+          collectionId: 'collectionId',
         },
       ],
       where: {
@@ -224,66 +213,61 @@ function query(transaction) {
   };
 }
 
-function runTransaction(callback, request) {
-  let requests = Array.prototype.slice.call(arguments, 1);
-
-  firestore._firestoreClient._innerApiCalls.beginTransaction = function(
-      actual, options, callback) {
-    request = requests.shift();
-    assert.equal(request.type, 'begin');
-    assert.deepEqual(actual, request.request);
-    callback(request.error, request.response);
+/**
+ * Asserts that the given transaction function issues the expected requests.
+ */
+function runTransaction(transactionCallback, ...expectedRequests) {
+  const overrides = {
+    beginTransaction: (actual, options, callback) => {
+      const request = expectedRequests.shift();
+      assert.equal(request.type, 'begin');
+      assert.deepEqual(actual, request.request);
+      callback(request.error, request.response);
+    },
+    commit: (actual, options, callback) => {
+      const request = expectedRequests.shift();
+      assert.equal(request.type, 'commit');
+      assert.deepEqual(actual, request.request);
+      callback(request.error, request.response);
+    },
+    rollback: (actual, options, callback) => {
+      const request = expectedRequests.shift();
+      assert.equal(request.type, 'rollback');
+      assert.deepEqual(actual, request.request);
+      callback(request.error, request.response);
+    },
+    batchGetDocuments: (actual) => {
+      const request = expectedRequests.shift();
+      assert.equal(request.type, 'getDocument');
+      assert.deepEqual(actual, request.request);
+      return request.stream;
+    },
+    runQuery: (actual) => {
+      const request = expectedRequests.shift();
+      assert.equal(request.type, 'query');
+      assert.deepEqual(actual, request.request);
+      return request.stream;
+    }
   };
 
-  firestore._firestoreClient._innerApiCalls.commit = function(
-      actual, options, callback) {
-    request = requests.shift();
-    assert.equal(request.type, 'commit');
-    assert.deepEqual(actual, request.request);
-    callback(request.error, request.response);
-  };
-
-  firestore._firestoreClient._innerApiCalls.rollback = function(
-      actual, options, callback) {
-    request = requests.shift();
-    assert.equal(request.type, 'rollback');
-    assert.deepEqual(actual, request.request);
-    callback(request.error, request.response);
-  };
-
-  firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
-      actual) {
-    request = requests.shift();
-    assert.equal(request.type, 'getDocument');
-    assert.deepEqual(actual, request.request);
-    return request.stream;
-  };
-
-  firestore._firestoreClient._innerApiCalls.runQuery = function(actual) {
-    request = requests.shift();
-    assert.equal(request.type, 'query');
-    assert.deepEqual(actual, request.request);
-    return request.stream;
-  };
-
-  return firestore.runTransaction(callback)
-      .then(val => {
-        assert.equal(requests.length, 0);
-        return val;
-      })
-      .catch(err => {
-        assert.equal(requests.length, 0);
-        return Promise.reject(err);
-      });
+  return createInstance(overrides).then(firestore => {
+    return firestore
+        .runTransaction(transaction => {
+          const docRef = firestore.doc('collectionId/documentId');
+          return transactionCallback(transaction, docRef);
+        })
+        .then(val => {
+          assert.equal(expectedRequests.length, 0);
+          return val;
+        })
+        .catch(err => {
+          assert.equal(expectedRequests.length, 0);
+          return Promise.reject(err);
+        });
+  });
 }
 
 describe('successful transactions', function() {
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
-  });
-
   it('empty transaction', function() {
     return runTransaction(() => {
       return Promise.resolve();
@@ -300,30 +284,36 @@ describe('successful transactions', function() {
 });
 
 describe('failed transactions', function() {
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
+  it('requires update function', function() {
+    const overrides = {
+      beginTransaction: () => {
+        assert.fail();
+      }
+    };
+
+    return createInstance(overrides).then(firestore => {
+      assert.throws(function() {
+        return firestore.runTransaction();
+      }, /Argument "updateFunction" is not a valid function\./);
     });
   });
 
-  it('requires update function', function() {
-    assert.throws(function() {
-      return runTransaction();
-    }, /Argument "updateFunction" is not a valid function\./);
-  });
-
   it('requires valid retry number', function() {
-    firestore._firestoreClient._innerApiCalls.beginTransaction = function() {
-      assert.fail();
+    const overrides = {
+      beginTransaction: () => {
+        assert.fail();
+      }
     };
 
-    assert.throws(function() {
-      firestore.runTransaction(() => {}, {maxAttempts: 'foo'});
-    }, /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
+    return createInstance(overrides).then(firestore => {
+      assert.throws(function() {
+        firestore.runTransaction(() => {}, {maxAttempts: 'foo'});
+      }, /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
 
-    assert.throws(function() {
-      firestore.runTransaction(() => {}, {maxAttempts: 0});
-    }, /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
+      assert.throws(function() {
+        firestore.runTransaction(() => {}, {maxAttempts: 0});
+      }, /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
+    });
   });
 
   it('requires a promise', function() {
@@ -339,19 +329,22 @@ describe('failed transactions', function() {
   });
 
   it('handles exception', function() {
-    firestore.request = function() {
-      return Promise.reject(new Error('Expected exception'));
-    };
+    return createInstance().then(firestore => {
+      firestore.request = function() {
+        return Promise.reject(new Error('Expected exception'));
+      };
 
-    return runTransaction(() => {
-             return Promise.resolve();
-           })
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          assert.equal(err.message, 'Expected exception');
-        });
+      return firestore
+          .runTransaction(() => {
+            return Promise.resolve();
+          })
+          .then(() => {
+            throw new Error('Unexpected success in Promise');
+          })
+          .catch(err => {
+            assert.equal(err.message, 'Expected exception');
+          });
+    });
   });
 
   it('doesn\'t retry on callback failure', function() {
@@ -438,17 +431,8 @@ describe('failed transactions', function() {
 });
 
 describe('transaction operations', function() {
-  let docRef;
-
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-      docRef = firestore.doc('collectionId/documentId');
-    });
-  });
-
   it('support get with document ref', function() {
-    return runTransaction(transaction => {
+    return runTransaction((transaction, docRef) => {
       return transaction.get(docRef).then(doc => {
         assert.equal(doc.id, 'documentId');
       });
@@ -471,7 +455,7 @@ describe('transaction operations', function() {
 
   it('enforce that gets come before writes', function() {
     return runTransaction(
-               transaction => {
+               (transaction, docRef) => {
                  transaction.set(docRef, {foo: 'bar'});
                  return transaction.get(docRef);
                },
@@ -488,8 +472,8 @@ describe('transaction operations', function() {
   });
 
   it('support get with query', function() {
-    return runTransaction(transaction => {
-      let query = firestore.collection('col').where('foo', '==', 'bar');
+    return runTransaction((transaction, docRef) => {
+      let query = docRef.parent.where('foo', '==', 'bar');
       return transaction.get(query).then(results => {
         assert.equal(results.docs[0].id, 'documentId');
       });
@@ -497,10 +481,10 @@ describe('transaction operations', function() {
   });
 
   it('support getAll', function() {
-    const firstDoc = firestore.doc('collectionId/firstDocument');
-    const secondDoc = firestore.doc('collectionId/secondDocument');
+    return runTransaction((transaction, docRef) => {
+      const firstDoc = docRef.parent.doc('firstDocument');
+      const secondDoc = docRef.parent.doc('secondDocument');
 
-    return runTransaction(transaction => {
       return transaction.getAll(firstDoc, secondDoc).then(docs => {
         assert.equal(docs.length, 2);
         assert.equal(docs[0].id, 'firstDocument');
@@ -511,7 +495,7 @@ describe('transaction operations', function() {
 
   it('enforce that getAll come before writes', function() {
     return runTransaction(
-               transaction => {
+               (transaction, docRef) => {
                  transaction.set(docRef, {foo: 'bar'});
                  return transaction.getAll(docRef);
                },
@@ -538,7 +522,7 @@ describe('transaction operations', function() {
       },
     };
 
-    return runTransaction(transaction => {
+    return runTransaction((transaction, docRef) => {
       transaction.create(docRef, {});
       return Promise.resolve();
     }, begin(), commit(null, [create]));
@@ -570,7 +554,7 @@ describe('transaction operations', function() {
       },
     };
 
-    return runTransaction(transaction => {
+    return runTransaction((transaction, docRef) => {
       transaction.update(docRef, {'a.b': 'c'});
       transaction.update(docRef, 'a.b', 'c');
       transaction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
@@ -591,7 +575,7 @@ describe('transaction operations', function() {
       },
     };
 
-    return runTransaction(transaction => {
+    return runTransaction((transaction, docRef) => {
       transaction.set(docRef, {'a.b': 'c'});
       return Promise.resolve();
     }, begin(), commit(null, [set]));
@@ -613,7 +597,7 @@ describe('transaction operations', function() {
       },
     };
 
-    return runTransaction(transaction => {
+    return runTransaction((transaction, docRef) => {
       transaction.set(docRef, {'a.b': 'c'}, {merge: true});
       return Promise.resolve();
     }, begin(), commit(null, [set]));
@@ -624,7 +608,7 @@ describe('transaction operations', function() {
       delete: DOCUMENT_NAME,
     };
 
-    return runTransaction(transaction => {
+    return runTransaction((transaction, docRef) => {
       transaction.delete(docRef);
       return Promise.resolve();
     }, begin(), commit(null, [remove]));
@@ -642,7 +626,7 @@ describe('transaction operations', function() {
       },
     };
 
-    return runTransaction(transaction => {
+    return runTransaction((transaction, docRef) => {
       transaction.delete(docRef).set(docRef, {});
       return Promise.resolve();
     }, begin(), commit(null, [remove, set]));

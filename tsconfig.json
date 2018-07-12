@@ -14,7 +14,12 @@
     "src/*.ts",
     "src/**/*.js",
     "test/*.js",
+    "test/*.ts",
+    "test/**/*.ts",
     "system-test/*.js",
     "conformance/*.js"
+  ],
+  "exclude": [
+    "test/typescript.ts"
   ]
 }

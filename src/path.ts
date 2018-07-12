@@ -57,7 +57,6 @@ const FIELD_PATH_RE = /^[^*~/[\]]+$/;
  * @class
  */
 abstract class Path<T> {
-  private _formattedName: string|undefined = undefined;
   /**
    * Creates a new Path with the given segments.
    *
@@ -74,11 +73,7 @@ abstract class Path<T> {
    * @type {string}
    */
   get formattedName(): string {
-    if (this._formattedName === undefined) {
-      this._formattedName = this.canonicalString();
-    }
-
-    return this._formattedName!;
+    return this.canonicalString()!;
   }
 
   abstract construct(segments: string[]|string): T;

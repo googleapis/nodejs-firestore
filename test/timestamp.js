@@ -23,15 +23,11 @@ const is = require('is');
 const through = require('through2');
 const assert = require('assert');
 
-function createInstance(opts, document) {
-  let firestore = new Firestore(Object.assign({}, opts, {
-    projectId: 'test-project',
-    sslCreds: grpc.credentials.createInsecure(),
-    keyFilename: './test/fake-certificate.json',
-  }));
+const createInstanceHelper = require('../test/util/helpers').createInstance;
 
-  return firestore._ensureClient().then(() => {
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function() {
+function createInstance(opts, document) {
+  const overrides = {
+    batchGetDocuments: () => {
       const stream = through.obj();
       setImmediate(function() {
         stream.push({found: document, readTime: {seconds: 5, nanos: 6}});
@@ -39,10 +35,10 @@ function createInstance(opts, document) {
       });
 
       return stream;
-    };
+    }
+  };
 
-    return firestore;
-  });
+  return createInstanceHelper(overrides, opts)
 }
 
 function document(field, value) {
@@ -78,10 +74,7 @@ const DOCUMENT_WITH_EMPTY_TIMESTAMP = document('moonLanding', {
 describe('timestamps', function() {
   it('returned when enabled', function() {
     return createInstance(
-               {
-                 timestampsInSnapshots: true,
-               },
-               DOCUMENT_WITH_TIMESTAMP)
+               {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
           const expected = new Firestore.Timestamp(-14182920, 123000123);
           return firestore.doc('coll/doc').get().then(res => {
