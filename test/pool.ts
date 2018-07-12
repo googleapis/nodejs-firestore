@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2018 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,16 +40,16 @@ describe('Client pool', () => {
 
     expect(clientPool.size).to.eq(0);
 
-    const deferred = deferredPromises(4);
+    const operationPromises = deferredPromises(4);
 
-    clientPool.run(() => deferred[0].promise);
+    clientPool.run(() => operationPromises[0].promise);
     expect(clientPool.size).to.eq(1);
-    clientPool.run(() => deferred[1].promise);
+    clientPool.run(() => operationPromises[1].promise);
     expect(clientPool.size).to.eq(1);
-    clientPool.run(() => deferred[2].promise);
+    clientPool.run(() => operationPromises[2].promise);
     expect(clientPool.size).to.eq(1);
 
-    clientPool.run(() => deferred[3].promise);
+    clientPool.run(() => operationPromises[3].promise);
     expect(clientPool.size).to.eq(2);
   });
 
@@ -60,21 +60,21 @@ describe('Client pool', () => {
 
     expect(clientPool.size).to.eq(0);
 
-    const deferred = deferredPromises(5);
+    const operationPromises = deferredPromises(5);
 
-    const operationComplete = clientPool.run(() => deferred[0].promise);
+    const completionPromise = clientPool.run(() => operationPromises[0].promise);
     expect(clientPool.size).to.eq(1);
-    clientPool.run(() => deferred[1].promise);
+    clientPool.run(() => operationPromises[1].promise);
     expect(clientPool.size).to.eq(1);
-    clientPool.run(() => deferred[2].promise);
+    clientPool.run(() => operationPromises[2].promise);
     expect(clientPool.size).to.eq(2);
-    clientPool.run(() => deferred[3].promise);
+    clientPool.run(() => operationPromises[3].promise);
     expect(clientPool.size).to.eq(2);
 
-    deferred[0].resolve();
+    operationPromises[0].resolve();
 
-    return operationComplete.then(() => {
-      clientPool.run(() => deferred[4].promise);
+    return completionPromise.then(() => {
+      clientPool.run(() => operationPromises[4].promise);
       expect(clientPool.size).to.eq(2);
     });
   });
@@ -98,10 +98,7 @@ describe('Client pool', () => {
     completionPromises.push(clientPool.run(() => operationPromises[3].promise));
     expect(clientPool.size).to.eq(2);
 
-    operationPromises[0].resolve();
-    operationPromises[1].resolve();
-    operationPromises[2].resolve();
-    operationPromises[3].resolve();
+    operationPromises.forEach(deferred => deferred.resolve());
 
     return Promise.all(completionPromises).then(() => {
       expect(clientPool.size).to.eq(1);
@@ -127,10 +124,8 @@ describe('Client pool', () => {
     completionPromises.push(clientPool.run(() => operationPromises[3].promise));
     expect(clientPool.size).to.eq(2);
 
-    operationPromises[0].reject();
-    operationPromises[1].reject();
-    operationPromises[2].reject();
-    operationPromises[3].reject();
+
+    operationPromises.forEach(deferred => deferred.reject());
 
     return Promise.all(completionPromises.map(p => p.catch(() => {})))
         .then(() => {

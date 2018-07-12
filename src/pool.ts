@@ -67,7 +67,7 @@ export class ClientPool<T> {
   }
 
   /**
-   * Reduces the number of operation for the provided client, potentially
+   * Reduces the number of operations for the provided client, potentially
    * removing it from the pool of active clients.
    */
   private release(client: T): void {
