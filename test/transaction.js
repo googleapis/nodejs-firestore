@@ -213,34 +213,37 @@ function query(transaction) {
   };
 }
 
-function runTransaction(callback, ...requests) {
+/**
+ * Asserts that the given transaction function issues the expected requests.
+ */
+function runTransaction(transactionCallback, ...expectedRequests) {
   const overrides = {
     beginTransaction: (actual, options, callback) => {
-      const request = requests.shift();
+      const request = expectedRequests.shift();
       assert.equal(request.type, 'begin');
       assert.deepEqual(actual, request.request);
       callback(request.error, request.response);
     },
     commit: (actual, options, callback) => {
-      const request = requests.shift();
+      const request = expectedRequests.shift();
       assert.equal(request.type, 'commit');
       assert.deepEqual(actual, request.request);
       callback(request.error, request.response);
     },
     rollback: (actual, options, callback) => {
-      const request = requests.shift();
+      const request = expectedRequests.shift();
       assert.equal(request.type, 'rollback');
       assert.deepEqual(actual, request.request);
       callback(request.error, request.response);
     },
     batchGetDocuments: (actual) => {
-      const request = requests.shift();
+      const request = expectedRequests.shift();
       assert.equal(request.type, 'getDocument');
       assert.deepEqual(actual, request.request);
       return request.stream;
     },
     runQuery: (actual) => {
-      const request = requests.shift();
+      const request = expectedRequests.shift();
       assert.equal(request.type, 'query');
       assert.deepEqual(actual, request.request);
       return request.stream;
@@ -251,14 +254,14 @@ function runTransaction(callback, ...requests) {
     return firestore
         .runTransaction(transaction => {
           const docRef = firestore.doc('collectionId/documentId');
-          return callback(transaction, docRef);
+          return transactionCallback(transaction, docRef);
         })
         .then(val => {
-          assert.equal(requests.length, 0);
+          assert.equal(expectedRequests.length, 0);
           return val;
         })
         .catch(err => {
-          assert.equal(requests.length, 0);
+          assert.equal(expectedRequests.length, 0);
           return Promise.reject(err);
         });
   });
