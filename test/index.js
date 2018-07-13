@@ -540,17 +540,6 @@ describe('snapshot_() method', function() {
     });
   });
 
-  it('validates Project ID provided', function() {
-    firestore = new Firestore({
-      sslCreds: grpc.credentials.createInsecure(),
-      keyFilename: './test/fake-certificate.json'
-    });
-
-    assert.throws(
-        () => firestore.snapshot_(),
-        /Cannot use `snapshot_\(\)` without a Project ID. Please provide a Project ID via `Firestore.settings\(\)`./);
-  });
-
   it('handles ProtobufJS', function() {
     let doc = firestore.snapshot_(
         document('doc', {
