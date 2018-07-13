@@ -16,6 +16,7 @@
 
 'use strict';
 
+const assert = require('assert');
 const bun = require('bun');
 const extend = require('extend');
 const is = require('is');
@@ -65,6 +66,11 @@ const FieldValue = require('./field-value').FieldValue;
 const Timestamp = require('./timestamp');
 
 /*!
+ * @see ClientPool
+ */
+const ClientPool = require('./pool').ClientPool;
+
+/*!
  * @see CollectionReference
  */
 let CollectionReference;
@@ -100,12 +106,12 @@ let Transaction;
 /*!
  * @see v1beta1
  */
-let v1beta1;  // Lazy-loaded in `_ensureClient()`
+let v1beta1;  // Lazy-loaded in `_runRequest()`
 
 /*!
  * @see @google-cloud/common
  */
-let common;  // Lazy-loaded in `_ensureClient()`
+let common;  // Lazy-loaded in `_runRequest()`
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -119,6 +125,16 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
  * @type {number}
  */
 const MAX_REQUEST_RETRIES = 5;
+
+/*!
+ * The maximum number of concurrent requests supported by a single GRPC channel,
+ * as enforced by Google's Frontend. If the SDK issues more than 100 concurrent
+ * operations, we need to use more than one GAPIC client since these clients
+ * multiplex all requests over a single channel.
+ *
+ * @type {number}
+ */
+const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
 
 /*!
  * GRPC Error code for 'UNAVAILABLE'.
@@ -233,11 +249,12 @@ class Firestore {
     });
 
     /**
+     * A client pool to distribute requests over multiple GAPIC clients in order
+     * to work around a connection limit of 100 concurrent requests per client.
      * @private
-     * @type {object|null}
-     * @property {FirestoreClient} Firestore The Firestore GAPIC client.
+     * @type {ClientPool|null}
      */
-    this._firestoreClient = null;
+    this._clientPool = null;
 
     /**
      * The configuration options for the GAPIC client.
@@ -725,47 +742,78 @@ follow these steps, YOUR APP MAY BREAK.`);
   }
 
   /**
-   * Initializes the client and detects the Firestore Project ID. Returns a
-   * Promise on completion. If the client is already initialized, the returned
-   * Promise resolves immediately.
+   * Executes a new request using the first available GAPIC client.
    *
    * @private
    */
-  _ensureClient() {
+  _runRequest(op) {
+    // Initialize the client pool if this is the first request.
     if (!this._clientInitialized) {
       common = require('@google-cloud/common');
-
-      this._clientInitialized = new Promise((resolve, reject) => {
-        this._firestoreClient =
-            module.exports.v1beta1(this._initalizationOptions);
-
-        Firestore.log('Firestore', null, 'Initialized Firestore GAPIC Client');
-
-        // We schedule Project ID detection using `setImmediate` to allow the
-        // testing framework to provide its own implementation of
-        // `getProjectId`.
-        setImmediate(() => {
-          this._firestoreClient.getProjectId((err, projectId) => {
-            if (err) {
-              Firestore.log(
-                  'Firestore._ensureClient', null,
-                  'Failed to detect project ID: %s', err);
-              reject(err);
-            } else {
-              Firestore.log(
-                  'Firestore._ensureClient', null, 'Detected project ID: %s',
-                  projectId);
-              this._referencePath =
-                  new ResourcePath(projectId, this._referencePath.databaseId);
-              resolve();
-            }
-          });
-        });
-      });
+      this._clientInitialized = this._initClientPool().then(clientPool => {
+        this._clientPool = clientPool;
+      })
     }
-    return this._clientInitialized;
+
+    return this._clientInitialized.then(() => this._clientPool.run(op));
   }
 
+  /**
+   * Initializes the client pool and invokes Project ID detection. Returns a
+   * Promise on completion.
+   *
+   * @private
+   * @return {Promise<ClientPool>}
+   */
+  _initClientPool() {
+    assert(!this._clientInitialized, 'Client pool already initialized');
+
+    const clientPool =
+        new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
+          const gapicClient =
+              module.exports.v1beta1(this._initalizationOptions);
+          Firestore.log(
+              'Firestore', null, 'Initialized Firestore GAPIC Client');
+          return gapicClient;
+        });
+
+    const projectIdProvided = this._referencePath.projectId !== '{{projectId}}';
+
+    if (projectIdProvided) {
+      return Promise.resolve(clientPool);
+    } else {
+      return clientPool.run(client => this._detectProjectId(client))
+          .then(projectId => {
+            this._referencePath =
+                new ResourcePath(projectId, this._referencePath.databaseId);
+            return clientPool;
+          });
+    }
+  }
+
+  /**
+   * Auto-detects the Firestore Project ID.
+   *
+   * @private
+   * @param {object} gapicClient - The Firestore GAPIC client.
+   * @return {Promise<string>} A Promise that resolves with the Project ID.
+   */
+  _detectProjectId(gapicClient) {
+    return new Promise(
+        (resolve, reject) => {gapicClient.getProjectId((err, projectId) => {
+          if (err) {
+            Firestore.log(
+                'Firestore._detectProjectId', null,
+                'Failed to detect project ID: %s', err);
+            reject(err);
+          } else {
+            Firestore.log(
+                'Firestore._detectProjectId', null, 'Detected project ID: %s',
+                projectId);
+            resolve(projectId);
+          }
+        })});
+  }
   /**
    * Decorate the request options of an API request. This is used to replace
    * any `{{projectId}}` placeholders with the value detected from the user's
@@ -801,7 +849,7 @@ follow these steps, YOUR APP MAY BREAK.`);
    *
    * @private
    * @param {number} attemptsRemaining - The number of available attempts.
-   * @param {string} requestTag A unique client-assigned identifier for this
+   * @param {string} requestTag - A unique client-assigned identifier for this
    * request.
    * @param {retryFunction} func - Method returning a Promise than can be
    * retried.
@@ -972,14 +1020,14 @@ follow these steps, YOUR APP MAY BREAK.`);
   request(methodName, request, requestTag, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._ensureClient().then(() => {
+    return this._runRequest(gapicClient => {
       const decorated = this._decorateRequest(request);
       return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
           Firestore.log(
               'Firestore.request', requestTag, 'Sending request: %j',
               decorated.request);
-          this._firestoreClient[methodName](
+          gapicClient[methodName](
               decorated.request, decorated.gax, (err, result) => {
                 if (err) {
                   Firestore.log(
@@ -1017,7 +1065,7 @@ follow these steps, YOUR APP MAY BREAK.`);
   readStream(methodName, request, requestTag, allowRetries) {
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._ensureClient().then(() => {
+    return this._runRequest(gapicClient => {
       const decorated = this._decorateRequest(request);
       return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
@@ -1025,7 +1073,7 @@ follow these steps, YOUR APP MAY BREAK.`);
                    Firestore.log(
                        'Firestore.readStream', requestTag,
                        'Sending request: %j', decorated.request);
-                   let stream = this._firestoreClient[methodName](
+                   let stream = gapicClient[methodName](
                        decorated.request, decorated.gax);
                    let logger = through.obj(function(chunk, enc, callback) {
                      Firestore.log(
@@ -1069,7 +1117,7 @@ follow these steps, YOUR APP MAY BREAK.`);
     let self = this;
     let attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._ensureClient().then(() => {
+    return this._runRequest(gapicClient => {
       const decorated = this._decorateRequest(request);
       return this._retry(attempts, requestTag, () => {
         return Promise.resolve().then(() => {
@@ -1077,8 +1125,7 @@ follow these steps, YOUR APP MAY BREAK.`);
               'Firestore.readWriteStream', requestTag, 'Opening stream');
           // The generated bi-directional streaming API takes the list of GAX
           // headers as its second argument.
-          let requestStream =
-              this._firestoreClient[methodName]({}, decorated.gax);
+          let requestStream = gapicClient[methodName]({}, decorated.gax);
 
           // The transform stream to assign the project ID.
           let transform = through.obj(function(chunk, encoding, callback) {

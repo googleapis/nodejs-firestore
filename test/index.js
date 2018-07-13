@@ -314,6 +314,22 @@ describe('instantiation', function() {
     assert(firestore instanceof Firestore);
   });
 
+  it('uses project id from constructor', () => {
+    let firestore = new Firestore({
+      projectId: PROJECT_ID,
+      sslCreds: grpc.credentials.createInsecure(),
+      timestampsInSnapshots: true,
+      keyFilename: './test/fake-certificate.json',
+    });
+
+    return firestore._runRequest(() => {
+      assert.equal(
+          firestore.formattedName,
+          `projects/${PROJECT_ID}/databases/(default)`);
+      return Promise.resolve();
+    });
+  });
+
   it('detects project id', function() {
     let firestore = new Firestore({
       sslCreds: grpc.credentials.createInsecure(),
@@ -324,48 +340,47 @@ describe('instantiation', function() {
     assert.equal(
         firestore.formattedName, 'projects/{{projectId}}/databases/(default)');
 
-    let initialized = firestore._ensureClient();
+    firestore._detectProjectId = () => Promise.resolve(PROJECT_ID);
 
-    let projectIdDetected = false;
-
-    firestore._firestoreClient.getProjectId = function(callback) {
-      projectIdDetected = true;
-      callback(null, PROJECT_ID);
-    };
-
-    firestore._firestoreClient._innerApiCalls.batchGetDocuments = function(
-        request) {
-      let expectedRequest = {
-        database: DATABASE_ROOT,
-        documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`],
-      };
-      assert.deepEqual(request, expectedRequest);
-      return stream(found('documentId'));
-    };
-
-    return initialized.then(() => {
-      assert.equal(projectIdDetected, true);
-      return firestore.doc('collectionId/documentId').get();
+    return firestore._runRequest(() => {
+      assert.equal(
+          firestore.formattedName,
+          `projects/${PROJECT_ID}/databases/(default)`);
+      return Promise.resolve();
     });
   });
 
-  it('handles error from project ID detection', function() {
+  it('uses project id from gapic client', function() {
     let firestore = new Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
     });
 
-    let initialized = firestore._ensureClient();
+    assert.equal(
+        firestore.formattedName, 'projects/{{projectId}}/databases/(default)');
 
-    firestore._firestoreClient.getProjectId = function(callback) {
-      callback(new Error('Project ID error'));
+    let gapicClient = {getProjectId: callback => callback(null, PROJECT_ID)};
+
+    return firestore._detectProjectId(gapicClient).then(projectId => {
+      assert.equal(projectId, PROJECT_ID);
+    });
+  });
+
+  it('handles error from project ID detection', () => {
+    let firestore = new Firestore({
+      sslCreds: grpc.credentials.createInsecure(),
+      timestampsInSnapshots: true,
+      keyFilename: './test/fake-certificate.json',
+    });
+
+    let gapicClient = {
+      getProjectId: callback => callback(new Error('Injected Error'))
     };
 
-    return initialized.then(
-        () => assert.fail('Expected error missing'), err => {
-          assert.equal(err.message, 'Project ID error');
-        });
+    return firestore._detectProjectId(gapicClient)
+        .then(() => assert.fail('Error ignored'))
+        .catch(err => assert.equal('Injected Error', err.message))
   });
 
   it('exports all types', function() {
