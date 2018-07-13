@@ -220,15 +220,15 @@ const GRPC_UNAVAILABLE = 14;
  */
 class Firestore {
   /**
-   * @param {Object=} options - [Configuration object](#/docs).
-   * @param {string=} options.projectId The Firestore Project ID. Can be
+   * @param {Object=} settings - [Configuration object](#/docs).
+   * @param {string=} settings.projectId The Firestore Project ID. Can be
    * omitted in environments that support `Application Default Credentials`
    * {@see https://cloud.google.com/docs/authentication}
-   * @param {string=} options.keyFilename Local file containing the Service
+   * @param {string=} settings.keyFilename Local file containing the Service
    * Account credentials. Can be omitted in environments that support
    * `Application Default Credentials`
    * {@see https://cloud.google.com/docs/authentication}
-   * @param {boolean=} options.timestampsInSnapshots Enables the use of
+   * @param {boolean=} settings.timestampsInSnapshots Enables the use of
    * `Timestamp`s for timestamp fields in `DocumentSnapshots`.<br/>
    * Currently, Firestore returns timestamp fields as `Date` but `Date` only
    * supports millisecond precision, which leads to truncation and causes
@@ -242,8 +242,8 @@ class Firestore {
    * default and this option will be removed so you should change your code to
    * use `Timestamp` now and opt-in to this new behavior as soon as you can.
    */
-  constructor(options) {
-    options = extend({}, options, {
+  constructor(settings) {
+    settings = extend({}, settings, {
       libName: 'gccl',
       libVersion: libVersion,
     });
@@ -257,11 +257,12 @@ class Firestore {
     this._clientPool = null;
 
     /**
-     * The configuration options for the GAPIC client.
+     * Whether the initialization settings can still be changed by invoking
+     * `settings()`.
      * @private
-     * @type {Object}
+     * @type {boolean}
      */
-    this._initalizationOptions = options;
+    this._settingsFrozen = false;
 
     /**
      * A Promise that resolves when client initialization completes. Can be
@@ -270,6 +271,15 @@ class Firestore {
      * @type {Promise|null}
      */
     this._clientInitialized = null;
+
+    /**
+     * The configuration options for the GAPIC client.
+     * @private
+     * @type {Object}
+     */
+    this._initalizationSettings = null;
+
+    this.validateAndApplySettings(settings);
 
     // GCF currently tears down idle connections after two minutes. Requests
     // that are issued after this period may fail. On GCF, we therefore issue
@@ -285,43 +295,59 @@ class Firestore {
       Firestore.log('Firestore', null, 'Detected GCF environment');
     }
 
-    this._timestampsInSnapshotsEnabled = !!options.timestampsInSnapshots;
+    Firestore.log('Firestore', null, 'Initialized Firestore');
+  }
 
-    if (!this._timestampsInSnapshotsEnabled) {
-      console.error(`
-The behavior for Date objects stored in Firestore is going to change
-AND YOUR APP MAY BREAK.
-To hide this warning and ensure your app does not break, you need to add the
-following code to your app before calling any other Cloud Firestore methods:
+  /**
+   * Specifies custom settings to be used to configure the `Firestore`
+   * instance. Can only be invoked once and before any other Firestore method.
+   *
+   * If settings are provided via both `settings()` and the `Firestore`
+   * constructor, both settings objects are merged and any settings provided via
+   * `settings()` take precedence.
+   *
+   * @param {object} settings The settings to use for all Firestore operations.
+   */
+  settings(settings) {
+    validate.isObject('settings', settings);
+    validate.isOptionalString('settings.projectId', settings.projectId);
+    validate.isOptionalBoolean(
+        'settings.timestampsInSnapshots', settings.timestampsInSnapshots);
 
-  const settings = {/* your settings... */ timestampsInSnapshots: true};
-  const firestore = new Firestore(settings);
-
-With this change, timestamps stored in Cloud Firestore will be read back as
-Firebase Timestamp objects instead of as system Date objects. So you will also
-need to update code expecting a Date to instead expect a Timestamp. For example:
-
-  // Old:
-  const date = snapshot.get('created_at');
-  // New:
-  const timestamp = snapshot.get('created_at');
-  const date = timestamp.toDate();
-
-Please audit all existing usages of Date when you enable the new behavior. In a
-future release, the behavior will change to the new behavior, so if you do not
-follow these steps, YOUR APP MAY BREAK.`);
+    if (this._clientInitialized) {
+      throw new Error(
+          'Firestore has already been started and its settings can no longer ' +
+          'be changed. You can only call settings() before calling any other ' +
+          'methods on a Firestore object.');
     }
 
-    if (options && options.projectId) {
-      validate.isString('options.projectId', options.projectId);
-      this._referencePath = new ResourcePath(options.projectId, '(default)');
+    if (this._settingsFrozen) {
+      throw new Error(
+          'Firestore.settings() has already be called. You can only call ' +
+          'settings() once, and only before calling any other methods on a ' +
+          'Firestore object.');
+    }
+
+    const mergedSettings = extend({}, this._initalizationSettings, settings);
+    this.validateAndApplySettings(mergedSettings);
+    this._settingsFrozen = true;
+  }
+
+  validateAndApplySettings(settings) {
+    validate.isOptionalBoolean(
+        'settings.timestampsInSnapshots', settings.timestampsInSnapshots);
+    this._timestampsInSnapshotsEnabled = !!settings.timestampsInSnapshots;
+
+    if (settings && settings.projectId) {
+      validate.isString('settings.projectId', settings.projectId);
+      this._referencePath = new ResourcePath(settings.projectId, '(default)');
     } else {
       // Initialize a temporary reference path that will be overwritten during
       // project ID detection.
       this._referencePath = new ResourcePath('{{projectId}}', '(default)');
     }
 
-    Firestore.log('Firestore', null, 'Initialized Firestore');
+    this._initalizationSettings = settings;
   }
 
   /**
@@ -429,6 +455,12 @@ follow these steps, YOUR APP MAY BREAK.`);
    * for existing documents, otherwise a DocumentSnapshot.
    */
   snapshot_(documentOrName, readTime, encoding) {
+    if (!this._initalizationSettings.projectId) {
+      throw new Error(
+          'Cannot use `snapshot_()` without a Project ID. Please provide a ' +
+          'Project ID via `Firestore.settings()`.');
+    }
+
     let convertTimestamp;
     let convertDocument;
 
@@ -750,9 +782,36 @@ follow these steps, YOUR APP MAY BREAK.`);
     // Initialize the client pool if this is the first request.
     if (!this._clientInitialized) {
       common = require('@google-cloud/common');
+
+      if (!this._timestampsInSnapshotsEnabled) {
+        console.error(`
+The behavior for Date objects stored in Firestore is going to change
+AND YOUR APP MAY BREAK.
+To hide this warning and ensure your app does not break, you need to add the
+following code to your app before calling any other Cloud Firestore methods:
+
+  const firestore = new Firestore();
+  const settings = {/* your settings... */ timestampsInSnapshots: true};
+  firestore.settings(settings);
+
+With this change, timestamps stored in Cloud Firestore will be read back as
+Firebase Timestamp objects instead of as system Date objects. So you will also
+need to update code expecting a Date to instead expect a Timestamp. For example:
+
+  // Old:
+  const date = snapshot.get('created_at');
+  // New:
+  const timestamp = snapshot.get('created_at');
+  const date = timestamp.toDate();
+
+Please audit all existing usages of Date when you enable the new behavior. In a
+future release, the behavior will change to the new behavior, so if you do not
+follow these steps, YOUR APP MAY BREAK.`);
+      }
+
       this._clientInitialized = this._initClientPool().then(clientPool => {
         this._clientPool = clientPool;
-      })
+      });
     }
 
     return this._clientInitialized.then(() => this._clientPool.run(op));

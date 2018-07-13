@@ -53,6 +53,12 @@ xdescribe('firestore.d.ts', function() {
   FirebaseFirestore.setLogFunction(console.log);
 
   it('has typings for Firestore', () => {
+    firestore.settings({
+      keyFilename: 'foo',
+      projectId: 'foo',
+      timestampsInSnapshots: true,
+      otherOption: 'foo'
+    });
     const collRef: CollectionReference = firestore.collection('coll');
     const docRef1: DocumentReference = firestore.doc('coll/doc');
     const docRef2: DocumentReference = firestore.doc('coll/doc');
