@@ -32,6 +32,12 @@ const createInstance = require('../test/util/helpers').createInstance;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
+const DEFAULT_SETTINGS = {
+  projectId: PROJECT_ID,
+  sslCreds: grpc.credentials.createInsecure(),
+  keyFilename: './test/fake-certificate.json',
+  timestampsInSnapshots: true
+};
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -305,22 +311,64 @@ function stream() {
 
 describe('instantiation', function() {
   it('creates instance', function() {
-    let firestore = new Firestore({
-      projectId: PROJECT_ID,
-      sslCreds: grpc.credentials.createInsecure(),
-      timestampsInSnapshots: true,
-      keyFilename: './test/fake-certificate.json',
-    });
+    let firestore = new Firestore(DEFAULT_SETTINGS);
     assert(firestore instanceof Firestore);
   });
 
+  it('merges settings', function() {
+    let firestore = new Firestore(DEFAULT_SETTINGS);
+    firestore.settings({foo: 'bar'});
+
+    assert.equal(firestore._initalizationSettings.projectId, PROJECT_ID);
+    assert.equal(firestore._initalizationSettings.foo, 'bar');
+  });
+
+  it('can only call settings() once', function() {
+    let firestore = new Firestore(DEFAULT_SETTINGS);
+    firestore.settings({timestampsInSnapshots: true});
+
+    assert.throws(
+        () => firestore.settings({}),
+        /Firestore.settings\(\) has already be called. You can only call settings\(\) once, and only before calling any other methods on a Firestore object./);
+  });
+
+  it('cannot change settings after client initialized', function() {
+    let firestore = new Firestore(DEFAULT_SETTINGS);
+    firestore._runRequest(() => Promise.resolve());
+
+    assert.throws(
+        () => firestore.settings({}),
+        /Firestore has already been started and its settings can no longer be changed. You can only call settings\(\) before calling any other methods on a Firestore object./);
+  });
+
+  it('validates project ID is string', function() {
+    assert.throws(() => {
+      const settings = Object.assign({}, DEFAULT_SETTINGS, {
+        projectId: 1337,
+      });
+      new Firestore(settings);
+    }, /Argument "settings.projectId" is not a valid string/);
+
+    assert.throws(() => {
+      new Firestore(DEFAULT_SETTINGS).settings({projectId: 1337});
+    }, /Argument "settings.projectId" is not a valid string/);
+  });
+
+  it('validates timestampsInSnapshots is boolean', function() {
+    assert.throws(() => {
+      const settings = Object.assign({}, DEFAULT_SETTINGS, {
+        timestampsInSnapshots: 1337,
+      });
+      new Firestore(settings);
+    }, /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
+
+    assert.throws(() => {
+      new Firestore(DEFAULT_SETTINGS).settings({timestampsInSnapshots: 1337});
+    }, /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
+  });
+
   it('uses project id from constructor', () => {
-    let firestore = new Firestore({
-      projectId: PROJECT_ID,
-      sslCreds: grpc.credentials.createInsecure(),
-      timestampsInSnapshots: true,
-      keyFilename: './test/fake-certificate.json',
-    });
+    let firestore = new Firestore(DEFAULT_SETTINGS);
 
     return firestore._runRequest(() => {
       assert.equal(
@@ -367,7 +415,20 @@ describe('instantiation', function() {
     });
   });
 
-  it('handles error from project ID detection', () => {
+  it('uses project ID from settings()', function() {
+    let firestore = new Firestore({
+      sslCreds: grpc.credentials.createInsecure(),
+      timestampsInSnapshots: true,
+      keyFilename: './test/fake-certificate.json',
+    });
+
+    firestore.settings({projectId: PROJECT_ID});
+
+    assert.equal(
+        firestore.formattedName, `projects/${PROJECT_ID}/databases/(default)`);
+  });
+
+  it('handles error from project ID detection', function() {
     let firestore = new Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
@@ -477,6 +538,17 @@ describe('snapshot_() method', function() {
       timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
     });
+  });
+
+  it('validates Project ID provided', function() {
+    firestore = new Firestore({
+      sslCreds: grpc.credentials.createInsecure(),
+      keyFilename: './test/fake-certificate.json'
+    });
+
+    assert.throws(
+        () => firestore.snapshot_(),
+        /Cannot use `snapshot_\(\)` without a Project ID. Please provide a Project ID via `Firestore.settings\(\)`./);
   });
 
   it('handles ProtobufJS', function() {

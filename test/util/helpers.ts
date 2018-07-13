@@ -80,7 +80,8 @@ export function createInstance(
       },
       firestoreSettings);
 
-  const firestore = new Firestore(initializationOptions);
+  const firestore = new Firestore();
+  firestore.settings(initializationOptions);
 
   const clientPool = new ClientPool(/* concurrentRequestLimit= */ 1, () => {
     const gapicClient: GapicClient = v1beta1(initializationOptions);

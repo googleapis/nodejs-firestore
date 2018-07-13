@@ -75,6 +75,7 @@ module.exports = validators => {
         },
         object: is.object,
         string: is.string,
+        boolean: is.boolean
       },
       validators);
 
