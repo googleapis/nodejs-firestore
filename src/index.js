@@ -347,7 +347,7 @@ class Firestore {
       this._referencePath = new ResourcePath('{{projectId}}', '(default)');
     }
 
-    this._initalizationSettings  = settings;
+    this._initalizationSettings = settings;
   }
 
   /**
@@ -455,7 +455,7 @@ class Firestore {
    * for existing documents, otherwise a DocumentSnapshot.
    */
   snapshot_(documentOrName, readTime, encoding) {
-    if (this._referencePath.projectId === '{{projectId}}') {
+    if (!this._initalizationSettings.projectId) {
       throw new Error(
           'Cannot use `snapshot_()` without a Project ID. Please provide a ' +
           'Project ID via `Firestore.settings()`.');

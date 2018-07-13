@@ -41,7 +41,7 @@
     "generate-scaffolding": "repo-tools generate all",
     "system-test": "mocha build/system-test --timeout 600000",
     "conformance": "mocha build/conformance",
-    "test-only": "nyc mocha build/test",
+    "test-only": "GOOGLE_APPLICATION_CREDENTIALS=build/test/fake-certificate.json nyc mocha build/test",
     "test": "npm run test-only",
     "check": "gts check",
     "clean": "gts clean",
