@@ -18,18 +18,13 @@
 
 let assert = require('power-assert');
 let is = require('is');
+let pkgUp = require('pkg-up');
 
 let DocumentReference = require('../src/reference').DocumentReference;
 let DocumentSnapshot =
     require('../src/document')(DocumentReference).DocumentSnapshot;
 
-let version;
-try {
-  version = require('../../package.json').version;
-} catch (e) {
-  version = require('../package.json').version;
-}
-
+let version = require(pkgUp.sync()).version;
 let Firestore = require('../src');
 
 if (process.env.NODE_ENV === 'DEBUG') {

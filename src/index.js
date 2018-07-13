@@ -20,17 +20,11 @@ const assert = require('assert');
 const bun = require('bun');
 const extend = require('extend');
 const is = require('is');
+const pkgUp = require('pkg-up');
 const through = require('through2');
 const util = require('util');
 
-let libVersion;
-
-// Allow Firestore to be run both from 'src' and 'build/src'.
-try {
-  libVersion = require('../package.json').version;
-} catch (err) {
-  libVersion = require('../../package.json').version;
-}
+const libVersion = require(pkgUp.sync()).version;
 
 const path = require('./path');
 const convert = require('./convert');
@@ -135,7 +129,7 @@ const MAX_REQUEST_RETRIES = 5;
 /*!
  * The maximum number of concurrent requests supported by a single GRPC channel,
  * as enforced by Google's Frontend. If the SDK issues more than 100 concurrent
- * operations, we need to use more than one GAPIC client since these client
+ * operations, we need to use more than one GAPIC client since these clients
  * multiplex all requests over a single channel.
  *
  * @type {number}
@@ -855,7 +849,7 @@ follow these steps, YOUR APP MAY BREAK.`);
    *
    * @private
    * @param {number} attemptsRemaining - The number of available attempts.
-   * @param {string} requestTag A unique client-assigned identifier for this
+   * @param {string} requestTag - A unique client-assigned identifier for this
    * request.
    * @param {retryFunction} func - Method returning a Promise than can be
    * retried.
