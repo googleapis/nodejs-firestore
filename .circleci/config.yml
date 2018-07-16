@@ -65,7 +65,11 @@ jobs:
             npm install
           environment:
             NPM_CONFIG_PREFIX: /home/node/.npm-global
-      - run: npm run test-only
+      - run:
+          name: Run unit tests
+          command: npm run test-only
+          environment:
+            GOOGLE_APPLICATION_CREDENTIALS: build/test/fake-certificate.json
       - run: npm run codecov
   node8:
     docker:
