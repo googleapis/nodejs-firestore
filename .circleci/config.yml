@@ -65,7 +65,11 @@ jobs:
             npm install
           environment:
             NPM_CONFIG_PREFIX: /home/node/.npm-global
-      - run: npm run test-only
+      - run:
+          name: Run unit tests
+          command: npm run test-only
+          environment:
+            GOOGLE_APPLICATION_CREDENTIALS: build/test/fake-certificate.json
       - run: npm run codecov
   node8:
     docker:
@@ -127,4 +131,5 @@ jobs:
     steps:
       - checkout
       - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+      - run: *npm_install_and_link
       - run: npm publish
