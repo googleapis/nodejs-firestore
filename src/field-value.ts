@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2018 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,7 @@
 
 'use strict';
 
-/*!
- * Sentinel value for a field delete.
- *
- */
-let DELETE_SENTINEL;
-
-/*!
- * Sentinel value for a server timestamp.
- *
- */
-let SERVER_TIMESTAMP_SENTINEL;
+import * as api from '../protos/firestore_proto_api';
 
 /**
  * Sentinel values that can be used when writing documents with set() or
@@ -34,7 +24,7 @@ let SERVER_TIMESTAMP_SENTINEL;
  *
  * @class
  */
-class FieldValue {
+export class FieldValue {
   /**
    * @private
    * @hideconstructor
@@ -56,8 +46,8 @@ class FieldValue {
    *   // Document now only contains { c: 'd' }
    * });
    */
-  static delete() {
-    return DELETE_SENTINEL;
+  static delete(): FieldValue {
+    return DeleteTransform.DELETE_SENTINEL;
   }
 
   /**
@@ -77,8 +67,8 @@ class FieldValue {
    *   console.log(`Server time set to ${doc.get('time')}`);
    * });
    */
-  static serverTimestamp() {
-    return SERVER_TIMESTAMP_SENTINEL;
+  static serverTimestamp(): FieldValue {
+    return ServerTimestampTransform.SERVER_TIMESTAMP_SENTINEL;
   }
 
   /**
@@ -87,7 +77,7 @@ class FieldValue {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `FieldValue` is equal to the provided value.
    */
-  isEqual(other) {
+  isEqual(other): boolean {
     return this === other;
   }
 }
@@ -102,20 +92,39 @@ class FieldValue {
  * @private
  * @abstract
  */
-class FieldTransform extends FieldValue {}
+export abstract class FieldTransform extends FieldValue {
+  /** Whether this FieldTransform should be included in the document mask. */
+  abstract get includeInDocumentMask(): boolean;
+  /**
+   * Whether this FieldTransform should be included in the list of document
+   * transforms.
+   */
+  abstract get includeInDocumentTransform(): boolean;
+}
 
 /**
  * A transform that deletes a field from a Firestore document.
  *
  * @private
  */
-class DeleteTransform extends FieldTransform {
+export class DeleteTransform extends FieldTransform {
+  /**
+   * Sentinel value for a field delete.
+   *
+   * @private
+   */
+  static DELETE_SENTINEL = new DeleteTransform();
+
+  private constructor() {
+    super();
+  }
+
   /**
    * Deletes are included in document masks.
    *
    * @private
    */
-  get includeInDocumentMask() {
+  get includeInDocumentMask(): true {
     return true;
   }
 
@@ -124,25 +133,34 @@ class DeleteTransform extends FieldTransform {
    *
    * @private
    */
-  get includeInDocumentTransform() {
+  get includeInDocumentTransform(): false {
     return false;
   }
 }
-
-DELETE_SENTINEL = new DeleteTransform();
 
 /**
  * A transform that sets a field to the Firestore server time.
  *
  * @private
  */
-class ServerTimestampTransform extends FieldTransform {
+export class ServerTimestampTransform extends FieldTransform {
+  /**
+   * Sentinel value for a server timestamp.
+   *
+   * @private
+   */
+  static SERVER_TIMESTAMP_SENTINEL = new ServerTimestampTransform();
+
+  private constructor() {
+    super();
+  }
+
   /**
    * Server timestamps are omitted from document masks.
    *
    * @private
    */
-  get includeInDocumentMask() {
+  get includeInDocumentMask(): false {
     return false;
   }
 
@@ -151,7 +169,7 @@ class ServerTimestampTransform extends FieldTransform {
    *
    * @private
    */
-  get includeInDocumentTransform() {
+  get includeInDocumentTransform(): true {
     return true;
   }
 
@@ -163,19 +181,10 @@ class ServerTimestampTransform extends FieldTransform {
    * to.
    * @return {object} The 'FieldTransform' proto message.
    */
-  toProto(fieldPath) {
+  toProto(fieldPath): api.FieldTransform {
     return {
       fieldPath: fieldPath.formattedName,
       setToServerValue: 'REQUEST_TIME',
     };
   }
 }
-
-SERVER_TIMESTAMP_SENTINEL = new ServerTimestampTransform();
-
-module.exports = {
-  FieldValue: FieldValue,
-  FieldTransform: FieldTransform,
-  DeleteTransform: DeleteTransform,
-  ServerTimestampTransform: ServerTimestampTransform,
-};
