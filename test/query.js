@@ -634,7 +634,7 @@ describe('where() interface', function() {
                 'EQUAL', 'barEquals', 'fooEqualsLong', 'EQUAL', 'barEqualsLong',
                 'fooGreaterOrEquals', 'GREATER_THAN_OR_EQUAL',
                 'barGreaterOrEquals', 'fooGreater', 'GREATER_THAN',
-                'barGreater'));
+                'barGreater', 'fooContains', 'ARRAY_CONTAINS', 'barContains'));
 
         return stream();
       }
@@ -648,6 +648,7 @@ describe('where() interface', function() {
       query = query.where('fooEqualsLong', '==', 'barEqualsLong');
       query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
       query = query.where('fooGreater', '>', 'barGreater');
+      query = query.where('fooContains', 'array-contains', 'barContains');
       return query.get();
     });
   });
@@ -1301,15 +1302,15 @@ describe('startAt() interface', function() {
     const overrides = {
       runQuery: (request) => {
         requestEquals(
-            request, orderBy('b', 'ASCENDING', '__name__', 'ASCENDING'),
-            startAt(true, 'b', {
+            request, orderBy('c', 'ASCENDING', '__name__', 'ASCENDING'),
+            startAt(true, 'c', {
               valueType: 'referenceValue',
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
             }),
             fieldFilters(
-                'a', 'EQUAL', 'a', 'b', 'GREATER_THAN_OR_EQUAL', 'b', 'c',
-                'EQUAL', 'c'));
+                'a', 'EQUAL', 'a', 'b', 'ARRAY_CONTAINS', 'b', 'c',
+                'GREATER_THAN_OR_EQUAL', 'c', 'd', 'EQUAL', 'd'));
 
         return stream();
       }
@@ -1318,9 +1319,10 @@ describe('startAt() interface', function() {
     return createInstance(overrides).then(firestore => {
       let query = firestore.collection('collectionId')
                       .where('a', '=', 'a')
-                      .where('b', '>=', 'b')
-                      .where('c', '=', 'c')
-                      .startAt(snapshot('collectionId/doc', {b: 'b'}));
+                      .where('b', 'array-contains', 'b')
+                      .where('c', '>=', 'c')
+                      .where('d', '=', 'd')
+                      .startAt(snapshot('collectionId/doc', {c: 'c'}));
       return query.get();
     });
   });

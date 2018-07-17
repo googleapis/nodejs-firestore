@@ -223,7 +223,12 @@ xdescribe('firestore.d.ts', function() {
     let query: Query = collRef;
     const firestore: FirebaseFirestore.Firestore = collRef.firestore;
     docRef.get().then((snapshot:DocumentSnapshot) => {
+      query = query.where('foo', '<', 'bar');
+      query = query.where('foo', '<=', 'bar');
       query = query.where('foo', '==', 'bar');
+      query = query.where('foo', '>=', 'bar');
+      query = query.where('foo', '>', 'bar');
+      query = query.where('foo', 'array-contains', 'bar');
       query = query.where(new FieldPath('foo'), '==', 'bar');
       query = query.orderBy('foo');
       query = query.orderBy('foo', 'asc');
