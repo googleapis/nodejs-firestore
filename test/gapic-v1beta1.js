@@ -74,7 +74,7 @@ describe('FirestoreClient', () => {
 
       client.getDocument(request, (err, response) => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         assert(typeof response === 'undefined');
         done();
       });
@@ -141,7 +141,7 @@ describe('FirestoreClient', () => {
 
       client.listDocuments(request, (err, response) => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         assert(typeof response === 'undefined');
         done();
       });
@@ -210,7 +210,7 @@ describe('FirestoreClient', () => {
 
       client.createDocument(request, (err, response) => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         assert(typeof response === 'undefined');
         done();
       });
@@ -269,7 +269,7 @@ describe('FirestoreClient', () => {
 
       client.updateDocument(request, (err, response) => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         assert(typeof response === 'undefined');
         done();
       });
@@ -318,7 +318,7 @@ describe('FirestoreClient', () => {
 
       client.deleteDocument(request, err => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         done();
       });
     });
@@ -389,7 +389,7 @@ describe('FirestoreClient', () => {
       });
       stream.on('error', err => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         done();
       });
 
@@ -447,7 +447,7 @@ describe('FirestoreClient', () => {
 
       client.beginTransaction(request, (err, response) => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         assert(typeof response === 'undefined');
         done();
       });
@@ -504,7 +504,7 @@ describe('FirestoreClient', () => {
 
       client.commit(request, (err, response) => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         assert(typeof response === 'undefined');
         done();
       });
@@ -557,7 +557,7 @@ describe('FirestoreClient', () => {
 
       client.rollback(request, err => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         done();
       });
     });
@@ -624,7 +624,7 @@ describe('FirestoreClient', () => {
       });
       stream.on('error', err => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         done();
       });
 
@@ -695,7 +695,7 @@ describe('FirestoreClient', () => {
                            })
                        .on('error', err => {
                          assert(err instanceof Error);
-                         assert.equal(err.code, FAKE_STATUS_CODE);
+                         assert.strictEqual(err.code, FAKE_STATUS_CODE);
                          done();
                        });
 
@@ -761,7 +761,7 @@ describe('FirestoreClient', () => {
                            })
                        .on('error', err => {
                          assert(err instanceof Error);
-                         assert.equal(err.code, FAKE_STATUS_CODE);
+                         assert.strictEqual(err.code, FAKE_STATUS_CODE);
                          done();
                        });
 
@@ -825,7 +825,7 @@ describe('FirestoreClient', () => {
 
       client.listCollectionIds(request, (err, response) => {
         assert(err instanceof Error);
-        assert.equal(err.code, FAKE_STATUS_CODE);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
         assert(typeof response === 'undefined');
         done();
       });

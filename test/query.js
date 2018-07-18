@@ -419,9 +419,9 @@ describe('query interface', function() {
       query = query.orderBy('foo');
       query = query.limit(10);
       return query.get().then(results => {
-        assert.equal(query, results.query);
-        assert.equal(0, results.size);
-        assert.equal(true, results.empty);
+        assert.strictEqual(query, results.query);
+        assert.strictEqual(0, results.size);
+        assert.strictEqual(true, results.empty);
       });
     });
   });
@@ -437,8 +437,8 @@ describe('query interface', function() {
     return createInstance(overrides).then(firestore => {
       let query = firestore.collection('collectionId');
       return query.get().then(results => {
-        assert.equal(0, results.size);
-        assert.equal(true, results.empty);
+        assert.strictEqual(0, results.size);
+        assert.strictEqual(true, results.empty);
         assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
       });
     });
@@ -460,7 +460,7 @@ describe('query interface', function() {
             throw new Error('Unexpected success');
           })
           .catch(() => {
-            assert.equal(5, attempts);
+            assert.strictEqual(5, attempts);
           });
     });
   });
@@ -497,12 +497,12 @@ describe('query interface', function() {
     return createInstance(overrides).then(firestore => {
       let query = firestore.collection('collectionId');
       return query.get().then(results => {
-        assert.equal(2, results.size);
-        assert.equal(false, results.empty);
+        assert.strictEqual(2, results.size);
+        assert.strictEqual(false, results.empty);
         assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
-        assert.equal('first', results.docs[0].get('first'));
-        assert.equal('second', results.docs[1].get('second'));
-        assert.equal(2, results.docChanges.length);
+        assert.strictEqual('first', results.docs[0].get('first'));
+        assert.strictEqual('second', results.docs[1].get('second'));
+        assert.strictEqual(2, results.docChanges.length);
 
         let count = 0;
 
@@ -514,7 +514,7 @@ describe('query interface', function() {
           ++count;
         });
 
-        assert.equal(2, count);
+        assert.strictEqual(2, count);
       });
     });
   });
@@ -531,7 +531,7 @@ describe('query interface', function() {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(err.message, 'Expected error');
+          assert.strictEqual(err.message, 'Expected error');
         });
   });
 
@@ -549,7 +549,7 @@ describe('query interface', function() {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected error');
+            assert.strictEqual(err.message, 'Expected error');
           });
     });
   });
@@ -568,7 +568,7 @@ describe('query interface', function() {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected error');
+            assert.strictEqual(err.message, 'Expected error');
           });
     });
   });
@@ -592,7 +592,7 @@ describe('query interface', function() {
                 ++received;
               })
           .on('end', () => {
-            assert.equal(received, 2);
+            assert.strictEqual(received, 2);
             callback();
           });
     });

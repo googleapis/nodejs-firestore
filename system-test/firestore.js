@@ -46,12 +46,12 @@ describe('Firestore class', function() {
 
   it('has collection() method', function() {
     let ref = firestore.collection('col');
-    assert.equal(ref.id, 'col');
+    assert.strictEqual(ref.id, 'col');
   });
 
   it('has doc() method', function() {
     let ref = firestore.doc('col/doc');
-    assert.equal(ref.id, 'doc');
+    assert.strictEqual(ref.id, 'doc');
   });
 
   it('has getAll() method', function() {
@@ -62,7 +62,7 @@ describe('Firestore class', function() {
           return firestore.getAll(ref1, ref2);
         })
         .then(docs => {
-          assert.equal(docs.length, 2);
+          assert.strictEqual(docs.length, 2);
         });
   });
 });
@@ -83,24 +83,24 @@ describe('CollectionReference class', function() {
 
   it('has id property', function() {
     let ref = firestore.collection('col');
-    assert.equal(ref.id, 'col');
+    assert.strictEqual(ref.id, 'col');
   });
 
   it('has parent property', function() {
     let ref = firestore.collection('col/doc/col');
-    assert.equal(ref.parent.id, 'doc');
+    assert.strictEqual(ref.parent.id, 'doc');
   });
 
   it('has path property', function() {
     let ref = firestore.collection('col/doc/col');
-    assert.equal(ref.path, 'col/doc/col');
+    assert.strictEqual(ref.path, 'col/doc/col');
   });
 
   it('has doc() method', function() {
     let ref = firestore.collection('col').doc('doc');
-    assert.equal(ref.id, 'doc');
+    assert.strictEqual(ref.id, 'doc');
     ref = firestore.collection('col').doc();
-    assert.equal(ref.id.length, 20);
+    assert.strictEqual(ref.id.length, 20);
   });
 
   it('has add() method', function() {
@@ -109,7 +109,7 @@ describe('CollectionReference class', function() {
           return ref.get();
         })
         .then(doc => {
-          assert.equal(doc.get('foo'), 'a');
+          assert.strictEqual(doc.get('foo'), 'a');
         });
   });
 });
@@ -130,22 +130,22 @@ describe('DocumentReference class', function() {
 
   it('has id property', function() {
     let ref = firestore.doc('col/doc');
-    assert.equal(ref.id, 'doc');
+    assert.strictEqual(ref.id, 'doc');
   });
 
   it('has parent property', function() {
     let ref = firestore.doc('col/doc');
-    assert.equal(ref.parent.id, 'col');
+    assert.strictEqual(ref.parent.id, 'col');
   });
 
   it('has path property', function() {
     let ref = firestore.doc('col/doc');
-    assert.equal(ref.path, 'col/doc');
+    assert.strictEqual(ref.path, 'col/doc');
   });
 
   it('has collection() method', function() {
     let ref = firestore.doc('col/doc').collection('subcol');
-    assert.equal(ref.id, 'subcol');
+    assert.strictEqual(ref.id, 'subcol');
   });
 
   it('has create()/get() method', function() {
@@ -155,7 +155,7 @@ describe('DocumentReference class', function() {
           return ref.get();
         })
         .then(doc => {
-          assert.equal(doc.get('foo'), 'a');
+          assert.strictEqual(doc.get('foo'), 'a');
         });
   });
 
@@ -186,7 +186,7 @@ describe('DocumentReference class', function() {
         })
         .then(doc => {
           let data = doc.data();
-          assert.equal(
+          assert.strictEqual(
               data.pathValue.path, allSupportedTypesObject.pathValue.path);
           delete data.pathValue;
           delete allSupportedTypesObject.pathValue;
@@ -205,7 +205,7 @@ describe('DocumentReference class', function() {
         })
         .then(doc => {
           const actualValue = doc.data().nanValue;
-          assert.equal(typeof actualValue, 'number');
+          assert.strictEqual(typeof actualValue, 'number');
           assert(isNaN(actualValue));
         });
   });
@@ -303,7 +303,7 @@ describe('DocumentReference class', function() {
           return ref.get();
         })
         .then(doc => {
-          assert.equal(doc.get('foo'), 'b');
+          assert.strictEqual(doc.get('foo'), 'b');
         });
   });
 
@@ -326,8 +326,8 @@ describe('DocumentReference class', function() {
           return ref.get();
         })
         .then(result => {
-          assert.equal(deleted, true);
-          assert.equal(result.exists, false);
+          assert.strictEqual(deleted, true);
+          assert.strictEqual(result.exists, false);
         });
   });
 
@@ -368,9 +368,9 @@ describe('DocumentReference class', function() {
           return randomCol.doc('doc').getCollections();
         })
         .then(response => {
-          assert.equal(response.length, collections.length);
+          assert.strictEqual(response.length, collections.length);
           for (let i = 0; i < response.length; ++i) {
-            assert.equal(response[i].id, collections[i]);
+            assert.strictEqual(response[i].id, collections[i]);
           }
         });
   });
@@ -437,7 +437,7 @@ describe('DocumentReference class', function() {
                     })
                     .then(snap => {
                       if (!snap.exists) {
-                        assert.equal(null, expectedState[i]);
+                        assert.strictEqual(null, expectedState[i]);
                       } else {
                         assert.deepEqual(snap.data(), expectedState[i]);
                       }
@@ -579,7 +579,7 @@ describe('DocumentReference class', function() {
 
       return waitForSnapshot()
           .then(snapshot => {
-            assert.equal(snapshot.exists, false);
+            assert.strictEqual(snapshot.exists, false);
 
             // Add the document.
             return ref.set({foo: 'a'});
@@ -588,8 +588,8 @@ describe('DocumentReference class', function() {
             return waitForSnapshot();
           })
           .then(snapshot => {
-            assert.equal(snapshot.exists, true);
-            assert.equal(snapshot.get('foo'), 'a');
+            assert.strictEqual(snapshot.exists, true);
+            assert.strictEqual(snapshot.get('foo'), 'a');
             readTime = snapshot.readTime;
             createTime = snapshot.createTime;
             updateTime = snapshot.updateTime;
@@ -601,8 +601,8 @@ describe('DocumentReference class', function() {
             return waitForSnapshot();
           })
           .then(snapshot => {
-            assert.equal(snapshot.exists, true);
-            assert.equal(snapshot.get('foo'), 'b');
+            assert.strictEqual(snapshot.exists, true);
+            assert.strictEqual(snapshot.get('foo'), 'b');
             assert.ok(snapshot.createTime.isEqual(createTime));
             assert.ok(snapshot.readTime.toMillis() > readTime.toMillis());
             assert.ok(snapshot.updateTime.toMillis() > updateTime.toMillis());
@@ -623,7 +623,7 @@ describe('DocumentReference class', function() {
 
       return waitForSnapshot()
           .then(snapshot => {
-            assert.equal(snapshot.exists, false);
+            assert.strictEqual(snapshot.exists, false);
 
             // Add the document.
             return ref.set({foo: 'a'});
@@ -632,7 +632,7 @@ describe('DocumentReference class', function() {
             return waitForSnapshot();
           })
           .then(snapshot => {
-            assert.equal(snapshot.exists, true);
+            assert.strictEqual(snapshot.exists, true);
 
             // Delete the document.
             return ref.delete();
@@ -641,7 +641,7 @@ describe('DocumentReference class', function() {
             return waitForSnapshot();
           })
           .then(snapshot => {
-            assert.equal(snapshot.exists, false);
+            assert.strictEqual(snapshot.exists, false);
             unsubscribe();
           });
     });
@@ -679,12 +679,12 @@ describe('DocumentReference class', function() {
         }
       };
       unsubscribe1 = doc1.onSnapshot(snapshot => {
-        assert.equal(snapshot.exists, exists1.shift());
+        assert.strictEqual(snapshot.exists, exists1.shift());
         maybeRun();
       });
 
       unsubscribe2 = doc2.onSnapshot(snapshot => {
-        assert.equal(snapshot.exists, exists2.shift());
+        assert.strictEqual(snapshot.exists, exists2.shift());
         maybeRun();
       });
     });
@@ -720,12 +720,12 @@ describe('DocumentReference class', function() {
       };
 
       unsubscribe1 = doc.onSnapshot(snapshot => {
-        assert.equal(snapshot.exists, exists1.shift());
+        assert.strictEqual(snapshot.exists, exists1.shift());
         maybeRun();
       });
 
       unsubscribe2 = doc.onSnapshot(snapshot => {
-        assert.equal(snapshot.exists, exists2.shift());
+        assert.strictEqual(snapshot.exists, exists2.shift());
         maybeRun();
       });
     });
@@ -814,7 +814,7 @@ describe('Query class', function() {
           assert.ok(
               typeof res.docs[0].get('foo') === 'number' &&
               isNaN(res.docs[0].get('foo')));
-          assert.equal(res.docs[0].get('bar'), null);
+          assert.strictEqual(res.docs[0].get('bar'), null);
         });
   });
 
@@ -827,7 +827,7 @@ describe('Query class', function() {
               .get();
         })
         .then(res => {
-          assert.equal(res.docs.length, 1);
+          assert.strictEqual(res.docs.length, 1);
         });
   });
 
@@ -873,7 +873,7 @@ describe('Query class', function() {
           return randomCol.orderBy('foo').limit(1).get();
         })
         .then(res => {
-          assert.equal(res.size, 1);
+          assert.strictEqual(res.size, 1);
           assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
         });
   });
@@ -887,7 +887,7 @@ describe('Query class', function() {
           return randomCol.orderBy('foo').offset(1).get();
         })
         .then(res => {
-          assert.equal(res.size, 1);
+          assert.strictEqual(res.size, 1);
           assert.deepStrictEqual(res.docs[0].data(), {foo: 'b'});
         });
   });
@@ -915,8 +915,8 @@ describe('Query class', function() {
     let query = randomCol.orderBy('val').limit(3);
 
     return batch.commit().then(() => paginateResults(query)).then(results => {
-      assert.equal(results.pages, 4);
-      assert.equal(results.docs.length, 10);
+      assert.strictEqual(results.pages, 4);
+      assert.strictEqual(results.docs.length, 10);
     });
   });
 
@@ -930,8 +930,8 @@ describe('Query class', function() {
     let query = randomCol.where('val', '>=', 1).limit(3);
 
     return batch.commit().then(() => paginateResults(query)).then(results => {
-      assert.equal(results.pages, 3);
-      assert.equal(results.docs.length, 9);
+      assert.strictEqual(results.pages, 3);
+      assert.strictEqual(results.docs.length, 9);
     });
   });
 
@@ -957,7 +957,7 @@ describe('Query class', function() {
           return randomCol.orderBy('foo').endAt('b').get();
         })
         .then(res => {
-          assert.equal(res.size, 2);
+          assert.strictEqual(res.size, 2);
           assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
           assert.deepStrictEqual(res.docs[1].data(), {foo: 'b'});
         });
@@ -972,7 +972,7 @@ describe('Query class', function() {
           return randomCol.orderBy('foo').endBefore('b').get();
         })
         .then(res => {
-          assert.equal(res.size, 1);
+          assert.strictEqual(res.size, 1);
           assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
         });
   });
@@ -989,7 +989,7 @@ describe('Query class', function() {
                 ++received;
               })
           .on('end', () => {
-            assert.equal(received, 2);
+            assert.strictEqual(received, 2);
             done();
           });
     });
@@ -1035,15 +1035,15 @@ describe('Query class', function() {
 
     const snapshotsEqual = function(actual, expected) {
       let i;
-      assert.equal(actual.size, expected.docs.length);
+      assert.strictEqual(actual.size, expected.docs.length);
       for (i = 0; i < expected.docs.length && i < actual.size; i++) {
-        assert.equal(actual.docs[i].ref.id, expected.docs[i].ref.id);
+        assert.strictEqual(actual.docs[i].ref.id, expected.docs[i].ref.id);
         assert.deepEqual(actual.docs[i].data(), expected.docs[i].data());
       }
-      assert.equal(actual.docChanges.length, expected.docChanges.length);
+      assert.strictEqual(actual.docChanges.length, expected.docChanges.length);
       for (i = 0; i < expected.docChanges.length; i++) {
-        assert.equal(actual.docChanges[i].type, expected.docChanges[i].type);
-        assert.equal(
+        assert.strictEqual(actual.docChanges[i].type, expected.docChanges[i].type);
+        assert.strictEqual(
             actual.docChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
         assert.deepEqual(
             actual.docChanges[i].doc.data(), expected.docChanges[i].doc.data());
@@ -1245,7 +1245,7 @@ describe('Transaction class', function() {
           });
         })
         .then(res => {
-          assert.equal('bar', res);
+          assert.strictEqual('bar', res);
         });
   });
 
@@ -1261,7 +1261,7 @@ describe('Transaction class', function() {
           });
         })
         .then(res => {
-          assert.equal(2, res);
+          assert.strictEqual(2, res);
         });
   });
 
@@ -1277,7 +1277,7 @@ describe('Transaction class', function() {
           });
         })
         .then(res => {
-          assert.equal('bar', res);
+          assert.strictEqual('bar', res);
         });
   });
 
@@ -1292,7 +1292,7 @@ describe('Transaction class', function() {
           return ref.get();
         })
         .then(doc => {
-          assert.equal('foobar', doc.get('foo'));
+          assert.strictEqual('foobar', doc.get('foo'));
         });
   });
 
@@ -1310,7 +1310,7 @@ describe('Transaction class', function() {
           return ref.get();
         })
         .then(doc => {
-          assert.equal('foobar', doc.get('foo'));
+          assert.strictEqual('foobar', doc.get('foo'));
         });
   });
 
@@ -1344,8 +1344,8 @@ describe('Transaction class', function() {
           return ref.get();
         })
         .then(result => {
-          assert.equal(success, true);
-          assert.equal(result.exists, false);
+          assert.strictEqual(success, true);
+          assert.strictEqual(result.exists, false);
         });
   });
 });
@@ -1368,7 +1368,7 @@ describe('WriteBatch class', function() {
           return ref.get();
         })
         .then(doc => {
-          assert.equal(doc.get('foo'), 'a');
+          assert.strictEqual(doc.get('foo'), 'a');
         });
   });
 
@@ -1381,7 +1381,7 @@ describe('WriteBatch class', function() {
           return ref.get();
         })
         .then(doc => {
-          assert.equal(doc.get('foo'), 'a');
+          assert.strictEqual(doc.get('foo'), 'a');
         });
   });
 
@@ -1395,7 +1395,7 @@ describe('WriteBatch class', function() {
           return ref.get();
         })
         .then(doc => {
-          assert.equal(doc.get('foo'), 'b');
+          assert.strictEqual(doc.get('foo'), 'b');
         });
   });
 
@@ -1404,7 +1404,7 @@ describe('WriteBatch class', function() {
     batch.set(randomCol.doc(), {foo: 'a'});
     batch.set(randomCol.doc(), {foo: Firestore.FieldValue.serverTimestamp()});
     return batch.commit().then(writeResults => {
-      assert.equal(writeResults.length, 2);
+      assert.strictEqual(writeResults.length, 2);
     });
   });
 
@@ -1434,8 +1434,8 @@ describe('WriteBatch class', function() {
           return ref.get();
         })
         .then(result => {
-          assert.equal(success, true);
-          assert.equal(result.exists, false);
+          assert.strictEqual(success, true);
+          assert.strictEqual(result.exists, false);
         });
   });
 });
@@ -1467,7 +1467,7 @@ describe('QuerySnapshot class', function() {
           return snapshot.query.get();
         })
         .then(snapshot => {
-          assert.equal(snapshot.size, 2);
+          assert.strictEqual(snapshot.size, 2);
         });
   });
 
@@ -1493,7 +1493,7 @@ describe('QuerySnapshot class', function() {
   it('has docs property', function() {
     return querySnapshot.then(snapshot => {
       assert.ok(snapshot.docs.length, 2);
-      assert.equal(snapshot.docs[0].get('foo'), 'a');
+      assert.strictEqual(snapshot.docs[0].get('foo'), 'a');
     });
   });
 
@@ -1502,10 +1502,10 @@ describe('QuerySnapshot class', function() {
 
     return querySnapshot.then(snapshot => {
       snapshot.forEach(doc => {
-        assert.equal(doc.get('foo'), 'a');
+        assert.strictEqual(doc.get('foo'), 'a');
         ++count;
       });
-      assert.equal(count, 2);
+      assert.strictEqual(count, 2);
     });
   });
 });

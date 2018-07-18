@@ -27,31 +27,31 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 describe('ResourcePath', function() {
   it('has id property', function() {
-    assert.equal(new ResourcePath(PROJECT_ID, '(default)', 'foo').id, 'foo');
-    assert.equal(new ResourcePath(PROJECT_ID, '(default)').id, null);
+    assert.strictEqual(new ResourcePath(PROJECT_ID, '(default)', 'foo').id, 'foo');
+    assert.strictEqual(new ResourcePath(PROJECT_ID, '(default)').id, null);
   });
 
   it('has append() method', function() {
     let path = new ResourcePath(PROJECT_ID, '(default)');
-    assert.equal(path.formattedName, DATABASE_ROOT);
+    assert.strictEqual(path.formattedName, DATABASE_ROOT);
     path = path.append('foo');
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
+    assert.strictEqual(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
   });
 
   it('has parent() method', function() {
     let path = new ResourcePath(PROJECT_ID, '(default)', 'foo');
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
+    assert.strictEqual(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
     path = path.parent();
-    assert.equal(path.formattedName, DATABASE_ROOT);
-    assert.equal(path.parent(), null);
+    assert.strictEqual(path.formattedName, DATABASE_ROOT);
+    assert.strictEqual(path.parent(), null);
   });
 
   it('parses strings', function() {
     let path = ResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
-    assert.equal(path.formattedName, DATABASE_ROOT);
+    assert.strictEqual(path.formattedName, DATABASE_ROOT);
     path =
         ResourcePath.fromSlashSeparatedString(`${DATABASE_ROOT}/documents/foo`);
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
+    assert.strictEqual(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
     assert.throws(() => {
       path =
           ResourcePath.fromSlashSeparatedString('projects/project/databases');
@@ -61,7 +61,7 @@ describe('ResourcePath', function() {
   it('accepts newlines', function() {
     const path = ResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/foo\nbar`);
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo\nbar`);
+    assert.strictEqual(path.formattedName, `${DATABASE_ROOT}/documents/foo\nbar`);
   });
 });
 
@@ -72,7 +72,7 @@ describe('FieldPath', function() {
     let results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
 
     for (let i = 0; i < components.length; ++i) {
-      assert.equal(new FieldPath(components[i]).toString(), results[i]);
+      assert.strictEqual(new FieldPath(components[i]).toString(), results[i]);
     }
   });
 
@@ -91,18 +91,18 @@ describe('FieldPath', function() {
   it('has append() method', function() {
     let path = new FieldPath('foo');
     path = path.append('bar');
-    assert.equal(path.formattedName, 'foo.bar');
+    assert.strictEqual(path.formattedName, 'foo.bar');
   });
 
   it('has parent() method', function() {
     let path = new FieldPath('foo', 'bar');
     path = path.parent();
-    assert.equal(path.formattedName, 'foo');
+    assert.strictEqual(path.formattedName, 'foo');
   });
 
   it('escapes special characters', function() {
     let path = new FieldPath('f.o.o');
-    assert.equal(path.formattedName, '`f.o.o`');
+    assert.strictEqual(path.formattedName, '`f.o.o`');
   });
 
   it('doesn\'t allow empty components', function() {
