@@ -826,7 +826,7 @@ follow these steps, YOUR APP MAY BREAK.`);
     const clientPool =
         new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
           const gapicClient =
-              module.exports.v1beta1(this._initalizationOptions);
+              module.exports.v1beta1(this._initalizationSettings);
           Firestore.log(
               'Firestore', null, 'Initialized Firestore GAPIC Client');
           return gapicClient;
