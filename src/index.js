@@ -24,7 +24,7 @@ const pkgUp = require('pkg-up');
 const through = require('through2');
 const util = require('util');
 
-const libVersion = require(pkgUp.sync()).version;
+const libVersion = require(pkgUp.sync(__dirname)).version;
 
 const path = require('./path');
 const convert = require('./convert');
