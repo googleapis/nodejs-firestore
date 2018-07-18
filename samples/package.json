@@ -13,7 +13,7 @@
     "test": "npm run ava"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^0.15.3"
+    "@google-cloud/firestore": "^0.15.4"
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.3.0",
