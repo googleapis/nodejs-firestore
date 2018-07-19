@@ -319,8 +319,8 @@ describe('instantiation', function() {
     let firestore = new Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    assert.equal(firestore._initalizationSettings.projectId, PROJECT_ID);
-    assert.equal(firestore._initalizationSettings.foo, 'bar');
+    assert.strictEqual(firestore._initalizationSettings.projectId, PROJECT_ID);
+    assert.strictEqual(firestore._initalizationSettings.foo, 'bar');
   });
 
   it('can only call settings() once', function() {
@@ -371,7 +371,7 @@ describe('instantiation', function() {
     let firestore = new Firestore(DEFAULT_SETTINGS);
 
     return firestore._runRequest(() => {
-      assert.equal(
+      assert.strictEqual(
           firestore.formattedName,
           `projects/${PROJECT_ID}/databases/(default)`);
       return Promise.resolve();
@@ -385,13 +385,13 @@ describe('instantiation', function() {
       keyFilename: './test/fake-certificate.json',
     });
 
-    assert.equal(
+    assert.strictEqual(
         firestore.formattedName, 'projects/{{projectId}}/databases/(default)');
 
     firestore._detectProjectId = () => Promise.resolve(PROJECT_ID);
 
     return firestore._runRequest(() => {
-      assert.equal(
+      assert.strictEqual(
           firestore.formattedName,
           `projects/${PROJECT_ID}/databases/(default)`);
       return Promise.resolve();
@@ -405,13 +405,13 @@ describe('instantiation', function() {
       keyFilename: './test/fake-certificate.json',
     });
 
-    assert.equal(
+    assert.strictEqual(
         firestore.formattedName, 'projects/{{projectId}}/databases/(default)');
 
     let gapicClient = {getProjectId: callback => callback(null, PROJECT_ID)};
 
     return firestore._detectProjectId(gapicClient).then(projectId => {
-      assert.equal(projectId, PROJECT_ID);
+      assert.strictEqual(projectId, PROJECT_ID);
     });
   });
 
@@ -424,7 +424,7 @@ describe('instantiation', function() {
 
     firestore.settings({projectId: PROJECT_ID});
 
-    assert.equal(
+    assert.strictEqual(
         firestore.formattedName, `projects/${PROJECT_ID}/databases/(default)`);
   });
 
@@ -441,39 +441,41 @@ describe('instantiation', function() {
 
     return firestore._detectProjectId(gapicClient)
         .then(() => assert.fail('Error ignored'))
-        .catch(err => assert.equal('Injected Error', err.message))
+        .catch(err => assert.strictEqual('Injected Error', err.message))
   });
 
   it('exports all types', function() {
     // Ordering as per firestore.d.ts
     assert.ok(is.defined(Firestore.Firestore));
-    assert.equal(Firestore.Firestore.name, 'Firestore');
+    assert.strictEqual(Firestore.Firestore.name, 'Firestore');
     assert.ok(is.defined(Firestore.Timestamp));
-    assert.equal(Firestore.Timestamp.name, 'Timestamp');
+    assert.strictEqual(Firestore.Timestamp.name, 'Timestamp');
     assert.ok(is.defined(Firestore.GeoPoint));
-    assert.equal(Firestore.GeoPoint.name, 'GeoPoint');
+    assert.strictEqual(Firestore.GeoPoint.name, 'GeoPoint');
     assert.ok(is.defined(Firestore.Transaction));
-    assert.equal(Firestore.Transaction.name, 'Transaction');
+    assert.strictEqual(Firestore.Transaction.name, 'Transaction');
     assert.ok(is.defined(Firestore.WriteBatch));
-    assert.equal(Firestore.WriteBatch.name, 'WriteBatch');
+    assert.strictEqual(Firestore.WriteBatch.name, 'WriteBatch');
     assert.ok(is.defined(Firestore.DocumentReference));
-    assert.equal(Firestore.DocumentReference.name, 'DocumentReference');
+    assert.strictEqual(Firestore.DocumentReference.name, 'DocumentReference');
     assert.ok(is.defined(Firestore.WriteResult));
-    assert.equal(Firestore.WriteResult.name, 'WriteResult');
+    assert.strictEqual(Firestore.WriteResult.name, 'WriteResult');
     assert.ok(is.defined(Firestore.DocumentSnapshot));
-    assert.equal(Firestore.DocumentSnapshot.name, 'DocumentSnapshot');
+    assert.strictEqual(Firestore.DocumentSnapshot.name, 'DocumentSnapshot');
     assert.ok(is.defined(Firestore.QueryDocumentSnapshot));
-    assert.equal(Firestore.QueryDocumentSnapshot.name, 'QueryDocumentSnapshot');
+    assert.strictEqual(
+        Firestore.QueryDocumentSnapshot.name, 'QueryDocumentSnapshot');
     assert.ok(is.defined(Firestore.Query));
-    assert.equal(Firestore.Query.name, 'Query');
+    assert.strictEqual(Firestore.Query.name, 'Query');
     assert.ok(is.defined(Firestore.QuerySnapshot));
-    assert.equal(Firestore.QuerySnapshot.name, 'QuerySnapshot');
+    assert.strictEqual(Firestore.QuerySnapshot.name, 'QuerySnapshot');
     assert.ok(is.defined(Firestore.CollectionReference));
-    assert.equal(Firestore.CollectionReference.name, 'CollectionReference');
+    assert.strictEqual(
+        Firestore.CollectionReference.name, 'CollectionReference');
     assert.ok(is.defined(Firestore.FieldValue));
-    assert.equal(Firestore.FieldValue.name, 'FieldValue');
+    assert.strictEqual(Firestore.FieldValue.name, 'FieldValue');
     assert.ok(is.defined(Firestore.FieldPath));
-    assert.equal(Firestore.Firestore.name, 'Firestore');
+    assert.strictEqual(Firestore.Firestore.name, 'Firestore');
     assert.ok(!Firestore.FieldValue.serverTimestamp().isEqual(
         Firestore.FieldValue.delete()));
   });
@@ -510,7 +512,7 @@ describe('snapshot_() method', function() {
     let expected = extend(true, {}, allSupportedTypesOutput);
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
-    assert.equal(
+    assert.strictEqual(
         actualObject.get('pathValue').formattedName,
         expected.pathValue.formattedName);
     let data = actualObject.data();
@@ -520,9 +522,9 @@ describe('snapshot_() method', function() {
 
     // We specifically test the GeoPoint properties to ensure 100% test
     // coverage.
-    assert.equal(data.geoPointValue.latitude, 50.1430847);
-    assert.equal(data.geoPointValue.longitude, -122.947778);
-    assert.equal(
+    assert.strictEqual(data.geoPointValue.latitude, 50.1430847);
+    assert.strictEqual(data.geoPointValue.longitude, -122.947778);
+    assert.strictEqual(
         data.geoPointValue.toString(),
         'GeoPoint { latitude: 50.1430847, longitude: -122.947778 }');
     assert.ok(data.geoPointValue.isEqual(
@@ -547,7 +549,7 @@ describe('snapshot_() method', function() {
         }),
         {seconds: 5, nanos: 6});
 
-    assert.equal(true, doc.exists);
+    assert.strictEqual(true, doc.exists);
     assert.deepEqual({foo: bytesData}, doc.data());
     assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)));
     assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
@@ -573,7 +575,7 @@ describe('snapshot_() method', function() {
         },
         '1970-01-01T00:00:05.000000006Z', 'json');
 
-    assert.equal(true, doc.exists);
+    assert.strictEqual(true, doc.exists);
     assert.deepEqual(doc.data(), {
       a: bytesData,
       b: Firestore.Timestamp.fromDate(new Date('1985-03-18T07:20:00.000Z')),
@@ -640,7 +642,7 @@ describe('snapshot_() method', function() {
         `${DATABASE_ROOT}/documents/collectionId/doc`,
         '1970-01-01T00:00:05.000000006Z', 'json');
 
-    assert.equal(false, doc.exists);
+    assert.strictEqual(false, doc.exists);
     assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
   });
 
@@ -687,8 +689,8 @@ describe('doc() method', function() {
 
   it('exposes properties', function() {
     let documentRef = firestore.doc('collectionId/documentId');
-    assert.equal(documentRef.id, 'documentId');
-    assert.equal(documentRef.firestore, firestore);
+    assert.strictEqual(documentRef.id, 'documentId');
+    assert.strictEqual(documentRef.firestore, firestore);
   });
 });
 
@@ -722,7 +724,7 @@ describe('collection() method', function() {
     let collection = firestore.collection('collectionId');
     assert.ok(collection.id);
     assert.ok(collection.doc);
-    assert.equal(collection.id, 'collectionId');
+    assert.strictEqual(collection.id, 'collectionId');
   });
 });
 
@@ -740,8 +742,8 @@ describe('getCollections() method', function() {
 
     return createInstance(overrides).then(firestore => {
       return firestore.getCollections().then(collections => {
-        assert.equal(collections[0].path, 'first');
-        assert.equal(collections[1].path, 'second');
+        assert.strictEqual(collections[0].path, 'first');
+        assert.strictEqual(collections[1].path, 'second');
       });
     });
   });
@@ -749,17 +751,17 @@ describe('getCollections() method', function() {
 
 describe('getAll() method', function() {
   function resultEquals(result, doc) {
-    assert.equal(result.length, arguments.length - 1);
+    assert.strictEqual(result.length, arguments.length - 1);
 
     for (let i = 0; i < result.length; ++i) {
       doc = arguments[i + 1];
 
       if (doc.found) {
         assert.ok(result[i].exists);
-        assert.equal(result[i].ref.formattedName, doc.found.name);
+        assert.strictEqual(result[i].ref.formattedName, doc.found.name);
       } else {
         assert.ok(!result[i].exists);
-        assert.equal(result[i].ref.formattedName, doc.missing);
+        assert.strictEqual(result[i].ref.formattedName, doc.missing);
       }
     }
   }
@@ -806,7 +808,7 @@ describe('getAll() method', function() {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(
+            assert.strictEqual(
                 err.message,
                 'Did not receive document for "collectionId/documentId".');
           });
@@ -826,7 +828,7 @@ describe('getAll() method', function() {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected exception');
+            assert.strictEqual(err.message, 'Expected exception');
           });
     });
   });
@@ -844,7 +846,7 @@ describe('getAll() method', function() {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected exception');
+            assert.strictEqual(err.message, 'Expected exception');
           });
     });
   });
@@ -866,7 +868,7 @@ describe('getAll() method', function() {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected exception');
+            assert.strictEqual(err.message, 'Expected exception');
           });
     });
   });
@@ -915,7 +917,7 @@ describe('getAll() method', function() {
                             throw new Error('Unexpected success in Promise');
                           })
                           .catch(err => {
-                            assert.equal(err.code, errorCode);
+                            assert.strictEqual(err.code, Number(errorCode));
                           }));
       });
 
@@ -987,7 +989,7 @@ describe('getAll() method', function() {
   it('accepts same document multiple times', function() {
     const overrides = {
       batchGetDocuments: request => {
-        assert.equal(request.documents.length, 2);
+        assert.strictEqual(request.documents.length, 2);
         return stream(found('a'), found('b'));
       }
     };

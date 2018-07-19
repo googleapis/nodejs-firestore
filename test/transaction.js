@@ -220,31 +220,31 @@ function runTransaction(transactionCallback, ...expectedRequests) {
   const overrides = {
     beginTransaction: (actual, options, callback) => {
       const request = expectedRequests.shift();
-      assert.equal(request.type, 'begin');
+      assert.strictEqual(request.type, 'begin');
       assert.deepEqual(actual, request.request);
       callback(request.error, request.response);
     },
     commit: (actual, options, callback) => {
       const request = expectedRequests.shift();
-      assert.equal(request.type, 'commit');
+      assert.strictEqual(request.type, 'commit');
       assert.deepEqual(actual, request.request);
       callback(request.error, request.response);
     },
     rollback: (actual, options, callback) => {
       const request = expectedRequests.shift();
-      assert.equal(request.type, 'rollback');
+      assert.strictEqual(request.type, 'rollback');
       assert.deepEqual(actual, request.request);
       callback(request.error, request.response);
     },
     batchGetDocuments: (actual) => {
       const request = expectedRequests.shift();
-      assert.equal(request.type, 'getDocument');
+      assert.strictEqual(request.type, 'getDocument');
       assert.deepEqual(actual, request.request);
       return request.stream;
     },
     runQuery: (actual) => {
       const request = expectedRequests.shift();
-      assert.equal(request.type, 'query');
+      assert.strictEqual(request.type, 'query');
       assert.deepEqual(actual, request.request);
       return request.stream;
     }
@@ -257,11 +257,11 @@ function runTransaction(transactionCallback, ...expectedRequests) {
           return transactionCallback(transaction, docRef);
         })
         .then(val => {
-          assert.equal(expectedRequests.length, 0);
+          assert.strictEqual(expectedRequests.length, 0);
           return val;
         })
         .catch(err => {
-          assert.equal(expectedRequests.length, 0);
+          assert.strictEqual(expectedRequests.length, 0);
           return Promise.reject(err);
         });
   });
@@ -278,7 +278,7 @@ describe('successful transactions', function() {
     return runTransaction(() => {
              return Promise.resolve('bar');
            }, begin(), commit()).then(val => {
-      assert.equal(val, 'bar');
+      assert.strictEqual(val, 'bar');
     });
   });
 });
@@ -322,7 +322,7 @@ describe('failed transactions', function() {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(
+          assert.strictEqual(
               err.message,
               'You must return a Promise in your transaction()-callback.');
         });
@@ -342,7 +342,7 @@ describe('failed transactions', function() {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected exception');
+            assert.strictEqual(err.message, 'Expected exception');
           });
     });
   });
@@ -357,7 +357,7 @@ describe('failed transactions', function() {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(err, 'request exception');
+          assert.strictEqual(err, 'request exception');
         });
   });
 
@@ -373,7 +373,7 @@ describe('failed transactions', function() {
                begin('foo2', 'foo1'), commit('foo2', [], serverError),
                begin('foo3', 'foo2'), commit('foo3'))
         .then(red => {
-          assert.equal(red, 'success');
+          assert.strictEqual(red, 'success');
         });
   });
 
@@ -393,7 +393,7 @@ describe('failed transactions', function() {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(err.message, 'Final exception');
+          assert.strictEqual(err.message, 'Final exception');
         });
   });
 
@@ -411,7 +411,7 @@ describe('failed transactions', function() {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(err.message, 'Fails (5) on beginTransaction');
+          assert.strictEqual(err.message, 'Fails (5) on beginTransaction');
         });
   });
 
@@ -425,7 +425,7 @@ describe('failed transactions', function() {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(err.message, 'Fails on rollback');
+          assert.strictEqual(err.message, 'Fails on rollback');
         });
   });
 });
@@ -434,7 +434,7 @@ describe('transaction operations', function() {
   it('support get with document ref', function() {
     return runTransaction((transaction, docRef) => {
       return transaction.get(docRef).then(doc => {
-        assert.equal(doc.id, 'documentId');
+        assert.strictEqual(doc.id, 'documentId');
       });
     }, begin(), getDocument(), commit());
   });
@@ -464,7 +464,7 @@ describe('transaction operations', function() {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(
+          assert.strictEqual(
               err.message,
               'Firestore transactions require all reads to ' +
                   'be executed before all writes.');
@@ -475,7 +475,7 @@ describe('transaction operations', function() {
     return runTransaction((transaction, docRef) => {
       let query = docRef.parent.where('foo', '==', 'bar');
       return transaction.get(query).then(results => {
-        assert.equal(results.docs[0].id, 'documentId');
+        assert.strictEqual(results.docs[0].id, 'documentId');
       });
     }, begin(), query(), commit());
   });
@@ -486,9 +486,9 @@ describe('transaction operations', function() {
       const secondDoc = docRef.parent.doc('secondDocument');
 
       return transaction.getAll(firstDoc, secondDoc).then(docs => {
-        assert.equal(docs.length, 2);
-        assert.equal(docs[0].id, 'firstDocument');
-        assert.equal(docs[1].id, 'secondDocument');
+        assert.strictEqual(docs.length, 2);
+        assert.strictEqual(docs[0].id, 'firstDocument');
+        assert.strictEqual(docs[1].id, 'secondDocument');
       });
     }, begin(), getAll(['firstDocument', 'secondDocument']), commit());
   });
@@ -504,7 +504,7 @@ describe('transaction operations', function() {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(
+          assert.strictEqual(
               err.message,
               'Firestore transactions require all reads to ' +
                   'be executed before all writes.');

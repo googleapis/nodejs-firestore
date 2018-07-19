@@ -107,8 +107,8 @@ describe('timestamps', function() {
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
-            assert.equal(timestamp.seconds, -14182920);
-            assert.equal(timestamp.nanoseconds, 123000123);
+            assert.strictEqual(timestamp.seconds, -14182920);
+            assert.strictEqual(timestamp.nanoseconds, 123000123);
           });
         });
   });
@@ -119,7 +119,7 @@ describe('timestamps', function() {
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
-            assert.equal(
+            assert.strictEqual(
                 new Date(-14182920 * 1000 + 123).getTime(),
                 timestamp.toDate().getTime());
           });
@@ -132,7 +132,7 @@ describe('timestamps', function() {
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
-            assert.equal(-14182920 * 1000 + 123, timestamp.toMillis());
+            assert.strictEqual(-14182920 * 1000 + 123, timestamp.toMillis());
           });
         });
   });

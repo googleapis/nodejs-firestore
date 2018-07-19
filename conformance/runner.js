@@ -269,7 +269,7 @@ function queryHandler(spec) {
 function getHandler(spec) {
   return request => {
     const getDocument = spec.request;
-    assert.equal(request.documents[0], getDocument.name);
+    assert.strictEqual(request.documents[0], getDocument.name);
 
     let stream = through.obj();
 
@@ -434,7 +434,7 @@ function runTest(spec) {
               }
             },
             err => {
-              assert.equal(expectedSnapshots.length, 0);
+              assert.strictEqual(expectedSnapshots.length, 0);
               unlisten();
               reject(err);
             });

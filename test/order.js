@@ -208,14 +208,14 @@ describe('Order', function() {
         for (let j = 0; j < groups.length; j++) {
           for (const right of groups[j]) {
             let expected = order.primitiveComparator(i, j);
-            assert.equal(
+            assert.strictEqual(
                 order.compare(left, right), expected,
                 'comparing ' + left + ' (' + JSON.stringify(left) + ') to ' +
                     right + ' (' + JSON.stringify(right) + ') at (' + i + ', ' +
                     j + ')');
 
             expected = order.primitiveComparator(j, i);
-            assert.equal(
+            assert.strictEqual(
                 order.compare(right, left), expected,
                 'comparing ' + right + ' (' + JSON.stringify(right) + ') to ' +
                     left + ' (' + JSON.stringify(left) + ') at (' + j + ', ' +

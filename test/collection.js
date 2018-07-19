@@ -46,8 +46,8 @@ describe('Collection interface', function() {
 
     let documentRef = collectionRef.doc('docId');
     assert.ok(is.instance(documentRef, DocumentReference));
-    assert.equal(collectionRef.id, 'colId');
-    assert.equal(documentRef.id, 'docId');
+    assert.strictEqual(collectionRef.id, 'colId');
+    assert.strictEqual(documentRef.id, 'docId');
 
     assert.throws(() => {
       collectionRef.doc(false);
@@ -75,16 +75,16 @@ describe('Collection interface', function() {
 
   it('has parent() method', function() {
     let collection = firestore.collection('col1/doc/col2');
-    assert.equal(collection.path, 'col1/doc/col2');
+    assert.strictEqual(collection.path, 'col1/doc/col2');
     let document = collection.parent;
-    assert.equal(document.path, 'col1/doc');
+    assert.strictEqual(document.path, 'col1/doc');
   });
 
   it('supports auto-generated ids', function() {
     let collectionRef = firestore.collection('collectionId');
     let documentRef = collectionRef.doc();
     assert.ok(is.instance(documentRef, DocumentReference));
-    assert.equal(collectionRef.id, 'collectionId');
+    assert.strictEqual(collectionRef.id, 'collectionId');
     assert.ok(documentRef.id.length, 20);
   });
 
@@ -139,7 +139,7 @@ describe('Collection interface', function() {
 
       return promise.then(documentRef => {
         assert.ok(is.instance(documentRef, DocumentReference));
-        assert.equal(collectionRef.id, 'collectionId');
+        assert.strictEqual(collectionRef.id, 'collectionId');
         assert.ok(documentRef.id.length, 20);
       });
     });
