@@ -915,7 +915,7 @@ describe('getAll() method', function() {
                             throw new Error('Unexpected success in Promise');
                           })
                           .catch(err => {
-                            assert.strictEqual(err.code, errorCode);
+                            assert.strictEqual(err.code, Number(errorCode));
                           }));
       });
 
