@@ -77,7 +77,7 @@ export class FieldValue {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `FieldValue` is equal to the provided value.
    */
-  isEqual(other: any): boolean {
+  isEqual(other: FieldValue): boolean {
     return this === other;
   }
 }
