@@ -732,8 +732,8 @@ describe('get document', function() {
       return firestore.doc('collectionId/documentId').get().then(result => {
         assert.strictEqual(result.exists, false);
         assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
-        assert.strictEqual(null, result.data());
-        assert.strictEqual(null, result.get('foo'));
+        assert.strictEqual(result.data(), null);
+        assert.strictEqual(result.get('foo'), null);
       });
     });
   });
