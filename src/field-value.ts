@@ -34,7 +34,7 @@ export class FieldValue {
   /**
    * Returns a sentinel used with update() to mark a field for deletion.
    *
-   * @returns {*} The sentinel value to use in your objects.
+   * @returns {FieldValue} The sentinel value to use in your objects.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -54,7 +54,7 @@ export class FieldValue {
    * Returns a sentinel used with set(), create() or update() to include a
    * server-generated timestamp in the written data.
    *
-   * @returns {*} The sentinel value to use in your objects.
+   * @returns {FieldValue} The sentinel value to use in your objects.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -77,7 +77,7 @@ export class FieldValue {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `FieldValue` is equal to the provided value.
    */
-  isEqual(other): boolean {
+  isEqual(other: any): boolean {
     return this === other;
   }
 }
@@ -95,6 +95,7 @@ export class FieldValue {
 export abstract class FieldTransform extends FieldValue {
   /** Whether this FieldTransform should be included in the document mask. */
   abstract get includeInDocumentMask(): boolean;
+
   /**
    * Whether this FieldTransform should be included in the list of document
    * transforms.
@@ -177,9 +178,8 @@ export class ServerTimestampTransform extends FieldTransform {
    * The proto representation for this field transform.
    *
    * @private
-   * @param {FieldPath} fieldPath The field path to apply this transformation
-   * to.
-   * @return {object} The 'FieldTransform' proto message.
+   * @param fieldPath - The field path to apply this transformation to.
+   * @return The 'FieldTransform' proto message.
    */
   toProto(fieldPath): api.FieldTransform {
     return {
