@@ -1042,7 +1042,8 @@ describe('Query class', function() {
       }
       assert.strictEqual(actual.docChanges.length, expected.docChanges.length);
       for (i = 0; i < expected.docChanges.length; i++) {
-        assert.strictEqual(actual.docChanges[i].type, expected.docChanges[i].type);
+        assert.strictEqual(
+            actual.docChanges[i].type, expected.docChanges[i].type);
         assert.strictEqual(
             actual.docChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
         assert.deepEqual(

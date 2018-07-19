@@ -463,13 +463,15 @@ describe('instantiation', function() {
     assert.ok(is.defined(Firestore.DocumentSnapshot));
     assert.strictEqual(Firestore.DocumentSnapshot.name, 'DocumentSnapshot');
     assert.ok(is.defined(Firestore.QueryDocumentSnapshot));
-    assert.strictEqual(Firestore.QueryDocumentSnapshot.name, 'QueryDocumentSnapshot');
+    assert.strictEqual(
+        Firestore.QueryDocumentSnapshot.name, 'QueryDocumentSnapshot');
     assert.ok(is.defined(Firestore.Query));
     assert.strictEqual(Firestore.Query.name, 'Query');
     assert.ok(is.defined(Firestore.QuerySnapshot));
     assert.strictEqual(Firestore.QuerySnapshot.name, 'QuerySnapshot');
     assert.ok(is.defined(Firestore.CollectionReference));
-    assert.strictEqual(Firestore.CollectionReference.name, 'CollectionReference');
+    assert.strictEqual(
+        Firestore.CollectionReference.name, 'CollectionReference');
     assert.ok(is.defined(Firestore.FieldValue));
     assert.strictEqual(Firestore.FieldValue.name, 'FieldValue');
     assert.ok(is.defined(Firestore.FieldPath));
