@@ -27,7 +27,8 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 describe('ResourcePath', function() {
   it('has id property', function() {
-    assert.strictEqual(new ResourcePath(PROJECT_ID, '(default)', 'foo').id, 'foo');
+    assert.strictEqual(
+        new ResourcePath(PROJECT_ID, '(default)', 'foo').id, 'foo');
     assert.strictEqual(new ResourcePath(PROJECT_ID, '(default)').id, null);
   });
 
@@ -61,7 +62,8 @@ describe('ResourcePath', function() {
   it('accepts newlines', function() {
     const path = ResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/foo\nbar`);
-    assert.strictEqual(path.formattedName, `${DATABASE_ROOT}/documents/foo\nbar`);
+    assert.strictEqual(
+        path.formattedName, `${DATABASE_ROOT}/documents/foo\nbar`);
   });
 });
 
