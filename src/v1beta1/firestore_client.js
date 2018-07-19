@@ -20,7 +20,7 @@ const merge = require('lodash.merge');
 const path = require('path');
 const pkgUp = require('pkg-up');
 
-const VERSION = require(pkgUp.sync()).version;
+const VERSION = require(pkgUp.sync(__dirname)).version;
 
 /**
  * The Cloud Firestore service.
