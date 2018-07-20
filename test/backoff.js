@@ -16,11 +16,12 @@
 
 'use strict';
 
-const assert = require('power-assert');
+import assert from 'power-assert';
 
-const Firestore = require('../src');
-const backoff = require('../src/backoff')(Firestore);
+import {Firestore} from '../src/index';
+import {backoffPkg} from '../src/backoff';
 
+const backoff = backoffPkg(Firestore);
 const ExponentialBackoff = backoff.ExponentialBackoff;
 const setTimeoutHandler = backoff.setTimeoutHandler;
 

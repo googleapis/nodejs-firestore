@@ -16,23 +16,28 @@
 
 'use strict';
 
-const assert = require('power-assert');
-const path = require('path');
-const is = require('is');
-const through = require('through2');
-const googleProtoFiles = require('google-proto-files');
-const protobufjs = require('protobufjs');
-const duplexify = require('duplexify');
+import assert from 'power-assert';
+import path from 'path';
+import is from 'is';
+import through2 from 'through2';
+import googleProtoFiles from 'google-proto-files';
+import protobufjs from 'protobufjs';
+import duplexify from 'duplexify';
+
+import {Firestore} from '../src/index';
+import {ResourcePath} from '../src/path';
+import {documentPkg} from '../src/document';
+import {referencePkg} from '../src/reference';
+import * as convert from '../src/convert';
+
+import {createInstance as createInstanceHelper} from '../test/util/helpers';
+
+const reference = referencePkg(Firestore);
+const document = documentPkg(reference.DocumentReference);
+const DocumentSnapshot = document.DocumentSnapshot;
+
 const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
-
-const Firestore = require('../src');
-const reference = require('../src/reference')(Firestore);
-const document = require('../src/document')(reference.DocumentReference);
-const DocumentSnapshot = document.DocumentSnapshot;
-const convert = require('../src/convert');
-const ResourcePath = require('../src/path').ResourcePath;
-const createInstanceHelper = require('../test/util/helpers').createInstance;
 
 /** List of test cases that are ignored. */
 const ignoredRe = [];
@@ -257,7 +262,7 @@ function queryHandler(spec) {
     assert.deepEqual(
         request.structuredQuery, convertProto.structuredQuery(spec.query));
 
-    let stream = through.obj();
+    let stream = through2.obj();
     setImmediate(function() {
       stream.push(null);
     });
@@ -271,7 +276,7 @@ function getHandler(spec) {
     const getDocument = spec.request;
     assert.equal(request.documents[0], getDocument.name);
 
-    let stream = through.obj();
+    let stream = through2.obj();
 
     setImmediate(function() {
       stream.push({
@@ -409,9 +414,11 @@ function runTest(spec) {
   const watchTest = function(spec) {
     let expectedSnapshots = spec.snapshots;
 
-    const writeStream = through.obj();
+    const writeStream = through2.obj();
 
-    const overrides = {listen: () => duplexify.obj(through.obj(), writeStream)};
+    const overrides = {
+      listen: () => duplexify.obj(through2.obj(), writeStream)
+    };
 
     return createInstance(overrides).then(() => {
       return new Promise((resolve, reject) => {

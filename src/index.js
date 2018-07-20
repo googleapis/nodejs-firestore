@@ -16,18 +16,27 @@
 
 'use strict';
 
-const assert = require('assert');
-const bun = require('bun');
-const extend = require('extend');
-const is = require('is');
-const pkgUp = require('pkg-up');
-const through = require('through2');
-const util = require('util');
+import assert from 'assert';
+import bun from 'bun';
+import extend from 'extend';
+import is from 'is';
+import pkgUp from 'pkg-up';
+import through2 from 'through2';
+import util from 'util';
+
+import {referencePkg} from './reference';
+import {documentPkg} from './document';
+import {FieldValue} from './field-value';
+import {validatePkg} from './validate';
+import {writeBatchPkg} from './write-batch';
+import {transactionPkg} from './transaction';
+import {Timestamp} from './timestamp';
+import {FieldPath, ResourcePath} from './path';
+import {ClientPool} from './pool';
+
+import * as convert from './convert';
 
 const libVersion = require(pkgUp.sync(__dirname)).version;
-
-const path = require('./path');
-const convert = require('./convert');
 
 /*!
  * DO NOT REMOVE THE FOLLOWING NAMESPACE DEFINITIONS
@@ -45,30 +54,6 @@ const convert = require('./convert');
  * @namespace google.firestore.v1beta1
  */
 
-/*!
- * @see ResourcePath
- */
-const ResourcePath = path.ResourcePath;
-
-/*!
- * @see ResourcePath
- */
-const FieldPath = path.FieldPath;
-
-/*!
- * @see FieldValue
- */
-const FieldValue = require('./field-value').FieldValue;
-
-/*!
- * @see Timestamp
- */
-const Timestamp = require('./timestamp');
-
-/*!
- * @see ClientPool
- */
-const ClientPool = require('./pool').ClientPool;
 
 /*!
  * @see CollectionReference
@@ -1130,7 +1115,7 @@ follow these steps, YOUR APP MAY BREAK.`);
                        'Sending request: %j', decorated.request);
                    let stream = gapicClient[methodName](
                        decorated.request, decorated.gax);
-                   let logger = through.obj(function(chunk, enc, callback) {
+                   let logger = through2.obj(function(chunk, enc, callback) {
                      Firestore.log(
                          'Firestore.readStream', requestTag,
                          'Received response: %j', chunk);
@@ -1183,7 +1168,7 @@ follow these steps, YOUR APP MAY BREAK.`);
           let requestStream = gapicClient[methodName]({}, decorated.gax);
 
           // The transform stream to assign the project ID.
-          let transform = through.obj(function(chunk, encoding, callback) {
+          let transform = through2.obj(function(chunk, encoding, callback) {
             let decoratedChunk = extend(true, {}, chunk);
             common.util.replaceProjectIdToken(
                 decoratedChunk, self._referencePath.projectId);
@@ -1193,7 +1178,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             requestStream.write(decoratedChunk, encoding, callback);
           });
 
-          let logger = through.obj(function(chunk, enc, callback) {
+          let logger = through2.obj(function(chunk, enc, callback) {
             Firestore.log(
                 'Firestore.readWriteStream', requestTag,
                 'Received response: %j', chunk);
@@ -1248,19 +1233,19 @@ Firestore.setLogFunction = function(logger) {
 };
 
 // Initializing dependencies that require that Firestore class type.
-const reference = require('./reference')(Firestore);
+const reference = referencePkg(Firestore);
 CollectionReference = reference.CollectionReference;
 DocumentReference = reference.DocumentReference;
-const document = require('./document')(DocumentReference);
+const document = documentPkg(DocumentReference);
 DocumentSnapshot = document.DocumentSnapshot;
 GeoPoint = document.GeoPoint;
-validate = require('./validate')({
+validate = validatePkg({
   DocumentReference: reference.validateDocumentReference,
   ResourcePath: ResourcePath.validateResourcePath,
 });
-const batch = require('./write-batch')(Firestore, DocumentReference);
+const batch = writeBatchPkg(Firestore, DocumentReference);
 WriteBatch = batch.WriteBatch;
-Transaction = require('./transaction')(Firestore);
+Transaction = transactionPkg(Firestore);
 
 /**
  * The default export of the `@google-cloud/firestore` package is the

@@ -16,7 +16,10 @@
 
 'use strict';
 
-const is = require('is');
+import is from 'is';
+
+import {referencePkg} from './reference';
+import {validatePkg} from './validate';
 
 /*! Injected. */
 let validate;
@@ -356,13 +359,13 @@ class Transaction {
   }
 }
 
-module.exports = FirestoreType => {
-  let reference = require('./reference')(FirestoreType);
+export function transactionPkg(FirestoreType) {
+  let reference = referencePkg(FirestoreType);
   DocumentReference = reference.DocumentReference;
   Query = reference.Query;
   Firestore = FirestoreType;
-  validate = require('./validate')({
+  validate = validatePkg({
     DocumentReference: reference.validateDocumentReference,
   });
   return Transaction;
-};
+}

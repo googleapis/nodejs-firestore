@@ -16,20 +16,22 @@
 
 'use strict';
 
-const assert = require('power-assert');
-const duplexify = require('duplexify');
-const gax = require('google-gax');
-const grpc = new gax.GrpcClient().grpc;
-const is = require('is');
-const through = require('through2');
+import assert from 'power-assert';
+import duplexify from 'duplexify';
+import is from 'is';
+import through2 from 'through2';
 
-const Firestore = require('../src');
-const reference = require('../src/reference')(Firestore);
+import {Firestore} from '../src/index';
+import {referencePkg} from '../src/reference';
+import {documentPkg} from '../src/document';
+import {backoffPkg} from '../src/backoff';
+import {createInstance} from '../test/util/helpers';
+
+const reference = referencePkg(Firestore);
 const DocumentReference = reference.DocumentReference;
-const DocumentSnapshot =
-    require('../src/document')(DocumentReference).DocumentSnapshot;
-const Backoff = require('../src/backoff')(Firestore);
-const createInstance = require('../test/util/helpers').createInstance;
+const document = documentPkg(DocumentReference);
+const DocumentSnapshot = document.DocumentSnapshot;
+const Backoff = backoffPkg(Firestore);
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -192,8 +194,8 @@ class StreamHelper {
       // Create a mock backend whose stream we can return.
       ++this.streamCount;
 
-      this.readStream = through.obj();
-      this.writeStream = through.obj();
+      this.readStream = through2.obj();
+      this.writeStream = through2.obj();
 
       this.readStream.once(
           'data', result => this.deferredListener.on('data', result));
@@ -1024,7 +1026,7 @@ describe('Query watch', function() {
                     listenCallback = () => {
                       // Return a stream that always errors on write
                       ++streamHelper.streamCount;
-                      return through.obj((chunk, enc, callback) => {
+                      return through2.obj((chunk, enc, callback) => {
                         callback(new Error(
                             `Stream Error (${streamHelper.streamCount})`));
                       });

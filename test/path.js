@@ -16,11 +16,9 @@
 
 'use strict';
 
-const assert = require('power-assert');
+import assert from 'power-assert';
 
-const path = require('../src/path');
-const ResourcePath = path.ResourcePath;
-const FieldPath = path.FieldPath;
+import {FieldPath, ResourcePath} from '../src/path';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;

@@ -18,9 +18,10 @@
 
 import {GrpcClient} from 'google-gax';
 
-import Firestore from '../../src';
-import {ClientPool} from '../../src/pool';
 import v1beta1 from '../../src/v1beta1';
+
+import {Firestore} from '../../src';
+import {ClientPool} from '../../src/pool';
 
 /* tslint:disable:no-any */
 type GapicClient = any;

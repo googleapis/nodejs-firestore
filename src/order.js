@@ -16,13 +16,12 @@
 
 'use strict';
 
-const is = require('is');
-const validate = require('./validate')();
+import is from 'is';
 
-/*!
- * @see ResourcePath
- */
-const ResourcePath = require('./path').ResourcePath;
+import {ResourcePath} from './path';
+import {validatePkg} from './validate';
+
+const validate = validatePkg({});
 
 /*!
  * The type order as defined by the backend.

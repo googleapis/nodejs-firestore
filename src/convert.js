@@ -16,8 +16,11 @@
 
 'use strict';
 
-const is = require('is');
-const validate = require('./validate')();
+import is from 'is';
+
+import {validatePkg} from './validate';
+
+const validate = validatePkg();
 
 /*!
  * @module firestore/convert

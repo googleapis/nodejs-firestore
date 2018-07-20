@@ -16,12 +16,19 @@
 
 'use strict';
 
-const bun = require('bun');
-const deepEqual = require('deep-equal');
-const extend = require('extend');
-const is = require('is');
-const order = require('./order');
-const through = require('through2');
+import bun from 'bun';
+import deepEqual from 'deep-equal';
+import extend from 'extend';
+import is from 'is';
+import order from './order';
+import through2 from 'through2';
+
+import {documentPkg} from './document';
+import {watchPkg} from './watch';
+import {writeBatchPkg} from './write-batch';
+import {validatePkg} from './validate';
+import {Timestamp} from './timestamp';
+import {FieldPath, ResourcePath} from './path';
 
 /*!
  * Injected.
@@ -55,25 +62,6 @@ let Watch;
  * @see WriteBatch
  */
 let WriteBatch;
-
-const path = require('./path');
-
-/*!
- * @private
- * @see ResourcePath
- */
-const ResourcePath = path.ResourcePath;
-
-/*!
- * @private
- * @see FieldPath
- */
-const FieldPath = path.FieldPath;
-
-/*!
- * @see Timestamp
- */
-const Timestamp = require('./timestamp');
 
 /*!
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1731,7 +1719,7 @@ class Query {
   stream() {
     let responseStream = this._stream();
 
-    let transform = through.obj(function(chunk, encoding, callback) {
+    let transform = through2.obj(function(chunk, encoding, callback) {
       // Only send chunks with documents.
       if (chunk.document) {
         this.push(chunk.document);
@@ -1826,7 +1814,7 @@ class Query {
     const requestTag = Firestore.requestTag();
     const self = this;
 
-    const stream = through.obj(function(proto, enc, callback) {
+    const stream = through2.obj(function(proto, enc, callback) {
       const readTime = Timestamp.fromProto(proto.readTime);
       if (proto.document) {
         let document = self.firestore.snapshot_(proto.document, proto.readTime);
@@ -2166,16 +2154,16 @@ function isArrayEqual(left, right) {
   return true;
 }
 
-module.exports = FirestoreType => {
+export function referencePkg(FirestoreType) {
   Firestore = FirestoreType;
-  let document = require('./document')(DocumentReference);
+  let document = documentPkg(DocumentReference);
   DocumentSnapshot = document.DocumentSnapshot;
-  Watch = require('./watch')(
+  Watch = watchPkg(
       FirestoreType, DocumentChange, DocumentReference, DocumentSnapshot);
-  WriteBatch = require('./write-batch')(
-                   FirestoreType, DocumentReference, validateDocumentReference)
-                   .WriteBatch;
-  validate = require('./validate')({
+  WriteBatch =
+      writeBatchPkg(FirestoreType, DocumentReference, validateDocumentReference)
+          .WriteBatch;
+  validate = validatePkg({
     Document: document.validateDocumentData,
     FieldPath: FieldPath.validateFieldPath,
     FieldComparison: validateComparisonOperator,
@@ -2192,4 +2180,4 @@ module.exports = FirestoreType => {
     QuerySnapshot,
     validateDocumentReference,
   };
-};
+}

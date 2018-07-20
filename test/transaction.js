@@ -16,13 +16,11 @@
 
 'use strict';
 
-const assert = require('power-assert');
-const gax = require('google-gax');
-const grpc = new gax.GrpcClient().grpc;
-const through = require('through2');
+import assert from 'power-assert';
+import through2 from 'through2';
 
-const Firestore = require('../src');
-const createInstance = require('../test/util/helpers').createInstance;
+import {Firestore} from '../src/index';
+import {createInstance} from '../test/util/helpers';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -109,7 +107,7 @@ function getDocument(transaction) {
     transaction: transaction || 'foo',
   };
 
-  let stream = through.obj();
+  let stream = through2.obj();
 
   setImmediate(function() {
     stream.push({
@@ -137,7 +135,7 @@ function getAll(docs) {
     transaction: 'foo',
   };
 
-  let stream = through.obj();
+  let stream = through2.obj();
 
   for (const doc of docs) {
     const name = `${COLLECTION_ROOT}/${doc}`;
@@ -191,7 +189,7 @@ function query(transaction) {
     transaction: transaction || 'foo',
   };
 
-  let stream = through.obj();
+  let stream = through2.obj();
 
   setImmediate(function() {
     stream.push({

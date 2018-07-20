@@ -221,10 +221,10 @@ class ExponentialBackoff {
   }
 }
 
-module.exports = FirestoreType => {
+export function backoffPkg(FirestoreType) {
   Firestore = FirestoreType;
   return {
     ExponentialBackoff,
     setTimeoutHandler,
   };
-};
+}

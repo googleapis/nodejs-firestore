@@ -16,15 +16,13 @@
 
 'use strict';
 
-const assert = require('power-assert');
-const extend = require('extend');
-const gax = require('google-gax');
-const grpc = new gax.GrpcClient().grpc;
-const is = require('is');
-const through = require('through2');
+import assert from 'power-assert';
+import extend from 'extend';
+import is from 'is';
+import through2 from 'through2';
 
-const Firestore = require('../src');
-const createInstance = require('../test/util/helpers').createInstance;
+import {Firestore} from '../src/index';
+import {createInstance} from '../test/util/helpers';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -174,7 +172,7 @@ function requestEquals(actual, protoOperation) {
 }
 
 function stream() {
-  let stream = through.obj();
+  let stream = through2.obj();
   let args = arguments;
 
   setImmediate(function() {
