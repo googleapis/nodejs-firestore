@@ -25,16 +25,18 @@ import assert from 'assert';
  * ClientPool is used within Firestore to manage a pool of GAPIC clients and
  * automatically initializes multiple clients if we issue more than 100
  * concurrent operations.
+ *
+ * @private
  */
 export class ClientPool<T> {
   /** Stores each active clients and how many operations it has outstanding. */
   private activeClients: Map<T, number> = new Map();
 
   /**
-   * @param {number} concurrentOperationLimit - The number of operations that
-   * each client can handle.
-   * @param {() => T} clientFactory - A factory function called as needed when
-   * new clients are required.
+   * @param concurrentOperationLimit - The number of operations that each client
+   * can handle.
+   * @param clientFactory - A factory function called as needed when new clients
+   * are required.
    */
   constructor(
       private readonly concurrentOperationLimit: number,
@@ -86,7 +88,7 @@ export class ClientPool<T> {
   /**
    * The number of currently registered clients.
    *
-   * @return {number} Number of currently registered clients.
+   * @return Number of currently registered clients.
    */
   // Visible for testing.
   get size(): number {
@@ -98,9 +100,9 @@ export class ClientPool<T> {
    * additional client if all existing clients already operate at the concurrent
    * operation limit.
    *
-   * @param {(client: T) => Promise<V>} op - A callback function that returns a
-   * Promise. The client T will be returned to the pool when callback finishes.
-   * @return {Promise<V>} A Promise that resolves with the result of `op`.
+   * @param op - A callback function that returns a Promise. The client T will
+   * be returned to the pool when callback finishes.
+   * @return A Promise that resolves with the result of `op`.
    */
   run<V>(op: (client: T) => Promise<V>): Promise<V> {
     const client = this.acquire();

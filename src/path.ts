@@ -223,7 +223,7 @@ export class ResourcePath extends Path<ResourcePath> {
    *
    * @param {string} projectId - The Firestore project id.
    * @param {string} databaseId - The Firestore database id.
-   * @param {string[]=} segments - Sequence of names of the parts of
+   * @param {string[]?} segments - Sequence of names of the parts of
    * the path.
    */
   constructor(projectId: string, databaseId: string, segments?: string[]) {
@@ -411,6 +411,8 @@ export class ResourcePath extends Path<ResourcePath> {
 export class FieldPath extends Path<FieldPath> {
   /**
    * A special sentinel value to refer to the ID of a document.
+   *
+   * @private
    */
   private static _DOCUMENT_ID = new FieldPath('__name__');
 

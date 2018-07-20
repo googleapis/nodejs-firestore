@@ -102,7 +102,7 @@ declare namespace FirebaseFirestore {
      * @param {object} settings The settings to use for all Firestore
      * operations.
      */
-    settings(settings: Settings);
+    settings(settings: Settings): void;
 
     /**
      * Gets a `CollectionReference` instance that refers to the collection at

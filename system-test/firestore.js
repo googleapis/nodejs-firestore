@@ -24,7 +24,7 @@ let DocumentReference = require('../src/reference').DocumentReference;
 let DocumentSnapshot =
     require('../src/document')(DocumentReference).DocumentSnapshot;
 
-let version = require(pkgUp.sync()).version;
+let version = require(pkgUp.sync(__dirname)).version;
 let Firestore = require('../src');
 
 if (process.env.NODE_ENV === 'DEBUG') {
