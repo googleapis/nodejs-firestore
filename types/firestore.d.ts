@@ -706,9 +706,9 @@ declare namespace FirebaseFirestore {
 
   /**
    * Filter conditions in a `Query.where()` clause are specified using the
-   * strings '<', '<=', '==', '>=', and '>'.
+   * strings '<', '<=', '==', '>=', '>', and 'array-contains'.
    */
-  export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>';
+  export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains';
 
   /**
    * A `Query` refers to a Query which you can read or listen to. You can also

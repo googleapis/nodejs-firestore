@@ -101,6 +101,7 @@ const comparisonOperators = {
   '==': 'EQUAL',
   '>': 'GREATER_THAN',
   '>=': 'GREATER_THAN_OR_EQUAL',
+  'array-contains': 'ARRAY_CONTAINS'
 };
 
 /**
@@ -778,8 +779,11 @@ class FieldFilter {
    * @private
    * @return {boolean}
    */
-  isEqualsFilter() {
-    return this._opString === 'EQUAL';
+  isInequalityFilter() {
+    return this._opString === 'GREATER_THAN' ||
+        this._opString === 'GREATER_THAN_OR_EQUAL' ||
+        this._opString === 'LESS_THAN' ||
+        this._opString === 'LESS_THAN_OR_EQUAL';
   }
 
   /**
@@ -1392,7 +1396,7 @@ class Query {
       // If no explicit ordering is specified, use the first inequality to
       // define an implicit order.
       for (let fieldFilter of this._fieldFilters) {
-        if (!fieldFilter.isEqualsFilter()) {
+        if (fieldFilter.isInequalityFilter()) {
           fieldOrders.push(new FieldOrder(fieldFilter.field, 'ASCENDING'));
           break;
         }

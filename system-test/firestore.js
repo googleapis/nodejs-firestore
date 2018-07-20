@@ -818,6 +818,17 @@ describe('Query class', function() {
         });
   });
 
+  it('supports array-contains', function() {
+    return Promise
+        .all([randomCol.add({foo: ['bar']}), randomCol.add({foo: []})])
+        .then(() => randomCol.where('foo', 'array-contains', 'bar').get())
+        .then(res => {
+          assert.ok(res.size, 1);
+          assert.deepStrictEqual(res.docs[0].get('foo'), ['bar']);
+        });
+  });
+
+
   it('can query by FieldPath.documentId()', function() {
     let ref = randomCol.doc('foo');
 
@@ -932,6 +943,21 @@ describe('Query class', function() {
     return batch.commit().then(() => paginateResults(query)).then(results => {
       assert.equal(results.pages, 3);
       assert.equal(results.docs.length, 9);
+    });
+  });
+
+  it('supports pagination with array-contains filter', function() {
+    let batch = firestore.batch();
+
+    for (let i = 0; i < 10; ++i) {
+      batch.set(randomCol.doc('doc' + i), {array: ['foo']});
+    }
+
+    let query = randomCol.where('array', 'array-contains', 'foo').limit(3);
+
+    return batch.commit().then(() => paginateResults(query)).then(results => {
+      assert.equal(results.pages, 4);
+      assert.equal(results.docs.length, 10);
     });
   });
 
