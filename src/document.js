@@ -16,43 +16,14 @@
 
 'use strict';
 
-const assert = require('assert');
-const deepEqual = require('deep-equal');
-const is = require('is');
+import assert from 'assert';
+import deepEqual from 'deep-equal';
+import is from 'is';
 
-const fieldValue = require('./field-value');
-const path = require('./path');
-
-/*!
- * @see {ResourcePath}
- */
-const ResourcePath = path.ResourcePath;
-
-/*!
- * @see {FieldPath}
- */
-const FieldPath = path.FieldPath;
-
-/*!
- * @see {FieldTransform}
- */
-
-const FieldTransform = fieldValue.FieldTransform;
-
-/*!
- * @see {DeleteTransform}
- */
-const DeleteTransform = fieldValue.DeleteTransform;
-
-/*!
- * @see {ServerTimestampTransform}
- */
-const ServerTimestampTransform = fieldValue.ServerTimestampTransform;
-
-/*!
- * @see {Timestamp}
- */
-const Timestamp = require('./timestamp');
+import {FieldTransform, DeleteTransform, ServerTimestampTransform} from './field-value';
+import {FieldPath, ResourcePath} from './path';
+import {Timestamp} from './timestamp';
+import {validatePkg} from './validate';
 
 /*!
  * Injected.
@@ -1594,9 +1565,9 @@ function isPlainObject(input) {
        Object.getPrototypeOf(input) === null));
 }
 
-module.exports = DocumentRefType => {
+export function documentPkg(DocumentRefType) {
   DocumentReference = DocumentRefType;
-  validate = require('./validate')({
+  validate = validatePkg({
     FieldPath: FieldPath.validateFieldPath,
     PlainObject: isPlainObject,
   });

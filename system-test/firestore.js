@@ -16,16 +16,15 @@
 
 'use strict';
 
-let assert = require('power-assert');
-let is = require('is');
-let pkgUp = require('pkg-up');
+import * as assert from 'power-assert';
+import is from 'is';
+import pkgUp from 'pkg-up';
 
-let DocumentReference = require('../src/reference').DocumentReference;
-let DocumentSnapshot =
-    require('../src/document')(DocumentReference).DocumentSnapshot;
+import Firestore from '../src';
+
+const DocumentSnapshot = Firestore.DocumentSnapshot;
 
 let version = require(pkgUp.sync(__dirname)).version;
-let Firestore = require('../src');
 
 if (process.env.NODE_ENV === 'DEBUG') {
   Firestore.setLogFunction(console.log);

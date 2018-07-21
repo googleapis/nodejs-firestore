@@ -16,9 +16,11 @@
 
 'use strict';
 
-const is = require('is');
+import is from 'is';
 
-const validate = require('./validate')();
+import {validatePkg} from './validate';
+
+const validate = validatePkg({});
 
 /*!
  * A regular expression to verify an absolute Resource Path in Firestore. It

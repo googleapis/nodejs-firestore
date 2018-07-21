@@ -16,19 +16,18 @@
 
 'use strict';
 
-const gax = require('google-gax');
-const grpc = new gax.GrpcClient().grpc;
-const Firestore = require('../src');
-const is = require('is');
-const through = require('through2');
-const assert = require('assert');
 
-const createInstanceHelper = require('../test/util/helpers').createInstance;
+import {Firestore} from '../src/index';
+import is from 'is';
+import through2 from 'through2';
+import assert from 'assert';
+
+import {createInstance as createInstanceHelper} from '../test/util/helpers';
 
 function createInstance(opts, document) {
   const overrides = {
     batchGetDocuments: () => {
-      const stream = through.obj();
+      const stream = through2.obj();
       setImmediate(function() {
         stream.push({found: document, readTime: {seconds: 5, nanos: 6}});
         stream.push(null);

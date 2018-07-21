@@ -16,19 +16,22 @@
 
 'use strict';
 
-const assert = require('power-assert');
-const extend = require('extend');
+import assert from 'power-assert';
+import extend from 'extend';
+import is from 'is';
+import through2 from 'through2';
+
+import {Firestore} from '../src/index';
+import {referencePkg} from '../src/reference';
+import {ResourcePath} from '../src/path';
+import {createInstance} from '../test/util/helpers';
+
 const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
-const is = require('is');
-const through = require('through2');
 
-const Firestore = require('../src');
-const reference = require('../src/reference')(Firestore);
+const reference = referencePkg(Firestore);
 const DocumentReference = reference.DocumentReference;
 const CollectionReference = reference.CollectionReference;
-const ResourcePath = require('../src/path').ResourcePath;
-const createInstance = require('../test/util/helpers').createInstance;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -292,7 +295,7 @@ function missing(name) {
 }
 
 function stream() {
-  let stream = through.obj();
+  let stream = through2.obj();
   let args = arguments;
 
   setImmediate(function() {

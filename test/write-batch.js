@@ -16,12 +16,10 @@
 
 'use strict';
 
-const assert = require('power-assert');
-const gax = require('google-gax');
-const grpc = new gax.GrpcClient().grpc;
+import assert from 'power-assert';
 
-const Firestore = require('../src');
-const createInstance = require('../test/util/helpers').createInstance;
+import {Firestore} from '../src/index';
+import {createInstance} from '../test/util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});

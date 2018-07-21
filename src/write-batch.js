@@ -16,8 +16,13 @@
 
 'use strict';
 
-const assert = require('assert');
-const is = require('is');
+import assert from 'assert';
+import is from 'is';
+
+import {documentPkg} from './document';
+import {validatePkg} from './validate';
+import {FieldPath} from './path';
+import {Timestamp} from './timestamp';
 
 /*!
  * Injected.
@@ -43,12 +48,6 @@ let DocumentTransform;
 /*!
  * @see FieldPath
  */
-const FieldPath = require('./path').FieldPath;
-
-/*!
- * @see Timestamp
- */
-const Timestamp = require('./timestamp');
 
 /*!
  * Injected.
@@ -625,28 +624,28 @@ function validateUpdateMap(data) {
   return true;
 }
 
-module.exports =
-    (FirestoreType, DocumentReferenceType, validateDocumentReference) => {
-      let document = require('./document')(DocumentReferenceType);
-      Firestore = FirestoreType;
-      DocumentMask = document.DocumentMask;
-      DocumentSnapshot = document.DocumentSnapshot;
-      DocumentTransform = document.DocumentTransform;
-      Precondition = document.Precondition;
-      validate = require('./validate')({
-        Document: document.validateDocumentData,
-        DocumentReference: validateDocumentReference,
-        FieldValue: document.validateFieldValue,
-        FieldPath: FieldPath.validateFieldPath,
-        UpdatePrecondition: precondition => document.validatePrecondition(
-            precondition, /* allowExists= */ false),
-        DeletePrecondition: precondition => document.validatePrecondition(
-            precondition, /* allowExists= */ true),
-        SetOptions: document.validateSetOptions,
-        UpdateMap: validateUpdateMap,
-      });
-      return {
-        WriteBatch,
-        WriteResult,
-      };
-    };
+export function writeBatchPkg(
+    FirestoreType, DocumentReferenceType, validateDocumentReference) {
+  let document = documentPkg(DocumentReferenceType);
+  Firestore = FirestoreType;
+  DocumentMask = document.DocumentMask;
+  DocumentSnapshot = document.DocumentSnapshot;
+  DocumentTransform = document.DocumentTransform;
+  Precondition = document.Precondition;
+  validate = validatePkg({
+    Document: document.validateDocumentData,
+    DocumentReference: validateDocumentReference,
+    FieldValue: document.validateFieldValue,
+    FieldPath: FieldPath.validateFieldPath,
+    UpdatePrecondition: precondition =>
+        document.validatePrecondition(precondition, /* allowExists= */ false),
+    DeletePrecondition: precondition =>
+        document.validatePrecondition(precondition, /* allowExists= */ true),
+    SetOptions: document.validateSetOptions,
+    UpdateMap: validateUpdateMap,
+  });
+  return {
+    WriteBatch,
+    WriteResult,
+  };
+}

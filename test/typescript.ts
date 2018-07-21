@@ -305,15 +305,16 @@ xdescribe('firestore.d.ts', function() {
 
   it('has typings for FieldValue', () => {
     const documentData: UpdateData = {
-      'foo': FieldValue.serverTimestamp(),
-      'bar': FieldValue.delete()
+      'a': FieldValue.serverTimestamp(),
+      'b': FieldValue.delete(),
+      'c': FieldValue.arrayUnion('foo'),
+      'd': FieldValue.arrayRemove('bar'),
     };
+    const serverTimestamp : FieldValue = FieldValue.serverTimestamp();
+    const deleteField : FieldValue = FieldValue.delete();
+    const arrayUnion : FieldValue = FieldValue.arrayUnion('foo', 'bar');
+    const arrayRemove : FieldValue = FieldValue.arrayRemove('foo', 'bar');
     const equals: boolean = FieldValue.serverTimestamp().isEqual(FieldValue.serverTimestamp());
-  });
-
-  it('has typings for FieldPath', () => {
-    const fieldPath = new FieldPath('foo');
-    const equals: boolean = FieldPath.documentId().isEqual(fieldPath);
   });
 
   it('has typings for SetOptions', () => {

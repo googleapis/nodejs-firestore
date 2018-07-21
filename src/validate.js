@@ -16,7 +16,7 @@
 
 'use strict';
 
-const is = require('is');
+import is from 'is';
 
 /**
  * Formats the given word as plural conditionally given the preceding number.
@@ -45,7 +45,7 @@ function formatPlural(num, str) {
  * @returns {Object.<string, function>} Map with validators following the naming
  * convention is{Type} and isOptional{Type}.
  */
-module.exports = validators => {
+export function validatePkg(validators) {
   validators = Object.assign(
       {
         function: is.function,

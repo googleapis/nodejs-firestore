@@ -16,8 +16,11 @@
 
 'use strict';
 
-const is = require('is');
-const validate = require('./validate')();
+import is from 'is';
+
+import {validatePkg} from './validate';
+
+const validate = validatePkg({});
 
 /*!
  * Number of nanoseconds in a millisecond.
@@ -37,7 +40,7 @@ const MS_TO_NANOS = 1000000;
  *
  * @see https://github.com/google/protobuf/blob/master/src/google/protobuf/timestamp.proto
  */
-class Timestamp {
+export class Timestamp {
   /**
    * Creates a new timestamp with the current date, with millisecond precision.
    *
@@ -238,5 +241,3 @@ class Timestamp {
     return timestamp;
   }
 }
-
-module.exports = Timestamp;

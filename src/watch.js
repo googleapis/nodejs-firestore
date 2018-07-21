@@ -16,9 +16,13 @@
 
 'use strict';
 
-const assert = require('assert');
-const rbtree = require('functional-red-black-tree');
-const through = require('through2');
+import assert from 'assert';
+import rbtree from 'functional-red-black-tree';
+import through2 from 'through2';
+
+import {backoffPkg} from './backoff';
+import {Timestamp} from './timestamp';
+import {ResourcePath} from './path';
 
 /*!
  * Injected.
@@ -54,16 +58,6 @@ let DocumentSnapshot;
  * @see Firestore
  */
 let Firestore;
-
-/*!
- * @see ResourcePath
- */
-let ResourcePath = require('./path').ResourcePath;
-
-/*!
- * @see Timestamp
- */
-const Timestamp = require('./timestamp');
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -386,7 +380,7 @@ class Watch {
 
     // We may need to replace the underlying stream on reset events.
     // This is the one that will be returned and proxy the current one.
-    const stream = through.obj();
+    const stream = through2.obj();
     // The current stream to the backend.
     let currentStream = null;
 
@@ -809,16 +803,16 @@ class Watch {
   }
 }
 
-module.exports =
-    (FirestoreType, DocumentChangeType, DocumentReferenceType,
-     DocumentSnapshotType) => {
-      Firestore = FirestoreType;
-      DocumentChange = DocumentChangeType;
-      DocumentReference = DocumentReferenceType;
-      DocumentSnapshot = DocumentSnapshotType;
+export function watchPkg(
+    FirestoreType, DocumentChangeType, DocumentReferenceType,
+    DocumentSnapshotType) {
+  Firestore = FirestoreType;
+  DocumentChange = DocumentChangeType;
+  DocumentReference = DocumentReferenceType;
+  DocumentSnapshot = DocumentSnapshotType;
 
-      const backoff = require('./backoff')(FirestoreType);
-      ExponentialBackoff = backoff.ExponentialBackoff;
+  const backoff = backoffPkg(FirestoreType);
+  ExponentialBackoff = backoff.ExponentialBackoff;
 
-      return Watch;
-    };
+  return Watch;
+}

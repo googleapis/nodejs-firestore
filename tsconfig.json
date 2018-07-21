@@ -7,7 +7,8 @@
     "rootDir": ".",
     "outDir": "build",
     "target": "es6",
-    "noImplicitAny": false // TODO: Remove when all source are migrated to TS
+    "noImplicitAny": false, // TODO: Remove when all source are migrated to TS
+    "allowSyntheticDefaultImports": true // TODO: Remove when all source are migrated to TS
   },
   "include": [
     "src/*.js",

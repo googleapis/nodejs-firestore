@@ -16,19 +16,20 @@
 
 'use strict';
 
-const assert = require('power-assert');
-const gax = require('google-gax');
-const grpc = new gax.GrpcClient().grpc;
+import assert from 'power-assert';
 
-const Firestore = require('../src');
-const DocumentReference =
-    require('../src/reference')(Firestore).DocumentReference;
-const document = require('../src/document')(DocumentReference);
+import {Firestore} from '../src/index';
+import {referencePkg} from '../src/reference';
+import {documentPkg} from '../src/document';
+import {createInstance} from '../test/util/helpers';
+import {ResourcePath} from '../src/path';
+import * as order from '../src/order'
+
+const reference = referencePkg(Firestore);
+const DocumentReference = reference.DocumentReference;
+const document = documentPkg(DocumentReference);
 const DocumentSnapshot = document.DocumentSnapshot;
 const GeoPoint = document.GeoPoint;
-const order = require('../src/order');
-const ResourcePath = require('../src/path').ResourcePath;
-const createInstance = require('../test/util/helpers').createInstance;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
