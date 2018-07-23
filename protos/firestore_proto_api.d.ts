@@ -20,6 +20,10 @@ export declare type ApiClientHookFactory = any;
 export declare type ApiClientObjectMap<T> = any;
 export declare type PromiseRequestService = any;
 
+export interface Timestamp {
+  seconds: number,
+  nanos: number
+}
 export declare type CompositeFilterOp = 'OPERATOR_UNSPECIFIED' | 'AND';
 export interface ICompositeFilterOpEnum {
   OPERATOR_UNSPECIFIED: CompositeFilterOp;
@@ -131,13 +135,13 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
     mask?: DocumentMask;
     transaction?: string;
     newTransaction?: TransactionOptions;
-    readTime?: string;
+    readTime?: Timestamp;
   }
   interface BatchGetDocumentsResponse {
     found?: Document;
     missing?: string;
     transaction?: string;
-    readTime?: string;
+    readTime?: Timestamp;
   }
   interface BeginTransactionRequest {
     options?: TransactionOptions;
@@ -155,7 +159,7 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
   }
   interface CommitResponse {
     writeResults?: Array<WriteResult>;
-    commitTime?: string;
+    commitTime?: Timestamp;
   }
   interface CompositeFilter {
     op?: CompositeFilterOp;
@@ -168,8 +172,8 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
   interface Document {
     name?: string;
     fields?: ApiClientObjectMap<Value>;
-    createTime?: string;
-    updateTime?: string;
+    createTime?: Timestamp;
+    updateTime?: Timestamp;
   }
   interface DocumentChange {
     document?: Document;
@@ -179,7 +183,7 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
   interface DocumentDelete {
     document?: string;
     removedTargetIds?: Array<number>;
-    readTime?: string;
+    readTime?: Timestamp;
   }
   interface DocumentMask {
     fieldPaths?: Array<string>;
@@ -187,7 +191,7 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
   interface DocumentRemove {
     document?: string;
     removedTargetIds?: Array<number>;
-    readTime?: string;
+    readTime?: Timestamp;
   }
   interface DocumentTransform {
     document?: string;
@@ -278,7 +282,7 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
   }
   interface Precondition {
     exists?: boolean;
-    updateTime?: string;
+    updateTime?: Timestamp;
   }
   interface Projection {
     fields?: Array<FieldReference>;
@@ -288,7 +292,7 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
     structuredQuery?: StructuredQuery;
   }
   interface ReadOnly {
-    readTime?: string;
+    readTime?: Timestamp;
   }
   interface ReadWrite {
     retryTransaction?: string;
@@ -300,12 +304,12 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
     structuredQuery?: StructuredQuery;
     transaction?: string;
     newTransaction?: TransactionOptions;
-    readTime?: string;
+    readTime?: Timestamp;
   }
   interface RunQueryResponse {
     transaction?: string;
     document?: Document;
-    readTime?: string;
+    readTime?: Timestamp;
     skippedResults?: number;
   }
   interface Status {
@@ -327,7 +331,7 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
     query?: QueryTarget;
     documents?: DocumentsTarget;
     resumeToken?: string;
-    readTime?: string;
+    readTime?: Timestamp;
     targetId?: number;
     once?: boolean;
   }
@@ -336,7 +340,7 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
     targetIds?: Array<number>;
     cause?: Status;
     resumeToken?: string;
-    readTime?: string;
+    readTime?: Timestamp;
   }
   interface TransactionOptions {
     readOnly?: ReadOnly;
@@ -346,7 +350,9 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
     op?: UnaryFilterOp;
     field?: FieldReference;
   }
+  type ValueType = 'nullValue'|'booleanValue'|'integerValue'|'doubleValue'|'timestampValue'|'stringValue'|'bytesValue'|'referenceValue'|'geoPointValue'|'arrayValue'|'mapValue';
   interface Value {
+    valueType:ValueType;
     nullValue?: ValueNullValue;
     booleanValue?: boolean;
     integerValue?: string;
@@ -376,10 +382,10 @@ export declare namespace firestoreV1beta1ApiClientInterfaces {
     streamId?: string;
     streamToken?: string;
     writeResults?: Array<WriteResult>;
-    commitTime?: string;
+    commitTime?: Timestamp;
   }
   interface WriteResult {
-    updateTime?: string;
+    updateTime?: Timestamp;
     transformResults?: Array<Value>;
   }
 }
@@ -532,7 +538,7 @@ export interface ProjectsDatabasesDocumentsDeleteNamedParameters {
   uploadType?: string;
   $Xgafv?: ProjectsDatabasesDocumentsApiClient$Xgafv;
   currentDocumentExists?: boolean;
-  currentDocumentUpdateTime?: string;
+  currentDocumentUpdateTime?: Timestamp;
 }
 export interface ProjectsDatabasesDocumentsGetNamedParameters {
   access_token?: string;
@@ -550,7 +556,7 @@ export interface ProjectsDatabasesDocumentsGetNamedParameters {
   $Xgafv?: ProjectsDatabasesDocumentsApiClient$Xgafv;
   maskFieldPaths?: Array<string>;
   transaction?: string;
-  readTime?: string;
+  readTime?: Timestamp;
 }
 export interface ProjectsDatabasesDocumentsListCollectionIdsNamedParameters {
   access_token?: string;
@@ -586,7 +592,7 @@ export interface ProjectsDatabasesDocumentsListNamedParameters {
   orderBy?: string;
   maskFieldPaths?: Array<string>;
   transaction?: string;
-  readTime?: string;
+  readTime?: Timestamp;
   showMissing?: boolean;
 }
 export interface ProjectsDatabasesDocumentsListenNamedParameters {
@@ -621,7 +627,7 @@ export interface ProjectsDatabasesDocumentsPatchNamedParameters {
   updateMaskFieldPaths?: Array<string>;
   maskFieldPaths?: Array<string>;
   currentDocumentExists?: boolean;
-  currentDocumentUpdateTime?: string;
+  currentDocumentUpdateTime?: Timestamp;
 }
 export interface ProjectsDatabasesDocumentsRollbackNamedParameters {
   access_token?: string;
