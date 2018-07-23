@@ -16,15 +16,24 @@
 
 'use strict';
 
+import deepEqual from 'deep-equal';
+
+import {AnyJs} from './types';
+import {validatePkg} from './validate';
 import * as api from '../protos/firestore_proto_api';
 
+const validate = validatePkg({});
+
+// tslint:disable-next-line:variable-name
+let DocumentSnapshot;
+
 /**
- * Sentinel values that can be used when writing documents with set() or
- * update().
+ * Sentinel values that can be used when writing documents with set(), create()
+ * or update().
  *
  * @class
  */
-export class FieldValue {
+class FieldValue {
   /**
    * @private
    * @hideconstructor
@@ -32,7 +41,8 @@ export class FieldValue {
   constructor() {}
 
   /**
-   * Returns a sentinel used with update() to mark a field for deletion.
+   * Returns a sentinel for use with update() or set() with {merge:true} to mark
+   * a field for deletion.
    *
    * @returns {FieldValue} The sentinel value to use in your objects.
    *
@@ -54,7 +64,8 @@ export class FieldValue {
    * Returns a sentinel used with set(), create() or update() to include a
    * server-generated timestamp in the written data.
    *
-   * @returns {FieldValue} The sentinel value to use in your objects.
+   * @return {FieldValue} The FieldValue sentinel for use in a call to set(),
+   * create() or update().
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -69,6 +80,61 @@ export class FieldValue {
    */
   static serverTimestamp(): FieldValue {
     return ServerTimestampTransform.SERVER_TIMESTAMP_SENTINEL;
+  }
+
+  /**
+   * Returns a special value that can be used with set(), create() or update()
+   * that tells the server to union the given elements with any array value that
+   * already exists on the server. Each specified element that doesn't already
+   * exist in the array will be added to the end. If the field being modified is
+   * not already an array it will be overwritten with an array containing
+   * exactly the specified elements.
+   *
+   * @param {...*} elements The elements to union into the array.
+   * @return {FieldValue} The FieldValue sentinel for use in a call to set(),
+   * create() or update().
+   *
+   * @example
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.update(
+   *   'array', Firestore.FieldValue.arrayUnion('foo')
+   * ).then(() => {
+   *   return documentRef.get();
+   * }).then(doc => {
+   *   // doc.get('array') contains field 'foo'
+   * });
+   */
+  static arrayUnion(...elements: AnyJs[]): FieldValue {
+    validate.minNumberOfArguments('FieldValue.arrayUnion', arguments, 1);
+    return new ArrayUnionTransform(elements);
+  }
+
+  /**
+   * Returns a special value that can be used with set(), create() or update()
+   * that tells the server to remove the given elements from any array value
+   * that already exists on the server. All instances of each element specified
+   * will be removed from the array. If the field being modified is not already
+   * an array it will be overwritten with an empty array.
+   *
+   * @param {...*} elements The elements to remove from the array.
+   * @return {FieldValue} The FieldValue sentinel for use in a call to set(),
+   * create() or update().
+   *
+   * @example
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.update(
+   *   'array', Firestore.FieldValue.arrayRemove('foo')
+   * ).then(() => {
+   *   return documentRef.get();
+   * }).then(doc => {
+   *   // doc.get('array') no longer contains field 'foo'
+   * });
+   */
+  static arrayRemove(...elements: AnyJs[]): FieldValue {
+    validate.minNumberOfArguments('FieldValue.arrayRemove', arguments, 1);
+    return new ArrayRemoveTransform(elements);
   }
 
   /**
@@ -92,7 +158,7 @@ export class FieldValue {
  * @private
  * @abstract
  */
-export abstract class FieldTransform extends FieldValue {
+abstract class FieldTransform extends FieldValue {
   /** Whether this FieldTransform should be included in the document mask. */
   abstract get includeInDocumentMask(): boolean;
 
@@ -101,6 +167,17 @@ export abstract class FieldTransform extends FieldValue {
    * transforms.
    */
   abstract get includeInDocumentTransform(): boolean;
+
+  /** The method name used to obtain the field transform. */
+  abstract get methodName(): string;
+
+  /***
+   * The proto representation for this field transform.
+   *
+   * @param fieldPath - The field path to apply this transformation to.
+   * @return The 'FieldTransform' proto message.
+   */
+  abstract toProto(fieldPath): api.FieldTransform;
 }
 
 /**
@@ -108,11 +185,9 @@ export abstract class FieldTransform extends FieldValue {
  *
  * @private
  */
-export class DeleteTransform extends FieldTransform {
+class DeleteTransform extends FieldTransform {
   /**
    * Sentinel value for a field delete.
-   *
-   * @private
    */
   static DELETE_SENTINEL = new DeleteTransform();
 
@@ -122,8 +197,6 @@ export class DeleteTransform extends FieldTransform {
 
   /**
    * Deletes are included in document masks.
-   *
-   * @private
    */
   get includeInDocumentMask(): true {
     return true;
@@ -131,11 +204,18 @@ export class DeleteTransform extends FieldTransform {
 
   /**
    * Deletes are are omitted from document transforms.
-   *
-   * @private
    */
   get includeInDocumentTransform(): false {
     return false;
+  }
+
+  get methodName(): string {
+    return 'FieldValue.delete';
+  }
+
+  toProto(fieldPath): api.FieldTransform {
+    throw new Error(
+        'FieldValue.delete() should not be included in a FieldTransform');
   }
 }
 
@@ -144,7 +224,7 @@ export class DeleteTransform extends FieldTransform {
  *
  * @private
  */
-export class ServerTimestampTransform extends FieldTransform {
+class ServerTimestampTransform extends FieldTransform {
   /**
    * Sentinel value for a server timestamp.
    *
@@ -174,17 +254,109 @@ export class ServerTimestampTransform extends FieldTransform {
     return true;
   }
 
-  /**
-   * The proto representation for this field transform.
-   *
-   * @private
-   * @param fieldPath - The field path to apply this transformation to.
-   * @return The 'FieldTransform' proto message.
-   */
+  get methodName(): string {
+    return 'FieldValue.serverTimestamp';
+  }
+
   toProto(fieldPath): api.FieldTransform {
     return {
       fieldPath: fieldPath.formattedName,
       setToServerValue: 'REQUEST_TIME',
     };
   }
+}
+
+/**
+ * Transforms an array value via a union operation.
+ *
+ * @private
+ */
+class ArrayUnionTransform extends FieldTransform {
+  constructor(private readonly elements: AnyJs[]) {
+    super();
+  }
+
+  /**
+   * Array transforms are omitted from document masks.
+   */
+  get includeInDocumentMask(): false {
+    return false;
+  }
+
+  /**
+   * Array transforms are included in document transforms.
+   */
+  get includeInDocumentTransform(): true {
+    return true;
+  }
+
+  get methodName(): string {
+    return 'FieldValue.arrayUnion';
+  }
+
+  toProto(fieldPath): api.FieldTransform {
+    const encodedElements =
+        DocumentSnapshot.encodeValue(this.elements).arrayValue;
+    return {
+      fieldPath: fieldPath.formattedName,
+      appendMissingElements: encodedElements
+    };
+  }
+
+  isEqual(other: FieldValue): boolean {
+    return (
+        this === other ||
+        (other instanceof ArrayUnionTransform &&
+         deepEqual(this.elements, other.elements, {strict: true})));
+  }
+}
+
+/**
+ * Transforms an array value via a remove operation.
+ *
+ * @private
+ */
+class ArrayRemoveTransform extends FieldTransform {
+  constructor(private readonly elements: AnyJs[]) {
+    super();
+  }
+
+  /**
+   * Array transforms are omitted from document masks.
+   */
+  get includeInDocumentMask(): false {
+    return false;
+  }
+
+  /**
+   * Array transforms are included in document transforms.
+   */
+  get includeInDocumentTransform(): true {
+    return true;
+  }
+
+  get methodName(): string {
+    return 'FieldValue.arrayRemove';
+  }
+
+  toProto(fieldPath): api.FieldTransform {
+    const encodedElements =
+        DocumentSnapshot.encodeValue(this.elements).arrayValue;
+    return {
+      fieldPath: fieldPath.formattedName,
+      removeAllFromArray: encodedElements
+    };
+  }
+
+  isEqual(other: FieldValue): boolean {
+    return (
+        this === other ||
+        (other instanceof ArrayRemoveTransform &&
+         deepEqual(this.elements, other.elements, {strict: true})));
+  }
+}
+
+export function fieldValuePkg(documentSnapshotType) {
+  DocumentSnapshot = documentSnapshotType;
+  return {FieldValue, FieldTransform, DeleteTransform};
 }

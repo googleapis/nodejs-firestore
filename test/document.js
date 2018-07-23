@@ -388,64 +388,6 @@ describe('serialize document', function() {
     });
   });
 
-  it('supports server timestamps', function() {
-    const overrides = {
-      commit: (request, options, callback) => {
-        requestEquals(
-            request,
-            set(document('foo', 'bar'),
-                /* updateMask= */ null,
-                fieldTransform(
-                    'field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
-
-        callback(null, writeResult(2));
-      }
-    };
-
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({
-        foo: 'bar',
-        field: Firestore.FieldValue.serverTimestamp(),
-        map: {field: Firestore.FieldValue.serverTimestamp()},
-      });
-    });
-  });
-
-  it('doesn\'t support server timestamp in array', function() {
-    const expectedErr =
-        /FieldValue transformations are not supported inside of array values./;
-
-    assert.throws(() => {
-      return firestore.doc('collectionId/documentId').set({
-        array: [Firestore.FieldValue.serverTimestamp()],
-      });
-    }, expectedErr);
-
-    assert.throws(() => {
-      return firestore.doc('collectionId/documentId').set({
-        map: {
-          array: [Firestore.FieldValue.serverTimestamp()],
-        },
-      });
-    }, expectedErr);
-
-    assert.throws(() => {
-      return firestore.doc('collectionId/documentId').set({
-        array: [{map: Firestore.FieldValue.serverTimestamp()}],
-      });
-    }, expectedErr);
-
-    assert.throws(() => {
-      return firestore.doc('collectionId/documentId').set({
-        array: {
-          map: {
-            array: [Firestore.FieldValue.serverTimestamp()],
-          },
-        },
-      });
-    }, expectedErr);
-  });
-
   it('with invalid geopoint', function() {
     assert.throws(() => {
       new Firestore.GeoPoint(57.2999988, 'INVALID');
@@ -921,7 +863,7 @@ describe('set document', function() {
     });
   });
 
-  it('skips merges with just server timestamps', function() {
+  it('skips merges with just field transform', function() {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -943,7 +885,7 @@ describe('set document', function() {
     });
   });
 
-  it('sends empty non-merge write even with just server timestamps', () => {
+  it('sends empty non-merge write even with just field transform', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1100,7 +1042,7 @@ describe('set document', function() {
     });
   });
 
-  it('supports document merges with field mask and server timestamps', () => {
+  it('supports document merges with field mask and field transform', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1285,7 +1227,7 @@ describe('create document', function() {
     });
   });
 
-  it('supports server timestamps', function() {
+  it('supports field transform', function() {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1366,7 +1308,7 @@ describe('update document', function() {
     });
   });
 
-  it('supports nested server timestamps', function() {
+  it('supports nested field transform', function() {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1391,7 +1333,7 @@ describe('update document', function() {
     });
   });
 
-  it('skips write for single server timestamp', function() {
+  it('skips write for single field transform', function() {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(

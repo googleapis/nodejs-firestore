@@ -190,7 +190,7 @@ class WriteBatch {
     validate.isDocument('data', data, {
       allowEmpty: true,
       allowDeletes: 'none',
-      allowServerTimestamps: true,
+      allowTransforms: true,
     });
 
     this.verifyNotCommitted();
@@ -288,7 +288,7 @@ class WriteBatch {
     validate.isDocument('data', data, {
       allowEmpty: true,
       allowDeletes: mergePaths || mergeLeaves ? 'all' : 'none',
-      allowServerTimestamps: true,
+      allowTransforms: true,
     });
 
     this.verifyNotCommitted();
@@ -391,7 +391,7 @@ class WriteBatch {
             validate.minNumberOfArguments('update', arguments, i + 1);
             validate.isFieldValue(i, arguments[i + 1], {
               allowDeletes: 'root',
-              allowServerTimestamps: true,
+              allowTransforms: true,
             });
             updateMap.set(
                 FieldPath.fromArgument(arguments[i]), arguments[i + 1]);
@@ -409,7 +409,7 @@ class WriteBatch {
         validate.isDocument('dataOrField', dataOrField, {
           allowEmpty: false,
           allowDeletes: 'root',
-          allowServerTimestamps: true,
+          allowTransforms: true,
         });
         validate.maxNumberOfArguments('update', arguments, 3);
 

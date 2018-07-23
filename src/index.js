@@ -26,7 +26,7 @@ import util from 'util';
 
 import {referencePkg} from './reference';
 import {documentPkg} from './document';
-import {FieldValue} from './field-value';
+import {fieldValuePkg} from './field-value';
 import {validatePkg} from './validate';
 import {writeBatchPkg} from './write-batch';
 import {transactionPkg} from './transaction';
@@ -74,6 +74,11 @@ let DocumentSnapshot;
  * @see GeoPoint
  */
 let GeoPoint;
+
+/*!
+ * @see FieldValue
+ */
+let FieldValue;
 
 /*! Injected. */
 let validate;
@@ -1246,6 +1251,7 @@ validate = validatePkg({
 const batch = writeBatchPkg(Firestore, DocumentReference);
 WriteBatch = batch.WriteBatch;
 Transaction = transactionPkg(Firestore);
+FieldValue = fieldValuePkg(DocumentSnapshot).FieldValue;
 
 /**
  * The default export of the `@google-cloud/firestore` package is the
