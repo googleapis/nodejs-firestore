@@ -18,6 +18,8 @@
 
 import {GrpcClient} from 'google-gax';
 
+import * as api from '../../protos/firestore_proto_api';
+
 import v1beta1 from '../../src/v1beta1';
 
 import {Firestore} from '../../src';
@@ -30,6 +32,8 @@ const SSL_CREDENTIALS = (grpc.credentials as any).createInsecure();
 /* tslint:enable:no-any */
 
 const PROJECT_ID = 'test-project';
+const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
+const DOCUMENT_NAME = `${DATABASE_ROOT}/documents/collectionId/documentId`;
 
 /** A Promise implementation that supports deferred resolution. */
 export class Deferred<R> {
@@ -97,4 +101,121 @@ export function createInstance(
   firestore._initClientPool = () => Promise.resolve(clientPool);
 
   return Promise.resolve(firestore);
+}
+
+type Database = {
+  database: string
+};
+
+export function commitRequest(writes: api.Write[]): api.CommitRequest&Database {
+  return {database: DATABASE_ROOT, writes};
+}
+
+function write(
+    document: api.Document|null, mask: api.DocumentMask|null,
+    transforms: api.FieldTransform[]|null,
+    precondition: api.Precondition|null): api.Write[] {
+  const writes: api.Write[] = [];
+
+  if (document) {
+    const update = Object.assign({}, document);
+    delete update.updateTime;
+    delete update.createTime;
+    writes.push({update});
+    if (mask) {
+      writes[0].updateMask = mask;
+    }
+  }
+
+  if (transforms) {
+    writes.push(
+        {transform: {document: DOCUMENT_NAME, fieldTransforms: transforms}});
+  }
+
+  if (precondition) {
+    writes[0].currentDocument = precondition;
+  }
+
+  return writes;
+}
+
+export function set(
+    document: api.Document, transforms?: api.FieldTransform[]): api.Write[] {
+  return write(document, null, transforms || null, null);
+}
+
+function value(value: string|api.Value): api.Value {
+  if (typeof value === 'string') {
+    return {
+      valueType: 'stringValue',
+      stringValue: value,
+    };
+  } else {
+    return value;
+  }
+}
+
+export function document(
+    field?: string, value?: string|api.Value,
+    ...fieldOrValue: Array<string|api.Value>): api.Document {
+  const document: api.Document = {
+    name: `${DATABASE_ROOT}/documents/collectionId/documentId`,
+    fields: {},
+    createTime: {seconds: 1, nanos: 2},
+    updateTime: {seconds: 3, nanos: 4},
+  };
+
+  for (let i = 0; i < arguments.length; i += 2) {
+    const field: string = arguments[i];
+    const value: string|api.Value = arguments[i + 1];
+
+    if (typeof value === 'string') {
+      document.fields[field] = {
+        valueType: 'stringValue',
+        stringValue: value,
+      };
+    } else {
+      document.fields[field] = value;
+    }
+  }
+
+  return document;
+}
+
+export function serverTimestamp(field: string): api.FieldTransform {
+  return {fieldPath: field, setToServerValue: 'REQUEST_TIME'};
+}
+
+export function arrayTransform(
+    field: string, transform: 'appendMissingElements'|'removeAllFromArray',
+    ...values: Array<string|api.Value>): api.FieldTransform {
+  const fieldTransform: api.FieldTransform = {fieldPath: field};
+
+  fieldTransform[transform] = {values: values.map(val => value(val))};
+
+  return fieldTransform;
+}
+
+export function writeResult(count: number): api.WriteResponse {
+  const response: api.WriteResponse = {
+    commitTime: {
+      nanos: 0,
+      seconds: 1,
+    },
+  };
+
+  if (count > 0) {
+    response.writeResults = [];
+
+    for (let i = 1; i <= count; ++i) {
+      response.writeResults.push({
+        updateTime: {
+          nanos: i * 2,
+          seconds: i * 2 + 1,
+        },
+      });
+    }
+  }
+
+  return response;
 }
