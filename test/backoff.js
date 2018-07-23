@@ -18,12 +18,7 @@
 
 import assert from 'power-assert';
 
-import {Firestore} from '../src/index';
-import {backoffPkg} from '../src/backoff';
-
-const backoff = backoffPkg(Firestore);
-const ExponentialBackoff = backoff.ExponentialBackoff;
-const setTimeoutHandler = backoff.setTimeoutHandler;
+import {ExponentialBackoff, setTimeoutHandler} from '../src/backoff';
 
 const nop = () => {};
 

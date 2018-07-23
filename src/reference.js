@@ -23,6 +23,7 @@ import is from 'is';
 import order from './order';
 import through2 from 'through2';
 
+import {logger} from './logger';
 import {documentPkg} from './document';
 import {watchPkg} from './watch';
 import {writeBatchPkg} from './write-batch';
@@ -1828,7 +1829,7 @@ class Query {
     this._firestore.readStream('runQuery', request, requestTag, true)
         .then(backendStream => {
           backendStream.on('error', err => {
-            Firestore.log(
+            logger(
                 'Query._stream', requestTag,
                 'Query failed with stream error:', err);
             stream.destroy(err);
@@ -2136,6 +2137,7 @@ function validateDocumentReference(value) {
 /**
  * Verifies euqality for an array of objects using the `isEqual` interface.
  *
+ * @private
  * @param {Array.<Object>} left Array of objects supporting `isEqual`.
  * @param {Array.<Object>} right Array of objects supporting `isEqual`.
  * @return {boolean} True if arrays are equal.

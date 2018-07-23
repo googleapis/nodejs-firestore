@@ -22,7 +22,9 @@ import * as api from '../../protos/firestore_proto_api';
 
 import v1beta1 from '../../src/v1beta1';
 
-import {Firestore} from '../../src';
+// TODO: This should be a TypeScript import after the full migration.
+import Firestore = require('../../src');
+
 import {ClientPool} from '../../src/pool';
 
 /* tslint:disable:no-any */
