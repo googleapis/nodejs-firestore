@@ -56,15 +56,15 @@ export class Deferred<R> {
 /**
  * Interface that defines the request handlers used by Firestore.
  */
-export interface ApiOverride {
-  beginTransaction(request, options, callback): void;
-  commit(request, options, callback): void;
-  rollback(request, options, callback): void;
-  listCollectionIds(request, options, callback): void;
-  batchGetDocuments(request): NodeJS.ReadableStream;
-  runQuery(request): NodeJS.ReadableStream;
-  listen(): NodeJS.ReadWriteStream;
-}
+export type ApiOverride = {
+  beginTransaction?: (request, options, callback) => void;
+  commit?: (request, options, callback) => void;
+  rollback?: (request, options, callback) => void;
+  listCollectionIds?: (request, options, callback) => void;
+  batchGetDocuments?: (request) => NodeJS.ReadableStream;
+  runQuery?: (request) => NodeJS.ReadableStream;
+  listen?: () => NodeJS.ReadWriteStream;
+};
 
 /**
  * Creates a new Firestore instance for testing. Request handlers can be

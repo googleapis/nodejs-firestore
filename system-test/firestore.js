@@ -255,6 +255,60 @@ describe('DocumentReference class', function() {
         });
   });
 
+  it('supports arrayUnion()', function() {
+    const baseObject = {
+      a: [],
+      b: ['foo'],
+      c: {d: ['foo']},
+    };
+    const updateObject = {
+      a: Firestore.FieldValue.arrayUnion('foo', 'bar'),
+      b: Firestore.FieldValue.arrayUnion('foo', 'bar'),
+      'c.d': Firestore.FieldValue.arrayUnion('foo', 'bar')
+    };
+    const expectedObject = {
+      a: ['foo', 'bar'],
+      b: ['foo', 'bar'],
+      c: {d: ['foo', 'bar']},
+    };
+
+    let ref = randomCol.doc('doc');
+
+    return ref.set(baseObject)
+        .then(() => ref.update(updateObject))
+        .then(() => ref.get())
+        .then(doc => {
+          assert.deepEqual(doc.data(), expectedObject);
+        });
+  });
+
+  it('supports arrayRemove()', function() {
+    const baseObject = {
+      a: [],
+      b: ['foo', 'foo', 'baz'],
+      c: {d: ['foo', 'bar', 'baz']},
+    };
+    const updateObject = {
+      a: Firestore.FieldValue.arrayRemove('foo'),
+      b: Firestore.FieldValue.arrayRemove('foo'),
+      'c.d': Firestore.FieldValue.arrayRemove('foo', 'bar')
+    };
+    const expectedObject = {
+      a: [],
+      b: ['baz'],
+      c: {d: ['baz']},
+    };
+
+    let ref = randomCol.doc('doc');
+
+    return ref.set(baseObject)
+        .then(() => ref.update(updateObject))
+        .then(() => ref.get())
+        .then(doc => {
+          assert.deepEqual(doc.data(), expectedObject);
+        });
+  });
+
   it('supports set() with merge', function() {
     let ref = randomCol.doc('doc');
     return ref.set({'a.1': 'foo', nested: {'b.1': 'bar'}})

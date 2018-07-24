@@ -20,7 +20,7 @@ import assert from 'assert';
 import deepEqual from 'deep-equal';
 import is from 'is';
 
-import {FieldTransform, DeleteTransform, ServerTimestampTransform} from './field-value';
+import {fieldValuePkg} from './field-value';
 import {FieldPath, ResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {validatePkg} from './validate';
@@ -31,6 +31,20 @@ import {validatePkg} from './validate';
  * @see {DocumentReference}
  */
 let DocumentReference;
+
+/*!
+ * Injected.
+ *
+ * @see {DocumentReference}
+ */
+let FieldTransform;
+
+/*!
+ * Injected.
+ *
+ * @see {DeleteTransform}
+ */
+let DeleteTransform;
 
 /*! Injected. */
 let validate;
@@ -1239,7 +1253,7 @@ class DocumentTransform {
           transforms.set(path, val);
         } else {
           throw new Error(
-              'FieldValue transformations are not supported inside of array values.');
+              `${val.methodName}() is not supported inside of array values.`);
         }
       } else if (is.array(val)) {
         for (let i = 0; i < val.length; ++i) {
@@ -1426,8 +1440,8 @@ function validateFieldValue(val, options, depth) {
       ['none', 'root', 'all'].indexOf(options.allowDeletes) !== -1,
       'Expected \'none\', \'root\', or \'all\' for \'options.allowDeletes\'');
   assert(
-      typeof options.allowServerTimestamps === 'boolean',
-      'Expected boolean for \'options.allowServerTimestamps\'');
+      typeof options.allowTransforms === 'boolean',
+      'Expected boolean for \'options.allowTransforms\'');
 
   if (!depth) {
     depth = 1;
@@ -1449,13 +1463,13 @@ function validateFieldValue(val, options, depth) {
   } else if (val instanceof DeleteTransform) {
     if ((options.allowDeletes === 'root' && depth > 1) ||
         options.allowDeletes === 'none') {
-      throw new Error(
-          'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.');
+      throw new Error(`${
+          val.methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}.`);
     }
-  } else if (val instanceof ServerTimestampTransform) {
-    if (!options.allowServerTimestamps) {
-      throw new Error(
-          'FieldValue.serverTimestamp() can only be used in update(), set() and create().');
+  } else if (val instanceof FieldTransform) {
+    if (!options.allowTransforms) {
+      throw new Error(`${
+          val.methodName}() can only be used in set(), create() or update().`);
     }
   } else if (is.instanceof(val, DocumentReference)) {
     return true;
@@ -1571,6 +1585,9 @@ export function documentPkg(DocumentRefType) {
     FieldPath: FieldPath.validateFieldPath,
     PlainObject: isPlainObject,
   });
+  const fieldValue = fieldValuePkg(DocumentSnapshot);
+  FieldTransform = fieldValue.FieldTransform;
+  DeleteTransform = fieldValue.DeleteTransform;
   return {
     DocumentMask,
     DocumentSnapshot,
@@ -1583,4 +1600,4 @@ export function documentPkg(DocumentRefType) {
     validatePrecondition,
     validateSetOptions,
   };
-};
+}

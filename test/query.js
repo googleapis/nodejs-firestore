@@ -738,21 +738,15 @@ describe('where() interface', function() {
       let query = firestore.collection('collectionId');
       query = query.where('foo', '=', new Firestore.FieldPath('bar'));
       return query.get();
-    }, /Argument "value" is not a valid FieldValue. Cannot use object of type "FieldPath" as a Firestore value./);
+    }, /Argument "value" is not a valid QueryValue. Cannot use object of type "FieldPath" as a Firestore value./);
   });
 
-  it('rejects field transforms as value', function() {
+  it('rejects field delete as value', function() {
     assert.throws(() => {
       let query = firestore.collection('collectionId');
       query = query.where('foo', '=', Firestore.FieldValue.delete());
       return query.get();
     }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
-
-    assert.throws(() => {
-      let query = firestore.collection('collectionId');
-      query = query.where('foo', '=', Firestore.FieldValue.serverTimestamp());
-      return query.get();
-    }, /FieldValue.serverTimestamp\(\) can only be used in update\(\), set\(\) and create\(\)./);
   });
 
   it('rejects custom classes as value', function() {
@@ -766,7 +760,7 @@ describe('where() interface', function() {
 
     assert.throws(() => {
       query.where('foo', '=', new Foo()).get();
-    }, /Argument "value" is not a valid FieldValue. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
+    }, /Argument "value" is not a valid QueryValue. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
 
     assert.throws(() => {
       query.where('foo', '=', new FieldPath()).get();
@@ -1358,18 +1352,12 @@ describe('startAt() interface', function() {
     }, /Field 'foo' is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy\(\) and where\(\) constraints./);
   });
 
-  it('does not accept field transforms', function() {
-    let query = firestore.collection('collectionId')
-                    .orderBy('foo', 'desc')
-                    .orderBy('bar', 'asc');
+  it('does not accept field deletes', function() {
+    let query = firestore.collection('collectionId').orderBy('foo');
 
     assert.throws(() => {
-      query.startAt(Firestore.FieldValue.serverTimestamp());
-    }, /Argument at index 0 is not a valid FieldValue. FieldValue.serverTimestamp\(\) can only be used in update\(\), set\(\) and create\(\)./);
-
-    assert.throws(() => {
-      query.startAt('foo', Firestore.FieldValue.delete());
-    }, /Argument at index 1 is not a valid FieldValue. FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
+      query.orderBy('foo').startAt('foo', Firestore.FieldValue.delete());
+    }, /Argument at index 1 is not a valid QueryValue. FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
   it('requires order by', function() {

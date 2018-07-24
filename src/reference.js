@@ -1175,10 +1175,10 @@ class Query {
    */
   where(fieldPath, opStr, value) {
     validate.isFieldPath('fieldPath', fieldPath);
-    validate.isFieldComparison('opStr', opStr, value);
-    validate.isFieldValue('value', value, {
+    validate.isQueryComparison('opStr', opStr, value);
+    validate.isQueryValue('value', value, {
       allowDeletes: 'none',
-      allowServerTimestamps: false,
+      allowTransforms: false,
     });
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
@@ -1454,9 +1454,9 @@ class Query {
         fieldValue = this._convertReference(fieldValue);
       }
 
-      validate.isFieldValue(i, fieldValue, {
+      validate.isQueryValue(i, fieldValue, {
         allowDeletes: 'none',
-        allowServerTimestamps: false,
+        allowTransforms: false,
       });
 
       options.values.push(DocumentSnapshot.encodeValue(fieldValue));
@@ -2046,7 +2046,7 @@ class CollectionReference extends Query {
     validate.isDocument('data', data, {
       allowEmpty: true,
       allowDeletes: 'none',
-      allowServerTimestamps: true,
+      allowTransforms: true,
     });
 
     let documentRef = this.doc();
@@ -2168,9 +2168,9 @@ export function referencePkg(FirestoreType) {
   validate = validatePkg({
     Document: document.validateDocumentData,
     FieldPath: FieldPath.validateFieldPath,
-    FieldComparison: validateComparisonOperator,
+    QueryComparison: validateComparisonOperator,
     FieldOrder: validateFieldOrder,
-    FieldValue: document.validateFieldValue,
+    QueryValue: document.validateFieldValue,
     Precondition: document.validatePrecondition,
     ResourcePath: ResourcePath.validateResourcePath,
   });
