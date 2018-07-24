@@ -23,6 +23,7 @@ import is from 'is';
 import pkgUp from 'pkg-up';
 import through2 from 'through2';
 import util from 'util';
+import {replaceProjectIdToken} from '@google-cloud/projectify';
 
 import {referencePkg} from './reference';
 import {documentPkg} from './document';
@@ -97,11 +98,6 @@ let Transaction;
  * @see v1beta1
  */
 let v1beta1;  // Lazy-loaded in `_runRequest()`
-
-/*!
- * @see @google-cloud/common
- */
-let common;  // Lazy-loaded in `_runRequest()`
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -767,8 +763,6 @@ class Firestore {
   _runRequest(op) {
     // Initialize the client pool if this is the first request.
     if (!this._clientInitialized) {
-      common = require('@google-cloud/common');
-
       if (!this._timestampsInSnapshotsEnabled) {
         console.error(`
 The behavior for Date objects stored in Firestore is going to change
@@ -868,9 +862,8 @@ follow these steps, YOUR APP MAY BREAK.`);
    */
   _decorateRequest(request) {
     let decoratedRequest = extend(true, {}, request);
-    decoratedRequest = common.util.replaceProjectIdToken(
-        decoratedRequest, this._referencePath.projectId);
-
+    decoratedRequest =
+        replaceProjectIdToken(decoratedRequest, this._referencePath.projectId);
     let decoratedGax = {otherArgs: {headers: {}}};
     decoratedGax.otherArgs.headers[CLOUD_RESOURCE_HEADER] = this.formattedName;
 
@@ -1175,7 +1168,7 @@ follow these steps, YOUR APP MAY BREAK.`);
           // The transform stream to assign the project ID.
           let transform = through2.obj(function(chunk, encoding, callback) {
             let decoratedChunk = extend(true, {}, chunk);
-            common.util.replaceProjectIdToken(
+            replaceProjectIdToken(
                 decoratedChunk, self._referencePath.projectId);
             Firestore.log(
                 'Firestore.readWriteStream', requestTag,
