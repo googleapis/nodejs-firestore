@@ -24,14 +24,13 @@ import through2 from 'through2';
 import {Firestore} from '../src/index';
 import {referencePkg} from '../src/reference';
 import {documentPkg} from '../src/document';
-import {backoffPkg} from '../src/backoff';
+import {setTimeoutHandler} from '../src/backoff';
 import {createInstance} from '../test/util/helpers';
 
 const reference = referencePkg(Firestore);
 const DocumentReference = reference.DocumentReference;
 const document = documentPkg(DocumentReference);
 const DocumentSnapshot = document.DocumentSnapshot;
-const Backoff = backoffPkg(Firestore);
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -582,7 +581,7 @@ describe('Query watch', function() {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are uneffected by this, as we maintain their
     // asynchronous behavior.
-    Backoff.setTimeoutHandler(setImmediate);
+    setTimeoutHandler(setImmediate);
 
     targetId = 0x1;
 
@@ -608,7 +607,7 @@ describe('Query watch', function() {
   });
 
   afterEach(function() {
-    Backoff.setTimeoutHandler(setTimeout);
+    setTimeoutHandler(setTimeout);
   });
 
   it('with invalid callbacks', function() {
@@ -706,7 +705,7 @@ describe('Query watch', function() {
     // backoff window during the the stream recovery. We then use this window to
     // unsubscribe from the Watch stream and make sure that we don't
     // re-open the stream once the backoff expires.
-    Backoff.setTimeoutHandler(setTimeout);
+    setTimeoutHandler(setTimeout);
 
     const unsubscribe = watchHelper.startWatch();
     return streamHelper.awaitOpen()
@@ -2079,7 +2078,7 @@ describe('DocumentReference watch', function() {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are uneffected by this, as we maintain their
     // asynchronous behavior.
-    Backoff.setTimeoutHandler(setImmediate);
+    setTimeoutHandler(setImmediate);
 
     targetId = 0x1;
     streamHelper = new StreamHelper(firestore);
@@ -2093,7 +2092,7 @@ describe('DocumentReference watch', function() {
   });
 
   afterEach(function() {
-    Backoff.setTimeoutHandler(setTimeout);
+    setTimeoutHandler(setTimeout);
   });
 
   it('with invalid callbacks', function() {

@@ -20,7 +20,10 @@
 import {use, expect} from 'chai';
 
 import {ApiOverride, arrayTransform, commitRequest, createInstance, document, serverTimestamp, set, writeResult} from './util/helpers';
-import {Firestore} from '../src';
+
+// TODO: This should be a TypeScript import after the full migration.
+import Firestore = require('../src');
+
 import {referencePkg} from '../src/reference';
 import {fieldValuePkg} from '../src/field-value';
 import {documentPkg} from '../src/document';

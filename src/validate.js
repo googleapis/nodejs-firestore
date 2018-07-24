@@ -40,6 +40,7 @@ function formatPlural(num, str) {
  * inputs and may throw errors with custom validation messages for easier
  * diagnosis.
  *
+ * @private
  * @param {Object.<string, function>} validators Mapping from types to
  * validator validators.
  * @returns {Object.<string, function>} Map with validators following the naming
