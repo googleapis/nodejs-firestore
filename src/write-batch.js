@@ -19,6 +19,7 @@
 import assert from 'assert';
 import is from 'is';
 
+import {logger} from './logger';
 import {documentPkg} from './document';
 import {validatePkg} from './validate';
 import {FieldPath} from './path';
@@ -398,8 +399,7 @@ class WriteBatch {
           }
         }
       } catch (err) {
-        Firestore.log(
-            'WriteBatch.update', null, 'Varargs validation failed:', err);
+        logger('WriteBatch.update', null, 'Varargs validation failed:', err);
         // We catch the validation error here and re-throw to provide a better
         // error message.
         throw new Error(`${argumentError} ${err.message}`);
@@ -424,7 +424,7 @@ class WriteBatch {
           precondition = new Precondition(preconditionOrValues);
         }
       } catch (err) {
-        Firestore.log(
+        logger(
             'WriteBatch.update', null, 'Non-varargs validation failed:', err);
         // We catch the validation error here and prefix the error with a custom
         // message to describe the usage of update() better.
@@ -502,8 +502,7 @@ class WriteBatch {
     // On GCF, we periodically force transactional commits to allow for
     // request retries in case GCF closes our backend connection.
     if (!explicitTransaction && this._shouldCreateTransaction()) {
-      Firestore.log(
-          'WriteBatch.commit', requestTag, 'Using transaction for commit');
+      logger('WriteBatch.commit', requestTag, 'Using transaction for commit');
       return this._firestore
           .request('beginTransaction', request, requestTag, true)
           .then(resp => {
@@ -531,7 +530,7 @@ class WriteBatch {
       }
     }
 
-    Firestore.log(
+    logger(
         'WriteBatch.commit', requestTag, 'Sending %d writes',
         request.writes.length);
 

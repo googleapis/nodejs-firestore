@@ -16,12 +16,7 @@
 
 'use strict';
 
-/*!
- * Injected.
- *
- * @see Firestore
- */
-let Firestore;
+import {logger} from './logger';
 
 /*
  * @module firestore/backoff
@@ -69,7 +64,7 @@ let delayExecution = setTimeout;
  * @private
  * @param {function} handler A handler than matches the API of `setTimeout()`.
  */
-function setTimeoutHandler(handler) {
+export function setTimeoutHandler(handler) {
   delayExecution = handler;
 }
 
@@ -84,7 +79,7 @@ function setTimeoutHandler(handler) {
  *
  * @private
  */
-class ExponentialBackoff {
+export class ExponentialBackoff {
   /**
    * @param {number=} options.initialDelayMs Optional override for the initial
    * retry delay.
@@ -188,7 +183,7 @@ class ExponentialBackoff {
     // honored as such).
     const delayWithJitterMs = this._currentBaseMs + this._jitterDelayMs();
     if (this._currentBaseMs > 0) {
-      Firestore.log(
+      logger(
           'ExponentialBackoff.backoffAndWait',
           `Backing off for ${delayWithJitterMs} ms ` +
               `(base delay: ${this._currentBaseMs} ms)`);
@@ -219,12 +214,4 @@ class ExponentialBackoff {
   _jitterDelayMs() {
     return (Math.random() - 0.5) * this._jitterFactor * this._currentBaseMs;
   }
-}
-
-export function backoffPkg(FirestoreType) {
-  Firestore = FirestoreType;
-  return {
-    ExponentialBackoff,
-    setTimeoutHandler,
-  };
 }
