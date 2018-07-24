@@ -18,8 +18,12 @@
 
 import assert from 'power-assert';
 
+import {google} from '../protos/firestore_proto_api';
 import {Firestore} from '../src/index';
 import {createInstance} from '../test/util/helpers';
+
+const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
+                         .ServerValue.REQUEST_TIME;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -157,7 +161,7 @@ describe('batch support', function() {
                 fieldTransforms: [
                   {
                     fieldPath: 'foo',
-                    setToServerValue: 'REQUEST_TIME',
+                    setToServerValue: REQUEST_TIME,
                   },
                 ],
               },
@@ -170,7 +174,6 @@ describe('batch support', function() {
                 fields: {
                   foo: {
                     stringValue: 'bar',
-                    valueType: 'stringValue',
                   },
                 },
                 name: documentName,

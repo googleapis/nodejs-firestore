@@ -24,6 +24,7 @@ import googleProtoFiles from 'google-proto-files';
 import protobufjs from 'protobufjs';
 import duplexify from 'duplexify';
 
+import {google} from '../protos/firestore_proto_api';
 import {Firestore} from '../src/index';
 import {ResourcePath} from '../src/path';
 import {documentPkg} from '../src/document';
@@ -31,6 +32,9 @@ import {referencePkg} from '../src/reference';
 import * as convert from '../src/convert';
 
 import {createInstance as createInstanceHelper} from '../test/util/helpers';
+
+const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
+                         .ServerValue.REQUEST_TIME;
 
 const reference = referencePkg(Firestore);
 const document = documentPkg(reference.DocumentReference);
@@ -181,8 +185,19 @@ const convertProto = {
       if (write.update) {
         write.update.fields = convert.documentFromJson(write.update.fields);
       }
+      if (write.transform) {
+        write.transform.fieldTransforms = write.transform.fieldTransforms.map(
+            transform => convertProto.transform(transform));
+      }
     }
 
+    return deepCopy;
+  },
+  transform: transform => {
+    const deepCopy = JSON.parse(JSON.stringify(transform));
+    if (deepCopy.setToServerValue === 'REQUEST_TIME') {
+      deepCopy.setToServerValue = REQUEST_TIME;
+    }
     return deepCopy;
   },
   position: position => {
