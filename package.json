@@ -53,7 +53,7 @@
     "posttest": "npm run check"
   },
   "dependencies": {
-    "@google-cloud/common": "^0.20.3",
+    "@google-cloud/projectify": "^0.3.0",
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
     "extend": "^3.0.1",
