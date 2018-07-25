@@ -65,21 +65,19 @@ describe('Order', function() {
 
   function int(number) {
     return {
-      valueType: 'integerValue',
       integerValue: '' + number,
     };
   }
 
   function double(number) {
     return {
-      valueType: 'doubleValue',
       doubleValue: '' + number,
     };
   }
 
   it('throws on invalid value', function() {
     assert.throws(() => {
-      order.compare({}, {});
+      order.compare({valueType: 'foo'}, {valueType: 'foo'});
     }, /Invalid use of type "object" as a Firestore argument./);
   });
 
@@ -87,11 +85,9 @@ describe('Order', function() {
     assert.throws(() => {
       order.compare(
           {
-            valueType: 'bytesValue',
             bytesValue: [1, 2, 3],
           },
           {
-            valueType: 'bytesValue',
             bytesValue: [1, 2, 3],
           });
     }, /Blobs can only be compared if they are Buffers/);

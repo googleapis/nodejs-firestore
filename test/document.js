@@ -21,8 +21,12 @@ import extend from 'extend';
 import is from 'is';
 import through2 from 'through2';
 
+import {google} from '../protos/firestore_proto_api';
 import {Firestore} from '../src/index';
 import {createInstance} from '../test/util/helpers';
+
+const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
+                         .ServerValue.REQUEST_TIME;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -107,7 +111,6 @@ function document(field, value) {
 
     if (is.string(value)) {
       document.fields[field] = {
-        valueType: 'stringValue',
         stringValue: value,
       };
     } else {
@@ -270,7 +273,6 @@ describe('serialize document', function() {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document('bytes', {
-                        valueType: 'bytesValue',
                         bytesValue: Buffer.from('AG=', 'base64'),
                       })));
         callback(null, writeResult(1));
@@ -305,7 +307,6 @@ describe('serialize document', function() {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document('moonLanding', {
-                        valueType: 'timestampValue',
                         timestampValue: {
                           nanos: 123000000,
                           seconds: -14182920,
@@ -344,12 +345,7 @@ describe('serialize document', function() {
         requestEquals(
             request,
             set(document(
-                'blob1', {
-                  valueType: 'bytesValue',
-                  bytesValue: new Uint8Array([0, 1, 2])
-                },
-                'blob2', {
-                  valueType: 'bytesValue',
+                'blob1', {bytesValue: new Uint8Array([0, 1, 2])}, 'blob2', {
                   bytesValue: Buffer.from([0, 1, 2]),
                 })));
 
@@ -434,7 +430,6 @@ describe('serialize document', function() {
             request, set(document('ref', {
               referenceValue: `projects/${
                   PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
-              valueType: 'referenceValue',
             })));
 
         callback(null, writeResult(1));
@@ -852,7 +847,6 @@ describe('set document', function() {
       commit: (request, options, callback) => {
         requestEquals(request, set(document('a', {
                         mapValue: {},
-                        valueType: 'mapValue',
                       })));
         callback(null, writeResult(1));
       }
@@ -869,7 +863,7 @@ describe('set document', function() {
         requestEquals(
             request,
             set(null, null,
-                fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')));
+                fieldTransform('a', REQUEST_TIME, 'b.c', REQUEST_TIME)));
         callback(null, writeResult(1));
       }
     };
@@ -892,8 +886,7 @@ describe('set document', function() {
             request,
             set(document(),  // The empty write clears the data on the
                              // server.
-                null,
-                fieldTransform('a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME')));
+                null, fieldTransform('a', REQUEST_TIME, 'b.c', REQUEST_TIME)));
         callback(null, writeResult(2));
       }
     };
@@ -916,11 +909,9 @@ describe('set document', function() {
                     fields: {
                       d: {
                         stringValue: 'e',
-                        valueType: 'stringValue',
                       },
                     },
                   },
-                  valueType: 'mapValue',
                 }),
                 updateMask('a', 'c.d', 'f')));
         callback(null, writeResult(1));
@@ -946,22 +937,18 @@ describe('set document', function() {
                         fields: {
                           c: {
                             stringValue: 'foo',
-                            valueType: 'stringValue',
                           },
                         },
                       },
-                      valueType: 'mapValue',
                     },
                     'd', {
                       mapValue: {
                         fields: {
                           e: {
                             stringValue: 'foo',
-                            valueType: 'stringValue',
                           },
                         },
                       },
-                      valueType: 'mapValue',
                     }),
                 updateMask('a', 'b', 'd.e', 'f')));
         callback(null, writeResult(1));
@@ -1009,22 +996,18 @@ describe('set document', function() {
                         fields: {
                           b: {
                             mapValue: {},
-                            valueType: 'mapValue',
                           },
                         },
                       },
-                      valueType: 'mapValue',
                     },
                     'c', {
                       mapValue: {
                         fields: {
                           d: {
                             mapValue: {},
-                            valueType: 'mapValue',
                           },
                         },
                       },
-                      valueType: 'mapValue',
                     }),
                 updateMask('a', 'c.d')));
         callback(null, writeResult(1));
@@ -1049,8 +1032,8 @@ describe('set document', function() {
             request,
             set(document(), updateMask('b', 'f'),
                 fieldTransform(
-                    'a', 'REQUEST_TIME', 'b.c', 'REQUEST_TIME', 'd.e',
-                    'REQUEST_TIME')));
+                    'a', REQUEST_TIME, 'b.c', REQUEST_TIME, 'd.e',
+                    REQUEST_TIME)));
         callback(null, writeResult(2));
       }
     };
@@ -1094,7 +1077,6 @@ describe('set document', function() {
             request,
             set(document('a', {
                   mapValue: {},
-                  valueType: 'mapValue',
                 }),
                 updateMask('a')));
         callback(null, writeResult(1));
@@ -1235,7 +1217,7 @@ describe('create document', function() {
             create(
                 null,
                 fieldTransform(
-                    'field', 'REQUEST_TIME', 'map.field', 'REQUEST_TIME')));
+                    'field', REQUEST_TIME, 'map.field', REQUEST_TIME)));
 
         callback(null, writeResult(1));
       }
@@ -1257,11 +1239,9 @@ describe('create document', function() {
                           fields: {
                             b: {
                               mapValue: {},
-                              valueType: 'mapValue',
                             },
                           },
                         },
-                        valueType: 'mapValue',
                       })));
         callback(null, writeResult(1));
       }
@@ -1315,11 +1295,10 @@ describe('update document', function() {
             request,
             update(
                 document('foo', {
-                  valueType: 'mapValue',
                   mapValue: {},
                 }),
                 updateMask('a', 'foo'),
-                fieldTransform('a.b', 'REQUEST_TIME', 'c.d', 'REQUEST_TIME')));
+                fieldTransform('a.b', REQUEST_TIME, 'c.d', REQUEST_TIME)));
         callback(null, writeResult(2));
       }
     };
@@ -1337,7 +1316,7 @@ describe('update document', function() {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
-            request, update(null, null, fieldTransform('a', 'REQUEST_TIME')));
+            request, update(null, null, fieldTransform('a', REQUEST_TIME)));
         callback(null, writeResult(1));
       }
     };
@@ -1356,7 +1335,6 @@ describe('update document', function() {
             update(
                 document('a', {
                   mapValue: {},
-                  valueType: 'mapValue',
                 }),
                 updateMask('a')));
         callback(null, writeResult(1));
@@ -1501,15 +1479,12 @@ describe('update document', function() {
             update(
                 document(
                     'a', {
-                      valueType: 'mapValue',
                       mapValue: {
                         fields: {
                           b: {
-                            valueType: 'mapValue',
                             mapValue: {
                               fields: {
                                 c: {
-                                  valueType: 'stringValue',
                                   stringValue: 'foobar',
                                 },
                               },
@@ -1519,11 +1494,9 @@ describe('update document', function() {
                       },
                     },
                     'foo', {
-                      valueType: 'mapValue',
                       mapValue: {
                         fields: {
                           bar: {
-                            valueType: 'stringValue',
                             stringValue: 'foobar',
                           },
                         },
@@ -1558,32 +1531,18 @@ describe('update document', function() {
                 document('foo', {
                   mapValue: {
                     fields: {
-                      bar: {
-                        stringValue: 'two',
-                        valueType: 'stringValue',
-                      },
+                      bar: {stringValue: 'two'},
                       deep: {
                         mapValue: {
                           fields: {
-                            bar: {
-                              stringValue: 'two',
-                              valueType: 'stringValue',
-                            },
-                            foo: {
-                              stringValue: 'one',
-                              valueType: 'stringValue',
-                            },
+                            bar: {stringValue: 'two'},
+                            foo: {stringValue: 'one'},
                           },
-                        },
-                        valueType: 'mapValue',
+                        }
                       },
-                      foo: {
-                        stringValue: 'one',
-                        valueType: 'stringValue',
-                      },
+                      foo: {stringValue: 'one'},
                     },
-                  },
-                  valueType: 'mapValue',
+                  }
                 }),
                 updateMask(
                     'foo.bar', 'foo.deep.bar', 'foo.deep.foo', 'foo.foo')));
@@ -1618,30 +1577,25 @@ describe('update document', function() {
                   mapValue: {
                     fields: {
                       b: {
-                        valueType: 'mapValue',
                         mapValue: {
                           fields: {
                             keep: {
                               stringValue: 'keep',
-                              valueType: 'stringValue',
                             },
                           },
                         },
                       },
                       c: {
-                        valueType: 'mapValue',
                         mapValue: {
                           fields: {
                             keep: {
                               stringValue: 'keep',
-                              valueType: 'stringValue',
                             },
                           },
                         },
                       },
                     },
                   },
-                  valueType: 'mapValue',
                 }),
                 updateMask(
                     'a.b.delete', 'a.b.keep', 'a.c.delete', 'a.c.keep')));

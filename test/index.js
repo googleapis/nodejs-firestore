@@ -49,102 +49,81 @@ const bytesData = Buffer.from('AQI=', 'base64');
 
 const allSupportedTypesProtobufJs = document('documentId', {
   arrayValue: {
-    valueType: 'arrayValue',
     arrayValue: {
       values: [
         {
-          valueType: 'stringValue',
           stringValue: 'foo',
         },
         {
-          valueType: 'integerValue',
           integerValue: 42,
         },
         {
-          valueType: 'stringValue',
           stringValue: 'bar',
         },
       ],
     },
   },
   emptyArray: {
-    valueType: 'arrayValue',
     arrayValue: {},
   },
   dateValue: {
-    valueType: 'timestampValue',
     timestampValue: {
       nanos: 123000000,
       seconds: 479978400,
     },
   },
   timestampValue: {
-    valueType: 'timestampValue',
     timestampValue: {
       nanos: 123000000,
       seconds: 479978400,
     },
   },
   doubleValue: {
-    valueType: 'doubleValue',
     doubleValue: 0.1,
   },
   falseValue: {
-    valueType: 'booleanValue',
     booleanValue: false,
   },
   infinityValue: {
-    valueType: 'doubleValue',
     doubleValue: Infinity,
   },
   integerValue: {
-    valueType: 'integerValue',
     integerValue: 0,
   },
   negativeInfinityValue: {
-    valueType: 'doubleValue',
     doubleValue: -Infinity,
   },
   nilValue: {
-    valueType: 'nullValue',
     nullValue: 'NULL_VALUE',
   },
   objectValue: {
-    valueType: 'mapValue',
     mapValue: {
       fields: {
         foo: {
-          valueType: 'stringValue',
           stringValue: 'bar',
         },
       },
     },
   },
   emptyObject: {
-    valueType: 'mapValue',
     mapValue: {},
   },
   pathValue: {
-    valueType: 'referenceValue',
     referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
   },
   stringValue: {
-    valueType: 'stringValue',
     stringValue: 'a',
   },
   trueValue: {
-    valueType: 'booleanValue',
     booleanValue: true,
   },
   geoPointValue: {
-    valueType: 'geoPointValue',
     geoPointValue: {
       latitude: 50.1430847,
       longitude: -122.947778,
     },
   },
   bytesValue: {
-    valueType: 'bytesValue',
     bytesValue: Buffer.from('AQI=', 'base64'),
   },
 });

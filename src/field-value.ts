@@ -20,7 +20,8 @@ import deepEqual from 'deep-equal';
 
 import {AnyJs} from './types';
 import {validatePkg} from './validate';
-import * as api from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_proto_api';
+import api = google.firestore.v1beta1;
 
 const validate = validatePkg({});
 
@@ -177,7 +178,7 @@ abstract class FieldTransform extends FieldValue {
    * @param fieldPath - The field path to apply this transformation to.
    * @return The 'FieldTransform' proto message.
    */
-  abstract toProto(fieldPath): api.FieldTransform;
+  abstract toProto(fieldPath): api.DocumentTransform.IFieldTransform;
 }
 
 /**
@@ -213,7 +214,7 @@ class DeleteTransform extends FieldTransform {
     return 'FieldValue.delete';
   }
 
-  toProto(fieldPath): api.FieldTransform {
+  toProto(fieldPath): never {
     throw new Error(
         'FieldValue.delete() should not be included in a FieldTransform');
   }
@@ -258,10 +259,11 @@ class ServerTimestampTransform extends FieldTransform {
     return 'FieldValue.serverTimestamp';
   }
 
-  toProto(fieldPath): api.FieldTransform {
+  toProto(fieldPath): api.DocumentTransform.IFieldTransform {
     return {
       fieldPath: fieldPath.formattedName,
-      setToServerValue: 'REQUEST_TIME',
+      setToServerValue:
+          api.DocumentTransform.FieldTransform.ServerValue.REQUEST_TIME,
     };
   }
 }
@@ -294,7 +296,7 @@ class ArrayUnionTransform extends FieldTransform {
     return 'FieldValue.arrayUnion';
   }
 
-  toProto(fieldPath): api.FieldTransform {
+  toProto(fieldPath): api.DocumentTransform.IFieldTransform {
     const encodedElements =
         DocumentSnapshot.encodeValue(this.elements).arrayValue;
     return {
@@ -339,7 +341,7 @@ class ArrayRemoveTransform extends FieldTransform {
     return 'FieldValue.arrayRemove';
   }
 
-  toProto(fieldPath): api.FieldTransform {
+  toProto(fieldPath): api.DocumentTransform.IFieldTransform {
     const encodedElements =
         DocumentSnapshot.encodeValue(this.elements).arrayValue;
     return {

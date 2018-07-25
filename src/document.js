@@ -24,6 +24,7 @@ import {fieldValuePkg} from './field-value';
 import {FieldPath, ResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {validatePkg} from './validate';
+import {detectValueType} from './convert';
 
 /*!
  * Injected.
@@ -237,7 +238,6 @@ class DocumentSnapshot {
         } else {
           // We need to expand the target object.
           const childNode = {
-            valueType: 'mapValue',
             mapValue: {
               fields: {},
             },
@@ -509,7 +509,9 @@ class DocumentSnapshot {
     const timestampsInSnapshotsEnabled =
         this._ref.firestore._timestampsInSnapshotsEnabled;
 
-    switch (proto.valueType) {
+    const valueType = detectValueType(proto);
+
+    switch (valueType) {
       case 'stringValue': {
         return proto.stringValue;
       }
@@ -650,21 +652,18 @@ class DocumentSnapshot {
 
     if (is.string(val)) {
       return {
-        valueType: 'stringValue',
         stringValue: val,
       };
     }
 
     if (is.boolean(val)) {
       return {
-        valueType: 'booleanValue',
         booleanValue: val,
       };
     }
 
     if (is.integer(val)) {
       return {
-        valueType: 'integerValue',
         integerValue: val,
       };
     }
@@ -672,14 +671,12 @@ class DocumentSnapshot {
     // Integers are handled above, the remaining numbers are treated as doubles
     if (is.number(val)) {
       return {
-        valueType: 'doubleValue',
         doubleValue: val,
       };
     }
 
     if (is.instance(val, Timestamp)) {
       return {
-        valueType: 'timestampValue',
         timestampValue: {seconds: val.seconds, nanos: val.nanoseconds},
       };
     }
@@ -687,7 +684,6 @@ class DocumentSnapshot {
     if (is.date(val)) {
       let timestamp = Timestamp.fromDate(val);
       return {
-        valueType: 'timestampValue',
         timestampValue: {
           seconds: timestamp.seconds,
           nanos: timestamp.nanoseconds,
@@ -697,7 +693,6 @@ class DocumentSnapshot {
 
     if (is.array(val)) {
       const array = {
-        valueType: 'arrayValue',
         arrayValue: {},
       };
 
@@ -716,35 +711,30 @@ class DocumentSnapshot {
 
     if (is.nil(val)) {
       return {
-        valueType: 'nullValue',
         nullValue: 'NULL_VALUE',
       };
     }
 
     if (is.instance(val, DocumentReference) || is.instance(val, ResourcePath)) {
       return {
-        valueType: 'referenceValue',
         referenceValue: val.formattedName,
       };
     }
 
     if (is.instance(val, GeoPoint)) {
       return {
-        valueType: 'geoPointValue',
         geoPointValue: val.toProto(),
       };
     }
 
     if (is.instanceof(val, Buffer) || is.instanceof(val, Uint8Array)) {
       return {
-        valueType: 'bytesValue',
         bytesValue: val,
       };
     }
 
     if (isPlainObject(val)) {
       const map = {
-        valueType: 'mapValue',
         mapValue: {},
       };
 

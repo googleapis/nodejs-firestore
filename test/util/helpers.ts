@@ -18,13 +18,13 @@
 
 import {GrpcClient} from 'google-gax';
 
-import * as api from '../../protos/firestore_proto_api';
+import {google} from '../../protos/firestore_proto_api';
+import api = google.firestore.v1beta1;
 
 import v1beta1 from '../../src/v1beta1';
 
 // TODO: This should be a TypeScript import after the full migration.
 import Firestore = require('../../src');
-
 import {ClientPool} from '../../src/pool';
 
 /* tslint:disable:no-any */
@@ -105,19 +105,15 @@ export function createInstance(
   return Promise.resolve(firestore);
 }
 
-type Database = {
-  database: string
-};
-
-export function commitRequest(writes: api.Write[]): api.CommitRequest&Database {
+export function commitRequest(writes: api.IWrite[]): api.ICommitRequest {
   return {database: DATABASE_ROOT, writes};
 }
 
 function write(
-    document: api.Document|null, mask: api.DocumentMask|null,
-    transforms: api.FieldTransform[]|null,
-    precondition: api.Precondition|null): api.Write[] {
-  const writes: api.Write[] = [];
+    document: api.IDocument|null, mask: api.IDocumentMask|null,
+    transforms: api.DocumentTransform.IFieldTransform[]|null,
+    precondition: api.IPrecondition|null): api.IWrite[] {
+  const writes: api.IWrite[] = [];
 
   if (document) {
     const update = Object.assign({}, document);
@@ -142,14 +138,14 @@ function write(
 }
 
 export function set(
-    document: api.Document, transforms?: api.FieldTransform[]): api.Write[] {
+    document: api.IDocument,
+    transforms?: api.DocumentTransform.IFieldTransform[]): api.IWrite[] {
   return write(document, null, transforms || null, null);
 }
 
-function value(value: string|api.Value): api.Value {
+function value(value: string|api.IValue): api.IValue {
   if (typeof value === 'string') {
     return {
-      valueType: 'stringValue',
       stringValue: value,
     };
   } else {
@@ -158,9 +154,9 @@ function value(value: string|api.Value): api.Value {
 }
 
 export function document(
-    field?: string, value?: string|api.Value,
-    ...fieldOrValue: Array<string|api.Value>): api.Document {
-  const document: api.Document = {
+    field?: string, value?: string|api.IValue,
+    ...fieldOrValue: Array<string|api.IValue>): api.IDocument {
+  const document: api.IDocument = {
     name: `${DATABASE_ROOT}/documents/collectionId/documentId`,
     fields: {},
     createTime: {seconds: 1, nanos: 2},
@@ -172,34 +168,40 @@ export function document(
     const value: string|api.Value = arguments[i + 1];
 
     if (typeof value === 'string') {
-      document.fields[field] = {
-        valueType: 'stringValue',
+      document.fields![field] = {
         stringValue: value,
       };
     } else {
-      document.fields[field] = value;
+      document.fields![field] = value;
     }
   }
 
   return document;
 }
 
-export function serverTimestamp(field: string): api.FieldTransform {
-  return {fieldPath: field, setToServerValue: 'REQUEST_TIME'};
+export function serverTimestamp(field: string):
+    api.DocumentTransform.IFieldTransform {
+  return {
+    fieldPath: field,
+    setToServerValue:
+        api.DocumentTransform.FieldTransform.ServerValue.REQUEST_TIME
+  };
 }
 
 export function arrayTransform(
     field: string, transform: 'appendMissingElements'|'removeAllFromArray',
-    ...values: Array<string|api.Value>): api.FieldTransform {
-  const fieldTransform: api.FieldTransform = {fieldPath: field};
+    ...values: Array<string|api.IValue>):
+    api.DocumentTransform.IFieldTransform {
+  const fieldTransform:
+      api.DocumentTransform.IFieldTransform = {fieldPath: field};
 
   fieldTransform[transform] = {values: values.map(val => value(val))};
 
   return fieldTransform;
 }
 
-export function writeResult(count: number): api.WriteResponse {
-  const response: api.WriteResponse = {
+export function writeResult(count: number): api.IWriteResponse {
+  const response: api.IWriteResponse = {
     commitTime: {
       nanos: 0,
       seconds: 1,

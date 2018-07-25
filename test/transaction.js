@@ -181,7 +181,6 @@ function query(transaction) {
           op: 'EQUAL',
           value: {
             stringValue: 'bar',
-            valueType: 'stringValue',
           },
         },
       },
@@ -534,11 +533,9 @@ describe('transaction operations', function() {
       update: {
         fields: {
           a: {
-            valueType: 'mapValue',
             mapValue: {
               fields: {
                 b: {
-                  valueType: 'stringValue',
                   stringValue: 'c',
                 },
               },
@@ -565,7 +562,6 @@ describe('transaction operations', function() {
       update: {
         fields: {
           'a.b': {
-            valueType: 'stringValue',
             stringValue: 'c',
           },
         },
@@ -584,7 +580,6 @@ describe('transaction operations', function() {
       update: {
         fields: {
           'a.b': {
-            valueType: 'stringValue',
             stringValue: 'c',
           },
         },

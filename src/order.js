@@ -18,6 +18,7 @@
 
 import is from 'is';
 
+import {detectValueType} from './convert';
 import {ResourcePath} from './path';
 import {validatePkg} from './validate';
 
@@ -43,7 +44,9 @@ const types = {
  * @private
  */
 function typeOrder(val) {
-  switch (val.valueType) {
+  const valueType = detectValueType(val);
+
+  switch (valueType) {
     case 'nullValue': {
       return types.NULL;
     }
@@ -120,12 +123,12 @@ function compareNumbers(left, right) {
  */
 function compareNumberProtos(left, right) {
   let leftValue, rightValue;
-  if (left.valueType === 'integerValue') {
+  if (left.integerValue !== undefined) {
     leftValue = parseInt(left.integerValue, 10);
   } else {
     leftValue = parseFloat(left.doubleValue, 10);
   }
-  if (right.valueType === 'integerValue') {
+  if (right.integerValue !== undefined) {
     rightValue = parseInt(right.integerValue, 10);
   } else {
     rightValue = parseFloat(right.doubleValue, 10);

@@ -526,7 +526,6 @@ describe('Query watch', function() {
                 op: 'EQUAL',
                 value: {
                   stringValue: 'yes',
-                  valueType: 'stringValue',
                 },
               },
             },

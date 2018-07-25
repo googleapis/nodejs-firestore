@@ -166,12 +166,10 @@ function convertValue(fieldValue) {
   switch (valueType) {
     case 'timestampValue':
       return {
-        valueType: 'timestampValue',
         timestampValue: convertTimestamp(fieldValue.timestampValue),
       };
     case 'bytesValue':
       return {
-        valueType: 'bytesValue',
         bytesValue: convertBytes(fieldValue.bytesValue),
       };
     case 'arrayValue': {
@@ -182,7 +180,6 @@ function convertValue(fieldValue) {
         }
       }
       return {
-        valueType: 'arrayValue',
         arrayValue: {
           values: arrayValue,
         },
@@ -196,14 +193,13 @@ function convertValue(fieldValue) {
         }
       }
       return {
-        valueType: 'mapValue',
         mapValue: {
           fields: mapValue,
         },
       };
     }
     default:
-      return Object.assign({valueType}, fieldValue);
+      return fieldValue;
   }
 }
 
@@ -233,4 +229,5 @@ module.exports = {
   documentFromJson: convertDocument,
   timestampFromJson: convertTimestamp,
   valueFromJson: convertValue,
+  detectValueType: detectValueType,
 };

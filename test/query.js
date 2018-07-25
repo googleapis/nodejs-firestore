@@ -67,10 +67,7 @@ function fieldFilters(fieldPath, op, value) {
     if (is.object(value)) {
       filter.value = value;
     } else {
-      filter.value = {
-        stringValue: value,
-        valueType: 'stringValue',
-      };
+      filter.value = {stringValue: value};
     }
 
     filters.push({fieldFilter: filter});
@@ -189,7 +186,6 @@ function startAt(before, value) {
     if (is.string(value)) {
       cursor.startAt.values.push({
         stringValue: value,
-        valueType: 'stringValue',
       });
     } else {
       cursor.startAt.values.push(value);
@@ -216,7 +212,6 @@ function endAt(before, value) {
     if (is.string(value)) {
       cursor.endAt.values.push({
         stringValue: value,
-        valueType: 'stringValue',
       });
     } else {
       cursor.endAt.values.push(value);
@@ -659,13 +654,9 @@ describe('where() interface', function() {
         requestEquals(request, fieldFilters('foo', 'EQUAL', {
                         mapValue: {
                           fields: {
-                            foo: {
-                              stringValue: 'bar',
-                              valueType: 'stringValue',
-                            },
+                            foo: {stringValue: 'bar'},
                           },
-                        },
-                        valueType: 'mapValue',
+                        }
                       }));
 
         return stream();
@@ -703,7 +694,6 @@ describe('where() interface', function() {
       runQuery: (request) => {
         requestEquals(
             request, fieldFilters('__name__', 'EQUAL', {
-              valueType: 'referenceValue',
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/foo',
             }));
@@ -1152,7 +1142,6 @@ describe('startAt() interface', function() {
       runQuery: (request) => {
         requestEquals(
             request, orderBy('__name__', 'ASCENDING'), startAt(true, {
-              valueType: 'referenceValue',
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
             }));
@@ -1210,7 +1199,6 @@ describe('startAt() interface', function() {
       runQuery: (request) => {
         requestEquals(
             request, orderBy('__name__', 'ASCENDING'), startAt(true, {
-              valueType: 'referenceValue',
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
             }));
@@ -1231,7 +1219,6 @@ describe('startAt() interface', function() {
       runQuery: (request) => {
         requestEquals(
             request, orderBy('__name__', 'ASCENDING'), startAt(true, {
-              valueType: 'referenceValue',
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
             }));
@@ -1254,7 +1241,6 @@ describe('startAt() interface', function() {
         requestEquals(
             request, orderBy('foo', 'ASCENDING', '__name__', 'ASCENDING'),
             startAt(true, 'bar', {
-              valueType: 'referenceValue',
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
             }));
@@ -1276,7 +1262,6 @@ describe('startAt() interface', function() {
         requestEquals(
             request, orderBy('foo', 'DESCENDING', '__name__', 'DESCENDING'),
             startAt(true, 'bar', {
-              valueType: 'referenceValue',
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
             }));
@@ -1298,7 +1283,6 @@ describe('startAt() interface', function() {
         requestEquals(
             request, orderBy('c', 'ASCENDING', '__name__', 'ASCENDING'),
             startAt(true, 'c', {
-              valueType: 'referenceValue',
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
             }),
@@ -1326,7 +1310,6 @@ describe('startAt() interface', function() {
       runQuery: (request) => {
         requestEquals(
             request, orderBy('__name__', 'ASCENDING'), startAt(true, {
-              valueType: 'referenceValue',
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
             }),
