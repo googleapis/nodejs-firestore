@@ -16,17 +16,17 @@
 // to be loaded as the JS file.
 
 /**
- * The `Status` type defines a logical error model that is suitable for
- * different programming environments, including REST APIs and RPC APIs. It is
- * used by [gRPC](https://github.com/grpc). The error model is designed to be:
+ * The `Status` type defines a logical error model that is suitable for different
+ * programming environments, including REST APIs and RPC APIs. It is used by
+ * [gRPC](https://github.com/grpc). The error model is designed to be:
  *
  * - Simple to use and understand for most users
  * - Flexible enough to meet unexpected needs
  *
  * # Overview
  *
- * The `Status` message contains three pieces of data: error code, error
- * message, and error details. The error code should be an enum value of
+ * The `Status` message contains three pieces of data: error code, error message,
+ * and error details. The error code should be an enum value of
  * google.rpc.Code, but it may accept additional error codes if needed.  The
  * error message should be a developer-facing English message that helps
  * developers *understand* and *resolve* the error. If a localized user-facing
@@ -81,13 +81,12 @@
  *   A list of messages that carry the error details.  There is a common set of
  *   message types for APIs to use.
  *
- *   This object should have the same structure as [Any]{@link
- * google.protobuf.Any}
+ *   This object should have the same structure as [Any]{@link google.protobuf.Any}
  *
  * @typedef Status
  * @memberof google.rpc
  * @see [google.rpc.Status definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto}
  */
 var Status = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
