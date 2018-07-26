@@ -541,15 +541,17 @@ class WriteBatch {
     this._committed = true;
 
     return this._firestore.request('commit', request, requestTag).then(resp => {
-      const commitTime = Timestamp.fromProto(resp.commitTime);
       const writeResults = [];
 
-      if (resp.writeResults) {
+      if (request.writes.length > 0) {
         assert(
-            request.writes.length === resp.writeResults.length,
+            resp.writeResults instanceof Array &&
+                request.writes.length === resp.writeResults.length,
             `Expected one write result per operation, but got ${
                 resp.writeResults.length} results for ${
                 request.writes.length} operations.`);
+
+        const commitTime = Timestamp.fromProto(resp.commitTime);
 
         let offset = 0;
 
