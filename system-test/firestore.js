@@ -1438,6 +1438,10 @@ describe('WriteBatch class', function() {
     randomCol = getTestRoot(firestore);
   });
 
+  it('supports empty batches', function() {
+    return firestore.batch().commit();
+  });
+
   it('has create() method', function() {
     let ref = randomCol.doc();
     let batch = firestore.batch();
