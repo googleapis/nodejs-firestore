@@ -23,4 +23,11 @@ sed -i '' 's/import \"google\/firestore\/v1beta1\//import \"/g' *.proto
 mkdir -p out && pbjs --proto_path node_modules/google-proto-files -t static-module -w commonjs -o out/firestore_proto_api.js firestore.proto && pbts -o out/firestore_proto_api.d.ts out/firestore_proto_api.js
 ```
 
+- Edit the type used for integers greater than 2^53. The GRPC settings we use represent them as 
+Strings, but pbjs uses the "Long" type.
+
+```
+sed -i '' 's/number\|Long/number\|string \"/g' firestore_proto_api.d.ts firestore_proto_api.js
+```
+
 TODO: Find a way to properly specify the proto paths for the Firestore imports so this can be automated.

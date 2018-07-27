@@ -1,5 +1,8 @@
 import * as $protobuf from "protobufjs";
 
+// Note: This file was manually edited to use "string" instead of "Long" for
+// types that can potentially hold large integer values (> 2^53).
+
 /** Namespace google. */
 export namespace google {
 
@@ -3598,7 +3601,7 @@ export namespace google {
         booleanValue?: (boolean|null);
 
         /** Value integerValue */
-        integerValue?: (number|Long|null);
+        integerValue?: (number|string|null);
 
         /** Value doubleValue */
         doubleValue?: (number|null);
@@ -3641,7 +3644,7 @@ export namespace google {
         public booleanValue: boolean;
 
         /** Value integerValue. */
-        public integerValue: (number|Long);
+        public integerValue: (number|string);
 
         /** Value doubleValue. */
         public doubleValue: number;
@@ -8353,10 +8356,10 @@ export namespace google {
       identifierValue?: (string|null);
 
       /** UninterpretedOption positiveIntValue */
-      positiveIntValue?: (number|Long|null);
+      positiveIntValue?: (number|string|null);
 
       /** UninterpretedOption negativeIntValue */
-      negativeIntValue?: (number|Long|null);
+      negativeIntValue?: (number|string|null);
 
       /** UninterpretedOption doubleValue */
       doubleValue?: (number|null);
@@ -8384,10 +8387,10 @@ export namespace google {
       public identifierValue: string;
 
       /** UninterpretedOption positiveIntValue. */
-      public positiveIntValue: (number|Long);
+      public positiveIntValue: (number|string);
 
       /** UninterpretedOption negativeIntValue. */
-      public negativeIntValue: (number|Long);
+      public negativeIntValue: (number|string);
 
       /** UninterpretedOption doubleValue. */
       public doubleValue: number;
@@ -8980,7 +8983,7 @@ export namespace google {
     interface ITimestamp {
 
       /** Timestamp seconds */
-      seconds?: (number|Long|null);
+      seconds?: (number|string|null);
 
       /** Timestamp nanos */
       nanos?: (number|null);
@@ -8996,7 +8999,7 @@ export namespace google {
       constructor(properties?: google.protobuf.ITimestamp);
 
       /** Timestamp seconds. */
-      public seconds: (number|Long);
+      public seconds: (number|string);
 
       /** Timestamp nanos. */
       public nanos: number;
@@ -9564,7 +9567,7 @@ export namespace google {
     interface IInt64Value {
 
       /** Int64Value value */
-      value?: (number|Long|null);
+      value?: (number|string|null);
     }
 
     /** Represents an Int64Value. */
@@ -9577,7 +9580,7 @@ export namespace google {
       constructor(properties?: google.protobuf.IInt64Value);
 
       /** Int64Value value. */
-      public value: (number|Long);
+      public value: (number|string);
 
       /**
        * Creates a new Int64Value instance using the specified properties.
@@ -9654,7 +9657,7 @@ export namespace google {
     interface IUInt64Value {
 
       /** UInt64Value value */
-      value?: (number|Long|null);
+      value?: (number|string|null);
     }
 
     /** Represents a UInt64Value. */
@@ -9667,7 +9670,7 @@ export namespace google {
       constructor(properties?: google.protobuf.IUInt64Value);
 
       /** UInt64Value value. */
-      public value: (number|Long);
+      public value: (number|string);
 
       /**
        * Creates a new UInt64Value instance using the specified properties.
