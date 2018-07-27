@@ -16,78 +16,74 @@
 
 'use strict';
 
+import assert from 'assert';
 import is from 'is';
+
+import {google} from '../protos/firestore_proto_api';
+import api = google.firestore.v1beta1;
 
 import {detectValueType} from './convert';
 import {ResourcePath} from './path';
 import {validatePkg} from './validate';
+import {APIIMapValue} from './types';
 
 const validate = validatePkg({});
 
 /*!
  * The type order as defined by the backend.
  */
-const types = {
-  NULL: 0,
-  BOOLEAN: 1,
-  NUMBER: 2,
-  TIMESTAMP: 3,
-  STRING: 4,
-  BLOB: 5,
-  REF: 6,
-  GEOPOINT: 7,
-  ARRAY: 8,
-  OBJECT: 9,
-};
+enum TypeOrder {
+  NULL = 0,
+  BOOLEAN = 1,
+  NUMBER = 2,
+  TIMESTAMP = 3,
+  STRING = 4,
+  BLOB = 5,
+  REF = 6,
+  GEO_POINT = 7,
+  ARRAY = 8,
+  OBJECT = 9
+}
 
 /*!
  * @private
  */
-function typeOrder(val) {
+function typeOrder(val: api.IValue): TypeOrder {
   const valueType = detectValueType(val);
 
   switch (valueType) {
-    case 'nullValue': {
-      return types.NULL;
-    }
-    case 'integerValue': {
-      return types.NUMBER;
-    }
-    case 'doubleValue': {
-      return types.NUMBER;
-    }
-    case 'stringValue': {
-      return types.STRING;
-    }
-    case 'booleanValue': {
-      return types.BOOLEAN;
-    }
-    case 'arrayValue': {
-      return types.ARRAY;
-    }
-    case 'timestampValue': {
-      return types.TIMESTAMP;
-    }
-    case 'geoPointValue': {
-      return types.GEOPOINT;
-    }
-    case 'bytesValue': {
-      return types.BLOB;
-    }
-    case 'referenceValue': {
-      return types.REF;
-    }
-    case 'mapValue': {
-      return types.OBJECT;
-    }
-    default: { throw validate.customObjectError(val); }
+    case 'nullValue':
+      return TypeOrder.NULL;
+    case 'integerValue':
+      return TypeOrder.NUMBER;
+    case 'doubleValue':
+      return TypeOrder.NUMBER;
+    case 'stringValue':
+      return TypeOrder.STRING;
+    case 'booleanValue':
+      return TypeOrder.BOOLEAN;
+    case 'arrayValue':
+      return TypeOrder.ARRAY;
+    case 'timestampValue':
+      return TypeOrder.TIMESTAMP;
+    case 'geoPointValue':
+      return TypeOrder.GEO_POINT;
+    case 'bytesValue':
+      return TypeOrder.BLOB;
+    case 'referenceValue':
+      return TypeOrder.REF;
+    case 'mapValue':
+      return TypeOrder.OBJECT;
+    default:
+      throw validate.customObjectError(val);
   }
 }
 
 /*!
  * @private
  */
-function primitiveComparator(left, right) {
+export function primitiveComparator(
+    left: string|boolean|number, right: string|boolean|number): number {
   if (left < right) {
     return -1;
   }
@@ -101,7 +97,7 @@ function primitiveComparator(left, right) {
  * Utility function to compare doubles (using Firestore semantics for NaN).
  * @private
  */
-function compareNumbers(left, right) {
+function compareNumbers(left: number, right: number): number {
   if (left < right) {
     return -1;
   }
@@ -121,17 +117,17 @@ function compareNumbers(left, right) {
 /*!
  * @private
  */
-function compareNumberProtos(left, right) {
+function compareNumberProtos(left: api.IValue, right: api.IValue): number {
   let leftValue, rightValue;
   if (left.integerValue !== undefined) {
-    leftValue = parseInt(left.integerValue, 10);
+    leftValue = Number(left.integerValue!);
   } else {
-    leftValue = parseFloat(left.doubleValue, 10);
+    leftValue = Number(left.doubleValue!);
   }
   if (right.integerValue !== undefined) {
-    rightValue = parseInt(right.integerValue, 10);
+    rightValue = Number(right.integerValue);
   } else {
-    rightValue = parseFloat(right.doubleValue, 10);
+    rightValue = Number(right.doubleValue!);
   }
   return compareNumbers(leftValue, rightValue);
 }
@@ -139,8 +135,10 @@ function compareNumberProtos(left, right) {
 /*!
  * @private
  */
-function compareTimestamps(left, right) {
-  let seconds = primitiveComparator(left.seconds || 0, right.seconds || 0);
+function compareTimestamps(
+    left: google.protobuf.ITimestamp,
+    right: google.protobuf.ITimestamp): number {
+  const seconds = primitiveComparator(left.seconds || 0, right.seconds || 0);
   if (seconds !== 0) {
     return seconds;
   }
@@ -150,7 +148,7 @@ function compareTimestamps(left, right) {
 /*!
  * @private
  */
-function compareBlobs(left, right) {
+function compareBlobs(left: Uint8Array, right: Uint8Array): number {
   if (!is.instanceof(left, Buffer) || !is.instanceof(right, Buffer)) {
     throw new Error('Blobs can only be compared if they are Buffers.');
   }
@@ -160,25 +158,31 @@ function compareBlobs(left, right) {
 /*!
  * @private
  */
-function compareReferenceProtos(left, right) {
-  const leftPath = ResourcePath.fromSlashSeparatedString(left.referenceValue);
-  const rightPath = ResourcePath.fromSlashSeparatedString(right.referenceValue);
+function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
+  assert(
+      typeof left.referenceValue === 'string' &&
+          typeof right.referenceValue === 'string',
+      'Expect reference values to be defined');
+  const leftPath = ResourcePath.fromSlashSeparatedString(left.referenceValue!);
+  const rightPath =
+      ResourcePath.fromSlashSeparatedString(right.referenceValue!);
   return leftPath.compareTo(rightPath);
 }
 
 /*!
  * @private
  */
-function compareGeoPoints(left, right) {
+function compareGeoPoints(
+    left: google.type.ILatLng, right: google.type.ILatLng): number {
   return (
-      primitiveComparator(left.latitude, right.latitude) ||
-      primitiveComparator(left.longitude, right.longitude));
+      primitiveComparator(left.latitude || 0, right.latitude || 0) ||
+      primitiveComparator(left.longitude || 0, right.longitude || 0));
 }
 
 /*!
  * @private
  */
-function compareArrays(left, right) {
+function compareArrays(left: api.IValue[], right: api.IValue[]): number {
   for (let i = 0; i < left.length && i < right.length; i++) {
     const valueComparison = compare(left[i], right[i]);
     if (valueComparison !== 0) {
@@ -192,7 +196,7 @@ function compareArrays(left, right) {
 /*!
  * @private
  */
-function compareObjects(left, right) {
+function compareObjects(left: APIIMapValue, right: APIIMapValue): number {
   // This requires iterating over the keys in the object in order and doing a
   // deep comparison.
   const leftKeys = Object.keys(left);
@@ -217,7 +221,7 @@ function compareObjects(left, right) {
 /*!
  * @private
  */
-function compare(left, right) {
+export function compare(left: api.IValue, right: api.IValue): number {
   // First compare the types.
   const leftType = typeOrder(left);
   const rightType = typeOrder(right);
@@ -228,43 +232,30 @@ function compare(left, right) {
 
   // So they are the same type.
   switch (leftType) {
-    case types.NULL: {
+    case TypeOrder.NULL:
       // Nulls are all equal.
       return 0;
-    }
-    case types.BOOLEAN: {
-      return primitiveComparator(left.booleanValue, right.booleanValue);
-    }
-    case types.STRING: {
-      return primitiveComparator(left.stringValue, right.stringValue);
-    }
-    case types.NUMBER: {
+    case TypeOrder.BOOLEAN:
+      return primitiveComparator(left.booleanValue!, right.booleanValue!);
+    case TypeOrder.STRING:
+      return primitiveComparator(left.stringValue!, right.stringValue!);
+    case TypeOrder.NUMBER:
       return compareNumberProtos(left, right);
-    }
-    case types.TIMESTAMP: {
-      return compareTimestamps(left.timestampValue, right.timestampValue);
-    }
-    case types.BLOB: {
-      return compareBlobs(left.bytesValue, right.bytesValue);
-    }
-    case types.REF: {
+    case TypeOrder.TIMESTAMP:
+      return compareTimestamps(left.timestampValue!, right.timestampValue!);
+    case TypeOrder.BLOB:
+      return compareBlobs(left.bytesValue!, right.bytesValue!);
+    case TypeOrder.REF:
       return compareReferenceProtos(left, right);
-    }
-    case types.GEOPOINT: {
-      return compareGeoPoints(left.geoPointValue, right.geoPointValue);
-    }
-    case types.ARRAY: {
+    case TypeOrder.GEO_POINT:
+      return compareGeoPoints(left.geoPointValue!, right.geoPointValue!);
+    case TypeOrder.ARRAY:
       return compareArrays(
-          left.arrayValue.values || [], right.arrayValue.values || []);
-    }
-    case types.OBJECT: {
+          left.arrayValue!.values || [], right.arrayValue!.values || []);
+    case TypeOrder.OBJECT:
       return compareObjects(
-          left.mapValue.fields || {}, right.mapValue.fields || {});
-    }
+          left.mapValue!.fields || {}, right.mapValue!.fields || {});
+    default:
+      throw new Error(`Encountered unknown type order: ${leftType}`);
   }
 }
-
-module.exports = {
-  compare,
-  primitiveComparator
-};
