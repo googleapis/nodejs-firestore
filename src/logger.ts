@@ -34,11 +34,11 @@ let logFunction = (msg: string) => {};
  * @private
  */
 export function logger(
-    libVersion: string, methodName: string, requestTag: string|null,
-    logMessage: string, ...additionalArgs: Array<string|object>): void {
+    methodName: string, requestTag: string|null, logMessage: string,
+    ...additionalArgs: Array<string|object>): void {
   requestTag = requestTag || '#####';
 
-  const formattedMessage = util.format.apply(null, additionalArgs);
+  const formattedMessage = util.format(logMessage, ...additionalArgs);
   const time = new Date().toISOString();
   logFunction(
       `Firestore (${libVersion}) ${time} ${requestTag} [${methodName}]: ` +
