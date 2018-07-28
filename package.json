@@ -83,8 +83,8 @@
     "power-assert": "^1.6.0",
     "protobufjs": "^6.8.6",
     "proxyquire": "^2.0.1",
-    "ts-node": "^7.0.0",
     "source-map-support": "^0.5.6",
+    "ts-node": "^7.0.0",
     "typescript": "^2.9.2"
   }
 }
