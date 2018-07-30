@@ -48,7 +48,7 @@ const docsEqual = function(actual, expected) {
   assert.equal(actual.length, expected.length);
   for (let i = 0; i < actual.size; i++) {
     assert.equal(actual[i].ref.id, expected[i].ref.id);
-    assert.deepEqual(actual[i].data(), expected[i].data());
+    assert.deepStrictEqual(actual[i].data(), expected[i].data());
     assert.ok(is.string(expected[i].createTime));
     assert.ok(is.string(expected[i].updateTime));
   }
@@ -68,7 +68,7 @@ const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
     assert.equal(actual.docChanges[i].type, expected.docChanges[i].type);
     assert.equal(
         actual.docChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
-    assert.deepEqual(
+    assert.deepStrictEqual(
         actual.docChanges[i].doc.data(), expected.docChanges[i].doc.data());
     let readVersion =
         actual.docChanges[i].type === 'removed' ? version - 1 : version;
@@ -447,7 +447,7 @@ class WatchHelper {
 
     return this.streamHelper.awaitOpen()
         .then(request => {
-          assert.deepEqual(request, expectedRequest);
+          assert.deepStrictEqual(request, expectedRequest);
           return func();
         })
         .then(() => {
@@ -463,7 +463,7 @@ class WatchHelper {
 
     return this.streamHelper.awaitOpen()
         .then(request => {
-          assert.deepEqual(request, expectedRequest);
+          assert.deepStrictEqual(request, expectedRequest);
           return func();
         })
         .then(() => {
@@ -710,7 +710,7 @@ describe('Query watch', function() {
     const unsubscribe = watchHelper.startWatch();
     return streamHelper.awaitOpen()
         .then(request => {
-          assert.deepEqual(request, collQueryJSON());
+          assert.deepStrictEqual(request, collQueryJSON());
           watchHelper.sendAddTarget();
           watchHelper.sendCurrent();
           watchHelper.sendSnapshot(1, [0xabcd]);
@@ -873,7 +873,7 @@ describe('Query watch', function() {
             return streamHelper.awaitReopen();
           })
           .then(request => {
-            assert.deepEqual(request, resumeTokenQuery(resumeToken));
+            assert.deepStrictEqual(request, resumeTokenQuery(resumeToken));
             watchHelper.sendAddTarget();
             watchHelper.sendDoc(doc2, {foo: 'b'});
 
@@ -890,7 +890,7 @@ describe('Query watch', function() {
             return streamHelper.awaitReopen();
           })
           .then(request => {
-            assert.deepEqual(request, resumeTokenQuery(resumeToken));
+            assert.deepStrictEqual(request, resumeTokenQuery(resumeToken));
             watchHelper.sendAddTarget();
             watchHelper.sendDoc(doc3, {foo: 'c'});
             watchHelper.sendSnapshot(4, resumeToken);
@@ -1000,7 +1000,7 @@ describe('Query watch', function() {
             return streamHelper.awaitReopen();
           })
           .then(request => {
-            assert.deepEqual(request, resumeTokenQuery(resumeToken));
+            assert.deepStrictEqual(request, resumeTokenQuery(resumeToken));
             assert.equal(streamHelper.streamCount, 2);
           });
     });
@@ -1567,7 +1567,7 @@ describe('Query watch', function() {
           .then(request => {
             assert.equal(streamHelper.streamCount, 2);
             assert.notEqual(oldRequestStream, streamHelper.writeStream);
-            assert.deepEqual(collQueryJSON(), request);
+            assert.deepStrictEqual(collQueryJSON(), request);
 
             watchHelper.sendAddTarget();
             watchHelper.sendCurrent();
@@ -2244,7 +2244,7 @@ describe('DocumentReference watch', function() {
             return streamHelper.awaitReopen();
           })
           .then(request => {
-            assert.deepEqual(request, resumeTokenJSON(resumeToken));
+            assert.deepStrictEqual(request, resumeTokenJSON(resumeToken));
             // Change the document.
             watchHelper.sendDoc(doc, {foo: 'b'});
             watchHelper.sendSnapshot(3, resumeToken);
