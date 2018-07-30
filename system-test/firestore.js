@@ -584,14 +584,15 @@ describe('DocumentReference class', function() {
     let times = [];
 
     for (let i = 0; i < actions.length; ++i) {
-      promise = promise.then(() => actions[i]())
-                    .then(() => {
-                      return ref.get();
-                    })
-                    .then(snap => {
-                      times.push(snap.get('time'));
-                      assert.deepStrictEqual(snap.data(), expectedState[i](times));
-                    });
+      promise =
+          promise.then(() => actions[i]())
+              .then(() => {
+                return ref.get();
+              })
+              .then(snap => {
+                times.push(snap.get('time'));
+                assert.deepStrictEqual(snap.data(), expectedState[i](times));
+              });
     }
 
     return promise;
