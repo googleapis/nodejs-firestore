@@ -146,7 +146,7 @@ describe('batch support', function() {
   beforeEach(() => {
     const overrides = {
       commit: (request, options, callback) => {
-        assert.deepEqual(request, {
+        assert.deepStrictEqual(request, {
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
             {
