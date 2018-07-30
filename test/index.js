@@ -465,7 +465,7 @@ describe('serializer', function() {
   it('supports all types', function() {
     const overrides = {
       commit: (request, options, callback) => {
-        assert.deepEqual(
+        assert.deepStrictEqual(
             allSupportedTypesProtobufJs.fields,
             request.writes[0].update.fields);
         callback(null, {
@@ -498,7 +498,7 @@ describe('snapshot_() method', function() {
     let data = actualObject.data();
     delete data.pathValue;
     delete expected.pathValue;
-    assert.deepEqual(data, expected);
+    assert.deepStrictEqual(data, expected);
 
     // We specifically test the GeoPoint properties to ensure 100% test
     // coverage.
@@ -530,7 +530,7 @@ describe('snapshot_() method', function() {
         {seconds: 5, nanos: 6});
 
     assert.equal(true, doc.exists);
-    assert.deepEqual({foo: bytesData}, doc.data());
+    assert.deepStrictEqual({foo: bytesData}, doc.data());
     assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)));
     assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
     assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
@@ -556,7 +556,7 @@ describe('snapshot_() method', function() {
         '1970-01-01T00:00:05.000000006Z', 'json');
 
     assert.equal(true, doc.exists);
-    assert.deepEqual(doc.data(), {
+    assert.deepStrictEqual(doc.data(), {
       a: bytesData,
       b: Firestore.Timestamp.fromDate(new Date('1985-03-18T07:20:00.000Z')),
       c: bytesData,
@@ -712,7 +712,7 @@ describe('getCollections() method', function() {
   it('returns collections', function() {
     const overrides = {
       listCollectionIds: (request, options, callback) => {
-        assert.deepEqual(request, {
+        assert.deepStrictEqual(request, {
           parent: `projects/${PROJECT_ID}/databases/(default)`,
         });
 
@@ -902,7 +902,7 @@ describe('getAll() method', function() {
       });
 
       return Promise.all(promises).then(() => {
-        assert.deepEqual(actualErrorAttempts, expectedErrorAttempts);
+        assert.deepStrictEqual(actualErrorAttempts, expectedErrorAttempts);
       });
     });
   });
