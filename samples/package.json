@@ -6,7 +6,7 @@
   "author": "Google Inc.",
   "repository": "googleapis/nodejs-firestore",
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "scripts": {
     "ava": "ava -T 20s --verbose system-test/*.test.js",
