@@ -103,7 +103,8 @@ describe('Order', function() {
 
     docs.sort(firestore.collection('col').comparator());
 
-    assert.deepEqual(docs.map(doc => doc.id), ['doc1', 'doc2', 'doc2', 'doc3']);
+    assert.deepStrictEqual(
+        docs.map(doc => doc.id), ['doc1', 'doc2', 'doc2', 'doc3']);
   });
 
   it('is correct', function() {
