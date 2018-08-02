@@ -2,3 +2,4 @@
 --require source-map-support/register
 --require intelli-espower-loader
 --timeout 2000
+--throw-deprecation
