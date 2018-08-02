@@ -141,6 +141,7 @@ class WriteBatch {
    */
   constructor(firestore) {
     this._firestore = firestore;
+    this._serializer = firestore._serializer;
     this._writes = [];
     this._committed = false;
   }
@@ -202,7 +203,7 @@ class WriteBatch {
 
     this._writes.push({
       write: !document.isEmpty || transform.isEmpty ? document.toProto() : null,
-      transform: transform.toProto(),
+      transform: transform.toProto(this._serializer),
       precondition: precondition.toProto(),
     });
 
@@ -318,12 +319,12 @@ class WriteBatch {
       write = document.toProto();
     } else if (hasDocumentData || transform.isEmpty) {
       write = document.toProto();
-      write.updateMask = documentMask.toProto();
+      write.updateMask = documentMask.toProto(this._serializer);
     }
 
     this._writes.push({
       write,
-      transform: transform.toProto(),
+      transform: transform.toProto(this._serializer),
     });
 
     return this;
@@ -448,7 +449,7 @@ class WriteBatch {
 
     this._writes.push({
       write: write,
-      transform: transform.toProto(),
+      transform: transform.toProto(this._serializer),
       precondition: precondition.toProto(),
     });
 

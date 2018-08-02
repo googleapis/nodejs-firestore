@@ -238,6 +238,6 @@ export class Timestamp {
       timestamp.nanos = this.nanoseconds;
     }
 
-    return timestamp;
+    return {timestampValue: timestamp};
   }
 }

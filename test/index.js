@@ -94,7 +94,7 @@ const allSupportedTypesProtobufJs = document('documentId', {
     doubleValue: -Infinity,
   },
   nilValue: {
-    nullValue: 'NULL_VALUE',
+    nullValue: 0,
   },
   objectValue: {
     mapValue: {
