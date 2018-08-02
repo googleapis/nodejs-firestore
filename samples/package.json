@@ -6,14 +6,14 @@
   "author": "Google Inc.",
   "repository": "googleapis/nodejs-firestore",
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "scripts": {
     "ava": "ava -T 20s --verbose system-test/*.test.js",
     "test": "npm run ava"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^0.15.4"
+    "@google-cloud/firestore": "^0.16.0"
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.3.0",

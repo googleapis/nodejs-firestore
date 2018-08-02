@@ -218,31 +218,31 @@ function runTransaction(transactionCallback, ...expectedRequests) {
     beginTransaction: (actual, options, callback) => {
       const request = expectedRequests.shift();
       assert.equal(request.type, 'begin');
-      assert.deepEqual(actual, request.request);
+      assert.deepStrictEqual(actual, request.request);
       callback(request.error, request.response);
     },
     commit: (actual, options, callback) => {
       const request = expectedRequests.shift();
       assert.equal(request.type, 'commit');
-      assert.deepEqual(actual, request.request);
+      assert.deepStrictEqual(actual, request.request);
       callback(request.error, request.response);
     },
     rollback: (actual, options, callback) => {
       const request = expectedRequests.shift();
       assert.equal(request.type, 'rollback');
-      assert.deepEqual(actual, request.request);
+      assert.deepStrictEqual(actual, request.request);
       callback(request.error, request.response);
     },
     batchGetDocuments: (actual) => {
       const request = expectedRequests.shift();
       assert.equal(request.type, 'getDocument');
-      assert.deepEqual(actual, request.request);
+      assert.deepStrictEqual(actual, request.request);
       return request.stream;
     },
     runQuery: (actual) => {
       const request = expectedRequests.shift();
       assert.equal(request.type, 'query');
-      assert.deepEqual(actual, request.request);
+      assert.deepStrictEqual(actual, request.request);
       return request.stream;
     }
   };

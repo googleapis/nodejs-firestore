@@ -100,7 +100,7 @@ describe('Collection interface', function() {
         delete request.writes[0].update.name;
 
         // Verify that the rest of the protobuf matches.
-        assert.deepEqual(request, {
+        assert.deepStrictEqual(request, {
           database: dbPrefix + '/(default)',
           writes: [
             {

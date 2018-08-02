@@ -171,7 +171,7 @@ function requestEquals(actual, protoOperation) {
     }
   }
 
-  assert.deepEqual(actual, proto);
+  assert.deepStrictEqual(actual, proto);
 }
 
 function stream() {
@@ -462,7 +462,7 @@ describe('deserialize document', function() {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(res => {
-        assert.deepEqual(res.data(), {foo: Buffer.from('AG=', 'base64')});
+        assert.deepStrictEqual(res.data(), {foo: Buffer.from('AG=', 'base64')});
       });
     });
   });
@@ -630,8 +630,8 @@ describe('get document', function() {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(result => {
-        assert.deepEqual(result.data(), {foo: {bar: 'foobar'}});
-        assert.deepEqual(result.get('foo'), {bar: 'foobar'});
+        assert.deepStrictEqual(result.data(), {foo: {bar: 'foobar'}});
+        assert.deepStrictEqual(result.get('foo'), {bar: 'foobar'});
         assert.equal(result.get('foo.bar'), 'foobar');
         assert.equal(
             result.get(new Firestore.FieldPath('foo', 'bar')), 'foobar');
@@ -1759,7 +1759,7 @@ describe('getCollections() method', function() {
   it('sorts results', function() {
     const overrides = {
       listCollectionIds: (request, options, callback) => {
-        assert.deepEqual(request, {
+        assert.deepStrictEqual(request, {
           parent:
               `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
         });

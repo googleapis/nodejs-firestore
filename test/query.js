@@ -242,7 +242,7 @@ function buildQuery(protoComponent) {
 
 function requestEquals(actual, protoComponents) {
   protoComponents = Array.prototype.slice.call(arguments, 1);
-  assert.deepEqual(actual, buildQuery.apply(null, protoComponents));
+  assert.deepStrictEqual(actual, buildQuery.apply(null, protoComponents));
 }
 
 function document(name) {
@@ -1554,7 +1554,7 @@ describe('endBefore() interface', function() {
 
     const overrides = {
       runQuery: (request) => {
-        assert.deepEqual(request, expectedResult);
+        assert.deepStrictEqual(request, expectedResult);
         return stream();
       }
     };
