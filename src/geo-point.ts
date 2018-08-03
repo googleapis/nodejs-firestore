@@ -31,7 +31,6 @@ const validate = validatePkg({});
  * @class
  */
 export class GeoPoint implements Serializable {
-
   private readonly _latitude: number;
   private readonly _longitude: number;
 
