@@ -21,10 +21,10 @@ import util from 'util';
 import {validatePkg} from './validate';
 const validate = validatePkg({});
 
-/** The Firestore library version */
+/*! The Firestore library version */
 let libVersion: string;
 
-/** The external function used to emit logs. */
+/*! The external function used to emit logs. */
 let logFunction = (msg: string) => {};
 
 /**

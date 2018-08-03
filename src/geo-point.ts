@@ -31,23 +31,9 @@ const validate = validatePkg({});
  * @class
  */
 export class GeoPoint implements Serializable {
-  /**
-   * The latitude as a number between -90 and 90.
-   *
-   * @type {number}
-   * @name GeoPoint#latitude
-   * @readonly
-   */
-  readonly latitude: number;
 
-  /**
-   * The longitude as a number between -180 and 180.
-   *
-   * @type {number}
-   * @name GeoPoint#longitude
-   * @readonly
-   */
-  readonly longitude: number;
+  private readonly _latitude: number;
+  private readonly _longitude: number;
 
   /**
    * Creates a [GeoPoint]{@link GeoPoint}.
@@ -69,8 +55,30 @@ export class GeoPoint implements Serializable {
     validate.isNumber('latitude', latitude, -90, 90);
     validate.isNumber('longitude', longitude, -180, 180);
 
-    this.latitude = latitude;
-    this.longitude = longitude;
+    this._latitude = latitude;
+    this._longitude = longitude;
+  }
+
+  /**
+   * The latitude as a number between -90 and 90.
+   *
+   * @type {number}
+   * @name GeoPoint#latitude
+   * @readonly
+   */
+  get latitude() {
+    return this._latitude;
+  }
+
+  /**
+   * The longitude as a number between -180 and 180.
+   *
+   * @type {number}
+   * @name GeoPoint#longitude
+   * @readonly
+   */
+  get longitude() {
+    return this._longitude;
   }
 
   /**
