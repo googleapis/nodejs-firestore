@@ -198,11 +198,13 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
 };
 
 /**
+ * @private
  * @callback docsCallback
  * @returns {Array.<QueryDocumentSnapshot>} An ordered list of documents.
  */
 
 /**
+ * @private
  * @callback changeCallback
  * @returns {Array.<DocumentChange>} An ordered list of document
  * changes.

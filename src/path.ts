@@ -17,6 +17,8 @@
 'use strict';
 
 import is from 'is';
+import {google} from '../protos/firestore_proto_api';
+import api = google.firestore.v1beta1;
 
 import {validatePkg} from './validate';
 
@@ -402,6 +404,17 @@ export class ResourcePath extends Path<ResourcePath> {
     }
 
     return super.compareTo(other);
+  }
+
+  /**
+   * Converts this ResourcePath to the Firestore Proto representation.
+   *
+   * @private
+   */
+  toProto(): api.IValue {
+    return {
+      referenceValue: this.formattedName,
+    };
   }
 }
 

@@ -26,6 +26,7 @@ import {referencePkg} from '../src/reference';
 import {documentPkg} from '../src/document';
 import {createInstance} from '../test/util/helpers';
 import {ResourcePath} from '../src/path';
+import {Serializer} from '../src/serializer';
 
 const reference = referencePkg(Firestore);
 const DocumentReference = reference.DocumentReference;
@@ -38,11 +39,15 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 Firestore.setLogFunction(() => {});
 
 function snapshot(relativePath, data) {
+  const firestore = {};
+  const serializer = new Serializer(firestore, /*timestampsInSnapshots=*/true);
+  firestore._serializer = serializer;
+
   const snapshot = new DocumentSnapshot.Builder();
   let path = ResourcePath.fromSlashSeparatedString(
       `${DATABASE_ROOT}/documents/${relativePath}`);
-  snapshot.ref = new DocumentReference({}, path);
-  snapshot.fieldsProto = DocumentSnapshot.encodeFields(data);
+  snapshot.ref = new DocumentReference(firestore, path);
+  snapshot.fieldsProto = serializer.encodeFields(data);
   snapshot.readTime = '1970-01-01T00:00:00.000000000Z';
   snapshot.createTime = '1970-01-01T00:00:00.000000000Z';
   snapshot.updateTime = '1970-01-01T00:00:00.000000000Z';

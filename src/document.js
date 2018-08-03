@@ -20,11 +20,12 @@ import assert from 'assert';
 import deepEqual from 'deep-equal';
 import is from 'is';
 
-import {fieldValuePkg} from './field-value';
-import {FieldPath, ResourcePath} from './path';
+import {FieldPath} from './path';
+import {FieldTransform, DeleteTransform} from './field-value';
 import {Timestamp} from './timestamp';
+import {GeoPoint} from './geo-point';
 import {validatePkg} from './validate';
-import {detectValueType} from './convert';
+import {isPlainObject} from './serializer';
 
 /*!
  * Injected.
@@ -32,20 +33,6 @@ import {detectValueType} from './convert';
  * @see {DocumentReference}
  */
 let DocumentReference;
-
-/*!
- * Injected.
- *
- * @see {DocumentReference}
- */
-let FieldTransform;
-
-/*!
- * Injected.
- *
- * @see {DeleteTransform}
- */
-let DeleteTransform;
 
 /*! Injected. */
 let validate;
@@ -57,101 +44,6 @@ let validate;
  */
 const MAX_DEPTH = 20;
 
-/**
- * An immutable object representing a geographic location in Firestore. The
- * location is represented as a latitude/longitude pair.
- *
- * @class
- */
-class GeoPoint {
-  /**
-   * Creates a [GeoPoint]{@link GeoPoint}.
-   *
-   * @param {number} latitude The latitude as a number between -90 and 90.
-   * @param {number} longitude The longitude as a number between -180 and 180.
-   *
-   * @example
-   * let data = {
-   *   google: new Firestore.GeoPoint(37.422, 122.084)
-   * };
-   *
-   * firestore.doc('col/doc').set(data).then(() => {
-   *   console.log(`Location is ${data.google.latitude}, ` +
-   *     `${data.google.longitude}`);
-   * });
-   */
-  constructor(latitude, longitude) {
-    validate.isNumber('latitude', latitude, -90, 90);
-    validate.isNumber('longitude', longitude, -180, 180);
-
-    this._latitude = latitude;
-    this._longitude = longitude;
-  }
-
-  /**
-   * The latitude as a number between -90 and 90.
-   *
-   * @type {number}
-   * @name GeoPoint#latitude
-   * @readonly
-   */
-  get latitude() {
-    return this._latitude;
-  }
-
-  /**
-   * The longitude as a number between -180 and 180.
-   *
-   * @type {number}
-   * @name GeoPoint#longitude
-   * @readonly
-   */
-  get longitude() {
-    return this._longitude;
-  }
-
-  /**
-   * Returns a string representation for this GeoPoint.
-   *
-   * @return {string} The string representation.
-   */
-  toString() {
-    return `GeoPoint { latitude: ${this.latitude}, longitude: ${
-        this.longitude} }`;
-  }
-
-  /**
-   * Returns true if this `GeoPoint` is equal to the provided value.
-   *
-   * @param {*} other The value to compare against.
-   * @return {boolean} true if this `GeoPoint` is equal to the provided value.
-   */
-  isEqual(other) {
-    return (
-        this === other ||
-        (is.instanceof(other, GeoPoint) && this.latitude === other.latitude &&
-         this.longitude === other.longitude));
-  }
-
-  /**
-   * Converts the GeoPoint to a google.type.LatLng proto.
-   * @private
-   */
-  toProto() {
-    return {
-      latitude: this._latitude,
-      longitude: this._longitude,
-    };
-  }
-
-  /**
-   * Converts a google.type.LatLng proto to its GeoPoint representation.
-   * @private
-   */
-  static fromProto(proto) {
-    return new GeoPoint(proto.latitude, proto.longitude);
-  }
-}
 
 /**
  * A DocumentSnapshot is an immutable representation for a document in a
@@ -186,6 +78,7 @@ class DocumentSnapshot {
   constructor(ref, fieldsProto, readTime, createTime, updateTime) {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
+    this._serializer = ref.firestore._serializer;
     this._readTime = readTime;
     this._createTime = createTime;
     this._updateTime = updateTime;
@@ -200,7 +93,8 @@ class DocumentSnapshot {
    * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
    */
   static fromObject(ref, obj) {
-    return new DocumentSnapshot(ref, DocumentSnapshot.encodeFields(obj));
+    const serializer = ref.firestore._serializer;
+    return new DocumentSnapshot(ref, serializer.encodeFields(obj));
   }
   /**
    * Creates a DocumentSnapshot from an UpdateMap.
@@ -214,6 +108,8 @@ class DocumentSnapshot {
    * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
    */
   static fromUpdateMap(ref, data) {
+    const serializer = ref.firestore._serializer;
+
     /**
      * Merges 'value' at the field path specified by the path array into
      * 'target'.
@@ -230,7 +126,7 @@ class DocumentSnapshot {
             return !is.empty(target) ? target : null;
           }
           // The merge is done.
-          const leafNode = DocumentSnapshot.encodeValue(value);
+          const leafNode = serializer.encodeValue(value);
           if (leafNode) {
             target[key] = leafNode;
           }
@@ -421,7 +317,7 @@ class DocumentSnapshot {
     let obj = {};
     for (let prop in fields) {
       if (fields.hasOwnProperty(prop)) {
-        obj[prop] = this._decodeValue(fields[prop]);
+        obj[prop] = this._serializer.decodeValue(fields[prop]);
       }
     }
     return obj;
@@ -464,7 +360,7 @@ class DocumentSnapshot {
       return undefined;
     }
 
-    return this._decodeValue(protoField);
+    return this._serializer.decodeValue(protoField);
   }
 
   /**
@@ -496,79 +392,6 @@ class DocumentSnapshot {
     }
 
     return fields[components[0]];
-  }
-
-  /**
-   * Decodes a single Firestore 'Value' Protobuf.
-   *
-   * @private
-   * @param proto - A Firestore 'Value' Protobuf.
-   * @returns {*} The converted JS type.
-   */
-  _decodeValue(proto) {
-    const timestampsInSnapshotsEnabled =
-        this._ref.firestore._timestampsInSnapshotsEnabled;
-
-    const valueType = detectValueType(proto);
-
-    switch (valueType) {
-      case 'stringValue': {
-        return proto.stringValue;
-      }
-      case 'booleanValue': {
-        return proto.booleanValue;
-      }
-      case 'integerValue': {
-        return parseInt(proto.integerValue, 10);
-      }
-      case 'doubleValue': {
-        return parseFloat(proto.doubleValue, 10);
-      }
-      case 'timestampValue': {
-        const timestamp = Timestamp.fromProto(proto.timestampValue);
-        return timestampsInSnapshotsEnabled ? timestamp : timestamp.toDate();
-      }
-      case 'referenceValue': {
-        return new DocumentReference(
-            this.ref.firestore,
-            ResourcePath.fromSlashSeparatedString(proto.referenceValue));
-      }
-      case 'arrayValue': {
-        let array = [];
-        if (is.array(proto.arrayValue.values)) {
-          for (let value of proto.arrayValue.values) {
-            array.push(this._decodeValue(value));
-          }
-        }
-        return array;
-      }
-      case 'nullValue': {
-        return null;
-      }
-      case 'mapValue': {
-        let obj = {};
-        let fields = proto.mapValue.fields;
-
-        for (let prop in fields) {
-          if (fields.hasOwnProperty(prop)) {
-            obj[prop] = this._decodeValue(fields[prop]);
-          }
-        }
-
-        return obj;
-      }
-      case 'geoPointValue': {
-        return GeoPoint.fromProto(proto.geoPointValue);
-      }
-      case 'bytesValue': {
-        return proto.bytesValue;
-      }
-      default: {
-        throw new Error(
-            'Cannot decode type from Firestore Value: ' +
-            JSON.stringify(proto));
-      }
-    }
   }
 
   /**
@@ -612,145 +435,6 @@ class DocumentSnapshot {
         (is.instance(other, DocumentSnapshot) &&
          this._ref.isEqual(other._ref) &&
          deepEqual(this._fieldsProto, other._fieldsProto, {strict: true})));
-  }
-
-  /**
-   * Encodes a JavaScrip object into the Firestore 'Fields' representation.
-   *
-   * @private
-   * @param {Object} obj The object to encode.
-   * @returns {Object} The Firestore 'Fields' representation
-   */
-  static encodeFields(obj) {
-    let fields = {};
-
-    for (let prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        let val = DocumentSnapshot.encodeValue(obj[prop]);
-
-        if (val) {
-          fields[prop] = val;
-        }
-      }
-    }
-
-    return fields;
-  }
-
-  /**
-   * Encodes a JavaScript value into the Firestore 'Value' representation.
-   *
-   * @private
-   * @param {Object} val The object to encode
-   * @returns {object|null} The Firestore Proto or null if we are deleting a
-   * field.
-   */
-  static encodeValue(val) {
-    if (val instanceof FieldTransform) {
-      return null;
-    }
-
-    if (is.string(val)) {
-      return {
-        stringValue: val,
-      };
-    }
-
-    if (is.boolean(val)) {
-      return {
-        booleanValue: val,
-      };
-    }
-
-    if (is.integer(val)) {
-      return {
-        integerValue: val,
-      };
-    }
-
-    // Integers are handled above, the remaining numbers are treated as doubles
-    if (is.number(val)) {
-      return {
-        doubleValue: val,
-      };
-    }
-
-    if (is.instance(val, Timestamp)) {
-      return {
-        timestampValue: {seconds: val.seconds, nanos: val.nanoseconds},
-      };
-    }
-
-    if (is.date(val)) {
-      let timestamp = Timestamp.fromDate(val);
-      return {
-        timestampValue: {
-          seconds: timestamp.seconds,
-          nanos: timestamp.nanoseconds,
-        },
-      };
-    }
-
-    if (is.array(val)) {
-      const array = {
-        arrayValue: {},
-      };
-
-      if (val.length > 0) {
-        array.arrayValue.values = [];
-        for (let i = 0; i < val.length; ++i) {
-          let enc = DocumentSnapshot.encodeValue(val[i]);
-          if (enc) {
-            array.arrayValue.values.push(enc);
-          }
-        }
-      }
-
-      return array;
-    }
-
-    if (is.nil(val)) {
-      return {
-        nullValue: 'NULL_VALUE',
-      };
-    }
-
-    if (is.instance(val, DocumentReference) || is.instance(val, ResourcePath)) {
-      return {
-        referenceValue: val.formattedName,
-      };
-    }
-
-    if (is.instance(val, GeoPoint)) {
-      return {
-        geoPointValue: val.toProto(),
-      };
-    }
-
-    if (is.instanceof(val, Buffer) || is.instanceof(val, Uint8Array)) {
-      return {
-        bytesValue: val,
-      };
-    }
-
-    if (isPlainObject(val)) {
-      const map = {
-        mapValue: {},
-      };
-
-      // If we encounter an empty object, we always need to send it to make sure
-      // the server creates a map entry.
-      if (!is.empty(val)) {
-        map.mapValue.fields = DocumentSnapshot.encodeFields(val);
-        if (is.empty(map.mapValue.fields)) {
-          return null;
-        }
-      }
-
-      return map;
-    }
-
-    throw validate.customObjectError(val);
   }
 }
 
@@ -1293,17 +977,18 @@ class DocumentTransform {
    * Converts a document transform to the Firestore 'DocumentTransform' Proto.
    *
    * @private
+   * @param {Serializer} serializer - The Firestore serializer
    * @returns {Object|null} A Firestore 'DocumentTransform' Proto or 'null' if
    * this transform is empty.
    */
-  toProto() {
+  toProto(serializer) {
     if (this.isEmpty) {
       return null;
     }
 
     const protoTransforms = [];
     this._transforms.forEach((transform, path) => {
-      protoTransforms.push(transform.toProto(path));
+      protoTransforms.push(transform.toProto(serializer, path));
     });
 
     return {
@@ -1354,7 +1039,7 @@ class Precondition {
     let proto = {};
 
     if (is.defined(this._lastUpdateTime)) {
-      proto.updateTime = this._lastUpdateTime.toProto();
+      proto.updateTime = this._lastUpdateTime.toProto().timestampValue;
     } else {
       proto.exists = this._exists;
     }
@@ -1555,29 +1240,12 @@ function validateSetOptions(options) {
   return true;
 }
 
-/*!
- * Verifies that 'obj' is a plain JavaScript object that can be encoded as a
- * 'Map' in Firestore.
- *
- * @param {*} input - The argument to verify.
- * @returns {boolean} 'true' if the input can be a treated as a plain object.
- */
-function isPlainObject(input) {
-  return (
-      typeof input === 'object' && input !== null &&
-      (Object.getPrototypeOf(input) === Object.prototype ||
-       Object.getPrototypeOf(input) === null));
-}
-
 export function documentPkg(DocumentRefType) {
   DocumentReference = DocumentRefType;
   validate = validatePkg({
     FieldPath: FieldPath.validateFieldPath,
     PlainObject: isPlainObject,
   });
-  const fieldValue = fieldValuePkg(DocumentSnapshot);
-  FieldTransform = fieldValue.FieldTransform;
-  DeleteTransform = fieldValue.DeleteTransform;
   return {
     DocumentMask,
     DocumentSnapshot,

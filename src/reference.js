@@ -495,7 +495,8 @@ class DocumentReference {
 
       // The document is missing.
       let document = new DocumentSnapshot.Builder();
-      document.ref = this._referencePath;
+      document.ref =
+          new DocumentReference(this._firestore, this._referencePath);
       document.readTime = readTime;
       onNext(document.build());
     }, onError);
@@ -514,6 +515,17 @@ class DocumentReference {
         (is.instanceof(other, DocumentReference) &&
          this._firestore === other._firestore &&
          this._referencePath.isEqual(other._referencePath)));
+  }
+
+  /**
+   * Converts this DocumentReference to the Firestore Proto representation.
+   *
+   * @private
+   */
+  toProto() {
+    return {
+      referenceValue: this.formattedName
+    }
   }
 }
 
@@ -746,7 +758,8 @@ class FieldFilter {
    * @param {*} value The value to which to compare the
    * field for inclusion in a query.
    */
-  constructor(field, opString, value) {
+  constructor(serializer, field, opString, value) {
+    this._serializer = serializer;
     this._field = field;
     this._opString = opString;
     this._value = value;
@@ -810,7 +823,7 @@ class FieldFilter {
           fieldPath: this._field.formattedName,
         },
         op: this._opString,
-        value: DocumentSnapshot.encodeValue(this._value),
+        value: this._serializer.encodeValue(this._value),
       },
     };
   }
@@ -1061,6 +1074,7 @@ class Query {
    */
   constructor(firestore, path, fieldFilters, fieldOrders, queryOptions) {
     this._firestore = firestore;
+    this._serializer = firestore._serializer;
     this._referencePath = path;
     this._fieldFilters = fieldFilters || [];
     this._fieldOrders = fieldOrders || [];
@@ -1193,8 +1207,8 @@ class Query {
       value = this._convertReference(value);
     }
 
-    let combinedFilters = this._fieldFilters.concat(
-        new FieldFilter(fieldPath, comparisonOperators[opStr], value));
+    let combinedFilters = this._fieldFilters.concat(new FieldFilter(
+        this._serializer, fieldPath, comparisonOperators[opStr], value));
 
     return new Query(
         this._firestore, this._referencePath, combinedFilters,
@@ -1459,7 +1473,7 @@ class Query {
         allowTransforms: false,
       });
 
-      options.values.push(DocumentSnapshot.encodeValue(fieldValue));
+      options.values.push(this._serializer.encodeValue(fieldValue));
     }
 
     return options;
