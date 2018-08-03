@@ -24,15 +24,8 @@ import {ApiOverride, arrayTransform, commitRequest, createInstance, document, se
 // TODO: This should be a TypeScript import after the full migration.
 import Firestore = require('../src');
 
-import {referencePkg} from '../src/reference';
-import {fieldValuePkg} from '../src/field-value';
-import {documentPkg} from '../src/document';
+import {FieldValue} from '../src/field-value';
 import {AnyDuringMigration} from '../src/types';
-
-const reference = referencePkg(Firestore);
-const fieldValue =
-    fieldValuePkg(documentPkg(reference.DocumentReference).DocumentSnapshot);
-const FieldValue = fieldValue.FieldValue;
 
 // tslint:disable:no-unused-expression
 

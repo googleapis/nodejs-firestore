@@ -22,11 +22,10 @@ import {AnyJs} from './types';
 import {validatePkg} from './validate';
 import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
+import {Serializer} from './serializer';
+import {FieldPath} from './path';
 
 const validate = validatePkg({});
-
-// tslint:disable-next-line:variable-name
-let DocumentSnapshot;
 
 /**
  * Sentinel values that can be used when writing documents with set(), create()
@@ -34,7 +33,7 @@ let DocumentSnapshot;
  *
  * @class
  */
-class FieldValue {
+export class FieldValue {
   /**
    * @private
    * @hideconstructor
@@ -159,7 +158,7 @@ class FieldValue {
  * @private
  * @abstract
  */
-abstract class FieldTransform extends FieldValue {
+export abstract class FieldTransform extends FieldValue {
   /** Whether this FieldTransform should be included in the document mask. */
   abstract get includeInDocumentMask(): boolean;
 
@@ -175,10 +174,12 @@ abstract class FieldTransform extends FieldValue {
   /***
    * The proto representation for this field transform.
    *
+   * @param serializer - The Firestore serializer.
    * @param fieldPath - The field path to apply this transformation to.
    * @return The 'FieldTransform' proto message.
    */
-  abstract toProto(fieldPath): api.DocumentTransform.IFieldTransform;
+  abstract toProto(serializer: Serializer, fieldPath: FieldPath):
+      api.DocumentTransform.IFieldTransform;
 }
 
 /**
@@ -186,7 +187,7 @@ abstract class FieldTransform extends FieldValue {
  *
  * @private
  */
-class DeleteTransform extends FieldTransform {
+export class DeleteTransform extends FieldTransform {
   /**
    * Sentinel value for a field delete.
    */
@@ -214,7 +215,7 @@ class DeleteTransform extends FieldTransform {
     return 'FieldValue.delete';
   }
 
-  toProto(fieldPath): never {
+  toProto(serializer: Serializer, fieldPath: FieldPath): never {
     throw new Error(
         'FieldValue.delete() should not be included in a FieldTransform');
   }
@@ -259,7 +260,8 @@ class ServerTimestampTransform extends FieldTransform {
     return 'FieldValue.serverTimestamp';
   }
 
-  toProto(fieldPath): api.DocumentTransform.IFieldTransform {
+  toProto(serializer: Serializer, fieldPath: FieldPath):
+      api.DocumentTransform.IFieldTransform {
     return {
       fieldPath: fieldPath.formattedName,
       setToServerValue:
@@ -296,9 +298,9 @@ class ArrayUnionTransform extends FieldTransform {
     return 'FieldValue.arrayUnion';
   }
 
-  toProto(fieldPath): api.DocumentTransform.IFieldTransform {
-    const encodedElements =
-        DocumentSnapshot.encodeValue(this.elements).arrayValue;
+  toProto(serializer: Serializer, fieldPath: FieldPath):
+      api.DocumentTransform.IFieldTransform {
+    const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
       fieldPath: fieldPath.formattedName,
       appendMissingElements: encodedElements
@@ -341,9 +343,9 @@ class ArrayRemoveTransform extends FieldTransform {
     return 'FieldValue.arrayRemove';
   }
 
-  toProto(fieldPath): api.DocumentTransform.IFieldTransform {
-    const encodedElements =
-        DocumentSnapshot.encodeValue(this.elements).arrayValue;
+  toProto(serializer: Serializer, fieldPath):
+      api.DocumentTransform.IFieldTransform {
+    const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
       fieldPath: fieldPath.formattedName,
       removeAllFromArray: encodedElements
@@ -356,9 +358,4 @@ class ArrayRemoveTransform extends FieldTransform {
         (other instanceof ArrayRemoveTransform &&
          deepEqual(this.elements, other.elements, {strict: true})));
   }
-}
-
-export function fieldValuePkg(documentSnapshotType) {
-  DocumentSnapshot = documentSnapshotType;
-  return {FieldValue, FieldTransform, DeleteTransform};
 }

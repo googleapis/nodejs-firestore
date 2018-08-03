@@ -99,7 +99,7 @@ const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
 const snapshot = function(ref, data) {
   const snapshot = new DocumentSnapshot.Builder();
   snapshot.ref = ref;
-  snapshot.fieldsProto = DocumentSnapshot.encodeFields(data);
+  snapshot.fieldsProto = ref.firestore._serializer.encodeFields(data);
   snapshot.readTime = new Firestore.Timestamp(0, 0);
   snapshot.createTime = new Firestore.Timestamp(0, 0);
   snapshot.updateTime = new Firestore.Timestamp(0, 0);
@@ -271,6 +271,7 @@ class WatchHelper {
    */
   constructor(streamHelper, reference, targetId) {
     this.reference = reference;
+    this.serializer = reference.firestore._serializer;
     this.streamHelper = streamHelper;
     this.targetId = targetId;
     this.snapshotVersion = 0;
@@ -398,7 +399,7 @@ class WatchHelper {
       documentChange: {
         document: {
           name: ref.formattedName,
-          fields: DocumentSnapshot.encodeFields(data),
+          fields: this.serializer.encodeFields(data),
           createTime: {seconds: 1, nanos: 2},
           updateTime: {seconds: 3, nanos: this.snapshotVersion},
         },
@@ -418,7 +419,7 @@ class WatchHelper {
       documentChange: {
         document: {
           name: ref.formattedName,
-          fields: DocumentSnapshot.encodeFields(data),
+          fields: this.serializer.encodeFields(data),
         },
         removedTargetIds: [this.targetId],
       },
@@ -1747,7 +1748,7 @@ describe('Query watch', function() {
               documentChange: {
                 document: {
                   name: doc1.formattedName,
-                  fields: DocumentSnapshot.encodeFields({foo: 'a'}),
+                  fields: watchHelper.serializer.encodeFields({foo: 'a'}),
                   createTime: {seconds: 1, nanos: 2},
                   updateTime: {seconds: 3, nanos: 5},
                 },
