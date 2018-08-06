@@ -25,7 +25,7 @@ import api = google.firestore.v1beta1;
 import {detectValueType} from './convert';
 import {ResourcePath} from './path';
 import {validatePkg} from './validate';
-import {APIIMapValue} from './types';
+import {ApiMapValue} from './types';
 
 const validate = validatePkg({});
 
@@ -196,7 +196,7 @@ function compareArrays(left: api.IValue[], right: api.IValue[]): number {
 /*!
  * @private
  */
-function compareObjects(left: APIIMapValue, right: APIIMapValue): number {
+function compareObjects(left: ApiMapValue, right: ApiMapValue): number {
   // This requires iterating over the keys in the object in order and doing a
   // deep comparison.
   const leftKeys = Object.keys(left);

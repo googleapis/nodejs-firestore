@@ -29,6 +29,6 @@ export type AnyJs = null|undefined|boolean|number|string|object;
 export type AnyDuringMigration = any;
 
 // A map in the format of the Proto API
-export type APIIMapValue = {
+export type ApiMapValue = {
   [k: string]: google.firestore.v1beta1.IValue
 };
