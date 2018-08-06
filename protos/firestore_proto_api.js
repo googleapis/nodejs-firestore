@@ -1,6 +1,9 @@
 /*eslint-disable block-scoped-var, no-redeclare, no-control-regex, no-prototype-builtins*/
 "use strict";
 
+// Note: This file was manually edited to use "string" instead of "Long" for
+// types that can potentially hold large integer values (> 2^53).
+
 var $protobuf = require("protobufjs/minimal");
 
 // Common aliases
@@ -8852,7 +8855,7 @@ $root.google = (function() {
          * @interface IValue
          * @property {google.protobuf.NullValue|null} [nullValue] Value nullValue
          * @property {boolean|null} [booleanValue] Value booleanValue
-         * @property {number|Long|null} [integerValue] Value integerValue
+         * @property {number|string|null} [integerValue] Value integerValue
          * @property {number|null} [doubleValue] Value doubleValue
          * @property {google.protobuf.ITimestamp|null} [timestampValue] Value timestampValue
          * @property {string|null} [stringValue] Value stringValue
@@ -8896,7 +8899,7 @@ $root.google = (function() {
 
         /**
          * Value integerValue.
-         * @member {number|Long} integerValue
+         * @member {number|string} integerValue
          * @memberof google.firestore.v1beta1.Value
          * @instance
          */
@@ -21483,8 +21486,8 @@ $root.google = (function() {
        * @interface IUninterpretedOption
        * @property {Array.<google.protobuf.UninterpretedOption.INamePart>|null} [name] UninterpretedOption name
        * @property {string|null} [identifierValue] UninterpretedOption identifierValue
-       * @property {number|Long|null} [positiveIntValue] UninterpretedOption positiveIntValue
-       * @property {number|Long|null} [negativeIntValue] UninterpretedOption negativeIntValue
+       * @property {number|string|null} [positiveIntValue] UninterpretedOption positiveIntValue
+       * @property {number|string|null} [negativeIntValue] UninterpretedOption negativeIntValue
        * @property {number|null} [doubleValue] UninterpretedOption doubleValue
        * @property {Uint8Array|null} [stringValue] UninterpretedOption stringValue
        * @property {string|null} [aggregateValue] UninterpretedOption aggregateValue
@@ -21524,7 +21527,7 @@ $root.google = (function() {
 
       /**
        * UninterpretedOption positiveIntValue.
-       * @member {number|Long} positiveIntValue
+       * @member {number|string} positiveIntValue
        * @memberof google.protobuf.UninterpretedOption
        * @instance
        */
@@ -21532,7 +21535,7 @@ $root.google = (function() {
 
       /**
        * UninterpretedOption negativeIntValue.
-       * @member {number|Long} negativeIntValue
+       * @member {number|string} negativeIntValue
        * @memberof google.protobuf.UninterpretedOption
        * @instance
        */
@@ -23101,7 +23104,7 @@ $root.google = (function() {
        * Properties of a Timestamp.
        * @memberof google.protobuf
        * @interface ITimestamp
-       * @property {number|Long|null} [seconds] Timestamp seconds
+       * @property {number|string|null} [seconds] Timestamp seconds
        * @property {number|null} [nanos] Timestamp nanos
        */
 
@@ -23122,7 +23125,7 @@ $root.google = (function() {
 
       /**
        * Timestamp seconds.
-       * @member {number|Long} seconds
+       * @member {number|string} seconds
        * @memberof google.protobuf.Timestamp
        * @instance
        */
@@ -24499,7 +24502,7 @@ $root.google = (function() {
        * Properties of an Int64Value.
        * @memberof google.protobuf
        * @interface IInt64Value
-       * @property {number|Long|null} [value] Int64Value value
+       * @property {number|string|null} [value] Int64Value value
        */
 
       /**
@@ -24519,7 +24522,7 @@ $root.google = (function() {
 
       /**
        * Int64Value value.
-       * @member {number|Long} value
+       * @member {number|string} value
        * @memberof google.protobuf.Int64Value
        * @instance
        */
@@ -24700,7 +24703,7 @@ $root.google = (function() {
        * Properties of a UInt64Value.
        * @memberof google.protobuf
        * @interface IUInt64Value
-       * @property {number|Long|null} [value] UInt64Value value
+       * @property {number|string|null} [value] UInt64Value value
        */
 
       /**
@@ -24720,7 +24723,7 @@ $root.google = (function() {
 
       /**
        * UInt64Value value.
-       * @member {number|Long} value
+       * @member {number|string} value
        * @memberof google.protobuf.UInt64Value
        * @instance
        */
