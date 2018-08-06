@@ -232,7 +232,7 @@ describe('DocumentReference class', function() {
         .then(doc => {
           setTimestamp = doc.get('f');
           assert.ok(is.instanceof(setTimestamp, Firestore.Timestamp));
-          assert.deepEqual(doc.data(), {
+          assert.deepStrictEqual(doc.data(), {
             a: 'bar',
             b: {remove: 'bar'},
             d: {keep: 'bar'},
@@ -246,7 +246,7 @@ describe('DocumentReference class', function() {
         .then(doc => {
           let updateTimestamp = doc.get('a');
           assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
-          assert.deepEqual(doc.data(), {
+          assert.deepStrictEqual(doc.data(), {
             a: updateTimestamp,
             b: {c: updateTimestamp},
             d: {e: updateTimestamp, keep: 'bar'},
@@ -278,7 +278,7 @@ describe('DocumentReference class', function() {
         .then(() => ref.update(updateObject))
         .then(() => ref.get())
         .then(doc => {
-          assert.deepEqual(doc.data(), expectedObject);
+          assert.deepStrictEqual(doc.data(), expectedObject);
         });
   });
 
@@ -305,7 +305,7 @@ describe('DocumentReference class', function() {
         .then(() => ref.update(updateObject))
         .then(() => ref.get())
         .then(doc => {
-          assert.deepEqual(doc.data(), expectedObject);
+          assert.deepStrictEqual(doc.data(), expectedObject);
         });
   });
 
@@ -339,7 +339,7 @@ describe('DocumentReference class', function() {
         .then(doc => {
           let updateTimestamp = doc.get('c');
           assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
-          assert.deepEqual(doc.data(), {
+          assert.deepStrictEqual(doc.data(), {
             a: 'b',
             c: updateTimestamp,
           });
@@ -492,7 +492,7 @@ describe('DocumentReference class', function() {
                       if (!snap.exists) {
                         assert.equal(null, expectedState[i]);
                       } else {
-                        assert.deepEqual(snap.data(), expectedState[i]);
+                        assert.deepStrictEqual(snap.data(), expectedState[i]);
                       }
                     });
     }
@@ -584,14 +584,15 @@ describe('DocumentReference class', function() {
     let times = [];
 
     for (let i = 0; i < actions.length; ++i) {
-      promise = promise.then(() => actions[i]())
-                    .then(() => {
-                      return ref.get();
-                    })
-                    .then(snap => {
-                      times.push(snap.get('time'));
-                      assert.deepEqual(snap.data(), expectedState[i](times));
-                    });
+      promise =
+          promise.then(() => actions[i]())
+              .then(() => {
+                return ref.get();
+              })
+              .then(snap => {
+                times.push(snap.get('time'));
+                assert.deepStrictEqual(snap.data(), expectedState[i](times));
+              });
     }
 
     return promise;
@@ -1081,7 +1082,7 @@ describe('Query class', function() {
       const ref = randomCol.doc(id);
       return randomCol.firestore.snapshot_({
         name: ref.formattedName,
-        fields: DocumentSnapshot.encodeFields(data),
+        fields: ref.firestore._serializer.encodeFields(data),
         createTime: {seconds: 0, nanos: 0},
         updateTime: {seconds: 0, nanos: 0},
       });
@@ -1117,14 +1118,14 @@ describe('Query class', function() {
       assert.equal(actual.size, expected.docs.length);
       for (i = 0; i < expected.docs.length && i < actual.size; i++) {
         assert.equal(actual.docs[i].ref.id, expected.docs[i].ref.id);
-        assert.deepEqual(actual.docs[i].data(), expected.docs[i].data());
+        assert.deepStrictEqual(actual.docs[i].data(), expected.docs[i].data());
       }
       assert.equal(actual.docChanges.length, expected.docChanges.length);
       for (i = 0; i < expected.docChanges.length; i++) {
         assert.equal(actual.docChanges[i].type, expected.docChanges[i].type);
         assert.equal(
             actual.docChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
-        assert.deepEqual(
+        assert.deepStrictEqual(
             actual.docChanges[i].doc.data(), expected.docChanges[i].doc.data());
         assert.ok(is.defined(actual.docChanges[i].doc.readTime));
         assert.ok(is.defined(actual.docChanges[i].doc.createTime));

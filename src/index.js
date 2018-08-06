@@ -26,13 +26,14 @@ import {replaceProjectIdToken} from '@google-cloud/projectify';
 
 import {referencePkg} from './reference';
 import {documentPkg} from './document';
-import {fieldValuePkg} from './field-value';
+import {FieldValue} from './field-value';
 import {validatePkg} from './validate';
 import {writeBatchPkg} from './write-batch';
 import {transactionPkg} from './transaction';
 import {Timestamp} from './timestamp';
 import {FieldPath, ResourcePath} from './path';
 import {ClientPool} from './pool';
+import {Serializer} from './serializer';
 import {logger, setLibVersion, setLogFunction} from './logger';
 
 import * as convert from './convert';
@@ -76,11 +77,6 @@ let DocumentSnapshot;
  * @see GeoPoint
  */
 let GeoPoint;
-
-/*!
- * @see FieldValue
- */
-let FieldValue;
 
 /*! Injected. */
 let validate;
@@ -266,6 +262,13 @@ class Firestore {
      */
     this._initalizationSettings = null;
 
+    /**
+     * The serializer to use for the Protobuf transformation.
+     * @private
+     * @type {Serializer}
+     */
+    this._serializer = null;
+
     this.validateAndApplySettings(settings);
 
     // GCF currently tears down idle connections after two minutes. Requests
@@ -335,6 +338,7 @@ class Firestore {
     }
 
     this._initalizationSettings = settings;
+    this._serializer = new Serializer(this, this._timestampsInSnapshotsEnabled);
   }
 
   /**
@@ -1220,7 +1224,6 @@ validate = validatePkg({
 const batch = writeBatchPkg(Firestore, DocumentReference);
 WriteBatch = batch.WriteBatch;
 Transaction = transactionPkg(Firestore);
-FieldValue = fieldValuePkg(DocumentSnapshot).FieldValue;
 
 /**
  * The default export of the `@google-cloud/firestore` package is the
@@ -1379,7 +1382,6 @@ module.exports.Query = reference.Query;
  *
  * @name Firestore.FieldValue
  * @see FieldValue
- * @type FieldValue
  */
 module.exports.FieldValue = FieldValue;
 
