@@ -16,8 +16,7 @@
 
 'use strict';
 
-import assert from 'assert';
-import is from 'is';
+import * as is from 'is';
 
 import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
@@ -159,10 +158,6 @@ function compareBlobs(left: Uint8Array, right: Uint8Array): number {
  * @private
  */
 function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
-  assert(
-      typeof left.referenceValue === 'string' &&
-          typeof right.referenceValue === 'string',
-      'Expect reference values to be defined');
   const leftPath = ResourcePath.fromSlashSeparatedString(left.referenceValue!);
   const rightPath =
       ResourcePath.fromSlashSeparatedString(right.referenceValue!);
