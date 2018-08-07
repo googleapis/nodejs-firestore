@@ -21,7 +21,14 @@
  * unknown. Unlike "any" this doesn't lose all type-safety, since the consuming
  * code must still cast to a particular type before using it.
  */
+import {google} from '../protos/firestore_proto_api';
+
 export type AnyJs = null|undefined|boolean|number|string|object;
 
 // tslint:disable-next-line:no-any
 export type AnyDuringMigration = any;
+
+// A map in the format of the Proto API
+export type ApiMapValue = {
+  [k: string]: google.firestore.v1beta1.IValue
+};

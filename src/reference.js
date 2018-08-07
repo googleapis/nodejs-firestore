@@ -20,9 +20,9 @@ import bun from 'bun';
 import deepEqual from 'deep-equal';
 import extend from 'extend';
 import is from 'is';
-import order from './order';
 import through2 from 'through2';
 
+import {compare} from './order';
 import {logger} from './logger';
 import {documentPkg} from './document';
 import {watchPkg} from './watch';
@@ -1924,7 +1924,7 @@ class Query {
                 'don\'t exist. Please include the fields you are ordering on ' +
                 'in your select() call.');
           }
-          comp = order.compare(v1, v2);
+          comp = compare(v1, v2);
         }
 
         if (comp !== 0) {
