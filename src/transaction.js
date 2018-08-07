@@ -20,9 +20,7 @@ import is from 'is';
 
 import {referencePkg} from './reference';
 import {validatePkg} from './validate';
-
-/*! Injected. */
-let validate;
+import {requestTag} from './util';
 
 /*!
  * Injected.
@@ -77,11 +75,11 @@ class Transaction {
    */
   constructor(firestore, previousTransaction) {
     this._firestore = firestore;
+    this._validator = firestore._validator;
     this._previousTransaction = previousTransaction;
     this._writeBatch = firestore.batch();
-
-    this._requestTag = previousTransaction ? previousTransaction.requestTag :
-                                             Firestore.requestTag();
+    this._requestTag =
+        previousTransaction ? previousTransaction.requestTag : requestTag();
   }
 
   /**
@@ -156,7 +154,7 @@ class Transaction {
                                          Array.prototype.slice.call(arguments);
 
     for (let i = 0; i < documents.length; ++i) {
-      validate.isDocumentReference(i, documents[i]);
+      this._validator.isDocumentReference(i, documents[i]);
     }
 
     return this._firestore.getAll_(
@@ -260,7 +258,7 @@ class Transaction {
    * });
    */
   update(documentRef, dataOrField, preconditionOrValues) {
-    validate.minNumberOfArguments('update', arguments, 2);
+    this._validator.minNumberOfArguments('update', arguments, 2);
 
     preconditionOrValues = Array.prototype.slice.call(arguments, 2);
     this._writeBatch.update.apply(
@@ -364,8 +362,5 @@ export function transactionPkg(FirestoreType) {
   DocumentReference = reference.DocumentReference;
   Query = reference.Query;
   Firestore = FirestoreType;
-  validate = validatePkg({
-    DocumentReference: reference.validateDocumentReference,
-  });
   return Transaction;
 }

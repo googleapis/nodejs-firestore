@@ -19,10 +19,10 @@
 import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
-import {validatePkg} from './validate';
+import {createValidator} from './validate';
 import {Serializable} from './serializer';
 
-const validate = validatePkg({});
+const validate = createValidator();
 
 /**
  * An immutable object representing a geographic location in Firestore. The

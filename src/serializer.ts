@@ -24,13 +24,11 @@ import api = google.firestore.v1beta1;
 import {Timestamp} from './timestamp';
 import {FieldTransform} from './field-value';
 
-import {validatePkg} from './validate';
+import {customObjectError} from './validate';
 import {ResourcePath} from './path';
 import {detectValueType} from './convert';
 import {AnyDuringMigration, AnyJs} from './types';
 import {GeoPoint} from './geo-point';
-
-const validate = validatePkg({});
 
 /** An interface for Firestore types that can be serialized to Protobuf. */
 export interface Serializable {
@@ -179,7 +177,7 @@ export class Serializer {
       return map;
     }
 
-    throw validate.customObjectError(val);
+    throw customObjectError(val);
   }
 
   /**

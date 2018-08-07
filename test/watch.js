@@ -22,15 +22,9 @@ import is from 'is';
 import through2 from 'through2';
 
 import {Firestore} from '../src/index';
-import {referencePkg} from '../src/reference';
-import {documentPkg} from '../src/document';
+import {DocumentSnapshot} from '../src/document';
 import {setTimeoutHandler} from '../src/backoff';
 import {createInstance} from '../test/util/helpers';
-
-const reference = referencePkg(Firestore);
-const DocumentReference = reference.DocumentReference;
-const document = documentPkg(DocumentReference);
-const DocumentSnapshot = document.DocumentSnapshot;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
