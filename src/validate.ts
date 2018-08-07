@@ -129,7 +129,7 @@ export class Validator {
    * @throws if the expectation is not met.
    * @returns {boolean} 'true' when the minimum number of elements is available.
    */
-  minNumberOfArguments(funcName, args, minSize) {
+  minNumberOfArguments(funcName, args, minSize): boolean {
     if (args.length < minSize) {
       throw new Error(
           `Function '${funcName}()' requires at least ` +
@@ -149,7 +149,7 @@ export class Validator {
    * @returns {boolean} 'true' when only the maximum number of elements is
    * specified.
    */
-  maxNumberOfArguments(funcName, args, maxSize) {
+  maxNumberOfArguments(funcName, args, maxSize): boolean {
     if (args.length > maxSize) {
       throw new Error(
           `Function '${funcName}()' accepts at most ` +
@@ -160,7 +160,7 @@ export class Validator {
   }
 }
 
-export function customObjectError(val) {
+export function customObjectError(val): Error {
   if (is.object(val) && val.constructor.name !== 'Object') {
     const typeName = val.constructor.name;
     switch (typeName) {
