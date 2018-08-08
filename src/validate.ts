@@ -16,7 +16,7 @@
 
 'use strict';
 
-import is from 'is';
+import * as is from 'is';
 import {AnyDuringMigration} from './types';
 
 /**
