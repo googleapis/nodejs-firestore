@@ -21,8 +21,7 @@ import is from 'is';
 import pkgUp from 'pkg-up';
 
 import Firestore from '../src';
-
-const DocumentSnapshot = Firestore.DocumentSnapshot;
+import {autoId} from '../src/util';
 
 let version = require(pkgUp.sync(__dirname)).version;
 
@@ -31,7 +30,7 @@ if (process.env.NODE_ENV === 'DEBUG') {
 }
 
 function getTestRoot(firestore) {
-  return firestore.collection(`node_${version}_${Firestore.autoId(firestore)}`);
+  return firestore.collection(`node_${version}_${autoId(firestore)}`);
 }
 
 describe('Firestore class', function() {

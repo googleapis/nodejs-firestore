@@ -24,6 +24,7 @@ import {logger} from './logger';
 import {ExponentialBackoff} from './backoff';
 import {Timestamp} from './timestamp';
 import {ResourcePath} from './path';
+import {requestTag} from './util';
 
 /*!
  * Injected.
@@ -247,7 +248,7 @@ class Watch {
     this._targets = target;
     this._comparator = comparator;
     this._backoff = new ExponentialBackoff();
-    this._requestTag = Firestore.requestTag();
+    this._requestTag = requestTag();
   }
 
   /**

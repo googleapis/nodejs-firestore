@@ -18,9 +18,9 @@
 
 import is from 'is';
 
-import {validatePkg} from './validate';
+import {createValidator} from './validate';
 
-const validate = validatePkg();
+const validate = createValidator();
 
 /*!
  * @module firestore/convert

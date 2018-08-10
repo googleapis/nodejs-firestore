@@ -27,18 +27,13 @@ import duplexify from 'duplexify';
 import {google} from '../protos/firestore_proto_api';
 import {Firestore} from '../src/index';
 import {ResourcePath} from '../src/path';
-import {documentPkg} from '../src/document';
-import {referencePkg} from '../src/reference';
+import {DocumentSnapshot} from '../src/document';
 import * as convert from '../src/convert';
 
 import {createInstance as createInstanceHelper} from '../test/util/helpers';
 
 const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
                          .ServerValue.REQUEST_TIME;
-
-const reference = referencePkg(Firestore);
-const document = documentPkg(reference.DocumentReference);
-const DocumentSnapshot = document.DocumentSnapshot;
 
 const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;

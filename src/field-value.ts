@@ -19,13 +19,13 @@
 import deepEqual from 'deep-equal';
 
 import {AnyJs} from './types';
-import {validatePkg} from './validate';
+import {createValidator} from './validate';
 import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 import {Serializer} from './serializer';
 import {FieldPath} from './path';
 
-const validate = validatePkg({});
+const validate = createValidator();
 
 /**
  * Sentinel values that can be used when writing documents with set(), create()

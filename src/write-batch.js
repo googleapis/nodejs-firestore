@@ -20,52 +20,10 @@ import assert from 'assert';
 import is from 'is';
 
 import {logger} from './logger';
-import {documentPkg} from './document';
-import {validatePkg} from './validate';
+import {DocumentSnapshot, DocumentMask, DocumentTransform, Precondition} from './document';
 import {FieldPath} from './path';
 import {Timestamp} from './timestamp';
-
-/*!
- * Injected.
- *
- * @see DocumentSnapshot
- */
-let DocumentSnapshot;
-
-/*!
- * Injected.
- *
- * @see DocumentMask
- */
-let DocumentMask;
-
-/*!
- * Injected.
- *
- * @see DocumentTransform
- */
-let DocumentTransform;
-
-/*!
- * @see FieldPath
- */
-
-/*!
- * Injected.
- *
- * @see Firestore
- */
-let Firestore;
-
-/*!
- * Injected.
- *
- * @see Precondition
- */
-let Precondition;
-
-/*! Injected. */
-let validate;
+import {requestTag} from './util';
 
 /*!
  * Google Cloud Functions terminates idle connections after two minutes. After
@@ -82,7 +40,7 @@ const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
  *
  * @class
  */
-class WriteResult {
+export class WriteResult {
   /**
    * @private
    * @hideconstructor
@@ -132,7 +90,7 @@ class WriteResult {
  *
  * @class
  */
-class WriteBatch {
+export class WriteBatch {
   /**
    * @private
    * @hideconstructor
@@ -141,6 +99,7 @@ class WriteBatch {
    */
   constructor(firestore) {
     this._firestore = firestore;
+    this._validator = firestore._validator;
     this._serializer = firestore._serializer;
     this._writes = [];
     this._committed = false;
@@ -188,8 +147,8 @@ class WriteBatch {
    * });
    */
   create(documentRef, data) {
-    validate.isDocumentReference('documentRef', documentRef);
-    validate.isDocument('data', data, {
+    this._validator.isDocumentReference('documentRef', documentRef);
+    this._validator.isDocument('data', data, {
       allowEmpty: true,
       allowDeletes: 'none',
       allowTransforms: true,
@@ -234,8 +193,8 @@ class WriteBatch {
    * });
    */
   delete(documentRef, precondition) {
-    validate.isDocumentReference('documentRef', documentRef);
-    validate.isOptionalDeletePrecondition('precondition', precondition);
+    this._validator.isDocumentReference('documentRef', documentRef);
+    this._validator.isOptionalDeletePrecondition('precondition', precondition);
 
     this.verifyNotCommitted();
 
@@ -282,12 +241,12 @@ class WriteBatch {
    * });
    */
   set(documentRef, data, options) {
-    validate.isOptionalSetOptions('options', options);
+    this._validator.isOptionalSetOptions('options', options);
     const mergeLeaves = options && options.merge === true;
     const mergePaths = options && options.mergeFields;
 
-    validate.isDocumentReference('documentRef', documentRef);
-    validate.isDocument('data', data, {
+    this._validator.isDocumentReference('documentRef', documentRef);
+    this._validator.isDocument('data', data, {
       allowEmpty: true,
       allowDeletes: mergePaths || mergeLeaves ? 'all' : 'none',
       allowTransforms: true,
@@ -367,8 +326,8 @@ class WriteBatch {
    * });
    */
   update(documentRef, dataOrField, preconditionOrValues) {
-    validate.minNumberOfArguments('update', arguments, 2);
-    validate.isDocumentReference('documentRef', documentRef);
+    this._validator.minNumberOfArguments('update', arguments, 2);
+    this._validator.isDocumentReference('documentRef', documentRef);
 
     this.verifyNotCommitted();
 
@@ -386,12 +345,12 @@ class WriteBatch {
       try {
         for (let i = 1; i < arguments.length; i += 2) {
           if (i === arguments.length - 1) {
-            validate.isUpdatePrecondition(i, arguments[i]);
+            this._validator.isUpdatePrecondition(i, arguments[i]);
             precondition = new Precondition(arguments[i]);
           } else {
-            validate.isFieldPath(i, arguments[i]);
-            validate.minNumberOfArguments('update', arguments, i + 1);
-            validate.isFieldValue(i, arguments[i + 1], {
+            this._validator.isFieldPath(i, arguments[i]);
+            this._validator.minNumberOfArguments('update', arguments, i + 1);
+            this._validator.isFieldValue(i, arguments[i + 1], {
               allowDeletes: 'root',
               allowTransforms: true,
             });
@@ -407,20 +366,20 @@ class WriteBatch {
       }
     } else {
       try {
-        validate.isDocument('dataOrField', dataOrField, {
+        this._validator.isDocument('dataOrField', dataOrField, {
           allowEmpty: false,
           allowDeletes: 'root',
           allowTransforms: true,
         });
-        validate.maxNumberOfArguments('update', arguments, 3);
+        this._validator.maxNumberOfArguments('update', arguments, 3);
 
         Object.keys(dataOrField).forEach(key => {
-          validate.isFieldPath(key, key);
+          this._validator.isFieldPath(key, key);
           updateMap.set(FieldPath.fromArgument(key), dataOrField[key]);
         });
 
         if (is.defined(preconditionOrValues)) {
-          validate.isUpdatePrecondition(
+          this._validator.isUpdatePrecondition(
               'preconditionOrValues', preconditionOrValues);
           precondition = new Precondition(preconditionOrValues);
         }
@@ -433,7 +392,7 @@ class WriteBatch {
       }
     }
 
-    validate.isUpdateMap('dataOrField', updateMap);
+    this._validator.isUpdateMap('dataOrField', updateMap);
 
     let document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
     let documentMask = DocumentMask.fromUpdateMap(updateMap);
@@ -494,8 +453,7 @@ class WriteBatch {
 
     let explicitTransaction = commitOptions && commitOptions.transactionId;
 
-    let requestTag =
-        (commitOptions && commitOptions.requestTag) || Firestore.requestTag();
+    let tag = (commitOptions && commitOptions.requestTag) || requestTag();
     let request = {
       database: this._firestore.formattedName,
     };
@@ -503,9 +461,8 @@ class WriteBatch {
     // On GCF, we periodically force transactional commits to allow for
     // request retries in case GCF closes our backend connection.
     if (!explicitTransaction && this._shouldCreateTransaction()) {
-      logger('WriteBatch.commit', requestTag, 'Using transaction for commit');
-      return this._firestore
-          .request('beginTransaction', request, requestTag, true)
+      logger('WriteBatch.commit', tag, 'Using transaction for commit');
+      return this._firestore.request('beginTransaction', request, tag, true)
           .then(resp => {
             return this.commit_({transactionId: resp.transaction});
           });
@@ -532,8 +489,7 @@ class WriteBatch {
     }
 
     logger(
-        'WriteBatch.commit', requestTag, 'Sending %d writes',
-        request.writes.length);
+        'WriteBatch.commit', tag, 'Sending %d writes', request.writes.length);
 
     if (explicitTransaction) {
       request.transaction = explicitTransaction;
@@ -541,7 +497,7 @@ class WriteBatch {
 
     this._committed = true;
 
-    return this._firestore.request('commit', request, requestTag).then(resp => {
+    return this._firestore.request('commit', request, tag).then(resp => {
       const writeResults = [];
 
       if (request.writes.length > 0) {
@@ -609,7 +565,7 @@ class WriteBatch {
  * @param {Map.<FieldPath, *>} data - An update map with field/value pairs.
  * @returns {boolean} 'true' if the input is a valid update map.
  */
-function validateUpdateMap(data) {
+export function validateUpdateMap(data) {
   const fields = [];
   data.forEach((value, key) => {
     fields.push(key);
@@ -624,30 +580,4 @@ function validateUpdateMap(data) {
   }
 
   return true;
-}
-
-export function writeBatchPkg(
-    FirestoreType, DocumentReferenceType, validateDocumentReference) {
-  let document = documentPkg(DocumentReferenceType);
-  Firestore = FirestoreType;
-  DocumentMask = document.DocumentMask;
-  DocumentSnapshot = document.DocumentSnapshot;
-  DocumentTransform = document.DocumentTransform;
-  Precondition = document.Precondition;
-  validate = validatePkg({
-    Document: document.validateDocumentData,
-    DocumentReference: validateDocumentReference,
-    FieldValue: document.validateFieldValue,
-    FieldPath: FieldPath.validateFieldPath,
-    UpdatePrecondition: precondition =>
-        document.validatePrecondition(precondition, /* allowExists= */ false),
-    DeletePrecondition: precondition =>
-        document.validatePrecondition(precondition, /* allowExists= */ true),
-    SetOptions: document.validateSetOptions,
-    UpdateMap: validateUpdateMap,
-  });
-  return {
-    WriteBatch,
-    WriteResult,
-  };
 }
