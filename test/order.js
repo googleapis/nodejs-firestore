@@ -20,21 +20,18 @@ import assert from 'power-assert';
 
 import {Firestore} from '../src/index';
 import {referencePkg} from '../src/reference';
-import {documentPkg} from '../src/document';
+import {DocumentSnapshot} from '../src/document';
 import {createInstance} from '../test/util/helpers';
 import {ResourcePath} from '../src/path';
+import {GeoPoint} from '../src/geo-point';
 import * as order from '../src/order'
 
 const reference = referencePkg(Firestore);
 const DocumentReference = reference.DocumentReference;
-const document = documentPkg(DocumentReference);
-const DocumentSnapshot = document.DocumentSnapshot;
-const GeoPoint = document.GeoPoint;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-const PROJECT_ID = 'test-project';
 
 describe('Order', function() {
   let firestore;

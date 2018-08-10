@@ -20,9 +20,9 @@ import is from 'is';
 import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
-import {validatePkg} from './validate';
+import {createValidator, customObjectError} from './validate';
 
-const validate = validatePkg({});
+const validate = createValidator();
 
 /*!
  * A regular expression to verify an absolute Resource Path in Firestore. It
@@ -485,7 +485,7 @@ export class FieldPath extends Path<FieldPath> {
   static validateFieldPath(fieldPath: string|FieldPath) {
     if (!(fieldPath instanceof FieldPath)) {
       if (!is.string(fieldPath)) {
-        throw validate.customObjectError(fieldPath);
+        throw customObjectError(fieldPath);
       }
 
       if (fieldPath.indexOf('..') >= 0) {

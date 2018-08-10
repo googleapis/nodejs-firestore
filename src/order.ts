@@ -23,10 +23,8 @@ import api = google.firestore.v1beta1;
 
 import {detectValueType} from './convert';
 import {ResourcePath} from './path';
-import {validatePkg} from './validate';
+import {customObjectError} from './validate';
 import {ApiMapValue} from './types';
-
-const validate = validatePkg({});
 
 /*!
  * The type order as defined by the backend.
@@ -74,7 +72,7 @@ function typeOrder(val: api.IValue): TypeOrder {
     case 'mapValue':
       return TypeOrder.OBJECT;
     default:
-      throw validate.customObjectError(val);
+      throw customObjectError(val);
   }
 }
 

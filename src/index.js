@@ -25,16 +25,18 @@ import through2 from 'through2';
 import {replaceProjectIdToken} from '@google-cloud/projectify';
 
 import {referencePkg} from './reference';
-import {documentPkg} from './document';
-import {FieldValue} from './field-value';
-import {validatePkg} from './validate';
-import {writeBatchPkg} from './write-batch';
+import {DocumentSnapshot, QueryDocumentSnapshot, validateDocumentData, validateFieldValue, validatePrecondition, validateSetOptions} from './document';
+import {FieldTransform, FieldValue, DeleteTransform} from './field-value';
+import {Validator, customObjectError} from './validate';
+import {WriteBatch, WriteResult, validateUpdateMap} from './write-batch';
 import {transactionPkg} from './transaction';
 import {Timestamp} from './timestamp';
 import {FieldPath, ResourcePath} from './path';
 import {ClientPool} from './pool';
-import {Serializer} from './serializer';
+import {isPlainObject, Serializer} from './serializer';
+import {GeoPoint} from './geo-point';
 import {logger, setLibVersion, setLogFunction} from './logger';
+import {requestTag} from './util';
 
 import * as convert from './convert';
 
@@ -57,7 +59,6 @@ setLibVersion(libVersion);
  * @namespace google.firestore.v1beta1
  */
 
-
 /*!
  * @see CollectionReference
  */
@@ -69,24 +70,6 @@ let CollectionReference;
 let DocumentReference;
 
 /*!
- * @see DocumentSnapshot
- */
-let DocumentSnapshot;
-
-/*!
- * @see GeoPoint
- */
-let GeoPoint;
-
-/*! Injected. */
-let validate;
-
-/*!
- * @see WriteBatch
- */
-let WriteBatch;
-
-/*!
  * @see Transaction
  */
 let Transaction;
@@ -95,6 +78,11 @@ let Transaction;
  * @see v1beta1
  */
 let v1beta1;  // Lazy-loaded in `_runRequest()`
+
+// Injected custom validation functions.
+let validateDocumentReference;
+let validateComparisonOperator;
+let validateFieldOrder;
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -124,6 +112,13 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * @type {number}
  */
 const GRPC_UNAVAILABLE = 14;
+
+/*!
+ * The maximum depth of a Firestore object.
+ *
+ * @type {number}
+ */
+const MAX_DEPTH = 20;
 
 /**
  * Document data (e.g. for use with
@@ -231,6 +226,22 @@ class Firestore {
       libVersion: libVersion,
     });
 
+    this._validator = new Validator({
+      DeletePrecondition: precondition =>
+          validatePrecondition(precondition, /* allowExists= */ true),
+      Document: validateDocumentData,
+      DocumentReference: validateDocumentReference,
+      FieldPath: FieldPath.validateFieldPath,
+      FieldValue: validateFieldValue,
+      FieldOrder: validateFieldOrder,
+      QueryComparison: validateComparisonOperator,
+      QueryValue: validateFieldValue,
+      ResourcePath: ResourcePath.validateResourcePath,
+      SetOptions: validateSetOptions,
+      UpdateMap: validateUpdateMap,
+      UpdatePrecondition: precondition =>
+          validatePrecondition(precondition, /* allowExists= */ false),
+    });
     /**
      * A client pool to distribute requests over multiple GAPIC clients in order
      * to work around a connection limit of 100 concurrent requests per client.
@@ -299,9 +310,9 @@ class Firestore {
    * @param {object} settings The settings to use for all Firestore operations.
    */
   settings(settings) {
-    validate.isObject('settings', settings);
-    validate.isOptionalString('settings.projectId', settings.projectId);
-    validate.isOptionalBoolean(
+    this._validator.isObject('settings', settings);
+    this._validator.isOptionalString('settings.projectId', settings.projectId);
+    this._validator.isOptionalBoolean(
         'settings.timestampsInSnapshots', settings.timestampsInSnapshots);
 
     if (this._clientInitialized) {
@@ -324,12 +335,12 @@ class Firestore {
   }
 
   validateAndApplySettings(settings) {
-    validate.isOptionalBoolean(
+    this._validator.isOptionalBoolean(
         'settings.timestampsInSnapshots', settings.timestampsInSnapshots);
     this._timestampsInSnapshotsEnabled = !!settings.timestampsInSnapshots;
 
     if (settings && settings.projectId) {
-      validate.isString('settings.projectId', settings.projectId);
+      this._validator.isString('settings.projectId', settings.projectId);
       this._referencePath = new ResourcePath(settings.projectId, '(default)');
     } else {
       // Initialize a temporary reference path that will be overwritten during
@@ -364,7 +375,7 @@ class Firestore {
    * console.log(`Path of document is ${documentRef.path}`);
    */
   doc(documentPath) {
-    validate.isResourcePath('documentPath', documentPath);
+    this._validator.isResourcePath('documentPath', documentPath);
 
     let path = this._referencePath.append(documentPath);
     if (!path.isDocument) {
@@ -392,7 +403,7 @@ class Firestore {
    * });
    */
   collection(collectionPath) {
-    validate.isResourcePath('collectionPath', collectionPath);
+    this._validator.isResourcePath('collectionPath', collectionPath);
 
     let path = this._referencePath.append(collectionPath);
     if (!path.isCollection) {
@@ -532,7 +543,7 @@ class Firestore {
    * });
    */
   runTransaction(updateFunction, transactionOptions) {
-    validate.isFunction('updateFunction', updateFunction);
+    this._validator.isFunction('updateFunction', updateFunction);
 
     const defaultAttempts = 5;
 
@@ -540,8 +551,8 @@ class Firestore {
     let previousTransaction;
 
     if (is.defined(transactionOptions)) {
-      validate.isObject('transactionOptions', transactionOptions);
-      validate.isOptionalInteger(
+      this._validator.isObject('transactionOptions', transactionOptions);
+      this._validator.isOptionalInteger(
           'transactionOptions.maxAttempts', transactionOptions.maxAttempts, 1);
 
       attemptsRemaining = transactionOptions.maxAttempts || attemptsRemaining;
@@ -631,10 +642,10 @@ class Firestore {
                                          Array.prototype.slice.call(arguments);
 
     for (let i = 0; i < documents.length; ++i) {
-      validate.isDocumentReference(i, documents[i]);
+      this._validator.isDocumentReference(i, documents[i]);
     }
 
-    return this.getAll_(documents, Firestore.requestTag());
+    return this.getAll_(documents, requestTag());
   }
 
   /**
@@ -728,36 +739,6 @@ class Firestore {
             stream.resume();
           });
         });
-  }
-
-  /**
-   * Generate a unique client-side identifier.
-   *
-   * Used for the creation of new documents.
-   *
-   * @private
-   * @returns {string} A unique 20-character wide identifier.
-   */
-  static autoId() {
-    let chars =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let autoId = '';
-    for (let i = 0; i < 20; i++) {
-      autoId += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return autoId;
-  }
-
-  /**
-   * Generate a short and semi-random client-side identifier.
-   *
-   * Used for the creation of request tags.
-   *
-   * @private
-   * @returns {string} A random 5-character wide identifier.
-   */
-  static requestTag() {
-    return Firestore.autoId().substr(0, 5);
   }
 
   /**
@@ -857,6 +838,7 @@ follow these steps, YOUR APP MAY BREAK.`);
           }
         })});
   }
+
   /**
    * Decorate the request options of an API request. This is used to replace
    * any `{{projectId}}` placeholders with the value detected from the user's
@@ -1194,6 +1176,112 @@ follow these steps, YOUR APP MAY BREAK.`);
   }
 }
 
+
+/**
+ * Validates a JavaScript value for usage as a Firestore value.
+ *
+ * @private
+ * @param {Object} obj JavaScript value to validate.
+ * @param {string} options.allowDeletes At what level field deletes are
+ * supported (acceptable values are 'none', 'root' or 'all').
+ * @param {boolean} options.allowServerTimestamps Whether server timestamps
+ * are supported.
+ * @param {number=} depth The current depth of the traversal.
+ * @returns {boolean} 'true' when the object is valid.
+ * @throws {Error} when the object is invalid.
+ */
+function validateFieldValue(val, options, depth) {
+  assert(
+      ['none', 'root', 'all'].indexOf(options.allowDeletes) !== -1,
+      'Expected \'none\', \'root\', or \'all\' for \'options.allowDeletes\'');
+  assert(
+      typeof options.allowTransforms === 'boolean',
+      'Expected boolean for \'options.allowTransforms\'');
+
+  if (!depth) {
+    depth = 1;
+  } else if (depth > MAX_DEPTH) {
+    throw new Error(
+        `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`);
+  }
+
+  if (is.array(val)) {
+    for (let prop of val) {
+      validateFieldValue(val[prop], options, depth + 1);
+    }
+  } else if (isPlainObject(val)) {
+    for (let prop in val) {
+      if (val.hasOwnProperty(prop)) {
+        validateFieldValue(val[prop], options, depth + 1);
+      }
+    }
+  } else if (val instanceof DeleteTransform) {
+    if ((options.allowDeletes === 'root' && depth > 1) ||
+        options.allowDeletes === 'none') {
+      throw new Error(`${
+          val.methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}.`);
+    }
+  } else if (val instanceof FieldTransform) {
+    if (!options.allowTransforms) {
+      throw new Error(`${
+          val.methodName}() can only be used in set(), create() or update().`);
+    }
+  } else if (is.instanceof(val, DocumentReference)) {
+    return true;
+  } else if (is.instanceof(val, GeoPoint)) {
+    return true;
+  } else if (is.instanceof(val, Timestamp)) {
+    return true;
+  } else if (is.instanceof(val, FieldPath)) {
+    throw new Error(
+        'Cannot use object of type "FieldPath" as a Firestore value.');
+  } else if (is.object(val)) {
+    throw customObjectError(val);
+  }
+
+  return true;
+}
+
+/**
+ * Validates a JavaScript object for usage as a Firestore document.
+ *
+ * @private
+ * @param {Object} obj JavaScript object to validate.
+ * @param {string} options.allowDeletes At what level field deletes are
+ * supported (acceptable values are 'none', 'root' or 'all').
+ * @param {boolean} options.allowServerTimestamps Whether server timestamps
+ * are supported.
+ * @param {boolean} options.allowEmpty Whether empty documents are supported.
+ * @returns {boolean} 'true' when the object is valid.
+ * @throws {Error} when the object is invalid.
+ */
+function validateDocumentData(obj, options) {
+  assert(
+      typeof options.allowEmpty === 'boolean',
+      'Expected boolean for \'options.allowEmpty\'');
+
+  if (!isPlainObject(obj)) {
+    throw new Error('Input is not a plain JavaScript object.');
+  }
+
+  options = options || {};
+
+  let isEmpty = true;
+
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      isEmpty = false;
+      validateFieldValue(obj[prop], options, /* depth= */ 1);
+    }
+  }
+
+  if (options.allowEmpty === false && isEmpty) {
+    throw new Error('At least one field must be updated.');
+  }
+
+  return true;
+}
+
 /**
  * A logging function that takes a single string.
  *
@@ -1214,15 +1302,9 @@ Firestore.setLogFunction = setLogFunction;
 const reference = referencePkg(Firestore);
 CollectionReference = reference.CollectionReference;
 DocumentReference = reference.DocumentReference;
-const document = documentPkg(DocumentReference);
-DocumentSnapshot = document.DocumentSnapshot;
-GeoPoint = document.GeoPoint;
-validate = validatePkg({
-  DocumentReference: reference.validateDocumentReference,
-  ResourcePath: ResourcePath.validateResourcePath,
-});
-const batch = writeBatchPkg(Firestore, DocumentReference);
-WriteBatch = batch.WriteBatch;
+validateDocumentReference = reference.validateDocumentReference;
+validateComparisonOperator = reference.validateComparisonOperator;
+validateFieldOrder = reference.validateFieldOrder;
 Transaction = transactionPkg(Firestore);
 
 /**
@@ -1321,7 +1403,7 @@ module.exports.DocumentReference = DocumentReference;
  * @see WriteResult
  * @type WriteResult
  */
-module.exports.WriteResult = batch.WriteResult;
+module.exports.WriteResult = WriteResult;
 
 /**
  * {@link DocumentSnapshot} DocumentSnapshot.
@@ -1339,7 +1421,7 @@ module.exports.DocumentSnapshot = DocumentSnapshot;
  * @see QueryDocumentSnapshot
  * @type QueryDocumentSnapshot
  */
-module.exports.QueryDocumentSnapshot = document.QueryDocumentSnapshot;
+module.exports.QueryDocumentSnapshot = QueryDocumentSnapshot;
 
 /**
  * {@link CollectionReference} class.

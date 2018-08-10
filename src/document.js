@@ -21,29 +21,10 @@ import deepEqual from 'deep-equal';
 import is from 'is';
 
 import {FieldPath} from './path';
-import {FieldTransform, DeleteTransform} from './field-value';
+import {FieldTransform} from './field-value';
 import {Timestamp} from './timestamp';
-import {GeoPoint} from './geo-point';
 import {validatePkg} from './validate';
 import {isPlainObject} from './serializer';
-
-/*!
- * Injected.
- *
- * @see {DocumentReference}
- */
-let DocumentReference;
-
-/*! Injected. */
-let validate;
-
-/*!
- * The maximum depth of a Firestore object.
- *
- * @type {number}
- */
-const MAX_DEPTH = 20;
-
 
 /**
  * A DocumentSnapshot is an immutable representation for a document in a
@@ -59,7 +40,7 @@ const MAX_DEPTH = 20;
  *
  * @class
  */
-class DocumentSnapshot {
+export class DocumentSnapshot {
   /**
    * @private
    * @hideconstructor
@@ -79,6 +60,7 @@ class DocumentSnapshot {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
     this._serializer = ref.firestore._serializer;
+    this._validator = ref.firestore._validator;
     this._readTime = readTime;
     this._createTime = createTime;
     this._updateTime = updateTime;
@@ -352,7 +334,7 @@ class DocumentSnapshot {
    * });
    */
   get(field) {
-    validate.isFieldPath('field', field);
+    this._validator.isFieldPath('field', field);
 
     let protoField = this.protoField(field);
 
@@ -453,7 +435,7 @@ class DocumentSnapshot {
  * @class
  * @extends DocumentSnapshot
  */
-class QueryDocumentSnapshot extends DocumentSnapshot {
+export class QueryDocumentSnapshot extends DocumentSnapshot {
   /**
    * @private
    * @hideconstructor
@@ -623,7 +605,7 @@ DocumentSnapshot.Builder = DocumentSnapshotBuilder;
  * @class
  * @private
  */
-class DocumentMask {
+export class DocumentMask {
   /**
    * @private
    * @hideconstructor
@@ -874,7 +856,7 @@ class DocumentMask {
  * @private
  * @class
  */
-class DocumentTransform {
+export class DocumentTransform {
   /**
    * @private
    * @hideconstructor
@@ -1006,7 +988,7 @@ class DocumentTransform {
  * @private
  * @class
  */
-class Precondition {
+export class Precondition {
   /**
    * @private
    * @hideconstructor
@@ -1060,109 +1042,6 @@ class Precondition {
 }
 
 /*!
- * Validates a JavaScript object for usage as a Firestore document.
- *
- * @param {Object} obj JavaScript object to validate.
- *@param {string} options.allowDeletes At what level field deletes are
- * supported (acceptable values are 'none', 'root' or 'all').
- * @param {boolean} options.allowServerTimestamps Whether server timestamps
- * are supported.
- * @param {boolean} options.allowEmpty Whether empty documents are supported.
- * @returns {boolean} 'true' when the object is valid.
- * @throws {Error} when the object is invalid.
- */
-function validateDocumentData(obj, options) {
-  assert(
-      typeof options.allowEmpty === 'boolean',
-      'Expected boolean for \'options.allowEmpty\'');
-
-  if (!isPlainObject(obj)) {
-    throw new Error('Input is not a plain JavaScript object.');
-  }
-
-  options = options || {};
-
-  let isEmpty = true;
-
-  for (let prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      isEmpty = false;
-      validateFieldValue(obj[prop], options, /* depth= */ 1);
-    }
-  }
-
-  if (options.allowEmpty === false && isEmpty) {
-    throw new Error('At least one field must be updated.');
-  }
-
-  return true;
-}
-
-/*!
- * Validates a JavaScript value for usage as a Firestore value.
- *
- * @param {Object} obj JavaScript value to validate.
- * @param {string} options.allowDeletes At what level field deletes are
- * supported (acceptable values are 'none', 'root' or 'all').
- * @param {boolean} options.allowServerTimestamps Whether server timestamps
- * are supported.
- * @param {number=} depth The current depth of the traversal.
- * @returns {boolean} 'true' when the object is valid.
- * @throws {Error} when the object is invalid.
- */
-function validateFieldValue(val, options, depth) {
-  assert(
-      ['none', 'root', 'all'].indexOf(options.allowDeletes) !== -1,
-      'Expected \'none\', \'root\', or \'all\' for \'options.allowDeletes\'');
-  assert(
-      typeof options.allowTransforms === 'boolean',
-      'Expected boolean for \'options.allowTransforms\'');
-
-  if (!depth) {
-    depth = 1;
-  } else if (depth > MAX_DEPTH) {
-    throw new Error(
-        `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`);
-  }
-
-  if (is.array(val)) {
-    for (let prop of val) {
-      validateFieldValue(val[prop], options, depth + 1);
-    }
-  } else if (isPlainObject(val)) {
-    for (let prop in val) {
-      if (val.hasOwnProperty(prop)) {
-        validateFieldValue(val[prop], options, depth + 1);
-      }
-    }
-  } else if (val instanceof DeleteTransform) {
-    if ((options.allowDeletes === 'root' && depth > 1) ||
-        options.allowDeletes === 'none') {
-      throw new Error(`${
-          val.methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}.`);
-    }
-  } else if (val instanceof FieldTransform) {
-    if (!options.allowTransforms) {
-      throw new Error(`${
-          val.methodName}() can only be used in set(), create() or update().`);
-    }
-  } else if (is.instanceof(val, DocumentReference)) {
-    return true;
-  } else if (is.instanceof(val, GeoPoint)) {
-    return true;
-  } else if (is.instanceof(val, Timestamp)) {
-    return true;
-  } else if (is.instanceof(val, FieldPath)) {
-    throw new Error(
-        'Cannot use object of type "FieldPath" as a Firestore value.');
-  } else if (is.object(val)) {
-    throw validate.customObjectError(val);
-  }
-
-  return true;
-}
-
-/*!
  * Validates the use of 'options' as a Precondition and enforces that 'exists'
  * and 'lastUpdateTime' use valid types.
  *
@@ -1173,7 +1052,7 @@ function validateFieldValue(val, options, depth) {
  * @param {boolean} allowExist Whether to allow the 'exists' preconditions.
  * @returns {boolean} 'true' if the input is a valid Precondition.
  */
-function validatePrecondition(precondition, allowExist) {
+export function validatePrecondition(precondition, allowExist) {
   if (!is.object(precondition)) {
     throw new Error('Input is not an object.');
   }
@@ -1214,7 +1093,7 @@ function validatePrecondition(precondition, allowExist) {
  * specified set of fields.
  * @returns {boolean} 'true' if the input is a valid SetOptions object.
  */
-function validateSetOptions(options) {
+export function validateSetOptions(options) {
   if (!is.object(options)) {
     throw new Error('Input is not an object.');
   }
@@ -1229,7 +1108,12 @@ function validateSetOptions(options) {
     }
 
     for (let i = 0; i < options.mergeFields.length; ++i) {
-      validate.isFieldPath(i, options.mergeFields[i]);
+      try {
+        FieldPath.validateFieldPath(options.mergeFields[i]);
+      } catch (err) {
+        throw new Error(
+            `Argument at index ${i} is not a valid FieldPath. ${err.message}`);
+      }
     }
   }
 
@@ -1238,24 +1122,4 @@ function validateSetOptions(options) {
   }
 
   return true;
-}
-
-export function documentPkg(DocumentRefType) {
-  DocumentReference = DocumentRefType;
-  validate = validatePkg({
-    FieldPath: FieldPath.validateFieldPath,
-    PlainObject: isPlainObject,
-  });
-  return {
-    DocumentMask,
-    DocumentSnapshot,
-    DocumentTransform,
-    Precondition,
-    GeoPoint,
-    QueryDocumentSnapshot,
-    validateFieldValue,
-    validateDocumentData,
-    validatePrecondition,
-    validateSetOptions,
-  };
 }

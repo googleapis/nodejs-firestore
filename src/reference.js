@@ -24,31 +24,13 @@ import through2 from 'through2';
 
 import {compare} from './order';
 import {logger} from './logger';
-import {documentPkg} from './document';
+import {DocumentSnapshot} from './document';
 import {watchPkg} from './watch';
-import {writeBatchPkg} from './write-batch';
-import {validatePkg} from './validate';
+import {WriteBatch} from './write-batch';
 import {Timestamp} from './timestamp';
 import {FieldPath, ResourcePath} from './path';
-
-/*!
- * Injected.
- *
- * @see Firestore
- */
-let Firestore;
-
-/*!
- * Injected.
- *
- * @see DocumentSnapshot
- */
-let DocumentSnapshot;
-
-/*!
- * Injected.
- */
-let validate;
+import {autoId, requestTag} from './util';
+import {customObjectError} from './validate';
 
 /*!
  * Injected.
@@ -56,13 +38,6 @@ let validate;
  * @see Watch
  */
 let Watch;
-
-/*!
- * Injected.
- *
- * @see WriteBatch
- */
-let WriteBatch;
 
 /*!
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -134,6 +109,7 @@ class DocumentReference {
    */
   constructor(firestore, path) {
     this._firestore = firestore;
+    this._validator = firestore._validator;
     this._referencePath = path;
   }
 
@@ -274,7 +250,7 @@ class DocumentReference {
    * console.log(`Path to subcollection: ${subcollection.path}`);
    */
   collection(collectionPath) {
-    validate.isResourcePath('collectionPath', collectionPath);
+    this._validator.isResourcePath('collectionPath', collectionPath);
 
     let path = this._referencePath.append(collectionPath);
     if (!path.isCollection) {
@@ -305,8 +281,7 @@ class DocumentReference {
       parent: this._referencePath.formattedName,
     };
 
-    return this._firestore
-        .request('listCollectionIds', request, Firestore.requestTag())
+    return this._firestore.request('listCollectionIds', request, requestTag())
         .then(collectionIds => {
           let collections = [];
 
@@ -437,7 +412,7 @@ class DocumentReference {
    * });
    */
   update(dataOrField, preconditionOrValues) {
-    validate.minNumberOfArguments('update', arguments, 1);
+    this._validator.minNumberOfArguments('update', arguments, 1);
 
     let writeBatch = new WriteBatch(this._firestore);
     preconditionOrValues = Array.prototype.slice.call(arguments, 1);
@@ -476,8 +451,8 @@ class DocumentReference {
    * unsubscribe();
    */
   onSnapshot(onNext, onError) {
-    validate.isFunction('onNext', onNext);
-    validate.isOptionalFunction('onError', onError);
+    this._validator.isFunction('onNext', onNext);
+    this._validator.isOptionalFunction('onError', onError);
 
     if (!is.defined(onError)) {
       onError = console.error;
@@ -857,6 +832,7 @@ class QuerySnapshot {
    */
   constructor(query, readTime, size, docs, changes) {
     this._query = query;
+    this._validator = query.firestore._validator;
     this._readTime = readTime;
     this._size = size;
     this._docs = docs;
@@ -1004,7 +980,7 @@ class QuerySnapshot {
    * });
    */
   forEach(callback, thisArg) {
-    validate.isFunction('callback', callback);
+    this._validator.isFunction('callback', callback);
 
     for (let doc of this.docs) {
       callback.call(thisArg, doc);
@@ -1075,6 +1051,7 @@ class Query {
   constructor(firestore, path, fieldFilters, fieldOrders, queryOptions) {
     this._firestore = firestore;
     this._serializer = firestore._serializer;
+    this._validator = firestore._validator;
     this._referencePath = path;
     this._fieldFilters = fieldFilters || [];
     this._fieldOrders = fieldOrders || [];
@@ -1188,9 +1165,9 @@ class Query {
    * });
    */
   where(fieldPath, opStr, value) {
-    validate.isFieldPath('fieldPath', fieldPath);
-    validate.isQueryComparison('opStr', opStr, value);
-    validate.isQueryValue('value', value, {
+    this._validator.isFieldPath('fieldPath', fieldPath);
+    this._validator.isQueryComparison('opStr', opStr, value);
+    this._validator.isQueryValue('value', value, {
       allowDeletes: 'none',
       allowTransforms: false,
     });
@@ -1247,7 +1224,7 @@ class Query {
       result.push({fieldPath: FieldPath._DOCUMENT_ID.formattedName});
     } else {
       for (let i = 0; i < fieldPaths.length; ++i) {
-        validate.isFieldPath(i, fieldPaths[i]);
+        this._validator.isFieldPath(i, fieldPaths[i]);
         result.push({
           fieldPath: FieldPath.fromArgument(fieldPaths[i]).formattedName,
         });
@@ -1285,8 +1262,8 @@ class Query {
    * });
    */
   orderBy(fieldPath, directionStr) {
-    validate.isFieldPath('fieldPath', fieldPath);
-    validate.isOptionalFieldOrder('directionStr', directionStr);
+    this._validator.isFieldPath('fieldPath', fieldPath);
+    this._validator.isOptionalFieldOrder('directionStr', directionStr);
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
@@ -1322,7 +1299,7 @@ class Query {
    * });
    */
   limit(limit) {
-    validate.isInteger('limit', limit);
+    this._validator.isInteger('limit', limit);
 
     let options = extend(true, {}, this._queryOptions);
     options.limit = limit;
@@ -1351,7 +1328,7 @@ class Query {
    * });
    */
   offset(offset) {
-    validate.isInteger('offset', offset);
+    this._validator.isInteger('offset', offset);
 
     let options = extend(true, {}, this._queryOptions);
     options.offset = offset;
@@ -1468,7 +1445,7 @@ class Query {
         fieldValue = this._convertReference(fieldValue);
       }
 
-      validate.isQueryValue(i, fieldValue, {
+      this._validator.isQueryValue(i, fieldValue, {
         allowDeletes: 'none',
         allowTransforms: false,
       });
@@ -1826,7 +1803,7 @@ class Query {
    */
   _stream(queryOptions) {
     const request = this.toProto(queryOptions);
-    const requestTag = Firestore.requestTag();
+    const tag = requestTag();
     const self = this;
 
     const stream = through2.obj(function(proto, enc, callback) {
@@ -1840,12 +1817,11 @@ class Query {
       callback();
     });
 
-    this._firestore.readStream('runQuery', request, requestTag, true)
+    this._firestore.readStream('runQuery', request, tag, true)
         .then(backendStream => {
           backendStream.on('error', err => {
             logger(
-                'Query._stream', requestTag,
-                'Query failed with stream error:', err);
+                'Query._stream', tag, 'Query failed with stream error:', err);
             stream.destroy(err);
           });
           backendStream.resume();
@@ -1882,8 +1858,8 @@ class Query {
    * unsubscribe();
    */
   onSnapshot(onNext, onError) {
-    validate.isFunction('onNext', onNext);
-    validate.isOptionalFunction('onError', onError);
+    this._validator.isFunction('onNext', onNext);
+    this._validator.isOptionalFunction('onError', onError);
 
     if (!is.defined(onError)) {
       onError = console.error;
@@ -2026,9 +2002,9 @@ class CollectionReference extends Query {
    */
   doc(documentPath) {
     if (arguments.length === 0) {
-      documentPath = Firestore.autoId();
+      documentPath = autoId();
     } else {
-      validate.isResourcePath('documentPath', documentPath);
+      this._validator.isResourcePath('documentPath', documentPath);
     }
 
     let path = this._referencePath.append(documentPath);
@@ -2057,7 +2033,7 @@ class CollectionReference extends Query {
    * });
    */
   add(data) {
-    validate.isDocument('data', data, {
+    this._validator.isDocument('data', data, {
       allowEmpty: true,
       allowDeletes: 'none',
       allowTransforms: true,
@@ -2145,7 +2121,7 @@ function validateDocumentReference(value) {
   if (is.instanceof(value, DocumentReference)) {
     return true;
   }
-  throw validate.customObjectError(value);
+  throw customObjectError(value);
 }
 
 /**
@@ -2171,23 +2147,8 @@ function isArrayEqual(left, right) {
 }
 
 export function referencePkg(FirestoreType) {
-  Firestore = FirestoreType;
-  let document = documentPkg(DocumentReference);
-  DocumentSnapshot = document.DocumentSnapshot;
   Watch = watchPkg(
       FirestoreType, DocumentChange, DocumentReference, DocumentSnapshot);
-  WriteBatch =
-      writeBatchPkg(FirestoreType, DocumentReference, validateDocumentReference)
-          .WriteBatch;
-  validate = validatePkg({
-    Document: document.validateDocumentData,
-    FieldPath: FieldPath.validateFieldPath,
-    QueryComparison: validateComparisonOperator,
-    FieldOrder: validateFieldOrder,
-    QueryValue: document.validateFieldValue,
-    Precondition: document.validatePrecondition,
-    ResourcePath: ResourcePath.validateResourcePath,
-  });
   return {
     CollectionReference,
     DocumentChange,
@@ -2195,5 +2156,7 @@ export function referencePkg(FirestoreType) {
     Query,
     QuerySnapshot,
     validateDocumentReference,
+    validateComparisonOperator,
+    validateFieldOrder
   };
 }

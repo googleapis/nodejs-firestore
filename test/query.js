@@ -23,14 +23,12 @@ import through2 from 'through2';
 
 import {Firestore} from '../src/index';
 import {referencePkg} from '../src/reference';
-import {documentPkg} from '../src/document';
+import {DocumentSnapshot} from '../src/document';
 import {createInstance} from '../test/util/helpers';
 import {ResourcePath} from '../src/path';
-import {Serializer} from '../src/serializer';
 
 const reference = referencePkg(Firestore);
 const DocumentReference = reference.DocumentReference;
-const DocumentSnapshot = documentPkg(Firestore).DocumentSnapshot;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -39,19 +37,17 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 Firestore.setLogFunction(() => {});
 
 function snapshot(relativePath, data) {
-  const firestore = {};
-  const serializer = new Serializer(firestore, /*timestampsInSnapshots=*/true);
-  firestore._serializer = serializer;
-
-  const snapshot = new DocumentSnapshot.Builder();
-  let path = ResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/${relativePath}`);
-  snapshot.ref = new DocumentReference(firestore, path);
-  snapshot.fieldsProto = serializer.encodeFields(data);
-  snapshot.readTime = '1970-01-01T00:00:00.000000000Z';
-  snapshot.createTime = '1970-01-01T00:00:00.000000000Z';
-  snapshot.updateTime = '1970-01-01T00:00:00.000000000Z';
-  return snapshot.build();
+  return createInstance().then(firestore => {
+    const snapshot = new DocumentSnapshot.Builder();
+    let path = ResourcePath.fromSlashSeparatedString(
+        `${DATABASE_ROOT}/documents/${relativePath}`);
+    snapshot.ref = new DocumentReference(firestore, path);
+    snapshot.fieldsProto = firestore._serializer.encodeFields(data);
+    snapshot.readTime = '1970-01-01T00:00:00.000000000Z';
+    snapshot.createTime = '1970-01-01T00:00:00.000000000Z';
+    snapshot.updateTime = '1970-01-01T00:00:00.000000000Z';
+    return snapshot.build();
+  });
 }
 
 function fieldFilters(fieldPath, op, value) {
@@ -909,25 +905,27 @@ describe('orderBy() interface', function() {
   it('rejects call after cursor', function() {
     let query = firestore.collection('collectionId');
 
-    assert.throws(function() {
-      query = query.orderBy('foo').startAt('foo').orderBy('foo');
-    }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+    return snapshot('collectionId/doc', {foo: 'bar'}).then(snapshot => {
+      assert.throws(function() {
+        query = query.orderBy('foo').startAt('foo').orderBy('foo');
+      }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
-    assert.throws(function() {
-      query = query.where('foo', '>', 'bar')
-                  .startAt(snapshot('collectionId/doc', {foo: 'bar'}))
-                  .where('foo', '>', 'bar');
-    }, /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+      assert.throws(function() {
+        query = query.where('foo', '>', 'bar')
+                    .startAt(snapshot)
+                    .where('foo', '>', 'bar');
+      }, /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
-    assert.throws(function() {
-      query = query.orderBy('foo').endAt('foo').orderBy('foo');
-    }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+      assert.throws(function() {
+        query = query.orderBy('foo').endAt('foo').orderBy('foo');
+      }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
-    assert.throws(function() {
-      query = query.where('foo', '>', 'bar')
-                  .endAt(snapshot('collectionId/doc', {foo: 'bar'}))
-                  .where('foo', '>', 'bar');
-    }, /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+      assert.throws(function() {
+        query = query.where('foo', '>', 'bar')
+                    .endAt(snapshot)
+                    .where('foo', '>', 'bar');
+      }, /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+    });
   });
 
   it('concatenates orders', function() {
@@ -1156,13 +1154,16 @@ describe('startAt() interface', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      let doc = snapshot('collectionId/doc', {foo: 'bar'});
-      let query = firestore.collection('collectionId');
+      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
+        let query = firestore.collection('collectionId');
 
-      return Promise.all([
-        query.orderBy(Firestore.FieldPath.documentId()).startAt(doc.id).get(),
-        query.orderBy(Firestore.FieldPath.documentId()).startAt(doc.ref).get(),
-      ]);
+        return Promise.all([
+          query.orderBy(Firestore.FieldPath.documentId()).startAt(doc.id).get(),
+          query.orderBy(Firestore.FieldPath.documentId())
+              .startAt(doc.ref)
+              .get(),
+        ]);
+      });
     });
   });
 
@@ -1213,9 +1214,10 @@ describe('startAt() interface', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      let query = firestore.collection('collectionId')
-                      .startAt(snapshot('collectionId/doc', {}));
-      return query.get();
+      return snapshot('collectionId/doc', {}).then(doc => {
+        let query = firestore.collection('collectionId').startAt(doc);
+        return query.get();
+      });
     });
   });
 
@@ -1233,10 +1235,12 @@ describe('startAt() interface', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      let query = firestore.collection('collectionId')
-                      .orderBy(Firestore.FieldPath.documentId())
-                      .startAt(snapshot('collectionId/doc', {}));
-      return query.get();
+      return snapshot('collectionId/doc', {}).then(doc => {
+        let query = firestore.collection('collectionId')
+                        .orderBy(Firestore.FieldPath.documentId())
+                        .startAt(doc);
+        return query.get();
+      });
     });
   });
 
@@ -1255,9 +1259,11 @@ describe('startAt() interface', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      let query = firestore.collection('collectionId').orderBy('foo');
-      query = query.startAt(snapshot('collectionId/doc', {foo: 'bar'}));
-      return query.get();
+      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
+        let query = firestore.collection('collectionId').orderBy('foo');
+        query = query.startAt(doc);
+        return query.get();
+      });
     });
   });
 
@@ -1276,9 +1282,11 @@ describe('startAt() interface', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      let query = firestore.collection('collectionId').orderBy('foo', 'desc');
-      query = query.startAt(snapshot('collectionId/doc', {foo: 'bar'}));
-      return query.get();
+      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
+        let query = firestore.collection('collectionId').orderBy('foo', 'desc');
+        query = query.startAt(doc);
+        return query.get();
+      });
     });
   });
 
@@ -1300,13 +1308,15 @@ describe('startAt() interface', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      let query = firestore.collection('collectionId')
-                      .where('a', '=', 'a')
-                      .where('b', 'array-contains', 'b')
-                      .where('c', '>=', 'c')
-                      .where('d', '=', 'd')
-                      .startAt(snapshot('collectionId/doc', {c: 'c'}));
-      return query.get();
+      return snapshot('collectionId/doc', {c: 'c'}).then(doc => {
+        let query = firestore.collection('collectionId')
+                        .where('a', '=', 'a')
+                        .where('b', 'array-contains', 'b')
+                        .where('c', '>=', 'c')
+                        .where('d', '=', 'd')
+                        .startAt(doc);
+        return query.get();
+      });
     });
   });
 
@@ -1325,19 +1335,23 @@ describe('startAt() interface', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      let query = firestore.collection('collectionId')
-                      .where('foo', '=', 'bar')
-                      .startAt(snapshot('collectionId/doc', {foo: 'bar'}));
-      return query.get();
+      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
+        let query = firestore.collection('collectionId')
+                        .where('foo', '=', 'bar')
+                        .startAt(doc);
+        return query.get();
+      });
     });
   });
 
   it('validates field exists in document snapshot', function() {
     let query = firestore.collection('collectionId').orderBy('foo', 'desc');
 
-    assert.throws(() => {
-      query.startAt(snapshot('collectionId/doc'));
-    }, /Field 'foo' is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy\(\) and where\(\) constraints./);
+    return snapshot('collectionId/doc', {}).then(doc => {
+      assert.throws(() => {
+        query.startAt(doc);
+      }, /Field 'foo' is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy\(\) and where\(\) constraints./);
+    });
   });
 
   it('does not accept field deletes', function() {
