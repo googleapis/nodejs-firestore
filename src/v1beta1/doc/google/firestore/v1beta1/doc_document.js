@@ -57,8 +57,7 @@
  *   recreated. It can also be compared to values from other documents and
  *   the `read_time` of a query.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {Object} updateTime
  *   Output only. The time at which the document was last changed.
@@ -67,15 +66,14 @@
  *   monotonically with each change to the document. It can also be
  *   compared to values from other documents and the `read_time` of a query.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef Document
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Document definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var Document = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -84,8 +82,7 @@ var Document = {
  * @property {number} nullValue
  *   A null value.
  *
- *   The number should be among the values of [NullValue]{@link
- * google.protobuf.NullValue}
+ *   The number should be among the values of [NullValue]{@link google.protobuf.NullValue}
  *
  * @property {boolean} booleanValue
  *   A boolean value.
@@ -102,8 +99,7 @@ var Document = {
  *   Precise only to microseconds. When stored, any additional precision is
  *   rounded down.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {string} stringValue
  *   A string value.
@@ -125,29 +121,26 @@ var Document = {
  * @property {Object} geoPointValue
  *   A geo point value representing a point on the surface of Earth.
  *
- *   This object should have the same structure as [LatLng]{@link
- * google.type.LatLng}
+ *   This object should have the same structure as [LatLng]{@link google.type.LatLng}
  *
  * @property {Object} arrayValue
  *   An array value.
  *
  *   Cannot contain another array value.
  *
- *   This object should have the same structure as [ArrayValue]{@link
- * google.firestore.v1beta1.ArrayValue}
+ *   This object should have the same structure as [ArrayValue]{@link google.firestore.v1beta1.ArrayValue}
  *
  * @property {Object} mapValue
  *   A map value.
  *
- *   This object should have the same structure as [MapValue]{@link
- * google.firestore.v1beta1.MapValue}
+ *   This object should have the same structure as [MapValue]{@link google.firestore.v1beta1.MapValue}
  *
  * @typedef Value
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Value definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var Value = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -156,15 +149,14 @@ var Value = {
  * @property {Object[]} values
  *   Values in the array.
  *
- *   This object should have the same structure as [Value]{@link
- * google.firestore.v1beta1.Value}
+ *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
  *
  * @typedef ArrayValue
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ArrayValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var ArrayValue = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -183,5 +175,5 @@ var ArrayValue = {
  * @see [google.firestore.v1beta1.MapValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 var MapValue = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
