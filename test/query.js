@@ -22,13 +22,10 @@ import is from 'is';
 import through2 from 'through2';
 
 import {Firestore} from '../src/index';
-import {referencePkg} from '../src/reference';
+import {DocumentReference} from '../src/reference';
 import {DocumentSnapshot} from '../src/document';
 import {createInstance} from '../test/util/helpers';
 import {ResourcePath} from '../src/path';
-
-const reference = referencePkg(Firestore);
-const DocumentReference = reference.DocumentReference;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;

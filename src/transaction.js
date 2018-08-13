@@ -18,30 +18,8 @@
 
 import is from 'is';
 
-import {referencePkg} from './reference';
-import {validatePkg} from './validate';
+import {DocumentReference, Query} from './reference';
 import {requestTag} from './util';
-
-/*!
- * Injected.
- *
- * @see DocumentReference
- */
-let DocumentReference;
-
-/*!
- * Injected.
- *
- * @see Firestore
- */
-let Firestore;
-
-/*!
- * Injected.
- *
- * @see Query
- */
-let Query;
 
 /*!
  * Error message for transactional reads that were executed after performing
@@ -64,7 +42,7 @@ const ALLOW_RETRIES = true;
  *
  * @class
  */
-class Transaction {
+export class Transaction {
   /**
    * @private
    * @hideconstructor
@@ -355,12 +333,4 @@ class Transaction {
   get requestTag() {
     return this._requestTag;
   }
-}
-
-export function transactionPkg(FirestoreType) {
-  let reference = referencePkg(FirestoreType);
-  DocumentReference = reference.DocumentReference;
-  Query = reference.Query;
-  Firestore = FirestoreType;
-  return Transaction;
 }

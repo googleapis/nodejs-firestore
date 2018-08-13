@@ -20,11 +20,8 @@ import assert from 'power-assert';
 import is from 'is';
 
 import {Firestore} from '../src/index';
-import {referencePkg} from '../src/reference';
+import {DocumentReference} from '../src/reference';
 import {createInstance} from '../test/util/helpers';
-
-const reference = referencePkg(Firestore);
-const DocumentReference = reference.DocumentReference;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});

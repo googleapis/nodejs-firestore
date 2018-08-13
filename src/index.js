@@ -24,15 +24,16 @@ import pkgUp from 'pkg-up';
 import through2 from 'through2';
 import {replaceProjectIdToken} from '@google-cloud/projectify';
 
-import {referencePkg} from './reference';
-import {DocumentSnapshot, QueryDocumentSnapshot, validateDocumentData, validateFieldValue, validatePrecondition, validateSetOptions} from './document';
+import {CollectionReference, CollectionReference, DocumentReference, QuerySnapshot, Query, validateDocumentReference, validateComparisonOperator, validateFieldOrder} from './reference';
+import {DocumentSnapshot, QueryDocumentSnapshot, validatePrecondition, validateSetOptions} from './document';
 import {FieldTransform, FieldValue, DeleteTransform} from './field-value';
 import {Validator, customObjectError} from './validate';
 import {WriteBatch, WriteResult, validateUpdateMap} from './write-batch';
-import {transactionPkg} from './transaction';
+import {Transaction} from './transaction';
 import {Timestamp} from './timestamp';
 import {FieldPath, ResourcePath} from './path';
 import {ClientPool} from './pool';
+import {DocumentChange} from './document-change';
 import {isPlainObject, Serializer} from './serializer';
 import {GeoPoint} from './geo-point';
 import {logger, setLibVersion, setLogFunction} from './logger';
@@ -60,29 +61,9 @@ setLibVersion(libVersion);
  */
 
 /*!
- * @see CollectionReference
- */
-let CollectionReference;
-
-/*!
- * @see DocumentReference
- */
-let DocumentReference;
-
-/*!
- * @see Transaction
- */
-let Transaction;
-
-/*!
  * @see v1beta1
  */
 let v1beta1;  // Lazy-loaded in `_runRequest()`
-
-// Injected custom validation functions.
-let validateDocumentReference;
-let validateComparisonOperator;
-let validateFieldOrder;
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -1298,15 +1279,6 @@ function validateDocumentData(obj, options) {
  */
 Firestore.setLogFunction = setLogFunction;
 
-// Initializing dependencies that require that Firestore class type.
-const reference = referencePkg(Firestore);
-CollectionReference = reference.CollectionReference;
-DocumentReference = reference.DocumentReference;
-validateDocumentReference = reference.validateDocumentReference;
-validateComparisonOperator = reference.validateComparisonOperator;
-validateFieldOrder = reference.validateFieldOrder;
-Transaction = transactionPkg(Firestore);
-
 /**
  * The default export of the `@google-cloud/firestore` package is the
  * {@link Firestore} class.
@@ -1439,7 +1411,7 @@ module.exports.CollectionReference = CollectionReference;
  * @see QuerySnapshot
  * @type QuerySnapshot
  */
-module.exports.QuerySnapshot = reference.QuerySnapshot;
+module.exports.QuerySnapshot = QuerySnapshot;
 
 /**
  * {@link DocumentChange} class.
@@ -1448,7 +1420,7 @@ module.exports.QuerySnapshot = reference.QuerySnapshot;
  * @see DocumentChange
  * @type DocumentChange
  */
-module.exports.DocumentChange = reference.DocumentChange;
+module.exports.DocumentChange = DocumentChange;
 
 /**
  * {@link Query} class.
@@ -1457,7 +1429,7 @@ module.exports.DocumentChange = reference.DocumentChange;
  * @see Query
  * @type Query
  */
-module.exports.Query = reference.Query;
+module.exports.Query = Query;
 
 /**
  * {@link FieldValue} class.
