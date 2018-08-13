@@ -25,34 +25,8 @@ import {ExponentialBackoff} from './backoff';
 import {Timestamp} from './timestamp';
 import {ResourcePath} from './path';
 import {requestTag} from './util';
-
-/*!
- * Injected.
- *
- * @see DocumentChange
- */
-let DocumentChange;
-
-/*!
- * Injected.
- *
- * @see DocumentReference
- */
-let DocumentReference;
-
-/*!
- * Injected.
- *
- * @see DocumentSnapshot
- */
-let DocumentSnapshot;
-
-/*!
- * Injected.
- *
- * @see Firestore
- */
-let Firestore;
+import {DocumentSnapshot} from './document';
+import {DocumentChange} from './document-change';
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -232,7 +206,7 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
  * @class
  * @private
  */
-class Watch {
+export class Watch {
   /**
    * @private
    * @hideconstructor
@@ -740,9 +714,8 @@ class Watch {
                       'Watch.onSnapshot', self._requestTag,
                       'Received document change');
                   const snapshot = new DocumentSnapshot.Builder();
-                  snapshot.ref = new DocumentReference(
-                      self._firestore,
-                      ResourcePath.fromSlashSeparatedString(name));
+                  snapshot.ref = self._firestore.doc(
+                      ResourcePath.fromSlashSeparatedString(name).relativeName);
                   snapshot.fieldsProto = document.fields || {};
                   snapshot.createTime =
                       Timestamp.fromProto(document.createTime);
@@ -794,15 +767,4 @@ class Watch {
       stream.end();
     };
   }
-}
-
-export function watchPkg(
-    FirestoreType, DocumentChangeType, DocumentReferenceType,
-    DocumentSnapshotType) {
-  Firestore = FirestoreType;
-  DocumentChange = DocumentChangeType;
-  DocumentReference = DocumentReferenceType;
-  DocumentSnapshot = DocumentSnapshotType;
-
-  return Watch;
 }

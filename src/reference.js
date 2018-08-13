@@ -25,19 +25,13 @@ import through2 from 'through2';
 import {compare} from './order';
 import {logger} from './logger';
 import {DocumentSnapshot} from './document';
-import {watchPkg} from './watch';
+import {DocumentChange} from './document-change';
+import {Watch} from './watch';
 import {WriteBatch} from './write-batch';
 import {Timestamp} from './timestamp';
 import {FieldPath, ResourcePath} from './path';
 import {autoId, requestTag} from './util';
 import {customObjectError} from './validate';
-
-/*!
- * Injected.
- *
- * @see Watch
- */
-let Watch;
 
 /*!
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -99,7 +93,7 @@ const comparisonOperators = {
  *
  * @class
  */
-class DocumentReference {
+export class DocumentReference {
   /**
    * @private
    * @hideconstructor
@@ -505,161 +499,6 @@ class DocumentReference {
 }
 
 /**
- * A DocumentChange represents a change to the documents matching a query.
- * It contains the document affected and the type of change that occurred.
- *
- * @class
- */
-class DocumentChange {
-  /**
-   * @private
-   * @hideconstructor
-   *
-   * @param {string} type - 'added' | 'removed' | 'modified'.
-   * @param {QueryDocumentSnapshot} document - The document.
-   * @param {number} oldIndex - The index in the documents array prior to this
-   * change.
-   * @param {number} newIndex - The index in the documents array after this
-   * change.
-   */
-  constructor(type, document, oldIndex, newIndex) {
-    this._type = type;
-    this._document = document;
-    this._oldIndex = oldIndex;
-    this._newIndex = newIndex;
-  }
-
-  /**
-   * The type of change ('added', 'modified', or 'removed').
-   *
-   * @type {string}
-   * @name DocumentChange#type
-   * @readonly
-   *
-   * @example
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   * let docsArray = [];
-   *
-   * let unsubscribe = query.onSnapshot(querySnapshot => {
-   *   for (let change of querySnapshot.docChanges) {
-   *     console.log(`Type of change is ${change.type}`);
-   *   }
-   * });
-   *
-   * // Remove this listener.
-   * unsubscribe();
-   */
-  get type() {
-    return this._type;
-  }
-
-  /**
-   * The document affected by this change.
-   *
-   * @type {QueryDocumentSnapshot}
-   * @name DocumentChange#doc
-   * @readonly
-   *
-   * @example
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   *
-   * let unsubscribe = query.onSnapshot(querySnapshot => {
-   *   for (let change of querySnapshot.docChanges) {
-   *     console.log(change.doc.data());
-   *   }
-   * });
-   *
-   * // Remove this listener.
-   * unsubscribe();
-   */
-  get doc() {
-    return this._document;
-  }
-
-  /**
-   * The index of the changed document in the result set immediately prior to
-   * this DocumentChange (i.e. supposing that all prior DocumentChange objects
-   * have been applied). Is -1 for 'added' events.
-   *
-   * @type {number}
-   * @name DocumentChange#oldIndex
-   * @readonly
-   *
-   * @example
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   * let docsArray = [];
-   *
-   * let unsubscribe = query.onSnapshot(querySnapshot => {
-   *   for (let change of querySnapshot.docChanges) {
-   *     if (change.oldIndex !== -1) {
-   *       docsArray.splice(change.oldIndex, 1);
-   *     }
-   *     if (change.newIndex !== -1) {
-   *       docsArray.splice(change.newIndex, 0, change.doc);
-   *     }
-   *   }
-   * });
-   *
-   * // Remove this listener.
-   * unsubscribe();
-   */
-  get oldIndex() {
-    return this._oldIndex;
-  }
-
-  /**
-   * The index of the changed document in the result set immediately after
-   * this DocumentChange (i.e. supposing that all prior DocumentChange
-   * objects and the current DocumentChange object have been applied).
-   * Is -1 for 'removed' events.
-   *
-   * @type {number}
-   * @name DocumentChange#newIndex
-   * @readonly
-   *
-   * @example
-   * let query = firestore.collection('col').where('foo', '==', 'bar');
-   * let docsArray = [];
-   *
-   * let unsubscribe = query.onSnapshot(querySnapshot => {
-   *   for (let change of querySnapshot.docChanges) {
-   *     if (change.oldIndex !== -1) {
-   *       docsArray.splice(change.oldIndex, 1);
-   *     }
-   *     if (change.newIndex !== -1) {
-   *       docsArray.splice(change.newIndex, 0, change.doc);
-   *     }
-   *   }
-   * });
-   *
-   * // Remove this listener.
-   * unsubscribe();
-   */
-  get newIndex() {
-    return this._newIndex;
-  }
-
-  /**
-   * Returns true if the data in this `DocumentChange` is equal to the provided
-   * value.
-   *
-   * @param {*} other The value to compare against.
-   * @return true if this `DocumentChange` is equal to the provided value.
-   */
-  isEqual(other) {
-    if (this === other) {
-      return true;
-    }
-
-    return (
-        is.instanceof(other, DocumentChange) && this._type === other._type &&
-        this._oldIndex === other._oldIndex &&
-        this._newIndex === other._newIndex &&
-        this._document.isEqual(other._document));
-  }
-}
-
-/**
  * A Query order-by field.
  *
  * @private
@@ -816,7 +655,7 @@ class FieldFilter {
  *
  * @class QuerySnapshot
  */
-class QuerySnapshot {
+export class QuerySnapshot {
   /**
    * @private
    * @hideconstructor
@@ -1035,7 +874,7 @@ class QuerySnapshot {
  *
  * @class Query
  */
-class Query {
+export class Query {
   /**
    * @private
    * @hideconstructor
@@ -1923,7 +1762,7 @@ class Query {
  * @class
  * @extends Query
  */
-class CollectionReference extends Query {
+export class CollectionReference extends Query {
   /**
    * @private
    * @hideconstructor
@@ -2076,7 +1915,7 @@ function createCollectionReference(firestore, path) {
  * @param {string=} str Order direction to validate.
  * @throws {Error} when the direction is invalid
  */
-function validateFieldOrder(str) {
+export function validateFieldOrder(str) {
   if (!is.string(str) || !is.defined(directionOperators[str])) {
     throw new Error('Order must be one of "asc" or "desc".');
   }
@@ -2091,7 +1930,7 @@ function validateFieldOrder(str) {
  * @param {*} val Value that is used in the filter.
  * @throws {Error} when the comparison operation is invalid
  */
-function validateComparisonOperator(str, val) {
+export function validateComparisonOperator(str, val) {
   if (is.string(str) && comparisonOperators[str]) {
     let op = comparisonOperators[str];
 
@@ -2117,7 +1956,7 @@ function validateComparisonOperator(str, val) {
  * @param {*} value The argument to validate.
  * @returns 'true' is value is an instance of DocumentReference.
  */
-function validateDocumentReference(value) {
+export function validateDocumentReference(value) {
   if (is.instanceof(value, DocumentReference)) {
     return true;
   }
@@ -2144,19 +1983,4 @@ function isArrayEqual(left, right) {
   }
 
   return true;
-}
-
-export function referencePkg(FirestoreType) {
-  Watch = watchPkg(
-      FirestoreType, DocumentChange, DocumentReference, DocumentSnapshot);
-  return {
-    CollectionReference,
-    DocumentChange,
-    DocumentReference,
-    Query,
-    QuerySnapshot,
-    validateDocumentReference,
-    validateComparisonOperator,
-    validateFieldOrder
-  };
 }
