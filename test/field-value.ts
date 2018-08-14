@@ -45,18 +45,6 @@ function genericFieldValueTests(
     });
   });
 
-  it('can\'t be used with queries', () => {
-    return createInstance().then((firestore: AnyDuringMigration) => {
-      const collRef = firestore.collection('coll');
-      expect(() => collRef.where('a', '==', sentinel))
-          .to.throw(`Argument "value" is not a valid QueryValue. ${
-              methodName}() can only be used in set(), create() or update().`);
-      expect(() => collRef.orderBy('a').startAt(sentinel))
-          .to.throw(`Argument at index 0 is not a valid QueryValue. ${
-              methodName}() can only be used in set(), create() or update().`);
-    });
-  });
-
   it('can\'t be used inside arrayUnion()', () => {
     return createInstance().then((firestore: AnyDuringMigration) => {
       const docRef = firestore.doc('collectionId/documentId');
@@ -73,6 +61,18 @@ function genericFieldValueTests(
           () => docRef.set({foo: Firestore.FieldValue.arrayRemove(sentinel)}))
           .to.throw(`Argument at index 0 is not a valid ArrayTransform. ${
               methodName}() cannot be used inside of an array.`);
+    });
+  });
+
+  it('can\'t be used with queries', () => {
+    return createInstance().then((firestore: AnyDuringMigration) => {
+      const collRef = firestore.collection('coll');
+      expect(() => collRef.where('a', '==', sentinel))
+          .to.throw(`Argument "value" is not a valid QueryValue. ${
+              methodName}() can only be used in set(), create() or update().`);
+      expect(() => collRef.orderBy('a').startAt(sentinel))
+          .to.throw(`Argument at index 0 is not a valid QueryValue. ${
+              methodName}() can only be used in set(), create() or update().`);
     });
   });
 }

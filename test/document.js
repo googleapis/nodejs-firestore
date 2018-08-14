@@ -1453,6 +1453,13 @@ describe('update document', function() {
         b: Firestore.FieldValue.delete()
       });
     }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
+
+    assert.throws(() => {
+      firestore.doc('collectionId/documentId')
+          .update(
+              'a',
+              Firestore.FieldValue.arrayUnion(Firestore.FieldValue.delete()));
+    }, /FieldValue.delete\(\) cannot be used inside of an array./);
   });
 
   it('with top-level document', function() {
