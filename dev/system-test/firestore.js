@@ -169,11 +169,13 @@ describe('DocumentReference class', function() {
       objectValue: {foo: 'bar', '😀': '😜'},
       emptyObject: {},
       dateValue: new Firestore.Timestamp(479978400, 123000000),
+      zeroDateValue: new Firestore.Timestamp(0, 0),
       pathValue: firestore.doc('col1/ref1'),
       arrayValue: ['foo', 42, 'bar'],
       emptyArray: [],
       nilValue: null,
       geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
+      zeroGeoPointValue: new Firestore.GeoPoint(0, 0),
       bytesValue: Buffer.from([0x01, 0x02]),
     };
     let ref = randomCol.doc('doc');

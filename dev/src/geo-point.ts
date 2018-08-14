@@ -50,7 +50,7 @@ export class GeoPoint implements Serializable {
    *     `${data.google.longitude}`);
    * });
    */
-  constructor(latitude, longitude) {
+  constructor(latitude: number, longitude: number) {
     validate.isNumber('latitude', latitude, -90, 90);
     validate.isNumber('longitude', longitude, -180, 180);
 
@@ -65,7 +65,7 @@ export class GeoPoint implements Serializable {
    * @name GeoPoint#latitude
    * @readonly
    */
-  get latitude() {
+  get latitude(): number {
     return this._latitude;
   }
 
@@ -76,7 +76,7 @@ export class GeoPoint implements Serializable {
    * @name GeoPoint#longitude
    * @readonly
    */
-  get longitude() {
+  get longitude(): number {
     return this._longitude;
   }
 
@@ -121,6 +121,6 @@ export class GeoPoint implements Serializable {
    * @private
    */
   static fromProto(proto: google.type.ILatLng): GeoPoint {
-    return new GeoPoint(proto.latitude, proto.longitude);
+    return new GeoPoint(proto.latitude || 0, proto.longitude || 0);
   }
 }
