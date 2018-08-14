@@ -56,6 +56,25 @@ function genericFieldValueTests(
               methodName}() can only be used in set(), create() or update().`);
     });
   });
+
+  it('can\'t be used inside arrayUnion()', () => {
+    return createInstance().then((firestore: AnyDuringMigration) => {
+      const docRef = firestore.doc('collectionId/documentId');
+      expect(() => docRef.set({foo: Firestore.FieldValue.arrayUnion(sentinel)}))
+          .to.throw(`Argument at index 0 is not a valid ArrayTransform. ${
+              methodName}() cannot be used inside of an array.`);
+    });
+  });
+
+  it('can\'t be used inside arrayRemove()', () => {
+    return createInstance().then((firestore: AnyDuringMigration) => {
+      const docRef = firestore.doc('collectionId/documentId');
+      expect(
+          () => docRef.set({foo: Firestore.FieldValue.arrayRemove(sentinel)}))
+          .to.throw(`Argument at index 0 is not a valid ArrayTransform. ${
+              methodName}() cannot be used inside of an array.`);
+    });
+  });
 }
 
 describe('FieldValue.arrayUnion()', () => {
