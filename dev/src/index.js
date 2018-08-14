@@ -20,7 +20,6 @@ import assert from 'assert';
 import bun from 'bun';
 import extend from 'extend';
 import is from 'is';
-import pkgUp from 'pkg-up';
 import through2 from 'through2';
 import {replaceProjectIdToken} from '@google-cloud/projectify';
 
@@ -41,7 +40,7 @@ import {requestTag} from './util';
 
 import * as convert from './convert';
 
-const libVersion = require(pkgUp.sync(__dirname)).version;
+const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
 
 /*!

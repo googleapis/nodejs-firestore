@@ -46,7 +46,7 @@
     "test": "npm run test-only",
     "check": "gts check",
     "clean": "gts clean",
-    "compile": "tsc -p . && cp -r protos build/protos && cp -r test/fake-certificate.json build/test/fake-certificate.json  && cp src/v1beta1/firestore_client_config.json build/src/v1beta1/ && cp conformance/test-definition.proto build/conformance && cp conformance/test-suite.binproto build/conformance",
+    "compile": "tsc -p . && cp -r dev/protos build && cp -r dev/test/fake-certificate.json build/test/fake-certificate.json  && cp dev/src/v1beta1/firestore_client_config.json build/src/v1beta1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest-only": "npm run compile",
@@ -62,7 +62,6 @@
     "google-proto-files": "^0.16.1",
     "is": "^3.2.1",
     "lodash.merge": "^4.6.1",
-    "pkg-up": "^2.0.0",
     "through2": "^2.0.3"
   },
   "devDependencies": {

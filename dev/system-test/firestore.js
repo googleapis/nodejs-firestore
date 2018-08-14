@@ -18,12 +18,11 @@
 
 import * as assert from 'power-assert';
 import is from 'is';
-import pkgUp from 'pkg-up';
 
 import Firestore from '../src';
 import {autoId} from '../src/util';
 
-let version = require(pkgUp.sync(__dirname)).version;
+let version = require('../../package').version;
 
 if (process.env.NODE_ENV === 'DEBUG') {
   Firestore.setLogFunction(console.log);
