@@ -22,7 +22,7 @@ import is from 'is';
 import Firestore from '../src';
 import {autoId} from '../src/util';
 
-let version = require('../../package').version;
+let version = require('../../package.json').version;
 
 if (process.env.NODE_ENV === 'DEBUG') {
   Firestore.setLogFunction(console.log);
