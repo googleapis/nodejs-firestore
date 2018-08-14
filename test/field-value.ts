@@ -49,7 +49,7 @@ function genericFieldValueTests(
     return createInstance().then((firestore: AnyDuringMigration) => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: Firestore.FieldValue.arrayUnion(sentinel)}))
-          .to.throw(`Argument at index 0 is not a valid ArrayTransform. ${
+          .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
               methodName}() cannot be used inside of an array.`);
     });
   });
@@ -59,7 +59,7 @@ function genericFieldValueTests(
       const docRef = firestore.doc('collectionId/documentId');
       expect(
           () => docRef.set({foo: Firestore.FieldValue.arrayRemove(sentinel)}))
-          .to.throw(`Argument at index 0 is not a valid ArrayTransform. ${
+          .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
               methodName}() cannot be used inside of an array.`);
     });
   });

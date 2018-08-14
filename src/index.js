@@ -208,7 +208,7 @@ class Firestore {
     });
 
     this._validator = new Validator({
-      ArrayTransform: (name, value) =>
+      ArrayElement: (name, value) =>
           validateFieldValue(name, value, /* depth */ 0, /*inArray=*/true),
       DeletePrecondition: precondition =>
           validatePrecondition(precondition, /* allowExists= */ true),

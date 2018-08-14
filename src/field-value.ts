@@ -312,7 +312,7 @@ class ArrayUnionTransform extends FieldTransform {
   validate(validator: AnyDuringMigration): boolean {
     let valid = true;
     for (let i = 0; valid && i < this.elements.length; ++i) {
-      valid = validator.isArrayTransform(
+      valid = validator.isArrayElement(
           i, this.elements[i], {allowDeletes: 'none', allowTransforms: false});
     }
     return valid;
@@ -366,7 +366,7 @@ class ArrayRemoveTransform extends FieldTransform {
   validate(validator: AnyDuringMigration): boolean {
     let valid = true;
     for (let i = 0; valid && i < this.elements.length; ++i) {
-      valid = validator.isArrayTransform(
+      valid = validator.isArrayElement(
           i, this.elements[i], {allowDeletes: 'none', allowTransforms: false});
     }
     return valid;
