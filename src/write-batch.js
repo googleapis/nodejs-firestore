@@ -157,8 +157,9 @@ export class WriteBatch {
     this.verifyNotCommitted();
 
     const document = DocumentSnapshot.fromObject(documentRef, data);
-    const transform = DocumentTransform.fromObject(documentRef, data);
     const precondition = new Precondition({exists: false});
+    const transform = DocumentTransform.fromObject(documentRef, data);
+    transform.validate();
 
     this._writes.push({
       write: !document.isEmpty || transform.isEmpty ? document.toProto() : null,
@@ -261,9 +262,10 @@ export class WriteBatch {
       data = documentMask.applyTo(data);
     }
 
-    const document = DocumentSnapshot.fromObject(documentRef, data);
     const transform = DocumentTransform.fromObject(documentRef, data);
+    transform.validate();
 
+    const document = DocumentSnapshot.fromObject(documentRef, data);
     if (mergePaths) {
       documentMask.removeFields(transform.fields);
     } else {
@@ -405,6 +407,7 @@ export class WriteBatch {
     }
 
     let transform = DocumentTransform.fromUpdateMap(documentRef, updateMap);
+    transform.validate();
 
     this._writes.push({
       write: write,

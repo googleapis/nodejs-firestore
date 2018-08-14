@@ -868,6 +868,7 @@ export class DocumentTransform {
    */
   constructor(ref, transforms) {
     this._ref = ref;
+    this._validator = ref.firestore._validator;
     this._transforms = transforms;
   }
   /**
@@ -953,6 +954,11 @@ export class DocumentTransform {
    */
   get fields() {
     return Array.from(this._transforms.keys());
+  }
+
+  /** Validates the user provided field values in this document transform. */
+  validate() {
+    this._transforms.forEach(transform => transform.validate(this._validator));
   }
 
   /**
