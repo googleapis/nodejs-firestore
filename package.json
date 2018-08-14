@@ -62,6 +62,7 @@
     "google-proto-files": "^0.16.1",
     "is": "^3.2.1",
     "lodash.merge": "^4.6.1",
+    "protobufjs": "^6.8.6",
     "through2": "^2.0.3"
   },
   "devDependencies": {
@@ -80,7 +81,6 @@
     "mocha": "^5.2.0",
     "nyc": "^12.0.2",
     "power-assert": "^1.6.0",
-    "protobufjs": "^6.8.6",
     "proxyquire": "^2.0.1",
     "ts-node": "^7.0.0",
     "source-map-support": "^0.5.6",
