@@ -11,7 +11,7 @@
   },
   "include": [
     "dev/src/*.js",
-    "dev/src/*.ts",,
+    "dev/src/*.ts",
     "dev/src/**/*.js",
     "dev/test/*.js",
     "dev/test/*.ts",
