@@ -45,6 +45,25 @@ function genericFieldValueTests(
     });
   });
 
+  it('can\'t be used inside arrayUnion()', () => {
+    return createInstance().then((firestore: AnyDuringMigration) => {
+      const docRef = firestore.doc('collectionId/documentId');
+      expect(() => docRef.set({foo: Firestore.FieldValue.arrayUnion(sentinel)}))
+          .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
+              methodName}() cannot be used inside of an array.`);
+    });
+  });
+
+  it('can\'t be used inside arrayRemove()', () => {
+    return createInstance().then((firestore: AnyDuringMigration) => {
+      const docRef = firestore.doc('collectionId/documentId');
+      expect(
+          () => docRef.set({foo: Firestore.FieldValue.arrayRemove(sentinel)}))
+          .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
+              methodName}() cannot be used inside of an array.`);
+    });
+  });
+
   it('can\'t be used with queries', () => {
     return createInstance().then((firestore: AnyDuringMigration) => {
       const collRef = firestore.collection('coll');
