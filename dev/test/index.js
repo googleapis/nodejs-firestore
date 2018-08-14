@@ -34,7 +34,7 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 const DEFAULT_SETTINGS = {
   projectId: PROJECT_ID,
   sslCreds: grpc.credentials.createInsecure(),
-  keyFilename: './test/fake-certificate.json',
+  keyFilename: __dirname + '/fake-certificate.json',
   timestampsInSnapshots: true
 };
 
@@ -360,7 +360,7 @@ describe('instantiation', function() {
     let firestore = new Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
-      keyFilename: './test/fake-certificate.json',
+      keyFilename: __dirname + '/fake-certificate.json',
     });
 
     assert.equal(

@@ -4,23 +4,22 @@
     "allowJs": true,
     "declaration": false, // TODO: Remove when all source are migrated to TS
     "sourceMap": false,
-    "rootDir": ".",
     "outDir": "build",
     "target": "es6",
     "noImplicitAny": false, // TODO: Remove when all source are migrated to TS
     "allowSyntheticDefaultImports": true // TODO: Remove when all source are migrated to TS
   },
   "include": [
-    "src/*.js",
-    "src/*.ts",
-    "src/**/*.js",
-    "test/*.js",
-    "test/*.ts",
-    "test/**/*.ts",
-    "system-test/*.js",
-    "conformance/*.js"
+    "dev/src/*.js",
+    "dev/src/*.ts",
+    "dev/src/**/*.js",
+    "dev/test/*.js",
+    "dev/test/*.ts",
+    "dev/test/**/*.ts",
+    "dev/system-test/*.js",
+    "dev/conformance/*.js"
   ],
   "exclude": [
-    "test/typescript.ts"
+    "dev/test/typescript.ts"
   ]
 }
