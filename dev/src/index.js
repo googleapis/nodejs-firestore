@@ -207,6 +207,8 @@ class Firestore {
     });
 
     this._validator = new Validator({
+      ArrayElement: (name, value) =>
+          validateFieldValue(name, value, /* depth */ 0, /*inArray=*/true),
       DeletePrecondition: precondition =>
           validatePrecondition(precondition, /* allowExists= */ true),
       Document: validateDocumentData,
@@ -1161,16 +1163,17 @@ follow these steps, YOUR APP MAY BREAK.`);
  * Validates a JavaScript value for usage as a Firestore value.
  *
  * @private
- * @param {Object} obj JavaScript value to validate.
+ * @param {Object} val JavaScript value to validate.
  * @param {string} options.allowDeletes At what level field deletes are
  * supported (acceptable values are 'none', 'root' or 'all').
  * @param {boolean} options.allowServerTimestamps Whether server timestamps
  * are supported.
  * @param {number=} depth The current depth of the traversal.
+ * @param {number=} inArray Whether we are inside an array.
  * @returns {boolean} 'true' when the object is valid.
  * @throws {Error} when the object is invalid.
  */
-function validateFieldValue(val, options, depth) {
+function validateFieldValue(val, options, depth, inArray) {
   assert(
       ['none', 'root', 'all'].indexOf(options.allowDeletes) !== -1,
       'Expected \'none\', \'root\', or \'all\' for \'options.allowDeletes\'');
@@ -1185,24 +1188,31 @@ function validateFieldValue(val, options, depth) {
         `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`);
   }
 
+  inArray = inArray || false;
+
   if (is.array(val)) {
     for (let prop of val) {
-      validateFieldValue(val[prop], options, depth + 1);
+      validateFieldValue(val[prop], options, depth + 1, /* inArray= */ true);
     }
   } else if (isPlainObject(val)) {
     for (let prop in val) {
       if (val.hasOwnProperty(prop)) {
-        validateFieldValue(val[prop], options, depth + 1);
+        validateFieldValue(val[prop], options, depth + 1, inArray);
       }
     }
   } else if (val instanceof DeleteTransform) {
-    if ((options.allowDeletes === 'root' && depth > 1) ||
+    if (inArray) {
+      throw new Error(`${val.methodName}() cannot be used inside of an array.`);
+    } else if (
+        (options.allowDeletes === 'root' && depth > 1) ||
         options.allowDeletes === 'none') {
       throw new Error(`${
           val.methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}.`);
     }
   } else if (val instanceof FieldTransform) {
-    if (!options.allowTransforms) {
+    if (inArray) {
+      throw new Error(`${val.methodName}() cannot be used inside of an array.`);
+    } else if (!options.allowTransforms) {
       throw new Error(`${
           val.methodName}() can only be used in set(), create() or update().`);
     }

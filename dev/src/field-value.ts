@@ -18,7 +18,7 @@
 
 import deepEqual from 'deep-equal';
 
-import {AnyJs} from './types';
+import {AnyDuringMigration, AnyJs} from './types';
 import {createValidator} from './validate';
 import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
@@ -171,6 +171,9 @@ export abstract class FieldTransform extends FieldValue {
   /** The method name used to obtain the field transform. */
   abstract get methodName(): string;
 
+  /** Performs input validation on the values of this field transform. */
+  abstract validate(validator: AnyDuringMigration): boolean;
+
   /***
    * The proto representation for this field transform.
    *
@@ -213,6 +216,10 @@ export class DeleteTransform extends FieldTransform {
 
   get methodName(): string {
     return 'FieldValue.delete';
+  }
+
+  validate(): true {
+    return true;
   }
 
   toProto(serializer: Serializer, fieldPath: FieldPath): never {
@@ -260,6 +267,10 @@ class ServerTimestampTransform extends FieldTransform {
     return 'FieldValue.serverTimestamp';
   }
 
+  validate(): true {
+    return true;
+  }
+
   toProto(serializer: Serializer, fieldPath: FieldPath):
       api.DocumentTransform.IFieldTransform {
     return {
@@ -296,6 +307,15 @@ class ArrayUnionTransform extends FieldTransform {
 
   get methodName(): string {
     return 'FieldValue.arrayUnion';
+  }
+
+  validate(validator: AnyDuringMigration): boolean {
+    let valid = true;
+    for (let i = 0; valid && i < this.elements.length; ++i) {
+      valid = validator.isArrayElement(
+          i, this.elements[i], {allowDeletes: 'none', allowTransforms: false});
+    }
+    return valid;
   }
 
   toProto(serializer: Serializer, fieldPath: FieldPath):
@@ -341,6 +361,15 @@ class ArrayRemoveTransform extends FieldTransform {
 
   get methodName(): string {
     return 'FieldValue.arrayRemove';
+  }
+
+  validate(validator: AnyDuringMigration): boolean {
+    let valid = true;
+    for (let i = 0; valid && i < this.elements.length; ++i) {
+      valid = validator.isArrayElement(
+          i, this.elements[i], {allowDeletes: 'none', allowTransforms: false});
+    }
+    return valid;
   }
 
   toProto(serializer: Serializer, fieldPath):
