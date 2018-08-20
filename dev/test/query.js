@@ -495,7 +495,7 @@ describe('query interface', function() {
         assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
         assert.equal('first', results.docs[0].get('first'));
         assert.equal('second', results.docs[1].get('second'));
-        assert.equal(2, results.docChanges.length);
+        assert.equal(2, results.docChanges().length);
 
         let count = 0;
 
@@ -588,6 +588,29 @@ describe('query interface', function() {
             assert.equal(received, 2);
             callback();
           });
+    });
+  });
+
+  it('throws if QuerySnapshot.docChanges() is used as a property', function() {
+    const overrides = {
+      runQuery: (request) => {
+        requestEquals(request);
+        return stream(document('first'), document('second'));
+      }
+    };
+
+    return createInstance(overrides).then(firestore => {
+      let query = firestore.collection('collectionId');
+      return query.get().then(snapshot => {
+        assert.throws(() => {
+          snapshot.docChanges.forEach(() => {});
+        }, /QuerySnapshot.docChanges has been changed from a property into a method/);
+
+        assert.throws(() => {
+          for (const doc of snapshot.docChanges) {
+          }
+        }, /QuerySnapshot.docChanges has been changed from a property into a method/);
+      });
     });
   });
 });

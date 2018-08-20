@@ -268,7 +268,7 @@ xdescribe('firestore.d.ts', function() {
   it('has typings for QuerySnapshot', () => {
     collRef.get().then((snapshot: QuerySnapshot) => {
       const query: Query = snapshot.query;
-      const docChanges: DocumentChange[] = snapshot.docChanges;
+      const docChanges: DocumentChange[] = snapshot.docChanges();
       const docs: QueryDocumentSnapshot[] = snapshot.docs;
       const size: number = snapshot.size;
       const empty: boolean = snapshot.empty;
@@ -283,7 +283,7 @@ xdescribe('firestore.d.ts', function() {
 
   it('has typings for DocumentChange', () => {
     collRef.get().then((snapshot: QuerySnapshot) => {
-      const docChange: DocumentChange = snapshot.docChanges[0];
+      const docChange: DocumentChange = snapshot.docChanges()[0];
       const doc: QueryDocumentSnapshot = docChange.doc;
       const oldIndex: number = docChange.oldIndex;
       const newIndex: number = docChange.newIndex;
