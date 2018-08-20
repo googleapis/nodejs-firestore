@@ -730,22 +730,6 @@ export class QuerySnapshot {
   }
 
   /**
-   * An array of all changes in this QuerySnapshot.
-   *
-   * @type {Array.<DocumentChange>}
-   * @name QuerySnapshot#docChanges
-   * @readonly
-   */
-  get docChanges() {
-    if (this._materializedChanges) {
-      return this._materializedChanges;
-    }
-    this._materializedChanges = this._changes();
-    this._changes = null;
-    return this._materializedChanges;
-  }
-
-  /**
    * True if there are no documents in the QuerySnapshot.
    *
    * @type {boolean}
@@ -799,6 +783,32 @@ export class QuerySnapshot {
    */
   get readTime() {
     return this._readTime;
+  }
+
+  /**
+   * Returns an array of the documents changes since the last snapshot. If
+   * this is the first snapshot, all documents will be in the list as added
+   * changes.
+   *
+   * @return {Array.<DocumentChange>}
+   *
+   * @example
+   * let query = firestore.collection('col').where('foo', '==', 'bar');
+   *
+   * query.onSnapshot(querySnapshot => {
+   *   let changes = querySnapshot.docChanges();
+   *   for (let change of changes) {
+   *     console.log(`A document was ${change.type}.`);
+   *   }
+   * });
+   */
+  docChanges() {
+    if (this._materializedChanges) {
+      return this._materializedChanges;
+    }
+    this._materializedChanges = this._changes();
+    this._changes = null;
+    return this._materializedChanges;
   }
 
   /**
@@ -858,15 +868,37 @@ export class QuerySnapshot {
       // If we have only materialized the documents, we compare them first.
       return (
           isArrayEqual(this.docs, other.docs) &&
-          isArrayEqual(this.docChanges, other.docChanges));
+          isArrayEqual(this.docChanges(), other.docChanges()));
     }
 
     // Otherwise, we compare the changes first as we expect there to be fewer.
     return (
-        isArrayEqual(this.docChanges, other.docChanges) &&
+        isArrayEqual(this.docChanges(), other.docChanges()) &&
         isArrayEqual(this.docs, other.docs));
   }
 }
+
+// TODO: As of v0.17.0, we're changing docChanges from an array into a method.
+// Because this is a runtime breaking change and somewhat subtle (both Array and
+// Function have a .length, etc.), we'll replace commonly-used properties
+// (including Symbol.iterator) to throw a custom error message. By our v1.0
+// release, we should remove this code.
+function throwDocChangesMethodError() {
+  throw new Error(
+      'QuerySnapshot.docChanges has been changed from a property into a ' +
+      'method, so usages like "querySnapshot.docChanges" should become ' +
+      '"querySnapshot.docChanges()"');
+}
+
+const docChangesPropertiesToOverride = [
+  'length', 'forEach', 'map',
+  ...(typeof Symbol !== 'undefined' ? [Symbol.iterator] : [])
+];
+docChangesPropertiesToOverride.forEach(property => {
+  Object.defineProperty(
+      QuerySnapshot.prototype.docChanges, property,
+      {get: () => throwDocChangesMethodError()});
+});
 
 /**
  * A Query refers to a query which you can read or stream from. You can also

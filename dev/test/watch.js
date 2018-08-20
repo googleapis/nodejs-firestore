@@ -57,25 +57,27 @@ const docsEqual = function(actual, expected) {
 const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
   let localDocs = [].concat(lastSnapshot.docs);
 
-  assert.equal(actual.docChanges.length, expected.docChanges.length);
+  const actualDocChanges = actual.docChanges();
+
+  assert.equal(actualDocChanges.length, expected.docChanges.length);
   for (let i = 0; i < expected.docChanges.length; i++) {
-    assert.equal(actual.docChanges[i].type, expected.docChanges[i].type);
+    assert.equal(actualDocChanges[i].type, expected.docChanges[i].type);
     assert.equal(
-        actual.docChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
+        actualDocChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
     assert.deepStrictEqual(
-        actual.docChanges[i].doc.data(), expected.docChanges[i].doc.data());
+        actualDocChanges[i].doc.data(), expected.docChanges[i].doc.data());
     let readVersion =
-        actual.docChanges[i].type === 'removed' ? version - 1 : version;
-    assert.ok(actual.docChanges[i].doc.readTime.isEqual(
+        actualDocChanges[i].type === 'removed' ? version - 1 : version;
+    assert.ok(actualDocChanges[i].doc.readTime.isEqual(
         new Firestore.Timestamp(0, readVersion)));
 
-    if (actual.docChanges[i].oldIndex !== -1) {
-      localDocs.splice(actual.docChanges[i].oldIndex, 1);
+    if (actualDocChanges[i].oldIndex !== -1) {
+      localDocs.splice(actualDocChanges[i].oldIndex, 1);
     }
 
-    if (actual.docChanges[i].newIndex !== -1) {
+    if (actualDocChanges[i].newIndex !== -1) {
       localDocs.splice(
-          actual.docChanges[i].newIndex, 0, actual.docChanges[i].doc);
+          actualDocChanges[i].newIndex, 0, actualDocChanges[i].doc);
     }
   }
 
@@ -84,7 +86,7 @@ const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
   assert.ok(actual.readTime.isEqual(new Firestore.Timestamp(0, version)));
   assert.equal(actual.size, expected.docs.length);
 
-  return {docs: actual.docs, docChanges: actual.docChanges};
+  return {docs: actual.docs, docChanges: actualDocChanges};
 };
 
 /*
@@ -1891,8 +1893,8 @@ describe('Query watch', function() {
                         watchHelper.sendDoc(doc1, {foo: 'a'});
                       }).then(snapshot => {
                  firstSnapshot = snapshot;
-                 assert.ok(snapshot.docChanges[0].isEqual(
-                     firstSnapshot.docChanges[0]));
+                 assert.ok(snapshot.docChanges()[0].isEqual(
+                     firstSnapshot.docChanges()[0]));
                });
              })
           .then(() => initialSnapshot(snapshot => {
@@ -1900,8 +1902,8 @@ describe('Query watch', function() {
                            watchHelper.sendDoc(doc1, {foo: 'b'});
                          }).then(snapshot => {
                     assert.ok(!snapshot.isEqual(firstSnapshot));
-                    assert.ok(!snapshot.docChanges[0].isEqual(
-                        firstSnapshot.docChanges[0]));
+                    assert.ok(!snapshot.docChanges()[0].isEqual(
+                        firstSnapshot.docChanges()[0]));
                   });
                 }));
     });

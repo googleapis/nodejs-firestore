@@ -1120,16 +1120,17 @@ describe('Query class', function() {
         assert.equal(actual.docs[i].ref.id, expected.docs[i].ref.id);
         assert.deepStrictEqual(actual.docs[i].data(), expected.docs[i].data());
       }
-      assert.equal(actual.docChanges.length, expected.docChanges.length);
+      const actualDocChanges = actual.docChanges();
+      assert.equal(actualDocChanges.length, expected.docChanges.length);
       for (i = 0; i < expected.docChanges.length; i++) {
-        assert.equal(actual.docChanges[i].type, expected.docChanges[i].type);
+        assert.equal(actualDocChanges[i].type, expected.docChanges[i].type);
         assert.equal(
-            actual.docChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
+            actualDocChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
         assert.deepStrictEqual(
-            actual.docChanges[i].doc.data(), expected.docChanges[i].doc.data());
-        assert.ok(is.defined(actual.docChanges[i].doc.readTime));
-        assert.ok(is.defined(actual.docChanges[i].doc.createTime));
-        assert.ok(is.defined(actual.docChanges[i].doc.updateTime));
+            actualDocChanges[i].doc.data(), expected.docChanges[i].doc.data());
+        assert.ok(is.defined(actualDocChanges[i].doc.readTime));
+        assert.ok(is.defined(actualDocChanges[i].doc.createTime));
+        assert.ok(is.defined(actualDocChanges[i].doc.updateTime));
       }
       assert.ok(is.defined(actual.readTime));
     };

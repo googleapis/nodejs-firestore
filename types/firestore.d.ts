@@ -931,13 +931,6 @@ declare namespace FirebaseFirestore {
      */
     readonly query: Query;
 
-    /**
-     * An array of the documents that changed since the last snapshot. If this
-     * is the first snapshot, all documents will be in the list as added
-     * changes.
-     */
-    readonly docChanges: DocumentChange[];
-
     /** An array of all the documents in the QuerySnapshot. */
     readonly docs: QueryDocumentSnapshot[];
 
@@ -949,6 +942,13 @@ declare namespace FirebaseFirestore {
 
     /** The time this query snapshot was obtained. */
     readonly readTime: Timestamp;
+
+    /**
+     * Returns an array of the documents changes since the last snapshot. If
+     * this is the first snapshot, all documents will be in the list as added
+     * changes.
+     */
+    docChanges(): DocumentChange[];
 
     /**
      * Enumerates all of the documents in the QuerySnapshot.
