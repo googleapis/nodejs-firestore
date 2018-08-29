@@ -207,8 +207,7 @@ export class DocumentReference {
   }
 
   /**
-   * Retrieve a document from the database. Fails the Promise if the document is
-   * not found.
+   * Reads the document referred to by this DocumentReference.
    *
    * @returns {Promise.<DocumentSnapshot>} A Promise resolved with a
    * DocumentSnapshot for the retrieved document on success. For missing
