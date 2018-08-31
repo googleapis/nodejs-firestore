@@ -70,6 +70,10 @@ export function setTimeoutHandler(handler: typeof setTimeout): void {
 
 /**
  * Configuration object to adjust the delays of the exponential backoff
+<<<<<<< HEAD:dev/src/backoff.ts
+=======
+ * algorithm.
+>>>>>>> 93deb66b7502ce7ea88e7dd4ed5eea3519e55015:dev/src/backoff.ts
  *
  * @private
  */
