@@ -70,7 +70,6 @@ export function setTimeoutHandler(handler: typeof setTimeout): void {
 
 /**
  * Configuration object to adjust the delays of the exponential backoff
- * algorithm.
  *
  * @private
  */
@@ -186,12 +185,8 @@ export class ExponentialBackoff {
     // Apply backoff factor to determine next delay and ensure it is within
     // bounds.
     this.currentBaseMs *= this.backoffFactor;
-    if (this.currentBaseMs < this.initialDelayMs) {
-      this.currentBaseMs = this.initialDelayMs;
-    }
-    if (this.currentBaseMs > this.maxDelayMs) {
-      this.currentBaseMs = this.maxDelayMs;
-    }
+    this.currentBaseMs = Math.max(this.currentBaseMs, this.initialDelayMs);
+    this.currentBaseMs = Math.min(this.currentBaseMs, this.maxDelayMs);
 
     return new Promise(resolve => {
       delayExecution(resolve, delayWithJitterMs);
