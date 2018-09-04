@@ -53,7 +53,7 @@ const DEFAULT_JITTER_FACTOR = 1.0;
 /*!
  * The timeout handler used by `ExponentialBackoff`.
  */
-let delayExecution = setTimeout;
+let delayExecution: typeof setTimeout = setTimeout;
 
 /**
  * Allows overriding of the timeout handler used by the exponential backoff
@@ -64,8 +64,29 @@ let delayExecution = setTimeout;
  * @private
  * @param {function} handler A handler than matches the API of `setTimeout()`.
  */
-export function setTimeoutHandler(handler) {
+export function setTimeoutHandler(handler: typeof setTimeout): void {
   delayExecution = handler;
+}
+
+/**
+ * Configuration object to adjust the delays of the exponential backoff
+ * algorithm.
+ *
+ * @private
+ */
+export interface ExponentialBackoffOptions {
+  /** Optional override for the initial retry delay. */
+  initialDelayMs?: number;
+  /** Optional override for the exponential backoff factor. */
+  backoffFactor?: number;
+  /** Optional override for the maximum retry delay. */
+  maxDelayMs?: number;
+  /**
+   * Optional override to control the itter factor by which to randomize
+   * attempts (0 means no randomization, 1.0 means +/-50% randomization). It is
+   * suggested not to exceed this range.
+   */
+  jitterFactor?: number;
 }
 
 /**
@@ -81,70 +102,49 @@ export function setTimeoutHandler(handler) {
  */
 export class ExponentialBackoff {
   /**
-   * @param {number=} options.initialDelayMs Optional override for the initial
-   * retry delay.
-   * @param {number=} options.backoffFactor Optional override for the
-   * exponential backoff factor.
-   * @param {number=} options.maxDelayMs Optional override for the maximum
-   * retry delay.
-   * @param {number=} options.jitterFactor Optional override to control the
-   * jitter factor by which to randomize attempts (0 means no randomization,
-   * 1.0 means +/-50% randomization). It is suggested not to exceed this range.
+   * The initial delay (used as the base delay on the first retry attempt).
+   * Note that jitter will still be applied, so the actual delay could be as
+   * little as 0.5*initialDelayMs (based on a jitter factor of 1.0).
    */
-  constructor(options) {
-    options = options || {};
+  private readonly initialDelayMs: number;
 
-    /**
-     * The initial delay (used as the base delay on the first retry attempt).
-     * Note that jitter will still be applied, so the actual delay could be as
-     * little as 0.5*initialDelayMs (based on a jitter factor of 1.0).
-     *
-     * @type {number}
-     * @private
-     */
-    this._initialDelayMs = options.initialDelayMs !== undefined ?
+  /**
+   * The multiplier to use to determine the extended base delay after each
+   * attempt.
+   */
+  private readonly backoffFactor: number;
+
+  /**
+   * The maximum base delay after which no further backoff is performed.
+   * Note that jitter will still be applied, so the actual delay could be as
+   * much as 1.5*maxDelayMs (based on a jitter factor of 1.0).
+   */
+  private readonly maxDelayMs: number;
+
+  /**
+   * The jitter factor that controls the random distribution of the backoff
+   * points.
+   */
+  private readonly jitterFactor: number;
+
+  /**
+   * The backoff delay of the current attempt.
+   */
+  private currentBaseMs = 0;
+
+  constructor(options: ExponentialBackoffOptions = {}) {
+    this.initialDelayMs = options.initialDelayMs !== undefined ?
         options.initialDelayMs :
         DEFAULT_BACKOFF_INITIAL_DELAY_MS;
-
-    /**
-     * The multiplier to use to determine the extended base delay after each
-     * attempt.
-     * @type {number}
-     * @private
-     */
-    this._backoffFactor = options.backoffFactor !== undefined ?
+    this.backoffFactor = options.backoffFactor !== undefined ?
         options.backoffFactor :
         DEFAULT_BACKOFF_FACTOR;
-
-    /**
-     * The maximum base delay after which no further backoff is performed.
-     * Note that jitter will still be applied, so the actual delay could be as
-     * much as 1.5*maxDelayMs (based on a jitter factor of 1.0).
-     *
-     * @type {number}
-     * @private
-     */
-    this._maxDelayMs = options.maxDelayMs !== undefined ?
+    this.maxDelayMs = options.maxDelayMs !== undefined ?
         options.maxDelayMs :
         DEFAULT_BACKOFF_MAX_DELAY_MS;
-
-    /**
-     * The jitter factor that controls the random distribution of the backoff
-     * points.
-     *
-     * @type {number}
-     * @private
-     */
-    this._jitterFactor = options.jitterFactor !== undefined ?
+    this.jitterFactor = options.jitterFactor !== undefined ?
         options.jitterFactor :
         DEFAULT_JITTER_FACTOR;
-
-    /**
-     * The backoff delay of the current attempt.
-     * @type {number}
-     * @private
-     */
-    this._currentBaseMs = 0;
   }
 
   /**
@@ -153,51 +153,41 @@ export class ExponentialBackoff {
    * The very next backoffAndWait() will have no delay. If it is called again
    * (i.e. due to an error), initialDelayMs (plus jitter) will be used, and
    * subsequent ones will increase according to the backoffFactor.
-   *
-   * @private
    */
-  reset() {
-    this._currentBaseMs = 0;
+  private reset(): void {
+    this.currentBaseMs = 0;
   }
 
   /**
    * Resets the backoff delay to the maximum delay (e.g. for use after a
    * RESOURCE_EXHAUSTED error).
-   *
-   * @private
    */
-  resetToMax() {
-    this._currentBaseMs = this._maxDelayMs;
+  private resetToMax(): void {
+    this.currentBaseMs = this.maxDelayMs;
   }
 
   /**
    * Returns a promise that resolves after currentDelayMs, and increases the
    * delay for any subsequent attempts.
    *
-   * @private
-   * @return {Promise.<void>} A Promise that resolves when the current delay
-   * elapsed.
+   * @return A Promise that resolves when the current delay elapsed.
    */
-  backoffAndWait() {
+  backoffAndWait(): Promise<void> {
     // First schedule using the current base (which may be 0 and should be
     // honored as such).
-    const delayWithJitterMs = this._currentBaseMs + this._jitterDelayMs();
-    if (this._currentBaseMs > 0) {
+    const delayWithJitterMs = this.currentBaseMs + this.jitterDelayMs();
+    if (this.currentBaseMs > 0) {
       logger(
-          'ExponentialBackoff.backoffAndWait',
+          'ExponentialBackoff.backoffAndWait', null,
           `Backing off for ${delayWithJitterMs} ms ` +
-              `(base delay: ${this._currentBaseMs} ms)`);
+              `(base delay: ${this.currentBaseMs} ms)`);
     }
 
     // Apply backoff factor to determine next delay and ensure it is within
     // bounds.
-    this._currentBaseMs *= this._backoffFactor;
-    if (this._currentBaseMs < this._initialDelayMs) {
-      this._currentBaseMs = this._initialDelayMs;
-    }
-    if (this._currentBaseMs > this._maxDelayMs) {
-      this._currentBaseMs = this._maxDelayMs;
-    }
+    this.currentBaseMs *= this.backoffFactor;
+    this.currentBaseMs = Math.max(this.currentBaseMs, this.initialDelayMs);
+    this.currentBaseMs = Math.min(this.currentBaseMs, this.maxDelayMs);
 
     return new Promise(resolve => {
       delayExecution(resolve, delayWithJitterMs);
@@ -211,7 +201,7 @@ export class ExponentialBackoff {
    * @private
    * @returns {number} The jitter to apply based on the current delay.
    */
-  _jitterDelayMs() {
-    return (Math.random() - 0.5) * this._jitterFactor * this._currentBaseMs;
+  private jitterDelayMs() {
+    return (Math.random() - 0.5) * this.jitterFactor * this.currentBaseMs;
   }
 }
