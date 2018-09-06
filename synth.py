@@ -36,7 +36,7 @@ s.replace(
 
 # Copy template files
 common_templates = gcp.CommonTemplates()
-templates = common_templates.node_library(source_location="src/build")
+templates = common_templates.node_library(source_location="build/src")
 s.copy(templates)
 
 # Node.js specific cleanup
