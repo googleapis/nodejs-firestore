@@ -16,7 +16,9 @@ library = gapic.node_library(
 s.copy(library, "dev", excludes=["package.json", "README.md", "src/index.js"])
 
 # package.json is one level deeper since firestore's src/ is under dev/
-s.replace("dev/src/v1beta1/index.js", "../../package.json", "../../../package.json")
+s.replace(
+    "dev/src/v1beta1/firestore_client.js", "../../package.json", "../../../package.json"
+)
 
 s.replace(
     "dev/test/gapic-v1beta1.js",
