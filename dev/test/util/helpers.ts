@@ -91,7 +91,7 @@ export function createInstance(
   firestore.settings(initializationOptions);
 
   const clientPool = new ClientPool(/* concurrentRequestLimit= */ 1, () => {
-    const gapicClient: GapicClient = v1beta1(initializationOptions);
+    const gapicClient: GapicClient = new v1beta1(initializationOptions);
     if (apiOverrides) {
       Object.keys(apiOverrides).forEach(override => {
         gapicClient._innerApiCalls[override] = apiOverrides[override];
