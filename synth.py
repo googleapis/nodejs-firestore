@@ -20,6 +20,14 @@ s.replace(
     "dev/src/v1beta1/firestore_client.js", "../../package.json", "../../../package.json"
 )
 
+# Special case for firestore: FirestoreClient is exported as top level module.exports
+# from gapic-generated code
+s.replace(
+    "dev/src/v1beta1/index.js",
+    "module.exports.FirestoreClient = FirestoreClient",
+    "module.exports = FirestoreClient",
+)
+
 s.replace(
     "dev/test/gapic-v1beta1.js",
     "new firestoreModule.v1beta1.FirestoreClient\(",
@@ -28,7 +36,7 @@ s.replace(
 
 # Copy template files
 common_templates = gcp.CommonTemplates()
-templates = common_templates.node_library()
+templates = common_templates.node_library(source_location="src/build")
 s.copy(templates)
 
 # Node.js specific cleanup
