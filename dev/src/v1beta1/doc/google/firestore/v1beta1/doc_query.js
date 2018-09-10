@@ -250,7 +250,12 @@ var StructuredQuery = {
       /**
        * Equal.
        */
-      EQUAL: 5
+      EQUAL: 5,
+
+      /**
+       * Contains. Requires that the field is an array.
+       */
+      ARRAY_CONTAINS: 7
     }
   },
 

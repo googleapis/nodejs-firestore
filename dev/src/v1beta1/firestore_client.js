@@ -19,7 +19,7 @@ const gax = require('google-gax');
 const merge = require('lodash.merge');
 const path = require('path');
 
-const VERSION = require('../../../package.json').version;
+const VERSION = require('../../package.json').version;
 
 /**
  * The Cloud Firestore service.
@@ -526,7 +526,7 @@ class FirestoreClient {
 
     return this._descriptors.page.listDocuments.createStream(
         this._innerApiCalls.listDocuments, request, options);
-  }
+  };
 
   /**
    * Creates a new document.
@@ -1287,7 +1287,7 @@ class FirestoreClient {
 
     return this._descriptors.page.listCollectionIds.createStream(
         this._innerApiCalls.listCollectionIds, request, options);
-  }
+  };
 
   // --------------------
   // -- Path templates --
@@ -1483,5 +1483,6 @@ class FirestoreClient {
     return this._pathTemplates.anyPathPathTemplate.match(anyPathName).any_path;
   }
 }
+
 
 module.exports = FirestoreClient;

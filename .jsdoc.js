@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2018 Google LLC. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ module.exports = {
   source: {
     excludePattern: '(^|\\/|\\\\)[._]',
     include: [
-      'build/src'
+      'src'
     ],
     includePattern: '\\.js$'
   },
   templates: {
-    copyright: 'Copyright 2017 Google, Inc.',
+    copyright: 'Copyright 2018 Google, LLC.',
     includeDate: false,
     sourceFiles: false,
     systemName: '@google-cloud/firestore',
