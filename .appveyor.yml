@@ -1,6 +1,4 @@
 environment:
-  GOOGLE_APPLICATION_CREDENTIALS: build/test/fake-certificate.json
-
   matrix:
   - nodejs_version: 8
 
