@@ -36,7 +36,10 @@ s.replace(
 
 # Copy template files
 common_templates = gcp.CommonTemplates()
-templates = common_templates.node_library(source_location="build/src")
+templates = common_templates.node_library(
+    source_location="build/src", test_project="node-gcloud-ci"
+)
+
 s.copy(templates)
 
 # Node.js specific cleanup
