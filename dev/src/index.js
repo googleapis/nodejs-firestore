@@ -777,10 +777,10 @@ follow these steps, YOUR APP MAY BREAK.`);
 
     const clientPool =
         new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
-          const gapicClient =
-              module.exports.v1beta1(this._initalizationSettings);
+          const client =
+              new module.exports.v1beta1(this._initalizationSettings);
           logger('Firestore', null, 'Initialized Firestore GAPIC Client');
-          return gapicClient;
+          return client;
         });
 
     const projectIdProvided = this._referencePath.projectId !== '{{projectId}}';

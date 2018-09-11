@@ -41,9 +41,10 @@
  *   The fields to update in this write.
  *
  *   This field can be set only when the operation is `update`.
- *   None of the field paths in the mask may contain a reserved name.
- *   If the document exists on the server and has fields not referenced in the
- *   mask, they are left unchanged.
+ *   If the mask is not set for an `update` and the document exists, any
+ *   existing data will be overwritten.
+ *   If the mask is set and the document on the server has fields not covered by
+ *   the mask, they are left unchanged.
  *   Fields referenced in the mask, but not present in the input document, are
  *   deleted from the document on the server.
  *   The field paths in this mask must not contain a reserved field name.
@@ -100,6 +101,38 @@ var DocumentTransform = {
    *
    *   The number should be among the values of [ServerValue]{@link
    * google.firestore.v1beta1.ServerValue}
+   *
+   * @property {Object} appendMissingElements
+   *   Append the given elements in order if they are not already present in
+   *   the current field value.
+   *   If the field is not an array, or if the field does not yet exist, it is
+   *   first set to the empty array.
+   *
+   *   Equivalent numbers of different types (e.g. 3L and 3.0) are
+   *   considered equal when checking if a value is missing.
+   *   NaN is equal to NaN, and Null is equal to Null.
+   *   If the input contains multiple equivalent values, only the first will
+   *   be considered.
+   *
+   *   The corresponding transform_result will be the null value.
+   *
+   *   This object should have the same structure as [ArrayValue]{@link
+   * google.firestore.v1beta1.ArrayValue}
+   *
+   * @property {Object} removeAllFromArray
+   *   Remove all of the given elements from the array in the field.
+   *   If the field is not an array, or if the field does not yet exist, it is
+   *   set to the empty array.
+   *
+   *   Equivalent numbers of the different types (e.g. 3L and 3.0) are
+   *   considered equal when deciding whether an element should be removed.
+   *   NaN is equal to NaN, and Null is equal to Null.
+   *   This will remove all equivalent values if there are duplicates.
+   *
+   *   The corresponding transform_result will be the null value.
+   *
+   *   This object should have the same structure as [ArrayValue]{@link
+   * google.firestore.v1beta1.ArrayValue}
    *
    * @typedef FieldTransform
    * @memberof google.firestore.v1beta1

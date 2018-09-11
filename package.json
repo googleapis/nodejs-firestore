@@ -41,6 +41,7 @@
     "docs": "jsdoc -c .jsdoc.js",
     "generate-scaffolding": "repo-tools generate all",
     "system-test": "mocha build/system-test --timeout 600000",
+    "samples-test": "npm link && cd samples/ && npm link ../ && npm test && cd ../",
     "conformance": "mocha build/conformance",
     "test-only": "nyc mocha build/test",
     "test": "npm run test-only",

@@ -21,7 +21,7 @@ import {GrpcClient} from 'google-gax';
 import {google} from '../../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
-import v1beta1 from '../../src/v1beta1';
+const v1beta1 = require('../../src/v1beta1');
 
 // TODO: This should be a TypeScript import after the full migration.
 import Firestore = require('../../src');
@@ -91,7 +91,7 @@ export function createInstance(
   firestore.settings(initializationOptions);
 
   const clientPool = new ClientPool(/* concurrentRequestLimit= */ 1, () => {
-    const gapicClient: GapicClient = v1beta1(initializationOptions);
+    const gapicClient: GapicClient = new v1beta1(initializationOptions);
     if (apiOverrides) {
       Object.keys(apiOverrides).forEach(override => {
         gapicClient._innerApiCalls[override] = apiOverrides[override];
