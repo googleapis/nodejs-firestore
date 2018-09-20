@@ -253,7 +253,7 @@ class Firestore {
      * @private
      * @type {Object}
      */
-    this._initalizationSettings = null;
+    this._initializationSettings = null;
 
     /**
      * The serializer to use for the Protobuf transformation.
@@ -311,7 +311,7 @@ class Firestore {
           'Firestore object.');
     }
 
-    const mergedSettings = extend({}, this._initalizationSettings, settings);
+    const mergedSettings = extend({}, this._initializationSettings, settings);
     this.validateAndApplySettings(mergedSettings);
     this._settingsFrozen = true;
   }
@@ -330,7 +330,7 @@ class Firestore {
       this._referencePath = new ResourcePath('{{projectId}}', '(default)');
     }
 
-    this._initalizationSettings = settings;
+    this._initializationSettings = settings;
     this._serializer = new Serializer(this, this._timestampsInSnapshotsEnabled);
   }
 
@@ -778,7 +778,7 @@ follow these steps, YOUR APP MAY BREAK.`);
     const clientPool =
         new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
           const client =
-              new module.exports.v1beta1(this._initalizationSettings);
+              new module.exports.v1beta1(this._initializationSettings);
           logger('Firestore', null, 'Initialized Firestore GAPIC Client');
           return client;
         });
