@@ -36,7 +36,7 @@ import {DocumentChange} from './document-change';
 import {isPlainObject, Serializer} from './serializer';
 import {GeoPoint} from './geo-point';
 import {logger, setLibVersion, setLogFunction} from './logger';
-import {requestTag} from './util';
+import {DocumentGroup} from './document-group';
 
 import * as convert from './convert';
 
@@ -603,7 +603,35 @@ class Firestore {
   }
 
   /**
+   * Creates a `DocumentGroup` that can be used to efficiently retrieve multiple
+   * documents from Firestore
+   *
+   * @param {...DocumentReference} documents The `DocumentReferences` to receive.
+   * @return {DocumentGroup} A `DocumentGroup` for the provided documents.
+   *
+   * @example
+   * let documentRef1 = firestore.doc('col/doc1');
+   * let documentRef2 = firestore.doc('col/doc2');
+   *
+   * firestore.documentGroup(documentRef1, documentRef2).get().then(docs => {
+   *   console.log(`First document: ${JSON.stringify(docs[0])}`);
+   *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
+   * });
+   */
+  documentGroup(...documents) {
+    this._validator.minNumberOfArguments('documentGroup', arguments, 1);
+
+    for (let i = 0; i < documents.length; ++i) {
+      this._validator.isDocumentReference(i, documents[i]);
+    }
+
+    return new DocumentGroup(this, documents);
+  }
+
+  /**
    * Retrieves multiple documents from Firestore.
+   *
+   * @deprecated Use `.documentGroup(...).get()` instead.
    *
    * @param {...DocumentReference} documents - The document references
    * to receive.
@@ -627,100 +655,8 @@ class Firestore {
       this._validator.isDocumentReference(i, documents[i]);
     }
 
-    return this.getAll_(documents, requestTag());
-  }
-
-  /**
-   * Internal method to retrieve multiple documents from Firestore, optionally
-   * as part of a transaction.
-   *
-   * @private
-   * @param {Array.<DocumentReference>} docRefs - The documents
-   * to receive.
-   * @param {string} requestTag A unique client-assigned identifier for this
-   * request.
-   * @param {bytes=} transactionId - transactionId - The transaction ID to use
-   * for this read.
-   * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that contains an array with
-   * the resulting documents.
-   */
-  getAll_(docRefs, requestTag, transactionId) {
-    const requestedDocuments = new Set();
-    const retrievedDocuments = new Map();
-
-    let request = {
-      database: this.formattedName,
-      transaction: transactionId,
-    };
-
-    for (let docRef of docRefs) {
-      requestedDocuments.add(docRef.formattedName);
-    }
-
-    request.documents = Array.from(requestedDocuments);
-
-    const self = this;
-
-    return self.readStream('batchGetDocuments', request, requestTag, true)
-        .then(stream => {
-          return new Promise((resolve, reject) => {
-            stream
-                .on('error',
-                    err => {
-                      logger(
-                          'Firestore.getAll_', requestTag,
-                          'GetAll failed with error:', err);
-                      reject(err);
-                    })
-                .on('data',
-                    response => {
-                      try {
-                        let document;
-
-                        if (response.found) {
-                          logger(
-                              'Firestore.getAll_', requestTag,
-                              'Received document: %s', response.found.name);
-                          document =
-                              self.snapshot_(response.found, response.readTime);
-                        } else {
-                          logger(
-                              'Firestore.getAll_', requestTag,
-                              'Document missing: %s', response.missing);
-                          document = self.snapshot_(
-                              response.missing, response.readTime);
-                        }
-
-                        let path = document.ref.path;
-                        retrievedDocuments.set(path, document);
-                      } catch (err) {
-                        logger(
-                            'Firestore.getAll_', requestTag,
-                            'GetAll failed with exception:', err);
-                        reject(err);
-                      }
-                    })
-                .on('end', () => {
-                  logger(
-                      'Firestore.getAll_', requestTag, 'Received %d results',
-                      retrievedDocuments.size);
-
-                  // BatchGetDocuments doesn't preserve document order. We use
-                  // the request order to sort the resulting documents.
-                  const orderedDocuments = [];
-                  for (let docRef of docRefs) {
-                    let document = retrievedDocuments.get(docRef.path);
-                    if (!is.defined(document)) {
-                      reject(new Error(
-                          `Did not receive document for "${docRef.path}".`));
-                    }
-                    orderedDocuments.push(document);
-                  }
-                  resolve(orderedDocuments);
-                });
-            stream.resume();
-          });
-        });
+    const documentGroup = new DocumentGroup(this, documents);
+    return documentGroup.get();
   }
 
   /**
@@ -1465,3 +1401,12 @@ module.exports.FieldPath = FieldPath;
  * @type Timestamp
  */
 module.exports.Timestamp = Timestamp;
+
+/**
+ * {@link DocumentGroup} class.
+ *
+ * @name Firestore.DocumentGroup
+ * @see DocumentGroup
+ * @type DocumentGroup
+ */
+module.exports.DocumentGroup = DocumentGroup;

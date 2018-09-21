@@ -167,10 +167,7 @@ const GRPC_STATUS_CODE = {
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
-const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
-  assert(doc1 === doc2, 'Document watches only support one document.');
-  return 0;
-};
+const DOCUMENT_WATCH_COMPARATOR = (d1, d2) => d1.ref.ref.compareTo(d2.ref.ref);
 
 /**
  * @private
@@ -233,11 +230,13 @@ export class Watch {
    * reference for this watch.
    * @returns {Watch} A newly created Watch instance.
    */
-  static forDocument(documentRef) {
+  static forDocuments(documents) {
+    assert(
+        documents.length > 0, 'Document watches require at least one document');
     return new Watch(
-        documentRef.firestore, {
+        documents[0].firestore, {
           documents: {
-            documents: [documentRef.formattedName],
+            documents: documents.map(document => document.formattedName),
           },
           targetId: WATCH_TARGET_ID,
         },

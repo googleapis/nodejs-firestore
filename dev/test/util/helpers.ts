@@ -17,7 +17,7 @@
 'use strict';
 
 import {GrpcClient} from 'google-gax';
-
+import * as through2 from 'through2';
 import {google} from '../../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
@@ -35,7 +35,9 @@ const SSL_CREDENTIALS = (grpc.credentials as any).createInsecure();
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
-const DOCUMENT_NAME = `${DATABASE_ROOT}/documents/collectionId/documentId`;
+export const COLLECTION_ROOT =
+    `projects/${PROJECT_ID}/databases/(default)/documents/collectionId`;
+const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
 /** A Promise implementation that supports deferred resolution. */
 export class Deferred<R> {
@@ -157,7 +159,7 @@ export function document(
     field?: string, value?: string|api.IValue,
     ...fieldOrValue: Array<string|api.IValue>): api.IDocument {
   const document: api.IDocument = {
-    name: `${DATABASE_ROOT}/documents/collectionId/documentId`,
+    name: DOCUMENT_NAME,
     fields: {},
     createTime: {seconds: 1, nanos: 2},
     updateTime: {seconds: 3, nanos: 4},
@@ -222,4 +224,40 @@ export function writeResult(count: number): api.IWriteResponse {
   }
 
   return response;
+}
+
+export function found(name): api.IBatchGetDocumentsResponse {
+  return {
+    found: {
+      name: `${COLLECTION_ROOT}/${name}`,
+      fields: {},
+      createTime: {seconds: 1, nanos: 2},
+      updateTime: {seconds: 3, nanos: 4},
+    },
+    readTime: {seconds: 5, nanos: 6},
+  };
+}
+
+export function missing(name): api.IBatchGetDocumentsResponse {
+  return {
+    missing: `${COLLECTION_ROOT}/${name}`,
+    readTime: {seconds: 5, nanos: 6},
+  };
+}
+
+export function stream<T>(...results: Array<T|Error>): NodeJS.ReadWriteStream {
+  const stream = through2.obj();
+
+  setImmediate(() => {
+    for (const result of results) {
+      if (result instanceof Error) {
+        stream.destroy(result);
+        return;
+      }
+      stream.push(result);
+    }
+    stream.push(null);
+  });
+
+  return stream;
 }

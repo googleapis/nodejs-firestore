@@ -261,13 +261,13 @@ class StreamHelper {
 class WatchHelper {
   /**
    * @param streamHelper The StreamHelper base class for this Watch operation.
-   * @param reference The CollectionReference or DocumentReference that is being
-   * watched.
+   * @param target The CollectionReference, DocumentReference or DocumentGroup
+   * that is being watched.
    * @param targetId The target ID of the watch stream.
    */
-  constructor(streamHelper, reference, targetId) {
-    this.reference = reference;
-    this.serializer = reference.firestore._serializer;
+  constructor(streamHelper, target, targetId) {
+    this.target = target;
+    this.serializer = target.firestore._serializer;
     this.streamHelper = streamHelper;
     this.targetId = targetId;
     this.snapshotVersion = 0;
@@ -288,7 +288,7 @@ class WatchHelper {
    * @return The unsubscribe handler for the listener.
    */
   startWatch() {
-    this.unsubscribe = this.reference.onSnapshot(
+    this.unsubscribe = this.target.onSnapshot(
         snapshot => {
           this.deferredListener.on('snapshot', snapshot);
         },
@@ -2486,5 +2486,124 @@ describe('Query comparator', function() {
     assert.throws(() => {
       input.sort(comparator);
     }, /Trying to compare documents on fields that don't exist/);
+  });
+});
+
+describe('DocumentGroup watch', function() {
+  let firestore;
+  let targetId;
+  let streamHelper;
+
+  // The proto JSON that should be sent for the watch.
+  const watchJSON = (...docs) => {
+    const formattedNames = docs.map(
+        doc => `projects/${PROJECT_ID}/databases/(default)/documents/${doc}`);
+    return {
+      database: `projects/${PROJECT_ID}/databases/(default)`,
+      addTarget: {
+        documents: {documents: formattedNames},
+        targetId: targetId,
+      },
+    };
+  };
+
+
+  beforeEach(function() {
+    targetId = 0x1;
+    streamHelper = new StreamHelper(firestore);
+
+    const overrides = {listen: streamHelper.getListenCallback()};
+    return createInstance(overrides).then(firestoreClient => {
+      firestore = firestoreClient;
+    });
+  });
+
+  it('supports more than one document', () => {
+    const docA = firestore.doc('colA/docA');
+    const docB = firestore.doc('colB/docB');
+    const collectionGroup = firestore.documentGroup(docA, docB);
+
+    const watchHelper =
+        new WatchHelper(streamHelper, collectionGroup, targetId);
+
+    return watchHelper.runTest(watchJSON('colA/docA', 'colB/docB'), () => {
+      watchHelper.sendAddTarget();
+      watchHelper.sendDoc(docA, {a: 'a'});
+      watchHelper.sendDoc(docB, {b: 'b'});
+      watchHelper.sendCurrent();
+      watchHelper.sendSnapshot(1);
+      return watchHelper.await('snapshot').then(snapshot => {
+        assert.equal(snapshot.size, 2);
+      });
+    });
+  });
+
+  it('supports documents going in and out of scope', () => {
+    const docA = firestore.doc('colA/docA');
+    const docB = firestore.doc('colB/docB');
+    const docC = firestore.doc('colC/docC');
+    const collectionGroup = firestore.documentGroup(docA, docB, docC);
+
+    const watchHelper =
+        new WatchHelper(streamHelper, collectionGroup, targetId);
+
+    return watchHelper.runTest(
+        watchJSON('colA/docA', 'colB/docB', 'colC/docC'), () => {
+          watchHelper.sendAddTarget();
+          watchHelper.sendDoc(docA, {a: 'a'});
+          watchHelper.sendDoc(docB, {b: 'b'});
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(1);
+          return watchHelper.await('snapshot')
+              .then(snapshot => {
+                assert.equal(snapshot.size, 2);
+                watchHelper.sendDocDelete(docB);
+                watchHelper.sendDoc(docC, {c: 'c'});
+                watchHelper.sendSnapshot(2);
+                return watchHelper.await('snapshot')
+              })
+              .then(snapshot => {
+                assert.equal(snapshot.size, 2);
+                assert.equal(snapshot.docChanges()[0].type, 'removed');
+                assert.deepStrictEqual(snapshot.docChanges()[0].doc.ref, docB);
+                assert.equal(snapshot.docChanges()[1].type, 'added');
+                assert.deepStrictEqual(snapshot.docChanges()[1].doc.ref, docC);
+              });
+        });
+  });
+
+  it('orders documents by name', () => {
+    const docA = firestore.doc('colA/docA');
+    const docB = firestore.doc('colB/docB');
+    const collectionGroup = firestore.documentGroup(docB, docA);
+
+    const watchHelper =
+        new WatchHelper(streamHelper, collectionGroup, targetId);
+
+    return watchHelper.runTest(watchJSON('colB/docB', 'colA/docA'), () => {
+      watchHelper.sendAddTarget();
+      watchHelper.sendDoc(docB, {b: 'b'});
+      watchHelper.sendDoc(docA, {a: 'a'});
+      watchHelper.sendCurrent();
+      watchHelper.sendSnapshot(1);
+      return watchHelper.await('snapshot').then(snapshot => {
+        assert.equal(snapshot.size, 2);
+        assert.deepStrictEqual(snapshot.docs[0].ref, docA);
+        assert.deepStrictEqual(snapshot.docs[1].ref, docB);
+      });
+    });
+  });
+
+  it('rejects field mask', () => {
+    const doc = firestore.doc('col/doc');
+    const collectionGroup = firestore.documentGroup(doc);
+
+    assert.throws(
+        () => {collectionGroup.select().onSnapshot(() => {})},
+        /Firestore doesn't yet support FieldMasks with Snapshot Listeners. Calls to `select\(\)` can only be combined with `get\(\)` and `stream\(\)`./);
+
+    assert.throws(
+        () => {collectionGroup.select('field').onSnapshot(() => {})},
+        /Firestore doesn't yet support FieldMasks with Snapshot Listeners. Calls to `select\(\)` can only be combined with `get\(\)` and `stream\(\)`./);
   });
 });

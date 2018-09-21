@@ -123,7 +123,18 @@ declare namespace FirebaseFirestore {
     doc(documentPath: string): DocumentReference;
 
     /**
+     * Creates a `DocumentGroup` that can be used to efficiently retrieve
+     * multiple documents from Firestore
+     *
+     * @param documentRef The `DocumentReferences` to receive.
+     * @return A `DocumentGroup` for the provided documents.
+     */
+    documentGroup(...documentRef: DocumentReference[]): DocumentGroup;
+
+    /**
      * Retrieves multiple documents from Firestore.
+     *
+     * @deprecated Use `.documentGroup(...).get()` instead.
      *
      * @param documentRef The `DocumentReferences` to receive.
      * @return A Promise that resolves with an array of resulting document
@@ -164,6 +175,84 @@ declare namespace FirebaseFirestore {
      * atomic operation.
      */
     batch(): WriteBatch;
+  }
+
+  /**
+   * A `DocumentGroup` combines read operations for multiple documents and
+   * supports efficient retrieval for groups of documents from a Firestore
+   * database.
+   */
+  export class DocumentGroup {
+    /**
+     * The `Firestore` instance for the Firestore database (useful for
+     * performing transactions, etc.).
+     */
+    readonly firestore: Firestore;
+
+    /**
+     * Creates and returns a new DocumentGroup instance that applies a field
+     * mask to the result and returns only the specified subset of fields. You
+     * can specify a list of field paths to return, or use an empty list to only
+     * return the references of matching documents.
+     *
+     * Adding a field mask to a DocumentGroup does not filter results. Documents
+     * that do not contain values for all or any of the fields in the mask will
+     * continue be returned by this DocumentGroup.
+     *
+     * This function returns a new (immutable) instance of the DocumentGroup
+     * (rather than modify the existing instance) to impose the field mask.
+     * DocumentGroups that impose a field mask no longer supports real-time
+     * updates via `.onSnapshot()`.
+     *
+     * @param field The field paths to return.
+     * @return The created DocumentGroup.
+     */
+    select(...field: (string | FieldPath)[]): DocumentGroup;
+
+    /**
+     * Retrieves the documents in this DocumentGroup. The results are ordered
+     * to match the order of the references passed to `documentGroup(...)`.
+     *
+     * @return A Promise that will be resolved with an array of
+     * DocumentSnapshots.
+     */
+    get(): Promise<DocumentSnapshot[]>;
+
+    /*
+     * Retrieves the documents in this DocumentGroup and returns the results as
+     * Node Stream.
+     *
+     * Unlike `.get()`, the original input order is not preserved.
+     *
+     * @return A stream of DocumentSnapshots.
+     */
+    stream(): NodeJS.ReadableStream;
+
+    /**
+     * Attaches a listener to retrieve real-time change events for the document
+     * in this document group.
+     *
+     * The results are ordered by document name and missing documents are
+     * omitted. If you specified the same document reference multiple times,
+     * only one copy will be included in the QuerySnapshot.
+     *
+     * @param onNext A callback to be called every time new document data is
+     * available.
+     * @param onError A callback to be called if the listen fails or is
+     * cancelled. No further callbacks will occur.
+     * @return An unsubscribe function that can be called to cancel
+     * the snapshot listener.
+     */
+    onSnapshot(onNext: (snapshot: QuerySnapshot) => void,
+               onError?: (error: Error) => void) : () => void;
+
+    /**
+     * Returns 'true' if this `DocumentGroup` is equal to the provided one.
+     *
+     * @param other The `DocumentGroup` to compare against.
+     * @return true if this `DocumentGroup` is equal to the provided one.
+     */
+    isEqual(other: DocumentGroup): boolean;
   }
 
   /**
@@ -718,8 +807,8 @@ declare namespace FirebaseFirestore {
     protected constructor();
 
     /**
-     * The `Firestore` for the Firestore database (useful for performing
-     * transactions, etc.).
+     * The `Firestore` instance for the Firestore database (useful for
+     * performing transactions, etc.).
      */
     readonly firestore: Firestore;
 
@@ -927,9 +1016,9 @@ declare namespace FirebaseFirestore {
 
     /**
      * The query on which you called `get` or `onSnapshot` in order to get this
-     * `QuerySnapshot`.
+     * `QuerySnapshot`. This property is not set for `DocumentGroup` snapshots.
      */
-    readonly query: Query;
+    readonly query?: Query;
 
     /** An array of all the documents in the QuerySnapshot. */
     readonly docs: QueryDocumentSnapshot[];

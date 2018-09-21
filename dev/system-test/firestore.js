@@ -64,6 +64,66 @@ describe('Firestore class', function() {
   });
 });
 
+
+describe('DocumentGroup class', () => {
+  let firestore;
+  let randomCol;
+  let docA;
+  let docB;
+
+  beforeEach(async () => {
+    firestore = new Firestore({timestampsInSnapshots: true});
+    randomCol = getTestRoot(firestore);
+    docA = await randomCol.add({a: 'a'});
+    docB = await randomCol.add({a: 'a', b: 'b'});
+  });
+
+  it('supports get()', async () => {
+    const docs = await firestore.documentGroup(docA, docB).get();
+    assert.equal(docs.length, 2);
+  });
+
+  it('supports stream()', done => {
+    const docs = [];
+    const stream = firestore.documentGroup(docA, docB).stream();
+
+    stream.on('data', doc => docs.push(doc));
+    stream.on('end', () => {
+      assert.equal(docs.length, 2);
+      done();
+    })
+  });
+
+  it('supports field mask', async () => {
+    const docs =
+        await firestore.documentGroup(docA, docB).select('a', 'ignore').get();
+    assert.equal(docs.length, 2);
+    assert.deepStrictEqual(docs[0].data(), {a: 'a'});
+    assert.deepStrictEqual(docs[0].data(), {a: 'a'});
+  });
+
+  it('supports onSnapshot()', (done) => {
+    let count = 0;
+    let docC = randomCol.doc();
+    let unsubscribe =
+        firestore.documentGroup(docA, docB, docC).onSnapshot(snapshot => {
+          if (count === 0) {
+            assert.equal(snapshot.size, 2);
+            docC.set({});
+          } else if (count === 1) {
+            assert.equal(snapshot.size, 3);
+            docC.delete();
+          } else if (count === 2) {
+            assert.equal(snapshot.size, 2);
+            unsubscribe();
+            done();
+          }
+
+          ++count;
+        });
+  });
+});
+
 describe('CollectionReference class', function() {
   let firestore;
   let randomCol;
@@ -842,6 +902,17 @@ describe('Query class', function() {
         .then(res => {
           assert.deepStrictEqual(res.docs[0].ref.id, 'doc');
           assert.deepStrictEqual(res.docs[0].data(), {});
+        });
+  });
+
+  it('select() doesn\'t require field existence', function() {
+    let ref = randomCol.doc('doc');
+    return ref.set({foo: 'bar', bar: 'foo'})
+        .then(() => {
+          return randomCol.select('foo', 'ignore').get();
+        })
+        .then(res => {
+          assert.deepStrictEqual(res.docs[0].data(), {foo: 'bar'});
         });
   });
 

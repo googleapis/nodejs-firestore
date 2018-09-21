@@ -1,3 +1,4 @@
+///<reference path="../../types/firestore.d.ts"/>
 /**
  * Copyright 2017 Google Inc. All Rights Reserved.
  *
@@ -32,6 +33,7 @@ import GeoPoint = FirebaseFirestore.GeoPoint;
 import Precondition = FirebaseFirestore.Precondition;
 import SetOptions = FirebaseFirestore.SetOptions;
 import Timestamp = FirebaseFirestore.Timestamp;
+import DocumentGroup = FirebaseFirestore.DocumentGroup;
 
 // This test verifies the Typescript typings and is not meant for execution.
 xdescribe('firestore.d.ts', function() {
@@ -62,6 +64,7 @@ xdescribe('firestore.d.ts', function() {
     const collRef: CollectionReference = firestore.collection('coll');
     const docRef1: DocumentReference = firestore.doc('coll/doc');
     const docRef2: DocumentReference = firestore.doc('coll/doc');
+    const documentGroup: DocumentGroup = firestore.documentGroup(docRef1, docRef2);
     firestore.getAll(docRef1, docRef2).then(
         (docs: DocumentSnapshot[]) => {
         });
@@ -103,6 +106,17 @@ xdescribe('firestore.d.ts', function() {
       transaction = transaction.delete(docRef, precondition);
       return Promise.resolve()
     });
+  });
+
+  it('has typings for DocumentGroup', () => {
+    const docRef: DocumentReference = firestore.doc('coll/doc');
+    let documentGroup: DocumentGroup = firestore.documentGroup(docRef);
+    documentGroup = documentGroup.select('a');
+    documentGroup = documentGroup.select(new FieldPath('a'), 'b');
+    let stream : NodeJS.ReadableStream = documentGroup.stream();
+    let docs: Promise<DocumentSnapshot[]> = documentGroup.get();
+    documentGroup.onSnapshot((snap:QuerySnapshot) => {});
+    documentGroup.onSnapshot((snap:QuerySnapshot) => {}, (e:Error) => {});
   });
 
   it('has typings for WriteBatch', () => {

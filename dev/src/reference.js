@@ -31,7 +31,7 @@ import {WriteBatch} from './write-batch';
 import {Timestamp} from './timestamp';
 import {FieldPath, ResourcePath} from './path';
 import {autoId, requestTag} from './util';
-import {customObjectError} from './validate';
+import {customObjectError, Validator} from './validate';
 
 /*!
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -451,7 +451,7 @@ export class DocumentReference {
       onError = console.error;
     }
 
-    let watch = Watch.forDocument(this);
+    let watch = Watch.forDocuments([this]);
 
     return watch.onSnapshot((readTime, size, docs) => {
       for (let document of docs()) {
@@ -659,7 +659,7 @@ export class QuerySnapshot {
    * @private
    * @hideconstructor
    *
-   * @param {Query} query - The originating query.
+   * @param {Query|null} query - If applicable, the originating query.
    * @param {Timestamp} readTime - The time when this query snapshot was
    * obtained.
    * @param {number} size - The number of documents in the result set.
@@ -669,8 +669,8 @@ export class QuerySnapshot {
    * document change events for this snapshot.
    */
   constructor(query, readTime, size, docs, changes) {
+    this._validator = new Validator();
     this._query = query;
-    this._validator = query.firestore._validator;
     this._readTime = readTime;
     this._size = size;
     this._docs = docs;
@@ -681,9 +681,9 @@ export class QuerySnapshot {
 
   /**
    * The query on which you called get() or onSnapshot() in order to get this
-   * QuerySnapshot.
+   * QuerySnapshot. This property is not set for `DocumentGroup` snapshots.
    *
-   * @type {Query}
+   * @type {Query|undefined}
    * @name QuerySnapshot#query
    * @readonly
    *
@@ -699,7 +699,7 @@ export class QuerySnapshot {
    * });
    */
   get query() {
-    return this._query;
+    return this._query || undefined;
   }
 
   /**

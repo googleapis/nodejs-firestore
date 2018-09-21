@@ -20,6 +20,7 @@ import is from 'is';
 
 import {DocumentReference, Query} from './reference';
 import {requestTag} from './util';
+import {DocumentGroup} from './document-group';
 
 /*!
  * Error message for transactional reads that were executed after performing
@@ -87,11 +88,7 @@ export class Transaction {
     }
 
     if (is.instance(refOrQuery, DocumentReference)) {
-      return this._firestore
-          .getAll_([refOrQuery], this._requestTag, this._transactionId)
-          .then(res => {
-            return Promise.resolve(res[0]);
-          });
+      return this.getAll(refOrQuery).then(([res]) => res);
     }
 
     if (is.instance(refOrQuery, Query)) {
@@ -135,8 +132,9 @@ export class Transaction {
       this._validator.isDocumentReference(i, documents[i]);
     }
 
-    return this._firestore.getAll_(
-        documents, this._requestTag, this._transactionId);
+    const documentGroup = new DocumentGroup(
+        this._firestore, documents, {transactionId: this._transactionId});
+    return documentGroup.get();
   }
 
   /**

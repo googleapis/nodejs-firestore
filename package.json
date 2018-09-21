@@ -39,6 +39,7 @@
     "codecov": "nyc report --reporter=json && codecov -f .coverage/*.json",
     "predocs": "npm run compile",
     "docs": "jsdoc -c .jsdoc.js",
+    "cover": "nyc npm test",
     "generate-scaffolding": "repo-tools generate all",
     "system-test": "mocha build/system-test --timeout 600000",
     "samples-test": "npm link && cd samples/ && npm link ../ && npm test && cd ../",
@@ -86,5 +87,20 @@
     "ts-node": "^7.0.0",
     "source-map-support": "^0.5.6",
     "typescript": "^2.9.2"
+  },
+  "nyc": {
+    "include": [
+      "dev/src/*.ts",
+      "dev/src/.js"
+    ],
+    "extension": [
+      ".ts",
+      ".js"
+    ],
+    "reporter": [
+      "json",
+      "html"
+    ],
+    "all": true
   }
 }
