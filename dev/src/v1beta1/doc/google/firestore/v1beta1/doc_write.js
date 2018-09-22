@@ -64,7 +64,7 @@
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Write definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
-var Write = {
+const Write = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -86,7 +86,7 @@ var Write = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentTransform definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
-var DocumentTransform = {
+const DocumentTransform = {
   // This is for documentation. Actual contents will be loaded by gRPC.
 
   /**
@@ -187,7 +187,7 @@ var DocumentTransform = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.WriteResult definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
-var WriteResult = {
+const WriteResult = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -218,7 +218,7 @@ var WriteResult = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
-var DocumentChange = {
+const DocumentChange = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -249,7 +249,7 @@ var DocumentChange = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentDelete definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
-var DocumentDelete = {
+const DocumentDelete = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -281,7 +281,7 @@ var DocumentDelete = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentRemove definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
-var DocumentRemove = {
+const DocumentRemove = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -301,6 +301,6 @@ var DocumentRemove = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ExistenceFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
  */
-var ExistenceFilter = {
+const ExistenceFilter = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
