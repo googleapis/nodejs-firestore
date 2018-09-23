@@ -39,9 +39,11 @@ const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
 
 /** List of test cases that are ignored. */
+// tslint:disable-next-line:no-any
 const ignoredRe: any[] = [];
 
 /** If non-empty, list the test cases to run exclusively. */
+// tslint:disable-next-line:no-any
 const exclusiveRe: any[] = [];
 
 // The project ID used in the conformance test protos.
@@ -50,21 +52,21 @@ const CONFORMANCE_TEST_PROJECT_ID = 'projectID';
 // Firestore instance initialized by the test runner.
 let firestore;
 
-const docRef = function(path) {
+const docRef = path => {
   const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
   return firestore.doc(relativePath);
 };
 
-const collRef = function(path) {
+const collRef = path => {
   const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
   return firestore.collection(relativePath);
 };
 
-const watchQuery = function() {
+const watchQuery = () => {
   return firestore.collection('C').orderBy('a');
 };
 
-const createInstance = function(overrides) {
+const createInstance = overrides => {
   return createInstanceHelper(
              overrides, {projectId: CONFORMANCE_TEST_PROJECT_ID})
       .then(firestoreClient => {
@@ -124,9 +126,9 @@ const convertInput = {
     return new Firestore.FieldPath(path.field);
   },
   paths: fields => {
-    const convertedPaths: {}[] = [];
+    const convertedPaths: Array<{}> = [];
     if (fields) {
-      for (let field of fields) {
+      for (const field of fields) {
         convertedPaths.push(convertInput.path(field));
       }
     } else {
@@ -135,21 +137,21 @@ const convertInput = {
     return convertedPaths;
   },
   cursor: cursor => {
-    const args: {}[] = [];
+    const args: Array<{}> = [];
     if (cursor.docSnapshot) {
       args.push(DocumentSnapshot.fromObject(
           docRef(cursor.docSnapshot.path),
           convertInput.argument(cursor.docSnapshot.jsonData)));
     } else {
-      for (let jsonValue of cursor.jsonValues) {
+      for (const jsonValue of cursor.jsonValues) {
         args.push(convertInput.argument(jsonValue));
       }
     }
     return args;
   },
   snapshot: snapshot => {
-    const docs: {}[] = [];
-    const changes: {}[] = [];
+    const docs: Array<{}> = [];
+    const changes: Array<{}> = [];
     const readTime = Firestore.Timestamp.fromProto(snapshot.readTime);
 
     for (const doc of snapshot.docs) {
@@ -176,7 +178,7 @@ const convertInput = {
 const convertProto = {
   commitRequest: commitRequest => {
     const deepCopy = JSON.parse(JSON.stringify(commitRequest));
-    for (let write of deepCopy.writes) {
+    for (const write of deepCopy.writes) {
       if (write.update) {
         write.update.fields = convert.documentFromJson(write.update.fields);
       }
@@ -197,8 +199,8 @@ const convertProto = {
   },
   position: position => {
     const deepCopy = JSON.parse(JSON.stringify(position));
-    const values: {}[] = [];
-    for (let value of position.values) {
+    const values: Array<{}> = [];
+    for (const value of position.values) {
       values.push(convert.valueFromJson(value));
     }
     deepCopy.values = values;
@@ -211,7 +213,7 @@ const convertProto = {
           convert.valueFromJson(deepCopy.where.fieldFilter.value);
     }
     if (deepCopy.where && deepCopy.where.compositeFilter) {
-      for (let filter of deepCopy.where.compositeFilter.filters) {
+      for (const filter of deepCopy.where.compositeFilter.filters) {
         filter.fieldFilter.value =
             convert.valueFromJson(filter.fieldFilter.value);
       }
@@ -248,6 +250,7 @@ function commitHandler(spec) {
     try {
       assert.deepEqual(request, convertProto.commitRequest(spec.request));
 
+      // tslint:disable-next-line:no-any
       const res: any = {
         commitTime: {},
         writeResults: [],
@@ -271,11 +274,8 @@ function queryHandler(spec) {
   return request => {
     assert.deepEqual(
         request.structuredQuery, convertProto.structuredQuery(spec.query));
-
-    let stream = through2.obj();
-    setImmediate(function() {
-      stream.push(null);
-    });
+    const stream = through2.obj();
+    setImmediate(() => stream.push(null));
     return stream;
   };
 }
@@ -285,17 +285,14 @@ function getHandler(spec) {
   return request => {
     const getDocument = spec.request;
     assert.equal(request.documents[0], getDocument.name);
-
-    let stream = through2.obj();
-
-    setImmediate(function() {
+    const stream = through2.obj();
+    setImmediate(() => {
       stream.push({
         missing: getDocument.name,
         readTime: {seconds: 0, nanos: 0},
       });
       stream.push(null);
     });
-
     return stream;
   };
 }
@@ -303,11 +300,10 @@ function getHandler(spec) {
 function runTest(spec) {
   console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`);
 
-  const updateTest = function(spec) {
+  const updateTest = spec => {
     const overrides = {commit: commitHandler(spec)};
-
     return createInstance(overrides).then(() => {
-      let varargs: {}[] = [];
+      const varargs: Array<{}> = [];
 
       if (spec.jsonData) {
         varargs[0] = convertInput.argument(spec.jsonData);
@@ -329,19 +325,18 @@ function runTest(spec) {
     });
   };
 
-  const queryTest = function(spec) {
+  const queryTest = spec => {
     const overrides = {runQuery: queryHandler(spec)};
-
-    const applyClause = function(query, clause) {
+    const applyClause = (query, clause) => {
       if (clause.select) {
         query =
             query.select.apply(query, convertInput.paths(clause.select.fields));
       } else if (clause.where) {
-        let fieldPath = convertInput.path(clause.where.path);
-        let value = convertInput.argument(clause.where.jsonValue);
+        const fieldPath = convertInput.path(clause.where.path);
+        const value = convertInput.argument(clause.where.jsonValue);
         query = query.where(fieldPath, clause.where.op, value);
       } else if (clause.orderBy) {
-        let fieldPath = convertInput.path(clause.orderBy.path);
+        const fieldPath = convertInput.path(clause.orderBy.path);
         query = query.orderBy(fieldPath, clause.orderBy.direction);
       } else if (clause.offset) {
         query = query.offset(clause.offset);
@@ -364,16 +359,15 @@ function runTest(spec) {
 
     return createInstance(overrides).then(() => {
       let query = collRef(spec.collPath);
-      for (let clause of spec.clauses) {
+      for (const clause of spec.clauses) {
         query = applyClause(query, clause);
       }
       return query.get();
     });
   };
 
-  const deleteTest = function(spec) {
+  const deleteTest = spec => {
     const overrides = {commit: commitHandler(spec)};
-
     return createInstance(overrides).then(() => {
       if (spec.precondition) {
         const precondition = convertInput.precondition(deleteSpec.precondition);
@@ -384,12 +378,11 @@ function runTest(spec) {
     });
   };
 
-  const setTest = function(spec) {
+  const setTest = spec => {
     const overrides = {commit: commitHandler(spec)};
-
     return createInstance(overrides).then(() => {
+      // tslint:disable-next-line:no-any
       const setOption: any = {};
-
       if (spec.option && spec.option.all) {
         setOption.merge = true;
       } else if (spec.option && spec.option.fields) {
@@ -398,34 +391,29 @@ function runTest(spec) {
           setOption.mergeFields.push(new Firestore.FieldPath(fieldPath.field));
         }
       }
-
       return docRef(setSpec.docRefPath)
           .set(convertInput.argument(spec.jsonData), setOption);
     });
   };
 
-  const createTest = function(spec) {
+  const createTest = spec => {
     const overrides = {commit: commitHandler(spec)};
-
     return createInstance(overrides).then(() => {
       return docRef(spec.docRefPath)
           .create(convertInput.argument(spec.jsonData));
     });
   };
 
-  const getTest = function(spec) {
+  const getTest = spec => {
     const overrides = {batchGetDocuments: getHandler(spec)};
-
     return createInstance(overrides).then(() => {
       return docRef(spec.docRefPath).get();
     });
   };
 
-  const watchTest = function(spec) {
-    let expectedSnapshots = spec.snapshots;
-
+  const watchTest = spec => {
+    const expectedSnapshots = spec.snapshots;
     const writeStream = through2.obj();
-
     const overrides = {
       listen: () => duplexify.obj(through2.obj(), writeStream)
     };
@@ -511,11 +499,11 @@ function runTest(spec) {
       });
 }
 
-describe('Conformance Tests', function() {
+describe('Conformance Tests', () => {
   const loadTestCases = () => {
     const protobufRoot = new protobufjs.Root();
 
-    protobufRoot.resolvePath = function(origin, target) {
+    protobufRoot.resolvePath = (origin, target) => {
       if (/^google\/.*/.test(target)) {
         target = path.join(googleProtoFiles(), target.substr('google/'.length));
       }
@@ -529,12 +517,13 @@ describe('Conformance Tests', function() {
         require('fs').readFileSync(path.join(__dirname, 'test-suite.binproto'));
 
     const testType = protoDefinition.lookupType('tests.TestSuite');
+    // tslint:disable-next-line:no-any
     const testSuite: any = testType.decode(binaryProtoData);
 
     return testSuite.tests;
   };
 
-  for (let testCase of loadTestCases()) {
+  for (const testCase of loadTestCases()) {
     const isIgnored = ignoredRe.find(re => re.test(testCase.description));
     const isExclusive = exclusiveRe.find(re => re.test(testCase.description));
 

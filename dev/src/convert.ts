@@ -44,19 +44,20 @@ const validate = createValidator();
  * @return {{nanos,seconds}|undefined} The value as expected by Protobuf JS or
  * undefined if no input was provided.
  */
-export function timestampFromJson(timestampValue, argumentName?: string) {
+function convertTimestamp(timestampValue, argumentName?) {
+  // tslint:disable-next-line:no-any
   let timestampProto: any = undefined;
 
   if (is.string(timestampValue)) {
-    let date = new Date(timestampValue);
-    let seconds = Math.floor(date.getTime() / 1000);
+    const date = new Date(timestampValue);
+    const seconds = Math.floor(date.getTime() / 1000);
     let nanos = 0;
 
     if (timestampValue.length > 20) {
       const nanoString =
           timestampValue.substring(20, timestampValue.length - 1);
       const trailingZeroes = 9 - nanoString.length;
-      nanos = parseInt(nanoString, 10) * Math.pow(10, trailingZeroes);
+      nanos = Number(nanoString) * Math.pow(10, trailingZeroes);
     }
 
     if (isNaN(seconds) || isNaN(nanos)) {
@@ -107,7 +108,7 @@ export function detectValueType(proto) {
     return proto.valueType;
   }
 
-  let detectedValues: string[] = [];
+  const detectedValues: string[] = [];
 
   if (is.defined(proto.stringValue)) {
     detectedValues.push('stringValue');
@@ -160,23 +161,23 @@ export function detectValueType(proto) {
  * format.
  * @return {object} The `firestore.v1beta1.Value` in Protobuf JS format.
  */
-export function valueFromJson(fieldValue) {
-  let valueType = detectValueType(fieldValue);
+function convertValue(fieldValue) {
+  const valueType = detectValueType(fieldValue);
 
   switch (valueType) {
     case 'timestampValue':
       return {
-        timestampValue: timestampFromJson(fieldValue.timestampValue),
+        timestampValue: convertTimestamp(fieldValue.timestampValue),
       };
     case 'bytesValue':
       return {
         bytesValue: convertBytes(fieldValue.bytesValue),
       };
     case 'arrayValue': {
-      let arrayValue: {}[] = [];
+      const arrayValue: Array<{}> = [];
       if (is.array(fieldValue.arrayValue.values)) {
-        for (let value of fieldValue.arrayValue.values) {
-          arrayValue.push(documentFromJson(value));
+        for (const value of fieldValue.arrayValue.values) {
+          arrayValue.push(convertValue(value));
         }
       }
       return {
@@ -186,10 +187,10 @@ export function valueFromJson(fieldValue) {
       };
     }
     case 'mapValue': {
-      let mapValue = {};
-      for (let prop in fieldValue.mapValue.fields) {
+      const mapValue = {};
+      for (const prop in fieldValue.mapValue.fields) {
         if (fieldValue.mapValue.fields.hasOwnProperty(prop)) {
-          mapValue[prop] = valueFromJson(fieldValue.mapValue.fields[prop]);
+          mapValue[prop] = convertValue(fieldValue.mapValue.fields[prop]);
         }
       }
       return {
@@ -213,14 +214,25 @@ export function valueFromJson(fieldValue) {
  * format.
  * @return {object} The `firestore.v1beta1.Document` in Protobuf JS format.
  */
-export function documentFromJson(document) {
-  let result = {};
+function convertDocument(document) {
+  const result = {};
 
-  for (let prop in document) {
+  for (const prop in document) {
     if (document.hasOwnProperty(prop)) {
-      result[prop] = valueFromJson(document[prop]);
+      result[prop] = convertValue(document[prop]);
     }
   }
 
   return result;
 }
+
+// module.exports = {
+//   documentFromJson: convertDocument,
+//   timestampFromJson: convertTimestamp,
+//   valueFromJson: convertValue,
+//   detectValueType: detectValueType,
+// };
+
+export const documentFromJson = convertDocument;
+export const timestampFromJson = convertTimestamp;
+export const valueFromJson = convertValue;
