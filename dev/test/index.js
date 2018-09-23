@@ -574,7 +574,6 @@ describe('snapshot_() method', function() {
   it('deserializes all supported types from Proto3 JSON', function() {
     let doc = firestore.snapshot_(
         allSupportedTypesJson, '1970-01-01T00:00:05.000000006Z', 'json');
-
     verifyAllSupportedTypes(doc);
   });
 

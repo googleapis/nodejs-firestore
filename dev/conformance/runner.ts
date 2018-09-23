@@ -25,7 +25,7 @@ import protobufjs from 'protobufjs';
 import duplexify from 'duplexify';
 
 import {google} from '../protos/firestore_proto_api';
-import {Firestore} from '../src/index';
+const {Firestore} = require('../src/index');
 import {ResourcePath} from '../src/path';
 import {DocumentSnapshot} from '../src/document';
 import * as convert from '../src/convert';
@@ -39,10 +39,10 @@ const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
 
 /** List of test cases that are ignored. */
-const ignoredRe = [];
+const ignoredRe: any[] = [];
 
 /** If non-empty, list the test cases to run exclusively. */
-const exclusiveRe = [];
+const exclusiveRe: any[] = [];
 
 // The project ID used in the conformance test protos.
 const CONFORMANCE_TEST_PROJECT_ID = 'projectID';
@@ -124,7 +124,7 @@ const convertInput = {
     return new Firestore.FieldPath(path.field);
   },
   paths: fields => {
-    const convertedPaths = [];
+    const convertedPaths: {}[] = [];
     if (fields) {
       for (let field of fields) {
         convertedPaths.push(convertInput.path(field));
@@ -135,7 +135,7 @@ const convertInput = {
     return convertedPaths;
   },
   cursor: cursor => {
-    const args = [];
+    const args: {}[] = [];
     if (cursor.docSnapshot) {
       args.push(DocumentSnapshot.fromObject(
           docRef(cursor.docSnapshot.path),
@@ -148,8 +148,8 @@ const convertInput = {
     return args;
   },
   snapshot: snapshot => {
-    const docs = [];
-    const changes = [];
+    const docs: {}[] = [];
+    const changes: {}[] = [];
     const readTime = Firestore.Timestamp.fromProto(snapshot.readTime);
 
     for (const doc of snapshot.docs) {
@@ -197,7 +197,7 @@ const convertProto = {
   },
   position: position => {
     const deepCopy = JSON.parse(JSON.stringify(position));
-    const values = [];
+    const values: {}[] = [];
     for (let value of position.values) {
       values.push(convert.valueFromJson(value));
     }
@@ -248,7 +248,7 @@ function commitHandler(spec) {
     try {
       assert.deepEqual(request, convertProto.commitRequest(spec.request));
 
-      const res = {
+      const res: any = {
         commitTime: {},
         writeResults: [],
       };
@@ -307,7 +307,7 @@ function runTest(spec) {
     const overrides = {commit: commitHandler(spec)};
 
     return createInstance(overrides).then(() => {
-      let varargs = [];
+      let varargs: {}[] = [];
 
       if (spec.jsonData) {
         varargs[0] = convertInput.argument(spec.jsonData);
@@ -388,7 +388,7 @@ function runTest(spec) {
     const overrides = {commit: commitHandler(spec)};
 
     return createInstance(overrides).then(() => {
-      const setOption = {};
+      const setOption: any = {};
 
       if (spec.option && spec.option.all) {
         setOption.merge = true;
@@ -529,7 +529,7 @@ describe('Conformance Tests', function() {
         require('fs').readFileSync(path.join(__dirname, 'test-suite.binproto'));
 
     const testType = protoDefinition.lookupType('tests.TestSuite');
-    const testSuite = testType.decode(binaryProtoData);
+    const testSuite: any = testType.decode(binaryProtoData);
 
     return testSuite.tests;
   };

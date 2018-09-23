@@ -5,7 +5,6 @@
     "declaration": false, // TODO: Remove when all source are migrated to TS
     "sourceMap": false,
     "outDir": "build",
-    "target": "es6",
     "noImplicitAny": false, // TODO: Remove when all source are migrated to TS
     "allowSyntheticDefaultImports": true // TODO: Remove when all source are migrated to TS
   },
@@ -17,7 +16,7 @@
     "dev/test/*.ts",
     "dev/test/**/*.ts",
     "dev/system-test/*.js",
-    "dev/conformance/*.js"
+    "dev/conformance/*.ts"
   ],
   "exclude": [
     "dev/test/typescript.ts"
