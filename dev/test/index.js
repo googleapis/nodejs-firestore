@@ -297,8 +297,8 @@ describe('instantiation', function() {
     let firestore = new Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    assert.equal(firestore._initalizationSettings.projectId, PROJECT_ID);
-    assert.equal(firestore._initalizationSettings.foo, 'bar');
+    assert.equal(firestore._initializationSettings.projectId, PROJECT_ID);
+    assert.equal(firestore._initializationSettings.foo, 'bar');
   });
 
   it('can only call settings() once', function() {
