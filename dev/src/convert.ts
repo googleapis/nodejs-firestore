@@ -67,8 +67,8 @@ function convertTimestamp(timestampValue, argumentName?: string) {
     }
 
     timestampProto = {
-      seconds,
-      nanos,
+      seconds: seconds || undefined,
+      nanos: nanos || undefined,
     };
   } else if (is.defined(timestampValue)) {
     validate.isObject('timestampValue', timestampValue);
