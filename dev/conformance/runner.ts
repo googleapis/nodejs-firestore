@@ -31,6 +31,7 @@ import {DocumentSnapshot} from '../src/document';
 import * as convert from '../src/convert';
 
 import {createInstance as createInstanceHelper} from '../test/util/helpers';
+import {AnyDuringMigration} from '../src/types';
 
 const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
                          .ServerValue.REQUEST_TIME;
@@ -39,12 +40,10 @@ const gax = require('google-gax');
 const grpc = new gax.GrpcClient().grpc;
 
 /** List of test cases that are ignored. */
-// tslint:disable-next-line:no-any
-const ignoredRe: any[] = [];
+const ignoredRe: RegExp[] = [];
 
 /** If non-empty, list the test cases to run exclusively. */
-// tslint:disable-next-line:no-any
-const exclusiveRe: any[] = [];
+const exclusiveRe: RegExp[] = [];
 
 // The project ID used in the conformance test protos.
 const CONFORMANCE_TEST_PROJECT_ID = 'projectID';
@@ -249,19 +248,15 @@ function commitHandler(spec) {
   return (request, options, callback) => {
     try {
       assert.deepEqual(request, convertProto.commitRequest(spec.request));
-
-      // tslint:disable-next-line:no-any
-      const res: any = {
+      const res: google.firestore.v1beta1.IWriteResponse = {
         commitTime: {},
         writeResults: [],
       };
-
       for (let i = 1; i <= request.writes.length; ++i) {
-        res.writeResults.push({
+        res.writeResults!.push({
           updateTime: {},
         });
       }
-
       callback(null, res);
     } catch (err) {
       callback(err);
@@ -381,8 +376,7 @@ function runTest(spec) {
   const setTest = spec => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      // tslint:disable-next-line:no-any
-      const setOption: any = {};
+      const setOption: AnyDuringMigration = {};
       if (spec.option && spec.option.all) {
         setOption.merge = true;
       } else if (spec.option && spec.option.fields) {

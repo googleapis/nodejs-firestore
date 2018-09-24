@@ -19,6 +19,7 @@
 import is from 'is';
 
 import {createValidator} from './validate';
+import * as fspb from '../protos/firestore_proto_api';
 
 const validate = createValidator();
 
@@ -44,9 +45,8 @@ const validate = createValidator();
  * @return {{nanos,seconds}|undefined} The value as expected by Protobuf JS or
  * undefined if no input was provided.
  */
-function convertTimestamp(timestampValue, argumentName?) {
-  // tslint:disable-next-line:no-any
-  let timestampProto: any = undefined;
+function convertTimestamp(timestampValue, argumentName?: string) {
+  let timestampProto: fspb.google.protobuf.ITimestamp|undefined;
 
   if (is.string(timestampValue)) {
     const date = new Date(timestampValue);
@@ -67,14 +67,14 @@ function convertTimestamp(timestampValue, argumentName?) {
     }
 
     timestampProto = {
-      seconds: seconds || undefined,
-      nanos: nanos || undefined,
+      seconds,
+      nanos,
     };
   } else if (is.defined(timestampValue)) {
     validate.isObject('timestampValue', timestampValue);
     timestampProto = {
-      seconds: timestampValue.seconds || undefined,
-      nanos: timestampValue.nanos || undefined,
+      seconds: timestampValue.seconds,
+      nanos: timestampValue.nanos,
     };
   }
 
@@ -225,13 +225,6 @@ function convertDocument(document) {
 
   return result;
 }
-
-// module.exports = {
-//   documentFromJson: convertDocument,
-//   timestampFromJson: convertTimestamp,
-//   valueFromJson: convertValue,
-//   detectValueType: detectValueType,
-// };
 
 export const documentFromJson = convertDocument;
 export const timestampFromJson = convertTimestamp;
