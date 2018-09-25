@@ -22,6 +22,7 @@
  * code must still cast to a particular type before using it.
  */
 import {google} from '../protos/firestore_proto_api';
+import {FieldPath} from './path';
 
 export type AnyJs = null|undefined|boolean|number|string|object;
 
@@ -32,3 +33,62 @@ export type AnyDuringMigration = any;
 export type ApiMapValue = {
   [k: string]: google.firestore.v1beta1.IValue
 };
+
+// tslint:disable-next-line:no-any
+/** JavaScript input from the API layer. */
+export type UserInput = any;
+
+/**
+ * Document data (for use with `DocumentReference.set()`) consists of fields
+ * mapped to values.
+ */
+export type DocumentData = {
+  [field: string]: UserInput
+};
+
+/**
+ * Update data (for use with `DocumentReference.update()`) consists of field
+ * paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that contain dots
+ * reference nested fields within the document.
+ */
+export type UpdateData = {
+  [fieldPath: string]: UserInput
+};
+
+/**
+ * An options object that configures conditional behavior of `update()` and
+ * `delete()` calls in `DocumentReference`, `WriteBatch`, and `Transaction`.
+ * Using Preconditions, these calls can be restricted to only apply to
+ * documents that match the specified restrictions.
+ */
+export interface Precondition {
+  /**
+   * If set, the last update time to enforce.
+   */
+  readonly lastUpdateTime?: Timestamp;
+}
+
+/**
+ * An options object that configures the behavior of `set()` calls in
+ * `DocumentReference`, `WriteBatch` and `Transaction`. These calls can be
+ * configured to perform granular merges instead of overwriting the target
+ * documents in their entirety.
+ */
+export interface SetOptions {
+  /**
+   * Changes the behavior of a set() call to only replace the values specified
+   * in its data argument. Fields omitted from the set() call remain
+   * untouched.
+   */
+  readonly merge?: boolean;
+
+  /**
+   * Changes the behavior of set() calls to only replace the specified field
+   * paths. Any field path that is not specified is ignored and remains
+   * untouched.
+   *
+   * It is an error to pass a SetOptions object to a set() call that is
+   * missing a value for any of the fields specified here.
+   */
+  readonly mergeFields?: Array<string|FieldPath>;
+}

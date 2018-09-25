@@ -25,6 +25,8 @@ import protobufjs from 'protobufjs';
 import duplexify from 'duplexify';
 
 import {google} from '../protos/firestore_proto_api';
+import api = google.firestore.v1beta1;
+
 const {Firestore} = require('../src/index');
 import {ResourcePath} from '../src/path';
 import {DocumentSnapshot} from '../src/document';
@@ -33,11 +35,9 @@ import * as convert from '../src/convert';
 import {createInstance as createInstanceHelper} from '../test/util/helpers';
 import {AnyDuringMigration} from '../src/types';
 
-const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
-                         .ServerValue.REQUEST_TIME;
+const REQUEST_TIME =
+    api.DocumentTransform.FieldTransform.ServerValue.REQUEST_TIME;
 
-const gax = require('google-gax');
-const grpc = new gax.GrpcClient().grpc;
 
 /** List of test cases that are ignored. */
 const ignoredRe: RegExp[] = [];
@@ -173,8 +173,16 @@ const convertInput = {
   },
 };
 
+
 /** Converts Firestore Protobuf types in Proto3 JSON format to Protobuf JS. */
 const convertProto = {
+  operator: op => api.StructuredQuery.FieldFilter.Operator[op] ||
+      api.StructuredQuery.UnaryFilter.Operator[op],
+  direction: dir => dir === 'DESCENDING' ?
+      api.StructuredQuery.Direction.DESCENDING :
+      api.StructuredQuery.Direction.ASCENDING,
+  targetChange: type => type ? api.TargetChange.TargetChangeType[type] :
+                               api.TargetChange.TargetChangeType.NO_CHANGE,
   commitRequest: commitRequest => {
     const deepCopy = JSON.parse(JSON.stringify(commitRequest));
     for (const write of deepCopy.writes) {
@@ -208,13 +216,27 @@ const convertProto = {
   structuredQuery: queryRequest => {
     const deepCopy = JSON.parse(JSON.stringify(queryRequest));
     if (deepCopy.where && deepCopy.where.fieldFilter) {
+      deepCopy.where.fieldFilter.op =
+          convertProto.operator(deepCopy.where.fieldFilter.op);
       deepCopy.where.fieldFilter.value =
           convert.valueFromJson(deepCopy.where.fieldFilter.value);
     }
     if (deepCopy.where && deepCopy.where.compositeFilter) {
+      deepCopy.where.compositeFilter.op =
+          api.StructuredQuery.CompositeFilter.Operator.AND;
       for (const filter of deepCopy.where.compositeFilter.filters) {
+        filter.fieldFilter.op = convertProto.operator(filter.fieldFilter.op);
         filter.fieldFilter.value =
             convert.valueFromJson(filter.fieldFilter.value);
+      }
+    }
+    if (deepCopy.where && deepCopy.where.unaryFilter) {
+      deepCopy.where.unaryFilter.op =
+          convertProto.operator(deepCopy.where.unaryFilter.op);
+    }
+    if (deepCopy.orderBy) {
+      for (const orderBy of deepCopy.orderBy) {
+        orderBy.direction = convertProto.direction(orderBy.direction);
       }
     }
     if (deepCopy.startAt) {
@@ -229,9 +251,8 @@ const convertProto = {
     const deepCopy = JSON.parse(JSON.stringify(listenRequest));
 
     if (deepCopy.targetChange) {
-      if (deepCopy.targetChange.targetChangeType === undefined) {
-        deepCopy.targetChange.targetChangeType = 'NO_CHANGE';
-      }
+      deepCopy.targetChange.targetChangeType =
+          convertProto.targetChange(deepCopy.targetChange.targetChangeType);
     }
 
     if (deepCopy.documentChange) {
