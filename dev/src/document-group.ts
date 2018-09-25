@@ -125,7 +125,8 @@ export class DocumentGroup {
 
   /**
    * Retrieves the documents in this DocumentGroup. The results are ordered
-   * to match the order of the references passed to `documentGroup(...)`.
+   * to match the order of the references passed to
+   * `Firestore.documentGroup()`.
    *
    * @returns {Promise.<DocumentSnapshot[]>} A Promise that will be resolved
    * with an array of DocumentSnapshots.
@@ -198,7 +199,7 @@ export class DocumentGroup {
    *
    * let count = 0;
    *
-   * query.stream().on('data', (documentSnapshot) => {
+   * query.stream().on('data', documentSnapshot => {
    *   console.log(`Retrieved document with name '${documentSnapshot.id}'`);
    *   ++count;
    * }).on('end', () => {

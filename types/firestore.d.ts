@@ -134,7 +134,7 @@ declare namespace FirebaseFirestore {
     /**
      * Retrieves multiple documents from Firestore.
      *
-     * @deprecated Use `.documentGroup(...).get()` instead.
+     * @deprecated Use `.documentGroup().get()` instead.
      *
      * @param documentRef The `DocumentReferences` to receive.
      * @return A Promise that resolves with an array of resulting document
@@ -211,7 +211,8 @@ declare namespace FirebaseFirestore {
 
     /**
      * Retrieves the documents in this DocumentGroup. The results are ordered
-     * to match the order of the references passed to `documentGroup(...)`.
+     * to match the order of the references passed to
+     * `FirestoredocumentGroup()`.
      *
      * @return A Promise that will be resolved with an array of
      * DocumentSnapshots.
