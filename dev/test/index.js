@@ -297,8 +297,8 @@ describe('instantiation', function() {
     let firestore = new Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    assert.equal(firestore._initalizationSettings.projectId, PROJECT_ID);
-    assert.equal(firestore._initalizationSettings.foo, 'bar');
+    assert.equal(firestore._initializationSettings.projectId, PROJECT_ID);
+    assert.equal(firestore._initializationSettings.foo, 'bar');
   });
 
   it('can only call settings() once', function() {
@@ -576,7 +576,6 @@ describe('snapshot_() method', function() {
   it('deserializes all supported types from Proto3 JSON', function() {
     let doc = firestore.snapshot_(
         allSupportedTypesJson, '1970-01-01T00:00:05.000000006Z', 'json');
-
     verifyAllSupportedTypes(doc);
   });
 
