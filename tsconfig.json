@@ -3,10 +3,8 @@
   "compilerOptions": {
     "allowJs": true,
     "declaration": false, // TODO: Remove when all source are migrated to TS
-    "sourceMap": false,
     "outDir": "build",
     "noImplicitAny": false, // TODO: Remove when all source are migrated to TS
-    "allowSyntheticDefaultImports": true // TODO: Remove when all source are migrated to TS
   },
   "include": [
     "dev/src/*.js",

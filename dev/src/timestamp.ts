@@ -17,7 +17,7 @@
 'use strict';
 
 import is from 'is';
-
+import {google} from '../protos/firestore_proto_api';
 import {createValidator} from './validate';
 
 const validate = createValidator();
@@ -41,6 +41,9 @@ const MS_TO_NANOS = 1000000;
  * @see https://github.com/google/protobuf/blob/master/src/google/protobuf/timestamp.proto
  */
 export class Timestamp {
+  _seconds: number;
+  _nanoseconds: number;
+
   /**
    * Creates a new timestamp with the current date, with millisecond precision.
    *
@@ -228,7 +231,7 @@ export class Timestamp {
    * @returns {Object} The `Timestamp` Protobuf object.
    */
   toProto() {
-    const timestamp = {};
+    const timestamp: google.protobuf.ITimestamp = {};
 
     if (this.seconds) {
       timestamp.seconds = this.seconds;

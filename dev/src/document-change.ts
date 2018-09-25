@@ -17,6 +17,7 @@
 'use strict';
 
 import * as is from 'is';
+import {QueryDocumentSnapshot} from './document';
 
 /**
  * A DocumentChange represents a change to the documents matching a query.
@@ -25,6 +26,10 @@ import * as is from 'is';
  * @class
  */
 export class DocumentChange {
+  _type: string;
+  _document: QueryDocumentSnapshot;
+  _oldIndex: number;
+  _newIndex: number;
   /**
    * @private
    * @hideconstructor
@@ -36,7 +41,9 @@ export class DocumentChange {
    * @param {number} newIndex - The index in the documents array after this
    * change.
    */
-  constructor(type, document, oldIndex, newIndex) {
+  constructor(
+      type: string, document: QueryDocumentSnapshot, oldIndex: number,
+      newIndex: number) {
     this._type = type;
     this._document = document;
     this._oldIndex = oldIndex;
