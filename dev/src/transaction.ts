@@ -44,6 +44,12 @@ const ALLOW_RETRIES = true;
  * @class
  */
 export class Transaction {
+  _firestore;
+  _validator;
+  _previousTransaction;
+  _writeBatch;
+  _requestTag;
+  _transactionId;
   /**
    * @private
    * @hideconstructor
@@ -276,12 +282,13 @@ export class Transaction {
    * @returns {Promise} An empty Promise.
    */
   begin() {
-    let request = {
+    const request = {
       database: this._firestore.formattedName,
     };
 
     if (this._previousTransaction) {
-      request.options = {
+      // tslint:disable-next-line no-any
+      (request as any).options = {
         readWrite: {
           retryTransaction: this._previousTransaction._transactionId,
         },
@@ -315,7 +322,7 @@ export class Transaction {
    * @returns {Promise} An empty Promise.
    */
   rollback() {
-    let request = {
+    const request = {
       database: this._firestore.formattedName,
       transaction: this._transactionId,
     };

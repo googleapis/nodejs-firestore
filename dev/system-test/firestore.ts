@@ -19,17 +19,24 @@
 import * as assert from 'power-assert';
 import is from 'is';
 
-import Firestore from '../src';
+const Firestore = require('../src');
 import {autoId} from '../src/util';
+import {DocumentSnapshot} from '../src/document';
 
 let version = require('../../package.json').version;
+
+type PromiseArgs = {
+  resolve?: Function,
+  reject?: Function,
+  promise: Promise<{}>|null
+};
 
 if (process.env.NODE_ENV === 'DEBUG') {
   Firestore.setLogFunction(console.log);
 }
 
 function getTestRoot(firestore) {
-  return firestore.collection(`node_${version}_${autoId(firestore)}`);
+  return firestore.collection(`node_${version}_${autoId()}`);
 }
 
 describe('Firestore class', function() {
@@ -659,7 +666,8 @@ describe('DocumentReference class', function() {
   });
 
   describe('watch', function() {
-    let currentDeferred = {promise: null};
+    let currentDeferred: PromiseArgs = {promise: null};
+
 
     function resetPromise() {
       currentDeferred.promise = new Promise((resolve, reject) => {
@@ -668,10 +676,10 @@ describe('DocumentReference class', function() {
       });
     }
 
-    function waitForSnapshot() {
+    function waitForSnapshot(): Promise<DocumentSnapshot> {
       return currentDeferred.promise.then(snapshot => {
         resetPromise();
-        return snapshot;
+        return snapshot as DocumentSnapshot;
       });
     }
 
@@ -850,7 +858,7 @@ describe('Query class', function() {
   let firestore;
   let randomCol;
 
-  let paginateResults = (query, startAfter) => {
+  let paginateResults = (query, startAfter?) => {
     return (startAfter ? query.startAfter(startAfter) : query)
         .get()
         .then(snapshot => {
@@ -1147,7 +1155,7 @@ describe('Query class', function() {
   });
 
   describe('watch', function() {
-    let currentDeferred = {promise: null};
+    let currentDeferred: PromiseArgs = {promise: null};
 
     const snapshot = function(id, data) {
       const ref = randomCol.doc(id);
