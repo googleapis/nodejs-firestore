@@ -34,7 +34,7 @@ import {WriteBatch, WriteResult} from './write-batch';
 import {Timestamp} from './timestamp';
 import {FieldPath, ResourcePath} from './path';
 import {autoId, requestTag} from './util';
-import {customObjectError, Validator} from './validate';
+import {customObjectError} from './validate';
 import {AnyDuringMigration, DocumentData, UpdateData, Precondition, SetOptions, UserInput} from './types';
 import {Serializer} from './serializer';
 
@@ -608,6 +608,9 @@ class FieldFilter {
  */
 export class QuerySnapshot {
   private readonly _validator: AnyDuringMigration;
+  private readonly _size: number;
+  private readonly _query: Query;
+  private readonly _readTime: Timestamp;
   private _materializedDocs: DocumentSnapshot[]|null = null;
   private _materializedChanges: DocumentChange[]|null = null;
   private _docs: (() => DocumentSnapshot[])|null = null;
@@ -617,16 +620,16 @@ export class QuerySnapshot {
    * @private
    * @hideconstructor
    *
-   * @param _query - If applicable, the originating query.
-   * @param _readTime - The time when this query snapshot was obtained.
-   * @param _size - The number of documents in the result set.
+   * @param query - If applicable, the originating query.
+   * @param readTime - The time when this query snapshot was obtained.
+   * @param size - The number of documents in the result set.
    * @param docs - A callback returning a sorted array of documents matching
    * this query
    * @param changes - A callback returning a sorted array of document change
    * events for this snapshot.
    */
-  constructor(query, readTime, size, docs, changes) {
-    this._validator = _query.firestore._validator;
+  constructor(query:Query|null, readTime:Timestamp, size:number, docs:() => DocumentSnapshot[], changes:() => DocumentChange[]) {
+    this._validator = query.firestore._validator;
     this._query = query;
     this._readTime = readTime;
     this._size = size;
