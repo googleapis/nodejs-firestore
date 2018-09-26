@@ -16,3 +16,4 @@
 
 # Override GCLOUD_PROJECT set in samples-test.sh
 export GCLOUD_PROJECT='node-gcloud-ci'
+export GOOGLE_APPLICATION_CREDENTIALS=$KOKORO_GFILE_DIR/firestore-key.json
