@@ -26,7 +26,12 @@ import {Timestamp} from './timestamp';
 import {ResourcePath} from './path';
 import {requestTag} from './util';
 import {DocumentSnapshot} from './document';
-import {DocumentChange} from './document-change';
+import {DocumentChange, DocumentChangeType} from './document-change';
+import {PassThrough} from 'stream';
+
+export class ErrorWithCode extends Error {
+  code?: number;
+}
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -40,7 +45,8 @@ const WATCH_TARGET_ID = 0x1;
 /*!
  * The change type for document change events.
  */
-const ChangeType = {
+// tslint:disable-next-line:variable-name
+const ChangeType: {[k: string]: DocumentChangeType} = {
   added: 'added',
   modified: 'modified',
   removed: 'removed',
@@ -207,6 +213,12 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
  * @private
  */
 export class Watch {
+  _firestore;
+  _targets;
+  _comparator;
+  _backoff;
+  _requestTag;
+
   /**
    * @private
    * @hideconstructor
@@ -316,7 +328,7 @@ export class Watch {
    * the snapshot listener.
    */
   onSnapshot(onNext, onError) {
-    let self = this;
+    const self = this;
 
     // The sorted tree of QueryDocumentSnapshots as sent in the last snapshot.
     // We only look at the keys.
@@ -326,7 +338,7 @@ export class Watch {
     let docMap = new Map();
     // The accumulates map of document changes (keyed by document name) for the
     // current snapshot.
-    let changeMap = new Map();
+    const changeMap = new Map();
 
     // The current state of the query results.
     let current = false;
@@ -353,10 +365,10 @@ export class Watch {
     // This is the one that will be returned and proxy the current one.
     const stream = through2.obj();
     // The current stream to the backend.
-    let currentStream = null;
+    let currentStream: PassThrough|null = null;
 
     /** Helper to clear the docs on RESET or filter mismatch. */
-    const resetDocs = function() {
+    const resetDocs = () => {
       logger('Watch.onSnapshot', self._requestTag, 'Resetting documents');
       changeMap.clear();
       resumeToken = undefined;
@@ -371,7 +383,7 @@ export class Watch {
     };
 
     /** Closes the stream and calls onError() if the stream is still active. */
-    const closeStream = function(err) {
+    const closeStream = (err) => {
       if (currentStream) {
         currentStream.unpipe(stream);
         currentStream.end();
@@ -390,7 +402,7 @@ export class Watch {
      * Re-opens the stream unless the specified error is considered permanent.
      * Clears the change map.
      */
-    const maybeReopenStream = function(err) {
+    const maybeReopenStream = (err) => {
       if (isActive && !self.isPermanentError(err)) {
         logger(
             'Watch.onSnapshot', self._requestTag,
@@ -409,7 +421,7 @@ export class Watch {
     };
 
     /** Helper to restart the outgoing stream to the backend. */
-    const resetStream = function() {
+    const resetStream = () => {
       logger('Watch.onSnapshot', self._requestTag, 'Opening new stream');
       if (currentStream) {
         currentStream.unpipe(stream);
@@ -422,7 +434,7 @@ export class Watch {
     /**
      * Initializes a new stream to the backend with backoff.
      */
-    const initStream = function() {
+    const initStream = () => {
       self._backoff.backoffAndWait().then(() => {
         if (!isActive) {
           logger(
@@ -445,16 +457,16 @@ export class Watch {
               }
               logger('Watch.onSnapshot', self._requestTag, 'Opened new stream');
               currentStream = backendStream;
-              currentStream.on('error', err => {
+              currentStream!.on('error', err => {
                 maybeReopenStream(err);
               });
-              currentStream.on('end', () => {
+              currentStream!.on('end', () => {
                 const err = new Error('Stream ended unexpectedly');
-                err.code = GRPC_STATUS_CODE.UNKNOWN;
+                (err as ErrorWithCode).code = GRPC_STATUS_CODE.UNKNOWN;
                 maybeReopenStream(err);
               });
-              currentStream.pipe(stream);
-              currentStream.resume();
+              currentStream!.pipe(stream);
+              currentStream!.resume();
             })
             .catch(closeStream);
       });
@@ -464,12 +476,12 @@ export class Watch {
      * Checks if the current target id is included in the list of target ids.
      * If no targetIds are provided, returns true.
      */
-    const affectsTarget = function(targetIds, currentId) {
+    const affectsTarget = (targetIds, currentId) => {
       if (targetIds === undefined || targetIds.length === 0) {
         return true;
       }
 
-      for (let targetId of targetIds) {
+      for (const targetId of targetIds) {
         if (targetId === currentId) {
           return true;
         }
@@ -479,10 +491,10 @@ export class Watch {
     };
 
     /** Splits up document changes into removals, additions, and updates. */
-    const extractChanges = function(docMap, changes, readTime) {
-      let deletes = [];
-      let adds = [];
-      let updates = [];
+    const extractChanges = (docMap, changes, readTime?) => {
+      const deletes: string[] = [];
+      const adds: string[] = [];
+      const updates: string[] = [];
 
       changes.forEach((value, name) => {
         if (value === REMOVED) {
@@ -506,9 +518,9 @@ export class Watch {
      * document lookup map. Modified docMap in-place and returns the updated
      * state.
      */
-    const computeSnapshot = function(docTree, docMap, changes) {
+    const computeSnapshot = (docTree, docMap, changes) => {
       let updatedTree = docTree;
-      let updatedMap = docMap;
+      const updatedMap = docMap;
 
       assert(
           docTree.length === docMap.size,
@@ -519,11 +531,11 @@ export class Watch {
        * Applies a document delete to the document tree and the document map.
        * Returns the corresponding DocumentChange event.
        */
-      const deleteDoc = function(name) {
+      const deleteDoc = (name) => {
         assert(updatedMap.has(name), 'Document to delete does not exist');
-        let oldDocument = updatedMap.get(name);
-        let existing = updatedTree.find(oldDocument);
-        let oldIndex = existing.index;
+        const oldDocument = updatedMap.get(name);
+        const existing = updatedTree.find(oldDocument);
+        const oldIndex = existing.index;
         updatedTree = existing.remove();
         updatedMap.delete(name);
         return new DocumentChange(
@@ -534,11 +546,11 @@ export class Watch {
        * Applies a document add to the document tree and the document map.
        * Returns the corresponding DocumentChange event.
        */
-      const addDoc = function(newDocument) {
-        let name = newDocument.ref.formattedName;
+      const addDoc = (newDocument) => {
+        const name = newDocument.ref.formattedName;
         assert(!updatedMap.has(name), 'Document to add already exists');
         updatedTree = updatedTree.insert(newDocument, null);
-        let newIndex = updatedTree.find(newDocument).index;
+        const newIndex = updatedTree.find(newDocument).index;
         updatedMap.set(name, newDocument);
         return new DocumentChange(ChangeType.added, newDocument, -1, newIndex);
       };
@@ -547,13 +559,13 @@ export class Watch {
        * Applies a document modification to the document tree and the document
        * map. Returns the DocumentChange event for successful modifications.
        */
-      const modifyDoc = function(newDocument) {
-        let name = newDocument.ref.formattedName;
+      const modifyDoc = (newDocument) => {
+        const name = newDocument.ref.formattedName;
         assert(updatedMap.has(name), 'Document to modify does not exist');
-        let oldDocument = updatedMap.get(name);
+        const oldDocument = updatedMap.get(name);
         if (!oldDocument.updateTime.isEqual(newDocument.updateTime)) {
-          let removeChange = deleteDoc(name);
-          let addChange = addDoc(newDocument);
+          const removeChange = deleteDoc(name);
+          const addChange = addDoc(newDocument);
           return new DocumentChange(
               ChangeType.modified, newDocument, removeChange.oldIndex,
               addChange.newIndex);
@@ -565,14 +577,14 @@ export class Watch {
       // clients (removals, additions, and then modifications). We also need to
       // sort the individual changes to assure that oldIndex/newIndex keep
       // incrementing.
-      let appliedChanges = [];
+      const appliedChanges: DocumentChange[] = [];
 
       changes.deletes.sort((name1, name2) => {
         // Deletes are sorted based on the order of the existing document.
         return self._comparator(updatedMap.get(name1), updatedMap.get(name2));
       });
       changes.deletes.forEach(name => {
-        let change = deleteDoc(name);
+        const change = deleteDoc(name);
         if (change) {
           appliedChanges.push(change);
         }
@@ -580,7 +592,7 @@ export class Watch {
 
       changes.adds.sort(self._comparator);
       changes.adds.forEach(snapshot => {
-        let change = addDoc(snapshot);
+        const change = addDoc(snapshot);
         if (change) {
           appliedChanges.push(change);
         }
@@ -588,7 +600,7 @@ export class Watch {
 
       changes.updates.sort(self._comparator);
       changes.updates.forEach(snapshot => {
-        let change = modifyDoc(snapshot);
+        const change = modifyDoc(snapshot);
         if (change) {
           appliedChanges.push(change);
         }
@@ -606,15 +618,15 @@ export class Watch {
      * Assembles a new snapshot from the current set of changes and invokes the
      * user's callback. Clears the current changes on completion.
      */
-    const push = function(readTime, nextResumeToken) {
-      let changes = extractChanges(docMap, changeMap, readTime);
-      let diff = computeSnapshot(docTree, docMap, changes);
+    const push = (readTime, nextResumeToken) => {
+      const changes = extractChanges(docMap, changeMap, readTime);
+      const diff = computeSnapshot(docTree, docMap, changes);
 
       if (!hasPushed || diff.appliedChanges.length > 0) {
         logger(
             'Watch.onSnapshot', self._requestTag,
             'Sending snapshot with %d changes and %d documents',
-            diff.appliedChanges.length, diff.updatedTree.length);
+            String(diff.appliedChanges.length), diff.updatedTree.length);
         onNext(
             readTime, diff.updatedTree.length, () => diff.updatedTree.keys,
             () => diff.appliedChanges);
@@ -631,8 +643,8 @@ export class Watch {
      * Returns the current count of all documents, including the changes from
      * the current changeMap.
      */
-    const currentSize = function() {
-      let changes = extractChanges(docMap, changeMap);
+    const currentSize = () => {
+      const changes = extractChanges(docMap, changeMap);
       return docMap.size + changes.adds.length - changes.deletes.length;
     };
 
