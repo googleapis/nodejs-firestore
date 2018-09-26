@@ -25,8 +25,7 @@ import {FieldTransform} from './field-value';
 import {Timestamp} from './timestamp';
 import {isPlainObject} from './serializer';
 import {DocumentReference} from './reference';
-import {ApiMapValue} from './types';
-import {UpdateData} from '.';
+import {ApiMapValue, UpdateData} from './types';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -36,11 +35,12 @@ import {UpdateData} from '.';
  * @class
  */
 class DocumentSnapshotBuilder {
-  private ref: DocumentReference;
-  private fieldsProto: ApiMapValue;
-  private readTime: Timestamp;
-  private createTime: Timestamp;
-  private updateTime: Timestamp;
+  ref: DocumentReference;
+  fieldsProto: ApiMapValue;
+  readTime: Timestamp;
+  createTime: Timestamp;
+  updateTime: Timestamp;
+
   /**
    * @private
    * @hideconstructor

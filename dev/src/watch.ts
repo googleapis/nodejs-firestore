@@ -26,7 +26,7 @@ import {Timestamp} from './timestamp';
 import {ResourcePath} from './path';
 import {requestTag} from './util';
 import {DocumentSnapshot} from './document';
-import {DocumentChange} from './document-change';
+import {DocumentChange, DocumentChangeType} from './document-change';
 import {PassThrough} from 'stream';
 
 export class ErrorWithCode extends Error {
@@ -46,7 +46,7 @@ const WATCH_TARGET_ID = 0x1;
  * The change type for document change events.
  */
 // tslint:disable-next-line:variable-name
-const ChangeType = {
+const ChangeType: {[k: string]: DocumentChangeType} = {
   added: 'added',
   modified: 'modified',
   removed: 'removed',
