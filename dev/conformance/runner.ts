@@ -173,7 +173,6 @@ const convertInput = {
   },
 };
 
-
 /** Converts Firestore Protobuf types in Proto3 JSON format to Protobuf JS. */
 const convertProto = {
   operator: op => api.StructuredQuery.FieldFilter.Operator[op] ||
@@ -181,8 +180,7 @@ const convertProto = {
   direction: dir => dir === 'DESCENDING' ?
       api.StructuredQuery.Direction.DESCENDING :
       api.StructuredQuery.Direction.ASCENDING,
-  targetChange: type => type ? api.TargetChange.TargetChangeType[type] :
-                               api.TargetChange.TargetChangeType.NO_CHANGE,
+  targetChange: type => type ? type : "NO_CHANGE",
   commitRequest: commitRequest => {
     const deepCopy = JSON.parse(JSON.stringify(commitRequest));
     for (const write of deepCopy.writes) {

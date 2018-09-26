@@ -20,8 +20,6 @@ import assert from 'assert';
 import rbtree from 'functional-red-black-tree';
 import through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
-
 import {logger} from './logger';
 import {ExponentialBackoff} from './backoff';
 import {Timestamp} from './timestamp';
@@ -29,8 +27,6 @@ import {ResourcePath} from './path';
 import {requestTag} from './util';
 import {DocumentSnapshot} from './document';
 import {DocumentChange} from './document-change';
-
-const api = google.firestore.v1beta1;
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -652,9 +648,7 @@ export class Watch {
                 const change = proto.targetChange;
                 const noTargetIds =
                     !change.targetIds || change.targetIds.length === 0;
-                if (change.targetChangeType === 'NO_CHANGE' ||
-                    change.targetChangeType ===
-                        api.TargetChange.TargetChangeType.NO_CHANGE) {
+                if (change.targetChangeType === 'NO_CHANGE') {
                   if (noTargetIds && change.readTime && current) {
                     // This means everything is up-to-date, so emit the current
                     // set of docs as a snapshot, if there were changes.
@@ -662,17 +656,11 @@ export class Watch {
                         Timestamp.fromProto(change.readTime),
                         change.resumeToken);
                   }
-                } else if (
-                    change.targetChangeType === 'ADD' ||
-                    change.targetChangeType ===
-                        api.TargetChange.TargetChangeType.ADD) {
+                } else if (change.targetChangeType === 'ADD') {
                   if (WATCH_TARGET_ID !== change.targetIds[0]) {
                     closeStream(Error('Unexpected target ID sent by server'));
                   }
-                } else if (
-                    change.targetChangeType === 'REMOVE' ||
-                    change.targetChangeType ===
-                        api.TargetChange.TargetChangeType.REMOVE) {
+                } else if (change.targetChangeType === 'REMOVE') {
                   let code = 13;
                   let message = 'internal error';
                   if (change.cause) {
@@ -681,16 +669,10 @@ export class Watch {
                   }
                   // @todo: Surface a .code property on the exception.
                   closeStream(new Error('Error ' + code + ': ' + message));
-                } else if (
-                    change.targetChangeType === 'RESET' ||
-                    change.targetChangeType ===
-                        api.TargetChange.TargetChangeType.RESET) {
+                } else if (change.targetChangeType === 'RESET') {
                   // Whatever changes have happened so far no longer matter.
                   resetDocs();
-                } else if (
-                    change.targetChangeType === 'CURRENT' ||
-                    change.targetChangeType ===
-                        api.TargetChange.TargetChangeType.CURRENT) {
+                } else if (change.targetChangeType === 'CURRENT') {
                   current = true;
                 } else {
                   closeStream(new Error(
