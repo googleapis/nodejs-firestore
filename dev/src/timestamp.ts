@@ -41,8 +41,8 @@ const MS_TO_NANOS = 1000000;
  * @see https://github.com/google/protobuf/blob/master/src/google/protobuf/timestamp.proto
  */
 export class Timestamp {
-  _seconds: number;
-  _nanoseconds: number;
+  private readonly _seconds: number;
+  private readonly _nanoseconds: number;
 
   /**
    * Creates a new timestamp with the current date, with millisecond precision.

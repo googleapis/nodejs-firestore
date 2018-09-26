@@ -51,7 +51,7 @@ describe('Firestore class', function() {
   it('has collection() method', function() {
     let ref = firestore.collection('col');
     assert.equal(ref.id, 'col');
-  });``
+  });
 
   it('has doc() method', function() {
     let ref = firestore.doc('col/doc');

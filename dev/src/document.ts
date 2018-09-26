@@ -24,6 +24,9 @@ import {FieldPath} from './path';
 import {FieldTransform} from './field-value';
 import {Timestamp} from './timestamp';
 import {isPlainObject} from './serializer';
+import { DocumentReference } from './reference';
+import { ApiMapValue } from './types';
+import { UpdateData } from '.';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -33,11 +36,11 @@ import {isPlainObject} from './serializer';
  * @class
  */
 class DocumentSnapshotBuilder {
-  ref;
-  fieldsProto;
-  readTime;
-  createTime;
-  updateTime;
+  private ref: DocumentReference;
+  private fieldsProto: ApiMapValue;
+  private readTime: Timestamp;
+  private createTime: Timestamp;
+  private updateTime: Timestamp;
   /**
    * @private
    * @hideconstructor
@@ -92,7 +95,7 @@ class DocumentSnapshotBuilder {
    * QueryDocumentSnapshot (if `fieldsProto` was provided) or a
    * DocumentSnapshot.
    */
-  build() {
+  build(): QueryDocumentSnapshot|DocumentSnapshot {
     assert(
         is.defined(this.fieldsProto) === is.defined(this.createTime),
         'Create time should be set iff document exists.');
@@ -122,13 +125,13 @@ class DocumentSnapshotBuilder {
  * @class
  */
 export class DocumentSnapshot {
-  _ref;
-  _fieldsProto;
-  _serializer;
-  _validator;
-  _readTime;
-  _createTime;
-  _updateTime;
+  private _ref: DocumentReference;
+  private _fieldsProto;
+  private _serializer;
+  private _validator;
+  private _readTime: Timestamp;
+  private _createTime: Timestamp;
+  private _updateTime: Timestamp;
   /**
    * @private
    * @hideconstructor
@@ -177,7 +180,7 @@ export class DocumentSnapshot {
    * @param {Map.<FieldPath, *>} data - The field/value map to expand.
    * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
    */
-  static fromUpdateMap(ref, data) {
+  static fromUpdateMap(ref: DocumentReference, data: UpdateData): DocumentSnapshot {
     const serializer = ref.firestore._serializer;
 
     /**
@@ -443,7 +446,7 @@ export class DocumentSnapshot {
    * @returns {*} The Protobuf-encoded data at the specified field location or
    * undefined if no such field exists.
    */
-  protoField(field) {
+  protoField(field: string|FieldPath) {
     let fields = this.protoFields();
 
     if (is.undefined(fields)) {
@@ -878,9 +881,9 @@ export class DocumentMask {
  * @class
  */
 export class DocumentTransform {
-  _ref;
-  _validator;
-  _transforms;
+  private readonly _ref: DocumentReference;
+  private readonly _validator;
+  private readonly _transforms;
   /**
    * @private
    * @hideconstructor
@@ -890,7 +893,7 @@ export class DocumentTransform {
    * @param {Map.<FieldPath, FieldTransforms>} transforms A Map of FieldPaths to
    * FieldTransforms.
    */
-  constructor(ref, transforms) {
+  constructor(ref: DocumentReference, transforms) {
     this._ref = ref;
     this._validator = ref.firestore._validator;
     this._transforms = transforms;
@@ -904,7 +907,7 @@ export class DocumentTransform {
    * @param {Object} obj The object to extract the transformations from.
    * @returns {firestore.DocumentTransform} The Document Transform.
    */
-  static fromObject(ref, obj) {
+  static fromObject(ref: DocumentReference, obj) {
     const updateMap = new Map();
 
     for (const prop in obj) {
