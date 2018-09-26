@@ -309,7 +309,7 @@ export class Watch {
    * @private
    * @param {watchSnapshotCallback} onNext - A callback to be called every time
    * a new snapshot is available.
-   * @param {function(Error)} onError - A callback to be called if the listen
+   * @param {function(Error)=} onError - A callback to be called if the listen
    * fails or is cancelled. No further callbacks will occur.
    *
    * @returns {function()} An unsubscribe function that can be called to cancel
