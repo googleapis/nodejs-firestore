@@ -34,8 +34,8 @@ export type ApiMapValue = {
   [k: string]: google.firestore.v1beta1.IValue
 };
 
-// tslint:disable-next-line:no-any
 /** JavaScript input from the API layer. */
+// tslint:disable-next-line:no-any
 export type UserInput = any;
 
 /**

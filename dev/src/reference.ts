@@ -361,8 +361,9 @@ export class DocumentReference {
    */
   set(data: DocumentData, options?: SetOptions): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch.set(this, data, options).commit()
-        .then(([writeResult]) => writeResult);
+    return writeBatch.set(this, data, options).commit().then(([
+                                                               writeResult
+                                                             ]) => writeResult);
   }
 
   /**
