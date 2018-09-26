@@ -24,9 +24,9 @@ import {FieldPath} from './path';
 import {FieldTransform} from './field-value';
 import {Timestamp} from './timestamp';
 import {isPlainObject} from './serializer';
-import { DocumentReference } from './reference';
-import { ApiMapValue } from './types';
-import { UpdateData } from '.';
+import {DocumentReference} from './reference';
+import {ApiMapValue} from './types';
+import {UpdateData} from '.';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -180,7 +180,8 @@ export class DocumentSnapshot {
    * @param {Map.<FieldPath, *>} data - The field/value map to expand.
    * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
    */
-  static fromUpdateMap(ref: DocumentReference, data: UpdateData): DocumentSnapshot {
+  static fromUpdateMap(ref: DocumentReference, data: UpdateData):
+      DocumentSnapshot {
     const serializer = ref.firestore._serializer;
 
     /**

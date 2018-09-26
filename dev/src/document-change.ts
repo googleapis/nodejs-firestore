@@ -18,7 +18,7 @@
 
 import * as is from 'is';
 import {QueryDocumentSnapshot} from './document';
-export type DocumentChangeType = 'added' | 'removed' | 'modified';
+export type DocumentChangeType = 'added'|'removed'|'modified';
 
 /**
  * A DocumentChange represents a change to the documents matching a query.
@@ -43,8 +43,8 @@ export class DocumentChange {
    * change.
    */
   constructor(
-      type: DocumentChangeType, document: QueryDocumentSnapshot, oldIndex: number,
-      newIndex: number) {
+      type: DocumentChangeType, document: QueryDocumentSnapshot,
+      oldIndex: number, newIndex: number) {
     this._type = type;
     this._document = document;
     this._oldIndex = oldIndex;
