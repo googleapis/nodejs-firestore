@@ -19,8 +19,12 @@
 import assert from 'power-assert';
 import through2 from 'through2';
 
+import {google} from '../protos/firestore_proto_api';
+
 import {Firestore} from '../src/index';
 import {createInstance} from '../test/util/helpers';
+
+const api = google.firestore.v1beta1;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -178,7 +182,7 @@ function query(transaction) {
           field: {
             fieldPath: 'foo',
           },
-          op: 'EQUAL',
+          op: api.StructuredQuery.FieldFilter.Operator.EQUAL,
           value: {
             stringValue: 'bar',
           },
