@@ -180,7 +180,7 @@ const convertProto = {
   direction: dir => dir === 'DESCENDING' ?
       api.StructuredQuery.Direction.DESCENDING :
       api.StructuredQuery.Direction.ASCENDING,
-  targetChange: type => type ? type : "NO_CHANGE",
+  targetChange: type => type ? type : 'NO_CHANGE',
   commitRequest: commitRequest => {
     const deepCopy = JSON.parse(JSON.stringify(commitRequest));
     for (const write of deepCopy.writes) {
