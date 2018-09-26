@@ -95,7 +95,7 @@ export class Transaction {
     }
 
     if (is.instance(refOrQuery, Query)) {
-      return refOrQuery._get({transactionId: this._transactionId});
+      return refOrQuery._get(this._transactionId);
     }
 
     throw new Error('Argument "refOrQuery" must be a DocumentRef or a Query.');
