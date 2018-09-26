@@ -17,6 +17,8 @@
 'use strict';
 
 import * as is from 'is';
+import {QueryDocumentSnapshot} from './document';
+export type DocumentChangeType = 'added'|'removed'|'modified';
 
 /**
  * A DocumentChange represents a change to the documents matching a query.
@@ -25,6 +27,10 @@ import * as is from 'is';
  * @class
  */
 export class DocumentChange {
+  private readonly _type: DocumentChangeType;
+  private readonly _document: QueryDocumentSnapshot;
+  private readonly _oldIndex: number;
+  private readonly _newIndex: number;
   /**
    * @private
    * @hideconstructor
@@ -36,7 +42,9 @@ export class DocumentChange {
    * @param {number} newIndex - The index in the documents array after this
    * change.
    */
-  constructor(type, document, oldIndex, newIndex) {
+  constructor(
+      type: DocumentChangeType, document: QueryDocumentSnapshot,
+      oldIndex: number, newIndex: number) {
     this._type = type;
     this._document = document;
     this._oldIndex = oldIndex;
@@ -160,7 +168,7 @@ export class DocumentChange {
    * @param {*} other The value to compare against.
    * @return true if this `DocumentChange` is equal to the provided value.
    */
-  isEqual(other) {
+  isEqual(other): boolean {
     if (this === other) {
       return true;
     }
