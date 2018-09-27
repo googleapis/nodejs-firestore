@@ -13,6 +13,7 @@
   "files": [
     "build/protos",
     "build/src",
+    "!build/src/**/*.map",
     "types"
   ],
   "keywords": [
