@@ -45,7 +45,7 @@
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.GetDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var GetDocumentRequest = {
+const GetDocumentRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -105,7 +105,7 @@ var GetDocumentRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ListDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var ListDocumentsRequest = {
+const ListDocumentsRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -125,7 +125,7 @@ var ListDocumentsRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ListDocumentsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var ListDocumentsResponse = {
+const ListDocumentsResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -164,7 +164,7 @@ var ListDocumentsResponse = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.CreateDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var CreateDocumentRequest = {
+const CreateDocumentRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -210,7 +210,7 @@ var CreateDocumentRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.UpdateDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var UpdateDocumentRequest = {
+const UpdateDocumentRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -232,7 +232,7 @@ var UpdateDocumentRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DeleteDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var DeleteDocumentRequest = {
+const DeleteDocumentRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -281,7 +281,7 @@ var DeleteDocumentRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.BatchGetDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var BatchGetDocumentsRequest = {
+const BatchGetDocumentsRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -316,7 +316,7 @@ var BatchGetDocumentsRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.BatchGetDocumentsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var BatchGetDocumentsResponse = {
+const BatchGetDocumentsResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -338,7 +338,7 @@ var BatchGetDocumentsResponse = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.BeginTransactionRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var BeginTransactionRequest = {
+const BeginTransactionRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -352,7 +352,7 @@ var BeginTransactionRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.BeginTransactionResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var BeginTransactionResponse = {
+const BeginTransactionResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -378,7 +378,7 @@ var BeginTransactionResponse = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.CommitRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var CommitRequest = {
+const CommitRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -404,7 +404,7 @@ var CommitRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.CommitResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var CommitResponse = {
+const CommitResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -422,7 +422,7 @@ var CommitResponse = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.RollbackRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var RollbackRequest = {
+const RollbackRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -466,7 +466,7 @@ var RollbackRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.RunQueryRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var RunQueryRequest = {
+const RunQueryRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -506,7 +506,7 @@ var RunQueryRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.RunQueryResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var RunQueryResponse = {
+const RunQueryResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -566,7 +566,7 @@ var RunQueryResponse = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.WriteRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var WriteRequest = {
+const WriteRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -602,7 +602,7 @@ var WriteRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.WriteResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var WriteResponse = {
+const WriteResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -629,7 +629,7 @@ var WriteResponse = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ListenRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var ListenRequest = {
+const ListenRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -675,7 +675,7 @@ var ListenRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ListenResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var ListenResponse = {
+const ListenResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -724,7 +724,7 @@ var ListenResponse = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Target definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var Target = {
+const Target = {
   // This is for documentation. Actual contents will be loaded by gRPC.
 
   /**
@@ -821,7 +821,7 @@ var Target = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.TargetChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var TargetChange = {
+const TargetChange = {
   // This is for documentation. Actual contents will be loaded by gRPC.
 
   /**
@@ -890,7 +890,7 @@ var TargetChange = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ListCollectionIdsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var ListCollectionIdsRequest = {
+const ListCollectionIdsRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -907,6 +907,6 @@ var ListCollectionIdsRequest = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.ListCollectionIdsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
  */
-var ListCollectionIdsResponse = {
+const ListCollectionIdsResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
