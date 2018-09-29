@@ -2,5 +2,8 @@
   "extends": "gts/tslint.json" ,
   "jsRules": {
     "no-bitwise": true
+  },
+  "rules": {
+    "no-unused-expression": false
   }
 }

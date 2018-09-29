@@ -33,9 +33,10 @@ const grpc = new GrpcClient({} as any).grpc;
 const SSL_CREDENTIALS = (grpc.credentials as any).createInsecure();
 /* tslint:enable:no-any */
 
-const PROJECT_ID = 'test-project';
-const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
-const DOCUMENT_NAME = `${DATABASE_ROOT}/documents/collectionId/documentId`;
+export const PROJECT_ID = 'test-project';
+export const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
+export const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
+export const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
 /** A Promise implementation that supports deferred resolution. */
 export class Deferred<R> {

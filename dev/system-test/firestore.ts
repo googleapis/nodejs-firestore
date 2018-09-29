@@ -17,6 +17,7 @@
 'use strict';
 
 import * as assert from 'power-assert';
+import {expect} from 'chai';
 import is from 'is';
 
 const Firestore = require('../src');
@@ -25,11 +26,21 @@ import {DocumentSnapshot} from '../src/document';
 
 let version = require('../../package.json').version;
 
-type PromiseArgs = {
-  resolve?: Function,
-  reject?: Function,
-  promise: Promise<{}>|null
-};
+class DeferredPromise {
+  resolve: Function;
+  reject: Function;
+  promise: Promise<{}>;
+
+  constructor() {
+    this.resolve = () => {
+      throw new Error('DeferredPromise.resolve has not been initialized');
+    };
+    this.reject = () => {
+      throw new Error('DeferredPromise.reject has not been initialized');
+    };
+    this.promise = Promise.resolve('DeferredPromise.promise has not been initialized');
+  }
+}
 
 if (process.env.NODE_ENV === 'DEBUG') {
   Firestore.setLogFunction(console.log);
@@ -417,7 +428,7 @@ describe('DocumentReference class', function() {
 
   it('has getCollections() method', function() {
     let collections = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
-    let promises = [];
+    let promises : Promise<{}>[] = [];
 
     for (let collection of collections) {
       promises.push(randomCol.doc(`doc/${collection}/doc`).create({}));
@@ -588,7 +599,7 @@ describe('DocumentReference class', function() {
     ];
 
     let promise = Promise.resolve();
-    let times = [];
+    let times : {}[] = [];
 
     for (let i = 0; i < actions.length; ++i) {
       promise =
@@ -606,7 +617,7 @@ describe('DocumentReference class', function() {
   });
 
   describe('watch', function() {
-    let currentDeferred: PromiseArgs = {promise: null};
+    let currentDeferred = new DeferredPromise();
 
 
     function resetPromise() {
@@ -737,7 +748,7 @@ describe('DocumentReference class', function() {
 
       let maybeRun = function() {
         if (exists1.length === exists2.length) {
-          run.shift()();
+          run.shift()!();
         }
       };
       unsubscribe1 = doc1.onSnapshot(snapshot => {
@@ -777,7 +788,7 @@ describe('DocumentReference class', function() {
 
       let maybeRun = function() {
         if (exists1.length === exists2.length) {
-          run.shift()();
+          run.shift()!();
         }
       };
 
@@ -805,10 +816,7 @@ describe('Query class', function() {
           if (snapshot.empty) {
             return {pages: 0, docs: []};
           } else {
-            let docs = [];
-            snapshot.forEach(doc => {
-              docs.push(doc);
-            });
+            let docs = snapshot.docs;
             return paginateResults(query, docs[docs.length - 1])
                 .then(nextPage => {
                   return {
@@ -1084,7 +1092,7 @@ describe('Query class', function() {
   });
 
   describe('watch', function() {
-    let currentDeferred: PromiseArgs = {promise: null};
+    let currentDeferred = new DeferredPromise();
 
     const snapshot = function(id, data) {
       const ref = randomCol.doc(id);
@@ -1156,7 +1164,7 @@ describe('Query class', function() {
             currentDeferred.resolve(snapshot);
           },
           err => {
-            currentDeferred.reject(err);
+            currentDeferred.reject!(err);
           });
 
       return waitForSnapshot()
