@@ -90,7 +90,7 @@
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.StructuredQuery definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
  */
-var StructuredQuery = {
+const StructuredQuery = {
   // This is for documentation. Actual contents will be loaded by gRPC.
 
   /**
@@ -407,6 +407,6 @@ var StructuredQuery = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Cursor definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
  */
-var Cursor = {
+const Cursor = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
