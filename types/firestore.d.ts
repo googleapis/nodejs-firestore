@@ -1036,6 +1036,18 @@ declare namespace FirebaseFirestore {
     readonly path: string;
 
     /**
+     * Retrieves the list of documents in this collection.
+     *
+     * The document references returned may include missing documents, which
+     * are documents that have not been explicitly created but contain
+     * subcollections. If you attempt to read a missing document, we will return
+     * a DocumentSnapshot whose `.exists` property is set to false.
+     *
+     * @return {Promise<DocumentReference[]>}
+     */
+    list(): Promise<CollectionReference[]>;
+
+    /**
      * Get a `DocumentReference` for the document within the collection at the
      * specified path. If no path is specified, an automatically-generated
      * unique ID will be used for the returned DocumentReference.

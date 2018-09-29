@@ -1817,6 +1817,54 @@ export class CollectionReference extends Query {
   }
 
   /**
+   * Retrieves the list of documents in this collection.
+   *
+   * The document references returned may include missing documents, which
+   * are documents that have not been explicitly created but contain
+   * subcollections. If you attempt to read a missing document, we will return
+   * a DocumentSnapshot whose `.exists` property is set to false.
+   *
+   * @return {Promise<DocumentReference[]>}
+   *
+   * @example
+   * let collectionRef = firestore.collection('col');
+   *
+   * return collectionRef.list().then(documentRefs => {
+   *    return firestore.getAll(documentRefs);
+   * }).then(documentSnapshots => {
+   *    let documentsWithData = 0;
+   *    let missingDocuments = 0;
+   *
+   *    for (let documentSnapshot of documentSnapshots) {
+   *       if (documentSnapshot.exists) {
+   *        documentsWithData++;
+   *       } else {
+   *        missingDocuments++;
+   *       }
+   *    }
+   * });
+   */
+  list(): Promise<DocumentReference[]> {
+    const request: api.IListDocumentsRequest = {
+      parent: this._path.parent()!.formattedName,
+      collectionId: this.id,
+      showMissing: true,
+      mask: {fieldPaths: []}
+    };
+
+    return this.firestore.request('listDocuments', request, requestTag())
+        .then((documents: api.IDocument[]) => {
+          // Note that the backend already orders these documents by name,
+          // so we do not need to manually sort them.
+          return documents.map(doc => {
+            const path = ResourcePath.fromSlashSeparatedString(doc.name!);
+            return this.doc(path.id!);
+          });
+        });
+  }
+
+
+  /**
    * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path. If no path is specified, an
    * automatically-generated unique ID will be used for the returned

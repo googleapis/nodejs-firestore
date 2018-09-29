@@ -62,6 +62,7 @@ export type ApiOverride = {
   commit?: (request, options, callback) => void;
   rollback?: (request, options, callback) => void;
   listCollectionIds?: (request, options, callback) => void;
+  listDocuments?: (request, options, callback) => void;
   batchGetDocuments?: (request) => NodeJS.ReadableStream;
   runQuery?: (request) => NodeJS.ReadableStream;
   listen?: () => NodeJS.ReadWriteStream;
@@ -155,16 +156,16 @@ function value(value: string|api.IValue): api.IValue {
 }
 
 export function document(
-    field?: string, value?: string|api.IValue,
+    id: string, field?: string, value?: string|api.IValue,
     ...fieldOrValue: Array<string|api.IValue>): api.IDocument {
   const document: api.IDocument = {
-    name: `${DATABASE_ROOT}/documents/collectionId/documentId`,
+    name: `${DATABASE_ROOT}/documents/collectionId/${id}`,
     fields: {},
     createTime: {seconds: 1, nanos: 2},
     updateTime: {seconds: 3, nanos: 4},
   };
 
-  for (let i = 0; i < arguments.length; i += 2) {
+  for (let i = 1; i < arguments.length; i += 2) {
     const field: string = arguments[i];
     const value: string|api.Value = arguments[i + 1];
 

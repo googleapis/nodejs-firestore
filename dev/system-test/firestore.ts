@@ -127,6 +127,24 @@ describe('CollectionReference class', function() {
           assert.equal(doc.get('foo'), 'a');
         });
   });
+
+  it('lists missing documents', async () => {
+    let batch = firestore.batch();
+
+    batch.set(randomCol.doc('a'),{});
+    batch.set(randomCol.doc('b/b/b'),{});
+    batch.set(randomCol.doc('c'),{});
+    await batch.commit();
+
+    const documentRefs = await randomCol.list();
+    const documents = await firestore.getAll(documentRefs);
+
+    const existingDocs = documents.filter(doc => doc.exists);
+    const missingDocs = documents.filter(doc => !doc.exists);
+
+    expect(existingDocs.map(doc => doc.id)).to.have.members(['a', 'c']);
+    expect(missingDocs.map(doc => doc.id)).to.have.members(['b']);
+  });
 });
 
 describe('DocumentReference class', function() {
