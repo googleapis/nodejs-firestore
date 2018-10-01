@@ -1038,10 +1038,11 @@ declare namespace FirebaseFirestore {
     /**
      * Retrieves the list of documents in this collection.
      *
-     * The document references returned may include missing documents, which
-     * are documents that have not been explicitly created but contain
-     * subcollections. If you attempt to read a missing document, we will return
-     * a DocumentSnapshot whose `.exists` property is set to false.
+     * The document references returned may include references to "missing
+     * documents", i.e. document locations that have no document present but
+     * which contain subcollections with documents. Attempting to read such a
+     * document reference (e.g. via `.get()` or `.onSnapshot()`) will return a
+     * `DocumentSnapshot` whose `.exists` property is false.
      *
      * @return {Promise<DocumentReference[]>}
      */

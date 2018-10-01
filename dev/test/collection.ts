@@ -135,7 +135,7 @@ describe('Collection interface', () => {
     });
   });
 
-  it('hast list() method', () => {
+  it('has list() method', () => {
     const overrides = {
       listDocuments: (request, options, callback) => {
         expect(request).to.deep.eq({
