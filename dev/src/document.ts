@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import assert from 'assert';
 import deepEqual from 'deep-equal';
 import is from 'is';

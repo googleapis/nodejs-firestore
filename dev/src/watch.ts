@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import assert from 'assert';
 import rbtree from 'functional-red-black-tree';
 import through2 from 'through2';

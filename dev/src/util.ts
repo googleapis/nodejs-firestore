@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * Generate a unique client-side identifier.
  *

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-
-'use strict';
-
 import {use, expect} from 'chai';
 
 import {ApiOverride, arrayTransform, commitRequest, createInstance, document, serverTimestamp, set, writeResult} from './util/helpers';

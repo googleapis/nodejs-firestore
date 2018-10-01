@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import assert from 'power-assert';
 import path from 'path';
 import is from 'is';

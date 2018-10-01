@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import {use, expect} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 

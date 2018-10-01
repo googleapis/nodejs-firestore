@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import {GrpcClient} from 'google-gax';
 
 import {google} from '../../protos/firestore_proto_api';

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import deepEqual from 'deep-equal';
 
 import {AnyDuringMigration, AnyJs} from './types';
