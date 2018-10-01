@@ -18,11 +18,11 @@ import assert from 'assert';
 import deepEqual from 'deep-equal';
 import is from 'is';
 
-import {FieldPath} from './path';
 import {FieldTransform} from './field-value';
-import {Timestamp} from './timestamp';
-import {isPlainObject} from './serializer';
+import {FieldPath} from './path';
 import {DocumentReference} from './reference';
+import {isPlainObject} from './serializer';
+import {Timestamp} from './timestamp';
 import {ApiMapValue, UpdateData} from './types';
 
 /**

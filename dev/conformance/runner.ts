@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import assert from 'power-assert';
-import path from 'path';
-import is from 'is';
-import through2 from 'through2';
-import googleProtoFiles from 'google-proto-files';
-import protobufjs from 'protobufjs';
 import duplexify from 'duplexify';
+import googleProtoFiles from 'google-proto-files';
+import is from 'is';
+import path from 'path';
+import assert from 'power-assert';
+import protobufjs from 'protobufjs';
+import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
+
 import api = google.firestore.v1beta1;
 
 const {Firestore} = require('../src/index');

@@ -16,16 +16,16 @@
 
 import assert from 'assert';
 import rbtree from 'functional-red-black-tree';
+import {PassThrough} from 'stream';
 import through2 from 'through2';
 
-import {logger} from './logger';
 import {ExponentialBackoff} from './backoff';
-import {Timestamp} from './timestamp';
-import {ResourcePath} from './path';
-import {requestTag} from './util';
 import {DocumentSnapshot} from './document';
 import {DocumentChange, DocumentChangeType} from './document-change';
-import {PassThrough} from 'stream';
+import {logger} from './logger';
+import {ResourcePath} from './path';
+import {Timestamp} from './timestamp';
+import {requestTag} from './util';
 
 export class ErrorWithCode extends Error {
   code?: number;
