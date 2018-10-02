@@ -598,7 +598,7 @@ class Firestore {
    * });
    */
   listCollections() {
-    let rootDocument = new DocumentReference(this, this._referencePath);
+    const rootDocument = new DocumentReference(this, this._referencePath);
     return rootDocument.listCollections();
   }
 
