@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import is from 'is';
 
-import {createValidator} from './validate';
 import * as fspb from '../protos/firestore_proto_api';
+
+import {createValidator} from './validate';
 
 const validate = createValidator();
 

@@ -15,8 +15,6 @@
  */
 
 
-'use strict';
-
 import {expect} from 'chai';
 
 // TODO: This should be a TypeScript import after the full migration.
