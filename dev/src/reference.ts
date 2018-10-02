@@ -1827,6 +1827,53 @@ export class CollectionReference extends Query {
   }
 
   /**
+   * Retrieves the list of documents in this collection.
+   *
+   * The document references returned may include references to "missing
+   * documents", i.e. document locations that have no document present but
+   * which contain subcollections with documents. Attempting to read such a
+   * document reference (e.g. via `.get()` or `.onSnapshot()`) will return a
+   * `DocumentSnapshot` whose `.exists` property is false.
+   *
+   * @return {Promise<DocumentReference[]>} The list of documents in this
+   * collection.
+   *
+   * @example
+   * let collectionRef = firestore.collection('col');
+   *
+   * return collectionRef.listDocuments().then(documentRefs => {
+   *    return firestore.getAll(documentRefs);
+   * }).then(documentSnapshots => {
+   *    for (let documentSnapshot of documentSnapshots) {
+   *       if (documentSnapshot.exists) {
+   *         console.log(`Found document with data: ${documentSnapshot.id}`);
+   *       } else {
+   *         console.log(`Found missing document: ${documentSnapshot.id}`);
+   *       }
+   *    }
+   * });
+   */
+  listDocuments(): Promise<DocumentReference[]> {
+    const request: api.IListDocumentsRequest = {
+      parent: this._path.parent()!.formattedName,
+      collectionId: this.id,
+      showMissing: true,
+      mask: {fieldPaths: []}
+    };
+
+    return this.firestore.request('listDocuments', request, requestTag())
+        .then((documents: api.IDocument[]) => {
+          // Note that the backend already orders these documents by name,
+          // so we do not need to manually sort them.
+          return documents.map(doc => {
+            const path = ResourcePath.fromSlashSeparatedString(doc.name!);
+            return this.doc(path.id!);
+          });
+        });
+  }
+
+
+  /**
    * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path. If no path is specified, an
    * automatically-generated unique ID will be used for the returned

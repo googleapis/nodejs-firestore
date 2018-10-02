@@ -92,10 +92,11 @@ describe('FieldValue.arrayUnion()', () => {
   it('can be used with set()', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
-        const expectedRequest = commitRequest(set(document('foo', 'bar'), [
-          arrayTransform('field', 'appendMissingElements', 'foo', 'bar'),
-          arrayTransform('map.field', 'appendMissingElements', 'foo', 'bar')
-        ]));
+        const expectedRequest =
+            commitRequest(set(document('documentId', 'foo', 'bar'), [
+              arrayTransform('field', 'appendMissingElements', 'foo', 'bar'),
+              arrayTransform('map.field', 'appendMissingElements', 'foo', 'bar')
+            ]));
 
         expect(request).to.deep.equal(expectedRequest);
 
@@ -133,10 +134,11 @@ describe('FieldValue.arrayRemove()', () => {
   it('can be used with set()', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
-        const expectedRequest = commitRequest(set(document('foo', 'bar'), [
-          arrayTransform('field', 'removeAllFromArray', 'foo', 'bar'),
-          arrayTransform('map.field', 'removeAllFromArray', 'foo', 'bar')
-        ]));
+        const expectedRequest =
+            commitRequest(set(document('documentId', 'foo', 'bar'), [
+              arrayTransform('field', 'removeAllFromArray', 'foo', 'bar'),
+              arrayTransform('map.field', 'removeAllFromArray', 'foo', 'bar')
+            ]));
         expect(request).to.deep.equal(expectedRequest);
 
         callback(null, writeResult(2));
@@ -167,7 +169,7 @@ describe('FieldValue.serverTimestamp()', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         const expectedRequest = commitRequest(
-            set(document('foo', 'bar'),
+            set(document('documentId', 'foo', 'bar'),
                 [serverTimestamp('field'), serverTimestamp('map.field')]));
         expect(request).to.deep.equal(expectedRequest);
 

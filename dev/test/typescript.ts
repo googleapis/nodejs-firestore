@@ -304,6 +304,7 @@ xdescribe('firestore.d.ts', function() {
     const docRef2: DocumentReference = collRef.doc('doc');
     collRef.add(documentData).then((docRef: DocumentReference) => {
     });
+    const list: Promise<DocumentReference[]> = collRef.listDocuments();
     const equals: boolean = collRef.isEqual(collRef);
   });
 

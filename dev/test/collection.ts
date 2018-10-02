@@ -21,7 +21,7 @@ import {expect} from 'chai';
 import Firestore = require('../src');
 
 import {DocumentReference} from '../src/reference';
-import {COLLECTION_ROOT, createInstance, DATABASE_ROOT} from './util/helpers';
+import {createInstance, DATABASE_ROOT, document} from './util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -130,6 +130,29 @@ describe('Collection interface', () => {
         expect(collectionRef.id).to.eq('collectionId');
         expect(documentRef.id).to.have.length(20);
       });
+    });
+  });
+
+  it('has list() method', () => {
+    const overrides = {
+      listDocuments: (request, options, callback) => {
+        expect(request).to.deep.eq({
+          parent: `${DATABASE_ROOT}/documents/a/b`,
+          collectionId: 'c',
+          showMissing: true,
+          mask: {fieldPaths: []}
+        });
+
+        callback(null, [document('first'), document('second')]);
+      }
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.collection('a/b/c').listDocuments().then(
+          documentRefs => {
+            expect(documentRefs[0].id).to.eq('first');
+            expect(documentRefs[1].id).to.eq('second');
+          });
     });
   });
 
