@@ -1046,7 +1046,7 @@ declare namespace FirebaseFirestore {
      *
      * @return {Promise<DocumentReference[]>}
      */
-    listDocuments(): Promise<CollectionReference[]>;
+    listDocuments(): Promise<DocumentReference[]>;
 
     /**
      * Get a `DocumentReference` for the document within the collection at the
