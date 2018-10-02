@@ -87,13 +87,13 @@ class FirestoreClient {
     // Create a `gaxGrpc` object, with any grpc-specific options
     // sent to the client.
     opts.scopes = this.constructor.scopes;
-    var gaxGrpc = new gax.GrpcClient(opts);
+    const gaxGrpc = new gax.GrpcClient(opts);
 
     // Save the auth object to the client, for use by other methods.
     this.auth = gaxGrpc.auth;
 
     // Determine the client header string.
-    var clientHeader = [
+    const clientHeader = [
       `gl-node/${process.version}`,
       `grpc/${gaxGrpc.grpcVersion}`,
       `gax/${gax.version}`,
@@ -104,7 +104,7 @@ class FirestoreClient {
     }
 
     // Load the applicable protos.
-    var protos = merge(
+    const protos = merge(
         {},
         gaxGrpc.loadProto(
             path.join(__dirname, '..', '..', 'protos'),
@@ -145,7 +145,7 @@ class FirestoreClient {
     };
 
     // Put together the default options sent with requests.
-    var defaults = gaxGrpc.constructSettings(
+    const defaults = gaxGrpc.constructSettings(
         'google.firestore.v1beta1.Firestore', gapicConfig, opts.clientConfig,
         {'x-goog-api-client': clientHeader.join(' ')});
 
@@ -156,12 +156,12 @@ class FirestoreClient {
 
     // Put together the "service stub" for
     // google.firestore.v1beta1.Firestore.
-    var firestoreStub =
+    const firestoreStub =
         gaxGrpc.createStub(protos.google.firestore.v1beta1.Firestore, opts);
 
     // Iterate over each of the methods that the service provides
     // and create an API call method for each.
-    var firestoreStubMethods = [
+    const firestoreStubMethods = [
       'getDocument',
       'listDocuments',
       'createDocument',
@@ -176,10 +176,10 @@ class FirestoreClient {
       'listen',
       'listCollectionIds',
     ];
-    for (let methodName of firestoreStubMethods) {
+    for (const methodName of firestoreStubMethods) {
       this._innerApiCalls[methodName] = gax.createApiCall(
           firestoreStub.then(stub => function() {
-            var args = Array.prototype.slice.call(arguments, 0);
+            const args = Array.prototype.slice.call(arguments, 0);
             return stub[methodName].apply(stub, args);
           }),
           defaults[methodName],
@@ -269,14 +269,14 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * const formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]',
    * '[DOCUMENT]', '[ANY_PATH]'); client.getDocument({name: formattedName})
    *   .then(responses => {
-   *     var response = responses[0];
+   *     const response = responses[0];
    *     // doThingsWith(response)
    *   })
    *   .catch(err => {
@@ -376,19 +376,20 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
    * // Iterate over all elements.
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
-   * '[DOCUMENT]', '[ANY_PATH]'); var collectionId = ''; var request = { parent:
-   * formattedParent, collectionId: collectionId,
+   * const formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); const collectionId = ''; const request = {
+   *   parent: formattedParent,
+   *   collectionId: collectionId,
    * };
    *
    * client.listDocuments(request)
    *   .then(responses => {
-   *     var resources = responses[0];
+   *     const resources = responses[0];
    *     for (let i = 0; i < resources.length; i += 1) {
    *       // doThingsWith(resources[i])
    *     }
@@ -398,20 +399,21 @@ class FirestoreClient {
    *   });
    *
    * // Or obtain the paged response.
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
-   * '[DOCUMENT]', '[ANY_PATH]'); var collectionId = ''; var request = { parent:
-   * formattedParent, collectionId: collectionId,
+   * const formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); const collectionId = ''; const request = {
+   *   parent: formattedParent,
+   *   collectionId: collectionId,
    * };
    *
    *
-   * var options = {autoPaginate: false};
-   * var callback = responses => {
+   * const options = {autoPaginate: false};
+   * const callback = responses => {
    *   // The actual resources in a response.
-   *   var resources = responses[0];
+   *   const resources = responses[0];
    *   // The next request if the response shows that there are more responses.
-   *   var nextRequest = responses[1];
+   *   const nextRequest = responses[1];
    *   // The actual response object, if necessary.
-   *   // var rawResponse = responses[2];
+   *   // const rawResponse = responses[2];
    *   for (let i = 0; i < resources.length; i += 1) {
    *     // doThingsWith(resources[i]);
    *   }
@@ -506,13 +508,14 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
-   * '[DOCUMENT]', '[ANY_PATH]'); var collectionId = ''; var request = { parent:
-   * formattedParent, collectionId: collectionId,
+   * const formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); const collectionId = ''; const request = {
+   *   parent: formattedParent,
+   *   collectionId: collectionId,
    * };
    * client.listDocumentsStream(request)
    *   .on('data', element => {
@@ -576,22 +579,20 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
-   * '[DOCUMENT]', '[ANY_PATH]'); var collectionId = ''; var documentId = '';
-   * var document = {};
-   * var request = {
-   *   parent: formattedParent,
+   * const formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * '[DOCUMENT]', '[ANY_PATH]'); const collectionId = ''; const documentId =
+   * ''; const document = {}; const request = { parent: formattedParent,
    *   collectionId: collectionId,
    *   documentId: documentId,
    *   document: document,
    * };
    * client.createDocument(request)
    *   .then(responses => {
-   *     var response = responses[0];
+   *     const response = responses[0];
    *     // doThingsWith(response)
    *   })
    *   .catch(err => {
@@ -663,19 +664,19 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var document = {};
-   * var updateMask = {};
-   * var request = {
+   * const document = {};
+   * const updateMask = {};
+   * const request = {
    *   document: document,
    *   updateMask: updateMask,
    * };
    * client.updateDocument(request)
    *   .then(responses => {
-   *     var response = responses[0];
+   *     const response = responses[0];
    *     // doThingsWith(response)
    *   })
    *   .catch(err => {
@@ -721,11 +722,11 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * const formattedName = client.anyPathPath('[PROJECT]', '[DATABASE]',
    * '[DOCUMENT]', '[ANY_PATH]'); client.deleteDocument({name:
    * formattedName}).catch(err => { console.error(err);
    * });
@@ -793,15 +794,13 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
-   * var documents = [];
-   * var request = {
-   *   database: formattedDatabase,
-   *   documents: documents,
+   * const formattedDatabase = client.databaseRootPath('[PROJECT]',
+   * '[DATABASE]'); const documents = []; const request = { database:
+   * formattedDatabase, documents: documents,
    * };
    * client.batchGetDocuments(request).on('data', response => {
    *   // doThingsWith(response)
@@ -848,14 +847,14 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
-   * client.beginTransaction({database: formattedDatabase})
+   * const formattedDatabase = client.databaseRootPath('[PROJECT]',
+   * '[DATABASE]'); client.beginTransaction({database: formattedDatabase})
    *   .then(responses => {
-   *     var response = responses[0];
+   *     const response = responses[0];
    *     // doThingsWith(response)
    *   })
    *   .catch(err => {
@@ -908,19 +907,17 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
-   * var writes = [];
-   * var request = {
-   *   database: formattedDatabase,
-   *   writes: writes,
+   * const formattedDatabase = client.databaseRootPath('[PROJECT]',
+   * '[DATABASE]'); const writes = []; const request = { database:
+   * formattedDatabase, writes: writes,
    * };
    * client.commit(request)
    *   .then(responses => {
-   *     var response = responses[0];
+   *     const response = responses[0];
    *     // doThingsWith(response)
    *   })
    *   .catch(err => {
@@ -962,15 +959,13 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
-   * var transaction = '';
-   * var request = {
-   *   database: formattedDatabase,
-   *   transaction: transaction,
+   * const formattedDatabase = client.databaseRootPath('[PROJECT]',
+   * '[DATABASE]'); const transaction = ''; const request = { database:
+   * formattedDatabase, transaction: transaction,
    * };
    * client.rollback(request).catch(err => {
    *   console.error(err);
@@ -1032,11 +1027,11 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * const formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
    * '[DOCUMENT]', '[ANY_PATH]'); client.runQuery({parent:
    * formattedParent}).on('data', response => {
    *   // doThingsWith(response)
@@ -1067,16 +1062,15 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var stream = client.write().on('data', response => {
+   * const stream = client.write().on('data', response => {
    *   // doThingsWith(response)
    * });
-   * var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
-   * var request = {
-   *   database: formattedDatabase,
+   * const formattedDatabase = client.databaseRootPath('[PROJECT]',
+   * '[DATABASE]'); const request = { database: formattedDatabase,
    * };
    * // Write request objects.
    * stream.write(request);
@@ -1106,16 +1100,15 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var stream = client.listen().on('data', response => {
+   * const stream = client.listen().on('data', response => {
    *   // doThingsWith(response)
    * });
-   * var formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
-   * var request = {
-   *   database: formattedDatabase,
+   * const formattedDatabase = client.databaseRootPath('[PROJECT]',
+   * '[DATABASE]'); const request = { database: formattedDatabase,
    * };
    * // Write request objects.
    * stream.write(request);
@@ -1175,17 +1168,17 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
    * // Iterate over all elements.
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * const formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
    * '[DOCUMENT]', '[ANY_PATH]');
    *
    * client.listCollectionIds({parent: formattedParent})
    *   .then(responses => {
-   *     var resources = responses[0];
+   *     const resources = responses[0];
    *     for (let i = 0; i < resources.length; i += 1) {
    *       // doThingsWith(resources[i])
    *     }
@@ -1195,18 +1188,18 @@ class FirestoreClient {
    *   });
    *
    * // Or obtain the paged response.
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * const formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
    * '[DOCUMENT]', '[ANY_PATH]');
    *
    *
-   * var options = {autoPaginate: false};
-   * var callback = responses => {
+   * const options = {autoPaginate: false};
+   * const callback = responses => {
    *   // The actual resources in a response.
-   *   var resources = responses[0];
+   *   const resources = responses[0];
    *   // The next request if the response shows that there are more responses.
-   *   var nextRequest = responses[1];
+   *   const nextRequest = responses[1];
    *   // The actual response object, if necessary.
-   *   // var rawResponse = responses[2];
+   *   // const rawResponse = responses[2];
    *   for (let i = 0; i < resources.length; i += 1) {
    *     // doThingsWith(resources[i]);
    *   }
@@ -1270,11 +1263,11 @@ class FirestoreClient {
    *
    * const firestore = require('firestore.v1beta1');
    *
-   * var client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1beta1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
-   * var formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
+   * const formattedParent = client.anyPathPath('[PROJECT]', '[DATABASE]',
    * '[DOCUMENT]', '[ANY_PATH]'); client.listCollectionIdsStream({parent:
    * formattedParent}) .on('data', element => {
    *     // doThingsWith(element)

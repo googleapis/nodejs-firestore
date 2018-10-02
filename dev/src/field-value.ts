@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import deepEqual from 'deep-equal';
+
+import {google} from '../protos/firestore_proto_api';
 
 import {AnyDuringMigration, AnyJs} from './types';
 import {createValidator} from './validate';
-import {google} from '../protos/firestore_proto_api';
+
 import api = google.firestore.v1beta1;
 import {Serializer} from './serializer';
 import {FieldPath} from './path';
