@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import * as assert from 'power-assert';
 import {expect} from 'chai';
 import is from 'is';

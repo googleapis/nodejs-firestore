@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import {use, expect} from 'chai';
+import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
 import {ClientPool} from '../src/pool';
+
 import {Deferred} from './util/helpers';
 
 use(chaiAsPromised.default);

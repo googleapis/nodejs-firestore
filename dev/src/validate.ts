@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import * as is from 'is';
 import {AnyDuringMigration} from './types';
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import bun from 'bun';
 import deepEqual from 'deep-equal';
 import extend from 'extend';
