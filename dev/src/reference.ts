@@ -286,15 +286,6 @@ export class DocumentReference {
    *
    * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
    * with an array of CollectionReferences.
-   *
-   * @example
-   * let documentRef = firestore.doc('col/doc');
-   *
-   * documentRef.getCollections().then(collections => {
-   *   for (let collection of collections) {
-   *     console.log(`Found subcollection with id: ${collection.id}`);
-   *   }
-   * });
    */
   getCollections(): Promise<CollectionReference[]> {
     return this.listCollections();

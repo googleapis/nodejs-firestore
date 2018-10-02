@@ -610,13 +610,6 @@ class Firestore {
    *
    * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
    * with an array of CollectionReferences.
-   *
-   * @example
-   * firestore.getCollections().then(collections => {
-   *   for (let collection of collections) {
-   *     console.log(`Found collection with id: ${collection.id}`);
-   *   }
-   * });
    */
   getCollections() {
     return this.listCollections();
