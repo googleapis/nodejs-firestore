@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import * as is from 'is';
 import {QueryDocumentSnapshot} from './document';
 export type DocumentChangeType = 'added'|'removed'|'modified';
