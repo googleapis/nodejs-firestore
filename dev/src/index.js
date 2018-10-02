@@ -591,6 +591,27 @@ class Firestore {
    * with an array of CollectionReferences.
    *
    * @example
+   * firestore.listCollections().then(collections => {
+   *   for (let collection of collections) {
+   *     console.log(`Found collection with id: ${collection.id}`);
+   *   }
+   * });
+   */
+  listCollections() {
+    let rootDocument = new DocumentReference(this, this._referencePath);
+    return rootDocument.listCollections();
+  }
+
+  /**
+   * Fetches the root collections that are associated with this Firestore
+   * database.
+   *
+   * @deprecated Use `listCollections()`.
+   *
+   * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
+   * with an array of CollectionReferences.
+   *
+   * @example
    * firestore.getCollections().then(collections => {
    *   for (let collection of collections) {
    *     console.log(`Found collection with id: ${collection.id}`);
@@ -598,8 +619,7 @@ class Firestore {
    * });
    */
   getCollections() {
-    let rootDocument = new DocumentReference(this, this._referencePath);
-    return rootDocument.getCollections();
+    return this.listCollections();
   }
 
   /**

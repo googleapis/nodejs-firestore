@@ -135,9 +135,19 @@ declare namespace FirebaseFirestore {
      * Fetches the root collections that are associated with this Firestore
      * database.
      *
+     * @deprecated Use `listCollections()`.
+     *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
     getCollections() : Promise<CollectionReference[]>;
+
+    /**
+     * Fetches the root collections that are associated with this Firestore
+     * database.
+     *
+     * @returns A Promise that resolves with an array of CollectionReferences.
+     */
+    listCollections() : Promise<CollectionReference[]>;
 
     /**
      * Executes the given updateFunction and commits the changes applied within
@@ -501,9 +511,18 @@ declare namespace FirebaseFirestore {
     /**
      * Fetches the subcollections that are direct children of this document.
      *
+     * @deprecated Use `listCollections()`.
+     *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
     getCollections() : Promise<CollectionReference[]>;
+
+    /**
+     * Fetches the subcollections that are direct children of this document.
+     *
+     * @returns A Promise that resolves with an array of CollectionReferences.
+     */
+    listCollections() : Promise<CollectionReference[]>;
 
     /**
      * Creates a document referred to by this `DocumentReference` with the
