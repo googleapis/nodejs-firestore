@@ -1044,7 +1044,7 @@ declare namespace FirebaseFirestore {
      * document reference (e.g. via `.get()` or `.onSnapshot()`) will return a
      * `DocumentSnapshot` whose `.exists` property is false.
      *
-     * @return {Promise<DocumentReference[]>} The  list of documents in this
+     * @return {Promise<DocumentReference[]>} The list of documents in this
      * collection.
      */
     listDocuments(): Promise<DocumentReference[]>;
