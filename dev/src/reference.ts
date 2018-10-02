@@ -284,7 +284,7 @@ export class DocumentReference {
   /**
    * Fetches the subcollections that are direct children of this document.
    *
-   * @deprecated Use `listCollections()`.
+   * @deprecated Use `.listCollections()`.
    *
    * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
    * with an array of CollectionReferences.
