@@ -1871,9 +1871,7 @@ export class CollectionReference extends Query {
     });
 
     const documentRef = this.doc();
-    return documentRef.create(data).then(() => {
-      return Promise.resolve(documentRef);
-    });
+    return documentRef.create(data).then(() => documentRef);
   }
 
   /**
