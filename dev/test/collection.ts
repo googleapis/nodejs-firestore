@@ -150,10 +150,11 @@ describe('Collection interface', () => {
     };
 
     return createInstance(overrides).then(firestore => {
-      return firestore.collection('a/b/c').list().then(documentRefs => {
-        expect(documentRefs[0].id).to.eq('first');
-        expect(documentRefs[1].id).to.eq('second');
-      });
+      return firestore.collection('a/b/c').listDocuments().then(
+          documentRefs => {
+            expect(documentRefs[0].id).to.eq('first');
+            expect(documentRefs[1].id).to.eq('second');
+          });
     });
   });
 

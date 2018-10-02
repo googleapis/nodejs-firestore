@@ -136,7 +136,7 @@ describe('CollectionReference class', function() {
     batch.set(randomCol.doc('c'),{});
     await batch.commit();
 
-    const documentRefs = await randomCol.list();
+    const documentRefs = await randomCol.listDocuments();
     const documents = await firestore.getAll(documentRefs);
 
     const existingDocs = documents.filter(doc => doc.exists);

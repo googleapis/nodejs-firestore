@@ -1830,7 +1830,7 @@ export class CollectionReference extends Query {
    * @example
    * let collectionRef = firestore.collection('col');
    *
-   * return collectionRef.list().then(documentRefs => {
+   * return collectionRef.listDocuments().then(documentRefs => {
    *    return firestore.getAll(documentRefs);
    * }).then(documentSnapshots => {
    *    for (let documentSnapshot of documentSnapshots) {
@@ -1842,7 +1842,7 @@ export class CollectionReference extends Query {
    *    }
    * });
    */
-  list(): Promise<DocumentReference[]> {
+  listDocuments(): Promise<DocumentReference[]> {
     const request: api.IListDocumentsRequest = {
       parent: this._path.parent()!.formattedName,
       collectionId: this.id,
