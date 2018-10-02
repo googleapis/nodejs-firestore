@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 /**
  * A union of all of the standard JS types, useful for cases where the type is
  * unknown. Unlike "any" this doesn't lose all type-safety, since the consuming

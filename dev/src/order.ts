@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import * as is from 'is';
 
 import {google} from '../protos/firestore_proto_api';

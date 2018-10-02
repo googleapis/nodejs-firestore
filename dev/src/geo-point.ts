@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
