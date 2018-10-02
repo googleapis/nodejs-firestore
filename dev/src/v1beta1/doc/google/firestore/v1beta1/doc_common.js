@@ -30,7 +30,7 @@
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.DocumentMask definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
-var DocumentMask = {
+const DocumentMask = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -52,7 +52,7 @@ var DocumentMask = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.Precondition definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
-var Precondition = {
+const Precondition = {
     // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
@@ -75,7 +75,7 @@ var Precondition = {
  * @memberof google.firestore.v1beta1
  * @see [google.firestore.v1beta1.TransactionOptions definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
-var TransactionOptions = {
+const TransactionOptions = {
   // This is for documentation. Actual contents will be loaded by gRPC.
 
   /**

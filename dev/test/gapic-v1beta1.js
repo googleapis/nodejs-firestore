@@ -19,28 +19,28 @@ const through2 = require('through2');
 
 const firestoreModule = require('../src');
 
-var FAKE_STATUS_CODE = 1;
-var error = new Error();
+const FAKE_STATUS_CODE = 1;
+const error = new Error();
 error.code = FAKE_STATUS_CODE;
 
 describe('FirestoreClient', () => {
   describe('getDocument', () => {
     it('invokes getDocument without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedName = client.anyPathPath(
+      const formattedName = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var request = {
+      const request = {
         name: formattedName,
       };
 
       // Mock response
-      var name2 = 'name2-1052831874';
-      var expectedResponse = {
+      const name2 = 'name2-1052831874';
+      const expectedResponse = {
         name: name2,
       };
 
@@ -56,15 +56,15 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes getDocument with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedName = client.anyPathPath(
+      const formattedName = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var request = {
+      const request = {
         name: formattedName,
       };
 
@@ -83,25 +83,25 @@ describe('FirestoreClient', () => {
 
   describe('listDocuments', () => {
     it('invokes listDocuments without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
+      const formattedParent = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var collectionId = 'collectionId-821242276';
-      var request = {
+      const collectionId = 'collectionId-821242276';
+      const request = {
         parent: formattedParent,
         collectionId: collectionId,
       };
 
       // Mock response
-      var nextPageToken = '';
-      var documentsElement = {};
-      var documents = [documentsElement];
-      var expectedResponse = {
+      const nextPageToken = '';
+      const documentsElement = {};
+      const documents = [documentsElement];
+      const expectedResponse = {
         nextPageToken: nextPageToken,
         documents: documents,
       };
@@ -121,16 +121,16 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes listDocuments with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
+      const formattedParent = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var collectionId = 'collectionId-821242276';
-      var request = {
+      const collectionId = 'collectionId-821242276';
+      const request = {
         parent: formattedParent,
         collectionId: collectionId,
       };
@@ -150,18 +150,18 @@ describe('FirestoreClient', () => {
 
   describe('createDocument', () => {
     it('invokes createDocument without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
+      const formattedParent = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var collectionId = 'collectionId-821242276';
-      var documentId = 'documentId506676927';
-      var document = {};
-      var request = {
+      const collectionId = 'collectionId-821242276';
+      const documentId = 'documentId506676927';
+      const document = {};
+      const request = {
         parent: formattedParent,
         collectionId: collectionId,
         documentId: documentId,
@@ -169,8 +169,8 @@ describe('FirestoreClient', () => {
       };
 
       // Mock response
-      var name = 'name3373707';
-      var expectedResponse = {
+      const name = 'name3373707';
+      const expectedResponse = {
         name: name,
       };
 
@@ -186,18 +186,18 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes createDocument with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
+      const formattedParent = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var collectionId = 'collectionId-821242276';
-      var documentId = 'documentId506676927';
-      var document = {};
-      var request = {
+      const collectionId = 'collectionId-821242276';
+      const documentId = 'documentId506676927';
+      const document = {};
+      const request = {
         parent: formattedParent,
         collectionId: collectionId,
         documentId: documentId,
@@ -219,22 +219,22 @@ describe('FirestoreClient', () => {
 
   describe('updateDocument', () => {
     it('invokes updateDocument without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var document = {};
-      var updateMask = {};
-      var request = {
+      const document = {};
+      const updateMask = {};
+      const request = {
         document: document,
         updateMask: updateMask,
       };
 
       // Mock response
-      var name = 'name3373707';
-      var expectedResponse = {
+      const name = 'name3373707';
+      const expectedResponse = {
         name: name,
       };
 
@@ -250,15 +250,15 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes updateDocument with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var document = {};
-      var updateMask = {};
-      var request = {
+      const document = {};
+      const updateMask = {};
+      const request = {
         document: document,
         updateMask: updateMask,
       };
@@ -278,15 +278,15 @@ describe('FirestoreClient', () => {
 
   describe('deleteDocument', () => {
     it('invokes deleteDocument without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedName = client.anyPathPath(
+      const formattedName = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var request = {
+      const request = {
         name: formattedName,
       };
 
@@ -300,15 +300,15 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes deleteDocument with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedName = client.anyPathPath(
+      const formattedName = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var request = {
+      const request = {
         name: formattedName,
       };
 
@@ -326,24 +326,24 @@ describe('FirestoreClient', () => {
 
   describe('batchGetDocuments', () => {
     it('invokes batchGetDocuments without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var documents = [];
-      var request = {
+      const documents = [];
+      const request = {
         database: formattedDatabase,
         documents: documents,
       };
 
       // Mock response
-      var missing = 'missing1069449574';
-      var transaction = '-34';
-      var expectedResponse = {
+      const missing = 'missing1069449574';
+      const transaction = '-34';
+      const expectedResponse = {
         missing: missing,
         transaction: transaction,
       };
@@ -352,7 +352,7 @@ describe('FirestoreClient', () => {
       client._innerApiCalls.batchGetDocuments =
           mockServerStreamingGrpcMethod(request, expectedResponse);
 
-      var stream = client.batchGetDocuments(request);
+      const stream = client.batchGetDocuments(request);
       stream.on('data', response => {
         assert.deepStrictEqual(response, expectedResponse);
         done();
@@ -365,16 +365,16 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes batchGetDocuments with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var documents = [];
-      var request = {
+      const documents = [];
+      const request = {
         database: formattedDatabase,
         documents: documents,
       };
@@ -383,7 +383,7 @@ describe('FirestoreClient', () => {
       client._innerApiCalls.batchGetDocuments =
           mockServerStreamingGrpcMethod(request, null, error);
 
-      var stream = client.batchGetDocuments(request);
+      const stream = client.batchGetDocuments(request);
       stream.on('data', () => {
         assert.fail();
       });
@@ -399,21 +399,21 @@ describe('FirestoreClient', () => {
 
   describe('beginTransaction', () => {
     it('invokes beginTransaction without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var request = {
+      const request = {
         database: formattedDatabase,
       };
 
       // Mock response
-      var transaction = '-34';
-      var expectedResponse = {
+      const transaction = '-34';
+      const expectedResponse = {
         transaction: transaction,
       };
 
@@ -429,15 +429,15 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes beginTransaction with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var request = {
+      const request = {
         database: formattedDatabase,
       };
 
@@ -456,22 +456,22 @@ describe('FirestoreClient', () => {
 
   describe('commit', () => {
     it('invokes commit without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var writes = [];
-      var request = {
+      const writes = [];
+      const request = {
         database: formattedDatabase,
         writes: writes,
       };
 
       // Mock response
-      var expectedResponse = {};
+      const expectedResponse = {};
 
       // Mock Grpc layer
       client._innerApiCalls.commit =
@@ -485,16 +485,16 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes commit with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var writes = [];
-      var request = {
+      const writes = [];
+      const request = {
         database: formattedDatabase,
         writes: writes,
       };
@@ -513,16 +513,16 @@ describe('FirestoreClient', () => {
 
   describe('rollback', () => {
     it('invokes rollback without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var transaction = '-34';
-      var request = {
+      const transaction = '-34';
+      const request = {
         database: formattedDatabase,
         transaction: transaction,
       };
@@ -537,16 +537,16 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes rollback with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var transaction = '-34';
-      var request = {
+      const transaction = '-34';
+      const request = {
         database: formattedDatabase,
         transaction: transaction,
       };
@@ -565,22 +565,22 @@ describe('FirestoreClient', () => {
 
   describe('runQuery', () => {
     it('invokes runQuery without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
+      const formattedParent = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var request = {
+      const request = {
         parent: formattedParent,
       };
 
       // Mock response
-      var transaction = '-34';
-      var skippedResults = 880286183;
-      var expectedResponse = {
+      const transaction = '-34';
+      const skippedResults = 880286183;
+      const expectedResponse = {
         transaction: transaction,
         skippedResults: skippedResults,
       };
@@ -589,7 +589,7 @@ describe('FirestoreClient', () => {
       client._innerApiCalls.runQuery =
           mockServerStreamingGrpcMethod(request, expectedResponse);
 
-      var stream = client.runQuery(request);
+      const stream = client.runQuery(request);
       stream.on('data', response => {
         assert.deepStrictEqual(response, expectedResponse);
         done();
@@ -602,15 +602,15 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes runQuery with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
+      const formattedParent = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var request = {
+      const request = {
         parent: formattedParent,
       };
 
@@ -618,7 +618,7 @@ describe('FirestoreClient', () => {
       client._innerApiCalls.runQuery =
           mockServerStreamingGrpcMethod(request, null, error);
 
-      var stream = client.runQuery(request);
+      const stream = client.runQuery(request);
       stream.on('data', () => {
         assert.fail();
       });
@@ -634,22 +634,22 @@ describe('FirestoreClient', () => {
 
   describe('write', () => {
     it('invokes write without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var request = {
+      const request = {
         database: formattedDatabase,
       };
 
       // Mock response
-      var streamId = 'streamId-315624902';
-      var streamToken = '122';
-      var expectedResponse = {
+      const streamId = 'streamId-315624902';
+      const streamToken = '122';
+      const expectedResponse = {
         streamId: streamId,
         streamToken: streamToken,
       };
@@ -658,29 +658,30 @@ describe('FirestoreClient', () => {
       client._innerApiCalls.write =
           mockBidiStreamingGrpcMethod(request, expectedResponse);
 
-      var stream = client.write()
-                       .on('data',
-                           response => {
-                             assert.deepStrictEqual(response, expectedResponse);
-                             done();
-                           })
-                       .on('error', err => {
-                         done(err);
-                       });
+      const stream =
+          client.write()
+              .on('data',
+                  response => {
+                    assert.deepStrictEqual(response, expectedResponse);
+                    done();
+                  })
+              .on('error', err => {
+                done(err);
+              });
 
       stream.write(request);
     });
 
     it('invokes write with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var request = {
+      const request = {
         database: formattedDatabase,
       };
 
@@ -688,16 +689,16 @@ describe('FirestoreClient', () => {
       client._innerApiCalls.write =
           mockBidiStreamingGrpcMethod(request, null, error);
 
-      var stream = client.write()
-                       .on('data',
-                           () => {
-                             assert.fail();
-                           })
-                       .on('error', err => {
-                         assert(err instanceof Error);
-                         assert.strictEqual(err.code, FAKE_STATUS_CODE);
-                         done();
-                       });
+      const stream = client.write()
+                         .on('data',
+                             () => {
+                               assert.fail();
+                             })
+                         .on('error', err => {
+                           assert(err instanceof Error);
+                           assert.strictEqual(err.code, FAKE_STATUS_CODE);
+                           done();
+                         });
 
       stream.write(request);
     });
@@ -705,48 +706,49 @@ describe('FirestoreClient', () => {
 
   describe('listen', () => {
     it('invokes listen without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var request = {
+      const request = {
         database: formattedDatabase,
       };
 
       // Mock response
-      var expectedResponse = {};
+      const expectedResponse = {};
 
       // Mock Grpc layer
       client._innerApiCalls.listen =
           mockBidiStreamingGrpcMethod(request, expectedResponse);
 
-      var stream = client.listen()
-                       .on('data',
-                           response => {
-                             assert.deepStrictEqual(response, expectedResponse);
-                             done();
-                           })
-                       .on('error', err => {
-                         done(err);
-                       });
+      const stream =
+          client.listen()
+              .on('data',
+                  response => {
+                    assert.deepStrictEqual(response, expectedResponse);
+                    done();
+                  })
+              .on('error', err => {
+                done(err);
+              });
 
       stream.write(request);
     });
 
     it('invokes listen with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedDatabase =
+      const formattedDatabase =
           client.databaseRootPath('[PROJECT]', '[DATABASE]');
-      var request = {
+      const request = {
         database: formattedDatabase,
       };
 
@@ -754,16 +756,16 @@ describe('FirestoreClient', () => {
       client._innerApiCalls.listen =
           mockBidiStreamingGrpcMethod(request, null, error);
 
-      var stream = client.listen()
-                       .on('data',
-                           () => {
-                             assert.fail();
-                           })
-                       .on('error', err => {
-                         assert(err instanceof Error);
-                         assert.strictEqual(err.code, FAKE_STATUS_CODE);
-                         done();
-                       });
+      const stream = client.listen()
+                         .on('data',
+                             () => {
+                               assert.fail();
+                             })
+                         .on('error', err => {
+                           assert(err instanceof Error);
+                           assert.strictEqual(err.code, FAKE_STATUS_CODE);
+                           done();
+                         });
 
       stream.write(request);
     });
@@ -771,23 +773,23 @@ describe('FirestoreClient', () => {
 
   describe('listCollectionIds', () => {
     it('invokes listCollectionIds without error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
+      const formattedParent = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var request = {
+      const request = {
         parent: formattedParent,
       };
 
       // Mock response
-      var nextPageToken = '';
-      var collectionIdsElement = 'collectionIdsElement1368994900';
-      var collectionIds = [collectionIdsElement];
-      var expectedResponse = {
+      const nextPageToken = '';
+      const collectionIdsElement = 'collectionIdsElement1368994900';
+      const collectionIds = [collectionIdsElement];
+      const expectedResponse = {
         nextPageToken: nextPageToken,
         collectionIds: collectionIds,
       };
@@ -807,15 +809,15 @@ describe('FirestoreClient', () => {
     });
 
     it('invokes listCollectionIds with error', done => {
-      var client = new firestoreModule.v1beta1({
+      const client = new firestoreModule.v1beta1({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
 
       // Mock request
-      var formattedParent = client.anyPathPath(
+      const formattedParent = client.anyPathPath(
           '[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]');
-      var request = {
+      const request = {
         parent: formattedParent,
       };
 
@@ -849,7 +851,7 @@ function mockSimpleGrpcMethod(expectedRequest, response, error) {
 function mockServerStreamingGrpcMethod(expectedRequest, response, error) {
   return actualRequest => {
     assert.deepStrictEqual(actualRequest, expectedRequest);
-    var mockStream = through2.obj((chunk, enc, callback) => {
+    const mockStream = through2.obj((chunk, enc, callback) => {
       if (error) {
         callback(error);
       } else {
@@ -862,7 +864,7 @@ function mockServerStreamingGrpcMethod(expectedRequest, response, error) {
 
 function mockBidiStreamingGrpcMethod(expectedRequest, response, error) {
   return () => {
-    var mockStream = through2.obj((chunk, enc, callback) => {
+    const mockStream = through2.obj((chunk, enc, callback) => {
       assert.deepStrictEqual(chunk, expectedRequest);
       if (error) {
         callback(error);
