@@ -703,7 +703,7 @@ describe('collection() method', function() {
   });
 });
 
-describe('getCollections() method', function() {
+describe('listCollections() method', function() {
   it('returns collections', function() {
     const overrides = {
       listCollectionIds: (request, options, callback) => {
@@ -716,6 +716,7 @@ describe('getCollections() method', function() {
     };
 
     return createInstance(overrides).then(firestore => {
+      // We are using `getCollections()` to ensure 100% code coverage
       return firestore.getCollections().then(collections => {
         assert.equal(collections[0].path, 'first');
         assert.equal(collections[1].path, 'second');

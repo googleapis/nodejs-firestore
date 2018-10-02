@@ -254,13 +254,13 @@ export class DocumentReference {
    * @example
    * let documentRef = firestore.doc('col/doc');
    *
-   * documentRef.getCollections().then(collections => {
+   * documentRef.listCollections().then(collections => {
    *   for (let collection of collections) {
    *     console.log(`Found subcollection with id: ${collection.id}`);
    *   }
    * });
    */
-  getCollections(): Promise<CollectionReference[]> {
+  listCollections(): Promise<CollectionReference[]> {
     const request = {parent: this._path.formattedName};
 
     return this._firestore.request('listCollectionIds', request, requestTag())
@@ -277,6 +277,18 @@ export class DocumentReference {
 
           return collections;
         });
+  }
+
+  /**
+   * Fetches the subcollections that are direct children of this document.
+   *
+   * @deprecated Use `.listCollections()`.
+   *
+   * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
+   * with an array of CollectionReferences.
+   */
+  getCollections(): Promise<CollectionReference[]> {
+    return this.listCollections();
   }
 
   /**

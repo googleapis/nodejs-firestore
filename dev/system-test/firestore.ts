@@ -424,7 +424,7 @@ describe('DocumentReference class', function() {
         });
   });
 
-  it('has getCollections() method', function() {
+  it('has listCollections() method', function() {
     let collections = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
     let promises : Promise<{}>[] = [];
 
@@ -434,7 +434,7 @@ describe('DocumentReference class', function() {
 
     return Promise.all(promises)
         .then(() => {
-          return randomCol.doc('doc').getCollections();
+          return randomCol.doc('doc').listCollections();
         })
         .then(response => {
           assert.equal(response.length, collections.length);

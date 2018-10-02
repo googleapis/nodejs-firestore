@@ -1762,7 +1762,7 @@ describe('update document', function() {
   });
 });
 
-describe('getCollections() method', function() {
+describe('listCollections() method', function() {
   it('sorts results', function() {
     const overrides = {
       listCollectionIds: (request, options, callback) => {
@@ -1776,6 +1776,7 @@ describe('getCollections() method', function() {
     };
 
     return createInstance(overrides).then(firestore => {
+      // We are using `getCollections()` to ensure 100% code coverage
       return firestore.doc('coll/doc').getCollections().then(collections => {
         assert.equal(collections[0].path, 'coll/doc/first');
         assert.equal(collections[1].path, 'coll/doc/second');
