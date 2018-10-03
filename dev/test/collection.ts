@@ -18,7 +18,8 @@
 import {expect} from 'chai';
 
 // TODO: This should be a TypeScript import after the full migration.
-import Firestore = require('../src');
+// tslint:disable-next-line:variable-name
+const Firestore = require('../src');
 
 import {DocumentReference} from '../src/reference';
 import {createInstance, DATABASE_ROOT, document} from './util/helpers';

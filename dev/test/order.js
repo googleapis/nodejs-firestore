@@ -18,7 +18,7 @@
 
 import assert from 'power-assert';
 
-import {Firestore} from '../src/index';
+import Firestore from '../src/index';
 import {DocumentReference} from '../src/reference';
 import {DocumentSnapshot} from '../src/document';
 import {createInstance} from '../test/util/helpers';

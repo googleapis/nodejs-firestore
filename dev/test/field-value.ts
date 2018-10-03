@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {expect, use} from 'chai';
-
+import {expect} from 'chai';
 import {ApiOverride, arrayTransform, commitRequest, createInstance, document, serverTimestamp, set, writeResult} from './util/helpers';
 
 // TODO: This should be a TypeScript import after the full migration.
@@ -45,7 +44,7 @@ function genericFieldValueTests(
   it('can\'t be used inside arrayUnion()', () => {
     return createInstance().then((firestore: AnyDuringMigration) => {
       const docRef = firestore.doc('collectionId/documentId');
-      expect(() => docRef.set({foo: Firestore.FieldValue.arrayUnion(sentinel)}))
+      expect(() => docRef.set({foo: FieldValue.arrayUnion(sentinel)}))
           .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
               methodName}() cannot be used inside of an array.`);
     });
@@ -54,8 +53,7 @@ function genericFieldValueTests(
   it('can\'t be used inside arrayRemove()', () => {
     return createInstance().then((firestore: AnyDuringMigration) => {
       const docRef = firestore.doc('collectionId/documentId');
-      expect(
-          () => docRef.set({foo: Firestore.FieldValue.arrayRemove(sentinel)}))
+      expect(() => docRef.set({foo: FieldValue.arrayRemove(sentinel)}))
           .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
               methodName}() cannot be used inside of an array.`);
     });
@@ -107,8 +105,8 @@ describe('FieldValue.arrayUnion()', () => {
     return createInstance(overrides).then((firestore: AnyDuringMigration) => {
       return firestore.doc('collectionId/documentId').set({
         foo: 'bar',
-        field: Firestore.FieldValue.arrayUnion('foo', 'bar'),
-        map: {field: Firestore.FieldValue.arrayUnion('foo', 'bar')},
+        field: FieldValue.arrayUnion('foo', 'bar'),
+        map: {field: FieldValue.arrayUnion('foo', 'bar')},
       });
     });
   });
@@ -148,8 +146,8 @@ describe('FieldValue.arrayRemove()', () => {
     return createInstance(overrides).then((firestore: AnyDuringMigration) => {
       return firestore.doc('collectionId/documentId').set({
         foo: 'bar',
-        field: Firestore.FieldValue.arrayRemove('foo', 'bar'),
-        map: {field: Firestore.FieldValue.arrayRemove('foo', 'bar')},
+        field: FieldValue.arrayRemove('foo', 'bar'),
+        map: {field: FieldValue.arrayRemove('foo', 'bar')},
       });
     });
   });
@@ -180,8 +178,8 @@ describe('FieldValue.serverTimestamp()', () => {
     return createInstance(overrides).then((firestore: AnyDuringMigration) => {
       return firestore.doc('collectionId/documentId').set({
         foo: 'bar',
-        field: Firestore.FieldValue.serverTimestamp(),
-        map: {field: Firestore.FieldValue.serverTimestamp()},
+        field: FieldValue.serverTimestamp(),
+        map: {field: FieldValue.serverTimestamp()},
       });
     });
   });

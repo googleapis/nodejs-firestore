@@ -17,7 +17,7 @@
 'use strict';
 
 
-import {Firestore} from '../src/index';
+import Firestore from '../src/index';
 import is from 'is';
 import through2 from 'through2';
 import assert from 'assert';
