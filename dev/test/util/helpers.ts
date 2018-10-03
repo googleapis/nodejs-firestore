@@ -22,7 +22,8 @@ import api = google.firestore.v1beta1;
 const v1beta1 = require('../../src/v1beta1');
 
 // TODO: This should be a TypeScript import after the full migration.
-import Firestore = require('../../src');
+// tslint:disable-next-line:variable-name
+const Firestore = require('../../src');
 import {ClientPool} from '../../src/pool';
 
 /* tslint:disable:no-any */
@@ -77,7 +78,8 @@ export type ApiOverride = {
  * client.
  */
 export function createInstance(
-    apiOverrides?: ApiOverride, firestoreSettings?: {}): Promise<Firestore> {
+    apiOverrides?: ApiOverride,
+    firestoreSettings?: {}): Promise<typeof Firestore> {
   const initializationOptions = Object.assign(
       {
         projectId: PROJECT_ID,

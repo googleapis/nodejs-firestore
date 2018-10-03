@@ -21,13 +21,13 @@ import extend from 'extend';
 import is from 'is';
 import through2 from 'through2';
 
-import {Firestore} from '../src/index';
+import Firestore from '../src/index';
 import {DocumentReference, CollectionReference} from '../src/reference';
 import {ResourcePath} from '../src/path';
 import {createInstance} from '../test/util/helpers';
+import * as gax from 'google-gax';
 
-const gax = require('google-gax');
-const grpc = new gax.GrpcClient().grpc;
+const {grpc} = new gax.GrpcClient();
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;

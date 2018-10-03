@@ -21,7 +21,7 @@ import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 
-import {Firestore} from '../src/index';
+import Firestore from '../src/index';
 import {createInstance} from '../test/util/helpers';
 
 const api = google.firestore.v1beta1;
