@@ -1140,9 +1140,7 @@ follow these steps, YOUR APP MAY BREAK.`);
       return this._retry(attempts, requestTag, () => {
         return Promise.resolve().then(() => {
           logger('Firestore.readWriteStream', requestTag, 'Opening stream');
-          // The generated bi-directional streaming API takes the list of GAX
-          // headers as its second argument.
-          let requestStream = gapicClient[methodName]({}, decorated.gax);
+          let requestStream = gapicClient[methodName](decorated.gax);
 
           // The transform stream to assign the project ID.
           let transform = through2.obj(function(chunk, encoding, callback) {

@@ -34,6 +34,14 @@ s.replace(
     "new firestoreModule.v1beta1(",
 )
 
+# Fix dropping of google-cloud-resource-header
+# See: https://github.com/googleapis/nodejs-firestore/pull/375
+s.replace(
+    "dev/src/v1beta1/firestore_client.js",
+    "return this._innerApiCalls.listen(options);",
+    "return this._innerApiCalls.listen({}, options);",
+)
+
 # Copy template files
 common_templates = gcp.CommonTemplates()
 templates = common_templates.node_library(
