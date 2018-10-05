@@ -1116,7 +1116,7 @@ class FirestoreClient {
   listen(options) {
     options = options || {};
 
-    return this._innerApiCalls.listen({}, options);
+    return this._innerApiCalls.listen(options);
   }
 
   /**
