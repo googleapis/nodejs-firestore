@@ -16,7 +16,10 @@
 
 import is from 'is';
 
-import {DocumentReference, Query} from './reference';
+import {DocumentSnapshot, Precondition} from './document';
+import {FieldPath} from './path';
+import {DocumentReference, Query, QuerySnapshot} from './reference';
+import {AnyJs, DocumentData, Precondition as PublicPrecondition, SetOptions, UpdateData} from './types';
 import {requestTag} from './util';
 
 /*!
@@ -65,11 +68,29 @@ export class Transaction {
   }
 
   /**
+   * Retrieves a query result. Holds a pessimistic lock on all returned
+   * documents.
+   *
+   * @param {Query} query A query to execute.
+   * @return {Promise<QuerySnapshot>} A QuerySnapshot for the retrieved data.
+   */
+  get(query: Query): Promise<QuerySnapshot>;
+
+  /**
+   * Reads the document referenced by the provided `DocumentReference.`
+   * Holds a pessimistic lock on the returned document.
+   *
+   * @param {DocumentReference} documentRef A reference to the document to be read.
+   * @return {Promise<DocumentSnapshot>}  A DocumentSnapshot for the read data.
+   */
+  get(documentRef: DocumentReference): Promise<DocumentSnapshot>;
+
+  /**
    * Retrieve a document or a query result from the database. Holds a
    * pessimistic lock on all returned documents.
    *
-   * @param {DocumentReference|Query} refOrQuery - The
-   * document or query to return.
+   * @param {DocumentReference|Query} refOrQuery - The document or query to
+   * return.
    * @returns {Promise} A Promise that resolves with a DocumentSnapshot or
    * QuerySnapshot for the returned documents.
    *
@@ -85,12 +106,13 @@ export class Transaction {
    *   });
    * });
    */
-  get(refOrQuery) {
+  get(refOrQuery: DocumentReference|
+      Query): Promise<DocumentSnapshot|QuerySnapshot> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
-    if (is.instance(refOrQuery, DocumentReference)) {
+    if (refOrQuery instanceof DocumentReference) {
       return this._firestore
           .getAll_([refOrQuery], this._requestTag, this._transactionId)
           .then(res => {
@@ -98,7 +120,7 @@ export class Transaction {
           });
     }
 
-    if (is.instance(refOrQuery, Query)) {
+    if (refOrQuery instanceof Query) {
       return refOrQuery._get(this._transactionId);
     }
 
@@ -127,7 +149,7 @@ export class Transaction {
    *   });
    * });
    */
-  getAll(documents) {
+  getAll(...documents: DocumentReference[]): Promise<DocumentSnapshot[]> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
@@ -164,7 +186,7 @@ export class Transaction {
    *   });
    * });
    */
-  create(documentRef, data) {
+  create(documentRef: DocumentReference, data: DocumentData): Transaction {
     this._writeBatch.create(documentRef, data);
     return this;
   }
@@ -196,7 +218,8 @@ export class Transaction {
    *   return Promise.resolve();
    * });
    */
-  set(documentRef, data, options) {
+  set(documentRef: DocumentReference, data: DocumentData,
+      options?: SetOptions): Transaction {
     this._writeBatch.set(documentRef, data, options);
     return this;
   }
@@ -239,7 +262,10 @@ export class Transaction {
    *   });
    * });
    */
-  update(documentRef, dataOrField, preconditionOrValues) {
+  update(
+      documentRef: DocumentReference, dataOrField: UpdateData|string|FieldPath,
+      ...preconditionOrValues: Array<Precondition|AnyJs|string|FieldPath>):
+      Transaction {
     this._validator.minNumberOfArguments('update', arguments, 2);
 
     preconditionOrValues = Array.prototype.slice.call(arguments, 2);
@@ -270,7 +296,8 @@ export class Transaction {
    *   return Promise.resolve();
    * });
    */
-  delete(documentRef, precondition) {
+  delete(documentRef: DocumentReference, precondition?: PublicPrecondition):
+      this {
     this._writeBatch.delete(documentRef, precondition);
     return this;
   }
@@ -279,9 +306,8 @@ export class Transaction {
    * Starts a transaction and obtains the transaction id from the server.
    *
    * @private
-   * @returns {Promise} An empty Promise.
    */
-  begin() {
+  begin(): Promise<void> {
     const request = {
       database: this._firestore.formattedName,
     };
@@ -306,9 +332,8 @@ export class Transaction {
    * Commits all queued-up changes in this transaction and releases all locks.
    *
    * @private
-   * @returns {Promise} An empty Promise.
    */
-  commit() {
+  commit(): Promise<void> {
     return this._writeBatch.commit_({
       transactionId: this._transactionId,
       requestTag: this._requestTag,
@@ -319,9 +344,8 @@ export class Transaction {
    * Releases all locks and rolls back this transaction.
    *
    * @private
-   * @returns {Promise} An empty Promise.
    */
-  rollback() {
+  rollback(): Promise<void> {
     const request = {
       database: this._firestore.formattedName,
       transaction: this._transactionId,
@@ -333,9 +357,9 @@ export class Transaction {
   /**
    * Returns the tag to use with with all request for this Transaction.
    * @private
-   * @return {string} A unique client-generated identifier for this transaction.
+   * @return A unique client-generated identifier for this transaction.
    */
-  get requestTag() {
+  get requestTag(): string {
     return this._requestTag;
   }
 }

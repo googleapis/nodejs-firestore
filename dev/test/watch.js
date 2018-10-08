@@ -23,7 +23,7 @@ import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 
-import Firestore from '../src/index';
+import * as Firestore from '../src';
 import {DocumentSnapshot} from '../src/document';
 import {setTimeoutHandler} from '../src/backoff';
 import {createInstance} from '../test/util/helpers';

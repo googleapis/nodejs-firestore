@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import {google} from '../protos/firestore_proto_api';
+import {FieldPath} from './path';
+import {Transaction} from './transaction';
+
 /**
  * A union of all of the standard JS types, useful for cases where the type is
  * unknown. Unlike "any" this doesn't lose all type-safety, since the consuming
  * code must still cast to a particular type before using it.
  */
-import {google} from '../protos/firestore_proto_api';
-import {FieldPath} from './path';
-
 export type AnyJs = null|undefined|boolean|number|string|object;
 
 // tslint:disable-next-line:no-any
@@ -32,9 +33,56 @@ export type ApiMapValue = {
   [k: string]: google.firestore.v1beta1.IValue
 };
 
-/** JavaScript input from the API layer. */
+/**
+ * @private
+ * JavaScript input from the API layer.
+ */
 // tslint:disable-next-line:no-any
 export type UserInput = any;
+
+// tslint:disable-next-line:no-any
+export type GapicClient = any;
+
+/**
+ * Settings used to directly configure a `Firestore` instance.
+ */
+export interface Settings {
+  /**
+   * The Firestore Project ID. Can be omitted in environments that support
+   * `Application Default Credentials` {@see https://cloud.google.com/docs/authentication}
+   */
+  projectId?: string;
+
+  /**
+   * Local file containing the Service Account credentials. Can be omitted
+   * in environments that support `Application Default Credentials`
+   * {@see https://cloud.google.com/docs/authentication}
+   */
+  keyFilename?: string;
+
+  /**
+   * Enables the use of `Timestamp`s for timestamp fields in
+   * `DocumentSnapshot`s.
+   *
+   * Currently, Firestore returns timestamp fields as `Date` but `Date` only
+   * supports millisecond precision, which leads to truncation and causes
+   * unexpected behavior when using a timestamp from a snapshot as a part
+   * of a subsequent query.
+   *
+   * Setting `timestampsInSnapshots` to true will cause Firestore to return
+   * `Timestamp` values instead of `Date` avoiding this kind of problem. To
+   * make this work you must also change any code that uses `Date` to use
+   * `Timestamp` instead.
+   *
+   * NOTE: in the future `timestampsInSnapshots: true` will become the
+   * default and this option will be removed so you should change your code to
+   * use `Timestamp` now and opt-in to this new behavior as soon as you can.
+   */
+  timestampsInSnapshots?: boolean;
+
+  // tslint:disable-next-line:no-any
+  [key: string]: any;  // Accept other properties, such as GRPC settings.
+}
 
 /**
  * Document data (for use with `DocumentReference.set()`) consists of fields
@@ -89,4 +137,20 @@ export interface SetOptions {
    * missing a value for any of the fields specified here.
    */
   readonly mergeFields?: Array<string|FieldPath>;
+}
+
+/**
+ * @private
+ *
+ * Internal user data validation options.
+ */
+export interface ValidationOptions {
+  /** At what level field deletes are supported. */
+  allowDeletes?: 'none'|'root'|'all';
+
+  /** Whether server transforms are supported. */
+  allowTransforms?: boolean;
+
+  /** Whether empty documents are supported. */
+  allowEmpty?: boolean;
 }

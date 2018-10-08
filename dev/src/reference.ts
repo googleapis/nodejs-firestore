@@ -618,9 +618,9 @@ class FieldFilter {
  */
 export class QuerySnapshot {
   private readonly _validator: AnyDuringMigration;
-  private _materializedDocs: DocumentSnapshot[]|null = null;
+  private _materializedDocs: QueryDocumentSnapshot[]|null = null;
   private _materializedChanges: DocumentChange[]|null = null;
-  private _docs: (() => DocumentSnapshot[])|null = null;
+  private _docs: (() => QueryDocumentSnapshot[])|null = null;
   private _changes: (() => DocumentChange[])|null = null;
 
   /**
@@ -637,7 +637,7 @@ export class QuerySnapshot {
    */
   constructor(
       private readonly _query: Query, private readonly _readTime: Timestamp,
-      private readonly _size: number, docs: () => DocumentSnapshot[],
+      private readonly _size: number, docs: () => QueryDocumentSnapshot[],
       changes: () => DocumentChange[]) {
     this._validator = _query.firestore._validator;
     this._docs = docs;
@@ -684,7 +684,7 @@ export class QuerySnapshot {
    *   }
    * });
    */
-  get docs(): DocumentSnapshot[] {
+  get docs(): QueryDocumentSnapshot[] {
     if (this._materializedDocs) {
       return this._materializedDocs!;
     }
@@ -1013,7 +1013,7 @@ export class Query {
    *   });
    * });
    */
-  where(fieldPath: FieldPath, opStr: string, value: UserInput): Query {
+  where(fieldPath: string|FieldPath, opStr: string, value: UserInput): Query {
     this._validator.isFieldPath('fieldPath', fieldPath);
     this._validator.isQueryComparison('opStr', opStr, value);
     this._validator.isQueryValue('value', value, {
@@ -1107,7 +1107,7 @@ export class Query {
    *   });
    * });
    */
-  orderBy(fieldPath: string|FieldPath, directionStr: string): Query {
+  orderBy(fieldPath: string|FieldPath, directionStr?: string): Query {
     this._validator.isFieldPath('fieldPath', fieldPath);
     this._validator.isOptionalFieldOrder('directionStr', directionStr);
 
@@ -1118,7 +1118,8 @@ export class Query {
     }
 
     const newOrder = new FieldOrder(
-        FieldPath.fromArgument(fieldPath), directionOperators[directionStr]);
+        FieldPath.fromArgument(fieldPath),
+        directionOperators[directionStr || 'asc']);
     const combinedOrders = this._fieldOrders.concat(newOrder);
     return new Query(
         this._firestore, this._path, this._fieldFilters, combinedOrders,
@@ -1362,7 +1363,7 @@ export class Query {
    *   });
    * });
    */
-  startAt(fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
+  startAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
       Query {
     const options = extend(true, {}, this._queryOptions);
 
@@ -1397,8 +1398,8 @@ export class Query {
    *   });
    * });
    */
-  startAfter(fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
-      Query {
+  startAfter(...fieldValuesOrDocumentSnapshot:
+                 Array<DocumentSnapshot|UserInput>): Query {
     const options = extend(true, {}, this._queryOptions);
 
     fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
@@ -1431,8 +1432,8 @@ export class Query {
    *   });
    * });
    */
-  endBefore(fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
-      Query {
+  endBefore(...fieldValuesOrDocumentSnapshot:
+                Array<DocumentSnapshot|UserInput>): Query {
     const options = extend(true, {}, this._queryOptions);
 
     fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
@@ -1465,7 +1466,7 @@ export class Query {
    *   });
    * });
    */
-  endAt(fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
+  endAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
       Query {
     const options = extend(true, {}, this._queryOptions);
 
@@ -1506,7 +1507,7 @@ export class Query {
    * @private
    * @param {bytes=} transactionId - A transaction ID.
    */
-  private _get(transactionId?: Uint8Array): Promise<QuerySnapshot> {
+  _get(transactionId?: Uint8Array): Promise<QuerySnapshot> {
     const self = this;
     const docs: QueryDocumentSnapshot[] = [];
 

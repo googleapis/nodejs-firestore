@@ -21,10 +21,9 @@ import api = google.firestore.v1beta1;
 
 const v1beta1 = require('../../src/v1beta1');
 
-// TODO: This should be a TypeScript import after the full migration.
-// tslint:disable-next-line:variable-name
-const Firestore = require('../../src');
+import {Firestore} from '../../src/index';
 import {ClientPool} from '../../src/pool';
+import {AnyDuringMigration} from '../../src/types';
 
 /* tslint:disable:no-any */
 type GapicClient = any;
@@ -78,8 +77,7 @@ export type ApiOverride = {
  * client.
  */
 export function createInstance(
-    apiOverrides?: ApiOverride,
-    firestoreSettings?: {}): Promise<typeof Firestore> {
+    apiOverrides?: ApiOverride, firestoreSettings?: {}): Promise<Firestore> {
   const initializationOptions = Object.assign(
       {
         projectId: PROJECT_ID,
@@ -102,7 +100,8 @@ export function createInstance(
     return gapicClient;
   });
 
-  firestore._initClientPool = () => Promise.resolve(clientPool);
+  // tslint:disable-next-line:no-any
+  (firestore as any)._initClientPool = () => Promise.resolve(clientPool);
 
   return Promise.resolve(firestore);
 }
