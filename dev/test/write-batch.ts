@@ -145,7 +145,7 @@ describe('batch support', () => {
   beforeEach(() => {
     const overrides = {
       commit: (request, options, callback) => {
-        assert.deepStrictEqual(request, {
+        expect(request).to.deep.eq({
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
             {
@@ -292,7 +292,7 @@ describe('batch support', () => {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(err.message, 'Expected exception');
+          expect(err.message).to.eq('Expected exception');
         });
   });
 
@@ -392,21 +392,21 @@ describe('batch support', () => {
           .commit()
           .then(() => {
             // The first commit always uses a transcation.
-            assert.equal(1, beginCalled);
-            assert.equal(1, commitCalled);
+            expect(beginCalled).to.eq(1);
+            expect(commitCalled).to.eq(1);
             return firestore.batch().commit();
           })
           .then(() => {
             // The following commits don't use transactions if they happen
             // within two minutes.
-            assert.equal(1, beginCalled);
-            assert.equal(2, commitCalled);
+            expect(beginCalled).to.eq(1);
+            expect(commitCalled).to.eq(2);
             firestore['_lastSuccessfulRequest'] = 1337;
             return firestore.batch().commit();
           })
           .then(() => {
-            assert.equal(2, beginCalled);
-            assert.equal(3, commitCalled);
+            expect(beginCalled).to.eq(2);
+            expect(commitCalled).to.eq(3);
             delete process.env.FUNCTION_TRIGGER_TYPE;
           });
     });

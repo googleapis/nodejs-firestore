@@ -173,7 +173,7 @@ function requestEquals(actual, protoOperation) {
     }
   }
 
-  assert.deepStrictEqual(actual, proto);
+  expect(actual).to.deep.eq(proto);
 }
 
 function stream(...elements) {
@@ -235,22 +235,22 @@ describe('DocumentReference interface', () => {
     }, /Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string./);
 
     let collection = documentRef.collection('col');
-    assert.equal(collection.id, 'col');
+    expect(collection.id).to.eq('col');
 
     assert.throws(() => {
       documentRef.collection('col/doc');
     }, /Argument "collectionPath" must point to a collection, but was "col\/doc". Your path does not contain an odd number of components\./);
 
     collection = documentRef.collection('col/doc/col');
-    assert.equal(collection.id, 'col');
+    expect(collection.id).to.eq('col');
   });
 
   it('has path property', () => {
-    assert.equal(documentRef.path, 'collectionId/documentId');
+    expect(documentRef.path).to.eq('collectionId/documentId');
   });
 
   it('has parent property', () => {
-    assert.equal(documentRef.parent.path, 'collectionId');
+    expect(documentRef.parent.path).to.eq('collectionId');
   });
 
   it('has isEqual() method', () => {
@@ -369,8 +369,8 @@ describe('serialize document', () => {
         const fields = request.writes[0].update.fields;
         expect(fields.nanValue.doubleValue).to.be.a('number');
         expect(fields.nanValue.doubleValue).to.be.NaN;
-        assert.equal(fields.posInfinity.doubleValue, Infinity);
-        assert.equal(fields.negInfinity.doubleValue, -Infinity);
+        expect(fields.posInfinity.doubleValue).to.eq(Infinity);
+        expect(fields.negInfinity.doubleValue).to.eq(-Infinity);
 
         callback(null, writeResult(1));
       }
@@ -463,7 +463,7 @@ describe('deserialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(res => {
-        assert.deepStrictEqual(res.data(), {foo: Buffer.from('AG=', 'base64')});
+        expect(res.data()).to.deep.eq({foo: Buffer.from('AG=', 'base64')});
       });
     });
   });
@@ -484,7 +484,7 @@ describe('deserialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(() => {
-        assert.equal(3, attempts);
+        expect(attempts).to.eq(3);
       });
     });
   });
@@ -504,9 +504,8 @@ describe('deserialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(res => {
-        assert.equal(
-            res.get('moonLanding').toMillis(),
-            new Date('Jul 20 1969 20:18:00.123 UTC').getTime());
+        expect(res.get('moonLanding').toMillis())
+            .to.eq(new Date('Jul 20 1969 20:18:00.123 UTC').getTime());
       });
     });
   });
@@ -520,8 +519,8 @@ describe('deserialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(res => {
-        assert.equal(res.get('bar'), undefined);
-        assert.equal(res.get('bar.foo'), undefined);
+        expect(res.get('bar')).to.not.exist;
+        expect(res.get('bar.foo')).to.not.exist;
       });
     });
   });
@@ -542,8 +541,8 @@ describe('deserialize document', () => {
         assert.ok(
             typeof res.get('nanValue') === 'number' &&
             isNaN(res.get('nanValue')));
-        assert.equal(res.get('posInfinity'), Infinity);
-        assert.equal(res.get('negInfinity'), -Infinity);
+        expect(res.get('posInfinity')).to.eq(Infinity);
+        expect(res.get('negInfinity')).to.eq(-Infinity);
       });
     });
   });
@@ -631,12 +630,12 @@ describe('get document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(result => {
-        assert.deepStrictEqual(result.data(), {foo: {bar: 'foobar'}});
-        assert.deepStrictEqual(result.get('foo'), {bar: 'foobar'});
-        assert.equal(result.get('foo.bar'), 'foobar');
-        assert.equal(
-            result.get(new Firestore.FieldPath('foo', 'bar')), 'foobar');
-        assert.equal(result.ref.id, 'documentId');
+        expect(result.data()).to.deep.eq({foo: {bar: 'foobar'}});
+        expect(result.get('foo')).to.deep.eq({bar: 'foobar'});
+        expect(result.get('foo.bar')).to.eq('foobar');
+        expect(result.get(new Firestore.FieldPath('foo', 'bar')))
+            .to.eq('foobar');
+        expect(result.ref.id).to.eq('documentId');
       });
     });
   });
@@ -669,11 +668,11 @@ describe('get document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(result => {
-        assert.equal(result.exists, false);
+        expect(result.exists).to.be.false;
         expect(result.readTime.isEqual(new Firestore.Timestamp(5, 6)))
             .to.be.true;
-        assert.equal(null, result.data());
-        assert.equal(null, result.get('foo'));
+        expect(result.data()).to.not.exist;
+        expect(result.get('foo')).to.not.exist;
       });
     });
   });
@@ -687,7 +686,7 @@ describe('get document', () => {
 
     createInstance(overrides).then(firestore => {
       firestore.doc('collectionId/documentId').get().catch(err => {
-        assert.equal(err.message, 'RPC Error');
+        expect(err.message).to.eq('RPC Error');
         done();
       });
     });
@@ -1773,7 +1772,7 @@ describe('listCollections() method', () => {
   it('sorts results', () => {
     const overrides = {
       listCollectionIds: (request, options, callback) => {
-        assert.deepStrictEqual(request, {
+        expect(request).to.deep.eq({
           parent:
               `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
         });
@@ -1785,8 +1784,8 @@ describe('listCollections() method', () => {
     return createInstance(overrides).then(firestore => {
       // We are using `getCollections()` to ensure 100% code coverage
       return firestore.doc('coll/doc').getCollections().then(collections => {
-        assert.equal(collections[0].path, 'coll/doc/first');
-        assert.equal(collections[1].path, 'coll/doc/second');
+        expect(collections[0].path).to.eq('coll/doc/first');
+        expect(collections[1].path).to.eq('coll/doc/second');
       });
     });
   });

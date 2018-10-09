@@ -25,31 +25,31 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 describe('ResourcePath', () => {
   it('has id property', () => {
-    assert.equal(new ResourcePath(PROJECT_ID, '(default)', 'foo').id, 'foo');
-    assert.equal(new ResourcePath(PROJECT_ID, '(default)').id, null);
+    expect(new ResourcePath(PROJECT_ID, '(default)', 'foo').id).to.eq('foo');
+    expect(new ResourcePath(PROJECT_ID, '(default)').id).to.be.null;
   });
 
   it('has append() method', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)');
-    assert.equal(path.formattedName, DATABASE_ROOT);
+    expect(path.formattedName).to.eq(DATABASE_ROOT);
     path = path.append('foo');
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
+    expect(path.formattedName).to.eq(`${DATABASE_ROOT}/documents/foo`);
   });
 
   it('has parent() method', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)', 'foo');
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
+    expect(path.formattedName).to.eq(`${DATABASE_ROOT}/documents/foo`);
     path = path.parent()!;
-    assert.equal(path.formattedName, DATABASE_ROOT);
-    assert.equal(path.parent(), null);
+    expect(path.formattedName).to.eq(DATABASE_ROOT);
+    expect(path.parent()).to.be.null;
   });
 
   it('parses strings', () => {
     let path = ResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
-    assert.equal(path.formattedName, DATABASE_ROOT);
+    expect(path.formattedName).to.eq(DATABASE_ROOT);
     path =
         ResourcePath.fromSlashSeparatedString(`${DATABASE_ROOT}/documents/foo`);
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
+    expect(path.formattedName).to.eq(`${DATABASE_ROOT}/documents/foo`);
     assert.throws(() => {
       path =
           ResourcePath.fromSlashSeparatedString('projects/project/databases');
@@ -59,7 +59,7 @@ describe('ResourcePath', () => {
   it('accepts newlines', () => {
     const path = ResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/foo\nbar`);
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo\nbar`);
+    expect(path.formattedName).to.eq(`${DATABASE_ROOT}/documents/foo\nbar`);
   });
 });
 
@@ -70,7 +70,7 @@ describe('FieldPath', () => {
     const results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
 
     for (let i = 0; i < components.length; ++i) {
-      assert.equal(new FieldPath(...components[i]).toString(), results[i]);
+      expect(new FieldPath(...components[i]).toString()).to.eq(results[i]);
     }
   });
 
@@ -89,18 +89,18 @@ describe('FieldPath', () => {
   it('has append() method', () => {
     let path = new FieldPath('foo');
     path = path.append('bar');
-    assert.equal(path.formattedName, 'foo.bar');
+    expect(path.formattedName).to.eq('foo.bar');
   });
 
   it('has parent() method', () => {
     let path = new FieldPath('foo', 'bar');
     path = path.parent()!;
-    assert.equal(path.formattedName, 'foo');
+    expect(path.formattedName).to.eq('foo');
   });
 
   it('escapes special characters', () => {
     const path = new FieldPath('f.o.o');
-    assert.equal(path.formattedName, '`f.o.o`');
+    expect(path.formattedName).to.eq('`f.o.o`');
   });
 
   it('doesn\'t allow empty components', () => {

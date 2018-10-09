@@ -296,8 +296,8 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    assert.equal(firestore['_initializationSettings'].projectId, PROJECT_ID);
-    assert.equal(firestore['_initializationSettings'].foo, 'bar');
+    expect(firestore['_initializationSettings'].projectId).to.eq(PROJECT_ID);
+    expect(firestore['_initializationSettings'].foo).to.eq('bar');
   });
 
   it('can only call settings() once', () => {
@@ -352,9 +352,8 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
 
     return firestore['_runRequest'](() => {
-      assert.equal(
-          firestore.formattedName,
-          `projects/${PROJECT_ID}/databases/(default)`);
+      expect(firestore.formattedName)
+          .to.eq(`projects/${PROJECT_ID}/databases/(default)`);
       return Promise.resolve();
     });
   });
@@ -372,9 +371,8 @@ describe('instantiation', () => {
     firestore['_detectProjectId'] = () => Promise.resolve(PROJECT_ID);
 
     return firestore['_runRequest'](() => {
-      assert.equal(
-          firestore.formattedName,
-          `projects/${PROJECT_ID}/databases/(default)`);
+      expect(firestore.formattedName)
+          .to.eq(`projects/${PROJECT_ID}/databases/(default)`);
       return Promise.resolve();
     });
   });
@@ -392,7 +390,7 @@ describe('instantiation', () => {
     const gapicClient = {getProjectId: callback => callback(null, PROJECT_ID)};
 
     return firestore['_detectProjectId'](gapicClient).then(projectId => {
-      assert.equal(projectId, PROJECT_ID);
+      expect(projectId).to.eq(PROJECT_ID);
     });
   });
 
@@ -405,8 +403,8 @@ describe('instantiation', () => {
 
     firestore.settings({projectId: PROJECT_ID});
 
-    assert.equal(
-        firestore.formattedName, `projects/${PROJECT_ID}/databases/(default)`);
+    expect(firestore.formattedName)
+        .to.eq(`projects/${PROJECT_ID}/databases/(default)`);
   });
 
   it('handles error from project ID detection', () => {
@@ -422,39 +420,39 @@ describe('instantiation', () => {
 
     return firestore['_detectProjectId'](gapicClient)
         .then(() => assert.fail('Error ignored'))
-        .catch(err => assert.equal('Injected Error', err.message));
+        .catch(err => expect('Injected Error').to.eq(err.message));
   });
 
   it('exports all types', () => {
     // Ordering as per firestore.d.ts
     expect((Firestore.Firestore)).to.exist;
-    assert.equal(Firestore.Firestore.name, 'Firestore');
+    expect(Firestore.Firestore.name).to.eq('Firestore');
     expect((Firestore.Timestamp)).to.exist;
-    assert.equal(Firestore.Timestamp.name, 'Timestamp');
+    expect(Firestore.Timestamp.name).to.eq('Timestamp');
     expect((Firestore.GeoPoint)).to.exist;
-    assert.equal(Firestore.GeoPoint.name, 'GeoPoint');
+    expect(Firestore.GeoPoint.name).to.eq('GeoPoint');
     expect((Firestore.Transaction)).to.exist;
-    assert.equal(Firestore.Transaction.name, 'Transaction');
+    expect(Firestore.Transaction.name).to.eq('Transaction');
     expect((Firestore.WriteBatch)).to.exist;
-    assert.equal(Firestore.WriteBatch.name, 'WriteBatch');
+    expect(Firestore.WriteBatch.name).to.eq('WriteBatch');
     expect((Firestore.DocumentReference)).to.exist;
-    assert.equal(Firestore.DocumentReference.name, 'DocumentReference');
+    expect(Firestore.DocumentReference.name).to.eq('DocumentReference');
     expect((Firestore.WriteResult)).to.exist;
-    assert.equal(Firestore.WriteResult.name, 'WriteResult');
+    expect(Firestore.WriteResult.name).to.eq('WriteResult');
     expect((Firestore.DocumentSnapshot)).to.exist;
-    assert.equal(Firestore.DocumentSnapshot.name, 'DocumentSnapshot');
+    expect(Firestore.DocumentSnapshot.name).to.eq('DocumentSnapshot');
     expect((Firestore.QueryDocumentSnapshot)).to.exist;
-    assert.equal(Firestore.QueryDocumentSnapshot.name, 'QueryDocumentSnapshot');
+    expect(Firestore.QueryDocumentSnapshot.name).to.eq('QueryDocumentSnapshot');
     expect((Firestore.Query)).to.exist;
-    assert.equal(Firestore.Query.name, 'Query');
+    expect(Firestore.Query.name).to.eq('Query');
     expect(Firestore.QuerySnapshot).to.exist;
-    assert.equal(Firestore.QuerySnapshot.name, 'QuerySnapshot');
+    expect(Firestore.QuerySnapshot.name).to.eq('QuerySnapshot');
     expect((Firestore.CollectionReference)).to.exist;
-    assert.equal(Firestore.CollectionReference.name, 'CollectionReference');
+    expect(Firestore.CollectionReference.name).to.eq('CollectionReference');
     expect((Firestore.FieldValue)).to.exist;
-    assert.equal(Firestore.FieldValue.name, 'FieldValue');
+    expect(Firestore.FieldValue.name).to.eq('FieldValue');
     expect((Firestore.FieldPath)).to.exist;
-    assert.equal(Firestore.Firestore.name, 'Firestore');
+    expect(Firestore.Firestore.name).to.eq('Firestore');
     expect(Firestore.FieldValue.serverTimestamp().isEqual(
                Firestore.FieldValue.delete()))
         .to.be.false;
@@ -465,9 +463,8 @@ describe('serializer', () => {
   it('supports all types', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        assert.deepStrictEqual(
-            allSupportedTypesProtobufJs.fields,
-            request.writes[0].update.fields);
+        expect(allSupportedTypesProtobufJs.fields)
+            .to.deep.eq(request.writes[0].update.fields);
         callback(null, {
           commitTime: {},
           writeResults: [
@@ -498,15 +495,14 @@ describe('snapshot_() method', () => {
     const data = actualObject.data();
     delete data.pathValue;
     delete expected.pathValue;
-    assert.deepStrictEqual(data, expected);
+    expect(data).to.deep.eq(expected);
 
     // We specifically test the GeoPoint properties to ensure 100% test
     // coverage.
-    assert.equal(data.geoPointValue.latitude, 50.1430847);
-    assert.equal(data.geoPointValue.longitude, -122.947778);
-    assert.equal(
-        data.geoPointValue.toString(),
-        'GeoPoint { latitude: 50.1430847, longitude: -122.947778 }');
+    expect(data.geoPointValue.latitude).to.eq(50.1430847);
+    expect(data.geoPointValue.longitude).to.eq(-122.947778);
+    expect(data.geoPointValue.toString())
+        .to.eq('GeoPoint { latitude: 50.1430847, longitude: -122.947778 }');
     expect(data.geoPointValue.isEqual(
                new Firestore.GeoPoint(50.1430847, -122.947778)))
         .to.be.true;
@@ -530,8 +526,8 @@ describe('snapshot_() method', () => {
         }),
         {seconds: 5, nanos: 6});
 
-    assert.equal(true, doc.exists);
-    assert.deepStrictEqual({foo: bytesData}, doc.data());
+    expect(doc.exists).to.be.true;
+    expect({foo: bytesData}).to.deep.eq(doc.data());
     expect(doc.createTime.isEqual(new Firestore.Timestamp(1, 2))).to.be.true;
     expect(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4))).to.be.true;
     expect(doc.readTime.isEqual(new Firestore.Timestamp(5, 6))).to.be.true;
@@ -556,8 +552,8 @@ describe('snapshot_() method', () => {
         },
         '1970-01-01T00:00:05.000000006Z', 'json');
 
-    assert.equal(true, doc.exists);
-    assert.deepStrictEqual(doc.data(), {
+    expect(doc.exists).to.be.true;
+    expect(doc.data()).to.deep.eq({
       a: bytesData,
       b: Firestore.Timestamp.fromDate(new Date('1985-03-18T07:20:00.000Z')),
       c: bytesData,
@@ -623,7 +619,7 @@ describe('snapshot_() method', () => {
         `${DATABASE_ROOT}/documents/collectionId/doc`,
         '1970-01-01T00:00:05.000000006Z', 'json');
 
-    assert.equal(false, doc.exists);
+    expect(doc.exists).to.be.false;
     expect(doc.readTime.isEqual(new Firestore.Timestamp(5, 6))).to.be.true;
   });
 
@@ -670,8 +666,8 @@ describe('doc() method', () => {
 
   it('exposes properties', () => {
     const documentRef = firestore.doc('collectionId/documentId');
-    assert.equal(documentRef.id, 'documentId');
-    assert.equal(documentRef.firestore, firestore);
+    expect(documentRef.id).to.eq('documentId');
+    expect(documentRef.firestore).to.eq(firestore);
   });
 });
 
@@ -706,7 +702,7 @@ describe('collection() method', () => {
     const collection = firestore.collection('collectionId');
     expect(collection.id).to.exist;
     expect(collection.doc).to.exist;
-    assert.equal(collection.id, 'collectionId');
+    expect(collection.id).to.eq('collectionId');
   });
 });
 
@@ -714,7 +710,7 @@ describe('listCollections() method', () => {
   it('returns collections', () => {
     const overrides = {
       listCollectionIds: (request, options, callback) => {
-        assert.deepStrictEqual(request, {
+        expect(request).to.deep.eq({
           parent: `projects/${PROJECT_ID}/databases/(default)`,
         });
 
@@ -725,8 +721,8 @@ describe('listCollections() method', () => {
     return createInstance(overrides).then(firestore => {
       // We are using `getCollections()` to ensure 100% code coverage
       return firestore.getCollections().then(collections => {
-        assert.equal(collections[0].path, 'first');
-        assert.equal(collections[1].path, 'second');
+        expect(collections[0].path).to.eq('first');
+        expect(collections[1].path).to.eq('second');
       });
     });
   });
@@ -734,17 +730,17 @@ describe('listCollections() method', () => {
 
 describe('getAll() method', () => {
   function resultEquals(result, ...docs) {
-    assert.equal(result.length, arguments.length - 1);
+    expect(result.length).to.eq(arguments.length - 1);
 
     for (let i = 0; i < result.length; ++i) {
       const doc = arguments[i + 1];
 
       if (doc.found) {
         expect(result[i].exists).to.be.true;
-        assert.equal(result[i].ref.formattedName, doc.found.name);
+        expect(result[i].ref.formattedName).to.eq(doc.found.name);
       } else {
         expect(result[i].exists).to.be.false;
-        assert.equal(result[i].ref.formattedName, doc.missing);
+        expect(result[i].ref.formattedName).to.eq(doc.missing);
       }
     }
   }
@@ -811,7 +807,7 @@ describe('getAll() method', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected exception');
+            expect(err.message).to.eq('Expected exception');
           });
     });
   });
@@ -829,7 +825,7 @@ describe('getAll() method', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected exception');
+            expect(err.message).to.eq('Expected exception');
           });
     });
   });
@@ -851,7 +847,7 @@ describe('getAll() method', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected exception');
+            expect(err.message).to.eq('Expected exception');
           });
     });
   });
@@ -901,12 +897,12 @@ describe('getAll() method', () => {
                             throw new Error('Unexpected success in Promise');
                           })
                           .catch(err => {
-                            assert.equal(err.code, errorCode);
+                            expect(err.code).to.eq(Number(errorCode));
                           }));
       });
 
       return Promise.all(promises).then(() => {
-        assert.deepStrictEqual(actualErrorAttempts, expectedErrorAttempts);
+        expect(actualErrorAttempts).to.deep.eq(expectedErrorAttempts);
       });
     });
   });
@@ -973,7 +969,7 @@ describe('getAll() method', () => {
   it('accepts same document multiple times', () => {
     const overrides = {
       batchGetDocuments: request => {
-        assert.equal(request.documents.length, 2);
+        expect(request.documents.length).to.eq(2);
         return stream(found('a'), found('b'));
       }
     };
