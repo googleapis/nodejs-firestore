@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import assert from 'power-assert';
 import duplexify from 'duplexify';
 import is from 'is';
+import assert from 'power-assert';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
-
 import * as Firestore from '../src';
-import {DocumentSnapshot} from '../src/document';
 import {setTimeoutHandler} from '../src/backoff';
+import {DocumentSnapshot} from '../src/document';
+import {AnyDuringMigration} from '../src/types';
 import {createInstance} from '../test/util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-const api = google.firestore.v1beta1;
+import api = google.firestore.v1beta1;
+import {QueryDocumentSnapshot} from '../src';
 
 let PROJECT_ID = process.env.PROJECT_ID;
 if (!PROJECT_ID) {
@@ -42,7 +41,7 @@ if (!PROJECT_ID) {
  * @param actual The computed docs array.
  * @param expected The expected docs array.
  */
-const docsEqual = function(actual, expected) {
+function docsEqual(actual, expected) {
   assert.equal(actual.length, expected.length);
   for (let i = 0; i < actual.size; i++) {
     assert.equal(actual[i].ref.id, expected[i].ref.id);
@@ -50,7 +49,8 @@ const docsEqual = function(actual, expected) {
     assert.ok(is.string(expected[i].createTime));
     assert.ok(is.string(expected[i].updateTime));
   }
-};
+}
+
 /**
  * Asserts that the given query snapshot matches the expected results.
  * @param lastSnapshot The previous snapshot that this snapshot is based upon.
@@ -58,8 +58,8 @@ const docsEqual = function(actual, expected) {
  * @param actual A QuerySnapshot with results.
  * @param expected Array of DocumentSnapshot.
  */
-const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
-  let localDocs = [].concat(lastSnapshot.docs);
+function snapshotsEqual(lastSnapshot, version, actual, expected) {
+  const localDocs: QueryDocumentSnapshot[] = [].concat(lastSnapshot.docs);
 
   const actualDocChanges = actual.docChanges();
 
@@ -70,7 +70,7 @@ const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
         actualDocChanges[i].doc.ref.id, expected.docChanges[i].doc.ref.id);
     assert.deepStrictEqual(
         actualDocChanges[i].doc.data(), expected.docChanges[i].doc.data());
-    let readVersion =
+    const readVersion =
         actualDocChanges[i].type === 'removed' ? version - 1 : version;
     assert.ok(actualDocChanges[i].doc.readTime.isEqual(
         new Firestore.Timestamp(0, readVersion)));
@@ -91,12 +91,12 @@ const snapshotsEqual = function(lastSnapshot, version, actual, expected) {
   assert.equal(actual.size, expected.docs.length);
 
   return {docs: actual.docs, docChanges: actualDocChanges};
-};
+}
 
 /*
  * Helper for constructing a snapshot.
  */
-const snapshot = function(ref, data) {
+function snapshot(ref, data) {
   const snapshot = new DocumentSnapshot.Builder();
   snapshot.ref = ref;
   snapshot.fieldsProto = ref.firestore._serializer.encodeFields(data);
@@ -104,17 +104,14 @@ const snapshot = function(ref, data) {
   snapshot.createTime = new Firestore.Timestamp(0, 0);
   snapshot.updateTime = new Firestore.Timestamp(0, 0);
   return snapshot.build();
-};
+}
 
 /*
  * Helpers for constructing document changes.
  */
-const docChange = function(type, ref, data) {
-  return {
-    type: type,
-    doc: snapshot(ref, data),
-  };
-};
+function docChange(type, ref, data) {
+  return {type, doc: snapshot(ref, data)};
+}
 
 const added = (ref, data) => docChange('added', ref, data);
 const modified = (ref, data) => docChange('modified', ref, data);
@@ -127,17 +124,15 @@ const EMPTY = {
 
 /** Captures stream data and makes it available via deferred Promises. */
 class DeferredListener {
-  constructor() {
-    this.pendingData = [];
-    this.pendingListeners = [];
-  }
+  private readonly pendingData: AnyDuringMigration[] = [];
+  private readonly pendingListeners: AnyDuringMigration[] = [];
 
   /**
    * Makes stream data available via the Promises set in the 'await' call. If no
    * Promise has been set, the data will be cached.
    */
-  on(type, data) {
-    let listener = this.pendingListeners.shift();
+  on(type, data?) {
+    const listener = this.pendingListeners.shift();
 
     if (listener) {
       assert.equal(
@@ -147,8 +142,8 @@ class DeferredListener {
       listener.resolve(data);
     } else {
       this.pendingData.push({
-        type: type,
-        data: data,
+        type,
+        data,
       });
     }
   }
@@ -159,7 +154,7 @@ class DeferredListener {
    * resolves when the next chunk arrives.
    */
   await(expectedType) {
-    let data = this.pendingData.shift();
+    const data = this.pendingData.shift();
 
     if (data) {
       assert.equal(
@@ -171,7 +166,7 @@ class DeferredListener {
 
     return new Promise(resolve => this.pendingListeners.push({
       type: expectedType,
-      resolve: resolve,
+      resolve,
     }));
   }
 }
@@ -182,10 +177,11 @@ class DeferredListener {
  * sequential invocations of the Listen API.
  */
 class StreamHelper {
-  constructor() {
-    this.streamCount = 0;
-    this.deferredListener = new DeferredListener();
-  }
+  private streamCount = 0;
+  private readonly deferredListener = new DeferredListener();
+  private readStream;
+  private writeStream;
+  private backendStream;
 
   /** Returns the GAPIC callback to use with this stream helper. */
   getListenCallback() {
@@ -263,17 +259,21 @@ class StreamHelper {
  * Encapsulates the stream logic for the Watch API.
  */
 class WatchHelper {
+  private readonly serializer;
+  private readonly streamHelper;
+  private snapshotVersion = 0;
+  private readonly deferredListener = new DeferredListener();
+  private unsubscribe;
+
   /**
    * @param streamHelper The StreamHelper base class for this Watch operation.
    * @param reference The CollectionReference or DocumentReference that is being
    * watched.
    * @param targetId The target ID of the watch stream.
    */
-  constructor(streamHelper, reference, targetId) {
-    this.reference = reference;
+  constructor(streamHelper, private reference, private targetId) {
     this.serializer = reference.firestore._serializer;
     this.streamHelper = streamHelper;
-    this.targetId = targetId;
     this.snapshotVersion = 0;
     this.deferredListener = new DeferredListener();
   }
@@ -333,7 +333,7 @@ class WatchHelper {
    * @param {number} cause The optional code indicating why the target was removed.
    */
   sendRemoveTarget(cause) {
-    const proto = {
+    const proto: AnyDuringMigration = {
       targetChange: {
         targetChangeType: 'REMOVE',
         targetIds: [this.targetId],
@@ -355,7 +355,7 @@ class WatchHelper {
   sendSnapshot(version, resumeToken) {
     this.snapshotVersion = version;
 
-    let proto = {
+    const proto: AnyDuringMigration = {
       targetChange: {
         targetChangeType: 'NO_CHANGE',
         targetIds: [],
@@ -374,7 +374,7 @@ class WatchHelper {
    * Sends a target change from the backend of type 'CURRENT'.
    */
   sendCurrent(resumeToken) {
-    let proto = {
+    const proto: AnyDuringMigration = {
       targetChange: {
         targetChangeType: 'CURRENT',
         targetIds: [this.targetId],
@@ -476,7 +476,7 @@ class WatchHelper {
   }
 }
 
-describe('Query watch', function() {
+describe('Query watch', () => {
   // The collection to query.
   let colRef;
 
@@ -501,7 +501,7 @@ describe('Query watch', function() {
             from: [{collectionId: 'col'}],
           },
         },
-        targetId: targetId,
+        targetId,
       },
     };
   };
@@ -532,7 +532,7 @@ describe('Query watch', function() {
             },
           },
         },
-        targetId: targetId,
+        targetId,
       },
     };
   };
@@ -548,8 +548,8 @@ describe('Query watch', function() {
             from: [{collectionId: 'col'}],
           },
         },
-        targetId: targetId,
-        resumeToken: resumeToken,
+        targetId,
+        resumeToken,
       },
     };
   };
@@ -573,7 +573,7 @@ describe('Query watch', function() {
             }],
           },
         },
-        targetId: targetId,
+        targetId,
       },
     };
   };
@@ -581,7 +581,7 @@ describe('Query watch', function() {
   /** The GAPIC callback that executes the listen. */
   let listenCallback;
 
-  beforeEach(function() {
+  beforeEach(() => {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are uneffected by this, as we maintain their
     // asynchronous behavior.
@@ -610,11 +610,11 @@ describe('Query watch', function() {
         });
   });
 
-  afterEach(function() {
+  afterEach(() => {
     setTimeoutHandler(setTimeout);
   });
 
-  it('with invalid callbacks', function() {
+  it('with invalid callbacks', () => {
     assert.throws(() => {
       colRef.onSnapshot('foo');
     }, /Argument "onNext" is not a valid function./);
@@ -624,8 +624,8 @@ describe('Query watch', function() {
     }, /Argument "onError" is not a valid function./);
   });
 
-  it('without error callback', function(done) {
-    let unsubscribe = colRef.onSnapshot(() => {
+  it('without error callback', (done) => {
+    const unsubscribe = colRef.onSnapshot(() => {
       unsubscribe();
       done();
     });
@@ -637,14 +637,14 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles invalid listen protos', function() {
+  it('handles invalid listen protos', () => {
     return watchHelper.runFailedTest(collQueryJSON(), () => {
       // Mock the server responding to the query with an invalid proto.
       streamHelper.write({invalid: true});
     }, 'Unknown listen response type: {"invalid":true}');
   });
 
-  it('handles invalid target change protos', function() {
+  it('handles invalid target change protos', () => {
     return watchHelper.runFailedTest(
         collQueryJSON(),
         () => {
@@ -660,25 +660,25 @@ describe('Query watch', function() {
             '"targetIds":[65261]}');
   });
 
-  it('handles remove target change protos', function() {
+  it('handles remove target change protos', () => {
     return watchHelper.runFailedTest(collQueryJSON(), () => {
       watchHelper.sendRemoveTarget();
     }, 'Error 13: internal error');
   });
 
-  it('handles remove target change with code', function() {
+  it('handles remove target change with code', () => {
     return watchHelper.runFailedTest(collQueryJSON(), () => {
       watchHelper.sendRemoveTarget(7);
     }, 'Error 7: test remove');
   });
 
-  it('rejects an unknown target', function() {
+  it('rejects an unknown target', () => {
     return watchHelper.runFailedTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget(2);
     }, 'Unexpected target ID sent by server');
   });
 
-  it('re-opens on unexpected stream end', function() {
+  it('re-opens on unexpected stream end', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
@@ -704,7 +704,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('doesn\'t re-open inactive stream', function() {
+  it('doesn\'t re-open inactive stream', () => {
     // This test uses the normal timeout handler since it relies on the actual
     // backoff window during the the stream recovery. We then use this window to
     // unsubscribe from the Watch stream and make sure that we don't
@@ -730,7 +730,7 @@ describe('Query watch', function() {
         });
   });
 
-  it('retries based on error code', function() {
+  it('retries based on error code', () => {
     const expectRetry = {
       /* Cancelled */ 1: true,
       /* Unknown */ 2: true,
@@ -756,7 +756,7 @@ describe('Query watch', function() {
       if (expectRetry.hasOwnProperty(statusCode)) {
         result = result.then(() => {
           const err = new Error('GRPC Error');
-          err.code = Number(statusCode);
+          (err as AnyDuringMigration).code = Number(statusCode);
 
           if (expectRetry[statusCode]) {
             return watchHelper.runTest(collQueryJSON(), () => {
@@ -792,7 +792,7 @@ describe('Query watch', function() {
     return result;
   });
 
-  it('retries with unknown code', function() {
+  it('retries with unknown code', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
@@ -804,7 +804,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles changing a doc', function() {
+  it('handles changing a doc', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -850,7 +850,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('reconnects after error', function() {
+  it('reconnects after error', () => {
     let resumeToken = [0xabcd];
 
     return watchHelper.runTest(collQueryJSON(), () => {
@@ -914,7 +914,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('ignores changes sent after the last snapshot', function() {
+  it('ignores changes sent after the last snapshot', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -955,7 +955,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('ignores non-matching tokens', function() {
+  it('ignores non-matching tokens', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -989,7 +989,7 @@ describe('Query watch', function() {
                 targetChangeType: 'NO_CHANGE',
                 targetIds: [],
                 readTime: {seconds: 0, nanos: 0},
-                resumeToken: resumeToken,
+                resumeToken,
               },
             });
 
@@ -1010,7 +1010,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('reconnects with multiple attempts', function() {
+  it('reconnects with multiple attempts', () => {
     return watchHelper
         .runFailedTest(
             collQueryJSON(),
@@ -1018,7 +1018,7 @@ describe('Query watch', function() {
               // Mock the server responding to the query.
               watchHelper.sendAddTarget();
               watchHelper.sendCurrent();
-              let resumeToken = [0xabcd];
+              const resumeToken = [0xabcd];
               watchHelper.sendSnapshot(1, resumeToken);
               return watchHelper.await('snapshot')
                   .then(results => {
@@ -1052,7 +1052,7 @@ describe('Query watch', function() {
         });
   });
 
-  it('sorts docs', function() {
+  it('sorts docs', () => {
     watchHelper = new WatchHelper(streamHelper, sortedQuery(), targetId);
 
     return watchHelper.runTest(sortedQueryJSON(), () => {
@@ -1094,7 +1094,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('combines multiple change events for the same doc', function() {
+  it('combines multiple change events for the same doc', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1140,9 +1140,9 @@ describe('Query watch', function() {
     });
   });
 
-  it('can sort by FieldPath.documentId()', function() {
+  it('can sort by FieldPath.documentId()', () => {
     let query = sortedQuery();
-    let expectedJson = sortedQueryJSON();
+    const expectedJson = sortedQueryJSON();
 
     // Add FieldPath.documentId() sorting
     query = query.orderBy(Firestore.FieldPath.documentId(), 'desc');
@@ -1173,7 +1173,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('sorts document changes in the right order', function() {
+  it('sorts document changes in the right order', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1219,7 +1219,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles changing a doc so it doesn\'t match', function() {
+  it('handles changing a doc so it doesn\'t match', () => {
     watchHelper = new WatchHelper(streamHelper, includeQuery(), targetId);
 
     return watchHelper.runTest(includeQueryJSON(), () => {
@@ -1270,7 +1270,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles deleting a doc', function() {
+  it('handles deleting a doc', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1316,7 +1316,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles removing a doc', function() {
+  it('handles removing a doc', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1362,7 +1362,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles deleting a non-existent doc', function() {
+  it('handles deleting a non-existent doc', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1390,7 +1390,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles reset', function() {
+  it('handles reset', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1459,7 +1459,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles reset with phantom doc', function() {
+  it('handles reset with phantom doc', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1510,7 +1510,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles sending the snapshot version multiple times', function() {
+  it('handles sending the snapshot version multiple times', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1538,7 +1538,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles filter mismatch', function() {
+  it('handles filter mismatch', () => {
     let oldRequestStream;
 
     return watchHelper.runTest(collQueryJSON(), () => {
@@ -1587,7 +1587,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles filter match', function() {
+  it('handles filter match', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget();
       // Add a result.
@@ -1623,7 +1623,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles resets with pending updates', function() {
+  it('handles resets with pending updates', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget();
       // Add a result.
@@ -1661,7 +1661,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles add and delete in same snapshot', function() {
+  it('handles add and delete in same snapshot', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1687,7 +1687,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles non-changing modify', function() {
+  it('handles non-changing modify', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1725,7 +1725,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles update time change', function() {
+  it('handles update time change', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -1770,7 +1770,7 @@ describe('Query watch', function() {
     });
   });
 
-  describe('supports isEqual', function() {
+  describe('supports isEqual', () => {
     let snapshotVersion;
 
     beforeEach(() => {
@@ -1793,7 +1793,7 @@ describe('Query watch', function() {
       return watchHelper.await('snapshot');
     }
 
-    it('for equal snapshots', function() {
+    it('for equal snapshots', () => {
       let firstSnapshot;
       let secondSnapshot;
       let thirdSnapshot;
@@ -1847,7 +1847,7 @@ describe('Query watch', function() {
                 }));
     });
 
-    it('for equal snapshots with materialized changes', function() {
+    it('for equal snapshots with materialized changes', () => {
       let firstSnapshot;
 
       return initialSnapshot(snapshot => {
@@ -1865,14 +1865,14 @@ describe('Query watch', function() {
                            watchHelper.sendDoc(doc2, {foo: 'b'});
                            watchHelper.sendDoc(doc3, {foo: 'c'});
                          }).then(snapshot => {
-                    let materializedDocs = snapshot.docs;
+                    const materializedDocs = snapshot.docs;
                     assert.equal(materializedDocs.length, 3);
                     assert.ok(snapshot.isEqual(firstSnapshot));
                   });
                 }));
     });
 
-    it('for snapshots of different size', function() {
+    it('for snapshots of different size', () => {
       let firstSnapshot;
 
       return initialSnapshot(snapshot => {
@@ -1892,7 +1892,7 @@ describe('Query watch', function() {
                 }));
     });
 
-    it('for snapshots with different kind of changes', function() {
+    it('for snapshots with different kind of changes', () => {
       let firstSnapshot;
 
       return initialSnapshot(snapshot => {
@@ -1915,7 +1915,7 @@ describe('Query watch', function() {
                 }));
     });
 
-    it('for snapshots with different number of changes', function() {
+    it('for snapshots with different number of changes', () => {
       let firstSnapshot;
 
       return initialSnapshot(snapshot => {
@@ -1954,7 +1954,7 @@ describe('Query watch', function() {
                 }));
     });
 
-    it('for snapshots with different data types', function() {
+    it('for snapshots with different data types', () => {
       let originalSnapshot;
 
       return initialSnapshot(snapshot => {
@@ -1973,7 +1973,7 @@ describe('Query watch', function() {
                 }));
     });
 
-    it('for snapshots with different queries', function() {
+    it('for snapshots with different queries', () => {
       let firstSnapshot;
 
       return initialSnapshot(snapshot => {
@@ -2002,7 +2002,7 @@ describe('Query watch', function() {
     });
   });
 
-  it('handles delete and re-add in same snapshot', function() {
+  it('handles delete and re-add in same snapshot', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
@@ -2042,7 +2042,7 @@ describe('Query watch', function() {
   });
 });
 
-describe('DocumentReference watch', function() {
+describe('DocumentReference watch', () => {
   // The document to query.
   let doc;
 
@@ -2059,7 +2059,7 @@ describe('DocumentReference watch', function() {
         documents: {
           documents: [doc.formattedName],
         },
-        targetId: targetId,
+        targetId,
       },
     };
   };
@@ -2072,20 +2072,20 @@ describe('DocumentReference watch', function() {
         documents: {
           documents: [doc.formattedName],
         },
-        targetId: targetId,
-        resumeToken: resumeToken,
+        targetId,
+        resumeToken,
       },
     };
   };
 
-  beforeEach(function() {
+  beforeEach(() => {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are uneffected by this, as we maintain their
     // asynchronous behavior.
     setTimeoutHandler(setImmediate);
 
     targetId = 0x1;
-    streamHelper = new StreamHelper(firestore);
+    streamHelper = new StreamHelper();
 
     const overrides = {listen: streamHelper.getListenCallback()};
     return createInstance(overrides).then(firestoreClient => {
@@ -2095,11 +2095,11 @@ describe('DocumentReference watch', function() {
     });
   });
 
-  afterEach(function() {
+  afterEach(() => {
     setTimeoutHandler(setTimeout);
   });
 
-  it('with invalid callbacks', function() {
+  it('with invalid callbacks', () => {
     assert.throws(() => {
       doc.onSnapshot('foo');
     }, /Argument "onNext" is not a valid function./);
@@ -2109,8 +2109,8 @@ describe('DocumentReference watch', function() {
     }, /Argument "onError" is not a valid function./);
   });
 
-  it('without error callback', function(done) {
-    let unsubscribe = doc.onSnapshot(() => {
+  it('without error callback', done => {
+    const unsubscribe = doc.onSnapshot(() => {
       unsubscribe();
       done();
     });
@@ -2122,14 +2122,14 @@ describe('DocumentReference watch', function() {
     });
   });
 
-  it('handles invalid listen protos', function() {
+  it('handles invalid listen protos', () => {
     return watchHelper.runFailedTest(watchJSON(), () => {
       // Mock the server responding to the watch with an invalid proto.
       streamHelper.write({invalid: true});
     }, 'Unknown listen response type: {"invalid":true}');
   });
 
-  it('handles invalid target change protos', function() {
+  it('handles invalid target change protos', () => {
     return watchHelper.runFailedTest(
         watchJSON(),
         () => {
@@ -2145,19 +2145,19 @@ describe('DocumentReference watch', function() {
             '"targetIds":[65261]}');
   });
 
-  it('handles remove target change protos', function() {
+  it('handles remove target change protos', () => {
     return watchHelper.runFailedTest(watchJSON(), () => {
       watchHelper.sendRemoveTarget();
     }, 'Error 13: internal error');
   });
 
-  it('handles remove target change with code', function() {
+  it('handles remove target change with code', () => {
     return watchHelper.runFailedTest(watchJSON(), () => {
       watchHelper.sendRemoveTarget(7);
     }, 'Error 7: test remove');
   });
 
-  it('handles changing a doc', function() {
+  it('handles changing a doc', () => {
     return watchHelper.runTest(watchJSON(), () => {
       // Mock the server responding to the watch.
       watchHelper.sendAddTarget();
@@ -2192,7 +2192,7 @@ describe('DocumentReference watch', function() {
     });
   });
 
-  it('ignores non-matching doc', function() {
+  it('ignores non-matching doc', () => {
     return watchHelper.runTest(watchJSON(), () => {
       // Mock the server responding to the watch.
       watchHelper.sendAddTarget();
@@ -2223,8 +2223,8 @@ describe('DocumentReference watch', function() {
     });
   });
 
-  it('reconnects after error', function() {
-    let resumeToken = [0xabcd];
+  it('reconnects after error', () => {
+    const resumeToken = [0xabcd];
 
     return watchHelper.runTest(watchJSON(), () => {
       // Mock the server responding to the watch.
@@ -2270,7 +2270,7 @@ describe('DocumentReference watch', function() {
     });
   });
 
-  it('combines multiple change events for the same doc', function() {
+  it('combines multiple change events for the same doc', () => {
     return watchHelper.runTest(watchJSON(), () => {
       // Mock the server responding to the watch.
       watchHelper.sendAddTarget();
@@ -2307,7 +2307,7 @@ describe('DocumentReference watch', function() {
     });
   });
 
-  it('handles deleting a doc', function() {
+  it('handles deleting a doc', () => {
     return watchHelper.runTest(watchJSON(), () => {
       // Mock the server responding to the watch.
       watchHelper.sendAddTarget();
@@ -2336,7 +2336,7 @@ describe('DocumentReference watch', function() {
     });
   });
 
-  it('handles removing a doc', function() {
+  it('handles removing a doc', () => {
     return watchHelper.runTest(watchJSON(), () => {
       // Mock the server responding to the watch.
       watchHelper.sendAddTarget();
@@ -2365,7 +2365,7 @@ describe('DocumentReference watch', function() {
     });
   });
 
-  it('handles reset', function() {
+  it('handles reset', () => {
     return watchHelper.runTest(watchJSON(), () => {
       // Mock the server responding to the watch.
       watchHelper.sendAddTarget();
@@ -2402,12 +2402,12 @@ describe('DocumentReference watch', function() {
   });
 });
 
-describe('Query comparator', function() {
+describe('Query comparator', () => {
   let firestore;
   let colRef;
   let doc1, doc2, doc3, doc4;
 
-  beforeEach(function() {
+  beforeEach(() => {
     return createInstance().then(firestoreClient => {
       firestore = firestoreClient;
 
@@ -2426,7 +2426,7 @@ describe('Query comparator', function() {
     docsEqual(input, expected);
   }
 
-  it('handles basic case', function() {
+  it('handles basic case', () => {
     const query = colRef.orderBy('foo');
 
     const input = [
@@ -2444,7 +2444,7 @@ describe('Query comparator', function() {
     testSort(query, input, expected);
   });
 
-  it('handles descending case', function() {
+  it('handles descending case', () => {
     const query = colRef.orderBy('foo', 'desc');
 
     const input = [
@@ -2462,7 +2462,7 @@ describe('Query comparator', function() {
     testSort(query, input, expected);
   });
 
-  it('handles nested fields', function() {
+  it('handles nested fields', () => {
     const query = colRef.orderBy('foo.bar');
 
     const input = [
@@ -2480,7 +2480,7 @@ describe('Query comparator', function() {
     testSort(query, input, expected);
   });
 
-  it('fails on missing fields', function() {
+  it('fails on missing fields', () => {
     const query = colRef.orderBy('bar');
 
     const input = [

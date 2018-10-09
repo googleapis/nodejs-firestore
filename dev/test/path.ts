@@ -14,37 +14,36 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import assert from 'power-assert';
 
 import {FieldPath, ResourcePath} from '../src/path';
+import {InvalidApiUsage} from './util/helpers';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
-describe('ResourcePath', function() {
-  it('has id property', function() {
+describe('ResourcePath', () => {
+  it('has id property', () => {
     assert.equal(new ResourcePath(PROJECT_ID, '(default)', 'foo').id, 'foo');
     assert.equal(new ResourcePath(PROJECT_ID, '(default)').id, null);
   });
 
-  it('has append() method', function() {
+  it('has append() method', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)');
     assert.equal(path.formattedName, DATABASE_ROOT);
     path = path.append('foo');
     assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
   });
 
-  it('has parent() method', function() {
+  it('has parent() method', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)', 'foo');
     assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
-    path = path.parent();
+    path = path.parent()!;
     assert.equal(path.formattedName, DATABASE_ROOT);
     assert.equal(path.parent(), null);
   });
 
-  it('parses strings', function() {
+  it('parses strings', () => {
     let path = ResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
     assert.equal(path.formattedName, DATABASE_ROOT);
     path =
@@ -56,63 +55,63 @@ describe('ResourcePath', function() {
     }, /Resource name 'projects\/project\/databases' is not valid\./);
   });
 
-  it('accepts newlines', function() {
+  it('accepts newlines', () => {
     const path = ResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/foo\nbar`);
     assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo\nbar`);
   });
 });
 
-describe('FieldPath', function() {
-  it('encodes field names', function() {
-    let components = [['foo'], ['foo', 'bar'], ['.', '`'], ['\\']];
+describe('FieldPath', () => {
+  it('encodes field names', () => {
+    const components = [['foo'], ['foo', 'bar'], ['.', '`'], ['\\']];
 
-    let results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
+    const results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
 
     for (let i = 0; i < components.length; ++i) {
-      assert.equal(new FieldPath(components[i]).toString(), results[i]);
+      assert.equal(new FieldPath(...components[i]).toString(), results[i]);
     }
   });
 
-  it('doesn\'t accept empty path', function() {
+  it('doesn\'t accept empty path', () => {
     assert.throws(() => {
       new FieldPath();
     }, /Function 'FieldPath\(\)' requires at least 1 argument\./);
   });
 
-  it('only accepts strings', function() {
+  it('only accepts strings', () => {
     assert.throws(() => {
-      new FieldPath('foo', 'bar', 0);
+      new FieldPath('foo', 'bar', 0 as InvalidApiUsage);
     }, /Argument at index 2 is not a valid string\./);
   });
 
-  it('has append() method', function() {
+  it('has append() method', () => {
     let path = new FieldPath('foo');
     path = path.append('bar');
     assert.equal(path.formattedName, 'foo.bar');
   });
 
-  it('has parent() method', function() {
+  it('has parent() method', () => {
     let path = new FieldPath('foo', 'bar');
-    path = path.parent();
+    path = path.parent()!;
     assert.equal(path.formattedName, 'foo');
   });
 
-  it('escapes special characters', function() {
-    let path = new FieldPath('f.o.o');
+  it('escapes special characters', () => {
+    const path = new FieldPath('f.o.o');
     assert.equal(path.formattedName, '`f.o.o`');
   });
 
-  it('doesn\'t allow empty components', function() {
+  it('doesn\'t allow empty components', () => {
     assert.throws(() => {
       new FieldPath('foo', '');
     }, /Argument at index 1 should not be empty./);
   });
 
-  it('has isEqual() method', function() {
-    let path = new FieldPath('a');
-    let equals = new FieldPath('a');
-    let notEquals = new FieldPath('a', 'b', 'a');
+  it('has isEqual() method', () => {
+    const path = new FieldPath('a');
+    const equals = new FieldPath('a');
+    const notEquals = new FieldPath('a', 'b', 'a');
     assert.ok(path.isEqual(equals));
     assert.ok(!path.isEqual(notEquals));
   });

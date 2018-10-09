@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-'use strict';
-
-import assert from 'power-assert';
 import extend from 'extend';
+import * as gax from 'google-gax';
 import is from 'is';
+import assert from 'power-assert';
 import through2 from 'through2';
 
+import * as Firestore from '../src';
 import {ResourcePath} from '../src/path';
-import {createInstance} from '../test/util/helpers';
-import * as gax from 'google-gax';
+import {AnyDuringMigration} from '../src/types';
+import {createInstance, InvalidApiUsage} from '../test/util/helpers';
 
-import * as Firestore from '../src'
-const {grpc} = new gax.GrpcClient();
+const {grpc} = new gax.GrpcClient({} as AnyDuringMigration);
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -245,10 +244,10 @@ const allSupportedTypesOutput = {
   bytesValue: Buffer.from([0x1, 0x2]),
 };
 
-function document(name, fields) {
+function document(name, fields?) {
   return {
     name: `${DATABASE_ROOT}/documents/collectionId/${name}`,
-    fields: fields,
+    fields,
     createTime: {seconds: 1, nanos: 2},
     updateTime: {seconds: 3, nanos: 4},
   };
@@ -268,12 +267,12 @@ function missing(name) {
   };
 }
 
-function stream() {
-  let stream = through2.obj();
-  let args = arguments;
+function stream(...elements) {
+  const stream = through2.obj();
+  const args = arguments;
 
-  setImmediate(function() {
-    for (let arg of args) {
+  setImmediate(() => {
+    for (const arg of args) {
       if (is.instance(arg, Error)) {
         stream.destroy(arg);
         return;
@@ -286,22 +285,22 @@ function stream() {
   return stream;
 }
 
-describe('instantiation', function() {
-  it('creates instance', function() {
-    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
+describe('instantiation', () => {
+  it('creates instance', () => {
+    const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     assert(firestore instanceof Firestore.Firestore);
   });
 
-  it('merges settings', function() {
-    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
+  it('merges settings', () => {
+    const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    assert.equal(firestore._initializationSettings.projectId, PROJECT_ID);
-    assert.equal(firestore._initializationSettings.foo, 'bar');
+    assert.equal(firestore['_initializationSettings'].projectId, PROJECT_ID);
+    assert.equal(firestore['_initializationSettings'].foo, 'bar');
   });
 
-  it('can only call settings() once', function() {
-    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
+  it('can only call settings() once', () => {
+    const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({timestampsInSnapshots: true});
 
     assert.throws(
@@ -309,16 +308,16 @@ describe('instantiation', function() {
         /Firestore.settings\(\) has already be called. You can only call settings\(\) once, and only before calling any other methods on a Firestore object./);
   });
 
-  it('cannot change settings after client initialized', function() {
-    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
-    firestore._runRequest(() => Promise.resolve());
+  it('cannot change settings after client initialized', () => {
+    const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
+    firestore['_runRequest'](() => Promise.resolve());
 
     assert.throws(
         () => firestore.settings({}),
         /Firestore has already been started and its settings can no longer be changed. You can only call settings\(\) before calling any other methods on a Firestore object./);
   });
 
-  it('validates project ID is string', function() {
+  it('validates project ID is string', () => {
     assert.throws(() => {
       const settings = Object.assign({}, DEFAULT_SETTINGS, {
         projectId: 1337,
@@ -327,11 +326,13 @@ describe('instantiation', function() {
     }, /Argument "settings.projectId" is not a valid string/);
 
     assert.throws(() => {
-      new Firestore.Firestore(DEFAULT_SETTINGS).settings({projectId: 1337});
+      new Firestore.Firestore(DEFAULT_SETTINGS).settings({
+        projectId: 1337
+      } as InvalidApiUsage);
     }, /Argument "settings.projectId" is not a valid string/);
   });
 
-  it('validates timestampsInSnapshots is boolean', function() {
+  it('validates timestampsInSnapshots is boolean', () => {
     assert.throws(() => {
       const settings = Object.assign({}, DEFAULT_SETTINGS, {
         timestampsInSnapshots: 1337,
@@ -342,14 +343,14 @@ describe('instantiation', function() {
     assert.throws(() => {
       new Firestore.Firestore(DEFAULT_SETTINGS).settings({
         timestampsInSnapshots: 1337
-      });
+      } as AnyDuringMigration);
     }, /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
   });
 
   it('uses project id from constructor', () => {
-    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
+    const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
 
-    return firestore._runRequest(() => {
+    return firestore['_runRequest'](() => {
       assert.equal(
           firestore.formattedName,
           `projects/${PROJECT_ID}/databases/(default)`);
@@ -357,8 +358,8 @@ describe('instantiation', function() {
     });
   });
 
-  it('detects project id', function() {
-    let firestore = new Firestore.Firestore({
+  it('detects project id', () => {
+    const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
       keyFilename: __dirname + '/fake-certificate.json',
@@ -367,9 +368,9 @@ describe('instantiation', function() {
     assert.equal(
         firestore.formattedName, 'projects/{{projectId}}/databases/(default)');
 
-    firestore._detectProjectId = () => Promise.resolve(PROJECT_ID);
+    firestore['_detectProjectId'] = () => Promise.resolve(PROJECT_ID);
 
-    return firestore._runRequest(() => {
+    return firestore['_runRequest'](() => {
       assert.equal(
           firestore.formattedName,
           `projects/${PROJECT_ID}/databases/(default)`);
@@ -377,8 +378,8 @@ describe('instantiation', function() {
     });
   });
 
-  it('uses project id from gapic client', function() {
-    let firestore = new Firestore.Firestore({
+  it('uses project id from gapic client', () => {
+    const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
@@ -387,15 +388,15 @@ describe('instantiation', function() {
     assert.equal(
         firestore.formattedName, 'projects/{{projectId}}/databases/(default)');
 
-    let gapicClient = {getProjectId: callback => callback(null, PROJECT_ID)};
+    const gapicClient = {getProjectId: callback => callback(null, PROJECT_ID)};
 
-    return firestore._detectProjectId(gapicClient).then(projectId => {
+    return firestore['_detectProjectId'](gapicClient).then(projectId => {
       assert.equal(projectId, PROJECT_ID);
     });
   });
 
-  it('uses project ID from settings()', function() {
-    let firestore = new Firestore.Firestore({
+  it('uses project ID from settings()', () => {
+    const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
@@ -407,23 +408,23 @@ describe('instantiation', function() {
         firestore.formattedName, `projects/${PROJECT_ID}/databases/(default)`);
   });
 
-  it('handles error from project ID detection', function() {
-    let firestore = new Firestore.Firestore({
+  it('handles error from project ID detection', () => {
+    const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
     });
 
-    let gapicClient = {
+    const gapicClient = {
       getProjectId: callback => callback(new Error('Injected Error'))
     };
 
-    return firestore._detectProjectId(gapicClient)
+    return firestore['_detectProjectId'](gapicClient)
         .then(() => assert.fail('Error ignored'))
-        .catch(err => assert.equal('Injected Error', err.message))
+        .catch(err => assert.equal('Injected Error', err.message));
   });
 
-  it('exports all types', function() {
+  it('exports all types', () => {
     // Ordering as per firestore.d.ts
     assert.ok(is.defined(Firestore.Firestore));
     assert.equal(Firestore.Firestore.name, 'Firestore');
@@ -458,8 +459,8 @@ describe('instantiation', function() {
   });
 });
 
-describe('serializer', function() {
-  it('supports all types', function() {
+describe('serializer', () => {
+  it('supports all types', () => {
     const overrides = {
       commit: (request, options, callback) => {
         assert.deepStrictEqual(
@@ -482,17 +483,17 @@ describe('serializer', function() {
   });
 });
 
-describe('snapshot_() method', function() {
+describe('snapshot_() method', () => {
   let firestore;
 
   function verifyAllSupportedTypes(actualObject) {
-    let expected = extend(true, {}, allSupportedTypesOutput);
+    const expected = extend(true, {}, allSupportedTypesOutput);
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
     assert.equal(
         actualObject.get('pathValue').formattedName,
         expected.pathValue.formattedName);
-    let data = actualObject.data();
+    const data = actualObject.data();
     delete data.pathValue;
     delete expected.pathValue;
     assert.deepStrictEqual(data, expected);
@@ -519,8 +520,8 @@ describe('snapshot_() method', function() {
     });
   });
 
-  it('handles ProtobufJS', function() {
-    let doc = firestore.snapshot_(
+  it('handles ProtobufJS', () => {
+    const doc = firestore.snapshot_(
         document('doc', {
           foo: {valueType: 'bytesValue', bytesValue: bytesData},
         }),
@@ -533,10 +534,10 @@ describe('snapshot_() method', function() {
     assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
   });
 
-  it('handles Proto3 JSON together with existing types', function() {
+  it('handles Proto3 JSON together with existing types', () => {
     // Google Cloud Functions must be able to call snapshot_() with Proto3 JSON
     // data.
-    let doc = firestore.snapshot_(
+    const doc = firestore.snapshot_(
         {
           name: `${DATABASE_ROOT}/documents/collectionId/doc`,
           fields: {
@@ -563,8 +564,8 @@ describe('snapshot_() method', function() {
     assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
   });
 
-  it('deserializes all supported types from Protobuf JS', function() {
-    let doc = firestore.snapshot_(allSupportedTypesProtobufJs, {
+  it('deserializes all supported types from Protobuf JS', () => {
+    const doc = firestore.snapshot_(allSupportedTypesProtobufJs, {
       seconds: 5,
       nanos: 6,
     });
@@ -572,13 +573,13 @@ describe('snapshot_() method', function() {
     verifyAllSupportedTypes(doc);
   });
 
-  it('deserializes all supported types from Proto3 JSON', function() {
-    let doc = firestore.snapshot_(
+  it('deserializes all supported types from Proto3 JSON', () => {
+    const doc = firestore.snapshot_(
         allSupportedTypesJson, '1970-01-01T00:00:05.000000006Z', 'json');
     verifyAllSupportedTypes(doc);
   });
 
-  it('handles invalid Proto3 JSON', function() {
+  it('handles invalid Proto3 JSON', () => {
     assert.throws(() => {
       firestore.snapshot_(
           {
@@ -613,8 +614,8 @@ describe('snapshot_() method', function() {
     }, /Specify a valid ISO 8601 timestamp for "documentOrName.createTime"./);
   });
 
-  it('handles missing document ', function() {
-    let doc = firestore.snapshot_(
+  it('handles missing document ', () => {
+    const doc = firestore.snapshot_(
         `${DATABASE_ROOT}/documents/collectionId/doc`,
         '1970-01-01T00:00:05.000000006Z', 'json');
 
@@ -622,7 +623,7 @@ describe('snapshot_() method', function() {
     assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
   });
 
-  it('handles invalid encoding format ', function() {
+  it('handles invalid encoding format ', () => {
     assert.throws(() => {
       firestore.snapshot_(
           `${DATABASE_ROOT}/documents/collectionId/doc`,
@@ -631,7 +632,7 @@ describe('snapshot_() method', function() {
   });
 });
 
-describe('doc() method', function() {
+describe('doc() method', () => {
   let firestore;
 
   beforeEach(() => {
@@ -640,37 +641,37 @@ describe('doc() method', function() {
     });
   });
 
-  it('returns DocumentReference', function() {
-    let documentRef = firestore.doc('collectionId/documentId');
+  it('returns DocumentReference', () => {
+    const documentRef = firestore.doc('collectionId/documentId');
     assert.ok(documentRef instanceof Firestore.DocumentReference);
   });
 
-  it('requires document path', function() {
-    assert.throws(function() {
-      firestore.doc();
-    }, /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
+  it('requires document path', () => {
+    assert.throws(
+        () => firestore.doc(),
+        /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
   });
 
-  it('doesn\'t accept empty components', function() {
-    assert.throws(function() {
-      firestore.doc('coll//doc');
-    }, /Argument "documentPath" is not a valid ResourcePath. Paths must not contain \/\/./);
+  it('doesn\'t accept empty components', () => {
+    assert.throws(
+        () => firestore.doc('coll//doc'),
+        /Argument "documentPath" is not a valid ResourcePath. Paths must not contain \/\/./);
   });
 
-  it('must point to document', function() {
-    assert.throws(function() {
-      firestore.doc('collectionId');
-    }, /Argument "documentPath" must point to a document, but was "collectionId". Your path does not contain an even number of components\./);
+  it('must point to document', () => {
+    assert.throws(
+        () => firestore.doc('collectionId'),
+        /Argument "documentPath" must point to a document, but was "collectionId". Your path does not contain an even number of components\./);
   });
 
-  it('exposes properties', function() {
-    let documentRef = firestore.doc('collectionId/documentId');
+  it('exposes properties', () => {
+    const documentRef = firestore.doc('collectionId/documentId');
     assert.equal(documentRef.id, 'documentId');
     assert.equal(documentRef.firestore, firestore);
   });
 });
 
-describe('collection() method', function() {
+describe('collection() method', () => {
   let firestore;
 
   beforeEach(() => {
@@ -679,33 +680,34 @@ describe('collection() method', function() {
     });
   });
 
-  it('returns collection', function() {
-    let collection = firestore.collection('col1/doc1/col2');
+  it('returns collection', () => {
+    const collection = firestore.collection('col1/doc1/col2');
     assert.ok(is.instance(collection, Firestore.CollectionReference));
   });
 
-  it('requires collection id', function() {
-    assert.throws(function() {
-      firestore.collection();
-    }, /Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string./);
+  it('requires collection id', () => {
+    assert.throws(
+        () => firestore.collection(),
+        /Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string./);
   });
 
-  it('must point to a collection', function() {
-    assert.throws(function() {
-      firestore.collection('collectionId/documentId');
-    }, /Argument "collectionPath" must point to a collection, but was "collectionId\/documentId". Your path does not contain an odd number of components\./);
+
+  it('must point to a collection', () => {
+    assert.throws(
+        () => firestore.collection('collectionId/documentId'),
+        /Argument "collectionPath" must point to a collection, but was "collectionId\/documentId". Your path does not contain an odd number of components\./);
   });
 
-  it('exposes properties', function() {
-    let collection = firestore.collection('collectionId');
+  it('exposes properties', () => {
+    const collection = firestore.collection('collectionId');
     assert.ok(collection.id);
     assert.ok(collection.doc);
     assert.equal(collection.id, 'collectionId');
   });
 });
 
-describe('listCollections() method', function() {
-  it('returns collections', function() {
+describe('listCollections() method', () => {
+  it('returns collections', () => {
     const overrides = {
       listCollectionIds: (request, options, callback) => {
         assert.deepStrictEqual(request, {
@@ -726,12 +728,12 @@ describe('listCollections() method', function() {
   });
 });
 
-describe('getAll() method', function() {
-  function resultEquals(result, doc) {
+describe('getAll() method', () => {
+  function resultEquals(result, ...docs) {
     assert.equal(result.length, arguments.length - 1);
 
     for (let i = 0; i < result.length; ++i) {
-      doc = arguments[i + 1];
+      const doc = arguments[i + 1];
 
       if (doc.found) {
         assert.ok(result[i].exists);
@@ -743,7 +745,7 @@ describe('getAll() method', function() {
     }
   }
 
-  it('accepts empty list', function() {
+  it('accepts empty list', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream();
@@ -757,7 +759,7 @@ describe('getAll() method', function() {
     });
   });
 
-  it('accepts single document', function() {
+  it('accepts single document', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found('documentId'));
@@ -772,7 +774,7 @@ describe('getAll() method', function() {
     });
   });
 
-  it('verifies response', function() {
+  it('verifies response', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found('documentId2'));
@@ -792,7 +794,7 @@ describe('getAll() method', function() {
     });
   });
 
-  it('handles stream exception during initialization', function() {
+  it('handles stream exception during initialization', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(new Error('Expected exception'));
@@ -810,7 +812,7 @@ describe('getAll() method', function() {
     });
   });
 
-  it('handles stream exception after initialization', function() {
+  it('handles stream exception after initialization', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found('documentId'), new Error('Expected exception'));
@@ -828,7 +830,7 @@ describe('getAll() method', function() {
     });
   });
 
-  it('handles serialization error', function() {
+  it('handles serialization error', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found('documentId'));
@@ -836,7 +838,7 @@ describe('getAll() method', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      firestore.snapshot_ = function() {
+      firestore['snapshot_'] = () => {
         throw new Error('Expected exception');
       };
 
@@ -850,8 +852,8 @@ describe('getAll() method', function() {
     });
   });
 
-  it('only retries on GRPC unavailable', function() {
-    let expectedErrorAttempts = {
+  it('only retries on GRPC unavailable', () => {
+    const expectedErrorAttempts = {
       /* Cancelled */ 1: 1,
       /* Unknown */ 2: 1,
       /* InvalidArgument */ 3: 1,
@@ -870,23 +872,24 @@ describe('getAll() method', function() {
       /* Unauthenticated */ 16: 1,
     };
 
-    let actualErrorAttempts = {};
+    const actualErrorAttempts = {};
 
     const overrides = {
       batchGetDocuments: request => {
-        let errorCode = Number(request.documents[0].split('/').pop());
+        const errorCode = Number(request.documents[0].split('/').pop());
         actualErrorAttempts[errorCode] =
             (actualErrorAttempts[errorCode] || 0) + 1;
-        let error = new Error('Expected exception');
-        error.code = errorCode;
+        const error = new Error('Expected exception');
+        // tslint:disable-next-line:no-any
+        (error as any).code = errorCode;
         return stream(error);
       }
     };
 
     return createInstance(overrides).then(firestore => {
-      let coll = firestore.collection('collectionId');
+      const coll = firestore.collection('collectionId');
 
-      let promises = [];
+      const promises: Array<Promise<void>> = [];
 
       Object.keys(expectedErrorAttempts).forEach(errorCode => {
         promises.push(firestore.getAll(coll.doc(`${errorCode}`))
@@ -904,26 +907,26 @@ describe('getAll() method', function() {
     });
   });
 
-  it('requires document reference', function() {
+  it('requires document reference', () => {
     return createInstance().then(firestore => {
       assert.throws(() => {
-        firestore.getAll({});
+        (firestore as InvalidApiUsage).getAll({});
       }, /Argument at index 0 is not a valid DocumentReference\./);
     });
   });
 
-  it('accepts array', function() {
+  it('accepts array', () => {
     const overrides = {batchGetDocuments: () => stream(found('documentId'))};
 
     return createInstance(overrides).then(firestore => {
-      return firestore.getAll([firestore.doc('collectionId/documentId')])
+      return firestore.getAll(firestore.doc('collectionId/documentId'))
           .then(result => {
             resultEquals(result, found('documentId'));
           });
     });
   });
 
-  it('returns not found for missing documents', function() {
+  it('returns not found for missing documents', () => {
     const overrides = {
       batchGetDocuments: () => stream(found('exists'), missing('missing'))
     };
@@ -939,7 +942,7 @@ describe('getAll() method', function() {
     });
   });
 
-  it('returns results in order', function() {
+  it('returns results in order', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(
@@ -963,7 +966,7 @@ describe('getAll() method', function() {
     });
   });
 
-  it('accepts same document multiple times', function() {
+  it('accepts same document multiple times', () => {
     const overrides = {
       batchGetDocuments: request => {
         assert.equal(request.documents.length, 2);

@@ -224,16 +224,12 @@ export class ResourcePath extends Path<ResourcePath> {
    * @private
    * @hideconstructor
    *
-   * @param {string} projectId - The Firestore project id.
-   * @param {string} databaseId - The Firestore database id.
-   * @param {string[]?} segments - Sequence of names of the parts of
-   * the path.
+   * @param projectId The Firestore project id.
+   * @param databaseId The Firestore database id.
+   * @param segments Sequence of names of the parts of the path.
    */
-  constructor(projectId: string, databaseId: string, segments?: string[]) {
-    const elements = segments instanceof Array ?
-        segments :
-        Array.prototype.slice.call(arguments, 2);
-    super(elements);
+  constructor(projectId: string, databaseId: string, ...segments: string[]) {
+    super(segments);
 
     this.projectId = projectId;
     this.databaseId = databaseId;
@@ -369,7 +365,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * @returns {ResourcePath} The newly created ResourcePath.
    */
   construct(segments: string[]): ResourcePath {
-    return new ResourcePath(this.projectId, this.databaseId, segments);
+    return new ResourcePath(this.projectId, this.databaseId, ...segments);
   }
 
   /**

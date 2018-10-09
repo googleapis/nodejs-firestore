@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import assert from 'power-assert';
 
 import {google} from '../protos/firestore_proto_api';
@@ -30,7 +28,7 @@ Firestore.setLogFunction(() => {});
 
 const PROJECT_ID = 'test-project';
 
-describe('set() method', function() {
+describe('set() method', () => {
   let firestore;
   let writeBatch;
 
@@ -41,24 +39,24 @@ describe('set() method', function() {
     });
   });
 
-  it('requires document name', function() {
-    assert.throws(function() {
-      writeBatch.set();
-    }, /Argument "documentRef" is not a valid DocumentReference\./);
+  it('requires document name', () => {
+    assert.throws(
+        () => writeBatch.set(),
+        /Argument "documentRef" is not a valid DocumentReference\./);
   });
 
-  it('requires object', function() {
-    assert.throws(function() {
-      writeBatch.set(firestore.doc('sub/doc'));
-    }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
+  it('requires object', () => {
+    assert.throws(
+        () => writeBatch.set(firestore.doc('sub/doc')),
+        /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
-  it('accepts preconditions', function() {
+  it('accepts preconditions', () => {
     writeBatch.set(firestore.doc('sub/doc'), {exists: false});
   });
 });
 
-describe('delete() method', function() {
+describe('delete() method', () => {
   let firestore;
   let writeBatch;
 
@@ -69,20 +67,20 @@ describe('delete() method', function() {
     });
   });
 
-  it('requires document name', function() {
-    assert.throws(function() {
-      writeBatch.delete();
-    }, /Argument "documentRef" is not a valid DocumentReference\./);
+  it('requires document name', () => {
+    assert.throws(
+        () => writeBatch.delete(),
+        /Argument "documentRef" is not a valid DocumentReference\./);
   });
 
-  it('accepts preconditions', function() {
+  it('accepts preconditions', () => {
     writeBatch.delete(firestore.doc('sub/doc'), {
       lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
     });
   });
 });
 
-describe('update() method', function() {
+describe('update() method', () => {
   let firestore;
   let writeBatch;
 
@@ -93,26 +91,26 @@ describe('update() method', function() {
     });
   });
 
-  it('requires document name', function() {
-    assert.throws(() => {
-      writeBatch.update({}, {});
-    }, /Argument "documentRef" is not a valid DocumentReference\./);
+  it('requires document name', () => {
+    assert.throws(
+        () => writeBatch.update({}, {}),
+        /Argument "documentRef" is not a valid DocumentReference\./);
   });
 
-  it('requires object', function() {
+  it('requires object', () => {
     assert.throws(() => {
       writeBatch.update(firestore.doc('sub/doc'), firestore.doc('sub/doc'));
     }, /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
-  it('accepts preconditions', function() {
+  it('accepts preconditions', () => {
     writeBatch.update(
         firestore.doc('sub/doc'), {foo: 'bar'},
         {lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)});
   });
 });
 
-describe('create() method', function() {
+describe('create() method', () => {
   let firestore;
   let writeBatch;
 
@@ -123,20 +121,20 @@ describe('create() method', function() {
     });
   });
 
-  it('requires document name', function() {
-    assert.throws(function() {
-      writeBatch.create();
-    }, /Argument "documentRef" is not a valid DocumentReference\./);
+  it('requires document name', () => {
+    assert.throws(
+        () => writeBatch.create(),
+        /Argument "documentRef" is not a valid DocumentReference\./);
   });
 
-  it('requires object', function() {
-    assert.throws(function() {
+  it('requires object', () => {
+    assert.throws(() => {
       writeBatch.create(firestore.doc('sub/doc'));
     }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 });
 
-describe('batch support', function() {
+describe('batch support', () => {
   const documentName =
       `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
 
@@ -251,8 +249,8 @@ describe('batch support', function() {
     assert.ok(writeResults[3].writeTime.isEqual(new Firestore.Timestamp(3, 3)));
   }
 
-  it('accepts multiple operations', function() {
-    let documentName = firestore.doc('col/doc');
+  it('accepts multiple operations', () => {
+    const documentName = firestore.doc('col/doc');
 
     writeBatch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
     writeBatch.update(documentName, {foo: 'bar'});
@@ -264,8 +262,8 @@ describe('batch support', function() {
     });
   });
 
-  it('chains multiple operations', function() {
-    let documentName = firestore.doc('col/doc');
+  it('chains multiple operations', () => {
+    const documentName = firestore.doc('col/doc');
 
     return writeBatch
         .set(documentName, {foo: Firestore.FieldValue.serverTimestamp()})
@@ -278,8 +276,8 @@ describe('batch support', function() {
         });
   });
 
-  it('handles exception', function() {
-    firestore.request = function() {
+  it('handles exception', () => {
+    firestore.request = () => {
       return Promise.reject(new Error('Expected exception'));
     };
 
@@ -293,15 +291,15 @@ describe('batch support', function() {
         });
   });
 
-  it('cannot append to committed batch', function() {
-    let documentName = firestore.doc('col/doc');
+  it('cannot append to committed batch', () => {
+    const documentName = firestore.doc('col/doc');
 
-    let batch = firestore.batch();
+    const batch = firestore.batch();
     batch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
     batch.update(documentName, {foo: 'bar'});
     batch.create(documentName, {});
     batch.delete(documentName);
-    let promise = batch.commit();
+    const promise = batch.commit();
 
     assert.throws(() => {
       batch.set(documentName, {});
@@ -310,10 +308,10 @@ describe('batch support', function() {
     return promise;
   });
 
-  it('can commit an unmodified batch multiple times', function() {
-    let documentName = firestore.doc('col/doc');
+  it('can commit an unmodified batch multiple times', () => {
+    const documentName = firestore.doc('col/doc');
 
-    let batch = firestore.batch();
+    const batch = firestore.batch();
     batch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
     batch.update(documentName, {foo: 'bar'});
     batch.create(documentName, {});
@@ -321,7 +319,7 @@ describe('batch support', function() {
     return batch.commit().then(() => batch.commit);
   });
 
-  it('can return same write result', function() {
+  it('can return same write result', () => {
     const overrides = {
       commit: (request, options, callback) => {
         callback(null, {
@@ -345,9 +343,9 @@ describe('batch support', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      let documentName = firestore.doc('col/doc');
+      const documentName = firestore.doc('col/doc');
 
-      let batch = firestore.batch();
+      const batch = firestore.batch();
       batch.set(documentName, {});
       batch.set(documentName, {});
 
@@ -357,7 +355,7 @@ describe('batch support', function() {
     });
   });
 
-  it('uses transactions on GCF', function() {
+  it('uses transactions on GCF', () => {
     // We use this environment variable during initialization to detect whether
     // we are running on GCF.
     process.env.FUNCTION_TRIGGER_TYPE = 'http-trigger';
@@ -377,13 +375,13 @@ describe('batch support', function() {
             nanos: 0,
             seconds: 0,
           },
-        })
+        });
       }
     };
 
     return createInstance(overrides).then(firestore => {
-      firestore._preferTransactions = true;
-      firestore._lastSuccessfulRequest = null;
+      firestore['_preferTransactions'] = true;
+      firestore['_lastSuccessfulRequest'] = 0;
 
       return firestore.batch()
           .commit()
@@ -398,7 +396,7 @@ describe('batch support', function() {
             // within two minutes.
             assert.equal(1, beginCalled);
             assert.equal(2, commitCalled);
-            firestore._lastSuccessfulRequest = new Date(1337);
+            firestore['_lastSuccessfulRequest'] = 1337;
             return firestore.batch().commit();
           })
           .then(() => {

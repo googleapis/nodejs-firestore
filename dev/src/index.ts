@@ -14,38 +14,36 @@
  * limitations under the License.
  */
 
-'use strict';
-
+import {replaceProjectIdToken} from '@google-cloud/projectify';
 import assert from 'assert';
 import bun from 'bun';
 import extend from 'extend';
 import is from 'is';
 import through2 from 'through2';
-import {replaceProjectIdToken} from '@google-cloud/projectify';
 
-import {CollectionReference, validateDocumentReference, validateComparisonOperator, validateFieldOrder} from './reference';
+import {google} from '../protos/firestore_proto_api';
+
+import * as convert from './convert';
 import {DocumentSnapshot, QueryDocumentSnapshot, validatePrecondition, validateSetOptions} from './document';
 import {FieldValue} from './field-value';
-import {FieldTransform, DeleteTransform} from './field-value';
-import {Validator, customObjectError} from './validate';
-import {WriteBatch, WriteResult} from './write-batch';
-import {validateUpdateMap} from './write-batch';
-import {Transaction} from './transaction';
-import {Timestamp} from './timestamp';
+import {DeleteTransform, FieldTransform} from './field-value';
+import {GeoPoint} from './geo-point';
+import {logger, setLibVersion, setLogFunction} from './logger';
 import {FieldPath} from './path';
 import {ResourcePath} from './path';
 import {ClientPool} from './pool';
-import {isPlainObject, Serializer} from './serializer';
-import {GeoPoint} from './geo-point';
-import {logger, setLibVersion, setLogFunction} from './logger';
-import {requestTag} from './util';
-import {DocumentData, GapicClient, Settings, ValidationOptions} from './types';
+import {CollectionReference, validateComparisonOperator, validateDocumentReference, validateFieldOrder} from './reference';
 import {DocumentReference} from './reference';
-
-import * as convert from './convert';
+import {isPlainObject, Serializer} from './serializer';
+import {Timestamp} from './timestamp';
+import {Transaction} from './transaction';
+import {DocumentData, GapicClient, Settings, ValidationOptions} from './types';
 import {AnyDuringMigration, AnyJs} from './types';
+import {requestTag} from './util';
+import {customObjectError, Validator} from './validate';
+import {WriteBatch, WriteResult} from './write-batch';
+import {validateUpdateMap} from './write-batch';
 
-import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
 export {CollectionReference, DocumentReference, QuerySnapshot, Query} from './reference';
