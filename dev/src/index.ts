@@ -313,7 +313,7 @@ export class Firestore {
    *
    * @param {object} settings The settings to use for all Firestore operations.
    */
-  settings(settings: Settings) {
+  settings(settings: Settings): void {
     this._validator.isObject('settings', settings);
     this._validator.isOptionalString('settings.projectId', settings.projectId);
     this._validator.isOptionalBoolean(
@@ -959,8 +959,7 @@ follow these steps, YOUR APP MAY BREAK.`);
    *
    * @private
    * @param resultStream - The Node stream to monitor.
-   * @param  requestTag A unique client-assigned identifier for this
-   * request.
+   * @param requestTag A unique client-assigned identifier for this request.
    * @param request - If specified, the request that should be written
    * to the stream after it opened.
    * @returns The given Stream once it is considered healthy.
@@ -1121,11 +1120,10 @@ follow these steps, YOUR APP MAY BREAK.`);
    * listeners are attached.
    *
    * @private
-   * @param  methodName - Name of the streaming Veneer API endpoint that
+   * @param methodName Name of the streaming Veneer API endpoint that
    * takes a request and GAX options.
-   * @param request - The Protobuf request to send.
-   * @param  requestTag A unique client-assigned identifier for this
-   * request.
+   * @param request The Protobuf request to send.
+   * @param requestTag A unique client-assigned identifier for this request.
    * @param {boolean} allowRetries - Whether this is an idempotent request that
    * can be retried.
    * @returns A Promise with the resulting read-only stream.
@@ -1178,7 +1176,7 @@ follow these steps, YOUR APP MAY BREAK.`);
    * GAX options.
    * @param request - The Protobuf request to send as the first stream message.
    * @param requestTag A unique client-assigned identifier for this request.
-   * @param  allowRetries - Whether this is an idempotent request that can be
+   * @param allowRetries - Whether this is an idempotent request that can be
    * retried.
    * @returns A Promise with the resulting read/write stream.
    */
@@ -1228,7 +1226,7 @@ follow these steps, YOUR APP MAY BREAK.`);
  *
  * @private
  * @param val JavaScript value to validate.
- * @param  options Validation options
+ * @param options Validation options
  * @param depth The current depth of the traversal.
  * @param inArray Whether we are inside an array.
  * @returns 'true' when the object is valid.
@@ -1295,7 +1293,7 @@ function validateFieldValue(
  *
  * @private
  * @param obj JavaScript object to validate.
- * @param  options Validation options
+ * @param options Validation options
  * @returns 'true' when the object is valid.
  * @throws when the object is invalid.
  */

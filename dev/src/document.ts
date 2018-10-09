@@ -131,25 +131,27 @@ export class DocumentSnapshot {
   private _fieldsProto;
   private _serializer;
   private _validator;
-  private _readTime: Timestamp;
-  private _createTime: Timestamp;
-  private _updateTime: Timestamp;
+  private _readTime: Timestamp|undefined;
+  private _createTime: Timestamp|undefined;
+  private _updateTime: Timestamp|undefined;
+
   /**
    * @private
    * @hideconstructor
    *
-   * @param {firestore/DocumentReference} ref - The reference to the
-   * document.
-   * @param {object=} fieldsProto - The fields of the Firestore `Document`
-   * Protobuf backing this document (or undefined if the document does not
-   * exist).
-   * @param {Timestamp} readTime - The time when this snapshot was read.
-   * @param {Timestamp=} createTime - The time when the document was created
-   * (or undefined if the document does not exist).
-   * @param {Timestamp=} updateTime - The time when the document was last
-   * updated (or undefined if the document does not exist).
+   * @param ref The reference to the document.
+   * @param fieldsProto The fields of the Firestore `Document` Protobuf backing
+   * this document (or undefined if the document does not exist).
+   * @param readTime The time when this snapshot was read  (or undefined if
+   * the document exists only locally).
+   * @param createTime The time when the document was created (or undefined if
+   * the document does not exist).
+   * @param updateTime The time when the document was last updated (or undefined
+   * if the document does not exist).
    */
-  constructor(ref, fieldsProto, readTime?, createTime?, updateTime?) {
+  constructor(
+      ref: DocumentReference, fieldsProto?: api.IDocument, readTime?: Timestamp,
+      createTime?: Timestamp, updateTime?: Timestamp) {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
     this._serializer = ref.firestore._serializer;
@@ -163,11 +165,11 @@ export class DocumentSnapshot {
    * Creates a DocumentSnapshot from an object.
    *
    * @private
-   * @param {firestore/DocumentReference} ref - The reference to the document.
-   * @param {Object} obj - The object to store in the DocumentSnapshot.
-   * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
+   * @param ref The reference to the document.
+   * @param obj The object to store in the DocumentSnapshot.
+   * @return The created DocumentSnapshot.
    */
-  static fromObject(ref, obj): DocumentSnapshot {
+  static fromObject(ref: DocumentReference, obj: {}): DocumentSnapshot {
     const serializer = ref.firestore._serializer;
     return new DocumentSnapshot(ref, serializer.encodeFields(obj));
   }
@@ -178,9 +180,9 @@ export class DocumentSnapshot {
    * turns { foo.bar : foobar } into { foo { bar : foobar }}
    *
    * @private
-   * @param {firestore/DocumentReference} ref - The reference to the document.
-   * @param {Map.<FieldPath, *>} data - The field/value map to expand.
-   * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
+   * @param ref The reference to the document.
+   * @param data The field/value map to expand.
+   * @return The created DocumentSnapshot.
    */
   static fromUpdateMap(ref: DocumentReference, data: UpdateData):
       DocumentSnapshot {
@@ -365,6 +367,9 @@ export class DocumentSnapshot {
    * });
    */
   get readTime(): Timestamp {
+    if (this._readTime === undefined) {
+      throw new Error(`Called 'readTime' on a local document`);
+    }
     return this._readTime;
   }
 
@@ -542,15 +547,16 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
    * @private
    * @hideconstructor
    *
-   * @param {firestore/DocumentReference} ref - The reference to the document.
-   * @param {object} fieldsProto - The fields of the Firestore `Document`
-   * Protobuf backing this document.
-   * @param {Timestamp} readTime - The time when this snapshot was read.
-   * @param {Timestamp} createTime - The time when the document was created.
-   * @param {Timestamp} updateTime - The time when the document was last
-   * updated.
+   * @param ref The reference to the document.
+   * @param fieldsProto The fields of the Firestore `Document` Protobuf backing
+   * this document.
+   * @param readTime The time when this snapshot was read.
+   * @param createTime The time when the document was created.
+   * @param updateTime The time when the document was last updated.
    */
-  constructor(ref, fieldsProto, readTime, createTime, updateTime) {
+  constructor(
+      ref: DocumentReference, fieldsProto: api.IDocument, readTime: Timestamp,
+      createTime: Timestamp, updateTime: Timestamp) {
     super(ref, fieldsProto, readTime, createTime, updateTime);
   }
 

@@ -892,11 +892,11 @@ export class Query {
    * @hideconstructor
    *
    * @param _firestore - The Firestore Database client.
-   * @param  _path Path of the collection to be queried.
+   * @param _path Path of the collection to be queried.
    * @param _fieldFilters - Sequence of fields constraining the results of the
    * query.
    * @param _fieldOrders - Sequence of fields to control the order of results.
-   * @param  _queryOptions Additional query options.
+   * @param _queryOptions Additional query options.
    */
   constructor(
       private readonly _firestore: AnyDuringMigration,

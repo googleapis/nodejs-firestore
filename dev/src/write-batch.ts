@@ -88,7 +88,7 @@ export class WriteResult {
 
 
 /** Helper type to manage the list of writes in a WriteBatch. */
-// TODO: Replace with api.IWrite
+// TODO(mrschmidt): Replace with api.IWrite
 interface WriteOp {
   write?: api.IWrite|null;
   transform?: api.IWrite|null;
@@ -583,7 +583,7 @@ export class WriteBatch {
  * Validates that the update data does not contain any ambiguous field
  * definitions (such as 'a.b' and 'a').
  *
- * @param data - An update map with field/value pairs.
+ * @param data An update map with field/value pairs.
  * @returns 'true' if the input is a valid update map.
  */
 export function validateUpdateMap(data: UpdateData): boolean {
