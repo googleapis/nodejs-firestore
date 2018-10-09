@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import assert from 'power-assert';
 import extend from 'extend';
 import is from 'is';
+import assert from 'power-assert';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
-import {createInstance, InvalidApiUsage} from './util/helpers';
-import {AnyDuringMigration, AnyJs} from '../src/types';
 import {DocumentSnapshot, QueryDocumentSnapshot} from '../src';
+import {AnyDuringMigration, AnyJs} from '../src/types';
+
+import {createInstance, InvalidApiUsage} from './util/helpers';
 
 const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
                          .ServerValue.REQUEST_TIME;
@@ -648,13 +649,11 @@ describe('get document', () => {
     };
 
     return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId')
-          .get()
-          .then((result) => {
-            assert.ok(result.createTime!.isEqual(new Firestore.Timestamp(1, 2)));
-            assert.ok(result.updateTime!.isEqual(new Firestore.Timestamp(3, 4)));
-            assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
-          });
+      return firestore.doc('collectionId/documentId').get().then((result) => {
+        assert.ok(result.createTime!.isEqual(new Firestore.Timestamp(1, 2)));
+        assert.ok(result.updateTime!.isEqual(new Firestore.Timestamp(3, 4)));
+        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+      });
     });
   });
 

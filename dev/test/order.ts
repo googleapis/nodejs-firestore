@@ -17,12 +17,12 @@
 import assert from 'power-assert';
 
 import * as Firestore from '../src';
-import {DocumentReference} from '../src/reference';
 import {DocumentSnapshot} from '../src/document';
-import {createInstance, InvalidApiUsage} from '../test/util/helpers';
-import {ResourcePath} from '../src/path';
 import {GeoPoint} from '../src/geo-point';
 import * as order from '../src/order';
+import {ResourcePath} from '../src/path';
+import {DocumentReference} from '../src/reference';
+import {createInstance, InvalidApiUsage} from '../test/util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});

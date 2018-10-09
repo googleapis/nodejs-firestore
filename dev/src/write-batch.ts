@@ -17,17 +17,18 @@
 import assert from 'assert';
 import is from 'is';
 
-import {logger} from './logger';
-import {DocumentSnapshot, DocumentMask, DocumentTransform, Precondition} from './document';
-import {FieldPath} from './path';
-import {Timestamp} from './timestamp';
-import {requestTag} from './util';
-import {AnyDuringMigration, AnyJs, SetOptions, UpdateData, UserInput, Precondition as PublicPrecondition} from './types';
-import {Serializer} from './serializer';
-import {DocumentData} from './types';
-import {DocumentReference} from './reference';
-
 import {google} from '../protos/firestore_proto_api';
+
+import {DocumentMask, DocumentSnapshot, DocumentTransform, Precondition} from './document';
+import {logger} from './logger';
+import {FieldPath} from './path';
+import {DocumentReference} from './reference';
+import {Serializer} from './serializer';
+import {Timestamp} from './timestamp';
+import {AnyDuringMigration, AnyJs, Precondition as PublicPrecondition, SetOptions, UpdateData, UserInput} from './types';
+import {DocumentData} from './types';
+import {requestTag} from './util';
+
 import api = google.firestore.v1beta1;
 
 /*!

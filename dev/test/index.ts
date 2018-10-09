@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import assert from 'power-assert';
 import extend from 'extend';
+import * as gax from 'google-gax';
 import is from 'is';
+import assert from 'power-assert';
 import through2 from 'through2';
 
-import {ResourcePath} from '../src/path';
-import {createInstance, InvalidApiUsage} from '../test/util/helpers';
-import * as gax from 'google-gax';
-
 import * as Firestore from '../src';
-
+import {ResourcePath} from '../src/path';
 import {AnyDuringMigration} from '../src/types';
+import {createInstance, InvalidApiUsage} from '../test/util/helpers';
+
 const {grpc} = new gax.GrpcClient({} as AnyDuringMigration);
 
 const PROJECT_ID = 'test-project';
@@ -391,7 +390,7 @@ describe('instantiation', () => {
 
     const gapicClient = {getProjectId: callback => callback(null, PROJECT_ID)};
 
-    return  firestore['_detectProjectId'] (gapicClient).then(projectId => {
+    return firestore['_detectProjectId'](gapicClient).then(projectId => {
       assert.equal(projectId, PROJECT_ID);
     });
   });
@@ -420,7 +419,7 @@ describe('instantiation', () => {
       getProjectId: callback => callback(new Error('Injected Error'))
     };
 
-    return  firestore['_detectProjectId'] (gapicClient)
+    return firestore['_detectProjectId'](gapicClient)
         .then(() => assert.fail('Error ignored'))
         .catch(err => assert.equal('Injected Error', err.message));
   });

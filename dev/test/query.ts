@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import assert from 'power-assert';
 import extend from 'extend';
 import is from 'is';
+import assert from 'power-assert';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
-
 import * as Firestore from '../src';
-import {DocumentReference} from '../src/reference';
+import {Query, Timestamp} from '../src';
 import {DocumentSnapshot} from '../src/document';
 import {ResourcePath} from '../src/path';
+import {DocumentReference} from '../src/reference';
 import {AnyDuringMigration} from '../src/types';
-import {Query, Timestamp} from '../src';
-
 import {createInstance, InvalidApiUsage} from '../test/util/helpers';
 
 import api = google.firestore.v1beta1;

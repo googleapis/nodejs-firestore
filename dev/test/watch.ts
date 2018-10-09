@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import assert from 'power-assert';
 import duplexify from 'duplexify';
 import is from 'is';
+import assert from 'power-assert';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
-
 import * as Firestore from '../src';
-import {DocumentSnapshot} from '../src/document';
 import {setTimeoutHandler} from '../src/backoff';
-import {createInstance} from '../test/util/helpers';
+import {DocumentSnapshot} from '../src/document';
 import {AnyDuringMigration} from '../src/types';
+import {createInstance} from '../test/util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});

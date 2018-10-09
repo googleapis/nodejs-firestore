@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import * as Firestore from '../src/index';
+import assert from 'assert';
 import is from 'is';
 import through2 from 'through2';
-import assert from 'assert';
 
+import * as Firestore from '../src/index';
 import {createInstance as createInstanceHelper} from '../test/util/helpers';
 
 function createInstance(opts, document) {
