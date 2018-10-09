@@ -25,7 +25,7 @@ import {FieldTransform} from './field-value';
 import {customObjectError} from './validate';
 import {ResourcePath} from './path';
 import {detectValueType} from './convert';
-import {AnyDuringMigration, AnyJs} from './types';
+import {AnyDuringMigration, AnyJs, UserInput} from './types';
 import {GeoPoint} from './geo-point';
 
 /** An interface for Firestore types that can be serialized to Protobuf. */
@@ -259,7 +259,7 @@ export class Serializer {
  * @param input - The argument to verify.
  * @returns 'true' if the input can be a treated as a plain object.
  */
-export function isPlainObject(input: object): boolean {
+export function isPlainObject(input: UserInput): boolean {
   return (
       typeof input === 'object' && input !== null &&
       (Object.getPrototypeOf(input) === Object.prototype ||

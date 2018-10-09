@@ -18,12 +18,16 @@ import assert from 'assert';
 import deepEqual from 'deep-equal';
 import is from 'is';
 
+import {google} from '../protos/firestore_proto_api';
+
 import {FieldTransform} from './field-value';
 import {FieldPath} from './path';
 import {DocumentReference} from './reference';
 import {isPlainObject} from './serializer';
 import {Timestamp} from './timestamp';
-import {ApiMapValue, UpdateData} from './types';
+import {ApiMapValue, DocumentData, UpdateData, UserInput} from './types';
+
+import api = google.firestore.v1beta1;
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -127,25 +131,27 @@ export class DocumentSnapshot {
   private _fieldsProto;
   private _serializer;
   private _validator;
-  private _readTime: Timestamp;
-  private _createTime: Timestamp;
-  private _updateTime: Timestamp;
+  private _readTime: Timestamp|undefined;
+  private _createTime: Timestamp|undefined;
+  private _updateTime: Timestamp|undefined;
+
   /**
    * @private
    * @hideconstructor
    *
-   * @param {firestore/DocumentReference} ref - The reference to the
-   * document.
-   * @param {object=} fieldsProto - The fields of the Firestore `Document`
-   * Protobuf backing this document (or undefined if the document does not
-   * exist).
-   * @param {Timestamp} readTime - The time when this snapshot was read.
-   * @param {Timestamp=} createTime - The time when the document was created
-   * (or undefined if the document does not exist).
-   * @param {Timestamp=} updateTime - The time when the document was last
-   * updated (or undefined if the document does not exist).
+   * @param ref The reference to the document.
+   * @param fieldsProto The fields of the Firestore `Document` Protobuf backing
+   * this document (or undefined if the document does not exist).
+   * @param readTime The time when this snapshot was read  (or undefined if
+   * the document exists only locally).
+   * @param createTime The time when the document was created (or undefined if
+   * the document does not exist).
+   * @param updateTime The time when the document was last updated (or undefined
+   * if the document does not exist).
    */
-  constructor(ref, fieldsProto, readTime?, createTime?, updateTime?) {
+  constructor(
+      ref: DocumentReference, fieldsProto?: api.IDocument, readTime?: Timestamp,
+      createTime?: Timestamp, updateTime?: Timestamp) {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
     this._serializer = ref.firestore._serializer;
@@ -159,11 +165,11 @@ export class DocumentSnapshot {
    * Creates a DocumentSnapshot from an object.
    *
    * @private
-   * @param {firestore/DocumentReference} ref - The reference to the document.
-   * @param {Object} obj - The object to store in the DocumentSnapshot.
-   * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
+   * @param ref The reference to the document.
+   * @param obj The object to store in the DocumentSnapshot.
+   * @return The created DocumentSnapshot.
    */
-  static fromObject(ref, obj) {
+  static fromObject(ref: DocumentReference, obj: {}): DocumentSnapshot {
     const serializer = ref.firestore._serializer;
     return new DocumentSnapshot(ref, serializer.encodeFields(obj));
   }
@@ -174,9 +180,9 @@ export class DocumentSnapshot {
    * turns { foo.bar : foobar } into { foo { bar : foobar }}
    *
    * @private
-   * @param {firestore/DocumentReference} ref - The reference to the document.
-   * @param {Map.<FieldPath, *>} data - The field/value map to expand.
-   * @return {firestore.DocumentSnapshot} The created DocumentSnapshot.
+   * @param ref The reference to the document.
+   * @param data The field/value map to expand.
+   * @return The created DocumentSnapshot.
    */
   static fromUpdateMap(ref: DocumentReference, data: UpdateData):
       DocumentSnapshot {
@@ -256,7 +262,7 @@ export class DocumentSnapshot {
    *   }
    * });
    */
-  get exists() {
+  get exists(): boolean {
     return this._fieldsProto !== undefined;
   }
 
@@ -277,7 +283,7 @@ export class DocumentSnapshot {
    *   }
    * });
    */
-  get ref() {
+  get ref(): DocumentReference {
     return this._ref;
   }
 
@@ -297,7 +303,7 @@ export class DocumentSnapshot {
    *   }
    * });
    */
-  get id() {
+  get id(): string {
     return this._ref.id;
   }
 
@@ -319,7 +325,7 @@ export class DocumentSnapshot {
    *   }
    * });
    */
-  get createTime() {
+  get createTime(): Timestamp|undefined {
     return this._createTime;
   }
 
@@ -341,7 +347,7 @@ export class DocumentSnapshot {
    *   }
    * });
    */
-  get updateTime() {
+  get updateTime(): Timestamp|undefined {
     return this._updateTime;
   }
 
@@ -360,7 +366,10 @@ export class DocumentSnapshot {
    *   console.log(`Document read at '${readTime.toDate()}'`);
    * });
    */
-  get readTime() {
+  get readTime(): Timestamp {
+    if (this._readTime === undefined) {
+      throw new Error(`Called 'readTime' on a local document`);
+    }
     return this._readTime;
   }
 
@@ -379,7 +388,7 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
    */
-  data() {
+  data(): DocumentData|undefined {
     const fields = this.protoFields();
 
     if (is.undefined(fields)) {
@@ -423,7 +432,7 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved field value: ${field}`);
    * });
    */
-  get(field) {
+  get(field: string|FieldPath): UserInput {
     this._validator.isFieldPath('field', field);
 
     const protoField = this.protoField(field);
@@ -472,7 +481,7 @@ export class DocumentSnapshot {
    * @private
    * @return {boolean}
    */
-  get isEmpty() {
+  get isEmpty(): boolean {
     return is.undefined(this._fieldsProto) || is.empty(this._fieldsProto);
   }
 
@@ -482,7 +491,7 @@ export class DocumentSnapshot {
    * @private
    * @returns {Object} - The document in the format the API expects.
    */
-  toProto() {
+  toProto(): api.IWrite|null {
     return {
       update: {
         name: this._ref.formattedName,
@@ -499,7 +508,7 @@ export class DocumentSnapshot {
    * @return {boolean} true if this `DocumentSnapshot` is equal to the provided
    * value.
    */
-  isEqual(other) {
+  isEqual(other: DocumentSnapshot): boolean {
     // Since the read time is different on every document read, we explicitly
     // ignore all document metadata in this comparison.
     return (
@@ -538,15 +547,16 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
    * @private
    * @hideconstructor
    *
-   * @param {firestore/DocumentReference} ref - The reference to the document.
-   * @param {object} fieldsProto - The fields of the Firestore `Document`
-   * Protobuf backing this document.
-   * @param {Timestamp} readTime - The time when this snapshot was read.
-   * @param {Timestamp} createTime - The time when the document was created.
-   * @param {Timestamp} updateTime - The time when the document was last
-   * updated.
+   * @param ref The reference to the document.
+   * @param fieldsProto The fields of the Firestore `Document` Protobuf backing
+   * this document.
+   * @param readTime The time when this snapshot was read.
+   * @param createTime The time when the document was created.
+   * @param updateTime The time when the document was last updated.
    */
-  constructor(ref, fieldsProto, readTime, createTime, updateTime) {
+  constructor(
+      ref: DocumentReference, fieldsProto: api.IDocument, readTime: Timestamp,
+      createTime: Timestamp, updateTime: Timestamp) {
     super(ref, fieldsProto, readTime, createTime, updateTime);
   }
 
@@ -565,8 +575,8 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
    *   console.log(`Document created at '${snapshot.createTime.toDate()}'`);
    * });
    */
-  get createTime() {
-    return super.createTime;
+  get createTime(): Timestamp {
+    return super.createTime!;
   }
 
   /**
@@ -585,8 +595,8 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
    *   console.log(`Document updated at '${snapshot.updateTime.toDate()}'`);
    * });
    */
-  get updateTime() {
-    return super.updateTime;
+  get updateTime(): Timestamp {
+    return super.updateTime!;
   }
 
   /**
@@ -604,11 +614,12 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
    */
-  data() {
+  data(): DocumentData {
     const data = super.data();
-    assert(
-        is.defined(data),
-        'The data in a QueryDocumentSnapshot should always exist.');
+    if (!data) {
+      throw new Error(
+          'The data in a QueryDocumentSnapshot should always exist.');
+    }
     return data;
   }
 }
@@ -995,7 +1006,7 @@ export class DocumentTransform {
    * @returns {Object|null} A Firestore 'DocumentTransform' Proto or 'null' if
    * this transform is empty.
    */
-  toProto(serializer) {
+  toProto(serializer): api.IWrite|null {
     if (this.isEmpty) {
       return null;
     }
@@ -1047,7 +1058,7 @@ export class Precondition {
    * @returns {Object|null} The `Preconditon` Protobuf object or 'null' if there
    * are no preconditions.
    */
-  toProto() {
+  toProto(): api.IPrecondition|null {
     if (this.isEmpty) {
       return null;
     }

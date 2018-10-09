@@ -18,10 +18,8 @@ import {expect} from 'chai';
 import is from 'is';
 import * as assert from 'power-assert';
 
-// tslint:disable-next-line variable-name
-const Firestore = require('../src');
+import {DocumentSnapshot, FieldPath, FieldValue, Firestore, GeoPoint, setLogFunction, Timestamp} from '../src';
 import {autoId} from '../src/util';
-import {DocumentSnapshot} from '../src/document';
 
 const version = require('../../package.json').version;
 
@@ -43,7 +41,7 @@ class DeferredPromise {
 }
 
 if (process.env.NODE_ENV === 'DEBUG') {
-  Firestore.setLogFunction(console.log);
+  setLogFunction(console.log);
 }
 
 function getTestRoot(firestore) {
@@ -204,14 +202,14 @@ describe('DocumentReference class', () => {
       negativeInfinityValue: -Infinity,
       objectValue: {foo: 'bar', '😀': '😜'},
       emptyObject: {},
-      dateValue: new Firestore.Timestamp(479978400, 123000000),
-      zeroDateValue: new Firestore.Timestamp(0, 0),
+      dateValue: new Timestamp(479978400, 123000000),
+      zeroDateValue: new Timestamp(0, 0),
       pathValue: firestore.doc('col1/ref1'),
       arrayValue: ['foo', 42, 'bar'],
       emptyArray: [],
       nilValue: null,
-      geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
-      zeroGeoPointValue: new Firestore.GeoPoint(0, 0),
+      geoPointValue: new GeoPoint(50.1430847, -122.947778),
+      zeroGeoPointValue: new GeoPoint(0, 0),
       bytesValue: Buffer.from([0x01, 0x02]),
     };
     const ref = randomCol.doc('doc');
@@ -250,12 +248,12 @@ describe('DocumentReference class', () => {
       a: 'bar',
       b: {remove: 'bar'},
       d: {keep: 'bar'},
-      f: Firestore.FieldValue.serverTimestamp(),
+      f: FieldValue.serverTimestamp(),
     };
     const updateObject = {
-      a: Firestore.FieldValue.serverTimestamp(),
-      b: {c: Firestore.FieldValue.serverTimestamp()},
-      'd.e': Firestore.FieldValue.serverTimestamp(),
+      a: FieldValue.serverTimestamp(),
+      b: {c: FieldValue.serverTimestamp()},
+      'd.e': FieldValue.serverTimestamp(),
     };
 
     const ref = randomCol.doc('doc');
@@ -267,7 +265,7 @@ describe('DocumentReference class', () => {
         })
         .then(doc => {
           setTimestamp = doc.get('f');
-          assert.ok(is.instanceof(setTimestamp, Firestore.Timestamp));
+          assert.ok(is.instanceof(setTimestamp, Timestamp));
           assert.deepStrictEqual(doc.data(), {
             a: 'bar',
             b: {remove: 'bar'},
@@ -281,7 +279,7 @@ describe('DocumentReference class', () => {
         })
         .then(doc => {
           const updateTimestamp = doc.get('a');
-          assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
+          assert.ok(is.instanceof(updateTimestamp, Timestamp));
           assert.deepStrictEqual(doc.data(), {
             a: updateTimestamp,
             b: {c: updateTimestamp},
@@ -298,9 +296,9 @@ describe('DocumentReference class', () => {
       c: {d: ['foo']},
     };
     const updateObject = {
-      a: Firestore.FieldValue.arrayUnion('foo', 'bar'),
-      b: Firestore.FieldValue.arrayUnion('foo', 'bar'),
-      'c.d': Firestore.FieldValue.arrayUnion('foo', 'bar')
+      a: FieldValue.arrayUnion('foo', 'bar'),
+      b: FieldValue.arrayUnion('foo', 'bar'),
+      'c.d': FieldValue.arrayUnion('foo', 'bar')
     };
     const expectedObject = {
       a: ['foo', 'bar'],
@@ -325,9 +323,9 @@ describe('DocumentReference class', () => {
       c: {d: ['foo', 'bar', 'baz']},
     };
     const updateObject = {
-      a: Firestore.FieldValue.arrayRemove('foo'),
-      b: Firestore.FieldValue.arrayRemove('foo'),
-      'c.d': Firestore.FieldValue.arrayRemove('foo', 'bar')
+      a: FieldValue.arrayRemove('foo'),
+      b: FieldValue.arrayRemove('foo'),
+      'c.d': FieldValue.arrayRemove('foo', 'bar')
     };
     const expectedObject = {
       a: [],
@@ -368,13 +366,11 @@ describe('DocumentReference class', () => {
   it('supports server timestamps for merge', () => {
     const ref = randomCol.doc('doc');
     return ref.set({a: 'b'})
-        .then(
-            () => ref.set(
-                {c: Firestore.FieldValue.serverTimestamp()}, {merge: true}))
+        .then(() => ref.set({c: FieldValue.serverTimestamp()}, {merge: true}))
         .then(() => ref.get())
         .then(doc => {
           const updateTimestamp = doc.get('c');
-          assert.ok(is.instanceof(updateTimestamp, Firestore.Timestamp));
+          assert.ok(is.instanceof(updateTimestamp, Timestamp));
           assert.deepStrictEqual(doc.data(), {
             a: 'b',
             c: updateTimestamp,
@@ -386,7 +382,7 @@ describe('DocumentReference class', () => {
     const ref = randomCol.doc('doc');
     return ref.set({foo: 'a'})
         .then(res => {
-          return ref.update({foo: 'b'}, {lastUpdateTime: res.updateTime});
+          return ref.update({foo: 'b'}, {lastUpdateTime: res.writeTime});
         })
         .then(() => {
           return ref.get();
@@ -433,8 +429,7 @@ describe('DocumentReference class', () => {
         })
         .then(doc => {
           assert.deepStrictEqual(doc.data(), {'!.\\`': {'!.\\`': 'value'}});
-          return ref.update(
-              new Firestore.FieldPath('!.\\`', '!.\\`'), 'new-value');
+          return ref.update(new FieldPath('!.\\`', '!.\\`'), 'new-value');
         })
         .then(() => {
           return ref.get();
@@ -478,20 +473,20 @@ describe('DocumentReference class', () => {
       () => ref.set({}),
       () => ref.set({a: {b: 'c'}}),
       () => ref.set({a: {d: 'e'}}, {merge: true}),
-      () => ref.set({a: {d: Firestore.FieldValue.delete()}}, {merge: true}),
-      () => ref.set({a: {b: Firestore.FieldValue.delete()}}, {merge: true}),
+      () => ref.set({a: {d: FieldValue.delete()}}, {merge: true}),
+      () => ref.set({a: {b: FieldValue.delete()}}, {merge: true}),
       () => ref.set({a: {e: 'foo'}}, {merge: true}),
       () => ref.set({f: 'foo'}, {merge: true}),
       () => ref.set({f: {g: 'foo'}}, {merge: true}),
       () => ref.update({'f.h': 'foo'}),
-      () => ref.update({'f.g': Firestore.FieldValue.delete()}),
-      () => ref.update({'f.h': Firestore.FieldValue.delete()}),
-      () => ref.update({f: Firestore.FieldValue.delete()}),
+      () => ref.update({'f.g': FieldValue.delete()}),
+      () => ref.update({'f.h': FieldValue.delete()}),
+      () => ref.update({f: FieldValue.delete()}),
       () => ref.update({'i.j': {}}),
       () => ref.update({'i.j': {k: 'foo'}}),
       () => ref.update({'i.j': {l: {}}}),
-      () => ref.update({i: Firestore.FieldValue.delete()}),
-      () => ref.update({a: Firestore.FieldValue.delete()}),
+      () => ref.update({i: FieldValue.delete()}),
+      () => ref.update({a: FieldValue.delete()}),
     ];
 
     const expectedState = [
@@ -545,38 +540,38 @@ describe('DocumentReference class', () => {
 
     const actions = [
       () => ref.create({
-        time: Firestore.FieldValue.serverTimestamp(),
-        a: {b: Firestore.FieldValue.serverTimestamp()},
+        time: FieldValue.serverTimestamp(),
+        a: {b: FieldValue.serverTimestamp()},
       }),
       () => ref.set({
-        time: Firestore.FieldValue.serverTimestamp(),
-        a: {c: Firestore.FieldValue.serverTimestamp()},
+        time: FieldValue.serverTimestamp(),
+        a: {c: FieldValue.serverTimestamp()},
       }),
       () => ref.set(
           {
-            time: Firestore.FieldValue.serverTimestamp(),
-            a: {d: Firestore.FieldValue.serverTimestamp()},
+            time: FieldValue.serverTimestamp(),
+            a: {d: FieldValue.serverTimestamp()},
           },
           {merge: true}),
       () => ref.set(
           {
-            time: Firestore.FieldValue.serverTimestamp(),
-            e: Firestore.FieldValue.serverTimestamp(),
+            time: FieldValue.serverTimestamp(),
+            e: FieldValue.serverTimestamp(),
           },
           {merge: true}),
       () => ref.set(
           {
-            time: Firestore.FieldValue.serverTimestamp(),
-            e: {f: Firestore.FieldValue.serverTimestamp()},
+            time: FieldValue.serverTimestamp(),
+            e: {f: FieldValue.serverTimestamp()},
           },
           {merge: true}),
       () => ref.update({
-        time: Firestore.FieldValue.serverTimestamp(),
-        'g.h': Firestore.FieldValue.serverTimestamp(),
+        time: FieldValue.serverTimestamp(),
+        'g.h': FieldValue.serverTimestamp(),
       }),
       () => ref.update({
-        time: Firestore.FieldValue.serverTimestamp(),
-        'g.j': {k: Firestore.FieldValue.serverTimestamp()},
+        time: FieldValue.serverTimestamp(),
+        'g.j': {k: FieldValue.serverTimestamp()},
       }),
     ];
 
@@ -694,9 +689,9 @@ describe('DocumentReference class', () => {
           .then(snapshot => {
             assert.equal(snapshot.exists, true);
             assert.equal(snapshot.get('foo'), 'b');
-            assert.ok(snapshot.createTime.isEqual(createTime));
+            assert.ok(snapshot.createTime!.isEqual(createTime));
             assert.ok(snapshot.readTime.toMillis() > readTime.toMillis());
-            assert.ok(snapshot.updateTime.toMillis() > updateTime.toMillis());
+            assert.ok(snapshot.updateTime!.toMillis() > updateTime.toMillis());
             unsubscribe();
           });
     });
@@ -922,8 +917,7 @@ describe('Query class', () => {
 
     return ref.set({})
         .then(() => {
-          return randomCol.where(Firestore.FieldPath.documentId(), '>=', 'bar')
-              .get();
+          return randomCol.where(FieldPath.documentId(), '>=', 'bar').get();
         })
         .then(res => {
           assert.equal(res.docs.length, 1);
@@ -955,7 +949,7 @@ describe('Query class', () => {
 
     return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
         .then(() => {
-          return randomCol.orderBy(Firestore.FieldPath.documentId()).get();
+          return randomCol.orderBy(FieldPath.documentId()).get();
         })
         .then(res => {
           assert.deepStrictEqual(res.docs[0].data(), {foo: 'a'});
@@ -1519,7 +1513,7 @@ describe('WriteBatch class', () => {
   it('omits document transforms from write results', () => {
     const batch = firestore.batch();
     batch.set(randomCol.doc(), {foo: 'a'});
-    batch.set(randomCol.doc(), {foo: Firestore.FieldValue.serverTimestamp()});
+    batch.set(randomCol.doc(), {foo: FieldValue.serverTimestamp()});
     return batch.commit().then(writeResults => {
       assert.equal(writeResults.length, 2);
     });

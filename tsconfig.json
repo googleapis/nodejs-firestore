@@ -7,17 +7,12 @@
     "noImplicitAny": false, // TODO: Remove when all source are migrated to TS
   },
   "include": [
-    "dev/src/*.js",
     "dev/src/*.ts",
     "dev/src/**/*.js",
     "dev/test/*.js",
     "dev/test/*.ts",
     "dev/test/**/*.ts",
-    "dev/system-test/*.js",
     "dev/system-test/*.ts",
     "dev/conformance/*.ts"
-  ],
-  "exclude": [
-    "dev/test/typescript.ts"
   ]
 }

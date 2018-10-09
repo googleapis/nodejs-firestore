@@ -24,13 +24,18 @@ import {DocumentSnapshot, DocumentMask, DocumentTransform, Precondition} from '.
 import {FieldPath} from './path';
 import {Timestamp} from './timestamp';
 import {requestTag} from './util';
+import {AnyDuringMigration, AnyJs, SetOptions, UpdateData, UserInput, Precondition as PublicPrecondition} from './types';
+import {Serializer} from './serializer';
+import {DocumentData} from './types';
+import {DocumentReference} from './reference';
+
+import {google} from '../protos/firestore_proto_api';
+import api = google.firestore.v1beta1;
 
 /*!
  * Google Cloud Functions terminates idle connections after two minutes. After
  * longer periods of idleness, we issue transactional commits to allow for
  * retries.
- *
- * @type {number}
  */
 const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
 
@@ -45,12 +50,9 @@ export class WriteResult {
    * @private
    * @hideconstructor
    *
-   * @param {Timestamp} writeTime - The time of the corresponding document
-   * write.
+   * @param _writeTime - The time of the corresponding document write.
    */
-  constructor(writeTime) {
-    this._writeTime = writeTime;
-  }
+  constructor(private readonly _writeTime: Timestamp) {}
 
   /**
    * The write time as set by the Firestore servers.
@@ -66,7 +68,7 @@ export class WriteResult {
    *   console.log(`Document written at: ${writeResult.toDate()}`);
    * });
    */
-  get writeTime() {
+  get writeTime(): Timestamp {
     return this._writeTime;
   }
 
@@ -76,12 +78,21 @@ export class WriteResult {
    * @param {*} other The value to compare against.
    * @return true if this `WriteResult` is equal to the provided value.
    */
-  isEqual(other) {
+  isEqual(other: WriteResult): boolean {
     return (
         this === other ||
         (is.instanceof(other, WriteResult) &&
          this._writeTime.isEqual(other._writeTime)));
   }
+}
+
+
+/** Helper type to manage the list of writes in a WriteBatch. */
+// TODO(mrschmidt): Replace with api.IWrite
+interface WriteOp {
+  write?: api.IWrite|null;
+  transform?: api.IWrite|null;
+  precondition?: api.IPrecondition|null;
 }
 
 /**
@@ -91,6 +102,12 @@ export class WriteResult {
  * @class
  */
 export class WriteBatch {
+  private readonly _firestore: AnyDuringMigration;
+  private readonly _validator: AnyDuringMigration;
+  private readonly _serializer: Serializer;
+  private readonly _writes: WriteOp[] = [];
+
+  private _committed = false;
   /**
    * @private
    * @hideconstructor
@@ -101,17 +118,14 @@ export class WriteBatch {
     this._firestore = firestore;
     this._validator = firestore._validator;
     this._serializer = firestore._serializer;
-    this._writes = [];
-    this._committed = false;
   }
 
   /**
    * Checks if this write batch has any pending operations.
    *
    * @private
-   * @returns {boolean}
    */
-  get isEmpty() {
+  get isEmpty(): boolean {
     return this._writes.length === 0;
   }
 
@@ -120,7 +134,7 @@ export class WriteBatch {
    *
    * @private
    */
-  verifyNotCommitted() {
+  private verifyNotCommitted(): void {
     if (this._committed) {
       throw new Error('Cannot modify a WriteBatch that has been committed.');
     }
@@ -146,7 +160,7 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  create(documentRef, data) {
+  create(documentRef: DocumentReference, data: DocumentData): WriteBatch {
     this._validator.isDocumentReference('documentRef', documentRef);
     this._validator.isDocument('data', data, {
       allowEmpty: true,
@@ -193,7 +207,8 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  delete(documentRef, precondition) {
+  delete(documentRef: DocumentReference, precondition?: PublicPrecondition):
+      WriteBatch {
     this._validator.isDocumentReference('documentRef', documentRef);
     this._validator.isOptionalDeletePrecondition('precondition', precondition);
 
@@ -241,7 +256,8 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  set(documentRef, data, options) {
+  set(documentRef: DocumentReference, data: DocumentData,
+      options?: SetOptions): WriteBatch {
     this._validator.isOptionalSetOptions('options', options);
     const mergeLeaves = options && options.merge === true;
     const mergePaths = options && options.mergeFields;
@@ -258,7 +274,7 @@ export class WriteBatch {
     let documentMask;
 
     if (mergePaths) {
-      documentMask = DocumentMask.fromFieldMask(options.mergeFields);
+      documentMask = DocumentMask.fromFieldMask(options!.mergeFields);
       data = documentMask.applyTo(data);
     }
 
@@ -327,7 +343,10 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  update(documentRef, dataOrField, preconditionOrValues) {
+  update(
+      documentRef: DocumentReference, dataOrField: UpdateData|string|FieldPath,
+      ...preconditionOrValues: Array<Precondition|AnyJs|string|FieldPath>):
+      WriteBatch {
     this._validator.minNumberOfArguments('update', arguments, 2);
     this._validator.isDocumentReference('documentRef', documentRef);
 
@@ -340,8 +359,8 @@ export class WriteBatch {
         'object or an alternating list of field/value pairs that can be ' +
         'followed by an optional precondition.';
 
-    let usesVarargs = is.string(
-                          dataOrField) || is.instance(dataOrField, FieldPath);
+    const usesVarargs =
+        typeof dataOrField === 'string' || dataOrField instanceof FieldPath;
 
     if (usesVarargs) {
       try {
@@ -380,10 +399,10 @@ export class WriteBatch {
           updateMap.set(FieldPath.fromArgument(key), dataOrField[key]);
         });
 
-        if (is.defined(preconditionOrValues)) {
+        if (preconditionOrValues.length > 0) {
           this._validator.isUpdatePrecondition(
-              'preconditionOrValues', preconditionOrValues);
-          precondition = new Precondition(preconditionOrValues);
+              'preconditionOrValues', preconditionOrValues[0]);
+          precondition = new Precondition(preconditionOrValues[0]);
         }
       } catch (err) {
         logger(
@@ -396,21 +415,21 @@ export class WriteBatch {
 
     this._validator.isUpdateMap('dataOrField', updateMap);
 
-    let document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
-    let documentMask = DocumentMask.fromUpdateMap(updateMap);
+    const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
+    const documentMask = DocumentMask.fromUpdateMap(updateMap);
 
-    let write = null;
+    let write: api.IWrite|null = null;
 
     if (!document.isEmpty || !documentMask.isEmpty) {
       write = document.toProto();
-      write.updateMask = documentMask.toProto();
+      write!.updateMask = documentMask.toProto();
     }
 
-    let transform = DocumentTransform.fromUpdateMap(documentRef, updateMap);
+    const transform = DocumentTransform.fromUpdateMap(documentRef, updateMap);
     transform.validate();
 
     this._writes.push({
-      write: write,
+      write,
       transform: transform.toProto(this._serializer),
       precondition: precondition.toProto(),
     });
@@ -435,7 +454,7 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  commit() {
+  commit(): Promise<WriteResult[]> {
     return this.commit_();
   }
 
@@ -443,21 +462,20 @@ export class WriteBatch {
    * Commit method that takes an optional transaction ID.
    *
    * @private
-   * @param {object=} commitOptions Options to use for this commit.
-   * @param {bytes=} commitOptions.transactionId The transaction ID of this
-   * commit.
-   * @param {string=} commitOptions.requestTag A unique client-assigned
-   * identifier for this request.
-   * @returns {Promise.<Array.<WriteResult>>} A Promise that resolves
-   * when this batch completes.
+   * @param commitOptions Options to use for this commit.
+   * @param commitOptions.transactionId The transaction ID of this commit.
+   * @param commitOptions.requestTag A unique client-assigned identifier for
+   * this request.
+   * @returns  A Promise that resolves when this batch completes.
    */
-  commit_(commitOptions) {
+  commit_(commitOptions?: {transactionId?: Uint8Array, requestTag?: string}):
+      Promise<WriteResult[]> {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
 
-    let explicitTransaction = commitOptions && commitOptions.transactionId;
+    const explicitTransaction = commitOptions && commitOptions.transactionId;
 
-    let tag = (commitOptions && commitOptions.requestTag) || requestTag();
-    let request = {
+    const tag = (commitOptions && commitOptions.requestTag) || requestTag();
+    const request: api.ICommitRequest = {
       database: this._firestore.formattedName,
     };
 
@@ -473,13 +491,13 @@ export class WriteBatch {
 
     request.writes = [];
 
-    for (let req of this._writes) {
+    for (const req of this._writes) {
       assert(
           req.write || req.transform,
           'Either a write or transform must be set');
 
       if (req.precondition) {
-        (req.write || req.transform).currentDocument = req.precondition;
+        (req.write || req.transform)!.currentDocument = req.precondition;
       }
 
       if (req.write) {
@@ -501,22 +519,22 @@ export class WriteBatch {
     this._committed = true;
 
     return this._firestore.request('commit', request, tag).then(resp => {
-      const writeResults = [];
+      const writeResults: WriteResult[] = [];
 
-      if (request.writes.length > 0) {
+      if (request.writes!.length > 0) {
         assert(
             resp.writeResults instanceof Array &&
-                request.writes.length === resp.writeResults.length,
+                request.writes!.length === resp.writeResults.length,
             `Expected one write result per operation, but got ${
                 resp.writeResults.length} results for ${
-                request.writes.length} operations.`);
+                request.writes!.length} operations.`);
 
         const commitTime = Timestamp.fromProto(resp.commitTime);
 
         let offset = 0;
 
         for (let i = 0; i < this._writes.length; ++i) {
-          let writeRequest = this._writes[i];
+          const writeRequest = this._writes[i];
 
           // Don't return two write results for a write that contains a
           // transform, as the fact that we have to split one write operation
@@ -527,7 +545,7 @@ export class WriteBatch {
             ++offset;
           }
 
-          let writeResult = resp.writeResults[i + offset];
+          const writeResult = resp.writeResults[i + offset];
 
           writeResults.push(new WriteResult(
               writeResult.updateTime ?
@@ -545,15 +563,15 @@ export class WriteBatch {
    * happens after two minutes of idleness.
    *
    * @private
-   * @returns {boolean} Whether to use a transaction.
+   * @returns Whether to use a transaction.
    */
-  _shouldCreateTransaction() {
+  private _shouldCreateTransaction(): boolean {
     if (!this._firestore._preferTransactions) {
       return false;
     }
 
     if (this._firestore._lastSuccessfulRequest) {
-      let now = new Date().getTime();
+      const now = new Date().getTime();
       return now - this._firestore._lastSuccessfulRequest > GCF_IDLE_TIMEOUT_MS;
     }
 
@@ -565,11 +583,11 @@ export class WriteBatch {
  * Validates that the update data does not contain any ambiguous field
  * definitions (such as 'a.b' and 'a').
  *
- * @param {Map.<FieldPath, *>} data - An update map with field/value pairs.
- * @returns {boolean} 'true' if the input is a valid update map.
+ * @param data An update map with field/value pairs.
+ * @returns 'true' if the input is a valid update map.
  */
-export function validateUpdateMap(data) {
-  const fields = [];
+export function validateUpdateMap(data: UpdateData): boolean {
+  const fields: UserInput = [];
   data.forEach((value, key) => {
     fields.push(key);
   });

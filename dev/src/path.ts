@@ -19,6 +19,7 @@ import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
 import {createValidator, customObjectError} from './validate';
+import {AnyDuringMigration} from './types';
 
 const validate = createValidator();
 
@@ -445,12 +446,12 @@ export class FieldPath extends Path<FieldPath> {
    *   });
    * });
    */
-  constructor(segments: string[]|string) {
+  constructor(...segments: string[]) {
     validate.minNumberOfArguments('FieldPath', arguments, 1);
 
-    const elements = segments instanceof Array ?
-        segments :
-        Array.prototype.slice.call(arguments);
+    const elements: string[] = is.array(segments[0]) ?
+        segments[0] as AnyDuringMigration :
+        segments;
 
     for (let i = 0; i < elements.length; ++i) {
       validate.isString(i, elements[i]);
@@ -514,8 +515,9 @@ export class FieldPath extends Path<FieldPath> {
   static fromArgument(fieldPath: string|FieldPath) {
     // validateFieldPath() is used in all public API entry points to validate
     // that fromArgument() is only called with a Field Path or a string.
-    return fieldPath instanceof FieldPath ? fieldPath :
-                                            new FieldPath(fieldPath.split('.'));
+    return fieldPath instanceof FieldPath ?
+        fieldPath :
+        new FieldPath(...fieldPath.split('.'));
   }
 
   /**
@@ -558,7 +560,7 @@ export class FieldPath extends Path<FieldPath> {
    * @returns {ResourcePath} The newly created FieldPath.
    */
   construct(segments: string[]) {
-    return new FieldPath(segments);
+    return new FieldPath(...segments);
   }
 
   /**

@@ -21,12 +21,11 @@ import extend from 'extend';
 import is from 'is';
 import through2 from 'through2';
 
-import Firestore from '../src/index';
-import {DocumentReference, CollectionReference} from '../src/reference';
 import {ResourcePath} from '../src/path';
 import {createInstance} from '../test/util/helpers';
 import * as gax from 'google-gax';
 
+import * as Firestore from '../src'
 const {grpc} = new gax.GrpcClient();
 
 const PROJECT_ID = 'test-project';
@@ -212,7 +211,7 @@ const allSupportedTypesInput = {
   dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
-  pathValue: new DocumentReference(
+  pathValue: new Firestore.DocumentReference(
       {formattedName: DATABASE_ROOT},
       new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
@@ -236,7 +235,7 @@ const allSupportedTypesOutput = {
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
-  pathValue: new DocumentReference(
+  pathValue: new Firestore.DocumentReference(
       {formattedName: DATABASE_ROOT},
       new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
@@ -289,12 +288,12 @@ function stream() {
 
 describe('instantiation', function() {
   it('creates instance', function() {
-    let firestore = new Firestore(DEFAULT_SETTINGS);
-    assert(firestore instanceof Firestore);
+    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
+    assert(firestore instanceof Firestore.Firestore);
   });
 
   it('merges settings', function() {
-    let firestore = new Firestore(DEFAULT_SETTINGS);
+    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
     assert.equal(firestore._initializationSettings.projectId, PROJECT_ID);
@@ -302,7 +301,7 @@ describe('instantiation', function() {
   });
 
   it('can only call settings() once', function() {
-    let firestore = new Firestore(DEFAULT_SETTINGS);
+    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({timestampsInSnapshots: true});
 
     assert.throws(
@@ -311,7 +310,7 @@ describe('instantiation', function() {
   });
 
   it('cannot change settings after client initialized', function() {
-    let firestore = new Firestore(DEFAULT_SETTINGS);
+    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore._runRequest(() => Promise.resolve());
 
     assert.throws(
@@ -324,11 +323,11 @@ describe('instantiation', function() {
       const settings = Object.assign({}, DEFAULT_SETTINGS, {
         projectId: 1337,
       });
-      new Firestore(settings);
+      new Firestore.Firestore(settings);
     }, /Argument "settings.projectId" is not a valid string/);
 
     assert.throws(() => {
-      new Firestore(DEFAULT_SETTINGS).settings({projectId: 1337});
+      new Firestore.Firestore(DEFAULT_SETTINGS).settings({projectId: 1337});
     }, /Argument "settings.projectId" is not a valid string/);
   });
 
@@ -337,16 +336,18 @@ describe('instantiation', function() {
       const settings = Object.assign({}, DEFAULT_SETTINGS, {
         timestampsInSnapshots: 1337,
       });
-      new Firestore(settings);
+      new Firestore.Firestore(settings);
     }, /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
 
     assert.throws(() => {
-      new Firestore(DEFAULT_SETTINGS).settings({timestampsInSnapshots: 1337});
+      new Firestore.Firestore(DEFAULT_SETTINGS).settings({
+        timestampsInSnapshots: 1337
+      });
     }, /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
   });
 
   it('uses project id from constructor', () => {
-    let firestore = new Firestore(DEFAULT_SETTINGS);
+    let firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
 
     return firestore._runRequest(() => {
       assert.equal(
@@ -357,7 +358,7 @@ describe('instantiation', function() {
   });
 
   it('detects project id', function() {
-    let firestore = new Firestore({
+    let firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
       keyFilename: __dirname + '/fake-certificate.json',
@@ -377,7 +378,7 @@ describe('instantiation', function() {
   });
 
   it('uses project id from gapic client', function() {
-    let firestore = new Firestore({
+    let firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
@@ -394,7 +395,7 @@ describe('instantiation', function() {
   });
 
   it('uses project ID from settings()', function() {
-    let firestore = new Firestore({
+    let firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
@@ -407,7 +408,7 @@ describe('instantiation', function() {
   });
 
   it('handles error from project ID detection', function() {
-    let firestore = new Firestore({
+    let firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
@@ -510,7 +511,7 @@ describe('snapshot_() method', function() {
   beforeEach(() => {
     // Unlike most other tests, we don't call `ensureClient` since the
     // `snapshot_` method does not require a GAPIC client.
-    firestore = new Firestore({
+    firestore = new Firestore.Firestore({
       projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
       timestampsInSnapshots: true,
@@ -641,7 +642,7 @@ describe('doc() method', function() {
 
   it('returns DocumentReference', function() {
     let documentRef = firestore.doc('collectionId/documentId');
-    assert.ok(documentRef instanceof DocumentReference);
+    assert.ok(documentRef instanceof Firestore.DocumentReference);
   });
 
   it('requires document path', function() {
@@ -680,7 +681,7 @@ describe('collection() method', function() {
 
   it('returns collection', function() {
     let collection = firestore.collection('col1/doc1/col2');
-    assert.ok(is.instance(collection, CollectionReference));
+    assert.ok(is.instance(collection, Firestore.CollectionReference));
   });
 
   it('requires collection id', function() {

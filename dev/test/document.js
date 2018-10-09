@@ -22,7 +22,7 @@ import is from 'is';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
-import Firestore from '../src/index';
+const Firestore = require('../src');
 import {createInstance} from '../test/util/helpers';
 
 const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform

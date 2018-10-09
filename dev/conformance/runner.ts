@@ -26,13 +26,14 @@ import {google} from '../protos/firestore_proto_api';
 
 import api = google.firestore.v1beta1;
 
-const {Firestore} = require('../src/index');
+import * as Firestore from '../src';
+
 import {ResourcePath} from '../src/path';
-import {DocumentSnapshot} from '../src/document';
 import * as convert from '../src/convert';
 
 import {createInstance as createInstanceHelper} from '../test/util/helpers';
 import {AnyDuringMigration} from '../src/types';
+import {DocumentChangeType} from '../src/document-change';
 
 const REQUEST_TIME =
     api.DocumentTransform.FieldTransform.ServerValue.REQUEST_TIME;
@@ -137,7 +138,7 @@ const convertInput = {
   cursor: cursor => {
     const args: Array<{}> = [];
     if (cursor.docSnapshot) {
-      args.push(DocumentSnapshot.fromObject(
+      args.push(Firestore.DocumentSnapshot.fromObject(
           docRef(cursor.docSnapshot.path),
           convertInput.argument(cursor.docSnapshot.jsonData)));
     } else {
@@ -148,21 +149,25 @@ const convertInput = {
     return args;
   },
   snapshot: snapshot => {
-    const docs: Array<{}> = [];
-    const changes: Array<{}> = [];
+    const docs: Firestore.QueryDocumentSnapshot[] = [];
+    const changes: Firestore.DocumentChange[] = [];
     const readTime = Firestore.Timestamp.fromProto(snapshot.readTime);
 
     for (const doc of snapshot.docs) {
       const deepCopy = JSON.parse(JSON.stringify(doc));
       deepCopy.fields = convert.documentFromJson(deepCopy.fields);
-      docs.push(firestore.snapshot_(deepCopy, readTime, 'json'));
+      docs.push(
+          firestore.snapshot_(deepCopy, readTime, 'json') as
+          Firestore.QueryDocumentSnapshot);
     }
 
     for (const change of snapshot.changes) {
       const deepCopy = JSON.parse(JSON.stringify(change.doc));
       deepCopy.fields = convert.documentFromJson(deepCopy.fields);
       const doc = firestore.snapshot_(deepCopy, readTime, 'json');
-      const type = ['unspecified', 'added', 'removed', 'modified'][change.kind];
+      const type =
+          (['unspecified', 'added', 'removed', 'modified'][change.kind] as
+           DocumentChangeType);
       changes.push(new Firestore.DocumentChange(
           type, doc, change.oldIndex, change.newIndex));
     }

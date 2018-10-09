@@ -19,7 +19,7 @@
 import assert from 'power-assert';
 
 import {google} from '../protos/firestore_proto_api';
-import Firestore from '../src/index';
+import * as Firestore from '../src';
 import {createInstance} from '../test/util/helpers';
 
 const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform

@@ -159,6 +159,9 @@ declare namespace FirebaseFirestore {
      *
      * @param updateFunction The function to execute within the transaction
      * context.
+     * @param {object=} transactionOptions - Transaction options.
+     * @param {number=} transactionOptions.maxAttempts - The maximum number of
+     * attempts for this transaction.
      * @return If the transaction completed successfully or was explicitly
      * aborted (by the updateFunction returning a failed Promise), the Promise
      * returned by the updateFunction will be returned here. Else if the
@@ -166,7 +169,8 @@ declare namespace FirebaseFirestore {
      * error will be returned.
      */
     runTransaction<T>(
-        updateFunction: (transaction: Transaction) => Promise<T>
+        updateFunction: (transaction: Transaction) => Promise<T>,
+        transactionOptions?:{maxAttempts?: number}
     ): Promise<T>;
 
     /**
