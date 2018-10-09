@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import assert from 'power-assert';
 
 import * as Firestore from '../src';
 import {DocumentReference} from '../src/reference';
 import {DocumentSnapshot} from '../src/document';
-import {createInstance} from '../test/util/helpers';
+import {createInstance, InvalidApiUsage} from '../test/util/helpers';
 import {ResourcePath} from '../src/path';
 import {GeoPoint} from '../src/geo-point';
-import * as order from '../src/order'
+import * as order from '../src/order';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-describe('Order', function() {
+describe('Order', () => {
   let firestore;
 
   beforeEach(() => {
@@ -56,38 +54,40 @@ describe('Order', function() {
     return wrap(new GeoPoint(lat, lng));
   }
 
-  function int(number) {
+  function int(n: number) {
     return {
-      integerValue: '' + number,
+      integerValue: '' + n,
     };
   }
 
-  function double(number) {
+  function double(n: number) {
     return {
-      doubleValue: '' + number,
+      doubleValue: '' + n,
     };
   }
 
-  it('throws on invalid value', function() {
+  it('throws on invalid value', () => {
     assert.throws(() => {
-      order.compare({valueType: 'foo'}, {valueType: 'foo'});
+      order.compare(
+          {valueType: 'foo'} as InvalidApiUsage,
+          {valueType: 'foo'} as InvalidApiUsage);
     }, /Invalid use of type "object" as a Firestore argument./);
   });
 
-  it('throws on invalid blob', function() {
+  it('throws on invalid blob', () => {
     assert.throws(() => {
       order.compare(
           {
-            bytesValue: [1, 2, 3],
+            bytesValue: new Uint8Array([1, 2, 3]),
           },
           {
-            bytesValue: [1, 2, 3],
+            bytesValue: new Uint8Array([1, 2, 3]),
           });
     }, /Blobs can only be compared if they are Buffers/);
   });
 
-  it('compares document snapshots by name', function() {
-    let docs = [
+  it('compares document snapshots by name', () => {
+    const docs = [
       new DocumentSnapshot(firestore.doc('col/doc3')),
       new DocumentSnapshot(firestore.doc('col/doc2')),
       new DocumentSnapshot(firestore.doc('col/doc2')),
@@ -100,7 +100,7 @@ describe('Order', function() {
         docs.map(doc => doc.id), ['doc1', 'doc2', 'doc2', 'doc3']);
   });
 
-  it('is correct', function() {
+  it('is correct', () => {
     const groups = [
       // null first
       [wrap(null)],

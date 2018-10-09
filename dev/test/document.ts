@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import assert from 'power-assert';
 import extend from 'extend';
 import is from 'is';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
-const Firestore = require('../src');
-import {createInstance} from '../test/util/helpers';
+import * as Firestore from '../src';
+import {createInstance, InvalidApiUsage} from './util/helpers';
+import {AnyDuringMigration, AnyJs} from '../src/types';
+import {DocumentSnapshot, QueryDocumentSnapshot} from '../src';
 
 const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
                          .ServerValue.REQUEST_TIME;
@@ -39,11 +39,11 @@ const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-function buildWrite_(document, mask, transform, precondition) {
-  let writes = [];
+function buildWrite_(document?, mask?, transform?, precondition?) {
+  const writes: AnyDuringMigration[] = [];
 
   if (document) {
-    let update = extend(true, {}, document);
+    const update = extend(true, {}, document);
     delete update.updateTime;
     delete update.createTime;
 
@@ -55,27 +55,27 @@ function buildWrite_(document, mask, transform, precondition) {
   }
 
   if (transform) {
-    writes.push({transform: transform});
+    writes.push({transform});
   }
 
   if (precondition) {
     writes[0].currentDocument = precondition;
   }
 
-  return {writes: writes};
+  return {writes};
 }
 
-function set(document, mask, transform, precondition) {
+function set(document, mask?, transform?, precondition?) {
   return buildWrite_(document, mask, transform, precondition);
 }
 
-function update(document, mask, transform, precondition) {
+function update(document, mask?, transform?, precondition?) {
   precondition = precondition || {exists: true};
   mask = mask || updateMask();
   return buildWrite_(document, mask, transform, precondition);
 }
 
-function create(document, transform) {
+function create(document, transform?) {
   return buildWrite_(document, /* updateMask */ null, transform, {
     exists: false,
   });
@@ -85,8 +85,8 @@ function retrieve() {
   return {documents: [`${DATABASE_ROOT}/documents/collectionId/documentId`]};
 }
 
-function remove(document, precondition) {
-  let writes = [
+function remove(document, precondition?) {
+  const writes: AnyDuringMigration[] = [
     {delete: `${DATABASE_ROOT}/documents/collectionId/${document}`},
   ];
 
@@ -94,11 +94,11 @@ function remove(document, precondition) {
     writes[0].currentDocument = precondition;
   }
 
-  return {writes: writes};
+  return {writes};
 }
 
-function document(field, value) {
-  let document = {
+function document(...fieldsAndValues) {
+  const document = {
     name: `${DATABASE_ROOT}/documents/collectionId/documentId`,
     fields: {},
     createTime: {seconds: 1, nanos: 2},
@@ -106,8 +106,8 @@ function document(field, value) {
   };
 
   for (let i = 0; i < arguments.length; i += 2) {
-    field = arguments[i];
-    value = arguments[i + 1];
+    const field = arguments[i];
+    const value = arguments[i + 1];
 
     if (is.string(value)) {
       document.fields[field] = {
@@ -121,7 +121,7 @@ function document(field, value) {
   return document;
 }
 
-function updateMask(/* field */) {
+function updateMask(...fields) {
   return arguments.length === 0 ?
       {} :
       {fieldPaths: Array.prototype.slice.call(arguments)};
@@ -135,12 +135,12 @@ function missing(document) {
   return {missing: document.name, readTime: {seconds: 5, nanos: 6}};
 }
 
-function fieldTransform(field, transform) {
-  let proto = [];
+function fieldTransform(...fieldsAndTransforms) {
+  const proto: AnyDuringMigration[] = [];
 
   for (let i = 0; i < arguments.length; i += 2) {
-    field = arguments[i];
-    transform = arguments[i + 1];
+    const field = arguments[i];
+    const transform = arguments[i + 1];
 
     proto.push({
       fieldPath: field,
@@ -155,12 +155,12 @@ function fieldTransform(field, transform) {
 }
 
 function requestEquals(actual, protoOperation) {
-  let proto = {
+  const proto = {
     database: DATABASE_ROOT,
   };
 
   for (protoOperation of Array.prototype.slice.call(arguments, 1)) {
-    for (let key in protoOperation) {
+    for (const key in protoOperation) {
       if (protoOperation.hasOwnProperty(key)) {
         if (proto[key]) {
           proto[key] = proto[key].concat(protoOperation[key]);
@@ -174,12 +174,12 @@ function requestEquals(actual, protoOperation) {
   assert.deepStrictEqual(actual, proto);
 }
 
-function stream() {
-  let stream = through2.obj();
-  let args = arguments;
+function stream(...elements) {
+  const stream = through2.obj();
+  const args = arguments;
 
-  setImmediate(function() {
-    for (let arg of args) {
+  setImmediate(() => {
+    for (const arg of args) {
       if (is.instance(arg, Error)) {
         stream.destroy(arg);
         return;
@@ -193,7 +193,7 @@ function stream() {
 }
 
 function writeResult(count) {
-  const res = {
+  const res: AnyDuringMigration = {
     commitTime: {
       nanos: 0,
       seconds: 1,
@@ -216,7 +216,7 @@ function writeResult(count) {
   return res;
 }
 
-describe('DocumentReference interface', function() {
+describe('DocumentReference interface', () => {
   let firestore;
   let documentRef;
 
@@ -227,7 +227,7 @@ describe('DocumentReference interface', function() {
     });
   });
 
-  it('has collection() method', function() {
+  it('has collection() method', () => {
     assert.throws(() => {
       documentRef.collection(42);
     }, /Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string./);
@@ -243,24 +243,24 @@ describe('DocumentReference interface', function() {
     assert.equal(collection.id, 'col');
   });
 
-  it('has path property', function() {
+  it('has path property', () => {
     assert.equal(documentRef.path, 'collectionId/documentId');
   });
 
-  it('has parent property', function() {
+  it('has parent property', () => {
     assert.equal(documentRef.parent.path, 'collectionId');
   });
 
-  it('has isEqual() method', function() {
-    let doc1 = firestore.doc('coll/doc1');
-    let doc1Equals = firestore.doc('coll/doc1');
-    let doc2 = firestore.doc('coll/doc1/coll/doc1');
+  it('has isEqual() method', () => {
+    const doc1 = firestore.doc('coll/doc1');
+    const doc1Equals = firestore.doc('coll/doc1');
+    const doc2 = firestore.doc('coll/doc1/coll/doc1');
     assert.ok(doc1.isEqual(doc1Equals));
     assert.ok(!doc1.isEqual(doc2));
   });
 });
 
-describe('serialize document', function() {
+describe('serialize document', () => {
   let firestore;
 
   beforeEach(() => {
@@ -269,7 +269,7 @@ describe('serialize document', function() {
     });
   });
 
-  it('serializes to Protobuf JS', function() {
+  it('serializes to Protobuf JS', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document('bytes', {
@@ -286,7 +286,7 @@ describe('serialize document', function() {
     });
   });
 
-  it('doesn\'t serialize unsupported types', function() {
+  it('doesn\'t serialize unsupported types', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
     }, /Invalid use of type "undefined" as a Firestore argument./);
@@ -303,7 +303,7 @@ describe('serialize document', function() {
     }, /Argument "data" is not a valid Document. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
   });
 
-  it('serializes date before 1970', function() {
+  it('serializes date before 1970', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document('moonLanding', {
@@ -324,7 +324,7 @@ describe('serialize document', function() {
     });
   });
 
-  it('serializes unicode keys', function() {
+  it('serializes unicode keys', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document('😀', '😜')));
@@ -339,7 +339,7 @@ describe('serialize document', function() {
     });
   });
 
-  it('accepts both blob formats', function() {
+  it('accepts both blob formats', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -361,10 +361,10 @@ describe('serialize document', function() {
     });
   });
 
-  it('supports NaN and Infinity', function() {
+  it('supports NaN and Infinity', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        let fields = request.writes[0].update.fields;
+        const fields = request.writes[0].update.fields;
         assert.ok(
             typeof fields.nanValue.doubleValue === 'number' &&
             isNaN(fields.nanValue.doubleValue));
@@ -384,25 +384,25 @@ describe('serialize document', function() {
     });
   });
 
-  it('with invalid geopoint', function() {
+  it('with invalid geopoint', () => {
     assert.throws(() => {
-      new Firestore.GeoPoint(57.2999988, 'INVALID');
+      new Firestore.GeoPoint(57.2999988, 'INVALID' as InvalidApiUsage);
     }, /Argument "longitude" is not a valid number/);
 
     assert.throws(() => {
-      new Firestore.GeoPoint('INVALID', -4.4499982);
+      new Firestore.GeoPoint('INVALID' as InvalidApiUsage, -4.4499982);
     }, /Argument "latitude" is not a valid number/);
 
     assert.throws(() => {
-      new Firestore.GeoPoint();
+      new (Firestore as InvalidApiUsage).GeoPoint();
     }, /Argument "latitude" is not a valid number/);
 
     assert.throws(() => {
-      new Firestore.GeoPoint(NaN);
+      new Firestore.GeoPoint(NaN as InvalidApiUsage, 0);
     }, /Argument "latitude" is not a valid number/);
 
     assert.throws(() => {
-      new Firestore.GeoPoint(Infinity);
+      new Firestore.GeoPoint(Infinity as InvalidApiUsage, 0);
     }, /Argument "latitude" is not a valid number/);
 
     assert.throws(() => {
@@ -414,8 +414,8 @@ describe('serialize document', function() {
     }, /Argument "longitude" is not a valid number. Value must be within \[-180, 180] inclusive, but was: 181/);
   });
 
-  it('resolves infinite nesting', function() {
-    let obj = {};
+  it('resolves infinite nesting', () => {
+    const obj: AnyDuringMigration = {};
     obj.foo = obj;
 
     assert.throws(() => {
@@ -423,7 +423,7 @@ describe('serialize document', function() {
     }, /Argument "dataOrField" is not a valid Document. Input object is deeper than 20 levels or contains a cycle./);
   });
 
-  it('is able to write a document reference with cycles', function() {
+  it('is able to write a document reference with cycles', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -442,15 +442,15 @@ describe('serialize document', function() {
       // test to verify that we can properly serialize DocumentReference
       // instances, even if they have cyclic references (we shouldn't try to
       // validate them beyond the instanceof check).
-      let ref = firestore.doc('collectionId/documentId');
+      const ref = firestore.doc('collectionId/documentId');
       ref.firestore.firestore = firestore;
       return ref.set({ref});
     });
   });
 });
 
-describe('deserialize document', function() {
-  it('deserializes Protobuf JS', function() {
+describe('deserialize document', () => {
+  it('deserializes Protobuf JS', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document('foo', {
@@ -467,7 +467,7 @@ describe('deserialize document', function() {
     });
   });
 
-  it('ignores intermittent stream failures', function() {
+  it('ignores intermittent stream failures', () => {
     let attempts = 1;
 
     const overrides = {
@@ -488,7 +488,7 @@ describe('deserialize document', function() {
     });
   });
 
-  it('deserializes date before 1970', function() {
+  it('deserializes date before 1970', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document('moonLanding', {
@@ -510,7 +510,7 @@ describe('deserialize document', function() {
     });
   });
 
-  it('returns undefined for unknown fields', function() {
+  it('returns undefined for unknown fields', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document()));
@@ -525,7 +525,7 @@ describe('deserialize document', function() {
     });
   });
 
-  it('supports NaN and Infinity', function() {
+  it('supports NaN and Infinity', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document(
@@ -547,7 +547,7 @@ describe('deserialize document', function() {
     });
   });
 
-  it('doesn\'t deserialize unsupported types', function() {
+  it('doesn\'t deserialize unsupported types', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document('moonLanding', {valueType: 'foo'})));
@@ -563,7 +563,7 @@ describe('deserialize document', function() {
     });
   });
 
-  it('doesn\'t deserialize invalid latitude', function() {
+  it('doesn\'t deserialize invalid latitude', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document('geoPointValue', {
@@ -585,7 +585,7 @@ describe('deserialize document', function() {
     });
   });
 
-  it('doesn\'t deserialize invalid longitude', function() {
+  it('doesn\'t deserialize invalid longitude', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document('geoPointValue', {
@@ -608,8 +608,8 @@ describe('deserialize document', function() {
   });
 });
 
-describe('get document', function() {
-  it('returns document', function() {
+describe('get document', () => {
+  it('returns document', () => {
     const overrides = {
       batchGetDocuments: request => {
         requestEquals(request, retrieve());
@@ -640,7 +640,7 @@ describe('get document', function() {
     });
   });
 
-  it('returns read, update and create times', function() {
+  it('returns read, update and create times', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document()));
@@ -648,15 +648,17 @@ describe('get document', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').get().then(result => {
-        assert.ok(result.createTime.isEqual(new Firestore.Timestamp(1, 2)));
-        assert.ok(result.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
-        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
-      });
+      return firestore.doc('collectionId/documentId')
+          .get()
+          .then((result) => {
+            assert.ok(result.createTime!.isEqual(new Firestore.Timestamp(1, 2)));
+            assert.ok(result.updateTime!.isEqual(new Firestore.Timestamp(3, 4)));
+            assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+          });
     });
   });
 
-  it('returns not found', function() {
+  it('returns not found', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(missing(document()));
@@ -673,7 +675,7 @@ describe('get document', function() {
     });
   });
 
-  it('throws error', function(done) {
+  it('throws error', (done) => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(new Error('RPC Error'));
@@ -688,7 +690,7 @@ describe('get document', function() {
     });
   });
 
-  it('requires field path', function() {
+  it('requires field path', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document('foo', {
@@ -708,14 +710,14 @@ describe('get document', function() {
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(doc => {
         assert.throws(() => {
-          doc.get();
+          (doc as InvalidApiUsage).get();
         }, /Argument "field" is not a valid FieldPath. Invalid use of type "undefined" as a Firestore argument./);
       });
     });
   });
 });
 
-describe('delete document', function() {
+describe('delete document', () => {
   let firestore;
 
   beforeEach(() => {
@@ -724,7 +726,7 @@ describe('delete document', function() {
     });
   });
 
-  it('generates proto', function() {
+  it('generates proto', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, remove('documentId'));
@@ -738,7 +740,7 @@ describe('delete document', function() {
     });
   });
 
-  it('returns update time', function() {
+  it('returns update time', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, remove('documentId'));
@@ -761,7 +763,7 @@ describe('delete document', function() {
     });
   });
 
-  it('with last update time precondition', function() {
+  it('with last update time precondition', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, remove('documentId', {
@@ -776,7 +778,7 @@ describe('delete document', function() {
     };
 
     return createInstance(overrides).then(firestore => {
-      let docRef = firestore.doc('collectionId/documentId');
+      const docRef = firestore.doc('collectionId/documentId');
 
       return Promise.all([
         docRef.delete({
@@ -792,7 +794,7 @@ describe('delete document', function() {
     });
   });
 
-  it('with invalid last update time precondition', function() {
+  it('with invalid last update time precondition', () => {
     assert.throws(() => {
       return firestore.doc('collectionId/documentId').delete({
         lastUpdateTime: 1337
@@ -820,7 +822,7 @@ describe('delete document', function() {
   });
 });
 
-describe('set document', function() {
+describe('set document', () => {
   let firestore;
 
   beforeEach(() => {
@@ -829,7 +831,7 @@ describe('set document', function() {
     });
   });
 
-  it('supports empty map', function() {
+  it('supports empty map', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document()));
@@ -842,7 +844,7 @@ describe('set document', function() {
     });
   });
 
-  it('supports nested empty map', function() {
+  it('supports nested empty map', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document('a', {
@@ -857,7 +859,7 @@ describe('set document', function() {
     });
   });
 
-  it('skips merges with just field transform', function() {
+  it('skips merges with just field transform', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -899,7 +901,7 @@ describe('set document', function() {
     });
   });
 
-  it('supports document merges', function() {
+  it('supports document merges', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -926,7 +928,7 @@ describe('set document', function() {
     });
   });
 
-  it('supports document merges with field mask', function() {
+  it('supports document merges with field mask', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -970,7 +972,7 @@ describe('set document', function() {
     });
   });
 
-  it('supports document merges with empty field mask', function() {
+  it('supports document merges with empty field mask', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document(), updateMask()));
@@ -985,7 +987,7 @@ describe('set document', function() {
     });
   });
 
-  it('supports document merges with field mask and empty maps', function() {
+  it('supports document merges with field mask and empty maps', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1057,7 +1059,7 @@ describe('set document', function() {
   });
 
 
-  it('supports empty merge', function() {
+  it('supports empty merge', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document(), updateMask()));
@@ -1070,7 +1072,7 @@ describe('set document', function() {
     });
   });
 
-  it('supports nested empty merge', function() {
+  it('supports nested empty merge', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1090,7 +1092,7 @@ describe('set document', function() {
     });
   });
 
-  it('doesn\'t split on dots', function() {
+  it('doesn\'t split on dots', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, set(document('a.b', 'c')));
@@ -1103,7 +1105,7 @@ describe('set document', function() {
     });
   });
 
-  it('validates merge option', function() {
+  it('validates merge option', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, 'foo');
     }, /Argument "options" is not a valid SetOptions. Input is not an object./);
@@ -1136,13 +1138,13 @@ describe('set document', function() {
     }, /Argument "options" is not a valid SetOptions. You cannot specify both "merge" and "mergeFields"./);
   });
 
-  it('requires an object', function() {
+  it('requires an object', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set(null);
     }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
-  it('doesn\'t support non-merge deletes', function() {
+  it('doesn\'t support non-merge deletes', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set({
         foo: Firestore.FieldValue.delete()
@@ -1150,14 +1152,14 @@ describe('set document', function() {
     }, /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
   });
 
-  it('doesn\'t accept arrays', function() {
+  it('doesn\'t accept arrays', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').set([42]);
     }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 });
 
-describe('create document', function() {
+describe('create document', () => {
   let firestore;
 
   beforeEach(() => {
@@ -1166,7 +1168,7 @@ describe('create document', function() {
     });
   });
 
-  it('creates document', function() {
+  it('creates document', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, create(document()));
@@ -1179,7 +1181,7 @@ describe('create document', function() {
     });
   });
 
-  it('returns update time', function() {
+  it('returns update time', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, create(document()));
@@ -1209,7 +1211,7 @@ describe('create document', function() {
     });
   });
 
-  it('supports field transform', function() {
+  it('supports field transform', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1231,7 +1233,7 @@ describe('create document', function() {
     });
   });
 
-  it('supports nested empty map', function() {
+  it('supports nested empty map', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, create(document('a', {
@@ -1252,20 +1254,20 @@ describe('create document', function() {
     });
   });
 
-  it('requires an object', function() {
+  it('requires an object', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').create(null);
     }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
-  it('doesn\'t accept arrays', function() {
+  it('doesn\'t accept arrays', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').create([42]);
     }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 });
 
-describe('update document', function() {
+describe('update document', () => {
   let firestore;
 
   beforeEach(() => {
@@ -1274,7 +1276,7 @@ describe('update document', function() {
     });
   });
 
-  it('generates proto', function() {
+  it('generates proto', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1288,7 +1290,7 @@ describe('update document', function() {
     });
   });
 
-  it('supports nested field transform', function() {
+  it('supports nested field transform', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1312,7 +1314,7 @@ describe('update document', function() {
     });
   });
 
-  it('skips write for single field transform', function() {
+  it('skips write for single field transform', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1327,7 +1329,7 @@ describe('update document', function() {
     });
   });
 
-  it('supports nested empty map', function() {
+  it('supports nested empty map', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1346,7 +1348,7 @@ describe('update document', function() {
     });
   });
 
-  it('supports nested delete', function() {
+  it('supports nested delete', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(request, update(document(), updateMask('a.b')));
@@ -1361,7 +1363,7 @@ describe('update document', function() {
     });
   });
 
-  it('returns update time', function() {
+  it('returns update time', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1394,7 +1396,7 @@ describe('update document', function() {
     });
   });
 
-  it('with last update time precondition', function() {
+  it('with last update time precondition', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1423,7 +1425,7 @@ describe('update document', function() {
     });
   });
 
-  it('with invalid last update time precondition', function() {
+  it('with invalid last update time precondition', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update({foo: 'bar'}, {
         lastUpdateTime: 'foo'
@@ -1431,7 +1433,7 @@ describe('update document', function() {
     }, /"lastUpdateTime" is not a Firestore Timestamp\./);
   });
 
-  it('requires at least one field', function() {
+  it('requires at least one field', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update({});
     }, /At least one field must be updated./);
@@ -1441,7 +1443,7 @@ describe('update document', function() {
     }, /Function 'update\(\)' requires at least 1 argument./);
   });
 
-  it('rejects nested deletes', function() {
+  it('rejects nested deletes', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update({
         a: {b: Firestore.FieldValue.delete()}
@@ -1462,7 +1464,7 @@ describe('update document', function() {
     }, /FieldValue.delete\(\) cannot be used inside of an array./);
   });
 
-  it('with top-level document', function() {
+  it('with top-level document', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1478,7 +1480,7 @@ describe('update document', function() {
     });
   });
 
-  it('with nested document', function() {
+  it('with nested document', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1529,7 +1531,7 @@ describe('update document', function() {
     });
   });
 
-  it('with two nested fields ', function() {
+  it('with two nested fields ', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1574,7 +1576,7 @@ describe('update document', function() {
     });
   });
 
-  it('with nested field and document transform ', function() {
+  it('with nested field and document transform ', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1621,7 +1623,7 @@ describe('update document', function() {
     });
   });
 
-  it('with field with dot ', function() {
+  it('with field with dot ', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1636,7 +1638,7 @@ describe('update document', function() {
     });
   });
 
-  it('with conflicting update', function() {
+  it('with conflicting update', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update({
         foo: 'foobar',
@@ -1688,16 +1690,16 @@ describe('update document', function() {
     }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times\./);
   });
 
-  it('with valid field paths', function() {
-    let validFields = ['foo.bar', '_', 'foo.bar.foobar', '\n`'];
+  it('with valid field paths', () => {
+    const validFields = ['foo.bar', '_', 'foo.bar.foobar', '\n`'];
 
     for (let i = 0; i < validFields.length; ++i) {
       firestore.collection('col').select(validFields[i]);
     }
   });
 
-  it('with invalid field paths', function() {
-    let invalidFields = [
+  it('with invalid field paths', () => {
+    const invalidFields = [
       '',
       '.a',
       'a.',
@@ -1718,7 +1720,7 @@ describe('update document', function() {
     }
   });
 
-  it('doesn\'t accept argument after precondition', function() {
+  it('doesn\'t accept argument after precondition', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update('foo', 'bar', {
         exists: true
@@ -1731,19 +1733,19 @@ describe('update document', function() {
     }, INVALID_ARGUMENTS_TO_UPDATE);
   });
 
-  it('accepts an object', function() {
+  it('accepts an object', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update(null);
     }, /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
-  it('doesn\'t accept arrays', function() {
+  it('doesn\'t accept arrays', () => {
     assert.throws(() => {
       firestore.doc('collectionId/documentId').update([42]);
     }, /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
-  it('with field delete', function() {
+  it('with field delete', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
@@ -1762,8 +1764,8 @@ describe('update document', function() {
   });
 });
 
-describe('listCollections() method', function() {
-  it('sorts results', function() {
+describe('listCollections() method', () => {
+  it('sorts results', () => {
     const overrides = {
       listCollectionIds: (request, options, callback) => {
         assert.deepStrictEqual(request, {

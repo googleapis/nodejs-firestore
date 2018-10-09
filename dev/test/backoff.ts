@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-'use strict';
-
 import assert from 'power-assert';
 
 import {ExponentialBackoff, setTimeoutHandler} from '../src/backoff';
+import {AnyDuringMigration} from '../src/types';
 
 const nop = () => {};
 
-describe('ExponentialBackoff', function() {
-  let observedDelays = [];
+describe('ExponentialBackoff', () => {
+  let observedDelays: number[] = [];
 
   before(() => {
-    setTimeoutHandler((callback, timeout) => observedDelays.push(timeout));
+    setTimeoutHandler(((callback, timeout) => {
+                        observedDelays.push(timeout);
+                        callback();
+                      }) as AnyDuringMigration);
   });
 
   beforeEach(() => {
@@ -42,105 +44,105 @@ describe('ExponentialBackoff', function() {
   }
 
   function assertDelayBetween(low, high) {
-    let actual = observedDelays.shift();
+    const actual = observedDelays.shift()!;
     assert.ok(actual >= low);
     assert.ok(actual <= high);
   }
 
-  it('doesn\'t delay first attempt', () => {
+  it('doesn\'t delay first attempt', async () => {
     const backoff = new ExponentialBackoff();
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(0);
   });
 
-  it('respects the initial retry delay', () => {
+  it('respects the initial retry delay', async () => {
     const backoff = new ExponentialBackoff({
       initialDelayMs: 10,
       jitterFactor: 0,
     });
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(0);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(10);
   });
 
-  it('exponentially increases the delay', () => {
+  it('exponentially increases the delay', async () => {
     const backoff = new ExponentialBackoff({
       initialDelayMs: 10,
       backoffFactor: 2,
       jitterFactor: 0,
     });
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(0);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(10);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(20);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(40);
   });
 
-  it('increases until maximum', () => {
+  it('increases until maximum', async () => {
     const backoff = new ExponentialBackoff({
       initialDelayMs: 10,
       backoffFactor: 2,
       maxDelayMs: 35,
       jitterFactor: 0,
     });
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(0);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(10);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(20);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(35);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(35);
   });
 
-  it('can reset delay', () => {
+  it('can reset delay', async () => {
     const backoff = new ExponentialBackoff({
       initialDelayMs: 10,
       backoffFactor: 2,
       maxDelayMs: 35,
       jitterFactor: 0,
     });
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(0);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(10);
-    backoff.reset();
-    backoff.backoffAndWait(nop);
+    backoff['reset']();
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(0);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(10);
   });
 
-  it('can reset delay to maximum', () => {
+  it('can reset delay to maximum', async () => {
     const backoff = new ExponentialBackoff({
       initialDelayMs: 10,
       maxDelayMs: 35,
       jitterFactor: 0,
     });
-    backoff.resetToMax();
-    backoff.backoffAndWait(nop);
+    backoff['resetToMax']();
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(35);
   });
 
-  it('applies jitter', () => {
+  it('applies jitter', async () => {
     const backoff = new ExponentialBackoff({
       initialDelayMs: 10,
       backoffFactor: 2,
       jitterFactor: 0.1,
     });
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayEquals(0);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayBetween(9, 11);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayBetween(18, 22);
-    backoff.backoffAndWait(nop);
+    await backoff.backoffAndWait().then(nop);
     assertDelayBetween(36, 44);
   });
 });

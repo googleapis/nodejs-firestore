@@ -35,9 +35,10 @@ import Precondition = FirebaseFirestore.Precondition;
 import SetOptions = FirebaseFirestore.SetOptions;
 import Timestamp = FirebaseFirestore.Timestamp;
 import Settings = FirebaseFirestore.Settings;
+import {AnyDuringMigration} from '../src/types';
 
 // This test verifies the Typescript typings and is not meant for execution.
-xdescribe('firestore.d.ts', function() {
+xdescribe('firestore.d.ts', () => {
   const firestore: Firestore = new Firestore({
     keyFilename: 'foo',
     projectId: 'foo',
@@ -254,7 +255,7 @@ xdescribe('firestore.d.ts', function() {
       const empty: boolean = snapshot.empty;
       const readTime: Timestamp = snapshot.readTime;
       snapshot.forEach((result: QueryDocumentSnapshot) => {});
-      snapshot.forEach((result: QueryDocumentSnapshot) => {}, this);
+      snapshot.forEach((result: QueryDocumentSnapshot) => {}, {});
       const equals: boolean = snapshot.isEqual(snapshot);
     });
   });

@@ -36,6 +36,10 @@ export const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 export const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
 export const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
+// Allow invalid API usage to test error handling.
+// tslint:disable-next-line:no-any
+export type InvalidApiUsage = any;
+
 /** A Promise implementation that supports deferred resolution. */
 export class Deferred<R> {
   promise: Promise<R>;
