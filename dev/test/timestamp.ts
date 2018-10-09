@@ -104,8 +104,8 @@ describe('timestamps', () => {
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
-            expect(timestamp.seconds).to.eq(-14182920);
-            expect(timestamp.nanoseconds).to.eq(123000123);
+            expect(timestamp.seconds).to.equal(-14182920);
+            expect(timestamp.nanoseconds).to.equal(123000123);
           });
         });
   });
@@ -117,7 +117,7 @@ describe('timestamps', () => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
             expect(new Date(-14182920 * 1000 + 123).getTime())
-                .to.eq(timestamp.toDate().getTime());
+                .to.equal(timestamp.toDate().getTime());
           });
         });
   });
@@ -128,7 +128,7 @@ describe('timestamps', () => {
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
-            expect(-14182920 * 1000 + 123).to.eq(timestamp.toMillis());
+            expect(-14182920 * 1000 + 123).to.equal(timestamp.toMillis());
           });
         });
   });

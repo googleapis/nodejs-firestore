@@ -296,8 +296,8 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    expect(firestore['_initializationSettings'].projectId).to.eq(PROJECT_ID);
-    expect(firestore['_initializationSettings'].foo).to.eq('bar');
+    expect(firestore['_initializationSettings'].projectId).to.equal(PROJECT_ID);
+    expect(firestore['_initializationSettings'].foo).to.equal('bar');
   });
 
   it('can only call settings() once', () => {
@@ -353,7 +353,7 @@ describe('instantiation', () => {
 
     return firestore['_runRequest'](() => {
       expect(firestore.formattedName)
-          .to.eq(`projects/${PROJECT_ID}/databases/(default)`);
+          .to.equal(`projects/${PROJECT_ID}/databases/(default)`);
       return Promise.resolve();
     });
   });
@@ -372,7 +372,7 @@ describe('instantiation', () => {
 
     return firestore['_runRequest'](() => {
       expect(firestore.formattedName)
-          .to.eq(`projects/${PROJECT_ID}/databases/(default)`);
+          .to.equal(`projects/${PROJECT_ID}/databases/(default)`);
       return Promise.resolve();
     });
   });
@@ -390,7 +390,7 @@ describe('instantiation', () => {
     const gapicClient = {getProjectId: callback => callback(null, PROJECT_ID)};
 
     return firestore['_detectProjectId'](gapicClient).then(projectId => {
-      expect(projectId).to.eq(PROJECT_ID);
+      expect(projectId).to.equal(PROJECT_ID);
     });
   });
 
@@ -404,7 +404,7 @@ describe('instantiation', () => {
     firestore.settings({projectId: PROJECT_ID});
 
     expect(firestore.formattedName)
-        .to.eq(`projects/${PROJECT_ID}/databases/(default)`);
+        .to.equal(`projects/${PROJECT_ID}/databases/(default)`);
   });
 
   it('handles error from project ID detection', () => {
@@ -420,39 +420,39 @@ describe('instantiation', () => {
 
     return firestore['_detectProjectId'](gapicClient)
         .then(() => assert.fail('Error ignored'))
-        .catch(err => expect('Injected Error').to.eq(err.message));
+        .catch(err => expect('Injected Error').to.equal(err.message));
   });
 
   it('exports all types', () => {
     // Ordering as per firestore.d.ts
     expect((Firestore.Firestore)).to.exist;
-    expect(Firestore.Firestore.name).to.eq('Firestore');
+    expect(Firestore.Firestore.name).to.equal('Firestore');
     expect((Firestore.Timestamp)).to.exist;
-    expect(Firestore.Timestamp.name).to.eq('Timestamp');
+    expect(Firestore.Timestamp.name).to.equal('Timestamp');
     expect((Firestore.GeoPoint)).to.exist;
-    expect(Firestore.GeoPoint.name).to.eq('GeoPoint');
+    expect(Firestore.GeoPoint.name).to.equal('GeoPoint');
     expect((Firestore.Transaction)).to.exist;
-    expect(Firestore.Transaction.name).to.eq('Transaction');
+    expect(Firestore.Transaction.name).to.equal('Transaction');
     expect((Firestore.WriteBatch)).to.exist;
-    expect(Firestore.WriteBatch.name).to.eq('WriteBatch');
+    expect(Firestore.WriteBatch.name).to.equal('WriteBatch');
     expect((Firestore.DocumentReference)).to.exist;
-    expect(Firestore.DocumentReference.name).to.eq('DocumentReference');
+    expect(Firestore.DocumentReference.name).to.equal('DocumentReference');
     expect((Firestore.WriteResult)).to.exist;
-    expect(Firestore.WriteResult.name).to.eq('WriteResult');
+    expect(Firestore.WriteResult.name).to.equal('WriteResult');
     expect((Firestore.DocumentSnapshot)).to.exist;
-    expect(Firestore.DocumentSnapshot.name).to.eq('DocumentSnapshot');
+    expect(Firestore.DocumentSnapshot.name).to.equal('DocumentSnapshot');
     expect((Firestore.QueryDocumentSnapshot)).to.exist;
-    expect(Firestore.QueryDocumentSnapshot.name).to.eq('QueryDocumentSnapshot');
+    expect(Firestore.QueryDocumentSnapshot.name).to.equal('QueryDocumentSnapshot');
     expect((Firestore.Query)).to.exist;
-    expect(Firestore.Query.name).to.eq('Query');
+    expect(Firestore.Query.name).to.equal('Query');
     expect(Firestore.QuerySnapshot).to.exist;
-    expect(Firestore.QuerySnapshot.name).to.eq('QuerySnapshot');
+    expect(Firestore.QuerySnapshot.name).to.equal('QuerySnapshot');
     expect((Firestore.CollectionReference)).to.exist;
-    expect(Firestore.CollectionReference.name).to.eq('CollectionReference');
+    expect(Firestore.CollectionReference.name).to.equal('CollectionReference');
     expect((Firestore.FieldValue)).to.exist;
-    expect(Firestore.FieldValue.name).to.eq('FieldValue');
+    expect(Firestore.FieldValue.name).to.equal('FieldValue');
     expect((Firestore.FieldPath)).to.exist;
-    expect(Firestore.Firestore.name).to.eq('Firestore');
+    expect(Firestore.Firestore.name).to.equal('Firestore');
     expect(Firestore.FieldValue.serverTimestamp().isEqual(
                Firestore.FieldValue.delete()))
         .to.be.false;
@@ -499,10 +499,10 @@ describe('snapshot_() method', () => {
 
     // We specifically test the GeoPoint properties to ensure 100% test
     // coverage.
-    expect(data.geoPointValue.latitude).to.eq(50.1430847);
-    expect(data.geoPointValue.longitude).to.eq(-122.947778);
+    expect(data.geoPointValue.latitude).to.equal(50.1430847);
+    expect(data.geoPointValue.longitude).to.equal(-122.947778);
     expect(data.geoPointValue.toString())
-        .to.eq('GeoPoint { latitude: 50.1430847, longitude: -122.947778 }');
+        .to.equal('GeoPoint { latitude: 50.1430847, longitude: -122.947778 }');
     expect(data.geoPointValue.isEqual(
                new Firestore.GeoPoint(50.1430847, -122.947778)))
         .to.be.true;
@@ -666,8 +666,8 @@ describe('doc() method', () => {
 
   it('exposes properties', () => {
     const documentRef = firestore.doc('collectionId/documentId');
-    expect(documentRef.id).to.eq('documentId');
-    expect(documentRef.firestore).to.eq(firestore);
+    expect(documentRef.id).to.equal('documentId');
+    expect(documentRef.firestore).to.equal(firestore);
   });
 });
 
@@ -702,7 +702,7 @@ describe('collection() method', () => {
     const collection = firestore.collection('collectionId');
     expect(collection.id).to.exist;
     expect(collection.doc).to.exist;
-    expect(collection.id).to.eq('collectionId');
+    expect(collection.id).to.equal('collectionId');
   });
 });
 
@@ -721,8 +721,8 @@ describe('listCollections() method', () => {
     return createInstance(overrides).then(firestore => {
       // We are using `getCollections()` to ensure 100% code coverage
       return firestore.getCollections().then(collections => {
-        expect(collections[0].path).to.eq('first');
-        expect(collections[1].path).to.eq('second');
+        expect(collections[0].path).to.equal('first');
+        expect(collections[1].path).to.equal('second');
       });
     });
   });
@@ -730,17 +730,17 @@ describe('listCollections() method', () => {
 
 describe('getAll() method', () => {
   function resultEquals(result, ...docs) {
-    expect(result.length).to.eq(arguments.length - 1);
+    expect(result.length).to.equal(arguments.length - 1);
 
     for (let i = 0; i < result.length; ++i) {
       const doc = arguments[i + 1];
 
       if (doc.found) {
         expect(result[i].exists).to.be.true;
-        expect(result[i].ref.formattedName).to.eq(doc.found.name);
+        expect(result[i].ref.formattedName).to.equal(doc.found.name);
       } else {
         expect(result[i].exists).to.be.false;
-        expect(result[i].ref.formattedName).to.eq(doc.missing);
+        expect(result[i].ref.formattedName).to.equal(doc.missing);
       }
     }
   }
@@ -807,7 +807,7 @@ describe('getAll() method', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            expect(err.message).to.eq('Expected exception');
+            expect(err.message).to.equal('Expected exception');
           });
     });
   });
@@ -825,7 +825,7 @@ describe('getAll() method', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            expect(err.message).to.eq('Expected exception');
+            expect(err.message).to.equal('Expected exception');
           });
     });
   });
@@ -847,7 +847,7 @@ describe('getAll() method', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            expect(err.message).to.eq('Expected exception');
+            expect(err.message).to.equal('Expected exception');
           });
     });
   });
@@ -897,7 +897,7 @@ describe('getAll() method', () => {
                             throw new Error('Unexpected success in Promise');
                           })
                           .catch(err => {
-                            expect(err.code).to.eq(Number(errorCode));
+                            expect(err.code).to.equal(Number(errorCode));
                           }));
       });
 
@@ -969,7 +969,7 @@ describe('getAll() method', () => {
   it('accepts same document multiple times', () => {
     const overrides = {
       batchGetDocuments: request => {
-        expect(request.documents.length).to.eq(2);
+        expect(request.documents.length).to.equal(2);
         return stream(found('a'), found('b'));
       }
     };

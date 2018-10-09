@@ -43,9 +43,9 @@ if (!PROJECT_ID) {
  * @param expected The expected docs array.
  */
 function docsEqual(actual, expected) {
-  expect(actual.length).to.eq(expected.length);
+  expect(actual.length).to.equal(expected.length);
   for (let i = 0; i < actual.size; i++) {
-    expect(actual[i].ref.id).to.eq(expected[i].ref.id);
+    expect(actual[i].ref.id).to.equal(expected[i].ref.id);
     expect(actual[i].data()).to.deep.eq(expected[i].data());
     expect((expected[i].createTime)).to.be.a('string');
     expect((expected[i].updateTime)).to.be.a('string');
@@ -64,11 +64,11 @@ function snapshotsEqual(lastSnapshot, version, actual, expected) {
 
   const actualDocChanges = actual.docChanges();
 
-  expect(actualDocChanges.length).to.eq(expected.docChanges.length);
+  expect(actualDocChanges.length).to.equal(expected.docChanges.length);
   for (let i = 0; i < expected.docChanges.length; i++) {
-    expect(actualDocChanges[i].type).to.eq(expected.docChanges[i].type);
+    expect(actualDocChanges[i].type).to.equal(expected.docChanges[i].type);
     expect(actualDocChanges[i].doc.ref.id)
-        .to.eq(expected.docChanges[i].doc.ref.id);
+        .to.equal(expected.docChanges[i].doc.ref.id);
     expect(actualDocChanges[i].doc.data())
         .to.deep.eq(expected.docChanges[i].doc.data());
     const readVersion =
@@ -91,7 +91,7 @@ function snapshotsEqual(lastSnapshot, version, actual, expected) {
   docsEqual(localDocs, expected.docs);
   expect(actual.readTime.isEqual(new Firestore.Timestamp(0, version)))
       .to.be.true;
-  expect(actual.size).to.eq(expected.docs.length);
+  expect(actual.size).to.equal(expected.docs.length);
 
   return {docs: actual.docs, docChanges: actualDocChanges};
 }
@@ -139,7 +139,7 @@ class DeferredListener {
 
     if (listener) {
       expect(listener.type)
-          .to.eq(
+          .to.equal(
               type,
               `Expected message of type '${listener.type}' but got '${type}' ` +
                   `with '${JSON.stringify(data)}'.`);
@@ -161,7 +161,7 @@ class DeferredListener {
     const data = this.pendingData.shift();
 
     if (data) {
-      expect(data.type).to.eq(
+      expect(data.type).to.equal(
           expectedType,
           `Expected message of type '${expectedType}' but got '${data.type}' ` +
               `with '${JSON.stringify(data.data)}'.`);
@@ -475,7 +475,7 @@ class WatchHelper {
           return this.await('error');
         })
         .then(err => {
-          expect(err.message).to.eq(expectedError);
+          expect(err.message).to.equal(expectedError);
         });
   }
 }
@@ -703,7 +703,7 @@ describe('Query watch', () => {
             return streamHelper.awaitOpen();
           })
           .then(() => {
-            expect(streamHelper.streamCount).to.eq(3);
+            expect(streamHelper.streamCount).to.equal(3);
           });
     });
   });
@@ -730,7 +730,7 @@ describe('Query watch', () => {
         })
         .then(() => {
           unsubscribe();
-          expect(streamHelper.streamCount).to.eq(1);
+          expect(streamHelper.streamCount).to.equal(1);
         });
   });
 
@@ -876,7 +876,7 @@ describe('Query watch', () => {
               docs: [snapshot(doc1, {foo: 'a'})],
               docChanges: [added(doc1, {foo: 'a'})],
             });
-            expect(streamHelper.streamCount).to.eq(1);
+            expect(streamHelper.streamCount).to.equal(1);
             streamHelper.destroyStream();
             return streamHelper.awaitReopen();
           })
@@ -905,7 +905,7 @@ describe('Query watch', () => {
             return watchHelper.await('snapshot');
           })
           .then(results => {
-            expect(streamHelper.streamCount).to.eq(3);
+            expect(streamHelper.streamCount).to.equal(3);
             snapshotsEqual(lastSnapshot, 4, results, {
               docs: [
                 snapshot(doc1, {foo: 'a'}),
@@ -939,7 +939,7 @@ describe('Query watch', () => {
               docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
               docChanges: [added(doc1, {foo: 'a'}), added(doc2, {foo: 'b'})],
             });
-            expect(streamHelper.streamCount).to.eq(1);
+            expect(streamHelper.streamCount).to.equal(1);
             // This document delete will be ignored.
             watchHelper.sendDocDelete(doc1);
             streamHelper.destroyStream();
@@ -1009,7 +1009,7 @@ describe('Query watch', () => {
           })
           .then(request => {
             expect(request).to.deep.eq(resumeTokenQuery(resumeToken));
-            expect(streamHelper.streamCount).to.eq(2);
+            expect(streamHelper.streamCount).to.equal(2);
           });
     });
   });
@@ -1051,7 +1051,7 @@ describe('Query watch', () => {
             'Stream Error (6)')
         .then(() => {
           expect(streamHelper.streamCount)
-              .to.eq(
+              .to.equal(
                   6,
                   'Expected stream to be opened once and retried five times');
         });
@@ -1574,7 +1574,7 @@ describe('Query watch', () => {
           })
           .then(() => streamHelper.awaitOpen())
           .then(request => {
-            expect(streamHelper.streamCount).to.eq(2);
+            expect(streamHelper.streamCount).to.equal(2);
             assert.notEqual(oldRequestStream, streamHelper.writeStream);
             expect(collQueryJSON()).to.deep.eq(request);
 
@@ -1619,7 +1619,7 @@ describe('Query watch', () => {
             return watchHelper.await('snapshot');
           })
           .then(results => {
-            expect(streamHelper.streamCount).to.eq(1);
+            expect(streamHelper.streamCount).to.equal(1);
             snapshotsEqual(lastSnapshot, 2, results, {
               docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
               docChanges: [added(doc2, {foo: 'b'})],
@@ -1657,7 +1657,7 @@ describe('Query watch', () => {
             return watchHelper.await('snapshot');
           })
           .then(results => {
-            expect(streamHelper.streamCount).to.eq(1);
+            expect(streamHelper.streamCount).to.equal(1);
             snapshotsEqual(lastSnapshot, 2, results, {
               docs: [snapshot(doc1, {foo: 'd'}), snapshot(doc2, {foo: 'e'})],
               docChanges: [added(doc2, {foo: 'e'}), modified(doc1, {foo: 'd'})],
@@ -1875,7 +1875,7 @@ describe('Query watch', () => {
                            watchHelper.sendDoc(doc3, {foo: 'c'});
                          }).then(snapshot => {
                     const materializedDocs = snapshot.docs;
-                    expect(materializedDocs.length).to.eq(3);
+                    expect(materializedDocs.length).to.equal(3);
                     expect(snapshot.isEqual(firstSnapshot)).to.be.true;
                   });
                 }));
@@ -2189,7 +2189,7 @@ describe('DocumentReference watch', () => {
                 .to.be.true;
             expect(snapshot.updateTime.isEqual(new Firestore.Timestamp(3, 1)))
                 .to.be.true;
-            expect(snapshot.get('foo')).to.eq('a');
+            expect(snapshot.get('foo')).to.equal('a');
 
             // Change the document.
             watchHelper.sendDoc(doc, {foo: 'b'});
@@ -2198,7 +2198,7 @@ describe('DocumentReference watch', () => {
           })
           .then(snapshot => {
             expect(snapshot.exists).to.be.true;
-            expect(snapshot.get('foo')).to.eq('b');
+            expect(snapshot.get('foo')).to.equal('b');
           });
     });
   });
@@ -2253,7 +2253,7 @@ describe('DocumentReference watch', () => {
           })
           .then(snapshot => {
             expect(snapshot.exists).to.be.true;
-            expect(snapshot.get('foo')).to.eq('a');
+            expect(snapshot.get('foo')).to.equal('a');
 
             streamHelper.destroyStream();
             return streamHelper.awaitReopen();
@@ -2267,7 +2267,7 @@ describe('DocumentReference watch', () => {
           })
           .then(snapshot => {
             expect(snapshot.exists).to.be.true;
-            expect(snapshot.get('foo')).to.eq('b');
+            expect(snapshot.get('foo')).to.equal('b');
 
             // Remove the document.
             watchHelper.sendDocDelete(doc);
@@ -2276,7 +2276,7 @@ describe('DocumentReference watch', () => {
           })
           .then(snapshot => {
             expect(snapshot.exists).to.be.false;
-            expect(streamHelper.streamCount).to.eq(2);
+            expect(streamHelper.streamCount).to.equal(2);
           });
     });
   });
@@ -2294,7 +2294,7 @@ describe('DocumentReference watch', () => {
       watchHelper.sendSnapshot(1);
       return watchHelper.await('snapshot')
           .then(snapshot => {
-            expect(snapshot.get('foo')).to.eq('b');
+            expect(snapshot.get('foo')).to.equal('b');
 
             // Modify it two more times.
             watchHelper.sendDoc(doc, {foo: 'c'});
@@ -2303,7 +2303,7 @@ describe('DocumentReference watch', () => {
             return watchHelper.await('snapshot');
           })
           .then(snapshot => {
-            expect(snapshot.get('foo')).to.eq('d');
+            expect(snapshot.get('foo')).to.equal('d');
 
             // Remove it, delete it, and then add it again.
             watchHelper.sendDocRemove(doc, {foo: 'e'});
@@ -2313,7 +2313,7 @@ describe('DocumentReference watch', () => {
             return watchHelper.await('snapshot');
           })
           .then(snapshot => {
-            expect(snapshot.get('foo')).to.eq('f');
+            expect(snapshot.get('foo')).to.equal('f');
           });
     });
   });
@@ -2355,7 +2355,7 @@ describe('DocumentReference watch', () => {
       watchHelper.sendSnapshot(1);
       return watchHelper.await('snapshot')
           .then(snapshot => {
-            expect(snapshot.exists).to.eq(false);
+            expect(snapshot.exists).to.be.false;
 
             // Add a result.
             watchHelper.sendDoc(doc, {foo: 'a'});
@@ -2363,7 +2363,7 @@ describe('DocumentReference watch', () => {
             return watchHelper.await('snapshot');
           })
           .then(snapshot => {
-            expect(snapshot.exists).to.eq(true);
+            expect(snapshot.exists).to.be.true;
 
             // Remove the document.
             watchHelper.sendDocRemove(doc);
@@ -2371,7 +2371,7 @@ describe('DocumentReference watch', () => {
             return watchHelper.await('snapshot');
           })
           .then(snapshot => {
-            expect(snapshot.exists).to.eq(false);
+            expect(snapshot.exists).to.be.false;
           });
     });
   });
@@ -2390,7 +2390,7 @@ describe('DocumentReference watch', () => {
             return watchHelper.await('snapshot');
           })
           .then(snapshot => {
-            expect(snapshot.get('foo')).to.eq('a');
+            expect(snapshot.get('foo')).to.equal('a');
 
             // Send a RESET.
             streamHelper.write({
@@ -2407,7 +2407,7 @@ describe('DocumentReference watch', () => {
             return watchHelper.await('snapshot');
           })
           .then(snapshot => {
-            expect(snapshot.get('foo')).to.eq('b');
+            expect(snapshot.get('foo')).to.equal('b');
           });
     });
   });

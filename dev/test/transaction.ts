@@ -226,31 +226,31 @@ function runTransaction<T>(
   const overrides = {
     beginTransaction: (actual, options, callback) => {
       const request = expectedRequests.shift();
-      expect(request.type).to.eq('begin');
+      expect(request.type).to.equal('begin');
       expect(actual).to.deep.eq(request.request);
       callback(request.error, request.response);
     },
     commit: (actual, options, callback) => {
       const request = expectedRequests.shift();
-      expect(request.type).to.eq('commit');
+      expect(request.type).to.equal('commit');
       expect(actual).to.deep.eq(request.request);
       callback(request.error, request.response);
     },
     rollback: (actual, options, callback) => {
       const request = expectedRequests.shift();
-      expect(request.type).to.eq('rollback');
+      expect(request.type).to.equal('rollback');
       expect(actual).to.deep.eq(request.request);
       callback(request.error, request.response);
     },
     batchGetDocuments: (actual) => {
       const request = expectedRequests.shift();
-      expect(request.type).to.eq('getDocument');
+      expect(request.type).to.equal('getDocument');
       expect(actual).to.deep.eq(request.request);
       return request.stream;
     },
     runQuery: (actual) => {
       const request = expectedRequests.shift();
-      expect(request.type).to.eq('query');
+      expect(request.type).to.equal('query');
       expect(actual).to.deep.eq(request.request);
       return request.stream;
     }
@@ -263,11 +263,11 @@ function runTransaction<T>(
           return transactionCallback(transaction, docRef);
         })
         .then(val => {
-          expect(expectedRequests.length).to.eq(0);
+          expect(expectedRequests.length).to.equal(0);
           return val;
         })
         .catch(err => {
-          expect(expectedRequests.length).to.eq(0);
+          expect(expectedRequests.length).to.equal(0);
           return Promise.reject(err);
         });
   });
@@ -284,7 +284,7 @@ describe('successful transactions', () => {
     return runTransaction(() => {
              return Promise.resolve('bar');
            }, begin(), commit()).then(val => {
-      expect(val).to.eq('bar');
+      expect(val).to.equal('bar');
     });
   });
 });
@@ -366,7 +366,7 @@ describe('failed transactions', () => {
                begin('foo2', 'foo1'), commit('foo2', [], serverError),
                begin('foo3', 'foo2'), commit('foo3'))
         .then(red => {
-          expect(red).to.eq('success');
+          expect(red).to.equal('success');
         });
   });
 
@@ -420,7 +420,7 @@ describe('transaction operations', () => {
   it('support get with document ref', () => {
     return runTransaction((transaction, docRef) => {
       return transaction.get(docRef).then(doc => {
-        expect(doc.id).to.eq('documentId');
+        expect(doc.id).to.equal('documentId');
       });
     }, begin(), getDocument(), commit());
   });
@@ -454,7 +454,7 @@ describe('transaction operations', () => {
     return runTransaction((transaction, docRef) => {
       const query = docRef.parent.where('foo', '==', 'bar');
       return transaction.get(query).then(results => {
-        expect(results.docs[0].id).to.eq('documentId');
+        expect(results.docs[0].id).to.equal('documentId');
       });
     }, begin(), query(), commit());
   });
@@ -465,9 +465,9 @@ describe('transaction operations', () => {
       const secondDoc = docRef.parent.doc('secondDocument');
 
       return transaction.getAll(firstDoc, secondDoc).then(docs => {
-        expect(docs.length).to.eq(2);
-        expect(docs[0].id).to.eq('firstDocument');
-        expect(docs[1].id).to.eq('secondDocument');
+        expect(docs.length).to.equal(2);
+        expect(docs[0].id).to.equal('firstDocument');
+        expect(docs[1].id).to.equal('secondDocument');
       });
     }, begin(), getAll(['firstDocument', 'secondDocument']), commit());
   });

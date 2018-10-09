@@ -386,8 +386,8 @@ describe('query interface', () => {
       query = query.orderBy('foo');
       query = query.limit(10);
       return query.get().then(results => {
-        expect(results.query).to.eq(query);
-        expect(results.size).to.eq(0);
+        expect(results.query).to.equal(query);
+        expect(results.size).to.equal(0);
         expect(results.empty).to.be.true;
       });
     });
@@ -404,7 +404,7 @@ describe('query interface', () => {
     return createInstance(overrides).then(firestore => {
       const query = firestore.collection('collectionId');
       return query.get().then(results => {
-        expect(results.size).to.eq(0);
+        expect(results.size).to.equal(0);
         expect(results.empty).to.be.true;
         expect(results.readTime.isEqual(new Firestore.Timestamp(5, 6)))
             .to.be.true;
@@ -428,7 +428,7 @@ describe('query interface', () => {
             throw new Error('Unexpected success');
           })
           .catch(() => {
-            expect(attempts).to.eq(5);
+            expect(attempts).to.equal(5);
           });
     });
   });
@@ -465,12 +465,12 @@ describe('query interface', () => {
     return createInstance(overrides).then(firestore => {
       const query = firestore.collection('collectionId');
       return query.get().then(results => {
-        expect(results.size).to.eq(2);
+        expect(results.size).to.equal(2);
         expect(results.empty).to.be.false;
         expect(results.readTime.isEqual(new Firestore.Timestamp(5, 6)))
             .to.be.true;
-        expect(results.docs[0].get('first')).to.eq('first');
-        expect(results.docs[1].get('second')).to.eq('second');
+        expect(results.docs[0].get('first')).to.equal('first');
+        expect(results.docs[1].get('second')).to.equal('second');
         expect(results.docChanges()).to.have.length(2);
 
         let count = 0;
@@ -486,7 +486,7 @@ describe('query interface', () => {
           ++count;
         });
 
-        expect(2).to.eq(count);
+        expect(2).to.equal(count);
       });
     });
   });
@@ -503,7 +503,7 @@ describe('query interface', () => {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          expect(err.message).to.eq('Expected error');
+          expect(err.message).to.equal('Expected error');
         });
   });
 
@@ -521,7 +521,7 @@ describe('query interface', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            expect(err.message).to.eq('Expected error');
+            expect(err.message).to.equal('Expected error');
           });
     });
   });
@@ -540,7 +540,7 @@ describe('query interface', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            expect(err.message).to.eq('Expected error');
+            expect(err.message).to.equal('Expected error');
           });
     });
   });
@@ -564,7 +564,7 @@ describe('query interface', () => {
                 ++received;
               })
           .on('end', () => {
-            expect(received).to.eq(2);
+            expect(received).to.equal(2);
             callback();
           });
     });

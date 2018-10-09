@@ -41,7 +41,7 @@ describe('ExponentialBackoff', () => {
   });
 
   function assertDelayEquals(expected) {
-    expect(observedDelays.shift()).to.eq(expected);
+    expect(observedDelays.shift()).to.equal(expected);
   }
 
   function assertDelayBetween(low, high) {

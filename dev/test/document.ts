@@ -235,22 +235,22 @@ describe('DocumentReference interface', () => {
     }, /Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string./);
 
     let collection = documentRef.collection('col');
-    expect(collection.id).to.eq('col');
+    expect(collection.id).to.equal('col');
 
     assert.throws(() => {
       documentRef.collection('col/doc');
     }, /Argument "collectionPath" must point to a collection, but was "col\/doc". Your path does not contain an odd number of components\./);
 
     collection = documentRef.collection('col/doc/col');
-    expect(collection.id).to.eq('col');
+    expect(collection.id).to.equal('col');
   });
 
   it('has path property', () => {
-    expect(documentRef.path).to.eq('collectionId/documentId');
+    expect(documentRef.path).to.equal('collectionId/documentId');
   });
 
   it('has parent property', () => {
-    expect(documentRef.parent.path).to.eq('collectionId');
+    expect(documentRef.parent.path).to.equal('collectionId');
   });
 
   it('has isEqual() method', () => {
@@ -369,8 +369,8 @@ describe('serialize document', () => {
         const fields = request.writes[0].update.fields;
         expect(fields.nanValue.doubleValue).to.be.a('number');
         expect(fields.nanValue.doubleValue).to.be.NaN;
-        expect(fields.posInfinity.doubleValue).to.eq(Infinity);
-        expect(fields.negInfinity.doubleValue).to.eq(-Infinity);
+        expect(fields.posInfinity.doubleValue).to.equal(Infinity);
+        expect(fields.negInfinity.doubleValue).to.equal(-Infinity);
 
         callback(null, writeResult(1));
       }
@@ -484,7 +484,7 @@ describe('deserialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(() => {
-        expect(attempts).to.eq(3);
+        expect(attempts).to.equal(3);
       });
     });
   });
@@ -505,7 +505,7 @@ describe('deserialize document', () => {
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(res => {
         expect(res.get('moonLanding').toMillis())
-            .to.eq(new Date('Jul 20 1969 20:18:00.123 UTC').getTime());
+            .to.equal(new Date('Jul 20 1969 20:18:00.123 UTC').getTime());
       });
     });
   });
@@ -541,8 +541,8 @@ describe('deserialize document', () => {
         assert.ok(
             typeof res.get('nanValue') === 'number' &&
             isNaN(res.get('nanValue')));
-        expect(res.get('posInfinity')).to.eq(Infinity);
-        expect(res.get('negInfinity')).to.eq(-Infinity);
+        expect(res.get('posInfinity')).to.equal(Infinity);
+        expect(res.get('negInfinity')).to.equal(-Infinity);
       });
     });
   });
@@ -632,10 +632,10 @@ describe('get document', () => {
       return firestore.doc('collectionId/documentId').get().then(result => {
         expect(result.data()).to.deep.eq({foo: {bar: 'foobar'}});
         expect(result.get('foo')).to.deep.eq({bar: 'foobar'});
-        expect(result.get('foo.bar')).to.eq('foobar');
+        expect(result.get('foo.bar')).to.equal('foobar');
         expect(result.get(new Firestore.FieldPath('foo', 'bar')))
-            .to.eq('foobar');
-        expect(result.ref.id).to.eq('documentId');
+            .to.equal('foobar');
+        expect(result.ref.id).to.equal('documentId');
       });
     });
   });
@@ -686,7 +686,7 @@ describe('get document', () => {
 
     createInstance(overrides).then(firestore => {
       firestore.doc('collectionId/documentId').get().catch(err => {
-        expect(err.message).to.eq('RPC Error');
+        expect(err.message).to.equal('RPC Error');
         done();
       });
     });
@@ -1784,8 +1784,8 @@ describe('listCollections() method', () => {
     return createInstance(overrides).then(firestore => {
       // We are using `getCollections()` to ensure 100% code coverage
       return firestore.doc('coll/doc').getCollections().then(collections => {
-        expect(collections[0].path).to.eq('coll/doc/first');
-        expect(collections[1].path).to.eq('coll/doc/second');
+        expect(collections[0].path).to.equal('coll/doc/first');
+        expect(collections[1].path).to.equal('coll/doc/second');
       });
     });
   });

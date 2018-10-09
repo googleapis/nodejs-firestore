@@ -202,7 +202,7 @@ describe('Order', () => {
           for (const right of groups[j]) {
             let expected = order.primitiveComparator(i, j);
             expect(order.compare(left, right))
-                .to.eq(
+                .to.equal(
                     expected,
                     'comparing ' + left + ' (' + JSON.stringify(left) +
                         ') to ' + right + ' (' + JSON.stringify(right) +
@@ -210,7 +210,7 @@ describe('Order', () => {
 
             expected = order.primitiveComparator(j, i);
             expect(order.compare(right, left))
-                .to.eq(
+                .to.equal(
                     expected,
                     'comparing ' + right + ' (' + JSON.stringify(right) +
                         ') to ' + left + ' (' + JSON.stringify(left) +

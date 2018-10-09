@@ -292,7 +292,7 @@ describe('batch support', () => {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          expect(err.message).to.eq('Expected exception');
+          expect(err.message).to.equal('Expected exception');
         });
   });
 
@@ -392,21 +392,21 @@ describe('batch support', () => {
           .commit()
           .then(() => {
             // The first commit always uses a transcation.
-            expect(beginCalled).to.eq(1);
-            expect(commitCalled).to.eq(1);
+            expect(beginCalled).to.equal(1);
+            expect(commitCalled).to.equal(1);
             return firestore.batch().commit();
           })
           .then(() => {
             // The following commits don't use transactions if they happen
             // within two minutes.
-            expect(beginCalled).to.eq(1);
-            expect(commitCalled).to.eq(2);
+            expect(beginCalled).to.equal(1);
+            expect(commitCalled).to.equal(2);
             firestore['_lastSuccessfulRequest'] = 1337;
             return firestore.batch().commit();
           })
           .then(() => {
-            expect(beginCalled).to.eq(2);
-            expect(commitCalled).to.eq(3);
+            expect(beginCalled).to.equal(2);
+            expect(commitCalled).to.equal(3);
             delete process.env.FUNCTION_TRIGGER_TYPE;
           });
     });
