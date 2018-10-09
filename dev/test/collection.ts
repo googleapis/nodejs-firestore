@@ -39,8 +39,8 @@ describe('Collection interface', () => {
 
     let documentRef = collectionRef.doc('docId');
     expect(documentRef).to.be.an.instanceOf(DocumentReference);
-    expect(collectionRef.id).to.eq('colId');
-    expect(documentRef.id).to.eq('docId');
+    expect(collectionRef.id).to.equal('colId');
+    expect(documentRef.id).to.equal('docId');
 
     expect(() => collectionRef.doc(false))
         .to.throw(
@@ -64,16 +64,16 @@ describe('Collection interface', () => {
 
   it('has parent() method', () => {
     const collection = firestore.collection('col1/doc/col2');
-    expect(collection.path).to.eq('col1/doc/col2');
+    expect(collection.path).to.equal('col1/doc/col2');
     const document = collection.parent;
-    expect(document.path).to.eq('col1/doc');
+    expect(document.path).to.equal('col1/doc');
   });
 
   it('supports auto-generated ids', () => {
     const collectionRef = firestore.collection('collectionId');
     const documentRef = collectionRef.doc();
     expect(documentRef).to.be.an.instanceOf(DocumentReference);
-    expect(collectionRef.id).to.eq('collectionId');
+    expect(collectionRef.id).to.equal('collectionId');
     expect(documentRef.id).to.have.length(20);
   });
 
@@ -125,7 +125,7 @@ describe('Collection interface', () => {
 
       return promise.then(documentRef => {
         expect(documentRef).to.be.an.instanceOf(DocumentReference);
-        expect(collectionRef.id).to.eq('collectionId');
+        expect(collectionRef.id).to.equal('collectionId');
         expect(documentRef.id).to.have.length(20);
       });
     });
@@ -148,8 +148,8 @@ describe('Collection interface', () => {
     return createInstance(overrides).then(firestore => {
       return firestore.collection('a/b/c').listDocuments().then(
           documentRefs => {
-            expect(documentRefs[0].id).to.eq('first');
-            expect(documentRefs[1].id).to.eq('second');
+            expect(documentRefs[0].id).to.equal('first');
+            expect(documentRefs[1].id).to.equal('second');
           });
     });
   });

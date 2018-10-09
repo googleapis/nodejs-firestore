@@ -104,8 +104,8 @@ describe('timestamps', () => {
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
-            assert.equal(timestamp.seconds, -14182920);
-            assert.equal(timestamp.nanoseconds, 123000123);
+            expect(timestamp.seconds).to.equal(-14182920);
+            expect(timestamp.nanoseconds).to.equal(123000123);
           });
         });
   });
@@ -116,9 +116,8 @@ describe('timestamps', () => {
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
-            assert.equal(
-                new Date(-14182920 * 1000 + 123).getTime(),
-                timestamp.toDate().getTime());
+            expect(new Date(-14182920 * 1000 + 123).getTime())
+                .to.equal(timestamp.toDate().getTime());
           });
         });
   });
@@ -129,7 +128,7 @@ describe('timestamps', () => {
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
             const timestamp = res.get('moonLanding');
-            assert.equal(-14182920 * 1000 + 123, timestamp.toMillis());
+            expect(-14182920 * 1000 + 123).to.equal(timestamp.toMillis());
           });
         });
   });
@@ -159,20 +158,18 @@ describe('timestamps', () => {
   });
 
   it('validates nanoseconds', () => {
-    assert.throws(
-        () => new Firestore.Timestamp(0.1, 0),
-        /Argument "seconds" is not a valid integer./);
+    expect(() => new Firestore.Timestamp(0.1, 0))
+        .to.throw(/Argument "seconds" is not a valid integer./);
 
-    assert.throws(
-        () => new Firestore.Timestamp(0, 0.1),
-        /Argument "nanoseconds" is not a valid integer./);
+    expect(() => new Firestore.Timestamp(0, 0.1))
+        .to.throw(/Argument "nanoseconds" is not a valid integer./);
 
-    assert.throws(
-        () => new Firestore.Timestamp(0, -1),
-        /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1/);
+    expect(() => new Firestore.Timestamp(0, -1))
+        .to.throw(
+            /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1/);
 
-    assert.throws(
-        () => new Firestore.Timestamp(0, 1000000000),
-        /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000/);
+    expect(() => new Firestore.Timestamp(0, 1000000000))
+        .to.throw(
+            /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000/);
   });
 });

@@ -25,41 +25,41 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 describe('ResourcePath', () => {
   it('has id property', () => {
-    assert.equal(new ResourcePath(PROJECT_ID, '(default)', 'foo').id, 'foo');
-    assert.equal(new ResourcePath(PROJECT_ID, '(default)').id, null);
+    expect(new ResourcePath(PROJECT_ID, '(default)', 'foo').id).to.equal('foo');
+    expect(new ResourcePath(PROJECT_ID, '(default)').id).to.be.null;
   });
 
   it('has append() method', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)');
-    assert.equal(path.formattedName, DATABASE_ROOT);
+    expect(path.formattedName).to.equal(DATABASE_ROOT);
     path = path.append('foo');
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
   });
 
   it('has parent() method', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)', 'foo');
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
     path = path.parent()!;
-    assert.equal(path.formattedName, DATABASE_ROOT);
-    assert.equal(path.parent(), null);
+    expect(path.formattedName).to.equal(DATABASE_ROOT);
+    expect(path.parent()).to.be.null;
   });
 
   it('parses strings', () => {
     let path = ResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
-    assert.equal(path.formattedName, DATABASE_ROOT);
+    expect(path.formattedName).to.equal(DATABASE_ROOT);
     path =
         ResourcePath.fromSlashSeparatedString(`${DATABASE_ROOT}/documents/foo`);
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo`);
-    assert.throws(() => {
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
+    expect(() => {
       path =
           ResourcePath.fromSlashSeparatedString('projects/project/databases');
-    }, /Resource name 'projects\/project\/databases' is not valid\./);
+    }).to.throw(/Resource name 'projects\/project\/databases' is not valid\./);
   });
 
   it('accepts newlines', () => {
     const path = ResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/foo\nbar`);
-    assert.equal(path.formattedName, `${DATABASE_ROOT}/documents/foo\nbar`);
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo\nbar`);
   });
 });
 
@@ -70,18 +70,18 @@ describe('FieldPath', () => {
     const results = ['foo', 'foo.bar', '`.`.`\\``', '`\\\\`'];
 
     for (let i = 0; i < components.length; ++i) {
-      assert.equal(new FieldPath(...components[i]).toString(), results[i]);
+      expect(new FieldPath(...components[i]).toString()).to.equal(results[i]);
     }
   });
 
   it('doesn\'t accept empty path', () => {
-    assert.throws(() => {
+    expect(() => {
       new FieldPath();
-    }, /Function 'FieldPath\(\)' requires at least 1 argument\./);
+    }).to.throw(/Function 'FieldPath\(\)' requires at least 1 argument\./);
   });
 
   it('only accepts strings', () => {
-    assert.throws(() => {
+    expect(() => {
       new FieldPath('foo', 'bar', 0 as InvalidApiUsage);
     }, /Argument at index 2 is not a valid string\./);
   });
@@ -89,24 +89,24 @@ describe('FieldPath', () => {
   it('has append() method', () => {
     let path = new FieldPath('foo');
     path = path.append('bar');
-    assert.equal(path.formattedName, 'foo.bar');
+    expect(path.formattedName).to.equal('foo.bar');
   });
 
   it('has parent() method', () => {
     let path = new FieldPath('foo', 'bar');
     path = path.parent()!;
-    assert.equal(path.formattedName, 'foo');
+    expect(path.formattedName).to.equal('foo');
   });
 
   it('escapes special characters', () => {
     const path = new FieldPath('f.o.o');
-    assert.equal(path.formattedName, '`f.o.o`');
+    expect(path.formattedName).to.equal('`f.o.o`');
   });
 
   it('doesn\'t allow empty components', () => {
-    assert.throws(() => {
+    expect(() => {
       new FieldPath('foo', '');
-    }, /Argument at index 1 should not be empty./);
+    }).to.throw(/Argument at index 1 should not be empty./);
   });
 
   it('has isEqual() method', () => {

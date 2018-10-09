@@ -37,19 +37,19 @@ describe('Client pool', () => {
       return {};
     });
 
-    expect(clientPool.size).to.eq(0);
+    expect(clientPool.size).to.equal(0);
 
     const operationPromises = deferredPromises(4);
 
     clientPool.run(() => operationPromises[0].promise);
-    expect(clientPool.size).to.eq(1);
+    expect(clientPool.size).to.equal(1);
     clientPool.run(() => operationPromises[1].promise);
-    expect(clientPool.size).to.eq(1);
+    expect(clientPool.size).to.equal(1);
     clientPool.run(() => operationPromises[2].promise);
-    expect(clientPool.size).to.eq(1);
+    expect(clientPool.size).to.equal(1);
 
     clientPool.run(() => operationPromises[3].promise);
-    expect(clientPool.size).to.eq(2);
+    expect(clientPool.size).to.equal(2);
   });
 
   it('re-uses idle instances', () => {
@@ -57,25 +57,25 @@ describe('Client pool', () => {
       return {};
     });
 
-    expect(clientPool.size).to.eq(0);
+    expect(clientPool.size).to.equal(0);
 
     const operationPromises = deferredPromises(5);
 
     const completionPromise =
         clientPool.run(() => operationPromises[0].promise);
-    expect(clientPool.size).to.eq(1);
+    expect(clientPool.size).to.equal(1);
     clientPool.run(() => operationPromises[1].promise);
-    expect(clientPool.size).to.eq(1);
+    expect(clientPool.size).to.equal(1);
     clientPool.run(() => operationPromises[2].promise);
-    expect(clientPool.size).to.eq(2);
+    expect(clientPool.size).to.equal(2);
     clientPool.run(() => operationPromises[3].promise);
-    expect(clientPool.size).to.eq(2);
+    expect(clientPool.size).to.equal(2);
 
     operationPromises[0].resolve();
 
     return completionPromise.then(() => {
       clientPool.run(() => operationPromises[4].promise);
-      expect(clientPool.size).to.eq(2);
+      expect(clientPool.size).to.equal(2);
     });
   });
 
@@ -84,24 +84,24 @@ describe('Client pool', () => {
       return {};
     });
 
-    expect(clientPool.size).to.eq(0);
+    expect(clientPool.size).to.equal(0);
 
     const operationPromises = deferredPromises(4);
     const completionPromises: Array<Promise<void>> = [];
 
     completionPromises.push(clientPool.run(() => operationPromises[0].promise));
-    expect(clientPool.size).to.eq(1);
+    expect(clientPool.size).to.equal(1);
     completionPromises.push(clientPool.run(() => operationPromises[1].promise));
-    expect(clientPool.size).to.eq(1);
+    expect(clientPool.size).to.equal(1);
     completionPromises.push(clientPool.run(() => operationPromises[2].promise));
-    expect(clientPool.size).to.eq(2);
+    expect(clientPool.size).to.equal(2);
     completionPromises.push(clientPool.run(() => operationPromises[3].promise));
-    expect(clientPool.size).to.eq(2);
+    expect(clientPool.size).to.equal(2);
 
     operationPromises.forEach(deferred => deferred.resolve());
 
     return Promise.all(completionPromises).then(() => {
-      expect(clientPool.size).to.eq(1);
+      expect(clientPool.size).to.equal(1);
     });
   });
 
@@ -110,25 +110,25 @@ describe('Client pool', () => {
       return {};
     });
 
-    expect(clientPool.size).to.eq(0);
+    expect(clientPool.size).to.equal(0);
 
     const operationPromises = deferredPromises(4);
     const completionPromises: Array<Promise<void>> = [];
 
     completionPromises.push(clientPool.run(() => operationPromises[0].promise));
-    expect(clientPool.size).to.eq(1);
+    expect(clientPool.size).to.equal(1);
     completionPromises.push(clientPool.run(() => operationPromises[1].promise));
-    expect(clientPool.size).to.eq(1);
+    expect(clientPool.size).to.equal(1);
     completionPromises.push(clientPool.run(() => operationPromises[2].promise));
-    expect(clientPool.size).to.eq(2);
+    expect(clientPool.size).to.equal(2);
     completionPromises.push(clientPool.run(() => operationPromises[3].promise));
-    expect(clientPool.size).to.eq(2);
+    expect(clientPool.size).to.equal(2);
 
     operationPromises.forEach(deferred => deferred.reject());
 
     return Promise.all(completionPromises.map(p => p.catch(() => {})))
         .then(() => {
-          expect(clientPool.size).to.eq(1);
+          expect(clientPool.size).to.equal(1);
         });
   });
 

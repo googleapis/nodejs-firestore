@@ -41,15 +41,14 @@ describe('set() method', () => {
   });
 
   it('requires document name', () => {
-    assert.throws(
-        () => writeBatch.set(),
-        /Argument "documentRef" is not a valid DocumentReference\./);
+    expect(() => writeBatch.set())
+        .to.throw(/Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('requires object', () => {
-    assert.throws(
-        () => writeBatch.set(firestore.doc('sub/doc')),
-        /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
+    expect(() => writeBatch.set(firestore.doc('sub/doc')))
+        .to.throw(
+            /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
   it('accepts preconditions', () => {
@@ -69,9 +68,8 @@ describe('delete() method', () => {
   });
 
   it('requires document name', () => {
-    assert.throws(
-        () => writeBatch.delete(),
-        /Argument "documentRef" is not a valid DocumentReference\./);
+    expect(() => writeBatch.delete())
+        .to.throw(/Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('accepts preconditions', () => {
@@ -93,15 +91,16 @@ describe('update() method', () => {
   });
 
   it('requires document name', () => {
-    assert.throws(
-        () => writeBatch.update({}, {}),
-        /Argument "documentRef" is not a valid DocumentReference\./);
+    expect(() => writeBatch.update({}, {}))
+        .to.throw(/Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('requires object', () => {
-    assert.throws(() => {
+    expect(() => {
       writeBatch.update(firestore.doc('sub/doc'), firestore.doc('sub/doc'));
-    }, /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
+    })
+        .to.throw(
+            /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
   it('accepts preconditions', () => {
@@ -123,15 +122,16 @@ describe('create() method', () => {
   });
 
   it('requires document name', () => {
-    assert.throws(
-        () => writeBatch.create(),
-        /Argument "documentRef" is not a valid DocumentReference\./);
+    expect(() => writeBatch.create())
+        .to.throw(/Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('requires object', () => {
-    assert.throws(() => {
+    expect(() => {
       writeBatch.create(firestore.doc('sub/doc'));
-    }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
+    })
+        .to.throw(
+            /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 });
 
@@ -145,7 +145,7 @@ describe('batch support', () => {
   beforeEach(() => {
     const overrides = {
       commit: (request, options, callback) => {
-        assert.deepStrictEqual(request, {
+        expect(request).to.deep.eq({
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
             {
@@ -292,7 +292,7 @@ describe('batch support', () => {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(err.message, 'Expected exception');
+          expect(err.message).to.equal('Expected exception');
         });
   });
 
@@ -306,9 +306,9 @@ describe('batch support', () => {
     batch.delete(documentName);
     const promise = batch.commit();
 
-    assert.throws(() => {
+    expect(() => {
       batch.set(documentName, {});
-    }, /Cannot modify a WriteBatch that has been committed./);
+    }).to.throw(/Cannot modify a WriteBatch that has been committed./);
 
     return promise;
   });
@@ -392,21 +392,21 @@ describe('batch support', () => {
           .commit()
           .then(() => {
             // The first commit always uses a transcation.
-            assert.equal(1, beginCalled);
-            assert.equal(1, commitCalled);
+            expect(beginCalled).to.equal(1);
+            expect(commitCalled).to.equal(1);
             return firestore.batch().commit();
           })
           .then(() => {
             // The following commits don't use transactions if they happen
             // within two minutes.
-            assert.equal(1, beginCalled);
-            assert.equal(2, commitCalled);
+            expect(beginCalled).to.equal(1);
+            expect(commitCalled).to.equal(2);
             firestore['_lastSuccessfulRequest'] = 1337;
             return firestore.batch().commit();
           })
           .then(() => {
-            assert.equal(2, beginCalled);
-            assert.equal(3, commitCalled);
+            expect(beginCalled).to.equal(2);
+            expect(commitCalled).to.equal(3);
             delete process.env.FUNCTION_TRIGGER_TYPE;
           });
     });

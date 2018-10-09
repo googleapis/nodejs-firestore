@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import assert from 'power-assert';
 
 import * as Firestore from '../src';
@@ -67,15 +68,15 @@ describe('Order', () => {
   }
 
   it('throws on invalid value', () => {
-    assert.throws(() => {
+    expect(() => {
       order.compare(
           {valueType: 'foo'} as InvalidApiUsage,
           {valueType: 'foo'} as InvalidApiUsage);
-    }, /Invalid use of type "object" as a Firestore argument./);
+    }).to.throw(/Invalid use of type "object" as a Firestore argument./);
   });
 
   it('throws on invalid blob', () => {
-    assert.throws(() => {
+    expect(() => {
       order.compare(
           {
             bytesValue: new Uint8Array([1, 2, 3]),
@@ -83,7 +84,7 @@ describe('Order', () => {
           {
             bytesValue: new Uint8Array([1, 2, 3]),
           });
-    }, /Blobs can only be compared if they are Buffers/);
+    }).to.throw(/Blobs can only be compared if they are Buffers/);
   });
 
   it('compares document snapshots by name', () => {
@@ -96,8 +97,9 @@ describe('Order', () => {
 
     docs.sort(firestore.collection('col').comparator());
 
-    assert.deepStrictEqual(
-        docs.map(doc => doc.id), ['doc1', 'doc2', 'doc2', 'doc3']);
+    expect(docs.map(doc => doc.id)).to.deep.eq([
+      'doc1', 'doc2', 'doc2', 'doc3'
+    ]);
   });
 
   it('is correct', () => {
@@ -199,18 +201,20 @@ describe('Order', () => {
         for (let j = 0; j < groups.length; j++) {
           for (const right of groups[j]) {
             let expected = order.primitiveComparator(i, j);
-            assert.equal(
-                order.compare(left, right), expected,
-                'comparing ' + left + ' (' + JSON.stringify(left) + ') to ' +
-                    right + ' (' + JSON.stringify(right) + ') at (' + i + ', ' +
-                    j + ')');
+            expect(order.compare(left, right))
+                .to.equal(
+                    expected,
+                    'comparing ' + left + ' (' + JSON.stringify(left) +
+                        ') to ' + right + ' (' + JSON.stringify(right) +
+                        ') at (' + i + ', ' + j + ')');
 
             expected = order.primitiveComparator(j, i);
-            assert.equal(
-                order.compare(right, left), expected,
-                'comparing ' + right + ' (' + JSON.stringify(right) + ') to ' +
-                    left + ' (' + JSON.stringify(left) + ') at (' + j + ', ' +
-                    i + ')');
+            expect(order.compare(right, left))
+                .to.equal(
+                    expected,
+                    'comparing ' + right + ' (' + JSON.stringify(right) +
+                        ') to ' + left + ' (' + JSON.stringify(left) +
+                        ') at (' + j + ', ' + i + ')');
           }
         }
       }
