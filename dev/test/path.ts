@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import assert from 'power-assert';
 
 import {FieldPath, ResourcePath} from '../src/path';
@@ -112,7 +113,7 @@ describe('FieldPath', () => {
     const path = new FieldPath('a');
     const equals = new FieldPath('a');
     const notEquals = new FieldPath('a', 'b', 'a');
-    assert.ok(path.isEqual(equals));
-    assert.ok(!path.isEqual(notEquals));
+    expect(path.isEqual(equals)).to.be.true;
+    expect(path.isEqual(notEquals)).to.be.false;
   });
 });

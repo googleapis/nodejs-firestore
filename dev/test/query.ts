@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import extend from 'extend';
 import is from 'is';
 import assert from 'power-assert';
@@ -283,44 +284,19 @@ describe('query interface', () => {
     });
   });
 
-  it('has limit() method', () => {
-    const query = firestore.collection('collectionId');
-    assert.ok(query.limit);
-  });
-
-  it('has orderBy() method', () => {
-    const query = firestore.collection('collectionId');
-    assert.ok(query.orderBy);
-  });
-
-  it('has where() method', () => {
-    const query = firestore.collection('collectionId');
-    assert.ok(query.where);
-  });
-
-  it('has stream() method', () => {
-    const query = firestore.collection('collectionId');
-    assert.ok(query.stream);
-  });
-
-  it('has get() method', () => {
-    const query = firestore.collection('collectionId');
-    assert.ok(query.get);
-  });
-
   it('has isEqual() method', () => {
     const query = firestore.collection('collectionId');
 
     const queryEquals = (equals, notEquals) => {
       for (let i = 0; i < equals.length; ++i) {
         for (const equal of equals) {
-          assert.ok(equals[i].isEqual(equal));
-          assert.ok(equal.isEqual(equals[i]));
+          expect(equals[i].isEqual(equal)).to.be.true;
+          expect(equal.isEqual(equals[i])).to.be.true;
         }
 
         for (const notEqual of notEquals) {
-          assert.ok(!equals[i].isEqual(notEqual));
-          assert.ok(!notEqual.isEqual(equals[i]));
+          expect(equals[i].isEqual(notEqual)).to.be.false;
+          expect(notEqual.isEqual(equals[i])).to.be.false;
         }
       }
     };
@@ -430,7 +406,8 @@ describe('query interface', () => {
       return query.get().then(results => {
         assert.equal(0, results.size);
         assert.equal(true, results.empty);
-        assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+        expect(results.readTime.isEqual(new Firestore.Timestamp(5, 6)))
+            .to.be.true;
       });
     });
   });
@@ -490,7 +467,8 @@ describe('query interface', () => {
       return query.get().then(results => {
         assert.equal(2, results.size);
         assert.equal(false, results.empty);
-        assert.ok(results.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+        expect(results.readTime.isEqual(new Firestore.Timestamp(5, 6)))
+            .to.be.true;
         assert.equal('first', results.docs[0].get('first'));
         assert.equal('second', results.docs[1].get('second'));
         assert.equal(2, results.docChanges().length);
@@ -498,10 +476,13 @@ describe('query interface', () => {
         let count = 0;
 
         results.forEach(doc => {
-          assert.ok(is.instanceof(doc, DocumentSnapshot));
-          assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)));
-          assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
-          assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+          expect(is.instanceof(doc, DocumentSnapshot)).to.be.true;
+          expect(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)))
+              .to.be.true;
+          expect(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)))
+              .to.be.true;
+          expect(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)))
+              .to.be.true;
           ++count;
         });
 
@@ -579,7 +560,7 @@ describe('query interface', () => {
       query.stream()
           .on('data',
               doc => {
-                assert.ok(is.instanceof(doc, DocumentSnapshot));
+                expect(doc).to.be.an.instanceOf(DocumentSnapshot);
                 ++received;
               })
           .on('end', () => {

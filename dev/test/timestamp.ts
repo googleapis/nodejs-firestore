@@ -15,6 +15,7 @@
  */
 
 import assert from 'assert';
+import {expect} from 'chai';
 import is from 'is';
 import through2 from 'through2';
 
@@ -74,8 +75,8 @@ describe('timestamps', () => {
         .then(firestore => {
           const expected = new Firestore.Timestamp(-14182920, 123000123);
           return firestore.doc('coll/doc').get().then(res => {
-            assert.ok(res.data()!['moonLanding'].isEqual(expected));
-            assert.ok(res.get('moonLanding')!.isEqual(expected));
+            expect(res.data()!['moonLanding'].isEqual(expected)).to.be.true;
+            expect(res.get('moonLanding')!.isEqual(expected)).to.be.true;
           });
         });
   });
@@ -90,8 +91,8 @@ describe('timestamps', () => {
                {timestampsInSnapshots: false}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
           return firestore.doc('coll/doc').get().then(res => {
-            assert.ok(is.date(res.data()!['moonLanding']));
-            assert.ok(is.date(res.get('moonLanding')));
+            expect(is.date(res.data()!['moonLanding'])).to.be.true;
+            expect(is.date(res.get('moonLanding'))).to.be.true;
             console.error = oldErrorLog;
           });
         });
@@ -140,21 +141,21 @@ describe('timestamps', () => {
           const expected = new Firestore.Timestamp(0, 0);
 
           return firestore.doc('coll/doc').get().then(res => {
-            assert.ok(res.get('moonLanding').isEqual(expected));
+            expect(res.get('moonLanding').isEqual(expected)).to.be.true;
           });
         });
   });
 
   it('constructed using helper', () => {
-    assert.ok(is.instance(Firestore.Timestamp.now(), Firestore.Timestamp));
+    expect(Firestore.Timestamp.now()).to.be.an.instanceOf(Firestore.Timestamp);
 
     let actual = Firestore.Timestamp.fromDate(new Date(123123));
     let expected = new Firestore.Timestamp(123, 123000000);
-    assert.ok(actual.isEqual(expected));
+    expect(actual.isEqual(expected)).to.be.true;
 
     actual = Firestore.Timestamp.fromMillis(123123);
     expected = new Firestore.Timestamp(123, 123000000);
-    assert.ok(actual.isEqual(expected));
+    expect(actual.isEqual(expected)).to.be.true;
   });
 
   it('validates nanoseconds', () => {

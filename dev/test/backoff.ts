@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import assert from 'power-assert';
 
 import {ExponentialBackoff, setTimeoutHandler} from '../src/backoff';
@@ -45,8 +46,8 @@ describe('ExponentialBackoff', () => {
 
   function assertDelayBetween(low, high) {
     const actual = observedDelays.shift()!;
-    assert.ok(actual >= low);
-    assert.ok(actual <= high);
+    expect(actual).to.be.at.least(low);
+    expect(actual).to.be.at.most(high);
   }
 
   it('doesn\'t delay first attempt', async () => {

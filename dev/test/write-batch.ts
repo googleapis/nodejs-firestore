@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import assert from 'power-assert';
 
 import {google} from '../protos/firestore_proto_api';
@@ -243,10 +244,14 @@ describe('batch support', () => {
   });
 
   function verifyResponse(writeResults) {
-    assert.ok(writeResults[0].writeTime.isEqual(new Firestore.Timestamp(0, 0)));
-    assert.ok(writeResults[1].writeTime.isEqual(new Firestore.Timestamp(1, 1)));
-    assert.ok(writeResults[2].writeTime.isEqual(new Firestore.Timestamp(2, 2)));
-    assert.ok(writeResults[3].writeTime.isEqual(new Firestore.Timestamp(3, 3)));
+    expect(writeResults[0].writeTime.isEqual(new Firestore.Timestamp(0, 0)))
+        .to.be.true;
+    expect(writeResults[1].writeTime.isEqual(new Firestore.Timestamp(1, 1)))
+        .to.be.true;
+    expect(writeResults[2].writeTime.isEqual(new Firestore.Timestamp(2, 2)))
+        .to.be.true;
+    expect(writeResults[3].writeTime.isEqual(new Firestore.Timestamp(3, 3)))
+        .to.be.true;
   }
 
   it('accepts multiple operations', () => {
@@ -350,7 +355,7 @@ describe('batch support', () => {
       batch.set(documentName, {});
 
       return batch.commit().then(results => {
-        assert.ok(results[0].isEqual(results[1]));
+        expect(results[0].isEqual(results[1])).to.be.true;
       });
     });
   });

@@ -17,7 +17,6 @@
 
 import {expect} from 'chai';
 
-
 import * as Firestore from '../src/index';
 import DocumentReference = Firestore.DocumentReference;
 import {createInstance, DATABASE_ROOT, document} from './util/helpers';
