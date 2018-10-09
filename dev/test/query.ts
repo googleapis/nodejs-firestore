@@ -240,7 +240,7 @@ function buildQuery(...protoComponents) {
 }
 
 function requestEquals(actual, ...protoComponents) {
-  assert.deepStrictEqual(actual, buildQuery.apply(null, protoComponents));
+  expect(actual).to.deep.eq(buildQuery.apply(null, protoComponents));
 }
 
 function document(name) {
@@ -386,9 +386,9 @@ describe('query interface', () => {
       query = query.orderBy('foo');
       query = query.limit(10);
       return query.get().then(results => {
-        assert.equal(query, results.query);
-        assert.equal(0, results.size);
-        assert.equal(true, results.empty);
+        expect(results.query).to.equal(query);
+        expect(results.size).to.equal(0);
+        expect(results.empty).to.be.true;
       });
     });
   });
@@ -404,8 +404,8 @@ describe('query interface', () => {
     return createInstance(overrides).then(firestore => {
       const query = firestore.collection('collectionId');
       return query.get().then(results => {
-        assert.equal(0, results.size);
-        assert.equal(true, results.empty);
+        expect(results.size).to.equal(0);
+        expect(results.empty).to.be.true;
         expect(results.readTime.isEqual(new Firestore.Timestamp(5, 6)))
             .to.be.true;
       });
@@ -428,7 +428,7 @@ describe('query interface', () => {
             throw new Error('Unexpected success');
           })
           .catch(() => {
-            assert.equal(5, attempts);
+            expect(attempts).to.equal(5);
           });
     });
   });
@@ -465,13 +465,13 @@ describe('query interface', () => {
     return createInstance(overrides).then(firestore => {
       const query = firestore.collection('collectionId');
       return query.get().then(results => {
-        assert.equal(2, results.size);
-        assert.equal(false, results.empty);
+        expect(results.size).to.equal(2);
+        expect(results.empty).to.be.false;
         expect(results.readTime.isEqual(new Firestore.Timestamp(5, 6)))
             .to.be.true;
-        assert.equal('first', results.docs[0].get('first'));
-        assert.equal('second', results.docs[1].get('second'));
-        assert.equal(2, results.docChanges().length);
+        expect(results.docs[0].get('first')).to.equal('first');
+        expect(results.docs[1].get('second')).to.equal('second');
+        expect(results.docChanges()).to.have.length(2);
 
         let count = 0;
 
@@ -486,7 +486,7 @@ describe('query interface', () => {
           ++count;
         });
 
-        assert.equal(2, count);
+        expect(2).to.equal(count);
       });
     });
   });
@@ -503,7 +503,7 @@ describe('query interface', () => {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
-          assert.equal(err.message, 'Expected error');
+          expect(err.message).to.equal('Expected error');
         });
   });
 
@@ -521,7 +521,7 @@ describe('query interface', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected error');
+            expect(err.message).to.equal('Expected error');
           });
     });
   });
@@ -540,7 +540,7 @@ describe('query interface', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(err.message, 'Expected error');
+            expect(err.message).to.equal('Expected error');
           });
     });
   });
@@ -564,7 +564,7 @@ describe('query interface', () => {
                 ++received;
               })
           .on('end', () => {
-            assert.equal(received, 2);
+            expect(received).to.equal(2);
             callback();
           });
     });
@@ -1644,7 +1644,7 @@ describe('endBefore() interface', () => {
 
     const overrides = {
       runQuery: (request) => {
-        assert.deepStrictEqual(request, expectedResult);
+        expect(request).to.deep.eq(expectedResult);
         return stream();
       }
     };
