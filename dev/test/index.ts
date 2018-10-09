@@ -442,7 +442,8 @@ describe('instantiation', () => {
     expect((Firestore.DocumentSnapshot)).to.exist;
     expect(Firestore.DocumentSnapshot.name).to.equal('DocumentSnapshot');
     expect((Firestore.QueryDocumentSnapshot)).to.exist;
-    expect(Firestore.QueryDocumentSnapshot.name).to.equal('QueryDocumentSnapshot');
+    expect(Firestore.QueryDocumentSnapshot.name)
+        .to.equal('QueryDocumentSnapshot');
     expect((Firestore.Query)).to.exist;
     expect(Firestore.Query.name).to.equal('Query');
     expect(Firestore.QuerySnapshot).to.exist;
