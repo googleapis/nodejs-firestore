@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import extend from 'extend';
 import is from 'is';
 import assert from 'power-assert';
@@ -256,8 +257,8 @@ describe('DocumentReference interface', () => {
     const doc1 = firestore.doc('coll/doc1');
     const doc1Equals = firestore.doc('coll/doc1');
     const doc2 = firestore.doc('coll/doc1/coll/doc1');
-    assert.ok(doc1.isEqual(doc1Equals));
-    assert.ok(!doc1.isEqual(doc2));
+    expect(doc1.isEqual(doc1Equals)).to.be.true;
+    expect(doc1.isEqual(doc2)).to.be.false;
   });
 });
 
@@ -366,9 +367,8 @@ describe('serialize document', () => {
     const overrides = {
       commit: (request, options, callback) => {
         const fields = request.writes[0].update.fields;
-        assert.ok(
-            typeof fields.nanValue.doubleValue === 'number' &&
-            isNaN(fields.nanValue.doubleValue));
+        expect(fields.nanValue.doubleValue).to.be.a('number');
+        expect(fields.nanValue.doubleValue).to.be.NaN;
         assert.equal(fields.posInfinity.doubleValue, Infinity);
         assert.equal(fields.negInfinity.doubleValue, -Infinity);
 
@@ -650,9 +650,12 @@ describe('get document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then((result) => {
-        assert.ok(result.createTime!.isEqual(new Firestore.Timestamp(1, 2)));
-        assert.ok(result.updateTime!.isEqual(new Firestore.Timestamp(3, 4)));
-        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+        expect(result.createTime!.isEqual(new Firestore.Timestamp(1, 2)))
+            .to.be.true;
+        expect(result.updateTime!.isEqual(new Firestore.Timestamp(3, 4)))
+            .to.be.true;
+        expect(result.readTime.isEqual(new Firestore.Timestamp(5, 6)))
+            .to.be.true;
       });
     });
   });
@@ -667,7 +670,8 @@ describe('get document', () => {
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(result => {
         assert.equal(result.exists, false);
-        assert.ok(result.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+        expect(result.readTime.isEqual(new Firestore.Timestamp(5, 6)))
+            .to.be.true;
         assert.equal(null, result.data());
         assert.equal(null, result.get('foo'));
       });
@@ -756,8 +760,9 @@ describe('delete document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').delete().then(res => {
-        assert.ok(res.writeTime.isEqual(
-            new Firestore.Timestamp(479978400, 123000000)));
+        expect(res.writeTime.isEqual(
+                   new Firestore.Timestamp(479978400, 123000000)))
+            .to.be.true;
       });
     });
   });
@@ -1389,8 +1394,9 @@ describe('update document', () => {
       return firestore.doc('collectionId/documentId')
           .update({foo: 'bar'})
           .then(res => {
-            assert.ok(res.writeTime.isEqual(
-                new Firestore.Timestamp(479978400, 123000000)));
+            expect(res.writeTime.isEqual(
+                       new Firestore.Timestamp(479978400, 123000000)))
+                .to.be.true;
           });
     });
   });

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import extend from 'extend';
 import * as gax from 'google-gax';
 import is from 'is';
@@ -426,36 +427,37 @@ describe('instantiation', () => {
 
   it('exports all types', () => {
     // Ordering as per firestore.d.ts
-    assert.ok(is.defined(Firestore.Firestore));
+    expect((Firestore.Firestore)).to.exist;
     assert.equal(Firestore.Firestore.name, 'Firestore');
-    assert.ok(is.defined(Firestore.Timestamp));
+    expect((Firestore.Timestamp)).to.exist;
     assert.equal(Firestore.Timestamp.name, 'Timestamp');
-    assert.ok(is.defined(Firestore.GeoPoint));
+    expect((Firestore.GeoPoint)).to.exist;
     assert.equal(Firestore.GeoPoint.name, 'GeoPoint');
-    assert.ok(is.defined(Firestore.Transaction));
+    expect((Firestore.Transaction)).to.exist;
     assert.equal(Firestore.Transaction.name, 'Transaction');
-    assert.ok(is.defined(Firestore.WriteBatch));
+    expect((Firestore.WriteBatch)).to.exist;
     assert.equal(Firestore.WriteBatch.name, 'WriteBatch');
-    assert.ok(is.defined(Firestore.DocumentReference));
+    expect((Firestore.DocumentReference)).to.exist;
     assert.equal(Firestore.DocumentReference.name, 'DocumentReference');
-    assert.ok(is.defined(Firestore.WriteResult));
+    expect((Firestore.WriteResult)).to.exist;
     assert.equal(Firestore.WriteResult.name, 'WriteResult');
-    assert.ok(is.defined(Firestore.DocumentSnapshot));
+    expect((Firestore.DocumentSnapshot)).to.exist;
     assert.equal(Firestore.DocumentSnapshot.name, 'DocumentSnapshot');
-    assert.ok(is.defined(Firestore.QueryDocumentSnapshot));
+    expect((Firestore.QueryDocumentSnapshot)).to.exist;
     assert.equal(Firestore.QueryDocumentSnapshot.name, 'QueryDocumentSnapshot');
-    assert.ok(is.defined(Firestore.Query));
+    expect((Firestore.Query)).to.exist;
     assert.equal(Firestore.Query.name, 'Query');
-    assert.ok(is.defined(Firestore.QuerySnapshot));
+    expect(Firestore.QuerySnapshot).to.exist;
     assert.equal(Firestore.QuerySnapshot.name, 'QuerySnapshot');
-    assert.ok(is.defined(Firestore.CollectionReference));
+    expect((Firestore.CollectionReference)).to.exist;
     assert.equal(Firestore.CollectionReference.name, 'CollectionReference');
-    assert.ok(is.defined(Firestore.FieldValue));
+    expect((Firestore.FieldValue)).to.exist;
     assert.equal(Firestore.FieldValue.name, 'FieldValue');
-    assert.ok(is.defined(Firestore.FieldPath));
+    expect((Firestore.FieldPath)).to.exist;
     assert.equal(Firestore.Firestore.name, 'Firestore');
-    assert.ok(!Firestore.FieldValue.serverTimestamp().isEqual(
-        Firestore.FieldValue.delete()));
+    expect(Firestore.FieldValue.serverTimestamp().isEqual(
+               Firestore.FieldValue.delete()))
+        .to.be.false;
   });
 });
 
@@ -505,8 +507,9 @@ describe('snapshot_() method', () => {
     assert.equal(
         data.geoPointValue.toString(),
         'GeoPoint { latitude: 50.1430847, longitude: -122.947778 }');
-    assert.ok(data.geoPointValue.isEqual(
-        new Firestore.GeoPoint(50.1430847, -122.947778)));
+    expect(data.geoPointValue.isEqual(
+               new Firestore.GeoPoint(50.1430847, -122.947778)))
+        .to.be.true;
   }
 
   beforeEach(() => {
@@ -529,9 +532,9 @@ describe('snapshot_() method', () => {
 
     assert.equal(true, doc.exists);
     assert.deepStrictEqual({foo: bytesData}, doc.data());
-    assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)));
-    assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)));
-    assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+    expect(doc.createTime.isEqual(new Firestore.Timestamp(1, 2))).to.be.true;
+    expect(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4))).to.be.true;
+    expect(doc.readTime.isEqual(new Firestore.Timestamp(5, 6))).to.be.true;
   });
 
   it('handles Proto3 JSON together with existing types', () => {
@@ -559,9 +562,10 @@ describe('snapshot_() method', () => {
       b: Firestore.Timestamp.fromDate(new Date('1985-03-18T07:20:00.000Z')),
       c: bytesData,
     });
-    assert.ok(doc.createTime.isEqual(new Firestore.Timestamp(1, 2000000)));
-    assert.ok(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4000)));
-    assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+    expect(doc.createTime.isEqual(new Firestore.Timestamp(1, 2000000)))
+        .to.be.true;
+    expect(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4000))).to.be.true;
+    expect(doc.readTime.isEqual(new Firestore.Timestamp(5, 6))).to.be.true;
   });
 
   it('deserializes all supported types from Protobuf JS', () => {
@@ -620,7 +624,7 @@ describe('snapshot_() method', () => {
         '1970-01-01T00:00:05.000000006Z', 'json');
 
     assert.equal(false, doc.exists);
-    assert.ok(doc.readTime.isEqual(new Firestore.Timestamp(5, 6)));
+    expect(doc.readTime.isEqual(new Firestore.Timestamp(5, 6))).to.be.true;
   });
 
   it('handles invalid encoding format ', () => {
@@ -643,7 +647,7 @@ describe('doc() method', () => {
 
   it('returns DocumentReference', () => {
     const documentRef = firestore.doc('collectionId/documentId');
-    assert.ok(documentRef instanceof Firestore.DocumentReference);
+    expect(documentRef).to.be.an.instanceOf(Firestore.DocumentReference);
   });
 
   it('requires document path', () => {
@@ -682,7 +686,7 @@ describe('collection() method', () => {
 
   it('returns collection', () => {
     const collection = firestore.collection('col1/doc1/col2');
-    assert.ok(is.instance(collection, Firestore.CollectionReference));
+    expect(collection).to.be.an.instanceOf(Firestore.CollectionReference);
   });
 
   it('requires collection id', () => {
@@ -700,8 +704,8 @@ describe('collection() method', () => {
 
   it('exposes properties', () => {
     const collection = firestore.collection('collectionId');
-    assert.ok(collection.id);
-    assert.ok(collection.doc);
+    expect(collection.id).to.exist;
+    expect(collection.doc).to.exist;
     assert.equal(collection.id, 'collectionId');
   });
 });
@@ -736,10 +740,10 @@ describe('getAll() method', () => {
       const doc = arguments[i + 1];
 
       if (doc.found) {
-        assert.ok(result[i].exists);
+        expect(result[i].exists).to.be.true;
         assert.equal(result[i].ref.formattedName, doc.found.name);
       } else {
-        assert.ok(!result[i].exists);
+        expect(result[i].exists).to.be.false;
         assert.equal(result[i].ref.formattedName, doc.missing);
       }
     }

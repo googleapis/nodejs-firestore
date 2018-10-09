@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import duplexify from 'duplexify';
 import is from 'is';
 import assert from 'power-assert';
@@ -46,8 +47,8 @@ function docsEqual(actual, expected) {
   for (let i = 0; i < actual.size; i++) {
     assert.equal(actual[i].ref.id, expected[i].ref.id);
     assert.deepStrictEqual(actual[i].data(), expected[i].data());
-    assert.ok(is.string(expected[i].createTime));
-    assert.ok(is.string(expected[i].updateTime));
+    expect((expected[i].createTime)).to.be.a('string');
+    expect((expected[i].updateTime)).to.be.a('string');
   }
 }
 
@@ -72,8 +73,9 @@ function snapshotsEqual(lastSnapshot, version, actual, expected) {
         actualDocChanges[i].doc.data(), expected.docChanges[i].doc.data());
     const readVersion =
         actualDocChanges[i].type === 'removed' ? version - 1 : version;
-    assert.ok(actualDocChanges[i].doc.readTime.isEqual(
-        new Firestore.Timestamp(0, readVersion)));
+    expect(actualDocChanges[i].doc.readTime.isEqual(
+               new Firestore.Timestamp(0, readVersion)))
+        .to.be.true;
 
     if (actualDocChanges[i].oldIndex !== -1) {
       localDocs.splice(actualDocChanges[i].oldIndex, 1);
@@ -87,7 +89,8 @@ function snapshotsEqual(lastSnapshot, version, actual, expected) {
 
   docsEqual(actual.docs, expected.docs);
   docsEqual(localDocs, expected.docs);
-  assert.ok(actual.readTime.isEqual(new Firestore.Timestamp(0, version)));
+  expect(actual.readTime.isEqual(new Firestore.Timestamp(0, version)))
+      .to.be.true;
   assert.equal(actual.size, expected.docs.length);
 
   return {docs: actual.docs, docChanges: actualDocChanges};
@@ -1803,7 +1806,8 @@ describe('Query watch', () => {
                           snapshot,
                           snapshot => {
                             firstSnapshot = snapshot;
-                            assert.ok(firstSnapshot.isEqual(firstSnapshot));
+                            expect(firstSnapshot.isEqual(firstSnapshot))
+                                .to.be.true;
                             watchHelper.sendDoc(doc1, {foo: 'a'});
                             watchHelper.sendDoc(doc2, {foo: 'b'});
                             watchHelper.sendDoc(doc3, {foo: 'c'});
@@ -1813,38 +1817,41 @@ describe('Query watch', () => {
                            snapshot,
                            snapshot => {
                              secondSnapshot = snapshot;
-                             assert.ok(secondSnapshot.isEqual(secondSnapshot));
+                             expect(secondSnapshot.isEqual(secondSnapshot))
+                                 .to.be.true;
                              watchHelper.sendDocDelete(doc1);
                              watchHelper.sendDoc(doc2, {foo: 'bar'});
                              watchHelper.sendDoc(doc4, {foo: 'd'});
                            }))
                    .then(snapshot => {
                      thirdSnapshot = snapshot;
-                     assert.ok(thirdSnapshot.isEqual(thirdSnapshot));
+                     expect(thirdSnapshot.isEqual(thirdSnapshot)).to.be.true;
                    });
              })
-          .then(() => initialSnapshot(snapshot => {
-                  return nextSnapshot(
-                             snapshot,
-                             snapshot => {
-                               assert.ok(snapshot.isEqual(firstSnapshot));
-                               watchHelper.sendDoc(doc1, {foo: 'a'});
-                               watchHelper.sendDoc(doc2, {foo: 'b'});
-                               watchHelper.sendDoc(doc3, {foo: 'c'});
-                             })
-                      .then(
-                          snapshot => nextSnapshot(
-                              snapshot,
-                              snapshot => {
-                                assert.ok(snapshot.isEqual(secondSnapshot));
-                                watchHelper.sendDocDelete(doc1);
-                                watchHelper.sendDoc(doc2, {foo: 'bar'});
-                                watchHelper.sendDoc(doc4, {foo: 'd'});
-                              }))
-                      .then(snapshot => {
-                        assert.ok(snapshot.isEqual(thirdSnapshot));
-                      });
-                }));
+          .then(
+              () => initialSnapshot(snapshot => {
+                return nextSnapshot(
+                           snapshot,
+                           snapshot => {
+                             expect(snapshot.isEqual(firstSnapshot)).to.be.true;
+                             watchHelper.sendDoc(doc1, {foo: 'a'});
+                             watchHelper.sendDoc(doc2, {foo: 'b'});
+                             watchHelper.sendDoc(doc3, {foo: 'c'});
+                           })
+                    .then(
+                        snapshot => nextSnapshot(
+                            snapshot,
+                            snapshot => {
+                              expect(snapshot.isEqual(secondSnapshot))
+                                  .to.be.true;
+                              watchHelper.sendDocDelete(doc1);
+                              watchHelper.sendDoc(doc2, {foo: 'bar'});
+                              watchHelper.sendDoc(doc4, {foo: 'd'});
+                            }))
+                    .then(snapshot => {
+                      expect(snapshot.isEqual(thirdSnapshot)).to.be.true;
+                    });
+              }));
     });
 
     it('for equal snapshots with materialized changes', () => {
@@ -1867,7 +1874,7 @@ describe('Query watch', () => {
                          }).then(snapshot => {
                     const materializedDocs = snapshot.docs;
                     assert.equal(materializedDocs.length, 3);
-                    assert.ok(snapshot.isEqual(firstSnapshot));
+                    expect(snapshot.isEqual(firstSnapshot)).to.be.true;
                   });
                 }));
     });
@@ -1887,7 +1894,7 @@ describe('Query watch', () => {
                   return nextSnapshot(snapshot, () => {
                            watchHelper.sendDoc(doc1, {foo: 'a'});
                          }).then(snapshot => {
-                    assert.ok(!snapshot.isEqual(firstSnapshot));
+                    expect(snapshot.isEqual(firstSnapshot)).to.be.false;
                   });
                 }));
     });
@@ -1900,17 +1907,19 @@ describe('Query watch', () => {
                         watchHelper.sendDoc(doc1, {foo: 'a'});
                       }).then(snapshot => {
                  firstSnapshot = snapshot;
-                 assert.ok(snapshot.docChanges()[0].isEqual(
-                     firstSnapshot.docChanges()[0]));
+                 expect(snapshot.docChanges()[0].isEqual(
+                            firstSnapshot.docChanges()[0]))
+                     .to.be.true;
                });
              })
           .then(() => initialSnapshot(snapshot => {
                   return nextSnapshot(snapshot, () => {
                            watchHelper.sendDoc(doc1, {foo: 'b'});
                          }).then(snapshot => {
-                    assert.ok(!snapshot.isEqual(firstSnapshot));
-                    assert.ok(!snapshot.docChanges()[0].isEqual(
-                        firstSnapshot.docChanges()[0]));
+                    expect(snapshot.isEqual(firstSnapshot)).to.be.false;
+                    expect(snapshot.docChanges()[0].isEqual(
+                               firstSnapshot.docChanges()[0]))
+                        .to.be.false;
                   });
                 }));
     });
@@ -1949,7 +1958,7 @@ describe('Query watch', () => {
                                 watchHelper.sendDoc(doc3, {foo: 'c'});
                               }))
                       .then(snapshot => {
-                        assert.ok(!snapshot.isEqual(firstSnapshot));
+                        expect(snapshot.isEqual(firstSnapshot)).to.be.false;
                       });
                 }));
     });
@@ -1968,7 +1977,7 @@ describe('Query watch', () => {
                   return nextSnapshot(snapshot, () => {
                            watchHelper.sendDoc(doc1, {foo: 1});
                          }).then(snapshot => {
-                    assert.ok(!snapshot.isEqual(originalSnapshot));
+                    expect(snapshot.isEqual(originalSnapshot)).to.be.false;
                   });
                 }));
     });
@@ -1987,7 +1996,7 @@ describe('Query watch', () => {
               watchHelper.sendCurrent();
               watchHelper.sendSnapshot(1);
               return watchHelper.await('snapshot').then(snapshot => {
-                assert.ok(!snapshot.isEqual(firstSnapshot));
+                expect(snapshot.isEqual(firstSnapshot)).to.be.false;
               });
             });
           });
@@ -1995,9 +2004,9 @@ describe('Query watch', () => {
 
     it('for objects with different type', () => {
       return initialSnapshot(snapshot => {
-        assert.ok(!snapshot.isEqual('foo'));
-        assert.ok(!snapshot.isEqual({}));
-        assert.ok(!snapshot.isEqual(new Firestore.GeoPoint(0, 0)));
+        expect(snapshot.isEqual('foo')).to.be.false;
+        expect(snapshot.isEqual({})).to.be.false;
+        expect(snapshot.isEqual(new Firestore.GeoPoint(0, 0))).to.be.false;
       });
     });
   });
@@ -2174,10 +2183,10 @@ describe('DocumentReference watch', () => {
           })
           .then(snapshot => {
             assert.equal(snapshot.exists, true);
-            assert.ok(
-                snapshot.createTime.isEqual(new Firestore.Timestamp(1, 2)));
-            assert.ok(
-                snapshot.updateTime.isEqual(new Firestore.Timestamp(3, 1)));
+            expect(snapshot.createTime.isEqual(new Firestore.Timestamp(1, 2)))
+                .to.be.true;
+            expect(snapshot.updateTime.isEqual(new Firestore.Timestamp(3, 1)))
+                .to.be.true;
             assert.equal(snapshot.get('foo'), 'a');
 
             // Change the document.
