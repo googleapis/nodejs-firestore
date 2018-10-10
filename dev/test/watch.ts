@@ -16,8 +16,6 @@
 
 import {expect} from 'chai';
 import duplexify from 'duplexify';
-import is from 'is';
-import assert from 'power-assert';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
@@ -1573,7 +1571,7 @@ describe('Query watch', () => {
           .then(() => streamHelper.awaitOpen())
           .then(request => {
             expect(streamHelper.streamCount).to.equal(2);
-            assert.notEqual(oldRequestStream, streamHelper.writeStream);
+            expect(oldRequestStream).to.not.equal(streamHelper.writeStream);
             expect(collQueryJSON()).to.deep.eq(request);
 
             watchHelper.sendAddTarget();

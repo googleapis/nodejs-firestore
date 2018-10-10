@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import assert from 'assert';
 import {expect} from 'chai';
 import is from 'is';
 import through2 from 'through2';

@@ -17,12 +17,10 @@
 import {expect} from 'chai';
 import extend from 'extend';
 import is from 'is';
-import assert from 'power-assert';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
-import {DocumentSnapshot, QueryDocumentSnapshot} from '../src';
 import {AnyDuringMigration, AnyJs} from '../src/types';
 
 import {createInstance, InvalidApiUsage} from './util/helpers';
@@ -546,9 +544,8 @@ describe('deserialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(res => {
-        assert.ok(
-            typeof res.get('nanValue') === 'number' &&
-            isNaN(res.get('nanValue')));
+        expect(res.get('nanValue')).to.be.a('number');
+        expect(res.get('nanValue')).to.be.NaN;
         expect(res.get('posInfinity')).to.equal(Infinity);
         expect(res.get('negInfinity')).to.equal(-Infinity);
       });
@@ -1232,8 +1229,9 @@ describe('create document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').create({}).then(res => {
-        assert.ok(res.writeTime.isEqual(
-            new Firestore.Timestamp(479978400, 123000000)));
+        expect(res.writeTime.isEqual(
+                   new Firestore.Timestamp(479978400, 123000000)))
+            .to.be.true;
       });
     });
   });

@@ -15,7 +15,6 @@
  */
 
 import {expect} from 'chai';
-import assert from 'power-assert';
 
 import * as Firestore from '../src';
 import {DocumentSnapshot} from '../src/document';

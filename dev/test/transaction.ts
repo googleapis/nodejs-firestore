@@ -16,7 +16,6 @@
 
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import assert from 'power-assert';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
@@ -293,7 +292,7 @@ describe('failed transactions', () => {
   it('requires update function', () => {
     const overrides = {
       beginTransaction: () => {
-        assert.fail();
+        expect.fail();
       }
     };
 
@@ -306,7 +305,7 @@ describe('failed transactions', () => {
   it('requires valid retry number', () => {
     const overrides = {
       beginTransaction: () => {
-        assert.fail();
+        expect.fail();
       }
     };
 
