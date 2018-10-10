@@ -23,7 +23,7 @@ import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {AnyDuringMigration, AnyJs} from '../src/types';
 
-import {createInstance, InvalidApiUsage} from './util/helpers';
+import {createInstance, document, InvalidApiUsage} from './util/helpers';
 
 const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
                          .ServerValue.REQUEST_TIME;
@@ -95,30 +95,6 @@ function remove(document, precondition?) {
   }
 
   return {writes};
-}
-
-function document(...fieldsAndValues) {
-  const document = {
-    name: `${DATABASE_ROOT}/documents/collectionId/documentId`,
-    fields: {},
-    createTime: {seconds: 1, nanos: 2},
-    updateTime: {seconds: 3, nanos: 4},
-  };
-
-  for (let i = 0; i < arguments.length; i += 2) {
-    const field = arguments[i];
-    const value = arguments[i + 1];
-
-    if (is.string(value)) {
-      document.fields[field] = {
-        stringValue: value,
-      };
-    } else {
-      document.fields[field] = value;
-    }
-  }
-
-  return document;
 }
 
 function updateMask(...fields) {
@@ -272,7 +248,7 @@ describe('serialize document', () => {
   it('serializes to Protobuf JS', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, set(document('bytes', {
+        requestEquals(request, set(document('documentId', 'bytes', {
                         bytesValue: Buffer.from('AG=', 'base64'),
                       })));
         callback(null, writeResult(1));
@@ -308,7 +284,7 @@ describe('serialize document', () => {
   it('serializes date before 1970', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, set(document('moonLanding', {
+        requestEquals(request, set(document('documentId', 'moonLanding', {
                         timestampValue: {
                           nanos: 123000000,
                           seconds: -14182920,
@@ -329,7 +305,7 @@ describe('serialize document', () => {
   it('serializes unicode keys', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, set(document('😀', '😜')));
+        requestEquals(request, set(document('documentId', '😀', '😜')));
         callback(null, writeResult(1));
       }
     };
@@ -347,7 +323,8 @@ describe('serialize document', () => {
         requestEquals(
             request,
             set(document(
-                'blob1', {bytesValue: new Uint8Array([0, 1, 2])}, 'blob2', {
+                'documentId', 'blob1', {bytesValue: new Uint8Array([0, 1, 2])},
+                'blob2', {
                   bytesValue: Buffer.from([0, 1, 2]),
                 })));
 
@@ -434,7 +411,7 @@ describe('serialize document', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
-            request, set(document('ref', {
+            request, set(document('documentId', 'ref', {
               referenceValue: `projects/${
                   PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
             })));
@@ -460,8 +437,7 @@ describe('deserialize document', () => {
   it('deserializes Protobuf JS', () => {
     const overrides = {
       batchGetDocuments: () => {
-        return stream(found(document('foo', {
-          valueType: 'bytesValue',
+        return stream(found(document('documentId', 'foo', {
           bytesValue: Buffer.from('AG=', 'base64'),
         })));
       }
@@ -483,7 +459,7 @@ describe('deserialize document', () => {
           ++attempts;
           throw new Error('Expected error');
         } else {
-          return stream(found(document()));
+          return stream(found(document('documentId')));
         }
       }
     };
@@ -498,8 +474,7 @@ describe('deserialize document', () => {
   it('deserializes date before 1970', () => {
     const overrides = {
       batchGetDocuments: () => {
-        return stream(found(document('moonLanding', {
-          valueType: 'timestampValue',
+        return stream(found(document('documentId', 'moonLanding', {
           timestampValue: {
             nanos: 123000000,
             seconds: -14182920,
@@ -519,7 +494,7 @@ describe('deserialize document', () => {
   it('returns undefined for unknown fields', () => {
     const overrides = {
       batchGetDocuments: () => {
-        return stream(found(document()));
+        return stream(found(document('documentId')));
       }
     };
 
@@ -535,10 +510,8 @@ describe('deserialize document', () => {
     const overrides = {
       batchGetDocuments: () => {
         return stream(found(document(
-            'nanValue', {valueType: 'doubleValue', doubleValue: 'NaN'},
-            'posInfinity', {valueType: 'doubleValue', doubleValue: 'Infinity'},
-            'negInfinity',
-            {valueType: 'doubleValue', doubleValue: '-Infinity'})));
+            'documentId', 'nanValue', {doubleValue: NaN}, 'posInfinity',
+            {doubleValue: Infinity}, 'negInfinity', {doubleValue: -Infinity})));
       }
     };
 
@@ -555,7 +528,9 @@ describe('deserialize document', () => {
   it('doesn\'t deserialize unsupported types', () => {
     const overrides = {
       batchGetDocuments: () => {
-        return stream(found(document('moonLanding', {valueType: 'foo'})));
+        return stream(found(document(
+            'documentId', 'moonLanding',
+            {valueType: 'foo'} as InvalidApiUsage)));
       }
     };
 
@@ -573,10 +548,9 @@ describe('deserialize document', () => {
   it('doesn\'t deserialize invalid latitude', () => {
     const overrides = {
       batchGetDocuments: () => {
-        return stream(found(document('geoPointValue', {
-          valueType: 'geoPointValue',
+        return stream(found(document('documentId', 'geoPointValue', {
           geoPointValue: {
-            latitude: 'foo',
+            latitude: 'foo' as InvalidApiUsage,
             longitude: -122.947778,
           },
         })));
@@ -594,11 +568,10 @@ describe('deserialize document', () => {
   it('doesn\'t deserialize invalid longitude', () => {
     const overrides = {
       batchGetDocuments: () => {
-        return stream(found(document('geoPointValue', {
-          valueType: 'geoPointValue',
+        return stream(found(document('documentId', 'geoPointValue', {
           geoPointValue: {
             latitude: 50.1430847,
-            longitude: 'foo',
+            longitude: 'foo' as InvalidApiUsage,
           },
         })));
       }
@@ -619,12 +592,10 @@ describe('get document', () => {
       batchGetDocuments: request => {
         requestEquals(request, retrieve());
 
-        return stream(found(document('foo', {
-          valueType: 'mapValue',
+        return stream(found(document('documentId', 'foo', {
           mapValue: {
             fields: {
               bar: {
-                valueType: 'stringValue',
                 stringValue: 'foobar',
               },
             },
@@ -648,7 +619,7 @@ describe('get document', () => {
   it('returns read, update and create times', () => {
     const overrides = {
       batchGetDocuments: () => {
-        return stream(found(document()));
+        return stream(found(document('documentId')));
       }
     };
 
@@ -667,7 +638,9 @@ describe('get document', () => {
   it('returns not found', () => {
     const overrides = {
       batchGetDocuments: () => {
-        return stream(missing(document()));
+        return stream(missing(document(
+            'documentId',
+            )));
       }
     };
 
@@ -700,8 +673,7 @@ describe('get document', () => {
   it('requires field path', () => {
     const overrides = {
       batchGetDocuments: () => {
-        return stream(found(document('foo', {
-          valueType: 'mapValue',
+        return stream(found(document('documentId', 'foo', {
           mapValue: {
             fields: {
               bar: {
@@ -842,7 +814,7 @@ describe('set document', () => {
   it('supports empty map', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, set(document()));
+        requestEquals(request, set(document('documentId')));
         callback(null, writeResult(1));
       }
     };
@@ -855,7 +827,7 @@ describe('set document', () => {
   it('supports nested empty map', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, set(document('a', {
+        requestEquals(request, set(document('documentId', 'a', {
                         mapValue: {},
                       })));
         callback(null, writeResult(1));
@@ -894,8 +866,8 @@ describe('set document', () => {
       commit: (request, options, callback) => {
         requestEquals(
             request,
-            set(document(),  // The empty write clears the data on the
-                             // server.
+            set(document('documentId'),  // The empty write clears the data on
+                                         // the server.
                 null, fieldTransform('a', REQUEST_TIME, 'b.c', REQUEST_TIME)));
         callback(null, writeResult(2));
       }
@@ -914,7 +886,7 @@ describe('set document', () => {
       commit: (request, options, callback) => {
         requestEquals(
             request,
-            set(document('a', 'b', 'c', {
+            set(document('documentId', 'a', 'b', 'c', {
                   mapValue: {
                     fields: {
                       d: {
@@ -942,7 +914,7 @@ describe('set document', () => {
         requestEquals(
             request,
             set(document(
-                    'a', 'foo', 'b', {
+                    'documentId', 'a', 'foo', 'b', {
                       mapValue: {
                         fields: {
                           c: {
@@ -983,7 +955,7 @@ describe('set document', () => {
   it('supports document merges with empty field mask', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, set(document(), updateMask()));
+        requestEquals(request, set(document('documentId'), updateMask()));
         callback(null, writeResult(1));
       }
     };
@@ -1001,7 +973,7 @@ describe('set document', () => {
         requestEquals(
             request,
             set(document(
-                    'a', {
+                    'documentId', 'a', {
                       mapValue: {
                         fields: {
                           b: {
@@ -1040,7 +1012,7 @@ describe('set document', () => {
       commit: (request, options, callback) => {
         requestEquals(
             request,
-            set(document(), updateMask('b', 'f'),
+            set(document('documentId'), updateMask('b', 'f'),
                 fieldTransform(
                     'a', REQUEST_TIME, 'b.c', REQUEST_TIME, 'd.e',
                     REQUEST_TIME)));
@@ -1070,7 +1042,7 @@ describe('set document', () => {
   it('supports empty merge', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, set(document(), updateMask()));
+        requestEquals(request, set(document('documentId'), updateMask()));
         callback(null, writeResult(1));
       }
     };
@@ -1085,7 +1057,7 @@ describe('set document', () => {
       commit: (request, options, callback) => {
         requestEquals(
             request,
-            set(document('a', {
+            set(document('documentId', 'a', {
                   mapValue: {},
                 }),
                 updateMask('a')));
@@ -1103,7 +1075,7 @@ describe('set document', () => {
   it('doesn\'t split on dots', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, set(document('a.b', 'c')));
+        requestEquals(request, set(document('documentId', 'a.b', 'c')));
         callback(null, writeResult(1));
       }
     };
@@ -1195,7 +1167,7 @@ describe('create document', () => {
   it('creates document', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, create(document()));
+        requestEquals(request, create(document('documentId')));
         callback(null, writeResult(1));
       }
     };
@@ -1208,7 +1180,7 @@ describe('create document', () => {
   it('returns update time', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, create(document()));
+        requestEquals(request, create(document('documentId')));
 
         callback(null, {
           commitTime: {
@@ -1261,7 +1233,7 @@ describe('create document', () => {
   it('supports nested empty map', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, create(document('a', {
+        requestEquals(request, create(document('documentId', 'a', {
                         mapValue: {
                           fields: {
                             b: {
@@ -1309,7 +1281,8 @@ describe('update document', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
-            request, update(document('foo', 'bar'), updateMask('foo')));
+            request,
+            update(document('documentId', 'foo', 'bar'), updateMask('foo')));
         callback(null, writeResult(1));
       }
     };
@@ -1325,7 +1298,7 @@ describe('update document', () => {
         requestEquals(
             request,
             update(
-                document('foo', {
+                document('documentId', 'foo', {
                   mapValue: {},
                 }),
                 updateMask('a', 'foo'),
@@ -1364,7 +1337,7 @@ describe('update document', () => {
         requestEquals(
             request,
             update(
-                document('a', {
+                document('documentId', 'a', {
                   mapValue: {},
                 }),
                 updateMask('a')));
@@ -1380,7 +1353,8 @@ describe('update document', () => {
   it('supports nested delete', () => {
     const overrides = {
       commit: (request, options, callback) => {
-        requestEquals(request, update(document(), updateMask('a.b')));
+        requestEquals(
+            request, update(document('documentId'), updateMask('a.b')));
         callback(null, writeResult(1));
       }
     };
@@ -1396,7 +1370,8 @@ describe('update document', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
-            request, update(document('foo', 'bar'), updateMask('foo')));
+            request,
+            update(document('documentId', 'foo', 'bar'), updateMask('foo')));
 
         callback(null, {
           commitTime: {
@@ -1432,7 +1407,7 @@ describe('update document', () => {
         requestEquals(
             request,
             update(
-                document('foo', 'bar'), updateMask('foo'),
+                document('documentId', 'foo', 'bar'), updateMask('foo'),
                 /*transform */ null, {
                   updateTime: {
                     nanos: 123000000,
@@ -1502,7 +1477,8 @@ describe('update document', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
-            request, update(document('foo', 'bar'), updateMask('foo')));
+            request,
+            update(document('documentId', 'foo', 'bar'), updateMask('foo')));
         callback(null, writeResult(1));
       }
     };
@@ -1521,7 +1497,7 @@ describe('update document', () => {
             request,
             update(
                 document(
-                    'a', {
+                    'documentId', 'a', {
                       mapValue: {
                         fields: {
                           b: {
@@ -1571,7 +1547,7 @@ describe('update document', () => {
         requestEquals(
             request,
             update(
-                document('foo', {
+                document('documentId', 'foo', {
                   mapValue: {
                     fields: {
                       bar: {stringValue: 'two'},
@@ -1616,7 +1592,7 @@ describe('update document', () => {
         requestEquals(
             request,
             update(
-                document('a', {
+                document('documentId', 'a', {
                   mapValue: {
                     fields: {
                       b: {
@@ -1661,7 +1637,8 @@ describe('update document', () => {
     const overrides = {
       commit: (request, options, callback) => {
         requestEquals(
-            request, update(document('a.b', 'c'), updateMask('`a.b`')));
+            request,
+            update(document('documentId', 'a.b', 'c'), updateMask('`a.b`')));
 
         callback(null, writeResult(1));
       }
@@ -1798,7 +1775,9 @@ describe('update document', () => {
       commit: (request, options, callback) => {
         requestEquals(
             request,
-            update(document('bar', 'foobar'), updateMask('bar', 'foo')));
+            update(
+                document('documentId', 'bar', 'foobar'),
+                updateMask('bar', 'foo')));
         callback(null, writeResult(1));
       }
     };

@@ -26,7 +26,7 @@ import {DocumentSnapshot} from '../src/document';
 import {ResourcePath} from '../src/path';
 import {DocumentReference} from '../src/reference';
 import {AnyDuringMigration} from '../src/types';
-import {createInstance, InvalidApiUsage} from '../test/util/helpers';
+import {createInstance, document, InvalidApiUsage} from '../test/util/helpers';
 
 import api = google.firestore.v1beta1;
 
@@ -242,18 +242,8 @@ function requestEquals(actual, ...protoComponents) {
   expect(actual).to.deep.eq(buildQuery.apply(null, protoComponents));
 }
 
-function document(name) {
-  const document: api.IDocument = {
-    fields: {},
-    createTime: {seconds: 1, nanos: 2},
-    updateTime: {seconds: 3, nanos: 4},
-  };
-
-  document.fields![name] = {stringValue: name};
-
-  document.name = `${DATABASE_ROOT}/documents/collectionId/${name}`;
-
-  return {document, readTime: {seconds: 5, nanos: 6}};
+function found(name: string) {
+  return {document: document(name), readTime: {seconds: 5, nanos: 6}};
 }
 
 function stream(...elements) {
@@ -359,9 +349,9 @@ describe('query interface', () => {
 
     queryEquals(
         [
-          query.orderBy('foo').orderBy('__name__').startAt('foo', 'foo'),
+          query.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
           query.orderBy('foo').startAt(
-              firestore.snapshot_(document('foo').document, {})),
+              firestore.snapshot_(document('c', 'foo', 'b'))),
         ],
         []);
   });
@@ -457,7 +447,7 @@ describe('query interface', () => {
     const overrides = {
       runQuery: (request) => {
         requestEquals(request);
-        return stream(document('first'), document('second'));
+        return stream(found('first'), found('second'));
       }
     };
 
@@ -468,8 +458,8 @@ describe('query interface', () => {
         expect(results.empty).to.be.false;
         expect(results.readTime.isEqual(new Firestore.Timestamp(5, 6)))
             .to.be.true;
-        expect(results.docs[0].get('first')).to.equal('first');
-        expect(results.docs[1].get('second')).to.equal('second');
+        expect(results.docs[0].id).to.equal('first');
+        expect(results.docs[1].id).to.equal('second');
         expect(results.docChanges()).to.have.length(2);
 
         let count = 0;
@@ -528,7 +518,7 @@ describe('query interface', () => {
   it('handles stream exception after initialization', () => {
     const overrides = {
       runQuery: () => {
-        return stream(document('first'), new Error('Expected error'));
+        return stream(found('first'), new Error('Expected error'));
       }
     };
 
@@ -548,7 +538,7 @@ describe('query interface', () => {
     const overrides = {
       runQuery: (request) => {
         requestEquals(request);
-        return stream(document('first'), document('second'));
+        return stream(found('first'), found('second'));
       }
     };
 
@@ -573,7 +563,7 @@ describe('query interface', () => {
     const overrides = {
       runQuery: (request) => {
         requestEquals(request);
-        return stream(document('first'), document('second'));
+        return stream(found('first'), found('second'));
       }
     };
 
