@@ -41,15 +41,14 @@ describe('set() method', () => {
   });
 
   it('requires document name', () => {
-    assert.throws(
-        () => writeBatch.set(),
-        /Argument "documentRef" is not a valid DocumentReference\./);
+    expect(() => writeBatch.set())
+        .to.throw(/Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('requires object', () => {
-    assert.throws(
-        () => writeBatch.set(firestore.doc('sub/doc')),
-        /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
+    expect(() => writeBatch.set(firestore.doc('sub/doc')))
+        .to.throw(
+            /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
   it('accepts preconditions', () => {
@@ -69,9 +68,8 @@ describe('delete() method', () => {
   });
 
   it('requires document name', () => {
-    assert.throws(
-        () => writeBatch.delete(),
-        /Argument "documentRef" is not a valid DocumentReference\./);
+    expect(() => writeBatch.delete())
+        .to.throw(/Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('accepts preconditions', () => {
@@ -93,15 +91,16 @@ describe('update() method', () => {
   });
 
   it('requires document name', () => {
-    assert.throws(
-        () => writeBatch.update({}, {}),
-        /Argument "documentRef" is not a valid DocumentReference\./);
+    expect(() => writeBatch.update({}, {}))
+        .to.throw(/Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('requires object', () => {
-    assert.throws(() => {
+    expect(() => {
       writeBatch.update(firestore.doc('sub/doc'), firestore.doc('sub/doc'));
-    }, /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
+    })
+        .to.throw(
+            /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
   it('accepts preconditions', () => {
@@ -123,15 +122,16 @@ describe('create() method', () => {
   });
 
   it('requires document name', () => {
-    assert.throws(
-        () => writeBatch.create(),
-        /Argument "documentRef" is not a valid DocumentReference\./);
+    expect(() => writeBatch.create())
+        .to.throw(/Argument "documentRef" is not a valid DocumentReference\./);
   });
 
   it('requires object', () => {
-    assert.throws(() => {
+    expect(() => {
       writeBatch.create(firestore.doc('sub/doc'));
-    }, /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
+    })
+        .to.throw(
+            /Argument "data" is not a valid Document. Input is not a plain JavaScript object./);
   });
 });
 
@@ -306,9 +306,9 @@ describe('batch support', () => {
     batch.delete(documentName);
     const promise = batch.commit();
 
-    assert.throws(() => {
+    expect(() => {
       batch.set(documentName, {});
-    }, /Cannot modify a WriteBatch that has been committed./);
+    }).to.throw(/Cannot modify a WriteBatch that has been committed./);
 
     return promise;
   });

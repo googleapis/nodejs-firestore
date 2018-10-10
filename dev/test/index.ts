@@ -304,48 +304,52 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({timestampsInSnapshots: true});
 
-    assert.throws(
-        () => firestore.settings({}),
-        /Firestore.settings\(\) has already be called. You can only call settings\(\) once, and only before calling any other methods on a Firestore object./);
+    expect(() => firestore.settings({}))
+        .to.throw(
+            /Firestore.settings\(\) has already be called. You can only call settings\(\) once, and only before calling any other methods on a Firestore object./);
   });
 
   it('cannot change settings after client initialized', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore['_runRequest'](() => Promise.resolve());
 
-    assert.throws(
-        () => firestore.settings({}),
-        /Firestore has already been started and its settings can no longer be changed. You can only call settings\(\) before calling any other methods on a Firestore object./);
+    expect(() => firestore.settings({}))
+        .to.throw(
+            /Firestore has already been started and its settings can no longer be changed. You can only call settings\(\) before calling any other methods on a Firestore object./);
   });
 
   it('validates project ID is string', () => {
-    assert.throws(() => {
+    expect(() => {
       const settings = Object.assign({}, DEFAULT_SETTINGS, {
         projectId: 1337,
       });
       new Firestore.Firestore(settings);
-    }, /Argument "settings.projectId" is not a valid string/);
+    }).to.throw(/Argument "settings.projectId" is not a valid string/);
 
-    assert.throws(() => {
+    expect(() => {
       new Firestore.Firestore(DEFAULT_SETTINGS).settings({
         projectId: 1337
       } as InvalidApiUsage);
-    }, /Argument "settings.projectId" is not a valid string/);
+    }).to.throw(/Argument "settings.projectId" is not a valid string/);
   });
 
   it('validates timestampsInSnapshots is boolean', () => {
-    assert.throws(() => {
+    expect(() => {
       const settings = Object.assign({}, DEFAULT_SETTINGS, {
         timestampsInSnapshots: 1337,
       });
       new Firestore.Firestore(settings);
-    }, /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
+    })
+        .to.throw(
+            /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
 
-    assert.throws(() => {
+    expect(() => {
       new Firestore.Firestore(DEFAULT_SETTINGS).settings({
         timestampsInSnapshots: 1337
       } as AnyDuringMigration);
-    }, /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
+    })
+        .to.throw(
+            /Argument "settings.timestampsInSnapshots" is not a valid boolean/);
   });
 
   it('uses project id from constructor', () => {
@@ -581,7 +585,7 @@ describe('snapshot_() method', () => {
   });
 
   it('handles invalid Proto3 JSON', () => {
-    assert.throws(() => {
+    expect(() => {
       firestore.snapshot_(
           {
             name: `${DATABASE_ROOT}/documents/collectionId/doc`,
@@ -590,9 +594,9 @@ describe('snapshot_() method', () => {
             updateTime: '1970-01-01T00:00:03.000000004Z',
           },
           '1970-01-01T00:00:05.000000006Z', 'json');
-    }, /Unable to infer type value fom '{}'./);
+    }).to.throw(/Unable to infer type value fom '{}'./);
 
-    assert.throws(() => {
+    expect(() => {
       firestore.snapshot_(
           {
             name: `${DATABASE_ROOT}/documents/collectionId/doc`,
@@ -601,9 +605,11 @@ describe('snapshot_() method', () => {
             updateTime: '1970-01-01T00:00:03.000000004Z',
           },
           '1970-01-01T00:00:05.000000006Z', 'json');
-    }, /Unable to infer type value fom '{"stringValue":"bar","integerValue":42}'./);
+    })
+        .to.throw(
+            /Unable to infer type value fom '{"stringValue":"bar","integerValue":42}'./);
 
-    assert.throws(() => {
+    expect(() => {
       firestore.snapshot_(
           {
             name: `${DATABASE_ROOT}/documents/collectionId/doc`,
@@ -612,7 +618,9 @@ describe('snapshot_() method', () => {
             updateTime: '1970-01-01T00:00:03.000000004Z',
           },
           '1970-01-01T00:00:05.000000006Z', 'json');
-    }, /Specify a valid ISO 8601 timestamp for "documentOrName.createTime"./);
+    })
+        .to.throw(
+            /Specify a valid ISO 8601 timestamp for "documentOrName.createTime"./);
   });
 
   it('handles missing document ', () => {
@@ -625,11 +633,13 @@ describe('snapshot_() method', () => {
   });
 
   it('handles invalid encoding format ', () => {
-    assert.throws(() => {
+    expect(() => {
       firestore.snapshot_(
           `${DATABASE_ROOT}/documents/collectionId/doc`,
           '1970-01-01T00:00:05.000000006Z', 'ascii');
-    }, /Unsupported encoding format. Expected 'json' or 'protobufJS', but was 'ascii'./);
+    })
+        .to.throw(
+            /Unsupported encoding format. Expected 'json' or 'protobufJS', but was 'ascii'./);
   });
 });
 
@@ -648,21 +658,21 @@ describe('doc() method', () => {
   });
 
   it('requires document path', () => {
-    assert.throws(
-        () => firestore.doc(),
-        /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
+    expect(() => firestore.doc())
+        .to.throw(
+            /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
   });
 
   it('doesn\'t accept empty components', () => {
-    assert.throws(
-        () => firestore.doc('coll//doc'),
-        /Argument "documentPath" is not a valid ResourcePath. Paths must not contain \/\/./);
+    expect(() => firestore.doc('coll//doc'))
+        .to.throw(
+            /Argument "documentPath" is not a valid ResourcePath. Paths must not contain \/\/./);
   });
 
   it('must point to document', () => {
-    assert.throws(
-        () => firestore.doc('collectionId'),
-        /Argument "documentPath" must point to a document, but was "collectionId". Your path does not contain an even number of components\./);
+    expect(() => firestore.doc('collectionId'))
+        .to.throw(
+            /Argument "documentPath" must point to a document, but was "collectionId". Your path does not contain an even number of components\./);
   });
 
   it('exposes properties', () => {
@@ -687,16 +697,16 @@ describe('collection() method', () => {
   });
 
   it('requires collection id', () => {
-    assert.throws(
-        () => firestore.collection(),
-        /Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string./);
+    expect(() => firestore.collection())
+        .to.throw(
+            /Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string./);
   });
 
 
   it('must point to a collection', () => {
-    assert.throws(
-        () => firestore.collection('collectionId/documentId'),
-        /Argument "collectionPath" must point to a collection, but was "collectionId\/documentId". Your path does not contain an odd number of components\./);
+    expect(() => firestore.collection('collectionId/documentId'))
+        .to.throw(
+            /Argument "collectionPath" must point to a collection, but was "collectionId\/documentId". Your path does not contain an odd number of components\./);
   });
 
   it('exposes properties', () => {
@@ -910,9 +920,8 @@ describe('getAll() method', () => {
 
   it('requires document reference', () => {
     return createInstance().then(firestore => {
-      assert.throws(() => {
-        (firestore as InvalidApiUsage).getAll({});
-      }, /Argument at index 0 is not a valid DocumentReference\./);
+      expect(() => (firestore as InvalidApiUsage).getAll({}))
+          .to.throw(/Argument at index 0 is not a valid DocumentReference\./);
     });
   });
 

@@ -158,20 +158,18 @@ describe('timestamps', () => {
   });
 
   it('validates nanoseconds', () => {
-    assert.throws(
-        () => new Firestore.Timestamp(0.1, 0),
-        /Argument "seconds" is not a valid integer./);
+    expect(() => new Firestore.Timestamp(0.1, 0))
+        .to.throw(/Argument "seconds" is not a valid integer./);
 
-    assert.throws(
-        () => new Firestore.Timestamp(0, 0.1),
-        /Argument "nanoseconds" is not a valid integer./);
+    expect(() => new Firestore.Timestamp(0, 0.1))
+        .to.throw(/Argument "nanoseconds" is not a valid integer./);
 
-    assert.throws(
-        () => new Firestore.Timestamp(0, -1),
-        /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1/);
+    expect(() => new Firestore.Timestamp(0, -1))
+        .to.throw(
+            /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1/);
 
-    assert.throws(
-        () => new Firestore.Timestamp(0, 1000000000),
-        /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000/);
+    expect(() => new Firestore.Timestamp(0, 1000000000))
+        .to.throw(
+            /Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000/);
   });
 });

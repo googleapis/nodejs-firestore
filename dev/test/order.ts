@@ -68,15 +68,15 @@ describe('Order', () => {
   }
 
   it('throws on invalid value', () => {
-    assert.throws(() => {
+    expect(() => {
       order.compare(
           {valueType: 'foo'} as InvalidApiUsage,
           {valueType: 'foo'} as InvalidApiUsage);
-    }, /Invalid use of type "object" as a Firestore argument./);
+    }).to.throw(/Invalid use of type "object" as a Firestore argument./);
   });
 
   it('throws on invalid blob', () => {
-    assert.throws(() => {
+    expect(() => {
       order.compare(
           {
             bytesValue: new Uint8Array([1, 2, 3]),
@@ -84,7 +84,7 @@ describe('Order', () => {
           {
             bytesValue: new Uint8Array([1, 2, 3]),
           });
-    }, /Blobs can only be compared if they are Buffers/);
+    }).to.throw(/Blobs can only be compared if they are Buffers/);
   });
 
   it('compares document snapshots by name', () => {

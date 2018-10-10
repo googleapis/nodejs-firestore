@@ -50,10 +50,10 @@ describe('ResourcePath', () => {
     path =
         ResourcePath.fromSlashSeparatedString(`${DATABASE_ROOT}/documents/foo`);
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
-    assert.throws(() => {
+    expect(() => {
       path =
           ResourcePath.fromSlashSeparatedString('projects/project/databases');
-    }, /Resource name 'projects\/project\/databases' is not valid\./);
+    }).to.throw(/Resource name 'projects\/project\/databases' is not valid\./);
   });
 
   it('accepts newlines', () => {
@@ -75,15 +75,15 @@ describe('FieldPath', () => {
   });
 
   it('doesn\'t accept empty path', () => {
-    assert.throws(() => {
+    expect(() => {
       new FieldPath();
-    }, /Function 'FieldPath\(\)' requires at least 1 argument\./);
+    }).to.throw(/Function 'FieldPath\(\)' requires at least 1 argument\./);
   });
 
   it('only accepts strings', () => {
-    assert.throws(() => {
+    expect(() => {
       new FieldPath('foo', 'bar', 0 as InvalidApiUsage);
-    }, /Argument at index 2 is not a valid string\./);
+    }).to.throw(/Argument at index 2 is not a valid string\./);
   });
 
   it('has append() method', () => {
@@ -104,9 +104,9 @@ describe('FieldPath', () => {
   });
 
   it('doesn\'t allow empty components', () => {
-    assert.throws(() => {
+    expect(() => {
       new FieldPath('foo', '');
-    }, /Argument at index 1 should not be empty./);
+    }).to.throw(/Argument at index 1 should not be empty./);
   });
 
   it('has isEqual() method', () => {

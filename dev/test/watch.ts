@@ -619,13 +619,11 @@ describe('Query watch', () => {
   });
 
   it('with invalid callbacks', () => {
-    assert.throws(() => {
-      colRef.onSnapshot('foo');
-    }, /Argument "onNext" is not a valid function./);
+    expect(() => colRef.onSnapshot('foo'))
+        .to.throw(/Argument "onNext" is not a valid function./);
 
-    assert.throws(() => {
-      colRef.onSnapshot(() => {}, 'foo');
-    }, /Argument "onError" is not a valid function./);
+    expect(() => colRef.onSnapshot(() => {}, 'foo'))
+        .to.throw(/Argument "onError" is not a valid function./);
   });
 
   it('without error callback', (done) => {
@@ -2111,13 +2109,11 @@ describe('DocumentReference watch', () => {
   });
 
   it('with invalid callbacks', () => {
-    assert.throws(() => {
-      doc.onSnapshot('foo');
-    }, /Argument "onNext" is not a valid function./);
+    expect(() => doc.onSnapshot('foo'))
+        .to.throw(/Argument "onNext" is not a valid function./);
 
-    assert.throws(() => {
-      doc.onSnapshot(() => {}, 'foo');
-    }, /Argument "onError" is not a valid function./);
+    expect(() => doc.onSnapshot(() => {}, 'foo'))
+        .to.throw(/Argument "onError" is not a valid function./);
   });
 
   it('without error callback', done => {
@@ -2501,8 +2497,7 @@ describe('Query comparator', () => {
     ];
 
     const comparator = query.comparator();
-    assert.throws(() => {
-      input.sort(comparator);
-    }, /Trying to compare documents on fields that don't exist/);
+    expect(() => input.sort(comparator))
+        .to.throw(/Trying to compare documents on fields that don't exist/);
   });
 });

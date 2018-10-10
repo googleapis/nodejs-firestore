@@ -298,9 +298,8 @@ describe('failed transactions', () => {
     };
 
     return createInstance(overrides).then(firestore => {
-      assert.throws(
-          () => (firestore as InvalidApiUsage).runTransaction(),
-          /Argument "updateFunction" is not a valid function\./);
+      expect(() => (firestore as InvalidApiUsage).runTransaction())
+          .to.throw(/Argument "updateFunction" is not a valid function\./);
     });
   });
 
@@ -312,15 +311,17 @@ describe('failed transactions', () => {
     };
 
     return createInstance(overrides).then(firestore => {
-      assert.throws(
+      expect(
           () => firestore.runTransaction(
-              () => Promise.resolve(), {maxAttempts: 'foo' as InvalidApiUsage}),
-          /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
+              () => Promise.resolve(), {maxAttempts: 'foo' as InvalidApiUsage}))
+          .to.throw(
+              /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
 
-      assert.throws(
+      expect(
           () => firestore.runTransaction(
-              () => Promise.resolve(), {maxAttempts: 0}),
-          /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
+              () => Promise.resolve(), {maxAttempts: 0}))
+          .to.throw(
+              /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
     });
   });
 
@@ -427,13 +428,11 @@ describe('transaction operations', () => {
 
   it('requires a query or document for get', () => {
     return runTransaction(transaction => {
-      assert.throws(
-          () => transaction.get(),
-          /Argument "refOrQuery" must be a DocumentRef or a Query\./);
+      expect(() => transaction.get())
+          .to.throw(/Argument "refOrQuery" must be a DocumentRef or a Query\./);
 
-      assert.throws(
-          () => transaction.get('foo'),
-          /Argument "refOrQuery" must be a DocumentRef or a Query\./);
+      expect(() => transaction.get('foo'))
+          .to.throw(/Argument "refOrQuery" must be a DocumentRef or a Query\./);
 
       return Promise.resolve();
     }, begin(), commit());
