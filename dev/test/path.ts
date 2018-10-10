@@ -15,7 +15,6 @@
  */
 
 import {expect} from 'chai';
-import assert from 'power-assert';
 
 import {FieldPath, ResourcePath} from '../src/path';
 import {InvalidApiUsage} from './util/helpers';

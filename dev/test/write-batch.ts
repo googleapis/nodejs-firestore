@@ -15,11 +15,10 @@
  */
 
 import {expect} from 'chai';
-import assert from 'power-assert';
 
 import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
-import {createInstance} from '../test/util/helpers';
+import {createInstance} from './util/helpers';
 
 const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
                          .ServerValue.REQUEST_TIME;

@@ -18,7 +18,6 @@ import {expect} from 'chai';
 import extend from 'extend';
 import * as gax from 'google-gax';
 import is from 'is';
-import assert from 'power-assert';
 import through2 from 'through2';
 
 import * as Firestore from '../src';
@@ -289,7 +288,7 @@ function stream(...elements) {
 describe('instantiation', () => {
   it('creates instance', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
-    assert(firestore instanceof Firestore.Firestore);
+    expect(firestore).to.be.an.instanceOf(Firestore.Firestore);
   });
 
   it('merges settings', () => {
@@ -369,8 +368,8 @@ describe('instantiation', () => {
       keyFilename: __dirname + '/fake-certificate.json',
     });
 
-    assert.equal(
-        firestore.formattedName, 'projects/{{projectId}}/databases/(default)');
+    expect(firestore.formattedName)
+        .to.equal('projects/{{projectId}}/databases/(default)');
 
     firestore['_detectProjectId'] = () => Promise.resolve(PROJECT_ID);
 
@@ -388,8 +387,8 @@ describe('instantiation', () => {
       keyFilename: './test/fake-certificate.json',
     });
 
-    assert.equal(
-        firestore.formattedName, 'projects/{{projectId}}/databases/(default)');
+    expect(firestore.formattedName)
+        .to.equal('projects/{{projectId}}/databases/(default)');
 
     const gapicClient = {getProjectId: callback => callback(null, PROJECT_ID)};
 
@@ -423,7 +422,7 @@ describe('instantiation', () => {
     };
 
     return firestore['_detectProjectId'](gapicClient)
-        .then(() => assert.fail('Error ignored'))
+        .then(() => expect.fail('Error ignored'))
         .catch(err => expect('Injected Error').to.equal(err.message));
   });
 
@@ -494,9 +493,8 @@ describe('snapshot_() method', () => {
     const expected = extend(true, {}, allSupportedTypesOutput);
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
-    assert.equal(
-        actualObject.get('pathValue').formattedName,
-        expected.pathValue.formattedName);
+    expect(actualObject.get('pathValue').formattedName)
+        .to.equal(expected.pathValue.formattedName);
     const data = actualObject.data();
     delete data.pathValue;
     delete expected.pathValue;
@@ -798,9 +796,9 @@ describe('getAll() method', () => {
             throw new Error('Unexpected success in Promise');
           })
           .catch(err => {
-            assert.equal(
-                err.message,
-                'Did not receive document for "collectionId/documentId".');
+            expect(err.message)
+                .to.equal(
+                    'Did not receive document for "collectionId/documentId".');
           });
     });
   });

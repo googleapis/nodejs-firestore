@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
 import duplexify from 'duplexify';
 import googleProtoFiles from 'google-proto-files';
 import is from 'is';
 import path from 'path';
-import assert from 'power-assert';
 import protobufjs from 'protobufjs';
 import through2 from 'through2';
 
@@ -270,7 +270,7 @@ const convertProto = {
 function commitHandler(spec) {
   return (request, options, callback) => {
     try {
-      assert.deepEqual(request, convertProto.commitRequest(spec.request));
+      expect(request).to.deep.equal(convertProto.commitRequest(spec.request));
       const res: google.firestore.v1beta1.IWriteResponse = {
         commitTime: {},
         writeResults: [],
@@ -290,8 +290,8 @@ function commitHandler(spec) {
 /** Request handler for _runQuery. */
 function queryHandler(spec) {
   return request => {
-    assert.deepEqual(
-        request.structuredQuery, convertProto.structuredQuery(spec.query));
+    expect(request.structuredQuery)
+        .to.deep.equal(convertProto.structuredQuery(spec.query));
     const stream = through2.obj();
     setImmediate(() => stream.push(null));
     return stream;
@@ -302,7 +302,7 @@ function queryHandler(spec) {
 function getHandler(spec) {
   return request => {
     const getDocument = spec.request;
-    assert.equal(request.documents[0], getDocument.name);
+    expect(request.documents[0]).to.equal(getDocument.name);
     const stream = through2.obj();
     setImmediate(() => {
       stream.push({
@@ -456,7 +456,7 @@ function runTest(spec) {
               }
             },
             err => {
-              assert.equal(expectedSnapshots.length, 0);
+              expect(expectedSnapshots).to.have.length(0);
               unlisten();
               reject(err);
             });
@@ -506,8 +506,8 @@ function runTest(spec) {
 
   return testPromise.then(
       () => {
-        assert.ok(
-            !testSpec.isError, 'Expected test to fail, but test succeeded');
+        expect(testSpec.isError)
+            .to.be.false('Expected test to fail, but test succeeded');
       },
       err => {
         if (!testSpec.isError) {

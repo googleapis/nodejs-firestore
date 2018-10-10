@@ -15,7 +15,6 @@
  */
 
 import {expect} from 'chai';
-import assert from 'power-assert';
 
 import {ExponentialBackoff, setTimeoutHandler} from '../src/backoff';
 import {AnyDuringMigration} from '../src/types';

@@ -17,7 +17,6 @@
 import {expect} from 'chai';
 import extend from 'extend';
 import is from 'is';
-import assert from 'power-assert';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
