@@ -51,7 +51,7 @@ const DEFAULT_JITTER_FACTOR = 1.0;
 /*!
  * The timeout handler used by `ExponentialBackoff`.
  */
-let delayExecution: typeof setTimeout = setTimeout;
+let delayExecution: ((f: () => void, ms: number) => void) = setTimeout;
 
 /**
  * Allows overriding of the timeout handler used by the exponential backoff
@@ -62,7 +62,8 @@ let delayExecution: typeof setTimeout = setTimeout;
  * @private
  * @param {function} handler A handler than matches the API of `setTimeout()`.
  */
-export function setTimeoutHandler(handler: typeof setTimeout): void {
+export function setTimeoutHandler(
+    handler: ((f: () => void, ms: number) => void)): void {
   delayExecution = handler;
 }
 
