@@ -1775,26 +1775,22 @@ describe('update document', () => {
       firestore.doc('collectionId/documentId').update('foo', 'bar', {
         exists: true
       });
-    }, INVALID_ARGUMENTS_TO_UPDATE);
+    }).to.throw(INVALID_ARGUMENTS_TO_UPDATE);
 
     expect(() => {
       firestore.doc('collectionId/documentId')
           .update({foo: 'bar'}, {exists: true}, 'foo');
-    }, INVALID_ARGUMENTS_TO_UPDATE);
+    }).to.throw(INVALID_ARGUMENTS_TO_UPDATE);
   });
 
   it('accepts an object', () => {
-    expect(() => {
-      firestore.doc('collectionId/documentId').update(null);
-    })
+    expect(() => firestore.doc('collectionId/documentId').update(null))
         .to.throw(
             /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
 
   it('doesn\'t accept arrays', () => {
-    expect(() => {
-      firestore.doc('collectionId/documentId').update([42]);
-    })
+    expect(() => firestore.doc('collectionId/documentId').update([42]))
         .to.throw(
             /Argument "dataOrField" is not a valid Document. Input is not a plain JavaScript object./);
   });
