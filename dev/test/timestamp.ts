@@ -19,7 +19,7 @@ import is from 'is';
 import through2 from 'through2';
 
 import * as Firestore from '../src/index';
-import {createInstance as createInstanceHelper} from '../test/util/helpers';
+import {createInstance as createInstanceHelper, document} from '../test/util/helpers';
 
 function createInstance(opts, document) {
   const overrides = {
@@ -37,33 +37,14 @@ function createInstance(opts, document) {
   return createInstanceHelper(overrides, opts);
 }
 
-function document(field, value) {
-  const document = {
-    name: `projects/test-project/databases/(default)/documents/coll/doc`,
-    fields: {},
-    createTime: {},
-    updateTime: {},
-  };
-
-  for (let i = 0; i < arguments.length; i += 2) {
-    field = arguments[i];
-    value = arguments[i + 1];
-    document.fields[field] = value;
-  }
-
-  return document;
-}
-
-const DOCUMENT_WITH_TIMESTAMP = document('moonLanding', {
-  valueType: 'timestampValue',
+const DOCUMENT_WITH_TIMESTAMP = document('documentId', 'moonLanding', {
   timestampValue: {
     nanos: 123000123,
     seconds: -14182920,
   },
 });
 
-const DOCUMENT_WITH_EMPTY_TIMESTAMP = document('moonLanding', {
-  valueType: 'timestampValue',
+const DOCUMENT_WITH_EMPTY_TIMESTAMP = document('documentId', 'moonLanding', {
   timestampValue: {},
 });
 
@@ -73,7 +54,7 @@ describe('timestamps', () => {
                {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
           const expected = new Firestore.Timestamp(-14182920, 123000123);
-          return firestore.doc('coll/doc').get().then(res => {
+          return firestore.doc('collectionId/documentId').get().then(res => {
             expect(res.data()!['moonLanding'].isEqual(expected)).to.be.true;
             expect(res.get('moonLanding')!.isEqual(expected)).to.be.true;
           });
@@ -89,7 +70,7 @@ describe('timestamps', () => {
     return createInstance(
                {timestampsInSnapshots: false}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
-          return firestore.doc('coll/doc').get().then(res => {
+          return firestore.doc('collectionId/documentId').get().then(res => {
             expect(is.date(res.data()!['moonLanding'])).to.be.true;
             expect(is.date(res.get('moonLanding'))).to.be.true;
             console.error = oldErrorLog;
@@ -101,7 +82,7 @@ describe('timestamps', () => {
     return createInstance(
                {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
-          return firestore.doc('coll/doc').get().then(res => {
+          return firestore.doc('collectionId/documentId').get().then(res => {
             const timestamp = res.get('moonLanding');
             expect(timestamp.seconds).to.equal(-14182920);
             expect(timestamp.nanoseconds).to.equal(123000123);
@@ -113,7 +94,7 @@ describe('timestamps', () => {
     return createInstance(
                {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
-          return firestore.doc('coll/doc').get().then(res => {
+          return firestore.doc('collectionId/documentId').get().then(res => {
             const timestamp = res.get('moonLanding');
             expect(new Date(-14182920 * 1000 + 123).getTime())
                 .to.equal(timestamp.toDate().getTime());
@@ -125,7 +106,7 @@ describe('timestamps', () => {
     return createInstance(
                {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
-          return firestore.doc('coll/doc').get().then(res => {
+          return firestore.doc('collectionId/documentId').get().then(res => {
             const timestamp = res.get('moonLanding');
             expect(-14182920 * 1000 + 123).to.equal(timestamp.toMillis());
           });
@@ -138,7 +119,7 @@ describe('timestamps', () => {
         .then(firestore => {
           const expected = new Firestore.Timestamp(0, 0);
 
-          return firestore.doc('coll/doc').get().then(res => {
+          return firestore.doc('collectionId/documentId').get().then(res => {
             expect(res.get('moonLanding').isEqual(expected)).to.be.true;
           });
         });

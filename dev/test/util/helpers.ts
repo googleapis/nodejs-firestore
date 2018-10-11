@@ -160,7 +160,7 @@ function value(value: string|api.IValue): api.IValue {
 
 export function document(
     id: string, field?: string, value?: string|api.IValue,
-    ...fieldOrValue: Array<string|api.IValue>): api.IDocument {
+    ...fieldOrValues: Array<string|api.IValue>): api.IDocument {
   const document: api.IDocument = {
     name: `${DATABASE_ROOT}/documents/collectionId/${id}`,
     fields: {},
@@ -168,16 +168,20 @@ export function document(
     updateTime: {seconds: 3, nanos: 4},
   };
 
-  for (let i = 1; i < arguments.length; i += 2) {
-    const field: string = arguments[i];
-    const value: string|api.Value = arguments[i + 1];
+  if (field !== undefined) {
+    fieldOrValues = [field, value!].concat(fieldOrValues);
 
-    if (typeof value === 'string') {
-      document.fields![field] = {
-        stringValue: value,
-      };
-    } else {
-      document.fields![field] = value;
+    for (let i = 0; i < fieldOrValues.length; i += 2) {
+      const field = fieldOrValues[i] as string;
+      const value = fieldOrValues[i + 1];
+
+      if (typeof value === 'string') {
+        document.fields![field] = {
+          stringValue: value,
+        };
+      } else {
+        document.fields![field] = value;
+      }
     }
   }
 
