@@ -22,8 +22,9 @@ import through2 from 'through2';
 
 import * as Firestore from '../src';
 import {ResourcePath} from '../src/path';
+
 import {AnyDuringMigration, GrpcError} from '../src/types';
-import {createInstance, InvalidApiUsage} from '../test/util/helpers';
+import {createInstance, document, DOCUMENT_NAME, InvalidApiUsage} from './util/helpers';
 
 const {grpc} = new gax.GrpcClient({} as AnyDuringMigration);
 
@@ -41,161 +42,165 @@ Firestore.setLogFunction(() => {});
 
 const bytesData = Buffer.from('AQI=', 'base64');
 
-const allSupportedTypesProtobufJs = document('documentId', {
-  arrayValue: {
-    arrayValue: {
-      values: [
-        {
-          stringValue: 'foo',
-        },
-        {
-          integerValue: 42,
-        },
-        {
-          stringValue: 'bar',
-        },
-      ],
+const allSupportedTypesProtobufJs = document(
+    'documentId', 'arrayValue', {
+      arrayValue: {
+        values: [
+          {
+            stringValue: 'foo',
+          },
+          {
+            integerValue: 42,
+          },
+          {
+            stringValue: 'bar',
+          },
+        ],
+      },
     },
-  },
-  emptyArray: {
-    arrayValue: {},
-  },
-  dateValue: {
-    timestampValue: {
-      nanos: 123000000,
-      seconds: 479978400,
+    'emptyArray', {
+      arrayValue: {},
     },
-  },
-  timestampValue: {
-    timestampValue: {
-      nanos: 123000000,
-      seconds: 479978400,
+    'dateValue', {
+      timestampValue: {
+        nanos: 123000000,
+        seconds: 479978400,
+      }
     },
-  },
-  doubleValue: {
-    doubleValue: 0.1,
-  },
-  falseValue: {
-    booleanValue: false,
-  },
-  infinityValue: {
-    doubleValue: Infinity,
-  },
-  integerValue: {
-    integerValue: 0,
-  },
-  negativeInfinityValue: {
-    doubleValue: -Infinity,
-  },
-  nilValue: {
-    nullValue: 0,
-  },
-  objectValue: {
-    mapValue: {
-      fields: {
-        foo: {
-          stringValue: 'bar',
+    'timestampValue', {
+      timestampValue: {
+        nanos: 123000000,
+        seconds: 479978400,
+      }
+    },
+    'doubleValue', {
+      doubleValue: 0.1,
+    },
+    'falseValue', {
+      booleanValue: false,
+    },
+    'infinityValue', {
+      doubleValue: Infinity,
+    },
+    'integerValue', {
+      integerValue: 0,
+    },
+    'negativeInfinityValue', {
+      doubleValue: -Infinity,
+    },
+    'nilValue', {
+      nullValue: 'NULL_VALUE',
+    },
+    'objectValue', {
+      mapValue: {
+        fields: {
+          foo: {
+            stringValue: 'bar',
+          },
         },
       },
     },
-  },
-  emptyObject: {
-    mapValue: {},
-  },
-  pathValue: {
-    referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
-  },
-  stringValue: {
-    stringValue: 'a',
-  },
-  trueValue: {
-    booleanValue: true,
-  },
-  geoPointValue: {
-    geoPointValue: {
-      latitude: 50.1430847,
-      longitude: -122.947778,
+    'emptyObject', {
+      mapValue: {},
     },
-  },
-  bytesValue: {
-    bytesValue: Buffer.from('AQI=', 'base64'),
-  },
-});
+    'pathValue', {
+      referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
+    },
+    'stringValue', {
+      stringValue: 'a',
+    },
+    'trueValue', {
+      booleanValue: true,
+    },
+    'geoPointValue', {
+      geoPointValue: {
+        latitude: 50.1430847,
+        longitude: -122.947778,
+      },
+    },
+    'bytesValue', {
+      bytesValue: Buffer.from('AQI=', 'base64'),
+    });
 
-const allSupportedTypesJson = document('documentId', {
-  arrayValue: {
+const allSupportedTypesJson = {
+  name: `${DOCUMENT_NAME}`,
+  fields: {
     arrayValue: {
-      values: [
-        {
-          stringValue: 'foo',
-        },
-        {
-          integerValue: 42,
-        },
-        {
-          stringValue: 'bar',
-        },
-      ],
+      arrayValue: {
+        values: [
+          {
+            stringValue: 'foo',
+          },
+          {
+            integerValue: 42,
+          },
+          {
+            stringValue: 'bar',
+          },
+        ],
+      },
     },
-  },
-  emptyArray: {
-    arrayValue: {},
-  },
-  dateValue: {
-    timestampValue: '1985-03-18T07:20:00.123000000Z',
-  },
-  timestampValue: {
-    timestampValue: '1985-03-18T07:20:00.123000000Z',
-  },
-  doubleValue: {
-    doubleValue: 0.1,
-  },
-  falseValue: {
-    booleanValue: false,
-  },
-  infinityValue: {
-    doubleValue: Infinity,
-  },
-  integerValue: {
-    integerValue: 0,
-  },
-  negativeInfinityValue: {
-    doubleValue: -Infinity,
-  },
-  nilValue: {
-    nullValue: 'NULL_VALUE',
-  },
-  objectValue: {
-    mapValue: {
-      fields: {
-        foo: {
-          stringValue: 'bar',
+    emptyArray: {
+      arrayValue: {},
+    },
+    dateValue: {
+      timestampValue: '1985-03-18T07:20:00.123000000Z',
+    },
+    timestampValue: {
+      timestampValue: '1985-03-18T07:20:00.123000000Z',
+    },
+    doubleValue: {
+      doubleValue: 0.1,
+    },
+    falseValue: {
+      booleanValue: false,
+    },
+    infinityValue: {
+      doubleValue: Infinity,
+    },
+    integerValue: {
+      integerValue: 0,
+    },
+    negativeInfinityValue: {
+      doubleValue: -Infinity,
+    },
+    nilValue: {
+      nullValue: 'NULL_VALUE',
+    },
+    objectValue: {
+      mapValue: {
+        fields: {
+          foo: {
+            stringValue: 'bar',
+          },
         },
       },
     },
-  },
-  emptyObject: {
-    mapValue: {},
-  },
-  pathValue: {
-    referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
-  },
-  stringValue: {
-    stringValue: 'a',
-  },
-  trueValue: {
-    booleanValue: true,
-  },
-  geoPointValue: {
+    emptyObject: {
+      mapValue: {},
+    },
+    pathValue: {
+      referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
+    },
+    stringValue: {
+      stringValue: 'a',
+    },
+    trueValue: {
+      booleanValue: true,
+    },
     geoPointValue: {
-      latitude: 50.1430847,
-      longitude: -122.947778,
+      geoPointValue: {
+        latitude: 50.1430847,
+        longitude: -122.947778,
+      },
+    },
+    bytesValue: {
+      bytesValue: 'AQI=',
     },
   },
-  bytesValue: {
-    bytesValue: 'AQI=',
-  },
-});
+  createTime: {seconds: 1, nanos: 2},
+  updateTime: {seconds: 3, nanos: 4},
+};
 
 const allSupportedTypesInput = {
   stringValue: 'a',
@@ -243,15 +248,6 @@ const allSupportedTypesOutput = {
   geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
   bytesValue: Buffer.from([0x1, 0x2]),
 };
-
-function document(name, fields?) {
-  return {
-    name: `${DATABASE_ROOT}/documents/collectionId/${name}`,
-    fields,
-    createTime: {seconds: 1, nanos: 2},
-    updateTime: {seconds: 3, nanos: 4},
-  };
-}
 
 function found(name) {
   return {
@@ -524,9 +520,7 @@ describe('snapshot_() method', () => {
 
   it('handles ProtobufJS', () => {
     const doc = firestore.snapshot_(
-        document('doc', {
-          foo: {valueType: 'bytesValue', bytesValue: bytesData},
-        }),
+        document('doc', 'foo', {bytesValue: bytesData}),
         {seconds: 5, nanos: 6});
 
     expect(doc.exists).to.be.true;

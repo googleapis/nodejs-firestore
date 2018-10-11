@@ -474,7 +474,7 @@ export namespace google {
     interface IInt64Value {
 
       /** Int64Value value */
-      value?: (Long|null);
+      value?: (number|null);
     }
 
     /** Represents an Int64Value. */
@@ -487,14 +487,14 @@ export namespace google {
       constructor(properties?: google.protobuf.IInt64Value);
 
       /** Int64Value value. */
-      public value: Long;
+      public value: number;
     }
 
     /** Properties of a UInt64Value. */
     interface IUInt64Value {
 
       /** UInt64Value value */
-      value?: (Long|null);
+      value?: (number|null);
     }
 
     /** Represents a UInt64Value. */
@@ -507,7 +507,7 @@ export namespace google {
       constructor(properties?: google.protobuf.IUInt64Value);
 
       /** UInt64Value value. */
-      public value: Long;
+      public value: number;
     }
 
     /** Properties of an Int32Value. */
@@ -1467,10 +1467,10 @@ export namespace google {
       identifierValue?: (string|null);
 
       /** UninterpretedOption positiveIntValue */
-      positiveIntValue?: (Long|null);
+      positiveIntValue?: (number|null);
 
       /** UninterpretedOption negativeIntValue */
-      negativeIntValue?: (Long|null);
+      negativeIntValue?: (number|null);
 
       /** UninterpretedOption doubleValue */
       doubleValue?: (number|null);
@@ -1498,10 +1498,10 @@ export namespace google {
       public identifierValue: string;
 
       /** UninterpretedOption positiveIntValue. */
-      public positiveIntValue: Long;
+      public positiveIntValue: number;
 
       /** UninterpretedOption negativeIntValue. */
-      public negativeIntValue: Long;
+      public negativeIntValue: number;
 
       /** UninterpretedOption doubleValue. */
       public doubleValue: number;
@@ -1674,7 +1674,7 @@ export namespace google {
     interface ITimestamp {
 
       /** Timestamp seconds */
-      seconds?: (Long|null);
+      seconds?: (number|null);
 
       /** Timestamp nanos */
       nanos?: (number|null);
@@ -1690,7 +1690,7 @@ export namespace google {
       constructor(properties?: google.protobuf.ITimestamp);
 
       /** Timestamp seconds. */
-      public seconds: Long;
+      public seconds: number;
 
       /** Timestamp nanos. */
       public nanos: number;
@@ -1797,7 +1797,7 @@ export namespace google {
     interface IDuration {
 
       /** Duration seconds */
-      seconds?: (Long|null);
+      seconds?: (number|null);
 
       /** Duration nanos */
       nanos?: (number|null);
@@ -1813,7 +1813,7 @@ export namespace google {
       constructor(properties?: google.protobuf.IDuration);
 
       /** Duration seconds. */
-      public seconds: Long;
+      public seconds: number;
 
       /** Duration nanos. */
       public nanos: number;
@@ -1851,6 +1851,384 @@ export namespace google {
 
       /** FieldMask paths. */
       public paths: string[];
+    }
+  }
+
+  /** Namespace rpc. */
+  namespace rpc {
+
+    /** Code enum. */
+    type Code =
+        "OK"| "CANCELLED"| "UNKNOWN"| "INVALID_ARGUMENT"| "DEADLINE_EXCEEDED"| "NOT_FOUND"| "ALREADY_EXISTS"| "PERMISSION_DENIED"| "UNAUTHENTICATED"| "RESOURCE_EXHAUSTED"| "FAILED_PRECONDITION"| "ABORTED"| "OUT_OF_RANGE"| "UNIMPLEMENTED"| "INTERNAL"| "UNAVAILABLE"| "DATA_LOSS";
+
+    /** Properties of a RetryInfo. */
+    interface IRetryInfo {
+
+      /** RetryInfo retryDelay */
+      retryDelay?: (google.protobuf.IDuration|null);
+    }
+
+    /** Represents a RetryInfo. */
+    class RetryInfo implements IRetryInfo {
+
+      /**
+       * Constructs a new RetryInfo.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.IRetryInfo);
+
+      /** RetryInfo retryDelay. */
+      public retryDelay?: (google.protobuf.IDuration|null);
+    }
+
+    /** Properties of a DebugInfo. */
+    interface IDebugInfo {
+
+      /** DebugInfo stackEntries */
+      stackEntries?: (string[]|null);
+
+      /** DebugInfo detail */
+      detail?: (string|null);
+    }
+
+    /** Represents a DebugInfo. */
+    class DebugInfo implements IDebugInfo {
+
+      /**
+       * Constructs a new DebugInfo.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.IDebugInfo);
+
+      /** DebugInfo stackEntries. */
+      public stackEntries: string[];
+
+      /** DebugInfo detail. */
+      public detail: string;
+    }
+
+    /** Properties of a QuotaFailure. */
+    interface IQuotaFailure {
+
+      /** QuotaFailure violations */
+      violations?: (google.rpc.QuotaFailure.IViolation[]|null);
+    }
+
+    /** Represents a QuotaFailure. */
+    class QuotaFailure implements IQuotaFailure {
+
+      /**
+       * Constructs a new QuotaFailure.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.IQuotaFailure);
+
+      /** QuotaFailure violations. */
+      public violations: google.rpc.QuotaFailure.IViolation[];
+    }
+
+    namespace QuotaFailure {
+
+      /** Properties of a Violation. */
+      interface IViolation {
+
+        /** Violation subject */
+        subject?: (string|null);
+
+        /** Violation description */
+        description?: (string|null);
+      }
+
+      /** Represents a Violation. */
+      class Violation implements IViolation {
+
+        /**
+         * Constructs a new Violation.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: google.rpc.QuotaFailure.IViolation);
+
+        /** Violation subject. */
+        public subject: string;
+
+        /** Violation description. */
+        public description: string;
+      }
+    }
+
+    /** Properties of a PreconditionFailure. */
+    interface IPreconditionFailure {
+
+      /** PreconditionFailure violations */
+      violations?: (google.rpc.PreconditionFailure.IViolation[]|null);
+    }
+
+    /** Represents a PreconditionFailure. */
+    class PreconditionFailure implements IPreconditionFailure {
+
+      /**
+       * Constructs a new PreconditionFailure.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.IPreconditionFailure);
+
+      /** PreconditionFailure violations. */
+      public violations: google.rpc.PreconditionFailure.IViolation[];
+    }
+
+    namespace PreconditionFailure {
+
+      /** Properties of a Violation. */
+      interface IViolation {
+
+        /** Violation type */
+        type?: (string|null);
+
+        /** Violation subject */
+        subject?: (string|null);
+
+        /** Violation description */
+        description?: (string|null);
+      }
+
+      /** Represents a Violation. */
+      class Violation implements IViolation {
+
+        /**
+         * Constructs a new Violation.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: google.rpc.PreconditionFailure.IViolation);
+
+        /** Violation type. */
+        public type: string;
+
+        /** Violation subject. */
+        public subject: string;
+
+        /** Violation description. */
+        public description: string;
+      }
+    }
+
+    /** Properties of a BadRequest. */
+    interface IBadRequest {
+
+      /** BadRequest fieldViolations */
+      fieldViolations?: (google.rpc.BadRequest.IFieldViolation[]|null);
+    }
+
+    /** Represents a BadRequest. */
+    class BadRequest implements IBadRequest {
+
+      /**
+       * Constructs a new BadRequest.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.IBadRequest);
+
+      /** BadRequest fieldViolations. */
+      public fieldViolations: google.rpc.BadRequest.IFieldViolation[];
+    }
+
+    namespace BadRequest {
+
+      /** Properties of a FieldViolation. */
+      interface IFieldViolation {
+
+        /** FieldViolation field */
+        field?: (string|null);
+
+        /** FieldViolation description */
+        description?: (string|null);
+      }
+
+      /** Represents a FieldViolation. */
+      class FieldViolation implements IFieldViolation {
+
+        /**
+         * Constructs a new FieldViolation.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: google.rpc.BadRequest.IFieldViolation);
+
+        /** FieldViolation field. */
+        public field: string;
+
+        /** FieldViolation description. */
+        public description: string;
+      }
+    }
+
+    /** Properties of a RequestInfo. */
+    interface IRequestInfo {
+
+      /** RequestInfo requestId */
+      requestId?: (string|null);
+
+      /** RequestInfo servingData */
+      servingData?: (string|null);
+    }
+
+    /** Represents a RequestInfo. */
+    class RequestInfo implements IRequestInfo {
+
+      /**
+       * Constructs a new RequestInfo.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.IRequestInfo);
+
+      /** RequestInfo requestId. */
+      public requestId: string;
+
+      /** RequestInfo servingData. */
+      public servingData: string;
+    }
+
+    /** Properties of a ResourceInfo. */
+    interface IResourceInfo {
+
+      /** ResourceInfo resourceType */
+      resourceType?: (string|null);
+
+      /** ResourceInfo resourceName */
+      resourceName?: (string|null);
+
+      /** ResourceInfo owner */
+      owner?: (string|null);
+
+      /** ResourceInfo description */
+      description?: (string|null);
+    }
+
+    /** Represents a ResourceInfo. */
+    class ResourceInfo implements IResourceInfo {
+
+      /**
+       * Constructs a new ResourceInfo.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.IResourceInfo);
+
+      /** ResourceInfo resourceType. */
+      public resourceType: string;
+
+      /** ResourceInfo resourceName. */
+      public resourceName: string;
+
+      /** ResourceInfo owner. */
+      public owner: string;
+
+      /** ResourceInfo description. */
+      public description: string;
+    }
+
+    /** Properties of a Help. */
+    interface IHelp {
+
+      /** Help links */
+      links?: (google.rpc.Help.ILink[]|null);
+    }
+
+    /** Represents a Help. */
+    class Help implements IHelp {
+
+      /**
+       * Constructs a new Help.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.IHelp);
+
+      /** Help links. */
+      public links: google.rpc.Help.ILink[];
+    }
+
+    namespace Help {
+
+      /** Properties of a Link. */
+      interface ILink {
+
+        /** Link description */
+        description?: (string|null);
+
+        /** Link url */
+        url?: (string|null);
+      }
+
+      /** Represents a Link. */
+      class Link implements ILink {
+
+        /**
+         * Constructs a new Link.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: google.rpc.Help.ILink);
+
+        /** Link description. */
+        public description: string;
+
+        /** Link url. */
+        public url: string;
+      }
+    }
+
+    /** Properties of a LocalizedMessage. */
+    interface ILocalizedMessage {
+
+      /** LocalizedMessage locale */
+      locale?: (string|null);
+
+      /** LocalizedMessage message */
+      message?: (string|null);
+    }
+
+    /** Represents a LocalizedMessage. */
+    class LocalizedMessage implements ILocalizedMessage {
+
+      /**
+       * Constructs a new LocalizedMessage.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.ILocalizedMessage);
+
+      /** LocalizedMessage locale. */
+      public locale: string;
+
+      /** LocalizedMessage message. */
+      public message: string;
+    }
+
+    /** Properties of a Status. */
+    interface IStatus {
+
+      /** Status code */
+      code?: (number|null);
+
+      /** Status message */
+      message?: (string|null);
+
+      /** Status details */
+      details?: (google.protobuf.IAny[]|null);
+    }
+
+    /** Represents a Status. */
+    class Status implements IStatus {
+
+      /**
+       * Constructs a new Status.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: google.rpc.IStatus);
+
+      /** Status code. */
+      public code: number;
+
+      /** Status message. */
+      public message: string;
+
+      /** Status details. */
+      public details: google.protobuf.IAny[];
     }
   }
 
@@ -1964,7 +2342,7 @@ export namespace google {
       currencyCode?: (string|null);
 
       /** Money units */
-      units?: (Long|null);
+      units?: (number|null);
 
       /** Money nanos */
       nanos?: (number|null);
@@ -1983,7 +2361,7 @@ export namespace google {
       public currencyCode: string;
 
       /** Money units. */
-      public units: Long;
+      public units: number;
 
       /** Money nanos. */
       public nanos: number;
@@ -2286,7 +2664,7 @@ export namespace google {
         booleanValue?: (boolean|null);
 
         /** Value integerValue */
-        integerValue?: (Long|null);
+        integerValue?: (number|null);
 
         /** Value doubleValue */
         doubleValue?: (number|null);
@@ -2329,7 +2707,7 @@ export namespace google {
         public booleanValue: boolean;
 
         /** Value integerValue. */
-        public integerValue: Long;
+        public integerValue: number;
 
         /** Value doubleValue. */
         public doubleValue: number;
@@ -3826,7 +4204,7 @@ export namespace google {
 
           /** Operator enum. */
           type Operator =
-              "OPERATOR_UNSPECIFIED"| "LESS_THAN"| "LESS_THAN_OR_EQUAL"| "GREATER_THAN"| "GREATER_THAN_OR_EQUAL"| "EQUAL";
+              "OPERATOR_UNSPECIFIED"| "LESS_THAN"| "LESS_THAN_OR_EQUAL"| "GREATER_THAN"| "GREATER_THAN_OR_EQUAL"| "EQUAL"| "ARRAY_CONTAINS";
         }
 
         /** Properties of an UnaryFilter. */
@@ -4045,6 +4423,12 @@ export namespace google {
 
           /** FieldTransform setToServerValue */
           setToServerValue?: (google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue|null);
+
+          /** FieldTransform appendMissingElements */
+          appendMissingElements?: (google.firestore.v1beta1.IArrayValue|null);
+
+          /** FieldTransform removeAllFromArray */
+          removeAllFromArray?: (google.firestore.v1beta1.IArrayValue|null);
         }
 
         /** Represents a FieldTransform. */
@@ -4062,8 +4446,14 @@ export namespace google {
           /** FieldTransform setToServerValue. */
           public setToServerValue: google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue;
 
+          /** FieldTransform appendMissingElements. */
+          public appendMissingElements?: (google.firestore.v1beta1.IArrayValue|null);
+
+          /** FieldTransform removeAllFromArray. */
+          public removeAllFromArray?: (google.firestore.v1beta1.IArrayValue|null);
+
           /** FieldTransform transformType. */
-          public transformType?: "setToServerValue";
+          public transformType?: ("setToServerValue"|"appendMissingElements"|"removeAllFromArray");
         }
 
         namespace FieldTransform {
@@ -4342,42 +4732,6 @@ export namespace google {
 
       /** CustomHttpPattern path. */
       public path: string;
-    }
-  }
-
-  /** Namespace rpc. */
-  namespace rpc {
-
-    /** Properties of a Status. */
-    interface IStatus {
-
-      /** Status code */
-      code?: (number|null);
-
-      /** Status message */
-      message?: (string|null);
-
-      /** Status details */
-      details?: (google.protobuf.IAny[]|null);
-    }
-
-    /** Represents a Status. */
-    class Status implements IStatus {
-
-      /**
-       * Constructs a new Status.
-       * @param [properties] Properties to set
-       */
-      constructor(properties?: google.rpc.IStatus);
-
-      /** Status code. */
-      public code: number;
-
-      /** Status message. */
-      public message: string;
-
-      /** Status details. */
-      public details: google.protobuf.IAny[];
     }
   }
 }

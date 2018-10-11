@@ -18,7 +18,6 @@ import {expect} from 'chai';
 import duplexify from 'duplexify';
 import through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {AnyDuringMigration, GrpcError} from '../src/types';
@@ -27,8 +26,7 @@ import {createInstance} from './util/helpers';
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-import api = google.firestore.v1beta1;
-import {QueryDocumentSnapshot, QuerySnapshot} from '../src';
+import {QueryDocumentSnapshot} from '../src';
 import {DocumentSnapshotBuilder} from '../src/document';
 
 let PROJECT_ID = process.env.PROJECT_ID;
@@ -526,7 +524,7 @@ describe('Query watch', () => {
                 field: {
                   fieldPath: 'included',
                 },
-                op: api.StructuredQuery.FieldFilter.Operator.EQUAL,
+                op: 'EQUAL',
                 value: {
                   stringValue: 'yes',
                 },
@@ -569,10 +567,7 @@ describe('Query watch', () => {
           parent: `projects/${PROJECT_ID}/databases/(default)`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
-            orderBy: [{
-              direction: api.StructuredQuery.Direction.DESCENDING,
-              field: {fieldPath: 'foo'}
-            }],
+            orderBy: [{direction: 'DESCENDING', field: {fieldPath: 'foo'}}],
           },
         },
         targetId,
@@ -1148,7 +1143,7 @@ describe('Query watch', () => {
     // Add FieldPath.documentId() sorting
     query = query.orderBy(Firestore.FieldPath.documentId(), 'desc');
     expectedJson.addTarget.query.structuredQuery.orderBy.push({
-      direction: api.StructuredQuery.Direction.DESCENDING,
+      direction: 'DESCENDING',
       field: {fieldPath: '__name__'},
     });
 

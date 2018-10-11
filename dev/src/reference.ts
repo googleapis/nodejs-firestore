@@ -20,8 +20,8 @@ import extend from 'extend';
 import is from 'is';
 import through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
-import api = google.firestore.v1beta1;
+import * as proto from '../protos/firestore_proto_api';
+import api = proto.google.firestore.v1beta1;
 
 import {compare} from './order';
 import {logger} from './logger';
@@ -47,10 +47,10 @@ import {Serializer} from './serializer';
  * @private
  */
 const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
-  asc: api.StructuredQuery.Direction.ASCENDING,
-  ASC: api.StructuredQuery.Direction.ASCENDING,
-  desc: api.StructuredQuery.Direction.DESCENDING,
-  DESC: api.StructuredQuery.Direction.DESCENDING,
+  asc: 'ASCENDING',
+  ASC: 'ASCENDING',
+  desc: 'DESCENDING',
+  DESC: 'DESCENDING',
 };
 
 /*!
@@ -61,13 +61,13 @@ const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
  */
 const comparisonOperators:
     {[k: string]: api.StructuredQuery.FieldFilter.Operator} = {
-      '<': api.StructuredQuery.FieldFilter.Operator.LESS_THAN,
-      '<=': api.StructuredQuery.FieldFilter.Operator.LESS_THAN_OR_EQUAL,
-      '=': api.StructuredQuery.FieldFilter.Operator.EQUAL,
-      '==': api.StructuredQuery.FieldFilter.Operator.EQUAL,
-      '>': api.StructuredQuery.FieldFilter.Operator.GREATER_THAN,
-      '>=': api.StructuredQuery.FieldFilter.Operator.GREATER_THAN_OR_EQUAL,
-      'array-contains': api.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS
+      '<': 'LESS_THAN',
+      '<=': 'LESS_THAN_OR_EQUAL',
+      '=': 'EQUAL',
+      '==': 'EQUAL',
+      '>': 'GREATER_THAN',
+      '>=': 'GREATER_THAN_OR_EQUAL',
+      'array-contains': 'ARRAY_CONTAINS'
     };
 
 /**
@@ -512,8 +512,7 @@ class FieldOrder {
    */
   constructor(
       readonly field: FieldPath,
-      readonly direction: api.StructuredQuery.Direction =
-          api.StructuredQuery.Direction.ASCENDING) {}
+      readonly direction: api.StructuredQuery.Direction = 'ASCENDING') {}
 
   /**
    * Generates the proto representation for this field order.
@@ -554,10 +553,10 @@ class FieldFilter {
    */
   isInequalityFilter(): boolean {
     switch (this.op) {
-      case api.StructuredQuery.FieldFilter.Operator.GREATER_THAN:
-      case api.StructuredQuery.FieldFilter.Operator.GREATER_THAN_OR_EQUAL:
-      case api.StructuredQuery.FieldFilter.Operator.LESS_THAN:
-      case api.StructuredQuery.FieldFilter.Operator.LESS_THAN_OR_EQUAL:
+      case 'GREATER_THAN':
+      case 'GREATER_THAN_OR_EQUAL':
+      case 'LESS_THAN':
+      case 'LESS_THAN_OR_EQUAL':
         return true;
       default:
         return false;
@@ -576,7 +575,7 @@ class FieldFilter {
           field: {
             fieldPath: this.field.formattedName,
           },
-          op: api.StructuredQuery.UnaryFilter.Operator.IS_NAN
+          op: 'IS_NAN'
         },
       };
     }
@@ -587,7 +586,7 @@ class FieldFilter {
           field: {
             fieldPath: this.field.formattedName,
           },
-          op: api.StructuredQuery.UnaryFilter.Operator.IS_NULL,
+          op: 'IS_NULL',
         },
       };
     }
@@ -1605,7 +1604,7 @@ export class Query {
       }
       structuredQuery.where = {
         compositeFilter: {
-          op: api.StructuredQuery.CompositeFilter.Operator.AND,
+          op: 'AND',
           filters,
         },
       };
@@ -1981,13 +1980,12 @@ export function validateComparisonOperator(
   if (is.string(str) && comparisonOperators[str]) {
     const op = comparisonOperators[str];
 
-    if (typeof val === 'number' && isNaN(val) &&
-        op !== api.StructuredQuery.FieldFilter.Operator.EQUAL) {
+    if (typeof val === 'number' && isNaN(val) && op !== 'EQUAL') {
       throw new Error(
           'Invalid query. You can only perform equals comparisons on NaN.');
     }
 
-    if (val === null && op !== api.StructuredQuery.FieldFilter.Operator.EQUAL) {
+    if (val === null && op !== 'EQUAL') {
       throw new Error(
           'Invalid query. You can only perform equals comparisons on Null.');
     }

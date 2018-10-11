@@ -1,3 +1,8 @@
+/*eslint-disable block-scoped-var, no-redeclare, no-control-regex, no-prototype-builtins*/
+"use strict";
+
+var $protobuf = require("protobufjs/minimal");
+
 // Common aliases
 var $util = $protobuf.util;
 
@@ -527,66 +532,66 @@ $root.google = (function() {
       /**
        * Kind enum.
        * @name google.protobuf.Field.Kind
-       * @enum {string}
-       * @property {number} TYPE_UNKNOWN=0 TYPE_UNKNOWN value
-       * @property {number} TYPE_DOUBLE=1 TYPE_DOUBLE value
-       * @property {number} TYPE_FLOAT=2 TYPE_FLOAT value
-       * @property {number} TYPE_INT64=3 TYPE_INT64 value
-       * @property {number} TYPE_UINT64=4 TYPE_UINT64 value
-       * @property {number} TYPE_INT32=5 TYPE_INT32 value
-       * @property {number} TYPE_FIXED64=6 TYPE_FIXED64 value
-       * @property {number} TYPE_FIXED32=7 TYPE_FIXED32 value
-       * @property {number} TYPE_BOOL=8 TYPE_BOOL value
-       * @property {number} TYPE_STRING=9 TYPE_STRING value
-       * @property {number} TYPE_GROUP=10 TYPE_GROUP value
-       * @property {number} TYPE_MESSAGE=11 TYPE_MESSAGE value
-       * @property {number} TYPE_BYTES=12 TYPE_BYTES value
-       * @property {number} TYPE_UINT32=13 TYPE_UINT32 value
-       * @property {number} TYPE_ENUM=14 TYPE_ENUM value
-       * @property {number} TYPE_SFIXED32=15 TYPE_SFIXED32 value
-       * @property {number} TYPE_SFIXED64=16 TYPE_SFIXED64 value
-       * @property {number} TYPE_SINT32=17 TYPE_SINT32 value
-       * @property {number} TYPE_SINT64=18 TYPE_SINT64 value
+       * @enum {number}
+       * @property {string} TYPE_UNKNOWN=TYPE_UNKNOWN TYPE_UNKNOWN value
+       * @property {string} TYPE_DOUBLE=TYPE_DOUBLE TYPE_DOUBLE value
+       * @property {string} TYPE_FLOAT=TYPE_FLOAT TYPE_FLOAT value
+       * @property {string} TYPE_INT64=TYPE_INT64 TYPE_INT64 value
+       * @property {string} TYPE_UINT64=TYPE_UINT64 TYPE_UINT64 value
+       * @property {string} TYPE_INT32=TYPE_INT32 TYPE_INT32 value
+       * @property {string} TYPE_FIXED64=TYPE_FIXED64 TYPE_FIXED64 value
+       * @property {string} TYPE_FIXED32=TYPE_FIXED32 TYPE_FIXED32 value
+       * @property {string} TYPE_BOOL=TYPE_BOOL TYPE_BOOL value
+       * @property {string} TYPE_STRING=TYPE_STRING TYPE_STRING value
+       * @property {string} TYPE_GROUP=TYPE_GROUP TYPE_GROUP value
+       * @property {string} TYPE_MESSAGE=TYPE_MESSAGE TYPE_MESSAGE value
+       * @property {string} TYPE_BYTES=TYPE_BYTES TYPE_BYTES value
+       * @property {string} TYPE_UINT32=TYPE_UINT32 TYPE_UINT32 value
+       * @property {string} TYPE_ENUM=TYPE_ENUM TYPE_ENUM value
+       * @property {string} TYPE_SFIXED32=TYPE_SFIXED32 TYPE_SFIXED32 value
+       * @property {string} TYPE_SFIXED64=TYPE_SFIXED64 TYPE_SFIXED64 value
+       * @property {string} TYPE_SINT32=TYPE_SINT32 TYPE_SINT32 value
+       * @property {string} TYPE_SINT64=TYPE_SINT64 TYPE_SINT64 value
        */
       Field.Kind = (function() {
         var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[0] = "TYPE_UNKNOWN"] = 0;
-        values[valuesById[1] = "TYPE_DOUBLE"] = 1;
-        values[valuesById[2] = "TYPE_FLOAT"] = 2;
-        values[valuesById[3] = "TYPE_INT64"] = 3;
-        values[valuesById[4] = "TYPE_UINT64"] = 4;
-        values[valuesById[5] = "TYPE_INT32"] = 5;
-        values[valuesById[6] = "TYPE_FIXED64"] = 6;
-        values[valuesById[7] = "TYPE_FIXED32"] = 7;
-        values[valuesById[8] = "TYPE_BOOL"] = 8;
-        values[valuesById[9] = "TYPE_STRING"] = 9;
-        values[valuesById[10] = "TYPE_GROUP"] = 10;
-        values[valuesById[11] = "TYPE_MESSAGE"] = 11;
-        values[valuesById[12] = "TYPE_BYTES"] = 12;
-        values[valuesById[13] = "TYPE_UINT32"] = 13;
-        values[valuesById[14] = "TYPE_ENUM"] = 14;
-        values[valuesById[15] = "TYPE_SFIXED32"] = 15;
-        values[valuesById[16] = "TYPE_SFIXED64"] = 16;
-        values[valuesById[17] = "TYPE_SINT32"] = 17;
-        values[valuesById[18] = "TYPE_SINT64"] = 18;
+        values[valuesById[0] = "TYPE_UNKNOWN"] = "TYPE_UNKNOWN";
+        values[valuesById[1] = "TYPE_DOUBLE"] = "TYPE_DOUBLE";
+        values[valuesById[2] = "TYPE_FLOAT"] = "TYPE_FLOAT";
+        values[valuesById[3] = "TYPE_INT64"] = "TYPE_INT64";
+        values[valuesById[4] = "TYPE_UINT64"] = "TYPE_UINT64";
+        values[valuesById[5] = "TYPE_INT32"] = "TYPE_INT32";
+        values[valuesById[6] = "TYPE_FIXED64"] = "TYPE_FIXED64";
+        values[valuesById[7] = "TYPE_FIXED32"] = "TYPE_FIXED32";
+        values[valuesById[8] = "TYPE_BOOL"] = "TYPE_BOOL";
+        values[valuesById[9] = "TYPE_STRING"] = "TYPE_STRING";
+        values[valuesById[10] = "TYPE_GROUP"] = "TYPE_GROUP";
+        values[valuesById[11] = "TYPE_MESSAGE"] = "TYPE_MESSAGE";
+        values[valuesById[12] = "TYPE_BYTES"] = "TYPE_BYTES";
+        values[valuesById[13] = "TYPE_UINT32"] = "TYPE_UINT32";
+        values[valuesById[14] = "TYPE_ENUM"] = "TYPE_ENUM";
+        values[valuesById[15] = "TYPE_SFIXED32"] = "TYPE_SFIXED32";
+        values[valuesById[16] = "TYPE_SFIXED64"] = "TYPE_SFIXED64";
+        values[valuesById[17] = "TYPE_SINT32"] = "TYPE_SINT32";
+        values[valuesById[18] = "TYPE_SINT64"] = "TYPE_SINT64";
         return values;
       })();
 
       /**
        * Cardinality enum.
        * @name google.protobuf.Field.Cardinality
-       * @enum {string}
-       * @property {number} CARDINALITY_UNKNOWN=0 CARDINALITY_UNKNOWN value
-       * @property {number} CARDINALITY_OPTIONAL=1 CARDINALITY_OPTIONAL value
-       * @property {number} CARDINALITY_REQUIRED=2 CARDINALITY_REQUIRED value
-       * @property {number} CARDINALITY_REPEATED=3 CARDINALITY_REPEATED value
+       * @enum {number}
+       * @property {string} CARDINALITY_UNKNOWN=CARDINALITY_UNKNOWN CARDINALITY_UNKNOWN value
+       * @property {string} CARDINALITY_OPTIONAL=CARDINALITY_OPTIONAL CARDINALITY_OPTIONAL value
+       * @property {string} CARDINALITY_REQUIRED=CARDINALITY_REQUIRED CARDINALITY_REQUIRED value
+       * @property {string} CARDINALITY_REPEATED=CARDINALITY_REPEATED CARDINALITY_REPEATED value
        */
       Field.Cardinality = (function() {
         var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[0] = "CARDINALITY_UNKNOWN"] = 0;
-        values[valuesById[1] = "CARDINALITY_OPTIONAL"] = 1;
-        values[valuesById[2] = "CARDINALITY_REQUIRED"] = 2;
-        values[valuesById[3] = "CARDINALITY_REPEATED"] = 3;
+        values[valuesById[0] = "CARDINALITY_UNKNOWN"] = "CARDINALITY_UNKNOWN";
+        values[valuesById[1] = "CARDINALITY_OPTIONAL"] = "CARDINALITY_OPTIONAL";
+        values[valuesById[2] = "CARDINALITY_REQUIRED"] = "CARDINALITY_REQUIRED";
+        values[valuesById[3] = "CARDINALITY_REPEATED"] = "CARDINALITY_REPEATED";
         return values;
       })();
 
@@ -767,14 +772,14 @@ $root.google = (function() {
     /**
      * Syntax enum.
      * @name google.protobuf.Syntax
-     * @enum {string}
-     * @property {number} SYNTAX_PROTO2=0 SYNTAX_PROTO2 value
-     * @property {number} SYNTAX_PROTO3=1 SYNTAX_PROTO3 value
+     * @enum {number}
+     * @property {string} SYNTAX_PROTO2=SYNTAX_PROTO2 SYNTAX_PROTO2 value
+     * @property {string} SYNTAX_PROTO3=SYNTAX_PROTO3 SYNTAX_PROTO3 value
      */
     protobuf.Syntax = (function() {
       var valuesById = {}, values = Object.create(valuesById);
-      values[valuesById[0] = "SYNTAX_PROTO2"] = 0;
-      values[valuesById[1] = "SYNTAX_PROTO3"] = 1;
+      values[valuesById[0] = "SYNTAX_PROTO2"] = "SYNTAX_PROTO2";
+      values[valuesById[1] = "SYNTAX_PROTO3"] = "SYNTAX_PROTO3";
       return values;
     })();
 
@@ -854,7 +859,7 @@ $root.google = (function() {
        * Properties of an Int64Value.
        * @memberof google.protobuf
        * @interface IInt64Value
-       * @property {number|Long|null} [value] Int64Value value
+       * @property {number|null} [value] Int64Value value
        */
 
       /**
@@ -874,7 +879,7 @@ $root.google = (function() {
 
       /**
        * Int64Value value.
-       * @member {number|Long} value
+       * @member {number} value
        * @memberof google.protobuf.Int64Value
        * @instance
        */
@@ -889,7 +894,7 @@ $root.google = (function() {
        * Properties of a UInt64Value.
        * @memberof google.protobuf
        * @interface IUInt64Value
-       * @property {number|Long|null} [value] UInt64Value value
+       * @property {number|null} [value] UInt64Value value
        */
 
       /**
@@ -909,7 +914,7 @@ $root.google = (function() {
 
       /**
        * UInt64Value value.
-       * @member {number|Long} value
+       * @member {number} value
        * @memberof google.protobuf.UInt64Value
        * @instance
        */
@@ -1598,62 +1603,62 @@ $root.google = (function() {
       /**
        * Type enum.
        * @name google.protobuf.FieldDescriptorProto.Type
-       * @enum {string}
-       * @property {number} TYPE_DOUBLE=1 TYPE_DOUBLE value
-       * @property {number} TYPE_FLOAT=2 TYPE_FLOAT value
-       * @property {number} TYPE_INT64=3 TYPE_INT64 value
-       * @property {number} TYPE_UINT64=4 TYPE_UINT64 value
-       * @property {number} TYPE_INT32=5 TYPE_INT32 value
-       * @property {number} TYPE_FIXED64=6 TYPE_FIXED64 value
-       * @property {number} TYPE_FIXED32=7 TYPE_FIXED32 value
-       * @property {number} TYPE_BOOL=8 TYPE_BOOL value
-       * @property {number} TYPE_STRING=9 TYPE_STRING value
-       * @property {number} TYPE_GROUP=10 TYPE_GROUP value
-       * @property {number} TYPE_MESSAGE=11 TYPE_MESSAGE value
-       * @property {number} TYPE_BYTES=12 TYPE_BYTES value
-       * @property {number} TYPE_UINT32=13 TYPE_UINT32 value
-       * @property {number} TYPE_ENUM=14 TYPE_ENUM value
-       * @property {number} TYPE_SFIXED32=15 TYPE_SFIXED32 value
-       * @property {number} TYPE_SFIXED64=16 TYPE_SFIXED64 value
-       * @property {number} TYPE_SINT32=17 TYPE_SINT32 value
-       * @property {number} TYPE_SINT64=18 TYPE_SINT64 value
+       * @enum {number}
+       * @property {string} TYPE_DOUBLE=TYPE_DOUBLE TYPE_DOUBLE value
+       * @property {string} TYPE_FLOAT=TYPE_FLOAT TYPE_FLOAT value
+       * @property {string} TYPE_INT64=TYPE_INT64 TYPE_INT64 value
+       * @property {string} TYPE_UINT64=TYPE_UINT64 TYPE_UINT64 value
+       * @property {string} TYPE_INT32=TYPE_INT32 TYPE_INT32 value
+       * @property {string} TYPE_FIXED64=TYPE_FIXED64 TYPE_FIXED64 value
+       * @property {string} TYPE_FIXED32=TYPE_FIXED32 TYPE_FIXED32 value
+       * @property {string} TYPE_BOOL=TYPE_BOOL TYPE_BOOL value
+       * @property {string} TYPE_STRING=TYPE_STRING TYPE_STRING value
+       * @property {string} TYPE_GROUP=TYPE_GROUP TYPE_GROUP value
+       * @property {string} TYPE_MESSAGE=TYPE_MESSAGE TYPE_MESSAGE value
+       * @property {string} TYPE_BYTES=TYPE_BYTES TYPE_BYTES value
+       * @property {string} TYPE_UINT32=TYPE_UINT32 TYPE_UINT32 value
+       * @property {string} TYPE_ENUM=TYPE_ENUM TYPE_ENUM value
+       * @property {string} TYPE_SFIXED32=TYPE_SFIXED32 TYPE_SFIXED32 value
+       * @property {string} TYPE_SFIXED64=TYPE_SFIXED64 TYPE_SFIXED64 value
+       * @property {string} TYPE_SINT32=TYPE_SINT32 TYPE_SINT32 value
+       * @property {string} TYPE_SINT64=TYPE_SINT64 TYPE_SINT64 value
        */
       FieldDescriptorProto.Type = (function() {
         var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[1] = "TYPE_DOUBLE"] = 1;
-        values[valuesById[2] = "TYPE_FLOAT"] = 2;
-        values[valuesById[3] = "TYPE_INT64"] = 3;
-        values[valuesById[4] = "TYPE_UINT64"] = 4;
-        values[valuesById[5] = "TYPE_INT32"] = 5;
-        values[valuesById[6] = "TYPE_FIXED64"] = 6;
-        values[valuesById[7] = "TYPE_FIXED32"] = 7;
-        values[valuesById[8] = "TYPE_BOOL"] = 8;
-        values[valuesById[9] = "TYPE_STRING"] = 9;
-        values[valuesById[10] = "TYPE_GROUP"] = 10;
-        values[valuesById[11] = "TYPE_MESSAGE"] = 11;
-        values[valuesById[12] = "TYPE_BYTES"] = 12;
-        values[valuesById[13] = "TYPE_UINT32"] = 13;
-        values[valuesById[14] = "TYPE_ENUM"] = 14;
-        values[valuesById[15] = "TYPE_SFIXED32"] = 15;
-        values[valuesById[16] = "TYPE_SFIXED64"] = 16;
-        values[valuesById[17] = "TYPE_SINT32"] = 17;
-        values[valuesById[18] = "TYPE_SINT64"] = 18;
+        values[valuesById[1] = "TYPE_DOUBLE"] = "TYPE_DOUBLE";
+        values[valuesById[2] = "TYPE_FLOAT"] = "TYPE_FLOAT";
+        values[valuesById[3] = "TYPE_INT64"] = "TYPE_INT64";
+        values[valuesById[4] = "TYPE_UINT64"] = "TYPE_UINT64";
+        values[valuesById[5] = "TYPE_INT32"] = "TYPE_INT32";
+        values[valuesById[6] = "TYPE_FIXED64"] = "TYPE_FIXED64";
+        values[valuesById[7] = "TYPE_FIXED32"] = "TYPE_FIXED32";
+        values[valuesById[8] = "TYPE_BOOL"] = "TYPE_BOOL";
+        values[valuesById[9] = "TYPE_STRING"] = "TYPE_STRING";
+        values[valuesById[10] = "TYPE_GROUP"] = "TYPE_GROUP";
+        values[valuesById[11] = "TYPE_MESSAGE"] = "TYPE_MESSAGE";
+        values[valuesById[12] = "TYPE_BYTES"] = "TYPE_BYTES";
+        values[valuesById[13] = "TYPE_UINT32"] = "TYPE_UINT32";
+        values[valuesById[14] = "TYPE_ENUM"] = "TYPE_ENUM";
+        values[valuesById[15] = "TYPE_SFIXED32"] = "TYPE_SFIXED32";
+        values[valuesById[16] = "TYPE_SFIXED64"] = "TYPE_SFIXED64";
+        values[valuesById[17] = "TYPE_SINT32"] = "TYPE_SINT32";
+        values[valuesById[18] = "TYPE_SINT64"] = "TYPE_SINT64";
         return values;
       })();
 
       /**
        * Label enum.
        * @name google.protobuf.FieldDescriptorProto.Label
-       * @enum {string}
-       * @property {number} LABEL_OPTIONAL=1 LABEL_OPTIONAL value
-       * @property {number} LABEL_REQUIRED=2 LABEL_REQUIRED value
-       * @property {number} LABEL_REPEATED=3 LABEL_REPEATED value
+       * @enum {number}
+       * @property {string} LABEL_OPTIONAL=LABEL_OPTIONAL LABEL_OPTIONAL value
+       * @property {string} LABEL_REQUIRED=LABEL_REQUIRED LABEL_REQUIRED value
+       * @property {string} LABEL_REPEATED=LABEL_REPEATED LABEL_REPEATED value
        */
       FieldDescriptorProto.Label = (function() {
         var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[1] = "LABEL_OPTIONAL"] = 1;
-        values[valuesById[2] = "LABEL_REQUIRED"] = 2;
-        values[valuesById[3] = "LABEL_REPEATED"] = 3;
+        values[valuesById[1] = "LABEL_OPTIONAL"] = "LABEL_OPTIONAL";
+        values[valuesById[2] = "LABEL_REQUIRED"] = "LABEL_REQUIRED";
+        values[valuesById[3] = "LABEL_REPEATED"] = "LABEL_REPEATED";
         return values;
       })();
 
@@ -2107,16 +2112,16 @@ $root.google = (function() {
       /**
        * OptimizeMode enum.
        * @name google.protobuf.FileOptions.OptimizeMode
-       * @enum {string}
-       * @property {number} SPEED=1 SPEED value
-       * @property {number} CODE_SIZE=2 CODE_SIZE value
-       * @property {number} LITE_RUNTIME=3 LITE_RUNTIME value
+       * @enum {number}
+       * @property {string} SPEED=SPEED SPEED value
+       * @property {string} CODE_SIZE=CODE_SIZE CODE_SIZE value
+       * @property {string} LITE_RUNTIME=LITE_RUNTIME LITE_RUNTIME value
        */
       FileOptions.OptimizeMode = (function() {
         var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[1] = "SPEED"] = 1;
-        values[valuesById[2] = "CODE_SIZE"] = 2;
-        values[valuesById[3] = "LITE_RUNTIME"] = 3;
+        values[valuesById[1] = "SPEED"] = "SPEED";
+        values[valuesById[2] = "CODE_SIZE"] = "CODE_SIZE";
+        values[valuesById[3] = "LITE_RUNTIME"] = "LITE_RUNTIME";
         return values;
       })();
 
@@ -2285,32 +2290,32 @@ $root.google = (function() {
       /**
        * CType enum.
        * @name google.protobuf.FieldOptions.CType
-       * @enum {string}
-       * @property {number} STRING=0 STRING value
-       * @property {number} CORD=1 CORD value
-       * @property {number} STRING_PIECE=2 STRING_PIECE value
+       * @enum {number}
+       * @property {string} STRING=STRING STRING value
+       * @property {string} CORD=CORD CORD value
+       * @property {string} STRING_PIECE=STRING_PIECE STRING_PIECE value
        */
       FieldOptions.CType = (function() {
         var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[0] = "STRING"] = 0;
-        values[valuesById[1] = "CORD"] = 1;
-        values[valuesById[2] = "STRING_PIECE"] = 2;
+        values[valuesById[0] = "STRING"] = "STRING";
+        values[valuesById[1] = "CORD"] = "CORD";
+        values[valuesById[2] = "STRING_PIECE"] = "STRING_PIECE";
         return values;
       })();
 
       /**
        * JSType enum.
        * @name google.protobuf.FieldOptions.JSType
-       * @enum {string}
-       * @property {number} JS_NORMAL=0 JS_NORMAL value
-       * @property {number} JS_STRING=1 JS_STRING value
-       * @property {number} JS_NUMBER=2 JS_NUMBER value
+       * @enum {number}
+       * @property {string} JS_NORMAL=JS_NORMAL JS_NORMAL value
+       * @property {string} JS_STRING=JS_STRING JS_STRING value
+       * @property {string} JS_NUMBER=JS_NUMBER JS_NUMBER value
        */
       FieldOptions.JSType = (function() {
         var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[0] = "JS_NORMAL"] = 0;
-        values[valuesById[1] = "JS_STRING"] = 1;
-        values[valuesById[2] = "JS_NUMBER"] = 2;
+        values[valuesById[0] = "JS_NORMAL"] = "JS_NORMAL";
+        values[valuesById[1] = "JS_STRING"] = "JS_STRING";
+        values[valuesById[2] = "JS_NUMBER"] = "JS_NUMBER";
         return values;
       })();
 
@@ -2559,8 +2564,8 @@ $root.google = (function() {
        * @interface IUninterpretedOption
        * @property {Array.<google.protobuf.UninterpretedOption.INamePart>|null} [name] UninterpretedOption name
        * @property {string|null} [identifierValue] UninterpretedOption identifierValue
-       * @property {number|Long|null} [positiveIntValue] UninterpretedOption positiveIntValue
-       * @property {number|Long|null} [negativeIntValue] UninterpretedOption negativeIntValue
+       * @property {number|null} [positiveIntValue] UninterpretedOption positiveIntValue
+       * @property {number|null} [negativeIntValue] UninterpretedOption negativeIntValue
        * @property {number|null} [doubleValue] UninterpretedOption doubleValue
        * @property {Uint8Array|null} [stringValue] UninterpretedOption stringValue
        * @property {string|null} [aggregateValue] UninterpretedOption aggregateValue
@@ -2600,7 +2605,7 @@ $root.google = (function() {
 
       /**
        * UninterpretedOption positiveIntValue.
-       * @member {number|Long} positiveIntValue
+       * @member {number} positiveIntValue
        * @memberof google.protobuf.UninterpretedOption
        * @instance
        */
@@ -2608,7 +2613,7 @@ $root.google = (function() {
 
       /**
        * UninterpretedOption negativeIntValue.
-       * @member {number|Long} negativeIntValue
+       * @member {number} negativeIntValue
        * @memberof google.protobuf.UninterpretedOption
        * @instance
        */
@@ -2900,7 +2905,7 @@ $root.google = (function() {
        * Properties of a Timestamp.
        * @memberof google.protobuf
        * @interface ITimestamp
-       * @property {number|Long|null} [seconds] Timestamp seconds
+       * @property {number|null} [seconds] Timestamp seconds
        * @property {number|null} [nanos] Timestamp nanos
        */
 
@@ -2921,7 +2926,7 @@ $root.google = (function() {
 
       /**
        * Timestamp seconds.
-       * @member {number|Long} seconds
+       * @member {number} seconds
        * @memberof google.protobuf.Timestamp
        * @instance
        */
@@ -3071,12 +3076,12 @@ $root.google = (function() {
     /**
      * NullValue enum.
      * @name google.protobuf.NullValue
-     * @enum {string}
-     * @property {number} NULL_VALUE=0 NULL_VALUE value
+     * @enum {number}
+     * @property {string} NULL_VALUE=NULL_VALUE NULL_VALUE value
      */
     protobuf.NullValue = (function() {
       var valuesById = {}, values = Object.create(valuesById);
-      values[valuesById[0] = "NULL_VALUE"] = 0;
+      values[valuesById[0] = "NULL_VALUE"] = "NULL_VALUE";
       return values;
     })();
 
@@ -3122,7 +3127,7 @@ $root.google = (function() {
        * Properties of a Duration.
        * @memberof google.protobuf
        * @interface IDuration
-       * @property {number|Long|null} [seconds] Duration seconds
+       * @property {number|null} [seconds] Duration seconds
        * @property {number|null} [nanos] Duration nanos
        */
 
@@ -3143,7 +3148,7 @@ $root.google = (function() {
 
       /**
        * Duration seconds.
-       * @member {number|Long} seconds
+       * @member {number} seconds
        * @memberof google.protobuf.Duration
        * @instance
        */
@@ -3223,6 +3228,675 @@ $root.google = (function() {
     })();
 
     return protobuf;
+  })();
+
+  google.rpc = (function() {
+
+    /**
+     * Namespace rpc.
+     * @memberof google
+     * @namespace
+     */
+    var rpc = {};
+
+    /**
+     * Code enum.
+     * @name google.rpc.Code
+     * @enum {number}
+     * @property {string} OK=OK OK value
+     * @property {string} CANCELLED=CANCELLED CANCELLED value
+     * @property {string} UNKNOWN=UNKNOWN UNKNOWN value
+     * @property {string} INVALID_ARGUMENT=INVALID_ARGUMENT INVALID_ARGUMENT value
+     * @property {string} DEADLINE_EXCEEDED=DEADLINE_EXCEEDED DEADLINE_EXCEEDED value
+     * @property {string} NOT_FOUND=NOT_FOUND NOT_FOUND value
+     * @property {string} ALREADY_EXISTS=ALREADY_EXISTS ALREADY_EXISTS value
+     * @property {string} PERMISSION_DENIED=PERMISSION_DENIED PERMISSION_DENIED value
+     * @property {string} UNAUTHENTICATED=UNAUTHENTICATED UNAUTHENTICATED value
+     * @property {string} RESOURCE_EXHAUSTED=RESOURCE_EXHAUSTED RESOURCE_EXHAUSTED value
+     * @property {string} FAILED_PRECONDITION=FAILED_PRECONDITION FAILED_PRECONDITION value
+     * @property {string} ABORTED=ABORTED ABORTED value
+     * @property {string} OUT_OF_RANGE=OUT_OF_RANGE OUT_OF_RANGE value
+     * @property {string} UNIMPLEMENTED=UNIMPLEMENTED UNIMPLEMENTED value
+     * @property {string} INTERNAL=INTERNAL INTERNAL value
+     * @property {string} UNAVAILABLE=UNAVAILABLE UNAVAILABLE value
+     * @property {string} DATA_LOSS=DATA_LOSS DATA_LOSS value
+     */
+    rpc.Code = (function() {
+      var valuesById = {}, values = Object.create(valuesById);
+      values[valuesById[0] = "OK"] = "OK";
+      values[valuesById[1] = "CANCELLED"] = "CANCELLED";
+      values[valuesById[2] = "UNKNOWN"] = "UNKNOWN";
+      values[valuesById[3] = "INVALID_ARGUMENT"] = "INVALID_ARGUMENT";
+      values[valuesById[4] = "DEADLINE_EXCEEDED"] = "DEADLINE_EXCEEDED";
+      values[valuesById[5] = "NOT_FOUND"] = "NOT_FOUND";
+      values[valuesById[6] = "ALREADY_EXISTS"] = "ALREADY_EXISTS";
+      values[valuesById[7] = "PERMISSION_DENIED"] = "PERMISSION_DENIED";
+      values[valuesById[16] = "UNAUTHENTICATED"] = "UNAUTHENTICATED";
+      values[valuesById[8] = "RESOURCE_EXHAUSTED"] = "RESOURCE_EXHAUSTED";
+      values[valuesById[9] = "FAILED_PRECONDITION"] = "FAILED_PRECONDITION";
+      values[valuesById[10] = "ABORTED"] = "ABORTED";
+      values[valuesById[11] = "OUT_OF_RANGE"] = "OUT_OF_RANGE";
+      values[valuesById[12] = "UNIMPLEMENTED"] = "UNIMPLEMENTED";
+      values[valuesById[13] = "INTERNAL"] = "INTERNAL";
+      values[valuesById[14] = "UNAVAILABLE"] = "UNAVAILABLE";
+      values[valuesById[15] = "DATA_LOSS"] = "DATA_LOSS";
+      return values;
+    })();
+
+    rpc.RetryInfo = (function() {
+
+      /**
+       * Properties of a RetryInfo.
+       * @memberof google.rpc
+       * @interface IRetryInfo
+       * @property {google.protobuf.IDuration|null} [retryDelay] RetryInfo retryDelay
+       */
+
+      /**
+       * Constructs a new RetryInfo.
+       * @memberof google.rpc
+       * @classdesc Represents a RetryInfo.
+       * @implements IRetryInfo
+       * @constructor
+       * @param {google.rpc.IRetryInfo=} [properties] Properties to set
+       */
+      function RetryInfo(properties) {
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * RetryInfo retryDelay.
+       * @member {google.protobuf.IDuration|null|undefined} retryDelay
+       * @memberof google.rpc.RetryInfo
+       * @instance
+       */
+      RetryInfo.prototype.retryDelay = null;
+
+      return RetryInfo;
+    })();
+
+    rpc.DebugInfo = (function() {
+
+      /**
+       * Properties of a DebugInfo.
+       * @memberof google.rpc
+       * @interface IDebugInfo
+       * @property {Array.<string>|null} [stackEntries] DebugInfo stackEntries
+       * @property {string|null} [detail] DebugInfo detail
+       */
+
+      /**
+       * Constructs a new DebugInfo.
+       * @memberof google.rpc
+       * @classdesc Represents a DebugInfo.
+       * @implements IDebugInfo
+       * @constructor
+       * @param {google.rpc.IDebugInfo=} [properties] Properties to set
+       */
+      function DebugInfo(properties) {
+        this.stackEntries = [];
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * DebugInfo stackEntries.
+       * @member {Array.<string>} stackEntries
+       * @memberof google.rpc.DebugInfo
+       * @instance
+       */
+      DebugInfo.prototype.stackEntries = $util.emptyArray;
+
+      /**
+       * DebugInfo detail.
+       * @member {string} detail
+       * @memberof google.rpc.DebugInfo
+       * @instance
+       */
+      DebugInfo.prototype.detail = "";
+
+      return DebugInfo;
+    })();
+
+    rpc.QuotaFailure = (function() {
+
+      /**
+       * Properties of a QuotaFailure.
+       * @memberof google.rpc
+       * @interface IQuotaFailure
+       * @property {Array.<google.rpc.QuotaFailure.IViolation>|null} [violations] QuotaFailure violations
+       */
+
+      /**
+       * Constructs a new QuotaFailure.
+       * @memberof google.rpc
+       * @classdesc Represents a QuotaFailure.
+       * @implements IQuotaFailure
+       * @constructor
+       * @param {google.rpc.IQuotaFailure=} [properties] Properties to set
+       */
+      function QuotaFailure(properties) {
+        this.violations = [];
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * QuotaFailure violations.
+       * @member {Array.<google.rpc.QuotaFailure.IViolation>} violations
+       * @memberof google.rpc.QuotaFailure
+       * @instance
+       */
+      QuotaFailure.prototype.violations = $util.emptyArray;
+
+      QuotaFailure.Violation = (function() {
+
+        /**
+         * Properties of a Violation.
+         * @memberof google.rpc.QuotaFailure
+         * @interface IViolation
+         * @property {string|null} [subject] Violation subject
+         * @property {string|null} [description] Violation description
+         */
+
+        /**
+         * Constructs a new Violation.
+         * @memberof google.rpc.QuotaFailure
+         * @classdesc Represents a Violation.
+         * @implements IViolation
+         * @constructor
+         * @param {google.rpc.QuotaFailure.IViolation=} [properties] Properties to set
+         */
+        function Violation(properties) {
+          if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+              if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * Violation subject.
+         * @member {string} subject
+         * @memberof google.rpc.QuotaFailure.Violation
+         * @instance
+         */
+        Violation.prototype.subject = "";
+
+        /**
+         * Violation description.
+         * @member {string} description
+         * @memberof google.rpc.QuotaFailure.Violation
+         * @instance
+         */
+        Violation.prototype.description = "";
+
+        return Violation;
+      })();
+
+      return QuotaFailure;
+    })();
+
+    rpc.PreconditionFailure = (function() {
+
+      /**
+       * Properties of a PreconditionFailure.
+       * @memberof google.rpc
+       * @interface IPreconditionFailure
+       * @property {Array.<google.rpc.PreconditionFailure.IViolation>|null} [violations] PreconditionFailure violations
+       */
+
+      /**
+       * Constructs a new PreconditionFailure.
+       * @memberof google.rpc
+       * @classdesc Represents a PreconditionFailure.
+       * @implements IPreconditionFailure
+       * @constructor
+       * @param {google.rpc.IPreconditionFailure=} [properties] Properties to set
+       */
+      function PreconditionFailure(properties) {
+        this.violations = [];
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * PreconditionFailure violations.
+       * @member {Array.<google.rpc.PreconditionFailure.IViolation>} violations
+       * @memberof google.rpc.PreconditionFailure
+       * @instance
+       */
+      PreconditionFailure.prototype.violations = $util.emptyArray;
+
+      PreconditionFailure.Violation = (function() {
+
+        /**
+         * Properties of a Violation.
+         * @memberof google.rpc.PreconditionFailure
+         * @interface IViolation
+         * @property {string|null} [type] Violation type
+         * @property {string|null} [subject] Violation subject
+         * @property {string|null} [description] Violation description
+         */
+
+        /**
+         * Constructs a new Violation.
+         * @memberof google.rpc.PreconditionFailure
+         * @classdesc Represents a Violation.
+         * @implements IViolation
+         * @constructor
+         * @param {google.rpc.PreconditionFailure.IViolation=} [properties] Properties to set
+         */
+        function Violation(properties) {
+          if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+              if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * Violation type.
+         * @member {string} type
+         * @memberof google.rpc.PreconditionFailure.Violation
+         * @instance
+         */
+        Violation.prototype.type = "";
+
+        /**
+         * Violation subject.
+         * @member {string} subject
+         * @memberof google.rpc.PreconditionFailure.Violation
+         * @instance
+         */
+        Violation.prototype.subject = "";
+
+        /**
+         * Violation description.
+         * @member {string} description
+         * @memberof google.rpc.PreconditionFailure.Violation
+         * @instance
+         */
+        Violation.prototype.description = "";
+
+        return Violation;
+      })();
+
+      return PreconditionFailure;
+    })();
+
+    rpc.BadRequest = (function() {
+
+      /**
+       * Properties of a BadRequest.
+       * @memberof google.rpc
+       * @interface IBadRequest
+       * @property {Array.<google.rpc.BadRequest.IFieldViolation>|null} [fieldViolations] BadRequest fieldViolations
+       */
+
+      /**
+       * Constructs a new BadRequest.
+       * @memberof google.rpc
+       * @classdesc Represents a BadRequest.
+       * @implements IBadRequest
+       * @constructor
+       * @param {google.rpc.IBadRequest=} [properties] Properties to set
+       */
+      function BadRequest(properties) {
+        this.fieldViolations = [];
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * BadRequest fieldViolations.
+       * @member {Array.<google.rpc.BadRequest.IFieldViolation>} fieldViolations
+       * @memberof google.rpc.BadRequest
+       * @instance
+       */
+      BadRequest.prototype.fieldViolations = $util.emptyArray;
+
+      BadRequest.FieldViolation = (function() {
+
+        /**
+         * Properties of a FieldViolation.
+         * @memberof google.rpc.BadRequest
+         * @interface IFieldViolation
+         * @property {string|null} [field] FieldViolation field
+         * @property {string|null} [description] FieldViolation description
+         */
+
+        /**
+         * Constructs a new FieldViolation.
+         * @memberof google.rpc.BadRequest
+         * @classdesc Represents a FieldViolation.
+         * @implements IFieldViolation
+         * @constructor
+         * @param {google.rpc.BadRequest.IFieldViolation=} [properties] Properties to set
+         */
+        function FieldViolation(properties) {
+          if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+              if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * FieldViolation field.
+         * @member {string} field
+         * @memberof google.rpc.BadRequest.FieldViolation
+         * @instance
+         */
+        FieldViolation.prototype.field = "";
+
+        /**
+         * FieldViolation description.
+         * @member {string} description
+         * @memberof google.rpc.BadRequest.FieldViolation
+         * @instance
+         */
+        FieldViolation.prototype.description = "";
+
+        return FieldViolation;
+      })();
+
+      return BadRequest;
+    })();
+
+    rpc.RequestInfo = (function() {
+
+      /**
+       * Properties of a RequestInfo.
+       * @memberof google.rpc
+       * @interface IRequestInfo
+       * @property {string|null} [requestId] RequestInfo requestId
+       * @property {string|null} [servingData] RequestInfo servingData
+       */
+
+      /**
+       * Constructs a new RequestInfo.
+       * @memberof google.rpc
+       * @classdesc Represents a RequestInfo.
+       * @implements IRequestInfo
+       * @constructor
+       * @param {google.rpc.IRequestInfo=} [properties] Properties to set
+       */
+      function RequestInfo(properties) {
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * RequestInfo requestId.
+       * @member {string} requestId
+       * @memberof google.rpc.RequestInfo
+       * @instance
+       */
+      RequestInfo.prototype.requestId = "";
+
+      /**
+       * RequestInfo servingData.
+       * @member {string} servingData
+       * @memberof google.rpc.RequestInfo
+       * @instance
+       */
+      RequestInfo.prototype.servingData = "";
+
+      return RequestInfo;
+    })();
+
+    rpc.ResourceInfo = (function() {
+
+      /**
+       * Properties of a ResourceInfo.
+       * @memberof google.rpc
+       * @interface IResourceInfo
+       * @property {string|null} [resourceType] ResourceInfo resourceType
+       * @property {string|null} [resourceName] ResourceInfo resourceName
+       * @property {string|null} [owner] ResourceInfo owner
+       * @property {string|null} [description] ResourceInfo description
+       */
+
+      /**
+       * Constructs a new ResourceInfo.
+       * @memberof google.rpc
+       * @classdesc Represents a ResourceInfo.
+       * @implements IResourceInfo
+       * @constructor
+       * @param {google.rpc.IResourceInfo=} [properties] Properties to set
+       */
+      function ResourceInfo(properties) {
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * ResourceInfo resourceType.
+       * @member {string} resourceType
+       * @memberof google.rpc.ResourceInfo
+       * @instance
+       */
+      ResourceInfo.prototype.resourceType = "";
+
+      /**
+       * ResourceInfo resourceName.
+       * @member {string} resourceName
+       * @memberof google.rpc.ResourceInfo
+       * @instance
+       */
+      ResourceInfo.prototype.resourceName = "";
+
+      /**
+       * ResourceInfo owner.
+       * @member {string} owner
+       * @memberof google.rpc.ResourceInfo
+       * @instance
+       */
+      ResourceInfo.prototype.owner = "";
+
+      /**
+       * ResourceInfo description.
+       * @member {string} description
+       * @memberof google.rpc.ResourceInfo
+       * @instance
+       */
+      ResourceInfo.prototype.description = "";
+
+      return ResourceInfo;
+    })();
+
+    rpc.Help = (function() {
+
+      /**
+       * Properties of a Help.
+       * @memberof google.rpc
+       * @interface IHelp
+       * @property {Array.<google.rpc.Help.ILink>|null} [links] Help links
+       */
+
+      /**
+       * Constructs a new Help.
+       * @memberof google.rpc
+       * @classdesc Represents a Help.
+       * @implements IHelp
+       * @constructor
+       * @param {google.rpc.IHelp=} [properties] Properties to set
+       */
+      function Help(properties) {
+        this.links = [];
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * Help links.
+       * @member {Array.<google.rpc.Help.ILink>} links
+       * @memberof google.rpc.Help
+       * @instance
+       */
+      Help.prototype.links = $util.emptyArray;
+
+      Help.Link = (function() {
+
+        /**
+         * Properties of a Link.
+         * @memberof google.rpc.Help
+         * @interface ILink
+         * @property {string|null} [description] Link description
+         * @property {string|null} [url] Link url
+         */
+
+        /**
+         * Constructs a new Link.
+         * @memberof google.rpc.Help
+         * @classdesc Represents a Link.
+         * @implements ILink
+         * @constructor
+         * @param {google.rpc.Help.ILink=} [properties] Properties to set
+         */
+        function Link(properties) {
+          if (properties)
+            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+              if (properties[keys[i]] != null)
+                this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * Link description.
+         * @member {string} description
+         * @memberof google.rpc.Help.Link
+         * @instance
+         */
+        Link.prototype.description = "";
+
+        /**
+         * Link url.
+         * @member {string} url
+         * @memberof google.rpc.Help.Link
+         * @instance
+         */
+        Link.prototype.url = "";
+
+        return Link;
+      })();
+
+      return Help;
+    })();
+
+    rpc.LocalizedMessage = (function() {
+
+      /**
+       * Properties of a LocalizedMessage.
+       * @memberof google.rpc
+       * @interface ILocalizedMessage
+       * @property {string|null} [locale] LocalizedMessage locale
+       * @property {string|null} [message] LocalizedMessage message
+       */
+
+      /**
+       * Constructs a new LocalizedMessage.
+       * @memberof google.rpc
+       * @classdesc Represents a LocalizedMessage.
+       * @implements ILocalizedMessage
+       * @constructor
+       * @param {google.rpc.ILocalizedMessage=} [properties] Properties to set
+       */
+      function LocalizedMessage(properties) {
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * LocalizedMessage locale.
+       * @member {string} locale
+       * @memberof google.rpc.LocalizedMessage
+       * @instance
+       */
+      LocalizedMessage.prototype.locale = "";
+
+      /**
+       * LocalizedMessage message.
+       * @member {string} message
+       * @memberof google.rpc.LocalizedMessage
+       * @instance
+       */
+      LocalizedMessage.prototype.message = "";
+
+      return LocalizedMessage;
+    })();
+
+    rpc.Status = (function() {
+
+      /**
+       * Properties of a Status.
+       * @memberof google.rpc
+       * @interface IStatus
+       * @property {number|null} [code] Status code
+       * @property {string|null} [message] Status message
+       * @property {Array.<google.protobuf.IAny>|null} [details] Status details
+       */
+
+      /**
+       * Constructs a new Status.
+       * @memberof google.rpc
+       * @classdesc Represents a Status.
+       * @implements IStatus
+       * @constructor
+       * @param {google.rpc.IStatus=} [properties] Properties to set
+       */
+      function Status(properties) {
+        this.details = [];
+        if (properties)
+          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+            if (properties[keys[i]] != null)
+              this[keys[i]] = properties[keys[i]];
+      }
+
+      /**
+       * Status code.
+       * @member {number} code
+       * @memberof google.rpc.Status
+       * @instance
+       */
+      Status.prototype.code = 0;
+
+      /**
+       * Status message.
+       * @member {string} message
+       * @memberof google.rpc.Status
+       * @instance
+       */
+      Status.prototype.message = "";
+
+      /**
+       * Status details.
+       * @member {Array.<google.protobuf.IAny>} details
+       * @memberof google.rpc.Status
+       * @instance
+       */
+      Status.prototype.details = $util.emptyArray;
+
+      return Status;
+    })();
+
+    return rpc;
   })();
 
   google.type = (function() {
@@ -3352,26 +4026,26 @@ $root.google = (function() {
     /**
      * DayOfWeek enum.
      * @name google.type.DayOfWeek
-     * @enum {string}
-     * @property {number} DAY_OF_WEEK_UNSPECIFIED=0 DAY_OF_WEEK_UNSPECIFIED value
-     * @property {number} MONDAY=1 MONDAY value
-     * @property {number} TUESDAY=2 TUESDAY value
-     * @property {number} WEDNESDAY=3 WEDNESDAY value
-     * @property {number} THURSDAY=4 THURSDAY value
-     * @property {number} FRIDAY=5 FRIDAY value
-     * @property {number} SATURDAY=6 SATURDAY value
-     * @property {number} SUNDAY=7 SUNDAY value
+     * @enum {number}
+     * @property {string} DAY_OF_WEEK_UNSPECIFIED=DAY_OF_WEEK_UNSPECIFIED DAY_OF_WEEK_UNSPECIFIED value
+     * @property {string} MONDAY=MONDAY MONDAY value
+     * @property {string} TUESDAY=TUESDAY TUESDAY value
+     * @property {string} WEDNESDAY=WEDNESDAY WEDNESDAY value
+     * @property {string} THURSDAY=THURSDAY THURSDAY value
+     * @property {string} FRIDAY=FRIDAY FRIDAY value
+     * @property {string} SATURDAY=SATURDAY SATURDAY value
+     * @property {string} SUNDAY=SUNDAY SUNDAY value
      */
     type.DayOfWeek = (function() {
       var valuesById = {}, values = Object.create(valuesById);
-      values[valuesById[0] = "DAY_OF_WEEK_UNSPECIFIED"] = 0;
-      values[valuesById[1] = "MONDAY"] = 1;
-      values[valuesById[2] = "TUESDAY"] = 2;
-      values[valuesById[3] = "WEDNESDAY"] = 3;
-      values[valuesById[4] = "THURSDAY"] = 4;
-      values[valuesById[5] = "FRIDAY"] = 5;
-      values[valuesById[6] = "SATURDAY"] = 6;
-      values[valuesById[7] = "SUNDAY"] = 7;
+      values[valuesById[0] = "DAY_OF_WEEK_UNSPECIFIED"] = "DAY_OF_WEEK_UNSPECIFIED";
+      values[valuesById[1] = "MONDAY"] = "MONDAY";
+      values[valuesById[2] = "TUESDAY"] = "TUESDAY";
+      values[valuesById[3] = "WEDNESDAY"] = "WEDNESDAY";
+      values[valuesById[4] = "THURSDAY"] = "THURSDAY";
+      values[valuesById[5] = "FRIDAY"] = "FRIDAY";
+      values[valuesById[6] = "SATURDAY"] = "SATURDAY";
+      values[valuesById[7] = "SUNDAY"] = "SUNDAY";
       return values;
     })();
 
@@ -3426,7 +4100,7 @@ $root.google = (function() {
        * @memberof google.type
        * @interface IMoney
        * @property {string|null} [currencyCode] Money currencyCode
-       * @property {number|Long|null} [units] Money units
+       * @property {number|null} [units] Money units
        * @property {number|null} [nanos] Money nanos
        */
 
@@ -3455,7 +4129,7 @@ $root.google = (function() {
 
       /**
        * Money units.
-       * @member {number|Long} units
+       * @member {number} units
        * @memberof google.type.Money
        * @instance
        */
@@ -3989,7 +4663,7 @@ $root.google = (function() {
          * @interface IValue
          * @property {google.protobuf.NullValue|null} [nullValue] Value nullValue
          * @property {boolean|null} [booleanValue] Value booleanValue
-         * @property {number|Long|null} [integerValue] Value integerValue
+         * @property {number|null} [integerValue] Value integerValue
          * @property {number|null} [doubleValue] Value doubleValue
          * @property {google.protobuf.ITimestamp|null} [timestampValue] Value timestampValue
          * @property {string|null} [stringValue] Value stringValue
@@ -4033,7 +4707,7 @@ $root.google = (function() {
 
         /**
          * Value integerValue.
-         * @member {number|Long} integerValue
+         * @member {number} integerValue
          * @memberof google.firestore.v1beta1.Value
          * @instance
          */
@@ -6181,20 +6855,20 @@ $root.google = (function() {
         /**
          * TargetChangeType enum.
          * @name google.firestore.v1beta1.TargetChange.TargetChangeType
-         * @enum {string}
-         * @property {number} NO_CHANGE=0 NO_CHANGE value
-         * @property {number} ADD=1 ADD value
-         * @property {number} REMOVE=2 REMOVE value
-         * @property {number} CURRENT=3 CURRENT value
-         * @property {number} RESET=4 RESET value
+         * @enum {number}
+         * @property {string} NO_CHANGE=NO_CHANGE NO_CHANGE value
+         * @property {string} ADD=ADD ADD value
+         * @property {string} REMOVE=REMOVE REMOVE value
+         * @property {string} CURRENT=CURRENT CURRENT value
+         * @property {string} RESET=RESET RESET value
          */
         TargetChange.TargetChangeType = (function() {
           var valuesById = {}, values = Object.create(valuesById);
-          values[valuesById[0] = "NO_CHANGE"] = 0;
-          values[valuesById[1] = "ADD"] = 1;
-          values[valuesById[2] = "REMOVE"] = 2;
-          values[valuesById[3] = "CURRENT"] = 3;
-          values[valuesById[4] = "RESET"] = 4;
+          values[valuesById[0] = "NO_CHANGE"] = "NO_CHANGE";
+          values[valuesById[1] = "ADD"] = "ADD";
+          values[valuesById[2] = "REMOVE"] = "REMOVE";
+          values[valuesById[3] = "CURRENT"] = "CURRENT";
+          values[valuesById[4] = "RESET"] = "RESET";
           return values;
         })();
 
@@ -6552,14 +7226,14 @@ $root.google = (function() {
           /**
            * Operator enum.
            * @name google.firestore.v1beta1.StructuredQuery.CompositeFilter.Operator
-           * @enum {string}
-           * @property {number} OPERATOR_UNSPECIFIED=0 OPERATOR_UNSPECIFIED value
-           * @property {number} AND=1 AND value
+           * @enum {number}
+           * @property {string} OPERATOR_UNSPECIFIED=OPERATOR_UNSPECIFIED OPERATOR_UNSPECIFIED value
+           * @property {string} AND=AND AND value
            */
           CompositeFilter.Operator = (function() {
             var valuesById = {}, values = Object.create(valuesById);
-            values[valuesById[0] = "OPERATOR_UNSPECIFIED"] = 0;
-            values[valuesById[1] = "AND"] = 1;
+            values[valuesById[0] = "OPERATOR_UNSPECIFIED"] = "OPERATOR_UNSPECIFIED";
+            values[valuesById[1] = "AND"] = "AND";
             return values;
           })();
 
@@ -6619,22 +7293,24 @@ $root.google = (function() {
           /**
            * Operator enum.
            * @name google.firestore.v1beta1.StructuredQuery.FieldFilter.Operator
-           * @enum {string}
-           * @property {number} OPERATOR_UNSPECIFIED=0 OPERATOR_UNSPECIFIED value
-           * @property {number} LESS_THAN=1 LESS_THAN value
-           * @property {number} LESS_THAN_OR_EQUAL=2 LESS_THAN_OR_EQUAL value
-           * @property {number} GREATER_THAN=3 GREATER_THAN value
-           * @property {number} GREATER_THAN_OR_EQUAL=4 GREATER_THAN_OR_EQUAL value
-           * @property {number} EQUAL=5 EQUAL value
+           * @enum {number}
+           * @property {string} OPERATOR_UNSPECIFIED=OPERATOR_UNSPECIFIED OPERATOR_UNSPECIFIED value
+           * @property {string} LESS_THAN=LESS_THAN LESS_THAN value
+           * @property {string} LESS_THAN_OR_EQUAL=LESS_THAN_OR_EQUAL LESS_THAN_OR_EQUAL value
+           * @property {string} GREATER_THAN=GREATER_THAN GREATER_THAN value
+           * @property {string} GREATER_THAN_OR_EQUAL=GREATER_THAN_OR_EQUAL GREATER_THAN_OR_EQUAL value
+           * @property {string} EQUAL=EQUAL EQUAL value
+           * @property {string} ARRAY_CONTAINS=ARRAY_CONTAINS ARRAY_CONTAINS value
            */
           FieldFilter.Operator = (function() {
             var valuesById = {}, values = Object.create(valuesById);
-            values[valuesById[0] = "OPERATOR_UNSPECIFIED"] = 0;
-            values[valuesById[1] = "LESS_THAN"] = 1;
-            values[valuesById[2] = "LESS_THAN_OR_EQUAL"] = 2;
-            values[valuesById[3] = "GREATER_THAN"] = 3;
-            values[valuesById[4] = "GREATER_THAN_OR_EQUAL"] = 4;
-            values[valuesById[5] = "EQUAL"] = 5;
+            values[valuesById[0] = "OPERATOR_UNSPECIFIED"] = "OPERATOR_UNSPECIFIED";
+            values[valuesById[1] = "LESS_THAN"] = "LESS_THAN";
+            values[valuesById[2] = "LESS_THAN_OR_EQUAL"] = "LESS_THAN_OR_EQUAL";
+            values[valuesById[3] = "GREATER_THAN"] = "GREATER_THAN";
+            values[valuesById[4] = "GREATER_THAN_OR_EQUAL"] = "GREATER_THAN_OR_EQUAL";
+            values[valuesById[5] = "EQUAL"] = "EQUAL";
+            values[valuesById[7] = "ARRAY_CONTAINS"] = "ARRAY_CONTAINS";
             return values;
           })();
 
@@ -6699,16 +7375,16 @@ $root.google = (function() {
           /**
            * Operator enum.
            * @name google.firestore.v1beta1.StructuredQuery.UnaryFilter.Operator
-           * @enum {string}
-           * @property {number} OPERATOR_UNSPECIFIED=0 OPERATOR_UNSPECIFIED value
-           * @property {number} IS_NAN=2 IS_NAN value
-           * @property {number} IS_NULL=3 IS_NULL value
+           * @enum {number}
+           * @property {string} OPERATOR_UNSPECIFIED=OPERATOR_UNSPECIFIED OPERATOR_UNSPECIFIED value
+           * @property {string} IS_NAN=IS_NAN IS_NAN value
+           * @property {string} IS_NULL=IS_NULL IS_NULL value
            */
           UnaryFilter.Operator = (function() {
             var valuesById = {}, values = Object.create(valuesById);
-            values[valuesById[0] = "OPERATOR_UNSPECIFIED"] = 0;
-            values[valuesById[2] = "IS_NAN"] = 2;
-            values[valuesById[3] = "IS_NULL"] = 3;
+            values[valuesById[0] = "OPERATOR_UNSPECIFIED"] = "OPERATOR_UNSPECIFIED";
+            values[valuesById[2] = "IS_NAN"] = "IS_NAN";
+            values[valuesById[3] = "IS_NULL"] = "IS_NULL";
             return values;
           })();
 
@@ -6833,16 +7509,16 @@ $root.google = (function() {
         /**
          * Direction enum.
          * @name google.firestore.v1beta1.StructuredQuery.Direction
-         * @enum {string}
-         * @property {number} DIRECTION_UNSPECIFIED=0 DIRECTION_UNSPECIFIED value
-         * @property {number} ASCENDING=1 ASCENDING value
-         * @property {number} DESCENDING=2 DESCENDING value
+         * @enum {number}
+         * @property {string} DIRECTION_UNSPECIFIED=DIRECTION_UNSPECIFIED DIRECTION_UNSPECIFIED value
+         * @property {string} ASCENDING=ASCENDING ASCENDING value
+         * @property {string} DESCENDING=DESCENDING DESCENDING value
          */
         StructuredQuery.Direction = (function() {
           var valuesById = {}, values = Object.create(valuesById);
-          values[valuesById[0] = "DIRECTION_UNSPECIFIED"] = 0;
-          values[valuesById[1] = "ASCENDING"] = 1;
-          values[valuesById[2] = "DESCENDING"] = 2;
+          values[valuesById[0] = "DIRECTION_UNSPECIFIED"] = "DIRECTION_UNSPECIFIED";
+          values[valuesById[1] = "ASCENDING"] = "ASCENDING";
+          values[valuesById[2] = "DESCENDING"] = "DESCENDING";
           return values;
         })();
 
@@ -7029,6 +7705,8 @@ $root.google = (function() {
            * @interface IFieldTransform
            * @property {string|null} [fieldPath] FieldTransform fieldPath
            * @property {google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue|null} [setToServerValue] FieldTransform setToServerValue
+           * @property {google.firestore.v1beta1.IArrayValue|null} [appendMissingElements] FieldTransform appendMissingElements
+           * @property {google.firestore.v1beta1.IArrayValue|null} [removeAllFromArray] FieldTransform removeAllFromArray
            */
 
           /**
@@ -7062,31 +7740,47 @@ $root.google = (function() {
            */
           FieldTransform.prototype.setToServerValue = 0;
 
+          /**
+           * FieldTransform appendMissingElements.
+           * @member {google.firestore.v1beta1.IArrayValue|null|undefined} appendMissingElements
+           * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
+           * @instance
+           */
+          FieldTransform.prototype.appendMissingElements = null;
+
+          /**
+           * FieldTransform removeAllFromArray.
+           * @member {google.firestore.v1beta1.IArrayValue|null|undefined} removeAllFromArray
+           * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
+           * @instance
+           */
+          FieldTransform.prototype.removeAllFromArray = null;
+
           // OneOf field names bound to virtual getters and setters
           var $oneOfFields;
 
           /**
            * FieldTransform transformType.
-           * @member {"setToServerValue"|undefined} transformType
+           * @member {"setToServerValue"|"appendMissingElements"|"removeAllFromArray"|undefined} transformType
            * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
            * @instance
            */
           Object.defineProperty(FieldTransform.prototype, "transformType", {
-            get: $util.oneOfGetter($oneOfFields = ["setToServerValue"]),
+            get: $util.oneOfGetter($oneOfFields = ["setToServerValue", "appendMissingElements", "removeAllFromArray"]),
             set: $util.oneOfSetter($oneOfFields)
           });
 
           /**
            * ServerValue enum.
            * @name google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue
-           * @enum {string}
-           * @property {number} SERVER_VALUE_UNSPECIFIED=0 SERVER_VALUE_UNSPECIFIED value
-           * @property {number} REQUEST_TIME=1 REQUEST_TIME value
+           * @enum {number}
+           * @property {string} SERVER_VALUE_UNSPECIFIED=SERVER_VALUE_UNSPECIFIED SERVER_VALUE_UNSPECIFIED value
+           * @property {string} REQUEST_TIME=REQUEST_TIME REQUEST_TIME value
            */
           FieldTransform.ServerValue = (function() {
             var valuesById = {}, values = Object.create(valuesById);
-            values[valuesById[0] = "SERVER_VALUE_UNSPECIFIED"] = 0;
-            values[valuesById[1] = "REQUEST_TIME"] = 1;
+            values[valuesById[0] = "SERVER_VALUE_UNSPECIFIED"] = "SERVER_VALUE_UNSPECIFIED";
+            values[valuesById[1] = "REQUEST_TIME"] = "REQUEST_TIME";
             return values;
           })();
 
@@ -7566,72 +8260,6 @@ $root.google = (function() {
     })();
 
     return api;
-  })();
-
-  google.rpc = (function() {
-
-    /**
-     * Namespace rpc.
-     * @memberof google
-     * @namespace
-     */
-    var rpc = {};
-
-    rpc.Status = (function() {
-
-      /**
-       * Properties of a Status.
-       * @memberof google.rpc
-       * @interface IStatus
-       * @property {number|null} [code] Status code
-       * @property {string|null} [message] Status message
-       * @property {Array.<google.protobuf.IAny>|null} [details] Status details
-       */
-
-      /**
-       * Constructs a new Status.
-       * @memberof google.rpc
-       * @classdesc Represents a Status.
-       * @implements IStatus
-       * @constructor
-       * @param {google.rpc.IStatus=} [properties] Properties to set
-       */
-      function Status(properties) {
-        this.details = [];
-        if (properties)
-          for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-            if (properties[keys[i]] != null)
-              this[keys[i]] = properties[keys[i]];
-      }
-
-      /**
-       * Status code.
-       * @member {number} code
-       * @memberof google.rpc.Status
-       * @instance
-       */
-      Status.prototype.code = 0;
-
-      /**
-       * Status message.
-       * @member {string} message
-       * @memberof google.rpc.Status
-       * @instance
-       */
-      Status.prototype.message = "";
-
-      /**
-       * Status details.
-       * @member {Array.<google.protobuf.IAny>} details
-       * @memberof google.rpc.Status
-       * @instance
-       */
-      Status.prototype.details = $util.emptyArray;
-
-      return Status;
-    })();
-
-    return rpc;
   })();
 
   return google;

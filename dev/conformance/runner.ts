@@ -22,9 +22,8 @@ import path from 'path';
 import protobufjs from 'protobufjs';
 import through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
-
-import api = google.firestore.v1beta1;
+import * as proto from '../protos/firestore_proto_api';
+import api = proto.google.firestore.v1beta1;
 
 import * as Firestore from '../src';
 
@@ -35,9 +34,7 @@ import {createInstance as createInstanceHelper} from '../test/util/helpers';
 import {AnyDuringMigration} from '../src/types';
 import {DocumentChangeType} from '../src/document-change';
 
-const REQUEST_TIME =
-    api.DocumentTransform.FieldTransform.ServerValue.REQUEST_TIME;
-
+const REQUEST_TIME = 'REQUEST_TIME';
 
 /** List of test cases that are ignored. */
 const ignoredRe: RegExp[] = [];
@@ -179,12 +176,7 @@ const convertInput = {
 
 /** Converts Firestore Protobuf types in Proto3 JSON format to Protobuf JS. */
 const convertProto = {
-  operator: op => api.StructuredQuery.FieldFilter.Operator[op] ||
-      api.StructuredQuery.UnaryFilter.Operator[op],
-  direction: dir => dir === 'DESCENDING' ?
-      api.StructuredQuery.Direction.DESCENDING :
-      api.StructuredQuery.Direction.ASCENDING,
-  targetChange: type => type ? type : 'NO_CHANGE',
+  targetChange: type => type || 'NO_CHANGE',
   commitRequest: commitRequest => {
     const deepCopy = JSON.parse(JSON.stringify(commitRequest));
     for (const write of deepCopy.writes) {
@@ -195,8 +187,18 @@ const convertProto = {
         write.transform.fieldTransforms = write.transform.fieldTransforms.map(
             transform => convertProto.transform(transform));
       }
+      if (write.currentDocument) {
+        write.currentDocument =
+            convertProto.precondition(write.currentDocument);
+      }
     }
-
+    return deepCopy;
+  },
+  precondition: precondition => {
+    const deepCopy = JSON.parse(JSON.stringify(precondition));
+    if (deepCopy.updateTime && deepCopy.updateTime.seconds) {
+      deepCopy.updateTime.seconds = Number(deepCopy.updateTime.seconds);
+    }
     return deepCopy;
   },
   transform: transform => {
@@ -218,27 +220,14 @@ const convertProto = {
   structuredQuery: queryRequest => {
     const deepCopy = JSON.parse(JSON.stringify(queryRequest));
     if (deepCopy.where && deepCopy.where.fieldFilter) {
-      deepCopy.where.fieldFilter.op =
-          convertProto.operator(deepCopy.where.fieldFilter.op);
       deepCopy.where.fieldFilter.value =
           convert.valueFromJson(deepCopy.where.fieldFilter.value);
     }
     if (deepCopy.where && deepCopy.where.compositeFilter) {
-      deepCopy.where.compositeFilter.op =
-          api.StructuredQuery.CompositeFilter.Operator.AND;
+      deepCopy.where.compositeFilter.op = 'AND';
       for (const filter of deepCopy.where.compositeFilter.filters) {
-        filter.fieldFilter.op = convertProto.operator(filter.fieldFilter.op);
         filter.fieldFilter.value =
             convert.valueFromJson(filter.fieldFilter.value);
-      }
-    }
-    if (deepCopy.where && deepCopy.where.unaryFilter) {
-      deepCopy.where.unaryFilter.op =
-          convertProto.operator(deepCopy.where.unaryFilter.op);
-    }
-    if (deepCopy.orderBy) {
-      for (const orderBy of deepCopy.orderBy) {
-        orderBy.direction = convertProto.direction(orderBy.direction);
       }
     }
     if (deepCopy.startAt) {
@@ -271,7 +260,7 @@ function commitHandler(spec) {
   return (request, options, callback) => {
     try {
       expect(request).to.deep.equal(convertProto.commitRequest(spec.request));
-      const res: google.firestore.v1beta1.IWriteResponse = {
+      const res: api.IWriteResponse = {
         commitTime: {},
         writeResults: [],
       };
@@ -506,8 +495,7 @@ function runTest(spec) {
 
   return testPromise.then(
       () => {
-        expect(testSpec.isError)
-            .to.be.false('Expected test to fail, but test succeeded');
+        expect(testSpec.isError || false).to.be.false;
       },
       err => {
         if (!testSpec.isError) {
