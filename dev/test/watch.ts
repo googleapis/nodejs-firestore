@@ -21,15 +21,15 @@ import through2 from 'through2';
 import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {setTimeoutHandler} from '../src/backoff';
-import {DocumentSnapshot} from '../src/document';
-import {AnyDuringMigration} from '../src/types';
-import {createInstance} from '../test/util/helpers';
+import {AnyDuringMigration, GrpcError} from '../src/types';
+import {createInstance} from './util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
 import api = google.firestore.v1beta1;
-import {QueryDocumentSnapshot} from '../src';
+import {QueryDocumentSnapshot, QuerySnapshot} from '../src';
+import {DocumentSnapshotBuilder} from '../src/document';
 
 let PROJECT_ID = process.env.PROJECT_ID;
 if (!PROJECT_ID) {
@@ -40,9 +40,9 @@ if (!PROJECT_ID) {
  * @param actual The computed docs array.
  * @param expected The expected docs array.
  */
-function docsEqual(actual, expected) {
+function docsEqual(actual:QueryDocumentSnapshot[], expected:QueryDocumentSnapshot[]) {
   expect(actual.length).to.equal(expected.length);
-  for (let i = 0; i < actual.size; i++) {
+  for (let i = 0; i < actual.length; i++) {
     expect(actual[i].ref.id).to.equal(expected[i].ref.id);
     expect(actual[i].data()).to.deep.eq(expected[i].data());
     expect((expected[i].createTime)).to.be.a('string');
@@ -98,7 +98,7 @@ function snapshotsEqual(lastSnapshot, version, actual, expected) {
  * Helper for constructing a snapshot.
  */
 function snapshot(ref, data) {
-  const snapshot = new DocumentSnapshot.Builder();
+  const snapshot = new DocumentSnapshotBuilder();
   snapshot.ref = ref;
   snapshot.fieldsProto = ref.firestore._serializer.encodeFields(data);
   snapshot.readTime = new Firestore.Timestamp(0, 0);
@@ -755,8 +755,8 @@ describe('Query watch', () => {
     for (const statusCode in expectRetry) {
       if (expectRetry.hasOwnProperty(statusCode)) {
         result = result.then(() => {
-          const err = new Error('GRPC Error');
-          (err as AnyDuringMigration).code = Number(statusCode);
+          const err = new GrpcError('GRPC Error');
+          err.code = Number(statusCode);
 
           if (expectRetry[statusCode]) {
             return watchHelper.runTest(collQueryJSON(), () => {

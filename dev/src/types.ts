@@ -17,6 +17,7 @@
 import {google} from '../protos/firestore_proto_api';
 import {FieldPath} from './path';
 import {Transaction} from './transaction';
+import {Timestamp} from './timestamp';
 
 /**
  * A union of all of the standard JS types, useful for cases where the type is
@@ -42,6 +43,10 @@ export type UserInput = any;
 
 // tslint:disable-next-line:no-any
 export type GapicClient = any;
+
+export class GrpcError extends Error {
+  code?: number;
+}
 
 /**
  * Settings used to directly configure a `Firestore` instance.

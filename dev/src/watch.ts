@@ -16,20 +16,24 @@
 
 import assert from 'assert';
 import rbtree from 'functional-red-black-tree';
-import {PassThrough} from 'stream';
 import through2 from 'through2';
 
 import {ExponentialBackoff} from './backoff';
-import {DocumentSnapshot} from './document';
+import {
+  DocumentSnapshot,
+  DocumentSnapshotBuilder,
+  QueryDocumentSnapshot
+} from './document';
 import {DocumentChange, DocumentChangeType} from './document-change';
 import {logger} from './logger';
 import {ResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {requestTag} from './util';
+import Firestore, {DocumentReference, Query} from './index';
 
-export class ErrorWithCode extends Error {
-  code?: number;
-}
+import {google} from '../protos/firestore_proto_api';
+import api = google.firestore.v1beta1;
+import {GrpcError} from './types';
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -56,7 +60,7 @@ const ChangeType: {[k: string]: DocumentChangeType} = {
  * This corresponds to
  * {@link https://github.com/grpc/grpc/blob/master/doc/statuscodes.md}.
  */
-const GRPC_STATUS_CODE = {
+const GRPC_STATUS_CODE : { [k:string] : number } = {
   // Not an error; returned on success.
   OK: 0,
 
@@ -171,7 +175,7 @@ const GRPC_STATUS_CODE = {
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
-const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
+const DOCUMENT_WATCH_COMPARATOR = (doc1:DocumentSnapshot, doc2:DocumentSnapshot) => {
   assert(doc1 === doc2, 'Document watches only support one document.');
   return 0;
 };
@@ -203,6 +207,9 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
  * changed documents since the last snapshot delivered for this watch.
  */
 
+/** @private */
+export type DocumentComparator =  (l:QueryDocumentSnapshot, r:QueryDocumentSnapshot) => number;
+
 /**
  * Watch provides listen functionality and exposes the 'onSnapshot' observer. It
  * can be used with a valid Firestore Listen target.
@@ -211,25 +218,24 @@ const DOCUMENT_WATCH_COMPARATOR = (doc1, doc2) => {
  * @private
  */
 export class Watch {
-  _firestore;
-  _targets;
-  _comparator;
-  _backoff;
-  _requestTag;
+  private readonly _firestore:Firestore;
+  private readonly _target:api.ITarget;
+  private readonly _comparator:DocumentComparator;
+  private readonly _backoff:  ExponentialBackoff;
+  private  readonly _requestTag:string;
 
   /**
    * @private
    * @hideconstructor
    *
-   * @param {Firestore} firestore The Firestore Database client.
-   * @param {Object} target - A Firestore 'Target' proto denoting the target to
-   * listen on.
-   * @param {function} comparator - A comparator for QueryDocumentSnapshots that
-   * is used to order the document snapshots returned by this watch.
+   * @param firestore The Firestore Database client.
+   * @param target A Firestore 'Target' proto denoting the target to listen on.
+   * @param comparator - A comparator for QueryDocumentSnapshots that is used to
+   * order the document snapshots returned by this watch.
    */
-  constructor(firestore, target, comparator) {
+  constructor(private readonly firestore:Firestore, private readonly target:api.ITarget, comparator:DocumentComparator) {
     this._firestore = firestore;
-    this._targets = target;
+    this._target = target;
     this._comparator = comparator;
     this._backoff = new ExponentialBackoff();
     this._requestTag = requestTag();
@@ -239,11 +245,10 @@ export class Watch {
    * Creates a new Watch instance to listen on DocumentReferences.
    *
    * @private
-   * @param {DocumentReference} documentRef - The document
-   * reference for this watch.
-   * @returns {Watch} A newly created Watch instance.
+   * @param  documentRef - The documentreference for this watch.
+   * @returns A newly created Watch instance.
    */
-  static forDocument(documentRef) {
+  static forDocument(documentRef:DocumentReference) : Watch {
     return new Watch(
         documentRef.firestore, {
           documents: {
@@ -258,10 +263,10 @@ export class Watch {
    * Creates a new Watch instance to listen on Queries.
    *
    * @private
-   * @param {Query} query - The query used for this watch.
-   * @returns {Watch} A newly created Watch instance.
+   * @param query The query used for this watch.
+   * @returns A newly created Watch instance.
    */
-  static forQuery(query) {
+  static forQuery(query:Query): Watch  {
     return new Watch(
         query.firestore, {
           query: query.toProto(),
@@ -276,10 +281,10 @@ export class Watch {
    * transient in this context.
    *
    * @private
-   * @param {Error} error An error object.
-   * @return {boolean} Whether the error is permanent.
+   * @param error An error object.
+   * @return Whether the error is permanent.
    */
-  isPermanentError(error) {
+  private isPermanentError(error:GrpcError) : boolean {
     if (error.code === undefined) {
       logger(
           'Watch.onSnapshot', this._requestTag,
@@ -306,10 +311,10 @@ export class Watch {
    * overload.
    *
    * @private
-   * @param {Error} error A GRPC Error object that exposes an error code.
-   * @return {boolean} Whether we need to back off our retries.
+   * @param error A GRPC Error object that exposes an error code.
+   * @return Whether we need to back off our retries.
    */
-  isResourceExhaustedError(error) {
+  private isResourceExhaustedError(error:GrpcError):boolean {
     return error.code === GRPC_STATUS_CODE.RESOURCE_EXHAUSTED;
   }
 
@@ -317,26 +322,25 @@ export class Watch {
    * Starts a watch and attaches a listener for document change events.
    *
    * @private
-   * @param {watchSnapshotCallback} onNext - A callback to be called every time
-   * a new snapshot is available.
-   * @param {function(Error)=} onError - A callback to be called if the listen
-   * fails or is cancelled. No further callbacks will occur.
+   * @param onNext A callback to be called every time a new snapshot is
+   * available.
+   * @param onError A callback to be called if the listen fails or is cancelled.
+   * No further callbacks will occur.
    *
-   * @returns {function()} An unsubscribe function that can be called to cancel
-   * the snapshot listener.
+   * @returns An unsubscribe function that can be called to cancel the snapshot
+   * listener.
    */
-  onSnapshot(onNext, onError) {
-    const self = this;
-
+  onSnapshot(onNext: (readTime: Timestamp, size:number, docs:() => QueryDocumentSnapshot[], changes:() => DocumentChange[]) => void,
+             onError: (error: Error) => void): () => void {
     // The sorted tree of QueryDocumentSnapshots as sent in the last snapshot.
     // We only look at the keys.
     let docTree = rbtree(this._comparator);
     // A map of document names to QueryDocumentSnapshots for the last sent
     // snapshot.
-    let docMap = new Map();
+    let docMap = new Map<string, QueryDocumentSnapshot>();
     // The accumulates map of document changes (keyed by document name) for the
     // current snapshot.
-    const changeMap = new Map();
+    const changeMap = new Map<string, DocumentSnapshotBuilder>();
 
     // The current state of the query results.
     let current = false;
@@ -345,31 +349,31 @@ export class Watch {
     // aren't docs.
     let hasPushed = false;
     // The server assigns and updates the resume token.
-    let resumeToken = undefined;
+    let resumeToken :Uint8Array|null = null;
 
     // Indicates whether we are interested in data from the stream. Set to false
     // in the 'unsubscribe()' callback.
     let isActive = true;
 
     // Sentinel value for a document remove.
-    const REMOVED = {};
+    const REMOVED = {} as DocumentSnapshotBuilder;
 
-    const request = {
+    const request : api.IListenRequest = {
       database: this._firestore.formattedName,
-      addTarget: this._targets,
+      addTarget: this._target,
     };
 
     // We may need to replace the underlying stream on reset events.
     // This is the one that will be returned and proxy the current one.
     const stream = through2.obj();
     // The current stream to the backend.
-    let currentStream: PassThrough|null = null;
+    let currentStream: NodeJS.ReadWriteStream|null = null;
 
     /** Helper to clear the docs on RESET or filter mismatch. */
     const resetDocs = () => {
-      logger('Watch.onSnapshot', self._requestTag, 'Resetting documents');
+      logger('Watch.onSnapshot', this._requestTag, 'Resetting documents');
       changeMap.clear();
-      resumeToken = undefined;
+      resumeToken = null;
 
       docTree.forEach(snapshot => {
         // Mark each document as deleted. If documents are not deleted, they
@@ -391,7 +395,7 @@ export class Watch {
 
       if (isActive) {
         isActive = false;
-        logger('Watch.onSnapshot', self._requestTag, 'Invoking onError: ', err);
+        logger('Watch.onSnapshot', this._requestTag, 'Invoking onError: ', err);
         onError(err);
       }
     };
@@ -400,16 +404,16 @@ export class Watch {
      * Re-opens the stream unless the specified error is considered permanent.
      * Clears the change map.
      */
-    const maybeReopenStream = (err) => {
-      if (isActive && !self.isPermanentError(err)) {
+    const maybeReopenStream = (err:GrpcError) => {
+      if (isActive && !this.isPermanentError(err)) {
         logger(
-            'Watch.onSnapshot', self._requestTag,
+            'Watch.onSnapshot', this._requestTag,
             'Stream ended, re-opening after retryable error: ', err);
-        request.addTarget.resumeToken = resumeToken;
+        request.addTarget!.resumeToken = resumeToken;
         changeMap.clear();
 
-        if (self.isResourceExhaustedError(err)) {
-          self._backoff.resetToMax();
+        if (this.isResourceExhaustedError(err)) {
+          this._backoff.resetToMax();
         }
 
         resetStream();
@@ -420,7 +424,7 @@ export class Watch {
 
     /** Helper to restart the outgoing stream to the backend. */
     const resetStream = () => {
-      logger('Watch.onSnapshot', self._requestTag, 'Opening new stream');
+      logger('Watch.onSnapshot', this._requestTag, 'Opening new stream');
       if (currentStream) {
         currentStream.unpipe(stream);
         currentStream.end();
@@ -433,34 +437,34 @@ export class Watch {
      * Initializes a new stream to the backend with backoff.
      */
     const initStream = () => {
-      self._backoff.backoffAndWait().then(() => {
+      this._backoff.backoffAndWait().then(() => {
         if (!isActive) {
           logger(
-              'Watch.onSnapshot', self._requestTag,
+              'Watch.onSnapshot', this._requestTag,
               'Not initializing inactive stream');
           return;
         }
 
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
-        self._firestore
-            .readWriteStream('listen', request, self._requestTag, true)
+        this._firestore
+            .readWriteStream('listen', request, this._requestTag, true)
             .then(backendStream => {
               if (!isActive) {
                 logger(
-                    'Watch.onSnapshot', self._requestTag,
+                    'Watch.onSnapshot', this._requestTag,
                     'Closing inactive stream');
                 backendStream.end();
                 return;
               }
-              logger('Watch.onSnapshot', self._requestTag, 'Opened new stream');
+              logger('Watch.onSnapshot', this._requestTag, 'Opened new stream');
               currentStream = backendStream;
               currentStream!.on('error', err => {
                 maybeReopenStream(err);
               });
               currentStream!.on('end', () => {
                 const err = new Error('Stream ended unexpectedly');
-                (err as ErrorWithCode).code = GRPC_STATUS_CODE.UNKNOWN;
+                (err as GrpcError).code = GRPC_STATUS_CODE.UNKNOWN;
                 maybeReopenStream(err);
               });
               currentStream!.pipe(stream);
@@ -474,7 +478,7 @@ export class Watch {
      * Checks if the current target id is included in the list of target ids.
      * If no targetIds are provided, returns true.
      */
-    const affectsTarget = (targetIds, currentId) => {
+    const affectsTarget = (targetIds:number[]|undefined, currentId:number) => {
       if (targetIds === undefined || targetIds.length === 0) {
         return true;
       }
@@ -488,11 +492,13 @@ export class Watch {
       return false;
     };
 
+    type DocumentChangeSet = { deletes: string[], adds: QueryDocumentSnapshot[], updates:QueryDocumentSnapshot[]};
+
     /** Splits up document changes into removals, additions, and updates. */
-    const extractChanges = (docMap, changes, readTime?) => {
+    const extractChanges = (docMap:Map<string, QueryDocumentSnapshot>, changes:Map<string,DocumentSnapshotBuilder>, readTime:Timestamp) => {
       const deletes: string[] = [];
-      const adds: string[] = [];
-      const updates: string[] = [];
+      const adds: QueryDocumentSnapshot[] = [];
+      const updates: QueryDocumentSnapshot[] = [];
 
       changes.forEach((value, name) => {
         if (value === REMOVED) {
@@ -501,14 +507,14 @@ export class Watch {
           }
         } else if (docMap.has(name)) {
           value.readTime = readTime;
-          updates.push(value.build());
+          updates.push(value.build() as QueryDocumentSnapshot);
         } else {
           value.readTime = readTime;
-          adds.push(value.build());
+          adds.push(value.build() as QueryDocumentSnapshot);
         }
       });
 
-      return {deletes, adds, updates};
+      return {deletes, adds, updates} as DocumentChangeSet;
     };
 
     /**
@@ -516,7 +522,7 @@ export class Watch {
      * document lookup map. Modified docMap in-place and returns the updated
      * state.
      */
-    const computeSnapshot = (docTree, docMap, changes) => {
+    const computeSnapshot = (docTree:rbtree, docMap:Map<string, QueryDocumentSnapshot>, changes:DocumentChangeSet) => {
       let updatedTree = docTree;
       const updatedMap = docMap;
 
@@ -531,7 +537,7 @@ export class Watch {
        */
       const deleteDoc = (name) => {
         assert(updatedMap.has(name), 'Document to delete does not exist');
-        const oldDocument = updatedMap.get(name);
+        const oldDocument = updatedMap.get(name)!;
         const existing = updatedTree.find(oldDocument);
         const oldIndex = existing.index;
         updatedTree = existing.remove();
@@ -560,7 +566,7 @@ export class Watch {
       const modifyDoc = (newDocument) => {
         const name = newDocument.ref.formattedName;
         assert(updatedMap.has(name), 'Document to modify does not exist');
-        const oldDocument = updatedMap.get(name);
+        const oldDocument = updatedMap.get(name)!;
         if (!oldDocument.updateTime.isEqual(newDocument.updateTime)) {
           const removeChange = deleteDoc(name);
           const addChange = addDoc(newDocument);
@@ -579,7 +585,7 @@ export class Watch {
 
       changes.deletes.sort((name1, name2) => {
         // Deletes are sorted based on the order of the existing document.
-        return self._comparator(updatedMap.get(name1), updatedMap.get(name2));
+        return this._comparator(updatedMap.get(name1)!, updatedMap.get(name2)!);
       });
       changes.deletes.forEach(name => {
         const change = deleteDoc(name);
@@ -588,7 +594,7 @@ export class Watch {
         }
       });
 
-      changes.adds.sort(self._comparator);
+      changes.adds.sort(this._comparator);
       changes.adds.forEach(snapshot => {
         const change = addDoc(snapshot);
         if (change) {
@@ -596,7 +602,7 @@ export class Watch {
         }
       });
 
-      changes.updates.sort(self._comparator);
+      changes.updates.sort(this._comparator);
       changes.updates.forEach(snapshot => {
         const change = modifyDoc(snapshot);
         if (change) {
@@ -616,13 +622,13 @@ export class Watch {
      * Assembles a new snapshot from the current set of changes and invokes the
      * user's callback. Clears the current changes on completion.
      */
-    const push = (readTime, nextResumeToken) => {
+    const push = (readTime:Timestamp, nextResumeToken:Uint8Array|null) => {
       const changes = extractChanges(docMap, changeMap, readTime);
       const diff = computeSnapshot(docTree, docMap, changes);
 
       if (!hasPushed || diff.appliedChanges.length > 0) {
         logger(
-            'Watch.onSnapshot', self._requestTag,
+            'Watch.onSnapshot', this._requestTag,
             'Sending snapshot with %d changes and %d documents',
             String(diff.appliedChanges.length), diff.updatedTree.length);
         onNext(
@@ -642,7 +648,7 @@ export class Watch {
      * the current changeMap.
      */
     const currentSize = () => {
-      const changes = extractChanges(docMap, changeMap);
+      const changes = extractChanges(docMap, changeMap, Timestamp.now());
       return docMap.size + changes.adds.length - changes.deletes.length;
     };
 
@@ -650,14 +656,15 @@ export class Watch {
 
     stream
         .on('data',
-            proto => {
+            (proto:api.IListenResponse) => {
               if (proto.targetChange) {
                 logger(
-                    'Watch.onSnapshot', self._requestTag,
+                    'Watch.onSnapshot', this._requestTag,
                     'Processing target change');
                 const change = proto.targetChange;
                 const noTargetIds =
                     !change.targetIds || change.targetIds.length === 0;
+                const targetChangeType  = change.targetChangeType as string;
                 if (change.targetChangeType === 'NO_CHANGE') {
                   if (noTargetIds && change.readTime && current) {
                     // This means everything is up-to-date, so emit the current
@@ -690,12 +697,12 @@ export class Watch {
                 }
 
                 if (change.resumeToken &&
-                    affectsTarget(change.targetIds, WATCH_TARGET_ID)) {
+                    affectsTarget(change.targetIds!, WATCH_TARGET_ID)) {
                   this._backoff.reset();
                 }
               } else if (proto.documentChange) {
                 logger(
-                    'Watch.onSnapshot', self._requestTag,
+                    'Watch.onSnapshot', this._requestTag,
                     'Processing change event');
 
                 // No other targetIds can show up here, but we still need to see
@@ -716,15 +723,15 @@ export class Watch {
                   }
                 }
 
-                const document = proto.documentChange.document;
-                const name = document.name;
+                const document = proto.documentChange.document!;
+                const name = document.name!;
 
                 if (changed) {
                   logger(
-                      'Watch.onSnapshot', self._requestTag,
+                      'Watch.onSnapshot', this._requestTag,
                       'Received document change');
-                  const snapshot = new DocumentSnapshot.Builder();
-                  snapshot.ref = self._firestore.doc(
+                  const snapshot = new DocumentSnapshotBuilder();
+                  snapshot.ref = this._firestore.doc(
                       ResourcePath.fromSlashSeparatedString(name).relativeName);
                   snapshot.fieldsProto = document.fields || {};
                   snapshot.createTime =
@@ -734,20 +741,20 @@ export class Watch {
                   changeMap.set(name, snapshot);
                 } else if (removed) {
                   logger(
-                      'Watch.onSnapshot', self._requestTag,
+                      'Watch.onSnapshot', this._requestTag,
                       'Received document remove');
                   changeMap.set(name, REMOVED);
                 }
               } else if (proto.documentDelete || proto.documentRemove) {
                 logger(
-                    'Watch.onSnapshot', self._requestTag,
+                    'Watch.onSnapshot', this._requestTag,
                     'Processing remove event');
                 const name =
-                    (proto.documentDelete || proto.documentRemove).document;
+                    (proto.documentDelete || proto.documentRemove)!.document!;
                 changeMap.set(name, REMOVED);
               } else if (proto.filter) {
                 logger(
-                    'Watch.onSnapshot', self._requestTag,
+                    'Watch.onSnapshot', this._requestTag,
                     'Processing filter update');
                 if (proto.filter.count !== currentSize()) {
                   // We need to remove all the current results.
@@ -761,7 +768,7 @@ export class Watch {
               }
             })
         .on('end', () => {
-          logger('Watch.onSnapshot', self._requestTag, 'Processing stream end');
+          logger('Watch.onSnapshot', this._requestTag, 'Processing stream end');
           if (currentStream) {
             // Pass the event on to the underlying stream.
             currentStream.end();
@@ -769,7 +776,7 @@ export class Watch {
         });
 
     return () => {
-      logger('Watch.onSnapshot', self._requestTag, 'Ending stream');
+      logger('Watch.onSnapshot', this._requestTag, 'Ending stream');
       // Prevent further callbacks.
       isActive = false;
       onNext = () => {};

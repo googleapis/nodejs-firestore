@@ -112,7 +112,7 @@ describe('ExponentialBackoff', () => {
     assertDelayEquals(0);
     await backoff.backoffAndWait().then(nop);
     assertDelayEquals(10);
-    backoff['reset']();
+    backoff.reset();
     await backoff.backoffAndWait().then(nop);
     assertDelayEquals(0);
     await backoff.backoffAndWait().then(nop);
@@ -125,7 +125,7 @@ describe('ExponentialBackoff', () => {
       maxDelayMs: 35,
       jitterFactor: 0,
     });
-    backoff['resetToMax']();
+    backoff.resetToMax();
     await backoff.backoffAndWait().then(nop);
     assertDelayEquals(35);
   });

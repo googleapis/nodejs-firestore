@@ -36,7 +36,7 @@ import api = google.firestore.v1beta1;
  * @private
  * @class
  */
-class DocumentSnapshotBuilder {
+export class DocumentSnapshotBuilder {
   ref: DocumentReference;
   fieldsProto: ApiMapValue;
   readTime: Timestamp;
@@ -517,14 +517,6 @@ export class DocumentSnapshot {
          this._ref.isEqual(other._ref) &&
          deepEqual(this._fieldsProto, other._fieldsProto, {strict: true})));
   }
-
-  /**
-   * @private
-   * @name DocumentSnapshot.DocumentSnapshotBuilder
-   * @see DocumentSnapshotBuilder
-   */
-  // tslint:disable-next-line variable-name
-  static Builder = DocumentSnapshotBuilder;
 }
 
 /**
@@ -623,13 +615,6 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
     return data;
   }
 }
-
-/**
- * @private
- * @name DocumentSnapshot.DocumentSnapshotBuilder
- * @see DocumentSnapshotBuilder
- */
-DocumentSnapshot.Builder = DocumentSnapshotBuilder;
 
 /**
  * A Firestore Document Mask contains the field paths affected by an update.

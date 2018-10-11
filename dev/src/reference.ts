@@ -25,7 +25,11 @@ import api = google.firestore.v1beta1;
 
 import {compare} from './order';
 import {logger} from './logger';
-import {DocumentSnapshot, QueryDocumentSnapshot} from './document';
+import {
+  DocumentSnapshot,
+  DocumentSnapshotBuilder,
+  QueryDocumentSnapshot
+} from './document';
 import {DocumentChange} from './document-change';
 import {Watch} from './watch';
 import {WriteBatch, WriteResult} from './write-batch';
@@ -450,10 +454,6 @@ export class DocumentReference {
     this._validator.isFunction('onNext', onNext);
     this._validator.isOptionalFunction('onError', onError);
 
-    if (!is.defined(onError)) {
-      onError = console.error;
-    }
-
     const watch = Watch.forDocument(this);
 
     return watch.onSnapshot((readTime, size, docs) => {
@@ -465,11 +465,11 @@ export class DocumentReference {
       }
 
       // The document is missing.
-      const document = new DocumentSnapshot.Builder();
+      const document = new DocumentSnapshotBuilder();
       document.ref = new DocumentReference(this._firestore, this._path);
       document.readTime = readTime;
       onNext(document.build());
-    }, onError);
+    }, onError || console.error);
   }
 
   /**
@@ -1704,15 +1704,11 @@ export class Query {
     this._validator.isFunction('onNext', onNext);
     this._validator.isOptionalFunction('onError', onError);
 
-    if (!is.defined(onError)) {
-      onError = console.error;
-    }
-
     const watch = Watch.forQuery(this);
 
     return watch.onSnapshot((readTime, size, docs, changes) => {
       onNext(new QuerySnapshot(this, readTime, size, docs, changes));
-    }, onError);
+    }, onError || console.error);
   }
 
   /**

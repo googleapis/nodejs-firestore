@@ -22,7 +22,7 @@ import through2 from 'through2';
 
 import * as Firestore from '../src';
 import {ResourcePath} from '../src/path';
-import {AnyDuringMigration} from '../src/types';
+import {AnyDuringMigration, GrpcError} from '../src/types';
 import {createInstance, InvalidApiUsage} from '../test/util/helpers';
 
 const {grpc} = new gax.GrpcClient({} as AnyDuringMigration);
@@ -888,9 +888,8 @@ describe('getAll() method', () => {
         const errorCode = Number(request.documents[0].split('/').pop());
         actualErrorAttempts[errorCode] =
             (actualErrorAttempts[errorCode] || 0) + 1;
-        const error = new Error('Expected exception');
-        // tslint:disable-next-line:no-any
-        (error as any).code = errorCode;
+        const error = new GrpcError('Expected exception');
+        error.code = errorCode;
         return stream(error);
       }
     };

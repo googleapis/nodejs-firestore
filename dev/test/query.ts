@@ -22,7 +22,7 @@ import through2 from 'through2';
 import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {Query, Timestamp} from '../src';
-import {DocumentSnapshot} from '../src/document';
+import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {ResourcePath} from '../src/path';
 import {DocumentReference} from '../src/reference';
 import {AnyDuringMigration} from '../src/types';
@@ -39,7 +39,7 @@ Firestore.setLogFunction(() => {});
 
 function snapshot(relativePath, data) {
   return createInstance().then(firestore => {
-    const snapshot = new DocumentSnapshot.Builder();
+    const snapshot = new DocumentSnapshotBuilder();
     const path = ResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/${relativePath}`);
     snapshot.ref = new DocumentReference(firestore, path);
