@@ -19,14 +19,12 @@ import extend from 'extend';
 import is from 'is';
 import through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
-import {AnyDuringMigration, AnyJs} from '../src/types';
+import {AnyDuringMigration} from '../src/types';
 
 import {createInstance, document, InvalidApiUsage} from './util/helpers';
 
-const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
-                         .ServerValue.REQUEST_TIME;
+const REQUEST_TIME = 'REQUEST_TIME';
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;

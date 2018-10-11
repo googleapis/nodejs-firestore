@@ -16,12 +16,12 @@
 
 import deepEqual from 'deep-equal';
 
-import {google} from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_proto_api';
 
 import {AnyDuringMigration, AnyJs} from './types';
 import {createValidator} from './validate';
 
-import api = google.firestore.v1beta1;
+import api = proto.google.firestore.v1beta1;
 import {Serializer} from './serializer';
 import {FieldPath} from './path';
 
@@ -275,8 +275,7 @@ class ServerTimestampTransform extends FieldTransform {
       api.DocumentTransform.IFieldTransform {
     return {
       fieldPath: fieldPath.formattedName,
-      setToServerValue:
-          api.DocumentTransform.FieldTransform.ServerValue.REQUEST_TIME,
+      setToServerValue: 'REQUEST_TIME',
     };
   }
 }

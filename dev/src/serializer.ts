@@ -16,8 +16,8 @@
 
 import is from 'is';
 
-import {google} from '../protos/firestore_proto_api';
-import api = google.firestore.v1beta1;
+import * as proto from '../protos/firestore_proto_api';
+import api = proto.google.firestore.v1beta1;
 
 import {Timestamp} from './timestamp';
 import {FieldTransform} from './field-value';
@@ -123,7 +123,7 @@ export class Serializer {
 
     if (val === null) {
       return {
-        nullValue: google.protobuf.NullValue.NULL_VALUE,
+        nullValue: 'NULL_VALUE',
       };
     }
 
