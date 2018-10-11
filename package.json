@@ -82,7 +82,6 @@
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
     "nyc": "^13.0.0",
-    "power-assert": "^1.6.0",
     "proxyquire": "^2.0.1",
     "ts-node": "^7.0.0",
     "source-map-support": "^0.5.6",
