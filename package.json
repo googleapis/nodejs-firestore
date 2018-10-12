@@ -61,7 +61,7 @@
     "extend": "^3.0.1",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^0.20.0",
-    "google-proto-files": "^0.16.1",
+    "google-proto-files": "^0.17.0",
     "is": "^3.2.1",
     "lodash.merge": "^4.6.1",
     "protobufjs": "^6.8.6",
