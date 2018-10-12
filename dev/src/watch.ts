@@ -205,11 +205,9 @@ const DOCUMENT_WATCH_COMPARATOR =
  * changed documents since the last snapshot delivered for this watch.
  */
 
-/** @private */
-export type DocumentComparator =
+type DocumentComparator =
     (l: QueryDocumentSnapshot, r: QueryDocumentSnapshot) => number;
 
-/** @private */
 type DocumentChangeSet = {
   deletes: string[],
   adds: QueryDocumentSnapshot[],
@@ -240,8 +238,8 @@ export class Watch {
    * order the document snapshots returned by this watch.
    */
   constructor(
-      private readonly firestore: Firestore,
-      private readonly target: api.ITarget, comparator: DocumentComparator) {
+      firestore: Firestore, target: api.ITarget,
+      comparator: DocumentComparator) {
     this._firestore = firestore;
     this._target = target;
     this._comparator = comparator;
