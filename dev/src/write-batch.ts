@@ -49,7 +49,7 @@ export class WriteResult {
    * @private
    * @hideconstructor
    *
-   * @param _writeTime - The time of the corresponding document write.
+   * @param _writeTime The time of the corresponding document write.
    */
   constructor(private readonly _writeTime: Timestamp) {}
 
@@ -111,7 +111,7 @@ export class WriteBatch {
    * @private
    * @hideconstructor
    *
-   * @param {Firestore} firestore - The Firestore Database client.
+   * @param {Firestore} firestore The Firestore Database client.
    */
   constructor(firestore) {
     this._firestore = firestore;
@@ -143,9 +143,9 @@ export class WriteBatch {
    * Create a document with the provided object values. This will fail the batch
    * if a document exists at its location.
    *
-   * @param {DocumentReference} documentRef - A reference to the
-   * document to be created.
-   * @param {DocumentData} data - The object to serialize as the document.
+   * @param {DocumentReference} documentRef A reference to the document to be
+   * created.
+   * @param {DocumentData} data The object to serialize as the document.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -186,9 +186,9 @@ export class WriteBatch {
   /**
    * Deletes a document from the database.
    *
-   * @param {DocumentReference} documentRef - A reference to the
-   * document to be deleted.
-   * @param {Precondition=} precondition - A precondition to enforce for this
+   * @param {DocumentReference} documentRef A reference to the document to be
+   * deleted.
+   * @param {Precondition=} precondition A precondition to enforce for this
    * delete.
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the batch if the
@@ -232,10 +232,10 @@ export class WriteBatch {
    * [SetOptions]{@link SetOptions}., the provided data can be merged
    * into the existing document.
    *
-   * @param {DocumentReference} documentRef - A reference to the
-   * document to be set.
-   * @param {DocumentData} data - The object to serialize as the document.
-   * @param {SetOptions=} options - An object to configure the set behavior.
+   * @param {DocumentReference} documentRef A reference to thedocument to be
+   * set.
+   * @param {DocumentData} data The object to serialize as the document.
+   * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
    * remain untouched.
@@ -320,9 +320,9 @@ export class WriteBatch {
    * A Precondition restricting this update can be specified as the last
    * argument.
    *
-   * @param {DocumentReference} documentRef - A reference to the
-   * document to be updated.
-   * @param {UpdateData|string|FieldPath} dataOrField - An object
+   * @param {DocumentReference} documentRef A reference to the document to be
+   * updated.
+   * @param {UpdateData|string|FieldPath} dataOrField An object
    * containing the fields and values with which to update the document
    * or the path of the first field to update.
    * @param {

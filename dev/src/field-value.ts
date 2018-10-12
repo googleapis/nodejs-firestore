@@ -177,8 +177,8 @@ export abstract class FieldTransform extends FieldValue {
   /***
    * The proto representation for this field transform.
    *
-   * @param serializer - The Firestore serializer.
-   * @param fieldPath - The field path to apply this transformation to.
+   * @param serializer The Firestore serializer.
+   * @param fieldPath The field path to apply this transformation to.
    * @return The 'FieldTransform' proto message.
    */
   abstract toProto(serializer: Serializer, fieldPath: FieldPath):

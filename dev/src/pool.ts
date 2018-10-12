@@ -31,9 +31,9 @@ export class ClientPool<T> {
   private activeClients: Map<T, number> = new Map();
 
   /**
-   * @param concurrentOperationLimit - The number of operations that each client
+   * @param concurrentOperationLimit The number of operations that each client
    * can handle.
-   * @param clientFactory - A factory function called as needed when new clients
+   * @param clientFactory A factory function called as needed when new clients
    * are required.
    */
   constructor(
@@ -98,7 +98,7 @@ export class ClientPool<T> {
    * additional client if all existing clients already operate at the concurrent
    * operation limit.
    *
-   * @param op - A callback function that returns a Promise. The client T will
+   * @param op A callback function that returns a Promise. The client T will
    * be returned to the pool when callback finishes.
    * @return A Promise that resolves with the result of `op`.
    */
