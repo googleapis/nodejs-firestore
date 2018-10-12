@@ -81,7 +81,6 @@ class FirestoreClient {
           clientConfig: {},
           port: this.constructor.port,
           servicePath: this.constructor.servicePath,
-          enumsAsStrings: false,
         },
         opts);
 

@@ -25,11 +25,7 @@ import api = proto.google.firestore.v1beta1;
 
 import {compare} from './order';
 import {logger} from './logger';
-import {
-  DocumentSnapshot,
-  DocumentSnapshotBuilder,
-  QueryDocumentSnapshot
-} from './document';
+import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange} from './document-change';
 import {Watch} from './watch';
 import {WriteBatch, WriteResult} from './write-batch';

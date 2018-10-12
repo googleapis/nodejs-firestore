@@ -22,7 +22,6 @@ import through2 from 'through2';
 
 import * as Firestore from '../src';
 import {ResourcePath} from '../src/path';
-
 import {AnyDuringMigration, GrpcError} from '../src/types';
 import {createInstance, document, DOCUMENT_NAME, InvalidApiUsage} from './util/helpers';
 

@@ -16,7 +16,6 @@
 
 import {google} from '../protos/firestore_proto_api';
 import {FieldPath} from './path';
-import {Transaction} from './transaction';
 import {Timestamp} from './timestamp';
 
 /**

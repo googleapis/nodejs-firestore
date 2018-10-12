@@ -18,16 +18,21 @@ import {expect} from 'chai';
 import duplexify from 'duplexify';
 import through2 from 'through2';
 
+import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
+import {DocumentData, DocumentReference, QueryDocumentSnapshot, QuerySnapshot} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
+import {DocumentSnapshotBuilder} from '../src/document';
+import {DocumentChangeType} from '../src/document-change';
+import {Serializer} from '../src/serializer';
 import {AnyDuringMigration, GrpcError} from '../src/types';
+
 import {createInstance} from './util/helpers';
+
+import api = proto.google.firestore.v1beta1;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
-
-import {QueryDocumentSnapshot} from '../src';
-import {DocumentSnapshotBuilder} from '../src/document';
 
 let PROJECT_ID = process.env.PROJECT_ID;
 if (!PROJECT_ID) {
@@ -38,15 +43,26 @@ if (!PROJECT_ID) {
  * @param actual The computed docs array.
  * @param expected The expected docs array.
  */
-function docsEqual(actual:QueryDocumentSnapshot[], expected:QueryDocumentSnapshot[]) {
+function docsEqual(
+    actual: QueryDocumentSnapshot[], expected: QueryDocumentSnapshot[]): void {
   expect(actual.length).to.equal(expected.length);
   for (let i = 0; i < actual.length; i++) {
     expect(actual[i].ref.id).to.equal(expected[i].ref.id);
     expect(actual[i].data()).to.deep.eq(expected[i].data());
-    expect((expected[i].createTime)).to.be.a('string');
-    expect((expected[i].updateTime)).to.be.a('string');
+    expect(expected[i].createTime).to.be.an.instanceOf(Firestore.Timestamp);
+    expect(expected[i].updateTime).to.be.an.instanceOf(Firestore.Timestamp);
   }
 }
+
+type TestChange = {
+  type: DocumentChangeType,
+  doc: QueryDocumentSnapshot
+};
+
+type TestSnapshot = {
+  docs: QueryDocumentSnapshot[],
+  docChanges: TestChange[]
+};
 
 /**
  * Asserts that the given query snapshot matches the expected results.
@@ -55,8 +71,10 @@ function docsEqual(actual:QueryDocumentSnapshot[], expected:QueryDocumentSnapsho
  * @param actual A QuerySnapshot with results.
  * @param expected Array of DocumentSnapshot.
  */
-function snapshotsEqual(lastSnapshot, version, actual, expected) {
-  const localDocs: QueryDocumentSnapshot[] = [].concat(lastSnapshot.docs);
+function snapshotsEqual(
+    lastSnapshot: TestSnapshot, version: number, actual: QuerySnapshot,
+    expected: TestSnapshot): TestSnapshot {
+  const localDocs = ([] as QueryDocumentSnapshot[]).concat(lastSnapshot.docs);
 
   const actualDocChanges = actual.docChanges();
 
@@ -95,20 +113,23 @@ function snapshotsEqual(lastSnapshot, version, actual, expected) {
 /*
  * Helper for constructing a snapshot.
  */
-function snapshot(ref, data) {
+function snapshot(
+    ref: DocumentReference, data: DocumentData): QueryDocumentSnapshot {
   const snapshot = new DocumentSnapshotBuilder();
   snapshot.ref = ref;
   snapshot.fieldsProto = ref.firestore._serializer.encodeFields(data);
   snapshot.readTime = new Firestore.Timestamp(0, 0);
   snapshot.createTime = new Firestore.Timestamp(0, 0);
   snapshot.updateTime = new Firestore.Timestamp(0, 0);
-  return snapshot.build();
+  return snapshot.build() as QueryDocumentSnapshot;
 }
 
 /*
  * Helpers for constructing document changes.
  */
-function docChange(type, ref, data) {
+function docChange(
+    type: DocumentChangeType, ref: DocumentReference, data: DocumentData):
+    {type: DocumentChangeType, doc: QueryDocumentSnapshot} {
   return {type, doc: snapshot(ref, data)};
 }
 
@@ -122,15 +143,16 @@ const EMPTY = {
 };
 
 /** Captures stream data and makes it available via deferred Promises. */
-class DeferredListener {
-  private readonly pendingData: AnyDuringMigration[] = [];
-  private readonly pendingListeners: AnyDuringMigration[] = [];
+class DeferredListener<T> {
+  private readonly pendingData: Array<{type: string, data?: T|Error}> = [];
+  private readonly pendingListeners:
+      Array<{type: string, resolve: ((r: T|Error|undefined) => void)}> = [];
 
   /**
    * Makes stream data available via the Promises set in the 'await' call. If no
    * Promise has been set, the data will be cached.
    */
-  on(type, data?) {
+  on(type: string, data?: T): void {
     const listener = this.pendingListeners.shift();
 
     if (listener) {
@@ -153,7 +175,7 @@ class DeferredListener {
    * Promise resolves immediately if pending data is available, otherwise it
    * resolves when the next chunk arrives.
    */
-  await(expectedType) {
+  await(expectedType: string): Promise<T|Error|undefined> {
     const data = this.pendingData.shift();
 
     if (data) {
@@ -178,10 +200,11 @@ class DeferredListener {
  */
 class StreamHelper {
   private streamCount = 0;
-  private readonly deferredListener = new DeferredListener();
-  private readStream;
-  private writeStream;
-  private backendStream;
+  private readonly deferredListener =
+      new DeferredListener<api.IListenResponse>();
+  private readStream: NodeJS.ReadableStream|null = null;
+  private writeStream: NodeJS.WritableStream|null = null;
+  private backendStream: NodeJS.ReadWriteStream|null = null;
 
   /** Returns the GAPIC callback to use with this stream helper. */
   getListenCallback() {
@@ -192,12 +215,12 @@ class StreamHelper {
       this.readStream = through2.obj();
       this.writeStream = through2.obj();
 
-      this.readStream.once(
+      this.readStream!.once(
           'data', result => this.deferredListener.on('data', result));
-      this.readStream.on(
+      this.readStream!.on(
           'error', error => this.deferredListener.on('error', error));
-      this.readStream.on('end', () => this.deferredListener.on('end'));
-      this.readStream.on('close', () => this.deferredListener.on('close'));
+      this.readStream!.on('end', () => this.deferredListener.on('end'));
+      this.readStream!.on('close', () => this.deferredListener.on('close'));
 
       this.deferredListener.on('open', {});
 
@@ -209,12 +232,12 @@ class StreamHelper {
   /**
    * Returns a Promise with the next results from the underlying stream.
    */
-  await(type) {
+  await(type: string): Promise<api.IListenResponse|Error|undefined> {
     return this.deferredListener.await(type);
   }
 
   /** Waits for a destroyed stream to be re-opened. */
-  awaitReopen() {
+  awaitReopen(): Promise<api.IListenResponse> {
     return this.await('error')
         .then(() => this.await('close'))
         .then(() => this.awaitOpen());
@@ -224,46 +247,48 @@ class StreamHelper {
    * Waits for the stream to open and to receive its first message (the
    * AddTarget message).
    */
-  awaitOpen() {
-    return this.await('open').then(() => this.await('data'));
+  awaitOpen(): Promise<api.IListenResponse> {
+    return this.await('open').then(() => {
+      return this.await('data') as api.IListenResponse;
+    });
   }
 
   /**
    * Sends a message to the currently active stream.
    */
-  write(data) {
-    this.writeStream.write(data);
+  write(data): void {
+    this.writeStream!.write(data);
   }
 
   /**
    * Closes the currently active stream.
    */
-  close() {
-    this.backendStream.emit('end');
+  close(): void {
+    this.backendStream!.emit('end');
   }
 
   /**
    * Destroys the currently active stream with the optionally provided error.
    * If omitted, the stream is closed with a GRPC Status of UNAVAILABLE.
    */
-  destroyStream(err) {
+  destroyStream(err): void {
     if (!err) {
       err = new Error('Server disconnect');
       err.code = 14;  // Unavailable
     }
-    this.readStream.destroy(err);
+    (this.readStream as AnyDuringMigration).destroy(err);
   }
 }
 
 /**
  * Encapsulates the stream logic for the Watch API.
  */
-class WatchHelper {
-  private readonly serializer;
-  private readonly streamHelper;
+class WatchHelper<T> {
+  private readonly serializer: Serializer;
+  private readonly streamHelper: StreamHelper;
   private snapshotVersion = 0;
-  private readonly deferredListener = new DeferredListener();
-  private unsubscribe;
+  private readonly deferredListener = new DeferredListener<T>();
+  private unsubscribe: (() => void)|null = null;
 
   /**
    * @param streamHelper The StreamHelper base class for this Watch operation.
@@ -281,7 +306,7 @@ class WatchHelper {
   /**
    * Returns a Promise with the next result from the underlying stream.
    */
-  await(type) {
+  await(type: string): Promise<T|Error|undefined> {
     return this.deferredListener.await(type);
   }
 
@@ -291,7 +316,7 @@ class WatchHelper {
    *
    * @return The unsubscribe handler for the listener.
    */
-  startWatch() {
+  startWatch(): () => void {
     this.unsubscribe = this.reference.onSnapshot(
         snapshot => {
           this.deferredListener.on('snapshot', snapshot);
@@ -299,7 +324,7 @@ class WatchHelper {
         error => {
           this.deferredListener.on('error', error);
         });
-    return this.unsubscribe;
+    return this.unsubscribe!;
   }
 
   /**
@@ -307,18 +332,18 @@ class WatchHelper {
    *
    * @return A Promise that will be fulfilled when the backend saw the end.
    */
-  endWatch() {
-    this.unsubscribe();
-    return this.streamHelper.await('end');
+  async endWatch(): Promise<void> {
+    this.unsubscribe!();
+    await this.streamHelper.await('end');
   }
 
   /**
    * Sends a target change from the backend simulating adding the query target.
    *
-   * @param {number=} targetId The target ID to send. If omitted, uses the
+   * @param targetId The target ID to send. If omitted, uses the
    * default target ID.
    */
-  sendAddTarget(targetId) {
+  sendAddTarget(targetId?: number): void {
     this.streamHelper.write({
       targetChange: {
         targetChangeType: 'ADD',
@@ -330,17 +355,17 @@ class WatchHelper {
   /**
    * Sends a target change from the backend simulating removing a query target.
    *
-   * @param {number} cause The optional code indicating why the target was removed.
+   * @param cause The optional code indicating why the target was removed.
    */
-  sendRemoveTarget(cause) {
-    const proto: AnyDuringMigration = {
+  sendRemoveTarget(cause?: number): void {
+    const proto: api.IListenResponse = {
       targetChange: {
         targetChangeType: 'REMOVE',
         targetIds: [this.targetId],
       },
     };
     if (cause) {
-      proto.targetChange.cause = {
+      proto.targetChange!.cause = {
         code: cause,
         message: 'test remove',
       };
@@ -352,10 +377,10 @@ class WatchHelper {
    * Sends a target change from the backend of type 'NO_CHANGE'. If specified,
    * includes a resume token.
    */
-  sendSnapshot(version, resumeToken) {
+  sendSnapshot(version: number, resumeToken: Uint8Array): void {
     this.snapshotVersion = version;
 
-    const proto: AnyDuringMigration = {
+    const proto: api.IListenResponse = {
       targetChange: {
         targetChangeType: 'NO_CHANGE',
         targetIds: [],
@@ -364,7 +389,7 @@ class WatchHelper {
     };
 
     if (resumeToken) {
-      proto.targetChange.resumeToken = resumeToken;
+      proto.targetChange!.resumeToken = resumeToken;
     }
 
     this.streamHelper.write(proto);
@@ -373,8 +398,8 @@ class WatchHelper {
   /**
    * Sends a target change from the backend of type 'CURRENT'.
    */
-  sendCurrent(resumeToken) {
-    const proto: AnyDuringMigration = {
+  sendCurrent(resumeToken: Uint8Array): void {
+    const proto: api.IListenResponse = {
       targetChange: {
         targetChangeType: 'CURRENT',
         targetIds: [this.targetId],
@@ -382,7 +407,7 @@ class WatchHelper {
     };
 
     if (resumeToken) {
-      proto.targetChange.resumeToken = resumeToken;
+      proto.targetChange!.resumeToken = resumeToken;
     }
 
     this.streamHelper.write(proto);
@@ -394,7 +419,7 @@ class WatchHelper {
    * @param ref The document reference.
    * @param data The data for the doc in proto JSON format.
    */
-  sendDoc(ref, data) {
+  sendDoc(ref: DocumentReference, data: DocumentData): void {
     this.streamHelper.write({
       documentChange: {
         document: {
@@ -414,7 +439,7 @@ class WatchHelper {
    * @param ref The document reference.
    * @param data The data for the doc in proto JSON format.
    */
-  sendDocRemove(ref, data) {
+  sendDocRemove(ref: DocumentReference, data: DocumentData): void {
     this.streamHelper.write({
       documentChange: {
         document: {
@@ -431,7 +456,7 @@ class WatchHelper {
    *
    * @param ref The document reference.
    */
-  sendDocDelete(ref) {
+  sendDocDelete(ref: DocumentReference): void {
     this.streamHelper.write({
       documentDelete: {
         document: ref.formattedName,
@@ -443,7 +468,8 @@ class WatchHelper {
   /**
    * A wrapper for writing tests that successfully run a watch.
    */
-  runTest(expectedRequest, func) {
+  runTest(expectedRequest: api.IListenRequest, func: () => Promise<void>):
+      Promise<void> {
     this.startWatch();
 
     return this.streamHelper.awaitOpen()
@@ -451,15 +477,15 @@ class WatchHelper {
           expect(request).to.deep.eq(expectedRequest);
           return func();
         })
-        .then(() => {
-          return this.endWatch();
-        });
+        .then(() => this.endWatch());
   }
 
   /**
    * A wrapper for writing tests that fail to run a watch.
    */
-  runFailedTest(expectedRequest, func, expectedError) {
+  runFailedTest(
+      expectedRequest: api.IListenRequest, func: () => Promise<void>,
+      expectedError: Error): Promise<void> {
     this.startWatch();
 
     return this.streamHelper.awaitOpen()
@@ -471,6 +497,9 @@ class WatchHelper {
           return this.await('error');
         })
         .then(err => {
+          if (!(err instanceof Error)) {
+            throw new Error('Expected error from Watch');
+          }
           expect(err.message).to.equal(expectedError);
         });
   }

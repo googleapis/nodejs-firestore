@@ -24,13 +24,7 @@ import through2 from 'through2';
 import {google} from '../protos/firestore_proto_api';
 
 import * as convert from './convert';
-import {
-  DocumentSnapshot,
-  DocumentSnapshotBuilder,
-  QueryDocumentSnapshot,
-  validatePrecondition,
-  validateSetOptions
-} from './document';
+import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot, validatePrecondition, validateSetOptions} from './document';
 import {FieldValue} from './field-value';
 import {DeleteTransform, FieldTransform} from './field-value';
 import {GeoPoint} from './geo-point';
