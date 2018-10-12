@@ -121,9 +121,9 @@ export class Validator {
   /**
    * Verifies that 'args' has at least 'minSize' elements.
    *
-   * @param {string} funcName - The function name to use in the error message.
-   * @param {Array.<*>} args - The array (or array-like structure) to verify.
-   * @param {number} minSize - The minimum number of elements to enforce.
+   * @param {string} funcName The function name to use in the error message.
+   * @param {Array.<*>} args The array (or array-like structure) to verify.
+   * @param {number} minSize The minimum number of elements to enforce.
    * @throws if the expectation is not met.
    * @returns {boolean} 'true' when the minimum number of elements is available.
    */
@@ -140,9 +140,9 @@ export class Validator {
   /**
    * Verifies that 'args' has at most 'maxSize' elements.
    *
-   * @param {string} funcName - The function name to use in the error message.
-   * @param {Array.<*>} args - The array (or array-like structure) to verify.
-   * @param {number} maxSize - The maximum number of elements to enforce.
+   * @param {string} funcName The function name to use in the error message.
+   * @param {Array.<*>} args The array (or array-like structure) to verify.
+   * @param {number} maxSize The maximum number of elements to enforce.
    * @throws if the expectation is not met.
    * @returns {boolean} 'true' when only the maximum number of elements is
    * specified.

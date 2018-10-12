@@ -65,7 +65,7 @@ abstract class Path<T> {
    *
    * @private
    * @hideconstructor
-   * @param {string[]} segments - Sequence of parts of a path.
+   * @param {string[]} segments Sequence of parts of a path.
    */
   constructor(protected readonly segments: string[]) {}
 
@@ -87,8 +87,7 @@ abstract class Path<T> {
    * Create a child path beneath the current level.
    *
    * @private
-   * @param {string|T} relativePath - Relative path to append to the current
-   * path.
+   * @param {string|T} relativePath Relative path to append to the current path.
    * @returns {T} The new path.
    * @template T
    */
@@ -119,8 +118,8 @@ abstract class Path<T> {
    * Checks whether the current path is a prefix of the specified path.
    *
    * @private
-   * @param {Path} other - The path to check against.
-   * @returns {boolean} 'true' iff the current path is a prefix match with
+   * @param other The path to check against.
+   * @returns 'true' iff the current path is a prefix match with
    * 'other'.
    */
   isPrefixOf(other: Path<T>): boolean {
@@ -151,8 +150,8 @@ abstract class Path<T> {
    * Compare the current path against another Path object.
    *
    * @private
-   * @param {Path} other - The path to compare to.
-   * @returns {number} -1 if current < other, 1 if current > other, 0 if equal
+   * @param other The path to compare to.
+   * @returns -1 if current < other, 1 if current > other, 0 if equal
    */
   compareTo(other: Path<T>): number {
     const len = Math.min(this.segments.length, other.segments.length);
@@ -283,7 +282,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * resource path.
    *
    * @private
-   * @param {string} resourcePath - The path to validate.
+   * @param {string} resourcePath The path to validate.
    * @throws if the string can't be used as a resource path.
    * @returns {boolean} 'true' when the path is valid.
    */
@@ -303,7 +302,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * Creates a resource path from an absolute Firestore path.
    *
    * @private
-   * @param {string} absolutePath - A string representation of a Resource Path.
+   * @param {string} absolutePath A string representation of a Resource Path.
    * @returns {ResourcePath} The new ResourcePath.
    */
   static fromSlashSeparatedString(absolutePath: string): ResourcePath {
@@ -324,7 +323,7 @@ export class ResourcePath extends Path<ResourcePath> {
    *
    * @private
    * @override
-   * @param {string} relativePath - The path to split.
+   * @param {string} relativePath The path to split.
    * @returns {Array.<string>} - The split path segments.
    */
   split(relativePath: string): string[] {
@@ -360,7 +359,7 @@ export class ResourcePath extends Path<ResourcePath> {
    *
    * @private
    * @override
-   * @param {Array.<string>} segments - Sequence of names of the parts of the
+   * @param {Array.<string>} segments Sequence of names of the parts of the
    * path.
    * @returns {ResourcePath} The newly created ResourcePath.
    */
@@ -373,7 +372,7 @@ export class ResourcePath extends Path<ResourcePath> {
    *
    * @private
    * @override
-   * @param {ResourcePath} other - The path to compare to.
+   * @param {ResourcePath} other The path to compare to.
    * @returns {number} -1 if current < other, 1 if current > other, 0 if equal
    */
   compareTo(other: ResourcePath): number {
@@ -429,7 +428,7 @@ export class FieldPath extends Path<FieldPath> {
   /**
    * Constructs a Firestore Field Path.
    *
-   * @param {...string|string[]} segments - Sequence of field names that form
+   * @param {...string|string[]} segments Sequence of field names that form
    * this path.
    *
    * @example
@@ -473,7 +472,7 @@ export class FieldPath extends Path<FieldPath> {
    * Returns true if the provided value can be used as a field path argument.
    *
    * @private
-   * @param {string|FieldPath} fieldPath - The value to verify.
+   * @param {string|FieldPath} fieldPath The value to verify.
    * @throws if the string can't be used as a field path.
    * @returns {boolean} 'true' when the path is valid.
    */
@@ -505,7 +504,7 @@ export class FieldPath extends Path<FieldPath> {
    * strings.
    *
    * @private
-   * @param {string|FieldPath} fieldPath - The FieldPath to create.
+   * @param {string|FieldPath} fieldPath The FieldPath to create.
    * @returns {FieldPath} A field path representation.
    */
   static fromArgument(fieldPath: string|FieldPath) {
@@ -538,7 +537,7 @@ export class FieldPath extends Path<FieldPath> {
    *
    * @private
    * @override
-   * @param {string} fieldPath - The path to split.
+   * @param {string} fieldPath The path to split.
    * @returns {Array.<string>} - The split path segments.
    */
   split(fieldPath: string): string[] {
@@ -552,7 +551,7 @@ export class FieldPath extends Path<FieldPath> {
    *
    * @private
    * @override
-   * @param {Array.<string>} segments - Sequence of field names.
+   * @param {Array.<string>} segments Sequence of field names.
    * @returns {ResourcePath} The newly created FieldPath.
    */
   construct(segments: string[]) {
