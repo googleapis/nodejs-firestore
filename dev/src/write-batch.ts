@@ -232,7 +232,7 @@ export class WriteBatch {
    * [SetOptions]{@link SetOptions}., the provided data can be merged
    * into the existing document.
    *
-   * @param {DocumentReference} documentRef A reference to thedocument to be
+   * @param {DocumentReference} documentRef A reference to the document to be
    * set.
    * @param {DocumentData} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
