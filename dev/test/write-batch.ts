@@ -16,12 +16,10 @@
 
 import {expect} from 'chai';
 
-import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {createInstance} from './util/helpers';
 
-const REQUEST_TIME = google.firestore.v1beta1.DocumentTransform.FieldTransform
-                         .ServerValue.REQUEST_TIME;
+const REQUEST_TIME = 'REQUEST_TIME';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});

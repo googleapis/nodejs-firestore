@@ -18,12 +18,12 @@ import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 
 import {createInstance, InvalidApiUsage} from './util/helpers';
 
-import api = google.firestore.v1beta1;
+import api = proto.google.firestore.v1beta1;
 import {AnyDuringMigration} from '../src/types';
 
 use(chaiAsPromised.default);
@@ -184,7 +184,7 @@ function query(transaction?) {
           field: {
             fieldPath: 'foo',
           },
-          op: api.StructuredQuery.FieldFilter.Operator.EQUAL,
+          op: 'EQUAL',
           value: {
             stringValue: 'bar',
           },

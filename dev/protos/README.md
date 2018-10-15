@@ -7,27 +7,17 @@ process was used:
 npm install --save google-proto-files
 ```
 
-- Copy the `google/firestore/v1beta/*.proto` and place them in current folder.
+- Copy the relevant proto files and place them in current folder.
 ```
-cp node_modules/google-proto-files/google/firestore/v1beta1/*.proto .
-```
-
-- Remove the `google/firestore/v1beta` path from any import statements in these files.
-
-```
-sed -i '' 's/import \"google\/firestore\/v1beta1\//import \"/g' *.proto
+cp node_modules/google-proto-files/google/firestore/v1beta1/*.proto . ; 
+cp node_modules/google-proto-files/google/type/*.proto . ; 
+cp node_modules/google-proto-files/google/protobuf/*.proto . ;
+cp node_modules/google-proto-files/google/rpc/*.proto . ; 
 ```
 
 - Generate the output files 
-```
-mkdir -p out && pbjs --proto_path node_modules/google-proto-files -t static-module -w commonjs -o out/firestore_proto_api.js firestore.proto && pbts -o out/firestore_proto_api.d.ts out/firestore_proto_api.js
-```
-
-- Edit the type used for integers greater than 2^53. The GRPC settings we use represent them as 
-Strings, but pbjs uses the "Long" type.
 
 ```
-sed -i '' 's/number\|Long/number\|string \"/g' firestore_proto_api.d.ts firestore_proto_api.js
+pbjs --proto_path=google --js_out=import_style=commonjs,binary:library --target=static --no-create --no-encode --no-decode --no-verify --no-convert --no-delimited --force-enum-string --force-number -o firestore_proto_api.js  *.proto ;
+pbts -o firestore_proto_api.d.ts firestore_proto_api.js
 ```
-
-TODO: Find a way to properly specify the proto paths for the Firestore imports so this can be automated.

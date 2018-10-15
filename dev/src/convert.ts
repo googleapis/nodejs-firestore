@@ -172,6 +172,14 @@ function convertValue(fieldValue) {
       return {
         bytesValue: convertBytes(fieldValue.bytesValue),
       };
+    case 'integerValue':
+      return {
+        integerValue: Number(fieldValue.integerValue),
+      };
+    case 'doubleValue':
+      return {
+        doubleValue: Number(fieldValue.doubleValue),
+      };
     case 'arrayValue': {
       const arrayValue: Array<{}> = [];
       if (is.array(fieldValue.arrayValue.values)) {

@@ -21,7 +21,7 @@ import * as gax from 'google-gax';
 import * as Firestore from '../src';
 import {ResourcePath} from '../src/path';
 import {AnyDuringMigration} from '../src/types';
-import {createInstance, document, DOCUMENT_NAME, found, InvalidApiUsage, missing, stream} from '../test/util/helpers';
+import {createInstance, document, DOCUMENT_NAME, found, InvalidApiUsage, missing, stream} from './util/helpers';
 
 const {grpc} = new gax.GrpcClient({} as AnyDuringMigration);
 
@@ -86,7 +86,7 @@ const allSupportedTypesProtobufJs = document(
       doubleValue: -Infinity,
     },
     'nilValue', {
-      nullValue: 0,
+      nullValue: 'NULL_VALUE',
     },
     'objectValue', {
       mapValue: {

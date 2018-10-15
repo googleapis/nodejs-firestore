@@ -19,8 +19,8 @@ import {extend} from 'extend';
 import {GrpcClient} from 'google-gax';
 import through2 from 'through2';
 
-import {google} from '../../protos/firestore_proto_api';
-import api = google.firestore.v1beta1;
+import * as proto from '../../protos/firestore_proto_api';
+import api = proto.google.firestore.v1beta1;
 
 const v1beta1 = require('../../src/v1beta1');
 
@@ -251,11 +251,7 @@ export function document(
 
 export function serverTimestamp(field: string):
     api.DocumentTransform.IFieldTransform {
-  return {
-    fieldPath: field,
-    setToServerValue:
-        api.DocumentTransform.FieldTransform.ServerValue.REQUEST_TIME
-  };
+  return {fieldPath: field, setToServerValue: 'REQUEST_TIME'};
 }
 
 export function arrayTransform(
