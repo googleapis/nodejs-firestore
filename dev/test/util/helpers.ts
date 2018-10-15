@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
+import {expect} from 'chai';
+import {extend} from 'extend';
 import {GrpcClient} from 'google-gax';
+import through2 from 'through2';
 
 import {google} from '../../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
 const v1beta1 = require('../../src/v1beta1');
 
-import {Firestore} from '../../src/index';
+import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
-import {AnyDuringMigration} from '../../src/types';
 
 /* tslint:disable:no-any */
 type GapicClient = any;
@@ -110,14 +112,10 @@ export function createInstance(
   return Promise.resolve(firestore);
 }
 
-export function commitRequest(writes: api.IWrite[]): api.ICommitRequest {
-  return {database: DATABASE_ROOT, writes};
-}
-
 function write(
     document: api.IDocument|null, mask: api.IDocumentMask|null,
     transforms: api.DocumentTransform.IFieldTransform[]|null,
-    precondition: api.IPrecondition|null): api.IWrite[] {
+    precondition: api.IPrecondition|null): api.ICommitRequest {
   const writes: api.IWrite[] = [];
 
   if (document) {
@@ -139,13 +137,43 @@ function write(
     writes[0].currentDocument = precondition;
   }
 
-  return writes;
+  return {writes};
 }
 
-export function set(
-    document: api.IDocument,
-    transforms?: api.DocumentTransform.IFieldTransform[]): api.IWrite[] {
-  return write(document, null, transforms || null, null);
+export function updateMask(...fieldPaths: string[]): api.IDocumentMask {
+  return fieldPaths.length === 0 ? {} : {fieldPaths};
+}
+
+export function set(opts: {
+  document?: api.IDocument,
+  transforms?: api.DocumentTransform.IFieldTransform[];
+  mask?: api.IDocumentMask,
+}): api.ICommitRequest {
+  return write(
+      opts.document || null, opts.mask || null, opts.transforms || null, null);
+}
+
+export function update(opts: {
+  document?: api.IDocument,
+  transforms?: api.DocumentTransform.IFieldTransform[];
+  mask?: api.IDocumentMask,
+  precondition?: api.IPrecondition
+}): api.ICommitRequest {
+  const precondition = opts.precondition || {exists: true};
+  const mask = opts.mask || updateMask();
+  return write(
+      opts.document || null, mask, opts.transforms || null, precondition);
+}
+
+export function create(opts: {
+  document?: api.IDocument,
+  transforms?: api.DocumentTransform.IFieldTransform[];
+  mask?: api.IDocumentMask
+}): api.ICommitRequest {
+  return write(
+      opts.document || null, /* updateMask */ null, opts.transforms || null, {
+        exists: false,
+      });
 }
 
 function value(value: string|api.IValue): api.IValue {
@@ -156,6 +184,39 @@ function value(value: string|api.IValue): api.IValue {
   } else {
     return value;
   }
+}
+
+
+export function retrieve(id: string): api.IBatchGetDocumentsRequest {
+  return {documents: [`${DATABASE_ROOT}/documents/collectionId/${id}`]};
+}
+
+export function remove(
+    id: string, precondition?: api.IPrecondition): api.ICommitRequest {
+  const writes: api.IWrite[] = [
+    {delete: `${DATABASE_ROOT}/documents/collectionId/${id}`},
+  ];
+
+  if (precondition) {
+    writes[0].currentDocument = precondition;
+  }
+
+  return {writes};
+}
+
+export function found(dataOrId: api.IDocument|
+                      string): api.IBatchGetDocumentsResponse {
+  return {
+    found: typeof dataOrId === 'string' ? document(dataOrId) : dataOrId,
+    readTime: {seconds: 5, nanos: 6}
+  };
+}
+
+export function missing(id: string): api.IBatchGetDocumentsResponse {
+  return {
+    missing: `${DATABASE_ROOT}/documents/collectionId/${id}`,
+    readTime: {seconds: 5, nanos: 6}
+  };
 }
 
 export function document(
@@ -231,4 +292,41 @@ export function writeResult(count: number): api.IWriteResponse {
   }
 
   return response;
+}
+
+export function requestEquals(actual: object, ...components: object[]): void {
+  const proto: object = {
+    database: DATABASE_ROOT,
+  };
+
+  for (const component of components) {
+    for (const key in component) {
+      if (component.hasOwnProperty(key)) {
+        if (proto[key]) {
+          proto[key] = proto[key].concat(component[key]);
+        } else {
+          proto[key] = component[key];
+        }
+      }
+    }
+  }
+
+  expect(actual).to.deep.eq(proto);
+}
+
+export function stream<T>(...elements: Array<T|Error>): NodeJS.ReadableStream {
+  const stream = through2.obj();
+
+  setImmediate(() => {
+    for (const el of elements) {
+      if (el instanceof Error) {
+        stream.destroy(el);
+        return;
+      }
+      stream.push(el);
+    }
+    stream.push(null);
+  });
+
+  return stream;
 }

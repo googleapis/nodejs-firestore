@@ -17,27 +17,26 @@
 import {expect} from 'chai';
 import extend from 'extend';
 import is from 'is';
-import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
-import {Query, Timestamp} from '../src';
-import {DocumentSnapshot} from '../src/document';
+import {DocumentData, Query, Timestamp} from '../src';
+import {DocumentSnapshot} from '../src';
+import {DocumentReference} from '../src';
 import {ResourcePath} from '../src/path';
-import {DocumentReference} from '../src/reference';
 import {AnyDuringMigration} from '../src/types';
-import {createInstance, document, InvalidApiUsage} from '../test/util/helpers';
+import {createInstance, document, InvalidApiUsage, stream} from '../test/util/helpers';
 
 import api = google.firestore.v1beta1;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
-
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-function snapshot(relativePath, data) {
+function snapshot(
+    relativePath: string, data: DocumentData): Promise<DocumentSnapshot> {
   return createInstance().then(firestore => {
     const snapshot = new DocumentSnapshot.Builder();
     const path = ResourcePath.fromSlashSeparatedString(
@@ -51,7 +50,12 @@ function snapshot(relativePath, data) {
   });
 }
 
-function fieldFilters(fieldPath, op, value, ...fieldPathOpAndValues) {
+function fieldFilters(
+    fieldPath: string, op: api.StructuredQuery.FieldFilter.Operator,
+    value: (string|api.IValue),
+    ...fieldPathOpAndValues:
+        Array<string|api.StructuredQuery.FieldFilter.Operator|string|
+              api.IValue>): api.IStructuredQuery {
   const filters: api.StructuredQuery.IFilter[] = [];
 
   for (let i = 0; i < arguments.length; i += 3) {
@@ -66,10 +70,10 @@ function fieldFilters(fieldPath, op, value, ...fieldPathOpAndValues) {
       op,
     };
 
-    if (is.object(value)) {
-      filter.value = value;
-    } else {
+    if (typeof value === 'string') {
       filter.value = {stringValue: value};
+    } else {
+      filter.value = value;
     }
 
     filters.push({fieldFilter: filter});
@@ -93,12 +97,15 @@ function fieldFilters(fieldPath, op, value, ...fieldPathOpAndValues) {
   }
 }
 
-function unaryFilters(fieldPath, equals, ...fieldPathsAndEquals) {
+function unaryFilters(
+    fieldPath: string, equals, ...fieldPathsAndEquals): api.IStructuredQuery {
   const filters: api.StructuredQuery.IFilter[] = [];
 
-  for (let i = 0; i < arguments.length; i += 2) {
-    fieldPath = arguments[i];
-    equals = arguments[i + 1];
+  fieldPathsAndEquals.unshift(fieldPath, equals);
+
+  for (let i = 0; i < fieldPathsAndEquals.length; i += 2) {
+    const fieldPath = fieldPathsAndEquals[i];
+    const equals = fieldPathsAndEquals[i + 1];
 
     filters.push({
       unaryFilter: {
@@ -128,12 +135,17 @@ function unaryFilters(fieldPath, equals, ...fieldPathsAndEquals) {
   }
 }
 
-function orderBy(fieldPath, direction, ...fieldPathAndOrderBys) {
-  const orderBy: AnyDuringMigration[] = [];
+function orderBy(
+    fieldPath: string, direction: api.StructuredQuery.Direction,
+    ...fieldPathAndOrderBys: Array<string|api.StructuredQuery.Direction>):
+    api.IStructuredQuery {
+  const orderBy: api.StructuredQuery.IOrder[] = [];
 
-  for (let i = 0; i < arguments.length; i += 2) {
-    fieldPath = arguments[i];
-    direction = arguments[i + 1];
+  fieldPathAndOrderBys.unshift(fieldPath, direction);
+
+  for (let i = 0; i < fieldPathAndOrderBys.length; i += 2) {
+    const fieldPath = fieldPathAndOrderBys[i] as string;
+    const direction: AnyDuringMigration = fieldPathAndOrderBys[i + 1];
     orderBy.push({
       field: {
         fieldPath,
@@ -145,7 +157,7 @@ function orderBy(fieldPath, direction, ...fieldPathAndOrderBys) {
   return {orderBy};
 }
 
-function limit(n) {
+function limit(n: number): api.IStructuredQuery {
   return {
     limit: {
       value: n,
@@ -153,74 +165,73 @@ function limit(n) {
   };
 }
 
-function offset(n) {
+function offset(n: number): api.IStructuredQuery {
   return {
     offset: n,
   };
 }
 
-function select(...fields) {
-  const select = {
-    fields: [] as AnyDuringMigration[],
+function select(...fields: string[]): api.IStructuredQuery {
+  const select: api.StructuredQuery.IProjection = {
+    fields: [],
   };
 
   for (const field of fields) {
-    select.fields.push({fieldPath: field});
+    select.fields!.push({fieldPath: field});
   }
 
   return {select};
 }
 
-function startAt(before, ...values) {
-  const cursor: AnyDuringMigration = {
-    startAt: {
-      values: [],
-    },
+function startAt(before: boolean, ...values: Array<string|api.IValue>):
+    api.IStructuredQuery {
+  const cursor: api.ICursor = {
+    values: [],
   };
 
   if (before) {
-    cursor.startAt.before = true;
+    cursor.before = true;
   }
 
   for (const value of values) {
-    if (is.string(value)) {
-      cursor.startAt.values.push({
+    if (typeof value === 'string') {
+      cursor.values!.push({
         stringValue: value,
       });
     } else {
-      cursor.startAt.values.push(value);
+      cursor.values!.push(value);
     }
   }
 
-  return cursor;
+  return {startAt: cursor};
 }
 
-function endAt(before, ...values) {
-  const cursor: AnyDuringMigration = {
-    endAt: {
-      values: [],
-    },
+function endAt(before: boolean, ...values: Array<string|api.IValue>):
+    api.IStructuredQuery {
+  const cursor: api.ICursor = {
+    values: [],
   };
 
   if (before) {
-    cursor.endAt.before = true;
+    cursor.before = true;
   }
 
   for (const value of values) {
-    if (is.string(value)) {
-      cursor.endAt.values.push({
+    if (typeof value === 'string') {
+      cursor.values!.push({
         stringValue: value,
       });
     } else {
-      cursor.endAt.values.push(value);
+      cursor.values!.push(value);
     }
   }
 
-  return cursor;
+  return {endAt: cursor};
 }
 
-function buildQuery(...protoComponents) {
-  const query = {
+function queryEquals(
+    actual: api.IRunQueryRequest, ...protoComponents: api.IStructuredQuery[]) {
+  const query: api.IRunQueryRequest = {
     parent: DATABASE_ROOT,
     structuredQuery: {
       from: [
@@ -235,33 +246,11 @@ function buildQuery(...protoComponents) {
     extend(true, query.structuredQuery, protoComponent);
   }
 
-  return query;
+  expect(actual).to.deep.eq(query);
 }
 
-function requestEquals(actual, ...protoComponents) {
-  expect(actual).to.deep.eq(buildQuery.apply(null, protoComponents));
-}
-
-function found(name: string) {
-  return {document: document(name), readTime: {seconds: 5, nanos: 6}};
-}
-
-function stream(...elements) {
-  const stream = through2.obj();
-  const args = arguments;
-
-  setImmediate(() => {
-    for (const arg of args) {
-      if (is.instance(arg, Error)) {
-        stream.destroy(arg);
-        return;
-      }
-      stream.push(arg);
-    }
-    stream.push(null);
-  });
-
-  return stream;
+export function result(documentId: string): api.IRunQueryResponse {
+  return {document: document(documentId), readTime: {seconds: 5, nanos: 6}};
 }
 
 describe('query interface', () => {
@@ -359,7 +348,7 @@ describe('query interface', () => {
   it('accepts all variations', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             fieldFilters(
                 'foo', api.StructuredQuery.FieldFilter.Operator.EQUAL, 'bar'),
@@ -385,7 +374,7 @@ describe('query interface', () => {
   it('supports empty gets', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request);
+        queryEquals(request);
         return stream({readTime: {seconds: 5, nanos: 6}});
       }
     };
@@ -425,7 +414,7 @@ describe('query interface', () => {
   it('supports empty streams', (callback) => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request);
+        queryEquals(request);
         return stream({readTime: {seconds: 5, nanos: 6}});
       }
     };
@@ -446,8 +435,8 @@ describe('query interface', () => {
   it('returns results', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request);
-        return stream(found('first'), found('second'));
+        queryEquals(request);
+        return stream(result('first'), result('second'));
       }
     };
 
@@ -518,7 +507,7 @@ describe('query interface', () => {
   it('handles stream exception after initialization', () => {
     const overrides = {
       runQuery: () => {
-        return stream(found('first'), new Error('Expected error'));
+        return stream(result('first'), new Error('Expected error'));
       }
     };
 
@@ -537,8 +526,8 @@ describe('query interface', () => {
   it('streams results', (callback) => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request);
-        return stream(found('first'), found('second'));
+        queryEquals(request);
+        return stream(result('first'), result('second'));
       }
     };
 
@@ -562,8 +551,8 @@ describe('query interface', () => {
   it('throws if QuerySnapshot.docChanges() is used as a property', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request);
-        return stream(found('first'), found('second'));
+        queryEquals(request);
+        return stream(result('first'), result('second'));
       }
     };
 
@@ -599,7 +588,7 @@ describe('where() interface', () => {
   it('generates proto', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             fieldFilters(
                 'foo', api.StructuredQuery.FieldFilter.Operator.EQUAL, 'bar'));
@@ -617,7 +606,7 @@ describe('where() interface', () => {
   it('concatenates all accepted filters', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             fieldFilters(
                 'fooSmaller',
@@ -655,7 +644,7 @@ describe('where() interface', () => {
   it('accepts object', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             fieldFilters(
                 'foo', api.StructuredQuery.FieldFilter.Operator.EQUAL, {
@@ -680,7 +669,7 @@ describe('where() interface', () => {
   it('supports field path objects for field paths', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             fieldFilters(
                 'foo.bar', api.StructuredQuery.FieldFilter.Operator.EQUAL,
@@ -701,7 +690,7 @@ describe('where() interface', () => {
   it('supports strings for FieldPath.documentId()', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             fieldFilters(
                 '__name__', api.StructuredQuery.FieldFilter.Operator.EQUAL, {
@@ -802,7 +791,7 @@ describe('where() interface', () => {
   it('supports unary filters', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             unaryFilters(
                 'foo', api.StructuredQuery.UnaryFilter.Operator.IS_NAN, 'bar',
@@ -868,7 +857,7 @@ describe('orderBy() interface', () => {
   it('accepts empty string', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request, orderBy('foo', api.StructuredQuery.Direction.ASCENDING));
         return stream();
       }
@@ -884,7 +873,7 @@ describe('orderBy() interface', () => {
   it('accepts asc', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request, orderBy('foo', api.StructuredQuery.Direction.ASCENDING));
         return stream();
       }
@@ -900,7 +889,7 @@ describe('orderBy() interface', () => {
   it('accepts desc', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request, orderBy('foo', api.StructuredQuery.Direction.DESCENDING));
         return stream();
       }
@@ -923,7 +912,7 @@ describe('orderBy() interface', () => {
   it('accepts field path', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'foo.bar', api.StructuredQuery.Direction.ASCENDING, 'bar.foo',
@@ -984,7 +973,7 @@ describe('orderBy() interface', () => {
   it('concatenates orders', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'foo', api.StructuredQuery.Direction.ASCENDING, 'bar',
@@ -1016,7 +1005,7 @@ describe('limit() interface', () => {
   it('generates proto', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request, limit(10));
+        queryEquals(request, limit(10));
         return stream();
       }
     };
@@ -1037,7 +1026,7 @@ describe('limit() interface', () => {
   it('uses latest limit', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request, limit(3));
+        queryEquals(request, limit(3));
         return stream();
       }
     };
@@ -1062,7 +1051,7 @@ describe('offset() interface', () => {
   it('generates proto', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request, offset(10));
+        queryEquals(request, offset(10));
         return stream();
       }
     };
@@ -1083,7 +1072,7 @@ describe('offset() interface', () => {
   it('uses latest offset', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request, offset(3));
+        queryEquals(request, offset(3));
         return stream();
       }
     };
@@ -1108,7 +1097,7 @@ describe('select() interface', () => {
   it('generates proto', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request, select('a', 'b.c'));
+        queryEquals(request, select('a', 'b.c'));
         return stream();
       }
     };
@@ -1137,7 +1126,7 @@ describe('select() interface', () => {
   it('uses latest field mask', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request, select('bar'));
+        queryEquals(request, select('bar'));
         return stream();
       }
     };
@@ -1152,7 +1141,7 @@ describe('select() interface', () => {
   it('implicitly adds FieldPath.documentId()', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(request, select('__name__'));
+        queryEquals(request, select('__name__'));
         return stream();
       }
     };
@@ -1177,7 +1166,7 @@ describe('startAt() interface', () => {
   it('accepts fields', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'foo', api.StructuredQuery.Direction.ASCENDING, 'bar',
@@ -1198,7 +1187,7 @@ describe('startAt() interface', () => {
   it('accepts FieldPath.documentId()', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy('__name__', api.StructuredQuery.Direction.ASCENDING),
             startAt(true, {
@@ -1272,7 +1261,7 @@ describe('startAt() interface', () => {
   it('can specify document snapshot', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy('__name__', api.StructuredQuery.Direction.ASCENDING),
             startAt(true, {
@@ -1295,7 +1284,7 @@ describe('startAt() interface', () => {
   it('doesn\'t append documentId() twice', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy('__name__', api.StructuredQuery.Direction.ASCENDING),
             startAt(true, {
@@ -1320,7 +1309,7 @@ describe('startAt() interface', () => {
   it('can extract implicit direction for document snapshot', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'foo', api.StructuredQuery.Direction.ASCENDING, '__name__',
@@ -1346,7 +1335,7 @@ describe('startAt() interface', () => {
   it('can extract explicit direction for document snapshot', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'foo', api.StructuredQuery.Direction.DESCENDING, '__name__',
@@ -1373,7 +1362,7 @@ describe('startAt() interface', () => {
   it('can specify document snapshot with inequality filter', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'c', api.StructuredQuery.Direction.ASCENDING, '__name__',
@@ -1409,7 +1398,7 @@ describe('startAt() interface', () => {
   it('ignores equality filter with document snapshot cursor', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy('__name__', api.StructuredQuery.Direction.ASCENDING),
             startAt(true, {
@@ -1465,7 +1454,7 @@ describe('startAt() interface', () => {
   it('can overspecify order by', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'foo', api.StructuredQuery.Direction.ASCENDING, 'bar',
@@ -1493,7 +1482,7 @@ describe('startAt() interface', () => {
   it('uses latest value', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request, orderBy('foo', api.StructuredQuery.Direction.ASCENDING),
             startAt(true, 'bar'));
 
@@ -1521,7 +1510,7 @@ describe('startAfter() interface', () => {
   it('accepts fields', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'foo', api.StructuredQuery.Direction.ASCENDING, 'bar',
@@ -1549,7 +1538,7 @@ describe('startAfter() interface', () => {
   it('uses latest value', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request, orderBy('foo', api.StructuredQuery.Direction.ASCENDING),
             startAt(false, 'bar'));
 
@@ -1577,7 +1566,7 @@ describe('endAt() interface', () => {
   it('accepts fields', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'foo', api.StructuredQuery.Direction.ASCENDING, 'bar',
@@ -1605,7 +1594,7 @@ describe('endAt() interface', () => {
   it('uses latest value', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request, orderBy('foo', api.StructuredQuery.Direction.ASCENDING),
             endAt(false, 'bar'));
 
@@ -1633,7 +1622,7 @@ describe('endBefore() interface', () => {
   it('accepts fields', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request,
             orderBy(
                 'foo', api.StructuredQuery.Direction.ASCENDING, 'bar',
@@ -1661,7 +1650,7 @@ describe('endBefore() interface', () => {
   it('uses latest value', () => {
     const overrides = {
       runQuery: (request) => {
-        requestEquals(
+        queryEquals(
             request, orderBy('foo', api.StructuredQuery.Direction.ASCENDING),
             endAt(true, 'bar'));
 
@@ -1677,11 +1666,11 @@ describe('endBefore() interface', () => {
   });
 
   it('is immutable', () => {
-    let expectedResult = buildQuery(limit(10));
+    let expectedComponents = [limit(10)];
 
     const overrides = {
       runQuery: (request) => {
-        expect(request).to.deep.eq(expectedResult);
+        queryEquals(request, ...expectedComponents);
         return stream();
       }
     };
@@ -1690,9 +1679,10 @@ describe('endBefore() interface', () => {
       const adjustedQuery = query.orderBy('foo').endBefore('foo');
 
       return query.get().then(() => {
-        expectedResult = buildQuery(
-            limit(10), orderBy('foo', api.StructuredQuery.Direction.ASCENDING),
-            endAt(true, 'foo'));
+        expectedComponents = [
+          limit(10), orderBy('foo', api.StructuredQuery.Direction.ASCENDING),
+          endAt(true, 'foo')
+        ];
         return adjustedQuery.get();
       });
     });
