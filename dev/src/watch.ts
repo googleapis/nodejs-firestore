@@ -197,11 +197,11 @@ const DOCUMENT_WATCH_COMPARATOR =
  * @private
  * @callback watchSnapshotCallback
  *
- * @param {Timestamp} readTime - The time at which this snapshot was obtained.
- * @param {number} size - The number of documents in the result set.
- * @param {docsCallback} docs - A callback that returns the ordered list of
+ * @param {Timestamp} readTime The time at which this snapshot was obtained.
+ * @param {number} size The number of documents in the result set.
+ * @param {docsCallback} docs A callback that returns the ordered list of
  * documents stored in this snapshot.
- * @param {changeCallback} changes - A callback that returns the list of
+ * @param {changeCallback} changes A callback that returns the list of
  * changed documents since the last snapshot delivered for this watch.
  */
 
@@ -234,7 +234,7 @@ export class Watch {
    *
    * @param firestore The Firestore Database client.
    * @param target A Firestore 'Target' proto denoting the target to listen on.
-   * @param comparator - A comparator for QueryDocumentSnapshots that is used to
+   * @param comparator A comparator for QueryDocumentSnapshots that is used to
    * order the document snapshots returned by this watch.
    */
   constructor(

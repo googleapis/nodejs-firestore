@@ -33,11 +33,11 @@ export class DocumentChange {
    * @private
    * @hideconstructor
    *
-   * @param {string} type - 'added' | 'removed' | 'modified'.
-   * @param {QueryDocumentSnapshot} document - The document.
-   * @param {number} oldIndex - The index in the documents array prior to this
+   * @param {string} type 'added' | 'removed' | 'modified'.
+   * @param {QueryDocumentSnapshot} document The document.
+   * @param {number} oldIndex The index in the documents array prior to this
    * change.
-   * @param {number} newIndex - The index in the documents array after this
+   * @param {number} newIndex The index in the documents array after this
    * change.
    */
   constructor(

@@ -182,7 +182,7 @@ export class Serializer {
    * Decodes a single Firestore 'Value' Protobuf.
    *
    * @private
-   * @param proto - A Firestore 'Value' Protobuf.
+   * @param proto A Firestore 'Value' Protobuf.
    * @returns The converted JS type.
    */
   decodeValue(proto: api.IValue): AnyJs {
@@ -256,7 +256,7 @@ export class Serializer {
  * 'Map' in Firestore.
  *
  * @private
- * @param input - The argument to verify.
+ * @param input The argument to verify.
  * @returns 'true' if the input can be a treated as a plain object.
  */
 export function isPlainObject(input: UserInput): boolean {

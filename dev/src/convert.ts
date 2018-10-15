@@ -38,8 +38,8 @@ const validate = createValidator();
  * Converts an ISO 8601 or google.protobuf.Timestamp proto into Protobuf JS.
  *
  * @private
- * @param {*=} timestampValue - The value to convert.
- * @param {string=} argumentName - The argument name to use in the error message
+ * @param {*=} timestampValue The value to convert.
+ * @param {string=} argumentName The argument name to use in the error message
  * if the conversion fails. If omitted, 'timestampValue' is used.
  * @return {{nanos,seconds}|undefined} The value as expected by Protobuf JS or
  * undefined if no input was provided.
@@ -84,7 +84,7 @@ function convertTimestamp(timestampValue, argumentName?: string) {
  * Converts a Proto3 JSON 'bytesValue' field into Protobuf JS.
  *
  * @private
- * @param {*} bytesValue - The value to convert.
+ * @param {*} bytesValue The value to convert.
  * @return {Buffer} The value as expected by Protobuf JS.
  */
 function convertBytes(bytesValue) {
@@ -99,7 +99,7 @@ function convertBytes(bytesValue) {
  * Detects 'valueType' from a Proto3 JSON `firestore.v1beta1.Value` proto.
  *
  * @private
- * @param {object} proto - The `firestore.v1beta1.Value` proto.
+ * @param {object} proto The `firestore.v1beta1.Value` proto.
  * @return {string} - The string value for 'valueType'.
  */
 export function detectValueType(proto) {
@@ -156,7 +156,7 @@ export function detectValueType(proto) {
  * Protobuf JS format expected by this client.
  *
  * @private
- * @param {object} fieldValue - The `firestore.v1beta1.Value` in Proto3 JSON
+ * @param {object} fieldValue The `firestore.v1beta1.Value` in Proto3 JSON
  * format.
  * @return {object} The `firestore.v1beta1.Value` in Protobuf JS format.
  */
@@ -217,7 +217,7 @@ function convertValue(fieldValue) {
  * the underlying document.
  *
  * @private
- * @param {object} document - The `firestore.v1beta1.Document` in Proto3 JSON
+ * @param {object} document The `firestore.v1beta1.Document` in Proto3 JSON
  * format.
  * @return {object} The `firestore.v1beta1.Document` in Protobuf JS format.
  */
