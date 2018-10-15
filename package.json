@@ -61,14 +61,14 @@
     "extend": "^3.0.1",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^0.20.0",
-    "google-proto-files": "^0.16.1",
+    "google-proto-files": "^0.17.0",
     "is": "^3.2.1",
     "lodash.merge": "^4.6.1",
     "protobufjs": "^6.8.6",
     "through2": "^2.0.3"
   },
   "devDependencies": {
-    "@google-cloud/nodejs-repo-tools": "^2.3.0",
+    "@google-cloud/nodejs-repo-tools": "^2.3.5",
     "@types/mocha": "^5.2.3",
     "@types/node": "^10.3.5",
     "chai": "^4.1.2",
@@ -83,8 +83,8 @@
     "mocha": "^5.2.0",
     "nyc": "^13.0.0",
     "proxyquire": "^2.0.1",
-    "ts-node": "^7.0.0",
     "source-map-support": "^0.5.6",
+    "ts-node": "^7.0.0",
     "typescript": "~3.1.1"
   }
 }

@@ -15,20 +15,14 @@
  */
 
 import {expect} from 'chai';
-import {ApiOverride, arrayTransform, commitRequest, createInstance, document, serverTimestamp, set, writeResult} from './util/helpers';
 
-// TODO: This should be a TypeScript import after the full migration.
-import Firestore = require('../src');
+import {FieldValue} from '../src';
 
-import {FieldValue} from '../src/field-value';
-import {AnyDuringMigration} from '../src/types';
+import {ApiOverride, arrayTransform, createInstance, document, requestEquals, serverTimestamp, set, writeResult} from './util/helpers';
 
-// tslint:disable:no-unused-expression
-
-function genericFieldValueTests(
-    methodName: string, sentinel: AnyDuringMigration) {
+function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
   it('can\'t be used inside arrays', () => {
-    return createInstance().then((firestore: AnyDuringMigration) => {
+    return createInstance().then(firestore => {
       const docRef = firestore.doc('coll/doc');
       const expectedErr =
           `${methodName}() is not supported inside of array values.`;
@@ -42,7 +36,7 @@ function genericFieldValueTests(
   });
 
   it('can\'t be used inside arrayUnion()', () => {
-    return createInstance().then((firestore: AnyDuringMigration) => {
+    return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: FieldValue.arrayUnion(sentinel)}))
           .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
@@ -51,7 +45,7 @@ function genericFieldValueTests(
   });
 
   it('can\'t be used inside arrayRemove()', () => {
-    return createInstance().then((firestore: AnyDuringMigration) => {
+    return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: FieldValue.arrayRemove(sentinel)}))
           .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
@@ -60,7 +54,7 @@ function genericFieldValueTests(
   });
 
   it('can\'t be used with queries', () => {
-    return createInstance().then((firestore: AnyDuringMigration) => {
+    return createInstance().then(firestore => {
       const collRef = firestore.collection('coll');
       expect(() => collRef.where('a', '==', sentinel))
           .to.throw(`Argument "value" is not a valid QueryValue. ${
@@ -90,19 +84,21 @@ describe('FieldValue.arrayUnion()', () => {
   it('can be used with set()', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
-        const expectedRequest =
-            commitRequest(set(document('documentId', 'foo', 'bar'), [
-              arrayTransform('field', 'appendMissingElements', 'foo', 'bar'),
-              arrayTransform('map.field', 'appendMissingElements', 'foo', 'bar')
-            ]));
+        const expectedRequest = set({
+          document: document('documentId', 'foo', 'bar'),
+          transforms: [
+            arrayTransform('field', 'appendMissingElements', 'foo', 'bar'),
+            arrayTransform('map.field', 'appendMissingElements', 'foo', 'bar')
+          ]
+        });
 
-        expect(request).to.deep.equal(expectedRequest);
+        requestEquals(request, expectedRequest);
 
         callback(null, writeResult(2));
       }
     };
 
-    return createInstance(overrides).then((firestore: AnyDuringMigration) => {
+    return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
         foo: 'bar',
         field: FieldValue.arrayUnion('foo', 'bar'),
@@ -132,18 +128,20 @@ describe('FieldValue.arrayRemove()', () => {
   it('can be used with set()', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
-        const expectedRequest =
-            commitRequest(set(document('documentId', 'foo', 'bar'), [
-              arrayTransform('field', 'removeAllFromArray', 'foo', 'bar'),
-              arrayTransform('map.field', 'removeAllFromArray', 'foo', 'bar')
-            ]));
-        expect(request).to.deep.equal(expectedRequest);
+        const expectedRequest = set({
+          document: document('documentId', 'foo', 'bar'),
+          transforms: [
+            arrayTransform('field', 'removeAllFromArray', 'foo', 'bar'),
+            arrayTransform('map.field', 'removeAllFromArray', 'foo', 'bar')
+          ]
+        });
+        requestEquals(request, expectedRequest);
 
         callback(null, writeResult(2));
       }
     };
 
-    return createInstance(overrides).then((firestore: AnyDuringMigration) => {
+    return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
         foo: 'bar',
         field: FieldValue.arrayRemove('foo', 'bar'),
@@ -166,16 +164,18 @@ describe('FieldValue.serverTimestamp()', () => {
   it('can be used with set()', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
-        const expectedRequest = commitRequest(
-            set(document('documentId', 'foo', 'bar'),
-                [serverTimestamp('field'), serverTimestamp('map.field')]));
-        expect(request).to.deep.equal(expectedRequest);
+        const expectedRequest = set({
+          document: document('documentId', 'foo', 'bar'),
+          transforms:
+              [serverTimestamp('field'), serverTimestamp('map.field')]
+        });
+        requestEquals(request, expectedRequest);
 
         callback(null, writeResult(2));
       }
     };
 
-    return createInstance(overrides).then((firestore: AnyDuringMigration) => {
+    return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
         foo: 'bar',
         field: FieldValue.serverTimestamp(),

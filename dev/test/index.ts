@@ -17,13 +17,11 @@
 import {expect} from 'chai';
 import extend from 'extend';
 import * as gax from 'google-gax';
-import is from 'is';
-import through2 from 'through2';
 
 import * as Firestore from '../src';
 import {ResourcePath} from '../src/path';
 import {AnyDuringMigration} from '../src/types';
-import {createInstance, document, DOCUMENT_NAME, InvalidApiUsage} from './util/helpers';
+import {createInstance, document, DOCUMENT_NAME, found, InvalidApiUsage, missing, stream} from './util/helpers';
 
 const {grpc} = new gax.GrpcClient({} as AnyDuringMigration);
 
@@ -247,38 +245,6 @@ const allSupportedTypesOutput = {
   geoPointValue: new Firestore.GeoPoint(50.1430847, -122.947778),
   bytesValue: Buffer.from([0x1, 0x2]),
 };
-
-function found(name) {
-  return {
-    found: document(name),
-    readTime: {seconds: 5, nanos: 6},
-  };
-}
-
-function missing(name) {
-  return {
-    missing: `${DATABASE_ROOT}/documents/collectionId/${name}`,
-    readTime: {seconds: 5, nanos: 6},
-  };
-}
-
-function stream(...elements) {
-  const stream = through2.obj();
-  const args = arguments;
-
-  setImmediate(() => {
-    for (const arg of args) {
-      if (is.instance(arg, Error)) {
-        stream.destroy(arg);
-        return;
-      }
-      stream.push(arg);
-    }
-    stream.push(null);
-  });
-
-  return stream;
-}
 
 describe('instantiation', () => {
   it('creates instance', () => {
@@ -962,7 +928,7 @@ describe('getAll() method', () => {
           .then(result => {
             resultEquals(
                 result, found('first'), found('second'), found('third'),
-                found('fourth'));
+                found(document(('fourth'))));
           });
     });
   });
