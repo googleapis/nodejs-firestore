@@ -153,7 +153,7 @@ export class ExponentialBackoff {
    * (i.e. due to an error), initialDelayMs (plus jitter) will be used, and
    * subsequent ones will increase according to the backoffFactor.
    */
-  private reset(): void {
+  reset(): void {
     this.currentBaseMs = 0;
   }
 
@@ -161,7 +161,7 @@ export class ExponentialBackoff {
    * Resets the backoff delay to the maximum delay (e.g. for use after a
    * RESOURCE_EXHAUSTED error).
    */
-  private resetToMax(): void {
+  resetToMax(): void {
     this.currentBaseMs = this.maxDelayMs;
   }
 

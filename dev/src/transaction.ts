@@ -54,9 +54,9 @@ export class Transaction {
    * @private
    * @hideconstructor
    *
-   * @param {Firestore} firestore - The Firestore Database client.
-   * @param {Transaction=} previousTransaction - If
-   * available, the failed transaction that is being retried.
+   * @param {Firestore} firestore The Firestore Database client.
+   * @param {Transaction=} previousTransaction If available, the failed
+   * transaction that is being retried.
    */
   constructor(firestore, previousTransaction) {
     this._firestore = firestore;
@@ -89,7 +89,7 @@ export class Transaction {
    * Retrieve a document or a query result from the database. Holds a
    * pessimistic lock on all returned documents.
    *
-   * @param {DocumentReference|Query} refOrQuery - The document or query to
+   * @param {DocumentReference|Query} refOrQuery The document or query to
    * return.
    * @returns {Promise} A Promise that resolves with a DocumentSnapshot or
    * QuerySnapshot for the returned documents.
@@ -131,8 +131,7 @@ export class Transaction {
    * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
    * all returned documents.
    *
-   * @param {...DocumentReference} documents - The document references
-   * to receive.
+   * @param {...DocumentReference} documents The document references to receive.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
    *
@@ -170,9 +169,9 @@ export class Transaction {
    * [DocumentReference]{@link DocumentReference}. The operation will
    * fail the transaction if a document exists at the specified location.
    *
-   * @param {DocumentReference} documentRef - A reference to the
-   * document to be created.
-   * @param {DocumentData} data - The object data to serialize as the document.
+   * @param {DocumentReference} documentRef A reference to the document to be
+   * created.
+   * @param {DocumentData} data The object data to serialize as the document.
    * @returns {Transaction} This Transaction instance. Used for
    * chaining method calls.
    *
@@ -198,10 +197,10 @@ export class Transaction {
    * [SetOptions]{@link SetOptions}, the provided data can be merged into the
    * existing document.
    *
-   * @param {DocumentReference} documentRef - A reference to the
-   * document to be set.
-   * @param {DocumentData} data - The object to serialize as the document.
-   * @param {SetOptions=} options - An object to configure the set behavior.
+   * @param {DocumentReference} documentRef A reference to the document to be
+   * set.
+   * @param {DocumentData} data The object to serialize as the document.
+   * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
    * remain untouched.
@@ -238,9 +237,9 @@ export class Transaction {
    * A Precondition restricting this update can be specified as the last
    * argument.
    *
-   * @param {DocumentReference} documentRef - A reference to the
-   * document to be updated.
-   * @param {UpdateData|string|FieldPath} dataOrField - An object
+   * @param {DocumentReference} documentRef A reference to the document to be
+   * updated.
+   * @param {UpdateData|string|FieldPath} dataOrField An object
    * containing the fields and values with which to update the document
    * or the path of the first field to update.
    * @param {
@@ -279,9 +278,9 @@ export class Transaction {
    * Deletes the document referred to by the provided [DocumentReference]
    * {@link DocumentReference}.
    *
-   * @param {DocumentReference} documentRef - A reference to the
-   * document to be deleted.
-   * @param {Precondition=} precondition - A precondition to enforce for this
+   * @param {DocumentReference} documentRef A reference to the document to be
+   * deleted.
+   * @param {Precondition=} precondition A precondition to enforce for this
    * delete.
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the transaction if the

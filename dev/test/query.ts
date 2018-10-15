@@ -20,12 +20,11 @@ import is from 'is';
 
 import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
-import {DocumentData, Query, Timestamp} from '../src';
-import {DocumentSnapshot} from '../src';
-import {DocumentReference} from '../src';
+import {DocumentData, DocumentReference, Query, Timestamp} from '../src';
+import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {ResourcePath} from '../src/path';
 import {AnyDuringMigration} from '../src/types';
-import {createInstance, document, InvalidApiUsage, stream} from '../test/util/helpers';
+import {createInstance, document, InvalidApiUsage, stream} from './util/helpers';
 
 import api = proto.google.firestore.v1beta1;
 
@@ -38,7 +37,7 @@ Firestore.setLogFunction(() => {});
 function snapshot(
     relativePath: string, data: DocumentData): Promise<DocumentSnapshot> {
   return createInstance().then(firestore => {
-    const snapshot = new DocumentSnapshot.Builder();
+    const snapshot = new DocumentSnapshotBuilder();
     const path = ResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/${relativePath}`);
     snapshot.ref = new DocumentReference(firestore, path);

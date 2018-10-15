@@ -24,7 +24,7 @@ import through2 from 'through2';
 import {google} from '../protos/firestore_proto_api';
 
 import * as convert from './convert';
-import {DocumentSnapshot, QueryDocumentSnapshot, validatePrecondition, validateSetOptions} from './document';
+import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot, validatePrecondition, validateSetOptions} from './document';
 import {FieldValue} from './field-value';
 import {DeleteTransform, FieldTransform} from './field-value';
 import {GeoPoint} from './geo-point';
@@ -234,7 +234,7 @@ export class Firestore {
   private _lastSuccessfulRequest = 0;
 
   /**
-   * @param {Object=} settings - [Configuration object](#/docs).
+   * @param {Object=} settings [Configuration object](#/docs).
    * @param {string=} settings.projectId The Firestore Project ID. Can be
    * omitted in environments that support `Application Default Credentials`
    * {@see https://cloud.google.com/docs/authentication}
@@ -367,7 +367,7 @@ export class Firestore {
    * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path.
    *
-   * @param {string} documentPath - A slash-separated path to a document.
+   * @param {string} documentPath A slash-separated path to a document.
    * @returns {DocumentReference} The
    * [DocumentReference]{@link DocumentReference} instance.
    *
@@ -391,7 +391,7 @@ export class Firestore {
    * Gets a [CollectionReference]{@link CollectionReference} instance
    * that refers to the collection at the specified path.
    *
-   * @param {string} collectionPath - A slash-separated path to a collection.
+   * @param {string} collectionPath A slash-separated path to a collection.
    * @returns {CollectionReference} The
    * [CollectionReference]{@link CollectionReference} instance.
    *
@@ -448,12 +448,12 @@ export class Firestore {
    * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
-   * @param documentOrName - The Firestore 'Document' proto or
-   * the resource name of a missing document.
-   * @param readTime - A 'Timestamp' proto indicating the time this
-   * document was read.
-   * @param encoding - One of 'json' or 'protobufJS'. Applies to both
-   * the 'document' Proto and 'readTime'. Defaults to 'protobufJS'.
+   * @param documentOrName The Firestore 'Document' proto or the resource name
+   * of a missing document.
+   * @param readTime A 'Timestamp' proto indicating the time this document was
+   * read.
+   * @param encoding One of 'json' or 'protobufJS'. Applies to both the
+   * 'document' Proto and 'readTime'. Defaults to 'protobufJS'.
    * @returns A QueryDocumentSnapshot for existing documents, otherwise a
    * DocumentSnapshot.
    */
@@ -480,7 +480,7 @@ export class Firestore {
           `but was '${encoding}'.`);
     }
 
-    const document = new DocumentSnapshot.Builder();
+    const document = new DocumentSnapshotBuilder();
 
     if (typeof documentOrName === 'string') {
       document.ref = new DocumentReference(
@@ -512,10 +512,9 @@ export class Firestore {
    * modify Firestore documents under lock. Transactions are committed once
    * 'updateFunction' resolves and attempted up to five times on failure.
    *
-   * @param {function(Transaction)} updateFunction - The
-   * function to execute within the transaction
-   * context.
-   * @param {object=} transactionOptions - Transaction options.
+   * @param {function(Transaction)} updateFunction The function to execute
+   * within the transaction context.
+   * @param {object=} transactionOptions Transaction options.
    * @param {number=} transactionOptions.maxAttempts - The maximum number of
    * attempts for this transaction.
    * @returns {Promise} If the transaction completed successfully or was
@@ -652,8 +651,7 @@ export class Firestore {
   /**
    * Retrieves multiple documents from Firestore.
    *
-   * @param {...DocumentReference} documents - The document references to
-   * receive.
+   * @param {...DocumentReference} documents The document references to receive.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
    *
@@ -682,14 +680,13 @@ export class Firestore {
    * as part of a transaction.
    *
    * @private
-   * @param {Array.<DocumentReference>} docRefs - The documents
-   * to receive.
+   * @param {Array.<DocumentReference>} docRefs The documents to receive.
    * @param {string} requestTag A unique client-assigned identifier for this
    * request.
-   * @param {bytes=} transactionId - transactionId - The transaction ID to use
+   * @param {bytes=} transactionId transactionId - The transaction ID to use
    * for this read.
-   * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that contains an array with
-   * the resulting documents.
+   * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that contains an
+   * array with the resulting documents.
    */
   getAll_(
       docRefs: DocumentReference[], requestTag: string,
@@ -850,7 +847,7 @@ follow these steps, YOUR APP MAY BREAK.`);
    * Auto-detects the Firestore Project ID.
    *
    * @private
-   * @param gapicClient - The Firestore GAPIC client.
+   * @param gapicClient The Firestore GAPIC client.
    * @return A Promise that resolves with the Project ID.
    */
   private _detectProjectId(gapicClient: GapicClient): Promise<string> {
@@ -904,10 +901,10 @@ follow these steps, YOUR APP MAY BREAK.`);
    * for further attempts.
    *
    * @private
-   * @param attemptsRemaining - The number of available attempts.
-   * @param requestTag - A unique client-assigned identifier for this request.
-   * @param func - Method returning a Promise than can be retried.
-   * @param delayMs - How long to wait before issuing a this retry. Defaults to
+   * @param attemptsRemaining The number of available attempts.
+   * @param requestTag A unique client-assigned identifier for this request.
+   * @param func Method returning a Promise than can be retried.
+   * @param delayMs How long to wait before issuing a this retry. Defaults to
    * zero.
    * @returns  - A Promise with the function's result if successful within
    * `attemptsRemaining`. Otherwise, returns the last rejected Promise.
@@ -956,10 +953,10 @@ follow these steps, YOUR APP MAY BREAK.`);
    * Promise.
    *
    * @private
-   * @param resultStream - The Node stream to monitor.
+   * @param resultStream The Node stream to monitor.
    * @param requestTag A unique client-assigned identifier for this request.
-   * @param request - If specified, the request that should be written
-   * to the stream after it opened.
+   * @param request If specified, the request that should be written to the
+   * stream after it opened.
    * @returns The given Stream once it is considered healthy.
    */
   private _initializeStream(
@@ -1072,11 +1069,11 @@ follow these steps, YOUR APP MAY BREAK.`);
    *  necessary within the request options.
    *
    * @private
-   * @param methodName - Name of the veneer API endpoint that takes a request
+   * @param methodName Name of the veneer API endpoint that takes a request
    * and GAX options.
-   * @param request - The Protobuf request to send.
+   * @param request The Protobuf request to send.
    * @param requestTag A unique client-assigned identifier for this request.
-   * @param allowRetries - Whether this is an idempotent request that can be
+   * @param allowRetries Whether this is an idempotent request that can be
    * retried.
    * @returns A Promise with the request result.
    */
@@ -1122,7 +1119,7 @@ follow these steps, YOUR APP MAY BREAK.`);
    * takes a request and GAX options.
    * @param request The Protobuf request to send.
    * @param requestTag A unique client-assigned identifier for this request.
-   * @param {boolean} allowRetries - Whether this is an idempotent request that
+   * @param {boolean} allowRetries Whether this is an idempotent request that
    * can be retried.
    * @returns A Promise with the resulting read-only stream.
    */
@@ -1170,11 +1167,11 @@ follow these steps, YOUR APP MAY BREAK.`);
    * listeners are attached.
    *
    * @private
-   * @param methodName - Name of the streaming Veneer API endpoint that takes
+   * @param methodName Name of the streaming Veneer API endpoint that takes
    * GAX options.
-   * @param request - The Protobuf request to send as the first stream message.
+   * @param request The Protobuf request to send as the first stream message.
    * @param requestTag A unique client-assigned identifier for this request.
-   * @param allowRetries - Whether this is an idempotent request that can be
+   * @param allowRetries Whether this is an idempotent request that can be
    * retried.
    * @returns A Promise with the resulting read/write stream.
    */

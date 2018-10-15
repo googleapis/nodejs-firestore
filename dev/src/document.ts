@@ -36,7 +36,7 @@ import api = google.firestore.v1beta1;
  * @private
  * @class
  */
-class DocumentSnapshotBuilder {
+export class DocumentSnapshotBuilder {
   ref: DocumentReference;
   fieldsProto: ApiMapValue;
   readTime: Timestamp;
@@ -417,7 +417,7 @@ export class DocumentSnapshot {
   /**
    * Retrieves the field specified by `field`.
    *
-   * @param {string|FieldPath} field - The field path
+   * @param {string|FieldPath} field The field path
    * (e.g. 'foo' or 'foo.bar') to a specific field.
    * @returns {*} The data at the specified field location or undefined if no
    * such field exists.
@@ -449,8 +449,8 @@ export class DocumentSnapshot {
    * representation.
    *
    * @private
-   * @param {string|FieldPath} field - The path (e.g. 'foo' or
-   * 'foo.bar') to a specific field.
+   * @param {string|FieldPath} field The path (e.g. 'foo' or 'foo.bar') to a
+   * specific field.
    * @returns {*} The Protobuf-encoded data at the specified field location or
    * undefined if no such field exists.
    */
@@ -517,14 +517,6 @@ export class DocumentSnapshot {
          this._ref.isEqual(other._ref) &&
          deepEqual(this._fieldsProto, other._fieldsProto, {strict: true})));
   }
-
-  /**
-   * @private
-   * @name DocumentSnapshot.DocumentSnapshotBuilder
-   * @see DocumentSnapshotBuilder
-   */
-  // tslint:disable-next-line variable-name
-  static Builder = DocumentSnapshotBuilder;
 }
 
 /**
@@ -625,13 +617,6 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
 }
 
 /**
- * @private
- * @name DocumentSnapshot.DocumentSnapshotBuilder
- * @see DocumentSnapshotBuilder
- */
-DocumentSnapshot.Builder = DocumentSnapshotBuilder;
-
-/**
  * A Firestore Document Mask contains the field paths affected by an update.
  *
  * @class
@@ -644,7 +629,7 @@ export class DocumentMask {
    * @private
    * @hideconstructor
    *
-   * @param {Array.<FieldPath>} fieldPaths - The field paths in this mask.
+   * @param {Array.<FieldPath>} fieldPaths The field paths in this mask.
    */
   constructor(fieldPaths) {
     this._sortedPaths = fieldPaths;
@@ -749,8 +734,8 @@ export class DocumentMask {
    * Removes the specified values from a sorted field path array.
    *
    * @private
-   * @param {Array.<FieldPath>} input - A sorted array of FieldPaths.
-   * @param {Array.<FieldPath>} values - An array of FieldPaths to remove.
+   * @param {Array.<FieldPath>} input A sorted array of FieldPaths.
+   * @param {Array.<FieldPath>} values An array of FieldPaths to remove.
    */
   static removeFromSortedArray(input, values) {
     for (let i = 0; i < input.length;) {
@@ -806,7 +791,7 @@ export class DocumentMask {
    * mask.
    *
    * @private
-   * @param {Object} data - An object to filter.
+   * @param {Object} data An object to filter.
    * @return {Object} A shallow copy of the object filtered by this document
    * mask.
    */
@@ -1002,7 +987,7 @@ export class DocumentTransform {
    * Converts a document transform to the Firestore 'DocumentTransform' Proto.
    *
    * @private
-   * @param {Serializer} serializer - The Firestore serializer
+   * @param {Serializer} serializer The Firestore serializer
    * @returns {Object|null} A Firestore 'DocumentTransform' Proto or 'null' if
    * this transform is empty.
    */
