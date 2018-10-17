@@ -79,16 +79,6 @@ export class GeoPoint implements Serializable {
   }
 
   /**
-   * Returns a string representation for this GeoPoint.
-   *
-   * @return {string} The string representation.
-   */
-  toString(): string {
-    return `GeoPoint { latitude: ${this.latitude}, longitude: ${
-        this.longitude} }`;
-  }
-
-  /**
    * Returns true if this `GeoPoint` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
