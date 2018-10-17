@@ -240,8 +240,15 @@ export class Firestore {
    * {@see https://cloud.google.com/docs/authentication}
    * @param {string=} settings.keyFilename Local file containing the Service
    * Account credentials. Can be omitted in environments that support
-   * `Application Default Credentials`
-   * {@see https://cloud.google.com/docs/authentication}
+   * `Application Default Credentials`.
+   * {@see https://cloud.google.com/docs/authentication}. If your credentials
+   * are not stored on disk, you can use `settings.credentials` to just provide
+   * the 'client_email' and 'private_key' of your service account.
+   * @param {{client_email:string, private_key:string}} settings.credentials Local file containing the Service
+   * Account credentials. Can be omitted in environments that support
+   * `Application Default Credentials`.
+   * {@see https://cloud.google.com/docs/authentication}. If your credentials
+   * are stored in a JSON file, you can load them using `settings.keyFilename`.
    * @param {boolean=} settings.timestampsInSnapshots Enables the use of
    * `Timestamp`s for timestamp fields in `DocumentSnapshots`.<br/>
    * Currently, Firestore returns timestamp fields as `Date` but `Date` only
