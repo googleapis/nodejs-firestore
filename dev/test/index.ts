@@ -465,8 +465,6 @@ describe('snapshot_() method', () => {
     // coverage.
     expect(data.geoPointValue.latitude).to.equal(50.1430847);
     expect(data.geoPointValue.longitude).to.equal(-122.947778);
-    expect(data.geoPointValue.toString())
-        .to.equal('GeoPoint { latitude: 50.1430847, longitude: -122.947778 }');
     expect(data.geoPointValue.isEqual(
                new Firestore.GeoPoint(50.1430847, -122.947778)))
         .to.be.true;
