@@ -137,7 +137,7 @@ const MAX_DEPTH = 20;
  * can be restricted to only apply to documents that match the specified
  * conditions.
  *
- * @property {string} lastUpdateTime - The update time to enforce (specified as
+ * @property {string} lastUpdateTime The update time to enforce (specified as
  * an ISO 8601 string).
  * @typedef {Object} Precondition
  */
@@ -152,9 +152,14 @@ const MAX_DEPTH = 20;
  * documents in their entirety by providing a SetOptions object with
  * { merge : true }.
  *
- * @property {boolean} merge - Changes the behavior of a set() call to only
+ * @property {boolean} merge Changes the behavior of a set() call to only
  * replace the values specified in its data argument. Fields omitted from the
  * set() call remain untouched.
+ * @property {Array<(string|FieldPath)>} mergeFields Changes the behavior of
+ * set() calls to only replace the specified field paths. Any field path that is
+ * not specified is ignored and remains untouched.
+ * It is an error to pass a SetOptions object to a set() call that is missing a
+ * value for any of the fields specified here.
  * @typedef {Object} SetOptions
  */
 
@@ -193,28 +198,33 @@ export class Firestore {
   /**
    * A client pool to distribute requests over multiple GAPIC clients in order
    * to work around a connection limit of 100 concurrent requests per client.
+   * @private
    */
   private _clientPool: ClientPool<GapicClient>|null = null;
 
   /**
    * Whether the initialization settings can still be changed by invoking
    * `settings()`.
+   * @private
    */
   private _settingsFrozen = false;
 
   /**
    * The configuration options for the GAPIC client.
+   * @private
    */
   private _initializationSettings: Settings = {};
 
   /**
    * A Promise that resolves when client initialization completes. Can be
    * 'null' if initialization hasn't started yet.
+   * @private
    */
   private _clientInitialized: Promise<void>|null = null;
 
   /**
    * The serializer to use for the Protobuf transformation.
+   * @private
    */
   private _serializer: Serializer|null = null;
 
@@ -1361,6 +1371,7 @@ export default Firestore;
 /**
  * {@link v1beta1} factory function.
  *
+ * @private
  * @name Firestore.v1beta1
  * @see v1beta1
  * @type {function}
