@@ -44,17 +44,32 @@ declare namespace FirebaseFirestore {
    */
   export interface Settings {
     /**
-     * The Firestore Project ID. Can be omitted in environments that support
-     * `Application Default Credentials` {@see https://cloud.google.com/docs/authentication}
+     * The project ID from the Google Developer's Console, e.g.
+     * 'grape-spaceship-123'. We will also check the environment variable
+     * GCLOUD_PROJECT for your project ID.  Can be omitted in environments that
+     * support {@link https://cloud.google.com/docs/authentication Application
+     * Default Credentials}
      */
     projectId?: string;
 
     /**
-     * Local file containing the Service Account credentials. Can be omitted
-     * in environments that support `Application Default Credentials`
-     * {@see https://cloud.google.com/docs/authentication}
+     * Local file containing the Service Account credentials as downloaded from
+     * the Google Developers Console. Can  be omitted in environments that
+     * support {@link https://cloud.google.com/docs/authentication Application
+     * Default Credentials}. To configure Firestore with custom credentials, use
+     * the `credentials` property to provide the `client_email` and
+     * `private_key` of your service account.
      */
     keyFilename?: string;
+
+    /**
+     * The 'client_email' and 'private_key' properties of the service account
+     * to use with your Firestore project. Can be omitted in environments that
+     * support {@link https://cloud.google.com/docs/authentication Application
+     * Default Credentials}. If your credentials are stored in a JSON file, you
+     * can specify a `keyFilename` instead.
+     */
+    credentials?: {client_email?:string, private_key?:string};
 
     /**
      * Enables the use of `Timestamp`s for timestamp fields in

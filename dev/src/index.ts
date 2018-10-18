@@ -137,7 +137,7 @@ const MAX_DEPTH = 20;
  * can be restricted to only apply to documents that match the specified
  * conditions.
  *
- * @property {string} lastUpdateTime - The update time to enforce (specified as
+ * @property {string} lastUpdateTime The update time to enforce (specified as
  * an ISO 8601 string).
  * @typedef {Object} Precondition
  */
@@ -152,9 +152,14 @@ const MAX_DEPTH = 20;
  * documents in their entirety by providing a SetOptions object with
  * { merge : true }.
  *
- * @property {boolean} merge - Changes the behavior of a set() call to only
+ * @property {boolean} merge Changes the behavior of a set() call to only
  * replace the values specified in its data argument. Fields omitted from the
  * set() call remain untouched.
+ * @property {Array<(string|FieldPath)>} mergeFields Changes the behavior of
+ * set() calls to only replace the specified field paths. Any field path that is
+ * not specified is ignored and remains untouched.
+ * It is an error to pass a SetOptions object to a set() call that is missing a
+ * value for any of the fields specified here.
  * @typedef {Object} SetOptions
  */
 
@@ -193,28 +198,33 @@ export class Firestore {
   /**
    * A client pool to distribute requests over multiple GAPIC clients in order
    * to work around a connection limit of 100 concurrent requests per client.
+   * @private
    */
   private _clientPool: ClientPool<GapicClient>|null = null;
 
   /**
    * Whether the initialization settings can still be changed by invoking
    * `settings()`.
+   * @private
    */
   private _settingsFrozen = false;
 
   /**
    * The configuration options for the GAPIC client.
+   * @private
    */
   private _initializationSettings: Settings = {};
 
   /**
    * A Promise that resolves when client initialization completes. Can be
    * 'null' if initialization hasn't started yet.
+   * @private
    */
   private _clientInitialized: Promise<void>|null = null;
 
   /**
    * The serializer to use for the Protobuf transformation.
+   * @private
    */
   private _serializer: Serializer|null = null;
 
@@ -235,13 +245,25 @@ export class Firestore {
 
   /**
    * @param {Object=} settings [Configuration object](#/docs).
-   * @param {string=} settings.projectId The Firestore Project ID. Can be
-   * omitted in environments that support `Application Default Credentials`
-   * {@see https://cloud.google.com/docs/authentication}
+   * @param {string=} settings.projectId The project ID from the Google
+   * Developer's Console, e.g. 'grape-spaceship-123'. We will also check the
+   * environment variable GCLOUD_PROJECT for your project ID.  Can be omitted in
+   * environments that support
+   * {@link https://cloud.google.com/docs/authentication Application Default
+   * Credentials}
    * @param {string=} settings.keyFilename Local file containing the Service
-   * Account credentials. Can be omitted in environments that support
-   * `Application Default Credentials`
-   * {@see https://cloud.google.com/docs/authentication}
+   * Account credentials as downloaded from the Google Developers Console. Can
+   * be omitted in environments that support
+   * {@link https://cloud.google.com/docs/authentication Application Default
+   * Credentials}. To configure Firestore with custom credentials, use
+   * `settings.credentials` and provide the `client_email` and `private_key` of
+   * your service account.
+   * @param {{client_email:string=, private_key:string=}=} settings.credentials
+   * The `client_email` and `private_key` properties of the service account
+   * to use with your Firestore project. Can be omitted in environments that
+   * support {@link https://cloud.google.com/docs/authentication Application
+   * Default Credentials}. If your credentials are stored in a JSON file, you
+   * can specify a `keyFilename` instead.
    * @param {boolean=} settings.timestampsInSnapshots Enables the use of
    * `Timestamp`s for timestamp fields in `DocumentSnapshots`.<br/>
    * Currently, Firestore returns timestamp fields as `Date` but `Date` only
@@ -1358,9 +1380,17 @@ function validateDocumentData(
 // tslint:disable-next-line:no-default-export
 export default Firestore;
 
+// Horrible hack to ensure backwards compatibility with <= 17.0, which allows
+// users to call the default constructor via
+// `const Fs = require(`@google-cloud/firestore`); new Fs()`;
+const existingExports = module.exports;
+module.exports = Firestore;
+module.exports = Object.assign(module.exports, existingExports);
+
 /**
  * {@link v1beta1} factory function.
  *
+ * @private
  * @name Firestore.v1beta1
  * @see v1beta1
  * @type {function}
