@@ -1380,6 +1380,13 @@ function validateDocumentData(
 // tslint:disable-next-line:no-default-export
 export default Firestore;
 
+// Horrible hack to ensure backwards compatibility with <= 17.0, which allows
+// users to call the default constructor via
+// `const Fs = require(`@google-cloud/firestore`); new Fs()`;
+const existingExports = module.exports;
+module.exports = Firestore;
+module.exports = Object.assign(module.exports, existingExports);
+
 /**
  * {@link v1beta1} factory function.
  *
