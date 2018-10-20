@@ -18,7 +18,6 @@
 // [START firestore_quickstart]
 const Firestore = require('@google-cloud/firestore');
 async function main() {
-  try{
     const firestore = new Firestore({
       projectId: 'YOUR_PROJECT_ID',
       keyFilename: '/path/to/keyfile.json',
@@ -42,10 +41,7 @@ async function main() {
     
     // Delete the document.
     await document.delete();
-        
-  } catch (error){
-    console.error('Something went wrong:', error);
-  }
+  
 };
 
 main().catch(console.error);
