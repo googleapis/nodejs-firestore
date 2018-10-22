@@ -23,9 +23,9 @@ const cmd = `node quickstart.js`;
 const cwd = path.join(__dirname, `..`);
 
 
-describe('should make some API calls',function(){
+describe('should make some API calls',() =>{
  
-  it('firestore_inspect_string', async function() {
+  it('firestore_inspect_string', async () => {
       const output =  await tools.runAsync(cmd,cwd);
 
       assert.strictEqual(output.includes('Document created'), true);
