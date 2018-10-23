@@ -17,36 +17,37 @@
 
 // [START firestore_quickstart]
 const Firestore = require('@google-cloud/firestore');
+async function main() {
+    const firestore = new Firestore({
+      projectId: process.env.GCLOUD_PROJECT,
+      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+    });
+    
+    const document = firestore.doc('posts/intro-to-firestore');
+    console.log('Document created');
+    
+    // Enter new data into the document.
+    await document.set({
+      title: 'Welcome to Firestore',
+      body: 'Hello World',
+    });
+    console.log('Entered new data into the document');
+    
+    // Update an existing document.
+    await document.update({
+      body: 'My first Firestore app',
+    });
+    console.log('Updated an existing document');
+    
+    // Read the document.
+    let doc = await document.get();
+    console.log('Read the document');
+    
+    // Delete the document.
+    await document.delete();
+    console.log('Deleted the document');
+  
+};
 
-const firestore = new Firestore({
-  projectId: 'YOUR_PROJECT_ID',
-  keyFilename: '/path/to/keyfile.json',
-});
-
-const document = firestore.doc('posts/intro-to-firestore');
-
-// Enter new data into the document.
-document.set({
-  title: 'Welcome to Firestore',
-  body: 'Hello World',
-}).then(() => {
-  // Document created successfully.
-});
-
-// Update an existing document.
-document.update({
-  body: 'My first Firestore app',
-}).then(() => {
-  // Document updated successfully.
-});
-
-// Read the document.
-document.get().then(doc => {
-  // Document read successfully.
-});
-
-// Delete the document.
-document.delete().then(() => {
-  // Document deleted successfully.
-});
+main().catch(console.error);
 // [END firestore_quickstart]

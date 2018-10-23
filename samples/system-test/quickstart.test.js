@@ -16,30 +16,24 @@
 'use strict';
 
 const path = require(`path`);
-const proxyquire = require(`proxyquire`).noPreserveCache();
-const sinon = require(`sinon`);
-const test = require(`ava`);
+const tools = require('@google-cloud/nodejs-repo-tools');
+const assert = require('assert');
 
 const cmd = `node quickstart.js`;
 const cwd = path.join(__dirname, `..`);
 
-test(`should make some API calls`, (t) => {
-  const docMock = {
-    set: sinon.stub().returns(Promise.resolve()),
-    update: sinon.stub().returns(Promise.resolve()),
-    get: sinon.stub().returns(Promise.resolve()),
-    delete: sinon.stub().returns(Promise.resolve()),
-  };
 
-  function FirestoreMock() {}
-  FirestoreMock.prototype.doc = sinon.stub().returns(docMock);
+describe('should make some API calls',() =>{
+ 
+  it('firestore_inspect_string', async () => {
+      const output =  await tools.runAsync(cmd,cwd);
 
-  proxyquire(`../quickstart`, {
-    '@google-cloud/firestore': FirestoreMock,
-  });
+      assert.strictEqual(output.includes('Document created'), true);
+      assert.strictEqual(output.includes('Entered new data into the document'), true);
+      assert.strictEqual(output.includes('Updated an existing document'), true);
+      assert.strictEqual(output.includes('Read the document'), true);
+      assert.strictEqual(output.includes('Deleted the document'), true);
 
-  t.is(docMock.set.callCount, 1);
-  t.is(docMock.update.callCount, 1);
-  t.is(docMock.get.callCount, 1);
-  t.is(docMock.delete.callCount, 1);
+    });
+
 });
