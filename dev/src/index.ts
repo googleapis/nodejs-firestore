@@ -305,7 +305,7 @@ export class Firestore {
     };
 
     if (settings && settings.firebaseVersion) {
-      libraryHeader.libVersion += ' firebase/' + settings.firebaseVersion;
+      libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
     }
 
     this.validateAndApplySettings(extend({}, settings, libraryHeader));
