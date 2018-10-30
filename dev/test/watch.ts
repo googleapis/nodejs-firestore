@@ -15,7 +15,7 @@
  */
 
 import {expect} from 'chai';
-import duplexify from 'duplexify';
+const duplexify = require('duplexify');
 import through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';

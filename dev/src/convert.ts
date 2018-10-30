@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import is from 'is';
+import * as is from 'is';
 
 import * as fspb from '../protos/firestore_proto_api';
 

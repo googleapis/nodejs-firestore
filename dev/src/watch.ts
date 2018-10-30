@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import assert from 'assert';
+import * as assert from 'assert';
 import rbtree from 'functional-red-black-tree';
 import through2 from 'through2';
 

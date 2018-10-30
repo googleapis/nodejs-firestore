@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import assert from 'assert';
+import * as assert from 'assert';
 import deepEqual from 'deep-equal';
-import is from 'is';
+import * as is from 'is';
 
 import {google} from '../protos/firestore_proto_api';
 

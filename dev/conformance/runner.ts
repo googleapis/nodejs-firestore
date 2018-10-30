@@ -15,11 +15,11 @@
  */
 
 import {expect} from 'chai';
-import duplexify from 'duplexify';
+import * as duplexify from 'duplexify';
 import googleProtoFiles from 'google-proto-files';
-import is from 'is';
-import path from 'path';
-import protobufjs from 'protobufjs';
+import * as is from 'is';
+import * as path from 'path';
+import * as protobufjs from 'protobufjs';
 import through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';

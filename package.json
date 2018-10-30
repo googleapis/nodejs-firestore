@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "@google-cloud/projectify": "^0.3.0",
+    "@types/duplexify": "^3.5.0",
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
     "extend": "^3.0.1",
@@ -69,6 +70,7 @@
   },
   "devDependencies": {
     "@google-cloud/nodejs-repo-tools": "^2.3.5",
+    "@types/is": "0.0.20",
     "@types/mocha": "^5.2.3",
     "@types/node": "^10.3.5",
     "chai": "^4.1.2",

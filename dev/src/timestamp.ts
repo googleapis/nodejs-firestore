@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import is from 'is';
+import * as is from 'is';
 import {google} from '../protos/firestore_proto_api';
 import {createValidator} from './validate';
 

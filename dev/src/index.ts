@@ -15,10 +15,10 @@
  */
 
 import {replaceProjectIdToken} from '@google-cloud/projectify';
-import assert from 'assert';
+import * as assert from 'assert';
 import bun from 'bun';
 import extend from 'extend';
-import is from 'is';
+import * as is from 'is';
 import through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';

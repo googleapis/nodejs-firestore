@@ -16,7 +16,7 @@
 
 import {expect} from 'chai';
 import extend from 'extend';
-import is from 'is';
+import * as is from 'is';
 
 import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';

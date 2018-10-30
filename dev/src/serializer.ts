@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import is from 'is';
+import * as is from 'is';
 
 import * as proto from '../protos/firestore_proto_api';
 import api = proto.google.firestore.v1beta1;
