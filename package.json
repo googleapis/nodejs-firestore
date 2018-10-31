@@ -56,7 +56,6 @@
   },
   "dependencies": {
     "@google-cloud/projectify": "^0.3.0",
-    "@types/duplexify": "^3.5.0",
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
     "extend": "^3.0.1",
@@ -73,6 +72,7 @@
     "@types/assert": "^1.4.0",
     "@types/chai": "^4.1.7",
     "@types/chai-as-promised": "^7.1.0",
+    "@types/duplexify": "^3.5.0",
     "@types/extend": "^3.0.0",
     "@types/is": "0.0.20",
     "@types/mocha": "^5.2.3",
