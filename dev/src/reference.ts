@@ -1724,7 +1724,7 @@ export class Query {
         } else {
           const v1 = doc1.protoField(orderBy.field);
           const v2 = doc2.protoField(orderBy.field);
-          if (!is.defined(v1) || !is.defined(v2)) {
+          if (v1 === undefined || v2 === undefined) {
             throw new Error(
                 'Trying to compare documents on fields that ' +
                 'don\'t exist. Please include the fields you are ordering on ' +

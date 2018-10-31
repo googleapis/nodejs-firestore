@@ -18,6 +18,8 @@ import {google} from '../protos/firestore_proto_api';
 import {FieldPath} from './path';
 import {Timestamp} from './timestamp';
 
+import api = google.firestore.v1beta1;
+
 /**
  * A union of all of the standard JS types, useful for cases where the type is
  * unknown. Unlike "any" this doesn't lose all type-safety, since the consuming
@@ -144,9 +146,8 @@ export interface SetOptions {
 }
 
 /**
- * @private
- *
  * Internal user data validation options.
+ * @private
  */
 export interface ValidationOptions {
   /** At what level field deletes are supported. */
@@ -157,4 +158,12 @@ export interface ValidationOptions {
 
   /** Whether empty documents are supported. */
   allowEmpty?: boolean;
+}
+
+/**
+ * A Firestore Proto value in ProtoJs format.
+ * @private
+ */
+export interface ProtobufJsValue extends api.IValue {
+  valueType?: string;
 }
