@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import is from 'is';
-
 import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
@@ -185,7 +183,7 @@ export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
       };
     case 'arrayValue': {
       const arrayValue: Array<{}> = [];
-      if (is.array(fieldValue.arrayValue!.values)) {
+      if (Array.isArray(fieldValue.arrayValue!.values)) {
         for (const value of fieldValue.arrayValue!.values!) {
           arrayValue.push(valueFromJson(value));
         }
