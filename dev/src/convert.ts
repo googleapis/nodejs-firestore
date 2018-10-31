@@ -163,7 +163,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
  * @param fieldValue The `firestore.v1beta1.Value` in Proto3 JSON format.
  * @return The `firestore.v1beta1.Value` in Protobuf JS format.
  */
-function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
+export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
   const valueType = detectValueType(fieldValue);
 
   switch (valueType) {
