@@ -15,7 +15,7 @@
  */
 
 import * as assert from 'assert';
-import * as deepEqual from 'deep-equal';
+const deepEqual = require('deep-equal');
 import * as is from 'is';
 
 import {google} from '../protos/firestore_proto_api';

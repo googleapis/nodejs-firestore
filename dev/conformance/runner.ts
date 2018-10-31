@@ -15,7 +15,7 @@
  */
 
 import {expect} from 'chai';
-import * as duplexify from 'duplexify';
+const duplexify = require('duplexify');
 import googleProtoFiles from 'google-proto-files';
 import * as is from 'is';
 import * as path from 'path';

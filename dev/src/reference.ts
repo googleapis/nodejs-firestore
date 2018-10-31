@@ -15,7 +15,7 @@
  */
 
 import * as bun from 'bun';
-import * as deepEqual from 'deep-equal';
+const deepEqual = require('deep-equal');
 import * as extend from 'extend';
 import * as is from 'is';
 import * as through2 from 'through2';

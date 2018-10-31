@@ -932,7 +932,9 @@ describe('orderBy() interface', () => {
 
       expect(() => {
         query = query.orderBy('foo').endAt('foo').orderBy('foo');
-      }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+      })
+          .to.throw(
+              /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
       expect(() => {
         query = query.where('foo', '>', 'bar')

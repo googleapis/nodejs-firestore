@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as deepEqual from 'deep-equal';
+const deepEqual = require('deep-equal');
 
 import * as proto from '../protos/firestore_proto_api';
 
