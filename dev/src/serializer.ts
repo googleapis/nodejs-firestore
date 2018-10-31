@@ -92,13 +92,13 @@ export class Serializer {
       };
     }
 
-    if (is.bool(val)) {
+    if (typeof val === 'boolean') {
       return {
         booleanValue: val as boolean,
       };
     }
 
-    if (is.integer(val)) {
+    if (typeof val === 'number' && is.integer(val)) {
       return {
         integerValue: val as number,
       };

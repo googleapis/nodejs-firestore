@@ -80,7 +80,7 @@ export class WriteResult {
   isEqual(other: WriteResult): boolean {
     return (
         this === other ||
-        (is.instanceof(other, WriteResult) &&
+        (other instanceof WriteResult &&
          this._writeTime.isEqual(other._writeTime)));
   }
 }

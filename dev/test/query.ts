@@ -451,7 +451,7 @@ describe('query interface', () => {
         let count = 0;
 
         results.forEach(doc => {
-          expect(is.instanceof(doc, DocumentSnapshot)).to.be.true;
+          expect(doc instanceof DocumentSnapshot).to.be.true;
           expect(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)))
               .to.be.true;
           expect(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)))

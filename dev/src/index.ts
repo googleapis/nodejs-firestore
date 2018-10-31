@@ -605,7 +605,7 @@ export class Firestore {
     return transaction.begin()
         .then(() => {
           const promise = updateFunction(transaction);
-          result = is.instanceof(promise, Promise) ?
+          result = promise instanceof Promise ?
               promise :
               Promise.reject(new Error(
                   'You must return a Promise in your transaction()-callback.'));

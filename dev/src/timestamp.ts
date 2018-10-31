@@ -218,7 +218,7 @@ export class Timestamp {
   isEqual(other) {
     return (
         this === other ||
-        (is.instanceof(other, Timestamp) && this._seconds === other.seconds &&
+        (other instanceof Timestamp && this._seconds === other.seconds &&
          this._nanoseconds === other.nanoseconds));
   }
 

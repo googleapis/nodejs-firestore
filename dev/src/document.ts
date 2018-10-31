@@ -513,7 +513,7 @@ export class DocumentSnapshot {
     // ignore all document metadata in this comparison.
     return (
         this === other ||
-        (is.instance(other, DocumentSnapshot) &&
+        ((other instanceof DocumentSnapshot) &&
          this._ref.isEqual(other._ref) &&
          deepEqual(this._fieldsProto, other._fieldsProto, {strict: true})));
   }
@@ -1102,7 +1102,7 @@ export function validatePrecondition(precondition, allowExist) {
 
   if (is.defined(precondition.lastUpdateTime)) {
     ++conditions;
-    if (!is.instance(precondition.lastUpdateTime, Timestamp)) {
+    if (!(precondition.lastUpdateTime instanceof Timestamp)) {
       throw new Error('"lastUpdateTime" is not a Firestore Timestamp.');
     }
   }

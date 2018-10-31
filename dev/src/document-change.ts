@@ -172,7 +172,7 @@ export class DocumentChange {
     }
 
     return (
-        is.instanceof(other, DocumentChange) && this._type === other._type &&
+        other instanceof DocumentChange && this._type === other._type &&
         this._oldIndex === other._oldIndex &&
         this._newIndex === other._newIndex &&
         this._document.isEqual(other._document));
