@@ -15,7 +15,7 @@
  */
 
 import {expect} from 'chai';
-import extend from 'extend';
+import * as extend from 'extend';
 import * as is from 'is';
 
 import * as proto from '../protos/firestore_proto_api';

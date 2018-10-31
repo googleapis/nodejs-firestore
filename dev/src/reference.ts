@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import bun from 'bun';
-import deepEqual from 'deep-equal';
-import extend from 'extend';
+import * as bun from 'bun';
+import * as deepEqual from 'deep-equal';
+import * as extend from 'extend';
 import * as is from 'is';
-import through2 from 'through2';
+import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
 import api = proto.google.firestore.v1beta1;

@@ -15,7 +15,7 @@
  */
 
 import * as assert from 'assert';
-import deepEqual from 'deep-equal';
+import * as deepEqual from 'deep-equal';
 import * as is from 'is';
 
 import {google} from '../protos/firestore_proto_api';
@@ -513,8 +513,7 @@ export class DocumentSnapshot {
     // ignore all document metadata in this comparison.
     return (
         this === other ||
-        ((other instanceof DocumentSnapshot) &&
-         this._ref.isEqual(other._ref) &&
+        ((other instanceof DocumentSnapshot) && this._ref.isEqual(other._ref) &&
          deepEqual(this._fieldsProto, other._fieldsProto, {strict: true})));
   }
 }

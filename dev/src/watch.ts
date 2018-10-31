@@ -15,8 +15,8 @@
  */
 
 import * as assert from 'assert';
-import rbtree from 'functional-red-black-tree';
-import through2 from 'through2';
+import * as rbtree from 'functional-red-black-tree';
+import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 

@@ -192,8 +192,7 @@ abstract class Path<T> {
   isEqual(other: Path<T>): boolean {
     return (
         this === other ||
-        (other instanceof this.constructor &&
-         this.compareTo(other) === 0));
+        (other instanceof this.constructor && this.compareTo(other) === 0));
   }
 }
 
