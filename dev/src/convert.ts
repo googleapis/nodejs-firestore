@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import is from 'is';
-
-import * as fspb from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_proto_api';
+import api = google.firestore.v1beta1;
 
 import {createValidator} from './validate';
+import {ProtobufJsValue} from './types';
 
 const validate = createValidator();
 
@@ -38,16 +38,18 @@ const validate = createValidator();
  * Converts an ISO 8601 or google.protobuf.Timestamp proto into Protobuf JS.
  *
  * @private
- * @param {*=} timestampValue The value to convert.
- * @param {string=} argumentName The argument name to use in the error message
- * if the conversion fails. If omitted, 'timestampValue' is used.
- * @return {{nanos,seconds}|undefined} The value as expected by Protobuf JS or
- * undefined if no input was provided.
+ * @param timestampValue The value to convert.
+ * @param argumentName The argument name to use in the error message if the
+ * conversion fails. If omitted, 'timestampValue' is used.
+ * @return The value as expected by Protobuf JS or undefined if no input was
+ * provided.
  */
-function convertTimestamp(timestampValue, argumentName?: string) {
-  let timestampProto: fspb.google.protobuf.ITimestamp|undefined;
+export function timestampFromJson(
+    timestampValue?: string|google.protobuf.ITimestamp,
+    argumentName?: string): google.protobuf.ITimestamp|undefined {
+  let timestampProto: google.protobuf.ITimestamp|undefined;
 
-  if (is.string(timestampValue)) {
+  if (typeof timestampValue === 'string') {
     const date = new Date(timestampValue);
     const seconds = Math.floor(date.getTime() / 1000);
     let nanos = 0;
@@ -69,7 +71,7 @@ function convertTimestamp(timestampValue, argumentName?: string) {
       seconds: seconds || undefined,
       nanos: nanos || undefined,
     };
-  } else if (is.defined(timestampValue)) {
+  } else if (timestampValue !== undefined) {
     validate.isObject('timestampValue', timestampValue);
     timestampProto = {
       seconds: timestampValue.seconds || undefined,
@@ -84,10 +86,10 @@ function convertTimestamp(timestampValue, argumentName?: string) {
  * Converts a Proto3 JSON 'bytesValue' field into Protobuf JS.
  *
  * @private
- * @param {*} bytesValue The value to convert.
- * @return {Buffer} The value as expected by Protobuf JS.
+ * @param bytesValue The value to convert.
+ * @return The value as expected by Protobuf JS.
  */
-function convertBytes(bytesValue) {
+function bytesFromJson(bytesValue: string|Uint8Array): Uint8Array {
   if (typeof bytesValue === 'string') {
     return Buffer.from(bytesValue, 'base64');
   } else {
@@ -99,47 +101,47 @@ function convertBytes(bytesValue) {
  * Detects 'valueType' from a Proto3 JSON `firestore.v1beta1.Value` proto.
  *
  * @private
- * @param {object} proto The `firestore.v1beta1.Value` proto.
- * @return {string} - The string value for 'valueType'.
+ * @param proto The `firestore.v1beta1.Value` proto.
+ * @return The string value for 'valueType'.
  */
-export function detectValueType(proto) {
+export function detectValueType(proto: ProtobufJsValue): string {
   if (proto.valueType) {
     return proto.valueType;
   }
 
   const detectedValues: string[] = [];
 
-  if (is.defined(proto.stringValue)) {
+  if (proto.stringValue !== undefined) {
     detectedValues.push('stringValue');
   }
-  if (is.defined(proto.booleanValue)) {
+  if (proto.booleanValue !== undefined) {
     detectedValues.push('booleanValue');
   }
-  if (is.defined(proto.integerValue)) {
+  if (proto.integerValue !== undefined) {
     detectedValues.push('integerValue');
   }
-  if (is.defined(proto.doubleValue)) {
+  if (proto.doubleValue !== undefined) {
     detectedValues.push('doubleValue');
   }
-  if (is.defined(proto.timestampValue)) {
+  if (proto.timestampValue !== undefined) {
     detectedValues.push('timestampValue');
   }
-  if (is.defined(proto.referenceValue)) {
+  if (proto.referenceValue !== undefined) {
     detectedValues.push('referenceValue');
   }
-  if (is.defined(proto.arrayValue)) {
+  if (proto.arrayValue !== undefined) {
     detectedValues.push('arrayValue');
   }
-  if (is.defined(proto.nullValue)) {
+  if (proto.nullValue !== undefined) {
     detectedValues.push('nullValue');
   }
-  if (is.defined(proto.mapValue)) {
+  if (proto.mapValue !== undefined) {
     detectedValues.push('mapValue');
   }
-  if (is.defined(proto.geoPointValue)) {
+  if (proto.geoPointValue !== undefined) {
     detectedValues.push('geoPointValue');
   }
-  if (is.defined(proto.bytesValue)) {
+  if (proto.bytesValue !== undefined) {
     detectedValues.push('bytesValue');
   }
 
@@ -156,21 +158,20 @@ export function detectValueType(proto) {
  * Protobuf JS format expected by this client.
  *
  * @private
- * @param {object} fieldValue The `firestore.v1beta1.Value` in Proto3 JSON
- * format.
- * @return {object} The `firestore.v1beta1.Value` in Protobuf JS format.
+ * @param fieldValue The `firestore.v1beta1.Value` in Proto3 JSON format.
+ * @return The `firestore.v1beta1.Value` in Protobuf JS format.
  */
-function convertValue(fieldValue) {
+export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
   const valueType = detectValueType(fieldValue);
 
   switch (valueType) {
     case 'timestampValue':
       return {
-        timestampValue: convertTimestamp(fieldValue.timestampValue),
+        timestampValue: timestampFromJson(fieldValue.timestampValue!),
       };
     case 'bytesValue':
       return {
-        bytesValue: convertBytes(fieldValue.bytesValue),
+        bytesValue: bytesFromJson(fieldValue.bytesValue!),
       };
     case 'integerValue':
       return {
@@ -182,9 +183,9 @@ function convertValue(fieldValue) {
       };
     case 'arrayValue': {
       const arrayValue: Array<{}> = [];
-      if (is.array(fieldValue.arrayValue.values)) {
-        for (const value of fieldValue.arrayValue.values) {
-          arrayValue.push(convertValue(value));
+      if (Array.isArray(fieldValue.arrayValue!.values)) {
+        for (const value of fieldValue.arrayValue!.values!) {
+          arrayValue.push(valueFromJson(value));
         }
       }
       return {
@@ -195,9 +196,9 @@ function convertValue(fieldValue) {
     }
     case 'mapValue': {
       const mapValue = {};
-      for (const prop in fieldValue.mapValue.fields) {
-        if (fieldValue.mapValue.fields.hasOwnProperty(prop)) {
-          mapValue[prop] = convertValue(fieldValue.mapValue.fields[prop]);
+      for (const prop in fieldValue.mapValue!.fields!) {
+        if (fieldValue.mapValue!.fields!.hasOwnProperty(prop)) {
+          mapValue[prop] = valueFromJson(fieldValue.mapValue!.fields![prop]);
         }
       }
       return {
@@ -217,22 +218,18 @@ function convertValue(fieldValue) {
  * the underlying document.
  *
  * @private
- * @param {object} document The `firestore.v1beta1.Document` in Proto3 JSON
+ * @param document The `firestore.v1beta1.Document` in Proto3 JSON
  * format.
- * @return {object} The `firestore.v1beta1.Document` in Protobuf JS format.
+ * @return The `firestore.v1beta1.Document` in Protobuf JS format.
  */
-function convertDocument(document) {
+export function documentFromJson(document: api.IDocument): api.IDocument {
   const result = {};
 
   for (const prop in document) {
     if (document.hasOwnProperty(prop)) {
-      result[prop] = convertValue(document[prop]);
+      result[prop] = valueFromJson(document[prop]);
     }
   }
 
   return result;
 }
-
-export const documentFromJson = convertDocument;
-export const timestampFromJson = convertTimestamp;
-export const valueFromJson = convertValue;
