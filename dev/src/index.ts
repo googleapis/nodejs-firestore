@@ -279,11 +279,6 @@ export class Firestore {
    * use `Timestamp` now and opt-in to this new behavior as soon as you can.
    */
   constructor(settings?: Settings) {
-    settings = extend({}, settings, {
-      libName: 'gccl',
-      libVersion,
-    });
-
     this._validator = new Validator({
       ArrayElement: (name, value) =>
           validateFieldValue(name, value, /* depth */ 0, /*inArray=*/true),
@@ -304,7 +299,16 @@ export class Firestore {
     } as AnyDuringMigration);
 
 
-    this.validateAndApplySettings(settings!);
+    const libraryHeader = {
+      libName: 'gccl',
+      libVersion,
+    };
+
+    if (settings && settings.firebaseVersion) {
+      libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
+    }
+
+    this.validateAndApplySettings(extend({}, settings, libraryHeader));
 
     // GCF currently tears down idle connections after two minutes. Requests
     // that are issued after this period may fail. On GCF, we therefore issue
