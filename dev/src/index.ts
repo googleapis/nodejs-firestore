@@ -15,11 +15,11 @@
  */
 
 import {replaceProjectIdToken} from '@google-cloud/projectify';
-import assert from 'assert';
-import bun from 'bun';
-import extend from 'extend';
-import is from 'is';
-import through2 from 'through2';
+import * as assert from 'assert';
+import * as bun from 'bun';
+import * as extend from 'extend';
+import * as is from 'is';
+import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 
@@ -605,7 +605,7 @@ export class Firestore {
     return transaction.begin()
         .then(() => {
           const promise = updateFunction(transaction);
-          result = is.instanceof(promise, Promise) ?
+          result = promise instanceof Promise ?
               promise :
               Promise.reject(new Error(
                   'You must return a Promise in your transaction()-callback.'));

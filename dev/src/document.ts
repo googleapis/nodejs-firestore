@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import assert from 'assert';
-import deepEqual from 'deep-equal';
-import is from 'is';
+import * as assert from 'assert';
+const deepEqual = require('deep-equal');
+import * as is from 'is';
 
 import {google} from '../protos/firestore_proto_api';
 
@@ -467,8 +467,7 @@ export class DocumentSnapshot {
     // ignore all document metadata in this comparison.
     return (
         this === other ||
-        (is.instance(other, DocumentSnapshot) &&
-         this._ref.isEqual(other._ref) &&
+        ((other instanceof DocumentSnapshot) && this._ref.isEqual(other._ref) &&
          deepEqual(this._fieldsProto, other._fieldsProto, {strict: true})));
   }
 }
@@ -1048,7 +1047,7 @@ export function validatePrecondition(
 
   if (precondition.lastUpdateTime !== undefined) {
     ++conditions;
-    if (!is.instance(precondition.lastUpdateTime, Timestamp)) {
+    if (!(precondition.lastUpdateTime instanceof Timestamp)) {
       throw new Error('"lastUpdateTime" is not a Firestore Timestamp.');
     }
   }

@@ -1538,7 +1538,9 @@ describe('update document', () => {
         'foo.bar': 'foobar',
         'foo.bar.foo': 'foobar',
       });
-    }, /Argument "dataOrField" is not a valid UpdateMap. Field "foo.bar" was specified multiple times\./);
+    })
+        .to.throw(
+            /Argument "dataOrField" is not a valid UpdateMap. Field "foo.bar" was specified multiple times\./);
 
     expect(() => {
       firestore.doc('collectionId/documentId').update({

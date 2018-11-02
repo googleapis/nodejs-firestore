@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import bun from 'bun';
-import deepEqual from 'deep-equal';
-import extend from 'extend';
-import is from 'is';
-import through2 from 'through2';
+import * as bun from 'bun';
+const deepEqual = require('deep-equal');
+import * as extend from 'extend';
+import * as is from 'is';
+import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
 import api = proto.google.firestore.v1beta1;
@@ -476,7 +476,7 @@ export class DocumentReference {
   isEqual(other: DocumentReference): boolean {
     return (
         this === other ||
-        (is.instanceof(other, DocumentReference) &&
+        (other instanceof DocumentReference &&
          this._firestore === other._firestore &&
          this._path.isEqual(other._path)));
   }
@@ -811,7 +811,7 @@ export class QuerySnapshot {
       return true;
     }
 
-    if (!is.instanceof(other, QuerySnapshot)) {
+    if (!(other instanceof QuerySnapshot)) {
       return false;
     }
 
@@ -913,7 +913,7 @@ export class Query {
                                  Array<DocumentSnapshot|UserInput>): boolean {
     return (
         fieldValuesOrDocumentSnapshot.length === 1 &&
-        is.instance(fieldValuesOrDocumentSnapshot[0], DocumentSnapshot));
+        (fieldValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot));
   }
 
   /**
@@ -1187,7 +1187,7 @@ export class Query {
     }
 
     return (
-        is.instanceof(other, Query) && this._path.isEqual(other._path) &&
+        other instanceof Query && this._path.isEqual(other._path) &&
         deepEqual(this._fieldFilters, other._fieldFilters, {strict: true}) &&
         deepEqual(this._fieldOrders, other._fieldOrders, {strict: true}) &&
         deepEqual(this._queryOptions, other._queryOptions, {strict: true}));
@@ -1930,7 +1930,7 @@ export class CollectionReference extends Query {
   isEqual(other: CollectionReference): boolean {
     return (
         this === other ||
-        (is.instanceof(other, CollectionReference) && super.isEqual(other)));
+        (other instanceof CollectionReference && super.isEqual(other)));
   }
 }
 /*!
@@ -1994,7 +1994,7 @@ export function validateComparisonOperator(
  * @returns 'true' is value is an instance of DocumentReference.
  */
 export function validateDocumentReference(value: DocumentReference): boolean {
-  if (is.instanceof(value, DocumentReference)) {
+  if (value instanceof DocumentReference) {
     return true;
   }
   throw customObjectError(value);

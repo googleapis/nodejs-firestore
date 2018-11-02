@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import assert from 'assert';
+import * as assert from 'assert';
 
 /**
  * An auto-resizing pool that distributes concurrent operations over multiple
