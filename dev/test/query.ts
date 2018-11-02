@@ -1228,6 +1228,14 @@ describe('startAt() interface', () => {
             /Only a direct child can be used as a query boundary. Found: 'coll\/doc\/coll\/doc\/coll'./);
   });
 
+  it('requires at least one value', () => {
+    const query = firestore.collection('coll/doc/coll');
+
+    expect(() => {
+      query.startAt();
+    }).to.throw(/Function 'startAt\(\)' requires at least 1 argument./);
+  });
+
   it('can specify document snapshot', () => {
     const overrides = {
       runQuery: (request) => {
