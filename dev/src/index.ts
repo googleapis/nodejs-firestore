@@ -299,7 +299,7 @@ export class Firestore {
     } as AnyDuringMigration);
 
 
-    const libraryHeader =  {
+    const libraryHeader = {
       libName: 'gccl',
       libVersion,
     };
