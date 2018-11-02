@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import is from 'is';
+import * as is from 'is';
 import {google} from '../protos/firestore_proto_api';
 import api = google.firestore.v1beta1;
 
@@ -192,8 +192,7 @@ abstract class Path<T> {
   isEqual(other: Path<T>): boolean {
     return (
         this === other ||
-        (is.instanceof(other, this.constructor) &&
-         this.compareTo(other) === 0));
+        (other instanceof this.constructor && this.compareTo(other) === 0));
   }
 }
 

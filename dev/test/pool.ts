@@ -21,7 +21,7 @@ import {ClientPool} from '../src/pool';
 
 import {Deferred} from './util/helpers';
 
-use(chaiAsPromised.default);
+use(chaiAsPromised);
 
 function deferredPromises(count: number): Array<Deferred<void>> {
   const deferred: Array<Deferred<void>> = [];

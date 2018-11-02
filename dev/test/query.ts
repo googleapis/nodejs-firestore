@@ -15,8 +15,8 @@
  */
 
 import {expect} from 'chai';
-import extend from 'extend';
-import is from 'is';
+import * as extend from 'extend';
+import * as is from 'is';
 
 import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
@@ -451,7 +451,7 @@ describe('query interface', () => {
         let count = 0;
 
         results.forEach(doc => {
-          expect(is.instanceof(doc, DocumentSnapshot)).to.be.true;
+          expect(doc instanceof DocumentSnapshot).to.be.true;
           expect(doc.createTime.isEqual(new Firestore.Timestamp(1, 2)))
               .to.be.true;
           expect(doc.updateTime.isEqual(new Firestore.Timestamp(3, 4)))
@@ -932,7 +932,9 @@ describe('orderBy() interface', () => {
 
       expect(() => {
         query = query.orderBy('foo').endAt('foo').orderBy('foo');
-      }, /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+      })
+          .to.throw(
+              /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
 
       expect(() => {
         query = query.where('foo', '>', 'bar')

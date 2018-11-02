@@ -906,7 +906,7 @@ describe('Query class', () => {
         .all([randomCol.add({foo: ['bar']}), randomCol.add({foo: []})])
         .then(() => randomCol.where('foo', 'array-contains', 'bar').get())
         .then(res => {
-          expect(res.size, 1);
+          expect(res.size).to.equal(1);
           expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
         });
   });

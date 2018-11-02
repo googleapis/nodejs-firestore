@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import util from 'util';
+import * as util from 'util';
 
 import {createValidator} from './validate';
 
