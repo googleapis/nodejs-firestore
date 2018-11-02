@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import is from 'is';
+import * as is from 'is';
 
 import * as proto from '../protos/firestore_proto_api';
 import api = proto.google.firestore.v1beta1;
@@ -92,13 +92,13 @@ export class Serializer {
       };
     }
 
-    if (is.bool(val)) {
+    if (typeof val === 'boolean') {
       return {
         booleanValue: val as boolean,
       };
     }
 
-    if (is.integer(val)) {
+    if (typeof val === 'number' && is.integer(val)) {
       return {
         integerValue: val as number,
       };

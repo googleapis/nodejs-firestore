@@ -16,7 +16,7 @@
 
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import through2 from 'through2';
+import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
@@ -26,7 +26,7 @@ import {createInstance, InvalidApiUsage} from './util/helpers';
 import api = proto.google.firestore.v1beta1;
 import {AnyDuringMigration} from '../src/types';
 
-use(chaiAsPromised.default);
+use(chaiAsPromised);
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;

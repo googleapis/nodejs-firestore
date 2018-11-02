@@ -15,9 +15,8 @@
  */
 
 import {expect} from 'chai';
-import {extend} from 'extend';
 import {GrpcClient} from 'google-gax';
-import through2 from 'through2';
+import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_proto_api';
 import api = proto.google.firestore.v1beta1;

@@ -15,7 +15,7 @@
  */
 
 import {expect} from 'chai';
-import extend from 'extend';
+import * as extend from 'extend';
 import * as gax from 'google-gax';
 
 import * as Firestore from '../src';

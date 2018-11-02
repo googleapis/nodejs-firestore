@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import is from 'is';
+import * as is from 'is';
 import {google} from '../protos/firestore_proto_api';
 import {createValidator} from './validate';
 
@@ -218,7 +218,7 @@ export class Timestamp {
   isEqual(other) {
     return (
         this === other ||
-        (is.instanceof(other, Timestamp) && this._seconds === other.seconds &&
+        (other instanceof Timestamp && this._seconds === other.seconds &&
          this._nanoseconds === other.nanoseconds));
   }
 

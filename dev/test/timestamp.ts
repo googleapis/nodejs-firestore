@@ -15,8 +15,8 @@
  */
 
 import {expect} from 'chai';
-import is from 'is';
-import through2 from 'through2';
+import * as is from 'is';
+import * as through2 from 'through2';
 
 import * as Firestore from '../src/index';
 import {createInstance as createInstanceHelper, document} from '../test/util/helpers';
