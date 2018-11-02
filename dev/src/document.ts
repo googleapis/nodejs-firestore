@@ -23,92 +23,56 @@ import {google} from '../protos/firestore_proto_api';
 import {FieldTransform} from './field-value';
 import {FieldPath} from './path';
 import {DocumentReference} from './reference';
-import {isPlainObject} from './serializer';
+import {isPlainObject, Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {ApiMapValue, DocumentData, UpdateData, UserInput} from './types';
+import {AnyDuringMigration, AnyJs, ApiMapValue, DocumentData, UpdateData, UserInput} from './types';
 
 import api = google.firestore.v1beta1;
+import {Validator} from './validate';
+import Any = google.protobuf.Any;
+import ArrayValue = google.firestore.v1beta1.ArrayValue;
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
  * Invoke `.build()' to assemble the final snapshot.
  *
  * @private
- * @class
  */
 export class DocumentSnapshotBuilder {
-  ref: DocumentReference;
-  fieldsProto: ApiMapValue;
-  readTime: Timestamp;
-  createTime: Timestamp;
-  updateTime: Timestamp;
+  /** The reference to the document. */
+  ref?: DocumentReference;
 
-  /**
-   * @private
-   * @hideconstructor
-   *
-   * @param {DocumentSnapshot=} snapshot An optional snapshot to base this
-   * builder on.
-   */
-  constructor(snapshot?) {
-    snapshot = snapshot || {};
+  /** The fields of the Firestore `Document` Protobuf backing this document. */
+  fieldsProto?: ApiMapValue;
 
-    /**
-     * The reference to the document.
-     *
-     * @type {DocumentReference}
-     */
-    this.ref = snapshot._ref;
+  /** The time when this document was read. */
+  readTime?: Timestamp;
 
-    /**
-     * The fields of the Firestore `Document` Protobuf backing this document.
-     *
-     * @type {object}
-     */
-    this.fieldsProto = snapshot._fieldsProto;
+  /** The time when this document was created. */
+  createTime?: Timestamp;
 
-    /**
-     * The time when this document was read.
-     *
-     * @type {Timestamp}
-     */
-    this.readTime = snapshot._readTime;
-
-    /**
-     * The time when this document was created.
-     *
-     * @type {Timestamp}
-     */
-    this.createTime = snapshot._createTime;
-
-    /**
-     * The time when this document was last updated.
-     *
-     * @type {Timestamp}
-     */
-    this.updateTime = snapshot._updateTime;
-  }
+  /** The time when this document was last updated. */
+  updateTime?: Timestamp;
 
   /**
    * Builds the DocumentSnapshot.
    *
    * @private
-   * @returns {QueryDocumentSnapshot|DocumentSnapshot} Returns either a
-   * QueryDocumentSnapshot (if `fieldsProto` was provided) or a
-   * DocumentSnapshot.
+   * @returns Returns either a QueryDocumentSnapshot (if `fieldsProto` was
+   * provided) or a DocumentSnapshot.
    */
   build(): QueryDocumentSnapshot|DocumentSnapshot {
     assert(
-        is.defined(this.fieldsProto) === is.defined(this.createTime),
+        (this.fieldsProto !== undefined) === (this.createTime !== undefined),
         'Create time should be set iff document exists.');
     assert(
-        is.defined(this.fieldsProto) === is.defined(this.updateTime),
+        (this.fieldsProto !== undefined) === (this.updateTime !== undefined),
         'Update time should be set iff document exists.');
     return this.fieldsProto ?
         new QueryDocumentSnapshot(
-            this.ref, this.fieldsProto, this.readTime, this.createTime,
-            this.updateTime) :
-        new DocumentSnapshot(this.ref, undefined, this.readTime);
+            this.ref!, this.fieldsProto!, this.readTime!, this.createTime!,
+            this.updateTime!) :
+        new DocumentSnapshot(this.ref!, undefined, this.readTime!);
   }
 }
 
@@ -128,9 +92,9 @@ export class DocumentSnapshotBuilder {
  */
 export class DocumentSnapshot {
   private _ref: DocumentReference;
-  private _fieldsProto;
-  private _serializer;
-  private _validator;
+  private _fieldsProto: ApiMapValue|undefined;
+  private _serializer: Serializer;
+  private _validator: AnyDuringMigration;
   private _readTime: Timestamp|undefined;
   private _createTime: Timestamp|undefined;
   private _updateTime: Timestamp|undefined;
@@ -150,7 +114,7 @@ export class DocumentSnapshot {
    * if the document does not exist).
    */
   constructor(
-      ref: DocumentReference, fieldsProto?: api.IDocument, readTime?: Timestamp,
+      ref: DocumentReference, fieldsProto?: ApiMapValue, readTime?: Timestamp,
       createTime?: Timestamp, updateTime?: Timestamp) {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
@@ -192,11 +156,12 @@ export class DocumentSnapshot {
      * Merges 'value' at the field path specified by the path array into
      * 'target'.
      */
-    function merge(target, value, path, pos) {
+    function merge(
+        target: ApiMapValue, value: AnyJs, path: string[], pos: number) {
       const key = path[pos];
       const isLast = pos === path.length - 1;
 
-      if (!is.defined(target[key])) {
+      if (target[key] === undefined) {
         if (isLast) {
           if (value instanceof FieldTransform) {
             // If there is already data at this path, we need to retain it.
@@ -230,13 +195,13 @@ export class DocumentSnapshot {
         }
       } else {
         assert(!isLast, 'Can\'t merge current value into a nested object');
-        target[key].mapValue.fields =
-            merge(target[key].mapValue.fields, value, path, pos + 1);
+        target[key].mapValue!.fields =
+            merge(target[key].mapValue!.fields!, value, path, pos + 1);
         return target;
       }
     }
 
-    const res = {};
+    const res: ApiMapValue = {};
 
     data.forEach((value, key) => {
       const components = key.toArray();
@@ -389,29 +354,19 @@ export class DocumentSnapshot {
    * });
    */
   data(): DocumentData|undefined {
-    const fields = this.protoFields();
+    const fields = this._fieldsProto;
 
-    if (is.undefined(fields)) {
+    if (fields === undefined) {
       return undefined;
     }
 
-    const obj = {};
+    const obj: DocumentData = {};
     for (const prop in fields) {
       if (fields.hasOwnProperty(prop)) {
         obj[prop] = this._serializer.decodeValue(fields[prop]);
       }
     }
     return obj;
-  }
-
-  /**
-   * Returns the underlying Firestore 'Fields' Protobuf in Protobuf JS format.
-   *
-   * @private
-   * @returns {Object} The Protobuf encoded document.
-   */
-  protoFields() {
-    return this._fieldsProto;
   }
 
   /**
@@ -449,27 +404,26 @@ export class DocumentSnapshot {
    * representation.
    *
    * @private
-   * @param {string|FieldPath} field The path (e.g. 'foo' or 'foo.bar') to a
-   * specific field.
-   * @returns {*} The Protobuf-encoded data at the specified field location or
+   * @param field The path (e.g. 'foo' or 'foo.bar') to a specific field.
+   * @returns The Protobuf-encoded data at the specified field location or
    * undefined if no such field exists.
    */
-  protoField(field: string|FieldPath) {
-    let fields = this.protoFields();
+  protoField(field: string|FieldPath): api.IValue|undefined {
+    let fields: ApiMapValue|api.IValue|undefined = this._fieldsProto;
 
-    if (is.undefined(fields)) {
+    if (fields === undefined) {
       return undefined;
     }
 
     const components = FieldPath.fromArgument(field).toArray();
     while (components.length > 1) {
-      fields = fields[components.shift()!];
+      fields = fields![components.shift()!] as api.IValue;
 
       if (!fields || !fields.mapValue) {
         return undefined;
       }
 
-      fields = fields.mapValue.fields;
+      fields = fields.mapValue.fields!;
     }
 
     return fields[components[0]];
@@ -489,7 +443,7 @@ export class DocumentSnapshot {
    * Convert a document snapshot to the Firestore 'Document' Protobuf.
    *
    * @private
-   * @returns {Object} - The document in the format the API expects.
+   * @returns The document in the format the API expects.
    */
   toProto(): api.IWrite|null {
     return {
@@ -546,7 +500,7 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
    * @param updateTime The time when the document was last updated.
    */
   constructor(
-      ref: DocumentReference, fieldsProto: api.IDocument, readTime: Timestamp,
+      ref: DocumentReference, fieldsProto: ApiMapValue, readTime: Timestamp,
       createTime: Timestamp, updateTime: Timestamp) {
     super(ref, fieldsProto, readTime, createTime, updateTime);
   }
@@ -622,15 +576,15 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
  * @private
  */
 export class DocumentMask {
-  _sortedPaths: FieldPath[];
+  private _sortedPaths: FieldPath[];
 
   /**
    * @private
    * @hideconstructor
    *
-   * @param {Array.<FieldPath>} fieldPaths The field paths in this mask.
+   * @param fieldPaths The field paths in this mask.
    */
-  constructor(fieldPaths) {
+  constructor(fieldPaths: FieldPath[]) {
     this._sortedPaths = fieldPaths;
     this._sortedPaths.sort((a, b) => a.compareTo(b));
   }
@@ -639,11 +593,10 @@ export class DocumentMask {
    * Creates a document mask with the field paths of a document.
    *
    * @private
-   * @param {Map.<string|FieldPath, *>} data A map with
-   * fields to modify. Only the keys are used to extract the document mask.
-   * @returns {DocumentMask}
+   * @param data A map with fields to modify. Only the keys are used to extract
+   * the document mask.
    */
-  static fromUpdateMap(data) {
+  static fromUpdateMap(data: UpdateData): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
     data.forEach((value, key) => {
@@ -659,10 +612,9 @@ export class DocumentMask {
    * Creates a document mask from an array of field paths.
    *
    * @private
-   * @param {Array.<string|FieldPath>} fieldMask A list of field paths.
-   * @returns {DocumentMask}
+   * @param fieldMask A list of field paths.
    */
-  static fromFieldMask(fieldMask) {
+  static fromFieldMask(fieldMask: Array<string|FieldPath>): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
     for (const fieldPath of fieldMask) {
@@ -676,14 +628,14 @@ export class DocumentMask {
    * Creates a document mask with the field names of a document.
    *
    * @private
-   * @param {DocumentData} data An object with fields to modify. Only the keys
-   * are used to extract the document mask.
-   * @returns {DocumentMask}
+   * @param data An object with fields to modify. Only the keys are used to
+   * extract the document mask.
    */
-  static fromObject(data) {
+  static fromObject(data: DocumentData): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
-    const extractFieldPaths = (currentData, currentPath?) => {
+    function extractFieldPaths(
+        currentData: DocumentData, currentPath?: FieldPath): void {
       let isEmpty = true;
 
       for (const key in currentData) {
@@ -712,7 +664,7 @@ export class DocumentMask {
       if (currentPath && isEmpty) {
         fieldPaths.push(currentPath);
       }
-    };
+    }
 
     extractFieldPaths(data);
 
@@ -733,10 +685,11 @@ export class DocumentMask {
    * Removes the specified values from a sorted field path array.
    *
    * @private
-   * @param {Array.<FieldPath>} input A sorted array of FieldPaths.
-   * @param {Array.<FieldPath>} values An array of FieldPaths to remove.
+   * @param input A sorted array of FieldPaths.
+   * @param values An array of FieldPaths to remove.
    */
-  static removeFromSortedArray(input, values) {
+  private static removeFromSortedArray(input: FieldPath[], values: FieldPath[]):
+      void {
     for (let i = 0; i < input.length;) {
       let removed = false;
 
@@ -758,9 +711,9 @@ export class DocumentMask {
    * Removes the field path specified in 'fieldPaths' from this document mask.
    *
    * @private
-   * @param {Array.<FieldPath>} fieldPaths An array of FieldPaths.
+   * @param fieldPaths An array of FieldPaths.
    */
-  removeFields(fieldPaths) {
+  removeFields(fieldPaths: FieldPath[]): void {
     DocumentMask.removeFromSortedArray(this._sortedPaths, fieldPaths);
   }
 
@@ -768,10 +721,10 @@ export class DocumentMask {
    * Returns whether this document mask contains 'fieldPath'.
    *
    * @private
-   * @param {FieldPath} fieldPath The field path to test.
-   * @return {boolean} Whether this document mask contains 'fieldPath'.
+   * @param fieldPath The field path to test.
+   * @return Whether this document mask contains 'fieldPath'.
    */
-  contains(fieldPath) {
+  contains(fieldPath: FieldPath): boolean {
     for (const sortedPath of this._sortedPaths) {
       const cmp = sortedPath.compareTo(fieldPath);
 
@@ -790,11 +743,10 @@ export class DocumentMask {
    * mask.
    *
    * @private
-   * @param {Object} data An object to filter.
-   * @return {Object} A shallow copy of the object filtered by this document
-   * mask.
+   * @param data An object to filter.
+   * @return A shallow copy of the object filtered by this document mask.
    */
-  applyTo(data) {
+  applyTo(data: object): object {
     /*!
      * Applies this DocumentMask to 'data' and computes the list of field paths
      * that were specified in the mask but are not present in 'data'.
@@ -847,9 +799,9 @@ export class DocumentMask {
    * Converts a document mask to the Firestore 'DocumentMask' Proto.
    *
    * @private
-   * @returns {Object} A Firestore 'DocumentMask' Proto.
+   * @returns A Firestore 'DocumentMask' Proto.
    */
-  toProto() {
+  toProto(): api.IDocumentMask {
     if (this.isEmpty) {
       return {};
     }
@@ -876,16 +828,14 @@ export class DocumentMask {
  */
 export class DocumentTransform {
   private readonly _ref: DocumentReference;
-  private readonly _validator;
-  private readonly _transforms;
+  private readonly _validator: AnyDuringMigration;
+  private readonly _transforms: Map<FieldPath, FieldTransform>;
   /**
    * @private
    * @hideconstructor
    *
-   * @param {DocumentReference} ref The DocumentReference for this
-   * transform.
-   * @param {Map.<FieldPath, FieldTransforms>} transforms A Map of FieldPaths to
-   * FieldTransforms.
+   * @param ref The DocumentReference for this transform.
+   * @param transforms A Map of FieldPaths to FieldTransforms.
    */
   constructor(ref: DocumentReference, transforms) {
     this._ref = ref;
@@ -896,13 +846,13 @@ export class DocumentTransform {
    * Generates a DocumentTransform from a JavaScript object.
    *
    * @private
-   * @param {firestore/DocumentReference} ref The `DocumentReference` to
-   * use for the DocumentTransform.
-   * @param {Object} obj The object to extract the transformations from.
-   * @returns {firestore.DocumentTransform} The Document Transform.
+   * @param ref The `DocumentReference` to use for the DocumentTransform.
+   * @param obj The object to extract the transformations from.
+   * @returns The Document Transform.
    */
-  static fromObject(ref: DocumentReference, obj) {
-    const updateMap = new Map();
+  static fromObject(ref: DocumentReference, obj: DocumentData):
+      DocumentTransform {
+    const updateMap = new Map<FieldPath, FieldTransform>();
 
     for (const prop in obj) {
       if (obj.hasOwnProperty(prop)) {
@@ -917,13 +867,13 @@ export class DocumentTransform {
    * Generates a DocumentTransform from an Update Map.
    *
    * @private
-   * @param {firestore/DocumentReference} ref The `DocumentReference` to
-   * use for the DocumentTransform.
-   * @param {Map} data The map to extract the transformations from.
-   * @returns {firestore.DocumentTransform}} The Document Transform.
+   * @param ref The `DocumentReference` to use for the DocumentTransform.
+   * @param data The update data to extract the transformations from.
+   * @returns The Document Transform.
    */
-  static fromUpdateMap(ref, data) {
-    const transforms = new Map();
+  static fromUpdateMap(ref: DocumentReference, data: UpdateData):
+      DocumentTransform {
+    const transforms = new Map<FieldPath, FieldTransform>();
 
     function encode_(val, path, allowTransforms) {
       if (val instanceof FieldTransform && val.includeInDocumentTransform) {
@@ -959,10 +909,8 @@ export class DocumentTransform {
    * Whether this DocumentTransform contains any actionable transformations.
    *
    * @private
-   * @type {boolean}
-   * @readonly
    */
-  get isEmpty() {
+  get isEmpty(): boolean {
     return this._transforms.size === 0;
   }
 
@@ -970,15 +918,13 @@ export class DocumentTransform {
    * Returns the array of fields in this DocumentTransform.
    *
    * @private
-   * @type {Array.<FieldPath>}
-   * @readonly
    */
-  get fields() {
+  get fields(): FieldPath[] {
     return Array.from(this._transforms.keys());
   }
 
   /** Validates the user provided field values in this document transform. */
-  validate() {
+  validate(): void {
     this._transforms.forEach(transform => transform.validate(this._validator));
   }
 
@@ -986,11 +932,11 @@ export class DocumentTransform {
    * Converts a document transform to the Firestore 'DocumentTransform' Proto.
    *
    * @private
-   * @param {Serializer} serializer The Firestore serializer
-   * @returns {Object|null} A Firestore 'DocumentTransform' Proto or 'null' if
-   * this transform is empty.
+   * @param serializer The Firestore serializer
+   * @returns A Firestore 'DocumentTransform' Proto or 'null' if this transform
+   * is empty.
    */
-  toProto(serializer): api.IWrite|null {
+  toProto(serializer: Serializer): api.IWrite|null {
     if (this.isEmpty) {
       return null;
     }
@@ -1016,20 +962,21 @@ export class DocumentTransform {
  * @class
  */
 export class Precondition {
-  _exists?: boolean;
-  _lastUpdateTime?: Timestamp;
+  private _exists?: boolean;
+  private _lastUpdateTime?: Timestamp;
+
   /**
    * @private
    * @hideconstructor
    *
-   * @param {boolean=} options.exists - Whether the referenced document should
-   * exist in Firestore,
-   * @param {Timestamp=} options.lastUpdateTime - The last update time of the
-   * referenced document in Firestore.
+   * @param options.exists - Whether the referenced document should exist in
+   * Firestore,
+   * @param options.lastUpdateTime - The last update time of the referenced
+   * document in Firestore.
    * @param options
    */
-  constructor(options) {
-    if (is.object(options)) {
+  constructor(options?: {exists?: boolean, lastUpdateTime?: Timestamp}) {
+    if (options !== undefined) {
       this._exists = options.exists;
       this._lastUpdateTime = options.lastUpdateTime;
     }
@@ -1039,18 +986,17 @@ export class Precondition {
    * Generates the Protobuf `Preconditon` object for this precondition.
    *
    * @private
-   * @returns {Object|null} The `Preconditon` Protobuf object or 'null' if there
-   * are no preconditions.
+   * @returns The `Preconditon` Protobuf object or 'null' if there are no
+   * preconditions.
    */
   toProto(): api.IPrecondition|null {
     if (this.isEmpty) {
       return null;
     }
 
-    // tslint:disable-next-line: no-any
-    const proto: any = {};
+    const proto: api.IPrecondition = {};
 
-    if (is.defined(this._lastUpdateTime)) {
+    if (this._lastUpdateTime !== undefined) {
       proto.updateTime = this._lastUpdateTime!.toProto().timestampValue;
     } else {
       proto.exists = this._exists;
@@ -1063,33 +1009,33 @@ export class Precondition {
    * Whether this DocumentTransform contains any enforcement.
    *
    * @private
-   * @type {boolean}
-   * @readonly
    */
-  get isEmpty() {
+  get isEmpty(): boolean {
     return this._exists === undefined && !this._lastUpdateTime;
   }
 }
 
-/*!
+/**
  * Validates the use of 'options' as a Precondition and enforces that 'exists'
  * and 'lastUpdateTime' use valid types.
  *
- * @param {boolean=} options.exists - Whether the referenced document
- * should exist.
- * @param {Timestamp=} options.lastUpdateTime - The last update time
- * of the referenced document in Firestore.
- * @param {boolean} allowExist Whether to allow the 'exists' preconditions.
- * @returns {boolean} 'true' if the input is a valid Precondition.
+ * @private
+ * @param options.exists Whether the referenced document should exist.
+ * @param options.lastUpdateTime The last update time of the referenced
+ * document in Firestore.
+ * @param allowExist Whether to allow the 'exists' preconditions.
+ * @returns 'true' if the input is a valid Precondition.
  */
-export function validatePrecondition(precondition, allowExist) {
+export function validatePrecondition(
+    precondition: {exists?: boolean, lastUpdateTime?: Timestamp},
+    allowExist: boolean): boolean {
   if (!is.object(precondition)) {
     throw new Error('Input is not an object.');
   }
 
   let conditions = 0;
 
-  if (is.defined(precondition.exists)) {
+  if (precondition.exists !== undefined) {
     ++conditions;
     if (!allowExist) {
       throw new Error('"exists" is not an allowed condition.');
@@ -1099,7 +1045,7 @@ export function validatePrecondition(precondition, allowExist) {
     }
   }
 
-  if (is.defined(precondition.lastUpdateTime)) {
+  if (precondition.lastUpdateTime !== undefined) {
     ++conditions;
     if (!(precondition.lastUpdateTime instanceof Timestamp)) {
       throw new Error('"lastUpdateTime" is not a Firestore Timestamp.');
@@ -1113,26 +1059,28 @@ export function validatePrecondition(precondition, allowExist) {
   return true;
 }
 
-/*!
+/**
  * Validates the use of 'options' as SetOptions and enforces that 'merge' is a
  * boolean.
  *
- * @param {boolean=} options.merge - Whether set() should merge the provided
- * data into an existing document.
- * @param {boolean=} options.mergeFields - Whether set() should only merge the
- * specified set of fields.
- * @returns {boolean} 'true' if the input is a valid SetOptions object.
+ * @private
+ * @param options.merge - Whether set() should merge the provided data into an
+ * existing document.
+ * @param options.mergeFields - Whether set() should only merge the specified
+ * set of fields.
+ * @returns 'true' if the input is a valid SetOptions object.
  */
-export function validateSetOptions(options) {
+export function validateSetOptions(
+    options: {merge?: boolean, mergeFields?: string[]}): boolean {
   if (!is.object(options)) {
     throw new Error('Input is not an object.');
   }
 
-  if (is.defined(options.merge) && !is.boolean(options.merge)) {
+  if (options.merge !== undefined && !is.boolean(options.merge)) {
     throw new Error('"merge" is not a boolean.');
   }
 
-  if (is.defined(options.mergeFields)) {
+  if (options.mergeFields !== undefined) {
     if (!is.array(options.mergeFields)) {
       throw new Error('"mergeFields" is not an array.');
     }
@@ -1147,7 +1095,7 @@ export function validateSetOptions(options) {
     }
   }
 
-  if (is.defined(options.merge) && is.defined(options.mergeFields)) {
+  if (options.merge !== undefined && options.mergeFields !== undefined) {
     throw new Error('You cannot specify both "merge" and "mergeFields".');
   }
 

@@ -273,7 +273,7 @@ export class WriteBatch {
     let documentMask;
 
     if (mergePaths) {
-      documentMask = DocumentMask.fromFieldMask(options!.mergeFields);
+      documentMask = DocumentMask.fromFieldMask(options!.mergeFields!);
       data = documentMask.applyTo(data);
     }
 
@@ -344,7 +344,8 @@ export class WriteBatch {
    */
   update(
       documentRef: DocumentReference, dataOrField: UpdateData|string|FieldPath,
-      ...preconditionOrValues: Array<Precondition|AnyJs|string|FieldPath>):
+      ...preconditionOrValues:
+          Array<{lastUpdateTime?: Timestamp}|AnyJs|string|FieldPath>):
       WriteBatch {
     this._validator.minNumberOfArguments('update', arguments, 2);
     this._validator.isDocumentReference('documentRef', documentRef);
@@ -401,7 +402,8 @@ export class WriteBatch {
         if (preconditionOrValues.length > 0) {
           this._validator.isUpdatePrecondition(
               'preconditionOrValues', preconditionOrValues[0]);
-          precondition = new Precondition(preconditionOrValues[0]);
+          precondition = new Precondition(
+              preconditionOrValues[0] as {lastUpdateTime?: Timestamp});
         }
       } catch (err) {
         logger(
