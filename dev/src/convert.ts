@@ -194,8 +194,6 @@ export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
       };
     }
     case 'mapValue': {
-      
-      
       const mapValue = {};
       for (const prop in fieldValue.mapValue!.fields!) {
         if (fieldValue.mapValue!.fields!.hasOwnProperty(prop)) {
