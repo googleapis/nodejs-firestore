@@ -15,11 +15,11 @@
  */
 
 import {replaceProjectIdToken} from '@google-cloud/projectify';
-import assert from 'assert';
-import bun from 'bun';
-import extend from 'extend';
-import is from 'is';
-import through2 from 'through2';
+import * as assert from 'assert';
+import * as bun from 'bun';
+import * as extend from 'extend';
+import * as is from 'is';
+import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 
@@ -279,11 +279,6 @@ export class Firestore {
    * use `Timestamp` now and opt-in to this new behavior as soon as you can.
    */
   constructor(settings?: Settings) {
-    settings = extend({}, settings, {
-      libName: 'gccl',
-      libVersion,
-    });
-
     this._validator = new Validator({
       ArrayElement: (name, value) =>
           validateFieldValue(name, value, /* depth */ 0, /*inArray=*/true),
@@ -304,7 +299,16 @@ export class Firestore {
     } as AnyDuringMigration);
 
 
-    this.validateAndApplySettings(settings!);
+    const libraryHeader = {
+      libName: 'gccl',
+      libVersion,
+    };
+
+    if (settings && settings.firebaseVersion) {
+      libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
+    }
+
+    this.validateAndApplySettings(extend({}, settings, libraryHeader));
 
     // GCF currently tears down idle connections after two minutes. Requests
     // that are issued after this period may fail. On GCF, we therefore issue
@@ -605,7 +609,7 @@ export class Firestore {
     return transaction.begin()
         .then(() => {
           const promise = updateFunction(transaction);
-          result = is.instanceof(promise, Promise) ?
+          result = promise instanceof Promise ?
               promise :
               Promise.reject(new Error(
                   'You must return a Promise in your transaction()-callback.'));

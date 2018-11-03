@@ -144,7 +144,7 @@ function compareTimestamps(
  * @private
  */
 function compareBlobs(left: Uint8Array, right: Uint8Array): number {
-  if (!is.instanceof(left, Buffer) || !is.instanceof(right, Buffer)) {
+  if (!(left instanceof Buffer) || !(right instanceof Buffer)) {
     throw new Error('Blobs can only be compared if they are Buffers.');
   }
   return Buffer.compare(left, right);
