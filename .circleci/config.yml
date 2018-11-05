@@ -127,7 +127,7 @@ jobs:
           name: Run sample tests.
           command: npm run samples-test
           environment:
-            GCLOUD_PROJECT: long-door-651
+            GCLOUD_PROJECT: node-gcloud-ci
             GOOGLE_APPLICATION_CREDENTIALS: /home/node/samples/.circleci/key.json
             NPM_CONFIG_PREFIX: /home/node/.npm-global
       - run:
@@ -159,7 +159,7 @@ jobs:
           name: Run system tests.
           command: npm run system-test
           environment:
-            GCLOUD_PROJECT: long-door-651
+            GCLOUD_PROJECT: node-gcloud-ci
             GOOGLE_APPLICATION_CREDENTIALS: /home/node/project/.circleci/key.json
             NPM_CONFIG_PREFIX: /home/node/.npm-global
       - run:
