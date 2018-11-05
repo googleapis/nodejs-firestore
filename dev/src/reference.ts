@@ -1355,9 +1355,9 @@ export class Query {
    */
   startAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
       Query {
-    const options = extend(true, {}, this._queryOptions);
+    this._validator.minNumberOfArguments('startAt', arguments, 1);
 
-    fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
+    const options = extend(true, {}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1390,9 +1390,9 @@ export class Query {
    */
   startAfter(...fieldValuesOrDocumentSnapshot:
                  Array<DocumentSnapshot|UserInput>): Query {
-    const options = extend(true, {}, this._queryOptions);
+    this._validator.minNumberOfArguments('startAfter', arguments, 1);
 
-    fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
+    const options = extend(true, {}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1424,9 +1424,9 @@ export class Query {
    */
   endBefore(...fieldValuesOrDocumentSnapshot:
                 Array<DocumentSnapshot|UserInput>): Query {
-    const options = extend(true, {}, this._queryOptions);
+    this._validator.minNumberOfArguments('endBefore', arguments, 1);
 
-    fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
+    const options = extend(true, {}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1458,9 +1458,9 @@ export class Query {
    */
   endAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
       Query {
-    const options = extend(true, {}, this._queryOptions);
+    this._validator.minNumberOfArguments('endAt', arguments, 1);
 
-    fieldValuesOrDocumentSnapshot = [].slice.call(arguments);
+    const options = extend(true, {}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
