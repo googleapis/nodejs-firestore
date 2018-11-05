@@ -16,7 +16,8 @@
 
 import {expect} from 'chai';
 const duplexify = require('duplexify');
-import googleProtoFiles from 'google-proto-files';
+const googleProtoFiles = require('google-proto-files');
+
 import * as is from 'is';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
@@ -44,6 +45,23 @@ const exclusiveRe: RegExp[] = [];
 
 // The project ID used in the conformance test protos.
 const CONFORMANCE_TEST_PROJECT_ID = 'projectID';
+
+// Load Protobuf definition and types
+const protobufRoot = new protobufjs.Root();
+protobufRoot.resolvePath = (origin, target) => {
+  if (/^google\/.*/.test(target)) {
+    target = path.join(googleProtoFiles(), target.substr('google/'.length));
+  }
+  return target;
+};
+const protoDefinition =
+    protobufRoot.loadSync(path.join(__dirname, 'test-definition.proto'));
+
+const TEST_SUITE_TYPE = protoDefinition.lookupType('tests.TestSuite');
+const STRUCTURED_QUERY_TYPE =
+    protoDefinition.lookupType('google.firestore.v1beta1.StructuredQuery');
+const COMMIT_REQUEST_TYPE =
+    protoDefinition.lookupType('google.firestore.v1beta1.CommitRequest');
 
 // Firestore instance initialized by the test runner.
 let firestore;
@@ -91,10 +109,16 @@ const convertInput = {
       return value;
     }
     function convertArray(arr) {
-      for (let i = 0; i < arr.length; ++i) {
-        arr[i] = convertValue(arr[i]);
+      if (arr.length > 0 && arr[0] === 'ArrayUnion') {
+        return Firestore.FieldValue.arrayUnion(...convertArray(arr.slice(1)));
+      } else if (arr.length > 0 && arr[0] === 'ArrayRemove') {
+        return Firestore.FieldValue.arrayRemove(...convertArray(arr.slice(1)));
+      } else {
+        for (let i = 0; i < arr.length; ++i) {
+          arr[i] = convertValue(arr[i]);
+        }
+        return arr;
       }
-      return arr;
     }
     function convertObject(obj) {
       for (const key in obj) {
@@ -177,80 +201,16 @@ const convertInput = {
 /** Converts Firestore Protobuf types in Proto3 JSON format to Protobuf JS. */
 const convertProto = {
   targetChange: type => type || 'NO_CHANGE',
-  commitRequest: commitRequest => {
-    const deepCopy = JSON.parse(JSON.stringify(commitRequest));
-    for (const write of deepCopy.writes) {
-      if (write.update) {
-        write.update.fields = convert.documentFromJson(write.update.fields);
-      }
-      if (write.transform) {
-        write.transform.fieldTransforms = write.transform.fieldTransforms.map(
-            transform => convertProto.transform(transform));
-      }
-      if (write.currentDocument) {
-        write.currentDocument =
-            convertProto.precondition(write.currentDocument);
-      }
-    }
-    return deepCopy;
-  },
-  precondition: precondition => {
-    const deepCopy = JSON.parse(JSON.stringify(precondition));
-    if (deepCopy.updateTime && deepCopy.updateTime.seconds) {
-      deepCopy.updateTime.seconds = Number(deepCopy.updateTime.seconds);
-    }
-    return deepCopy;
-  },
-  transform: transform => {
-    const deepCopy = JSON.parse(JSON.stringify(transform));
-    if (deepCopy.setToServerValue === 'REQUEST_TIME') {
-      deepCopy.setToServerValue = REQUEST_TIME;
-    }
-    return deepCopy;
-  },
-  position: position => {
-    const deepCopy = JSON.parse(JSON.stringify(position));
-    const values: Array<{}> = [];
-    for (const value of position.values) {
-      values.push(convert.valueFromJson(value));
-    }
-    deepCopy.values = values;
-    return deepCopy;
-  },
-  structuredQuery: queryRequest => {
-    const deepCopy = JSON.parse(JSON.stringify(queryRequest));
-    if (deepCopy.where && deepCopy.where.fieldFilter) {
-      deepCopy.where.fieldFilter.value =
-          convert.valueFromJson(deepCopy.where.fieldFilter.value);
-    }
-    if (deepCopy.where && deepCopy.where.compositeFilter) {
-      deepCopy.where.compositeFilter.op = 'AND';
-      for (const filter of deepCopy.where.compositeFilter.filters) {
-        filter.fieldFilter.value =
-            convert.valueFromJson(filter.fieldFilter.value);
-      }
-    }
-    if (deepCopy.startAt) {
-      deepCopy.startAt = convertProto.position(deepCopy.startAt);
-    }
-    if (deepCopy.endAt) {
-      deepCopy.endAt = convertProto.position(deepCopy.endAt);
-    }
-    return deepCopy;
-  },
-  listenRequest: listenRequest => {
+  listenResponse: listenRequest => {
     const deepCopy = JSON.parse(JSON.stringify(listenRequest));
-
     if (deepCopy.targetChange) {
       deepCopy.targetChange.targetChangeType =
           convertProto.targetChange(deepCopy.targetChange.targetChangeType);
     }
-
     if (deepCopy.documentChange) {
       deepCopy.documentChange.document.fields =
           convert.documentFromJson(deepCopy.documentChange.document.fields);
     }
-
     return deepCopy;
   },
 };
@@ -259,7 +219,9 @@ const convertProto = {
 function commitHandler(spec) {
   return (request, options, callback) => {
     try {
-      expect(request).to.deep.equal(convertProto.commitRequest(spec.request));
+      const actualCommit = COMMIT_REQUEST_TYPE.fromObject(request);
+      const expectedCommit = COMMIT_REQUEST_TYPE.fromObject(spec.request);
+      expect(actualCommit).to.deep.equal(expectedCommit);
       const res: api.IWriteResponse = {
         commitTime: {},
         writeResults: [],
@@ -279,8 +241,10 @@ function commitHandler(spec) {
 /** Request handler for _runQuery. */
 function queryHandler(spec) {
   return request => {
-    expect(request.structuredQuery)
-        .to.deep.equal(convertProto.structuredQuery(spec.query));
+    const actualQuery =
+        STRUCTURED_QUERY_TYPE.fromObject(request.structuredQuery);
+    const expectedQuery = STRUCTURED_QUERY_TYPE.fromObject(spec.query);
+    expect(actualQuery).to.deep.equal(expectedQuery);
     const stream = through2.obj();
     setImmediate(() => stream.push(null));
     return stream;
@@ -451,7 +415,7 @@ function runTest(spec) {
             });
 
         for (const response of spec.responses) {
-          writeStream.write(convertProto.listenRequest(response));
+          writeStream.write(convertProto.listenResponse(response));
         }
       });
     });
@@ -506,24 +470,11 @@ function runTest(spec) {
 
 describe('Conformance Tests', () => {
   const loadTestCases = () => {
-    const protobufRoot = new protobufjs.Root();
-
-    protobufRoot.resolvePath = (origin, target) => {
-      if (/^google\/.*/.test(target)) {
-        target = path.join(googleProtoFiles(), target.substr('google/'.length));
-      }
-      return target;
-    };
-
-    const protoDefinition =
-        protobufRoot.loadSync(path.join(__dirname, 'test-definition.proto'));
-
     const binaryProtoData =
         require('fs').readFileSync(path.join(__dirname, 'test-suite.binproto'));
 
-    const testType = protoDefinition.lookupType('tests.TestSuite');
     // tslint:disable-next-line:no-any
-    const testSuite: any = testType.decode(binaryProtoData);
+    const testSuite: any = TEST_SUITE_TYPE.decode(binaryProtoData);
 
     return testSuite.tests;
   };
