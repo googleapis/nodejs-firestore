@@ -22,6 +22,5 @@ cd $(dirname $0)/..
 
 npm install
 npm test
-npm run conformance
 
 bash $KOKORO_GFILE_DIR/codecov.sh
