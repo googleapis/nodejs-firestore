@@ -73,7 +73,7 @@
     "@types/chai-as-promised": "^7.1.0",
     "@types/duplexify": "^3.5.0",
     "@types/extend": "^3.0.0",
-    "@types/is": "0.0.20",
+    "@types/is": "0.0.21",
     "@types/mocha": "^5.2.3",
     "@types/node": "^10.3.5",
     "@types/through2": "^2.0.34",
