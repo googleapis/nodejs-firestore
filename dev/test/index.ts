@@ -213,7 +213,7 @@ const allSupportedTypesInput = {
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new Firestore.DocumentReference(
-      {formattedName: DATABASE_ROOT},
+      {formattedName: DATABASE_ROOT} as AnyDuringMigration,
       new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
@@ -237,7 +237,7 @@ const allSupportedTypesOutput = {
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new Firestore.DocumentReference(
-      {formattedName: DATABASE_ROOT},
+      {formattedName: DATABASE_ROOT} as AnyDuringMigration,
       new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],

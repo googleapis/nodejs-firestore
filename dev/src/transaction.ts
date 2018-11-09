@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import * as is from 'is';
+import * as proto from '../protos/firestore_proto_api';
 
 import {DocumentSnapshot, Precondition} from './document';
+import {Firestore, WriteBatch} from './index';
 import {FieldPath} from './path';
 import {DocumentReference, Query, QuerySnapshot} from './reference';
-import {AnyJs, DocumentData, Precondition as PublicPrecondition, SetOptions, UpdateData} from './types';
+import {AnyDuringMigration, AnyJs, DocumentData, Precondition as PublicPrecondition, SetOptions, UpdateData} from './types';
 import {requestTag} from './util';
+
+import api = proto.google.firestore.v1beta1;
 
 /*!
  * Error message for transactional reads that were executed after performing
@@ -44,21 +47,21 @@ const ALLOW_RETRIES = true;
  * @class
  */
 export class Transaction {
-  _firestore;
-  _validator;
-  _previousTransaction;
-  _writeBatch;
-  _requestTag;
-  _transactionId;
+  private _firestore: Firestore;
+  private _validator: AnyDuringMigration;
+  private _previousTransaction?: Transaction;
+  private _writeBatch: WriteBatch;
+  private _requestTag: string;
+  private _transactionId?: Uint8Array;
   /**
    * @private
    * @hideconstructor
    *
-   * @param {Firestore} firestore The Firestore Database client.
-   * @param {Transaction=} previousTransaction If available, the failed
-   * transaction that is being retried.
+   * @param firestore The Firestore Database client.
+   * @param previousTransaction If available, the failed transaction that is
+   * being retried.
    */
-  constructor(firestore, previousTransaction) {
+  constructor(firestore: Firestore, previousTransaction?: Transaction) {
     this._firestore = firestore;
     this._validator = firestore._validator;
     this._previousTransaction = previousTransaction;
@@ -153,8 +156,9 @@ export class Transaction {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
-    documents = is.array(arguments[0]) ? arguments[0].slice() :
-                                         Array.prototype.slice.call(arguments);
+    documents = Array.isArray(arguments[0]) ?
+        arguments[0].slice() :
+        Array.prototype.slice.call(arguments);
 
     for (let i = 0; i < documents.length; ++i) {
       this._validator.isDocumentReference(i, documents[i]);
@@ -321,9 +325,10 @@ export class Transaction {
     }
 
     return this._firestore
-        .request('beginTransaction', request, this._requestTag, ALLOW_RETRIES)
+        .request<api.IBeginTransactionResponse>(
+            'beginTransaction', request, this._requestTag, ALLOW_RETRIES)
         .then(resp => {
-          this._transactionId = resp.transaction;
+          this._transactionId = resp.transaction!;
         });
   }
 
@@ -333,10 +338,12 @@ export class Transaction {
    * @private
    */
   commit(): Promise<void> {
-    return this._writeBatch.commit_({
-      transactionId: this._transactionId,
-      requestTag: this._requestTag,
-    });
+    return this._writeBatch
+        .commit_({
+          transactionId: this._transactionId,
+          requestTag: this._requestTag,
+        })
+        .then(() => {});
   }
 
   /**
@@ -350,7 +357,8 @@ export class Transaction {
       transaction: this._transactionId,
     };
 
-    return this._firestore.request('rollback', request, this._requestTag);
+    return this._firestore.request(
+        'rollback', request, this._requestTag, /* allowRetries= */ false);
   }
 
   /**

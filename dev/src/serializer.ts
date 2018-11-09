@@ -27,6 +27,7 @@ import {ResourcePath} from './path';
 import {detectValueType} from './convert';
 import {AnyDuringMigration, AnyJs, UserInput} from './types';
 import {GeoPoint} from './geo-point';
+import {Firestore} from './index';
 
 /** An interface for Firestore types that can be serialized to Protobuf. */
 export interface Serializable {
@@ -43,7 +44,7 @@ export class Serializer {
   private createReference: (path: string) => AnyDuringMigration;
 
   constructor(
-      firestore: AnyDuringMigration,
+      firestore: Firestore,
       private readonly timestampsInSnapshotsEnabled: boolean) {
     // Instead of storing the `firestore` object, we store just a reference to
     // its `.doc()` method. This avoid a circular reference, which breaks

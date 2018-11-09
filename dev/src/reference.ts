@@ -35,6 +35,7 @@ import {autoId, requestTag} from './util';
 import {customObjectError} from './validate';
 import {AnyDuringMigration, DocumentData, UpdateData, Precondition, SetOptions, UserInput} from './types';
 import {Serializer} from './serializer';
+import {Firestore} from './index';
 
 /*!
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -108,8 +109,7 @@ export class DocumentReference {
    * @param _ref The Path of this reference.
    */
   constructor(
-      private readonly _firestore: AnyDuringMigration,
-      readonly _path: ResourcePath) {
+      private readonly _firestore: Firestore, readonly _path: ResourcePath) {
     this._validator = _firestore._validator;
   }
 
@@ -217,7 +217,7 @@ export class DocumentReference {
    * });
    */
   get(): Promise<DocumentSnapshot> {
-    return this._firestore.getAll([this]).then(([result]) => result);
+    return this._firestore.getAll(this).then(([result]) => result);
   }
 
   /**
@@ -263,7 +263,10 @@ export class DocumentReference {
   listCollections(): Promise<CollectionReference[]> {
     const request = {parent: this._path.formattedName};
 
-    return this._firestore.request('listCollectionIds', request, requestTag())
+    return this._firestore
+        .request<string[]>(
+            'listCollectionIds', request, requestTag(),
+            /* allowRetries= */ true)
         .then(collectionIds => {
           const collections: CollectionReference[] = [];
 
@@ -892,13 +895,12 @@ export class Query {
    * @param _queryOptions Additional query options.
    */
   constructor(
-      private readonly _firestore: AnyDuringMigration,
-      readonly _path: ResourcePath,
+      private readonly _firestore: Firestore, readonly _path: ResourcePath,
       private readonly _fieldFilters: FieldFilter[] = [],
       private readonly _fieldOrders: FieldOrder[] = [],
       private readonly _queryOptions: QueryOptions = {}) {
     this._validator = _firestore._validator;
-    this._serializer = _firestore._serializer;
+    this._serializer = _firestore._serializer!;
   }
 
   /**
