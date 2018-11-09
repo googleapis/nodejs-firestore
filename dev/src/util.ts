@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {FieldPath} from './path';
+import {DocumentReference} from './reference';
+import {isPlainObject} from './serializer';
+import {AnyDuringMigration, ReadOptions} from './types';
+
 /**
  * Generate a unique client-side identifier.
  *
@@ -42,4 +47,50 @@ export function autoId(): string {
  */
 export function requestTag(): string {
   return autoId().substr(0, 5);
+}
+
+/**
+ * Parses the arguments for the `getAll()` call supported by both the Firestore
+ * and Transaction class.
+ *
+ * @private
+ * @param validator The argument validator to use.
+ * @param documentRefsOrReadOptions An array of document references followed by
+ * an optional ReadOptions object.
+ */
+export function parseGetAllArguments(
+    validator: AnyDuringMigration,
+    documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+    {documents: DocumentReference[], fieldMask: FieldPath[]|null} {
+  let documents: DocumentReference[];
+  let readOptions: ReadOptions|undefined = undefined;
+
+  const usesVarags = !Array.isArray(documentRefsOrReadOptions[0]);
+
+  if (usesVarags) {
+    if (documentRefsOrReadOptions.length > 0 &&
+        isPlainObject(
+            documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1])) {
+      readOptions = documentRefsOrReadOptions.pop() as ReadOptions;
+      documents = documentRefsOrReadOptions as DocumentReference[];
+    } else {
+      documents = documentRefsOrReadOptions as DocumentReference[];
+    }
+  } else {
+    // Support an array of document references as the first argument for
+    // backwards compatibility.
+    documents = documentRefsOrReadOptions[0] as DocumentReference[];
+    readOptions = documentRefsOrReadOptions[1] as ReadOptions;
+  }
+
+  for (let i = 0; i < documents.length; ++i) {
+    validator.isDocumentReference(i, documents[i]);
+  }
+
+  validator.isOptionalReadOptions('options', readOptions);
+  const fieldMask = readOptions && readOptions.fieldMask ?
+      readOptions.fieldMask.map(
+          fieldPath => FieldPath.fromArgument(fieldPath)) :
+      null;
+  return {fieldMask, documents};
 }

@@ -76,6 +76,17 @@ describe('Firestore class', () => {
           expect(docs.length).to.equal(2);
         });
   });
+
+  it('getAll() supports field mask', () => {
+    const ref1 = randomCol.doc('doc1');
+    return ref1.set({foo: 'a', bar: 'b'})
+        .then(() => {
+          return firestore.getAll(ref1, {fieldMask: ['foo']});
+        })
+        .then(docs => {
+          expect(docs[0].data()).to.deep.equal({foo: 'a'});
+        });
+  });
 });
 
 describe('CollectionReference class', () => {
@@ -1370,6 +1381,20 @@ describe('Transaction class', () => {
         .then(res => {
           expect(res).to.equal(2);
         });
+  });
+
+  it('getAll() supports field mask', () => {
+    const ref1 = randomCol.doc('doc1');
+    return ref1.set({foo: 'a', bar: 'b'}).then(() => {
+      return firestore
+          .runTransaction(updateFunction => {
+            return updateFunction.getAll(ref1, {fieldMask: ['foo']})
+                .then(([doc]) => doc);
+          })
+          .then(doc => {
+            expect(doc.data()).to.deep.equal({foo: 'a'});
+          });
+    });
   });
 
   it('has get() with query', () => {

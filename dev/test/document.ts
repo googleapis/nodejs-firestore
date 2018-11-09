@@ -971,7 +971,7 @@ describe('set document', () => {
       });
     })
         .to.throw(
-            /Argument "options" is not a valid SetOptions. Argument at index 0 is not a valid FieldPath./);
+            /Argument "options" is not a valid SetOptions. Element at index 0 is not a valid FieldPath./);
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {

@@ -20,7 +20,8 @@ import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
 import {FieldPath} from './path';
 import {DocumentReference, Query, QuerySnapshot} from './reference';
-import {AnyDuringMigration, AnyJs, DocumentData, Precondition as PublicPrecondition, SetOptions, UpdateData} from './types';
+import {AnyDuringMigration, AnyJs, DocumentData, Precondition as PublicPrecondition, ReadOptions, SetOptions, UpdateData} from './types';
+import {parseGetAllArguments} from './util';
 import {requestTag} from './util';
 
 import api = proto.google.firestore.v1beta1;
@@ -117,7 +118,7 @@ export class Transaction {
 
     if (refOrQuery instanceof DocumentReference) {
       return this._firestore
-          .getAll_([refOrQuery], this._requestTag, this._transactionId)
+          .getAll_([refOrQuery], null, this._requestTag, this._transactionId)
           .then(res => {
             return Promise.resolve(res[0]);
           });
@@ -134,7 +135,10 @@ export class Transaction {
    * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
    * all returned documents.
    *
-   * @param {...DocumentReference} documents The document references to receive.
+   * @param {DocumentReference} documentRef A `DocumentReference` to receive.
+   * @param {Array.<DocumentReference|ReadOptions>} moreDocumentRefsOrReadOptions
+   * Additional `DocumentReferences` to receive, followed by an optional field
+   * mask.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
    *
@@ -151,21 +155,21 @@ export class Transaction {
    *   });
    * });
    */
-  getAll(...documents: DocumentReference[]): Promise<DocumentSnapshot[]> {
+  getAll(
+      documentRef: DocumentReference,
+      ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+      Promise<DocumentSnapshot[]> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
-    documents = Array.isArray(arguments[0]) ?
-        arguments[0].slice() :
-        Array.prototype.slice.call(arguments);
+    this._validator.minNumberOfArguments('Transaction.getAll', arguments, 1);
 
-    for (let i = 0; i < documents.length; ++i) {
-      this._validator.isDocumentReference(i, documents[i]);
-    }
+    const {documents, fieldMask} = parseGetAllArguments(
+        this._validator, [documentRef, ...moreDocumentRefsOrReadOptions]);
 
     return this._firestore.getAll_(
-        documents, this._requestTag, this._transactionId);
+        documents, fieldMask, this._requestTag, this._transactionId);
   }
 
   /**
