@@ -227,7 +227,7 @@ export class Firestore {
    * The serializer to use for the Protobuf transformation.
    * @private
    */
-  _serializer: Serializer | null = null;
+  _serializer: Serializer|null = null;
 
   private _timestampsInSnapshotsEnabled = false;
 

@@ -44,7 +44,7 @@ export class Serializer {
   private createReference: (path: string) => AnyDuringMigration;
 
   constructor(
-      private readonly firestore: Firestore,
+      firestore: Firestore,
       private readonly timestampsInSnapshotsEnabled: boolean) {
     // Instead of storing the `firestore` object, we store just a reference to
     // its `.doc()` method. This avoid a circular reference, which breaks

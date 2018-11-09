@@ -343,7 +343,7 @@ export class Transaction {
           transactionId: this._transactionId,
           requestTag: this._requestTag,
         })
-        .then();
+        .then(() => {});
   }
 
   /**

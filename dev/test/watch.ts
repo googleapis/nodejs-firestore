@@ -161,7 +161,7 @@ class DeferredListener<T> {
           .to.equal(
               type,
               `Expected message of type '${listener.type}' but got '${type}' ` +
-                  `with '${data}'.`);
+                  `with '${JSON.stringify(data)}'.`);
       listener.resolve(data);
     } else {
       this.pendingData.push({
