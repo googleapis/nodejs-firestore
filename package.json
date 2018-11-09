@@ -27,15 +27,6 @@
     "cloud",
     "firestore"
   ],
-  "contributors": [
-    "Alexander Fenster <github@fenster.name>",
-    "Bond <bondz@users.noreply.github.com>",
-    "Jason Dobry <jdobry@google.com>",
-    "Luke Sneeringer <lukesneeringer@google.com>",
-    "Sebastian Schmidt <mrschmidt@google.com>",
-    "Stephen Sawchuk <sawchuk@gmail.com>",
-    "greenkeeper[bot] <greenkeeper[bot]@users.noreply.github.com>"
-  ],
   "scripts": {
     "codecov": "nyc report --reporter=json && codecov -f .coverage/*.json",
     "predocs": "npm run compile",
