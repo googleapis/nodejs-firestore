@@ -193,7 +193,8 @@ const MAX_DEPTH = 20;
  * Full quickstart example:
  */
 export class Firestore {
-  private readonly _validator;
+  /** @private */
+  readonly _validator;
 
   /**
    * A client pool to distribute requests over multiple GAPIC clients in order
@@ -226,7 +227,7 @@ export class Firestore {
    * The serializer to use for the Protobuf transformation.
    * @private
    */
-  private _serializer: Serializer|null = null;
+  _serializer: Serializer|null = null;
 
   private _timestampsInSnapshotsEnabled = false;
 
@@ -240,8 +241,10 @@ export class Firestore {
   //
   // The environment variable FUNCTION_TRIGGER_TYPE is used to detect the GCF
   // environment.
-  private _preferTransactions: boolean;
-  private _lastSuccessfulRequest = 0;
+  /** @private */
+  _preferTransactions: boolean;
+  /** @private */
+  _lastSuccessfulRequest = 0;
 
   /**
    * @param {Object=} settings [Configuration object](#/docs).
@@ -1103,9 +1106,9 @@ follow these steps, YOUR APP MAY BREAK.`);
    * retried.
    * @returns A Promise with the request result.
    */
-  request(
+  request<T>(
       methodName: string, request: {}, requestTag: string,
-      allowRetries: boolean): Promise<{}> {
+      allowRetries: boolean): Promise<T> {
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
     return this._runRequest(gapicClient => {

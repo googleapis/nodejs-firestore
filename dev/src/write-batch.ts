@@ -15,11 +15,11 @@
  */
 
 import * as assert from 'assert';
-import * as is from 'is';
 
 import {google} from '../protos/firestore_proto_api';
 
 import {DocumentMask, DocumentSnapshot, DocumentTransform, Precondition} from './document';
+import {Firestore} from './index';
 import {logger} from './logger';
 import {FieldPath} from './path';
 import {DocumentReference} from './reference';
@@ -101,7 +101,7 @@ interface WriteOp {
  * @class
  */
 export class WriteBatch {
-  private readonly _firestore: AnyDuringMigration;
+  private readonly _firestore: Firestore;
   private readonly _validator: AnyDuringMigration;
   private readonly _serializer: Serializer;
   private readonly _writes: WriteOp[] = [];
@@ -484,9 +484,11 @@ export class WriteBatch {
     // request retries in case GCF closes our backend connection.
     if (!explicitTransaction && this._shouldCreateTransaction()) {
       logger('WriteBatch.commit', tag, 'Using transaction for commit');
-      return this._firestore.request('beginTransaction', request, tag, true)
+      return this._firestore
+          .request<api.IBeginTransactionResponse>(
+              'beginTransaction', request, tag, true)
           .then(resp => {
-            return this.commit_({transactionId: resp.transaction});
+            return this.commit_({transactionId: resp.transaction!});
           });
     }
 
@@ -519,44 +521,48 @@ export class WriteBatch {
 
     this._committed = true;
 
-    return this._firestore.request('commit', request, tag).then(resp => {
-      const writeResults: WriteResult[] = [];
+    return this._firestore
+        .request<api.CommitResponse>(
+            'commit', request, tag, /* allowRetries= */ false)
+        .then(resp => {
+          const writeResults: WriteResult[] = [];
 
-      if (request.writes!.length > 0) {
-        assert(
-            resp.writeResults instanceof Array &&
-                request.writes!.length === resp.writeResults.length,
-            `Expected one write result per operation, but got ${
-                resp.writeResults.length} results for ${
-                request.writes!.length} operations.`);
+          if (request.writes!.length > 0) {
+            assert(
+                Array.isArray(resp.writeResults) &&
+                    request.writes!.length === resp.writeResults.length,
+                `Expected one write result per operation, but got ${
+                    resp.writeResults.length} results for ${
+                    request.writes!.length} operations.`);
 
-        const commitTime = Timestamp.fromProto(resp.commitTime);
+            const commitTime = Timestamp.fromProto(resp.commitTime);
 
-        let offset = 0;
+            let offset = 0;
 
-        for (let i = 0; i < this._writes.length; ++i) {
-          const writeRequest = this._writes[i];
+            for (let i = 0; i < this._writes.length; ++i) {
+              const writeRequest = this._writes[i];
 
-          // Don't return two write results for a write that contains a
-          // transform, as the fact that we have to split one write operation
-          // into two distinct write requests is an implementation detail.
-          if (writeRequest.write && writeRequest.transform) {
-            // The document transform is always sent last and produces the
-            // latest update time.
-            ++offset;
+              // Don't return two write results for a write that contains a
+              // transform, as the fact that we have to split one write
+              // operation into two distinct write requests is an implementation
+              // detail.
+              if (writeRequest.write && writeRequest.transform) {
+                // The document transform is always sent last and produces the
+                // latest update time.
+                ++offset;
+              }
+
+              const writeResult = resp.writeResults[i + offset];
+
+              writeResults.push(new WriteResult(
+                  writeResult.updateTime ?
+                      Timestamp.fromProto(writeResult.updateTime) :
+                      commitTime));
+            }
           }
 
-          const writeResult = resp.writeResults[i + offset];
-
-          writeResults.push(new WriteResult(
-              writeResult.updateTime ?
-                  Timestamp.fromProto(writeResult.updateTime) :
-                  commitTime));
-        }
-      }
-
-      return writeResults;
-    });
+          return writeResults;
+        });
   }
 
   /**
