@@ -72,7 +72,7 @@
     "chai-as-promised": "^7.1.1",
     "codecov": "^3.0.2",
     "duplexify": "^3.6.0",
-    "google-proto-files": "^0.17.0",
+    "google-proto-files": "^0.18.0",
     "gts": "^0.8.0",
     "hard-rejection": "^1.0.0",
     "ink-docstrap": "git+https://github.com/docstrap/docstrap.git",
