@@ -298,7 +298,7 @@ describe('failed transactions', () => {
 
     return createInstance(overrides).then(firestore => {
       expect(() => (firestore as InvalidApiUsage).runTransaction())
-          .to.throw(/Argument "updateFunction" is not a valid function\./);
+          .to.throw(/Value for "updateFunction" is not a valid function\./);
     });
   });
 
@@ -314,13 +314,13 @@ describe('failed transactions', () => {
           () => firestore.runTransaction(
               () => Promise.resolve(), {maxAttempts: 'foo' as InvalidApiUsage}))
           .to.throw(
-              /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
+              /Value for "transactionOptions.maxAttempts" is not a valid integer\./);
 
       expect(
           () => firestore.runTransaction(
               () => Promise.resolve(), {maxAttempts: 0}))
           .to.throw(
-              /Argument "transactionOptions.maxAttempts" is not a valid integer\./);
+              /Value for "transactionOptions.maxAttempts" is not a valid integer\./);
     });
   });
 

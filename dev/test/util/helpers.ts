@@ -253,6 +253,14 @@ export function serverTimestamp(field: string):
   return {fieldPath: field, setToServerValue: 'REQUEST_TIME'};
 }
 
+export function numericAddTransform(
+    field: string, n: number): api.DocumentTransform.IFieldTransform {
+  return {
+    fieldPath: field,
+    numericAdd: Number.isInteger(n) ? {integerValue: n} : {doubleValue: n}
+  };
+}
+
 export function arrayTransform(
     field: string, transform: 'appendMissingElements'|'removeAllFromArray',
     ...values: Array<string|api.IValue>):

@@ -4424,6 +4424,9 @@ export namespace google {
           /** FieldTransform setToServerValue */
           setToServerValue?: (google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue|null);
 
+          /** FieldTransform numericAdd */
+          numericAdd?: (google.firestore.v1beta1.IValue|null);
+
           /** FieldTransform appendMissingElements */
           appendMissingElements?: (google.firestore.v1beta1.IArrayValue|null);
 
@@ -4446,6 +4449,9 @@ export namespace google {
           /** FieldTransform setToServerValue. */
           public setToServerValue: google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue;
 
+          /** FieldTransform numericAdd. */
+          public numericAdd?: (google.firestore.v1beta1.IValue|null);
+
           /** FieldTransform appendMissingElements. */
           public appendMissingElements?: (google.firestore.v1beta1.IArrayValue|null);
 
@@ -4453,7 +4459,7 @@ export namespace google {
           public removeAllFromArray?: (google.firestore.v1beta1.IArrayValue|null);
 
           /** FieldTransform transformType. */
-          public transformType?: ("setToServerValue"|"appendMissingElements"|"removeAllFromArray");
+          public transformType?: ("setToServerValue"|"numericAdd"|"appendMissingElements"|"removeAllFromArray");
         }
 
         namespace FieldTransform {

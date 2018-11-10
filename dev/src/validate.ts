@@ -92,7 +92,7 @@ export class Validator {
         let valid = false;
         let message = is.number(argumentName) ?
             `Argument at index ${argumentName} is not a valid ${type}.` :
-            `Argument "${argumentName}" is not a valid ${type}.`;
+            `Value for "${argumentName}" is not a valid ${type}.`;
 
         try {
           valid = validators[type].call(null, ...values);

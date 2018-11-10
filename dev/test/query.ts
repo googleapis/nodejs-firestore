@@ -695,7 +695,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            /Argument "fieldPath" is not a valid FieldPath. Invalid use of type "object" as a Firestore argument/);
+            /Value for "fieldPath" is not a valid FieldPath. Invalid use of type "object" as a Firestore argument/);
 
     class FieldPath {}
     expect(() => {
@@ -714,7 +714,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            /Argument "value" is not a valid QueryValue. Cannot use object of type "FieldPath" as a Firestore value./);
+            /Value for "value" is not a valid QueryValue. Cannot use object of type "FieldPath" as a Firestore value./);
   });
 
   it('rejects field delete as value', () => {
@@ -740,7 +740,7 @@ describe('where() interface', () => {
       query.where('foo', '=', new Foo()).get();
     })
         .to.throw(
-            /Argument "value" is not a valid QueryValue. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
+            /Value for "value" is not a valid QueryValue. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
 
     expect(() => {
       query.where('foo', '=', new FieldPath()).get();
@@ -810,7 +810,7 @@ describe('where() interface', () => {
       query = query.where('foo.', '=', 'foobar');
     })
         .to.throw(
-            /Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with '.'./);
+            /Value for "fieldPath" is not a valid FieldPath. Paths must not start or end with '.'./);
   });
 
   it('verifies operator', () => {
@@ -909,7 +909,7 @@ describe('orderBy() interface', () => {
       query = query.orderBy('foo.');
     })
         .to.throw(
-            /Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with '.'./);
+            /Value for "fieldPath" is not a valid FieldPath. Paths must not start or end with '.'./);
   });
 
   it('rejects call after cursor', () => {
@@ -995,7 +995,7 @@ describe('limit() interface', () => {
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.limit(Infinity))
-        .to.throw(/Argument "limit" is not a valid integer./);
+        .to.throw(/Value for "limit" is not a valid integer./);
   });
 
   it('uses latest limit', () => {
@@ -1041,7 +1041,7 @@ describe('offset() interface', () => {
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.offset(Infinity))
-        .to.throw(/Argument "offset" is not a valid integer\./);
+        .to.throw(/Value for "offset" is not a valid integer\./);
   });
 
   it('uses latest offset', () => {

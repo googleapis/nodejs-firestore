@@ -84,6 +84,38 @@ export class FieldValue {
 
   /**
    * Returns a special value that can be used with set(), create() or update()
+   * that tells the server to add the given value to the field's current
+   * value.
+   *
+   * If the either current field value or the operand uses floating point
+   * precision, both values will be interpreted as floating point numbers and
+   * all arithmetic will follow IEEE 754 semantics. Otherwise, integer
+   * precision is kept and the result is capped between -2^63 and 2^63-1.
+   *
+   * If the current field value is not of type 'number', or if the field does
+   * not yet exist, the transformation will set the field to the given value.
+   *
+   * @param n The value to add.
+   * @return The FieldValue sentinel for use in a call to set() or update().
+   *
+   * @example
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.update(
+   *   'counter', Firestore.FieldValue.numericAdd(1)
+   * ).then(() => {
+   *   return documentRef.get();
+   * }).then(doc => {
+   *   // doc.get('counter') was incremented
+   * });
+   */
+  static numericAdd(n: number): FieldValue {
+    validate.minNumberOfArguments('FieldValue.numericAdd', arguments, 1);
+    return new NumericAddTransform(n);
+  }
+
+  /**
+   * Returns a special value that can be used with set(), create() or update()
    * that tells the server to union the given elements with any array value that
    * already exists on the server. Each specified element that doesn't already
    * exist in the array will be added to the end. If the field being modified is
@@ -277,6 +309,52 @@ class ServerTimestampTransform extends FieldTransform {
       fieldPath: fieldPath.formattedName,
       setToServerValue: 'REQUEST_TIME',
     };
+  }
+}
+
+/**
+ * Increments a field value on the backend.
+ *
+ * @private
+ */
+class NumericAddTransform extends FieldTransform {
+  constructor(private readonly operand: number) {
+    super();
+  }
+
+  /**
+   * Numeric transforms are omitted from document masks.
+   */
+  get includeInDocumentMask(): false {
+    return false;
+  }
+
+  /**
+   * Numeric transforms are included in document transforms.
+   */
+  get includeInDocumentTransform(): true {
+    return true;
+  }
+
+  get methodName(): string {
+    return 'FieldValue.numericAdd';
+  }
+
+  validate(validator: AnyDuringMigration): boolean {
+    return validator.isNumber('FieldValue.numericAdd()', this.operand);
+  }
+
+  toProto(serializer: Serializer, fieldPath: FieldPath):
+      api.DocumentTransform.IFieldTransform {
+    const encodedOperand = serializer.encodeValue(this.operand)!;
+    return {fieldPath: fieldPath.formattedName, numericAdd: encodedOperand};
+  }
+
+  isEqual(other: FieldValue): boolean {
+    return (
+        this === other ||
+        (other instanceof NumericAddTransform &&
+         this.operand === other.operand));
   }
 }
 
