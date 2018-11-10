@@ -65,9 +65,18 @@ export function parseGetAllArguments(
   let documents: DocumentReference[];
   let readOptions: ReadOptions|undefined = undefined;
 
-  const usesVarags = !Array.isArray(documentRefsOrReadOptions[0]);
+  // In the original release of the SDK, getAll() was documented to accept
+  // either a varargs list of DocumentReferences or a single array of
+  // DocumentReferences. To support this usage in the TypeScript client, we have
+  // to manually verify the arguments to determine which input the user
+  // provided.
+  const usesDeprecatedArgumentStyle =
+      Array.isArray(documentRefsOrReadOptions[0]);
 
-  if (usesVarags) {
+  if (usesDeprecatedArgumentStyle) {
+    documents = documentRefsOrReadOptions[0] as DocumentReference[];
+    readOptions = documentRefsOrReadOptions[1] as ReadOptions;
+  } else {
     if (documentRefsOrReadOptions.length > 0 &&
         isPlainObject(
             documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1])) {
@@ -76,11 +85,6 @@ export function parseGetAllArguments(
     } else {
       documents = documentRefsOrReadOptions as DocumentReference[];
     }
-  } else {
-    // Support an array of document references as the first argument for
-    // backwards compatibility.
-    documents = documentRefsOrReadOptions[0] as DocumentReference[];
-    readOptions = documentRefsOrReadOptions[1] as ReadOptions;
   }
 
   for (let i = 0; i < documents.length; ++i) {

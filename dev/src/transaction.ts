@@ -118,7 +118,9 @@ export class Transaction {
 
     if (refOrQuery instanceof DocumentReference) {
       return this._firestore
-          .getAll_([refOrQuery], null, this._requestTag, this._transactionId)
+          .getAll_(
+              [refOrQuery], /* fieldMask= */ null, this._requestTag,
+              this._transactionId)
           .then(res => {
             return Promise.resolve(res[0]);
           });
