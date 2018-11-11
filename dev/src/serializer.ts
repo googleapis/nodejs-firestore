@@ -27,7 +27,7 @@ import {ResourcePath} from './path';
 import {detectValueType} from './convert';
 import {AnyDuringMigration, AnyJs, UserInput} from './types';
 import {GeoPoint} from './geo-point';
-import {Firestore} from './index';
+import {DocumentReference, Firestore} from './index';
 
 /** An interface for Firestore types that can be serialized to Protobuf. */
 export interface Serializable {
@@ -41,15 +41,15 @@ export interface Serializable {
  * @private
  */
 export class Serializer {
-  private createReference: (path: string) => AnyDuringMigration;
+  private timestampsInSnapshots: boolean;
+  private createReference: (path: string) => DocumentReference;
 
-  constructor(
-      firestore: Firestore,
-      private readonly timestampsInSnapshotsEnabled: boolean) {
+  constructor(firestore: Firestore) {
     // Instead of storing the `firestore` object, we store just a reference to
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
     this.createReference = path => firestore.doc(path);
+    this.timestampsInSnapshots = !!firestore._settings.timestampsInSnapshots;
   }
 
   /**
@@ -204,8 +204,7 @@ export class Serializer {
       }
       case 'timestampValue': {
         const timestamp = Timestamp.fromProto(proto.timestampValue);
-        return this.timestampsInSnapshotsEnabled ? timestamp :
-                                                   timestamp.toDate();
+        return this.timestampsInSnapshots ? timestamp : timestamp.toDate();
       }
       case 'referenceValue': {
         const resourcePath =

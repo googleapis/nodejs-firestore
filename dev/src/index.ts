@@ -204,17 +204,17 @@ export class Firestore {
   private _clientPool: ClientPool<GapicClient>|null = null;
 
   /**
+   * The configuration options for the GAPIC client.
+   * @private
+   */
+  _settings: Settings = {};
+
+  /**
    * Whether the initialization settings can still be changed by invoking
    * `settings()`.
    * @private
    */
   private _settingsFrozen = false;
-
-  /**
-   * The configuration options for the GAPIC client.
-   * @private
-   */
-  private _initializationSettings: Settings = {};
 
   /**
    * A Promise that resolves when client initialization completes. Can be
@@ -227,12 +227,9 @@ export class Firestore {
    * The serializer to use for the Protobuf transformation.
    * @private
    */
-  _serializer: Serializer|null = null;
-
-  private _timestampsInSnapshotsEnabled = false;
+  private _serializer: Serializer|null = null;
 
   private _referencePath: ResourcePath|null = null;
-
 
   // GCF currently tears down idle connections after two minutes. Requests
   // that are issued after this period may fail. On GCF, we therefore issue
@@ -360,7 +357,7 @@ export class Firestore {
           'Firestore object.');
     }
 
-    const mergedSettings = extend({}, this._initializationSettings, settings);
+    const mergedSettings = extend({}, this._settings, settings);
     this.validateAndApplySettings(mergedSettings);
     this._settingsFrozen = true;
   }
@@ -368,7 +365,6 @@ export class Firestore {
   private validateAndApplySettings(settings: Settings): void {
     this._validator.isOptionalBoolean(
         'settings.timestampsInSnapshots', settings.timestampsInSnapshots);
-    this._timestampsInSnapshotsEnabled = !!settings.timestampsInSnapshots;
 
     if (settings && settings.projectId) {
       this._validator.isString('settings.projectId', settings.projectId);
@@ -379,8 +375,8 @@ export class Firestore {
       this._referencePath = new ResourcePath('{{projectId}}', '(default)');
     }
 
-    this._initializationSettings = settings;
-    this._serializer = new Serializer(this, this._timestampsInSnapshotsEnabled);
+    this._settings = settings;
+    this._serializer = new Serializer(this);
   }
 
   /**
@@ -806,7 +802,7 @@ export class Firestore {
   private _runRequest<T>(op: (client: GapicClient) => Promise<T>): Promise<T> {
     // Initialize the client pool if this is the first request.
     if (!this._clientInitialized) {
-      if (!this._timestampsInSnapshotsEnabled) {
+      if (!this._settings.timestampsInSnapshots) {
         console.error(`
 The behavior for Date objects stored in Firestore is going to change
 AND YOUR APP MAY BREAK.
@@ -851,8 +847,7 @@ follow these steps, YOUR APP MAY BREAK.`);
 
     const clientPool =
         new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
-          const client =
-              new module.exports.v1beta1(this._initializationSettings);
+          const client = new module.exports.v1beta1(this._settings);
           logger('Firestore', null, 'Initialized Firestore GAPIC Client');
           return client;
         });
