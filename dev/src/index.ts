@@ -20,15 +20,12 @@ import * as bun from 'bun';
 import * as extend from 'extend';
 import * as is from 'is';
 import * as through2 from 'through2';
-
 import {google} from '../protos/firestore_proto_api';
-
 import * as convert from './convert';
-import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot, validatePrecondition, validateSetOptions} from './document';
-import {FieldValue} from './field-value';
+import {DocumentSnapshot, DocumentSnapshotBuilder, validatePrecondition, validateSetOptions} from './document';
 import {DeleteTransform, FieldTransform} from './field-value';
 import {GeoPoint} from './geo-point';
-import {logger, setLibVersion, setLogFunction} from './logger';
+import {logger, setLibVersion} from './logger';
 import {FieldPath} from './path';
 import {ResourcePath} from './path';
 import {ClientPool} from './pool';
@@ -41,7 +38,7 @@ import {DocumentData, GapicClient, Settings, ValidationOptions} from './types';
 import {AnyDuringMigration, AnyJs} from './types';
 import {requestTag} from './util';
 import {customObjectError, Validator} from './validate';
-import {WriteBatch, WriteResult} from './write-batch';
+import {WriteBatch} from './write-batch';
 import {validateUpdateMap} from './write-batch';
 
 import api = google.firestore.v1beta1;
@@ -311,7 +308,7 @@ export class Firestore {
       libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
     }
 
-    this.validateAndApplySettings(extend({}, settings, libraryHeader));
+    this.validateAndApplySettings(Object.assign({}, settings, libraryHeader));
 
     // GCF currently tears down idle connections after two minutes. Requests
     // that are issued after this period may fail. On GCF, we therefore issue
@@ -360,7 +357,8 @@ export class Firestore {
           'Firestore object.');
     }
 
-    const mergedSettings = extend({}, this._initializationSettings, settings);
+    const mergedSettings =
+        Object.assign({}, this._initializationSettings, settings);
     this.validateAndApplySettings(mergedSettings);
     this._settingsFrozen = true;
   }

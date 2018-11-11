@@ -21,7 +21,7 @@ import * as through2 from 'through2';
 import {google} from '../protos/firestore_proto_api';
 
 import {ExponentialBackoff} from './backoff';
-import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
+import {DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange, DocumentChangeType} from './document-change';
 import Firestore, {DocumentReference, Query} from './index';
 import {logger} from './logger';
