@@ -16,26 +16,19 @@
 
 import {expect} from 'chai';
 const duplexify = require('duplexify');
-const googleProtoFiles = require('google-proto-files');
-
+import {getProtoPath} from 'google-proto-files';
 import * as is from 'is';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
-
 import * as proto from '../protos/firestore_proto_api';
 import api = proto.google.firestore.v1beta1;
-
 import * as Firestore from '../src';
-
 import {ResourcePath} from '../src/path';
 import * as convert from '../src/convert';
-
 import {createInstance as createInstanceHelper} from '../test/util/helpers';
 import {AnyDuringMigration} from '../src/types';
 import {DocumentChangeType} from '../src/document-change';
-
-const REQUEST_TIME = 'REQUEST_TIME';
 
 /** List of test cases that are ignored. */
 const ignoredRe: RegExp[] = [];
@@ -50,7 +43,7 @@ const CONFORMANCE_TEST_PROJECT_ID = 'projectID';
 const protobufRoot = new protobufjs.Root();
 protobufRoot.resolvePath = (origin, target) => {
   if (/^google\/.*/.test(target)) {
-    target = path.join(googleProtoFiles(), target.substr('google/'.length));
+    target = path.join(getProtoPath(), target.substr('google/'.length));
   }
   return target;
 };
@@ -87,7 +80,6 @@ const createInstance = overrides => {
         firestore = firestoreClient;
       });
 };
-
 
 /** Converts JSON test data into JavaScript types suitable for the Node API. */
 const convertInput = {
