@@ -16,7 +16,6 @@
 
 import {expect} from 'chai';
 const duplexify = require('duplexify');
-const googleProtoFiles = require('google-proto-files');
 
 import * as is from 'is';
 import * as path from 'path';
@@ -50,7 +49,7 @@ const CONFORMANCE_TEST_PROJECT_ID = 'projectID';
 const protobufRoot = new protobufjs.Root();
 protobufRoot.resolvePath = (origin, target) => {
   if (/^google\/.*/.test(target)) {
-    target = path.join(googleProtoFiles(), target.substr('google/'.length));
+    target = path.join(__dirname, '../protos', target);
   }
   return target;
 };
