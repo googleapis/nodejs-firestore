@@ -34,9 +34,9 @@ import {DocumentReference} from './reference';
 import {isPlainObject, Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {Transaction} from './transaction';
-import {DocumentData, GapicClient, Settings, ValidationOptions} from './types';
+import {DocumentData, GapicClient, ReadOptions, Settings, ValidationOptions} from './types';
 import {AnyDuringMigration, AnyJs} from './types';
-import {requestTag} from './util';
+import {parseGetAllArguments, requestTag} from './util';
 import {customObjectError, Validator} from './validate';
 import {WriteBatch} from './write-batch';
 import {validateUpdateMap} from './write-batch';
@@ -158,6 +158,18 @@ const MAX_DEPTH = 20;
  * It is an error to pass a SetOptions object to a set() call that is missing a
  * value for any of the fields specified here.
  * @typedef {Object} SetOptions
+ */
+
+/**
+ * An options object that can be used to configure the behavior of
+ * [getAll()]{@link Firestore#getAll} calls. By providing a `fieldMask`, these
+ * calls can be configured to only return a subset of fields.
+ *
+ * @property {Array<(string|FieldPath)>} fieldMask Specifies the set of fields
+ * to return and reduces the amount of data transmitted by the backend.
+ * Adding a field mask does not filter results. Documents do not need to
+ * contain values for all the fields in the mask to be part of the result set.
+ * @typedef {Object} ReadOptions
  */
 
 /**
@@ -293,6 +305,7 @@ export class Firestore {
       QueryValue: validateFieldValue,
       ResourcePath: ResourcePath.validateResourcePath,
       SetOptions: validateSetOptions,
+      ReadOptions: validateReadOptions,
       UpdateMap: validateUpdateMap,
       UpdatePrecondition: precondition =>
           validatePrecondition(precondition, /* allowExists= */ false),
@@ -678,28 +691,31 @@ export class Firestore {
   /**
    * Retrieves multiple documents from Firestore.
    *
-   * @param {...DocumentReference} documents The document references to receive.
+   * @param {DocumentReference} documentRef A `DocumentReference` to receive.
+   * @param {Array.<DocumentReference|ReadOptions>} moreDocumentRefsOrReadOptions
+   * Additional `DocumentReferences` to receive, followed by an optional field
+   * mask.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
    *
    * @example
-   * let documentRef1 = firestore.doc('col/doc1');
-   * let documentRef2 = firestore.doc('col/doc2');
+   * let docRef1 = firestore.doc('col/doc1');
+   * let docRef2 = firestore.doc('col/doc2');
    *
-   * firestore.getAll(documentRef1, documentRef2).then(docs => {
+   * firestore.getAll(docRef1, docRef2, { fieldMask: ['user'] }).then(docs => {
    *   console.log(`First document: ${JSON.stringify(docs[0])}`);
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
    */
-  getAll(...documents: DocumentReference[]): Promise<DocumentSnapshot[]> {
-    documents = is.array(arguments[0]) ? arguments[0].slice() :
-                                         Array.prototype.slice.call(arguments);
+  getAll(
+      documentRef: DocumentReference,
+      ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+      Promise<DocumentSnapshot[]> {
+    this._validator.minNumberOfArguments('Firestore.getAll', arguments, 1);
 
-    for (let i = 0; i < documents.length; ++i) {
-      this._validator.isDocumentReference(i, documents[i]);
-    }
-
-    return this.getAll_(documents, requestTag());
+    const {documents, fieldMask} = parseGetAllArguments(
+        this._validator, [documentRef, ...moreDocumentRefsOrReadOptions]);
+    return this.getAll_(documents, fieldMask, requestTag());
   }
 
   /**
@@ -707,30 +723,33 @@ export class Firestore {
    * as part of a transaction.
    *
    * @private
-   * @param {Array.<DocumentReference>} docRefs The documents to receive.
-   * @param {string} requestTag A unique client-assigned identifier for this
-   * request.
-   * @param {bytes=} transactionId transactionId - The transaction ID to use
-   * for this read.
-   * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that contains an
-   * array with the resulting documents.
+   * @param docRefs The documents to receive.
+   * @param fieldMask An optional field mask to apply to this read.
+   * @param requestTag A unique client-assigned identifier for this request.
+   * @param transactionId The transaction ID to use for this read.
+   * @returns A Promise that contains an array with the resulting documents.
    */
   getAll_(
-      docRefs: DocumentReference[], requestTag: string,
+      docRefs: DocumentReference[], fieldMask: FieldPath[]|null,
+      requestTag: string,
       transactionId?: Uint8Array): Promise<DocumentSnapshot[]> {
     const requestedDocuments = new Set();
     const retrievedDocuments = new Map();
-
-    const request: api.IBatchGetDocumentsRequest = {
-      database: this.formattedName,
-      transaction: transactionId,
-    };
 
     for (const docRef of docRefs) {
       requestedDocuments.add(docRef.formattedName);
     }
 
-    request.documents = Array.from(requestedDocuments);
+    const request: api.IBatchGetDocumentsRequest = {
+      database: this.formattedName,
+      transaction: transactionId,
+      documents: Array.from(requestedDocuments)
+    };
+
+    if (fieldMask) {
+      const fieldPaths = fieldMask.map(fieldPath => fieldPath.formattedName);
+      request.mask = {fieldPaths};
+    }
 
     const self = this;
 
@@ -1338,6 +1357,39 @@ function validateDocumentData(
 
   if (options.allowEmpty === false && isEmpty) {
     throw new Error('At least one field must be updated.');
+  }
+
+  return true;
+}
+
+/**
+ * Validates the use of 'options' as ReadOptions and enforces that 'fieldMask'
+ * is an array of strings or field paths.
+ *
+ * @private
+ * @param options.fieldMask - The subset of fields to return from a read
+ * operation.
+ */
+export function validateReadOptions(options: ReadOptions): boolean {
+  if (!is.object(options)) {
+    throw new Error('Input is not an object.');
+  }
+
+  if (options.fieldMask === undefined) {
+    return true;
+  }
+
+  if (!Array.isArray(options.fieldMask)) {
+    throw new Error('"fieldMask" is not an array.');
+  }
+
+  for (let i = 0; i < options.fieldMask.length; ++i) {
+    try {
+      FieldPath.validateFieldPath(options.fieldMask[i]);
+    } catch (err) {
+      throw new Error(
+          `Element at index ${i} is not a valid FieldPath. ${err.message}`);
+    }
   }
 
   return true;

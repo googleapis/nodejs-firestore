@@ -1087,7 +1087,7 @@ export function validateSetOptions(
         FieldPath.validateFieldPath(options.mergeFields[i]);
       } catch (err) {
         throw new Error(
-            `Argument at index ${i} is not a valid FieldPath. ${err.message}`);
+            `Element at index ${i} is not a valid FieldPath. ${err.message}`);
       }
     }
   }
