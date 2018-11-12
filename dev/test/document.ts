@@ -21,9 +21,6 @@ import {AnyDuringMigration} from '../src/types';
 
 import {create, createInstance, document, found, InvalidApiUsage, missing, remove, requestEquals, retrieve, serverTimestamp, set, stream, update, updateMask, writeResult} from './util/helpers';
 
-const REQUEST_TIME = 'REQUEST_TIME';
-
-
 const PROJECT_ID = 'test-project';
 
 const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(

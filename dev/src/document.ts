@@ -19,7 +19,6 @@ const deepEqual = require('deep-equal');
 import * as is from 'is';
 
 import {google} from '../protos/firestore_proto_api';
-
 import {FieldTransform} from './field-value';
 import {FieldPath} from './path';
 import {DocumentReference} from './reference';
