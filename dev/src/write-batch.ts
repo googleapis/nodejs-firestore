@@ -116,7 +116,7 @@ export class WriteBatch {
   constructor(firestore) {
     this._firestore = firestore;
     this._validator = firestore._validator;
-    this._serializer = firestore._serializer;
+    this._serializer = new Serializer(firestore);
   }
 
   /**

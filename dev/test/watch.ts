@@ -298,7 +298,7 @@ class WatchHelper<T> {
    * @param targetId The target ID of the watch stream.
    */
   constructor(streamHelper, private reference, private targetId) {
-    this.serializer = reference.firestore._serializer;
+    this.serializer = new Serializer(reference.firestore);
     this.streamHelper = streamHelper;
     this.snapshotVersion = 0;
     this.deferredListener = new DeferredListener();

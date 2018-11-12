@@ -38,7 +38,7 @@ describe('Order', () => {
 
   /** Converts a value into its proto representation. */
   function wrap(value) {
-    return firestore._serializer.encodeValue(value);
+    return firestore['_serializer']!.encodeValue(value);
   }
 
   function blob(data) {
