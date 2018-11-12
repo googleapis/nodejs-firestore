@@ -44,19 +44,19 @@ describe('Collection interface', () => {
 
     expect(() => collectionRef.doc(false))
         .to.throw(
-            /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
+            'Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string.');
     expect(() => collectionRef.doc(null))
         .to.throw(
-            /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
+            'Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string.');
     expect(() => collectionRef.doc(''))
         .to.throw(
-            /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
+            'Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string.');
     expect(() => collectionRef.doc(undefined))
         .to.throw(
-            /Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string./);
+            'Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string.');
     expect(() => collectionRef.doc('doc/coll'))
         .to.throw(
-            /Argument "documentPath" must point to a document, but was "doc\/coll". Your path does not contain an even number of components\./);
+            'Argument "documentPath" must point to a document, but was "doc\/coll". Your path does not contain an even number of components.');
 
     documentRef = collectionRef.doc('docId/colId/docId');
     expect(documentRef).to.be.an.instanceOf(DocumentReference);

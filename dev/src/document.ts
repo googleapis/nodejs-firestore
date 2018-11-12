@@ -28,9 +28,6 @@ import {Timestamp} from './timestamp';
 import {AnyDuringMigration, AnyJs, ApiMapValue, DocumentData, UpdateData, UserInput} from './types';
 
 import api = google.firestore.v1beta1;
-import {Validator} from './validate';
-import Any = google.protobuf.Any;
-import ArrayValue = google.firestore.v1beta1.ArrayValue;
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -788,8 +785,8 @@ export class DocumentMask {
     const result = applyDocumentMask(data);
 
     if (result.remainingPaths.length !== 0) {
-      throw new Error(`Input data is missing for field '${
-          result.remainingPaths[0].toString()}'.`);
+      throw new Error(`Input data is missing for field "${
+          result.remainingPaths[0].toString()}".`);
     }
 
     return result.filteredData;

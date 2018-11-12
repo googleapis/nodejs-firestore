@@ -371,12 +371,15 @@ export class WriteBatch {
           } else {
             this._validator.isFieldPath(i, arguments[i]);
             this._validator.minNumberOfArguments('update', arguments, i + 1);
-            this._validator.isFieldValue(i, arguments[i + 1], {
-              allowDeletes: 'root',
-              allowTransforms: true,
-            });
-            updateMap.set(
-                FieldPath.fromArgument(arguments[i]), arguments[i + 1]);
+
+            const fieldPath = FieldPath.fromArgument(arguments[i]);
+            this._validator.isFieldValue(
+                i, arguments[i + 1], {
+                  allowDeletes: 'root',
+                  allowTransforms: true,
+                },
+                fieldPath);
+            updateMap.set(fieldPath, arguments[i + 1]);
           }
         }
       } catch (err) {

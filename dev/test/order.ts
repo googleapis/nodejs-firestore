@@ -71,7 +71,7 @@ describe('Order', () => {
       order.compare(
           {valueType: 'foo'} as InvalidApiUsage,
           {valueType: 'foo'} as InvalidApiUsage);
-    }).to.throw(/Invalid use of type "object" as a Firestore argument./);
+    }).to.throw('Invalid use of type "object" as a Firestore argument.');
   });
 
   it('throws on invalid blob', () => {
@@ -83,7 +83,7 @@ describe('Order', () => {
           {
             bytesValue: new Uint8Array([1, 2, 3]),
           });
-    }).to.throw(/Blobs can only be compared if they are Buffers/);
+    }).to.throw('Blobs can only be compared if they are Buffers');
   });
 
   it('compares document snapshots by name', () => {
