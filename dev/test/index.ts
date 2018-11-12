@@ -970,13 +970,13 @@ describe('getAll() method', () => {
         fieldMask: null
       } as InvalidApiUsage))
           .to.throw(
-              'Argument "options" is not a valid ReadOptions. "fieldMask" is not an array.');
+              'Value for "options" is not a valid ReadOptions. "fieldMask" is not an array.');
 
       expect(() => firestore.getAll(firestore.doc('collectionId/a'), {
         fieldMask: ['a', new FieldPath('b'), null]
       } as InvalidApiUsage))
           .to.throw(
-              'Argument "options" is not a valid ReadOptions. Element at index 2 is not a valid FieldPath. Invalid use of type "object" as a Firestore argument.');
+              'Value for "options" is not a valid ReadOptions. Element at index 2 is not a valid FieldPath. Invalid use of type "object" as a Firestore argument.');
     });
   });
 });

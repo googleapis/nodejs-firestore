@@ -1172,7 +1172,7 @@ declare namespace FirebaseFirestore {
      * that tells the server to add the given value to the field's current
      * value.
      *
-     * If the either current field value or the operand uses floating point
+     * If either current field value or the operand uses floating point
      * precision, both values will be interpreted as floating point numbers and
      * all arithmetic will follow IEEE 754 semantics. Otherwise, integer
      * precision is kept and the result is capped between -2^63 and 2^63-1.
