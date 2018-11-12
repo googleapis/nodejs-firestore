@@ -258,8 +258,8 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    expect(firestore['_initializationSettings'].projectId).to.equal(PROJECT_ID);
-    expect(firestore['_initializationSettings'].foo).to.equal('bar');
+    expect(firestore._settings.projectId).to.equal(PROJECT_ID);
+    expect(firestore._settings.foo).to.equal('bar');
   });
 
   it('can only call settings() once', () => {
