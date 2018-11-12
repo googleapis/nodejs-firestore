@@ -19,8 +19,10 @@ import * as extend from 'extend';
 import * as gax from 'google-gax';
 
 import * as Firestore from '../src';
+import {FieldPath} from '../src';
 import {ResourcePath} from '../src/path';
 import {AnyDuringMigration, GrpcError} from '../src/types';
+
 import {createInstance, document, DOCUMENT_NAME, found, InvalidApiUsage, missing, stream} from './util/helpers';
 
 const {grpc} = new gax.GrpcClient({} as AnyDuringMigration);
@@ -256,8 +258,8 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    expect(firestore['_initializationSettings'].projectId).to.equal(PROJECT_ID);
-    expect(firestore['_initializationSettings'].foo).to.equal('bar');
+    expect(firestore._settings.projectId).to.equal(PROJECT_ID);
+    expect(firestore._settings.foo).to.equal('bar');
   });
 
   it('can only call settings() once', () => {
@@ -711,20 +713,6 @@ describe('getAll() method', () => {
     }
   }
 
-  it('accepts empty list', () => {
-    const overrides = {
-      batchGetDocuments: () => {
-        return stream();
-      }
-    };
-
-    return createInstance(overrides).then(firestore => {
-      return firestore.getAll().then(result => {
-        resultEquals(result);
-      });
-    });
-  });
-
   it('accepts single document', () => {
     const overrides = {
       batchGetDocuments: () => {
@@ -872,9 +860,17 @@ describe('getAll() method', () => {
     });
   });
 
-  it('requires document reference', () => {
+  it('requires at least one argument', () => {
     return createInstance().then(firestore => {
-      expect(() => (firestore as InvalidApiUsage).getAll({}))
+      expect(() => (firestore as InvalidApiUsage).getAll())
+          .to.throw(
+              /Function 'Firestore.getAll\(\)' requires at least 1 argument\./);
+    });
+  });
+
+  it('validates document references', () => {
+    return createInstance().then(firestore => {
+      expect(() => firestore.getAll(null as InvalidApiUsage))
           .to.throw(/Argument at index 0 is not a valid DocumentReference\./);
     });
   });
@@ -883,7 +879,8 @@ describe('getAll() method', () => {
     const overrides = {batchGetDocuments: () => stream(found('documentId'))};
 
     return createInstance(overrides).then(firestore => {
-      return firestore.getAll(firestore.doc('collectionId/documentId'))
+      return (firestore as InvalidApiUsage)
+          .getAll([firestore.doc('collectionId/documentId')])
           .then(result => {
             resultEquals(result, found('documentId'));
           });
@@ -947,6 +944,39 @@ describe('getAll() method', () => {
             resultEquals(
                 result, found('a'), found('a'), found('b'), found('a'));
           });
+    });
+  });
+
+  it('applies field mask', () => {
+    const overrides = {
+      batchGetDocuments: request => {
+        expect(request.mask.fieldPaths).to.have.members([
+          'foo.bar', '`foo.bar`'
+        ]);
+        return stream(found('a'));
+      }
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.getAll(
+          firestore.doc('collectionId/a'),
+          {fieldMask: ['foo.bar', new FieldPath('foo.bar')]});
+    });
+  });
+
+  it('validates field mask', () => {
+    return createInstance().then(firestore => {
+      expect(() => firestore.getAll(firestore.doc('collectionId/a'), {
+        fieldMask: null
+      } as InvalidApiUsage))
+          .to.throw(
+              'Argument "options" is not a valid ReadOptions. "fieldMask" is not an array.');
+
+      expect(() => firestore.getAll(firestore.doc('collectionId/a'), {
+        fieldMask: ['a', new FieldPath('b'), null]
+      } as InvalidApiUsage))
+          .to.throw(
+              'Argument "options" is not a valid ReadOptions. Element at index 2 is not a valid FieldPath. Invalid use of type "object" as a Firestore argument.');
     });
   });
 });

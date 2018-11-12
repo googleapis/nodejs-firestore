@@ -16,8 +16,6 @@
 
 import {expect} from 'chai';
 import * as extend from 'extend';
-import * as is from 'is';
-
 import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {DocumentData, DocumentReference, Query, Timestamp} from '../src';

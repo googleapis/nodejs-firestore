@@ -25,6 +25,7 @@ import {createInstance, InvalidApiUsage} from './util/helpers';
 
 import api = proto.google.firestore.v1beta1;
 import {AnyDuringMigration} from '../src/types';
+import {FieldPath} from '../src';
 
 use(chaiAsPromised);
 
@@ -134,12 +135,16 @@ function getDocument(transaction?) {
   };
 }
 
-function getAll(docs) {
+function getAll(docs: string[], fieldMask?: string[]) {
   const request: api.IBatchGetDocumentsRequest = {
     database: DATABASE_ROOT,
     documents: [],
     transaction: 'foo' as AnyDuringMigration,
   };
+
+  if (fieldMask) {
+    request.mask = {fieldPaths: fieldMask};
+  }
 
   const stream = through2.obj();
 
@@ -468,6 +473,15 @@ describe('transaction operations', () => {
         expect(docs[1].id).to.equal('secondDocument');
       });
     }, begin(), getAll(['firstDocument', 'secondDocument']), commit());
+  });
+
+  it('support getAll with field mask', () => {
+    return runTransaction((transaction, docRef) => {
+      const doc = docRef.parent.doc('doc');
+
+      return transaction.getAll(
+          doc, {fieldMask: ['a.b', new FieldPath('a.b')]});
+    }, begin(), getAll(['doc'], ['a.b', '`a.b`']), commit());
   });
 
   it('enforce that getAll come before writes', () => {

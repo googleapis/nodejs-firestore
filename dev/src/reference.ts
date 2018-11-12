@@ -900,7 +900,7 @@ export class Query {
       private readonly _fieldOrders: FieldOrder[] = [],
       private readonly _queryOptions: QueryOptions = {}) {
     this._validator = _firestore._validator;
-    this._serializer = _firestore._serializer!;
+    this._serializer = new Serializer(_firestore);
   }
 
   /**

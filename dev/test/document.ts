@@ -21,9 +21,6 @@ import {AnyDuringMigration} from '../src/types';
 
 import {create, createInstance, document, found, InvalidApiUsage, missing, remove, requestEquals, retrieve, serverTimestamp, set, stream, update, updateMask, writeResult} from './util/helpers';
 
-const REQUEST_TIME = 'REQUEST_TIME';
-
-
 const PROJECT_ID = 'test-project';
 
 const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
@@ -971,7 +968,7 @@ describe('set document', () => {
       });
     })
         .to.throw(
-            /Value for "options" is not a valid SetOptions. Argument at index 0 is not a valid FieldPath./);
+            /Value for "options" is not a valid SetOptions. Element at index 0 is not a valid FieldPath./);
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {

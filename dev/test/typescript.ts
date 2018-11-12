@@ -67,6 +67,11 @@ xdescribe('firestore.d.ts', () => {
     const docRef1: DocumentReference = firestore.doc('coll/doc');
     const docRef2: DocumentReference = firestore.doc('coll/doc');
     firestore.getAll(docRef1, docRef2).then((docs: DocumentSnapshot[]) => {});
+    firestore.getAll(docRef1, docRef2, {})
+        .then((docs: DocumentSnapshot[]) => {});
+    firestore
+        .getAll(docRef1, docRef2, {fieldMask: ['foo', new FieldPath('foo')]})
+        .then((docs: DocumentSnapshot[]) => {});
     firestore.getCollections().then((collections: CollectionReference[]) => {});
     firestore.listCollections().then(
         (collections: CollectionReference[]) => {});
