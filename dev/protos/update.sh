@@ -59,7 +59,12 @@ cp protobuf/src/google/protobuf/{any,empty,struct,timestamp,wrappers}.proto \
    "${PROTOS_DIR}/google/protobuf/"
 
 # Generate the Protobuf typings
-pbjs --proto_path=. --js_out=import_style=commonjs,binary:library --target=static --no-create --no-encode --no-decode --no-verify --no-convert --no-delimited --force-enum-string --force-number -o firestore_proto_api.js  "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto";
+pbjs --proto_path=. --js_out=import_style=commonjs,binary:library \
+  --target=static --no-create --no-encode --no-decode --no-verify \
+  --no-convert --no-delimited --force-enum-string --force-number -o \
+  firestore_proto_api.js  "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" \
+  "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
+  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
 pbts -o firestore_proto_api.d.ts firestore_proto_api.js
 
 # Copy typings into source repo
