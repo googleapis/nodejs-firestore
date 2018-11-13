@@ -253,7 +253,7 @@ export function serverTimestamp(field: string):
   return {fieldPath: field, setToServerValue: 'REQUEST_TIME'};
 }
 
-export function numericAddTransform(
+export function incrementTransform(
     field: string, n: number): api.DocumentTransform.IFieldTransform {
   return {
     fieldPath: field,

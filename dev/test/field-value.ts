@@ -18,7 +18,7 @@ import {expect} from 'chai';
 
 import {FieldValue} from '../src';
 
-import {ApiOverride, arrayTransform, createInstance, document, InvalidApiUsage, numericAddTransform, requestEquals, serverTimestamp, set, writeResult} from './util/helpers';
+import {ApiOverride, arrayTransform, createInstance, document, incrementTransform, InvalidApiUsage, requestEquals, serverTimestamp, set, writeResult} from './util/helpers';
 
 function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
   it('can\'t be used inside arrays', () => {
@@ -110,27 +110,27 @@ describe('FieldValue.arrayUnion()', () => {
   genericFieldValueTests('FieldValue.arrayUnion', FieldValue.arrayUnion('foo'));
 });
 
-describe('FieldValue.numericAdd()', () => {
+describe('FieldValue.increment()', () => {
   it('requires one argument', () => {
-    expect(() => (FieldValue as InvalidApiUsage).numericAdd())
+    expect(() => (FieldValue as InvalidApiUsage).increment())
         .to.throw(
-            'Function "FieldValue.numericAdd()" requires at least 1 argument.');
+            'Function "FieldValue.increment()" requires at least 1 argument.');
   });
 
   it('validates that operand is number', () => {
     return createInstance().then(firestore => {
       expect(() => {
         return firestore.doc('collectionId/documentId').set({
-          foo: FieldValue.numericAdd('foo' as InvalidApiUsage),
+          foo: FieldValue.increment('foo' as InvalidApiUsage),
         });
-      }).to.throw('Value for "FieldValue.numericAdd()" is not a valid number');
+      }).to.throw('Value for "FieldValue.increment()" is not a valid number');
     });
   });
 
   it('supports isEqual()', () => {
-    const arrayUnionA = FieldValue.numericAdd(13.37);
-    const arrayUnionB = FieldValue.numericAdd(13.37);
-    const arrayUnionC = FieldValue.numericAdd(42);
+    const arrayUnionA = FieldValue.increment(13.37);
+    const arrayUnionB = FieldValue.increment(13.37);
+    const arrayUnionC = FieldValue.increment(42);
     expect(arrayUnionA.isEqual(arrayUnionB)).to.be.true;
     expect(arrayUnionC.isEqual(arrayUnionB)).to.be.false;
   });
@@ -141,8 +141,8 @@ describe('FieldValue.numericAdd()', () => {
         const expectedRequest = set({
           document: document('documentId', 'foo', 'bar'),
           transforms: [
-            numericAddTransform('field', 42),
-            numericAddTransform('map.field', 13.37),
+            incrementTransform('field', 42),
+            incrementTransform('map.field', 13.37),
           ]
         });
         requestEquals(request, expectedRequest);
@@ -153,13 +153,13 @@ describe('FieldValue.numericAdd()', () => {
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
         foo: 'bar',
-        field: FieldValue.numericAdd(42),
-        map: {field: FieldValue.numericAdd(13.37)},
+        field: FieldValue.increment(42),
+        map: {field: FieldValue.increment(13.37)},
       });
     });
   });
 
-  genericFieldValueTests('FieldValue.numericAdd', FieldValue.numericAdd(42));
+  genericFieldValueTests('FieldValue.increment', FieldValue.increment(42));
 });
 
 describe('FieldValue.arrayRemove()', () => {

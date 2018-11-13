@@ -84,8 +84,8 @@ export class FieldValue {
 
   /**
    * Returns a special value that can be used with set(), create() or update()
-   * that tells the server to add the given value to the field's current
-   * value.
+   * that tells the server to increment the the field's current value by the
+   * given value.
    *
    * If either current field value or the operand uses floating point
    * precision, both values will be interpreted as floating point numbers and
@@ -95,23 +95,23 @@ export class FieldValue {
    * If the current field value is not of type 'number', or if the field does
    * not yet exist, the transformation will set the field to the given value.
    *
-   * @param n The value to add.
+   * @param n The value to increment by.
    * @return The FieldValue sentinel for use in a call to set() or update().
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.update(
-   *   'counter', Firestore.FieldValue.numericAdd(1)
+   *   'counter', Firestore.FieldValue.increment(1)
    * ).then(() => {
    *   return documentRef.get();
    * }).then(doc => {
    *   // doc.get('counter') was incremented
    * });
    */
-  static numericAdd(n: number): FieldValue {
-    validate.minNumberOfArguments('FieldValue.numericAdd', arguments, 1);
-    return new NumericAddTransform(n);
+  static increment(n: number): FieldValue {
+    validate.minNumberOfArguments('FieldValue.increment', arguments, 1);
+    return new NumericIncrementTransform(n);
   }
 
   /**
@@ -317,7 +317,7 @@ class ServerTimestampTransform extends FieldTransform {
  *
  * @private
  */
-class NumericAddTransform extends FieldTransform {
+class NumericIncrementTransform extends FieldTransform {
   constructor(private readonly operand: number) {
     super();
   }
@@ -337,11 +337,11 @@ class NumericAddTransform extends FieldTransform {
   }
 
   get methodName(): string {
-    return 'FieldValue.numericAdd';
+    return 'FieldValue.increment';
   }
 
   validate(validator: AnyDuringMigration): boolean {
-    return validator.isNumber('FieldValue.numericAdd()', this.operand);
+    return validator.isNumber('FieldValue.increment()', this.operand);
   }
 
   toProto(serializer: Serializer, fieldPath: FieldPath):
@@ -353,7 +353,7 @@ class NumericAddTransform extends FieldTransform {
   isEqual(other: FieldValue): boolean {
     return (
         this === other ||
-        (other instanceof NumericAddTransform &&
+        (other instanceof NumericIncrementTransform &&
          this.operand === other.operand));
   }
 }

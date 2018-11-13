@@ -1169,7 +1169,7 @@ declare namespace FirebaseFirestore {
 
     /**
      * Returns a special value that can be used with set(), create() or update()
-     * that tells the server to add the given value to the field's current
+     * that tells the server to increment the field's current value by the given
      * value.
      *
      * If either current field value or the operand uses floating point
@@ -1180,10 +1180,10 @@ declare namespace FirebaseFirestore {
      * If the current field value is not of type 'number', or if the field does
      * not yet exist, the transformation will set the field to the given value.
      *
-     * @param n The value to add.
+     * @param n The value to increment by.
      * @return The FieldValue sentinel for use in a call to set() or update().
      */
-    static numericAdd(n: number): FieldValue;
+    static increment(n: number): FieldValue;
 
     /**
      * Returns a special value that can be used with set(), create() or update()

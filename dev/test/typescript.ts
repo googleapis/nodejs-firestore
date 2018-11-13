@@ -293,7 +293,7 @@ xdescribe('firestore.d.ts', () => {
       'b': FieldValue.delete(),
       'c': FieldValue.arrayUnion('foo'),
       'd': FieldValue.arrayRemove('bar'),
-      'e': FieldValue.numericAdd(0)
+      'e': FieldValue.increment(0)
     };
     const serverTimestamp: FieldValue = FieldValue.serverTimestamp();
     const deleteField: FieldValue = FieldValue.delete();
