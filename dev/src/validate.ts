@@ -15,6 +15,8 @@
  */
 
 import * as is from 'is';
+
+import {FieldPath} from './path';
 import {AnyDuringMigration} from './types';
 
 /**
@@ -91,7 +93,7 @@ export class Validator {
       this[`is${camelCase}`] = (argumentName, ...values) => {
         let valid = false;
         let message = is.number(argumentName) ?
-            `Argument at index ${argumentName} is not a valid ${type}.` :
+            `Element at index ${argumentName} is not a valid ${type}.` :
             `Value for "${argumentName}" is not a valid ${type}.`;
 
         try {
@@ -130,7 +132,7 @@ export class Validator {
   minNumberOfArguments(funcName, args, minSize): boolean {
     if (args.length < minSize) {
       throw new Error(
-          `Function '${funcName}()' requires at least ` +
+          `Function "${funcName}()" requires at least ` +
           `${formatPlural(minSize, 'argument')}.`);
     }
 
@@ -150,7 +152,7 @@ export class Validator {
   maxNumberOfArguments(funcName, args, maxSize): boolean {
     if (args.length > maxSize) {
       throw new Error(
-          `Function '${funcName}()' accepts at most ` +
+          `Function "${funcName}()" accepts at most ` +
           `${formatPlural(maxSize, 'argument')}.`);
     }
 
@@ -158,7 +160,9 @@ export class Validator {
   }
 }
 
-export function customObjectError(val): Error {
+export function customObjectError(val, path?: FieldPath): Error {
+  const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
+
   if (is.object(val) && val.constructor.name !== 'Object') {
     const typeName = val.constructor.name;
     switch (typeName) {
@@ -169,17 +173,21 @@ export function customObjectError(val): Error {
       case 'Timestamp':
         return new Error(
             `Detected an object of type "${typeName}" that doesn't match the ` +
-            'expected instance. Please ensure that the Firestore types you ' +
-            'are using are from the same NPM package.');
+            `expected instance${fieldPathMessage}. Please ensure that the ` +
+            'Firestore types you are using are from the same NPM package.');
       default:
         return new Error(
-            `Couldn't serialize object of type "${typeName}". Firestore ` +
-            'doesn\'t support JavaScript objects with custom prototypes ' +
-            '(i.e. objects that were created via the \'new\' operator).');
+            `Couldn't serialize object of type "${typeName}"${
+                fieldPathMessage}. Firestore doesn't support JavaScript ` +
+            'objects with custom prototypes (i.e. objects that were created ' +
+            'via the "new" operator).');
     }
+  } else if (!is.object(val)) {
+    throw new Error(
+        `Input is not a plain JavaScript object${fieldPathMessage}.`);
   } else {
-    return new Error(
-        `Invalid use of type "${typeof val}" as a Firestore argument.`);
+    return new Error(`Invalid use of type "${
+        typeof val}" as a Firestore argument${fieldPathMessage}.`);
   }
 }
 

@@ -139,17 +139,17 @@ describe('timestamps', () => {
 
   it('validates nanoseconds', () => {
     expect(() => new Firestore.Timestamp(0.1, 0))
-        .to.throw(/Value for "seconds" is not a valid integer./);
+        .to.throw('Value for "seconds" is not a valid integer.');
 
     expect(() => new Firestore.Timestamp(0, 0.1))
-        .to.throw(/Value for "nanoseconds" is not a valid integer./);
+        .to.throw('Value for "nanoseconds" is not a valid integer.');
 
     expect(() => new Firestore.Timestamp(0, -1))
         .to.throw(
-            /Value for "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1/);
+            'Value for "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1');
 
     expect(() => new Firestore.Timestamp(0, 1000000000))
         .to.throw(
-            /Value for "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000/);
+            'Value for "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000');
   });
 });

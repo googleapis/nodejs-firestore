@@ -303,7 +303,7 @@ describe('failed transactions', () => {
 
     return createInstance(overrides).then(firestore => {
       expect(() => (firestore as InvalidApiUsage).runTransaction())
-          .to.throw(/Value for "updateFunction" is not a valid function\./);
+          .to.throw('Value for "updateFunction" is not a valid function.');
     });
   });
 
@@ -319,13 +319,13 @@ describe('failed transactions', () => {
           () => firestore.runTransaction(
               () => Promise.resolve(), {maxAttempts: 'foo' as InvalidApiUsage}))
           .to.throw(
-              /Value for "transactionOptions.maxAttempts" is not a valid integer\./);
+              'Value for "transactionOptions.maxAttempts" is not a valid integer.');
 
       expect(
           () => firestore.runTransaction(
               () => Promise.resolve(), {maxAttempts: 0}))
           .to.throw(
-              /Value for "transactionOptions.maxAttempts" is not a valid integer\./);
+              'Value for "transactionOptions.maxAttempts" is not a valid integer.');
     });
   });
 
@@ -433,10 +433,10 @@ describe('transaction operations', () => {
   it('requires a query or document for get', () => {
     return runTransaction(transaction => {
       expect(() => transaction.get())
-          .to.throw(/Argument "refOrQuery" must be a DocumentRef or a Query\./);
+          .to.throw('Value for "refOrQuery" must be a DocumentRef or a Query.');
 
       expect(() => transaction.get('foo'))
-          .to.throw(/Argument "refOrQuery" must be a DocumentRef or a Query\./);
+          .to.throw('Value for "refOrQuery" must be a DocumentRef or a Query.');
 
       return Promise.resolve();
     }, begin(), commit());

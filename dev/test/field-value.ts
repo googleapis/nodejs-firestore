@@ -25,7 +25,7 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('coll/doc');
       const expectedErr =
-          `${methodName}() is not supported inside of array values.`;
+          new RegExp(`${methodName}\\(\\) cannot be used inside of an array`);
       expect(() => docRef.set({a: [sentinel]})).to.throw(expectedErr);
       expect(() => docRef.set({a: {b: [sentinel]}})).to.throw(expectedErr);
       expect(() => docRef.set({
@@ -39,7 +39,7 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: FieldValue.arrayUnion(sentinel)}))
-          .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
+          .to.throw(`Element at index 0 is not a valid ArrayElement. ${
               methodName}() cannot be used inside of an array.`);
     });
   });
@@ -48,7 +48,7 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: FieldValue.arrayRemove(sentinel)}))
-          .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
+          .to.throw(`Element at index 0 is not a valid ArrayElement. ${
               methodName}() cannot be used inside of an array.`);
     });
   });
@@ -60,7 +60,7 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
           .to.throw(`Value for "value" is not a valid QueryValue. ${
               methodName}() can only be used in set(), create() or update().`);
       expect(() => collRef.orderBy('a').startAt(sentinel))
-          .to.throw(`Argument at index 0 is not a valid QueryValue. ${
+          .to.throw(`Element at index 0 is not a valid QueryValue. ${
               methodName}() can only be used in set(), create() or update().`);
     });
   });
@@ -70,7 +70,7 @@ describe('FieldValue.arrayUnion()', () => {
   it('requires one argument', () => {
     expect(() => FieldValue.arrayUnion())
         .to.throw(
-            'Function \'FieldValue.arrayUnion()\' requires at least 1 argument.');
+            'Function "FieldValue.arrayUnion()" requires at least 1 argument.');
   });
 
   it('supports isEqual()', () => {
@@ -114,7 +114,7 @@ describe('FieldValue.numericAdd()', () => {
   it('requires one argument', () => {
     expect(() => (FieldValue as InvalidApiUsage).numericAdd())
         .to.throw(
-            'Function \'FieldValue.numericAdd()\' requires at least 1 argument.');
+            'Function "FieldValue.numericAdd()" requires at least 1 argument.');
   });
 
   it('validates that operand is number', () => {
@@ -166,7 +166,7 @@ describe('FieldValue.arrayRemove()', () => {
   it('requires one argument', () => {
     expect(() => FieldValue.arrayRemove())
         .to.throw(
-            'Function \'FieldValue.arrayRemove()\' requires at least 1 argument.');
+            'Function "FieldValue.arrayRemove()" requires at least 1 argument.');
   });
 
   it('supports isEqual()', () => {
