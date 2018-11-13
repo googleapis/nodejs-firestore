@@ -52,7 +52,7 @@ describe('ResourcePath', () => {
     expect(() => {
       path =
           ResourcePath.fromSlashSeparatedString('projects/project/databases');
-    }).to.throw(/Resource name 'projects\/project\/databases' is not valid\./);
+    }).to.throw('Resource name \'projects\/project\/databases\' is not valid');
   });
 
   it('accepts newlines', () => {
@@ -76,13 +76,13 @@ describe('FieldPath', () => {
   it('doesn\'t accept empty path', () => {
     expect(() => {
       new FieldPath();
-    }).to.throw(/Function 'FieldPath\(\)' requires at least 1 argument\./);
+    }).to.throw('Function "FieldPath()" requires at least 1 argument.');
   });
 
   it('only accepts strings', () => {
     expect(() => {
       new FieldPath('foo', 'bar', 0 as InvalidApiUsage);
-    }).to.throw(/Argument at index 2 is not a valid string\./);
+    }).to.throw('Argument at index 2 is not a valid string.');
   });
 
   it('has append() method', () => {
@@ -105,7 +105,7 @@ describe('FieldPath', () => {
   it('doesn\'t allow empty components', () => {
     expect(() => {
       new FieldPath('foo', '');
-    }).to.throw(/Argument at index 1 should not be empty./);
+    }).to.throw('Element at index 1 should not be an empty string.');
   });
 
   it('has isEqual() method', () => {

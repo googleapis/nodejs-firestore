@@ -25,7 +25,7 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('coll/doc');
       const expectedErr =
-          `${methodName}() is not supported inside of array values.`;
+          new RegExp(`${methodName}\\(\\) cannot be used inside of an array`);
       expect(() => docRef.set({a: [sentinel]})).to.throw(expectedErr);
       expect(() => docRef.set({a: {b: [sentinel]}})).to.throw(expectedErr);
       expect(() => docRef.set({
@@ -70,7 +70,7 @@ describe('FieldValue.arrayUnion()', () => {
   it('requires one argument', () => {
     expect(() => FieldValue.arrayUnion())
         .to.throw(
-            'Function \'FieldValue.arrayUnion()\' requires at least 1 argument.');
+            'Function "FieldValue.arrayUnion()" requires at least 1 argument.');
   });
 
   it('supports isEqual()', () => {
@@ -114,7 +114,7 @@ describe('FieldValue.arrayRemove()', () => {
   it('requires one argument', () => {
     expect(() => FieldValue.arrayRemove())
         .to.throw(
-            'Function \'FieldValue.arrayRemove()\' requires at least 1 argument.');
+            'Function "FieldValue.arrayRemove()" requires at least 1 argument.');
   });
 
   it('supports isEqual()', () => {

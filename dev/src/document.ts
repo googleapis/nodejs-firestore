@@ -19,7 +19,6 @@ const deepEqual = require('deep-equal');
 import * as is from 'is';
 
 import {google} from '../protos/firestore_proto_api';
-
 import {FieldTransform} from './field-value';
 import {FieldPath} from './path';
 import {DocumentReference} from './reference';
@@ -28,9 +27,6 @@ import {Timestamp} from './timestamp';
 import {AnyDuringMigration, AnyJs, ApiMapValue, DocumentData, UpdateData, UserInput} from './types';
 
 import api = google.firestore.v1beta1;
-import {Validator} from './validate';
-import Any = google.protobuf.Any;
-import ArrayValue = google.firestore.v1beta1.ArrayValue;
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -788,8 +784,8 @@ export class DocumentMask {
     const result = applyDocumentMask(data);
 
     if (result.remainingPaths.length !== 0) {
-      throw new Error(`Input data is missing for field '${
-          result.remainingPaths[0].toString()}'.`);
+      throw new Error(`Input data is missing for field "${
+          result.remainingPaths[0].toString()}".`);
     }
 
     return result.filteredData;
@@ -1090,7 +1086,7 @@ export function validateSetOptions(
         FieldPath.validateFieldPath(options.mergeFields[i]);
       } catch (err) {
         throw new Error(
-            `Argument at index ${i} is not a valid FieldPath. ${err.message}`);
+            `Element at index ${i} is not a valid FieldPath. ${err.message}`);
       }
     }
   }
