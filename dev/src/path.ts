@@ -65,7 +65,7 @@ abstract class Path<T> {
    *
    * @private
    * @hideconstructor
-   * @param {string[]} segments Sequence of parts of a path.
+   * @param segments Sequence of parts of a path.
    */
   constructor(protected readonly segments: string[]) {}
 
@@ -73,10 +73,18 @@ abstract class Path<T> {
    * String representation as expected by the proto API.
    *
    * @private
-   * @type {string}
    */
   get formattedName(): string {
     return this.canonicalString()!;
+  }
+
+  /**
+   * Returns the number of segments of this field path.
+   *
+   * @private
+   */
+  get size(): number {
+    return this.segments.length;
   }
 
   abstract construct(segments: string[]|string): T;
@@ -87,9 +95,8 @@ abstract class Path<T> {
    * Create a child path beneath the current level.
    *
    * @private
-   * @param {string|T} relativePath Relative path to append to the current path.
-   * @returns {T} The new path.
-   * @template T
+   * @param relativePath Relative path to append to the current path.
+   * @returns The new path.
    */
   append(relativePath: Path<T>|string): T {
     if (relativePath instanceof Path) {
@@ -102,9 +109,7 @@ abstract class Path<T> {
    * Returns the path of the parent node.
    *
    * @private
-   * @returns {T|null} The new path or null if we are already at the root.
-   * @returns {T} The new path.
-   * @template T
+   * @returns The new path or null if we are already at the root.
    */
   parent(): T|null {
     if (this.segments.length === 0) {
@@ -119,8 +124,7 @@ abstract class Path<T> {
    *
    * @private
    * @param other The path to check against.
-   * @returns 'true' iff the current path is a prefix match with
-   * 'other'.
+   * @returns 'true' iff the current path is a prefix match with 'other'.
    */
   isPrefixOf(other: Path<T>): boolean {
     if (other.segments.length < this.segments.length) {
@@ -140,7 +144,7 @@ abstract class Path<T> {
    * Returns a string representation of this path.
    *
    * @private
-   * @returns {string} A string representing this path.
+   * @returns A string representing this path.
    */
   toString(): string {
     return this.formattedName;
@@ -176,7 +180,7 @@ abstract class Path<T> {
    * Returns a copy of the underlying segments.
    *
    * @private
-   * @returns {Array.<string>} A copy of the segments that make up this path.
+   * @returns A copy of the segments that make up this path.
    */
   toArray(): string[] {
     return this.segments.slice();
@@ -186,8 +190,8 @@ abstract class Path<T> {
    * Returns true if this `Path` is equal to the provided value.
    *
    * @private
-   * @param {*} other The value to compare against.
-   * @return {boolean} true if this `Path` is equal to the provided value.
+   * @param other The value to compare against.
+   * @return true if this `Path` is equal to the provided value.
    */
   isEqual(other: Path<T>): boolean {
     return (
@@ -450,7 +454,7 @@ export class FieldPath extends Path<FieldPath> {
     for (let i = 0; i < elements.length; ++i) {
       validate.isString(i, elements[i]);
       if (elements[i].length === 0) {
-        throw new Error(`Argument at index ${i} should not be empty.`);
+        throw new Error(`Element at index ${i} should not be an empty string.`);
       }
     }
 
@@ -471,26 +475,36 @@ export class FieldPath extends Path<FieldPath> {
    * Returns true if the provided value can be used as a field path argument.
    *
    * @private
-   * @param {string|FieldPath} fieldPath The value to verify.
+   * @param fieldPath The value to verify.
    * @throws if the string can't be used as a field path.
-   * @returns {boolean} 'true' when the path is valid.
+   * @returns 'true' when the path is valid.
    */
-  static validateFieldPath(fieldPath: string|FieldPath) {
+  static validateFieldPath(fieldPath: unknown): boolean {
     if (!(fieldPath instanceof FieldPath)) {
-      if (!is.string(fieldPath)) {
+      if (fieldPath === undefined) {
+        throw new Error('Path cannot be omitted.');
+      }
+
+      if (is.object(fieldPath) &&
+          (fieldPath as object).constructor.name === 'FieldPath') {
         throw customObjectError(fieldPath);
       }
 
+      if (typeof fieldPath !== 'string') {
+        throw new Error(
+            'Paths can only be specified as strings or via a FieldPath object.');
+      }
+
       if (fieldPath.indexOf('..') >= 0) {
-        throw new Error(`Paths must not contain '..' in them.`);
+        throw new Error(`Paths must not contain ".." in them.`);
       }
 
       if (fieldPath.startsWith('.') || fieldPath.endsWith('.')) {
-        throw new Error(`Paths must not start or end with '.'.`);
+        throw new Error(`Paths must not start or end with ".".`);
       }
 
       if (!FIELD_PATH_RE.test(fieldPath)) {
-        throw new Error(`Paths can't be empty and must not contain '*~/[]'.`);
+        throw new Error(`Paths can't be empty and must not contain "*~/[]".`);
       }
     }
 

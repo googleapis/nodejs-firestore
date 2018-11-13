@@ -643,10 +643,10 @@ describe('Query watch', () => {
 
   it('with invalid callbacks', () => {
     expect(() => colRef.onSnapshot('foo'))
-        .to.throw(/Argument "onNext" is not a valid function./);
+        .to.throw('Argument "onNext" is not a valid function.');
 
     expect(() => colRef.onSnapshot(() => {}, 'foo'))
-        .to.throw(/Argument "onError" is not a valid function./);
+        .to.throw('Argument "onError" is not a valid function.');
   });
 
   it('without error callback', (done) => {
@@ -2133,10 +2133,10 @@ describe('DocumentReference watch', () => {
 
   it('with invalid callbacks', () => {
     expect(() => doc.onSnapshot('foo'))
-        .to.throw(/Argument "onNext" is not a valid function./);
+        .to.throw('Argument "onNext" is not a valid function.');
 
     expect(() => doc.onSnapshot(() => {}, 'foo'))
-        .to.throw(/Argument "onError" is not a valid function./);
+        .to.throw('Argument "onError" is not a valid function.');
   });
 
   it('without error callback', done => {
@@ -2521,6 +2521,6 @@ describe('Query comparator', () => {
 
     const comparator = query.comparator();
     expect(() => input.sort(comparator))
-        .to.throw(/Trying to compare documents on fields that don't exist/);
+        .to.throw('Trying to compare documents on fields that don\'t exist');
   });
 });

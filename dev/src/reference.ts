@@ -940,11 +940,11 @@ export class Query {
         const fieldValue = documentSnapshot.get(fieldOrder.field);
         if (fieldValue === undefined) {
           throw new Error(
-              `Field '${
+              `Field "${
                   fieldOrder
-                      .field}' is missing in the provided DocumentSnapshot. Please provide a ` +
-              'document that contains values for all specified orderBy() and ' +
-              'where() constraints.');
+                      .field}" is missing in the provided DocumentSnapshot. ` +
+              'Please provide a document that contains values for all specified ' +
+              'orderBy() and where() constraints.');
         } else {
           fieldValues.push(fieldValue);
         }
@@ -1319,7 +1319,7 @@ export class Query {
     } else if (reference instanceof DocumentReference) {
       if (!this._path.isPrefixOf(reference._path)) {
         throw new Error(
-            `'${reference.path}' is not part of the query result set and ` +
+            `"${reference.path}" is not part of the query result set and ` +
             'cannot be used as a query boundary.');
       }
     } else {
@@ -1331,7 +1331,7 @@ export class Query {
     if (reference._path.parent()!.compareTo(this._path) !== 0) {
       throw new Error(
           'Only a direct child can be used as a query boundary. ' +
-          `Found: '${reference.path}'.`);
+          `Found: "${reference.path}".`);
     }
     return reference;
   }

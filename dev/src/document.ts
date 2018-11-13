@@ -28,7 +28,6 @@ import {AnyDuringMigration, AnyJs, ApiMapValue, DocumentData, UpdateData, UserIn
 
 import api = google.firestore.v1beta1;
 
-
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
  * Invoke `.build()' to assemble the final snapshot.
@@ -785,8 +784,8 @@ export class DocumentMask {
     const result = applyDocumentMask(data);
 
     if (result.remainingPaths.length !== 0) {
-      throw new Error(`Input data is missing for field '${
-          result.remainingPaths[0].toString()}'.`);
+      throw new Error(`Input data is missing for field "${
+          result.remainingPaths[0].toString()}".`);
     }
 
     return result.filteredData;

@@ -558,14 +558,14 @@ describe('query interface', () => {
           snapshot.docChanges.forEach(() => {});
         })
             .to.throw(
-                /QuerySnapshot.docChanges has been changed from a property into a method/);
+                'QuerySnapshot.docChanges has been changed from a property into a method');
 
         expect(() => {
           for (const doc of snapshot.docChanges) {
           }
         })
             .to.throw(
-                /QuerySnapshot.docChanges has been changed from a property into a method/);
+                'QuerySnapshot.docChanges has been changed from a property into a method');
       });
     });
   });
@@ -693,7 +693,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            /Argument "fieldPath" is not a valid FieldPath. Invalid use of type "object" as a Firestore argument/);
+            'Argument "fieldPath" is not a valid FieldPath. Paths can only be specified as strings or via a FieldPath object.');
 
     class FieldPath {}
     expect(() => {
@@ -702,7 +702,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            /Detected an object of type "FieldPath" that doesn't match the expected instance./);
+            'Detected an object of type "FieldPath" that doesn\'t match the expected instance.');
   });
 
   it('rejects field paths as value', () => {
@@ -712,7 +712,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            /Argument "value" is not a valid QueryValue. Cannot use object of type "FieldPath" as a Firestore value./);
+            'Argument "value" is not a valid QueryValue. Cannot use object of type "FieldPath" as a Firestore value.');
   });
 
   it('rejects field delete as value', () => {
@@ -722,7 +722,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            /FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
+            'FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}.');
   });
 
   it('rejects custom classes as value', () => {
@@ -738,31 +738,31 @@ describe('where() interface', () => {
       query.where('foo', '=', new Foo()).get();
     })
         .to.throw(
-            /Argument "value" is not a valid QueryValue. Couldn't serialize object of type "Foo". Firestore doesn't support JavaScript objects with custom prototypes \(i.e. objects that were created via the 'new' operator\)./);
+            'Argument "value" is not a valid QueryValue. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
 
     expect(() => {
       query.where('foo', '=', new FieldPath()).get();
     })
         .to.throw(
-            /Detected an object of type "FieldPath" that doesn't match the expected instance./);
+            'Detected an object of type "FieldPath" that doesn\'t match the expected instance.');
 
     expect(() => {
       query.where('foo', '=', new FieldValue()).get();
     })
         .to.throw(
-            /Detected an object of type "FieldValue" that doesn't match the expected instance./);
+            'Detected an object of type "FieldValue" that doesn\'t match the expected instance.');
 
     expect(() => {
       query.where('foo', '=', new DocumentReference()).get();
     })
         .to.throw(
-            /Detected an object of type "DocumentReference" that doesn't match the expected instance./);
+            'Detected an object of type "DocumentReference" that doesn\'t match the expected instance.');
 
     expect(() => {
       query.where('foo', '=', new GeoPoint()).get();
     })
         .to.throw(
-            /Detected an object of type "GeoPoint" that doesn't match the expected instance./);
+            'Detected an object of type "GeoPoint" that doesn\'t match the expected instance.');
   });
 
   it('supports unary filters', () => {
@@ -789,7 +789,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            /Invalid query. You can only perform equals comparisons on NaN\./);
+            'Invalid query. You can only perform equals comparisons on NaN.');
   });
 
   it('rejects invalid Null filter', () => {
@@ -799,7 +799,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            /Invalid query. You can only perform equals comparisons on Null\./);
+            'Invalid query. You can only perform equals comparisons on Null.');
   });
 
   it('verifies field path', () => {
@@ -808,14 +808,14 @@ describe('where() interface', () => {
       query = query.where('foo.', '=', 'foobar');
     })
         .to.throw(
-            /Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with '.'./);
+            'Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with ".".');
   });
 
   it('verifies operator', () => {
     let query = firestore.collection('collectionId');
     expect(() => {
       query = query.where('foo', '@', 'foobar');
-    }).to.throw(/Operator must be one of "<", "<=", "==", ">", or ">="\./);
+    }).to.throw('Operator must be one of "<", "<=", "==", ">", or ">="\.');
   });
 });
 
@@ -880,7 +880,7 @@ describe('orderBy() interface', () => {
     let query: Query = firestore.collection('collectionId');
     expect(() => {
       query = query.orderBy('foo', 'foo');
-    }).to.throw(/Order must be one of "asc" or "desc"\./);
+    }).to.throw('Order must be one of "asc" or "desc".');
   });
 
   it('accepts field path', () => {
@@ -907,7 +907,7 @@ describe('orderBy() interface', () => {
       query = query.orderBy('foo.');
     })
         .to.throw(
-            /Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with '.'./);
+            'Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with ".".');
   });
 
   it('rejects call after cursor', () => {
@@ -918,7 +918,7 @@ describe('orderBy() interface', () => {
         query = query.orderBy('foo').startAt('foo').orderBy('foo');
       })
           .to.throw(
-              /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+              'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().');
 
       expect(() => {
         query = query.where('foo', '>', 'bar')
@@ -926,13 +926,13 @@ describe('orderBy() interface', () => {
                     .where('foo', '>', 'bar');
       })
           .to.throw(
-              /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+              'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().');
 
       expect(() => {
         query = query.orderBy('foo').endAt('foo').orderBy('foo');
       })
           .to.throw(
-              /Cannot specify an orderBy\(\) constraint after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+              'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().');
 
       expect(() => {
         query = query.where('foo', '>', 'bar')
@@ -940,7 +940,7 @@ describe('orderBy() interface', () => {
                     .where('foo', '>', 'bar');
       })
           .to.throw(
-              /Cannot specify a where\(\) filter after calling startAt\(\), startAfter\(\), endBefore\(\) or endAt\(\)./);
+              'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().');
     });
   });
 
@@ -993,7 +993,7 @@ describe('limit() interface', () => {
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.limit(Infinity))
-        .to.throw(/Argument "limit" is not a valid integer./);
+        .to.throw('Argument "limit" is not a valid integer.');
   });
 
   it('uses latest limit', () => {
@@ -1039,7 +1039,7 @@ describe('offset() interface', () => {
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.offset(Infinity))
-        .to.throw(/Argument "offset" is not a valid integer\./);
+        .to.throw('Argument "offset" is not a valid integer.');
   });
 
   it('uses latest offset', () => {
@@ -1089,11 +1089,11 @@ describe('select() interface', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.select(1))
         .to.throw(
-            /Argument at index 0 is not a valid FieldPath. Invalid use of type "number" as a Firestore argument./);
+            'Argument at index 0 is not a valid FieldPath. Paths can only be specified as strings or via a FieldPath object.');
 
     expect(() => query.select('.'))
         .to.throw(
-            /Argument at index 0 is not a valid FieldPath. Paths must not start or end with '.'./);
+            'Argument at index 0 is not a valid FieldPath. Paths must not start or end with ".".');
   });
 
   it('uses latest field mask', () => {
@@ -1188,42 +1188,42 @@ describe('startAt() interface', () => {
       query.orderBy(Firestore.FieldPath.documentId()).startAt(42);
     })
         .to.throw(
-            /The corresponding value for FieldPath.documentId\(\) must be a string or a DocumentReference./);
+            'The corresponding value for FieldPath.documentId\(\) must be a string or a DocumentReference.');
 
     expect(() => {
       query.orderBy(Firestore.FieldPath.documentId())
           .startAt(firestore.doc('coll/doc/other/doc'));
     })
         .to.throw(
-            /'coll\/doc\/other\/doc' is not part of the query result set and cannot be used as a query boundary./);
+            '"coll/doc/other/doc" is not part of the query result set and cannot be used as a query boundary.');
 
     expect(() => {
       query.orderBy(Firestore.FieldPath.documentId())
           .startAt(firestore.doc('coll/doc/coll_suffix/doc'));
     })
         .to.throw(
-            /'coll\/doc\/coll_suffix\/doc' is not part of the query result set and cannot be used as a query boundary./);
+            '"coll/doc/coll_suffix/doc" is not part of the query result set and cannot be used as a query boundary.');
 
     expect(() => {
       query.orderBy(Firestore.FieldPath.documentId())
           .startAt(firestore.doc('coll/doc'));
     })
         .to.throw(
-            /'coll\/doc' is not part of the query result set and cannot be used as a query boundary./);
+            '"coll/doc" is not part of the query result set and cannot be used as a query boundary.');
 
     expect(() => {
       query.orderBy(Firestore.FieldPath.documentId())
           .startAt(firestore.doc('coll/doc/coll/doc/coll/doc'));
     })
         .to.throw(
-            /Only a direct child can be used as a query boundary. Found: 'coll\/doc\/coll\/doc\/coll\/doc'./);
+            'Only a direct child can be used as a query boundary. Found: "coll/doc/coll/doc/coll/doc".');
 
     // Validate that we can't pass a reference to a collection.
     expect(() => {
       query.orderBy(Firestore.FieldPath.documentId()).startAt('doc/coll');
     })
         .to.throw(
-            /Only a direct child can be used as a query boundary. Found: 'coll\/doc\/coll\/doc\/coll'./);
+            'Only a direct child can be used as a query boundary. Found: "coll/doc/coll/doc/coll".');
   });
 
   it('requires at least one value', () => {
@@ -1231,7 +1231,7 @@ describe('startAt() interface', () => {
 
     expect(() => {
       query.startAt();
-    }).to.throw(/Function 'startAt\(\)' requires at least 1 argument./);
+    }).to.throw('Function "startAt()" requires at least 1 argument.');
   });
 
   it('can specify document snapshot', () => {
@@ -1385,7 +1385,7 @@ describe('startAt() interface', () => {
     return snapshot('collectionId/doc', {}).then(doc => {
       expect(() => query.startAt(doc))
           .to.throw(
-              /Field 'foo' is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy\(\) and where\(\) constraints./);
+              'Field "foo" is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy() and where() constraints.');
     });
   });
 
@@ -1396,7 +1396,7 @@ describe('startAt() interface', () => {
       query.orderBy('foo').startAt('foo', Firestore.FieldValue.delete());
     })
         .to.throw(
-            /Argument at index 1 is not a valid QueryValue. FieldValue.delete\(\) must appear at the top-level and can only be used in update\(\) or set\(\) with {merge:true}./);
+            'Argument at index 1 is not a valid QueryValue. FieldValue.delete\(\) must appear at the top-level and can only be used in update() or set() with {merge:true}.');
   });
 
   it('requires order by', () => {
@@ -1405,7 +1405,7 @@ describe('startAt() interface', () => {
 
     expect(() => query.startAt('foo', 'bar'))
         .to.throw(
-            /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
+            'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.');
   });
 
   it('can overspecify order by', () => {
@@ -1430,7 +1430,7 @@ describe('startAt() interface', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.startAt(123))
         .to.throw(
-            /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
+            'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.');
   });
 
   it('uses latest value', () => {
@@ -1481,7 +1481,7 @@ describe('startAfter() interface', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.startAfter(123))
         .to.throw(
-            /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
+            'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.');
   });
 
   it('uses latest value', () => {
@@ -1533,7 +1533,7 @@ describe('endAt() interface', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.endAt(123))
         .to.throw(
-            /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
+            'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.');
   });
 
   it('uses latest value', () => {
@@ -1584,7 +1584,7 @@ describe('endBefore() interface', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.endBefore(123))
         .to.throw(
-            /Too many cursor values specified. The specified values must match the orderBy\(\) constraints of the query./);
+            'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.');
   });
 
   it('uses latest value', () => {
