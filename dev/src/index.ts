@@ -290,7 +290,7 @@ export class Firestore {
   constructor(settings?: Settings) {
     this._validator = new Validator({
       ArrayElement: (name, value) => validateFieldValue(
-          name, value, /* path */ undefined, /*level=*/0,
+          name, value, /*path=*/undefined, /*level=*/0,
           /*inArray=*/true),
       DeletePrecondition: precondition =>
           validatePrecondition(precondition, /* allowExists= */ true),
@@ -1264,7 +1264,7 @@ follow these steps, YOUR APP MAY BREAK.`);
  * @param val JavaScript value to validate.
  * @param path The field path to validate.
  * @param options Validation options
- * @param level The current depth of the traversal. This is used to decided
+ * @param level The current depth of the traversal. This is used to decide
  * whether deletes are allowed in conjunction with `allowDeletes: root`.
  * @param inArray Whether we are inside an array.
  * @returns 'true' when the object is valid.

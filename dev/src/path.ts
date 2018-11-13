@@ -475,21 +475,22 @@ export class FieldPath extends Path<FieldPath> {
    * Returns true if the provided value can be used as a field path argument.
    *
    * @private
-   * @param {string|FieldPath} fieldPath The value to verify.
+   * @param fieldPath The value to verify.
    * @throws if the string can't be used as a field path.
-   * @returns {boolean} 'true' when the path is valid.
+   * @returns 'true' when the path is valid.
    */
-  static validateFieldPath(fieldPath: string|FieldPath) {
+  static validateFieldPath(fieldPath: unknown): boolean {
     if (!(fieldPath instanceof FieldPath)) {
       if (fieldPath === undefined) {
-        throw new Error('Path cannot be ommitted.');
+        throw new Error('Path cannot be omitted.');
       }
 
-      if (is.object(fieldPath) && fieldPath.constructor.name === 'FieldPath') {
+      if (is.object(fieldPath) &&
+          (fieldPath as object).constructor.name === 'FieldPath') {
         throw customObjectError(fieldPath);
       }
 
-      if (!is.string(fieldPath)) {
+      if (typeof fieldPath !== 'string') {
         throw new Error(
             'Paths can only be specified as strings or via a FieldPath object.');
       }

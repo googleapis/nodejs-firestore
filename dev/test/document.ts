@@ -543,7 +543,7 @@ describe('get document', () => {
       return firestore.doc('collectionId/documentId').get().then(doc => {
         expect(() => (doc as InvalidApiUsage).get())
             .to.throw(
-                'Argument "field" is not a valid FieldPath. Path cannot be ommitted.');
+                'Argument "field" is not a valid FieldPath. Path cannot be omitted.');
       });
     });
   });
