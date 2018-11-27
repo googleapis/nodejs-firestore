@@ -1181,7 +1181,8 @@ declare namespace FirebaseFirestore {
      * not yet exist, the transformation will set the field to the given value.
      *
      * @param n The value to increment by.
-     * @return The FieldValue sentinel for use in a call to set() or update().
+     * @return The FieldValue sentinel for use in a call to set(), create() or
+     * update().
      */
     static increment(n: number): FieldValue;
 

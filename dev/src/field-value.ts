@@ -95,8 +95,9 @@ export class FieldValue {
    * If the current field value is not of type 'number', or if the field does
    * not yet exist, the transformation will set the field to the given value.
    *
-   * @param n The value to increment by.
-   * @return The FieldValue sentinel for use in a call to set() or update().
+   * @param {number} n The value to increment by.
+   * @return {FieldValue} The FieldValue sentinel for use in a call to set(),
+   * create() or update().
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
