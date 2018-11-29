@@ -1986,7 +1986,8 @@ export function validateComparisonOperator(
     return true;
   }
 
-  throw new Error('Operator must be one of "<", "<=", "==", ">", or ">=".');
+  throw new Error(
+      'Operator must be one of "<", "<=", "==", ">", ">=" or "array-contains".');
 }
 
 /*!

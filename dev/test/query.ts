@@ -815,7 +815,9 @@ describe('where() interface', () => {
     let query = firestore.collection('collectionId');
     expect(() => {
       query = query.where('foo', '@', 'foobar');
-    }).to.throw('Operator must be one of "<", "<=", "==", ">", or ">="\.');
+    })
+        .to.throw(
+            'Operator must be one of "<", "<=", "==", ">", ">=" or "array-contains".');
   });
 });
 
