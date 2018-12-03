@@ -413,8 +413,13 @@ export class DocumentReference {
     this._validator.minNumberOfArguments('update', arguments, 1);
 
     const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch.update
-        .apply(writeBatch, [this, dataOrField].concat(preconditionOrValues))
+    return writeBatch
+        .update
+        // tslint:disable-next-line no-any
+        .apply(
+            writeBatch,
+            [this, dataOrField].concat(
+                preconditionOrValues) as [DocumentReference, string])
         .commit()
         .then(([writeResult]) => writeResult);
   }

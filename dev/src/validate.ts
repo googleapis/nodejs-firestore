@@ -97,7 +97,8 @@ export class Validator {
             `Argument "${argumentName}" is not a valid ${type}.`;
 
         try {
-          valid = validators[type].call(null, ...values);
+          // tslint:disable-next-line no-any
+          valid = (validators[type] as any).call(null, ...values);
         } catch (err) {
           message += ` ${err.message}`;
         }
