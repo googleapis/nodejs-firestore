@@ -133,7 +133,7 @@ export class Timestamp {
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.get().then(snap => {
-   *   let updatedAt = snap.updateTime;
+   *   let updated = snap.updateTime;
    *   console.log(`Updated at ${updated.seconds}s ${updated.nanoseconds}ns`);
    * });
    *
