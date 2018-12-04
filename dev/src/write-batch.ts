@@ -64,7 +64,7 @@ export class WriteResult {
    * let documentRef = firestore.doc('col/doc');
    *
    * documentRef.set({foo: 'bar'}).then(writeResult => {
-   *   console.log(`Document written at: ${writeResult.toDate()}`);
+   *   console.log(`Document written at: ${writeResult.writeTime.toDate()}`);
    * });
    */
   get writeTime(): Timestamp {
