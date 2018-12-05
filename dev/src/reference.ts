@@ -777,7 +777,9 @@ export class QuerySnapshot {
   }
 
   /**
-   * Enumerates all of the documents in the QuerySnapshot.
+   * Enumerates all of the documents in the QuerySnapshot. This is a convenience
+   * method for running the same callback on each {@link QueryDocumentSnapshot}
+   * that is returned.
    *
    * @param {function} callback A callback to be called with a
    * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} for each document in
