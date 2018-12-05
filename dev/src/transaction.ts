@@ -152,7 +152,7 @@ export class Transaction {
    * firestore.runTransaction(transaction => {
    *   return transaction.getAll(firstDoc, secondDoc).then(docs => {
    *     transaction.set(resultDoc, {
-   *       sum: docs[1].get('count') + docs[2].get('count')
+   *       sum: docs[0].get('count') + docs[1].get('count')
    *     });
    *   });
    * });
