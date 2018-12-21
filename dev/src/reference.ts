@@ -2011,7 +2011,7 @@ export function validateDocumentReference(value: DocumentReference): boolean {
 }
 
 /**
- * Verifies euqality for an array of objects using the `isEqual` interface.
+ * Verifies equality for an array of objects using the `isEqual` interface.
  *
  * @private
  * @param {Array.<Object>} left Array of objects supporting `isEqual`.
