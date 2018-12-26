@@ -3,8 +3,7 @@
 # [Google Cloud Firestore: Node.js Server SDK](https://github.com/googleapis/nodejs-firestore)
 
 [![release level](https://img.shields.io/badge/release%20level-beta-yellow.svg?style&#x3D;flat)](https://cloud.google.com/terms/launch-stages)
-[![CircleCI](https://img.shields.io/circleci/project/github/googleapis/nodejs-firestore.svg?style=flat)](https://circleci.com/gh/googleapis/nodejs-firestore)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/googleapis/nodejs-firestore?branch=master&svg=true)](https://ci.appveyor.com/project/googleapis/nodejs-firestore)
+[![npm version](https://img.shields.io/npm/v/@google-cloud/firestore.svg)](https://www.npmjs.org/package/@google-cloud/firestore)
 [![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-firestore/master.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-firestore)
 
 This is the Node.js Server SDK for 
@@ -139,3 +138,4 @@ See [LICENSE](https://github.com/googleapis/nodejs-firestore/blob/master/LICENSE
 [client-docs]: https://cloud.google.com/nodejs/docs/reference/firestore/latest/
 [product-docs]: https://firebase.google.com/docs/firestore/
 [shell_img]: //gstatic.com/cloudssh/images/open-btn.png
+

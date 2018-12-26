@@ -413,8 +413,13 @@ export class DocumentReference {
     this._validator.minNumberOfArguments('update', arguments, 1);
 
     const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch.update
-        .apply(writeBatch, [this, dataOrField].concat(preconditionOrValues))
+    return writeBatch
+        .update
+        // tslint:disable-next-line no-any
+        .apply(
+            writeBatch,
+            [this, dataOrField].concat(
+                preconditionOrValues) as [DocumentReference, string])
         .commit()
         .then(([writeResult]) => writeResult);
   }
@@ -772,7 +777,9 @@ export class QuerySnapshot {
   }
 
   /**
-   * Enumerates all of the documents in the QuerySnapshot.
+   * Enumerates all of the documents in the QuerySnapshot. This is a convenience
+   * method for running the same callback on each {@link QueryDocumentSnapshot}
+   * that is returned.
    *
    * @param {function} callback A callback to be called with a
    * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} for each document in
@@ -1986,7 +1993,8 @@ export function validateComparisonOperator(
     return true;
   }
 
-  throw new Error('Operator must be one of "<", "<=", "==", ">", or ">=".');
+  throw new Error(
+      'Operator must be one of "<", "<=", "==", ">", ">=" or "array-contains".');
 }
 
 /*!

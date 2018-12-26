@@ -152,7 +152,7 @@ export class Transaction {
    * firestore.runTransaction(transaction => {
    *   return transaction.getAll(firstDoc, secondDoc).then(docs => {
    *     transaction.set(resultDoc, {
-   *       sum: docs[1].get('count') + docs[2].get('count')
+   *       sum: docs[0].get('count') + docs[1].get('count')
    *     });
    *   });
    * });
@@ -278,9 +278,9 @@ export class Transaction {
     this._validator.minNumberOfArguments('update', arguments, 2);
 
     preconditionOrValues = Array.prototype.slice.call(arguments, 2);
-    this._writeBatch.update.apply(
-        this._writeBatch,
-        [documentRef, dataOrField].concat(preconditionOrValues));
+    this._writeBatch.update.apply(this._writeBatch, [
+      documentRef, dataOrField
+    ].concat(preconditionOrValues) as [DocumentReference, string]);
     return this;
   }
 
