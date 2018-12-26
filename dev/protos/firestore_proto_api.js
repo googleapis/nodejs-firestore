@@ -3380,7 +3380,7 @@ $root.google = (function() {
                      * @interface IFieldTransform
                      * @property {string|null} [fieldPath] FieldTransform fieldPath
                      * @property {google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue|null} [setToServerValue] FieldTransform setToServerValue
-                     * @property {google.firestore.v1beta1.IValue|null} [numericAdd] FieldTransform numericAdd
+                     * @property {google.firestore.v1beta1.IValue|null} [increment] FieldTransform increment
                      * @property {google.firestore.v1beta1.IArrayValue|null} [appendMissingElements] FieldTransform appendMissingElements
                      * @property {google.firestore.v1beta1.IArrayValue|null} [removeAllFromArray] FieldTransform removeAllFromArray
                      */
@@ -3417,12 +3417,12 @@ $root.google = (function() {
                     FieldTransform.prototype.setToServerValue = 0;
 
                     /**
-                     * FieldTransform numericAdd.
-                     * @member {google.firestore.v1beta1.IValue|null|undefined} numericAdd
+                     * FieldTransform increment.
+                     * @member {google.firestore.v1beta1.IValue|null|undefined} increment
                      * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
                      * @instance
                      */
-                    FieldTransform.prototype.numericAdd = null;
+                    FieldTransform.prototype.increment = null;
 
                     /**
                      * FieldTransform appendMissingElements.
@@ -3445,12 +3445,12 @@ $root.google = (function() {
 
                     /**
                      * FieldTransform transformType.
-                     * @member {"setToServerValue"|"numericAdd"|"appendMissingElements"|"removeAllFromArray"|undefined} transformType
+                     * @member {"setToServerValue"|"increment"|"appendMissingElements"|"removeAllFromArray"|undefined} transformType
                      * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
                      * @instance
                      */
                     Object.defineProperty(FieldTransform.prototype, "transformType", {
-                        get: $util.oneOfGetter($oneOfFields = ["setToServerValue", "numericAdd", "appendMissingElements", "removeAllFromArray"]),
+                        get: $util.oneOfGetter($oneOfFields = ["setToServerValue", "increment", "appendMissingElements", "removeAllFromArray"]),
                         set: $util.oneOfSetter($oneOfFields)
                     });
 

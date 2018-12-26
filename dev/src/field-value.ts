@@ -348,7 +348,7 @@ class NumericIncrementTransform extends FieldTransform {
   toProto(serializer: Serializer, fieldPath: FieldPath):
       api.DocumentTransform.IFieldTransform {
     const encodedOperand = serializer.encodeValue(this.operand)!;
-    return {fieldPath: fieldPath.formattedName, numericAdd: encodedOperand};
+    return {fieldPath: fieldPath.formattedName, increment: encodedOperand};
   }
 
   isEqual(other: FieldValue): boolean {

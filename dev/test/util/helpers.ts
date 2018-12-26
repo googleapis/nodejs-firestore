@@ -257,7 +257,7 @@ export function incrementTransform(
     field: string, n: number): api.DocumentTransform.IFieldTransform {
   return {
     fieldPath: field,
-    numericAdd: Number.isInteger(n) ? {integerValue: n} : {doubleValue: n}
+    increment: Number.isInteger(n) ? {integerValue: n} : {doubleValue: n}
   };
 }
 
