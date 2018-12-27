@@ -452,7 +452,7 @@ export class FieldPath extends Path<FieldPath> {
         segments;
 
     for (let i = 0; i < elements.length; ++i) {
-      validate.isString(i, elements[i]);
+      validateString(i, elements[i]);
       if (elements[i].length === 0) {
         throw new Error(`Element at index ${i} should not be an empty string.`);
       }
