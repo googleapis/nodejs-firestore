@@ -167,8 +167,8 @@ export class Transaction {
 
     this._validator.minNumberOfArguments('Transaction.getAll', arguments, 1);
 
-    const {documents, fieldMask} = parseGetAllArguments(
-        this._validator, [documentRef, ...moreDocumentRefsOrReadOptions]);
+    const {documents, fieldMask} =
+        parseGetAllArguments([documentRef, ...moreDocumentRefsOrReadOptions]);
 
     return this._firestore.getAll_(
         documents, fieldMask, this._requestTag, this._transactionId);
@@ -374,5 +374,94 @@ export class Transaction {
    */
   get requestTag(): string {
     return this._requestTag;
+  }
+}
+
+/**
+ * Parses the arguments for the `getAll()` call supported by both the Firestore
+ * and Transaction class.
+ *
+ * @private
+ * @param documentRefsOrReadOptions An array of document references followed by
+ * an optional ReadOptions object.
+ */
+export function parseGetAllArguments(
+    documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+    {documents: DocumentReference[], fieldMask: FieldPath[]|null} {
+  let documents: DocumentReference[];
+  let readOptions: ReadOptions|undefined = undefined;
+
+  // In the original release of the SDK, getAll() was documented to accept
+  // either a varargs list of DocumentReferences or a single array of
+  // DocumentReferences. To support this usage in the TypeScript client, we have
+  // to manually verify the arguments to determine which input the user
+  // provided.
+  const usesDeprecatedArgumentStyle =
+      Array.isArray(documentRefsOrReadOptions[0]);
+
+  if (usesDeprecatedArgumentStyle) {
+    documents = documentRefsOrReadOptions[0] as DocumentReference[];
+    readOptions = documentRefsOrReadOptions[1] as ReadOptions;
+  } else {
+    if (documentRefsOrReadOptions.length > 0 &&
+        isPlainObject(
+            documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1])) {
+      readOptions = documentRefsOrReadOptions.pop() as ReadOptions;
+      documents = documentRefsOrReadOptions as DocumentReference[];
+    } else {
+      documents = documentRefsOrReadOptions as DocumentReference[];
+    }
+  }
+
+  for (let i = 0; i < documents.length; ++i) {
+    validateDocumentReference(i, documents[i]);
+  }
+
+  validateReadOptions('options', readOptions, {optional: true});
+  const fieldMask = readOptions && readOptions.fieldMask ?
+      readOptions.fieldMask.map(
+          fieldPath => FieldPath.fromArgument(fieldPath)) :
+      null;
+  return {fieldMask, documents};
+}
+
+/**
+ * Validates the use of 'options' as ReadOptions and enforces that 'fieldMask'
+ * is an array of strings or field paths.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the ReadOptions can be omitted.
+ */
+export function validateReadOptions(
+    arg: number|string, value: unknown, options?: AllowOptional): void {
+  if (!validateOptional(value, options)) {
+    if (!isObject(value)) {
+      throw new Error(`${
+          invalidArgumentMessage(
+              arg, 'read option')} Input is not an object.'`);
+    }
+
+    const options = value as {[k: string]: unknown};
+
+    if (options.fieldMask !== undefined) {
+      if (!Array.isArray(options.fieldMask)) {
+        throw new Error(`${
+            invalidArgumentMessage(
+                arg, 'read option')} "fieldMask" is not an array.`);
+      }
+
+      for (let i = 0; i < options.fieldMask.length; ++i) {
+        try {
+          validateFieldPath(i, options.fieldMask[i]);
+        } catch (err) {
+          throw new Error(`${
+              invalidArgumentMessage(
+                  arg,
+                  'read option')} "fieldMask" is not valid: ${err.message}`);
+        }
+      }
+    }
   }
 }
