@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import * as bun from 'bun';
 const deepEqual = require('deep-equal');
+
+import * as bun from 'bun';
 import * as extend from 'extend';
-import * as is from 'is';
 import * as through2 from 'through2';
 
-import * as proto from '../protos/firestore_proto_api';
-import api = proto.google.firestore.v1beta1;
-
-import {compare} from './order';
-import {logger} from './logger';
-import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
+import {google} from '../protos/firestore_proto_api';
+import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot, validateUserInput} from './document';
 import {DocumentChange} from './document-change';
-import {Watch} from './watch';
-import {WriteBatch, WriteResult} from './write-batch';
-import {Timestamp} from './timestamp';
-import {FieldPath, ResourcePath} from './path';
-import {autoId, requestTag} from './util';
-import {customObjectError} from './validate';
-import {AnyDuringMigration, DocumentData, UpdateData, Precondition, SetOptions, UserInput} from './types';
-import {Serializer} from './serializer';
 import {Firestore} from './index';
+import {logger} from './logger';
+import {compare} from './order';
+import {FieldPath, ResourcePath, validateFieldPath, validateResourcePath} from './path';
+import {Serializer} from './serializer';
+import {Timestamp} from './timestamp';
+import {DocumentData, OrderByDirection, Precondition, SetOptions, UpdateData, WhereFilterOp} from './types';
+import {autoId, requestTag} from './util';
+import {invalidArgumentMessage, validateEnumValue, validateFunction, validateInteger, validateMinNumberOfArguments} from './validate';
+import {Watch} from './watch';
+import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
+
+import api = google.firestore.v1beta1;
 
 /*!
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'

@@ -15,7 +15,7 @@
  */
 
 import {google} from '../protos/firestore_proto_api';
-import {createValidator} from './validate';
+import {validateInteger} from './validate';
 
 const validate = createValidator();
 

@@ -18,28 +18,25 @@ import {replaceProjectIdToken} from '@google-cloud/projectify';
 import * as assert from 'assert';
 import * as bun from 'bun';
 import * as extend from 'extend';
-import * as is from 'is';
 import * as through2 from 'through2';
+
 import {google} from '../protos/firestore_proto_api';
-import * as convert from './convert';
-import {DocumentSnapshot, DocumentSnapshotBuilder, validatePrecondition, validateSetOptions} from './document';
-import {DeleteTransform, FieldTransform} from './field-value';
+import {documentFromJson, timestampFromJson} from './convert';
+import {DocumentSnapshot, DocumentSnapshotBuilder} from './document';
 import {GeoPoint} from './geo-point';
 import {logger, setLibVersion} from './logger';
-import {FieldPath} from './path';
+import {FieldPath, validateResourcePath} from './path';
 import {ResourcePath} from './path';
 import {ClientPool} from './pool';
-import {CollectionReference, validateComparisonOperator, validateDocumentReference, validateFieldOrder} from './reference';
+import {CollectionReference} from './reference';
 import {DocumentReference} from './reference';
-import {isPlainObject, Serializer} from './serializer';
+import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {Transaction} from './transaction';
-import {DocumentData, GapicClient, ReadOptions, Settings, ValidationOptions} from './types';
-import {AnyDuringMigration, AnyJs} from './types';
-import {parseGetAllArguments, requestTag} from './util';
-import {customObjectError, Validator} from './validate';
+import {parseGetAllArguments, Transaction} from './transaction';
+import {DocumentData, GapicClient, ReadOptions, Settings} from './types';
+import {requestTag} from './util';
+import {validateBoolean, validateFunction, validateInteger, validateMinNumberOfArguments, validateObject, validateString,} from './validate';
 import {WriteBatch} from './write-batch';
-import {validateUpdateMap} from './write-batch';
 
 import api = google.firestore.v1beta1;
 
@@ -508,8 +505,8 @@ export class Firestore {
     } else if (encoding === 'json') {
       // Google Cloud Functions calls us with Proto3 JSON format data, which we
       // must convert to Protobuf JS.
-      convertTimestamp = convert.timestampFromJson;
-      convertDocument = convert.documentFromJson;
+      convertTimestamp = timestampFromJson;
+      convertDocument = documentFromJson;
     } else {
       throw new Error(
           `Unsupported encoding format. Expected "json" or "protobufJS", ` +

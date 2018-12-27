@@ -17,17 +17,17 @@
 import * as assert from 'assert';
 
 import {google} from '../protos/firestore_proto_api';
-
-import {DocumentMask, DocumentSnapshot, DocumentTransform, Precondition} from './document';
+import {DocumentMask, DocumentSnapshot, DocumentTransform, Precondition, validateFieldValue, validateUserInput} from './document';
 import {Firestore} from './index';
 import {logger} from './logger';
-import {FieldPath} from './path';
-import {DocumentReference} from './reference';
-import {Serializer} from './serializer';
+import {FieldPath, validateFieldPath} from './path';
+import {DocumentReference, validateDocumentReference} from './reference';
+import {isPlainObject, Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {AnyDuringMigration, AnyJs, Precondition as PublicPrecondition, SetOptions, UpdateData, UserInput} from './types';
+import {Precondition as PublicPrecondition, SetOptions, UpdateData, UpdateMap} from './types';
 import {DocumentData} from './types';
-import {requestTag} from './util';
+import {isObject, requestTag} from './util';
+import {AllowOptional, customObjectMessage, invalidArgumentMessage, validateMaxNumberOfArguments, validateMinNumberOfArguments, validateOptional} from './validate';
 
 import api = google.firestore.v1beta1;
 

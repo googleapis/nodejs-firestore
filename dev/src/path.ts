@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import * as is from 'is';
 import {google} from '../protos/firestore_proto_api';
+import {customObjectMessage, invalidArgumentMessage, validateMinNumberOfArguments, validateString} from './validate';
+
 import api = google.firestore.v1beta1;
-
-import {createValidator, customObjectError} from './validate';
-import {AnyDuringMigration} from './types';
-
-const validate = createValidator();
 
 /*!
  * A regular expression to verify an absolute Resource Path in Firestore. It

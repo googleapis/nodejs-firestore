@@ -16,16 +16,13 @@
 
 const deepEqual = require('deep-equal');
 
-import * as proto from '../protos/firestore_proto_api';
-
-import {AnyDuringMigration, AnyJs} from './types';
-import {createValidator} from './validate';
-
-import api = proto.google.firestore.v1beta1;
-import {Serializer} from './serializer';
+import {google} from '../protos/firestore_proto_api';
+import {validateUserInput} from './document';
 import {FieldPath} from './path';
+import {Serializer} from './serializer';
+import {validateMinNumberOfArguments} from './validate';
 
-const validate = createValidator();
+import api = google.firestore.v1beta1;
 
 /**
  * Sentinel values that can be used when writing documents with set(), create()
