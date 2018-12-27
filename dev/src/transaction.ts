@@ -165,7 +165,7 @@ export class Transaction {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
-    this._validator.minNumberOfArguments('Transaction.getAll', arguments, 1);
+    validateMinNumberOfArguments('Transaction.getAll', arguments, 1);
 
     const {documents, fieldMask} = parseGetAllArguments(
         this._validator, [documentRef, ...moreDocumentRefsOrReadOptions]);
@@ -275,7 +275,7 @@ export class Transaction {
       documentRef: DocumentReference, dataOrField: UpdateData|string|FieldPath,
       ...preconditionOrValues: Array<Precondition|AnyJs|string|FieldPath>):
       Transaction {
-    this._validator.minNumberOfArguments('update', arguments, 2);
+    validateMinNumberOfArguments('Transaction.update', arguments, 2);
 
     preconditionOrValues = Array.prototype.slice.call(arguments, 2);
     this._writeBatch.update.apply(this._writeBatch, [

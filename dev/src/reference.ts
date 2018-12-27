@@ -410,12 +410,11 @@ export class DocumentReference {
       dataOrField: (UpdateData|string|FieldPath),
       ...preconditionOrValues: Array<UserInput|string|FieldPath|Precondition>):
       Promise<WriteResult> {
-    this._validator.minNumberOfArguments('update', arguments, 1);
+    validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
         .update
-        // tslint:disable-next-line no-any
         .apply(
             writeBatch,
             [this, dataOrField].concat(
@@ -1364,7 +1363,7 @@ export class Query {
    */
   startAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
       Query {
-    this._validator.minNumberOfArguments('startAt', arguments, 1);
+    validateMinNumberOfArguments('Query.startAt', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
 
@@ -1399,7 +1398,7 @@ export class Query {
    */
   startAfter(...fieldValuesOrDocumentSnapshot:
                  Array<DocumentSnapshot|UserInput>): Query {
-    this._validator.minNumberOfArguments('startAfter', arguments, 1);
+    validateMinNumberOfArguments('Query.startAfter', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
 
@@ -1433,7 +1432,7 @@ export class Query {
    */
   endBefore(...fieldValuesOrDocumentSnapshot:
                 Array<DocumentSnapshot|UserInput>): Query {
-    this._validator.minNumberOfArguments('endBefore', arguments, 1);
+    validateMinNumberOfArguments('Query.endBefore', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
 
@@ -1467,7 +1466,7 @@ export class Query {
    */
   endAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
       Query {
-    this._validator.minNumberOfArguments('endAt', arguments, 1);
+    validateMinNumberOfArguments('Query.endAt', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
 

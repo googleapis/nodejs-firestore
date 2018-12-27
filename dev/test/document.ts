@@ -1313,7 +1313,7 @@ describe('update document', () => {
 
     expect(() => {
       firestore.doc('collectionId/documentId').update();
-    }).to.throw('Function "update()" requires at least 1 argument.');
+    }).to.throw('Function "DocumentReference.update()" requires at least 1 argument.');
   });
 
   it('rejects nested deletes', () => {

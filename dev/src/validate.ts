@@ -205,3 +205,39 @@ export function createValidator(customValidators?: Validators):
   // consumers can call the custom validator functions.
   return new Validator(customValidators);
 }
+
+/**
+ * Verifies that 'args' has at least 'minSize' elements.
+ *
+ * @private
+ * @param funcName The function name to use in the error message.
+ * @param args The array (or array-like structure) to verify.
+ * @param minSize The minimum number of elements to enforce.
+ * @throws if the expectation is not met.
+ */
+export function validateMinNumberOfArguments(
+    funcName: string, args: IArguments, minSize: number): void {
+  if (args.length < minSize) {
+    throw new Error(
+        `Function "${funcName}()" requires at least ` +
+        `${formatPlural(minSize, 'argument')}.`);
+  }
+}
+
+/**
+ * Verifies that 'args' has at most 'maxSize' elements.
+ *
+ * @private
+ * @param funcName The function name to use in the error message.
+ * @param args The array (or array-like structure) to verify.
+ * @param maxSize The maximum number of elements to enforce.
+ * @throws if the expectation is not met.
+ */
+export function validateMaxNumberOfArguments(
+    funcName: string, args: IArguments, maxSize: number): void {
+  if (args.length > maxSize) {
+    throw new Error(
+        `Function "${funcName}()" accepts at most ` +
+        `${formatPlural(maxSize, 'argument')}.`);
+  }
+}

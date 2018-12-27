@@ -25,8 +25,6 @@ import api = proto.google.firestore.v1beta1;
 import {Serializer} from './serializer';
 import {FieldPath} from './path';
 
-const validate = createValidator();
-
 /**
  * Sentinel values that can be used when writing documents with set(), create()
  * or update().
@@ -106,7 +104,7 @@ export class FieldValue {
    * });
    */
   static arrayUnion(...elements: AnyJs[]): FieldValue {
-    validate.minNumberOfArguments('FieldValue.arrayUnion', arguments, 1);
+    validateMinNumberOfArguments('FieldValue.arrayUnion', arguments, 1);
     return new ArrayUnionTransform(elements);
   }
 
@@ -133,7 +131,7 @@ export class FieldValue {
    * });
    */
   static arrayRemove(...elements: AnyJs[]): FieldValue {
-    validate.minNumberOfArguments('FieldValue.arrayRemove', arguments, 1);
+    validateMinNumberOfArguments('FieldValue.arrayRemove', arguments, 1);
     return new ArrayRemoveTransform(elements);
   }
 
