@@ -349,10 +349,11 @@ export class Firestore {
    * @param {object} settings The settings to use for all Firestore operations.
    */
   settings(settings: Settings): void {
-    this._validator.isObject('settings', settings);
-    this._validator.isOptionalString('settings.projectId', settings.projectId);
-    this._validator.isOptionalBoolean(
-        'settings.timestampsInSnapshots', settings.timestampsInSnapshots);
+    validateObject('settings', settings);
+    validateString('settings.projectId', settings.projectId, {optional: true});
+    validateBoolean(
+        'settings.timestampsInSnapshots', settings.timestampsInSnapshots,
+        {optional: true});
 
     if (this._clientInitialized) {
       throw new Error(
@@ -374,11 +375,12 @@ export class Firestore {
   }
 
   private validateAndApplySettings(settings: Settings): void {
-    this._validator.isOptionalBoolean(
-        'settings.timestampsInSnapshots', settings.timestampsInSnapshots);
+    validateBoolean(
+        'settings.timestampsInSnapshots', settings.timestampsInSnapshots,
+        {optional: true});
 
     if (settings && settings.projectId) {
-      this._validator.isString('settings.projectId', settings.projectId);
+      validateString('settings.projectId', settings.projectId);
       this._referencePath = new ResourcePath(settings.projectId, '(default)');
     } else {
       // Initialize a temporary reference path that will be overwritten during
@@ -584,12 +586,13 @@ export class Firestore {
   runTransaction<T>(
       updateFunction: (transaction: Transaction) => Promise<T>,
       transactionOptions?: {maxAttempts?: number}): Promise<T> {
-    this._validator.isFunction('updateFunction', updateFunction);
+    validateFunction('updateFunction', updateFunction);
 
     if (transactionOptions) {
-      this._validator.isObject('transactionOptions', transactionOptions);
-      this._validator.isOptionalInteger(
-          'transactionOptions.maxAttempts', transactionOptions.maxAttempts, 1);
+      validateObject('transactionOptions', transactionOptions);
+      validateInteger(
+          'transactionOptions.maxAttempts', transactionOptions.maxAttempts,
+          {optional: true, minValue: 1});
     }
 
     return this._runTransaction(updateFunction, transactionOptions);
