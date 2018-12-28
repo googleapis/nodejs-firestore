@@ -277,7 +277,7 @@ class StreamHelper {
       err = new Error('Server disconnect');
       err.code = 14;  // Unavailable
     }
-    (this.readStream as AnyDuringMigration).destroy(err);
+    (this.readStream as any).destroy(err);  // tslint:disable-line no-any
   }
 }
 
