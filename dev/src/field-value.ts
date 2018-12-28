@@ -105,7 +105,7 @@ export class FieldValue {
    *   // doc.get('array') contains field 'foo'
    * });
    */
-  static arrayUnion(...elements: AnyJs[]): FieldValue {
+  static arrayUnion(...elements: unknown[]): FieldValue {
     validate.minNumberOfArguments('FieldValue.arrayUnion', arguments, 1);
     return new ArrayUnionTransform(elements);
   }
@@ -132,7 +132,7 @@ export class FieldValue {
    *   // doc.get('array') no longer contains field 'foo'
    * });
    */
-  static arrayRemove(...elements: AnyJs[]): FieldValue {
+  static arrayRemove(...elements: unknown[]): FieldValue {
     validate.minNumberOfArguments('FieldValue.arrayRemove', arguments, 1);
     return new ArrayRemoveTransform(elements);
   }
@@ -286,7 +286,7 @@ class ServerTimestampTransform extends FieldTransform {
  * @private
  */
 class ArrayUnionTransform extends FieldTransform {
-  constructor(private readonly elements: AnyJs[]) {
+  constructor(private readonly elements: unknown[]) {
     super();
   }
 
@@ -340,7 +340,7 @@ class ArrayUnionTransform extends FieldTransform {
  * @private
  */
 class ArrayRemoveTransform extends FieldTransform {
-  constructor(private readonly elements: AnyJs[]) {
+  constructor(private readonly elements: unknown[]) {
     super();
   }
 

@@ -82,7 +82,7 @@ export class Serializer {
    * @param val The object to encode
    * @returns The Firestore Proto or null if we are deleting a field.
    */
-  encodeValue(val: AnyJs|AnyJs[]|Serializable): api.IValue|null {
+  encodeValue(val: unknown): api.IValue|null {
     if (val instanceof FieldTransform) {
       return null;
     }
@@ -186,7 +186,7 @@ export class Serializer {
    * @param proto A Firestore 'Value' Protobuf.
    * @returns The converted JS type.
    */
-  decodeValue(proto: api.IValue): AnyJs {
+  decodeValue(proto: api.IValue): unknown {
     const valueType = detectValueType(proto);
 
     switch (valueType) {
@@ -212,7 +212,7 @@ export class Serializer {
         return this.createReference(resourcePath.relativeName);
       }
       case 'arrayValue': {
-        const array: AnyJs[] = [];
+        const array: unknown[] = [];
         if (is.array(proto.arrayValue!.values)) {
           for (const value of proto.arrayValue!.values!) {
             array.push(this.decodeValue(value));
@@ -259,7 +259,7 @@ export class Serializer {
  * @param input The argument to verify.
  * @returns 'true' if the input can be a treated as a plain object.
  */
-export function isPlainObject(input: UserInput): boolean {
+export function isPlainObject(input: unknown): input is object {
   return (
       typeof input === 'object' && input !== null &&
       (Object.getPrototypeOf(input) === Object.prototype ||
