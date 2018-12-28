@@ -142,7 +142,8 @@ function orderBy(
 
   for (let i = 0; i < fieldPathAndOrderBys.length; i += 2) {
     const fieldPath = fieldPathAndOrderBys[i] as string;
-    const direction: AnyDuringMigration = fieldPathAndOrderBys[i + 1];
+    const direction =
+        fieldPathAndOrderBys[i + 1] as api.StructuredQuery.Direction;
     orderBy.push({
       field: {
         fieldPath,
@@ -552,15 +553,15 @@ describe('query interface', () => {
 
     return createInstance(overrides).then(firestore => {
       const query = firestore.collection('collectionId');
-      return query.get().then((snapshot: AnyDuringMigration) => {
+      return query.get().then(snapshot => {
         expect(() => {
-          snapshot.docChanges.forEach(() => {});
+          (snapshot.docChanges as InvalidApiUsage).forEach(() => {});
         })
             .to.throw(
                 'QuerySnapshot.docChanges has been changed from a property into a method');
 
         expect(() => {
-          for (const doc of snapshot.docChanges) {
+          for (const doc of (snapshot.docChanges as InvalidApiUsage)) {
           }
         })
             .to.throw(
