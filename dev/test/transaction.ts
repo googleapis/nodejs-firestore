@@ -50,13 +50,13 @@ function transactionId(transaction?: Uint8Array|string): Uint8Array {
  * The format the transaction tests use to verify transaction behavior. The
  * format defines an expected request and its expected response or error code.
  */
-type TransactionStep = {
-  type: 'begin'|'getDocument'|'query'|'commit'|'rollback',
-  request: api.ICommitRequest|api.IBeginTransactionRequest|api.IRunQueryRequest,
-  error?: Error,
-  response?: api.ICommitResponse|api.IBeginTransactionResponse
-  stream?: NodeJS.ReadableStream
-};
+interface TransactionStep {
+  type: 'begin'|'getDocument'|'query'|'commit'|'rollback';
+  request: api.ICommitRequest|api.IBeginTransactionRequest|api.IRunQueryRequest;
+  error?: Error;
+  response?: api.ICommitResponse|api.IBeginTransactionResponse;
+  stream?: NodeJS.ReadableStream;
+}
 
 function commit(
     transaction?: Uint8Array|string, writes?: api.IWrite[],
@@ -319,8 +319,8 @@ describe('successful transactions', () => {
 
   it('returns value', () => {
     return runTransaction(() => {
-      return Promise.resolve('bar');
-    }, begin(), commit()).then(val => {
+             return Promise.resolve('bar');
+           }, begin(), commit()).then(val => {
       expect(val).to.equal('bar');
     });
   });
@@ -348,24 +348,24 @@ describe('failed transactions', () => {
     };
 
     return createInstance(overrides).then(firestore => {
-      expect(() => firestore.runTransaction(() => Promise.resolve(), {
-        maxAttempts: 'foo' as InvalidApiUsage
-      }))
+      expect(
+          () => firestore.runTransaction(
+              () => Promise.resolve(), {maxAttempts: 'foo' as InvalidApiUsage}))
           .to.throw(
-          'Argument "transactionOptions.maxAttempts" is not a valid integer.');
+              'Argument "transactionOptions.maxAttempts" is not a valid integer.');
 
       expect(
           () => firestore.runTransaction(
               () => Promise.resolve(), {maxAttempts: 0}))
           .to.throw(
-          'Value for argument "transactionOptions.maxAttempts" must be within [1, Infinity] inclusive, but was: 0');
+              'Value for argument "transactionOptions.maxAttempts" must be within [1, Infinity] inclusive, but was: 0');
     });
   });
 
   it('requires a promise', () => {
     return expect(runTransaction(
-        (() => {}) as InvalidApiUsage, begin(),
-        rollback(new Buffer('foo'))))
+                      (() => {}) as InvalidApiUsage, begin(),
+                      rollback(new Buffer('foo'))))
         .to.eventually.be.rejectedWith(
             'You must return a Promise in your transaction()-callback.');
   });
@@ -377,18 +377,18 @@ describe('failed transactions', () => {
       };
 
       return expect(firestore.runTransaction(() => {
-        return Promise.resolve();
-      }))
+               return Promise.resolve();
+             }))
           .to.eventually.be.rejectedWith('Expected exception');
     });
   });
 
   it('doesn\'t retry on callback failure', () => {
     return expect(runTransaction(
-        () => {
-          return Promise.reject('request exception');
-        },
-        begin(), rollback(new Buffer('foo'))))
+                      () => {
+                        return Promise.reject('request exception');
+                      },
+                      begin(), rollback(new Buffer('foo'))))
         .to.eventually.be.rejectedWith('request exception');
   });
 
@@ -397,12 +397,12 @@ describe('failed transactions', () => {
     const serverError = new Error('Retryable error');
 
     return runTransaction(
-        () => {
-          return Promise.resolve(userResult.shift());
-        },
-        begin('foo1'), commit('foo1', [], serverError),
-        begin('foo2', 'foo1'), commit('foo2', [], serverError),
-        begin('foo3', 'foo2'), commit('foo3'))
+               () => {
+                 return Promise.resolve(userResult.shift());
+               },
+               begin('foo1'), commit('foo1', [], serverError),
+               begin('foo2', 'foo1'), commit('foo2', [], serverError),
+               begin('foo3', 'foo2'), commit('foo3'))
         .then(red => {
           expect(red).to.equal('success');
         });
@@ -412,48 +412,47 @@ describe('failed transactions', () => {
     const err = new Error('Retryable error');
 
     return expect(runTransaction(
-        () => {
-          return Promise.resolve('success');
-        },
-        begin('foo1'), commit('foo1', [], err),
-        begin('foo2', 'foo1'), commit('foo2', [], err),
-        begin('foo3', 'foo2'), commit('foo3', [], err),
-        begin('foo4', 'foo3'), commit('foo4', [], err),
-        begin('foo5', 'foo4'),
-        commit('foo5', [], new Error('Final exception'))))
+                      () => {
+                        return Promise.resolve('success');
+                      },
+                      begin('foo1'), commit('foo1', [], err),
+                      begin('foo2', 'foo1'), commit('foo2', [], err),
+                      begin('foo3', 'foo2'), commit('foo3', [], err),
+                      begin('foo4', 'foo3'), commit('foo4', [], err),
+                      begin('foo5', 'foo4'),
+                      commit('foo5', [], new Error('Final exception'))))
         .to.eventually.be.rejectedWith('Final exception');
   });
 
   it('fails on beginTransaction', () => {
     return expect(runTransaction(
-        () => {
-          return Promise.resolve('success');
-        },
-        begin(
-            'foo', undefined,
-            new Error('Fails (1) on beginTransaction')),
-        begin(
-            'foo', undefined,
-            new Error('Fails (2) on beginTransaction')),
-        begin(
-            'foo', undefined,
-            new Error('Fails (3) on beginTransaction')),
-        begin(
-            'foo', undefined,
-            new Error('Fails (4) on beginTransaction')),
-        begin(
-            'foo', undefined,
-            new Error('Fails (5) on beginTransaction'))))
+                      () => {
+                        return Promise.resolve('success');
+                      },
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (1) on beginTransaction')),
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (2) on beginTransaction')),
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (3) on beginTransaction')),
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (4) on beginTransaction')),
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (5) on beginTransaction'))))
         .to.eventually.be.rejectedWith('Fails (5) on beginTransaction');
   });
 
   it('fails on rollback', () => {
     return expect(runTransaction(
-        () => {
-          return Promise.reject();
-        },
-        begin(),
-        rollback('foo', new Error('Fails on rollback'))))
+                      () => {
+                        return Promise.reject();
+                      },
+                      begin(), rollback('foo', new Error('Fails on rollback'))))
         .to.eventually.be.rejectedWith('Fails on rollback');
   });
 });
@@ -470,12 +469,10 @@ describe('transaction operations', () => {
   it('requires a query or document for get', () => {
     return runTransaction((transaction: InvalidApiUsage) => {
       expect(() => transaction.get())
-          .to.throw(
-          'Argument "refOrQuery" must be a DocumentRef or a Query.');
+          .to.throw('Argument "refOrQuery" must be a DocumentRef or a Query.');
 
       expect(() => transaction.get('foo'))
-          .to.throw(
-          'Argument "refOrQuery" must be a DocumentRef or a Query.');
+          .to.throw('Argument "refOrQuery" must be a DocumentRef or a Query.');
 
       return Promise.resolve();
     }, begin(), commit());
@@ -483,11 +480,11 @@ describe('transaction operations', () => {
 
   it('enforce that gets come before writes', () => {
     return expect(runTransaction(
-        (transaction, docRef) => {
-          transaction.set(docRef, {foo: 'bar'});
-          return transaction.get(docRef);
-        },
-        begin()))
+                      (transaction, docRef) => {
+                        transaction.set(docRef, {foo: 'bar'});
+                        return transaction.get(docRef);
+                      },
+                      begin()))
         .to.eventually.be.rejectedWith(
             'Firestore transactions require all reads to be executed before all writes.');
   });
@@ -525,11 +522,11 @@ describe('transaction operations', () => {
 
   it('enforce that getAll come before writes', () => {
     return expect(runTransaction(
-        (transaction, docRef) => {
-          transaction.set(docRef, {foo: 'bar'});
-          return transaction.getAll(docRef);
-        },
-        begin()))
+                      (transaction, docRef) => {
+                        transaction.set(docRef, {foo: 'bar'});
+                        return transaction.getAll(docRef);
+                      },
+                      begin()))
         .to.eventually.be.rejectedWith(
             'Firestore transactions require all reads to be executed before all writes.');
   });

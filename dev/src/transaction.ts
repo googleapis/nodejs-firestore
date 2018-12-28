@@ -22,11 +22,7 @@ import {DocumentReference, Query, QuerySnapshot, validateDocumentReference} from
 import {isPlainObject} from './serializer';
 import {DocumentData, Precondition as PublicPrecondition, ReadOptions, SetOptions, UpdateData} from './types';
 import {isObject, requestTag} from './util';
-import {
-  AllowOptional,
-  invalidArgumentMessage,
-  validateMinNumberOfArguments, validateOptional
-} from './validate';
+import {AllowOptional, invalidArgumentMessage, validateMinNumberOfArguments, validateOptional} from './validate';
 
 import api = google.firestore.v1beta1;
 

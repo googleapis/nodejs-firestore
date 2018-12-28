@@ -233,7 +233,9 @@ describe('serialize document', () => {
 
     expect(() => {
       new Firestore.GeoPoint(Infinity as InvalidApiUsage, 0);
-    }).to.throw('Value for argument "latitude" must be within [-90, 90] inclusive, but was: Infinity');
+    })
+        .to.throw(
+            'Value for argument "latitude" must be within [-90, 90] inclusive, but was: Infinity');
 
     expect(() => {
       new Firestore.GeoPoint(91, 0);
@@ -1312,7 +1314,9 @@ describe('update document', () => {
 
     expect(() => {
       firestore.doc('collectionId/documentId').update();
-    }).to.throw('Function "DocumentReference.update()" requires at least 1 argument.');
+    })
+        .to.throw(
+            'Function "DocumentReference.update()" requires at least 1 argument.');
   });
 
   it('rejects nested deletes', () => {
