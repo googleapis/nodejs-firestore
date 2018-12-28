@@ -370,7 +370,7 @@ export class WriteBatch {
             precondition = new Precondition(arguments[i]);
           } else {
             this._validator.isFieldPath(i, arguments[i]);
-            // Unlike the `validateMinNumberOfArguments` validation above, this
+            // Unlike the `validateMinNumberOfArguments` invocation above, this
             // validation can be triggered both from `WriteBatch.update()` and
             // `DocumentReference.update()`. Hence, we don't use the fully
             // qualified API name in the error message.
