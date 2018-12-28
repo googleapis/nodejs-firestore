@@ -682,8 +682,8 @@ export class Firestore {
       Promise<DocumentSnapshot[]> {
     validateMinNumberOfArguments('Firestore.getAll', arguments, 1);
 
-    const {documents, fieldMask} = parseGetAllArguments(
-        this._validator, [documentRef, ...moreDocumentRefsOrReadOptions]);
+    const {documents, fieldMask} =
+        parseGetAllArguments([documentRef, ...moreDocumentRefsOrReadOptions]);
     return this.getAll_(documents, fieldMask, requestTag());
   }
 
