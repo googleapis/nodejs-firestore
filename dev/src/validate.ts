@@ -297,3 +297,31 @@ export function validateMaxNumberOfArguments(
         `${formatPlural(maxSize, 'argument')}.`);
   }
 }
+
+/**
+ * Validates that the provided named option equals one of the expected values.
+ *
+ * @param arg The argument name or argument index (for varargs methods).).
+ * @param value The input to validate.
+ * @param allowedValues A list of expected values.
+ * @param options Whether the input can be omitted.
+ * @private
+ */
+export function validateEnumValue(
+    arg: string|number, value: unknown, allowedValues: string[],
+    options?: AllowOptional): void {
+  if (!validateOptional(value, options)) {
+    const expectedDescription: string[] = [];
+
+    for (const allowed of allowedValues) {
+      if (allowed === value) {
+        return;
+      }
+      expectedDescription.push(allowed);
+    }
+
+    throw new Error(`Invalid value for argument ${
+        formatArgumentName(
+            arg)}. Acceptable values are: ${expectedDescription.join(', ')}`);
+  }
+}
