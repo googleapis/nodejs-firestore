@@ -447,8 +447,8 @@ export class FieldPath extends Path<FieldPath> {
   constructor(...segments: string[]) {
     validate.minNumberOfArguments('FieldPath', arguments, 1);
 
-    const elements: string[] = is.array(segments[0]) ?
-        segments[0] as AnyDuringMigration :
+    const elements: string[] = Array.isArray(segments[0]) ?
+        (segments[0] as unknown) as string[] :
         segments;
 
     for (let i = 0; i < elements.length; ++i) {
