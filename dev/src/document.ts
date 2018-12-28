@@ -381,7 +381,7 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved field value: ${field}`);
    * });
    */
-  get(field: string|FieldPath): any {  // tslint:disable-line no-any
+  get(field: string|FieldPath): UserInput
     validateFieldPath('field', field);
 
     const protoField = this.protoField(field);

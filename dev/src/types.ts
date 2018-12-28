@@ -108,18 +108,6 @@ export type UpdateData = {
 };
 
 /**
- * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
- * (descending or ascending).
- */
-export type OrderByDirection = 'desc'|'asc';
-
-/**
- * Filter conditions in a `Query.where()` clause are specified using the
- * strings '<', '<=', '==', '>=', '>', and 'array-contains'.
- */
-export type WhereFilterOp = '<'|'<='|'=='|'>='|'>'|'array-contains';
-
-/**
  * An options object that configures conditional behavior of `update()` and
  * `delete()` calls in `DocumentReference`, `WriteBatch`, and `Transaction`.
  * Using Preconditions, these calls can be restricted to only apply to
@@ -183,9 +171,6 @@ export interface ValidationOptions {
 
   /** Whether server transforms are supported. */
   allowTransforms: boolean;
-
-  /** Whether empty documents are supported. */
-  allowEmpty: boolean;
 }
 
 /**

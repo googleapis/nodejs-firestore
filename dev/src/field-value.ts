@@ -391,5 +391,5 @@ function validateArrayElement(arg: string|number, value: unknown): void {
       arg, value, 'array element',
       /*path=*/{allowEmpty: true, allowDeletes: 'none', allowTransforms: false},
       /*path=*/undefined,
-      /*level=*/0, /* inArray=*/true);
+      /*level=*/0, /*inArray=*/true);
 }

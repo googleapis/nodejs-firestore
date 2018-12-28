@@ -395,7 +395,7 @@ export class ResourcePath extends Path<ResourcePath> {
 }
 
 /**
- * Returns true if the given string can be used as a relative or absolute
+ * Validates that the given string can be used as a relative or absolute
  * resource path.
  *
  * @private
