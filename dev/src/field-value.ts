@@ -172,7 +172,7 @@ export abstract class FieldTransform extends FieldValue {
   abstract get methodName(): string;
 
   /** Performs input validation on the values of this field transform. */
-  abstract validate(validator: AnyDuringMigration): boolean;
+  abstract validate(): void;
 
   /***
    * The proto representation for this field transform.
@@ -218,9 +218,7 @@ export class DeleteTransform extends FieldTransform {
     return 'FieldValue.delete';
   }
 
-  validate(): true {
-    return true;
-  }
+  validate(): void {}
 
   toProto(serializer: Serializer, fieldPath: FieldPath): never {
     throw new Error(
@@ -267,9 +265,7 @@ class ServerTimestampTransform extends FieldTransform {
     return 'FieldValue.serverTimestamp';
   }
 
-  validate(): true {
-    return true;
-  }
+  validate(): void {}
 
   toProto(serializer: Serializer, fieldPath: FieldPath):
       api.DocumentTransform.IFieldTransform {
@@ -308,13 +304,10 @@ class ArrayUnionTransform extends FieldTransform {
     return 'FieldValue.arrayUnion';
   }
 
-  validate(validator: AnyDuringMigration): boolean {
-    let valid = true;
-    for (let i = 0; valid && i < this.elements.length; ++i) {
-      valid = validator.isArrayElement(
-          i, this.elements[i], {allowDeletes: 'none', allowTransforms: false});
+  validate(): void {
+    for (let i = 0; i < this.elements.length; ++i) {
+      validateArrayElement(i, this.elements[i]);
     }
-    return valid;
   }
 
   toProto(serializer: Serializer, fieldPath: FieldPath):
@@ -362,13 +355,10 @@ class ArrayRemoveTransform extends FieldTransform {
     return 'FieldValue.arrayRemove';
   }
 
-  validate(validator: AnyDuringMigration): boolean {
-    let valid = true;
-    for (let i = 0; valid && i < this.elements.length; ++i) {
-      valid = validator.isArrayElement(
-          i, this.elements[i], {allowDeletes: 'none', allowTransforms: false});
+  validate(): void {
+    for (let i = 0; i < this.elements.length; ++i) {
+      validateArrayElement(i, this.elements[i]);
     }
-    return valid;
   }
 
   toProto(serializer: Serializer, fieldPath):
@@ -386,4 +376,20 @@ class ArrayRemoveTransform extends FieldTransform {
         (other instanceof ArrayRemoveTransform &&
          deepEqual(this.elements, other.elements, {strict: true})));
   }
+}
+
+/**
+ * Validates that `value` can be used as an element inside of an array. Certain
+ * field values (such as ServerTimestamps) are rejected.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The value to validate.
+ */
+function validateArrayElement(arg: string|number, value: unknown): void {
+  validateUserInput(
+      arg, value, 'array element',
+      /*path=*/{allowEmpty: true, allowDeletes: 'none', allowTransforms: false},
+      /*path=*/undefined,
+      /*level=*/0, /* inArray=*/true);
 }

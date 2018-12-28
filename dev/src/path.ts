@@ -281,27 +281,6 @@ export class ResourcePath extends Path<ResourcePath> {
   }
 
   /**
-   * Returns true if the given string can be used as a relative or absolute
-   * resource path.
-   *
-   * @private
-   * @param {string} resourcePath The path to validate.
-   * @throws if the string can't be used as a resource path.
-   * @returns {boolean} 'true' when the path is valid.
-   */
-  static validateResourcePath(resourcePath: string): boolean {
-    if (!is.string(resourcePath) || resourcePath === '') {
-      throw new Error(`Path must be a non-empty string.`);
-    }
-
-    if (resourcePath.indexOf('//') >= 0) {
-      throw new Error('Paths must not contain //.');
-    }
-
-    return true;
-  }
-
-  /**
    * Creates a resource path from an absolute Firestore path.
    *
    * @private
@@ -416,6 +395,30 @@ export class ResourcePath extends Path<ResourcePath> {
 }
 
 /**
+ * Returns true if the given string can be used as a relative or absolute
+ * resource path.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param resourcePath The path to validate.
+ * @throws if the string can't be used as a resource path.
+ */
+export function validateResourcePath(
+    arg: string|number, resourcePath: string): void {
+  if (typeof resourcePath !== 'string' || resourcePath === '') {
+    throw new Error(`${
+        invalidArgumentMessage(
+            arg, 'resource path')} Path must be a non-empty string.`);
+  }
+
+  if (resourcePath.indexOf('//') >= 0) {
+    throw new Error(`${
+        invalidArgumentMessage(
+            arg, 'resource path')} Paths must not contain //.`);
+  }
+}
+
+/**
  * A dot-separated path for navigating sub-objects within a document.
  *
  * @class
@@ -469,46 +472,6 @@ export class FieldPath extends Path<FieldPath> {
    */
   static documentId() {
     return FieldPath._DOCUMENT_ID;
-  }
-
-  /**
-   * Returns true if the provided value can be used as a field path argument.
-   *
-   * @private
-   * @param fieldPath The value to verify.
-   * @throws if the string can't be used as a field path.
-   * @returns 'true' when the path is valid.
-   */
-  static validateFieldPath(fieldPath: unknown): boolean {
-    if (!(fieldPath instanceof FieldPath)) {
-      if (fieldPath === undefined) {
-        throw new Error('Path cannot be omitted.');
-      }
-
-      if (is.object(fieldPath) &&
-          (fieldPath as object).constructor.name === 'FieldPath') {
-        throw customObjectError(fieldPath);
-      }
-
-      if (typeof fieldPath !== 'string') {
-        throw new Error(
-            'Paths can only be specified as strings or via a FieldPath object.');
-      }
-
-      if (fieldPath.indexOf('..') >= 0) {
-        throw new Error(`Paths must not contain ".." in them.`);
-      }
-
-      if (fieldPath.startsWith('.') || fieldPath.endsWith('.')) {
-        throw new Error(`Paths must not start or end with ".".`);
-      }
-
-      if (!FIELD_PATH_RE.test(fieldPath)) {
-        throw new Error(`Paths can't be empty and must not contain "*~/[]".`);
-      }
-    }
-
-    return true;
   }
 
   /**
@@ -579,5 +542,56 @@ export class FieldPath extends Path<FieldPath> {
    */
   isEqual(other: FieldPath): boolean {
     return super.isEqual(other);
+  }
+}
+
+/**
+ * Validates that the provided value can be used as a field path argument.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param fieldPath The value to verify.
+ * @throws if the string can't be used as a field path.
+ */
+export function validateFieldPath(
+    arg: string|number, fieldPath: unknown): void {
+  if (fieldPath instanceof FieldPath) {
+    return;
+  }
+
+  if (fieldPath === undefined) {
+    throw new Error(
+        invalidArgumentMessage(arg, 'field path') +
+        ' The path cannot be omitted.');
+  }
+
+  if (isObject(fieldPath) && fieldPath.constructor.name === 'FieldPath') {
+    throw new Error(customObjectMessage(arg, fieldPath));
+  }
+
+  if (typeof fieldPath !== 'string') {
+    throw new Error(`${
+        invalidArgumentMessage(
+            arg,
+            'field path')} Paths can only be specified as strings or via a FieldPath object.`);
+  }
+
+  if (fieldPath.indexOf('..') >= 0) {
+    throw new Error(`${
+        invalidArgumentMessage(
+            arg, 'field path')} Paths must not contain ".." in them.`);
+  }
+
+  if (fieldPath.startsWith('.') || fieldPath.endsWith('.')) {
+    throw new Error(`${
+        invalidArgumentMessage(
+            arg, 'field path')} Paths must not start or end with ".".`);
+  }
+
+  if (!FIELD_PATH_RE.test(fieldPath)) {
+    throw new Error(`${
+        invalidArgumentMessage(
+            arg, 'field path')} Paths can't be empty and must not contain
+    "*~/[]".`);
   }
 }
