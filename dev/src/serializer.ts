@@ -208,7 +208,7 @@ export class Serializer {
       }
       case 'arrayValue': {
         const array: unknown[] = [];
-        if (is.array(proto.arrayValue!.values)) {
+        if (Array.isArray(proto.arrayValue!.values)) {
           for (const value of proto.arrayValue!.values!) {
             array.push(this.decodeValue(value));
           }
