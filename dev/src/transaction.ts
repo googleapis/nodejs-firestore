@@ -273,7 +273,7 @@ export class Transaction {
    */
   update(
       documentRef: DocumentReference, dataOrField: UpdateData|string|FieldPath,
-      ...preconditionOrValues: Array<Precondition|AnyJs|string|FieldPath>):
+      ...preconditionOrValues: Array<Precondition|unknown|string|FieldPath>):
       Transaction {
     this._validator.minNumberOfArguments('update', arguments, 2);
 

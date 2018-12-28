@@ -345,14 +345,14 @@ export class WriteBatch {
   update(
       documentRef: DocumentReference, dataOrField: UpdateData|string|FieldPath,
       ...preconditionOrValues:
-          Array<{lastUpdateTime?: Timestamp}|AnyJs|string|FieldPath>):
+          Array<{lastUpdateTime?: Timestamp}|unknown|string|FieldPath>):
       WriteBatch {
     this._validator.minNumberOfArguments('update', arguments, 2);
     this._validator.isDocumentReference('documentRef', documentRef);
 
     this.verifyNotCommitted();
 
-    const updateMap = new Map();
+    const updateMap = new Map<FieldPath, unknown>();
     let precondition = new Precondition({exists: true});
 
     const argumentError = 'Update() requires either a single JavaScript ' +

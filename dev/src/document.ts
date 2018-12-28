@@ -144,7 +144,7 @@ export class DocumentSnapshot {
    * @param data The field/value map to expand.
    * @return The created DocumentSnapshot.
    */
-  static fromUpdateMap(ref: DocumentReference, data: UpdateData):
+  static fromUpdateMap(ref: DocumentReference, data: UpdateMap):
       DocumentSnapshot {
     const serializer = ref.firestore._serializer;
 
@@ -153,7 +153,7 @@ export class DocumentSnapshot {
      * 'target'.
      */
     function merge(
-        target: ApiMapValue, value: AnyJs, path: string[], pos: number) {
+        target: ApiMapValue, value: unknown, path: string[], pos: number) {
       const key = path[pos];
       const isLast = pos === path.length - 1;
 
@@ -349,7 +349,7 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
    */
-  data(): DocumentData|undefined {
+  data(): {[field: string]: any}|undefined {  // tslint:disable-line no-any
     const fields = this._fieldsProto;
 
     if (fields === undefined) {
@@ -383,7 +383,7 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved field value: ${field}`);
    * });
    */
-  get(field: string|FieldPath): UserInput {
+  get(field: string|FieldPath): any {  // tslint:disable-line no-any
     this._validator.isFieldPath('field', field);
 
     const protoField = this.protoField(field);
@@ -592,7 +592,7 @@ export class DocumentMask {
    * @param data A map with fields to modify. Only the keys are used to extract
    * the document mask.
    */
-  static fromUpdateMap(data: UpdateData): DocumentMask {
+  static fromUpdateMap(data: UpdateMap): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
     data.forEach((value, key) => {
@@ -848,7 +848,7 @@ export class DocumentTransform {
    */
   static fromObject(ref: DocumentReference, obj: DocumentData):
       DocumentTransform {
-    const updateMap = new Map<FieldPath, FieldTransform>();
+    const updateMap = new Map<FieldPath, unknown>();
 
     for (const prop in obj) {
       if (obj.hasOwnProperty(prop)) {
@@ -867,7 +867,7 @@ export class DocumentTransform {
    * @param data The update data to extract the transformations from.
    * @returns The Document Transform.
    */
-  static fromUpdateMap(ref: DocumentReference, data: UpdateData):
+  static fromUpdateMap(ref: DocumentReference, data: UpdateMap):
       DocumentTransform {
     const transforms = new Map<FieldPath, FieldTransform>();
 

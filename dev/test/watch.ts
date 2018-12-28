@@ -118,7 +118,7 @@ function snapshot(
     ref: DocumentReference, data: DocumentData): QueryDocumentSnapshot {
   const snapshot = new DocumentSnapshotBuilder();
   snapshot.ref = ref;
-  snapshot.fieldsProto = ref.firestore._serializer.encodeFields(data);
+  snapshot.fieldsProto = ref.firestore._serializer!.encodeFields(data);
   snapshot.readTime = new Firestore.Timestamp(0, 0);
   snapshot.createTime = new Firestore.Timestamp(0, 0);
   snapshot.updateTime = new Firestore.Timestamp(0, 0);

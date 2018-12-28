@@ -26,9 +26,9 @@ describe('ExponentialBackoff', () => {
 
   before(() => {
     setTimeoutHandler(((callback, timeout) => {
-                        observedDelays.push(timeout);
-                        callback();
-                      }) as AnyDuringMigration);
+      observedDelays.push(timeout);
+      callback();
+    }));
   });
 
   beforeEach(() => {

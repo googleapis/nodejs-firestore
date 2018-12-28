@@ -448,7 +448,7 @@ export class FieldPath extends Path<FieldPath> {
     validate.minNumberOfArguments('FieldPath', arguments, 1);
 
     const elements: string[] = is.array(segments[0]) ?
-        segments[0] as AnyDuringMigration :
+        (segments[0] as unknown) as string[] :
         segments;
 
     for (let i = 0; i < elements.length; ++i) {
