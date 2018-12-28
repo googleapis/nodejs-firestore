@@ -52,13 +52,13 @@ function transactionId(transaction?: Uint8Array|string): Uint8Array {
  * The format the transaction tests use to verify transaction behavior. The
  * format defines an expected request and its expected response or error code.
  */
-type TransactionStep = {
-  type: 'begin'|'getDocument'|'query'|'commit'|'rollback',
-  request: api.ICommitRequest|api.IBeginTransactionRequest|api.IRunQueryRequest,
-  error?: Error,
-  response?: api.ICommitResponse|api.IBeginTransactionResponse
-  stream?: NodeJS.ReadableStream
-};
+interface TransactionStep {
+  type: 'begin'|'getDocument'|'query'|'commit'|'rollback';
+  request: api.ICommitRequest|api.IBeginTransactionRequest|api.IRunQueryRequest;
+  error?: Error;
+  response?: api.ICommitResponse|api.IBeginTransactionResponse;
+  stream?: NodeJS.ReadableStream;
+}
 
 function commit(
     transaction?: Uint8Array|string, writes?: api.IWrite[],
