@@ -15,12 +15,11 @@
  */
 
 import {google} from '../protos/firestore_proto_api';
-import api = google.firestore.v1beta1;
-
 import {detectValueType} from './convert';
 import {ResourcePath} from './path';
-import {customObjectError} from './validate';
 import {ApiMapValue} from './types';
+
+import api = google.firestore.v1beta1;
 
 /*!
  * The type order as defined by the backend.

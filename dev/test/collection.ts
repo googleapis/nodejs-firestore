@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {expect} from 'chai';
 
 import * as Firestore from '../src/index';

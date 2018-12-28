@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import * as proto from '../protos/firestore_proto_api';
-
+import {google} from '../protos/firestore_proto_api';
 import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
-import {FieldPath} from './path';
-import {DocumentReference, Query, QuerySnapshot} from './reference';
-import {AnyDuringMigration, AnyJs, DocumentData, Precondition as PublicPrecondition, ReadOptions, SetOptions, UpdateData} from './types';
-import {parseGetAllArguments} from './util';
+import {FieldPath, validateFieldPath} from './path';
+import {DocumentReference, Query, QuerySnapshot, validateDocumentReference} from './reference';
+import {isPlainObject} from './serializer';
+import {DocumentData, Precondition as PublicPrecondition, ReadOptions, SetOptions, UpdateData} from './types';
 import {requestTag} from './util';
+import {invalidArgumentMessage, validateMinNumberOfArguments} from './validate';
 
-import api = proto.google.firestore.v1beta1;
+import api = google.firestore.v1beta1;
 
 /*!
  * Error message for transactional reads that were executed after performing

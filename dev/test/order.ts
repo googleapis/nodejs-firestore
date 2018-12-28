@@ -17,12 +17,12 @@
 import {expect} from 'chai';
 
 import * as Firestore from '../src';
-import {DocumentSnapshot} from '../src/document';
-import {GeoPoint} from '../src/geo-point';
+import {DocumentSnapshot} from '../src';
+import {GeoPoint} from '../src';
+import {DocumentReference} from '../src';
 import * as order from '../src/order';
 import {ResourcePath} from '../src/path';
-import {DocumentReference} from '../src/reference';
-import {createInstance, InvalidApiUsage} from '../test/util/helpers';
+import {createInstance, InvalidApiUsage} from './util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});

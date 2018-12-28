@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+const v1beta1 = require('../../src/v1beta1');
+
 import {expect} from 'chai';
 import {GrpcClient} from 'google-gax';
 import * as through2 from 'through2';
 
-import * as proto from '../../protos/firestore_proto_api';
-import api = proto.google.firestore.v1beta1;
-
-const v1beta1 = require('../../src/v1beta1');
-
+import {google} from '../../protos/firestore_proto_api';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
+
+import api = google.firestore.v1beta1;
 
 /* tslint:disable:no-any */
 type GapicClient = any;

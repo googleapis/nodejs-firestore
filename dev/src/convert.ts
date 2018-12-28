@@ -15,10 +15,14 @@
  */
 
 import {google} from '../protos/firestore_proto_api';
-import api = google.firestore.v1beta1;
-import {createValidator} from './validate';
 import {ProtobufJsValue} from './types';
+import {validateObject} from './validate';
 
+<<<<<<< HEAD
+=======
+import api = google.firestore.v1beta1;
+
+>>>>>>> mrschmidt-imports
 /*!
  * @module firestore/convert
  * @private

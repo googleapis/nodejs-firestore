@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-import * as is from 'is';
-
-import * as proto from '../protos/firestore_proto_api';
-import api = proto.google.firestore.v1beta1;
-
-import {Timestamp} from './timestamp';
-import {FieldTransform} from './field-value';
-
-import {customObjectError} from './validate';
-import {ResourcePath} from './path';
+import {google} from '../protos/firestore_proto_api';
 import {detectValueType} from './convert';
-import {AnyDuringMigration, AnyJs, UserInput} from './types';
+import {FieldTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
+import {ResourcePath} from './path';
+import {Timestamp} from './timestamp';
+
+import api = google.firestore.v1beta1;
 
 /** An interface for Firestore types that can be serialized to Protobuf. */
 export interface Serializable {
