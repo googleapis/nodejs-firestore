@@ -71,8 +71,8 @@ describe('timestamps', () => {
                {timestampsInSnapshots: false}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
           return firestore.doc('collectionId/documentId').get().then(res => {
-            expect(is.date(res.data()!['moonLanding'])).to.be.true;
-            expect(is.date(res.get('moonLanding'))).to.be.true;
+            expect(res.data()!['moonLanding']).to.be.instanceOf(Date);
+            expect(res.get('moonLanding')).to.be.instanceOf(Date);
             console.error = oldErrorLog;
           });
         });

@@ -162,7 +162,7 @@ export class DocumentSnapshot {
           if (value instanceof FieldTransform) {
             // If there is already data at this path, we need to retain it.
             // Otherwise, we don't include it in the DocumentSnapshot.
-            return !is.empty(target) ? target : null;
+            return !isEmpty(target) ? target : null;
           }
           // The merge is done.
           const leafNode = serializer.encodeValue(value);
@@ -186,7 +186,7 @@ export class DocumentSnapshot {
             target[key] = childNode;
             return target;
           } else {
-            return !is.empty(target) ? target : null;
+            return !isEmpty(target) ? target : null;
           }
         }
       } else {
@@ -432,7 +432,7 @@ export class DocumentSnapshot {
    * @return {boolean}
    */
   get isEmpty(): boolean {
-    return is.undefined(this._fieldsProto) || is.empty(this._fieldsProto);
+    return this._fieldsProto === undefined || isEmpty(this._fieldsProto);
   }
 
   /**
@@ -760,7 +760,7 @@ export class DocumentMask {
             DocumentMask.removeFromSortedArray(remainingPaths, [childPath]);
             result = result || {};
             result[key] = currentData[key];
-          } else if (is.object(currentData[key])) {
+          } else if (isObject(currentData[key])) {
             const childObject = processObject(currentData[key], childPath);
             if (childObject) {
               result = result || {};
@@ -879,7 +879,7 @@ export class DocumentTransform {
           throw new Error(
               `${val.methodName}() is not supported inside of array values.`);
         }
-      } else if (is.array(val)) {
+      } else if (Array.isArray(val)) {
         for (let i = 0; i < val.length; ++i) {
           // We need to verify that no array value contains a document transform
           encode_(val[i], path.append(String(i)), false);
