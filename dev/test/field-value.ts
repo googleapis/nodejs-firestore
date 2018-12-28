@@ -38,7 +38,7 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: FieldValue.arrayUnion(sentinel)}))
-          .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
+          .to.throw(`Argument at index 0 is not a valid array element. ${
               methodName}() cannot be used inside of an array.`);
     });
   });
@@ -47,7 +47,7 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: FieldValue.arrayRemove(sentinel)}))
-          .to.throw(`Argument at index 0 is not a valid ArrayElement. ${
+          .to.throw(`Argument at index 0 is not a valid array element. ${
               methodName}() cannot be used inside of an array.`);
     });
   });
@@ -56,10 +56,10 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const collRef = firestore.collection('coll');
       expect(() => collRef.where('a', '==', sentinel))
-          .to.throw(`Argument "value" is not a valid QueryValue. ${
+          .to.throw(`Argument "value" is not a valid query constraint. ${
               methodName}() can only be used in set(), create() or update().`);
       expect(() => collRef.orderBy('a').startAt(sentinel))
-          .to.throw(`Argument at index 0 is not a valid QueryValue. ${
+          .to.throw(`Argument at index 0 is not a valid query constraint. ${
               methodName}() can only be used in set(), create() or update().`);
     });
   });

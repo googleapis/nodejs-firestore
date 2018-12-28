@@ -45,7 +45,7 @@ describe('set() method', () => {
   it('requires object', () => {
     expect(() => writeBatch.set(firestore.doc('sub/doc')))
         .to.throw(
-            'Argument "data" is not a valid Document. Input is not a plain JavaScript object.');
+            'Argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 
   it('accepts preconditions', () => {
@@ -97,7 +97,7 @@ describe('update() method', () => {
       writeBatch.update(firestore.doc('sub/doc'), firestore.doc('sub/doc'));
     })
         .to.throw(
-            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Argument "dataOrField" is not a valid Document. Detected an object of type "DocumentReference" that doesn\'t match the expected instance. Please ensure that the Firestore types you are using are from the same NPM package.');
+            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Argument "dataOrField" is not a valid Firestore document. Detected an object of type "DocumentReference" that doesn\'t match the expected instance. Please ensure that the Firestore types you are using are from the same NPM package.');
   });
 
   it('accepts preconditions', () => {
@@ -128,7 +128,7 @@ describe('create() method', () => {
       writeBatch.create(firestore.doc('sub/doc'));
     })
         .to.throw(
-            'Argument "data" is not a valid Document. Input is not a plain JavaScript object.');
+            'Argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 });
 

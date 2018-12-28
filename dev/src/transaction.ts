@@ -49,7 +49,6 @@ const ALLOW_RETRIES = true;
  */
 export class Transaction {
   private _firestore: Firestore;
-  private _validator: AnyDuringMigration;
   private _previousTransaction?: Transaction;
   private _writeBatch: WriteBatch;
   private _requestTag: string;
@@ -64,7 +63,6 @@ export class Transaction {
    */
   constructor(firestore: Firestore, previousTransaction?: Transaction) {
     this._firestore = firestore;
-    this._validator = firestore._validator;
     this._previousTransaction = previousTransaction;
     this._writeBatch = firestore.batch();
     this._requestTag =
