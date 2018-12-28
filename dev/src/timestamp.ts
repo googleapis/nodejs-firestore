@@ -17,8 +17,6 @@
 import {google} from '../protos/firestore_proto_api';
 import {createValidator} from './validate';
 
-const validate = createValidator();
-
 /*!
  * Number of nanoseconds in a millisecond.
  *
@@ -119,8 +117,9 @@ export class Timestamp {
    * from 0 to 999,999,999 inclusive.
    */
   constructor(seconds, nanoseconds) {
-    validate.isInteger('seconds', seconds);
-    validate.isInteger('nanoseconds', nanoseconds, 0, 999999999);
+    validateInteger('seconds', seconds);
+    validateInteger(
+        'nanoseconds', nanoseconds, {minValue: 0, maxValue: 999999999});
 
     this._seconds = seconds;
     this._nanoseconds = nanoseconds;

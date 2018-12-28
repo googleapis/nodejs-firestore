@@ -453,8 +453,8 @@ export class DocumentReference {
   onSnapshot(
       onNext: (snapshot: DocumentSnapshot) => void,
       onError?: (error: Error) => void): () => void {
-    this._validator.isFunction('onNext', onNext);
-    this._validator.isOptionalFunction('onError', onError);
+    validateFunction('onNext', onNext);
+    validateFunction('onError', onError, {optional: true});
 
     const watch = Watch.forDocument(this);
 
@@ -798,7 +798,7 @@ export class QuerySnapshot {
   // tslint:disable-next-line:no-any
   forEach(callback: (result: QueryDocumentSnapshot) => void, thisArg?: any):
       void {
-    this._validator.isFunction('callback', callback);
+    validateFunction('callback', callback);
 
     for (const doc of this.docs) {
       callback.call(thisArg, doc);
@@ -1146,7 +1146,7 @@ export class Query {
    * });
    */
   limit(limit: number): Query {
-    this._validator.isInteger('limit', limit);
+    validateInteger('limit', limit);
 
     const options = extend(true, {}, this._queryOptions);
     options.limit = limit;
@@ -1175,7 +1175,7 @@ export class Query {
    * });
    */
   offset(offset: number): Query {
-    this._validator.isInteger('offset', offset);
+    validateInteger('offset', offset);
 
     const options = extend(true, {}, this._queryOptions);
     options.offset = offset;
@@ -1700,8 +1700,8 @@ export class Query {
   onSnapshot(
       onNext: (snapshot: QuerySnapshot) => void,
       onError?: (error: Error) => void): () => void {
-    this._validator.isFunction('onNext', onNext);
-    this._validator.isOptionalFunction('onError', onError);
+    validateFunction('onNext', onNext);
+    validateFunction('onError', onError, {optional: true});
 
     const watch = Watch.forQuery(this);
 

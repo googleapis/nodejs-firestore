@@ -20,12 +20,22 @@ import {FieldPath} from './path';
 import {AnyDuringMigration} from './types';
 
 /**
- * Formats the given word as plural conditionally given the preceding number.
+ * Options to allow argument omission.
  *
  * @private
  */
-function formatPlural(num, str) {
-  return `${num} ${str}` + (num === 1 ? '' : 's');
+export interface AllowOptional {
+  optional?: boolean;
+}
+
+/**
+ * Options to limit the range of numbers.
+ *
+ * @private
+ */
+export interface AllowRange {
+  minValue?: number;
+  maxValue?: number;
 }
 
 type Validators = {
@@ -190,6 +200,181 @@ export function customObjectError(val, path?: FieldPath): Error {
     return new Error(`Invalid use of type "${
         typeof val}" as a Firestore argument${fieldPathMessage}.`);
   }
+}
+
+/**
+ * Validates that 'value' is a function.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the function can be omitted.
+ */
+export function validateFunction(
+    arg: string|number, value: unknown, options?: AllowOptional): void {
+  if (!validateOptional(value, options)) {
+    if (!isFunction(value)) {
+      throw new Error(invalidArgumentMessage(arg, 'function'));
+    }
+  }
+}
+
+/**
+ * Validates that 'value' is an object.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the object can be omitted.
+ */
+export function validateObject(
+    arg: string|number, value: unknown, options?: AllowOptional): void {
+  if (!validateOptional(value, options)) {
+    if (!isObject(value)) {
+      throw new Error(invalidArgumentMessage(arg, 'object'));
+    }
+  }
+}
+
+/**
+ * Validates that 'value' is a string.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the string can be omitted.
+ */
+export function validateString(
+    arg: string|number, value: unknown, options?: AllowOptional): void {
+  if (!validateOptional(value, options)) {
+    if (typeof value !== 'string') {
+      throw new Error(invalidArgumentMessage(arg, 'string'));
+    }
+  }
+}
+
+/**
+ * Validates that 'value' is a boolean.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the boolean can be omitted.
+ */
+export function validateBoolean(
+    arg: string|number, value: unknown, options?: AllowOptional): void {
+  if (!validateOptional(value, options)) {
+    if (typeof value !== 'boolean') {
+      throw new Error(invalidArgumentMessage(arg, 'boolean'));
+    }
+  }
+}
+
+/**
+ * Validates that 'value' is a number.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the number can be omitted.
+ */
+export function validateNumber(
+    arg: string|number, value: unknown,
+    options?: AllowOptional&AllowRange): void {
+  const min = options !== undefined && options.minValue !== undefined ?
+      options.minValue :
+      -Infinity;
+  const max = options !== undefined && options.maxValue !== undefined ?
+      options.maxValue :
+      Infinity;
+
+  if (!validateOptional(value, options)) {
+    if (typeof value !== 'number' || isNaN(value)) {
+      throw new Error(invalidArgumentMessage(arg, 'number'));
+    } else if (value < min || value > max) {
+      throw new Error(
+          `Value for argument ${formatArgumentName(arg)} must be within [${
+              min}, ${max}] inclusive, but was: ${value}`);
+    }
+  }
+}
+
+/**
+ * Validates that 'value' is a integer.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the integer can be omitted.
+ */
+export function validateInteger(
+    arg: string|number, value: unknown,
+    options?: AllowOptional&AllowRange): void {
+  const min = options !== undefined && options.minValue !== undefined ?
+      options.minValue :
+      -Infinity;
+  const max = options !== undefined && options.maxValue !== undefined ?
+      options.maxValue :
+      Infinity;
+
+  if (!validateOptional(value, options)) {
+    if (typeof value !== 'number' || isNaN(value) || value % 1 !== 0) {
+      throw new Error(invalidArgumentMessage(arg, 'integer'));
+    } else if (value < min || value > max) {
+      throw new Error(
+          `Value for argument ${formatArgumentName(arg)} must be within [${
+              min}, ${max}] inclusive, but was: ${value}`);
+    }
+  }
+}
+
+
+/**
+ * Generates an error message to use with invalid arguments.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param expectedType The expected input type.
+ */
+export function invalidArgumentMessage(
+    arg: string|number, expectedType: string) {
+  return `Argument ${formatArgumentName(arg)} is not a valid ${expectedType}.`;
+}
+
+/**
+ * Enforces the 'options.optional' constraint for 'value'.
+ *
+ * @private
+ * @param value The input to validate.
+ * @param options Whether the function can be omitted.
+ * @return Whether the object is omitted and is allowed to be omitted.
+ */
+export function validateOptional(
+    value: unknown, options?: AllowOptional): boolean {
+  return value === undefined && options !== undefined &&
+      options.optional === true;
+}
+
+/**
+ * Formats the given word as plural conditionally given the preceding number.
+ *
+ * @private
+ * @param num The number to use for formatting.
+ * @param str The string to format.
+ */
+function formatPlural(num: number, str: string) : string {
+  return `${num} ${str}` + (num === 1 ? '' : 's');
+}
+
+/**
+ * Creates a descriptive name for the provided argument name or index.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @return Either the argument name or its index description.
+ */
+function formatArgumentName(arg: string|number) : string {
+  return typeof arg === 'string' ? `"${arg}"` : `at index ${arg}`;
 }
 
 /**
