@@ -261,7 +261,6 @@ export class Serializer {
  */
 export function isPlainObject(input: UserInput): boolean {
   return (
-      typeof input === 'object' && input !== null &&
-      (Object.getPrototypeOf(input) === Object.prototype ||
+      isObject(input) && (Object.getPrototypeOf(input) === Object.prototype ||
        Object.getPrototypeOf(input) === null));
 }
