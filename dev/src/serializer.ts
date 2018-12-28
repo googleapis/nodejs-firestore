@@ -212,7 +212,7 @@ export class Serializer {
         return this.createReference(resourcePath.relativeName);
       }
       case 'arrayValue': {
-        const array: unknown[] = [];
+        const array: Array<unknown> = [];
         if (is.array(proto.arrayValue!.values)) {
           for (const value of proto.arrayValue!.values!) {
             array.push(this.decodeValue(value));

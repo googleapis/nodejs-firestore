@@ -938,7 +938,7 @@ export class Query {
    */
   static _extractFieldValues(
       documentSnapshot: DocumentSnapshot, fieldOrders: FieldOrder[]) {
-    const fieldValues: unknown[] = [];
+    const fieldValues: Array<unknown> = [];
 
     for (const fieldOrder of fieldOrders) {
       if (FieldPath.documentId().isEqual(fieldOrder.field)) {
