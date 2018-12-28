@@ -45,9 +45,7 @@ import api = google.firestore.v1beta1;
  */
 const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
   asc: 'ASCENDING',
-  ASC: 'ASCENDING',
   desc: 'DESCENDING',
-  DESC: 'DESCENDING',
 };
 
 /*!
@@ -60,7 +58,6 @@ const comparisonOperators:
     {[k: string]: api.StructuredQuery.FieldFilter.Operator} = {
       '<': 'LESS_THAN',
       '<=': 'LESS_THAN_OR_EQUAL',
-      '=': 'EQUAL',
       '==': 'EQUAL',
       '>': 'GREATER_THAN',
       '>=': 'GREATER_THAN_OR_EQUAL',
@@ -1004,7 +1001,8 @@ export class Query {
    *   });
    * });
    */
-  where(fieldPath: string|FieldPath, opStr: string, value: UserInput): Query {
+  where(fieldPath: string|FieldPath, opStr: WhereFilterOp, value: unknown) :
+      Query {
     validateFieldPath('fieldPath', fieldPath);
     validateQueryOperator('opStr', opStr, value);
     validateQueryValue('value', value);
@@ -1094,7 +1092,7 @@ export class Query {
    *   });
    * });
    */
-  orderBy(fieldPath: string|FieldPath, directionStr?: string): Query {
+  orderBy(fieldPath: string|FieldPath, directionStr?: OrderByDirection): Query {
     validateFieldPath('fieldPath', fieldPath);
     validateQueryOrder('directionStr', directionStr);
 
@@ -1703,8 +1701,9 @@ export class Query {
       (s1: QueryDocumentSnapshot, s2: QueryDocumentSnapshot) => number {
     return (doc1, doc2) => {
       // Add implicit sorting by name, using the last specified direction.
-      const lastDirection = this._fieldOrders.length === 0 ?
-          directionOperators.ASC :
+      const lastDirection: api.StructuredQuery.Direction =
+          this._fieldOrders.length === 0 ?
+          'ASCENDING' :
           this._fieldOrders[this._fieldOrders.length - 1].direction;
       const orderBys = this._fieldOrders.concat(
           new FieldOrder(FieldPath.documentId(), lastDirection));
@@ -1726,8 +1725,7 @@ export class Query {
         }
 
         if (comp !== 0) {
-          const direction =
-              orderBy.direction === directionOperators.ASC ? 1 : -1;
+          const direction = orderBy.direction === 'ASCENDING' ? 1 : -1;
           return direction * comp;
         }
       }
@@ -1945,9 +1943,7 @@ function createCollectionReference(firestore, path): CollectionReference {
  * @throws when the direction is invalid
  */
 export function validateQueryOrder(arg: string|number, op: unknown): void {
-  if (!is.string(str) || !is.defined(directionOperators[str])) {
-    throw new Error('Order must be one of "asc" or "desc".');
-  }
+  validateEnumValue(arg, op, Object.keys(directionOperators), {optional: true});
 }
 
 /**
@@ -1959,20 +1955,18 @@ export function validateQueryOrder(arg: string|number, op: unknown): void {
  * @param fieldValue Value that is used in the filter.
  * @throws when the comparison operation is invalid
  */
-export function validateQueryOperator(
+export function validateComparisonOperator(
     arg: string|number, op: unknown, fieldValue: unknown): void {
-  if (is.string(str) && comparisonOperators[str]) {
-    const op = comparisonOperators[str];
+  validateEnumValue(arg, op, Object.keys(comparisonOperators));
 
-    if (typeof val === 'number' && isNaN(val) && op !== 'EQUAL') {
-      throw new Error(
-          'Invalid query. You can only perform equals comparisons on NaN.');
-    }
+  if (typeof fieldValue === 'number' && isNaN(fieldValue) && op !== '==') {
+    throw new Error(
+        'Invalid query. You can only perform equals comparisons on NaN.');
+  }
 
-    if (val === null && op !== 'EQUAL') {
-      throw new Error(
-          'Invalid query. You can only perform equals comparisons on Null.');
-    }
+  if (fieldValue === null && op !== '==') {
+    throw new Error(
+        'Invalid query. You can only perform equals comparisons on Null.');
   }
 }
 
