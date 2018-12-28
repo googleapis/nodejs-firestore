@@ -114,8 +114,7 @@ export class DocumentSnapshot {
       createTime?: Timestamp, updateTime?: Timestamp) {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
-    this._serializer = ref.firestore._serializer;
-    this._validator = ref.firestore._validator;
+    this._serializer = ref.firestore._serializer!;
     this._readTime = readTime;
     this._createTime = createTime;
     this._updateTime = updateTime;
@@ -130,7 +129,7 @@ export class DocumentSnapshot {
    * @return The created DocumentSnapshot.
    */
   static fromObject(ref: DocumentReference, obj: {}): DocumentSnapshot {
-    const serializer = ref.firestore._serializer;
+    const serializer = ref.firestore._serializer!;
     return new DocumentSnapshot(ref, serializer.encodeFields(obj));
   }
   /**
@@ -146,7 +145,7 @@ export class DocumentSnapshot {
    */
   static fromUpdateMap(ref: DocumentReference, data: UpdateData):
       DocumentSnapshot {
-    const serializer = ref.firestore._serializer;
+    const serializer = ref.firestore._serializer!;
 
     /**
      * Merges 'value' at the field path specified by the path array into
@@ -921,7 +920,7 @@ export class DocumentTransform {
 
   /** Validates the user provided field values in this document transform. */
   validate(): void {
-    this._transforms.forEach(transform => transform.validate(this._validator));
+    this._transforms.forEach(transform => transform.validate());
   }
 
   /**

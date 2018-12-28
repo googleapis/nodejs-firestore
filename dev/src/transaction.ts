@@ -277,7 +277,6 @@ export class Transaction {
       Transaction {
     this._validator.minNumberOfArguments('update', arguments, 2);
 
-    preconditionOrValues = Array.prototype.slice.call(arguments, 2);
     this._writeBatch.update.apply(this._writeBatch, [
       documentRef, dataOrField
     ].concat(preconditionOrValues) as [DocumentReference, string]);
