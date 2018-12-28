@@ -21,9 +21,9 @@ import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {ResourcePath} from './path';
 import {Timestamp} from './timestamp';
+import {isEmpty, isObject} from './util';
 
 import api = google.firestore.v1beta1;
-import {isEmpty} from './util';
 
 /** An interface for Firestore types that can be serialized to Protobuf. */
 export interface Serializable {
@@ -257,6 +257,7 @@ export class Serializer {
  */
 export function isPlainObject(input: unknown): input is object {
   return (
-      isObject(input) && (Object.getPrototypeOf(input) === Object.prototype ||
+      isObject(input) &&
+      (Object.getPrototypeOf(input) === Object.prototype ||
        Object.getPrototypeOf(input) === null));
 }
