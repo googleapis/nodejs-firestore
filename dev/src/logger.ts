@@ -18,8 +18,6 @@ import * as util from 'util';
 
 import {createValidator} from './validate';
 
-const validate = createValidator();
-
 /*! The Firestore library version */
 let libVersion: string;
 
@@ -50,7 +48,7 @@ export function logger(
  * @private
  */
 export function setLogFunction(logger: (msg: string) => void): void {
-  validate.isFunction('logger', logger);
+  validateFunction('logger', logger);
   logFunction = logger;
 }
 

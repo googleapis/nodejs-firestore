@@ -98,3 +98,31 @@ export function parseGetAllArguments(
       null;
   return {fieldMask, documents};
 }
+
+/**
+ * Determines whether `val` is a JavaScript object.
+ *
+ * @private
+ */
+export function isObject(val: unknown): val is object {
+  return Object.prototype.toString.call(val) === '[object Object]';
+}
+
+
+/**
+ * Returns whether `val` has no custom properties.
+ *
+ * @private
+ */
+export function isEmpty(val: {}): boolean {
+  return Object.keys(val).length === 0;
+}
+
+/**
+ * Determines whether `val` is a JavaScript function.
+ *
+ * @private
+ */
+export function isFunction(val: unknown): boolean {
+  return val && {}.toString.call(val) === '[object Function]';
+}
