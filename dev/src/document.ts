@@ -1020,7 +1020,9 @@ export class Precondition {
  * Validates a JavaScript value for usage as a Firestore value.
  *
  * @private
- * @param val JavaScript value to validate.
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value JavaScript value to validate.
+ * @param desc A description of the expected type.
  * @param path The field path to validate.
  * @param options Validation options
  * @param level The current depth of the traversal. This is used to decide
@@ -1029,13 +1031,13 @@ export class Precondition {
  * @throws when the object is invalid.
  */
 export function validateUserInput(
-    argumentName: string|number, val: unknown, desc: string,
+    arg: string|number, value: unknown, desc: string,
     options: ValidationOptions, path?: FieldPath, level?: number,
     inArray?: boolean): void {
   if (path && path.size > MAX_DEPTH) {
     throw new Error(`${
         invalidArgumentMessage(
-            argumentName, desc)} Input object is deeper than ${
+            arg, desc)} Input object is deeper than ${
         MAX_DEPTH} levels or contains a cycle.`);
   }
 
@@ -1045,73 +1047,73 @@ export function validateUserInput(
 
   const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
 
-  if (Array.isArray(val)) {
-    const arr = val as unknown[];
+  if (Array.isArray(value)) {
+    const arr = value as unknown[];
     for (let i = 0; i < arr.length; ++i) {
       validateUserInput(
-          argumentName, arr[i]!, desc, options,
+          arg, arr[i]!, desc, options,
           path ? path.append(String(i)) : new FieldPath(String(i)), level + 1,
           /* inArray= */ true);
     }
-  } else if (isPlainObject(val)) {
-    const obj = val as object;
+  } else if (isPlainObject(value)) {
+    const obj = value as object;
     for (const prop in obj) {
       if (obj.hasOwnProperty(prop)) {
         validateUserInput(
-            argumentName, obj[prop]!, desc, options,
+            arg, obj[prop]!, desc, options,
             path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
             level + 1, inArray);
       }
     }
-  } else if (val === undefined) {
+  } else if (value === undefined) {
     throw new Error(`${
         invalidArgumentMessage(
-            argumentName, desc)} Cannot use "undefined" as a Firestore value${
+            arg, desc)} Cannot use "undefined" as a Firestore value${
         fieldPathMessage}.`);
-  } else if (val instanceof DeleteTransform) {
+  } else if (value instanceof DeleteTransform) {
     if (inArray) {
-      throw new Error(`${invalidArgumentMessage(argumentName, desc)} ${
-          val.methodName}() cannot be used inside of an array${
+      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
+          value.methodName}() cannot be used inside of an array${
           fieldPathMessage}.`);
     } else if (
         (options.allowDeletes === 'root' && level !== 0) ||
         options.allowDeletes === 'none') {
-      throw new Error(`${invalidArgumentMessage(argumentName, desc)} ${
-          val.methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}${
+      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
+          value.methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}${
           fieldPathMessage}.`);
     }
-  } else if (val instanceof FieldTransform) {
+  } else if (value instanceof FieldTransform) {
     if (inArray) {
-      throw new Error(`${invalidArgumentMessage(argumentName, desc)} ${
-          val.methodName}() cannot be used inside of an array${
+      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
+          value.methodName}() cannot be used inside of an array${
           fieldPathMessage}.`);
     } else if (!options.allowTransforms) {
-      throw new Error(`${invalidArgumentMessage(argumentName, desc)} ${
-          val.methodName}() can only be used in set(), create() or update()${
+      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
+          value.methodName}() can only be used in set(), create() or update()${
           fieldPathMessage}.`);
     }
-  } else if (val instanceof FieldPath) {
+  } else if (value instanceof FieldPath) {
     throw new Error(`${
         invalidArgumentMessage(
-            argumentName,
+            arg,
             desc)} Cannot use object of type "FieldPath" as a Firestore value${
         fieldPathMessage}.`);
-  } else if (val instanceof DocumentReference) {
+  } else if (value instanceof DocumentReference) {
     // Ok.
-  } else if (val instanceof GeoPoint) {
+  } else if (value instanceof GeoPoint) {
     // Ok.
-  } else if (val instanceof Timestamp) {
+  } else if (value instanceof Timestamp) {
     // Ok.
-  } else if (val instanceof Buffer) {
+  } else if (value instanceof Buffer) {
     // Ok.
-  } else if (val instanceof Uint8Array) {
+  } else if (value instanceof Uint8Array) {
     // Ok.
-  } else if (val instanceof Date) {
+  } else if (value instanceof Date) {
     // Ok.
-  } else if (val === null) {
+  } else if (value === null) {
     // Ok.
-  } else if (typeof val === 'object') {
-    throw new Error(customObjectMessage(argumentName, val, path));
+  } else if (typeof value === 'object') {
+    throw new Error(customObjectMessage(arg, value, path));
   }
 }
 
