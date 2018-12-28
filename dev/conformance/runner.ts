@@ -90,9 +90,9 @@ const convertInput = {
   argument: json => {
     const obj = JSON.parse(json);
     function convertValue(value) {
-      if (is.object(value)) {
+      if (isObject(value)) {
         return convertObject(value);
-      } else if (is.array(value)) {
+      } else if (Array.isArray(value)) {
         return convertArray(value);
       } else if (value === 'NaN') {
         return NaN;
