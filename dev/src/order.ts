@@ -68,7 +68,7 @@ function typeOrder(val: api.IValue): TypeOrder {
     case 'mapValue':
       return TypeOrder.OBJECT;
     default:
-      throw customObjectError(val);
+      throw new Error('Unexpected value type: ' + valueType);
   }
 }
 

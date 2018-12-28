@@ -176,7 +176,7 @@ export class Serializer {
       return map;
     }
 
-    throw customObjectError(val);
+    throw new Error(`Cannot encode value: ${val}`);
   }
 
   /**
@@ -261,7 +261,6 @@ export class Serializer {
  */
 export function isPlainObject(input: UserInput): boolean {
   return (
-      typeof input === 'object' && input !== null &&
-      (Object.getPrototypeOf(input) === Object.prototype ||
+      isObject(input) && (Object.getPrototypeOf(input) === Object.prototype ||
        Object.getPrototypeOf(input) === null));
 }

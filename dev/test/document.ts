@@ -258,7 +258,7 @@ describe('serialize document', () => {
       firestore.doc('collectionId/documentId').update(obj);
     })
         .to.throw(
-            'Argument "dataOrField" is not a valid Document. Input object is deeper than 20 levels or contains a cycle.');
+            'Argument "dataOrField" is not a valid Firestore document. Input object is deeper than 20 levels or contains a cycle.');
   });
 
   it('is able to write a document reference with cycles', () => {
