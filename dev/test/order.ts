@@ -71,7 +71,7 @@ describe('Order', () => {
       order.compare(
           {valueType: 'foo'} as InvalidApiUsage,
           {valueType: 'foo'} as InvalidApiUsage);
-    }).to.throw('Invalid use of type "object" as a Firestore argument.');
+    }).to.throw('Unexpected value type: foo');
   });
 
   it('throws on invalid blob', () => {
