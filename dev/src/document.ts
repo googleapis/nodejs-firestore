@@ -90,7 +90,6 @@ export class DocumentSnapshot {
   private _ref: DocumentReference;
   private _fieldsProto: ApiMapValue|undefined;
   private _serializer: Serializer;
-  private _validator: AnyDuringMigration;
   private _readTime: Timestamp|undefined;
   private _createTime: Timestamp|undefined;
   private _updateTime: Timestamp|undefined;
@@ -115,7 +114,6 @@ export class DocumentSnapshot {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
     this._serializer = ref.firestore._serializer;
-    this._validator = ref.firestore._validator;
     this._readTime = readTime;
     this._createTime = createTime;
     this._updateTime = updateTime;
@@ -383,8 +381,8 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved field value: ${field}`);
    * });
    */
-  get(field: string|FieldPath): UserInput {
-    this._validator.isFieldPath('field', field);
+  get(field: string|FieldPath): UserInput
+    validateFieldPath('field', field);
 
     const protoField = this.protoField(field);
 
@@ -824,8 +822,8 @@ export class DocumentMask {
  */
 export class DocumentTransform {
   private readonly _ref: DocumentReference;
-  private readonly _validator: AnyDuringMigration;
   private readonly _transforms: Map<FieldPath, FieldTransform>;
+
   /**
    * @private
    * @hideconstructor
@@ -835,9 +833,9 @@ export class DocumentTransform {
    */
   constructor(ref: DocumentReference, transforms) {
     this._ref = ref;
-    this._validator = ref.firestore._validator;
     this._transforms = transforms;
   }
+
   /**
    * Generates a DocumentTransform from a JavaScript object.
    *

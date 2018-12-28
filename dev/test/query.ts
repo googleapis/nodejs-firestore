@@ -693,7 +693,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            'Argument "fieldPath" is not a valid FieldPath. Paths can only be specified as strings or via a FieldPath object.');
+            'Argument "fieldPath" is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
 
     class FieldPath {}
     expect(() => {
@@ -712,7 +712,7 @@ describe('where() interface', () => {
       return query.get();
     })
         .to.throw(
-            'Argument "value" is not a valid QueryValue. Cannot use object of type "FieldPath" as a Firestore value.');
+            'Argument "value" is not a valid query constraint. Cannot use object of type "FieldPath" as a Firestore value.');
   });
 
   it('rejects field delete as value', () => {
@@ -738,7 +738,7 @@ describe('where() interface', () => {
       query.where('foo', '=', new Foo()).get();
     })
         .to.throw(
-            'Argument "value" is not a valid QueryValue. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
+            'Argument "value" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
 
     expect(() => {
       query.where('foo', '=', new FieldPath()).get();
@@ -808,7 +808,7 @@ describe('where() interface', () => {
       query = query.where('foo.', '=', 'foobar');
     })
         .to.throw(
-            'Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with ".".');
+            'Argument "fieldPath" is not a valid field path. Paths must not start or end with ".".');
   });
 
   it('verifies operator', () => {
@@ -909,7 +909,7 @@ describe('orderBy() interface', () => {
       query = query.orderBy('foo.');
     })
         .to.throw(
-            'Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with ".".');
+            'Argument "fieldPath" is not a valid field path. Paths must not start or end with ".".');
   });
 
   it('rejects call after cursor', () => {
@@ -1091,11 +1091,11 @@ describe('select() interface', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.select(1))
         .to.throw(
-            'Argument at index 0 is not a valid FieldPath. Paths can only be specified as strings or via a FieldPath object.');
+            'Argument at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
 
     expect(() => query.select('.'))
         .to.throw(
-            'Argument at index 0 is not a valid FieldPath. Paths must not start or end with ".".');
+            'Argument at index 0 is not a valid field path. Paths must not start or end with ".".');
   });
 
   it('uses latest field mask', () => {
@@ -1398,7 +1398,7 @@ describe('startAt() interface', () => {
       query.orderBy('foo').startAt('foo', Firestore.FieldValue.delete());
     })
         .to.throw(
-            'Argument at index 1 is not a valid QueryValue. FieldValue.delete\(\) must appear at the top-level and can only be used in update() or set() with {merge:true}.');
+            'Argument at index 1 is not a valid query constraint. FieldValue.delete\(\) must appear at the top-level and can only be used in update() or set() with {merge:true}.');
   });
 
   it('requires order by', () => {

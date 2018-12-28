@@ -288,28 +288,6 @@ export class Firestore {
    * use `Timestamp` now and opt-in to this new behavior as soon as you can.
    */
   constructor(settings?: Settings) {
-    this._validator = new Validator({
-      ArrayElement: (name, value) => validateFieldValue(
-          name, value, /*path=*/undefined, /*level=*/0,
-          /*inArray=*/true),
-      DeletePrecondition: precondition =>
-          validatePrecondition(precondition, /* allowExists= */ true),
-      Document: validateDocumentData,
-      DocumentReference: validateDocumentReference,
-      FieldPath: FieldPath.validateFieldPath,
-      FieldValue: validateFieldValue,
-      FieldOrder: validateFieldOrder,
-      QueryComparison: validateComparisonOperator,
-      QueryValue: validateFieldValue,
-      ResourcePath: ResourcePath.validateResourcePath,
-      SetOptions: validateSetOptions,
-      ReadOptions: validateReadOptions,
-      UpdateMap: validateUpdateMap,
-      UpdatePrecondition: precondition =>
-          validatePrecondition(precondition, /* allowExists= */ false),
-    } as AnyDuringMigration);
-
-
     const libraryHeader = {
       libName: 'gccl',
       libVersion,
@@ -412,7 +390,7 @@ export class Firestore {
    * console.log(`Path of document is ${documentRef.path}`);
    */
   doc(documentPath: string): DocumentReference {
-    this._validator.isResourcePath('documentPath', documentPath);
+    validateResourcePath('documentPath', documentPath);
 
     const path = this._referencePath!.append(documentPath);
     if (!path.isDocument) {
@@ -440,7 +418,7 @@ export class Firestore {
    * });
    */
   collection(collectionPath: string): CollectionReference {
-    this._validator.isResourcePath('collectionPath', collectionPath);
+    validateResourcePath('collectionPath', collectionPath);
 
     const path = this._referencePath!.append(collectionPath);
     if (!path.isCollection) {
@@ -1336,39 +1314,6 @@ function validateFieldValue(
             fieldPathMessage}.`);
   } else if (is.object(val)) {
     throw customObjectError(val, path);
-  }
-
-  return true;
-}
-
-/**
- * Validates a JavaScript object for usage as a Firestore document.
- *
- * @private
- * @param obj JavaScript object to validate.
- * @param options Validation options
- * @returns 'true' when the object is valid.
- * @throws when the object is invalid.
- */
-function validateDocumentData(
-    obj: DocumentData, options: ValidationOptions): boolean {
-  if (!isPlainObject(obj)) {
-    throw customObjectError(obj);
-  }
-
-  options = options || {};
-
-  let isEmpty = true;
-
-  for (const prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      isEmpty = false;
-      validateFieldValue(obj[prop], options, new FieldPath(prop));
-    }
-  }
-
-  if (options.allowEmpty === false && isEmpty) {
-    throw new Error('At least one field must be updated.');
   }
 
   return true;
