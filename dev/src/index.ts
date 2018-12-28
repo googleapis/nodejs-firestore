@@ -100,11 +100,6 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  */
 const GRPC_UNAVAILABLE = 14;
 
-/*!
- * The maximum depth of a Firestore object.
- */
-const MAX_DEPTH = 20;
-
 /**
  * Document data (e.g. for use with
  * [set()]{@link DocumentReference#set}) consisting of fields mapped
@@ -1138,8 +1133,8 @@ follow these steps, YOUR APP MAY BREAK.`);
    * takes a request and GAX options.
    * @param request The Protobuf request to send.
    * @param requestTag A unique client-assigned identifier for this request.
-   * @param {boolean} allowRetries Whether this is an idempotent request that
-   * can be retried.
+   * @param allowRetries Whether this is an idempotent request that can be
+   * retried.
    * @returns A Promise with the resulting read-only stream.
    */
   readStream(
