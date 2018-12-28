@@ -19,7 +19,6 @@ import * as rbtree from 'functional-red-black-tree';
 import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
-
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange, DocumentChangeType} from './document-change';
@@ -27,10 +26,10 @@ import Firestore, {DocumentReference, Query} from './index';
 import {logger} from './logger';
 import {ResourcePath} from './path';
 import {Timestamp} from './timestamp';
+import {GrpcError} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1beta1;
-import {GrpcError} from './types';
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support

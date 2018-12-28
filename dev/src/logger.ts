@@ -16,9 +16,7 @@
 
 import * as util from 'util';
 
-import {createValidator} from './validate';
-
-const validate = createValidator();
+import {validateFunction} from './validate';
 
 /*! The Firestore library version */
 let libVersion: string;

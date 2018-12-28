@@ -17,7 +17,6 @@
 import {expect} from 'chai';
 
 import {FieldValue} from '../src';
-
 import {ApiOverride, arrayTransform, createInstance, document, requestEquals, serverTimestamp, set, writeResult} from './util/helpers';
 
 function genericFieldValueTests(methodName: string, sentinel: FieldValue) {

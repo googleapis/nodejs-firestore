@@ -15,7 +15,6 @@
  */
 
 import {expect} from 'chai';
-import * as is from 'is';
 import * as through2 from 'through2';
 
 import * as Firestore from '../src/index';
