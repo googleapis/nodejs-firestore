@@ -328,7 +328,7 @@ export class Firestore {
     //
     // The environment variable FUNCTION_TRIGGER_TYPE is used to detect the GCF
     // environment.
-    this._preferTransactions = is.defined(process.env.FUNCTION_TRIGGER_TYPE);
+    this._preferTransactions = process.env.FUNCTION_TRIGGER_TYPE !== undefined;
     this._lastSuccessfulRequest = 0;
 
     if (this._preferTransactions) {
@@ -502,7 +502,7 @@ export class Firestore {
     let convertTimestamp;
     let convertDocument;
 
-    if (!is.defined(encoding) || encoding === 'protobufJS') {
+    if (encoding === undefined || encoding === 'protobufJS') {
       convertTimestamp = data => data;
       convertDocument = data => data;
     } else if (encoding === 'json') {
@@ -798,7 +798,7 @@ export class Firestore {
                   const orderedDocuments: DocumentSnapshot[] = [];
                   for (const docRef of docRefs) {
                     const document = retrievedDocuments.get(docRef.path);
-                    if (!is.defined(document)) {
+                    if (document === undefined) {
                       reject(new Error(
                           `Did not receive document for "${docRef.path}".`));
                     }
@@ -969,7 +969,7 @@ follow these steps, YOUR APP MAY BREAK.`);
           return result;
         })
         .catch(err => {
-          if (is.defined(err.code) && err.code !== GRPC_UNAVAILABLE) {
+          if (err.code !== undefined && err.code !== GRPC_UNAVAILABLE) {
             logger(
                 'Firestore._retry', requestTag,
                 'Request failed with unrecoverable error:', err);
