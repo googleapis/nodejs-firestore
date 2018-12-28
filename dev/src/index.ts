@@ -233,7 +233,7 @@ export class Firestore {
    * The serializer to use for the Protobuf transformation.
    * @private
    */
-  private _serializer: Serializer|null = null;
+  _serializer: Serializer|null = null;
 
   private _referencePath: ResourcePath|null = null;
 
@@ -468,7 +468,7 @@ export class Firestore {
    * @returns A QueryDocumentSnapshot for existing documents, otherwise a
    * DocumentSnapshot.
    */
-  private snapshot_(
+  snapshot_(
       documentOrName: api.IDocument|string,
       readTime?: google.protobuf.ITimestamp,
       encoding?: 'json'|'protobufJS'): DocumentSnapshot {
@@ -1069,8 +1069,11 @@ follow these steps, YOUR APP MAY BREAK.`);
         logger(
             'Firestore._initializeStream', requestTag, 'Sending request: %j',
             request);
-        (resultStream as NodeJS.ReadWriteStream)
-            .write(request as AnyDuringMigration, 'utf-8', () => {
+        (resultStream as NodeJS.WritableStream)
+            // The stream returned by the Gapic library accepts Protobuf
+            // messages.
+            // tslint:disable-next-line no-any
+            .write(request as any, 'utf-8', () => {
               logger(
                   'Firestore._initializeStream', requestTag,
                   'Marking stream as healthy');
@@ -1154,14 +1157,14 @@ follow these steps, YOUR APP MAY BREAK.`);
                        'Sending request: %j', decorated.request);
                    const stream = gapicClient[methodName](
                        decorated.request, decorated.gax);
-                   const logStream = through2.obj(function(
-                       this: AnyDuringMigration, chunk, enc, callback) {
-                     logger(
-                         'Firestore.readStream', requestTag,
-                         'Received response: %j', chunk);
-                     this.push(chunk);
-                     callback();
-                   });
+                   const logStream =
+                       through2.obj(function(this, chunk, enc, callback) {
+                         logger(
+                             'Firestore.readStream', requestTag,
+                             'Received response: %j', chunk);
+                         this.push(chunk);
+                         callback();
+                       });
                    resolve(bun([stream, logStream]));
                  } catch (err) {
                    logger(
@@ -1215,8 +1218,7 @@ follow these steps, YOUR APP MAY BREAK.`);
             requestStream.write(decoratedChunk, encoding, callback);
           });
 
-          const logStream = through2.obj(function(
-              this: AnyDuringMigration, chunk, enc, callback) {
+          const logStream = through2.obj(function(this, chunk, enc, callback) {
             logger(
                 'Firestore.readWriteStream', requestTag,
                 'Received response: %j', chunk);

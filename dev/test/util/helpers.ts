@@ -27,7 +27,6 @@ import {ClientPool} from '../../src/pool';
 import api = google.firestore.v1beta1;
 
 /* tslint:disable:no-any */
-type GapicClient = any;
 const grpc = new GrpcClient({} as any).grpc;
 const SSL_CREDENTIALS = (grpc.credentials as any).createInsecure();
 /* tslint:enable:no-any */

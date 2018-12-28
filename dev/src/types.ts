@@ -21,26 +21,11 @@ import {Timestamp} from './timestamp';
 import api = google.firestore.v1beta1;
 
 /**
- * A union of all of the standard JS types, useful for cases where the type is
- * unknown. Unlike "any" this doesn't lose all type-safety, since the consuming
- * code must still cast to a particular type before using it.
+ * A map in the format of the Proto API
  */
-export type AnyJs = null|undefined|boolean|number|string|object;
-
-// tslint:disable-next-line:no-any
-export type AnyDuringMigration = any;
-
-// A map in the format of the Proto API
 export type ApiMapValue = {
   [k: string]: google.firestore.v1beta1.IValue
 };
-
-/**
- * @private
- * JavaScript input from the API layer.
- */
-// tslint:disable-next-line:no-any
-export type UserInput = any;
 
 // tslint:disable-next-line:no-any
 export type GapicClient = any;
