@@ -18,11 +18,8 @@ import {google} from '../protos/firestore_proto_api';
 import {ProtobufJsValue} from './types';
 import {validateObject} from './validate';
 
-<<<<<<< HEAD
-=======
 import api = google.firestore.v1beta1;
 
->>>>>>> mrschmidt-imports
 /*!
  * @module firestore/convert
  * @private

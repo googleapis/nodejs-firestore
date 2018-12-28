@@ -338,13 +338,8 @@ export class WriteBatch {
       ...preconditionOrValues:
           Array<{lastUpdateTime?: Timestamp}|unknown|string|FieldPath>):
       WriteBatch {
-<<<<<<< HEAD
     validateMinNumberOfArguments('WriteBatch.update', arguments, 2);
-    this._validator.isDocumentReference('documentRef', documentRef);
-=======
-    this._validator.minNumberOfArguments('update', arguments, 2);
     validateDocumentReference('documentRef', documentRef);
->>>>>>> mrschmidt-novalidator
 
     this.verifyNotCommitted();
 
