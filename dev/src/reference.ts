@@ -1703,8 +1703,9 @@ export class Query {
       (s1: QueryDocumentSnapshot, s2: QueryDocumentSnapshot) => number {
     return (doc1, doc2) => {
       // Add implicit sorting by name, using the last specified direction.
-      const lastDirection = this._fieldOrders.length === 0 ?
-          directionOperators.ASC :
+      const lastDirection: api.StructuredQuery.Direction =
+          this._fieldOrders.length === 0 ?
+          'ASCENDING' :
           this._fieldOrders[this._fieldOrders.length - 1].direction;
       const orderBys = this._fieldOrders.concat(
           new FieldOrder(FieldPath.documentId(), lastDirection));
@@ -1726,8 +1727,7 @@ export class Query {
         }
 
         if (comp !== 0) {
-          const direction =
-              orderBy.direction === directionOperators.ASC ? 1 : -1;
+          const direction = orderBy.direction === 'ASCENDING' ? 1 : -1;
           return direction * comp;
         }
       }
