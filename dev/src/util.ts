@@ -45,29 +45,28 @@ export function requestTag(): string {
 }
 
 /**
- * Determines whether `val` is a JavaScript object.
+ * Determines whether `value` is a JavaScript object.
  *
  * @private
  */
-export function isObject(val: unknown): val is object {
-  return Object.prototype.toString.call(val) === '[object Object]';
-}
-
-
-/**
- * Returns whether `val` has no custom properties.
- *
- * @private
- */
-export function isEmpty(val: {}): boolean {
-  return Object.keys(val).length === 0;
+export function isObject(value: unknown): value is object {
+  return Object.prototype.toString.call(value) === '[object Object]';
 }
 
 /**
- * Determines whether `val` is a JavaScript function.
+ * Returns whether `value` has no custom properties.
  *
  * @private
  */
-export function isFunction(val: unknown): boolean {
-  return val && {}.toString.call(val) === '[object Function]';
+export function isEmpty(value: {}): boolean {
+  return Object.keys(value).length === 0;
+}
+
+/**
+ * Determines whether `value` is a JavaScript function.
+ *
+ * @private
+ */
+export function isFunction(value: unknown): boolean {
+  return value && {}.toString.call(value) === '[object Function]';
 }

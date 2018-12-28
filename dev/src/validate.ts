@@ -215,7 +215,7 @@ export function validateInteger(
 
 
 /**
- * Generates an error message to use with invalid arguments
+ * Generates an error message to use with invalid arguments.
  *
  * @private
  * @param arg The argument name or argument index (for varargs methods).
