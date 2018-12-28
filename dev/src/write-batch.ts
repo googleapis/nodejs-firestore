@@ -729,14 +729,10 @@ export function validateDocumentData(
     throw new Error(customObjectMessage(arg, obj));
   }
 
-  let isEmpty = true;
-
   for (const prop in obj) {
     if (obj.hasOwnProperty(prop)) {
-      isEmpty = false;
       validateUserInput(
           arg, obj[prop], 'Firestore document', {
-            allowEmpty: true,
             allowDeletes: allowDeletes ? 'all' : 'none',
             allowTransforms: true,
           },
@@ -790,7 +786,6 @@ function validateUpdateMap(arg: string|number, obj: unknown): void {
       isEmpty = false;
       validateUserInput(
           arg, obj[prop], 'Firestore document', {
-            allowEmpty: true,
             allowDeletes: 'root',
             allowTransforms: true,
           },

@@ -1233,6 +1233,39 @@ follow these steps, YOUR APP MAY BREAK.`);
 }
 
 /**
+ * Validates the use of 'options' as ReadOptions and enforces that 'fieldMask'
+ * is an array of strings or field paths.
+ *
+ * @private
+ * @param options.fieldMask - The subset of fields to return from a read
+ * operation.
+ */
+export function validateReadOptions(options: ReadOptions): boolean {
+  if (!is.object(options)) {
+    throw new Error('Input is not an object.');
+  }
+
+  if (options.fieldMask === undefined) {
+    return true;
+  }
+
+  if (!Array.isArray(options.fieldMask)) {
+    throw new Error('"fieldMask" is not an array.');
+  }
+
+  for (let i = 0; i < options.fieldMask.length; ++i) {
+    try {
+      FieldPath.validateFieldPath(options.fieldMask[i]);
+    } catch (err) {
+      throw new Error(
+          `Element at index ${i} is not a valid FieldPath. ${err.message}`);
+    }
+  }
+
+  return true;
+}
+
+/**
  * A logging function that takes a single string.
  *
  * @callback Firestore~logFunction
