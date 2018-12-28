@@ -80,7 +80,7 @@ export interface Settings {
  * mapped to values.
  */
 export type DocumentData = {
-  [field: string]: UserInput
+  [field: string]: unknown
 };
 
 /**
@@ -89,8 +89,13 @@ export type DocumentData = {
  * reference nested fields within the document.
  */
 export type UpdateData = {
-  [fieldPath: string]: UserInput
+  [fieldPath: string]: unknown
 };
+
+/**
+ * Update data that has been resolved to a mapping of FieldPaths to values.
+ */
+export type UpdateMap = Map<FieldPath, unknown>;
 
 /**
  * An options object that configures conditional behavior of `update()` and

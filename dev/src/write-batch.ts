@@ -352,7 +352,7 @@ export class WriteBatch {
 
     this.verifyNotCommitted();
 
-    const updateMap = new Map();
+    const updateMap = new Map<FieldPath, unknown>();
     let precondition = new Precondition({exists: true});
 
     const argumentError = 'Update() requires either a single JavaScript ' +
