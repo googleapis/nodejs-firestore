@@ -233,7 +233,7 @@ describe('serialize document', () => {
 
     expect(() => {
       new Firestore.GeoPoint(Infinity as InvalidApiUsage, 0);
-    }).to.throw('Argument "latitude" is not a valid number');
+    }).to.throw('Value for argument "latitude" must be within [-90, 90] inclusive, but was: Infinity');
 
     expect(() => {
       new Firestore.GeoPoint(91, 0);

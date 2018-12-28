@@ -18,6 +18,7 @@ import {google} from '../protos/firestore_proto_api';
 import {customObjectMessage, invalidArgumentMessage, validateMinNumberOfArguments, validateString} from './validate';
 
 import api = google.firestore.v1beta1;
+import {isObject} from './util';
 
 /*!
  * A regular expression to verify an absolute Resource Path in Firestore. It

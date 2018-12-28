@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {GapicClient} from '../../src/types';
 
 const v1beta1 = require('../../src/v1beta1');
 

@@ -23,6 +23,7 @@ import {ResourcePath} from './path';
 import {Timestamp} from './timestamp';
 
 import api = google.firestore.v1beta1;
+import {isEmpty} from './util';
 
 /** An interface for Firestore types that can be serialized to Protobuf. */
 export interface Serializable {
@@ -163,7 +164,7 @@ export class Serializer {
       // the server creates a map entry.
       if (!isEmpty(val)) {
         map.mapValue!.fields = this.encodeFields(val);
-        if (isEmpty(map.mapValue!.fields)) {
+        if (isEmpty(map.mapValue!.fields!)) {
           return null;
         }
       }
