@@ -347,7 +347,7 @@ export class WriteBatch {
       ...preconditionOrValues:
           Array<{lastUpdateTime?: Timestamp}|AnyJs|string|FieldPath>):
       WriteBatch {
-    this._validator.minNumberOfArguments('update', arguments, 2);
+    validateMinNumberOfArguments('WriteBatch.update', arguments, 2);
     this._validator.isDocumentReference('documentRef', documentRef);
 
     this.verifyNotCommitted();
@@ -370,7 +370,11 @@ export class WriteBatch {
             precondition = new Precondition(arguments[i]);
           } else {
             this._validator.isFieldPath(i, arguments[i]);
-            this._validator.minNumberOfArguments('update', arguments, i + 1);
+            // Unlike the `validateMinNumberOfArguments` invocation above, this
+            // validation can be triggered both from `WriteBatch.update()` and
+            // `DocumentReference.update()`. Hence, we don't use the fully
+            // qualified API name in the error message.
+            validateMinNumberOfArguments('update', arguments, i + 1);
 
             const fieldPath = FieldPath.fromArgument(arguments[i]);
             this._validator.isFieldValue(
@@ -395,7 +399,7 @@ export class WriteBatch {
           allowDeletes: 'root',
           allowTransforms: true,
         });
-        this._validator.maxNumberOfArguments('update', arguments, 3);
+        validateMaxNumberOfArguments('update', arguments, 3);
 
         Object.keys(dataOrField).forEach(key => {
           this._validator.isFieldPath(key, key);

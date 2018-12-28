@@ -1233,7 +1233,7 @@ describe('startAt() interface', () => {
 
     expect(() => {
       query.startAt();
-    }).to.throw('Function "startAt()" requires at least 1 argument.');
+    }).to.throw('Function "Query.startAt()" requires at least 1 argument.');
   });
 
   it('can specify document snapshot', () => {
