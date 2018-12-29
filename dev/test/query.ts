@@ -278,14 +278,13 @@ describe('query interface', () => {
     };
 
     queryEquals(
-        [query.where('a', '=', '1'), query.where('a', '=', '1')],
-        [query.where('a', '=', 1)]);
+        [query.where('a', '==', '1'), query.where('a', '==', '1')],
+        [query.where('a', '==', 1)]);
 
     queryEquals(
         [
           query.orderBy('__name__'),
           query.orderBy('__name__', 'asc'),
-          query.orderBy('__name__', 'ASC'),
           query.orderBy(Firestore.FieldPath.documentId()),
         ],
         [
@@ -356,7 +355,7 @@ describe('query interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '=', 'bar');
+      query = query.where('foo', '==', 'bar');
       query = query.orderBy('foo');
       query = query.limit(10);
       return query.get().then(results => {
@@ -604,10 +603,10 @@ describe('where() interface', () => {
             fieldFilters(
                 'fooSmaller', 'LESS_THAN', 'barSmaller', 'fooSmallerOrEquals',
                 'LESS_THAN_OR_EQUAL', 'barSmallerOrEquals', 'fooEquals',
-                'EQUAL', 'barEquals', 'fooEqualsLong', 'EQUAL', 'barEqualsLong',
-                'fooGreaterOrEquals', 'GREATER_THAN_OR_EQUAL',
-                'barGreaterOrEquals', 'fooGreater', 'GREATER_THAN',
-                'barGreater', 'fooContains', 'ARRAY_CONTAINS', 'barContains'));
+                'EQUAL', 'barEquals', 'fooGreaterOrEquals',
+                'GREATER_THAN_OR_EQUAL', 'barGreaterOrEquals', 'fooGreater',
+                'GREATER_THAN', 'barGreater', 'fooContains', 'ARRAY_CONTAINS',
+                'barContains'));
 
         return stream();
       }
@@ -617,8 +616,7 @@ describe('where() interface', () => {
       let query: Query = firestore.collection('collectionId');
       query = query.where('fooSmaller', '<', 'barSmaller');
       query = query.where('fooSmallerOrEquals', '<=', 'barSmallerOrEquals');
-      query = query.where('fooEquals', '=', 'barEquals');
-      query = query.where('fooEqualsLong', '==', 'barEqualsLong');
+      query = query.where('fooEquals', '==', 'barEquals');
       query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
       query = query.where('fooGreater', '>', 'barGreater');
       query = query.where('fooContains', 'array-contains', 'barContains');
@@ -643,7 +641,7 @@ describe('where() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '=', {foo: 'bar'});
+      query = query.where('foo', '==', {foo: 'bar'});
       return query.get();
     });
   });
@@ -661,8 +659,9 @@ describe('where() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where('foo.bar', '=', 'foobar');
-      query = query.where(new Firestore.FieldPath('bar', 'foo'), '=', 'foobar');
+      query = query.where('foo.bar', '==', 'foobar');
+      query =
+          query.where(new Firestore.FieldPath('bar', 'foo'), '==', 'foobar');
       return query.get();
     });
   });
@@ -690,7 +689,7 @@ describe('where() interface', () => {
   it('rejects custom objects for field paths', () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where({} as InvalidApiUsage, '=', 'bar');
+      query = query.where({} as InvalidApiUsage, '==', 'bar');
       return query.get();
     })
         .to.throw(
@@ -699,7 +698,7 @@ describe('where() interface', () => {
     class FieldPath {}
     expect(() => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where(new FieldPath() as InvalidApiUsage, '=', 'bar');
+      query = query.where(new FieldPath() as InvalidApiUsage, '==', 'bar');
       return query.get();
     })
         .to.throw(
@@ -709,7 +708,7 @@ describe('where() interface', () => {
   it('rejects field paths as value', () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '=', new Firestore.FieldPath('bar'));
+      query = query.where('foo', '==', new Firestore.FieldPath('bar'));
       return query.get();
     })
         .to.throw(
@@ -719,7 +718,7 @@ describe('where() interface', () => {
   it('rejects field delete as value', () => {
     expect(() => {
       let query = firestore.collection('collectionId');
-      query = query.where('foo', '=', Firestore.FieldValue.delete());
+      query = query.where('foo', '==', Firestore.FieldValue.delete());
       return query.get();
     })
         .to.throw(
@@ -736,31 +735,31 @@ describe('where() interface', () => {
     const query = firestore.collection('collectionId');
 
     expect(() => {
-      query.where('foo', '=', new Foo()).get();
+      query.where('foo', '==', new Foo()).get();
     })
         .to.throw(
             'Argument "value" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
 
     expect(() => {
-      query.where('foo', '=', new FieldPath()).get();
+      query.where('foo', '==', new FieldPath()).get();
     })
         .to.throw(
             'Detected an object of type "FieldPath" that doesn\'t match the expected instance.');
 
     expect(() => {
-      query.where('foo', '=', new FieldValue()).get();
+      query.where('foo', '==', new FieldValue()).get();
     })
         .to.throw(
             'Detected an object of type "FieldValue" that doesn\'t match the expected instance.');
 
     expect(() => {
-      query.where('foo', '=', new DocumentReference()).get();
+      query.where('foo', '==', new DocumentReference()).get();
     })
         .to.throw(
             'Detected an object of type "DocumentReference" that doesn\'t match the expected instance.');
 
     expect(() => {
-      query.where('foo', '=', new GeoPoint()).get();
+      query.where('foo', '==', new GeoPoint()).get();
     })
         .to.throw(
             'Detected an object of type "GeoPoint" that doesn\'t match the expected instance.');
@@ -778,7 +777,7 @@ describe('where() interface', () => {
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '==', NaN);
-      query = query.where('bar', '=', null);
+      query = query.where('bar', '==', null);
       return query.get();
     });
   });
@@ -806,7 +805,7 @@ describe('where() interface', () => {
   it('verifies field path', () => {
     let query: Query = firestore.collection('collectionId');
     expect(() => {
-      query = query.where('foo.', '=', 'foobar');
+      query = query.where('foo.', '==', 'foobar');
     })
         .to.throw(
             'Argument "fieldPath" is not a valid field path. Paths must not start or end with ".".');
@@ -815,10 +814,10 @@ describe('where() interface', () => {
   it('verifies operator', () => {
     let query = firestore.collection('collectionId');
     expect(() => {
-      query = query.where('foo', '@', 'foobar');
+      query = query.where('foo', '@' as InvalidApiUsage, 'foobar');
     })
         .to.throw(
-            'Operator must be one of "<", "<=", "==", ">", ">=" or "array-contains".');
+            'Invalid value for argument "opStr". Acceptable values are: <, <=, ==, >, >=, array-contains');
   });
 });
 
@@ -882,8 +881,10 @@ describe('orderBy() interface', () => {
   it('verifies order', () => {
     let query: Query = firestore.collection('collectionId');
     expect(() => {
-      query = query.orderBy('foo', 'foo');
-    }).to.throw('Order must be one of "asc" or "desc".');
+      query = query.orderBy('foo', 'foo' as InvalidApiUsage);
+    })
+        .to.throw(
+            'Invalid value for argument "directionStr". Acceptable values are: asc, desc');
   });
 
   it('accepts field path', () => {
@@ -1348,10 +1349,10 @@ describe('startAt() interface', () => {
     return createInstance(overrides).then(firestore => {
       return snapshot('collectionId/doc', {c: 'c'}).then(doc => {
         const query = firestore.collection('collectionId')
-                          .where('a', '=', 'a')
+                          .where('a', '==', 'a')
                           .where('b', 'array-contains', 'b')
                           .where('c', '>=', 'c')
-                          .where('d', '=', 'd')
+                          .where('d', '==', 'd')
                           .startAt(doc);
         return query.get();
       });
@@ -1375,7 +1376,7 @@ describe('startAt() interface', () => {
     return createInstance(overrides).then(firestore => {
       return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
         const query = firestore.collection('collectionId')
-                          .where('foo', '=', 'bar')
+                          .where('foo', '==', 'bar')
                           .startAt(doc);
         return query.get();
       });
