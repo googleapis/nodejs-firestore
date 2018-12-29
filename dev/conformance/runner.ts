@@ -348,7 +348,8 @@ function runTest(spec) {
   const setTest = spec => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      const setOption: AnyDuringMigration = {};
+      const setOption: {merge?: boolean,
+                        mergeFields?: Firestore.FieldPath[]} = {};
       if (spec.option && spec.option.all) {
         setOption.merge = true;
       } else if (spec.option && spec.option.fields) {

@@ -24,7 +24,7 @@ import {ResourcePath} from '../src/path';
 import {GrpcError} from '../src/types';
 import {createInstance, document, DOCUMENT_NAME, found, InvalidApiUsage, missing, stream} from './util/helpers';
 
-const {grpc} = new gax.GrpcClient({} as AnyDuringMigration);
+const {grpc} = new gax.GrpcClient({});
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -214,7 +214,7 @@ const allSupportedTypesInput = {
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new Firestore.DocumentReference(
-      {formattedName: DATABASE_ROOT} as AnyDuringMigration,
+      {formattedName: DATABASE_ROOT} as any,  // tslint:disable-line no-any
       new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
@@ -238,7 +238,7 @@ const allSupportedTypesOutput = {
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new Firestore.DocumentReference(
-      {formattedName: DATABASE_ROOT} as AnyDuringMigration,
+      {formattedName: DATABASE_ROOT} as any,  // tslint:disable-line no-any
       new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
@@ -306,8 +306,8 @@ describe('instantiation', () => {
 
     expect(() => {
       new Firestore.Firestore(DEFAULT_SETTINGS).settings({
-        timestampsInSnapshots: 1337
-      } as AnyDuringMigration);
+        timestampsInSnapshots: 1337 as InvalidApiUsage
+      });
     })
         .to.throw(
             'Argument "settings.timestampsInSnapshots" is not a valid boolean.');

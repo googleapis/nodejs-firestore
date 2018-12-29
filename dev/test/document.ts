@@ -249,7 +249,7 @@ describe('serialize document', () => {
   });
 
   it('resolves infinite nesting', () => {
-    const obj: AnyDuringMigration = {};
+    const obj: {foo?: {}} = {};
     obj.foo = obj;
 
     expect(() => {
@@ -280,7 +280,8 @@ describe('serialize document', () => {
       // instances, even if they have cyclic references (we shouldn't try to
       // validate them beyond the instanceof check).
       const ref = firestore.doc('collectionId/documentId');
-      ref.firestore.firestore = firestore;
+      // tslint:disable-next-line:no-any
+      (ref.firestore as any).firestore = firestore;
       return ref.set({ref});
     });
   });

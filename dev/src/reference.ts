@@ -135,7 +135,7 @@ export class DocumentReference {
    *   console.log(`Root location for document is ${firestore.formattedName}`);
    * });
    */
-  get firestore(): AnyDuringMigration {
+  get firestore(): Firestore {
     return this._firestore;
   }
 
@@ -338,7 +338,7 @@ export class DocumentReference {
    */
   delete(precondition?: Precondition): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch.delete(this, precondition as AnyDuringMigration)
+    return writeBatch.delete(this, precondition)
         .commit()
         .then(([writeResult]) => writeResult);
   }
@@ -404,7 +404,7 @@ export class DocumentReference {
    */
   update(
       dataOrField: (UpdateData|string|FieldPath),
-      ...preconditionOrValues: Array<UserInput|string|FieldPath|Precondition>):
+      ...preconditionOrValues: Array<unknown|string|FieldPath|Precondition>):
       Promise<WriteResult> {
     validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
@@ -541,7 +541,7 @@ class FieldFilter {
   constructor(
       private readonly serializer: Serializer, readonly field: FieldPath,
       private readonly op: api.StructuredQuery.FieldFilter.Operator,
-      private readonly value: UserInput) {}
+      private readonly value: unknown) {}
 
   /**
    * Returns whether this FieldFilter uses an equals comparison.
@@ -910,7 +910,7 @@ export class Query {
    * @returns 'true' if the input is a single DocumentSnapshot..
    */
   static _isDocumentSnapshot(fieldValuesOrDocumentSnapshot:
-                                 Array<DocumentSnapshot|UserInput>): boolean {
+                                 Array<DocumentSnapshot|unknown>): boolean {
     return (
         fieldValuesOrDocumentSnapshot.length === 1 &&
         (fieldValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot));
@@ -929,7 +929,7 @@ export class Query {
    */
   static _extractFieldValues(
       documentSnapshot: DocumentSnapshot, fieldOrders: FieldOrder[]) {
-    const fieldValues: UserInput[] = [];
+    const fieldValues: Array<unknown> = [];
 
     for (const fieldOrder of fieldOrders) {
       if (FieldPath.documentId().isEqual(fieldOrder.field)) {
@@ -975,7 +975,7 @@ export class Query {
    *   console.log(`Root location for document is ${firestore.formattedName}`);
    * });
    */
-  get firestore(): AnyDuringMigration {
+  get firestore(): Firestore {
     return this._firestore;
   }
 
@@ -1199,7 +1199,7 @@ export class Query {
    * @returns The implicit ordering semantics.
    */
   private createImplicitOrderBy(cursorValuesOrDocumentSnapshot:
-                                    Array<DocumentSnapshot|UserInput>):
+                                    Array<DocumentSnapshot|unknown>):
       FieldOrder[] {
     if (!Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
       return this._fieldOrders;
@@ -1251,13 +1251,13 @@ export class Query {
    */
   private createCursor(
       fieldOrders: FieldOrder[],
-      cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>,
+      cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>,
       before: boolean): api.ICursor {
     let fieldValues;
 
     if (Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
       fieldValues = Query._extractFieldValues(
-          cursorValuesOrDocumentSnapshot[0], fieldOrders);
+          cursorValuesOrDocumentSnapshot[0] as DocumentSnapshot, fieldOrders);
     } else {
       fieldValues = cursorValuesOrDocumentSnapshot;
     }
@@ -1302,12 +1302,14 @@ export class Query {
    * query.
    * @private
    */
-  private convertReference(reference: string|
-                           DocumentReference): DocumentReference {
-    if (typeof reference === 'string') {
+  private convertReference(val: unknown): DocumentReference {
+    let reference: DocumentReference;
+
+    if (typeof val === 'string') {
       reference =
-          new DocumentReference(this._firestore, this._path.append(reference));
-    } else if (reference instanceof DocumentReference) {
+          new DocumentReference(this._firestore, this._path.append(val));
+    } else if (val instanceof DocumentReference) {
+      reference = val;
       if (!this._path.isPrefixOf(reference._path)) {
         throw new Error(
             `"${reference.path}" is not part of the query result set and ` +
@@ -1346,7 +1348,7 @@ export class Query {
    *   });
    * });
    */
-  startAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
+  startAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>):
       Query {
     validateMinNumberOfArguments('Query.startAt', arguments, 1);
 
@@ -1382,7 +1384,7 @@ export class Query {
    * });
    */
   startAfter(...fieldValuesOrDocumentSnapshot:
-                 Array<DocumentSnapshot|UserInput>): Query {
+                 Array<DocumentSnapshot|unknown>): Query {
     validateMinNumberOfArguments('Query.startAfter', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
@@ -1416,7 +1418,7 @@ export class Query {
    * });
    */
   endBefore(...fieldValuesOrDocumentSnapshot:
-                Array<DocumentSnapshot|UserInput>): Query {
+                Array<DocumentSnapshot|unknown>): Query {
     validateMinNumberOfArguments('Query.endBefore', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
@@ -1449,7 +1451,7 @@ export class Query {
    *   });
    * });
    */
-  endAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
+  endAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>):
       Query {
     validateMinNumberOfArguments('Query.endAt', arguments, 1);
 
@@ -1545,8 +1547,7 @@ export class Query {
   stream(): NodeJS.ReadableStream {
     const responseStream = this._stream();
 
-    const transform = through2.obj(function(
-        this: AnyDuringMigration, chunk, encoding, callback) {
+    const transform = through2.obj(function(this, chunk, encoding, callback) {
       // Only send chunks with documents.
       if (chunk.document) {
         this.push(chunk.document);
@@ -1628,18 +1629,17 @@ export class Query {
     const tag = requestTag();
     const self = this;
 
-    const stream =
-        through2.obj(function(this: AnyDuringMigration, proto, enc, callback) {
-          const readTime = Timestamp.fromProto(proto.readTime);
-          if (proto.document) {
-            const document =
-                self.firestore.snapshot_(proto.document, proto.readTime);
-            this.push({document, readTime});
-          } else {
-            this.push({readTime});
-          }
-          callback();
-        });
+    const stream = through2.obj(function(this, proto, enc, callback) {
+      const readTime = Timestamp.fromProto(proto.readTime);
+      if (proto.document) {
+        const document =
+            self.firestore.snapshot_(proto.document, proto.readTime);
+        this.push({document, readTime});
+      } else {
+        this.push({readTime});
+      }
+      callback();
+    });
 
     this._firestore.readStream('runQuery', request, tag, true)
         .then(backendStream => {
@@ -1841,8 +1841,10 @@ export class CollectionReference extends Query {
       mask: {fieldPaths: []}
     };
 
-    return this.firestore.request('listDocuments', request, requestTag())
-        .then((documents: api.IDocument[]) => {
+    return this.firestore
+        .request<api.IDocument[]>(
+            'listDocuments', request, requestTag(), /*allowRetries=*/true)
+        .then(documents => {
           // Note that the backend already orders these documents by name,
           // so we do not need to manually sort them.
           return documents.map(doc => {
