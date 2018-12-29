@@ -36,34 +36,54 @@ export interface AllowRange {
   maxValue?: number;
 }
 
-export function customObjectError(val, path?: FieldPath): Error {
+/**
+ * Generates an error message to use with custom objects that cannot be
+ * serialized.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The value that failed serialization.
+ * @param path The field path that the object is assigned to.
+ */
+export function customObjectMessage(
+    arg: string|number, value: unknown, path?: FieldPath): string {
   const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
 
-  if (is.object(val) && val.constructor.name !== 'Object') {
-    const typeName = val.constructor.name;
+  if (isObject(value)) {
+    const typeName = value.constructor.name;
     switch (typeName) {
       case 'DocumentReference':
       case 'FieldPath':
       case 'FieldValue':
       case 'GeoPoint':
       case 'Timestamp':
-        return new Error(
-            `Detected an object of type "${typeName}" that doesn't match the ` +
+        return `${
+                invalidArgumentMessage(
+                    arg,
+                    'Firestore document')} Detected an object of type "${
+                typeName}" that doesn't match the ` +
             `expected instance${fieldPathMessage}. Please ensure that the ` +
-            'Firestore types you are using are from the same NPM package.');
+            'Firestore types you are using are from the same NPM package.)';
+      case 'Object':
+        return `${
+            invalidArgumentMessage(
+                arg, 'Firestore document')} Invalid use of type "${
+            typeof value}" as a Firestore argument${fieldPathMessage}.`;
       default:
-        return new Error(
-            `Couldn't serialize object of type "${typeName}"${
+        return `${
+                invalidArgumentMessage(
+                    arg,
+                    'Firestore document')} Couldn't serialize object of type "${
+                typeName}"${
                 fieldPathMessage}. Firestore doesn't support JavaScript ` +
             'objects with custom prototypes (i.e. objects that were created ' +
-            'via the "new" operator).');
+            'via the "new" operator).';
     }
-  } else if (!is.object(val)) {
-    throw new Error(
-        `Input is not a plain JavaScript object${fieldPathMessage}.`);
   } else {
-    return new Error(`Invalid use of type "${
-        typeof val}" as a Firestore argument${fieldPathMessage}.`);
+    return `${
+        invalidArgumentMessage(
+            arg, 'Firestore document')} Input is not a plain JavaScript object${
+        fieldPathMessage}.`;
   }
 }
 
