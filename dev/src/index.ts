@@ -712,8 +712,8 @@ export class Firestore {
       Promise<DocumentSnapshot[]> {
     validateMinNumberOfArguments('Firestore.getAll', arguments, 1);
 
-    const {documents, fieldMask} = parseGetAllArguments(
-        this._validator, [documentRef, ...moreDocumentRefsOrReadOptions]);
+    const {documents, fieldMask} =
+        parseGetAllArguments([documentRef, ...moreDocumentRefsOrReadOptions]);
     return this.getAll_(documents, fieldMask, requestTag());
   }
 
@@ -1372,39 +1372,6 @@ function validateDocumentData(
 
   if (options.allowEmpty === false && isEmpty) {
     throw new Error('At least one field must be updated.');
-  }
-
-  return true;
-}
-
-/**
- * Validates the use of 'options' as ReadOptions and enforces that 'fieldMask'
- * is an array of strings or field paths.
- *
- * @private
- * @param options.fieldMask - The subset of fields to return from a read
- * operation.
- */
-export function validateReadOptions(options: ReadOptions): boolean {
-  if (!is.object(options)) {
-    throw new Error('Input is not an object.');
-  }
-
-  if (options.fieldMask === undefined) {
-    return true;
-  }
-
-  if (!Array.isArray(options.fieldMask)) {
-    throw new Error('"fieldMask" is not an array.');
-  }
-
-  for (let i = 0; i < options.fieldMask.length; ++i) {
-    try {
-      FieldPath.validateFieldPath(options.fieldMask[i]);
-    } catch (err) {
-      throw new Error(
-          `Element at index ${i} is not a valid FieldPath. ${err.message}`);
-    }
   }
 
   return true;
