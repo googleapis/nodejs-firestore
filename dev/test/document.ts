@@ -258,7 +258,7 @@ describe('serialize document', () => {
       firestore.doc('collectionId/documentId').update(obj);
     })
         .to.throw(
-            'Argument "dataOrField" is not a valid Firestore document. Input object is deeper than 20 levels or contains a cycle.');
+            'Argument "dataOrField" is not a valid Firestore value. Input object is deeper than 20 levels or contains a cycle.');
   });
 
   it('is able to write a document reference with cycles', () => {
@@ -1326,7 +1326,7 @@ describe('update document', () => {
       });
     })
         .to.throw(
-            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Argument "dataOrField" is not a valid Firestore document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field a.b).');
+            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Argument "dataOrField" is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field a.b).');
 
     expect(() => {
       firestore.doc('collectionId/documentId').update('a', {

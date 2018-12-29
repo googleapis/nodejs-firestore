@@ -21,13 +21,13 @@ import * as extend from 'extend';
 import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
-import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot, validateUserInput} from './document';
+import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange} from './document-change';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
 import {FieldPath, ResourcePath, validateFieldPath, validateResourcePath} from './path';
-import {Serializer} from './serializer';
+import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {DocumentData, OrderByDirection, Precondition, SetOptions, UpdateData, WhereFilterOp} from './types';
 import {autoId, requestTag} from './util';

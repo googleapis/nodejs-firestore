@@ -17,12 +17,12 @@
 import * as assert from 'assert';
 
 import {google} from '../protos/firestore_proto_api';
-import {DocumentMask, DocumentSnapshot, DocumentTransform, Precondition, validateFieldValue, validateUserInput} from './document';
+import {DocumentMask, DocumentSnapshot, DocumentTransform, Precondition} from './document';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference, validateDocumentReference} from './reference';
-import {isPlainObject, Serializer} from './serializer';
+import {isPlainObject, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {Precondition as PublicPrecondition, SetOptions, UpdateData, UpdateMap} from './types';
 import {DocumentData} from './types';
@@ -742,13 +742,27 @@ export function validateDocumentData(
 }
 
 /**
+ * Validates that a value can be used as field value during an update.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param val The value to verify.
+ * @param path The path to show in the error message.
+ */
+export function validateFieldValue(
+    arg: string|number, val: unknown, path?: FieldPath): void {
+  validateUserInput(
+      arg, val, 'Firestore value',
+      {allowDeletes: 'root', allowTransforms: true}, path);
+}
+
+/**
  * Validates that the update data does not contain any ambiguous field
  * definitions (such as 'a.b' and 'a').
  *
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param data An update map with field/value pairs.
- * @returns 'true' if the input is a valid update map.
  */
 function validateNoConflictingFields(
     arg: string|number, data: UpdateMap): void {
@@ -785,12 +799,7 @@ function validateUpdateMap(arg: string|number, obj: unknown): void {
   for (const prop in obj) {
     if (obj.hasOwnProperty(prop)) {
       isEmpty = false;
-      validateUserInput(
-          arg, obj[prop], 'Firestore document', {
-            allowDeletes: 'root',
-            allowTransforms: true,
-          },
-          new FieldPath(prop));
+      validateFieldValue(arg, obj[prop], new FieldPath(prop));
     }
   }
 
