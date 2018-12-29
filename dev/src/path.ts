@@ -446,7 +446,11 @@ export class FieldPath extends Path<FieldPath> {
   constructor(...segments: string[]) {
     validateMinNumberOfArguments('FieldPath', arguments, 1);
 
+<<<<<<< HEAD
     const elements: string[] = is.array(segments[0]) ?
+=======
+    const elements: string[] = Array.isArray(segments[0]) ?
+>>>>>>> mrschmidt-removeis
         (segments[0] as unknown) as string[] :
         segments;
 
