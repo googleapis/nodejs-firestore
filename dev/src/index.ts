@@ -1238,84 +1238,33 @@ follow these steps, YOUR APP MAY BREAK.`);
 }
 
 /**
- * Validates a JavaScript value for usage as a Firestore value.
+ * Validates a JavaScript object for usage as a Firestore document.
  *
  * @private
- * @param val JavaScript value to validate.
- * @param path The field path to validate.
+ * @param obj JavaScript object to validate.
  * @param options Validation options
- * @param level The current depth of the traversal. This is used to decide
- * whether deletes are allowed in conjunction with `allowDeletes: root`.
- * @param inArray Whether we are inside an array.
  * @returns 'true' when the object is valid.
  * @throws when the object is invalid.
  */
-function validateFieldValue(
-    val: AnyJs, options: ValidationOptions, path?: FieldPath, level?: number,
-    inArray?: boolean): boolean {
-  if (path && path.size > MAX_DEPTH) {
-    throw new Error(
-        `Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`);
+function validateDocumentData(
+    obj: DocumentData, options: ValidationOptions): boolean {
+  if (!isPlainObject(obj)) {
+    throw customObjectError(obj);
   }
 
-  level = level || 0;
-  inArray = inArray || false;
+  options = options || {};
 
-  const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
+  let isEmpty = true;
 
-  if (Array.isArray(val)) {
-    const arr = val as AnyDuringMigration[];
-    for (let i = 0; i < arr.length; ++i) {
-      validateFieldValue(
-          arr[i]!, options,
-          path ? path.append(String(i)) : new FieldPath(String(i)), level + 1,
-          /* inArray= */ true);
+  for (const prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      isEmpty = false;
+      validateFieldValue(obj[prop], options, new FieldPath(prop));
     }
-  } else if (isPlainObject(val)) {
-    const obj = val as object;
-    for (const prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        validateFieldValue(
-            obj[prop]!, options,
-            path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
-            level + 1, inArray);
-      }
-    }
-  } else if (val === undefined) {
-    throw new Error(
-        `Cannot use "undefined" as a Firestore value${fieldPathMessage}.`);
-  } else if (val instanceof DeleteTransform) {
-    if (inArray) {
-      throw new Error(`${val.methodName}() cannot be used inside of an array${
-          fieldPathMessage}.`);
-    } else if (
-        (options.allowDeletes === 'root' && level !== 0) ||
-        options.allowDeletes === 'none') {
-      throw new Error(`${
-          val.methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}${
-          fieldPathMessage}.`);
-    }
-  } else if (val instanceof FieldTransform) {
-    if (inArray) {
-      throw new Error(`${val.methodName}() cannot be used inside of an array${
-          fieldPathMessage}.`);
-    } else if (!options.allowTransforms) {
-      throw new Error(
-          `${val.methodName}() can only be used in set(), create() or update()${
-              fieldPathMessage}.`);
-    }
-  } else if (val instanceof DocumentReference) {
-    return true;
-  } else if (val instanceof GeoPoint) {
-    return true;
-  } else if (val instanceof Timestamp) {
-    return true;
-  } else if (val instanceof FieldPath) {
-    throw new Error(
-        `Cannot use object of type "FieldPath" as a Firestore value${
-            fieldPathMessage}.`);
-  } else if (is.object(val)) {
-    throw customObjectError(val, path);
+  }
+
+  if (options.allowEmpty === false && isEmpty) {
+    throw new Error('At least one field must be updated.');
   }
 
   return true;
