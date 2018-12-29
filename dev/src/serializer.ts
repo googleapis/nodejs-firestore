@@ -171,7 +171,7 @@ export class Serializer {
       return map;
     }
 
-    throw customObjectError(val);
+    throw new Error(`Cannot encode value: ${val}`);
   }
 
   /**
@@ -207,13 +207,8 @@ export class Serializer {
         return this.createReference(resourcePath.relativeName);
       }
       case 'arrayValue': {
-<<<<<<< HEAD
-        const array: Array<unknown> = [];
-        if (is.array(proto.arrayValue!.values)) {
-=======
         const array: unknown[] = [];
         if (Array.isArray(proto.arrayValue!.values)) {
->>>>>>> mrschmidt-removeis
           for (const value of proto.arrayValue!.values!) {
             array.push(this.decodeValue(value));
           }
@@ -261,7 +256,6 @@ export class Serializer {
  */
 export function isPlainObject(input: unknown): input is object {
   return (
-      typeof input === 'object' && input !== null &&
-      (Object.getPrototypeOf(input) === Object.prototype ||
+      isObject(input) && (Object.getPrototypeOf(input) === Object.prototype ||
        Object.getPrototypeOf(input) === null));
 }

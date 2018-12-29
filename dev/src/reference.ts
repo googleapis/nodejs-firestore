@@ -192,7 +192,7 @@ export class DocumentReference {
    * }):
    */
   get parent(): CollectionReference {
-    return createCollectionReference(this._firestore, this._path.parent());
+    return new CollectionReference(this._firestore, this._path.parent());
   }
 
   /**
@@ -238,7 +238,7 @@ export class DocumentReference {
           collectionPath}". Your path does not contain an odd number of components.`);
     }
 
-    return createCollectionReference(this._firestore, path);
+    return new CollectionReference(this._firestore, path);
   }
 
   /**
@@ -1923,18 +1923,6 @@ export class CollectionReference extends Query {
         this === other ||
         (other instanceof CollectionReference && super.isEqual(other)));
   }
-}
-
-/**
- * Creates a new CollectionReference. Invoked by DocumentReference to avoid
- * invalid declaration order.
- *
- * @private
- * @param firestore The Firestore Database client.
- * @param path The path of this collection.
- */
-function createCollectionReference(firestore, path): CollectionReference {
-  return new CollectionReference(firestore, path);
 }
 
 /**
