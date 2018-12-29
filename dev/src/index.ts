@@ -22,7 +22,11 @@ import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 import {documentFromJson, timestampFromJson} from './convert';
-import {DocumentSnapshot, DocumentSnapshotBuilder} from './document';
+import {
+  DocumentSnapshot,
+  DocumentSnapshotBuilder,
+  validateFieldValue
+} from './document';
 import {GeoPoint} from './geo-point';
 import {logger, setLibVersion} from './logger';
 import {FieldPath, validateResourcePath} from './path';
@@ -30,10 +34,16 @@ import {ResourcePath} from './path';
 import {ClientPool} from './pool';
 import {CollectionReference} from './reference';
 import {DocumentReference} from './reference';
-import {Serializer} from './serializer';
+import {isPlainObject, Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
-import {DocumentData, GapicClient, ReadOptions, Settings} from './types';
+import {
+  DocumentData,
+  GapicClient,
+  ReadOptions,
+  Settings,
+  ValidationOptions
+} from './types';
 import {requestTag} from './util';
 import {validateBoolean, validateFunction, validateInteger, validateMinNumberOfArguments, validateObject, validateString,} from './validate';
 import {WriteBatch} from './write-batch';
@@ -1230,72 +1240,6 @@ follow these steps, YOUR APP MAY BREAK.`);
       });
     });
   }
-}
-
-/**
- * Validates a JavaScript object for usage as a Firestore document.
- *
- * @private
- * @param obj JavaScript object to validate.
- * @param options Validation options
- * @returns 'true' when the object is valid.
- * @throws when the object is invalid.
- */
-function validateDocumentData(
-    obj: DocumentData, options: ValidationOptions): boolean {
-  if (!isPlainObject(obj)) {
-    throw customObjectError(obj);
-  }
-
-  options = options || {};
-
-  let isEmpty = true;
-
-  for (const prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      isEmpty = false;
-      validateFieldValue(obj[prop], options, new FieldPath(prop));
-    }
-  }
-
-  if (options.allowEmpty === false && isEmpty) {
-    throw new Error('At least one field must be updated.');
-  }
-
-  return true;
-}
-
-/**
- * Validates the use of 'options' as ReadOptions and enforces that 'fieldMask'
- * is an array of strings or field paths.
- *
- * @private
- * @param options.fieldMask - The subset of fields to return from a read
- * operation.
- */
-export function validateReadOptions(options: ReadOptions): boolean {
-  if (!is.object(options)) {
-    throw new Error('Input is not an object.');
-  }
-
-  if (options.fieldMask === undefined) {
-    return true;
-  }
-
-  if (!Array.isArray(options.fieldMask)) {
-    throw new Error('"fieldMask" is not an array.');
-  }
-
-  for (let i = 0; i < options.fieldMask.length; ++i) {
-    try {
-      FieldPath.validateFieldPath(options.fieldMask[i]);
-    } catch (err) {
-      throw new Error(
-          `Element at index ${i} is not a valid FieldPath. ${err.message}`);
-    }
-  }
-
-  return true;
 }
 
 /**

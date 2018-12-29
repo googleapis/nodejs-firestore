@@ -263,20 +263,6 @@ function formatArgumentName(arg: string|number) : string {
 }
 
 /**
- * Create a new Validator, optionally registering the custom validators as
- * provided.
- *
- * @private
- * @param customValidators A list of custom validators to register.
- */
-export function createValidator(customValidators?: Validators):
-    AnyDuringMigration {
-  // This function exists to change the type of `Validator` to `any` so that
-  // consumers can call the custom validator functions.
-  return new Validator(customValidators);
-}
-
-/**
  * Verifies that 'args' has at least 'minSize' elements.
  *
  * @private
