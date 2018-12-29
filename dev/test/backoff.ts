@@ -17,7 +17,6 @@
 import {expect} from 'chai';
 
 import {ExponentialBackoff, setTimeoutHandler} from '../src/backoff';
-import {AnyDuringMigration} from '../src/types';
 
 const nop = () => {};
 

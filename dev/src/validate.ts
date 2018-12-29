@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import * as is from 'is';
-
 import {FieldPath} from './path';
-import {AnyDuringMigration} from './types';
+import {isFunction, isObject} from './util';
 
 /**
  * Options to allow argument omission.

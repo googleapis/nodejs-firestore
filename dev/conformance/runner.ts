@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-import {expect} from 'chai';
 const duplexify = require('duplexify');
 
-import * as is from 'is';
+import {expect} from 'chai';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
 
-import * as proto from '../protos/firestore_proto_api';
-import api = proto.google.firestore.v1beta1;
-
+import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
-
-import {ResourcePath} from '../src/path';
-import * as convert from '../src/convert';
-
-import {createInstance as createInstanceHelper} from '../test/util/helpers';
-import {AnyDuringMigration} from '../src/types';
+import {documentFromJson} from '../src/convert';
 import {DocumentChangeType} from '../src/document-change';
+import {ResourcePath} from '../src/path';
+import {isObject} from '../src/util';
+import {createInstance as createInstanceHelper} from '../test/util/helpers';
+
+import api = google.firestore.v1beta1;
 
 const REQUEST_TIME = 'REQUEST_TIME';
 
@@ -175,7 +172,7 @@ const convertInput = {
 
     for (const doc of snapshot.docs) {
       const deepCopy = JSON.parse(JSON.stringify(doc));
-      deepCopy.fields = convert.documentFromJson(deepCopy.fields);
+      deepCopy.fields = documentFromJson(deepCopy.fields);
       docs.push(
           firestore.snapshot_(deepCopy, readTime, 'json') as
           Firestore.QueryDocumentSnapshot);
@@ -183,7 +180,7 @@ const convertInput = {
 
     for (const change of snapshot.changes) {
       const deepCopy = JSON.parse(JSON.stringify(change.doc));
-      deepCopy.fields = convert.documentFromJson(deepCopy.fields);
+      deepCopy.fields = documentFromJson(deepCopy.fields);
       const doc = firestore.snapshot_(deepCopy, readTime, 'json');
       const type =
           (['unspecified', 'added', 'removed', 'modified'][change.kind] as
@@ -208,7 +205,7 @@ const convertProto = {
     }
     if (deepCopy.documentChange) {
       deepCopy.documentChange.document.fields =
-          convert.documentFromJson(deepCopy.documentChange.document.fields);
+          documentFromJson(deepCopy.documentChange.document.fields);
     }
     return deepCopy;
   },

@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import * as assert from 'assert';
 const deepEqual = require('deep-equal');
-import * as is from 'is';
+
+import * as assert from 'assert';
 
 import {google} from '../protos/firestore_proto_api';
-import {FieldTransform} from './field-value';
-import {FieldPath} from './path';
+import {DeleteTransform, FieldTransform} from './field-value';
+import {GeoPoint} from './geo-point';
+import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference} from './reference';
 import {isPlainObject, Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {AnyDuringMigration, AnyJs, ApiMapValue, DocumentData, UpdateData, UserInput} from './types';
+import {ApiMapValue, DocumentData, UpdateMap, ValidationOptions} from './types';
+import {isEmpty, isObject} from './util';
+import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = google.firestore.v1beta1;
 

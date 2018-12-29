@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-import {FieldPath} from './path';
-import {DocumentReference} from './reference';
-import {isPlainObject} from './serializer';
-import {AnyDuringMigration, ReadOptions} from './types';
-
 /**
  * Generate a unique client-side identifier.
  *

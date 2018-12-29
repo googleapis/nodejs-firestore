@@ -17,8 +17,6 @@
 import {expect} from 'chai';
 
 import * as Firestore from '../src';
-import {AnyDuringMigration} from '../src/types';
-
 import {create, createInstance, document, found, InvalidApiUsage, missing, remove, requestEquals, retrieve, serverTimestamp, set, stream, update, updateMask, writeResult} from './util/helpers';
 
 const PROJECT_ID = 'test-project';
