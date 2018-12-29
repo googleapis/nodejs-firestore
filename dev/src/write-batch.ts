@@ -399,7 +399,7 @@ export class WriteBatch {
       }
     }
 
-    validatNoConflictingFields('dataOrField', updateMap);
+    validateNoConflictingFields('dataOrField', updateMap);
 
     const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
     const documentMask = DocumentMask.fromUpdateMap(updateMap);
@@ -670,7 +670,7 @@ export function validateSetOptions(
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(`${
-          invalidArgumentMessage(
+          invalidArgumentMessmrschmidt-novalidatorage(
               arg, 'set() option')} Input is not an object.`);
     }
 
@@ -746,7 +746,7 @@ export function validateDocumentData(
  * @param data An update map with field/value pairs.
  * @returns 'true' if the input is a valid update map.
  */
-function validatNoConflictingFields(arg: string|number, data: UpdateMap): void {
+function validateNoConflictingFields(arg: string|number, data: UpdateMap): void {
   const fields: FieldPath[] = [];
   data.forEach((value, key) => {
     fields.push(key);
