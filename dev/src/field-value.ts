@@ -279,7 +279,7 @@ class ServerTimestampTransform extends FieldTransform {
  * @private
  */
 class ArrayUnionTransform extends FieldTransform {
-  constructor(private readonly elements: Array<unknown>) {
+  constructor(private readonly elements: unknown[]) {
     super();
   }
 
@@ -330,7 +330,7 @@ class ArrayUnionTransform extends FieldTransform {
  * @private
  */
 class ArrayRemoveTransform extends FieldTransform {
-  constructor(private readonly elements: Array<unknown>) {
+  constructor(private readonly elements: unknown[]) {
     super();
   }
 

@@ -22,11 +22,7 @@ import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 import {documentFromJson, timestampFromJson} from './convert';
-import {
-  DocumentSnapshot,
-  DocumentSnapshotBuilder,
-  validateFieldValue
-} from './document';
+import {DocumentSnapshot, DocumentSnapshotBuilder} from './document';
 import {GeoPoint} from './geo-point';
 import {logger, setLibVersion} from './logger';
 import {FieldPath, validateResourcePath} from './path';
@@ -34,16 +30,10 @@ import {ResourcePath} from './path';
 import {ClientPool} from './pool';
 import {CollectionReference} from './reference';
 import {DocumentReference} from './reference';
-import {isPlainObject, Serializer} from './serializer';
+import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
-import {
-  DocumentData,
-  GapicClient,
-  ReadOptions,
-  Settings,
-  ValidationOptions
-} from './types';
+import {DocumentData, GapicClient, ReadOptions, Settings} from './types';
 import {requestTag} from './util';
 import {validateBoolean, validateFunction, validateInteger, validateMinNumberOfArguments, validateObject, validateString,} from './validate';
 import {WriteBatch} from './write-batch';

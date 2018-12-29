@@ -15,6 +15,7 @@
  */
 
 import {google} from '../protos/firestore_proto_api';
+import {isObject} from './util';
 import {customObjectMessage, invalidArgumentMessage, validateMinNumberOfArguments, validateString} from './validate';
 
 import api = google.firestore.v1beta1;

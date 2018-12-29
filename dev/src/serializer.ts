@@ -21,6 +21,7 @@ import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {ResourcePath} from './path';
 import {Timestamp} from './timestamp';
+import {isEmpty, isObject} from './util';
 
 import api = google.firestore.v1beta1;
 
@@ -163,7 +164,7 @@ export class Serializer {
       // the server creates a map entry.
       if (!isEmpty(val)) {
         map.mapValue!.fields = this.encodeFields(val);
-        if (isEmpty(map.mapValue!.fields)) {
+        if (isEmpty(map.mapValue!.fields!)) {
           return null;
         }
       }
@@ -256,6 +257,7 @@ export class Serializer {
  */
 export function isPlainObject(input: unknown): input is object {
   return (
-      isObject(input) && (Object.getPrototypeOf(input) === Object.prototype ||
+      isObject(input) &&
+      (Object.getPrototypeOf(input) === Object.prototype ||
        Object.getPrototypeOf(input) === null));
 }

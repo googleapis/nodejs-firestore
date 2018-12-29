@@ -21,8 +21,8 @@ import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference, Query, QuerySnapshot, validateDocumentReference} from './reference';
 import {isPlainObject} from './serializer';
 import {DocumentData, Precondition as PublicPrecondition, ReadOptions, SetOptions, UpdateData} from './types';
-import {requestTag} from './util';
-import {invalidArgumentMessage, validateMinNumberOfArguments} from './validate';
+import {isObject, requestTag} from './util';
+import {AllowOptional, invalidArgumentMessage, validateMinNumberOfArguments, validateOptional} from './validate';
 
 import api = google.firestore.v1beta1;
 

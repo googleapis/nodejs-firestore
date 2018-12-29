@@ -1036,10 +1036,9 @@ export function validateUserInput(
     options: ValidationOptions, path?: FieldPath, level?: number,
     inArray?: boolean): void {
   if (path && path.size > MAX_DEPTH) {
-    throw new Error(`${
-        invalidArgumentMessage(
-            arg, desc)} Input object is deeper than ${
-        MAX_DEPTH} levels or contains a cycle.`);
+    throw new Error(
+        `${invalidArgumentMessage(arg, desc)} Input object is deeper than ${
+            MAX_DEPTH} levels or contains a cycle.`);
   }
 
   options = options || {};
@@ -1080,7 +1079,8 @@ export function validateUserInput(
         (options.allowDeletes === 'root' && level !== 0) ||
         options.allowDeletes === 'none') {
       throw new Error(`${invalidArgumentMessage(arg, desc)} ${
-          value.methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}${
+          value
+              .methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}${
           fieldPathMessage}.`);
     }
   } else if (value instanceof FieldTransform) {

@@ -58,10 +58,10 @@ export function customObjectMessage(
       case 'GeoPoint':
       case 'Timestamp':
         return `${
-                invalidArgumentMessage(
-                    arg,
-                    'Firestore document')} Detected an object of type "${
-                typeName}" that doesn't match the ` +
+                   invalidArgumentMessage(
+                       arg,
+                       'Firestore document')} Detected an object of type "${
+                   typeName}" that doesn't match the ` +
             `expected instance${fieldPathMessage}. Please ensure that the ` +
             'Firestore types you are using are from the same NPM package.)';
       case 'Object':
@@ -71,11 +71,11 @@ export function customObjectMessage(
             typeof value}" as a Firestore argument${fieldPathMessage}.`;
       default:
         return `${
-                invalidArgumentMessage(
-                    arg,
-                    'Firestore document')} Couldn't serialize object of type "${
-                typeName}"${
-                fieldPathMessage}. Firestore doesn't support JavaScript ` +
+                   invalidArgumentMessage(
+                       arg,
+                       'Firestore document')} Couldn't serialize object of type "${
+                   typeName}"${
+                   fieldPathMessage}. Firestore doesn't support JavaScript ` +
             'objects with custom prototypes (i.e. objects that were created ' +
             'via the "new" operator).';
     }
@@ -213,7 +213,6 @@ export function validateInteger(
   }
 }
 
-
 /**
  * Generates an error message to use with invalid arguments.
  *
@@ -247,7 +246,7 @@ export function validateOptional(
  * @param num The number to use for formatting.
  * @param str The string to format.
  */
-function formatPlural(num: number, str: string) : string {
+function formatPlural(num: number, str: string): string {
   return `${num} ${str}` + (num === 1 ? '' : 's');
 }
 
@@ -258,7 +257,7 @@ function formatPlural(num: number, str: string) : string {
  * @param arg The argument name or argument index (for varargs methods).
  * @return Either the argument name or its index description.
  */
-function formatArgumentName(arg: string|number) : string {
+function formatArgumentName(arg: string|number): string {
   return typeof arg === 'string' ? `"${arg}"` : `at index ${arg}`;
 }
 

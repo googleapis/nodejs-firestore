@@ -406,8 +406,7 @@ export class DocumentReference {
     validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
     const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-        .update
+    return writeBatch.update
         .apply(
             writeBatch,
             [this, dataOrField].concat(
@@ -926,7 +925,7 @@ export class Query {
    */
   static _extractFieldValues(
       documentSnapshot: DocumentSnapshot, fieldOrders: FieldOrder[]) {
-    const fieldValues: Array<unknown> = [];
+    const fieldValues: unknown[] = [];
 
     for (const fieldOrder of fieldOrders) {
       if (FieldPath.documentId().isEqual(fieldOrder.field)) {
@@ -1381,8 +1380,8 @@ export class Query {
    *   });
    * });
    */
-  startAfter(...fieldValuesOrDocumentSnapshot:
-                 Array<DocumentSnapshot|unknown>): Query {
+  startAfter(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>):
+      Query {
     validateMinNumberOfArguments('Query.startAfter', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
@@ -1415,8 +1414,8 @@ export class Query {
    *   });
    * });
    */
-  endBefore(...fieldValuesOrDocumentSnapshot:
-                Array<DocumentSnapshot|unknown>): Query {
+  endBefore(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>):
+      Query {
     validateMinNumberOfArguments('Query.endBefore', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);

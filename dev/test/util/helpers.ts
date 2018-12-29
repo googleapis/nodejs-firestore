@@ -23,6 +23,7 @@ import * as through2 from 'through2';
 import {google} from '../../protos/firestore_proto_api';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
+import {GapicClient} from '../../src/types';
 
 import api = google.firestore.v1beta1;
 

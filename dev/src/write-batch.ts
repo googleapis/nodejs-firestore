@@ -674,7 +674,7 @@ export function validateSetOptions(
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(`${
-          invalidArgumentMessmrschmidt-novalidatorage(
+          invalidArgumentMessage(
               arg, 'set() option')} Input is not an object.`);
     }
 
@@ -750,7 +750,8 @@ export function validateDocumentData(
  * @param data An update map with field/value pairs.
  * @returns 'true' if the input is a valid update map.
  */
-function validateNoConflictingFields(arg: string|number, data: UpdateMap): void {
+function validateNoConflictingFields(
+    arg: string|number, data: UpdateMap): void {
   const fields: FieldPath[] = [];
   data.forEach((value, key) => {
     fields.push(key);
