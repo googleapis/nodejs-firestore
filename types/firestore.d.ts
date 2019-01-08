@@ -146,6 +146,8 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
+    getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>): 
+        Promise<DocumentSnapshot[]>;
     getAll(
         documentRef: DocumentReference,
         ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>
@@ -266,6 +268,8 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
+    getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>): 
+        Promise<DocumentSnapshot[]>;
     getAll(
         documentRef: DocumentReference,
         ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>
