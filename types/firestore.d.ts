@@ -146,10 +146,8 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll(
-      ...documentRefsOrReadOptions: [
-        DocumentReference, ...Array<DocumentReference|ReadOptions>
-    ]): Promise<DocumentSnapshot[]>;
+    getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>): 
+        Promise<DocumentSnapshot[]>;
 
     /**
      * Fetches the root collections that are associated with this Firestore
@@ -266,10 +264,8 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll(
-      ...documentRefsOrReadOptions: [
-        DocumentReference, ...Array<DocumentReference|ReadOptions>
-    ]): Promise<DocumentSnapshot[]>;
+    getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>): 
+        Promise<DocumentSnapshot[]>;
 
     /**
      * Create the document referred to by the provided `DocumentReference`.

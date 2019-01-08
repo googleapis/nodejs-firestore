@@ -703,13 +703,12 @@ export class Firestore {
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
    */
-  getAll(...documentRefsOrReadOptions: [
-    DocumentReference, ...Array<DocumentReference|ReadOptions>
-  ]): Promise<DocumentSnapshot[]> {
+  getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+      Promise<DocumentSnapshot[]> {
     this._validator.minNumberOfArguments('Firestore.getAll', arguments, 1);
 
     const {documents, fieldMask} =
-        parseGetAllArguments(this._validator, [...documentRefsOrReadOptions]);
+        parseGetAllArguments(this._validator, documentRefsOrReadOptions);
     return this.getAll_(documents, fieldMask, requestTag());
   }
 

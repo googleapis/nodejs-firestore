@@ -157,9 +157,8 @@ export class Transaction {
    *   });
    * });
    */
-  getAll(...documentRefsOrReadOptions: [
-    DocumentReference, ...Array<DocumentReference|ReadOptions>
-  ]): Promise<DocumentSnapshot[]> {
+  getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+      Promise<DocumentSnapshot[]> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
@@ -167,7 +166,7 @@ export class Transaction {
     this._validator.minNumberOfArguments('Transaction.getAll', arguments, 1);
 
     const {documents, fieldMask} =
-        parseGetAllArguments(this._validator, [...documentRefsOrReadOptions]);
+        parseGetAllArguments(this._validator, documentRefsOrReadOptions);
 
     return this._firestore.getAll_(
         documents, fieldMask, this._requestTag, this._transactionId);
