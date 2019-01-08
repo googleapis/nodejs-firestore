@@ -157,6 +157,8 @@ export class Transaction {
    *   });
    * });
    */
+  getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+      Promise<DocumentSnapshot[]>;
   getAll(
       documentRef: DocumentReference,
       ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):

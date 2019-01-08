@@ -703,6 +703,8 @@ export class Firestore {
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
    */
+  getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+      Promise<DocumentSnapshot[]>;
   getAll(
       documentRef: DocumentReference,
       ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
