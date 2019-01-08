@@ -157,20 +157,17 @@ export class Transaction {
    *   });
    * });
    */
-  getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
-      Promise<DocumentSnapshot[]>;
-  getAll(
-      documentRef: DocumentReference,
-      ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
-      Promise<DocumentSnapshot[]> {
+  getAll(...documentRefsOrReadOptions: [
+    DocumentReference, ...Array<DocumentReference|ReadOptions>
+  ]): Promise<DocumentSnapshot[]> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
     this._validator.minNumberOfArguments('Transaction.getAll', arguments, 1);
 
-    const {documents, fieldMask} = parseGetAllArguments(
-        this._validator, [documentRef, ...moreDocumentRefsOrReadOptions]);
+    const {documents, fieldMask} =
+        parseGetAllArguments(this._validator, [...documentRefsOrReadOptions]);
 
     return this._firestore.getAll_(
         documents, fieldMask, this._requestTag, this._transactionId);
