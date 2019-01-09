@@ -139,14 +139,14 @@ declare namespace FirebaseFirestore {
 
     /**
      * Retrieves multiple documents from Firestore.
-    *
-    * The first argument is required and must be of type `DocumentReference`
-    * followed by any additional `DocumentReference` documents. If used, the 
-    * optional `ReadOptions` must be the last argument.
-    * 
-    * @param {Array.<DocumentReference|ReadOptions>} documentRefsOrReadOptions
-    * The `DocumentReferences` to receive, followed by an optional field
-    * mask.
+     *
+     * The first argument is required and must be of type `DocumentReference`
+     * followed by any additional `DocumentReference` documents. If used, the 
+     * optional `ReadOptions` must be the last argument.
+     * 
+     * @param {Array.<DocumentReference|ReadOptions>} documentRefsOrReadOptions
+     * The `DocumentReferences` to receive, followed by an optional field
+     * mask.
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
