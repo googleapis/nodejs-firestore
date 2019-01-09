@@ -1443,16 +1443,16 @@ describe('Transaction class', () => {
     const ref2 = randomCol.doc('doc2');
     return Promise.all([ref1.set({f: 'a', b: 'b'}), ref2.set({f: 'a', b: 'b'})])
         .then(() => {
-          return firestore.runTransaction(updateFunction => {
-            return updateFunction.getAll(...[ref1, ref2], {fieldMask: ['f']})
-                .then(docs => {
-                  expect(docs[0].data()).to.deep.equal({f: 'a'});
-                  expect(docs[1].data()).to.deep.equal({f: 'a'});
-                });
-          });
-        })
-        .then(res => {
-          expect(res).to.equal(2);
+          return firestore
+              .runTransaction(updateFunction => {
+                return updateFunction
+                    .getAll(...[ref1, ref2], {fieldMask: ['f']})
+                    .then((docs) => docs);
+              })
+              .then(docs => {
+                expect(docs[0].data()).to.deep.equal({f: 'a'});
+                expect(docs[1].data()).to.deep.equal({f: 'a'});
+              });
         });
   });
 
