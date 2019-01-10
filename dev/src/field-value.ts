@@ -21,7 +21,7 @@ import * as proto from '../protos/firestore_proto_api';
 import {AnyDuringMigration, AnyJs} from './types';
 import {createValidator} from './validate';
 
-import api = proto.google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 import {Serializer} from './serializer';
 import {FieldPath} from './path';
 

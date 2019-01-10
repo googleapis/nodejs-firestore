@@ -29,7 +29,7 @@ import {AnyDuringMigration, GrpcError} from '../src/types';
 
 import {createInstance} from './util/helpers';
 
-import api = proto.google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});

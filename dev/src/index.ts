@@ -41,7 +41,7 @@ import {customObjectError, Validator} from './validate';
 import {WriteBatch} from './write-batch';
 import {validateUpdateMap} from './write-batch';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 export {CollectionReference, DocumentReference, QuerySnapshot, Query} from './reference';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
@@ -71,13 +71,13 @@ setLibVersion(libVersion);
  */
 
 /**
- * @namespace google.firestore.v1beta1
+ * @namespace google.firestore.v1
  */
 
 /*!
- * @see v1beta1
+ * @see v1
  */
-let v1beta1;  // Lazy-loaded in `_runRequest()`
+let v1;  // Lazy-loaded in `_runRequest()`
 
 /*!
  * HTTP header for the resource prefix to improve routing and project isolation
@@ -477,7 +477,7 @@ export class Firestore {
   /**
    * Creates a [DocumentSnapshot]{@link DocumentSnapshot} or a
    * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} from a
-   * `firestore.v1beta1.Document` proto (or from a resource name for missing
+   * `firestore.v1.Document` proto (or from a resource name for missing
    * documents).
    *
    * This API is used by Google Cloud Functions and can be called with both
@@ -865,7 +865,7 @@ follow these steps, YOUR APP MAY BREAK.`);
 
     const clientPool =
         new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
-          const client = new module.exports.v1beta1(this._settings);
+          const client = new module.exports.v1(this._settings);
           logger('Firestore', null, 'Initialized Firestore GAPIC Client');
           return client;
         });
@@ -1458,20 +1458,20 @@ module.exports = Firestore;
 module.exports = Object.assign(module.exports, existingExports);
 
 /**
- * {@link v1beta1} factory function.
+ * {@link v1} factory function.
  *
  * @private
- * @name Firestore.v1beta1
- * @see v1beta1
+ * @name Firestore.v1
+ * @see v1
  * @type {function}
  */
-Object.defineProperty(module.exports, 'v1beta1', {
-  // The v1beta1 module is very large. To avoid pulling it in from static
+Object.defineProperty(module.exports, 'v1', {
+  // The v1 module is very large. To avoid pulling it in from static
   // scope, we lazy-load and cache the module.
   get: () => {
-    if (!v1beta1) {
-      v1beta1 = require('./v1beta1');
+    if (!v1) {
+      v1 = require('./v1');
     }
-    return v1beta1;
+    return v1;
   },
 });

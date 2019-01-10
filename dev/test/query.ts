@@ -24,7 +24,7 @@ import {ResourcePath} from '../src/path';
 import {AnyDuringMigration} from '../src/types';
 import {createInstance, document, InvalidApiUsage, stream} from './util/helpers';
 
-import api = proto.google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;

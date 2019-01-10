@@ -23,7 +23,7 @@ import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
-import api = proto.google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 import * as Firestore from '../src';
 
@@ -58,9 +58,9 @@ const protoDefinition =
 
 const TEST_SUITE_TYPE = protoDefinition.lookupType('tests.TestSuite');
 const STRUCTURED_QUERY_TYPE =
-    protoDefinition.lookupType('google.firestore.v1beta1.StructuredQuery');
+    protoDefinition.lookupType('google.firestore.v1.StructuredQuery');
 const COMMIT_REQUEST_TYPE =
-    protoDefinition.lookupType('google.firestore.v1beta1.CommitRequest');
+    protoDefinition.lookupType('google.firestore.v1.CommitRequest');
 
 // Firestore instance initialized by the test runner.
 let firestore;

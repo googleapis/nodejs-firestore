@@ -18,7 +18,7 @@ import {google} from '../protos/firestore_proto_api';
 import {FieldPath} from './path';
 import {Timestamp} from './timestamp';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /**
  * A union of all of the standard JS types, useful for cases where the type is
@@ -32,7 +32,7 @@ export type AnyDuringMigration = any;
 
 // A map in the format of the Proto API
 export type ApiMapValue = {
-  [k: string]: google.firestore.v1beta1.IValue
+  [k: string]: google.firestore.v1.IValue
 };
 
 /**

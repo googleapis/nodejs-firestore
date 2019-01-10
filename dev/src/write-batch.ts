@@ -29,7 +29,7 @@ import {AnyDuringMigration, AnyJs, Precondition as PublicPrecondition, SetOption
 import {DocumentData} from './types';
 import {requestTag} from './util';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /*!
  * Google Cloud Functions terminates idle connections after two minutes. After

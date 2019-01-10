@@ -26,7 +26,7 @@ import {isPlainObject, Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {AnyDuringMigration, AnyJs, ApiMapValue, DocumentData, UpdateData, UserInput} from './types';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.

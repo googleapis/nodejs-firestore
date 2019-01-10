@@ -15,7 +15,7 @@
  */
 
 import {google} from '../protos/firestore_proto_api';
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 import {createValidator} from './validate';
 import {Serializable} from './serializer';

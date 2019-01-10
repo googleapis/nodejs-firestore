@@ -17,7 +17,7 @@
 import * as is from 'is';
 
 import * as proto from '../protos/firestore_proto_api';
-import api = proto.google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 import {Timestamp} from './timestamp';
 import {FieldTransform} from './field-value';

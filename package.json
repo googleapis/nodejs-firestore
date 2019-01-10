@@ -39,7 +39,7 @@
     "test": "npm run test-only && npm run conformance",
     "lint": "gts check",
     "clean": "gts clean",
-    "compile": "tsc -p . && cp -r dev/protos build && cp -r dev/test/fake-certificate.json build/test/fake-certificate.json  && cp dev/src/v1beta1/firestore_client_config.json build/src/v1beta1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
+    "compile": "tsc -p . && cp -r dev/protos build && cp -r dev/test/fake-certificate.json build/test/fake-certificate.json  && cp dev/src/v1/firestore_client_config.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest-only": "npm run compile",

@@ -19,9 +19,9 @@ import {GrpcClient} from 'google-gax';
 import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_proto_api';
-import api = proto.google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
-const v1beta1 = require('../../src/v1beta1');
+const v1 = require('../../src/v1');
 
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
@@ -96,7 +96,7 @@ export function createInstance(
   firestore.settings(initializationOptions);
 
   const clientPool = new ClientPool(/* concurrentRequestLimit= */ 1, () => {
-    const gapicClient: GapicClient = new v1beta1(initializationOptions);
+    const gapicClient: GapicClient = new v1(initializationOptions);
     if (apiOverrides) {
       Object.keys(apiOverrides).forEach(override => {
         gapicClient._innerApiCalls[override] = apiOverrides[override];
