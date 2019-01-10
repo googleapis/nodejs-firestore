@@ -22,7 +22,7 @@
  *   A document to write.
  *
  *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ * google.firestore.v1.Document}
  *
  * @property {string} delete
  *   A document name to delete. In the format:
@@ -35,7 +35,7 @@
  *   request.
  *
  *   This object should have the same structure as [DocumentTransform]{@link
- * google.firestore.v1beta1.DocumentTransform}
+ * google.firestore.v1.DocumentTransform}
  *
  * @property {Object} updateMask
  *   The fields to update in this write.
@@ -50,7 +50,7 @@
  *   The field paths in this mask must not contain a reserved field name.
  *
  *   This object should have the same structure as [DocumentMask]{@link
- * google.firestore.v1beta1.DocumentMask}
+ * google.firestore.v1.DocumentMask}
  *
  * @property {Object} currentDocument
  *   An optional precondition on the document.
@@ -58,11 +58,11 @@
  *   The write will fail if this is set and not met by the target document.
  *
  *   This object should have the same structure as [Precondition]{@link
- * google.firestore.v1beta1.Precondition}
+ * google.firestore.v1.Precondition}
  *
  * @typedef Write
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.Write definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.Write definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/write.proto}
  */
 const Write = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -80,11 +80,11 @@ const Write = {
  *   This must not be empty.
  *
  *   This object should have the same structure as [FieldTransform]{@link
- * google.firestore.v1beta1.FieldTransform}
+ * google.firestore.v1.FieldTransform}
  *
  * @typedef DocumentTransform
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.DocumentTransform definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.DocumentTransform definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/write.proto}
  */
 const DocumentTransform = {
   // This is for documentation. Actual contents will be loaded by gRPC.
@@ -100,7 +100,56 @@ const DocumentTransform = {
    *   Sets the field to the given server value.
    *
    *   The number should be among the values of [ServerValue]{@link
-   * google.firestore.v1beta1.ServerValue}
+   * google.firestore.v1.ServerValue}
+   *
+   * @property {Object} increment
+   *   Adds the given value to the field's current value.
+   *
+   *   This must be an integer or a double value.
+   *   If the field is not an integer or double, or if the field does not yet
+   *   exist, the transformation will set the field to the given value.
+   *   If either of the given value or the current field value are doubles,
+   *   both values will be interpreted as doubles. Double arithmetic and
+   *   representation of double values follow IEEE 754 semantics.
+   *   If there is positive/negative integer overflow, the field is resolved
+   *   to the largest magnitude positive/negative integer.
+   *
+   *   This object should have the same structure as [Value]{@link
+   * google.firestore.v1.Value}
+   *
+   * @property {Object} maximum
+   *   Sets the field to the maximum of its current value and the given value.
+   *
+   *   This must be an integer or a double value.
+   *   If the field is not an integer or double, or if the field does not yet
+   *   exist, the transformation will set the field to the given value.
+   *   If a maximum operation is applied where the field and the input value
+   *   are of mixed types (that is - one is an integer and one is a double)
+   *   the field takes on the type of the larger operand. If the operands are
+   *   equivalent (e.g. 3 and 3.0), the field does not change.
+   *   0, 0.0, and -0.0 are all zero. The maximum of a zero stored value and
+   *   zero input value is always the stored value.
+   *   The maximum of any numeric value x and NaN is NaN.
+   *
+   *   This object should have the same structure as [Value]{@link
+   * google.firestore.v1.Value}
+   *
+   * @property {Object} minimum
+   *   Sets the field to the minimum of its current value and the given value.
+   *
+   *   This must be an integer or a double value.
+   *   If the field is not an integer or double, or if the field does not yet
+   *   exist, the transformation will set the field to the input value.
+   *   If a minimum operation is applied where the field and the input value
+   *   are of mixed types (that is - one is an integer and one is a double)
+   *   the field takes on the type of the smaller operand. If the operands are
+   *   equivalent (e.g. 3 and 3.0), the field does not change.
+   *   0, 0.0, and -0.0 are all zero. The minimum of a zero stored value and
+   *   zero input value is always the stored value.
+   *   The minimum of any numeric value x and NaN is NaN.
+   *
+   *   This object should have the same structure as [Value]{@link
+   * google.firestore.v1.Value}
    *
    * @property {Object} appendMissingElements
    *   Append the given elements in order if they are not already present in
@@ -117,7 +166,7 @@ const DocumentTransform = {
    *   The corresponding transform_result will be the null value.
    *
    *   This object should have the same structure as [ArrayValue]{@link
-   * google.firestore.v1beta1.ArrayValue}
+   * google.firestore.v1.ArrayValue}
    *
    * @property {Object} removeAllFromArray
    *   Remove all of the given elements from the array in the field.
@@ -132,11 +181,11 @@ const DocumentTransform = {
    *   The corresponding transform_result will be the null value.
    *
    *   This object should have the same structure as [ArrayValue]{@link
-   * google.firestore.v1beta1.ArrayValue}
+   * google.firestore.v1.ArrayValue}
    *
    * @typedef FieldTransform
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.DocumentTransform.FieldTransform definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.DocumentTransform.FieldTransform definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/write.proto}
    */
   FieldTransform: {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -145,7 +194,7 @@ const DocumentTransform = {
      * A value that is calculated by the server.
      *
      * @enum {number}
-     * @memberof google.firestore.v1beta1
+     * @memberof google.firestore.v1
      */
     ServerValue: {
 
@@ -181,11 +230,11 @@ const DocumentTransform = {
  *   same order.
  *
  *   This object should have the same structure as [Value]{@link
- * google.firestore.v1beta1.Value}
+ * google.firestore.v1.Value}
  *
  * @typedef WriteResult
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.WriteResult definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.WriteResult definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/write.proto}
  */
 const WriteResult = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -206,7 +255,7 @@ const WriteResult = {
  *   If `mask` is set, contains only fields that were updated or added.
  *
  *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ * google.firestore.v1.Document}
  *
  * @property {number[]} targetIds
  *   A set of target IDs of targets that match this document.
@@ -215,8 +264,8 @@ const WriteResult = {
  *   A set of target IDs for targets that no longer match this document.
  *
  * @typedef DocumentChange
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.DocumentChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.DocumentChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/write.proto}
  */
 const DocumentChange = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -246,8 +295,8 @@ const DocumentChange = {
  * google.protobuf.Timestamp}
  *
  * @typedef DocumentDelete
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.DocumentDelete definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.DocumentDelete definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/write.proto}
  */
 const DocumentDelete = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -278,8 +327,8 @@ const DocumentDelete = {
  * google.protobuf.Timestamp}
  *
  * @typedef DocumentRemove
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.DocumentRemove definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.DocumentRemove definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/write.proto}
  */
 const DocumentRemove = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -298,8 +347,8 @@ const DocumentRemove = {
  *   client must manually determine which documents no longer match the target.
  *
  * @typedef ExistenceFilter
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.ExistenceFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/write.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.ExistenceFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/write.proto}
  */
 const ExistenceFilter = {
     // This is for documentation. Actual contents will be loaded by gRPC.

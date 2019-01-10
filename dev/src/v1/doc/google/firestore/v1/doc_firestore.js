@@ -29,7 +29,7 @@
  *   will not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link
- * google.firestore.v1beta1.DocumentMask}
+ * google.firestore.v1.DocumentMask}
  *
  * @property {string} transaction
  *   Reads the document in a transaction.
@@ -42,8 +42,8 @@
  * google.protobuf.Timestamp}
  *
  * @typedef GetDocumentRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.GetDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.GetDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const GetDocumentRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -80,7 +80,7 @@ const GetDocumentRequest = {
  *   will not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link
- * google.firestore.v1beta1.DocumentMask}
+ * google.firestore.v1.DocumentMask}
  *
  * @property {string} transaction
  *   Reads documents in a transaction.
@@ -102,8 +102,8 @@ const GetDocumentRequest = {
  *   `order_by`.
  *
  * @typedef ListDocumentsRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.ListDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.ListDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const ListDocumentsRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -116,14 +116,14 @@ const ListDocumentsRequest = {
  *   The Documents found.
  *
  *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ * google.firestore.v1.Document}
  *
  * @property {string} nextPageToken
  *   The next page token.
  *
  * @typedef ListDocumentsResponse
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.ListDocumentsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.ListDocumentsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const ListDocumentsResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -149,7 +149,7 @@ const ListDocumentsResponse = {
  *   The document to create. `name` must not be set.
  *
  *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ * google.firestore.v1.Document}
  *
  * @property {Object} mask
  *   The fields to return. If not set, returns all fields.
@@ -158,11 +158,11 @@ const ListDocumentsResponse = {
  *   will not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link
- * google.firestore.v1beta1.DocumentMask}
+ * google.firestore.v1.DocumentMask}
  *
  * @typedef CreateDocumentRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.CreateDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.CreateDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const CreateDocumentRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -176,7 +176,7 @@ const CreateDocumentRequest = {
  *   Creates the document if it does not already exist.
  *
  *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ * google.firestore.v1.Document}
  *
  * @property {Object} updateMask
  *   The fields to update.
@@ -188,7 +188,7 @@ const CreateDocumentRequest = {
  *   deleted from the document on the server.
  *
  *   This object should have the same structure as [DocumentMask]{@link
- * google.firestore.v1beta1.DocumentMask}
+ * google.firestore.v1.DocumentMask}
  *
  * @property {Object} mask
  *   The fields to return. If not set, returns all fields.
@@ -197,18 +197,18 @@ const CreateDocumentRequest = {
  *   will not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link
- * google.firestore.v1beta1.DocumentMask}
+ * google.firestore.v1.DocumentMask}
  *
  * @property {Object} currentDocument
  *   An optional precondition on the document.
  *   The request will fail if this is set and not met by the target document.
  *
  *   This object should have the same structure as [Precondition]{@link
- * google.firestore.v1beta1.Precondition}
+ * google.firestore.v1.Precondition}
  *
  * @typedef UpdateDocumentRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.UpdateDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.UpdateDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const UpdateDocumentRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -226,11 +226,11 @@ const UpdateDocumentRequest = {
  *   The request will fail if this is set and not met by the target document.
  *
  *   This object should have the same structure as [Precondition]{@link
- * google.firestore.v1beta1.Precondition}
+ * google.firestore.v1.Precondition}
  *
  * @typedef DeleteDocumentRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.DeleteDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.DeleteDocumentRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const DeleteDocumentRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -256,7 +256,7 @@ const DeleteDocumentRequest = {
  *   not be returned in the response.
  *
  *   This object should have the same structure as [DocumentMask]{@link
- * google.firestore.v1beta1.DocumentMask}
+ * google.firestore.v1.DocumentMask}
  *
  * @property {string} transaction
  *   Reads documents in a transaction.
@@ -268,7 +268,7 @@ const DeleteDocumentRequest = {
  *   stream.
  *
  *   This object should have the same structure as [TransactionOptions]{@link
- * google.firestore.v1beta1.TransactionOptions}
+ * google.firestore.v1.TransactionOptions}
  *
  * @property {Object} readTime
  *   Reads documents as they were at the given time.
@@ -278,8 +278,8 @@ const DeleteDocumentRequest = {
  * google.protobuf.Timestamp}
  *
  * @typedef BatchGetDocumentsRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.BatchGetDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.BatchGetDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const BatchGetDocumentsRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -292,7 +292,7 @@ const BatchGetDocumentsRequest = {
  *   A document that was requested.
  *
  *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ * google.firestore.v1.Document}
  *
  * @property {string} missing
  *   A document name that was requested but does not exist. In the format:
@@ -313,8 +313,8 @@ const BatchGetDocumentsRequest = {
  * google.protobuf.Timestamp}
  *
  * @typedef BatchGetDocumentsResponse
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.BatchGetDocumentsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.BatchGetDocumentsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const BatchGetDocumentsResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -332,11 +332,11 @@ const BatchGetDocumentsResponse = {
  *   Defaults to a read-write transaction.
  *
  *   This object should have the same structure as [TransactionOptions]{@link
- * google.firestore.v1beta1.TransactionOptions}
+ * google.firestore.v1.TransactionOptions}
  *
  * @typedef BeginTransactionRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.BeginTransactionRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.BeginTransactionRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const BeginTransactionRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -349,8 +349,8 @@ const BeginTransactionRequest = {
  *   The transaction that was started.
  *
  * @typedef BeginTransactionResponse
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.BeginTransactionResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.BeginTransactionResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const BeginTransactionResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -369,14 +369,14 @@ const BeginTransactionResponse = {
  *   Always executed atomically and in order.
  *
  *   This object should have the same structure as [Write]{@link
- * google.firestore.v1beta1.Write}
+ * google.firestore.v1.Write}
  *
  * @property {string} transaction
  *   If set, applies all writes in this transaction, and commits it.
  *
  * @typedef CommitRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.CommitRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.CommitRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const CommitRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -392,7 +392,7 @@ const CommitRequest = {
  *   request.
  *
  *   This object should have the same structure as [WriteResult]{@link
- * google.firestore.v1beta1.WriteResult}
+ * google.firestore.v1.WriteResult}
  *
  * @property {Object} commitTime
  *   The time at which the commit occurred.
@@ -401,8 +401,8 @@ const CommitRequest = {
  * google.protobuf.Timestamp}
  *
  * @typedef CommitResponse
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.CommitResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.CommitResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const CommitResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -419,8 +419,8 @@ const CommitResponse = {
  *   The transaction to roll back.
  *
  * @typedef RollbackRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.RollbackRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.RollbackRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const RollbackRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -441,7 +441,7 @@ const RollbackRequest = {
  *   A structured query.
  *
  *   This object should have the same structure as [StructuredQuery]{@link
- * google.firestore.v1beta1.StructuredQuery}
+ * google.firestore.v1.StructuredQuery}
  *
  * @property {string} transaction
  *   Reads documents in a transaction.
@@ -453,7 +453,7 @@ const RollbackRequest = {
  *   stream.
  *
  *   This object should have the same structure as [TransactionOptions]{@link
- * google.firestore.v1beta1.TransactionOptions}
+ * google.firestore.v1.TransactionOptions}
  *
  * @property {Object} readTime
  *   Reads documents as they were at the given time.
@@ -463,8 +463,8 @@ const RollbackRequest = {
  * google.protobuf.Timestamp}
  *
  * @typedef RunQueryRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.RunQueryRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.RunQueryRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const RunQueryRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -484,7 +484,7 @@ const RunQueryRequest = {
  *   Not set when reporting partial progress.
  *
  *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ * google.firestore.v1.Document}
  *
  * @property {Object} readTime
  *   The time at which the document was read. This may be monotonically
@@ -503,8 +503,8 @@ const RunQueryRequest = {
  *   the last response and the current response.
  *
  * @typedef RunQueryResponse
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.RunQueryResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.RunQueryResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const RunQueryResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -541,7 +541,7 @@ const RunQueryResponse = {
  *   This must not be empty on all other requests.
  *
  *   This object should have the same structure as [Write]{@link
- * google.firestore.v1beta1.Write}
+ * google.firestore.v1.Write}
  *
  * @property {string} streamToken
  *   A stream token that was previously sent by the server.
@@ -563,8 +563,8 @@ const RunQueryResponse = {
  *   Labels associated with this write request.
  *
  * @typedef WriteRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.WriteRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.WriteRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const WriteRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -590,7 +590,7 @@ const WriteRequest = {
  *   request.
  *
  *   This object should have the same structure as [WriteResult]{@link
- * google.firestore.v1beta1.WriteResult}
+ * google.firestore.v1.WriteResult}
  *
  * @property {Object} commitTime
  *   The time at which the commit occurred.
@@ -599,8 +599,8 @@ const WriteRequest = {
  * google.protobuf.Timestamp}
  *
  * @typedef WriteResponse
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.WriteResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.WriteResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const WriteResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -617,7 +617,7 @@ const WriteResponse = {
  *   A target to add to this stream.
  *
  *   This object should have the same structure as [Target]{@link
- * google.firestore.v1beta1.Target}
+ * google.firestore.v1.Target}
  *
  * @property {number} removeTarget
  *   The ID of a target to remove from this stream.
@@ -626,8 +626,8 @@ const WriteResponse = {
  *   Labels associated with this target change.
  *
  * @typedef ListenRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.ListenRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.ListenRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const ListenRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -640,26 +640,26 @@ const ListenRequest = {
  *   Targets have changed.
  *
  *   This object should have the same structure as [TargetChange]{@link
- * google.firestore.v1beta1.TargetChange}
+ * google.firestore.v1.TargetChange}
  *
  * @property {Object} documentChange
  *   A Document has changed.
  *
  *   This object should have the same structure as [DocumentChange]{@link
- * google.firestore.v1beta1.DocumentChange}
+ * google.firestore.v1.DocumentChange}
  *
  * @property {Object} documentDelete
  *   A Document has been deleted.
  *
  *   This object should have the same structure as [DocumentDelete]{@link
- * google.firestore.v1beta1.DocumentDelete}
+ * google.firestore.v1.DocumentDelete}
  *
  * @property {Object} documentRemove
  *   A Document has been removed from a target (because it is no longer
  *   relevant to that target).
  *
  *   This object should have the same structure as [DocumentRemove]{@link
- * google.firestore.v1beta1.DocumentRemove}
+ * google.firestore.v1.DocumentRemove}
  *
  * @property {Object} filter
  *   A filter to apply to the set of documents previously returned for the
@@ -669,11 +669,11 @@ const ListenRequest = {
  *   the exact documents are unknown.
  *
  *   This object should have the same structure as [ExistenceFilter]{@link
- * google.firestore.v1beta1.ExistenceFilter}
+ * google.firestore.v1.ExistenceFilter}
  *
  * @typedef ListenResponse
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.ListenResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.ListenResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const ListenResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -686,13 +686,13 @@ const ListenResponse = {
  *   A target specified by a query.
  *
  *   This object should have the same structure as [QueryTarget]{@link
- * google.firestore.v1beta1.QueryTarget}
+ * google.firestore.v1.QueryTarget}
  *
  * @property {Object} documents
  *   A target specified by a set of document names.
  *
  *   This object should have the same structure as [DocumentsTarget]{@link
- * google.firestore.v1beta1.DocumentsTarget}
+ * google.firestore.v1.DocumentsTarget}
  *
  * @property {string} resumeToken
  *   A resume token from a prior TargetChange for an identical target.
@@ -721,8 +721,8 @@ const ListenResponse = {
  *   If the target should be removed once it is current and consistent.
  *
  * @typedef Target
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.Target definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.Target definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const Target = {
   // This is for documentation. Actual contents will be loaded by gRPC.
@@ -737,8 +737,8 @@ const Target = {
    *   the given `database`. Duplicate names will be elided.
    *
    * @typedef DocumentsTarget
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.Target.DocumentsTarget definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.Target.DocumentsTarget definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
    */
   DocumentsTarget: {
       // This is for documentation. Actual contents will be loaded by gRPC.
@@ -759,11 +759,11 @@ const Target = {
    *   A structured query.
    *
    *   This object should have the same structure as [StructuredQuery]{@link
-   * google.firestore.v1beta1.StructuredQuery}
+   * google.firestore.v1.StructuredQuery}
    *
    * @typedef QueryTarget
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.Target.QueryTarget definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.Target.QueryTarget definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
    */
   QueryTarget: {
       // This is for documentation. Actual contents will be loaded by gRPC.
@@ -777,7 +777,7 @@ const Target = {
  *   The type of change that occurred.
  *
  *   The number should be among the values of [TargetChangeType]{@link
- * google.firestore.v1beta1.TargetChangeType}
+ * google.firestore.v1.TargetChangeType}
  *
  * @property {number[]} targetIds
  *   The target IDs of targets that have changed.
@@ -818,8 +818,8 @@ const Target = {
  * google.protobuf.Timestamp}
  *
  * @typedef TargetChange
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.TargetChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.TargetChange definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const TargetChange = {
   // This is for documentation. Actual contents will be loaded by gRPC.
@@ -828,7 +828,7 @@ const TargetChange = {
    * The type of change.
    *
    * @enum {number}
-   * @memberof google.firestore.v1beta1
+   * @memberof google.firestore.v1
    */
   TargetChangeType: {
 
@@ -887,8 +887,8 @@ const TargetChange = {
  *   ListCollectionIdsResponse.
  *
  * @typedef ListCollectionIdsRequest
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.ListCollectionIdsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.ListCollectionIdsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const ListCollectionIdsRequest = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -904,8 +904,8 @@ const ListCollectionIdsRequest = {
  *   A page token that may be used to continue the list.
  *
  * @typedef ListCollectionIdsResponse
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.ListCollectionIdsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/firestore.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.ListCollectionIdsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/firestore.proto}
  */
 const ListCollectionIdsResponse = {
     // This is for documentation. Actual contents will be loaded by gRPC.

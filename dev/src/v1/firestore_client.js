@@ -40,7 +40,7 @@ const VERSION = require('../../../package.json').version;
  *      to see the effects of the transaction.
  *
  * @class
- * @memberof v1beta1
+ * @memberof v1
  */
 class FirestoreClient {
   /**
@@ -108,7 +108,7 @@ class FirestoreClient {
         {},
         gaxGrpc.loadProto(
             path.join(__dirname, '..', '..', 'protos'),
-            'google/firestore/v1beta1/firestore.proto'));
+            'google/firestore/v1/firestore.proto'));
 
     // This API contains "path templates"; forward-slash-separated
     // identifiers to uniquely identify resources within the API.
@@ -146,7 +146,7 @@ class FirestoreClient {
 
     // Put together the default options sent with requests.
     const defaults = gaxGrpc.constructSettings(
-        'google.firestore.v1beta1.Firestore', gapicConfig, opts.clientConfig,
+        'google.firestore.v1.Firestore', gapicConfig, opts.clientConfig,
         {'x-goog-api-client': clientHeader.join(' ')});
 
     // Set up a dictionary of "inner API calls"; the core implementation
@@ -155,9 +155,9 @@ class FirestoreClient {
     this._innerApiCalls = {};
 
     // Put together the "service stub" for
-    // google.firestore.v1beta1.Firestore.
+    // google.firestore.v1.Firestore.
     const firestoreStub =
-        gaxGrpc.createStub(protos.google.firestore.v1beta1.Firestore, opts);
+        gaxGrpc.createStub(protos.google.firestore.v1.Firestore, opts);
 
     // Iterate over each of the methods that the service provides
     // and create an API call method for each.
@@ -241,7 +241,7 @@ class FirestoreClient {
    *   will not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link
-   * google.firestore.v1beta1.DocumentMask}
+   * google.firestore.v1.DocumentMask}
    * @param {string} [request.transaction]
    *   Reads the document in a transaction.
    * @param {Object} [request.readTime]
@@ -259,17 +259,17 @@ class FirestoreClient {
    *   The function which will be called with the result of the API call.
    *
    *   The second parameter to the callback is an object representing
-   * [Document]{@link google.firestore.v1beta1.Document}.
+   * [Document]{@link google.firestore.v1.Document}.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is an object representing [Document]{@link
-   * google.firestore.v1beta1.Document}. The promise has a method named "cancel"
+   * google.firestore.v1.Document}. The promise has a method named "cancel"
    * which cancels the ongoing API call.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -323,7 +323,7 @@ class FirestoreClient {
    *   will not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link
-   * google.firestore.v1beta1.DocumentMask}
+   * google.firestore.v1.DocumentMask}
    * @param {string} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.readTime]
@@ -349,34 +349,33 @@ class FirestoreClient {
    *   The function which will be called with the result of the API call.
    *
    *   The second parameter to the callback is Array of [Document]{@link
-   * google.firestore.v1beta1.Document}.
+   * google.firestore.v1.Document}.
    *
    *   When autoPaginate: false is specified through options, it contains the
    * result in a single response. If the response indicates the next page
    * exists, the third parameter is set to be used for the next request object.
    * The fourth parameter keeps the raw response object of an object
    * representing [ListDocumentsResponse]{@link
-   * google.firestore.v1beta1.ListDocumentsResponse}.
+   * google.firestore.v1.ListDocumentsResponse}.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is Array of [Document]{@link
-   * google.firestore.v1beta1.Document}.
+   * google.firestore.v1.Document}.
    *
    *   When autoPaginate: false is specified through options, the array has
    * three elements. The first element is Array of [Document]{@link
-   * google.firestore.v1beta1.Document} in a single response. The second element
-   * is the next request object if the response indicates the next page exists,
-   * or null. The third element is an object representing
-   * [ListDocumentsResponse]{@link
-   * google.firestore.v1beta1.ListDocumentsResponse}.
+   * google.firestore.v1.Document} in a single response. The second element is
+   * the next request object if the response indicates the next page exists, or
+   * null. The third element is an object representing
+   * [ListDocumentsResponse]{@link google.firestore.v1.ListDocumentsResponse}.
    *
    *   The promise has a method named "cancel" which cancels the ongoing API
    * call.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -478,7 +477,7 @@ class FirestoreClient {
    *   will not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link
-   * google.firestore.v1beta1.DocumentMask}
+   * google.firestore.v1.DocumentMask}
    * @param {string} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.readTime]
@@ -502,13 +501,13 @@ class FirestoreClient {
    * details.
    * @returns {Stream}
    *   An object stream which emits an object representing [Document]{@link
-   * google.firestore.v1beta1.Document} on 'data' event.
+   * google.firestore.v1.Document} on 'data' event.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -551,7 +550,7 @@ class FirestoreClient {
    *   The document to create. `name` must not be set.
    *
    *   This object should have the same structure as [Document]{@link
-   * google.firestore.v1beta1.Document}
+   * google.firestore.v1.Document}
    * @param {Object} [request.mask]
    *   The fields to return. If not set, returns all fields.
    *
@@ -559,7 +558,7 @@ class FirestoreClient {
    *   will not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link
-   * google.firestore.v1beta1.DocumentMask}
+   * google.firestore.v1.DocumentMask}
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call,
    * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
@@ -569,17 +568,17 @@ class FirestoreClient {
    *   The function which will be called with the result of the API call.
    *
    *   The second parameter to the callback is an object representing
-   * [Document]{@link google.firestore.v1beta1.Document}.
+   * [Document]{@link google.firestore.v1.Document}.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is an object representing [Document]{@link
-   * google.firestore.v1beta1.Document}. The promise has a method named "cancel"
+   * google.firestore.v1.Document}. The promise has a method named "cancel"
    * which cancels the ongoing API call.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -619,7 +618,7 @@ class FirestoreClient {
    *   Creates the document if it does not already exist.
    *
    *   This object should have the same structure as [Document]{@link
-   * google.firestore.v1beta1.Document}
+   * google.firestore.v1.Document}
    * @param {Object} request.updateMask
    *   The fields to update.
    *   None of the field paths in the mask may contain a reserved name.
@@ -630,7 +629,7 @@ class FirestoreClient {
    *   deleted from the document on the server.
    *
    *   This object should have the same structure as [DocumentMask]{@link
-   * google.firestore.v1beta1.DocumentMask}
+   * google.firestore.v1.DocumentMask}
    * @param {Object} [request.mask]
    *   The fields to return. If not set, returns all fields.
    *
@@ -638,13 +637,13 @@ class FirestoreClient {
    *   will not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link
-   * google.firestore.v1beta1.DocumentMask}
+   * google.firestore.v1.DocumentMask}
    * @param {Object} [request.currentDocument]
    *   An optional precondition on the document.
    *   The request will fail if this is set and not met by the target document.
    *
    *   This object should have the same structure as [Precondition]{@link
-   * google.firestore.v1beta1.Precondition}
+   * google.firestore.v1.Precondition}
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call,
    * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
@@ -654,17 +653,17 @@ class FirestoreClient {
    *   The function which will be called with the result of the API call.
    *
    *   The second parameter to the callback is an object representing
-   * [Document]{@link google.firestore.v1beta1.Document}.
+   * [Document]{@link google.firestore.v1.Document}.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is an object representing [Document]{@link
-   * google.firestore.v1beta1.Document}. The promise has a method named "cancel"
+   * google.firestore.v1.Document}. The promise has a method named "cancel"
    * which cancels the ongoing API call.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -706,7 +705,7 @@ class FirestoreClient {
    *   The request will fail if this is set and not met by the target document.
    *
    *   This object should have the same structure as [Precondition]{@link
-   * google.firestore.v1beta1.Precondition}
+   * google.firestore.v1.Precondition}
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call,
    * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
@@ -720,9 +719,9 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -764,7 +763,7 @@ class FirestoreClient {
    * will not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link
-   * google.firestore.v1beta1.DocumentMask}
+   * google.firestore.v1.DocumentMask}
    * @param {string} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.newTransaction]
@@ -774,7 +773,7 @@ class FirestoreClient {
    *   stream.
    *
    *   This object should have the same structure as [TransactionOptions]{@link
-   * google.firestore.v1beta1.TransactionOptions}
+   * google.firestore.v1.TransactionOptions}
    * @param {Object} [request.readTime]
    *   Reads documents as they were at the given time.
    *   This may not be older than 60 seconds.
@@ -788,13 +787,13 @@ class FirestoreClient {
    * details.
    * @returns {Stream}
    *   An object stream which emits [BatchGetDocumentsResponse]{@link
-   * google.firestore.v1beta1.BatchGetDocumentsResponse} on 'data' event.
+   * google.firestore.v1.BatchGetDocumentsResponse} on 'data' event.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -825,7 +824,7 @@ class FirestoreClient {
    *   Defaults to a read-write transaction.
    *
    *   This object should have the same structure as [TransactionOptions]{@link
-   * google.firestore.v1beta1.TransactionOptions}
+   * google.firestore.v1.TransactionOptions}
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call,
    * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
@@ -836,18 +835,18 @@ class FirestoreClient {
    *
    *   The second parameter to the callback is an object representing
    * [BeginTransactionResponse]{@link
-   * google.firestore.v1beta1.BeginTransactionResponse}.
+   * google.firestore.v1.BeginTransactionResponse}.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is an object representing
    * [BeginTransactionResponse]{@link
-   * google.firestore.v1beta1.BeginTransactionResponse}. The promise has a
-   * method named "cancel" which cancels the ongoing API call.
+   * google.firestore.v1.BeginTransactionResponse}. The promise has a method
+   * named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -885,7 +884,7 @@ class FirestoreClient {
    *   Always executed atomically and in order.
    *
    *   This object should have the same structure as [Write]{@link
-   * google.firestore.v1beta1.Write}
+   * google.firestore.v1.Write}
    * @param {string} [request.transaction]
    *   If set, applies all writes in this transaction, and commits it.
    * @param {Object} [options]
@@ -897,17 +896,17 @@ class FirestoreClient {
    *   The function which will be called with the result of the API call.
    *
    *   The second parameter to the callback is an object representing
-   * [CommitResponse]{@link google.firestore.v1beta1.CommitResponse}.
+   * [CommitResponse]{@link google.firestore.v1.CommitResponse}.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is an object representing
-   * [CommitResponse]{@link google.firestore.v1beta1.CommitResponse}. The
-   * promise has a method named "cancel" which cancels the ongoing API call.
+   * [CommitResponse]{@link google.firestore.v1.CommitResponse}. The promise has
+   * a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -957,9 +956,9 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -997,7 +996,7 @@ class FirestoreClient {
    *   A structured query.
    *
    *   This object should have the same structure as [StructuredQuery]{@link
-   * google.firestore.v1beta1.StructuredQuery}
+   * google.firestore.v1.StructuredQuery}
    * @param {string} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.newTransaction]
@@ -1007,7 +1006,7 @@ class FirestoreClient {
    *   stream.
    *
    *   This object should have the same structure as [TransactionOptions]{@link
-   * google.firestore.v1beta1.TransactionOptions}
+   * google.firestore.v1.TransactionOptions}
    * @param {Object} [request.readTime]
    *   Reads documents as they were at the given time.
    *   This may not be older than 60 seconds.
@@ -1021,13 +1020,13 @@ class FirestoreClient {
    * details.
    * @returns {Stream}
    *   An object stream which emits [RunQueryResponse]{@link
-   * google.firestore.v1beta1.RunQueryResponse} on 'data' event.
+   * google.firestore.v1.RunQueryResponse} on 'data' event.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -1053,16 +1052,15 @@ class FirestoreClient {
    * details.
    * @returns {Stream}
    *   An object stream which is both readable and writable. It accepts objects
-   *   representing [WriteRequest]{@link google.firestore.v1beta1.WriteRequest}
-   * for write() method, and will emit objects representing
-   * [WriteResponse]{@link google.firestore.v1beta1.WriteResponse} on 'data'
-   * event asynchronously.
+   *   representing [WriteRequest]{@link google.firestore.v1.WriteRequest} for
+   * write() method, and will emit objects representing [WriteResponse]{@link
+   * google.firestore.v1.WriteResponse} on 'data' event asynchronously.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -1091,16 +1089,15 @@ class FirestoreClient {
    * details.
    * @returns {Stream}
    *   An object stream which is both readable and writable. It accepts objects
-   *   representing [ListenRequest]{@link
-   * google.firestore.v1beta1.ListenRequest} for write() method, and will emit
-   * objects representing [ListenResponse]{@link
-   * google.firestore.v1beta1.ListenResponse} on 'data' event asynchronously.
+   *   representing [ListenRequest]{@link google.firestore.v1.ListenRequest} for
+   * write() method, and will emit objects representing [ListenResponse]{@link
+   * google.firestore.v1.ListenResponse} on 'data' event asynchronously.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -1150,7 +1147,7 @@ class FirestoreClient {
    * exists, the third parameter is set to be used for the next request object.
    * The fourth parameter keeps the raw response object of an object
    * representing [ListCollectionIdsResponse]{@link
-   * google.firestore.v1beta1.ListCollectionIdsResponse}.
+   * google.firestore.v1.ListCollectionIdsResponse}.
    * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is Array of string.
    *
@@ -1159,16 +1156,16 @@ class FirestoreClient {
    *   The second element is the next request object if the response
    *   indicates the next page exists, or null. The third element is
    *   an object representing [ListCollectionIdsResponse]{@link
-   * google.firestore.v1beta1.ListCollectionIdsResponse}.
+   * google.firestore.v1.ListCollectionIdsResponse}.
    *
    *   The promise has a method named "cancel" which cancels the ongoing API
    * call.
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *
@@ -1261,9 +1258,9 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1beta1');
+   * const firestore = require('firestore.v1');
    *
-   * const client = new firestore.v1beta1.FirestoreClient({
+   * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
    * });
    *

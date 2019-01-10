@@ -27,8 +27,8 @@
  *   path syntax reference.
  *
  * @typedef DocumentMask
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.DocumentMask definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.DocumentMask definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/common.proto}
  */
 const DocumentMask = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -49,8 +49,8 @@ const DocumentMask = {
  * google.protobuf.Timestamp}
  *
  * @typedef Precondition
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.Precondition definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.Precondition definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/common.proto}
  */
 const Precondition = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -63,17 +63,17 @@ const Precondition = {
  *   The transaction can only be used for read operations.
  *
  *   This object should have the same structure as [ReadOnly]{@link
- * google.firestore.v1beta1.ReadOnly}
+ * google.firestore.v1.ReadOnly}
  *
  * @property {Object} readWrite
  *   The transaction can be used for both read and write operations.
  *
  *   This object should have the same structure as [ReadWrite]{@link
- * google.firestore.v1beta1.ReadWrite}
+ * google.firestore.v1.ReadWrite}
  *
  * @typedef TransactionOptions
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.TransactionOptions definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.TransactionOptions definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/common.proto}
  */
 const TransactionOptions = {
   // This is for documentation. Actual contents will be loaded by gRPC.
@@ -85,8 +85,8 @@ const TransactionOptions = {
    *   An optional transaction to retry.
    *
    * @typedef ReadWrite
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.TransactionOptions.ReadWrite definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.TransactionOptions.ReadWrite definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/common.proto}
    */
   ReadWrite: {
       // This is for documentation. Actual contents will be loaded by gRPC.
@@ -103,8 +103,8 @@ const TransactionOptions = {
    * google.protobuf.Timestamp}
    *
    * @typedef ReadOnly
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.TransactionOptions.ReadOnly definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.TransactionOptions.ReadOnly definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/common.proto}
    */
   ReadOnly: {
       // This is for documentation. Actual contents will be loaded by gRPC.

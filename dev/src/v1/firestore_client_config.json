@@ -1,6 +1,6 @@
 {
   "interfaces": {
-    "google.firestore.v1beta1.Firestore": {
+    "google.firestore.v1.Firestore": {
       "retry_codes": {
         "idempotent": [
           "DEADLINE_EXCEEDED",

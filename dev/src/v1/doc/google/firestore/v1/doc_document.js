@@ -71,8 +71,8 @@
  * google.protobuf.Timestamp}
  *
  * @typedef Document
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.Document definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.Document definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/document.proto}
  */
 const Document = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -135,17 +135,17 @@ const Document = {
  *   map which contains another array.
  *
  *   This object should have the same structure as [ArrayValue]{@link
- * google.firestore.v1beta1.ArrayValue}
+ * google.firestore.v1.ArrayValue}
  *
  * @property {Object} mapValue
  *   A map value.
  *
  *   This object should have the same structure as [MapValue]{@link
- * google.firestore.v1beta1.MapValue}
+ * google.firestore.v1.MapValue}
  *
  * @typedef Value
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.Value definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.Value definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/document.proto}
  */
 const Value = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -158,11 +158,11 @@ const Value = {
  *   Values in the array.
  *
  *   This object should have the same structure as [Value]{@link
- * google.firestore.v1beta1.Value}
+ * google.firestore.v1.Value}
  *
  * @typedef ArrayValue
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.ArrayValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.ArrayValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/document.proto}
  */
 const ArrayValue = {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -180,8 +180,8 @@ const ArrayValue = {
  *   not exceed 1,500 bytes and cannot be empty.
  *
  * @typedef MapValue
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.MapValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.MapValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/document.proto}
  */
 const MapValue = {
     // This is for documentation. Actual contents will be loaded by gRPC.

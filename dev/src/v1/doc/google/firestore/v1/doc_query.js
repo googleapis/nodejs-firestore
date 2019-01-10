@@ -22,19 +22,19 @@
  *   The projection to return.
  *
  *   This object should have the same structure as [Projection]{@link
- * google.firestore.v1beta1.Projection}
+ * google.firestore.v1.Projection}
  *
  * @property {Object[]} from
  *   The collections to query.
  *
  *   This object should have the same structure as [CollectionSelector]{@link
- * google.firestore.v1beta1.CollectionSelector}
+ * google.firestore.v1.CollectionSelector}
  *
  * @property {Object} where
  *   The filter to apply.
  *
  *   This object should have the same structure as [Filter]{@link
- * google.firestore.v1beta1.Filter}
+ * google.firestore.v1.Filter}
  *
  * @property {Object[]} orderBy
  *   The order to apply to the query results.
@@ -57,19 +57,19 @@
  *      `SELECT * FROM Foo WHERE A > 1 ORDER BY A, __name__`
  *
  *   This object should have the same structure as [Order]{@link
- * google.firestore.v1beta1.Order}
+ * google.firestore.v1.Order}
  *
  * @property {Object} startAt
  *   A starting point for the query results.
  *
  *   This object should have the same structure as [Cursor]{@link
- * google.firestore.v1beta1.Cursor}
+ * google.firestore.v1.Cursor}
  *
  * @property {Object} endAt
  *   A end point for the query results.
  *
  *   This object should have the same structure as [Cursor]{@link
- * google.firestore.v1beta1.Cursor}
+ * google.firestore.v1.Cursor}
  *
  * @property {number} offset
  *   The number of results to skip.
@@ -87,8 +87,8 @@
  * google.protobuf.Int32Value}
  *
  * @typedef StructuredQuery
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.StructuredQuery definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.StructuredQuery definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
  */
 const StructuredQuery = {
   // This is for documentation. Actual contents will be loaded by gRPC.
@@ -106,8 +106,8 @@ const StructuredQuery = {
    *   When true, selects all descendant collections.
    *
    * @typedef CollectionSelector
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.CollectionSelector definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.CollectionSelector definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   CollectionSelector: {
       // This is for documentation. Actual contents will be loaded by gRPC.
@@ -120,23 +120,23 @@ const StructuredQuery = {
    *   A composite filter.
    *
    *   This object should have the same structure as [CompositeFilter]{@link
-   * google.firestore.v1beta1.CompositeFilter}
+   * google.firestore.v1.CompositeFilter}
    *
    * @property {Object} fieldFilter
    *   A filter on a document field.
    *
    *   This object should have the same structure as [FieldFilter]{@link
-   * google.firestore.v1beta1.FieldFilter}
+   * google.firestore.v1.FieldFilter}
    *
    * @property {Object} unaryFilter
    *   A filter that takes exactly one argument.
    *
    *   This object should have the same structure as [UnaryFilter]{@link
-   * google.firestore.v1beta1.UnaryFilter}
+   * google.firestore.v1.UnaryFilter}
    *
    * @typedef Filter
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.Filter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.Filter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   Filter: {
       // This is for documentation. Actual contents will be loaded by gRPC.
@@ -149,18 +149,18 @@ const StructuredQuery = {
    *   The operator for combining multiple filters.
    *
    *   The number should be among the values of [Operator]{@link
-   * google.firestore.v1beta1.Operator}
+   * google.firestore.v1.Operator}
    *
    * @property {Object[]} filters
    *   The list of filters to combine.
    *   Must contain at least one filter.
    *
    *   This object should have the same structure as [Filter]{@link
-   * google.firestore.v1beta1.Filter}
+   * google.firestore.v1.Filter}
    *
    * @typedef CompositeFilter
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.CompositeFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.CompositeFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   CompositeFilter: {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -169,7 +169,7 @@ const StructuredQuery = {
      * A composite filter operator.
      *
      * @enum {number}
-     * @memberof google.firestore.v1beta1
+     * @memberof google.firestore.v1
      */
     Operator: {
 
@@ -192,23 +192,23 @@ const StructuredQuery = {
    *   The field to filter by.
    *
    *   This object should have the same structure as [FieldReference]{@link
-   * google.firestore.v1beta1.FieldReference}
+   * google.firestore.v1.FieldReference}
    *
    * @property {number} op
    *   The operator to filter by.
    *
    *   The number should be among the values of [Operator]{@link
-   * google.firestore.v1beta1.Operator}
+   * google.firestore.v1.Operator}
    *
    * @property {Object} value
    *   The value to compare to.
    *
    *   This object should have the same structure as [Value]{@link
-   * google.firestore.v1beta1.Value}
+   * google.firestore.v1.Value}
    *
    * @typedef FieldFilter
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.FieldFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.FieldFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   FieldFilter: {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -217,7 +217,7 @@ const StructuredQuery = {
      * A field filter operator.
      *
      * @enum {number}
-     * @memberof google.firestore.v1beta1
+     * @memberof google.firestore.v1
      */
     Operator: {
 
@@ -266,17 +266,17 @@ const StructuredQuery = {
    *   The unary operator to apply.
    *
    *   The number should be among the values of [Operator]{@link
-   * google.firestore.v1beta1.Operator}
+   * google.firestore.v1.Operator}
    *
    * @property {Object} field
    *   The field to which to apply the operator.
    *
    *   This object should have the same structure as [FieldReference]{@link
-   * google.firestore.v1beta1.FieldReference}
+   * google.firestore.v1.FieldReference}
    *
    * @typedef UnaryFilter
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.UnaryFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.UnaryFilter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   UnaryFilter: {
     // This is for documentation. Actual contents will be loaded by gRPC.
@@ -285,7 +285,7 @@ const StructuredQuery = {
      * A unary operator.
      *
      * @enum {number}
-     * @memberof google.firestore.v1beta1
+     * @memberof google.firestore.v1
      */
     Operator: {
 
@@ -313,17 +313,17 @@ const StructuredQuery = {
    *   The field to order by.
    *
    *   This object should have the same structure as [FieldReference]{@link
-   * google.firestore.v1beta1.FieldReference}
+   * google.firestore.v1.FieldReference}
    *
    * @property {number} direction
    *   The direction to order by. Defaults to `ASCENDING`.
    *
    *   The number should be among the values of [Direction]{@link
-   * google.firestore.v1beta1.Direction}
+   * google.firestore.v1.Direction}
    *
    * @typedef Order
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.Order definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.Order definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   Order: {
       // This is for documentation. Actual contents will be loaded by gRPC.
@@ -335,8 +335,8 @@ const StructuredQuery = {
    * @property {string} fieldPath
    *
    * @typedef FieldReference
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   FieldReference: {
       // This is for documentation. Actual contents will be loaded by gRPC.
@@ -352,11 +352,11 @@ const StructuredQuery = {
    *   of the document, use `['__name__']`.
    *
    *   This object should have the same structure as [FieldReference]{@link
-   * google.firestore.v1beta1.FieldReference}
+   * google.firestore.v1.FieldReference}
    *
    * @typedef Projection
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   Projection: {
       // This is for documentation. Actual contents will be loaded by gRPC.
@@ -366,7 +366,7 @@ const StructuredQuery = {
    * A sort direction.
    *
    * @enum {number}
-   * @memberof google.firestore.v1beta1
+   * @memberof google.firestore.v1
    */
   Direction: {
 
@@ -397,15 +397,15 @@ const StructuredQuery = {
  *   Can contain fewer values than specified in the order by clause.
  *
  *   This object should have the same structure as [Value]{@link
- * google.firestore.v1beta1.Value}
+ * google.firestore.v1.Value}
  *
  * @property {boolean} before
  *   If the position is just before or just after the given values, relative
  *   to the sort order defined by the query.
  *
  * @typedef Cursor
- * @memberof google.firestore.v1beta1
- * @see [google.firestore.v1beta1.Cursor definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+ * @memberof google.firestore.v1
+ * @see [google.firestore.v1.Cursor definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
  */
 const Cursor = {
     // This is for documentation. Actual contents will be loaded by gRPC.
