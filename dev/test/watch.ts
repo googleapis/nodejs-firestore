@@ -526,7 +526,7 @@ describe('Query watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
           },
@@ -546,7 +546,7 @@ describe('Query watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
             where: {
@@ -573,7 +573,7 @@ describe('Query watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
           },
@@ -594,7 +594,7 @@ describe('Query watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
             orderBy: [{direction: 'DESCENDING', field: {fieldPath: 'foo'}}],

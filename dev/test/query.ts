@@ -229,7 +229,7 @@ function endAt(before: boolean, ...values: Array<string|api.IValue>):
 function queryEquals(
     actual: api.IRunQueryRequest, ...protoComponents: api.IStructuredQuery[]) {
   const query: api.IRunQueryRequest = {
-    parent: DATABASE_ROOT,
+    parent: DATABASE_ROOT + '/documents',
     structuredQuery: {
       from: [
         {

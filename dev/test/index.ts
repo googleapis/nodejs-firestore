@@ -679,7 +679,7 @@ describe('listCollections() method', () => {
     const overrides = {
       listCollectionIds: (request, options, callback) => {
         expect(request).to.deep.eq({
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
         });
 
         callback(null, ['first', 'second']);

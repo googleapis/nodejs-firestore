@@ -177,7 +177,7 @@ function getAll(docs: string[], fieldMask?: string[]) {
 
 function query(transaction?) {
   const request = {
-    parent: DATABASE_ROOT,
+    parent: `${DATABASE_ROOT}/documents`,
     structuredQuery: {
       from: [
         {

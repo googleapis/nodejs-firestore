@@ -396,7 +396,11 @@ export class Firestore {
    * @private
    */
   get formattedName(): string {
-    return this._referencePath!.formattedName;
+    const components = [
+      'projects', this._referencePath!.projectId, 'databases',
+      this._referencePath!.databaseId
+    ];
+    return components.join('/');
   }
 
   /**
