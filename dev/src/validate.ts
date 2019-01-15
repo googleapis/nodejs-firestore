@@ -129,6 +129,7 @@ export class Validator {
    * @param {number} minSize The minimum number of elements to enforce.
    * @throws if the expectation is not met.
    * @returns {boolean} 'true' when the minimum number of elements is available.
+   * @private
    */
   minNumberOfArguments(funcName, args, minSize): boolean {
     if (args.length < minSize) {
@@ -149,6 +150,7 @@ export class Validator {
    * @throws if the expectation is not met.
    * @returns {boolean} 'true' when only the maximum number of elements is
    * specified.
+   * @private
    */
   maxNumberOfArguments(funcName, args, maxSize): boolean {
     if (args.length > maxSize) {

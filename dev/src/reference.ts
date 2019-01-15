@@ -518,6 +518,7 @@ class FieldOrder {
 
   /**
    * Generates the proto representation for this field order.
+   * @private
    */
   toProto(): api.StructuredQuery.IOrder {
     return {
