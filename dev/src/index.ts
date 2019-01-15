@@ -74,6 +74,10 @@ setLibVersion(libVersion);
  * @namespace google.firestore.v1
  */
 
+/**
+ * @namespace google.firestore.v1beta1
+ */
+
 /*!
  * @see v1
  */
