@@ -919,7 +919,10 @@ export class DocumentTransform {
     return Array.from(this._transforms.keys());
   }
 
-  /** Validates the user provided field values in this document transform. */
+  /**
+   * Validates the user provided field values in this document transform.
+   * @private
+   */
   validate(): void {
     this._transforms.forEach(transform => transform.validate(this._validator));
   }

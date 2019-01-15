@@ -27,7 +27,10 @@ import * as assert from 'assert';
  * @private
  */
 export class ClientPool<T> {
-  /** Stores each active clients and how many operations it has outstanding. */
+  /**
+   * Stores each active clients and how many operations it has outstanding.
+   * @private
+   */
   private activeClients: Map<T, number> = new Map();
 
   /**
@@ -43,6 +46,8 @@ export class ClientPool<T> {
   /**
    * Returns an already existing client if it has less than the maximum number
    * of concurrent operations or initializes and returns a new client.
+   *
+   * @private
    */
   private acquire(): T {
     let selectedClient: T|null = null;
@@ -70,6 +75,7 @@ export class ClientPool<T> {
   /**
    * Reduces the number of operations for the provided client, potentially
    * removing it from the pool of active clients.
+   * @private
    */
   private release(client: T): void {
     let requestCount = this.activeClients.get(client) || 0;
@@ -87,6 +93,7 @@ export class ClientPool<T> {
    * The number of currently registered clients.
    *
    * @return Number of currently registered clients.
+   * @private
    */
   // Visible for testing.
   get size(): number {
@@ -101,6 +108,7 @@ export class ClientPool<T> {
    * @param op A callback function that returns a Promise. The client T will
    * be returned to the pool when callback finishes.
    * @return A Promise that resolves with the result of `op`.
+   * @private
    */
   run<V>(op: (client: T) => Promise<V>): Promise<V> {
     const client = this.acquire();
@@ -119,6 +127,8 @@ export class ClientPool<T> {
   /**
    * Deletes clients that are no longer executing operations. Keeps up to one
    * idle client to reduce future initialization costs.
+   *
+   * @private
    */
   private garbageCollect(): void {
     let idleClients = 0;
