@@ -687,9 +687,12 @@ export class Firestore {
   /**
    * Retrieves multiple documents from Firestore.
    *
-   * @param {DocumentReference} documentRef A `DocumentReference` to receive.
-   * @param {Array.<DocumentReference|ReadOptions>} moreDocumentRefsOrReadOptions
-   * Additional `DocumentReferences` to receive, followed by an optional field
+   * The first argument is required and must be of type `DocumentReference`
+   * followed by any additional `DocumentReference` documents. If used, the
+   * optional `ReadOptions` must be the last argument.
+   *
+   * @param {Array.<DocumentReference|ReadOptions>} documentRefsOrReadOptions
+   * The `DocumentReferences` to receive, followed by an optional field
    * mask.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
@@ -703,14 +706,12 @@ export class Firestore {
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
    */
-  getAll(
-      documentRef: DocumentReference,
-      ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+  getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
       Promise<DocumentSnapshot[]> {
     this._validator.minNumberOfArguments('Firestore.getAll', arguments, 1);
 
-    const {documents, fieldMask} = parseGetAllArguments(
-        this._validator, [documentRef, ...moreDocumentRefsOrReadOptions]);
+    const {documents, fieldMask} =
+        parseGetAllArguments(this._validator, documentRefsOrReadOptions);
     return this.getAll_(documents, fieldMask, requestTag());
   }
 

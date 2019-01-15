@@ -140,16 +140,18 @@ declare namespace FirebaseFirestore {
     /**
      * Retrieves multiple documents from Firestore.
      *
-     * @param documentRef A `DocumentReference` to receive.
-     * @param moreDocumentRefsOrReadOptions Additional `DocumentReferences` to
-     * receive, followed by an optional field mask.
+     * The first argument is required and must be of type `DocumentReference`
+     * followed by any additional `DocumentReference` documents. If used, the 
+     * optional `ReadOptions` must be the last argument.
+     * 
+     * @param {Array.<DocumentReference|ReadOptions>} documentRefsOrReadOptions
+     * The `DocumentReferences` to receive, followed by an optional field
+     * mask.
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll(
-        documentRef: DocumentReference,
-        ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>
-    ): Promise<DocumentSnapshot[]>;
+    getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>): 
+        Promise<DocumentSnapshot[]>;
 
     /**
      * Fetches the root collections that are associated with this Firestore
@@ -260,16 +262,18 @@ declare namespace FirebaseFirestore {
      * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
      * all returned documents.
      *
-     * @param documentRef A `DocumentReference` to receive.
-     * @param moreDocumentRefsOrReadOptions Additional `DocumentReferences` to
-     * receive, followed by an optional field mask.
+     * The first argument is required and must be of type `DocumentReference`
+     * followed by any additional `DocumentReference` documents. If used, the 
+     * optional `ReadOptions` must be the last argument.
+     * 
+     * @param {Array.<DocumentReference|ReadOptions>} documentRefsOrReadOptions
+     * The `DocumentReferences` to receive, followed by an optional field
+     * mask.
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll(
-        documentRef: DocumentReference,
-        ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>
-    ): Promise<DocumentSnapshot[]>;
+    getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>): 
+        Promise<DocumentSnapshot[]>;
 
     /**
      * Create the document referred to by the provided `DocumentReference`.
