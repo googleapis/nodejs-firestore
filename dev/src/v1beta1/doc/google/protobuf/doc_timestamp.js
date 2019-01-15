@@ -94,7 +94,9 @@
  * to this format using
  * [`strftime`](https://docs.python.org/2/library/time.html#time.strftime) with
  * the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one can use
- * the Joda Time's [`ISODateTimeFormat.dateTime()`](https://www.joda.org/joda-time/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime--) to obtain a formatter capable of generating timestamps in this format.
+ * the Joda Time's
+ * [`ISODateTimeFormat.dateTime()`](https://www.joda.org/joda-time/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime--)
+ * to obtain a formatter capable of generating timestamps in this format.
  *
  * @property {number} seconds
  *   Represents seconds of UTC time since Unix epoch
