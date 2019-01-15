@@ -49,7 +49,11 @@ export class Serializer {
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
     this.createReference = path => firestore.doc(path);
-    this.timestampsInSnapshots = !!firestore._settings.timestampsInSnapshots;
+    if (firestore._settings.timestampsInSnapshots === undefined) {
+      this.timestampsInSnapshots = true;
+    } else {
+      this.timestampsInSnapshots = firestore._settings.timestampsInSnapshots;
+    }
   }
 
   /**

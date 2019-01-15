@@ -32,8 +32,7 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 const DEFAULT_SETTINGS = {
   projectId: PROJECT_ID,
   sslCreds: grpc.credentials.createInsecure(),
-  keyFilename: __dirname + '/fake-certificate.json',
-  timestampsInSnapshots: true
+  keyFilename: __dirname + '/fake-certificate.json'
 };
 
 // Change the argument to 'console.log' to enable debug output.
@@ -264,7 +263,7 @@ describe('instantiation', () => {
 
   it('can only call settings() once', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
-    firestore.settings({timestampsInSnapshots: true});
+    firestore.settings({});
 
     expect(() => firestore.settings({}))
         .to.throw(
@@ -327,7 +326,6 @@ describe('instantiation', () => {
   it('detects project id', () => {
     const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
-      timestampsInSnapshots: true,
       keyFilename: __dirname + '/fake-certificate.json',
     });
 
@@ -346,7 +344,6 @@ describe('instantiation', () => {
   it('uses project id from gapic client', () => {
     const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
-      timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
     });
 
@@ -363,7 +360,6 @@ describe('instantiation', () => {
   it('uses project ID from settings()', () => {
     const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
-      timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
     });
 
@@ -376,7 +372,6 @@ describe('instantiation', () => {
   it('handles error from project ID detection', () => {
     const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
-      timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
     });
 
@@ -478,7 +473,6 @@ describe('snapshot_() method', () => {
     firestore = new Firestore.Firestore({
       projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
-      timestampsInSnapshots: true,
       keyFilename: './test/fake-certificate.json',
     });
   });

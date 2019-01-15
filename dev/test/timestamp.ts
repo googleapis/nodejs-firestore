@@ -49,16 +49,14 @@ const DOCUMENT_WITH_EMPTY_TIMESTAMP = document('documentId', 'moonLanding', {
 });
 
 describe('timestamps', () => {
-  it('returned when enabled', () => {
-    return createInstance(
-               {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
-        .then(firestore => {
-          const expected = new Firestore.Timestamp(-14182920, 123000123);
-          return firestore.doc('collectionId/documentId').get().then(res => {
-            expect(res.data()!['moonLanding'].isEqual(expected)).to.be.true;
-            expect(res.get('moonLanding')!.isEqual(expected)).to.be.true;
-          });
-        });
+  it('returned by default', () => {
+    return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
+      const expected = new Firestore.Timestamp(-14182920, 123000123);
+      return firestore.doc('collectionId/documentId').get().then(res => {
+        expect(res.data()!['moonLanding'].isEqual(expected)).to.be.true;
+        expect(res.get('moonLanding')!.isEqual(expected)).to.be.true;
+      });
+    });
   });
 
   it('converted to dates when disabled', () => {
@@ -79,50 +77,42 @@ describe('timestamps', () => {
   });
 
   it('retain seconds and nanoseconds', () => {
-    return createInstance(
-               {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
-        .then(firestore => {
-          return firestore.doc('collectionId/documentId').get().then(res => {
-            const timestamp = res.get('moonLanding');
-            expect(timestamp.seconds).to.equal(-14182920);
-            expect(timestamp.nanoseconds).to.equal(123000123);
-          });
-        });
+    return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(res => {
+        const timestamp = res.get('moonLanding');
+        expect(timestamp.seconds).to.equal(-14182920);
+        expect(timestamp.nanoseconds).to.equal(123000123);
+      });
+    });
   });
 
   it('convert to date', () => {
-    return createInstance(
-               {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
-        .then(firestore => {
-          return firestore.doc('collectionId/documentId').get().then(res => {
-            const timestamp = res.get('moonLanding');
-            expect(new Date(-14182920 * 1000 + 123).getTime())
-                .to.equal(timestamp.toDate().getTime());
-          });
-        });
+    return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(res => {
+        const timestamp = res.get('moonLanding');
+        expect(new Date(-14182920 * 1000 + 123).getTime())
+            .to.equal(timestamp.toDate().getTime());
+      });
+    });
   });
 
   it('convert to millis', () => {
-    return createInstance(
-               {timestampsInSnapshots: true}, DOCUMENT_WITH_TIMESTAMP)
-        .then(firestore => {
-          return firestore.doc('collectionId/documentId').get().then(res => {
-            const timestamp = res.get('moonLanding');
-            expect(-14182920 * 1000 + 123).to.equal(timestamp.toMillis());
-          });
-        });
+    return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
+      return firestore.doc('collectionId/documentId').get().then(res => {
+        const timestamp = res.get('moonLanding');
+        expect(-14182920 * 1000 + 123).to.equal(timestamp.toMillis());
+      });
+    });
   });
 
   it('support missing values', () => {
-    return createInstance(
-               {timestampsInSnapshots: true}, DOCUMENT_WITH_EMPTY_TIMESTAMP)
-        .then(firestore => {
-          const expected = new Firestore.Timestamp(0, 0);
+    return createInstance({}, DOCUMENT_WITH_EMPTY_TIMESTAMP).then(firestore => {
+      const expected = new Firestore.Timestamp(0, 0);
 
-          return firestore.doc('collectionId/documentId').get().then(res => {
-            expect(res.get('moonLanding').isEqual(expected)).to.be.true;
-          });
-        });
+      return firestore.doc('collectionId/documentId').get().then(res => {
+        expect(res.get('moonLanding').isEqual(expected)).to.be.true;
+      });
+    });
   });
 
   it('constructed using helper', () => {
