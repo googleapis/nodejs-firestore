@@ -87,7 +87,6 @@ export function createInstance(
       {
         projectId: PROJECT_ID,
         sslCreds: SSL_CREDENTIALS,
-        timestampsInSnapshots: true,
         keyFilename: __dirname + '/../fake-certificate.json',
       },
       firestoreSettings);

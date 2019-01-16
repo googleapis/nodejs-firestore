@@ -51,7 +51,7 @@ describe('Firestore class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -119,7 +119,7 @@ describe('CollectionReference class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -184,7 +184,7 @@ describe('DocumentReference class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -878,7 +878,7 @@ describe('Query class', () => {
   };
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -1373,7 +1373,7 @@ describe('Transaction class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -1546,7 +1546,7 @@ describe('WriteBatch class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -1640,7 +1640,7 @@ describe('QuerySnapshot class', () => {
   let querySnapshot;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
 
     const randomCol = getTestRoot(firestore);
     const ref1 = randomCol.doc('doc1');
