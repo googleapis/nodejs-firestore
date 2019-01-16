@@ -4,6 +4,45 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## v0.20.0
+
+01-16-2019 13:14 PST
+
+### Bug Fixes
+- refactor: change timestampsInSnapshots default to true.. ([#520](https://github.com/googleapis/nodejs-firestore/pull/520))
+- fix: getAll function signature to allow array destructuring ([#515](https://github.com/googleapis/nodejs-firestore/pull/515))
+- fix: update grpc retry config ([#464](https://github.com/googleapis/nodejs-firestore/pull/464))
+
+### New Features
+- feat: update to v1 protos ([#516](https://github.com/googleapis/nodejs-firestore/pull/516))
+- feat: add additional field transform types ([#521](https://github.com/googleapis/nodejs-firestore/pull/521))
+
+### Dependencies
+- fix(deps): update dependency google-gax to ^0.23.0 ([#518](https://github.com/googleapis/nodejs-firestore/pull/518))
+
+### Documentation
+- fix(docs): remove unused long running operations types
+- docs: elaborate on QuerySnapshot.forEach ([#480](https://github.com/googleapis/nodejs-firestore/pull/480))
+- docs: update doc writetime ([#475](https://github.com/googleapis/nodejs-firestore/pull/475))
+- docs: Fix example for writeTime ([#474](https://github.com/googleapis/nodejs-firestore/pull/474))
+- chore: update license file ([#473](https://github.com/googleapis/nodejs-firestore/pull/473))
+- docs: update readme badges ([#470](https://github.com/googleapis/nodejs-firestore/pull/470))
+
+### Internal / Testing Changes
+- build: check broken links in generated docs ([#511](https://github.com/googleapis/nodejs-firestore/pull/511))
+- chore(build): inject yoshi automation key ([#492](https://github.com/googleapis/nodejs-firestore/pull/492))
+- chore: update nyc and eslint configs ([#491](https://github.com/googleapis/nodejs-firestore/pull/491))
+- chore: fix publish.sh permission +x ([#489](https://github.com/googleapis/nodejs-firestore/pull/489))
+- fix(build): fix Kokoro release script ([#488](https://github.com/googleapis/nodejs-firestore/pull/488))
+- build: add Kokoro configs for autorelease ([#487](https://github.com/googleapis/nodejs-firestore/pull/487))
+- chore: add synth.metadata ([#485](https://github.com/googleapis/nodejs-firestore/pull/485))
+- chore: always nyc report before calling codecov ([#482](https://github.com/googleapis/nodejs-firestore/pull/482))
+- chore: nyc ignore build/test by default ([#479](https://github.com/googleapis/nodejs-firestore/pull/479))
+- chore(build): update the prettier config ([#476](https://github.com/googleapis/nodejs-firestore/pull/476))
+- chore(deps): update dependency typescript to ~3.2.0 ([#467](https://github.com/googleapis/nodejs-firestore/pull/467))
+- fix(build): fix system key decryption ([#468](https://github.com/googleapis/nodejs-firestore/pull/468))
+- Adding array-contains to error message ([#465](https://github.com/googleapis/nodejs-firestore/pull/465))
+
 ## v0.17.0
 
 ### Implementation Changes
