@@ -9,7 +9,7 @@ gapic = gcp.GAPICGenerator()
 
 # tasks has two product names, and a poorly named artman yaml
 library = gapic.node_library(
-    "firestore", "v1", config_path="/google/firestore/artman_firestore.yaml"
+    "firestore", "v1", config_path="/google/firestore/artman_firestore_v1.yaml"
 )
 
 # skip index, protos, package.json, and README.md
