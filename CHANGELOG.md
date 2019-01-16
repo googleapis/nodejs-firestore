@@ -8,8 +8,18 @@
 
 01-16-2019 13:14 PST
 
+#### BREAKING: The `timestampsInSnapshots` default has changed to true.
+The `timestampsInSnapshots` setting is now enabled by default so timestamp
+fields read from a `DocumentSnapshot` will be returned as `Timestamp` objects
+instead of `Date`. Any code expecting to receive a `Date` object must be
+updated.
+
+#### DEPRECATED: `Firestore.v1beta1` replaced by `Firestore.v1`
+If you are currently using `Firestore.v1beta1.FirestoreClient`, you must switch
+to `Firestore.v1.FirestoreClient`. No other changes should be required as the
+API is 100% identical.
+
 ### Bug Fixes
-- refactor: change timestampsInSnapshots default to true.. ([#520](https://github.com/googleapis/nodejs-firestore/pull/520))
 - fix: getAll function signature to allow array destructuring ([#515](https://github.com/googleapis/nodejs-firestore/pull/515))
 - fix: update grpc retry config ([#464](https://github.com/googleapis/nodejs-firestore/pull/464))
 
