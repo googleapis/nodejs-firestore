@@ -23,7 +23,7 @@ import * as Firestore from '../src';
 
 import {createInstance, InvalidApiUsage} from './util/helpers';
 
-import api = proto.google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 import {AnyDuringMigration} from '../src/types';
 import {FieldPath} from '../src';
 
@@ -177,7 +177,7 @@ function getAll(docs: string[], fieldMask?: string[]) {
 
 function query(transaction?) {
   const request = {
-    parent: DATABASE_ROOT,
+    parent: `${DATABASE_ROOT}/documents`,
     structuredQuery: {
       from: [
         {

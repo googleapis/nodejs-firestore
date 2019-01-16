@@ -24,7 +24,7 @@ import {AnyDuringMigration, AnyJs, DocumentData, Precondition as PublicPrecondit
 import {parseGetAllArguments} from './util';
 import {requestTag} from './util';
 
-import api = proto.google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 /*!
  * Error message for transactional reads that were executed after performing

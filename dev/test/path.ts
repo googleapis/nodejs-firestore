@@ -30,7 +30,7 @@ describe('ResourcePath', () => {
 
   it('has append() method', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)');
-    expect(path.formattedName).to.equal(DATABASE_ROOT);
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
     path = path.append('foo');
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
   });
@@ -39,13 +39,13 @@ describe('ResourcePath', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)', 'foo');
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
     path = path.parent()!;
-    expect(path.formattedName).to.equal(DATABASE_ROOT);
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
     expect(path.parent()).to.be.null;
   });
 
   it('parses strings', () => {
     let path = ResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
-    expect(path.formattedName).to.equal(DATABASE_ROOT);
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
     path =
         ResourcePath.fromSlashSeparatedString(`${DATABASE_ROOT}/documents/foo`);
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);

@@ -16,7 +16,7 @@
 
 import * as is from 'is';
 import {google} from '../protos/firestore_proto_api';
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 import {createValidator, customObjectError} from './validate';
 import {AnyDuringMigration} from './types';
@@ -343,15 +343,10 @@ export class ResourcePath extends Path<ResourcePath> {
    * @returns {string} The representation as expected by the API.
    */
   canonicalString(): string {
-    let components = [
-      'projects',
-      this.projectId,
-      'databases',
-      this.databaseId,
+    const components = [
+      'projects', this.projectId, 'databases', this.databaseId, 'documents',
+      ...this.segments
     ];
-    if (this.segments.length > 0) {
-      components = components.concat('documents', this.segments);
-    }
     return components.join('/');
   }
 

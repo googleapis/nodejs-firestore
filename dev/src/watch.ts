@@ -29,7 +29,7 @@ import {ResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {requestTag} from './util';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 import {GrpcError} from './types';
 
 /*!
