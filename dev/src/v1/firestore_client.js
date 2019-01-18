@@ -267,7 +267,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -373,7 +373,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -505,7 +505,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -576,7 +576,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -661,7 +661,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -719,7 +719,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -791,7 +791,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -844,7 +844,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -904,7 +904,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -956,7 +956,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -1024,7 +1024,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -1058,7 +1058,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -1095,7 +1095,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -1163,7 +1163,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
@@ -1258,7 +1258,7 @@ class FirestoreClient {
    *
    * @example
    *
-   * const firestore = require('firestore.v1');
+   * const firestore = require('@google-cloud/firestore');
    *
    * const client = new firestore.v1.FirestoreClient({
    *   // optional auth parameters.
