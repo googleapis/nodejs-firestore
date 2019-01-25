@@ -4,6 +4,23 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## v0.21.0
+
+01-25-2019 12:21 PST
+
+This release brings in google-gax update to 0.24.0 which had its dependency google-auth-library updated to 3.0.0^ that swaps out axios in favour of gaxios and addresses an issue using the library behind a proxy (https://github.com/googleapis/nodejs-firestore/issues/493).
+
+### Dependencies
+- chore(deps): update dependency ts-node to v8 ([#526](https://github.com/googleapis/nodejs-firestore/pull/526))
+- fix(deps): update dependency google-gax to ^0.24.0 ([#529](https://github.com/googleapis/nodejs-firestore/pull/529))
+
+### Documentation
+- build: ignore googleapis.com in doc link check ([#527](https://github.com/googleapis/nodejs-firestore/pull/527))
+- docs: fix import links in the jsdocs ([#524](https://github.com/googleapis/nodejs-firestore/pull/524))
+
+### Internal / Testing Changes
+- chore: update year in the license headers. ([#523](https://github.com/googleapis/nodejs-firestore/pull/523))
+
 ## v0.20.0
 
 01-16-2019 13:14 PST
