@@ -8,7 +8,7 @@
 [![npm version](https://img.shields.io/npm/v/@google-cloud/firestore.svg)](https://www.npmjs.org/package/@google-cloud/firestore)
 [![codecov](https://img.shields.io/codecov/c/github/googleapis/nodejs-firestore/master.svg?style=flat)](https://codecov.io/gh/googleapis/nodejs-firestore)
 
-This is the Node.js Server SDK for Google Cloud Firestore. Google Cloud Firestore is a NoSQL document database built for automatic scaling, high performance, and ease of application development.
+This is the Node.js Server SDK for [Google Cloud Firestore]({{doc_url}}). Google Cloud Firestore is a NoSQL document database built for automatic scaling, high performance, and ease of application development.
 
 This Cloud Firestore Server SDK uses Google’s Cloud Identity and Access Management for authentication and should only be used in trusted environments. Your Cloud Identity credentials allow you bypass all access restrictions and provide read and write access to all data in your Cloud Firestore project.
 
