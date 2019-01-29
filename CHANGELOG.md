@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## v1.0.1
+
+01-29-2019 14:02 PST
+
+# Documentation
+
+- doc: update README.md to show this library as GA ([#532](https://github.com/googleapis/nodejs-firestore/pull/532))
+- fix(samples): constructor doesn't need project or cred options ([#533](https://github.com/googleapis/nodejs-firestore/pull/533))
+
 ## v1.0.0
 
 01-29-2019 12:12 PST
