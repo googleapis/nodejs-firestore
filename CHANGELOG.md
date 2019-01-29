@@ -4,6 +4,12 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## v1.0.0
+
+01-29-2019 12:12 PST
+
+This is the Firestore Node.js Client Library GA release.
+
 ## v0.21.0
 
 01-25-2019 12:21 PST
