@@ -40,35 +40,32 @@ Applications that use Google&#x27;s Server SDKs should not be used in end-user e
 ```javascript
 const Firestore = require('@google-cloud/firestore');
 async function main() {
-    const firestore = new Firestore({
-      projectId: process.env.GCLOUD_PROJECT,
-      keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-    });
-    
+    const firestore = new Firestore();
+
     const document = firestore.doc('posts/intro-to-firestore');
     console.log('Document created');
-    
+
     // Enter new data into the document.
     await document.set({
       title: 'Welcome to Firestore',
       body: 'Hello World',
     });
     console.log('Entered new data into the document');
-    
+
     // Update an existing document.
     await document.update({
       body: 'My first Firestore app',
     });
     console.log('Updated an existing document');
-    
+
     // Read the document.
     let doc = await document.get();
     console.log('Read the document');
-    
+
     // Delete the document.
     await document.delete();
     console.log('Deleted the document');
-  
+
 };
 
 main().catch(console.error);
