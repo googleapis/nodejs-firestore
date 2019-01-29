@@ -2,7 +2,7 @@
 [//]: # "To regenerate it, use `npm run generate-scaffolding`."
 <img src="https://avatars2.githubusercontent.com/u/2810941?v=3&s=96" alt="Google Cloud Platform logo" title="Google Cloud Platform" align="right" height="96" width="96"/>
 
-# [Google Cloud Firestore: Node.js Client](https://github.com/googleapis/nodejs-firestore)
+# [Google Cloud Firestore: Node.js Server SDK](https://github.com/googleapis/nodejs-firestore)
 
 [![release level](https://img.shields.io/badge/release%20level-beta-yellow.svg?style&#x3D;flat)](https://cloud.google.com/terms/launch-stages)
 [![npm version](https://img.shields.io/npm/v/@google-cloud/firestore.svg)](https://www.npmjs.org/package/@google-cloud/firestore)
@@ -72,7 +72,7 @@ main().catch(console.error);
 ```
 
 
-The [Cloud Firestore Node.js Client API Reference][client-docs] documentation
+The [Cloud Firestore Node.js Server SDK API Reference][client-docs] documentation
 also contains samples.
 
 ## Versioning
@@ -101,7 +101,7 @@ See [LICENSE](https://github.com/googleapis/nodejs-firestore/blob/master/LICENSE
 ## What's Next
 
 * [Cloud Firestore Documentation][product-docs]
-* [Cloud Firestore Node.js Client API Reference][client-docs]
+* [Cloud Firestore Node.js Server SDK API Reference][client-docs]
 * [github.com/googleapis/nodejs-firestore](https://github.com/googleapis/nodejs-firestore)
 
 Read more about the client libraries for Cloud APIs, including the older
