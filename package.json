@@ -42,7 +42,9 @@
     "compile": "tsc -p . && cp -r dev/protos build && cp -r dev/test/fake-certificate.json build/test/fake-certificate.json && cp dev/src/v1beta1/firestore_client_config.json build/src/v1beta1/ && cp dev/src/v1/firestore_client_config.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
     "fix": "gts fix",
     "prepare": "npm run compile",
-    "pretest-only": "npm run compile"
+    "pretest-only": "npm run compile",
+    "docs-test": "blcl docs -r --exclude www.googleapis.com",
+    "predocs-test": "npm run docs"
   },
   "dependencies": {
     "@google-cloud/projectify": "^0.3.0",
@@ -81,6 +83,7 @@
     "proxyquire": "^2.0.1",
     "source-map-support": "^0.5.6",
     "ts-node": "^8.0.0",
-    "typescript": "~3.3.0"
+    "typescript": "~3.3.0",
+    "broken-link-checker-local": "^0.2.0"
   }
 }
