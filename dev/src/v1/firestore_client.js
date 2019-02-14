@@ -178,10 +178,14 @@ class FirestoreClient {
     ];
     for (const methodName of firestoreStubMethods) {
       this._innerApiCalls[methodName] = gax.createApiCall(
-          firestoreStub.then(stub => function() {
-            const args = Array.prototype.slice.call(arguments, 0);
-            return stub[methodName].apply(stub, args);
-          }),
+          firestoreStub.then(
+              stub => function() {
+                const args = Array.prototype.slice.call(arguments, 0);
+                return stub[methodName].apply(stub, args);
+              },
+              err => function() {
+                throw err;
+              }),
           defaults[methodName],
           this._descriptors.page[methodName] ||
               this._descriptors.stream[methodName]);
