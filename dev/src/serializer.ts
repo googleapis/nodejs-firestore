@@ -17,15 +17,15 @@
 
 import * as proto from '../protos/firestore_proto_api';
 
-import {FieldTransform} from './field-value';
 import {detectValueType} from './convert';
+import {FieldTransform} from './field-value';
 import {DeleteTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {FieldPath, ResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {isEmpty, isObject} from './util';
 import {ValidationOptions} from './types';
+import {isEmpty, isObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;

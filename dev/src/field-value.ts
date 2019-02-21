@@ -18,9 +18,9 @@ const deepEqual = require('deep-equal');
 
 import * as proto from '../protos/firestore_proto_api';
 
-import {validateMinNumberOfArguments} from './validate';
 import {FieldPath} from './path';
 import {Serializer, validateUserInput} from './serializer';
+import {validateMinNumberOfArguments} from './validate';
 
 import api = proto.google.firestore.v1;
 
