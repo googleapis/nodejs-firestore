@@ -599,7 +599,7 @@ function validatePrecondition(
     if (!allowExists) {
       throw new Error(`${
           invalidArgumentMessage(
-              arg, 'precondition')} "exists" is not an allowed condition.`);
+              arg, 'precondition')} "exists" is not an allowed precondition.`);
     }
     if (typeof precondition.exists !== 'boolean') {
       throw new Error(`${
@@ -621,7 +621,7 @@ function validatePrecondition(
   if (conditions > 1) {
     throw new Error(`${
         invalidArgumentMessage(
-            arg, 'precondition')} Input contains more than one condition.`);
+            arg, 'precondition')} Input contains more than one precondition.`);
   }
 }
 
