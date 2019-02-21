@@ -667,7 +667,7 @@ function validateDeletePrecondition(
  * @param value The object to validate.
  * @param options Optional validation options specifying whether the value can
  * be omitted.
- * @returns 'true' if the input is a valid SetOptions object.
+ * @throws if the input is not a valid SetOptions object.
  */
 export function validateSetOptions(
     arg: string|number, value: unknown, options?: OptionalProperty): void {
