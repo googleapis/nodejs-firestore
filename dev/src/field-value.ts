@@ -16,12 +16,13 @@
 
 const deepEqual = require('deep-equal');
 
-import {google} from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_proto_api';
+
+import {validateMinNumberOfArguments} from './validate';
 import {FieldPath} from './path';
 import {Serializer, validateUserInput} from './serializer';
-import {validateMinNumberOfArguments} from './validate';
 
-import api = google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 /**
  * Sentinel values that can be used when writing documents with set(), create()
@@ -189,6 +190,7 @@ export abstract class FieldTransform extends FieldValue {
 export class DeleteTransform extends FieldTransform {
   /**
    * Sentinel value for a field delete.
+   * @private
    */
   static DELETE_SENTINEL = new DeleteTransform();
 
@@ -198,6 +200,7 @@ export class DeleteTransform extends FieldTransform {
 
   /**
    * Deletes are included in document masks.
+   * @private
    */
   get includeInDocumentMask(): true {
     return true;
@@ -205,6 +208,7 @@ export class DeleteTransform extends FieldTransform {
 
   /**
    * Deletes are are omitted from document transforms.
+   * @private
    */
   get includeInDocumentTransform(): false {
     return false;
@@ -284,6 +288,7 @@ class ArrayUnionTransform extends FieldTransform {
 
   /**
    * Array transforms are omitted from document masks.
+   * @private
    */
   get includeInDocumentMask(): false {
     return false;
@@ -291,6 +296,7 @@ class ArrayUnionTransform extends FieldTransform {
 
   /**
    * Array transforms are included in document transforms.
+   * @private
    */
   get includeInDocumentTransform(): true {
     return true;
@@ -335,6 +341,7 @@ class ArrayRemoveTransform extends FieldTransform {
 
   /**
    * Array transforms are omitted from document masks.
+   * @private
    */
   get includeInDocumentMask(): false {
     return false;
@@ -342,6 +349,7 @@ class ArrayRemoveTransform extends FieldTransform {
 
   /**
    * Array transforms are included in document transforms.
+   * @private
    */
   get includeInDocumentTransform(): true {
     return true;

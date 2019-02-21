@@ -18,7 +18,7 @@ import {google} from '../protos/firestore_proto_api';
 import {Serializable} from './serializer';
 import {validateNumber} from './validate';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /**
  * An immutable object representing a geographic location in Firestore. The

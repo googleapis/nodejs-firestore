@@ -27,7 +27,7 @@ import {Timestamp} from './timestamp';
 import {ApiMapValue, DocumentData, UpdateMap} from './types';
 import {isEmpty, isObject} from './util';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -918,7 +918,10 @@ export class DocumentTransform {
     return Array.from(this._transforms.keys());
   }
 
-  /** Validates the user provided field values in this document transform. */
+  /**
+   * Validates the user provided field values in this document transform.
+   * @private
+   */
   validate(): void {
     this._transforms.forEach(transform => transform.validate());
   }

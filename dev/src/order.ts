@@ -19,7 +19,7 @@ import {detectValueType} from './convert';
 import {ResourcePath} from './path';
 import {ApiMapValue} from './types';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /*!
  * The type order as defined by the backend.

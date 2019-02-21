@@ -38,7 +38,7 @@ import {requestTag} from './util';
 import {validateBoolean, validateFunction, validateInteger, validateMinNumberOfArguments, validateObject, validateString,} from './validate';
 import {WriteBatch} from './write-batch';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 export {CollectionReference, DocumentReference, QuerySnapshot, Query} from './reference';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
@@ -68,8 +68,17 @@ setLibVersion(libVersion);
  */
 
 /**
+ * @namespace google.firestore.v1
+ */
+
+/**
  * @namespace google.firestore.v1beta1
  */
+
+/*!
+ * @see v1
+ */
+let v1;  // Lazy-loaded in `_runRequest()`
 
 /*!
  * @see v1beta1
@@ -265,19 +274,20 @@ export class Firestore {
    * support {@link https://cloud.google.com/docs/authentication Application
    * Default Credentials}. If your credentials are stored in a JSON file, you
    * can specify a `keyFilename` instead.
-   * @param {boolean=} settings.timestampsInSnapshots Enables the use of
-   * `Timestamp`s for timestamp fields in `DocumentSnapshots`.<br/>
-   * Currently, Firestore returns timestamp fields as `Date` but `Date` only
-   * supports millisecond precision, which leads to truncation and causes
-   * unexpected behavior when using a timestamp from a snapshot as a part
-   * of a subsequent query.
-   * <br/>Setting `timestampsInSnapshots` to true will cause Firestore to return
-   * `Timestamp` values instead of `Date` avoiding this kind of problem. To
-   * make this work you must also change any code that uses `Date` to use
-   * `Timestamp` instead.
-   * <br/>NOTE: in the future `timestampsInSnapshots: true` will become the
-   * default and this option will be removed so you should change your code to
-   * use `Timestamp` now and opt-in to this new behavior as soon as you can.
+   * @param {boolean=} settings.timestampsInSnapshots Specifies whether to use
+   * `Timestamp` objects for timestamp fields in `DocumentSnapshot`s. This is
+   * enabled by default and should not be disabled.
+   * <br/>Previously, Firestore returned timestamp fields as `Date` but `Date`
+   * only supports millisecond precision, which leads to truncation and causes
+   * unexpected behavior when using a timestamp from a snapshot as a part of a
+   * subsequent query.
+   * <br/>So now Firestore returns `Timestamp` values instead of `Date`,
+   * avoiding this kind of problem.
+   * <br/>To opt into the old behavior of returning `Date` objects, you can
+   * temporarily set `timestampsInSnapshots` to false.
+   * <br/>WARNING: This setting will be removed in a future release. You should
+   * update your code to expect `Timestamp` objects and stop using the
+   * `timestampsInSnapshots` setting.
    */
   constructor(settings?: Settings) {
     const libraryHeader = {
@@ -368,7 +378,11 @@ export class Firestore {
    * @private
    */
   get formattedName(): string {
-    return this._referencePath!.formattedName;
+    const components = [
+      'projects', this._referencePath!.projectId, 'databases',
+      this._referencePath!.databaseId
+    ];
+    return components.join('/');
   }
 
   /**
@@ -449,7 +463,7 @@ export class Firestore {
   /**
    * Creates a [DocumentSnapshot]{@link DocumentSnapshot} or a
    * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} from a
-   * `firestore.v1beta1.Document` proto (or from a resource name for missing
+   * `firestore.v1.Document` proto (or from a resource name for missing
    * documents).
    *
    * This API is used by Google Cloud Functions and can be called with both
@@ -660,9 +674,12 @@ export class Firestore {
   /**
    * Retrieves multiple documents from Firestore.
    *
-   * @param {DocumentReference} documentRef A `DocumentReference` to receive.
-   * @param {Array.<DocumentReference|ReadOptions>} moreDocumentRefsOrReadOptions
-   * Additional `DocumentReferences` to receive, followed by an optional field
+   * The first argument is required and must be of type `DocumentReference`
+   * followed by any additional `DocumentReference` documents. If used, the
+   * optional `ReadOptions` must be the last argument.
+   *
+   * @param {Array.<DocumentReference|ReadOptions>} documentRefsOrReadOptions
+   * The `DocumentReferences` to receive, followed by an optional field
    * mask.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
@@ -676,14 +693,12 @@ export class Firestore {
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
    */
-  getAll(
-      documentRef: DocumentReference,
-      ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+  getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
       Promise<DocumentSnapshot[]> {
     validateMinNumberOfArguments('Firestore.getAll', arguments, 1);
 
     const {documents, fieldMask} =
-        parseGetAllArguments([documentRef, ...moreDocumentRefsOrReadOptions]);
+        parseGetAllArguments(documentRefsOrReadOptions);
     return this.getAll_(documents, fieldMask, requestTag());
   }
 
@@ -792,20 +807,26 @@ export class Firestore {
   private _runRequest<T>(op: (client: GapicClient) => Promise<T>): Promise<T> {
     // Initialize the client pool if this is the first request.
     if (!this._clientInitialized) {
-      if (!this._settings.timestampsInSnapshots) {
+      // Nobody should set timestampsInSnapshots anymore, but the error depends
+      // on whether they set it to true or false...
+      if (this._settings.timestampsInSnapshots === true) {
         console.error(`
-The behavior for Date objects stored in Firestore is going to change
-AND YOUR APP MAY BREAK.
-To hide this warning and ensure your app does not break, you need to add the
-following code to your app before calling any other Cloud Firestore methods:
+  The timestampsInSnapshots setting now defaults to true and you no
+  longer need to explicitly set it. In a future release, the setting
+  will be removed entirely and so it is recommended that you remove it
+  from your firestore.settings() call now.`);
+      } else if (this._settings.timestampsInSnapshots === false) {
+        console.error(`
+  The timestampsInSnapshots setting will soon be removed. YOU MUST UPDATE
+  YOUR CODE.
 
-  const firestore = new Firestore();
-  const settings = {/* your settings... */ timestampsInSnapshots: true};
-  firestore.settings(settings);
+  To hide this warning, stop using the timestampsInSnapshots setting in your
+  firestore.settings({ ... }) call.
 
-With this change, timestamps stored in Cloud Firestore will be read back as
-Firebase Timestamp objects instead of as system Date objects. So you will also
-need to update code expecting a Date to instead expect a Timestamp. For example:
+  Once you remove the setting, Timestamps stored in Cloud Firestore will be
+  read back as Firebase Timestamp objects instead of as system Date objects.
+  So you will also need to update code expecting a Date to instead expect a
+  Timestamp. For example:
 
   // Old:
   const date = snapshot.get('created_at');
@@ -813,11 +834,9 @@ need to update code expecting a Date to instead expect a Timestamp. For example:
   const timestamp = snapshot.get('created_at');
   const date = timestamp.toDate();
 
-Please audit all existing usages of Date when you enable the new behavior. In a
-future release, the behavior will change to the new behavior, so if you do not
-follow these steps, YOUR APP MAY BREAK.`);
+  Please audit all existing usages of Date when you enable the new
+  behavior.`);
       }
-
       this._clientInitialized = this._initClientPool().then(clientPool => {
         this._clientPool = clientPool;
       });
@@ -837,7 +856,7 @@ follow these steps, YOUR APP MAY BREAK.`);
 
     const clientPool =
         new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
-          const client = new module.exports.v1beta1(this._settings);
+          const client = new module.exports.v1(this._settings);
           logger('Firestore', null, 'Initialized Firestore GAPIC Client');
           return client;
         });
@@ -1297,5 +1316,24 @@ Object.defineProperty(module.exports, 'v1beta1', {
       v1beta1 = require('./v1beta1');
     }
     return v1beta1;
+  },
+});
+
+/**
+ * {@link v1} factory function.
+ *
+ * @private
+ * @name Firestore.v1
+ * @see v1
+ * @type {function}
+ */
+Object.defineProperty(module.exports, 'v1', {
+  // The v1 module is very large. To avoid pulling it in from static
+  // scope, we lazy-load and cache the module.
+  get: () => {
+    if (!v1) {
+      v1 = require('./v1');
+    }
+    return v1;
   },
 });

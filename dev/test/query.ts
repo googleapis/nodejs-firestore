@@ -24,7 +24,7 @@ import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {ResourcePath} from '../src/path';
 import {createInstance, document, InvalidApiUsage, stream} from './util/helpers';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -230,7 +230,7 @@ function endAt(before: boolean, ...values: Array<string|api.IValue>):
 function queryEquals(
     actual: api.IRunQueryRequest, ...protoComponents: api.IStructuredQuery[]) {
   const query: api.IRunQueryRequest = {
-    parent: DATABASE_ROOT,
+    parent: DATABASE_ROOT + '/documents',
     structuredQuery: {
       from: [
         {

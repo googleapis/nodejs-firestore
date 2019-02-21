@@ -20,12 +20,14 @@ import {expect} from 'chai';
 import {GrpcClient} from 'google-gax';
 import * as through2 from 'through2';
 
-import {google} from '../../protos/firestore_proto_api';
+import * as proto from '../../protos/firestore_proto_api';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {GapicClient} from '../../src/types';
 
-import api = google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
+
+const v1 = require('../../src/v1');
 
 /* tslint:disable:no-any */
 const grpc = new GrpcClient({} as any).grpc;
@@ -87,7 +89,6 @@ export function createInstance(
       {
         projectId: PROJECT_ID,
         sslCreds: SSL_CREDENTIALS,
-        timestampsInSnapshots: true,
         keyFilename: __dirname + '/../fake-certificate.json',
       },
       firestoreSettings);
@@ -96,7 +97,7 @@ export function createInstance(
   firestore.settings(initializationOptions);
 
   const clientPool = new ClientPool(/* concurrentRequestLimit= */ 1, () => {
-    const gapicClient: GapicClient = new v1beta1(initializationOptions);
+    const gapicClient: GapicClient = new v1(initializationOptions);
     if (apiOverrides) {
       Object.keys(apiOverrides).forEach(override => {
         gapicClient._innerApiCalls[override] = apiOverrides[override];

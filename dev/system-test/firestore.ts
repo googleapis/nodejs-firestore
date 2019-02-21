@@ -51,7 +51,7 @@ describe('Firestore class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -77,6 +77,18 @@ describe('Firestore class', () => {
         });
   });
 
+  it('getAll() supports array destructuring', () => {
+    const ref1 = randomCol.doc('doc1');
+    const ref2 = randomCol.doc('doc2');
+    return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'a'})])
+        .then(() => {
+          return firestore.getAll(...[ref1, ref2]);
+        })
+        .then(docs => {
+          expect(docs.length).to.equal(2);
+        });
+  });
+
   it('getAll() supports field mask', () => {
     const ref1 = randomCol.doc('doc1');
     return ref1.set({foo: 'a', bar: 'b'})
@@ -87,6 +99,19 @@ describe('Firestore class', () => {
           expect(docs[0].data()).to.deep.equal({foo: 'a'});
         });
   });
+
+  it('getAll() supports array destructuring with field mask', () => {
+    const ref1 = randomCol.doc('doc1');
+    const ref2 = randomCol.doc('doc2');
+    return Promise.all([ref1.set({f: 'a', b: 'b'}), ref2.set({f: 'a', b: 'b'})])
+        .then(() => {
+          return firestore.getAll(...[ref1, ref2], {fieldMask: ['f']});
+        })
+        .then(docs => {
+          expect(docs[0].data()).to.deep.equal({f: 'a'});
+          expect(docs[1].data()).to.deep.equal({f: 'a'});
+        });
+  });
 });
 
 describe('CollectionReference class', () => {
@@ -94,7 +119,7 @@ describe('CollectionReference class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -159,7 +184,7 @@ describe('DocumentReference class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -853,7 +878,7 @@ describe('Query class', () => {
   };
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -1348,7 +1373,7 @@ describe('Transaction class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -1383,6 +1408,22 @@ describe('Transaction class', () => {
         });
   });
 
+  it('getAll() supports array destructuring', () => {
+    const ref1 = randomCol.doc('doc1');
+    const ref2 = randomCol.doc('doc2');
+    return Promise.all([ref1.set({}), ref2.set({})])
+        .then(() => {
+          return firestore.runTransaction(updateFunction => {
+            return updateFunction.getAll(...[ref1, ref2]).then(docs => {
+              return Promise.resolve(docs.length);
+            });
+          });
+        })
+        .then(res => {
+          expect(res).to.equal(2);
+        });
+  });
+
   it('getAll() supports field mask', () => {
     const ref1 = randomCol.doc('doc1');
     return ref1.set({foo: 'a', bar: 'b'}).then(() => {
@@ -1395,6 +1436,24 @@ describe('Transaction class', () => {
             expect(doc.data()).to.deep.equal({foo: 'a'});
           });
     });
+  });
+
+  it('getAll() supports array destructuring with field mask', () => {
+    const ref1 = randomCol.doc('doc1');
+    const ref2 = randomCol.doc('doc2');
+    return Promise.all([ref1.set({f: 'a', b: 'b'}), ref2.set({f: 'a', b: 'b'})])
+        .then(() => {
+          return firestore
+              .runTransaction(updateFunction => {
+                return updateFunction
+                    .getAll(...[ref1, ref2], {fieldMask: ['f']})
+                    .then((docs) => docs);
+              })
+              .then(docs => {
+                expect(docs[0].data()).to.deep.equal({f: 'a'});
+                expect(docs[1].data()).to.deep.equal({f: 'a'});
+              });
+        });
   });
 
   it('has get() with query', () => {
@@ -1487,7 +1546,7 @@ describe('WriteBatch class', () => {
   let randomCol;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
 
@@ -1581,7 +1640,7 @@ describe('QuerySnapshot class', () => {
   let querySnapshot;
 
   beforeEach(() => {
-    firestore = new Firestore({timestampsInSnapshots: true});
+    firestore = new Firestore({});
 
     const randomCol = getTestRoot(firestore);
     const ref1 = randomCol.doc('doc1');

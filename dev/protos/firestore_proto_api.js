@@ -22,31 +22,31 @@ $root.google = (function() {
          */
         var firestore = {};
 
-        firestore.v1beta1 = (function() {
+        firestore.v1 = (function() {
 
             /**
-             * Namespace v1beta1.
+             * Namespace v1.
              * @memberof google.firestore
              * @namespace
              */
-            var v1beta1 = {};
+            var v1 = {};
 
-            v1beta1.DocumentMask = (function() {
+            v1.DocumentMask = (function() {
 
                 /**
                  * Properties of a DocumentMask.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IDocumentMask
                  * @property {Array.<string>|null} [fieldPaths] DocumentMask fieldPaths
                  */
 
                 /**
                  * Constructs a new DocumentMask.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a DocumentMask.
                  * @implements IDocumentMask
                  * @constructor
-                 * @param {google.firestore.v1beta1.IDocumentMask=} [properties] Properties to set
+                 * @param {google.firestore.v1.IDocumentMask=} [properties] Properties to set
                  */
                 function DocumentMask(properties) {
                     this.fieldPaths = [];
@@ -59,7 +59,7 @@ $root.google = (function() {
                 /**
                  * DocumentMask fieldPaths.
                  * @member {Array.<string>} fieldPaths
-                 * @memberof google.firestore.v1beta1.DocumentMask
+                 * @memberof google.firestore.v1.DocumentMask
                  * @instance
                  */
                 DocumentMask.prototype.fieldPaths = $util.emptyArray;
@@ -67,11 +67,11 @@ $root.google = (function() {
                 return DocumentMask;
             })();
 
-            v1beta1.Precondition = (function() {
+            v1.Precondition = (function() {
 
                 /**
                  * Properties of a Precondition.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IPrecondition
                  * @property {boolean|null} [exists] Precondition exists
                  * @property {google.protobuf.ITimestamp|null} [updateTime] Precondition updateTime
@@ -79,11 +79,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new Precondition.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a Precondition.
                  * @implements IPrecondition
                  * @constructor
-                 * @param {google.firestore.v1beta1.IPrecondition=} [properties] Properties to set
+                 * @param {google.firestore.v1.IPrecondition=} [properties] Properties to set
                  */
                 function Precondition(properties) {
                     if (properties)
@@ -95,7 +95,7 @@ $root.google = (function() {
                 /**
                  * Precondition exists.
                  * @member {boolean} exists
-                 * @memberof google.firestore.v1beta1.Precondition
+                 * @memberof google.firestore.v1.Precondition
                  * @instance
                  */
                 Precondition.prototype.exists = false;
@@ -103,7 +103,7 @@ $root.google = (function() {
                 /**
                  * Precondition updateTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} updateTime
-                 * @memberof google.firestore.v1beta1.Precondition
+                 * @memberof google.firestore.v1.Precondition
                  * @instance
                  */
                 Precondition.prototype.updateTime = null;
@@ -114,7 +114,7 @@ $root.google = (function() {
                 /**
                  * Precondition conditionType.
                  * @member {"exists"|"updateTime"|undefined} conditionType
-                 * @memberof google.firestore.v1beta1.Precondition
+                 * @memberof google.firestore.v1.Precondition
                  * @instance
                  */
                 Object.defineProperty(Precondition.prototype, "conditionType", {
@@ -125,23 +125,23 @@ $root.google = (function() {
                 return Precondition;
             })();
 
-            v1beta1.TransactionOptions = (function() {
+            v1.TransactionOptions = (function() {
 
                 /**
                  * Properties of a TransactionOptions.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface ITransactionOptions
-                 * @property {google.firestore.v1beta1.TransactionOptions.IReadOnly|null} [readOnly] TransactionOptions readOnly
-                 * @property {google.firestore.v1beta1.TransactionOptions.IReadWrite|null} [readWrite] TransactionOptions readWrite
+                 * @property {google.firestore.v1.TransactionOptions.IReadOnly|null} [readOnly] TransactionOptions readOnly
+                 * @property {google.firestore.v1.TransactionOptions.IReadWrite|null} [readWrite] TransactionOptions readWrite
                  */
 
                 /**
                  * Constructs a new TransactionOptions.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a TransactionOptions.
                  * @implements ITransactionOptions
                  * @constructor
-                 * @param {google.firestore.v1beta1.ITransactionOptions=} [properties] Properties to set
+                 * @param {google.firestore.v1.ITransactionOptions=} [properties] Properties to set
                  */
                 function TransactionOptions(properties) {
                     if (properties)
@@ -152,16 +152,16 @@ $root.google = (function() {
 
                 /**
                  * TransactionOptions readOnly.
-                 * @member {google.firestore.v1beta1.TransactionOptions.IReadOnly|null|undefined} readOnly
-                 * @memberof google.firestore.v1beta1.TransactionOptions
+                 * @member {google.firestore.v1.TransactionOptions.IReadOnly|null|undefined} readOnly
+                 * @memberof google.firestore.v1.TransactionOptions
                  * @instance
                  */
                 TransactionOptions.prototype.readOnly = null;
 
                 /**
                  * TransactionOptions readWrite.
-                 * @member {google.firestore.v1beta1.TransactionOptions.IReadWrite|null|undefined} readWrite
-                 * @memberof google.firestore.v1beta1.TransactionOptions
+                 * @member {google.firestore.v1.TransactionOptions.IReadWrite|null|undefined} readWrite
+                 * @memberof google.firestore.v1.TransactionOptions
                  * @instance
                  */
                 TransactionOptions.prototype.readWrite = null;
@@ -172,7 +172,7 @@ $root.google = (function() {
                 /**
                  * TransactionOptions mode.
                  * @member {"readOnly"|"readWrite"|undefined} mode
-                 * @memberof google.firestore.v1beta1.TransactionOptions
+                 * @memberof google.firestore.v1.TransactionOptions
                  * @instance
                  */
                 Object.defineProperty(TransactionOptions.prototype, "mode", {
@@ -184,18 +184,18 @@ $root.google = (function() {
 
                     /**
                      * Properties of a ReadWrite.
-                     * @memberof google.firestore.v1beta1.TransactionOptions
+                     * @memberof google.firestore.v1.TransactionOptions
                      * @interface IReadWrite
                      * @property {Uint8Array|null} [retryTransaction] ReadWrite retryTransaction
                      */
 
                     /**
                      * Constructs a new ReadWrite.
-                     * @memberof google.firestore.v1beta1.TransactionOptions
+                     * @memberof google.firestore.v1.TransactionOptions
                      * @classdesc Represents a ReadWrite.
                      * @implements IReadWrite
                      * @constructor
-                     * @param {google.firestore.v1beta1.TransactionOptions.IReadWrite=} [properties] Properties to set
+                     * @param {google.firestore.v1.TransactionOptions.IReadWrite=} [properties] Properties to set
                      */
                     function ReadWrite(properties) {
                         if (properties)
@@ -207,7 +207,7 @@ $root.google = (function() {
                     /**
                      * ReadWrite retryTransaction.
                      * @member {Uint8Array} retryTransaction
-                     * @memberof google.firestore.v1beta1.TransactionOptions.ReadWrite
+                     * @memberof google.firestore.v1.TransactionOptions.ReadWrite
                      * @instance
                      */
                     ReadWrite.prototype.retryTransaction = $util.newBuffer([]);
@@ -219,18 +219,18 @@ $root.google = (function() {
 
                     /**
                      * Properties of a ReadOnly.
-                     * @memberof google.firestore.v1beta1.TransactionOptions
+                     * @memberof google.firestore.v1.TransactionOptions
                      * @interface IReadOnly
                      * @property {google.protobuf.ITimestamp|null} [readTime] ReadOnly readTime
                      */
 
                     /**
                      * Constructs a new ReadOnly.
-                     * @memberof google.firestore.v1beta1.TransactionOptions
+                     * @memberof google.firestore.v1.TransactionOptions
                      * @classdesc Represents a ReadOnly.
                      * @implements IReadOnly
                      * @constructor
-                     * @param {google.firestore.v1beta1.TransactionOptions.IReadOnly=} [properties] Properties to set
+                     * @param {google.firestore.v1.TransactionOptions.IReadOnly=} [properties] Properties to set
                      */
                     function ReadOnly(properties) {
                         if (properties)
@@ -242,7 +242,7 @@ $root.google = (function() {
                     /**
                      * ReadOnly readTime.
                      * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                     * @memberof google.firestore.v1beta1.TransactionOptions.ReadOnly
+                     * @memberof google.firestore.v1.TransactionOptions.ReadOnly
                      * @instance
                      */
                     ReadOnly.prototype.readTime = null;
@@ -253,7 +253,7 @@ $root.google = (function() {
                     /**
                      * ReadOnly consistencySelector.
                      * @member {"readTime"|undefined} consistencySelector
-                     * @memberof google.firestore.v1beta1.TransactionOptions.ReadOnly
+                     * @memberof google.firestore.v1.TransactionOptions.ReadOnly
                      * @instance
                      */
                     Object.defineProperty(ReadOnly.prototype, "consistencySelector", {
@@ -267,25 +267,25 @@ $root.google = (function() {
                 return TransactionOptions;
             })();
 
-            v1beta1.Document = (function() {
+            v1.Document = (function() {
 
                 /**
                  * Properties of a Document.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IDocument
                  * @property {string|null} [name] Document name
-                 * @property {Object.<string,google.firestore.v1beta1.IValue>|null} [fields] Document fields
+                 * @property {Object.<string,google.firestore.v1.IValue>|null} [fields] Document fields
                  * @property {google.protobuf.ITimestamp|null} [createTime] Document createTime
                  * @property {google.protobuf.ITimestamp|null} [updateTime] Document updateTime
                  */
 
                 /**
                  * Constructs a new Document.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a Document.
                  * @implements IDocument
                  * @constructor
-                 * @param {google.firestore.v1beta1.IDocument=} [properties] Properties to set
+                 * @param {google.firestore.v1.IDocument=} [properties] Properties to set
                  */
                 function Document(properties) {
                     this.fields = {};
@@ -298,15 +298,15 @@ $root.google = (function() {
                 /**
                  * Document name.
                  * @member {string} name
-                 * @memberof google.firestore.v1beta1.Document
+                 * @memberof google.firestore.v1.Document
                  * @instance
                  */
                 Document.prototype.name = "";
 
                 /**
                  * Document fields.
-                 * @member {Object.<string,google.firestore.v1beta1.IValue>} fields
-                 * @memberof google.firestore.v1beta1.Document
+                 * @member {Object.<string,google.firestore.v1.IValue>} fields
+                 * @memberof google.firestore.v1.Document
                  * @instance
                  */
                 Document.prototype.fields = $util.emptyObject;
@@ -314,7 +314,7 @@ $root.google = (function() {
                 /**
                  * Document createTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} createTime
-                 * @memberof google.firestore.v1beta1.Document
+                 * @memberof google.firestore.v1.Document
                  * @instance
                  */
                 Document.prototype.createTime = null;
@@ -322,7 +322,7 @@ $root.google = (function() {
                 /**
                  * Document updateTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} updateTime
-                 * @memberof google.firestore.v1beta1.Document
+                 * @memberof google.firestore.v1.Document
                  * @instance
                  */
                 Document.prototype.updateTime = null;
@@ -330,11 +330,11 @@ $root.google = (function() {
                 return Document;
             })();
 
-            v1beta1.Value = (function() {
+            v1.Value = (function() {
 
                 /**
                  * Properties of a Value.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IValue
                  * @property {google.protobuf.NullValue|null} [nullValue] Value nullValue
                  * @property {boolean|null} [booleanValue] Value booleanValue
@@ -345,17 +345,17 @@ $root.google = (function() {
                  * @property {Uint8Array|null} [bytesValue] Value bytesValue
                  * @property {string|null} [referenceValue] Value referenceValue
                  * @property {google.type.ILatLng|null} [geoPointValue] Value geoPointValue
-                 * @property {google.firestore.v1beta1.IArrayValue|null} [arrayValue] Value arrayValue
-                 * @property {google.firestore.v1beta1.IMapValue|null} [mapValue] Value mapValue
+                 * @property {google.firestore.v1.IArrayValue|null} [arrayValue] Value arrayValue
+                 * @property {google.firestore.v1.IMapValue|null} [mapValue] Value mapValue
                  */
 
                 /**
                  * Constructs a new Value.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a Value.
                  * @implements IValue
                  * @constructor
-                 * @param {google.firestore.v1beta1.IValue=} [properties] Properties to set
+                 * @param {google.firestore.v1.IValue=} [properties] Properties to set
                  */
                 function Value(properties) {
                     if (properties)
@@ -367,7 +367,7 @@ $root.google = (function() {
                 /**
                  * Value nullValue.
                  * @member {google.protobuf.NullValue} nullValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.nullValue = 0;
@@ -375,7 +375,7 @@ $root.google = (function() {
                 /**
                  * Value booleanValue.
                  * @member {boolean} booleanValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.booleanValue = false;
@@ -383,7 +383,7 @@ $root.google = (function() {
                 /**
                  * Value integerValue.
                  * @member {number} integerValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.integerValue = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
@@ -391,7 +391,7 @@ $root.google = (function() {
                 /**
                  * Value doubleValue.
                  * @member {number} doubleValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.doubleValue = 0;
@@ -399,7 +399,7 @@ $root.google = (function() {
                 /**
                  * Value timestampValue.
                  * @member {google.protobuf.ITimestamp|null|undefined} timestampValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.timestampValue = null;
@@ -407,7 +407,7 @@ $root.google = (function() {
                 /**
                  * Value stringValue.
                  * @member {string} stringValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.stringValue = "";
@@ -415,7 +415,7 @@ $root.google = (function() {
                 /**
                  * Value bytesValue.
                  * @member {Uint8Array} bytesValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.bytesValue = $util.newBuffer([]);
@@ -423,7 +423,7 @@ $root.google = (function() {
                 /**
                  * Value referenceValue.
                  * @member {string} referenceValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.referenceValue = "";
@@ -431,23 +431,23 @@ $root.google = (function() {
                 /**
                  * Value geoPointValue.
                  * @member {google.type.ILatLng|null|undefined} geoPointValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.geoPointValue = null;
 
                 /**
                  * Value arrayValue.
-                 * @member {google.firestore.v1beta1.IArrayValue|null|undefined} arrayValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @member {google.firestore.v1.IArrayValue|null|undefined} arrayValue
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.arrayValue = null;
 
                 /**
                  * Value mapValue.
-                 * @member {google.firestore.v1beta1.IMapValue|null|undefined} mapValue
-                 * @memberof google.firestore.v1beta1.Value
+                 * @member {google.firestore.v1.IMapValue|null|undefined} mapValue
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Value.prototype.mapValue = null;
@@ -458,7 +458,7 @@ $root.google = (function() {
                 /**
                  * Value valueType.
                  * @member {"nullValue"|"booleanValue"|"integerValue"|"doubleValue"|"timestampValue"|"stringValue"|"bytesValue"|"referenceValue"|"geoPointValue"|"arrayValue"|"mapValue"|undefined} valueType
-                 * @memberof google.firestore.v1beta1.Value
+                 * @memberof google.firestore.v1.Value
                  * @instance
                  */
                 Object.defineProperty(Value.prototype, "valueType", {
@@ -469,22 +469,22 @@ $root.google = (function() {
                 return Value;
             })();
 
-            v1beta1.ArrayValue = (function() {
+            v1.ArrayValue = (function() {
 
                 /**
                  * Properties of an ArrayValue.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IArrayValue
-                 * @property {Array.<google.firestore.v1beta1.IValue>|null} [values] ArrayValue values
+                 * @property {Array.<google.firestore.v1.IValue>|null} [values] ArrayValue values
                  */
 
                 /**
                  * Constructs a new ArrayValue.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents an ArrayValue.
                  * @implements IArrayValue
                  * @constructor
-                 * @param {google.firestore.v1beta1.IArrayValue=} [properties] Properties to set
+                 * @param {google.firestore.v1.IArrayValue=} [properties] Properties to set
                  */
                 function ArrayValue(properties) {
                     this.values = [];
@@ -496,8 +496,8 @@ $root.google = (function() {
 
                 /**
                  * ArrayValue values.
-                 * @member {Array.<google.firestore.v1beta1.IValue>} values
-                 * @memberof google.firestore.v1beta1.ArrayValue
+                 * @member {Array.<google.firestore.v1.IValue>} values
+                 * @memberof google.firestore.v1.ArrayValue
                  * @instance
                  */
                 ArrayValue.prototype.values = $util.emptyArray;
@@ -505,22 +505,22 @@ $root.google = (function() {
                 return ArrayValue;
             })();
 
-            v1beta1.MapValue = (function() {
+            v1.MapValue = (function() {
 
                 /**
                  * Properties of a MapValue.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IMapValue
-                 * @property {Object.<string,google.firestore.v1beta1.IValue>|null} [fields] MapValue fields
+                 * @property {Object.<string,google.firestore.v1.IValue>|null} [fields] MapValue fields
                  */
 
                 /**
                  * Constructs a new MapValue.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a MapValue.
                  * @implements IMapValue
                  * @constructor
-                 * @param {google.firestore.v1beta1.IMapValue=} [properties] Properties to set
+                 * @param {google.firestore.v1.IMapValue=} [properties] Properties to set
                  */
                 function MapValue(properties) {
                     this.fields = {};
@@ -532,8 +532,8 @@ $root.google = (function() {
 
                 /**
                  * MapValue fields.
-                 * @member {Object.<string,google.firestore.v1beta1.IValue>} fields
-                 * @memberof google.firestore.v1beta1.MapValue
+                 * @member {Object.<string,google.firestore.v1.IValue>} fields
+                 * @memberof google.firestore.v1.MapValue
                  * @instance
                  */
                 MapValue.prototype.fields = $util.emptyObject;
@@ -541,11 +541,11 @@ $root.google = (function() {
                 return MapValue;
             })();
 
-            v1beta1.Firestore = (function() {
+            v1.Firestore = (function() {
 
                 /**
                  * Constructs a new Firestore service.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a Firestore
                  * @extends $protobuf.rpc.Service
                  * @constructor
@@ -560,140 +560,140 @@ $root.google = (function() {
                 (Firestore.prototype = Object.create($protobuf.rpc.Service.prototype)).constructor = Firestore;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#getDocument}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#getDocument}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef GetDocumentCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.Document} [response] Document
+                 * @param {google.firestore.v1.Document} [response] Document
                  */
 
                 /**
                  * Calls GetDocument.
                  * @function getDocument
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IGetDocumentRequest} request GetDocumentRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.GetDocumentCallback} callback Node-style callback called with the error, if any, and Document
+                 * @param {google.firestore.v1.IGetDocumentRequest} request GetDocumentRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.GetDocumentCallback} callback Node-style callback called with the error, if any, and Document
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.getDocument = function getDocument(request, callback) {
-                    return this.rpcCall(getDocument, $root.google.firestore.v1beta1.GetDocumentRequest, $root.google.firestore.v1beta1.Document, request, callback);
+                    return this.rpcCall(getDocument, $root.google.firestore.v1.GetDocumentRequest, $root.google.firestore.v1.Document, request, callback);
                 }, "name", { value: "GetDocument" });
 
                 /**
                  * Calls GetDocument.
                  * @function getDocument
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IGetDocumentRequest} request GetDocumentRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.Document>} Promise
+                 * @param {google.firestore.v1.IGetDocumentRequest} request GetDocumentRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.Document>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#listDocuments}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#listDocuments}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef ListDocumentsCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.ListDocumentsResponse} [response] ListDocumentsResponse
+                 * @param {google.firestore.v1.ListDocumentsResponse} [response] ListDocumentsResponse
                  */
 
                 /**
                  * Calls ListDocuments.
                  * @function listDocuments
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IListDocumentsRequest} request ListDocumentsRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.ListDocumentsCallback} callback Node-style callback called with the error, if any, and ListDocumentsResponse
+                 * @param {google.firestore.v1.IListDocumentsRequest} request ListDocumentsRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.ListDocumentsCallback} callback Node-style callback called with the error, if any, and ListDocumentsResponse
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.listDocuments = function listDocuments(request, callback) {
-                    return this.rpcCall(listDocuments, $root.google.firestore.v1beta1.ListDocumentsRequest, $root.google.firestore.v1beta1.ListDocumentsResponse, request, callback);
+                    return this.rpcCall(listDocuments, $root.google.firestore.v1.ListDocumentsRequest, $root.google.firestore.v1.ListDocumentsResponse, request, callback);
                 }, "name", { value: "ListDocuments" });
 
                 /**
                  * Calls ListDocuments.
                  * @function listDocuments
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IListDocumentsRequest} request ListDocumentsRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.ListDocumentsResponse>} Promise
+                 * @param {google.firestore.v1.IListDocumentsRequest} request ListDocumentsRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.ListDocumentsResponse>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#createDocument}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef CreateDocumentCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.Document} [response] Document
+                 * @param {google.firestore.v1.Document} [response] Document
                  */
 
                 /**
                  * Calls CreateDocument.
                  * @function createDocument
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.CreateDocumentCallback} callback Node-style callback called with the error, if any, and Document
+                 * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.CreateDocumentCallback} callback Node-style callback called with the error, if any, and Document
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.createDocument = function createDocument(request, callback) {
-                    return this.rpcCall(createDocument, $root.google.firestore.v1beta1.CreateDocumentRequest, $root.google.firestore.v1beta1.Document, request, callback);
+                    return this.rpcCall(createDocument, $root.google.firestore.v1.CreateDocumentRequest, $root.google.firestore.v1.Document, request, callback);
                 }, "name", { value: "CreateDocument" });
 
                 /**
                  * Calls CreateDocument.
                  * @function createDocument
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.Document>} Promise
+                 * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.Document>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#updateDocument}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#updateDocument}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef UpdateDocumentCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.Document} [response] Document
+                 * @param {google.firestore.v1.Document} [response] Document
                  */
 
                 /**
                  * Calls UpdateDocument.
                  * @function updateDocument
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IUpdateDocumentRequest} request UpdateDocumentRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.UpdateDocumentCallback} callback Node-style callback called with the error, if any, and Document
+                 * @param {google.firestore.v1.IUpdateDocumentRequest} request UpdateDocumentRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.UpdateDocumentCallback} callback Node-style callback called with the error, if any, and Document
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.updateDocument = function updateDocument(request, callback) {
-                    return this.rpcCall(updateDocument, $root.google.firestore.v1beta1.UpdateDocumentRequest, $root.google.firestore.v1beta1.Document, request, callback);
+                    return this.rpcCall(updateDocument, $root.google.firestore.v1.UpdateDocumentRequest, $root.google.firestore.v1.Document, request, callback);
                 }, "name", { value: "UpdateDocument" });
 
                 /**
                  * Calls UpdateDocument.
                  * @function updateDocument
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IUpdateDocumentRequest} request UpdateDocumentRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.Document>} Promise
+                 * @param {google.firestore.v1.IUpdateDocumentRequest} request UpdateDocumentRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.Document>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#deleteDocument}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#deleteDocument}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef DeleteDocumentCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
@@ -703,129 +703,129 @@ $root.google = (function() {
                 /**
                  * Calls DeleteDocument.
                  * @function deleteDocument
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IDeleteDocumentRequest} request DeleteDocumentRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.DeleteDocumentCallback} callback Node-style callback called with the error, if any, and Empty
+                 * @param {google.firestore.v1.IDeleteDocumentRequest} request DeleteDocumentRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.DeleteDocumentCallback} callback Node-style callback called with the error, if any, and Empty
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.deleteDocument = function deleteDocument(request, callback) {
-                    return this.rpcCall(deleteDocument, $root.google.firestore.v1beta1.DeleteDocumentRequest, $root.google.protobuf.Empty, request, callback);
+                    return this.rpcCall(deleteDocument, $root.google.firestore.v1.DeleteDocumentRequest, $root.google.protobuf.Empty, request, callback);
                 }, "name", { value: "DeleteDocument" });
 
                 /**
                  * Calls DeleteDocument.
                  * @function deleteDocument
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IDeleteDocumentRequest} request DeleteDocumentRequest message or plain object
+                 * @param {google.firestore.v1.IDeleteDocumentRequest} request DeleteDocumentRequest message or plain object
                  * @returns {Promise<google.protobuf.Empty>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#batchGetDocuments}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#batchGetDocuments}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef BatchGetDocumentsCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.BatchGetDocumentsResponse} [response] BatchGetDocumentsResponse
+                 * @param {google.firestore.v1.BatchGetDocumentsResponse} [response] BatchGetDocumentsResponse
                  */
 
                 /**
                  * Calls BatchGetDocuments.
                  * @function batchGetDocuments
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IBatchGetDocumentsRequest} request BatchGetDocumentsRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.BatchGetDocumentsCallback} callback Node-style callback called with the error, if any, and BatchGetDocumentsResponse
+                 * @param {google.firestore.v1.IBatchGetDocumentsRequest} request BatchGetDocumentsRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.BatchGetDocumentsCallback} callback Node-style callback called with the error, if any, and BatchGetDocumentsResponse
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.batchGetDocuments = function batchGetDocuments(request, callback) {
-                    return this.rpcCall(batchGetDocuments, $root.google.firestore.v1beta1.BatchGetDocumentsRequest, $root.google.firestore.v1beta1.BatchGetDocumentsResponse, request, callback);
+                    return this.rpcCall(batchGetDocuments, $root.google.firestore.v1.BatchGetDocumentsRequest, $root.google.firestore.v1.BatchGetDocumentsResponse, request, callback);
                 }, "name", { value: "BatchGetDocuments" });
 
                 /**
                  * Calls BatchGetDocuments.
                  * @function batchGetDocuments
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IBatchGetDocumentsRequest} request BatchGetDocumentsRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.BatchGetDocumentsResponse>} Promise
+                 * @param {google.firestore.v1.IBatchGetDocumentsRequest} request BatchGetDocumentsRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.BatchGetDocumentsResponse>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#beginTransaction}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#beginTransaction}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef BeginTransactionCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.BeginTransactionResponse} [response] BeginTransactionResponse
+                 * @param {google.firestore.v1.BeginTransactionResponse} [response] BeginTransactionResponse
                  */
 
                 /**
                  * Calls BeginTransaction.
                  * @function beginTransaction
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IBeginTransactionRequest} request BeginTransactionRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.BeginTransactionCallback} callback Node-style callback called with the error, if any, and BeginTransactionResponse
+                 * @param {google.firestore.v1.IBeginTransactionRequest} request BeginTransactionRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.BeginTransactionCallback} callback Node-style callback called with the error, if any, and BeginTransactionResponse
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.beginTransaction = function beginTransaction(request, callback) {
-                    return this.rpcCall(beginTransaction, $root.google.firestore.v1beta1.BeginTransactionRequest, $root.google.firestore.v1beta1.BeginTransactionResponse, request, callback);
+                    return this.rpcCall(beginTransaction, $root.google.firestore.v1.BeginTransactionRequest, $root.google.firestore.v1.BeginTransactionResponse, request, callback);
                 }, "name", { value: "BeginTransaction" });
 
                 /**
                  * Calls BeginTransaction.
                  * @function beginTransaction
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IBeginTransactionRequest} request BeginTransactionRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.BeginTransactionResponse>} Promise
+                 * @param {google.firestore.v1.IBeginTransactionRequest} request BeginTransactionRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.BeginTransactionResponse>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#commit}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#commit}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef CommitCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.CommitResponse} [response] CommitResponse
+                 * @param {google.firestore.v1.CommitResponse} [response] CommitResponse
                  */
 
                 /**
                  * Calls Commit.
                  * @function commit
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.ICommitRequest} request CommitRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.CommitCallback} callback Node-style callback called with the error, if any, and CommitResponse
+                 * @param {google.firestore.v1.ICommitRequest} request CommitRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.CommitCallback} callback Node-style callback called with the error, if any, and CommitResponse
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.commit = function commit(request, callback) {
-                    return this.rpcCall(commit, $root.google.firestore.v1beta1.CommitRequest, $root.google.firestore.v1beta1.CommitResponse, request, callback);
+                    return this.rpcCall(commit, $root.google.firestore.v1.CommitRequest, $root.google.firestore.v1.CommitResponse, request, callback);
                 }, "name", { value: "Commit" });
 
                 /**
                  * Calls Commit.
                  * @function commit
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.ICommitRequest} request CommitRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.CommitResponse>} Promise
+                 * @param {google.firestore.v1.ICommitRequest} request CommitRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.CommitResponse>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#rollback}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#rollback}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef RollbackCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
@@ -835,181 +835,181 @@ $root.google = (function() {
                 /**
                  * Calls Rollback.
                  * @function rollback
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IRollbackRequest} request RollbackRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.RollbackCallback} callback Node-style callback called with the error, if any, and Empty
+                 * @param {google.firestore.v1.IRollbackRequest} request RollbackRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.RollbackCallback} callback Node-style callback called with the error, if any, and Empty
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.rollback = function rollback(request, callback) {
-                    return this.rpcCall(rollback, $root.google.firestore.v1beta1.RollbackRequest, $root.google.protobuf.Empty, request, callback);
+                    return this.rpcCall(rollback, $root.google.firestore.v1.RollbackRequest, $root.google.protobuf.Empty, request, callback);
                 }, "name", { value: "Rollback" });
 
                 /**
                  * Calls Rollback.
                  * @function rollback
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IRollbackRequest} request RollbackRequest message or plain object
+                 * @param {google.firestore.v1.IRollbackRequest} request RollbackRequest message or plain object
                  * @returns {Promise<google.protobuf.Empty>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#runQuery}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#runQuery}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef RunQueryCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.RunQueryResponse} [response] RunQueryResponse
+                 * @param {google.firestore.v1.RunQueryResponse} [response] RunQueryResponse
                  */
 
                 /**
                  * Calls RunQuery.
                  * @function runQuery
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IRunQueryRequest} request RunQueryRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.RunQueryCallback} callback Node-style callback called with the error, if any, and RunQueryResponse
+                 * @param {google.firestore.v1.IRunQueryRequest} request RunQueryRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.RunQueryCallback} callback Node-style callback called with the error, if any, and RunQueryResponse
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.runQuery = function runQuery(request, callback) {
-                    return this.rpcCall(runQuery, $root.google.firestore.v1beta1.RunQueryRequest, $root.google.firestore.v1beta1.RunQueryResponse, request, callback);
+                    return this.rpcCall(runQuery, $root.google.firestore.v1.RunQueryRequest, $root.google.firestore.v1.RunQueryResponse, request, callback);
                 }, "name", { value: "RunQuery" });
 
                 /**
                  * Calls RunQuery.
                  * @function runQuery
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IRunQueryRequest} request RunQueryRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.RunQueryResponse>} Promise
+                 * @param {google.firestore.v1.IRunQueryRequest} request RunQueryRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.RunQueryResponse>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#write}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#write}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef WriteCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.WriteResponse} [response] WriteResponse
+                 * @param {google.firestore.v1.WriteResponse} [response] WriteResponse
                  */
 
                 /**
                  * Calls Write.
                  * @function write
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IWriteRequest} request WriteRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.WriteCallback} callback Node-style callback called with the error, if any, and WriteResponse
+                 * @param {google.firestore.v1.IWriteRequest} request WriteRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.WriteCallback} callback Node-style callback called with the error, if any, and WriteResponse
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.write = function write(request, callback) {
-                    return this.rpcCall(write, $root.google.firestore.v1beta1.WriteRequest, $root.google.firestore.v1beta1.WriteResponse, request, callback);
+                    return this.rpcCall(write, $root.google.firestore.v1.WriteRequest, $root.google.firestore.v1.WriteResponse, request, callback);
                 }, "name", { value: "Write" });
 
                 /**
                  * Calls Write.
                  * @function write
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IWriteRequest} request WriteRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.WriteResponse>} Promise
+                 * @param {google.firestore.v1.IWriteRequest} request WriteRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.WriteResponse>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#listen}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#listen}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef ListenCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.ListenResponse} [response] ListenResponse
+                 * @param {google.firestore.v1.ListenResponse} [response] ListenResponse
                  */
 
                 /**
                  * Calls Listen.
                  * @function listen
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IListenRequest} request ListenRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.ListenCallback} callback Node-style callback called with the error, if any, and ListenResponse
+                 * @param {google.firestore.v1.IListenRequest} request ListenRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.ListenCallback} callback Node-style callback called with the error, if any, and ListenResponse
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.listen = function listen(request, callback) {
-                    return this.rpcCall(listen, $root.google.firestore.v1beta1.ListenRequest, $root.google.firestore.v1beta1.ListenResponse, request, callback);
+                    return this.rpcCall(listen, $root.google.firestore.v1.ListenRequest, $root.google.firestore.v1.ListenResponse, request, callback);
                 }, "name", { value: "Listen" });
 
                 /**
                  * Calls Listen.
                  * @function listen
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IListenRequest} request ListenRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.ListenResponse>} Promise
+                 * @param {google.firestore.v1.IListenRequest} request ListenRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.ListenResponse>} Promise
                  * @variation 2
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#listCollectionIds}.
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * Callback as used by {@link google.firestore.v1.Firestore#listCollectionIds}.
+                 * @memberof google.firestore.v1.Firestore
                  * @typedef ListCollectionIdsCallback
                  * @type {function}
                  * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1beta1.ListCollectionIdsResponse} [response] ListCollectionIdsResponse
+                 * @param {google.firestore.v1.ListCollectionIdsResponse} [response] ListCollectionIdsResponse
                  */
 
                 /**
                  * Calls ListCollectionIds.
                  * @function listCollectionIds
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IListCollectionIdsRequest} request ListCollectionIdsRequest message or plain object
-                 * @param {google.firestore.v1beta1.Firestore.ListCollectionIdsCallback} callback Node-style callback called with the error, if any, and ListCollectionIdsResponse
+                 * @param {google.firestore.v1.IListCollectionIdsRequest} request ListCollectionIdsRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.ListCollectionIdsCallback} callback Node-style callback called with the error, if any, and ListCollectionIdsResponse
                  * @returns {undefined}
                  * @variation 1
                  */
                 Object.defineProperty(Firestore.prototype.listCollectionIds = function listCollectionIds(request, callback) {
-                    return this.rpcCall(listCollectionIds, $root.google.firestore.v1beta1.ListCollectionIdsRequest, $root.google.firestore.v1beta1.ListCollectionIdsResponse, request, callback);
+                    return this.rpcCall(listCollectionIds, $root.google.firestore.v1.ListCollectionIdsRequest, $root.google.firestore.v1.ListCollectionIdsResponse, request, callback);
                 }, "name", { value: "ListCollectionIds" });
 
                 /**
                  * Calls ListCollectionIds.
                  * @function listCollectionIds
-                 * @memberof google.firestore.v1beta1.Firestore
+                 * @memberof google.firestore.v1.Firestore
                  * @instance
-                 * @param {google.firestore.v1beta1.IListCollectionIdsRequest} request ListCollectionIdsRequest message or plain object
-                 * @returns {Promise<google.firestore.v1beta1.ListCollectionIdsResponse>} Promise
+                 * @param {google.firestore.v1.IListCollectionIdsRequest} request ListCollectionIdsRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.ListCollectionIdsResponse>} Promise
                  * @variation 2
                  */
 
                 return Firestore;
             })();
 
-            v1beta1.GetDocumentRequest = (function() {
+            v1.GetDocumentRequest = (function() {
 
                 /**
                  * Properties of a GetDocumentRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IGetDocumentRequest
                  * @property {string|null} [name] GetDocumentRequest name
-                 * @property {google.firestore.v1beta1.IDocumentMask|null} [mask] GetDocumentRequest mask
+                 * @property {google.firestore.v1.IDocumentMask|null} [mask] GetDocumentRequest mask
                  * @property {Uint8Array|null} [transaction] GetDocumentRequest transaction
                  * @property {google.protobuf.ITimestamp|null} [readTime] GetDocumentRequest readTime
                  */
 
                 /**
                  * Constructs a new GetDocumentRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a GetDocumentRequest.
                  * @implements IGetDocumentRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IGetDocumentRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IGetDocumentRequest=} [properties] Properties to set
                  */
                 function GetDocumentRequest(properties) {
                     if (properties)
@@ -1021,15 +1021,15 @@ $root.google = (function() {
                 /**
                  * GetDocumentRequest name.
                  * @member {string} name
-                 * @memberof google.firestore.v1beta1.GetDocumentRequest
+                 * @memberof google.firestore.v1.GetDocumentRequest
                  * @instance
                  */
                 GetDocumentRequest.prototype.name = "";
 
                 /**
                  * GetDocumentRequest mask.
-                 * @member {google.firestore.v1beta1.IDocumentMask|null|undefined} mask
-                 * @memberof google.firestore.v1beta1.GetDocumentRequest
+                 * @member {google.firestore.v1.IDocumentMask|null|undefined} mask
+                 * @memberof google.firestore.v1.GetDocumentRequest
                  * @instance
                  */
                 GetDocumentRequest.prototype.mask = null;
@@ -1037,7 +1037,7 @@ $root.google = (function() {
                 /**
                  * GetDocumentRequest transaction.
                  * @member {Uint8Array} transaction
-                 * @memberof google.firestore.v1beta1.GetDocumentRequest
+                 * @memberof google.firestore.v1.GetDocumentRequest
                  * @instance
                  */
                 GetDocumentRequest.prototype.transaction = $util.newBuffer([]);
@@ -1045,7 +1045,7 @@ $root.google = (function() {
                 /**
                  * GetDocumentRequest readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.GetDocumentRequest
+                 * @memberof google.firestore.v1.GetDocumentRequest
                  * @instance
                  */
                 GetDocumentRequest.prototype.readTime = null;
@@ -1056,7 +1056,7 @@ $root.google = (function() {
                 /**
                  * GetDocumentRequest consistencySelector.
                  * @member {"transaction"|"readTime"|undefined} consistencySelector
-                 * @memberof google.firestore.v1beta1.GetDocumentRequest
+                 * @memberof google.firestore.v1.GetDocumentRequest
                  * @instance
                  */
                 Object.defineProperty(GetDocumentRequest.prototype, "consistencySelector", {
@@ -1067,18 +1067,18 @@ $root.google = (function() {
                 return GetDocumentRequest;
             })();
 
-            v1beta1.ListDocumentsRequest = (function() {
+            v1.ListDocumentsRequest = (function() {
 
                 /**
                  * Properties of a ListDocumentsRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IListDocumentsRequest
                  * @property {string|null} [parent] ListDocumentsRequest parent
                  * @property {string|null} [collectionId] ListDocumentsRequest collectionId
                  * @property {number|null} [pageSize] ListDocumentsRequest pageSize
                  * @property {string|null} [pageToken] ListDocumentsRequest pageToken
                  * @property {string|null} [orderBy] ListDocumentsRequest orderBy
-                 * @property {google.firestore.v1beta1.IDocumentMask|null} [mask] ListDocumentsRequest mask
+                 * @property {google.firestore.v1.IDocumentMask|null} [mask] ListDocumentsRequest mask
                  * @property {Uint8Array|null} [transaction] ListDocumentsRequest transaction
                  * @property {google.protobuf.ITimestamp|null} [readTime] ListDocumentsRequest readTime
                  * @property {boolean|null} [showMissing] ListDocumentsRequest showMissing
@@ -1086,11 +1086,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new ListDocumentsRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a ListDocumentsRequest.
                  * @implements IListDocumentsRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IListDocumentsRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IListDocumentsRequest=} [properties] Properties to set
                  */
                 function ListDocumentsRequest(properties) {
                     if (properties)
@@ -1102,7 +1102,7 @@ $root.google = (function() {
                 /**
                  * ListDocumentsRequest parent.
                  * @member {string} parent
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 ListDocumentsRequest.prototype.parent = "";
@@ -1110,7 +1110,7 @@ $root.google = (function() {
                 /**
                  * ListDocumentsRequest collectionId.
                  * @member {string} collectionId
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 ListDocumentsRequest.prototype.collectionId = "";
@@ -1118,7 +1118,7 @@ $root.google = (function() {
                 /**
                  * ListDocumentsRequest pageSize.
                  * @member {number} pageSize
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 ListDocumentsRequest.prototype.pageSize = 0;
@@ -1126,7 +1126,7 @@ $root.google = (function() {
                 /**
                  * ListDocumentsRequest pageToken.
                  * @member {string} pageToken
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 ListDocumentsRequest.prototype.pageToken = "";
@@ -1134,15 +1134,15 @@ $root.google = (function() {
                 /**
                  * ListDocumentsRequest orderBy.
                  * @member {string} orderBy
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 ListDocumentsRequest.prototype.orderBy = "";
 
                 /**
                  * ListDocumentsRequest mask.
-                 * @member {google.firestore.v1beta1.IDocumentMask|null|undefined} mask
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @member {google.firestore.v1.IDocumentMask|null|undefined} mask
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 ListDocumentsRequest.prototype.mask = null;
@@ -1150,7 +1150,7 @@ $root.google = (function() {
                 /**
                  * ListDocumentsRequest transaction.
                  * @member {Uint8Array} transaction
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 ListDocumentsRequest.prototype.transaction = $util.newBuffer([]);
@@ -1158,7 +1158,7 @@ $root.google = (function() {
                 /**
                  * ListDocumentsRequest readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 ListDocumentsRequest.prototype.readTime = null;
@@ -1166,7 +1166,7 @@ $root.google = (function() {
                 /**
                  * ListDocumentsRequest showMissing.
                  * @member {boolean} showMissing
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 ListDocumentsRequest.prototype.showMissing = false;
@@ -1177,7 +1177,7 @@ $root.google = (function() {
                 /**
                  * ListDocumentsRequest consistencySelector.
                  * @member {"transaction"|"readTime"|undefined} consistencySelector
-                 * @memberof google.firestore.v1beta1.ListDocumentsRequest
+                 * @memberof google.firestore.v1.ListDocumentsRequest
                  * @instance
                  */
                 Object.defineProperty(ListDocumentsRequest.prototype, "consistencySelector", {
@@ -1188,23 +1188,23 @@ $root.google = (function() {
                 return ListDocumentsRequest;
             })();
 
-            v1beta1.ListDocumentsResponse = (function() {
+            v1.ListDocumentsResponse = (function() {
 
                 /**
                  * Properties of a ListDocumentsResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IListDocumentsResponse
-                 * @property {Array.<google.firestore.v1beta1.IDocument>|null} [documents] ListDocumentsResponse documents
+                 * @property {Array.<google.firestore.v1.IDocument>|null} [documents] ListDocumentsResponse documents
                  * @property {string|null} [nextPageToken] ListDocumentsResponse nextPageToken
                  */
 
                 /**
                  * Constructs a new ListDocumentsResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a ListDocumentsResponse.
                  * @implements IListDocumentsResponse
                  * @constructor
-                 * @param {google.firestore.v1beta1.IListDocumentsResponse=} [properties] Properties to set
+                 * @param {google.firestore.v1.IListDocumentsResponse=} [properties] Properties to set
                  */
                 function ListDocumentsResponse(properties) {
                     this.documents = [];
@@ -1216,8 +1216,8 @@ $root.google = (function() {
 
                 /**
                  * ListDocumentsResponse documents.
-                 * @member {Array.<google.firestore.v1beta1.IDocument>} documents
-                 * @memberof google.firestore.v1beta1.ListDocumentsResponse
+                 * @member {Array.<google.firestore.v1.IDocument>} documents
+                 * @memberof google.firestore.v1.ListDocumentsResponse
                  * @instance
                  */
                 ListDocumentsResponse.prototype.documents = $util.emptyArray;
@@ -1225,7 +1225,7 @@ $root.google = (function() {
                 /**
                  * ListDocumentsResponse nextPageToken.
                  * @member {string} nextPageToken
-                 * @memberof google.firestore.v1beta1.ListDocumentsResponse
+                 * @memberof google.firestore.v1.ListDocumentsResponse
                  * @instance
                  */
                 ListDocumentsResponse.prototype.nextPageToken = "";
@@ -1233,26 +1233,26 @@ $root.google = (function() {
                 return ListDocumentsResponse;
             })();
 
-            v1beta1.CreateDocumentRequest = (function() {
+            v1.CreateDocumentRequest = (function() {
 
                 /**
                  * Properties of a CreateDocumentRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface ICreateDocumentRequest
                  * @property {string|null} [parent] CreateDocumentRequest parent
                  * @property {string|null} [collectionId] CreateDocumentRequest collectionId
                  * @property {string|null} [documentId] CreateDocumentRequest documentId
-                 * @property {google.firestore.v1beta1.IDocument|null} [document] CreateDocumentRequest document
-                 * @property {google.firestore.v1beta1.IDocumentMask|null} [mask] CreateDocumentRequest mask
+                 * @property {google.firestore.v1.IDocument|null} [document] CreateDocumentRequest document
+                 * @property {google.firestore.v1.IDocumentMask|null} [mask] CreateDocumentRequest mask
                  */
 
                 /**
                  * Constructs a new CreateDocumentRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a CreateDocumentRequest.
                  * @implements ICreateDocumentRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.ICreateDocumentRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.ICreateDocumentRequest=} [properties] Properties to set
                  */
                 function CreateDocumentRequest(properties) {
                     if (properties)
@@ -1264,7 +1264,7 @@ $root.google = (function() {
                 /**
                  * CreateDocumentRequest parent.
                  * @member {string} parent
-                 * @memberof google.firestore.v1beta1.CreateDocumentRequest
+                 * @memberof google.firestore.v1.CreateDocumentRequest
                  * @instance
                  */
                 CreateDocumentRequest.prototype.parent = "";
@@ -1272,7 +1272,7 @@ $root.google = (function() {
                 /**
                  * CreateDocumentRequest collectionId.
                  * @member {string} collectionId
-                 * @memberof google.firestore.v1beta1.CreateDocumentRequest
+                 * @memberof google.firestore.v1.CreateDocumentRequest
                  * @instance
                  */
                 CreateDocumentRequest.prototype.collectionId = "";
@@ -1280,23 +1280,23 @@ $root.google = (function() {
                 /**
                  * CreateDocumentRequest documentId.
                  * @member {string} documentId
-                 * @memberof google.firestore.v1beta1.CreateDocumentRequest
+                 * @memberof google.firestore.v1.CreateDocumentRequest
                  * @instance
                  */
                 CreateDocumentRequest.prototype.documentId = "";
 
                 /**
                  * CreateDocumentRequest document.
-                 * @member {google.firestore.v1beta1.IDocument|null|undefined} document
-                 * @memberof google.firestore.v1beta1.CreateDocumentRequest
+                 * @member {google.firestore.v1.IDocument|null|undefined} document
+                 * @memberof google.firestore.v1.CreateDocumentRequest
                  * @instance
                  */
                 CreateDocumentRequest.prototype.document = null;
 
                 /**
                  * CreateDocumentRequest mask.
-                 * @member {google.firestore.v1beta1.IDocumentMask|null|undefined} mask
-                 * @memberof google.firestore.v1beta1.CreateDocumentRequest
+                 * @member {google.firestore.v1.IDocumentMask|null|undefined} mask
+                 * @memberof google.firestore.v1.CreateDocumentRequest
                  * @instance
                  */
                 CreateDocumentRequest.prototype.mask = null;
@@ -1304,25 +1304,25 @@ $root.google = (function() {
                 return CreateDocumentRequest;
             })();
 
-            v1beta1.UpdateDocumentRequest = (function() {
+            v1.UpdateDocumentRequest = (function() {
 
                 /**
                  * Properties of an UpdateDocumentRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IUpdateDocumentRequest
-                 * @property {google.firestore.v1beta1.IDocument|null} [document] UpdateDocumentRequest document
-                 * @property {google.firestore.v1beta1.IDocumentMask|null} [updateMask] UpdateDocumentRequest updateMask
-                 * @property {google.firestore.v1beta1.IDocumentMask|null} [mask] UpdateDocumentRequest mask
-                 * @property {google.firestore.v1beta1.IPrecondition|null} [currentDocument] UpdateDocumentRequest currentDocument
+                 * @property {google.firestore.v1.IDocument|null} [document] UpdateDocumentRequest document
+                 * @property {google.firestore.v1.IDocumentMask|null} [updateMask] UpdateDocumentRequest updateMask
+                 * @property {google.firestore.v1.IDocumentMask|null} [mask] UpdateDocumentRequest mask
+                 * @property {google.firestore.v1.IPrecondition|null} [currentDocument] UpdateDocumentRequest currentDocument
                  */
 
                 /**
                  * Constructs a new UpdateDocumentRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents an UpdateDocumentRequest.
                  * @implements IUpdateDocumentRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IUpdateDocumentRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IUpdateDocumentRequest=} [properties] Properties to set
                  */
                 function UpdateDocumentRequest(properties) {
                     if (properties)
@@ -1333,32 +1333,32 @@ $root.google = (function() {
 
                 /**
                  * UpdateDocumentRequest document.
-                 * @member {google.firestore.v1beta1.IDocument|null|undefined} document
-                 * @memberof google.firestore.v1beta1.UpdateDocumentRequest
+                 * @member {google.firestore.v1.IDocument|null|undefined} document
+                 * @memberof google.firestore.v1.UpdateDocumentRequest
                  * @instance
                  */
                 UpdateDocumentRequest.prototype.document = null;
 
                 /**
                  * UpdateDocumentRequest updateMask.
-                 * @member {google.firestore.v1beta1.IDocumentMask|null|undefined} updateMask
-                 * @memberof google.firestore.v1beta1.UpdateDocumentRequest
+                 * @member {google.firestore.v1.IDocumentMask|null|undefined} updateMask
+                 * @memberof google.firestore.v1.UpdateDocumentRequest
                  * @instance
                  */
                 UpdateDocumentRequest.prototype.updateMask = null;
 
                 /**
                  * UpdateDocumentRequest mask.
-                 * @member {google.firestore.v1beta1.IDocumentMask|null|undefined} mask
-                 * @memberof google.firestore.v1beta1.UpdateDocumentRequest
+                 * @member {google.firestore.v1.IDocumentMask|null|undefined} mask
+                 * @memberof google.firestore.v1.UpdateDocumentRequest
                  * @instance
                  */
                 UpdateDocumentRequest.prototype.mask = null;
 
                 /**
                  * UpdateDocumentRequest currentDocument.
-                 * @member {google.firestore.v1beta1.IPrecondition|null|undefined} currentDocument
-                 * @memberof google.firestore.v1beta1.UpdateDocumentRequest
+                 * @member {google.firestore.v1.IPrecondition|null|undefined} currentDocument
+                 * @memberof google.firestore.v1.UpdateDocumentRequest
                  * @instance
                  */
                 UpdateDocumentRequest.prototype.currentDocument = null;
@@ -1366,23 +1366,23 @@ $root.google = (function() {
                 return UpdateDocumentRequest;
             })();
 
-            v1beta1.DeleteDocumentRequest = (function() {
+            v1.DeleteDocumentRequest = (function() {
 
                 /**
                  * Properties of a DeleteDocumentRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IDeleteDocumentRequest
                  * @property {string|null} [name] DeleteDocumentRequest name
-                 * @property {google.firestore.v1beta1.IPrecondition|null} [currentDocument] DeleteDocumentRequest currentDocument
+                 * @property {google.firestore.v1.IPrecondition|null} [currentDocument] DeleteDocumentRequest currentDocument
                  */
 
                 /**
                  * Constructs a new DeleteDocumentRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a DeleteDocumentRequest.
                  * @implements IDeleteDocumentRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IDeleteDocumentRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IDeleteDocumentRequest=} [properties] Properties to set
                  */
                 function DeleteDocumentRequest(properties) {
                     if (properties)
@@ -1394,15 +1394,15 @@ $root.google = (function() {
                 /**
                  * DeleteDocumentRequest name.
                  * @member {string} name
-                 * @memberof google.firestore.v1beta1.DeleteDocumentRequest
+                 * @memberof google.firestore.v1.DeleteDocumentRequest
                  * @instance
                  */
                 DeleteDocumentRequest.prototype.name = "";
 
                 /**
                  * DeleteDocumentRequest currentDocument.
-                 * @member {google.firestore.v1beta1.IPrecondition|null|undefined} currentDocument
-                 * @memberof google.firestore.v1beta1.DeleteDocumentRequest
+                 * @member {google.firestore.v1.IPrecondition|null|undefined} currentDocument
+                 * @memberof google.firestore.v1.DeleteDocumentRequest
                  * @instance
                  */
                 DeleteDocumentRequest.prototype.currentDocument = null;
@@ -1410,27 +1410,27 @@ $root.google = (function() {
                 return DeleteDocumentRequest;
             })();
 
-            v1beta1.BatchGetDocumentsRequest = (function() {
+            v1.BatchGetDocumentsRequest = (function() {
 
                 /**
                  * Properties of a BatchGetDocumentsRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IBatchGetDocumentsRequest
                  * @property {string|null} [database] BatchGetDocumentsRequest database
                  * @property {Array.<string>|null} [documents] BatchGetDocumentsRequest documents
-                 * @property {google.firestore.v1beta1.IDocumentMask|null} [mask] BatchGetDocumentsRequest mask
+                 * @property {google.firestore.v1.IDocumentMask|null} [mask] BatchGetDocumentsRequest mask
                  * @property {Uint8Array|null} [transaction] BatchGetDocumentsRequest transaction
-                 * @property {google.firestore.v1beta1.ITransactionOptions|null} [newTransaction] BatchGetDocumentsRequest newTransaction
+                 * @property {google.firestore.v1.ITransactionOptions|null} [newTransaction] BatchGetDocumentsRequest newTransaction
                  * @property {google.protobuf.ITimestamp|null} [readTime] BatchGetDocumentsRequest readTime
                  */
 
                 /**
                  * Constructs a new BatchGetDocumentsRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a BatchGetDocumentsRequest.
                  * @implements IBatchGetDocumentsRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IBatchGetDocumentsRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IBatchGetDocumentsRequest=} [properties] Properties to set
                  */
                 function BatchGetDocumentsRequest(properties) {
                     this.documents = [];
@@ -1443,7 +1443,7 @@ $root.google = (function() {
                 /**
                  * BatchGetDocumentsRequest database.
                  * @member {string} database
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsRequest
+                 * @memberof google.firestore.v1.BatchGetDocumentsRequest
                  * @instance
                  */
                 BatchGetDocumentsRequest.prototype.database = "";
@@ -1451,15 +1451,15 @@ $root.google = (function() {
                 /**
                  * BatchGetDocumentsRequest documents.
                  * @member {Array.<string>} documents
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsRequest
+                 * @memberof google.firestore.v1.BatchGetDocumentsRequest
                  * @instance
                  */
                 BatchGetDocumentsRequest.prototype.documents = $util.emptyArray;
 
                 /**
                  * BatchGetDocumentsRequest mask.
-                 * @member {google.firestore.v1beta1.IDocumentMask|null|undefined} mask
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsRequest
+                 * @member {google.firestore.v1.IDocumentMask|null|undefined} mask
+                 * @memberof google.firestore.v1.BatchGetDocumentsRequest
                  * @instance
                  */
                 BatchGetDocumentsRequest.prototype.mask = null;
@@ -1467,15 +1467,15 @@ $root.google = (function() {
                 /**
                  * BatchGetDocumentsRequest transaction.
                  * @member {Uint8Array} transaction
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsRequest
+                 * @memberof google.firestore.v1.BatchGetDocumentsRequest
                  * @instance
                  */
                 BatchGetDocumentsRequest.prototype.transaction = $util.newBuffer([]);
 
                 /**
                  * BatchGetDocumentsRequest newTransaction.
-                 * @member {google.firestore.v1beta1.ITransactionOptions|null|undefined} newTransaction
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsRequest
+                 * @member {google.firestore.v1.ITransactionOptions|null|undefined} newTransaction
+                 * @memberof google.firestore.v1.BatchGetDocumentsRequest
                  * @instance
                  */
                 BatchGetDocumentsRequest.prototype.newTransaction = null;
@@ -1483,7 +1483,7 @@ $root.google = (function() {
                 /**
                  * BatchGetDocumentsRequest readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsRequest
+                 * @memberof google.firestore.v1.BatchGetDocumentsRequest
                  * @instance
                  */
                 BatchGetDocumentsRequest.prototype.readTime = null;
@@ -1494,7 +1494,7 @@ $root.google = (function() {
                 /**
                  * BatchGetDocumentsRequest consistencySelector.
                  * @member {"transaction"|"newTransaction"|"readTime"|undefined} consistencySelector
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsRequest
+                 * @memberof google.firestore.v1.BatchGetDocumentsRequest
                  * @instance
                  */
                 Object.defineProperty(BatchGetDocumentsRequest.prototype, "consistencySelector", {
@@ -1505,13 +1505,13 @@ $root.google = (function() {
                 return BatchGetDocumentsRequest;
             })();
 
-            v1beta1.BatchGetDocumentsResponse = (function() {
+            v1.BatchGetDocumentsResponse = (function() {
 
                 /**
                  * Properties of a BatchGetDocumentsResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IBatchGetDocumentsResponse
-                 * @property {google.firestore.v1beta1.IDocument|null} [found] BatchGetDocumentsResponse found
+                 * @property {google.firestore.v1.IDocument|null} [found] BatchGetDocumentsResponse found
                  * @property {string|null} [missing] BatchGetDocumentsResponse missing
                  * @property {Uint8Array|null} [transaction] BatchGetDocumentsResponse transaction
                  * @property {google.protobuf.ITimestamp|null} [readTime] BatchGetDocumentsResponse readTime
@@ -1519,11 +1519,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new BatchGetDocumentsResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a BatchGetDocumentsResponse.
                  * @implements IBatchGetDocumentsResponse
                  * @constructor
-                 * @param {google.firestore.v1beta1.IBatchGetDocumentsResponse=} [properties] Properties to set
+                 * @param {google.firestore.v1.IBatchGetDocumentsResponse=} [properties] Properties to set
                  */
                 function BatchGetDocumentsResponse(properties) {
                     if (properties)
@@ -1534,8 +1534,8 @@ $root.google = (function() {
 
                 /**
                  * BatchGetDocumentsResponse found.
-                 * @member {google.firestore.v1beta1.IDocument|null|undefined} found
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsResponse
+                 * @member {google.firestore.v1.IDocument|null|undefined} found
+                 * @memberof google.firestore.v1.BatchGetDocumentsResponse
                  * @instance
                  */
                 BatchGetDocumentsResponse.prototype.found = null;
@@ -1543,7 +1543,7 @@ $root.google = (function() {
                 /**
                  * BatchGetDocumentsResponse missing.
                  * @member {string} missing
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsResponse
+                 * @memberof google.firestore.v1.BatchGetDocumentsResponse
                  * @instance
                  */
                 BatchGetDocumentsResponse.prototype.missing = "";
@@ -1551,7 +1551,7 @@ $root.google = (function() {
                 /**
                  * BatchGetDocumentsResponse transaction.
                  * @member {Uint8Array} transaction
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsResponse
+                 * @memberof google.firestore.v1.BatchGetDocumentsResponse
                  * @instance
                  */
                 BatchGetDocumentsResponse.prototype.transaction = $util.newBuffer([]);
@@ -1559,7 +1559,7 @@ $root.google = (function() {
                 /**
                  * BatchGetDocumentsResponse readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsResponse
+                 * @memberof google.firestore.v1.BatchGetDocumentsResponse
                  * @instance
                  */
                 BatchGetDocumentsResponse.prototype.readTime = null;
@@ -1570,7 +1570,7 @@ $root.google = (function() {
                 /**
                  * BatchGetDocumentsResponse result.
                  * @member {"found"|"missing"|undefined} result
-                 * @memberof google.firestore.v1beta1.BatchGetDocumentsResponse
+                 * @memberof google.firestore.v1.BatchGetDocumentsResponse
                  * @instance
                  */
                 Object.defineProperty(BatchGetDocumentsResponse.prototype, "result", {
@@ -1581,23 +1581,23 @@ $root.google = (function() {
                 return BatchGetDocumentsResponse;
             })();
 
-            v1beta1.BeginTransactionRequest = (function() {
+            v1.BeginTransactionRequest = (function() {
 
                 /**
                  * Properties of a BeginTransactionRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IBeginTransactionRequest
                  * @property {string|null} [database] BeginTransactionRequest database
-                 * @property {google.firestore.v1beta1.ITransactionOptions|null} [options] BeginTransactionRequest options
+                 * @property {google.firestore.v1.ITransactionOptions|null} [options] BeginTransactionRequest options
                  */
 
                 /**
                  * Constructs a new BeginTransactionRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a BeginTransactionRequest.
                  * @implements IBeginTransactionRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IBeginTransactionRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IBeginTransactionRequest=} [properties] Properties to set
                  */
                 function BeginTransactionRequest(properties) {
                     if (properties)
@@ -1609,15 +1609,15 @@ $root.google = (function() {
                 /**
                  * BeginTransactionRequest database.
                  * @member {string} database
-                 * @memberof google.firestore.v1beta1.BeginTransactionRequest
+                 * @memberof google.firestore.v1.BeginTransactionRequest
                  * @instance
                  */
                 BeginTransactionRequest.prototype.database = "";
 
                 /**
                  * BeginTransactionRequest options.
-                 * @member {google.firestore.v1beta1.ITransactionOptions|null|undefined} options
-                 * @memberof google.firestore.v1beta1.BeginTransactionRequest
+                 * @member {google.firestore.v1.ITransactionOptions|null|undefined} options
+                 * @memberof google.firestore.v1.BeginTransactionRequest
                  * @instance
                  */
                 BeginTransactionRequest.prototype.options = null;
@@ -1625,22 +1625,22 @@ $root.google = (function() {
                 return BeginTransactionRequest;
             })();
 
-            v1beta1.BeginTransactionResponse = (function() {
+            v1.BeginTransactionResponse = (function() {
 
                 /**
                  * Properties of a BeginTransactionResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IBeginTransactionResponse
                  * @property {Uint8Array|null} [transaction] BeginTransactionResponse transaction
                  */
 
                 /**
                  * Constructs a new BeginTransactionResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a BeginTransactionResponse.
                  * @implements IBeginTransactionResponse
                  * @constructor
-                 * @param {google.firestore.v1beta1.IBeginTransactionResponse=} [properties] Properties to set
+                 * @param {google.firestore.v1.IBeginTransactionResponse=} [properties] Properties to set
                  */
                 function BeginTransactionResponse(properties) {
                     if (properties)
@@ -1652,7 +1652,7 @@ $root.google = (function() {
                 /**
                  * BeginTransactionResponse transaction.
                  * @member {Uint8Array} transaction
-                 * @memberof google.firestore.v1beta1.BeginTransactionResponse
+                 * @memberof google.firestore.v1.BeginTransactionResponse
                  * @instance
                  */
                 BeginTransactionResponse.prototype.transaction = $util.newBuffer([]);
@@ -1660,24 +1660,24 @@ $root.google = (function() {
                 return BeginTransactionResponse;
             })();
 
-            v1beta1.CommitRequest = (function() {
+            v1.CommitRequest = (function() {
 
                 /**
                  * Properties of a CommitRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface ICommitRequest
                  * @property {string|null} [database] CommitRequest database
-                 * @property {Array.<google.firestore.v1beta1.IWrite>|null} [writes] CommitRequest writes
+                 * @property {Array.<google.firestore.v1.IWrite>|null} [writes] CommitRequest writes
                  * @property {Uint8Array|null} [transaction] CommitRequest transaction
                  */
 
                 /**
                  * Constructs a new CommitRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a CommitRequest.
                  * @implements ICommitRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.ICommitRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.ICommitRequest=} [properties] Properties to set
                  */
                 function CommitRequest(properties) {
                     this.writes = [];
@@ -1690,15 +1690,15 @@ $root.google = (function() {
                 /**
                  * CommitRequest database.
                  * @member {string} database
-                 * @memberof google.firestore.v1beta1.CommitRequest
+                 * @memberof google.firestore.v1.CommitRequest
                  * @instance
                  */
                 CommitRequest.prototype.database = "";
 
                 /**
                  * CommitRequest writes.
-                 * @member {Array.<google.firestore.v1beta1.IWrite>} writes
-                 * @memberof google.firestore.v1beta1.CommitRequest
+                 * @member {Array.<google.firestore.v1.IWrite>} writes
+                 * @memberof google.firestore.v1.CommitRequest
                  * @instance
                  */
                 CommitRequest.prototype.writes = $util.emptyArray;
@@ -1706,7 +1706,7 @@ $root.google = (function() {
                 /**
                  * CommitRequest transaction.
                  * @member {Uint8Array} transaction
-                 * @memberof google.firestore.v1beta1.CommitRequest
+                 * @memberof google.firestore.v1.CommitRequest
                  * @instance
                  */
                 CommitRequest.prototype.transaction = $util.newBuffer([]);
@@ -1714,23 +1714,23 @@ $root.google = (function() {
                 return CommitRequest;
             })();
 
-            v1beta1.CommitResponse = (function() {
+            v1.CommitResponse = (function() {
 
                 /**
                  * Properties of a CommitResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface ICommitResponse
-                 * @property {Array.<google.firestore.v1beta1.IWriteResult>|null} [writeResults] CommitResponse writeResults
+                 * @property {Array.<google.firestore.v1.IWriteResult>|null} [writeResults] CommitResponse writeResults
                  * @property {google.protobuf.ITimestamp|null} [commitTime] CommitResponse commitTime
                  */
 
                 /**
                  * Constructs a new CommitResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a CommitResponse.
                  * @implements ICommitResponse
                  * @constructor
-                 * @param {google.firestore.v1beta1.ICommitResponse=} [properties] Properties to set
+                 * @param {google.firestore.v1.ICommitResponse=} [properties] Properties to set
                  */
                 function CommitResponse(properties) {
                     this.writeResults = [];
@@ -1742,8 +1742,8 @@ $root.google = (function() {
 
                 /**
                  * CommitResponse writeResults.
-                 * @member {Array.<google.firestore.v1beta1.IWriteResult>} writeResults
-                 * @memberof google.firestore.v1beta1.CommitResponse
+                 * @member {Array.<google.firestore.v1.IWriteResult>} writeResults
+                 * @memberof google.firestore.v1.CommitResponse
                  * @instance
                  */
                 CommitResponse.prototype.writeResults = $util.emptyArray;
@@ -1751,7 +1751,7 @@ $root.google = (function() {
                 /**
                  * CommitResponse commitTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} commitTime
-                 * @memberof google.firestore.v1beta1.CommitResponse
+                 * @memberof google.firestore.v1.CommitResponse
                  * @instance
                  */
                 CommitResponse.prototype.commitTime = null;
@@ -1759,11 +1759,11 @@ $root.google = (function() {
                 return CommitResponse;
             })();
 
-            v1beta1.RollbackRequest = (function() {
+            v1.RollbackRequest = (function() {
 
                 /**
                  * Properties of a RollbackRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IRollbackRequest
                  * @property {string|null} [database] RollbackRequest database
                  * @property {Uint8Array|null} [transaction] RollbackRequest transaction
@@ -1771,11 +1771,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new RollbackRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a RollbackRequest.
                  * @implements IRollbackRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IRollbackRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IRollbackRequest=} [properties] Properties to set
                  */
                 function RollbackRequest(properties) {
                     if (properties)
@@ -1787,7 +1787,7 @@ $root.google = (function() {
                 /**
                  * RollbackRequest database.
                  * @member {string} database
-                 * @memberof google.firestore.v1beta1.RollbackRequest
+                 * @memberof google.firestore.v1.RollbackRequest
                  * @instance
                  */
                 RollbackRequest.prototype.database = "";
@@ -1795,7 +1795,7 @@ $root.google = (function() {
                 /**
                  * RollbackRequest transaction.
                  * @member {Uint8Array} transaction
-                 * @memberof google.firestore.v1beta1.RollbackRequest
+                 * @memberof google.firestore.v1.RollbackRequest
                  * @instance
                  */
                 RollbackRequest.prototype.transaction = $util.newBuffer([]);
@@ -1803,26 +1803,26 @@ $root.google = (function() {
                 return RollbackRequest;
             })();
 
-            v1beta1.RunQueryRequest = (function() {
+            v1.RunQueryRequest = (function() {
 
                 /**
                  * Properties of a RunQueryRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IRunQueryRequest
                  * @property {string|null} [parent] RunQueryRequest parent
-                 * @property {google.firestore.v1beta1.IStructuredQuery|null} [structuredQuery] RunQueryRequest structuredQuery
+                 * @property {google.firestore.v1.IStructuredQuery|null} [structuredQuery] RunQueryRequest structuredQuery
                  * @property {Uint8Array|null} [transaction] RunQueryRequest transaction
-                 * @property {google.firestore.v1beta1.ITransactionOptions|null} [newTransaction] RunQueryRequest newTransaction
+                 * @property {google.firestore.v1.ITransactionOptions|null} [newTransaction] RunQueryRequest newTransaction
                  * @property {google.protobuf.ITimestamp|null} [readTime] RunQueryRequest readTime
                  */
 
                 /**
                  * Constructs a new RunQueryRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a RunQueryRequest.
                  * @implements IRunQueryRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IRunQueryRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IRunQueryRequest=} [properties] Properties to set
                  */
                 function RunQueryRequest(properties) {
                     if (properties)
@@ -1834,15 +1834,15 @@ $root.google = (function() {
                 /**
                  * RunQueryRequest parent.
                  * @member {string} parent
-                 * @memberof google.firestore.v1beta1.RunQueryRequest
+                 * @memberof google.firestore.v1.RunQueryRequest
                  * @instance
                  */
                 RunQueryRequest.prototype.parent = "";
 
                 /**
                  * RunQueryRequest structuredQuery.
-                 * @member {google.firestore.v1beta1.IStructuredQuery|null|undefined} structuredQuery
-                 * @memberof google.firestore.v1beta1.RunQueryRequest
+                 * @member {google.firestore.v1.IStructuredQuery|null|undefined} structuredQuery
+                 * @memberof google.firestore.v1.RunQueryRequest
                  * @instance
                  */
                 RunQueryRequest.prototype.structuredQuery = null;
@@ -1850,15 +1850,15 @@ $root.google = (function() {
                 /**
                  * RunQueryRequest transaction.
                  * @member {Uint8Array} transaction
-                 * @memberof google.firestore.v1beta1.RunQueryRequest
+                 * @memberof google.firestore.v1.RunQueryRequest
                  * @instance
                  */
                 RunQueryRequest.prototype.transaction = $util.newBuffer([]);
 
                 /**
                  * RunQueryRequest newTransaction.
-                 * @member {google.firestore.v1beta1.ITransactionOptions|null|undefined} newTransaction
-                 * @memberof google.firestore.v1beta1.RunQueryRequest
+                 * @member {google.firestore.v1.ITransactionOptions|null|undefined} newTransaction
+                 * @memberof google.firestore.v1.RunQueryRequest
                  * @instance
                  */
                 RunQueryRequest.prototype.newTransaction = null;
@@ -1866,7 +1866,7 @@ $root.google = (function() {
                 /**
                  * RunQueryRequest readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.RunQueryRequest
+                 * @memberof google.firestore.v1.RunQueryRequest
                  * @instance
                  */
                 RunQueryRequest.prototype.readTime = null;
@@ -1877,7 +1877,7 @@ $root.google = (function() {
                 /**
                  * RunQueryRequest queryType.
                  * @member {"structuredQuery"|undefined} queryType
-                 * @memberof google.firestore.v1beta1.RunQueryRequest
+                 * @memberof google.firestore.v1.RunQueryRequest
                  * @instance
                  */
                 Object.defineProperty(RunQueryRequest.prototype, "queryType", {
@@ -1888,7 +1888,7 @@ $root.google = (function() {
                 /**
                  * RunQueryRequest consistencySelector.
                  * @member {"transaction"|"newTransaction"|"readTime"|undefined} consistencySelector
-                 * @memberof google.firestore.v1beta1.RunQueryRequest
+                 * @memberof google.firestore.v1.RunQueryRequest
                  * @instance
                  */
                 Object.defineProperty(RunQueryRequest.prototype, "consistencySelector", {
@@ -1899,25 +1899,25 @@ $root.google = (function() {
                 return RunQueryRequest;
             })();
 
-            v1beta1.RunQueryResponse = (function() {
+            v1.RunQueryResponse = (function() {
 
                 /**
                  * Properties of a RunQueryResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IRunQueryResponse
                  * @property {Uint8Array|null} [transaction] RunQueryResponse transaction
-                 * @property {google.firestore.v1beta1.IDocument|null} [document] RunQueryResponse document
+                 * @property {google.firestore.v1.IDocument|null} [document] RunQueryResponse document
                  * @property {google.protobuf.ITimestamp|null} [readTime] RunQueryResponse readTime
                  * @property {number|null} [skippedResults] RunQueryResponse skippedResults
                  */
 
                 /**
                  * Constructs a new RunQueryResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a RunQueryResponse.
                  * @implements IRunQueryResponse
                  * @constructor
-                 * @param {google.firestore.v1beta1.IRunQueryResponse=} [properties] Properties to set
+                 * @param {google.firestore.v1.IRunQueryResponse=} [properties] Properties to set
                  */
                 function RunQueryResponse(properties) {
                     if (properties)
@@ -1929,15 +1929,15 @@ $root.google = (function() {
                 /**
                  * RunQueryResponse transaction.
                  * @member {Uint8Array} transaction
-                 * @memberof google.firestore.v1beta1.RunQueryResponse
+                 * @memberof google.firestore.v1.RunQueryResponse
                  * @instance
                  */
                 RunQueryResponse.prototype.transaction = $util.newBuffer([]);
 
                 /**
                  * RunQueryResponse document.
-                 * @member {google.firestore.v1beta1.IDocument|null|undefined} document
-                 * @memberof google.firestore.v1beta1.RunQueryResponse
+                 * @member {google.firestore.v1.IDocument|null|undefined} document
+                 * @memberof google.firestore.v1.RunQueryResponse
                  * @instance
                  */
                 RunQueryResponse.prototype.document = null;
@@ -1945,7 +1945,7 @@ $root.google = (function() {
                 /**
                  * RunQueryResponse readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.RunQueryResponse
+                 * @memberof google.firestore.v1.RunQueryResponse
                  * @instance
                  */
                 RunQueryResponse.prototype.readTime = null;
@@ -1953,7 +1953,7 @@ $root.google = (function() {
                 /**
                  * RunQueryResponse skippedResults.
                  * @member {number} skippedResults
-                 * @memberof google.firestore.v1beta1.RunQueryResponse
+                 * @memberof google.firestore.v1.RunQueryResponse
                  * @instance
                  */
                 RunQueryResponse.prototype.skippedResults = 0;
@@ -1961,26 +1961,26 @@ $root.google = (function() {
                 return RunQueryResponse;
             })();
 
-            v1beta1.WriteRequest = (function() {
+            v1.WriteRequest = (function() {
 
                 /**
                  * Properties of a WriteRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IWriteRequest
                  * @property {string|null} [database] WriteRequest database
                  * @property {string|null} [streamId] WriteRequest streamId
-                 * @property {Array.<google.firestore.v1beta1.IWrite>|null} [writes] WriteRequest writes
+                 * @property {Array.<google.firestore.v1.IWrite>|null} [writes] WriteRequest writes
                  * @property {Uint8Array|null} [streamToken] WriteRequest streamToken
                  * @property {Object.<string,string>|null} [labels] WriteRequest labels
                  */
 
                 /**
                  * Constructs a new WriteRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a WriteRequest.
                  * @implements IWriteRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IWriteRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IWriteRequest=} [properties] Properties to set
                  */
                 function WriteRequest(properties) {
                     this.writes = [];
@@ -1994,7 +1994,7 @@ $root.google = (function() {
                 /**
                  * WriteRequest database.
                  * @member {string} database
-                 * @memberof google.firestore.v1beta1.WriteRequest
+                 * @memberof google.firestore.v1.WriteRequest
                  * @instance
                  */
                 WriteRequest.prototype.database = "";
@@ -2002,15 +2002,15 @@ $root.google = (function() {
                 /**
                  * WriteRequest streamId.
                  * @member {string} streamId
-                 * @memberof google.firestore.v1beta1.WriteRequest
+                 * @memberof google.firestore.v1.WriteRequest
                  * @instance
                  */
                 WriteRequest.prototype.streamId = "";
 
                 /**
                  * WriteRequest writes.
-                 * @member {Array.<google.firestore.v1beta1.IWrite>} writes
-                 * @memberof google.firestore.v1beta1.WriteRequest
+                 * @member {Array.<google.firestore.v1.IWrite>} writes
+                 * @memberof google.firestore.v1.WriteRequest
                  * @instance
                  */
                 WriteRequest.prototype.writes = $util.emptyArray;
@@ -2018,7 +2018,7 @@ $root.google = (function() {
                 /**
                  * WriteRequest streamToken.
                  * @member {Uint8Array} streamToken
-                 * @memberof google.firestore.v1beta1.WriteRequest
+                 * @memberof google.firestore.v1.WriteRequest
                  * @instance
                  */
                 WriteRequest.prototype.streamToken = $util.newBuffer([]);
@@ -2026,7 +2026,7 @@ $root.google = (function() {
                 /**
                  * WriteRequest labels.
                  * @member {Object.<string,string>} labels
-                 * @memberof google.firestore.v1beta1.WriteRequest
+                 * @memberof google.firestore.v1.WriteRequest
                  * @instance
                  */
                 WriteRequest.prototype.labels = $util.emptyObject;
@@ -2034,25 +2034,25 @@ $root.google = (function() {
                 return WriteRequest;
             })();
 
-            v1beta1.WriteResponse = (function() {
+            v1.WriteResponse = (function() {
 
                 /**
                  * Properties of a WriteResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IWriteResponse
                  * @property {string|null} [streamId] WriteResponse streamId
                  * @property {Uint8Array|null} [streamToken] WriteResponse streamToken
-                 * @property {Array.<google.firestore.v1beta1.IWriteResult>|null} [writeResults] WriteResponse writeResults
+                 * @property {Array.<google.firestore.v1.IWriteResult>|null} [writeResults] WriteResponse writeResults
                  * @property {google.protobuf.ITimestamp|null} [commitTime] WriteResponse commitTime
                  */
 
                 /**
                  * Constructs a new WriteResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a WriteResponse.
                  * @implements IWriteResponse
                  * @constructor
-                 * @param {google.firestore.v1beta1.IWriteResponse=} [properties] Properties to set
+                 * @param {google.firestore.v1.IWriteResponse=} [properties] Properties to set
                  */
                 function WriteResponse(properties) {
                     this.writeResults = [];
@@ -2065,7 +2065,7 @@ $root.google = (function() {
                 /**
                  * WriteResponse streamId.
                  * @member {string} streamId
-                 * @memberof google.firestore.v1beta1.WriteResponse
+                 * @memberof google.firestore.v1.WriteResponse
                  * @instance
                  */
                 WriteResponse.prototype.streamId = "";
@@ -2073,15 +2073,15 @@ $root.google = (function() {
                 /**
                  * WriteResponse streamToken.
                  * @member {Uint8Array} streamToken
-                 * @memberof google.firestore.v1beta1.WriteResponse
+                 * @memberof google.firestore.v1.WriteResponse
                  * @instance
                  */
                 WriteResponse.prototype.streamToken = $util.newBuffer([]);
 
                 /**
                  * WriteResponse writeResults.
-                 * @member {Array.<google.firestore.v1beta1.IWriteResult>} writeResults
-                 * @memberof google.firestore.v1beta1.WriteResponse
+                 * @member {Array.<google.firestore.v1.IWriteResult>} writeResults
+                 * @memberof google.firestore.v1.WriteResponse
                  * @instance
                  */
                 WriteResponse.prototype.writeResults = $util.emptyArray;
@@ -2089,7 +2089,7 @@ $root.google = (function() {
                 /**
                  * WriteResponse commitTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} commitTime
-                 * @memberof google.firestore.v1beta1.WriteResponse
+                 * @memberof google.firestore.v1.WriteResponse
                  * @instance
                  */
                 WriteResponse.prototype.commitTime = null;
@@ -2097,25 +2097,25 @@ $root.google = (function() {
                 return WriteResponse;
             })();
 
-            v1beta1.ListenRequest = (function() {
+            v1.ListenRequest = (function() {
 
                 /**
                  * Properties of a ListenRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IListenRequest
                  * @property {string|null} [database] ListenRequest database
-                 * @property {google.firestore.v1beta1.ITarget|null} [addTarget] ListenRequest addTarget
+                 * @property {google.firestore.v1.ITarget|null} [addTarget] ListenRequest addTarget
                  * @property {number|null} [removeTarget] ListenRequest removeTarget
                  * @property {Object.<string,string>|null} [labels] ListenRequest labels
                  */
 
                 /**
                  * Constructs a new ListenRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a ListenRequest.
                  * @implements IListenRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IListenRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IListenRequest=} [properties] Properties to set
                  */
                 function ListenRequest(properties) {
                     this.labels = {};
@@ -2128,15 +2128,15 @@ $root.google = (function() {
                 /**
                  * ListenRequest database.
                  * @member {string} database
-                 * @memberof google.firestore.v1beta1.ListenRequest
+                 * @memberof google.firestore.v1.ListenRequest
                  * @instance
                  */
                 ListenRequest.prototype.database = "";
 
                 /**
                  * ListenRequest addTarget.
-                 * @member {google.firestore.v1beta1.ITarget|null|undefined} addTarget
-                 * @memberof google.firestore.v1beta1.ListenRequest
+                 * @member {google.firestore.v1.ITarget|null|undefined} addTarget
+                 * @memberof google.firestore.v1.ListenRequest
                  * @instance
                  */
                 ListenRequest.prototype.addTarget = null;
@@ -2144,7 +2144,7 @@ $root.google = (function() {
                 /**
                  * ListenRequest removeTarget.
                  * @member {number} removeTarget
-                 * @memberof google.firestore.v1beta1.ListenRequest
+                 * @memberof google.firestore.v1.ListenRequest
                  * @instance
                  */
                 ListenRequest.prototype.removeTarget = 0;
@@ -2152,7 +2152,7 @@ $root.google = (function() {
                 /**
                  * ListenRequest labels.
                  * @member {Object.<string,string>} labels
-                 * @memberof google.firestore.v1beta1.ListenRequest
+                 * @memberof google.firestore.v1.ListenRequest
                  * @instance
                  */
                 ListenRequest.prototype.labels = $util.emptyObject;
@@ -2163,7 +2163,7 @@ $root.google = (function() {
                 /**
                  * ListenRequest targetChange.
                  * @member {"addTarget"|"removeTarget"|undefined} targetChange
-                 * @memberof google.firestore.v1beta1.ListenRequest
+                 * @memberof google.firestore.v1.ListenRequest
                  * @instance
                  */
                 Object.defineProperty(ListenRequest.prototype, "targetChange", {
@@ -2174,26 +2174,26 @@ $root.google = (function() {
                 return ListenRequest;
             })();
 
-            v1beta1.ListenResponse = (function() {
+            v1.ListenResponse = (function() {
 
                 /**
                  * Properties of a ListenResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IListenResponse
-                 * @property {google.firestore.v1beta1.ITargetChange|null} [targetChange] ListenResponse targetChange
-                 * @property {google.firestore.v1beta1.IDocumentChange|null} [documentChange] ListenResponse documentChange
-                 * @property {google.firestore.v1beta1.IDocumentDelete|null} [documentDelete] ListenResponse documentDelete
-                 * @property {google.firestore.v1beta1.IDocumentRemove|null} [documentRemove] ListenResponse documentRemove
-                 * @property {google.firestore.v1beta1.IExistenceFilter|null} [filter] ListenResponse filter
+                 * @property {google.firestore.v1.ITargetChange|null} [targetChange] ListenResponse targetChange
+                 * @property {google.firestore.v1.IDocumentChange|null} [documentChange] ListenResponse documentChange
+                 * @property {google.firestore.v1.IDocumentDelete|null} [documentDelete] ListenResponse documentDelete
+                 * @property {google.firestore.v1.IDocumentRemove|null} [documentRemove] ListenResponse documentRemove
+                 * @property {google.firestore.v1.IExistenceFilter|null} [filter] ListenResponse filter
                  */
 
                 /**
                  * Constructs a new ListenResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a ListenResponse.
                  * @implements IListenResponse
                  * @constructor
-                 * @param {google.firestore.v1beta1.IListenResponse=} [properties] Properties to set
+                 * @param {google.firestore.v1.IListenResponse=} [properties] Properties to set
                  */
                 function ListenResponse(properties) {
                     if (properties)
@@ -2204,40 +2204,40 @@ $root.google = (function() {
 
                 /**
                  * ListenResponse targetChange.
-                 * @member {google.firestore.v1beta1.ITargetChange|null|undefined} targetChange
-                 * @memberof google.firestore.v1beta1.ListenResponse
+                 * @member {google.firestore.v1.ITargetChange|null|undefined} targetChange
+                 * @memberof google.firestore.v1.ListenResponse
                  * @instance
                  */
                 ListenResponse.prototype.targetChange = null;
 
                 /**
                  * ListenResponse documentChange.
-                 * @member {google.firestore.v1beta1.IDocumentChange|null|undefined} documentChange
-                 * @memberof google.firestore.v1beta1.ListenResponse
+                 * @member {google.firestore.v1.IDocumentChange|null|undefined} documentChange
+                 * @memberof google.firestore.v1.ListenResponse
                  * @instance
                  */
                 ListenResponse.prototype.documentChange = null;
 
                 /**
                  * ListenResponse documentDelete.
-                 * @member {google.firestore.v1beta1.IDocumentDelete|null|undefined} documentDelete
-                 * @memberof google.firestore.v1beta1.ListenResponse
+                 * @member {google.firestore.v1.IDocumentDelete|null|undefined} documentDelete
+                 * @memberof google.firestore.v1.ListenResponse
                  * @instance
                  */
                 ListenResponse.prototype.documentDelete = null;
 
                 /**
                  * ListenResponse documentRemove.
-                 * @member {google.firestore.v1beta1.IDocumentRemove|null|undefined} documentRemove
-                 * @memberof google.firestore.v1beta1.ListenResponse
+                 * @member {google.firestore.v1.IDocumentRemove|null|undefined} documentRemove
+                 * @memberof google.firestore.v1.ListenResponse
                  * @instance
                  */
                 ListenResponse.prototype.documentRemove = null;
 
                 /**
                  * ListenResponse filter.
-                 * @member {google.firestore.v1beta1.IExistenceFilter|null|undefined} filter
-                 * @memberof google.firestore.v1beta1.ListenResponse
+                 * @member {google.firestore.v1.IExistenceFilter|null|undefined} filter
+                 * @memberof google.firestore.v1.ListenResponse
                  * @instance
                  */
                 ListenResponse.prototype.filter = null;
@@ -2248,7 +2248,7 @@ $root.google = (function() {
                 /**
                  * ListenResponse responseType.
                  * @member {"targetChange"|"documentChange"|"documentDelete"|"documentRemove"|"filter"|undefined} responseType
-                 * @memberof google.firestore.v1beta1.ListenResponse
+                 * @memberof google.firestore.v1.ListenResponse
                  * @instance
                  */
                 Object.defineProperty(ListenResponse.prototype, "responseType", {
@@ -2259,14 +2259,14 @@ $root.google = (function() {
                 return ListenResponse;
             })();
 
-            v1beta1.Target = (function() {
+            v1.Target = (function() {
 
                 /**
                  * Properties of a Target.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface ITarget
-                 * @property {google.firestore.v1beta1.Target.IQueryTarget|null} [query] Target query
-                 * @property {google.firestore.v1beta1.Target.IDocumentsTarget|null} [documents] Target documents
+                 * @property {google.firestore.v1.Target.IQueryTarget|null} [query] Target query
+                 * @property {google.firestore.v1.Target.IDocumentsTarget|null} [documents] Target documents
                  * @property {Uint8Array|null} [resumeToken] Target resumeToken
                  * @property {google.protobuf.ITimestamp|null} [readTime] Target readTime
                  * @property {number|null} [targetId] Target targetId
@@ -2275,11 +2275,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new Target.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a Target.
                  * @implements ITarget
                  * @constructor
-                 * @param {google.firestore.v1beta1.ITarget=} [properties] Properties to set
+                 * @param {google.firestore.v1.ITarget=} [properties] Properties to set
                  */
                 function Target(properties) {
                     if (properties)
@@ -2290,16 +2290,16 @@ $root.google = (function() {
 
                 /**
                  * Target query.
-                 * @member {google.firestore.v1beta1.Target.IQueryTarget|null|undefined} query
-                 * @memberof google.firestore.v1beta1.Target
+                 * @member {google.firestore.v1.Target.IQueryTarget|null|undefined} query
+                 * @memberof google.firestore.v1.Target
                  * @instance
                  */
                 Target.prototype.query = null;
 
                 /**
                  * Target documents.
-                 * @member {google.firestore.v1beta1.Target.IDocumentsTarget|null|undefined} documents
-                 * @memberof google.firestore.v1beta1.Target
+                 * @member {google.firestore.v1.Target.IDocumentsTarget|null|undefined} documents
+                 * @memberof google.firestore.v1.Target
                  * @instance
                  */
                 Target.prototype.documents = null;
@@ -2307,7 +2307,7 @@ $root.google = (function() {
                 /**
                  * Target resumeToken.
                  * @member {Uint8Array} resumeToken
-                 * @memberof google.firestore.v1beta1.Target
+                 * @memberof google.firestore.v1.Target
                  * @instance
                  */
                 Target.prototype.resumeToken = $util.newBuffer([]);
@@ -2315,7 +2315,7 @@ $root.google = (function() {
                 /**
                  * Target readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.Target
+                 * @memberof google.firestore.v1.Target
                  * @instance
                  */
                 Target.prototype.readTime = null;
@@ -2323,7 +2323,7 @@ $root.google = (function() {
                 /**
                  * Target targetId.
                  * @member {number} targetId
-                 * @memberof google.firestore.v1beta1.Target
+                 * @memberof google.firestore.v1.Target
                  * @instance
                  */
                 Target.prototype.targetId = 0;
@@ -2331,7 +2331,7 @@ $root.google = (function() {
                 /**
                  * Target once.
                  * @member {boolean} once
-                 * @memberof google.firestore.v1beta1.Target
+                 * @memberof google.firestore.v1.Target
                  * @instance
                  */
                 Target.prototype.once = false;
@@ -2342,7 +2342,7 @@ $root.google = (function() {
                 /**
                  * Target targetType.
                  * @member {"query"|"documents"|undefined} targetType
-                 * @memberof google.firestore.v1beta1.Target
+                 * @memberof google.firestore.v1.Target
                  * @instance
                  */
                 Object.defineProperty(Target.prototype, "targetType", {
@@ -2353,7 +2353,7 @@ $root.google = (function() {
                 /**
                  * Target resumeType.
                  * @member {"resumeToken"|"readTime"|undefined} resumeType
-                 * @memberof google.firestore.v1beta1.Target
+                 * @memberof google.firestore.v1.Target
                  * @instance
                  */
                 Object.defineProperty(Target.prototype, "resumeType", {
@@ -2365,18 +2365,18 @@ $root.google = (function() {
 
                     /**
                      * Properties of a DocumentsTarget.
-                     * @memberof google.firestore.v1beta1.Target
+                     * @memberof google.firestore.v1.Target
                      * @interface IDocumentsTarget
                      * @property {Array.<string>|null} [documents] DocumentsTarget documents
                      */
 
                     /**
                      * Constructs a new DocumentsTarget.
-                     * @memberof google.firestore.v1beta1.Target
+                     * @memberof google.firestore.v1.Target
                      * @classdesc Represents a DocumentsTarget.
                      * @implements IDocumentsTarget
                      * @constructor
-                     * @param {google.firestore.v1beta1.Target.IDocumentsTarget=} [properties] Properties to set
+                     * @param {google.firestore.v1.Target.IDocumentsTarget=} [properties] Properties to set
                      */
                     function DocumentsTarget(properties) {
                         this.documents = [];
@@ -2389,7 +2389,7 @@ $root.google = (function() {
                     /**
                      * DocumentsTarget documents.
                      * @member {Array.<string>} documents
-                     * @memberof google.firestore.v1beta1.Target.DocumentsTarget
+                     * @memberof google.firestore.v1.Target.DocumentsTarget
                      * @instance
                      */
                     DocumentsTarget.prototype.documents = $util.emptyArray;
@@ -2401,19 +2401,19 @@ $root.google = (function() {
 
                     /**
                      * Properties of a QueryTarget.
-                     * @memberof google.firestore.v1beta1.Target
+                     * @memberof google.firestore.v1.Target
                      * @interface IQueryTarget
                      * @property {string|null} [parent] QueryTarget parent
-                     * @property {google.firestore.v1beta1.IStructuredQuery|null} [structuredQuery] QueryTarget structuredQuery
+                     * @property {google.firestore.v1.IStructuredQuery|null} [structuredQuery] QueryTarget structuredQuery
                      */
 
                     /**
                      * Constructs a new QueryTarget.
-                     * @memberof google.firestore.v1beta1.Target
+                     * @memberof google.firestore.v1.Target
                      * @classdesc Represents a QueryTarget.
                      * @implements IQueryTarget
                      * @constructor
-                     * @param {google.firestore.v1beta1.Target.IQueryTarget=} [properties] Properties to set
+                     * @param {google.firestore.v1.Target.IQueryTarget=} [properties] Properties to set
                      */
                     function QueryTarget(properties) {
                         if (properties)
@@ -2425,15 +2425,15 @@ $root.google = (function() {
                     /**
                      * QueryTarget parent.
                      * @member {string} parent
-                     * @memberof google.firestore.v1beta1.Target.QueryTarget
+                     * @memberof google.firestore.v1.Target.QueryTarget
                      * @instance
                      */
                     QueryTarget.prototype.parent = "";
 
                     /**
                      * QueryTarget structuredQuery.
-                     * @member {google.firestore.v1beta1.IStructuredQuery|null|undefined} structuredQuery
-                     * @memberof google.firestore.v1beta1.Target.QueryTarget
+                     * @member {google.firestore.v1.IStructuredQuery|null|undefined} structuredQuery
+                     * @memberof google.firestore.v1.Target.QueryTarget
                      * @instance
                      */
                     QueryTarget.prototype.structuredQuery = null;
@@ -2444,7 +2444,7 @@ $root.google = (function() {
                     /**
                      * QueryTarget queryType.
                      * @member {"structuredQuery"|undefined} queryType
-                     * @memberof google.firestore.v1beta1.Target.QueryTarget
+                     * @memberof google.firestore.v1.Target.QueryTarget
                      * @instance
                      */
                     Object.defineProperty(QueryTarget.prototype, "queryType", {
@@ -2458,13 +2458,13 @@ $root.google = (function() {
                 return Target;
             })();
 
-            v1beta1.TargetChange = (function() {
+            v1.TargetChange = (function() {
 
                 /**
                  * Properties of a TargetChange.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface ITargetChange
-                 * @property {google.firestore.v1beta1.TargetChange.TargetChangeType|null} [targetChangeType] TargetChange targetChangeType
+                 * @property {google.firestore.v1.TargetChange.TargetChangeType|null} [targetChangeType] TargetChange targetChangeType
                  * @property {Array.<number>|null} [targetIds] TargetChange targetIds
                  * @property {google.rpc.IStatus|null} [cause] TargetChange cause
                  * @property {Uint8Array|null} [resumeToken] TargetChange resumeToken
@@ -2473,11 +2473,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new TargetChange.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a TargetChange.
                  * @implements ITargetChange
                  * @constructor
-                 * @param {google.firestore.v1beta1.ITargetChange=} [properties] Properties to set
+                 * @param {google.firestore.v1.ITargetChange=} [properties] Properties to set
                  */
                 function TargetChange(properties) {
                     this.targetIds = [];
@@ -2489,8 +2489,8 @@ $root.google = (function() {
 
                 /**
                  * TargetChange targetChangeType.
-                 * @member {google.firestore.v1beta1.TargetChange.TargetChangeType} targetChangeType
-                 * @memberof google.firestore.v1beta1.TargetChange
+                 * @member {google.firestore.v1.TargetChange.TargetChangeType} targetChangeType
+                 * @memberof google.firestore.v1.TargetChange
                  * @instance
                  */
                 TargetChange.prototype.targetChangeType = 0;
@@ -2498,7 +2498,7 @@ $root.google = (function() {
                 /**
                  * TargetChange targetIds.
                  * @member {Array.<number>} targetIds
-                 * @memberof google.firestore.v1beta1.TargetChange
+                 * @memberof google.firestore.v1.TargetChange
                  * @instance
                  */
                 TargetChange.prototype.targetIds = $util.emptyArray;
@@ -2506,7 +2506,7 @@ $root.google = (function() {
                 /**
                  * TargetChange cause.
                  * @member {google.rpc.IStatus|null|undefined} cause
-                 * @memberof google.firestore.v1beta1.TargetChange
+                 * @memberof google.firestore.v1.TargetChange
                  * @instance
                  */
                 TargetChange.prototype.cause = null;
@@ -2514,7 +2514,7 @@ $root.google = (function() {
                 /**
                  * TargetChange resumeToken.
                  * @member {Uint8Array} resumeToken
-                 * @memberof google.firestore.v1beta1.TargetChange
+                 * @memberof google.firestore.v1.TargetChange
                  * @instance
                  */
                 TargetChange.prototype.resumeToken = $util.newBuffer([]);
@@ -2522,14 +2522,14 @@ $root.google = (function() {
                 /**
                  * TargetChange readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.TargetChange
+                 * @memberof google.firestore.v1.TargetChange
                  * @instance
                  */
                 TargetChange.prototype.readTime = null;
 
                 /**
                  * TargetChangeType enum.
-                 * @name google.firestore.v1beta1.TargetChange.TargetChangeType
+                 * @name google.firestore.v1.TargetChange.TargetChangeType
                  * @enum {number}
                  * @property {string} NO_CHANGE=NO_CHANGE NO_CHANGE value
                  * @property {string} ADD=ADD ADD value
@@ -2550,11 +2550,11 @@ $root.google = (function() {
                 return TargetChange;
             })();
 
-            v1beta1.ListCollectionIdsRequest = (function() {
+            v1.ListCollectionIdsRequest = (function() {
 
                 /**
                  * Properties of a ListCollectionIdsRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IListCollectionIdsRequest
                  * @property {string|null} [parent] ListCollectionIdsRequest parent
                  * @property {number|null} [pageSize] ListCollectionIdsRequest pageSize
@@ -2563,11 +2563,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new ListCollectionIdsRequest.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a ListCollectionIdsRequest.
                  * @implements IListCollectionIdsRequest
                  * @constructor
-                 * @param {google.firestore.v1beta1.IListCollectionIdsRequest=} [properties] Properties to set
+                 * @param {google.firestore.v1.IListCollectionIdsRequest=} [properties] Properties to set
                  */
                 function ListCollectionIdsRequest(properties) {
                     if (properties)
@@ -2579,7 +2579,7 @@ $root.google = (function() {
                 /**
                  * ListCollectionIdsRequest parent.
                  * @member {string} parent
-                 * @memberof google.firestore.v1beta1.ListCollectionIdsRequest
+                 * @memberof google.firestore.v1.ListCollectionIdsRequest
                  * @instance
                  */
                 ListCollectionIdsRequest.prototype.parent = "";
@@ -2587,7 +2587,7 @@ $root.google = (function() {
                 /**
                  * ListCollectionIdsRequest pageSize.
                  * @member {number} pageSize
-                 * @memberof google.firestore.v1beta1.ListCollectionIdsRequest
+                 * @memberof google.firestore.v1.ListCollectionIdsRequest
                  * @instance
                  */
                 ListCollectionIdsRequest.prototype.pageSize = 0;
@@ -2595,7 +2595,7 @@ $root.google = (function() {
                 /**
                  * ListCollectionIdsRequest pageToken.
                  * @member {string} pageToken
-                 * @memberof google.firestore.v1beta1.ListCollectionIdsRequest
+                 * @memberof google.firestore.v1.ListCollectionIdsRequest
                  * @instance
                  */
                 ListCollectionIdsRequest.prototype.pageToken = "";
@@ -2603,11 +2603,11 @@ $root.google = (function() {
                 return ListCollectionIdsRequest;
             })();
 
-            v1beta1.ListCollectionIdsResponse = (function() {
+            v1.ListCollectionIdsResponse = (function() {
 
                 /**
                  * Properties of a ListCollectionIdsResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IListCollectionIdsResponse
                  * @property {Array.<string>|null} [collectionIds] ListCollectionIdsResponse collectionIds
                  * @property {string|null} [nextPageToken] ListCollectionIdsResponse nextPageToken
@@ -2615,11 +2615,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new ListCollectionIdsResponse.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a ListCollectionIdsResponse.
                  * @implements IListCollectionIdsResponse
                  * @constructor
-                 * @param {google.firestore.v1beta1.IListCollectionIdsResponse=} [properties] Properties to set
+                 * @param {google.firestore.v1.IListCollectionIdsResponse=} [properties] Properties to set
                  */
                 function ListCollectionIdsResponse(properties) {
                     this.collectionIds = [];
@@ -2632,7 +2632,7 @@ $root.google = (function() {
                 /**
                  * ListCollectionIdsResponse collectionIds.
                  * @member {Array.<string>} collectionIds
-                 * @memberof google.firestore.v1beta1.ListCollectionIdsResponse
+                 * @memberof google.firestore.v1.ListCollectionIdsResponse
                  * @instance
                  */
                 ListCollectionIdsResponse.prototype.collectionIds = $util.emptyArray;
@@ -2640,7 +2640,7 @@ $root.google = (function() {
                 /**
                  * ListCollectionIdsResponse nextPageToken.
                  * @member {string} nextPageToken
-                 * @memberof google.firestore.v1beta1.ListCollectionIdsResponse
+                 * @memberof google.firestore.v1.ListCollectionIdsResponse
                  * @instance
                  */
                 ListCollectionIdsResponse.prototype.nextPageToken = "";
@@ -2648,29 +2648,29 @@ $root.google = (function() {
                 return ListCollectionIdsResponse;
             })();
 
-            v1beta1.StructuredQuery = (function() {
+            v1.StructuredQuery = (function() {
 
                 /**
                  * Properties of a StructuredQuery.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IStructuredQuery
-                 * @property {google.firestore.v1beta1.StructuredQuery.IProjection|null} [select] StructuredQuery select
-                 * @property {Array.<google.firestore.v1beta1.StructuredQuery.ICollectionSelector>|null} [from] StructuredQuery from
-                 * @property {google.firestore.v1beta1.StructuredQuery.IFilter|null} [where] StructuredQuery where
-                 * @property {Array.<google.firestore.v1beta1.StructuredQuery.IOrder>|null} [orderBy] StructuredQuery orderBy
-                 * @property {google.firestore.v1beta1.ICursor|null} [startAt] StructuredQuery startAt
-                 * @property {google.firestore.v1beta1.ICursor|null} [endAt] StructuredQuery endAt
+                 * @property {google.firestore.v1.StructuredQuery.IProjection|null} [select] StructuredQuery select
+                 * @property {Array.<google.firestore.v1.StructuredQuery.ICollectionSelector>|null} [from] StructuredQuery from
+                 * @property {google.firestore.v1.StructuredQuery.IFilter|null} [where] StructuredQuery where
+                 * @property {Array.<google.firestore.v1.StructuredQuery.IOrder>|null} [orderBy] StructuredQuery orderBy
+                 * @property {google.firestore.v1.ICursor|null} [startAt] StructuredQuery startAt
+                 * @property {google.firestore.v1.ICursor|null} [endAt] StructuredQuery endAt
                  * @property {number|null} [offset] StructuredQuery offset
                  * @property {google.protobuf.IInt32Value|null} [limit] StructuredQuery limit
                  */
 
                 /**
                  * Constructs a new StructuredQuery.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a StructuredQuery.
                  * @implements IStructuredQuery
                  * @constructor
-                 * @param {google.firestore.v1beta1.IStructuredQuery=} [properties] Properties to set
+                 * @param {google.firestore.v1.IStructuredQuery=} [properties] Properties to set
                  */
                 function StructuredQuery(properties) {
                     this.from = [];
@@ -2683,48 +2683,48 @@ $root.google = (function() {
 
                 /**
                  * StructuredQuery select.
-                 * @member {google.firestore.v1beta1.StructuredQuery.IProjection|null|undefined} select
-                 * @memberof google.firestore.v1beta1.StructuredQuery
+                 * @member {google.firestore.v1.StructuredQuery.IProjection|null|undefined} select
+                 * @memberof google.firestore.v1.StructuredQuery
                  * @instance
                  */
                 StructuredQuery.prototype.select = null;
 
                 /**
                  * StructuredQuery from.
-                 * @member {Array.<google.firestore.v1beta1.StructuredQuery.ICollectionSelector>} from
-                 * @memberof google.firestore.v1beta1.StructuredQuery
+                 * @member {Array.<google.firestore.v1.StructuredQuery.ICollectionSelector>} from
+                 * @memberof google.firestore.v1.StructuredQuery
                  * @instance
                  */
                 StructuredQuery.prototype.from = $util.emptyArray;
 
                 /**
                  * StructuredQuery where.
-                 * @member {google.firestore.v1beta1.StructuredQuery.IFilter|null|undefined} where
-                 * @memberof google.firestore.v1beta1.StructuredQuery
+                 * @member {google.firestore.v1.StructuredQuery.IFilter|null|undefined} where
+                 * @memberof google.firestore.v1.StructuredQuery
                  * @instance
                  */
                 StructuredQuery.prototype.where = null;
 
                 /**
                  * StructuredQuery orderBy.
-                 * @member {Array.<google.firestore.v1beta1.StructuredQuery.IOrder>} orderBy
-                 * @memberof google.firestore.v1beta1.StructuredQuery
+                 * @member {Array.<google.firestore.v1.StructuredQuery.IOrder>} orderBy
+                 * @memberof google.firestore.v1.StructuredQuery
                  * @instance
                  */
                 StructuredQuery.prototype.orderBy = $util.emptyArray;
 
                 /**
                  * StructuredQuery startAt.
-                 * @member {google.firestore.v1beta1.ICursor|null|undefined} startAt
-                 * @memberof google.firestore.v1beta1.StructuredQuery
+                 * @member {google.firestore.v1.ICursor|null|undefined} startAt
+                 * @memberof google.firestore.v1.StructuredQuery
                  * @instance
                  */
                 StructuredQuery.prototype.startAt = null;
 
                 /**
                  * StructuredQuery endAt.
-                 * @member {google.firestore.v1beta1.ICursor|null|undefined} endAt
-                 * @memberof google.firestore.v1beta1.StructuredQuery
+                 * @member {google.firestore.v1.ICursor|null|undefined} endAt
+                 * @memberof google.firestore.v1.StructuredQuery
                  * @instance
                  */
                 StructuredQuery.prototype.endAt = null;
@@ -2732,7 +2732,7 @@ $root.google = (function() {
                 /**
                  * StructuredQuery offset.
                  * @member {number} offset
-                 * @memberof google.firestore.v1beta1.StructuredQuery
+                 * @memberof google.firestore.v1.StructuredQuery
                  * @instance
                  */
                 StructuredQuery.prototype.offset = 0;
@@ -2740,7 +2740,7 @@ $root.google = (function() {
                 /**
                  * StructuredQuery limit.
                  * @member {google.protobuf.IInt32Value|null|undefined} limit
-                 * @memberof google.firestore.v1beta1.StructuredQuery
+                 * @memberof google.firestore.v1.StructuredQuery
                  * @instance
                  */
                 StructuredQuery.prototype.limit = null;
@@ -2749,7 +2749,7 @@ $root.google = (function() {
 
                     /**
                      * Properties of a CollectionSelector.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @interface ICollectionSelector
                      * @property {string|null} [collectionId] CollectionSelector collectionId
                      * @property {boolean|null} [allDescendants] CollectionSelector allDescendants
@@ -2757,11 +2757,11 @@ $root.google = (function() {
 
                     /**
                      * Constructs a new CollectionSelector.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @classdesc Represents a CollectionSelector.
                      * @implements ICollectionSelector
                      * @constructor
-                     * @param {google.firestore.v1beta1.StructuredQuery.ICollectionSelector=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.ICollectionSelector=} [properties] Properties to set
                      */
                     function CollectionSelector(properties) {
                         if (properties)
@@ -2773,7 +2773,7 @@ $root.google = (function() {
                     /**
                      * CollectionSelector collectionId.
                      * @member {string} collectionId
-                     * @memberof google.firestore.v1beta1.StructuredQuery.CollectionSelector
+                     * @memberof google.firestore.v1.StructuredQuery.CollectionSelector
                      * @instance
                      */
                     CollectionSelector.prototype.collectionId = "";
@@ -2781,7 +2781,7 @@ $root.google = (function() {
                     /**
                      * CollectionSelector allDescendants.
                      * @member {boolean} allDescendants
-                     * @memberof google.firestore.v1beta1.StructuredQuery.CollectionSelector
+                     * @memberof google.firestore.v1.StructuredQuery.CollectionSelector
                      * @instance
                      */
                     CollectionSelector.prototype.allDescendants = false;
@@ -2793,20 +2793,20 @@ $root.google = (function() {
 
                     /**
                      * Properties of a Filter.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @interface IFilter
-                     * @property {google.firestore.v1beta1.StructuredQuery.ICompositeFilter|null} [compositeFilter] Filter compositeFilter
-                     * @property {google.firestore.v1beta1.StructuredQuery.IFieldFilter|null} [fieldFilter] Filter fieldFilter
-                     * @property {google.firestore.v1beta1.StructuredQuery.IUnaryFilter|null} [unaryFilter] Filter unaryFilter
+                     * @property {google.firestore.v1.StructuredQuery.ICompositeFilter|null} [compositeFilter] Filter compositeFilter
+                     * @property {google.firestore.v1.StructuredQuery.IFieldFilter|null} [fieldFilter] Filter fieldFilter
+                     * @property {google.firestore.v1.StructuredQuery.IUnaryFilter|null} [unaryFilter] Filter unaryFilter
                      */
 
                     /**
                      * Constructs a new Filter.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @classdesc Represents a Filter.
                      * @implements IFilter
                      * @constructor
-                     * @param {google.firestore.v1beta1.StructuredQuery.IFilter=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.IFilter=} [properties] Properties to set
                      */
                     function Filter(properties) {
                         if (properties)
@@ -2817,24 +2817,24 @@ $root.google = (function() {
 
                     /**
                      * Filter compositeFilter.
-                     * @member {google.firestore.v1beta1.StructuredQuery.ICompositeFilter|null|undefined} compositeFilter
-                     * @memberof google.firestore.v1beta1.StructuredQuery.Filter
+                     * @member {google.firestore.v1.StructuredQuery.ICompositeFilter|null|undefined} compositeFilter
+                     * @memberof google.firestore.v1.StructuredQuery.Filter
                      * @instance
                      */
                     Filter.prototype.compositeFilter = null;
 
                     /**
                      * Filter fieldFilter.
-                     * @member {google.firestore.v1beta1.StructuredQuery.IFieldFilter|null|undefined} fieldFilter
-                     * @memberof google.firestore.v1beta1.StructuredQuery.Filter
+                     * @member {google.firestore.v1.StructuredQuery.IFieldFilter|null|undefined} fieldFilter
+                     * @memberof google.firestore.v1.StructuredQuery.Filter
                      * @instance
                      */
                     Filter.prototype.fieldFilter = null;
 
                     /**
                      * Filter unaryFilter.
-                     * @member {google.firestore.v1beta1.StructuredQuery.IUnaryFilter|null|undefined} unaryFilter
-                     * @memberof google.firestore.v1beta1.StructuredQuery.Filter
+                     * @member {google.firestore.v1.StructuredQuery.IUnaryFilter|null|undefined} unaryFilter
+                     * @memberof google.firestore.v1.StructuredQuery.Filter
                      * @instance
                      */
                     Filter.prototype.unaryFilter = null;
@@ -2845,7 +2845,7 @@ $root.google = (function() {
                     /**
                      * Filter filterType.
                      * @member {"compositeFilter"|"fieldFilter"|"unaryFilter"|undefined} filterType
-                     * @memberof google.firestore.v1beta1.StructuredQuery.Filter
+                     * @memberof google.firestore.v1.StructuredQuery.Filter
                      * @instance
                      */
                     Object.defineProperty(Filter.prototype, "filterType", {
@@ -2860,19 +2860,19 @@ $root.google = (function() {
 
                     /**
                      * Properties of a CompositeFilter.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @interface ICompositeFilter
-                     * @property {google.firestore.v1beta1.StructuredQuery.CompositeFilter.Operator|null} [op] CompositeFilter op
-                     * @property {Array.<google.firestore.v1beta1.StructuredQuery.IFilter>|null} [filters] CompositeFilter filters
+                     * @property {google.firestore.v1.StructuredQuery.CompositeFilter.Operator|null} [op] CompositeFilter op
+                     * @property {Array.<google.firestore.v1.StructuredQuery.IFilter>|null} [filters] CompositeFilter filters
                      */
 
                     /**
                      * Constructs a new CompositeFilter.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @classdesc Represents a CompositeFilter.
                      * @implements ICompositeFilter
                      * @constructor
-                     * @param {google.firestore.v1beta1.StructuredQuery.ICompositeFilter=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.ICompositeFilter=} [properties] Properties to set
                      */
                     function CompositeFilter(properties) {
                         this.filters = [];
@@ -2884,23 +2884,23 @@ $root.google = (function() {
 
                     /**
                      * CompositeFilter op.
-                     * @member {google.firestore.v1beta1.StructuredQuery.CompositeFilter.Operator} op
-                     * @memberof google.firestore.v1beta1.StructuredQuery.CompositeFilter
+                     * @member {google.firestore.v1.StructuredQuery.CompositeFilter.Operator} op
+                     * @memberof google.firestore.v1.StructuredQuery.CompositeFilter
                      * @instance
                      */
                     CompositeFilter.prototype.op = 0;
 
                     /**
                      * CompositeFilter filters.
-                     * @member {Array.<google.firestore.v1beta1.StructuredQuery.IFilter>} filters
-                     * @memberof google.firestore.v1beta1.StructuredQuery.CompositeFilter
+                     * @member {Array.<google.firestore.v1.StructuredQuery.IFilter>} filters
+                     * @memberof google.firestore.v1.StructuredQuery.CompositeFilter
                      * @instance
                      */
                     CompositeFilter.prototype.filters = $util.emptyArray;
 
                     /**
                      * Operator enum.
-                     * @name google.firestore.v1beta1.StructuredQuery.CompositeFilter.Operator
+                     * @name google.firestore.v1.StructuredQuery.CompositeFilter.Operator
                      * @enum {number}
                      * @property {string} OPERATOR_UNSPECIFIED=OPERATOR_UNSPECIFIED OPERATOR_UNSPECIFIED value
                      * @property {string} AND=AND AND value
@@ -2919,20 +2919,20 @@ $root.google = (function() {
 
                     /**
                      * Properties of a FieldFilter.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @interface IFieldFilter
-                     * @property {google.firestore.v1beta1.StructuredQuery.IFieldReference|null} [field] FieldFilter field
-                     * @property {google.firestore.v1beta1.StructuredQuery.FieldFilter.Operator|null} [op] FieldFilter op
-                     * @property {google.firestore.v1beta1.IValue|null} [value] FieldFilter value
+                     * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [field] FieldFilter field
+                     * @property {google.firestore.v1.StructuredQuery.FieldFilter.Operator|null} [op] FieldFilter op
+                     * @property {google.firestore.v1.IValue|null} [value] FieldFilter value
                      */
 
                     /**
                      * Constructs a new FieldFilter.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @classdesc Represents a FieldFilter.
                      * @implements IFieldFilter
                      * @constructor
-                     * @param {google.firestore.v1beta1.StructuredQuery.IFieldFilter=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.IFieldFilter=} [properties] Properties to set
                      */
                     function FieldFilter(properties) {
                         if (properties)
@@ -2943,31 +2943,31 @@ $root.google = (function() {
 
                     /**
                      * FieldFilter field.
-                     * @member {google.firestore.v1beta1.StructuredQuery.IFieldReference|null|undefined} field
-                     * @memberof google.firestore.v1beta1.StructuredQuery.FieldFilter
+                     * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} field
+                     * @memberof google.firestore.v1.StructuredQuery.FieldFilter
                      * @instance
                      */
                     FieldFilter.prototype.field = null;
 
                     /**
                      * FieldFilter op.
-                     * @member {google.firestore.v1beta1.StructuredQuery.FieldFilter.Operator} op
-                     * @memberof google.firestore.v1beta1.StructuredQuery.FieldFilter
+                     * @member {google.firestore.v1.StructuredQuery.FieldFilter.Operator} op
+                     * @memberof google.firestore.v1.StructuredQuery.FieldFilter
                      * @instance
                      */
                     FieldFilter.prototype.op = 0;
 
                     /**
                      * FieldFilter value.
-                     * @member {google.firestore.v1beta1.IValue|null|undefined} value
-                     * @memberof google.firestore.v1beta1.StructuredQuery.FieldFilter
+                     * @member {google.firestore.v1.IValue|null|undefined} value
+                     * @memberof google.firestore.v1.StructuredQuery.FieldFilter
                      * @instance
                      */
                     FieldFilter.prototype.value = null;
 
                     /**
                      * Operator enum.
-                     * @name google.firestore.v1beta1.StructuredQuery.FieldFilter.Operator
+                     * @name google.firestore.v1.StructuredQuery.FieldFilter.Operator
                      * @enum {number}
                      * @property {string} OPERATOR_UNSPECIFIED=OPERATOR_UNSPECIFIED OPERATOR_UNSPECIFIED value
                      * @property {string} LESS_THAN=LESS_THAN LESS_THAN value
@@ -2996,19 +2996,19 @@ $root.google = (function() {
 
                     /**
                      * Properties of an UnaryFilter.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @interface IUnaryFilter
-                     * @property {google.firestore.v1beta1.StructuredQuery.UnaryFilter.Operator|null} [op] UnaryFilter op
-                     * @property {google.firestore.v1beta1.StructuredQuery.IFieldReference|null} [field] UnaryFilter field
+                     * @property {google.firestore.v1.StructuredQuery.UnaryFilter.Operator|null} [op] UnaryFilter op
+                     * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [field] UnaryFilter field
                      */
 
                     /**
                      * Constructs a new UnaryFilter.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @classdesc Represents an UnaryFilter.
                      * @implements IUnaryFilter
                      * @constructor
-                     * @param {google.firestore.v1beta1.StructuredQuery.IUnaryFilter=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.IUnaryFilter=} [properties] Properties to set
                      */
                     function UnaryFilter(properties) {
                         if (properties)
@@ -3019,16 +3019,16 @@ $root.google = (function() {
 
                     /**
                      * UnaryFilter op.
-                     * @member {google.firestore.v1beta1.StructuredQuery.UnaryFilter.Operator} op
-                     * @memberof google.firestore.v1beta1.StructuredQuery.UnaryFilter
+                     * @member {google.firestore.v1.StructuredQuery.UnaryFilter.Operator} op
+                     * @memberof google.firestore.v1.StructuredQuery.UnaryFilter
                      * @instance
                      */
                     UnaryFilter.prototype.op = 0;
 
                     /**
                      * UnaryFilter field.
-                     * @member {google.firestore.v1beta1.StructuredQuery.IFieldReference|null|undefined} field
-                     * @memberof google.firestore.v1beta1.StructuredQuery.UnaryFilter
+                     * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} field
+                     * @memberof google.firestore.v1.StructuredQuery.UnaryFilter
                      * @instance
                      */
                     UnaryFilter.prototype.field = null;
@@ -3039,7 +3039,7 @@ $root.google = (function() {
                     /**
                      * UnaryFilter operandType.
                      * @member {"field"|undefined} operandType
-                     * @memberof google.firestore.v1beta1.StructuredQuery.UnaryFilter
+                     * @memberof google.firestore.v1.StructuredQuery.UnaryFilter
                      * @instance
                      */
                     Object.defineProperty(UnaryFilter.prototype, "operandType", {
@@ -3049,7 +3049,7 @@ $root.google = (function() {
 
                     /**
                      * Operator enum.
-                     * @name google.firestore.v1beta1.StructuredQuery.UnaryFilter.Operator
+                     * @name google.firestore.v1.StructuredQuery.UnaryFilter.Operator
                      * @enum {number}
                      * @property {string} OPERATOR_UNSPECIFIED=OPERATOR_UNSPECIFIED OPERATOR_UNSPECIFIED value
                      * @property {string} IS_NAN=IS_NAN IS_NAN value
@@ -3070,19 +3070,19 @@ $root.google = (function() {
 
                     /**
                      * Properties of an Order.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @interface IOrder
-                     * @property {google.firestore.v1beta1.StructuredQuery.IFieldReference|null} [field] Order field
-                     * @property {google.firestore.v1beta1.StructuredQuery.Direction|null} [direction] Order direction
+                     * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [field] Order field
+                     * @property {google.firestore.v1.StructuredQuery.Direction|null} [direction] Order direction
                      */
 
                     /**
                      * Constructs a new Order.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @classdesc Represents an Order.
                      * @implements IOrder
                      * @constructor
-                     * @param {google.firestore.v1beta1.StructuredQuery.IOrder=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.IOrder=} [properties] Properties to set
                      */
                     function Order(properties) {
                         if (properties)
@@ -3093,16 +3093,16 @@ $root.google = (function() {
 
                     /**
                      * Order field.
-                     * @member {google.firestore.v1beta1.StructuredQuery.IFieldReference|null|undefined} field
-                     * @memberof google.firestore.v1beta1.StructuredQuery.Order
+                     * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} field
+                     * @memberof google.firestore.v1.StructuredQuery.Order
                      * @instance
                      */
                     Order.prototype.field = null;
 
                     /**
                      * Order direction.
-                     * @member {google.firestore.v1beta1.StructuredQuery.Direction} direction
-                     * @memberof google.firestore.v1beta1.StructuredQuery.Order
+                     * @member {google.firestore.v1.StructuredQuery.Direction} direction
+                     * @memberof google.firestore.v1.StructuredQuery.Order
                      * @instance
                      */
                     Order.prototype.direction = 0;
@@ -3114,18 +3114,18 @@ $root.google = (function() {
 
                     /**
                      * Properties of a FieldReference.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @interface IFieldReference
                      * @property {string|null} [fieldPath] FieldReference fieldPath
                      */
 
                     /**
                      * Constructs a new FieldReference.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @classdesc Represents a FieldReference.
                      * @implements IFieldReference
                      * @constructor
-                     * @param {google.firestore.v1beta1.StructuredQuery.IFieldReference=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.IFieldReference=} [properties] Properties to set
                      */
                     function FieldReference(properties) {
                         if (properties)
@@ -3137,7 +3137,7 @@ $root.google = (function() {
                     /**
                      * FieldReference fieldPath.
                      * @member {string} fieldPath
-                     * @memberof google.firestore.v1beta1.StructuredQuery.FieldReference
+                     * @memberof google.firestore.v1.StructuredQuery.FieldReference
                      * @instance
                      */
                     FieldReference.prototype.fieldPath = "";
@@ -3149,18 +3149,18 @@ $root.google = (function() {
 
                     /**
                      * Properties of a Projection.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @interface IProjection
-                     * @property {Array.<google.firestore.v1beta1.StructuredQuery.IFieldReference>|null} [fields] Projection fields
+                     * @property {Array.<google.firestore.v1.StructuredQuery.IFieldReference>|null} [fields] Projection fields
                      */
 
                     /**
                      * Constructs a new Projection.
-                     * @memberof google.firestore.v1beta1.StructuredQuery
+                     * @memberof google.firestore.v1.StructuredQuery
                      * @classdesc Represents a Projection.
                      * @implements IProjection
                      * @constructor
-                     * @param {google.firestore.v1beta1.StructuredQuery.IProjection=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.IProjection=} [properties] Properties to set
                      */
                     function Projection(properties) {
                         this.fields = [];
@@ -3172,8 +3172,8 @@ $root.google = (function() {
 
                     /**
                      * Projection fields.
-                     * @member {Array.<google.firestore.v1beta1.StructuredQuery.IFieldReference>} fields
-                     * @memberof google.firestore.v1beta1.StructuredQuery.Projection
+                     * @member {Array.<google.firestore.v1.StructuredQuery.IFieldReference>} fields
+                     * @memberof google.firestore.v1.StructuredQuery.Projection
                      * @instance
                      */
                     Projection.prototype.fields = $util.emptyArray;
@@ -3183,7 +3183,7 @@ $root.google = (function() {
 
                 /**
                  * Direction enum.
-                 * @name google.firestore.v1beta1.StructuredQuery.Direction
+                 * @name google.firestore.v1.StructuredQuery.Direction
                  * @enum {number}
                  * @property {string} DIRECTION_UNSPECIFIED=DIRECTION_UNSPECIFIED DIRECTION_UNSPECIFIED value
                  * @property {string} ASCENDING=ASCENDING ASCENDING value
@@ -3200,23 +3200,23 @@ $root.google = (function() {
                 return StructuredQuery;
             })();
 
-            v1beta1.Cursor = (function() {
+            v1.Cursor = (function() {
 
                 /**
                  * Properties of a Cursor.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface ICursor
-                 * @property {Array.<google.firestore.v1beta1.IValue>|null} [values] Cursor values
+                 * @property {Array.<google.firestore.v1.IValue>|null} [values] Cursor values
                  * @property {boolean|null} [before] Cursor before
                  */
 
                 /**
                  * Constructs a new Cursor.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a Cursor.
                  * @implements ICursor
                  * @constructor
-                 * @param {google.firestore.v1beta1.ICursor=} [properties] Properties to set
+                 * @param {google.firestore.v1.ICursor=} [properties] Properties to set
                  */
                 function Cursor(properties) {
                     this.values = [];
@@ -3228,8 +3228,8 @@ $root.google = (function() {
 
                 /**
                  * Cursor values.
-                 * @member {Array.<google.firestore.v1beta1.IValue>} values
-                 * @memberof google.firestore.v1beta1.Cursor
+                 * @member {Array.<google.firestore.v1.IValue>} values
+                 * @memberof google.firestore.v1.Cursor
                  * @instance
                  */
                 Cursor.prototype.values = $util.emptyArray;
@@ -3237,7 +3237,7 @@ $root.google = (function() {
                 /**
                  * Cursor before.
                  * @member {boolean} before
-                 * @memberof google.firestore.v1beta1.Cursor
+                 * @memberof google.firestore.v1.Cursor
                  * @instance
                  */
                 Cursor.prototype.before = false;
@@ -3245,26 +3245,26 @@ $root.google = (function() {
                 return Cursor;
             })();
 
-            v1beta1.Write = (function() {
+            v1.Write = (function() {
 
                 /**
                  * Properties of a Write.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IWrite
-                 * @property {google.firestore.v1beta1.IDocument|null} [update] Write update
+                 * @property {google.firestore.v1.IDocument|null} [update] Write update
                  * @property {string|null} ["delete"] Write delete
-                 * @property {google.firestore.v1beta1.IDocumentTransform|null} [transform] Write transform
-                 * @property {google.firestore.v1beta1.IDocumentMask|null} [updateMask] Write updateMask
-                 * @property {google.firestore.v1beta1.IPrecondition|null} [currentDocument] Write currentDocument
+                 * @property {google.firestore.v1.IDocumentTransform|null} [transform] Write transform
+                 * @property {google.firestore.v1.IDocumentMask|null} [updateMask] Write updateMask
+                 * @property {google.firestore.v1.IPrecondition|null} [currentDocument] Write currentDocument
                  */
 
                 /**
                  * Constructs a new Write.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a Write.
                  * @implements IWrite
                  * @constructor
-                 * @param {google.firestore.v1beta1.IWrite=} [properties] Properties to set
+                 * @param {google.firestore.v1.IWrite=} [properties] Properties to set
                  */
                 function Write(properties) {
                     if (properties)
@@ -3275,8 +3275,8 @@ $root.google = (function() {
 
                 /**
                  * Write update.
-                 * @member {google.firestore.v1beta1.IDocument|null|undefined} update
-                 * @memberof google.firestore.v1beta1.Write
+                 * @member {google.firestore.v1.IDocument|null|undefined} update
+                 * @memberof google.firestore.v1.Write
                  * @instance
                  */
                 Write.prototype.update = null;
@@ -3284,31 +3284,31 @@ $root.google = (function() {
                 /**
                  * Write delete.
                  * @member {string} delete
-                 * @memberof google.firestore.v1beta1.Write
+                 * @memberof google.firestore.v1.Write
                  * @instance
                  */
                 Write.prototype["delete"] = "";
 
                 /**
                  * Write transform.
-                 * @member {google.firestore.v1beta1.IDocumentTransform|null|undefined} transform
-                 * @memberof google.firestore.v1beta1.Write
+                 * @member {google.firestore.v1.IDocumentTransform|null|undefined} transform
+                 * @memberof google.firestore.v1.Write
                  * @instance
                  */
                 Write.prototype.transform = null;
 
                 /**
                  * Write updateMask.
-                 * @member {google.firestore.v1beta1.IDocumentMask|null|undefined} updateMask
-                 * @memberof google.firestore.v1beta1.Write
+                 * @member {google.firestore.v1.IDocumentMask|null|undefined} updateMask
+                 * @memberof google.firestore.v1.Write
                  * @instance
                  */
                 Write.prototype.updateMask = null;
 
                 /**
                  * Write currentDocument.
-                 * @member {google.firestore.v1beta1.IPrecondition|null|undefined} currentDocument
-                 * @memberof google.firestore.v1beta1.Write
+                 * @member {google.firestore.v1.IPrecondition|null|undefined} currentDocument
+                 * @memberof google.firestore.v1.Write
                  * @instance
                  */
                 Write.prototype.currentDocument = null;
@@ -3319,7 +3319,7 @@ $root.google = (function() {
                 /**
                  * Write operation.
                  * @member {"update"|"delete"|"transform"|undefined} operation
-                 * @memberof google.firestore.v1beta1.Write
+                 * @memberof google.firestore.v1.Write
                  * @instance
                  */
                 Object.defineProperty(Write.prototype, "operation", {
@@ -3330,23 +3330,23 @@ $root.google = (function() {
                 return Write;
             })();
 
-            v1beta1.DocumentTransform = (function() {
+            v1.DocumentTransform = (function() {
 
                 /**
                  * Properties of a DocumentTransform.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IDocumentTransform
                  * @property {string|null} [document] DocumentTransform document
-                 * @property {Array.<google.firestore.v1beta1.DocumentTransform.IFieldTransform>|null} [fieldTransforms] DocumentTransform fieldTransforms
+                 * @property {Array.<google.firestore.v1.DocumentTransform.IFieldTransform>|null} [fieldTransforms] DocumentTransform fieldTransforms
                  */
 
                 /**
                  * Constructs a new DocumentTransform.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a DocumentTransform.
                  * @implements IDocumentTransform
                  * @constructor
-                 * @param {google.firestore.v1beta1.IDocumentTransform=} [properties] Properties to set
+                 * @param {google.firestore.v1.IDocumentTransform=} [properties] Properties to set
                  */
                 function DocumentTransform(properties) {
                     this.fieldTransforms = [];
@@ -3359,15 +3359,15 @@ $root.google = (function() {
                 /**
                  * DocumentTransform document.
                  * @member {string} document
-                 * @memberof google.firestore.v1beta1.DocumentTransform
+                 * @memberof google.firestore.v1.DocumentTransform
                  * @instance
                  */
                 DocumentTransform.prototype.document = "";
 
                 /**
                  * DocumentTransform fieldTransforms.
-                 * @member {Array.<google.firestore.v1beta1.DocumentTransform.IFieldTransform>} fieldTransforms
-                 * @memberof google.firestore.v1beta1.DocumentTransform
+                 * @member {Array.<google.firestore.v1.DocumentTransform.IFieldTransform>} fieldTransforms
+                 * @memberof google.firestore.v1.DocumentTransform
                  * @instance
                  */
                 DocumentTransform.prototype.fieldTransforms = $util.emptyArray;
@@ -3376,21 +3376,24 @@ $root.google = (function() {
 
                     /**
                      * Properties of a FieldTransform.
-                     * @memberof google.firestore.v1beta1.DocumentTransform
+                     * @memberof google.firestore.v1.DocumentTransform
                      * @interface IFieldTransform
                      * @property {string|null} [fieldPath] FieldTransform fieldPath
-                     * @property {google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue|null} [setToServerValue] FieldTransform setToServerValue
-                     * @property {google.firestore.v1beta1.IArrayValue|null} [appendMissingElements] FieldTransform appendMissingElements
-                     * @property {google.firestore.v1beta1.IArrayValue|null} [removeAllFromArray] FieldTransform removeAllFromArray
+                     * @property {google.firestore.v1.DocumentTransform.FieldTransform.ServerValue|null} [setToServerValue] FieldTransform setToServerValue
+                     * @property {google.firestore.v1.IValue|null} [increment] FieldTransform increment
+                     * @property {google.firestore.v1.IValue|null} [maximum] FieldTransform maximum
+                     * @property {google.firestore.v1.IValue|null} [minimum] FieldTransform minimum
+                     * @property {google.firestore.v1.IArrayValue|null} [appendMissingElements] FieldTransform appendMissingElements
+                     * @property {google.firestore.v1.IArrayValue|null} [removeAllFromArray] FieldTransform removeAllFromArray
                      */
 
                     /**
                      * Constructs a new FieldTransform.
-                     * @memberof google.firestore.v1beta1.DocumentTransform
+                     * @memberof google.firestore.v1.DocumentTransform
                      * @classdesc Represents a FieldTransform.
                      * @implements IFieldTransform
                      * @constructor
-                     * @param {google.firestore.v1beta1.DocumentTransform.IFieldTransform=} [properties] Properties to set
+                     * @param {google.firestore.v1.DocumentTransform.IFieldTransform=} [properties] Properties to set
                      */
                     function FieldTransform(properties) {
                         if (properties)
@@ -3402,31 +3405,55 @@ $root.google = (function() {
                     /**
                      * FieldTransform fieldPath.
                      * @member {string} fieldPath
-                     * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
+                     * @memberof google.firestore.v1.DocumentTransform.FieldTransform
                      * @instance
                      */
                     FieldTransform.prototype.fieldPath = "";
 
                     /**
                      * FieldTransform setToServerValue.
-                     * @member {google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue} setToServerValue
-                     * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
+                     * @member {google.firestore.v1.DocumentTransform.FieldTransform.ServerValue} setToServerValue
+                     * @memberof google.firestore.v1.DocumentTransform.FieldTransform
                      * @instance
                      */
                     FieldTransform.prototype.setToServerValue = 0;
 
                     /**
+                     * FieldTransform increment.
+                     * @member {google.firestore.v1.IValue|null|undefined} increment
+                     * @memberof google.firestore.v1.DocumentTransform.FieldTransform
+                     * @instance
+                     */
+                    FieldTransform.prototype.increment = null;
+
+                    /**
+                     * FieldTransform maximum.
+                     * @member {google.firestore.v1.IValue|null|undefined} maximum
+                     * @memberof google.firestore.v1.DocumentTransform.FieldTransform
+                     * @instance
+                     */
+                    FieldTransform.prototype.maximum = null;
+
+                    /**
+                     * FieldTransform minimum.
+                     * @member {google.firestore.v1.IValue|null|undefined} minimum
+                     * @memberof google.firestore.v1.DocumentTransform.FieldTransform
+                     * @instance
+                     */
+                    FieldTransform.prototype.minimum = null;
+
+                    /**
                      * FieldTransform appendMissingElements.
-                     * @member {google.firestore.v1beta1.IArrayValue|null|undefined} appendMissingElements
-                     * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
+                     * @member {google.firestore.v1.IArrayValue|null|undefined} appendMissingElements
+                     * @memberof google.firestore.v1.DocumentTransform.FieldTransform
                      * @instance
                      */
                     FieldTransform.prototype.appendMissingElements = null;
 
                     /**
                      * FieldTransform removeAllFromArray.
-                     * @member {google.firestore.v1beta1.IArrayValue|null|undefined} removeAllFromArray
-                     * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
+                     * @member {google.firestore.v1.IArrayValue|null|undefined} removeAllFromArray
+                     * @memberof google.firestore.v1.DocumentTransform.FieldTransform
                      * @instance
                      */
                     FieldTransform.prototype.removeAllFromArray = null;
@@ -3436,18 +3463,18 @@ $root.google = (function() {
 
                     /**
                      * FieldTransform transformType.
-                     * @member {"setToServerValue"|"appendMissingElements"|"removeAllFromArray"|undefined} transformType
-                     * @memberof google.firestore.v1beta1.DocumentTransform.FieldTransform
+                     * @member {"setToServerValue"|"increment"|"maximum"|"minimum"|"appendMissingElements"|"removeAllFromArray"|undefined} transformType
+                     * @memberof google.firestore.v1.DocumentTransform.FieldTransform
                      * @instance
                      */
                     Object.defineProperty(FieldTransform.prototype, "transformType", {
-                        get: $util.oneOfGetter($oneOfFields = ["setToServerValue", "appendMissingElements", "removeAllFromArray"]),
+                        get: $util.oneOfGetter($oneOfFields = ["setToServerValue", "increment", "maximum", "minimum", "appendMissingElements", "removeAllFromArray"]),
                         set: $util.oneOfSetter($oneOfFields)
                     });
 
                     /**
                      * ServerValue enum.
-                     * @name google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue
+                     * @name google.firestore.v1.DocumentTransform.FieldTransform.ServerValue
                      * @enum {number}
                      * @property {string} SERVER_VALUE_UNSPECIFIED=SERVER_VALUE_UNSPECIFIED SERVER_VALUE_UNSPECIFIED value
                      * @property {string} REQUEST_TIME=REQUEST_TIME REQUEST_TIME value
@@ -3465,23 +3492,23 @@ $root.google = (function() {
                 return DocumentTransform;
             })();
 
-            v1beta1.WriteResult = (function() {
+            v1.WriteResult = (function() {
 
                 /**
                  * Properties of a WriteResult.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IWriteResult
                  * @property {google.protobuf.ITimestamp|null} [updateTime] WriteResult updateTime
-                 * @property {Array.<google.firestore.v1beta1.IValue>|null} [transformResults] WriteResult transformResults
+                 * @property {Array.<google.firestore.v1.IValue>|null} [transformResults] WriteResult transformResults
                  */
 
                 /**
                  * Constructs a new WriteResult.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a WriteResult.
                  * @implements IWriteResult
                  * @constructor
-                 * @param {google.firestore.v1beta1.IWriteResult=} [properties] Properties to set
+                 * @param {google.firestore.v1.IWriteResult=} [properties] Properties to set
                  */
                 function WriteResult(properties) {
                     this.transformResults = [];
@@ -3494,15 +3521,15 @@ $root.google = (function() {
                 /**
                  * WriteResult updateTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} updateTime
-                 * @memberof google.firestore.v1beta1.WriteResult
+                 * @memberof google.firestore.v1.WriteResult
                  * @instance
                  */
                 WriteResult.prototype.updateTime = null;
 
                 /**
                  * WriteResult transformResults.
-                 * @member {Array.<google.firestore.v1beta1.IValue>} transformResults
-                 * @memberof google.firestore.v1beta1.WriteResult
+                 * @member {Array.<google.firestore.v1.IValue>} transformResults
+                 * @memberof google.firestore.v1.WriteResult
                  * @instance
                  */
                 WriteResult.prototype.transformResults = $util.emptyArray;
@@ -3510,24 +3537,24 @@ $root.google = (function() {
                 return WriteResult;
             })();
 
-            v1beta1.DocumentChange = (function() {
+            v1.DocumentChange = (function() {
 
                 /**
                  * Properties of a DocumentChange.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IDocumentChange
-                 * @property {google.firestore.v1beta1.IDocument|null} [document] DocumentChange document
+                 * @property {google.firestore.v1.IDocument|null} [document] DocumentChange document
                  * @property {Array.<number>|null} [targetIds] DocumentChange targetIds
                  * @property {Array.<number>|null} [removedTargetIds] DocumentChange removedTargetIds
                  */
 
                 /**
                  * Constructs a new DocumentChange.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a DocumentChange.
                  * @implements IDocumentChange
                  * @constructor
-                 * @param {google.firestore.v1beta1.IDocumentChange=} [properties] Properties to set
+                 * @param {google.firestore.v1.IDocumentChange=} [properties] Properties to set
                  */
                 function DocumentChange(properties) {
                     this.targetIds = [];
@@ -3540,8 +3567,8 @@ $root.google = (function() {
 
                 /**
                  * DocumentChange document.
-                 * @member {google.firestore.v1beta1.IDocument|null|undefined} document
-                 * @memberof google.firestore.v1beta1.DocumentChange
+                 * @member {google.firestore.v1.IDocument|null|undefined} document
+                 * @memberof google.firestore.v1.DocumentChange
                  * @instance
                  */
                 DocumentChange.prototype.document = null;
@@ -3549,7 +3576,7 @@ $root.google = (function() {
                 /**
                  * DocumentChange targetIds.
                  * @member {Array.<number>} targetIds
-                 * @memberof google.firestore.v1beta1.DocumentChange
+                 * @memberof google.firestore.v1.DocumentChange
                  * @instance
                  */
                 DocumentChange.prototype.targetIds = $util.emptyArray;
@@ -3557,7 +3584,7 @@ $root.google = (function() {
                 /**
                  * DocumentChange removedTargetIds.
                  * @member {Array.<number>} removedTargetIds
-                 * @memberof google.firestore.v1beta1.DocumentChange
+                 * @memberof google.firestore.v1.DocumentChange
                  * @instance
                  */
                 DocumentChange.prototype.removedTargetIds = $util.emptyArray;
@@ -3565,11 +3592,11 @@ $root.google = (function() {
                 return DocumentChange;
             })();
 
-            v1beta1.DocumentDelete = (function() {
+            v1.DocumentDelete = (function() {
 
                 /**
                  * Properties of a DocumentDelete.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IDocumentDelete
                  * @property {string|null} [document] DocumentDelete document
                  * @property {Array.<number>|null} [removedTargetIds] DocumentDelete removedTargetIds
@@ -3578,11 +3605,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new DocumentDelete.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a DocumentDelete.
                  * @implements IDocumentDelete
                  * @constructor
-                 * @param {google.firestore.v1beta1.IDocumentDelete=} [properties] Properties to set
+                 * @param {google.firestore.v1.IDocumentDelete=} [properties] Properties to set
                  */
                 function DocumentDelete(properties) {
                     this.removedTargetIds = [];
@@ -3595,7 +3622,7 @@ $root.google = (function() {
                 /**
                  * DocumentDelete document.
                  * @member {string} document
-                 * @memberof google.firestore.v1beta1.DocumentDelete
+                 * @memberof google.firestore.v1.DocumentDelete
                  * @instance
                  */
                 DocumentDelete.prototype.document = "";
@@ -3603,7 +3630,7 @@ $root.google = (function() {
                 /**
                  * DocumentDelete removedTargetIds.
                  * @member {Array.<number>} removedTargetIds
-                 * @memberof google.firestore.v1beta1.DocumentDelete
+                 * @memberof google.firestore.v1.DocumentDelete
                  * @instance
                  */
                 DocumentDelete.prototype.removedTargetIds = $util.emptyArray;
@@ -3611,7 +3638,7 @@ $root.google = (function() {
                 /**
                  * DocumentDelete readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.DocumentDelete
+                 * @memberof google.firestore.v1.DocumentDelete
                  * @instance
                  */
                 DocumentDelete.prototype.readTime = null;
@@ -3619,11 +3646,11 @@ $root.google = (function() {
                 return DocumentDelete;
             })();
 
-            v1beta1.DocumentRemove = (function() {
+            v1.DocumentRemove = (function() {
 
                 /**
                  * Properties of a DocumentRemove.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IDocumentRemove
                  * @property {string|null} [document] DocumentRemove document
                  * @property {Array.<number>|null} [removedTargetIds] DocumentRemove removedTargetIds
@@ -3632,11 +3659,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new DocumentRemove.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents a DocumentRemove.
                  * @implements IDocumentRemove
                  * @constructor
-                 * @param {google.firestore.v1beta1.IDocumentRemove=} [properties] Properties to set
+                 * @param {google.firestore.v1.IDocumentRemove=} [properties] Properties to set
                  */
                 function DocumentRemove(properties) {
                     this.removedTargetIds = [];
@@ -3649,7 +3676,7 @@ $root.google = (function() {
                 /**
                  * DocumentRemove document.
                  * @member {string} document
-                 * @memberof google.firestore.v1beta1.DocumentRemove
+                 * @memberof google.firestore.v1.DocumentRemove
                  * @instance
                  */
                 DocumentRemove.prototype.document = "";
@@ -3657,7 +3684,7 @@ $root.google = (function() {
                 /**
                  * DocumentRemove removedTargetIds.
                  * @member {Array.<number>} removedTargetIds
-                 * @memberof google.firestore.v1beta1.DocumentRemove
+                 * @memberof google.firestore.v1.DocumentRemove
                  * @instance
                  */
                 DocumentRemove.prototype.removedTargetIds = $util.emptyArray;
@@ -3665,7 +3692,7 @@ $root.google = (function() {
                 /**
                  * DocumentRemove readTime.
                  * @member {google.protobuf.ITimestamp|null|undefined} readTime
-                 * @memberof google.firestore.v1beta1.DocumentRemove
+                 * @memberof google.firestore.v1.DocumentRemove
                  * @instance
                  */
                 DocumentRemove.prototype.readTime = null;
@@ -3673,11 +3700,11 @@ $root.google = (function() {
                 return DocumentRemove;
             })();
 
-            v1beta1.ExistenceFilter = (function() {
+            v1.ExistenceFilter = (function() {
 
                 /**
                  * Properties of an ExistenceFilter.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @interface IExistenceFilter
                  * @property {number|null} [targetId] ExistenceFilter targetId
                  * @property {number|null} [count] ExistenceFilter count
@@ -3685,11 +3712,11 @@ $root.google = (function() {
 
                 /**
                  * Constructs a new ExistenceFilter.
-                 * @memberof google.firestore.v1beta1
+                 * @memberof google.firestore.v1
                  * @classdesc Represents an ExistenceFilter.
                  * @implements IExistenceFilter
                  * @constructor
-                 * @param {google.firestore.v1beta1.IExistenceFilter=} [properties] Properties to set
+                 * @param {google.firestore.v1.IExistenceFilter=} [properties] Properties to set
                  */
                 function ExistenceFilter(properties) {
                     if (properties)
@@ -3701,7 +3728,7 @@ $root.google = (function() {
                 /**
                  * ExistenceFilter targetId.
                  * @member {number} targetId
-                 * @memberof google.firestore.v1beta1.ExistenceFilter
+                 * @memberof google.firestore.v1.ExistenceFilter
                  * @instance
                  */
                 ExistenceFilter.prototype.targetId = 0;
@@ -3709,7 +3736,7 @@ $root.google = (function() {
                 /**
                  * ExistenceFilter count.
                  * @member {number} count
-                 * @memberof google.firestore.v1beta1.ExistenceFilter
+                 * @memberof google.firestore.v1.ExistenceFilter
                  * @instance
                  */
                 ExistenceFilter.prototype.count = 0;
@@ -3717,7 +3744,7 @@ $root.google = (function() {
                 return ExistenceFilter;
             })();
 
-            return v1beta1;
+            return v1;
         })();
 
         return firestore;

@@ -18,12 +18,12 @@ import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {DocumentReference, FieldPath, Transaction} from '../src';
 import {createInstance, InvalidApiUsage} from './util/helpers';
 
-import api = google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 use(chaiAsPromised);
 
@@ -203,7 +203,7 @@ function getAll(docs: string[], fieldMask?: string[]): TransactionStep {
 
 function query(transaction?: Uint8Array): TransactionStep {
   const request = {
-    parent: DATABASE_ROOT,
+    parent: `${DATABASE_ROOT}/documents`,
     structuredQuery: {
       from: [
         {

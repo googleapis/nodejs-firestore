@@ -29,7 +29,7 @@ import {DocumentData} from './types';
 import {isObject, requestTag} from './util';
 import {AllowOptional, customObjectMessage, invalidArgumentMessage, validateMaxNumberOfArguments, validateMinNumberOfArguments, validateOptional} from './validate';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /*!
  * Google Cloud Functions terminates idle connections after two minutes. After

@@ -29,7 +29,7 @@ import {Timestamp} from './timestamp';
 import {GrpcError} from './types';
 import {requestTag} from './util';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -532,6 +532,7 @@ export class Watch {
      * Applies the mutations in changeMap to both the document tree and the
      * document lookup map. Modified docMap in-place and returns the updated
      * state.
+     * @private
      */
     const computeSnapshot =
         (docTree: rbtree, docMap: Map<string, QueryDocumentSnapshot>,
@@ -547,6 +548,7 @@ export class Watch {
           /**
            * Applies a document delete to the document tree and the document
            * map. Returns the corresponding DocumentChange event.
+           * @private
            */
           function deleteDoc(name: string): DocumentChange {
             assert(updatedMap.has(name), 'Document to delete does not exist');
@@ -562,6 +564,7 @@ export class Watch {
           /**
            * Applies a document add to the document tree and the document map.
            * Returns the corresponding DocumentChange event.
+           * @private
            */
           function addDoc(newDocument: QueryDocumentSnapshot): DocumentChange {
             const name = newDocument.ref.formattedName;
@@ -577,6 +580,7 @@ export class Watch {
            * Applies a document modification to the document tree and the
            * document map. Returns the DocumentChange event for successful
            * modifications.
+           * @private
            */
           function modifyDoc(newDocument: QueryDocumentSnapshot):
               DocumentChange|null {

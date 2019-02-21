@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import {google} from '../protos/firestore_proto_api';
+
+import * as proto from '../protos/firestore_proto_api';
+
+import {FieldTransform} from './field-value';
 import {detectValueType} from './convert';
-import {DeleteTransform, FieldTransform} from './field-value';
+import {DeleteTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {FieldPath, ResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {isEmpty, isObject} from './util';
-
-import api = google.firestore.v1beta1;
 import {ValidationOptions} from './types';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
+
+import api = proto.google.firestore.v1;
 
 /**
  * The maximum depth of a Firestore object.
@@ -58,7 +61,11 @@ export class Serializer {
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
     this.createReference = path => firestore.doc(path);
-    this.timestampsInSnapshots = !!firestore._settings.timestampsInSnapshots;
+    if (firestore._settings.timestampsInSnapshots === undefined) {
+      this.timestampsInSnapshots = true;
+    } else {
+      this.timestampsInSnapshots = firestore._settings.timestampsInSnapshots;
+    }
   }
 
   /**

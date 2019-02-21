@@ -29,7 +29,7 @@ import {Serializer} from '../src/serializer';
 import {GrpcError} from '../src/types';
 import {createInstance} from './util/helpers';
 
-import api = proto.google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -526,7 +526,7 @@ describe('Query watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
           },
@@ -546,7 +546,7 @@ describe('Query watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
             where: {
@@ -573,7 +573,7 @@ describe('Query watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
           },
@@ -594,7 +594,7 @@ describe('Query watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
             orderBy: [{direction: 'DESCENDING', field: {fieldPath: 'foo'}}],

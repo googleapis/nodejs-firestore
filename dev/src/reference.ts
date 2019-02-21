@@ -20,12 +20,13 @@ import * as bun from 'bun';
 import * as extend from 'extend';
 import * as through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_proto_api';
+
 import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange} from './document-change';
 import {Firestore} from './index';
-import {logger} from './logger';
 import {compare} from './order';
+import {logger} from './logger';
 import {FieldPath, ResourcePath, validateFieldPath, validateResourcePath} from './path';
 import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
@@ -35,9 +36,9 @@ import {invalidArgumentMessage, validateEnumValue, validateFunction, validateInt
 import {Watch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
-import api = google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
-/*!
+/**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
  * (descending or ascending).
  *
@@ -48,7 +49,7 @@ const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
   desc: 'DESCENDING',
 };
 
-/*!
+/**
  * Filter conditions in a `Query.where()` clause are specified using the
  * strings '<', '<=', '==', '>=', and '>'.
  *
@@ -509,6 +510,7 @@ class FieldOrder {
 
   /**
    * Generates the proto representation for this field order.
+   * @private
    */
   toProto(): api.StructuredQuery.IOrder {
     return {

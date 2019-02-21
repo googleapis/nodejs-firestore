@@ -15,10 +15,11 @@
  */
 
 import {google} from '../protos/firestore_proto_api';
+
 import {isObject} from './util';
 import {customObjectMessage, invalidArgumentMessage, validateMinNumberOfArguments, validateString} from './validate';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /*!
  * A regular expression to verify an absolute Resource Path in Firestore. It
@@ -319,15 +320,10 @@ export class ResourcePath extends Path<ResourcePath> {
    * @returns {string} The representation as expected by the API.
    */
   canonicalString(): string {
-    let components = [
-      'projects',
-      this.projectId,
-      'databases',
-      this.databaseId,
+    const components = [
+      'projects', this.projectId, 'databases', this.databaseId, 'documents',
+      ...this.segments
     ];
-    if (this.segments.length > 0) {
-      components = components.concat('documents', this.segments);
-    }
     return components.join('/');
   }
 

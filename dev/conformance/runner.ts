@@ -20,8 +20,8 @@ import {expect} from 'chai';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
+import * as proto from '../protos/firestore_proto_api';
 
-import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {documentFromJson} from '../src/convert';
 import {DocumentChangeType} from '../src/document-change';
@@ -29,7 +29,7 @@ import {ResourcePath} from '../src/path';
 import {isObject} from '../src/util';
 import {createInstance as createInstanceHelper} from '../test/util/helpers';
 
-import api = google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 const REQUEST_TIME = 'REQUEST_TIME';
 
@@ -55,9 +55,9 @@ const protoDefinition =
 
 const TEST_SUITE_TYPE = protoDefinition.lookupType('tests.TestSuite');
 const STRUCTURED_QUERY_TYPE =
-    protoDefinition.lookupType('google.firestore.v1beta1.StructuredQuery');
+    protoDefinition.lookupType('google.firestore.v1.StructuredQuery');
 const COMMIT_REQUEST_TYPE =
-    protoDefinition.lookupType('google.firestore.v1beta1.CommitRequest');
+    protoDefinition.lookupType('google.firestore.v1.CommitRequest');
 
 // Firestore instance initialized by the test runner.
 let firestore;

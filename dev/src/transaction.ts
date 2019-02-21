@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {google} from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_proto_api';
+
 import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
 import {FieldPath, validateFieldPath} from './path';
@@ -24,7 +25,7 @@ import {DocumentData, Precondition as PublicPrecondition, ReadOptions, SetOption
 import {isObject, requestTag} from './util';
 import {AllowOptional, invalidArgumentMessage, validateMinNumberOfArguments, validateOptional} from './validate';
 
-import api = google.firestore.v1beta1;
+import api = proto.google.firestore.v1;
 
 /*!
  * Error message for transactional reads that were executed after performing
@@ -135,9 +136,12 @@ export class Transaction {
    * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
    * all returned documents.
    *
-   * @param {DocumentReference} documentRef A `DocumentReference` to receive.
-   * @param {Array.<DocumentReference|ReadOptions>} moreDocumentRefsOrReadOptions
-   * Additional `DocumentReferences` to receive, followed by an optional field
+   * The first argument is required and must be of type `DocumentReference`
+   * followed by any additional `DocumentReference` documents. If used, the
+   * optional `ReadOptions` must be the last argument.
+   *
+   * @param {Array.<DocumentReference|ReadOptions>} documentRefsOrReadOptions
+   * The `DocumentReferences` to receive, followed by an optional field
    * mask.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
@@ -155,9 +159,7 @@ export class Transaction {
    *   });
    * });
    */
-  getAll(
-      documentRef: DocumentReference,
-      ...moreDocumentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+  getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
       Promise<DocumentSnapshot[]> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
@@ -166,7 +168,7 @@ export class Transaction {
     validateMinNumberOfArguments('Transaction.getAll', arguments, 1);
 
     const {documents, fieldMask} =
-        parseGetAllArguments([documentRef, ...moreDocumentRefsOrReadOptions]);
+        parseGetAllArguments(documentRefsOrReadOptions);
 
     return this._firestore.getAll_(
         documents, fieldMask, this._requestTag, this._transactionId);

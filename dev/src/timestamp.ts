@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {google} from '../protos/firestore_proto_api';
+
+import * as proto from '../protos/firestore_proto_api';
 import {validateInteger} from './validate';
 
 /*!
@@ -227,7 +228,7 @@ export class Timestamp {
    * @returns {Object} The `Timestamp` Protobuf object.
    */
   toProto() {
-    const timestamp: google.protobuf.ITimestamp = {};
+    const timestamp: proto.google.protobuf.ITimestamp = {};
 
     if (this.seconds) {
       timestamp.seconds = this.seconds;

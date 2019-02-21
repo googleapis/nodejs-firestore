@@ -104,12 +104,16 @@ export class ExponentialBackoff {
    * The initial delay (used as the base delay on the first retry attempt).
    * Note that jitter will still be applied, so the actual delay could be as
    * little as 0.5*initialDelayMs (based on a jitter factor of 1.0).
+   *
+   * @private
    */
   private readonly initialDelayMs: number;
 
   /**
    * The multiplier to use to determine the extended base delay after each
    * attempt.
+   *
+   * @private
    */
   private readonly backoffFactor: number;
 
@@ -117,17 +121,23 @@ export class ExponentialBackoff {
    * The maximum base delay after which no further backoff is performed.
    * Note that jitter will still be applied, so the actual delay could be as
    * much as 1.5*maxDelayMs (based on a jitter factor of 1.0).
+   *
+   * @private
    */
   private readonly maxDelayMs: number;
 
   /**
    * The jitter factor that controls the random distribution of the backoff
    * points.
+   *
+   * @private
    */
   private readonly jitterFactor: number;
 
   /**
    * The backoff delay of the current attempt.
+   *
+   * @private
    */
   private currentBaseMs = 0;
 
@@ -152,6 +162,8 @@ export class ExponentialBackoff {
    * The very next backoffAndWait() will have no delay. If it is called again
    * (i.e. due to an error), initialDelayMs (plus jitter) will be used, and
    * subsequent ones will increase according to the backoffFactor.
+   *
+   * @private
    */
   reset(): void {
     this.currentBaseMs = 0;
@@ -160,6 +172,8 @@ export class ExponentialBackoff {
   /**
    * Resets the backoff delay to the maximum delay (e.g. for use after a
    * RESOURCE_EXHAUSTED error).
+   *
+   * @private
    */
   resetToMax(): void {
     this.currentBaseMs = this.maxDelayMs;
@@ -170,6 +184,7 @@ export class ExponentialBackoff {
    * delay for any subsequent attempts.
    *
    * @return A Promise that resolves when the current delay elapsed.
+   * @private
    */
   backoffAndWait(): Promise<void> {
     // First schedule using the current base (which may be 0 and should be
@@ -197,8 +212,8 @@ export class ExponentialBackoff {
    * Returns a randomized "jitter" delay based on the current base and jitter
    * factor.
    *
-   * @private
    * @returns {number} The jitter to apply based on the current delay.
+   * @private
    */
   private jitterDelayMs() {
     return (Math.random() - 0.5) * this.jitterFactor * this.currentBaseMs;
