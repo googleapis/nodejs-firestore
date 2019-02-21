@@ -632,7 +632,7 @@ function validatePrecondition(
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate.
- * @param options Optional validation options specifying whether the valued can
+ * @param options Optional validation options specifying whether the value can
  * be omitted.
  */
 function validateUpdatePrecondition(
@@ -648,7 +648,7 @@ function validateUpdatePrecondition(
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate.
- * @param options Optional validation options specifying whether the valued can
+ * @param options Optional validation options specifying whether the value can
  * be omitted.
  */
 function validateDeletePrecondition(
@@ -665,7 +665,7 @@ function validateDeletePrecondition(
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate.
- * @param options Optional validation options specifying whether the valued can
+ * @param options Optional validation options specifying whether the value can
  * be omitted.
  * @returns 'true' if the input is a valid SetOptions object.
  */
