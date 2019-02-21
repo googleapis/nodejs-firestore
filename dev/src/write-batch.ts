@@ -27,7 +27,7 @@ import {Timestamp} from './timestamp';
 import {Precondition as PublicPrecondition, SetOptions, UpdateData, UpdateMap} from './types';
 import {DocumentData} from './types';
 import {isObject, requestTag} from './util';
-import {OptionalProperty, customObjectMessage, invalidArgumentMessage, validateMaxNumberOfArguments, validateMinNumberOfArguments, validateOptional} from './validate';
+import {customObjectMessage, invalidArgumentMessage, OptionalProperty, validateMaxNumberOfArguments, validateMinNumberOfArguments, validateOptional} from './validate';
 
 import api = google.firestore.v1;
 
@@ -690,7 +690,8 @@ export function validateSetOptions(
       if (!Array.isArray(setOptions.mergeFields)) {
         throw new Error(`${
             invalidArgumentMessage(
-                arg, 'set() options argument')} "mergeFields" is not an array.`);
+                arg,
+                'set() options argument')} "mergeFields" is not an array.`);
       }
 
       for (let i = 0; i < setOptions.mergeFields.length; ++i) {
@@ -699,8 +700,8 @@ export function validateSetOptions(
         } catch (err) {
           throw new Error(`${
               invalidArgumentMessage(
-                  arg,
-                  'set() options argument')} "mergeFields" is not valid: ${err.message}`);
+                  arg, 'set() options argument')} "mergeFields" is not valid: ${
+              err.message}`);
         }
       }
     }

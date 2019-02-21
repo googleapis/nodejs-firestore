@@ -1008,7 +1008,7 @@ export class Query {
   where(fieldPath: string|FieldPath, opStr: WhereFilterOp, value: unknown):
       Query {
     validateFieldPath('fieldPath', fieldPath);
-    validateQueryOperator('opStr', opStr, value);
+    opStr = validateQueryOperator('opStr', opStr, value);
     validateQueryValue('value', value);
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
@@ -1098,7 +1098,7 @@ export class Query {
    */
   orderBy(fieldPath: string|FieldPath, directionStr?: OrderByDirection): Query {
     validateFieldPath('fieldPath', fieldPath);
-    validateQueryOrder('directionStr', directionStr);
+    directionStr = validateQueryOrder('directionStr', directionStr);
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
@@ -1933,9 +1933,15 @@ export class CollectionReference extends Query {
  * @param arg The argument name or argument index (for varargs methods).
  * @param op Order direction to validate.
  * @throws when the direction is invalid
+ * @return a validated input value, which may be different from the provided
+ * value.
  */
-export function validateQueryOrder(arg: string|number, op: unknown): void {
+export function validateQueryOrder(arg: string, op: unknown): OrderByDirection|
+    undefined {
+  // For backwards compatibility, we support both lower and uppercase values.
+  op = typeof op === 'string' ? op.toLowerCase() : op;
   validateEnumValue(arg, op, Object.keys(directionOperators), {optional: true});
+  return op as OrderByDirection | undefined;
 }
 
 /**
@@ -1946,9 +1952,14 @@ export function validateQueryOrder(arg: string|number, op: unknown): void {
  * @param op Field comparison operator to validate.
  * @param fieldValue Value that is used in the filter.
  * @throws when the comparison operation is invalid
+ * @return a validated input value, which may be different from the provided
+ * value.
  */
 export function validateQueryOperator(
-    arg: string|number, op: unknown, fieldValue: unknown): void {
+    arg: string|number, op: unknown, fieldValue: unknown): WhereFilterOp {
+  // For backwards compatibility, we support both `=` and `==` for "equals".
+  op = op === '=' ? '==' : op;
+
   validateEnumValue(arg, op, Object.keys(comparisonOperators));
 
   if (typeof fieldValue === 'number' && isNaN(fieldValue) && op !== '==') {
@@ -1960,6 +1971,8 @@ export function validateQueryOperator(
     throw new Error(
         'Invalid query. You can only perform equals comparisons on Null.');
   }
+
+  return op as WhereFilterOp;
 }
 
 /**

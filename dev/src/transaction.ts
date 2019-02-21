@@ -23,7 +23,7 @@ import {DocumentReference, Query, QuerySnapshot, validateDocumentReference} from
 import {isPlainObject} from './serializer';
 import {DocumentData, Precondition as PublicPrecondition, ReadOptions, SetOptions, UpdateData} from './types';
 import {isObject, requestTag} from './util';
-import {OptionalProperty, invalidArgumentMessage, validateMinNumberOfArguments, validateOptional} from './validate';
+import {invalidArgumentMessage, OptionalProperty, validateMinNumberOfArguments, validateOptional} from './validate';
 
 import api = proto.google.firestore.v1;
 

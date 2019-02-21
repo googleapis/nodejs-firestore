@@ -279,12 +279,13 @@ describe('query interface', () => {
 
     queryEquals(
         [query.where('a', '==', '1'), query.where('a', '==', '1')],
-        [query.where('a', '==', 1)]);
+        [query.where('a', '=' as InvalidApiUsage, 1)]);
 
     queryEquals(
         [
           query.orderBy('__name__'),
           query.orderBy('__name__', 'asc'),
+          query.orderBy('__name__', 'ASC' as InvalidApiUsage),
           query.orderBy(Firestore.FieldPath.documentId()),
         ],
         [
@@ -603,10 +604,10 @@ describe('where() interface', () => {
             fieldFilters(
                 'fooSmaller', 'LESS_THAN', 'barSmaller', 'fooSmallerOrEquals',
                 'LESS_THAN_OR_EQUAL', 'barSmallerOrEquals', 'fooEquals',
-                'EQUAL', 'barEquals', 'fooGreaterOrEquals',
-                'GREATER_THAN_OR_EQUAL', 'barGreaterOrEquals', 'fooGreater',
-                'GREATER_THAN', 'barGreater', 'fooContains', 'ARRAY_CONTAINS',
-                'barContains'));
+                'EQUAL', 'barEquals', 'fooEqualsLong', 'EQUAL', 'barEqualsLong',
+                'fooGreaterOrEquals', 'GREATER_THAN_OR_EQUAL',
+                'barGreaterOrEquals', 'fooGreater', 'GREATER_THAN',
+                'barGreater', 'fooContains', 'ARRAY_CONTAINS', 'barContains'));
 
         return stream();
       }
@@ -616,7 +617,8 @@ describe('where() interface', () => {
       let query: Query = firestore.collection('collectionId');
       query = query.where('fooSmaller', '<', 'barSmaller');
       query = query.where('fooSmallerOrEquals', '<=', 'barSmallerOrEquals');
-      query = query.where('fooEquals', '==', 'barEquals');
+      query = query.where('fooEquals', '=' as InvalidApiUsage, 'barEquals');
+      query = query.where('fooEqualsLong', '==', 'barEqualsLong');
       query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
       query = query.where('fooGreater', '>', 'barGreater');
       query = query.where('fooContains', 'array-contains', 'barContains');
