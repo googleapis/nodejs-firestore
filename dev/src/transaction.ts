@@ -433,7 +433,8 @@ export function parseGetAllArguments(
  * @param options Options that specify whether the ReadOptions can be omitted.
  */
 export function validateReadOptions(
-    arg: number|string, value: unknown, options?: RequiredArgumentOptions): void {
+    arg: number|string, value: unknown,
+    options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(`${

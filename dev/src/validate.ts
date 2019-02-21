@@ -96,7 +96,8 @@ export function customObjectMessage(
  * @param options Options that specify whether the function can be omitted.
  */
 export function validateFunction(
-    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
+    arg: string|number, value: unknown,
+    options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (!isFunction(value)) {
       throw new Error(invalidArgumentMessage(arg, 'function'));
@@ -113,7 +114,8 @@ export function validateFunction(
  * @param options Options that specify whether the object can be omitted.
  */
 export function validateObject(
-    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
+    arg: string|number, value: unknown,
+    options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(invalidArgumentMessage(arg, 'object'));
@@ -130,7 +132,8 @@ export function validateObject(
  * @param options Options that specify whether the string can be omitted.
  */
 export function validateString(
-    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
+    arg: string|number, value: unknown,
+    options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (typeof value !== 'string') {
       throw new Error(invalidArgumentMessage(arg, 'string'));
@@ -147,7 +150,8 @@ export function validateString(
  * @param options Options that specify whether the boolean can be omitted.
  */
 export function validateBoolean(
-    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
+    arg: string|number, value: unknown,
+    options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (typeof value !== 'boolean') {
       throw new Error(invalidArgumentMessage(arg, 'boolean'));

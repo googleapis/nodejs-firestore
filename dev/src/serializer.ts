@@ -228,7 +228,7 @@ export class Serializer {
         return this.createReference(resourcePath.relativeName);
       }
       case 'arrayValue': {
-        const array: unknown[] = [];
+        const array: Array<unknown> = [];
         if (Array.isArray(proto.arrayValue!.values)) {
           for (const value of proto.arrayValue!.values!) {
             array.push(this.decodeValue(value));
@@ -312,7 +312,7 @@ export function validateUserInput(
   const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
 
   if (Array.isArray(value)) {
-    const arr = value as unknown[];
+    const arr = value as Array<unknown>;
     for (let i = 0; i < arr.length; ++i) {
       validateUserInput(
           arg, arr[i]!, desc, options,
