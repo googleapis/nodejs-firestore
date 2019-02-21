@@ -582,10 +582,10 @@ export class WriteBatch {
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The object to validate
- * @param allowExist Whether to allow the 'exists' preconditions.
+ * @param allowExists Whether to allow the 'exists' preconditions.
  */
 function validatePrecondition(
-    arg: string|number, value: unknown, allowExist: boolean): void {
+    arg: string|number, value: unknown, allowExists: boolean): void {
   if (typeof value !== 'object' || value === null) {
     throw new Error('Input is not an object.');
   }
@@ -596,7 +596,7 @@ function validatePrecondition(
 
   if (precondition.exists !== undefined) {
     ++conditions;
-    if (!allowExist) {
+    if (!allowExists) {
       throw new Error(`${
           invalidArgumentMessage(
               arg, 'precondition')} "exists" is not an allowed condition.`);
