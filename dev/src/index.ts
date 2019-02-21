@@ -1088,7 +1088,7 @@ export class Firestore {
             request);
         (resultStream as NodeJS.WritableStream)
             // The stream returned by the Gapic library accepts Protobuf
-            // messages.
+            // messages, but the type information does not expose this.
             // tslint:disable-next-line no-any
             .write(request as any, 'utf-8', () => {
               logger(

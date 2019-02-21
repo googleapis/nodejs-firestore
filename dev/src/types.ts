@@ -27,6 +27,7 @@ export type ApiMapValue = {
   [k: string]: google.firestore.v1.IValue
 };
 
+// We don't have type information for the JavaScript GapicClient.
 // tslint:disable-next-line:no-any
 export type GapicClient = any;
 

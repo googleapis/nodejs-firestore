@@ -470,6 +470,7 @@ describe('Conformance Tests', () => {
     const binaryProtoData =
         require('fs').readFileSync(path.join(__dirname, 'test-suite.binproto'));
 
+    // We don't have type information for the conformance proto.
     // tslint:disable-next-line:no-any
     const testSuite: any = TEST_SUITE_TYPE.decode(binaryProtoData);
 

@@ -316,13 +316,12 @@ export class Transaction {
    * @private
    */
   begin(): Promise<void> {
-    const request = {
+    const request: api.IBeginTransactionRequest = {
       database: this._firestore.formattedName,
     };
 
     if (this._previousTransaction) {
-      // tslint:disable-next-line no-any
-      (request as any).options = {
+      request.options = {
         readWrite: {
           retryTransaction: this._previousTransaction._transactionId,
         },

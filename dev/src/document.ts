@@ -348,6 +348,9 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
    */
+  // We deliberately use `any` in the external API, since the return type of
+  // this function is based on the Firestore document retrieved from the
+  // backend.
   data(): {[field: string]: any}|undefined {  // tslint:disable-line no-any
     const fields = this._fieldsProto;
 
@@ -382,6 +385,9 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved field value: ${field}`);
    * });
    */
+  // We deliberately use `any` in the external API, since the return type of
+  // this function is based on the Firestore document retrieved from the
+  // backend.
   get(field: string|FieldPath): any {  // tslint:disable-line no-any
     validateFieldPath('field', field);
 
