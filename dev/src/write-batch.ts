@@ -27,7 +27,7 @@ import {Timestamp} from './timestamp';
 import {Precondition as PublicPrecondition, SetOptions, UpdateData, UpdateMap} from './types';
 import {DocumentData} from './types';
 import {isObject, requestTag} from './util';
-import {customObjectMessage, invalidArgumentMessage, OptionalProperty, validateMaxNumberOfArguments, validateMinNumberOfArguments, validateOptional} from './validate';
+import {customObjectMessage, invalidArgumentMessage, RequiredArgumentOptions, validateMaxNumberOfArguments, validateMinNumberOfArguments, validateOptional} from './validate';
 
 import api = google.firestore.v1;
 
@@ -636,7 +636,7 @@ function validatePrecondition(
  * be omitted.
  */
 function validateUpdatePrecondition(
-    arg: string|number, value: unknown, options?: OptionalProperty): void {
+    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     validatePrecondition(arg, value, /* allowExists= */ false);
   }
@@ -652,7 +652,7 @@ function validateUpdatePrecondition(
  * be omitted.
  */
 function validateDeletePrecondition(
-    arg: string|number, value: unknown, options?: OptionalProperty): void {
+    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     validatePrecondition(arg, value, /* allowExists= */ true);
   }
@@ -670,7 +670,7 @@ function validateDeletePrecondition(
  * @throws if the input is not a valid SetOptions object.
  */
 export function validateSetOptions(
-    arg: string|number, value: unknown, options?: OptionalProperty): void {
+    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(`${

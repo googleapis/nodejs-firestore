@@ -22,7 +22,7 @@ import {isFunction, isObject} from './util';
  *
  * @private
  */
-export interface OptionalProperty {
+export interface RequiredArgumentOptions {
   optional?: boolean;
 }
 
@@ -31,7 +31,7 @@ export interface OptionalProperty {
  *
  * @private
  */
-export interface NumericRangeProperty {
+export interface NumericRangeOptions {
   minValue?: number;
   maxValue?: number;
 }
@@ -96,7 +96,7 @@ export function customObjectMessage(
  * @param options Options that specify whether the function can be omitted.
  */
 export function validateFunction(
-    arg: string|number, value: unknown, options?: OptionalProperty): void {
+    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (!isFunction(value)) {
       throw new Error(invalidArgumentMessage(arg, 'function'));
@@ -113,7 +113,7 @@ export function validateFunction(
  * @param options Options that specify whether the object can be omitted.
  */
 export function validateObject(
-    arg: string|number, value: unknown, options?: OptionalProperty): void {
+    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(invalidArgumentMessage(arg, 'object'));
@@ -130,7 +130,7 @@ export function validateObject(
  * @param options Options that specify whether the string can be omitted.
  */
 export function validateString(
-    arg: string|number, value: unknown, options?: OptionalProperty): void {
+    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (typeof value !== 'string') {
       throw new Error(invalidArgumentMessage(arg, 'string'));
@@ -147,7 +147,7 @@ export function validateString(
  * @param options Options that specify whether the boolean can be omitted.
  */
 export function validateBoolean(
-    arg: string|number, value: unknown, options?: OptionalProperty): void {
+    arg: string|number, value: unknown, options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     if (typeof value !== 'boolean') {
       throw new Error(invalidArgumentMessage(arg, 'boolean'));
@@ -165,7 +165,7 @@ export function validateBoolean(
  */
 export function validateNumber(
     arg: string|number, value: unknown,
-    options?: OptionalProperty&NumericRangeProperty): void {
+    options?: RequiredArgumentOptions&NumericRangeOptions): void {
   const min = options !== undefined && options.minValue !== undefined ?
       options.minValue :
       -Infinity;
@@ -194,7 +194,7 @@ export function validateNumber(
  */
 export function validateInteger(
     arg: string|number, value: unknown,
-    options?: OptionalProperty&NumericRangeProperty): void {
+    options?: RequiredArgumentOptions&NumericRangeOptions): void {
   const min = options !== undefined && options.minValue !== undefined ?
       options.minValue :
       -Infinity;
@@ -234,7 +234,7 @@ export function invalidArgumentMessage(
  * @return Whether the object is omitted and is allowed to be omitted.
  */
 export function validateOptional(
-    value: unknown, options?: OptionalProperty): boolean {
+    value: unknown, options?: RequiredArgumentOptions): boolean {
   return value === undefined && options !== undefined &&
       options.optional === true;
 }
@@ -308,7 +308,7 @@ export function validateMaxNumberOfArguments(
  */
 export function validateEnumValue(
     arg: string|number, value: unknown, allowedValues: string[],
-    options?: OptionalProperty): void {
+    options?: RequiredArgumentOptions): void {
   if (!validateOptional(value, options)) {
     const expectedDescription: string[] = [];
 
