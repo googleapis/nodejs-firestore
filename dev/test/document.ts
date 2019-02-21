@@ -652,7 +652,7 @@ describe('delete document', () => {
     expect(() => {
       return firestore.doc('collectionId/documentId')
           .delete({exists: false, lastUpdateTime: Firestore.Timestamp.now()});
-    }).to.throw('Input contains more than one condition.');
+    }).to.throw('Input specifies more than one precondition.');
   });
 });
 
@@ -958,13 +958,13 @@ describe('set document', () => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, 'foo');
     })
         .to.throw(
-            'Argument "options" is not a valid set() option. Input is not an object.');
+            'Argument "options" is not a valid set() options argument. Input is not an object.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {merge: 42});
     })
         .to.throw(
-            'Argument "options" is not a valid set() option. "merge" is not a boolean.');
+            'Argument "options" is not a valid set() options argument. "merge" is not a boolean.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
@@ -972,7 +972,7 @@ describe('set document', () => {
       });
     })
         .to.throw(
-            'Argument "options" is not a valid set() option. "mergeFields" is not an array.');
+            'Argument "options" is not a valid set() options argument. "mergeFields" is not an array.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
@@ -980,7 +980,7 @@ describe('set document', () => {
       });
     })
         .to.throw(
-            'Argument "options" is not a valid set() option. "mergeFields" is not valid: Argument at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
+            'Argument "options" is not a valid set() options argument. "mergeFields" is not valid: Argument at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
@@ -993,7 +993,7 @@ describe('set document', () => {
           .set({foo: 'bar'}, {merge: true, mergeFields: []});
     })
         .to.throw(
-            'Argument "options" is not a valid set() option. You cannot specify both "merge" and "mergeFields".');
+            'Argument "options" is not a valid set() options argument. You cannot specify both "merge" and "mergeFields".');
   });
 
   it('requires an object', () => {

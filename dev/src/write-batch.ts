@@ -621,7 +621,7 @@ function validatePrecondition(
   if (conditions > 1) {
     throw new Error(`${
         invalidArgumentMessage(
-            arg, 'precondition')} Input contains more than one precondition.`);
+            arg, 'precondition')} Input specifies more than one precondition.`);
   }
 }
 
@@ -675,7 +675,7 @@ export function validateSetOptions(
     if (!isObject(value)) {
       throw new Error(`${
           invalidArgumentMessage(
-              arg, 'set() option')} Input is not an object.`);
+              arg, 'set() options argument')} Input is not an object.`);
     }
 
     const setOptions = value as {[k: string]: unknown};
@@ -683,14 +683,14 @@ export function validateSetOptions(
     if ('merge' in setOptions && typeof setOptions.merge !== 'boolean') {
       throw new Error(`${
           invalidArgumentMessage(
-              arg, 'set() option')} "merge" is not a boolean.`);
+              arg, 'set() options argument')} "merge" is not a boolean.`);
     }
 
     if ('mergeFields' in setOptions) {
       if (!Array.isArray(setOptions.mergeFields)) {
         throw new Error(`${
             invalidArgumentMessage(
-                arg, 'set() option')} "mergeFields" is not an array.`);
+                arg, 'set() options argument')} "mergeFields" is not an array.`);
       }
 
       for (let i = 0; i < setOptions.mergeFields.length; ++i) {
@@ -700,7 +700,7 @@ export function validateSetOptions(
           throw new Error(`${
               invalidArgumentMessage(
                   arg,
-                  'set() option')} "mergeFields" is not valid: ${err.message}`);
+                  'set() options argument')} "mergeFields" is not valid: ${err.message}`);
         }
       }
     }
@@ -709,7 +709,7 @@ export function validateSetOptions(
       throw new Error(`${
           invalidArgumentMessage(
               arg,
-              'set() option')} You cannot specify both "merge" and "mergeFields".`);
+              'set() options argument')} You cannot specify both "merge" and "mergeFields".`);
     }
   }
 }
