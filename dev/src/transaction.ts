@@ -23,7 +23,7 @@ import {DocumentReference, Query, QuerySnapshot, validateDocumentReference} from
 import {isPlainObject} from './serializer';
 import {DocumentData, Precondition as PublicPrecondition, ReadOptions, SetOptions, UpdateData} from './types';
 import {isObject, requestTag} from './util';
-import {AllowOptional, invalidArgumentMessage, validateMinNumberOfArguments, validateOptional} from './validate';
+import {OptionalProperty, invalidArgumentMessage, validateMinNumberOfArguments, validateOptional} from './validate';
 
 import api = proto.google.firestore.v1;
 
@@ -433,7 +433,7 @@ export function parseGetAllArguments(
  * @param options Options that specify whether the ReadOptions can be omitted.
  */
 export function validateReadOptions(
-    arg: number|string, value: unknown, options?: AllowOptional): void {
+    arg: number|string, value: unknown, options?: OptionalProperty): void {
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(`${
