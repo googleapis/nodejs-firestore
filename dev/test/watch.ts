@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {expect} from 'chai';
 const duplexify = require('duplexify');
+
+import {expect} from 'chai';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
@@ -25,8 +26,7 @@ import {setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
-import {AnyDuringMigration, GrpcError} from '../src/types';
-
+import {GrpcError} from '../src/types';
 import {createInstance} from './util/helpers';
 
 import api = proto.google.firestore.v1;
@@ -118,7 +118,7 @@ function snapshot(
     ref: DocumentReference, data: DocumentData): QueryDocumentSnapshot {
   const snapshot = new DocumentSnapshotBuilder();
   snapshot.ref = ref;
-  snapshot.fieldsProto = ref.firestore._serializer.encodeFields(data);
+  snapshot.fieldsProto = ref.firestore._serializer!.encodeFields(data);
   snapshot.readTime = new Firestore.Timestamp(0, 0);
   snapshot.createTime = new Firestore.Timestamp(0, 0);
   snapshot.updateTime = new Firestore.Timestamp(0, 0);
@@ -277,7 +277,7 @@ class StreamHelper {
       err = new Error('Server disconnect');
       err.code = 14;  // Unavailable
     }
-    (this.readStream as AnyDuringMigration).destroy(err);
+    (this.readStream as any).destroy(err);  // tslint:disable-line no-any
   }
 }
 

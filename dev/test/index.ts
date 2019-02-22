@@ -21,11 +21,10 @@ import * as gax from 'google-gax';
 import * as Firestore from '../src';
 import {FieldPath} from '../src';
 import {ResourcePath} from '../src/path';
-import {AnyDuringMigration, GrpcError} from '../src/types';
-
+import {GrpcError} from '../src/types';
 import {createInstance, document, DOCUMENT_NAME, found, InvalidApiUsage, missing, stream} from './util/helpers';
 
-const {grpc} = new gax.GrpcClient({} as AnyDuringMigration);
+const {grpc} = new gax.GrpcClient({});
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -214,7 +213,7 @@ const allSupportedTypesInput = {
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new Firestore.DocumentReference(
-      {formattedName: DATABASE_ROOT} as AnyDuringMigration,
+      {formattedName: DATABASE_ROOT} as any,  // tslint:disable-line no-any
       new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
@@ -238,7 +237,7 @@ const allSupportedTypesOutput = {
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new Firestore.DocumentReference(
-      {formattedName: DATABASE_ROOT} as AnyDuringMigration,
+      {formattedName: DATABASE_ROOT} as any,  // tslint:disable-line no-any
       new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
@@ -306,8 +305,8 @@ describe('instantiation', () => {
 
     expect(() => {
       new Firestore.Firestore(DEFAULT_SETTINGS).settings({
-        timestampsInSnapshots: 1337
-      } as AnyDuringMigration);
+        timestampsInSnapshots: 1337 as InvalidApiUsage
+      });
     })
         .to.throw(
             'Argument "settings.timestampsInSnapshots" is not a valid boolean.');
@@ -611,13 +610,13 @@ describe('doc() method', () => {
   it('requires document path', () => {
     expect(() => firestore.doc())
         .to.throw(
-            'Argument "documentPath" is not a valid ResourcePath. Path must be a non-empty string.');
+            'Argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
   });
 
   it('doesn\'t accept empty components', () => {
     expect(() => firestore.doc('coll//doc'))
         .to.throw(
-            'Argument "documentPath" is not a valid ResourcePath. Paths must not contain //.');
+            'Argument "documentPath" is not a valid resource path. Paths must not contain //.');
   });
 
   it('must point to document', () => {
@@ -650,7 +649,7 @@ describe('collection() method', () => {
   it('requires collection id', () => {
     expect(() => firestore.collection())
         .to.throw(
-            'Argument "collectionPath" is not a valid ResourcePath. Path must be a non-empty string.');
+            'Argument "collectionPath" is not a valid resource path. Path must be a non-empty string.');
   });
 
 
@@ -964,13 +963,13 @@ describe('getAll() method', () => {
         fieldMask: null
       } as InvalidApiUsage))
           .to.throw(
-              'Argument "options" is not a valid ReadOptions. "fieldMask" is not an array.');
+              'Argument "options" is not a valid read option. "fieldMask" is not an array.');
 
       expect(() => firestore.getAll(firestore.doc('collectionId/a'), {
         fieldMask: ['a', new FieldPath('b'), null]
       } as InvalidApiUsage))
           .to.throw(
-              'Argument "options" is not a valid ReadOptions. Element at index 2 is not a valid FieldPath. Paths can only be specified as strings or via a FieldPath object.');
+              'Argument "options" is not a valid read option. "fieldMask" is not valid: Argument at index 2 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
     });
   });
 });

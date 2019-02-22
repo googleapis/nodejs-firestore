@@ -19,15 +19,15 @@ import {GrpcClient} from 'google-gax';
 import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_proto_api';
+import {Firestore} from '../../src';
+import {ClientPool} from '../../src/pool';
+import {GapicClient} from '../../src/types';
+
 import api = proto.google.firestore.v1;
 
 const v1 = require('../../src/v1');
 
-import {Firestore} from '../../src';
-import {ClientPool} from '../../src/pool';
-
 /* tslint:disable:no-any */
-type GapicClient = any;
 const grpc = new GrpcClient({} as any).grpc;
 const SSL_CREDENTIALS = (grpc.credentials as any).createInsecure();
 /* tslint:enable:no-any */

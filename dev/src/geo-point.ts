@@ -15,12 +15,10 @@
  */
 
 import {google} from '../protos/firestore_proto_api';
-import api = google.firestore.v1;
-
-import {createValidator} from './validate';
 import {Serializable} from './serializer';
+import {validateNumber} from './validate';
 
-const validate = createValidator();
+import api = google.firestore.v1;
 
 /**
  * An immutable object representing a geographic location in Firestore. The
@@ -49,8 +47,8 @@ export class GeoPoint implements Serializable {
    * });
    */
   constructor(latitude: number, longitude: number) {
-    validate.isNumber('latitude', latitude, -90, 90);
-    validate.isNumber('longitude', longitude, -180, 180);
+    validateNumber('latitude', latitude, {minValue: -90, maxValue: 90});
+    validateNumber('longitude', longitude, {minValue: -180, maxValue: 180});
 
     this._latitude = latitude;
     this._longitude = longitude;

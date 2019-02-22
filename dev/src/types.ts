@@ -21,27 +21,13 @@ import {Timestamp} from './timestamp';
 import api = google.firestore.v1;
 
 /**
- * A union of all of the standard JS types, useful for cases where the type is
- * unknown. Unlike "any" this doesn't lose all type-safety, since the consuming
- * code must still cast to a particular type before using it.
+ * A map in the format of the Proto API
  */
-export type AnyJs = null|undefined|boolean|number|string|object;
-
-// tslint:disable-next-line:no-any
-export type AnyDuringMigration = any;
-
-// A map in the format of the Proto API
 export type ApiMapValue = {
   [k: string]: google.firestore.v1.IValue
 };
 
-/**
- * @private
- * JavaScript input from the API layer.
- */
-// tslint:disable-next-line:no-any
-export type UserInput = any;
-
+// We don't have type information for the JavaScript GapicClient.
 // tslint:disable-next-line:no-any
 export type GapicClient = any;
 
@@ -96,7 +82,7 @@ export interface Settings {
  * mapped to values.
  */
 export type DocumentData = {
-  [field: string]: UserInput
+  [field: string]: unknown
 };
 
 /**
@@ -105,8 +91,25 @@ export type DocumentData = {
  * reference nested fields within the document.
  */
 export type UpdateData = {
-  [fieldPath: string]: UserInput
+  [fieldPath: string]: unknown
 };
+
+/**
+ * Update data that has been resolved to a mapping of FieldPaths to values.
+ */
+export type UpdateMap = Map<FieldPath, unknown>;
+
+/**
+ * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
+ * (descending or ascending).
+ */
+export type OrderByDirection = 'desc'|'asc';
+
+/**
+ * Filter conditions in a `Query.where()` clause are specified using the
+ * strings '<', '<=', '==', '>=', '>', and 'array-contains'.
+ */
+export type WhereFilterOp = '<'|'<='|'=='|'>='|'>'|'array-contains';
 
 /**
  * An options object that configures conditional behavior of `update()` and
@@ -168,13 +171,10 @@ export interface ReadOptions {
  */
 export interface ValidationOptions {
   /** At what level field deletes are supported. */
-  allowDeletes?: 'none'|'root'|'all';
+  allowDeletes: 'none'|'root'|'all';
 
   /** Whether server transforms are supported. */
-  allowTransforms?: boolean;
-
-  /** Whether empty documents are supported. */
-  allowEmpty?: boolean;
+  allowTransforms: boolean;
 }
 
 /**

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import * as assert from 'assert';
 const deepEqual = require('deep-equal');
-import * as is from 'is';
+
+import * as assert from 'assert';
 
 import {google} from '../protos/firestore_proto_api';
 import {FieldTransform} from './field-value';
-import {FieldPath} from './path';
+import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference} from './reference';
 import {isPlainObject, Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {AnyDuringMigration, AnyJs, ApiMapValue, DocumentData, UpdateData, UserInput} from './types';
+import {ApiMapValue, DocumentData, UpdateMap} from './types';
+import {isEmpty, isObject} from './util';
 
 import api = google.firestore.v1;
 
@@ -90,7 +91,6 @@ export class DocumentSnapshot {
   private _ref: DocumentReference;
   private _fieldsProto: ApiMapValue|undefined;
   private _serializer: Serializer;
-  private _validator: AnyDuringMigration;
   private _readTime: Timestamp|undefined;
   private _createTime: Timestamp|undefined;
   private _updateTime: Timestamp|undefined;
@@ -114,8 +114,7 @@ export class DocumentSnapshot {
       createTime?: Timestamp, updateTime?: Timestamp) {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
-    this._serializer = ref.firestore._serializer;
-    this._validator = ref.firestore._validator;
+    this._serializer = ref.firestore._serializer!;
     this._readTime = readTime;
     this._createTime = createTime;
     this._updateTime = updateTime;
@@ -130,7 +129,7 @@ export class DocumentSnapshot {
    * @return The created DocumentSnapshot.
    */
   static fromObject(ref: DocumentReference, obj: {}): DocumentSnapshot {
-    const serializer = ref.firestore._serializer;
+    const serializer = ref.firestore._serializer!;
     return new DocumentSnapshot(ref, serializer.encodeFields(obj));
   }
   /**
@@ -144,16 +143,16 @@ export class DocumentSnapshot {
    * @param data The field/value map to expand.
    * @return The created DocumentSnapshot.
    */
-  static fromUpdateMap(ref: DocumentReference, data: UpdateData):
+  static fromUpdateMap(ref: DocumentReference, data: UpdateMap):
       DocumentSnapshot {
-    const serializer = ref.firestore._serializer;
+    const serializer = ref.firestore._serializer!;
 
     /**
      * Merges 'value' at the field path specified by the path array into
      * 'target'.
      */
     function merge(
-        target: ApiMapValue, value: AnyJs, path: string[], pos: number) {
+        target: ApiMapValue, value: unknown, path: string[], pos: number) {
       const key = path[pos];
       const isLast = pos === path.length - 1;
 
@@ -162,7 +161,7 @@ export class DocumentSnapshot {
           if (value instanceof FieldTransform) {
             // If there is already data at this path, we need to retain it.
             // Otherwise, we don't include it in the DocumentSnapshot.
-            return !is.empty(target) ? target : null;
+            return !isEmpty(target) ? target : null;
           }
           // The merge is done.
           const leafNode = serializer.encodeValue(value);
@@ -186,7 +185,7 @@ export class DocumentSnapshot {
             target[key] = childNode;
             return target;
           } else {
-            return !is.empty(target) ? target : null;
+            return !isEmpty(target) ? target : null;
           }
         }
       } else {
@@ -349,7 +348,9 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
    */
-  data(): DocumentData|undefined {
+  // We deliberately use `any` in the external API to not impose type-checking
+  // on end users.
+  data(): {[field: string]: any}|undefined {  // tslint:disable-line no-any
     const fields = this._fieldsProto;
 
     if (fields === undefined) {
@@ -383,8 +384,10 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved field value: ${field}`);
    * });
    */
-  get(field: string|FieldPath): UserInput {
-    this._validator.isFieldPath('field', field);
+  // We deliberately use `any` in the external API to not impose type-checking
+  // on end users.
+  get(field: string|FieldPath): any {  // tslint:disable-line no-any
+    validateFieldPath('field', field);
 
     const protoField = this.protoField(field);
 
@@ -432,7 +435,7 @@ export class DocumentSnapshot {
    * @return {boolean}
    */
   get isEmpty(): boolean {
-    return is.undefined(this._fieldsProto) || is.empty(this._fieldsProto);
+    return this._fieldsProto === undefined || isEmpty(this._fieldsProto);
   }
 
   /**
@@ -592,7 +595,7 @@ export class DocumentMask {
    * @param data A map with fields to modify. Only the keys are used to extract
    * the document mask.
    */
-  static fromUpdateMap(data: UpdateData): DocumentMask {
+  static fromUpdateMap(data: UpdateMap): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
     data.forEach((value, key) => {
@@ -760,7 +763,7 @@ export class DocumentMask {
             DocumentMask.removeFromSortedArray(remainingPaths, [childPath]);
             result = result || {};
             result[key] = currentData[key];
-          } else if (is.object(currentData[key])) {
+          } else if (isObject(currentData[key])) {
             const childObject = processObject(currentData[key], childPath);
             if (childObject) {
               result = result || {};
@@ -824,8 +827,8 @@ export class DocumentMask {
  */
 export class DocumentTransform {
   private readonly _ref: DocumentReference;
-  private readonly _validator: AnyDuringMigration;
   private readonly _transforms: Map<FieldPath, FieldTransform>;
+
   /**
    * @private
    * @hideconstructor
@@ -835,9 +838,9 @@ export class DocumentTransform {
    */
   constructor(ref: DocumentReference, transforms) {
     this._ref = ref;
-    this._validator = ref.firestore._validator;
     this._transforms = transforms;
   }
+
   /**
    * Generates a DocumentTransform from a JavaScript object.
    *
@@ -848,7 +851,7 @@ export class DocumentTransform {
    */
   static fromObject(ref: DocumentReference, obj: DocumentData):
       DocumentTransform {
-    const updateMap = new Map<FieldPath, FieldTransform>();
+    const updateMap = new Map<FieldPath, unknown>();
 
     for (const prop in obj) {
       if (obj.hasOwnProperty(prop)) {
@@ -867,7 +870,7 @@ export class DocumentTransform {
    * @param data The update data to extract the transformations from.
    * @returns The Document Transform.
    */
-  static fromUpdateMap(ref: DocumentReference, data: UpdateData):
+  static fromUpdateMap(ref: DocumentReference, data: UpdateMap):
       DocumentTransform {
     const transforms = new Map<FieldPath, FieldTransform>();
 
@@ -879,7 +882,7 @@ export class DocumentTransform {
           throw new Error(
               `${val.methodName}() is not supported inside of array values.`);
         }
-      } else if (is.array(val)) {
+      } else if (Array.isArray(val)) {
         for (let i = 0; i < val.length; ++i) {
           // We need to verify that no array value contains a document transform
           encode_(val[i], path.append(String(i)), false);
@@ -924,7 +927,7 @@ export class DocumentTransform {
    * @private
    */
   validate(): void {
-    this._transforms.forEach(transform => transform.validate(this._validator));
+    this._transforms.forEach(transform => transform.validate());
   }
 
   /**
@@ -1012,91 +1015,4 @@ export class Precondition {
   get isEmpty(): boolean {
     return this._exists === undefined && !this._lastUpdateTime;
   }
-}
-
-/**
- * Validates the use of 'options' as a Precondition and enforces that 'exists'
- * and 'lastUpdateTime' use valid types.
- *
- * @private
- * @param options.exists Whether the referenced document should exist.
- * @param options.lastUpdateTime The last update time of the referenced
- * document in Firestore.
- * @param allowExist Whether to allow the 'exists' preconditions.
- * @returns 'true' if the input is a valid Precondition.
- */
-export function validatePrecondition(
-    precondition: {exists?: boolean, lastUpdateTime?: Timestamp},
-    allowExist: boolean): boolean {
-  if (!is.object(precondition)) {
-    throw new Error('Input is not an object.');
-  }
-
-  let conditions = 0;
-
-  if (precondition.exists !== undefined) {
-    ++conditions;
-    if (!allowExist) {
-      throw new Error('"exists" is not an allowed condition.');
-    }
-    if (!is.boolean(precondition.exists)) {
-      throw new Error('"exists" is not a boolean.');
-    }
-  }
-
-  if (precondition.lastUpdateTime !== undefined) {
-    ++conditions;
-    if (!(precondition.lastUpdateTime instanceof Timestamp)) {
-      throw new Error('"lastUpdateTime" is not a Firestore Timestamp.');
-    }
-  }
-
-  if (conditions > 1) {
-    throw new Error('Input contains more than one condition.');
-  }
-
-  return true;
-}
-
-/**
- * Validates the use of 'options' as SetOptions and enforces that 'merge' is a
- * boolean.
- *
- * @private
- * @param options.merge - Whether set() should merge the provided data into an
- * existing document.
- * @param options.mergeFields - Whether set() should only merge the specified
- * set of fields.
- * @returns 'true' if the input is a valid SetOptions object.
- */
-export function validateSetOptions(
-    options: {merge?: boolean, mergeFields?: string[]}): boolean {
-  if (!is.object(options)) {
-    throw new Error('Input is not an object.');
-  }
-
-  if (options.merge !== undefined && !is.boolean(options.merge)) {
-    throw new Error('"merge" is not a boolean.');
-  }
-
-  if (options.mergeFields !== undefined) {
-    if (!is.array(options.mergeFields)) {
-      throw new Error('"mergeFields" is not an array.');
-    }
-
-    for (let i = 0; i < options.mergeFields.length; ++i) {
-      try {
-        FieldPath.validateFieldPath(options.mergeFields[i]);
-      } catch (err) {
-        throw new Error(
-            `Element at index ${i} is not a valid FieldPath. ${err.message}`);
-      }
-    }
-  }
-
-  if (options.merge !== undefined && options.mergeFields !== undefined) {
-    throw new Error('You cannot specify both "merge" and "mergeFields".');
-  }
-
-  return true;
 }

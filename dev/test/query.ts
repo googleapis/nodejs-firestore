@@ -16,15 +16,15 @@
 
 import {expect} from 'chai';
 import * as extend from 'extend';
-import * as proto from '../protos/firestore_proto_api';
+
+import {google} from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {DocumentData, DocumentReference, Query, Timestamp} from '../src';
 import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {ResourcePath} from '../src/path';
-import {AnyDuringMigration} from '../src/types';
 import {createInstance, document, InvalidApiUsage, stream} from './util/helpers';
 
-import api = proto.google.firestore.v1;
+import api = google.firestore.v1;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -142,7 +142,8 @@ function orderBy(
 
   for (let i = 0; i < fieldPathAndOrderBys.length; i += 2) {
     const fieldPath = fieldPathAndOrderBys[i] as string;
-    const direction: AnyDuringMigration = fieldPathAndOrderBys[i + 1];
+    const direction =
+        fieldPathAndOrderBys[i + 1] as api.StructuredQuery.Direction;
     orderBy.push({
       field: {
         fieldPath,
@@ -277,14 +278,14 @@ describe('query interface', () => {
     };
 
     queryEquals(
-        [query.where('a', '=', '1'), query.where('a', '=', '1')],
-        [query.where('a', '=', 1)]);
+        [query.where('a', '==', '1'), query.where('a', '==', '1')],
+        [query.where('a', '=' as InvalidApiUsage, 1)]);
 
     queryEquals(
         [
           query.orderBy('__name__'),
           query.orderBy('__name__', 'asc'),
-          query.orderBy('__name__', 'ASC'),
+          query.orderBy('__name__', 'ASC' as InvalidApiUsage),
           query.orderBy(Firestore.FieldPath.documentId()),
         ],
         [
@@ -355,7 +356,7 @@ describe('query interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '=', 'bar');
+      query = query.where('foo', '==', 'bar');
       query = query.orderBy('foo');
       query = query.limit(10);
       return query.get().then(results => {
@@ -553,15 +554,15 @@ describe('query interface', () => {
 
     return createInstance(overrides).then(firestore => {
       const query = firestore.collection('collectionId');
-      return query.get().then((snapshot: AnyDuringMigration) => {
+      return query.get().then(snapshot => {
         expect(() => {
-          snapshot.docChanges.forEach(() => {});
+          (snapshot.docChanges as InvalidApiUsage).forEach(() => {});
         })
             .to.throw(
                 'QuerySnapshot.docChanges has been changed from a property into a method');
 
         expect(() => {
-          for (const doc of snapshot.docChanges) {
+          for (const doc of (snapshot.docChanges as InvalidApiUsage)) {
           }
         })
             .to.throw(
@@ -616,7 +617,7 @@ describe('where() interface', () => {
       let query: Query = firestore.collection('collectionId');
       query = query.where('fooSmaller', '<', 'barSmaller');
       query = query.where('fooSmallerOrEquals', '<=', 'barSmallerOrEquals');
-      query = query.where('fooEquals', '=', 'barEquals');
+      query = query.where('fooEquals', '=' as InvalidApiUsage, 'barEquals');
       query = query.where('fooEqualsLong', '==', 'barEqualsLong');
       query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
       query = query.where('fooGreater', '>', 'barGreater');
@@ -642,7 +643,7 @@ describe('where() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '=', {foo: 'bar'});
+      query = query.where('foo', '==', {foo: 'bar'});
       return query.get();
     });
   });
@@ -660,8 +661,9 @@ describe('where() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where('foo.bar', '=', 'foobar');
-      query = query.where(new Firestore.FieldPath('bar', 'foo'), '=', 'foobar');
+      query = query.where('foo.bar', '==', 'foobar');
+      query =
+          query.where(new Firestore.FieldPath('bar', 'foo'), '==', 'foobar');
       return query.get();
     });
   });
@@ -689,16 +691,16 @@ describe('where() interface', () => {
   it('rejects custom objects for field paths', () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where({} as InvalidApiUsage, '=', 'bar');
+      query = query.where({} as InvalidApiUsage, '==', 'bar');
       return query.get();
     })
         .to.throw(
-            'Argument "fieldPath" is not a valid FieldPath. Paths can only be specified as strings or via a FieldPath object.');
+            'Argument "fieldPath" is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
 
     class FieldPath {}
     expect(() => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where(new FieldPath() as InvalidApiUsage, '=', 'bar');
+      query = query.where(new FieldPath() as InvalidApiUsage, '==', 'bar');
       return query.get();
     })
         .to.throw(
@@ -708,17 +710,17 @@ describe('where() interface', () => {
   it('rejects field paths as value', () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '=', new Firestore.FieldPath('bar'));
+      query = query.where('foo', '==', new Firestore.FieldPath('bar'));
       return query.get();
     })
         .to.throw(
-            'Argument "value" is not a valid QueryValue. Cannot use object of type "FieldPath" as a Firestore value.');
+            'Argument "value" is not a valid query constraint. Cannot use object of type "FieldPath" as a Firestore value.');
   });
 
   it('rejects field delete as value', () => {
     expect(() => {
       let query = firestore.collection('collectionId');
-      query = query.where('foo', '=', Firestore.FieldValue.delete());
+      query = query.where('foo', '==', Firestore.FieldValue.delete());
       return query.get();
     })
         .to.throw(
@@ -735,31 +737,31 @@ describe('where() interface', () => {
     const query = firestore.collection('collectionId');
 
     expect(() => {
-      query.where('foo', '=', new Foo()).get();
+      query.where('foo', '==', new Foo()).get();
     })
         .to.throw(
-            'Argument "value" is not a valid QueryValue. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
+            'Argument "value" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
 
     expect(() => {
-      query.where('foo', '=', new FieldPath()).get();
+      query.where('foo', '==', new FieldPath()).get();
     })
         .to.throw(
             'Detected an object of type "FieldPath" that doesn\'t match the expected instance.');
 
     expect(() => {
-      query.where('foo', '=', new FieldValue()).get();
+      query.where('foo', '==', new FieldValue()).get();
     })
         .to.throw(
             'Detected an object of type "FieldValue" that doesn\'t match the expected instance.');
 
     expect(() => {
-      query.where('foo', '=', new DocumentReference()).get();
+      query.where('foo', '==', new DocumentReference()).get();
     })
         .to.throw(
             'Detected an object of type "DocumentReference" that doesn\'t match the expected instance.');
 
     expect(() => {
-      query.where('foo', '=', new GeoPoint()).get();
+      query.where('foo', '==', new GeoPoint()).get();
     })
         .to.throw(
             'Detected an object of type "GeoPoint" that doesn\'t match the expected instance.');
@@ -777,7 +779,7 @@ describe('where() interface', () => {
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '==', NaN);
-      query = query.where('bar', '=', null);
+      query = query.where('bar', '==', null);
       return query.get();
     });
   });
@@ -805,19 +807,19 @@ describe('where() interface', () => {
   it('verifies field path', () => {
     let query: Query = firestore.collection('collectionId');
     expect(() => {
-      query = query.where('foo.', '=', 'foobar');
+      query = query.where('foo.', '==', 'foobar');
     })
         .to.throw(
-            'Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with ".".');
+            'Argument "fieldPath" is not a valid field path. Paths must not start or end with ".".');
   });
 
   it('verifies operator', () => {
     let query = firestore.collection('collectionId');
     expect(() => {
-      query = query.where('foo', '@', 'foobar');
+      query = query.where('foo', '@' as InvalidApiUsage, 'foobar');
     })
         .to.throw(
-            'Operator must be one of "<", "<=", "==", ">", ">=" or "array-contains".');
+            'Invalid value for argument "opStr". Acceptable values are: <, <=, ==, >, >=, array-contains');
   });
 });
 
@@ -881,8 +883,10 @@ describe('orderBy() interface', () => {
   it('verifies order', () => {
     let query: Query = firestore.collection('collectionId');
     expect(() => {
-      query = query.orderBy('foo', 'foo');
-    }).to.throw('Order must be one of "asc" or "desc".');
+      query = query.orderBy('foo', 'foo' as InvalidApiUsage);
+    })
+        .to.throw(
+            'Invalid value for argument "directionStr". Acceptable values are: asc, desc');
   });
 
   it('accepts field path', () => {
@@ -909,7 +913,7 @@ describe('orderBy() interface', () => {
       query = query.orderBy('foo.');
     })
         .to.throw(
-            'Argument "fieldPath" is not a valid FieldPath. Paths must not start or end with ".".');
+            'Argument "fieldPath" is not a valid field path. Paths must not start or end with ".".');
   });
 
   it('rejects call after cursor', () => {
@@ -1091,11 +1095,11 @@ describe('select() interface', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.select(1))
         .to.throw(
-            'Argument at index 0 is not a valid FieldPath. Paths can only be specified as strings or via a FieldPath object.');
+            'Argument at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
 
     expect(() => query.select('.'))
         .to.throw(
-            'Argument at index 0 is not a valid FieldPath. Paths must not start or end with ".".');
+            'Argument at index 0 is not a valid field path. Paths must not start or end with ".".');
   });
 
   it('uses latest field mask', () => {
@@ -1233,7 +1237,7 @@ describe('startAt() interface', () => {
 
     expect(() => {
       query.startAt();
-    }).to.throw('Function "startAt()" requires at least 1 argument.');
+    }).to.throw('Function "Query.startAt()" requires at least 1 argument.');
   });
 
   it('can specify document snapshot', () => {
@@ -1347,10 +1351,10 @@ describe('startAt() interface', () => {
     return createInstance(overrides).then(firestore => {
       return snapshot('collectionId/doc', {c: 'c'}).then(doc => {
         const query = firestore.collection('collectionId')
-                          .where('a', '=', 'a')
+                          .where('a', '==', 'a')
                           .where('b', 'array-contains', 'b')
                           .where('c', '>=', 'c')
-                          .where('d', '=', 'd')
+                          .where('d', '==', 'd')
                           .startAt(doc);
         return query.get();
       });
@@ -1374,7 +1378,7 @@ describe('startAt() interface', () => {
     return createInstance(overrides).then(firestore => {
       return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
         const query = firestore.collection('collectionId')
-                          .where('foo', '=', 'bar')
+                          .where('foo', '==', 'bar')
                           .startAt(doc);
         return query.get();
       });
@@ -1398,7 +1402,7 @@ describe('startAt() interface', () => {
       query.orderBy('foo').startAt('foo', Firestore.FieldValue.delete());
     })
         .to.throw(
-            'Argument at index 1 is not a valid QueryValue. FieldValue.delete\(\) must appear at the top-level and can only be used in update() or set() with {merge:true}.');
+            'Argument at index 1 is not a valid query constraint. FieldValue.delete\(\) must appear at the top-level and can only be used in update() or set() with {merge:true}.');
   });
 
   it('requires order by', () => {

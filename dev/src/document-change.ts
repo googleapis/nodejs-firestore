@@ -15,6 +15,7 @@
  */
 
 import {QueryDocumentSnapshot} from './document';
+
 export type DocumentChangeType = 'added'|'removed'|'modified';
 
 /**

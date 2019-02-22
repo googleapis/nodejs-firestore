@@ -15,11 +15,11 @@
  */
 
 import {google} from '../protos/firestore_proto_api';
-import api = google.firestore.v1;
-import {createValidator} from './validate';
-import {ProtobufJsValue} from './types';
 
-const validate = createValidator();
+import {ProtobufJsValue} from './types';
+import {validateObject} from './validate';
+
+import api = google.firestore.v1;
 
 /*!
  * @module firestore/convert
@@ -71,7 +71,7 @@ export function timestampFromJson(
       nanos: nanos || undefined,
     };
   } else if (timestampValue !== undefined) {
-    validate.isObject('timestampValue', timestampValue);
+    validateObject('timestampValue', timestampValue);
     timestampProto = {
       seconds: timestampValue.seconds || undefined,
       nanos: timestampValue.nanos || undefined,

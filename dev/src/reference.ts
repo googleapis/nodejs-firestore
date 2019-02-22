@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-import * as bun from 'bun';
 const deepEqual = require('deep-equal');
+
+import * as bun from 'bun';
 import * as extend from 'extend';
-import * as is from 'is';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
-import api = proto.google.firestore.v1;
 
-import {compare} from './order';
-import {logger} from './logger';
 import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange} from './document-change';
-import {Watch} from './watch';
-import {WriteBatch, WriteResult} from './write-batch';
-import {Timestamp} from './timestamp';
-import {FieldPath, ResourcePath} from './path';
-import {autoId, requestTag} from './util';
-import {customObjectError} from './validate';
-import {AnyDuringMigration, DocumentData, UpdateData, Precondition, SetOptions, UserInput} from './types';
-import {Serializer} from './serializer';
 import {Firestore} from './index';
+import {logger} from './logger';
+import {compare} from './order';
+import {FieldPath, ResourcePath, validateFieldPath, validateResourcePath} from './path';
+import {Serializer, validateUserInput} from './serializer';
+import {Timestamp} from './timestamp';
+import {DocumentData, OrderByDirection, Precondition, SetOptions, UpdateData, WhereFilterOp} from './types';
+import {autoId, requestTag} from './util';
+import {invalidArgumentMessage, validateEnumValue, validateFunction, validateInteger, validateMinNumberOfArguments} from './validate';
+import {Watch} from './watch';
+import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
-/*!
+import api = proto.google.firestore.v1;
+
+/**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
  * (descending or ascending).
  *
@@ -45,12 +46,10 @@ import {Firestore} from './index';
  */
 const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
   asc: 'ASCENDING',
-  ASC: 'ASCENDING',
   desc: 'DESCENDING',
-  DESC: 'DESCENDING',
 };
 
-/*!
+/**
  * Filter conditions in a `Query.where()` clause are specified using the
  * strings '<', '<=', '==', '>=', and '>'.
  *
@@ -60,7 +59,6 @@ const comparisonOperators:
     {[k: string]: api.StructuredQuery.FieldFilter.Operator} = {
       '<': 'LESS_THAN',
       '<=': 'LESS_THAN_OR_EQUAL',
-      '=': 'EQUAL',
       '==': 'EQUAL',
       '>': 'GREATER_THAN',
       '>=': 'GREATER_THAN_OR_EQUAL',
@@ -99,19 +97,15 @@ const comparisonOperators:
  * @class
  */
 export class DocumentReference {
-  private readonly _validator: AnyDuringMigration;
-
   /**
    * @private
    * @hideconstructor
    *
    * @param _firestore The Firestore Database client.
-   * @param _ref The Path of this reference.
+   * @param _path The Path of this reference.
    */
   constructor(
-      private readonly _firestore: Firestore, readonly _path: ResourcePath) {
-    this._validator = _firestore._validator;
-  }
+      private readonly _firestore: Firestore, readonly _path: ResourcePath) {}
 
   /**
    * The string representation of the DocumentReference's location.
@@ -139,7 +133,7 @@ export class DocumentReference {
    *   console.log(`Root location for document is ${firestore.formattedName}`);
    * });
    */
-  get firestore(): AnyDuringMigration {
+  get firestore(): Firestore {
     return this._firestore;
   }
 
@@ -196,7 +190,7 @@ export class DocumentReference {
    * }):
    */
   get parent(): CollectionReference {
-    return createCollectionReference(this._firestore, this._path.parent());
+    return new CollectionReference(this._firestore, this._path.parent());
   }
 
   /**
@@ -234,7 +228,7 @@ export class DocumentReference {
    * console.log(`Path to subcollection: ${subcollection.path}`);
    */
   collection(collectionPath: string): CollectionReference {
-    this._validator.isResourcePath('collectionPath', collectionPath);
+    validateResourcePath('collectionPath', collectionPath);
 
     const path = this._path.append(collectionPath);
     if (!path.isCollection) {
@@ -242,7 +236,7 @@ export class DocumentReference {
           collectionPath}". Your path does not contain an odd number of components.`);
     }
 
-    return createCollectionReference(this._firestore, path);
+    return new CollectionReference(this._firestore, path);
   }
 
   /**
@@ -342,7 +336,7 @@ export class DocumentReference {
    */
   delete(precondition?: Precondition): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch.delete(this, precondition as AnyDuringMigration)
+    return writeBatch.delete(this, precondition)
         .commit()
         .then(([writeResult]) => writeResult);
   }
@@ -408,14 +402,12 @@ export class DocumentReference {
    */
   update(
       dataOrField: (UpdateData|string|FieldPath),
-      ...preconditionOrValues: Array<UserInput|string|FieldPath|Precondition>):
+      ...preconditionOrValues: Array<unknown|string|FieldPath|Precondition>):
       Promise<WriteResult> {
-    this._validator.minNumberOfArguments('update', arguments, 1);
+    validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
     const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-        .update
-        // tslint:disable-next-line no-any
+    return writeBatch.update
         .apply(
             writeBatch,
             [this, dataOrField].concat(
@@ -453,8 +445,8 @@ export class DocumentReference {
   onSnapshot(
       onNext: (snapshot: DocumentSnapshot) => void,
       onError?: (error: Error) => void): () => void {
-    this._validator.isFunction('onNext', onNext);
-    this._validator.isOptionalFunction('onError', onError);
+    validateFunction('onNext', onNext);
+    validateFunction('onError', onError, {optional: true});
 
     const watch = Watch.forDocument(this);
 
@@ -547,7 +539,7 @@ class FieldFilter {
   constructor(
       private readonly serializer: Serializer, readonly field: FieldPath,
       private readonly op: api.StructuredQuery.FieldFilter.Operator,
-      private readonly value: UserInput) {}
+      private readonly value: unknown) {}
 
   /**
    * Returns whether this FieldFilter uses an equals comparison.
@@ -619,7 +611,6 @@ class FieldFilter {
  * @class QuerySnapshot
  */
 export class QuerySnapshot {
-  private readonly _validator: AnyDuringMigration;
   private _materializedDocs: QueryDocumentSnapshot[]|null = null;
   private _materializedChanges: DocumentChange[]|null = null;
   private _docs: (() => QueryDocumentSnapshot[])|null = null;
@@ -641,7 +632,6 @@ export class QuerySnapshot {
       private readonly _query: Query, private readonly _readTime: Timestamp,
       private readonly _size: number, docs: () => QueryDocumentSnapshot[],
       changes: () => DocumentChange[]) {
-    this._validator = _query.firestore._validator;
     this._docs = docs;
     this._changes = changes;
   }
@@ -796,10 +786,9 @@ export class QuerySnapshot {
    *   });
    * });
    */
-  // tslint:disable-next-line:no-any
-  forEach(callback: (result: QueryDocumentSnapshot) => void, thisArg?: any):
+  forEach(callback: (result: QueryDocumentSnapshot) => void, thisArg?: unknown):
       void {
-    this._validator.isFunction('callback', callback);
+    validateFunction('callback', callback);
 
     for (const doc of this.docs) {
       callback.call(thisArg, doc);
@@ -888,7 +877,6 @@ interface QueryOptions {
  * @class Query
  */
 export class Query {
-  readonly _validator: AnyDuringMigration;
   private readonly _serializer: Serializer;
 
   /**
@@ -907,7 +895,6 @@ export class Query {
       private readonly _fieldFilters: FieldFilter[] = [],
       private readonly _fieldOrders: FieldOrder[] = [],
       private readonly _queryOptions: QueryOptions = {}) {
-    this._validator = _firestore._validator;
     this._serializer = new Serializer(_firestore);
   }
 
@@ -920,7 +907,7 @@ export class Query {
    * @returns 'true' if the input is a single DocumentSnapshot..
    */
   static _isDocumentSnapshot(fieldValuesOrDocumentSnapshot:
-                                 Array<DocumentSnapshot|UserInput>): boolean {
+                                 Array<DocumentSnapshot|unknown>): boolean {
     return (
         fieldValuesOrDocumentSnapshot.length === 1 &&
         (fieldValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot));
@@ -939,7 +926,7 @@ export class Query {
    */
   static _extractFieldValues(
       documentSnapshot: DocumentSnapshot, fieldOrders: FieldOrder[]) {
-    const fieldValues: UserInput[] = [];
+    const fieldValues: Array<unknown> = [];
 
     for (const fieldOrder of fieldOrders) {
       if (FieldPath.documentId().isEqual(fieldOrder.field)) {
@@ -985,7 +972,7 @@ export class Query {
    *   console.log(`Root location for document is ${firestore.formattedName}`);
    * });
    */
-  get firestore(): AnyDuringMigration {
+  get firestore(): Firestore {
     return this._firestore;
   }
 
@@ -1015,13 +1002,11 @@ export class Query {
    *   });
    * });
    */
-  where(fieldPath: string|FieldPath, opStr: string, value: UserInput): Query {
-    this._validator.isFieldPath('fieldPath', fieldPath);
-    this._validator.isQueryComparison('opStr', opStr, value);
-    this._validator.isQueryValue('value', value, {
-      allowDeletes: 'none',
-      allowTransforms: false,
-    });
+  where(fieldPath: string|FieldPath, opStr: WhereFilterOp, value: unknown):
+      Query {
+    validateFieldPath('fieldPath', fieldPath);
+    opStr = validateQueryOperator('opStr', opStr, value);
+    validateQueryValue('value', value);
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
@@ -1072,7 +1057,7 @@ export class Query {
       fields.push({fieldPath: FieldPath.documentId().formattedName});
     } else {
       for (let i = 0; i < fieldPaths.length; ++i) {
-        this._validator.isFieldPath(i, fieldPaths[i]);
+        validateFieldPath(i, fieldPaths[i]);
         fields.push(
             {fieldPath: FieldPath.fromArgument(fieldPaths[i]).formattedName});
       }
@@ -1108,9 +1093,9 @@ export class Query {
    *   });
    * });
    */
-  orderBy(fieldPath: string|FieldPath, directionStr?: string): Query {
-    this._validator.isFieldPath('fieldPath', fieldPath);
-    this._validator.isOptionalFieldOrder('directionStr', directionStr);
+  orderBy(fieldPath: string|FieldPath, directionStr?: OrderByDirection): Query {
+    validateFieldPath('fieldPath', fieldPath);
+    directionStr = validateQueryOrder('directionStr', directionStr);
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
@@ -1147,7 +1132,7 @@ export class Query {
    * });
    */
   limit(limit: number): Query {
-    this._validator.isInteger('limit', limit);
+    validateInteger('limit', limit);
 
     const options = extend(true, {}, this._queryOptions);
     options.limit = limit;
@@ -1176,7 +1161,7 @@ export class Query {
    * });
    */
   offset(offset: number): Query {
-    this._validator.isInteger('offset', offset);
+    validateInteger('offset', offset);
 
     const options = extend(true, {}, this._queryOptions);
     options.offset = offset;
@@ -1212,7 +1197,7 @@ export class Query {
    * @returns The implicit ordering semantics.
    */
   private createImplicitOrderBy(cursorValuesOrDocumentSnapshot:
-                                    Array<DocumentSnapshot|UserInput>):
+                                    Array<DocumentSnapshot|unknown>):
       FieldOrder[] {
     if (!Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
       return this._fieldOrders;
@@ -1264,13 +1249,13 @@ export class Query {
    */
   private createCursor(
       fieldOrders: FieldOrder[],
-      cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>,
+      cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>,
       before: boolean): api.ICursor {
     let fieldValues;
 
     if (Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
       fieldValues = Query._extractFieldValues(
-          cursorValuesOrDocumentSnapshot[0], fieldOrders);
+          cursorValuesOrDocumentSnapshot[0] as DocumentSnapshot, fieldOrders);
     } else {
       fieldValues = cursorValuesOrDocumentSnapshot;
     }
@@ -1296,11 +1281,7 @@ export class Query {
         fieldValue = this.convertReference(fieldValue);
       }
 
-      this._validator.isQueryValue(i, fieldValue, {
-        allowDeletes: 'none',
-        allowTransforms: false,
-      });
-
+      validateQueryValue(i, fieldValue);
       options.values!.push(this._serializer.encodeValue(fieldValue)!);
     }
 
@@ -1319,12 +1300,14 @@ export class Query {
    * query.
    * @private
    */
-  private convertReference(reference: string|
-                           DocumentReference): DocumentReference {
-    if (typeof reference === 'string') {
+  private convertReference(val: unknown): DocumentReference {
+    let reference: DocumentReference;
+
+    if (typeof val === 'string') {
       reference =
-          new DocumentReference(this._firestore, this._path.append(reference));
-    } else if (reference instanceof DocumentReference) {
+          new DocumentReference(this._firestore, this._path.append(val));
+    } else if (val instanceof DocumentReference) {
+      reference = val;
       if (!this._path.isPrefixOf(reference._path)) {
         throw new Error(
             `"${reference.path}" is not part of the query result set and ` +
@@ -1363,9 +1346,9 @@ export class Query {
    *   });
    * });
    */
-  startAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
+  startAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>):
       Query {
-    this._validator.minNumberOfArguments('startAt', arguments, 1);
+    validateMinNumberOfArguments('Query.startAt', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
 
@@ -1398,9 +1381,9 @@ export class Query {
    *   });
    * });
    */
-  startAfter(...fieldValuesOrDocumentSnapshot:
-                 Array<DocumentSnapshot|UserInput>): Query {
-    this._validator.minNumberOfArguments('startAfter', arguments, 1);
+  startAfter(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>):
+      Query {
+    validateMinNumberOfArguments('Query.startAfter', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
 
@@ -1432,9 +1415,9 @@ export class Query {
    *   });
    * });
    */
-  endBefore(...fieldValuesOrDocumentSnapshot:
-                Array<DocumentSnapshot|UserInput>): Query {
-    this._validator.minNumberOfArguments('endBefore', arguments, 1);
+  endBefore(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>):
+      Query {
+    validateMinNumberOfArguments('Query.endBefore', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
 
@@ -1466,9 +1449,9 @@ export class Query {
    *   });
    * });
    */
-  endAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|UserInput>):
+  endAt(...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>):
       Query {
-    this._validator.minNumberOfArguments('endAt', arguments, 1);
+    validateMinNumberOfArguments('Query.endAt', arguments, 1);
 
     const options = extend(true, {}, this._queryOptions);
 
@@ -1562,8 +1545,7 @@ export class Query {
   stream(): NodeJS.ReadableStream {
     const responseStream = this._stream();
 
-    const transform = through2.obj(function(
-        this: AnyDuringMigration, chunk, encoding, callback) {
+    const transform = through2.obj(function(this, chunk, encoding, callback) {
       // Only send chunks with documents.
       if (chunk.document) {
         this.push(chunk.document);
@@ -1645,18 +1627,17 @@ export class Query {
     const tag = requestTag();
     const self = this;
 
-    const stream =
-        through2.obj(function(this: AnyDuringMigration, proto, enc, callback) {
-          const readTime = Timestamp.fromProto(proto.readTime);
-          if (proto.document) {
-            const document =
-                self.firestore.snapshot_(proto.document, proto.readTime);
-            this.push({document, readTime});
-          } else {
-            this.push({readTime});
-          }
-          callback();
-        });
+    const stream = through2.obj(function(this, proto, enc, callback) {
+      const readTime = Timestamp.fromProto(proto.readTime);
+      if (proto.document) {
+        const document =
+            self.firestore.snapshot_(proto.document, proto.readTime);
+        this.push({document, readTime});
+      } else {
+        this.push({readTime});
+      }
+      callback();
+    });
 
     this._firestore.readStream('runQuery', request, tag, true)
         .then(backendStream => {
@@ -1701,8 +1682,8 @@ export class Query {
   onSnapshot(
       onNext: (snapshot: QuerySnapshot) => void,
       onError?: (error: Error) => void): () => void {
-    this._validator.isFunction('onNext', onNext);
-    this._validator.isOptionalFunction('onError', onError);
+    validateFunction('onNext', onNext);
+    validateFunction('onError', onError, {optional: true});
 
     const watch = Watch.forQuery(this);
 
@@ -1721,8 +1702,9 @@ export class Query {
       (s1: QueryDocumentSnapshot, s2: QueryDocumentSnapshot) => number {
     return (doc1, doc2) => {
       // Add implicit sorting by name, using the last specified direction.
-      const lastDirection = this._fieldOrders.length === 0 ?
-          directionOperators.ASC :
+      const lastDirection: api.StructuredQuery.Direction =
+          this._fieldOrders.length === 0 ?
+          'ASCENDING' :
           this._fieldOrders[this._fieldOrders.length - 1].direction;
       const orderBys = this._fieldOrders.concat(
           new FieldOrder(FieldPath.documentId(), lastDirection));
@@ -1744,8 +1726,7 @@ export class Query {
         }
 
         if (comp !== 0) {
-          const direction =
-              orderBy.direction === directionOperators.ASC ? 1 : -1;
+          const direction = orderBy.direction === 'ASCENDING' ? 1 : -1;
           return direction * comp;
         }
       }
@@ -1858,8 +1839,10 @@ export class CollectionReference extends Query {
       mask: {fieldPaths: []}
     };
 
-    return this.firestore.request('listDocuments', request, requestTag())
-        .then((documents: api.IDocument[]) => {
+    return this.firestore
+        .request<api.IDocument[]>(
+            'listDocuments', request, requestTag(), /*allowRetries=*/true)
+        .then(documents => {
           // Note that the backend already orders these documents by name,
           // so we do not need to manually sort them.
           return documents.map(doc => {
@@ -1891,7 +1874,7 @@ export class CollectionReference extends Query {
     if (arguments.length === 0) {
       documentPath = autoId();
     } else {
-      this._validator.isResourcePath('documentPath', documentPath);
+      validateResourcePath('documentPath', documentPath!);
     }
 
     const path = this._path.append(documentPath!);
@@ -1920,11 +1903,7 @@ export class CollectionReference extends Query {
    * });
    */
   add(data: DocumentData): Promise<DocumentReference> {
-    this._validator.isDocument('data', data, {
-      allowEmpty: true,
-      allowDeletes: 'none',
-      allowTransforms: true,
-    });
+    validateDocumentData('data', data, /*allowDeletes=*/false);
 
     const documentRef = this.doc();
     return documentRef.create(data).then(() => documentRef);
@@ -1943,81 +1922,90 @@ export class CollectionReference extends Query {
         (other instanceof CollectionReference && super.isEqual(other)));
   }
 }
-/*!
- * Creates a new CollectionReference. Invoked by DocumentReference to avoid
- * invalid declaration order.
- *
- * @param {Firestore} firestore The Firestore Database client.
- * @param {ResourcePath} path The path of this collection.
- * @returns {CollectionReference}
- */
-function createCollectionReference(firestore, path): CollectionReference {
-  return new CollectionReference(firestore, path);
-}
 
-/*!
+/**
  * Validates the input string as a field order direction.
  *
- * @param {string=} str Order direction to validate.
- * @throws {Error} when the direction is invalid
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param op Order direction to validate.
+ * @throws when the direction is invalid
+ * @return a validated input value, which may be different from the provided
+ * value.
  */
-export function validateFieldOrder(str: string): boolean {
-  if (!is.string(str) || !is.defined(directionOperators[str])) {
-    throw new Error('Order must be one of "asc" or "desc".');
-  }
-
-  return true;
+export function validateQueryOrder(arg: string, op: unknown): OrderByDirection|
+    undefined {
+  // For backwards compatibility, we support both lower and uppercase values.
+  op = typeof op === 'string' ? op.toLowerCase() : op;
+  validateEnumValue(arg, op, Object.keys(directionOperators), {optional: true});
+  return op as OrderByDirection | undefined;
 }
 
-/*!
+/**
  * Validates the input string as a field comparison operator.
  *
- * @param {string} str Field comparison operator to validate.
- * @param {*} val Value that is used in the filter.
- * @throws {Error} when the comparison operation is invalid
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param op Field comparison operator to validate.
+ * @param fieldValue Value that is used in the filter.
+ * @throws when the comparison operation is invalid
+ * @return a validated input value, which may be different from the provided
+ * value.
  */
-export function validateComparisonOperator(
-    str: string, val: UserInput): boolean {
-  if (is.string(str) && comparisonOperators[str]) {
-    const op = comparisonOperators[str];
+export function validateQueryOperator(
+    arg: string|number, op: unknown, fieldValue: unknown): WhereFilterOp {
+  // For backwards compatibility, we support both `=` and `==` for "equals".
+  op = op === '=' ? '==' : op;
 
-    if (typeof val === 'number' && isNaN(val) && op !== 'EQUAL') {
-      throw new Error(
-          'Invalid query. You can only perform equals comparisons on NaN.');
-    }
+  validateEnumValue(arg, op, Object.keys(comparisonOperators));
 
-    if (val === null && op !== 'EQUAL') {
-      throw new Error(
-          'Invalid query. You can only perform equals comparisons on Null.');
-    }
-
-    return true;
+  if (typeof fieldValue === 'number' && isNaN(fieldValue) && op !== '==') {
+    throw new Error(
+        'Invalid query. You can only perform equals comparisons on NaN.');
   }
 
-  throw new Error(
-      'Operator must be one of "<", "<=", "==", ">", ">=" or "array-contains".');
+  if (fieldValue === null && op !== '==') {
+    throw new Error(
+        'Invalid query. You can only perform equals comparisons on Null.');
+  }
+
+  return op as WhereFilterOp;
 }
 
-/*!
+/**
  * Validates that 'value' is a DocumentReference.
  *
- * @param {*} value The argument to validate.
- * @returns 'true' is value is an instance of DocumentReference.
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The argument to validate.
  */
-export function validateDocumentReference(value: DocumentReference): boolean {
-  if (value instanceof DocumentReference) {
-    return true;
+export function validateDocumentReference(
+    arg: string|number, value: unknown): void {
+  if (!(value instanceof DocumentReference)) {
+    throw new Error(invalidArgumentMessage(arg, 'DocumentReference'));
   }
-  throw customObjectError(value);
+}
+
+/**
+ * Validates that 'value' can be used as a query value.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The argument to validate.
+ */
+function validateQueryValue(arg: string|number, value: unknown): void {
+  validateUserInput(
+      arg, value, 'query constraint',
+      {allowDeletes: 'none', allowTransforms: false});
 }
 
 /**
  * Verifies euqality for an array of objects using the `isEqual` interface.
  *
  * @private
- * @param {Array.<Object>} left Array of objects supporting `isEqual`.
- * @param {Array.<Object>} right Array of objects supporting `isEqual`.
- * @return {boolean} True if arrays are equal.
+ * @param left Array of objects supporting `isEqual`.
+ * @param right Array of objects supporting `isEqual`.
+ * @return True if arrays are equal.
  */
 function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
     left: T[], right: T[]): boolean {

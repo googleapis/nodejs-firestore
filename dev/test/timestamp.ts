@@ -15,7 +15,6 @@
  */
 
 import {expect} from 'chai';
-import * as is from 'is';
 import * as through2 from 'through2';
 
 import * as Firestore from '../src/index';
@@ -69,8 +68,8 @@ describe('timestamps', () => {
                {timestampsInSnapshots: false}, DOCUMENT_WITH_TIMESTAMP)
         .then(firestore => {
           return firestore.doc('collectionId/documentId').get().then(res => {
-            expect(is.date(res.data()!['moonLanding'])).to.be.true;
-            expect(is.date(res.get('moonLanding'))).to.be.true;
+            expect(res.data()!['moonLanding']).to.be.instanceOf(Date);
+            expect(res.get('moonLanding')).to.be.instanceOf(Date);
             console.error = oldErrorLog;
           });
         });
@@ -136,10 +135,10 @@ describe('timestamps', () => {
 
     expect(() => new Firestore.Timestamp(0, -1))
         .to.throw(
-            'Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: -1');
+            'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: -1');
 
     expect(() => new Firestore.Timestamp(0, 1000000000))
         .to.throw(
-            'Argument "nanoseconds" is not a valid integer. Value must be within \[0, 999999999] inclusive, but was: 1000000000');
+            'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: 1000000000');
   });
 });

@@ -20,12 +20,10 @@ import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
-
+import {DocumentReference, FieldPath, Transaction} from '../src';
 import {createInstance, InvalidApiUsage} from './util/helpers';
 
 import api = proto.google.firestore.v1;
-import {AnyDuringMigration} from '../src/types';
-import {FieldPath} from '../src';
 
 use(chaiAsPromised);
 
@@ -37,10 +35,35 @@ const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
 
-function commit(transaction?, writes?, err?) {
+/** Helper to create a transaction ID from either a string or a Uint8Array. */
+function transactionId(transaction?: Uint8Array|string): Uint8Array {
+  if (transaction === undefined) {
+    return new Buffer('foo');
+  } else if (typeof transaction === 'string') {
+    return new Buffer(transaction);
+  } else {
+    return transaction;
+  }
+}
+
+/**
+ * The format the transaction tests use to verify transaction behavior. The
+ * format defines an expected request and its expected response or error code.
+ */
+interface TransactionStep {
+  type: 'begin'|'getDocument'|'query'|'commit'|'rollback';
+  request: api.ICommitRequest|api.IBeginTransactionRequest|api.IRunQueryRequest;
+  error?: Error;
+  response?: api.ICommitResponse|api.IBeginTransactionResponse;
+  stream?: NodeJS.ReadableStream;
+}
+
+function commit(
+    transaction?: Uint8Array|string, writes?: api.IWrite[],
+    err?: Error): TransactionStep {
   const proto: api.ICommitRequest = {
     database: DATABASE_ROOT,
-    transaction: transaction || 'foo',
+    transaction: transactionId(transaction),
   };
 
   proto.writes = writes || [];
@@ -70,10 +93,11 @@ function commit(transaction?, writes?, err?) {
   };
 }
 
-function rollback(transaction?, err?) {
+function rollback(
+    transaction?: Uint8Array|string, err?: Error): TransactionStep {
   const proto = {
     database: DATABASE_ROOT,
-    transaction: transaction || 'foo',
+    transaction: transactionId(transaction),
   };
 
   return {
@@ -84,19 +108,21 @@ function rollback(transaction?, err?) {
   };
 }
 
-function begin(transaction?, prevTransaction?, err?) {
+function begin(
+    transaction?: Uint8Array|string, prevTransaction?: Uint8Array|string,
+    err?: Error): TransactionStep {
   const proto: api.IBeginTransactionRequest = {database: DATABASE_ROOT};
 
   if (prevTransaction) {
     proto.options = {
       readWrite: {
-        retryTransaction: prevTransaction,
+        retryTransaction: transactionId(prevTransaction),
       },
     };
   }
 
   const response = {
-    transaction: transaction || 'foo',
+    transaction: transactionId(transaction),
   };
 
   return {
@@ -107,11 +133,11 @@ function begin(transaction?, prevTransaction?, err?) {
   };
 }
 
-function getDocument(transaction?) {
+function getDocument(transaction?: Uint8Array|string): TransactionStep {
   const request = {
     database: DATABASE_ROOT,
     documents: [DOCUMENT_NAME],
-    transaction: transaction || 'foo',
+    transaction: transactionId(transaction),
   };
 
   const stream = through2.obj();
@@ -135,11 +161,11 @@ function getDocument(transaction?) {
   };
 }
 
-function getAll(docs: string[], fieldMask?: string[]) {
+function getAll(docs: string[], fieldMask?: string[]): TransactionStep {
   const request: api.IBatchGetDocumentsRequest = {
     database: DATABASE_ROOT,
     documents: [],
-    transaction: 'foo' as AnyDuringMigration,
+    transaction: new Buffer('foo'),
   };
 
   if (fieldMask) {
@@ -175,7 +201,7 @@ function getAll(docs: string[], fieldMask?: string[]) {
   };
 }
 
-function query(transaction?) {
+function query(transaction?: Uint8Array): TransactionStep {
   const request = {
     parent: `${DATABASE_ROOT}/documents`,
     structuredQuery: {
@@ -196,7 +222,7 @@ function query(transaction?) {
         },
       },
     },
-    transaction: transaction || 'foo',
+    transaction: transaction || new Buffer('foo'),
   };
 
   const stream = through2.obj();
@@ -225,34 +251,41 @@ function query(transaction?) {
  * Asserts that the given transaction function issues the expected requests.
  */
 function runTransaction<T>(
-    transactionCallback: (transaction, docRef) => Promise<T>,
+    transactionCallback: (
+        transaction: Transaction, docRef: DocumentReference) => Promise<T>,
     ...expectedRequests) {
   const overrides = {
-    beginTransaction: (actual, options, callback) => {
-      const request = expectedRequests.shift();
-      expect(request.type).to.equal('begin');
-      expect(actual).to.deep.eq(request.request);
-      callback(request.error, request.response);
-    },
-    commit: (actual, options, callback) => {
-      const request = expectedRequests.shift();
-      expect(request.type).to.equal('commit');
-      expect(actual).to.deep.eq(request.request);
-      callback(request.error, request.response);
-    },
-    rollback: (actual, options, callback) => {
-      const request = expectedRequests.shift();
-      expect(request.type).to.equal('rollback');
-      expect(actual).to.deep.eq(request.request);
-      callback(request.error, request.response);
-    },
-    batchGetDocuments: (actual) => {
+    beginTransaction:
+        (actual: api.IBeginTransactionRequest, _,
+         callback: (err: Error, resp: api.IBeginTransactionResponse) =>
+             void) => {
+          const request = expectedRequests.shift();
+          expect(request.type).to.equal('begin');
+          expect(actual).to.deep.eq(request.request);
+          callback(request.error, request.response);
+        },
+    commit:
+        (actual: api.ICommitRequest, _,
+         callback: (err: Error, resp: api.ICommitResponse) => void) => {
+          const request = expectedRequests.shift();
+          expect(request.type).to.equal('commit');
+          expect(actual).to.deep.eq(request.request);
+          callback(request.error, request.response);
+        },
+    rollback:
+        (actual: api.IRollbackRequest, _, callback: (err: Error) => void) => {
+          const request = expectedRequests.shift();
+          expect(request.type).to.equal('rollback');
+          expect(actual).to.deep.eq(request.request);
+          callback(request.error);
+        },
+    batchGetDocuments: (actual: api.IBatchGetDocumentsRequest) => {
       const request = expectedRequests.shift();
       expect(request.type).to.equal('getDocument');
       expect(actual).to.deep.eq(request.request);
       return request.stream;
     },
-    runQuery: (actual) => {
+    runQuery: (actual: api.IRunQueryRequest) => {
       const request = expectedRequests.shift();
       expect(request.type).to.equal('query');
       expect(actual).to.deep.eq(request.request);
@@ -325,14 +358,13 @@ describe('failed transactions', () => {
           () => firestore.runTransaction(
               () => Promise.resolve(), {maxAttempts: 0}))
           .to.throw(
-              'Argument "transactionOptions.maxAttempts" is not a valid integer.');
+              'Value for argument "transactionOptions.maxAttempts" must be within [1, Infinity] inclusive, but was: 0');
     });
   });
 
   it('requires a promise', () => {
-    return expect(
-               runTransaction(
-                   (() => {}) as AnyDuringMigration, begin(), rollback('foo')))
+    return expect(runTransaction(
+                      (() => {}) as InvalidApiUsage, begin(), rollback('foo')))
         .to.eventually.be.rejectedWith(
             'You must return a Promise in your transaction()-callback.');
   });
@@ -392,22 +424,25 @@ describe('failed transactions', () => {
   });
 
   it('fails on beginTransaction', () => {
-    return expect(
-               runTransaction(
-                   () => {
-                     return Promise.resolve('success');
-                   },
-                   begin(
-                       'foo', null, new Error('Fails (1) on beginTransaction')),
-                   begin(
-                       'foo', null, new Error('Fails (2) on beginTransaction')),
-                   begin(
-                       'foo', null, new Error('Fails (3) on beginTransaction')),
-                   begin(
-                       'foo', null, new Error('Fails (4) on beginTransaction')),
-                   begin(
-                       'foo', null,
-                       new Error('Fails (5) on beginTransaction'))))
+    return expect(runTransaction(
+                      () => {
+                        return Promise.resolve('success');
+                      },
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (1) on beginTransaction')),
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (2) on beginTransaction')),
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (3) on beginTransaction')),
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (4) on beginTransaction')),
+                      begin(
+                          'foo', undefined,
+                          new Error('Fails (5) on beginTransaction'))))
         .to.eventually.be.rejectedWith('Fails (5) on beginTransaction');
   });
 
@@ -431,7 +466,7 @@ describe('transaction operations', () => {
   });
 
   it('requires a query or document for get', () => {
-    return runTransaction(transaction => {
+    return runTransaction((transaction: InvalidApiUsage) => {
       expect(() => transaction.get())
           .to.throw('Argument "refOrQuery" must be a DocumentRef or a Query.');
 
@@ -509,7 +544,7 @@ describe('transaction operations', () => {
     return runTransaction((transaction, docRef) => {
       transaction.create(docRef, {});
       return Promise.resolve();
-    }, begin(), commit(null, [create]));
+    }, begin(), commit(undefined, [create]));
   });
 
   it('support update', () => {
@@ -541,7 +576,7 @@ describe('transaction operations', () => {
       transaction.update(docRef, 'a.b', 'c');
       transaction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
       return Promise.resolve();
-    }, begin(), commit(null, [update, update, update]));
+    }, begin(), commit(undefined, [update, update, update]));
   });
 
   it('support set', () => {
@@ -559,7 +594,7 @@ describe('transaction operations', () => {
     return runTransaction((transaction, docRef) => {
       transaction.set(docRef, {'a.b': 'c'});
       return Promise.resolve();
-    }, begin(), commit(null, [set]));
+    }, begin(), commit(undefined, [set]));
   });
 
   it('support set with merge', () => {
@@ -580,7 +615,7 @@ describe('transaction operations', () => {
     return runTransaction((transaction, docRef) => {
       transaction.set(docRef, {'a.b': 'c'}, {merge: true});
       return Promise.resolve();
-    }, begin(), commit(null, [set]));
+    }, begin(), commit(undefined, [set]));
   });
 
   it('support delete', () => {
@@ -591,7 +626,7 @@ describe('transaction operations', () => {
     return runTransaction((transaction, docRef) => {
       transaction.delete(docRef);
       return Promise.resolve();
-    }, begin(), commit(null, [remove]));
+    }, begin(), commit(undefined, [remove]));
   });
 
   it('support multiple writes', () => {
@@ -609,6 +644,6 @@ describe('transaction operations', () => {
     return runTransaction((transaction, docRef) => {
       transaction.delete(docRef).set(docRef, {});
       return Promise.resolve();
-    }, begin(), commit(null, [remove, set]));
+    }, begin(), commit(undefined, [remove, set]));
   });
 });

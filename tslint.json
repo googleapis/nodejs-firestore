@@ -4,6 +4,7 @@
     "no-bitwise": true
   },
   "rules": {
-    "no-unused-expression": false
+    "no-unused-expression": false,
+    "ordered-imports": true
   }
 }
