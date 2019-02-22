@@ -348,8 +348,8 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
    */
-  // We deliberately use `any` in the external API, since the return type of
-  // this function is based on the document as retrieved from the backend.
+  // We deliberately use `any` in the external API to not impose type-checking
+  // on end users.
   data(): {[field: string]: any}|undefined {  // tslint:disable-line no-any
     const fields = this._fieldsProto;
 
@@ -384,8 +384,8 @@ export class DocumentSnapshot {
    *   console.log(`Retrieved field value: ${field}`);
    * });
    */
-  // We deliberately use `any` in the external API, since the return type of
-  // this function is based on the document as retrieved from the backend.
+  // We deliberately use `any` in the external API to not impose type-checking
+  // on end users.
   get(field: string|FieldPath): any {  // tslint:disable-line no-any
     validateFieldPath('field', field);
 

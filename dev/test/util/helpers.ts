@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-const v1beta1 = require('../../src/v1beta1');
-
 import {expect} from 'chai';
 import {GrpcClient} from 'google-gax';
 import * as through2 from 'through2';

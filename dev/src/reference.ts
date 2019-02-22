@@ -786,10 +786,7 @@ export class QuerySnapshot {
    *   });
    * });
    */
-  // We deliberately use `any` to allow users to use arbitrary objects as the
-  // callback's context.
-  // tslint:disable-next-line:no-any
-  forEach(callback: (result: QueryDocumentSnapshot) => void, thisArg?: any):
+  forEach(callback: (result: QueryDocumentSnapshot) => void, thisArg?: unknown):
       void {
     validateFunction('callback', callback);
 
