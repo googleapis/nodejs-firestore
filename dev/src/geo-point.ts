@@ -82,7 +82,7 @@ export class GeoPoint implements Serializable {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `GeoPoint` is equal to the provided value.
    */
-  isEqual(other): boolean {
+  isEqual(other: GeoPoint): boolean {
     return (
         this === other ||
         (other instanceof GeoPoint && this.latitude === other.latitude &&

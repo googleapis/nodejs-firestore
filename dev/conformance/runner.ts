@@ -17,19 +17,24 @@
 const duplexify = require('duplexify');
 
 import {expect} from 'chai';
+import {CallOptions} from 'google-gax';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
 import * as proto from '../protos/firestore_proto_api';
 
-import * as Firestore from '../src';
-import {documentFromJson} from '../src/convert';
+import {DocumentChange, DocumentSnapshot, FieldPath, FieldValue, Firestore, Query, QueryDocumentSnapshot, QuerySnapshot, Timestamp} from '../src';
+import {fieldsFromJson} from '../src/convert';
 import {DocumentChangeType} from '../src/document-change';
 import {ResourcePath} from '../src/path';
+import {DocumentData} from '../src/types';
 import {isObject} from '../src/util';
-import {createInstance as createInstanceHelper} from '../test/util/helpers';
+import {ApiOverride, createInstance as createInstanceHelper} from '../test/util/helpers';
 
 import api = proto.google.firestore.v1;
+
+// TODO(mrschmidt): Create Protobuf .d.ts file for the conformance proto
+type ConformanceProto = any;  // tslint:disable-line:no-any
 
 const REQUEST_TIME = 'REQUEST_TIME';
 
@@ -60,14 +65,14 @@ const COMMIT_REQUEST_TYPE =
     protoDefinition.lookupType('google.firestore.v1.CommitRequest');
 
 // Firestore instance initialized by the test runner.
-let firestore;
+let firestore: Firestore;
 
-const docRef = path => {
+const docRef = (path: string) => {
   const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
   return firestore.doc(relativePath);
 };
 
-const collRef = path => {
+const collRef = (path: string) => {
   const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
   return firestore.collection(relativePath);
 };
@@ -76,7 +81,7 @@ const watchQuery = () => {
   return firestore.collection('C').orderBy('a');
 };
 
-const createInstance = overrides => {
+const createInstance = (overrides: ApiOverride) => {
   return createInstanceHelper(
              overrides, {projectId: CONFORMANCE_TEST_PROJECT_ID})
       .then(firestoreClient => {
@@ -87,9 +92,9 @@ const createInstance = overrides => {
 
 /** Converts JSON test data into JavaScript types suitable for the Node API. */
 const convertInput = {
-  argument: json => {
+  argument: (json: ConformanceProto) => {
     const obj = JSON.parse(json);
-    function convertValue(value) {
+    function convertValue(value: unknown) {
       if (isObject(value)) {
         return convertObject(value);
       } else if (Array.isArray(value)) {
@@ -97,18 +102,20 @@ const convertInput = {
       } else if (value === 'NaN') {
         return NaN;
       } else if (value === 'Delete') {
-        return Firestore.FieldValue.delete();
+        return FieldValue.delete();
       } else if (value === 'ServerTimestamp') {
-        return Firestore.FieldValue.serverTimestamp();
+        return FieldValue.serverTimestamp();
       }
 
       return value;
     }
-    function convertArray(arr) {
+    function convertArray(arr: Array<unknown>): Array<unknown>|FieldValue {
       if (arr.length > 0 && arr[0] === 'ArrayUnion') {
-        return Firestore.FieldValue.arrayUnion(...convertArray(arr.slice(1)));
+        return FieldValue.arrayUnion(
+            ...(convertArray(arr.slice(1)) as Array<unknown>));
       } else if (arr.length > 0 && arr[0] === 'ArrayRemove') {
-        return Firestore.FieldValue.arrayRemove(...convertArray(arr.slice(1)));
+        return FieldValue.arrayRemove(
+            ...(convertArray(arr.slice(1)) as Array<unknown>));
       } else {
         for (let i = 0; i < arr.length; ++i) {
           arr[i] = convertValue(arr[i]);
@@ -116,7 +123,7 @@ const convertInput = {
         return arr;
       }
     }
-    function convertObject(obj) {
+    function convertObject(obj: {[k: string]: unknown}) {
       for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
           obj[key] = convertValue(obj[key]);
@@ -126,38 +133,37 @@ const convertInput = {
     }
     return convertValue(obj);
   },
-  precondition: precondition => {
+  precondition: (precondition: string) => {
     const deepCopy = JSON.parse(JSON.stringify(precondition));
     if (deepCopy.updateTime) {
-      deepCopy.lastUpdateTime =
-          Firestore.Timestamp.fromProto(deepCopy.updateTime);
+      deepCopy.lastUpdateTime = Timestamp.fromProto(deepCopy.updateTime);
       delete deepCopy.updateTime;
     }
     return deepCopy;
   },
-  path: path => {
+  path: (path: ConformanceProto) => {
     if (path.field.length === 1 && path.field[0] === '__name__') {
-      return Firestore.FieldPath.documentId();
+      return FieldPath.documentId();
     }
-    return new Firestore.FieldPath(path.field);
+    return new FieldPath(path.field);
   },
-  paths: fields => {
-    const convertedPaths: Array<{}> = [];
+  paths: (fields: ConformanceProto): FieldPath[] => {
+    const convertedPaths: FieldPath[] = [];
     if (fields) {
       for (const field of fields) {
         convertedPaths.push(convertInput.path(field));
       }
     } else {
-      convertedPaths.push(Firestore.FieldPath.documentId());
+      convertedPaths.push(FieldPath.documentId());
     }
     return convertedPaths;
   },
-  cursor: cursor => {
-    const args: Array<{}> = [];
+  cursor: (cursor: ConformanceProto) => {
+    const args: Array<unknown> = [];
     if (cursor.docSnapshot) {
-      args.push(Firestore.DocumentSnapshot.fromObject(
+      args.push(DocumentSnapshot.fromObject(
           docRef(cursor.docSnapshot.path),
-          convertInput.argument(cursor.docSnapshot.jsonData)));
+          convertInput.argument(cursor.docSnapshot.jsonData) as DocumentData));
     } else {
       for (const jsonValue of cursor.jsonValues) {
         args.push(convertInput.argument(jsonValue));
@@ -165,39 +171,42 @@ const convertInput = {
     }
     return args;
   },
-  snapshot: snapshot => {
-    const docs: Firestore.QueryDocumentSnapshot[] = [];
-    const changes: Firestore.DocumentChange[] = [];
-    const readTime = Firestore.Timestamp.fromProto(snapshot.readTime);
+  snapshot: (snapshot: ConformanceProto) => {
+    const docs: QueryDocumentSnapshot[] = [];
+    const changes: DocumentChange[] = [];
+    const readTime = Timestamp.fromProto(snapshot.readTime);
 
     for (const doc of snapshot.docs) {
       const deepCopy = JSON.parse(JSON.stringify(doc));
-      deepCopy.fields = documentFromJson(deepCopy.fields);
+      deepCopy.fields = fieldsFromJson(deepCopy.fields);
       docs.push(
-          firestore.snapshot_(deepCopy, readTime, 'json') as
-          Firestore.QueryDocumentSnapshot);
+          firestore.snapshot_(
+              deepCopy, readTime.toDate().toISOString(), 'json') as
+          QueryDocumentSnapshot);
     }
 
     for (const change of snapshot.changes) {
       const deepCopy = JSON.parse(JSON.stringify(change.doc));
-      deepCopy.fields = documentFromJson(deepCopy.fields);
-      const doc = firestore.snapshot_(deepCopy, readTime, 'json');
+      deepCopy.fields = fieldsFromJson(deepCopy.fields);
+      const doc = firestore.snapshot_(
+                      deepCopy, readTime.toDate().toISOString(), 'json') as
+          QueryDocumentSnapshot;
       const type =
           (['unspecified', 'added', 'removed', 'modified'][change.kind] as
            DocumentChangeType);
-      changes.push(new Firestore.DocumentChange(
-          type, doc, change.oldIndex, change.newIndex));
+      changes.push(
+          new DocumentChange(type, doc, change.oldIndex, change.newIndex));
     }
 
-    return new Firestore.QuerySnapshot(
+    return new QuerySnapshot(
         watchQuery(), readTime, docs.length, () => docs, () => changes);
   },
 };
 
 /** Converts Firestore Protobuf types in Proto3 JSON format to Protobuf JS. */
 const convertProto = {
-  targetChange: type => type || 'NO_CHANGE',
-  listenResponse: listenRequest => {
+  targetChange: (type?: string) => type || 'NO_CHANGE',
+  listenResponse: (listenRequest: ConformanceProto) => {
     const deepCopy = JSON.parse(JSON.stringify(listenRequest));
     if (deepCopy.targetChange) {
       deepCopy.targetChange.targetChangeType =
@@ -205,15 +214,17 @@ const convertProto = {
     }
     if (deepCopy.documentChange) {
       deepCopy.documentChange.document.fields =
-          documentFromJson(deepCopy.documentChange.document.fields);
+          fieldsFromJson(deepCopy.documentChange.document.fields);
     }
     return deepCopy;
   },
 };
 
 /** Request handler for _commit. */
-function commitHandler(spec) {
-  return (request, options, callback) => {
+function commitHandler(spec: ConformanceProto) {
+  return (request: api.ICommitRequest, options: CallOptions,
+          callback: (err: Error|null|undefined, resp?: api.ICommitResponse) =>
+              void) => {
     try {
       const actualCommit = COMMIT_REQUEST_TYPE.fromObject(request);
       const expectedCommit = COMMIT_REQUEST_TYPE.fromObject(spec.request);
@@ -222,7 +233,7 @@ function commitHandler(spec) {
         commitTime: {},
         writeResults: [],
       };
-      for (let i = 1; i <= request.writes.length; ++i) {
+      for (let i = 1; i <= request.writes!.length; ++i) {
         res.writeResults!.push({
           updateTime: {},
         });
@@ -235,10 +246,10 @@ function commitHandler(spec) {
 }
 
 /** Request handler for _runQuery. */
-function queryHandler(spec) {
-  return request => {
+function queryHandler(spec: ConformanceProto) {
+  return (request: api.IRunQueryRequest) => {
     const actualQuery =
-        STRUCTURED_QUERY_TYPE.fromObject(request.structuredQuery);
+        STRUCTURED_QUERY_TYPE.fromObject(request.structuredQuery!);
     const expectedQuery = STRUCTURED_QUERY_TYPE.fromObject(spec.query);
     expect(actualQuery).to.deep.equal(expectedQuery);
     const stream = through2.obj();
@@ -248,10 +259,10 @@ function queryHandler(spec) {
 }
 
 /** Request handler for _batchGetDocuments. */
-function getHandler(spec) {
-  return request => {
+function getHandler(spec: ConformanceProto) {
+  return (request: api.IBatchGetDocumentsRequest) => {
     const getDocument = spec.request;
-    expect(request.documents[0]).to.equal(getDocument.name);
+    expect(request.documents![0]).to.equal(getDocument.name);
     const stream = through2.obj();
     setImmediate(() => {
       stream.push({
@@ -264,19 +275,19 @@ function getHandler(spec) {
   };
 }
 
-function runTest(spec) {
+function runTest(spec: ConformanceProto) {
   console.log(`Running Spec:\n${JSON.stringify(spec, null, 2)}\n`);
 
-  const updateTest = spec => {
+  const updateTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      const varargs: Array<{}> = [];
+      const varargs: Array<unknown> = [];
 
       if (spec.jsonData) {
         varargs[0] = convertInput.argument(spec.jsonData);
       } else {
         for (let i = 0; i < spec.fieldPaths.length; ++i) {
-          varargs[2 * i] = new Firestore.FieldPath(spec.fieldPaths[i].field);
+          varargs[2 * i] = new FieldPath(spec.fieldPaths[i].field);
         }
         for (let i = 0; i < spec.jsonValues.length; ++i) {
           varargs[2 * i + 1] = convertInput.argument(spec.jsonValues[i]);
@@ -288,13 +299,16 @@ function runTest(spec) {
       }
 
       const document = docRef(spec.docRefPath);
-      return document.update.apply(document, varargs);
+      // TODO(mrschmidt): Remove 'any' and invoke by calling update() directly
+      // for each individual case.
+      // tslint:disable-next-line:no-any
+      return document.update.apply(document, varargs as any);
     });
   };
 
-  const queryTest = spec => {
+  const queryTest = (spec: ConformanceProto) => {
     const overrides = {runQuery: queryHandler(spec)};
-    const applyClause = (query, clause) => {
+    const applyClause = (query: Query, clause: ConformanceProto) => {
       if (clause.select) {
         query =
             query.select.apply(query, convertInput.paths(clause.select.fields));
@@ -325,7 +339,7 @@ function runTest(spec) {
     };
 
     return createInstance(overrides).then(() => {
-      let query = collRef(spec.collPath);
+      let query: Query = collRef(spec.collPath);
       for (const clause of spec.clauses) {
         query = applyClause(query, clause);
       }
@@ -333,7 +347,7 @@ function runTest(spec) {
     });
   };
 
-  const deleteTest = spec => {
+  const deleteTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
       if (spec.precondition) {
@@ -345,43 +359,42 @@ function runTest(spec) {
     });
   };
 
-  const setTest = spec => {
+  const setTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      const setOption: {merge?: boolean,
-                        mergeFields?: Firestore.FieldPath[]} = {};
+      const setOption: {merge?: boolean, mergeFields?: FieldPath[]} = {};
       if (spec.option && spec.option.all) {
         setOption.merge = true;
       } else if (spec.option && spec.option.fields) {
         setOption.mergeFields = [];
         for (const fieldPath of spec.option.fields) {
-          setOption.mergeFields.push(new Firestore.FieldPath(fieldPath.field));
+          setOption.mergeFields.push(new FieldPath(fieldPath.field));
         }
       }
       return docRef(setSpec.docRefPath)
-          .set(convertInput.argument(spec.jsonData), setOption);
+          .set(convertInput.argument(spec.jsonData) as DocumentData, setOption);
     });
   };
 
-  const createTest = spec => {
+  const createTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
       return docRef(spec.docRefPath)
-          .create(convertInput.argument(spec.jsonData));
+          .create(convertInput.argument(spec.jsonData) as DocumentData);
     });
   };
 
-  const getTest = spec => {
+  const getTest = (spec: ConformanceProto) => {
     const overrides = {batchGetDocuments: getHandler(spec)};
     return createInstance(overrides).then(() => {
       return docRef(spec.docRefPath).get();
     });
   };
 
-  const watchTest = spec => {
+  const watchTest = (spec: ConformanceProto) => {
     const expectedSnapshots = spec.snapshots;
     const writeStream = through2.obj();
-    const overrides = {
+    const overrides: ApiOverride = {
       listen: () => duplexify.obj(through2.obj(), writeStream)
     };
 
@@ -418,7 +431,7 @@ function runTest(spec) {
     });
   };
 
-  let testSpec;
+  let testSpec: ConformanceProto;
   let testPromise;
 
   const getSpec = spec.get;

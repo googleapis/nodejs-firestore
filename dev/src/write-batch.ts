@@ -110,9 +110,9 @@ export class WriteBatch {
    * @private
    * @hideconstructor
    *
-   * @param {Firestore} firestore The Firestore Database client.
+   * @param firestore The Firestore Database client.
    */
-  constructor(firestore) {
+  constructor(firestore: Firestore) {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
   }
@@ -261,7 +261,7 @@ export class WriteBatch {
 
     this.verifyNotCommitted();
 
-    let documentMask;
+    let documentMask: DocumentMask;
 
     if (mergePaths) {
       documentMask = DocumentMask.fromFieldMask(options!.mergeFields!);
@@ -273,20 +273,20 @@ export class WriteBatch {
 
     const document = DocumentSnapshot.fromObject(documentRef, data);
     if (mergePaths) {
-      documentMask.removeFields(transform.fields);
+      documentMask!.removeFields(transform.fields);
     } else {
       documentMask = DocumentMask.fromObject(data);
     }
 
-    const hasDocumentData = !document.isEmpty || !documentMask.isEmpty;
+    const hasDocumentData = !document.isEmpty || !documentMask!.isEmpty;
 
     let write;
 
     if (!mergePaths && !mergeLeaves) {
       write = document.toProto();
     } else if (hasDocumentData || transform.isEmpty) {
-      write = document.toProto();
-      write.updateMask = documentMask.toProto(this._serializer);
+      write = document.toProto()!;
+      write.updateMask = documentMask!.toProto();
     }
 
     this._writes.push({
@@ -383,9 +383,10 @@ export class WriteBatch {
         validateUpdateMap('dataOrField', dataOrField);
         validateMaxNumberOfArguments('update', arguments, 3);
 
-        Object.keys(dataOrField).forEach(key => {
+        const data = dataOrField as UpdateData;
+        Object.keys(data).forEach(key => {
           validateFieldPath(key, key);
-          updateMap.set(FieldPath.fromArgument(key), dataOrField[key]);
+          updateMap.set(FieldPath.fromArgument(key), data[key]);
         });
 
         if (preconditionOrValues.length > 0) {
@@ -524,7 +525,7 @@ export class WriteBatch {
                     resp.writeResults.length} results for ${
                     request.writes!.length} operations.`);
 
-            const commitTime = Timestamp.fromProto(resp.commitTime);
+            const commitTime = Timestamp.fromProto(resp.commitTime!);
 
             let offset = 0;
 

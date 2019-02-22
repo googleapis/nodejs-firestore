@@ -365,7 +365,7 @@ class ArrayRemoveTransform extends FieldTransform {
     }
   }
 
-  toProto(serializer: Serializer, fieldPath):
+  toProto(serializer: Serializer, fieldPath: FieldPath):
       api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {

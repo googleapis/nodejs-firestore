@@ -24,7 +24,7 @@ import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {FieldPath, ResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {ValidationOptions} from './types';
+import {ApiMapValue, DocumentData, ValidationOptions} from './types';
 import {isEmpty, isObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
@@ -75,8 +75,8 @@ export class Serializer {
    * @param obj The object to encode.
    * @returns The Firestore 'Fields' representation
    */
-  encodeFields(obj: object): {[k: string]: api.IValue} {
-    const fields = {};
+  encodeFields(obj: DocumentData): ApiMapValue {
+    const fields: ApiMapValue = {};
 
     for (const prop in obj) {
       if (obj.hasOwnProperty(prop)) {
@@ -219,7 +219,7 @@ export class Serializer {
         return Number(proto.doubleValue);
       }
       case 'timestampValue': {
-        const timestamp = Timestamp.fromProto(proto.timestampValue);
+        const timestamp = Timestamp.fromProto(proto.timestampValue!);
         return this.timestampsInSnapshots ? timestamp : timestamp.toDate();
       }
       case 'referenceValue': {
@@ -240,7 +240,7 @@ export class Serializer {
         return null;
       }
       case 'mapValue': {
-        const obj = {};
+        const obj: DocumentData = {};
         const fields = proto.mapValue!.fields!;
 
         for (const prop in fields) {
@@ -274,7 +274,7 @@ export class Serializer {
  * @param input The argument to verify.
  * @returns 'true' if the input can be a treated as a plain object.
  */
-export function isPlainObject(input: unknown): input is object {
+export function isPlainObject(input: unknown): input is DocumentData {
   return (
       isObject(input) &&
       (Object.getPrototypeOf(input) === Object.prototype ||
@@ -312,19 +312,17 @@ export function validateUserInput(
   const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
 
   if (Array.isArray(value)) {
-    const arr = value as Array<unknown>;
-    for (let i = 0; i < arr.length; ++i) {
+    for (let i = 0; i < value.length; ++i) {
       validateUserInput(
-          arg, arr[i]!, desc, options,
+          arg, value[i]!, desc, options,
           path ? path.append(String(i)) : new FieldPath(String(i)), level + 1,
           /* inArray= */ true);
     }
   } else if (isPlainObject(value)) {
-    const obj = value as object;
-    for (const prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
+    for (const prop in value) {
+      if (value.hasOwnProperty(prop)) {
         validateUserInput(
-            arg, obj[prop]!, desc, options,
+            arg, value[prop]!, desc, options,
             path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
             level + 1, inArray);
       }

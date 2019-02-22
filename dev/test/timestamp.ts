@@ -17,11 +17,15 @@
 import {expect} from 'chai';
 import * as through2 from 'through2';
 
-import * as Firestore from '../src/index';
-import {createInstance as createInstanceHelper, document} from '../test/util/helpers';
+import {google} from '../protos/firestore_proto_api';
 
-function createInstance(opts, document) {
-  const overrides = {
+import * as Firestore from '../src/index';
+import {ApiOverride, createInstance as createInstanceHelper, document} from '../test/util/helpers';
+
+import api = google.firestore.v1;
+
+function createInstance(opts: {}, document: api.IDocument) {
+  const overrides: ApiOverride = {
     batchGetDocuments: () => {
       const stream = through2.obj();
       setImmediate(() => {

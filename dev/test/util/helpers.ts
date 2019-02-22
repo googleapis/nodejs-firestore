@@ -15,13 +15,13 @@
  */
 
 import {expect} from 'chai';
-import {GrpcClient} from 'google-gax';
+import {CallOptions, GrpcClient} from 'google-gax';
 import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_proto_api';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
-import {GapicClient} from '../../src/types';
+import {GapicClient, GrpcError} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
@@ -61,13 +61,27 @@ export class Deferred<R> {
  * Interface that defines the request handlers used by Firestore.
  */
 export type ApiOverride = {
-  beginTransaction?: (request, options, callback) => void;
-  commit?: (request, options, callback) => void;
-  rollback?: (request, options, callback) => void;
-  listCollectionIds?: (request, options, callback) => void;
-  listDocuments?: (request, options, callback) => void;
-  batchGetDocuments?: (request) => NodeJS.ReadableStream;
-  runQuery?: (request) => NodeJS.ReadableStream;
+  beginTransaction?: (request: api.IBeginTransactionRequest,
+                      options: CallOptions,
+                      callback: (
+                          err?: Error|null,
+                          resp?: api.IBeginTransactionResponse) => void) =>
+                      void;
+  commit?: (request: api.ICommitRequest, options: CallOptions,
+            callback: (err?: Error|null, resp?: api.ICommitResponse) => void) =>
+            void;
+  rollback?: (request: api.IRollbackRequest, options: CallOptions,
+              callback: (err?: Error|null, resp?: void) => void) => void;
+  listCollectionIds?: (request: api.IListCollectionIdsRequest,
+                       options: CallOptions,
+                       callback: (err?: Error|null, resp?: string[]) => void) =>
+                       void;
+  listDocuments?: (request: api.IListDocumentsRequest, options: CallOptions,
+                   callback: (err?: GrpcError|null, resp?: api.IDocument[]) =>
+                       void) => void;
+  batchGetDocuments?: (request: api.IBatchGetDocumentsRequest) =>
+                       NodeJS.ReadableStream;
+  runQuery?: (request: api.IRunQueryRequest) => NodeJS.ReadableStream;
   listen?: () => NodeJS.ReadWriteStream;
 };
 
@@ -98,7 +112,8 @@ export function createInstance(
     const gapicClient: GapicClient = new v1(initializationOptions);
     if (apiOverrides) {
       Object.keys(apiOverrides).forEach(override => {
-        gapicClient._innerApiCalls[override] = apiOverrides[override];
+        gapicClient._innerApiCalls[override] =
+            (apiOverrides as {[k: string]: unknown})[override];
       });
     }
     return gapicClient;
@@ -288,23 +303,13 @@ export function writeResult(count: number): api.IWriteResponse {
   return response;
 }
 
-export function requestEquals(actual: object, ...components: object[]): void {
-  const proto: object = {
-    database: DATABASE_ROOT,
-  };
-
-  for (const component of components) {
-    for (const key in component) {
-      if (component.hasOwnProperty(key)) {
-        if (proto[key]) {
-          proto[key] = proto[key].concat(component[key]);
-        } else {
-          proto[key] = component[key];
-        }
-      }
-    }
-  }
-
+export function requestEquals(
+    actual: object, expected: {[k: string]: unknown}): void {
+  const proto = Object.assign(
+      {
+        database: DATABASE_ROOT,
+      },
+      expected);
   expect(actual).to.deep.eq(proto);
 }
 

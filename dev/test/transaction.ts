@@ -21,7 +21,7 @@ import * as through2 from 'through2';
 import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
 import {DocumentReference, FieldPath, Transaction} from '../src';
-import {createInstance, InvalidApiUsage} from './util/helpers';
+import {ApiOverride, createInstance, InvalidApiUsage} from './util/helpers';
 
 import api = proto.google.firestore.v1;
 
@@ -253,43 +253,38 @@ function query(transaction?: Uint8Array): TransactionStep {
 function runTransaction<T>(
     transactionCallback: (
         transaction: Transaction, docRef: DocumentReference) => Promise<T>,
-    ...expectedRequests) {
-  const overrides = {
-    beginTransaction:
-        (actual: api.IBeginTransactionRequest, _,
-         callback: (err: Error, resp: api.IBeginTransactionResponse) =>
-             void) => {
-          const request = expectedRequests.shift();
-          expect(request.type).to.equal('begin');
-          expect(actual).to.deep.eq(request.request);
-          callback(request.error, request.response);
-        },
-    commit:
-        (actual: api.ICommitRequest, _,
-         callback: (err: Error, resp: api.ICommitResponse) => void) => {
-          const request = expectedRequests.shift();
-          expect(request.type).to.equal('commit');
-          expect(actual).to.deep.eq(request.request);
-          callback(request.error, request.response);
-        },
-    rollback:
-        (actual: api.IRollbackRequest, _, callback: (err: Error) => void) => {
-          const request = expectedRequests.shift();
-          expect(request.type).to.equal('rollback');
-          expect(actual).to.deep.eq(request.request);
-          callback(request.error);
-        },
-    batchGetDocuments: (actual: api.IBatchGetDocumentsRequest) => {
-      const request = expectedRequests.shift();
+    ...expectedRequests: TransactionStep[]) {
+  const overrides: ApiOverride = {
+    beginTransaction: (actual, _, callback) => {
+      const request = expectedRequests.shift()!;
+      expect(request.type).to.equal('begin');
+      expect(actual).to.deep.eq(request.request);
+      callback(
+          request.error, request.response as api.IBeginTransactionResponse);
+    },
+    commit: (actual, _, callback) => {
+      const request = expectedRequests.shift()!;
+      expect(request.type).to.equal('commit');
+      expect(actual).to.deep.eq(request.request);
+      callback(request.error, request.response as api.ICommitResponse);
+    },
+    rollback: (actual, _, callback) => {
+      const request = expectedRequests.shift()!;
+      expect(request.type).to.equal('rollback');
+      expect(actual).to.deep.eq(request.request);
+      callback(request.error);
+    },
+    batchGetDocuments: (actual) => {
+      const request = expectedRequests.shift()!;
       expect(request.type).to.equal('getDocument');
       expect(actual).to.deep.eq(request.request);
-      return request.stream;
+      return request.stream!;
     },
-    runQuery: (actual: api.IRunQueryRequest) => {
-      const request = expectedRequests.shift();
+    runQuery: (actual) => {
+      const request = expectedRequests.shift()!;
       expect(request.type).to.equal('query');
       expect(actual).to.deep.eq(request.request);
-      return request.stream;
+      return request.stream!;
     }
   };
 
@@ -328,7 +323,7 @@ describe('successful transactions', () => {
 
 describe('failed transactions', () => {
   it('requires update function', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       beginTransaction: () => {
         expect.fail();
       }
@@ -341,7 +336,7 @@ describe('failed transactions', () => {
   });
 
   it('requires valid retry number', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       beginTransaction: () => {
         expect.fail();
       }

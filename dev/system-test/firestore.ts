@@ -16,15 +16,15 @@
 
 import {expect} from 'chai';
 
-import {DocumentSnapshot, FieldPath, FieldValue, Firestore, GeoPoint, setLogFunction, Timestamp} from '../src';
+import {CollectionReference, DocumentData, DocumentSnapshot, FieldPath, FieldValue, Firestore, GeoPoint, Query, QueryDocumentSnapshot, QuerySnapshot, setLogFunction, Timestamp} from '../src';
 import {autoId} from '../src/util';
 
 const version = require('../../package.json').version;
 
-class DeferredPromise {
+class DeferredPromise<T> {
   resolve: Function;
   reject: Function;
-  promise: Promise<{}>;
+  promise: Promise<T>;
 
   constructor() {
     this.resolve = () => {
@@ -34,7 +34,7 @@ class DeferredPromise {
       throw new Error('DeferredPromise.reject has not been initialized');
     };
     this.promise =
-        Promise.resolve('DeferredPromise.promise has not been initialized');
+        Promise.reject('DeferredPromise.promise has not been initialized');
   }
 }
 
@@ -42,13 +42,13 @@ if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
 }
 
-function getTestRoot(firestore) {
+function getTestRoot(firestore: Firestore) {
   return firestore.collection(`node_${version}_${autoId()}`);
 }
 
 describe('Firestore class', () => {
-  let firestore;
-  let randomCol;
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
 
   beforeEach(() => {
     firestore = new Firestore({});
@@ -115,8 +115,8 @@ describe('Firestore class', () => {
 });
 
 describe('CollectionReference class', () => {
-  let firestore;
-  let randomCol;
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
 
   beforeEach(() => {
     firestore = new Firestore({});
@@ -169,7 +169,7 @@ describe('CollectionReference class', () => {
     await batch.commit();
 
     const documentRefs = await randomCol.listDocuments();
-    const documents = await firestore.getAll(documentRefs);
+    const documents = await firestore.getAll(...documentRefs);
 
     const existingDocs = documents.filter(doc => doc.exists);
     const missingDocs = documents.filter(doc => !doc.exists);
@@ -180,8 +180,8 @@ describe('CollectionReference class', () => {
 });
 
 describe('DocumentReference class', () => {
-  let firestore;
-  let randomCol;
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
 
   beforeEach(() => {
     firestore = new Firestore({});
@@ -252,7 +252,7 @@ describe('DocumentReference class', () => {
           return ref.get();
         })
         .then(doc => {
-          const data = doc.data();
+          const data = doc.data()!;
           expect(data.pathValue.path)
               .to.equal(allSupportedTypesObject.pathValue.path);
           delete data.pathValue;
@@ -271,7 +271,7 @@ describe('DocumentReference class', () => {
           return ref.get();
         })
         .then(doc => {
-          const actualValue = doc.data().nanValue;
+          const actualValue = doc.data()!.nanValue;
           expect(actualValue).to.be.a('number');
           expect(actualValue).to.be.NaN;
         });
@@ -291,7 +291,7 @@ describe('DocumentReference class', () => {
     };
 
     const ref = randomCol.doc('doc');
-    let setTimestamp;
+    let setTimestamp: Timestamp;
 
     return ref.set(baseObject)
         .then(() => {
@@ -610,26 +610,26 @@ describe('DocumentReference class', () => {
     ];
 
     const expectedState = [
-      times => {
+      (times: number[]) => {
         return {time: times[0], a: {b: times[0]}};
       },
-      times => {
+      (times: number[]) => {
         return {time: times[1], a: {c: times[1]}};
       },
-      times => {
+      (times: number[]) => {
         return {time: times[2], a: {c: times[1], d: times[2]}};
       },
-      times => {
+      (times: number[]) => {
         return {time: times[3], a: {c: times[1], d: times[2]}, e: times[3]};
       },
-      times => {
+      (times: number[]) => {
         return {
           time: times[4],
           a: {c: times[1], d: times[2]},
           e: {f: times[4]},
         };
       },
-      times => {
+      (times: number[]) => {
         return {
           time: times[5],
           a: {c: times[1], d: times[2]},
@@ -637,7 +637,7 @@ describe('DocumentReference class', () => {
           g: {h: times[5]},
         };
       },
-      times => {
+      (times: number[]) => {
         return {
           time: times[6],
           a: {c: times[1], d: times[2]},
@@ -648,7 +648,7 @@ describe('DocumentReference class', () => {
     ];
 
     let promise = Promise.resolve();
-    const times: Array<{}> = [];
+    const times: number[] = [];
 
     for (let i = 0; i < actions.length; ++i) {
       promise =
@@ -687,7 +687,9 @@ describe('DocumentReference class', () => {
 
     it('handles changing a doc', () => {
       const ref = randomCol.doc('doc');
-      let readTime, createTime, updateTime;
+      let readTime: Timestamp;
+      let createTime: Timestamp;
+      let updateTime: Timestamp;
 
       const unsubscribe = ref.onSnapshot(
           snapshot => {
@@ -711,8 +713,8 @@ describe('DocumentReference class', () => {
             expect(snapshot.exists).to.be.true;
             expect(snapshot.get('foo')).to.equal('a');
             readTime = snapshot.readTime;
-            createTime = snapshot.createTime;
-            updateTime = snapshot.updateTime;
+            createTime = snapshot.createTime!;
+            updateTime = snapshot.updateTime!;
 
             // Update documents.
             return ref.set({foo: 'b'});
@@ -772,7 +774,8 @@ describe('DocumentReference class', () => {
       const doc1 = randomCol.doc();
       const doc2 = randomCol.doc();
 
-      let unsubscribe1, unsubscribe2;
+      let unsubscribe1: () => void;
+      let unsubscribe2: () => void;
 
       // Documents transition from non-existent to existent to non-existent.
       const exists1 = [false, true, false];
@@ -814,7 +817,8 @@ describe('DocumentReference class', () => {
     it('handles multiple streams on same doc', done => {
       const doc = randomCol.doc();
 
-      let unsubscribe1, unsubscribe2;
+      let unsubscribe1: () => void;
+      let unsubscribe2: () => void;
 
       // Document transitions from non-existent to existent to non-existent.
       const exists1 = [false, true, false];
@@ -855,27 +859,30 @@ describe('DocumentReference class', () => {
 });
 
 describe('Query class', () => {
-  let firestore;
-  let randomCol;
+  type PaginatedResults = {pages: number, docs: QueryDocumentSnapshot[]};
 
-  const paginateResults = (query, startAfter?) => {
-    return (startAfter ? query.startAfter(startAfter) : query)
-        .get()
-        .then(snapshot => {
-          if (snapshot.empty) {
-            return {pages: 0, docs: []};
-          } else {
-            const docs = snapshot.docs;
-            return paginateResults(query, docs[docs.length - 1])
-                .then(nextPage => {
-                  return {
-                    pages: nextPage.pages + 1,
-                    docs: docs.concat(nextPage.docs),
-                  };
-                });
-          }
-        });
-  };
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  const paginateResults =
+      (query: Query, startAfter?: unknown): Promise<PaginatedResults> => {
+        return (startAfter ? query.startAfter(startAfter) : query)
+            .get()
+            .then(snapshot => {
+              if (snapshot.empty) {
+                return {pages: 0, docs: []};
+              } else {
+                const docs = snapshot.docs;
+                return paginateResults(query, docs[docs.length - 1])
+                    .then(nextPage => {
+                      return {
+                        pages: nextPage.pages + 1,
+                        docs: docs.concat(nextPage.docs),
+                      };
+                    });
+              }
+            });
+      };
 
   beforeEach(() => {
     firestore = new Firestore({});
@@ -1140,28 +1147,37 @@ describe('Query class', () => {
   });
 
   describe('watch', () => {
-    const currentDeferred = new DeferredPromise();
+    type ExpectedChange = { type: string; doc: DocumentSnapshot; };
 
-    const snapshot = (id, data) => {
+    const currentDeferred = new DeferredPromise<QuerySnapshot>();
+
+    const snapshot = (id: string, data: DocumentData) => {
       const ref = randomCol.doc(id);
-      return randomCol.firestore.snapshot_({
-        name: ref.formattedName,
-        fields: ref.firestore._serializer.encodeFields(data),
-        createTime: {seconds: 0, nanos: 0},
-        updateTime: {seconds: 0, nanos: 0},
-      });
+      return randomCol.firestore.snapshot_(
+          {
+            name: ref.formattedName,
+            fields: ref.firestore._serializer!.encodeFields(data),
+            createTime: {seconds: 0, nanos: 0},
+            updateTime: {seconds: 0, nanos: 0},
+          },
+          {seconds: 0, nanos: 0},
+      );
     };
 
-    const docChange = (type, id, data) => {
-      return {
-        type,
-        doc: snapshot(id, data),
-      };
-    };
+    const docChange =
+        (type: string, id: string, data: DocumentData): ExpectedChange => {
+          return {
+            type,
+            doc: snapshot(id, data),
+          };
+        };
 
-    const added = (id, data) => docChange('added', id, data);
-    const modified = (id, data) => docChange('modified', id, data);
-    const removed = (id, data) => docChange('removed', id, data);
+    const added = (id: string, data: DocumentData) =>
+        docChange('added', id, data);
+    const modified = (id: string, data: DocumentData) =>
+        docChange('modified', id, data);
+    const removed = (id: string, data: DocumentData) =>
+        docChange('removed', id, data);
 
     function resetPromise() {
       currentDeferred.promise = new Promise((resolve, reject) => {
@@ -1170,14 +1186,16 @@ describe('Query class', () => {
       });
     }
 
-    function waitForSnapshot() {
+    function waitForSnapshot(): Promise<QuerySnapshot> {
       return currentDeferred.promise.then(snapshot => {
         resetPromise();
         return snapshot;
       });
     }
 
-    function snapshotsEqual(actual, expected) {
+    function snapshotsEqual(
+        actual: QuerySnapshot,
+        expected: {docs: DocumentSnapshot[], docChanges: ExpectedChange[]}) {
       let i;
       expect(actual.size).to.equal(expected.docs.length);
       for (i = 0; i < expected.docs.length && i < actual.size; i++) {
@@ -1369,8 +1387,8 @@ describe('Query class', () => {
 });
 
 describe('Transaction class', () => {
-  let firestore;
-  let randomCol;
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
 
   beforeEach(() => {
     firestore = new Firestore({});
@@ -1521,7 +1539,7 @@ describe('Transaction class', () => {
   });
 
   it('has delete() method', () => {
-    let success;
+    let success = false;
     const ref = randomCol.doc('doc');
     return ref.set({foo: 'bar'})
         .then(() => {
@@ -1542,8 +1560,8 @@ describe('Transaction class', () => {
 });
 
 describe('WriteBatch class', () => {
-  let firestore;
-  let randomCol;
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
 
   beforeEach(() => {
     firestore = new Firestore({});
@@ -1617,7 +1635,7 @@ describe('WriteBatch class', () => {
   });
 
   it('has delete() method', () => {
-    let success;
+    let success = false;
 
     const ref = randomCol.doc('doc');
     const batch = firestore.batch();
@@ -1636,8 +1654,8 @@ describe('WriteBatch class', () => {
 });
 
 describe('QuerySnapshot class', () => {
-  let firestore;
-  let querySnapshot;
+  let firestore: Firestore;
+  let querySnapshot: Promise<QuerySnapshot>;
 
   beforeEach(() => {
     firestore = new Firestore({});

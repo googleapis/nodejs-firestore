@@ -208,15 +208,13 @@ abstract class Path<T> {
 export class ResourcePath extends Path<ResourcePath> {
   /**
    * The project ID of this path.
-   * @type {string}
    */
-  readonly projectId;
+  readonly projectId: string;
 
   /**
    * The database ID of this path.
-   * @type {string}
    */
-  readonly databaseId;
+  readonly databaseId: string;
 
   /**
    * Constructs a Firestore Resource Path.

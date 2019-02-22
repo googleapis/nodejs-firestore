@@ -16,19 +16,19 @@
 
 import {expect} from 'chai';
 
-import * as Firestore from '../src';
-import {createInstance} from './util/helpers';
+import {FieldValue, Firestore, setLogFunction, Timestamp, WriteBatch, WriteResult} from '../src';
+import {ApiOverride, createInstance, InvalidApiUsage} from './util/helpers';
 
 const REQUEST_TIME = 'REQUEST_TIME';
 
 // Change the argument to 'console.log' to enable debug output.
-Firestore.setLogFunction(() => {});
+setLogFunction(() => {});
 
 const PROJECT_ID = 'test-project';
 
 describe('set() method', () => {
-  let firestore;
-  let writeBatch;
+  let firestore: Firestore;
+  let writeBatch: WriteBatch;
 
   beforeEach(() => {
     return createInstance().then(firestoreClient => {
@@ -38,12 +38,12 @@ describe('set() method', () => {
   });
 
   it('requires document name', () => {
-    expect(() => writeBatch.set())
+    expect(() => (writeBatch as InvalidApiUsage).set())
         .to.throw('Argument "documentRef" is not a valid DocumentReference.');
   });
 
   it('requires object', () => {
-    expect(() => writeBatch.set(firestore.doc('sub/doc')))
+    expect(() => (writeBatch as InvalidApiUsage).set(firestore.doc('sub/doc')))
         .to.throw(
             'Argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
@@ -54,8 +54,8 @@ describe('set() method', () => {
 });
 
 describe('delete() method', () => {
-  let firestore;
-  let writeBatch;
+  let firestore: Firestore;
+  let writeBatch: WriteBatch;
 
   beforeEach(() => {
     return createInstance().then(firestoreInstance => {
@@ -65,20 +65,20 @@ describe('delete() method', () => {
   });
 
   it('requires document name', () => {
-    expect(() => writeBatch.delete())
+    expect(() => (writeBatch as InvalidApiUsage).delete())
         .to.throw('Argument "documentRef" is not a valid DocumentReference.');
   });
 
   it('accepts preconditions', () => {
     writeBatch.delete(firestore.doc('sub/doc'), {
-      lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
+      lastUpdateTime: new Timestamp(479978400, 123000000),
     });
   });
 });
 
 describe('update() method', () => {
-  let firestore;
-  let writeBatch;
+  let firestore: Firestore;
+  let writeBatch: WriteBatch;
 
   beforeEach(() => {
     return createInstance().then(firestoreInstance => {
@@ -88,7 +88,7 @@ describe('update() method', () => {
   });
 
   it('requires document name', () => {
-    expect(() => writeBatch.update({}, {}))
+    expect(() => writeBatch.update({} as InvalidApiUsage, {}))
         .to.throw('Argument "documentRef" is not a valid DocumentReference.');
   });
 
@@ -103,13 +103,13 @@ describe('update() method', () => {
   it('accepts preconditions', () => {
     writeBatch.update(
         firestore.doc('sub/doc'), {foo: 'bar'},
-        {lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)});
+        {lastUpdateTime: new Timestamp(479978400, 123000000)});
   });
 });
 
 describe('create() method', () => {
-  let firestore;
-  let writeBatch;
+  let firestore: Firestore;
+  let writeBatch: WriteBatch;
 
   beforeEach(() => {
     return createInstance().then(firestoreClient => {
@@ -119,13 +119,13 @@ describe('create() method', () => {
   });
 
   it('requires document name', () => {
-    expect(() => writeBatch.create())
+    expect(() => (writeBatch as InvalidApiUsage).create())
         .to.throw('Argument "documentRef" is not a valid DocumentReference.');
   });
 
   it('requires object', () => {
     expect(() => {
-      writeBatch.create(firestore.doc('sub/doc'));
+      (writeBatch as InvalidApiUsage).create(firestore.doc('sub/doc'));
     })
         .to.throw(
             'Argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
@@ -136,11 +136,11 @@ describe('batch support', () => {
   const documentName =
       `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
 
-  let firestore;
-  let writeBatch;
+  let firestore: Firestore;
+  let writeBatch: WriteBatch;
 
   beforeEach(() => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         expect(request).to.deep.eq({
           database: `projects/${PROJECT_ID}/databases/(default)`,
@@ -240,21 +240,17 @@ describe('batch support', () => {
     });
   });
 
-  function verifyResponse(writeResults) {
-    expect(writeResults[0].writeTime.isEqual(new Firestore.Timestamp(0, 0)))
-        .to.be.true;
-    expect(writeResults[1].writeTime.isEqual(new Firestore.Timestamp(1, 1)))
-        .to.be.true;
-    expect(writeResults[2].writeTime.isEqual(new Firestore.Timestamp(2, 2)))
-        .to.be.true;
-    expect(writeResults[3].writeTime.isEqual(new Firestore.Timestamp(3, 3)))
-        .to.be.true;
+  function verifyResponse(writeResults: WriteResult[]) {
+    expect(writeResults[0].writeTime.isEqual(new Timestamp(0, 0))).to.be.true;
+    expect(writeResults[1].writeTime.isEqual(new Timestamp(1, 1))).to.be.true;
+    expect(writeResults[2].writeTime.isEqual(new Timestamp(2, 2))).to.be.true;
+    expect(writeResults[3].writeTime.isEqual(new Timestamp(3, 3))).to.be.true;
   }
 
   it('accepts multiple operations', () => {
     const documentName = firestore.doc('col/doc');
 
-    writeBatch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
+    writeBatch.set(documentName, {foo: FieldValue.serverTimestamp()});
     writeBatch.update(documentName, {foo: 'bar'});
     writeBatch.create(documentName, {});
     writeBatch.delete(documentName);
@@ -267,8 +263,7 @@ describe('batch support', () => {
   it('chains multiple operations', () => {
     const documentName = firestore.doc('col/doc');
 
-    return writeBatch
-        .set(documentName, {foo: Firestore.FieldValue.serverTimestamp()})
+    return writeBatch.set(documentName, {foo: FieldValue.serverTimestamp()})
         .update(documentName, {foo: 'bar'})
         .create(documentName, {})
         .delete(documentName)
@@ -297,7 +292,7 @@ describe('batch support', () => {
     const documentName = firestore.doc('col/doc');
 
     const batch = firestore.batch();
-    batch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
+    batch.set(documentName, {foo: FieldValue.serverTimestamp()});
     batch.update(documentName, {foo: 'bar'});
     batch.create(documentName, {});
     batch.delete(documentName);
@@ -314,7 +309,7 @@ describe('batch support', () => {
     const documentName = firestore.doc('col/doc');
 
     const batch = firestore.batch();
-    batch.set(documentName, {foo: Firestore.FieldValue.serverTimestamp()});
+    batch.set(documentName, {foo: FieldValue.serverTimestamp()});
     batch.update(documentName, {foo: 'bar'});
     batch.create(documentName, {});
     batch.delete(documentName);
@@ -322,7 +317,7 @@ describe('batch support', () => {
   });
 
   it('can return same write result', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         callback(null, {
           commitTime: {
@@ -365,12 +360,12 @@ describe('batch support', () => {
     let beginCalled = 0;
     let commitCalled = 0;
 
-    const overrides = {
+    const overrides: ApiOverride = {
       beginTransaction: (actual, options, callback) => {
         ++beginCalled;
-        callback(null, {transaction: 'foo'});
+        callback(null, {transaction: Buffer.from('foo')});
       },
-      commit: (actual, options, callback) => {
+      commit: (request, options, callback) => {
         ++commitCalled;
         callback(null, {
           commitTime: {
