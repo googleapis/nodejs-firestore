@@ -676,7 +676,7 @@ declare namespace FirebaseFirestore {
    * access will return 'undefined'. You can use the `exists` property to
    * explicitly verify a document's existence.
    */
-  export class DocumentSnapshot {
+  export class DocumentSnapshot<D = DocumentData> {
     protected constructor();
 
     /** True if the document exists. */
@@ -713,7 +713,7 @@ declare namespace FirebaseFirestore {
      *
      * @return An Object containing all fields in the document.
      */
-    data(): DocumentData | undefined;
+    data(): D | undefined;
 
     /**
      * Retrieves the field specified by `fieldPath`.
