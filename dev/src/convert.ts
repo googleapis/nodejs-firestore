@@ -15,18 +15,18 @@
  */
 
 import {google} from '../protos/firestore_proto_api';
-import api = google.firestore.v1beta1;
-import {createValidator} from './validate';
-import {ProtobufJsValue} from './types';
 
-const validate = createValidator();
+import {ApiMapValue, ProtobufJsValue} from './types';
+import {validateObject} from './validate';
+
+import api = google.firestore.v1;
 
 /*!
  * @module firestore/convert
  * @private
  *
  * This module contains utility functions to convert
- * `firestore.v1beta1.Documents` from Proto3 JSON to their equivalent
+ * `firestore.v1.Documents` from Proto3 JSON to their equivalent
  * representation in Protobuf JS. Protobuf JS is the only encoding supported by
  * this client, and dependencies that use Proto3 JSON (such as the Google Cloud
  * Functions SDK) are supported through this conversion and its usage in
@@ -71,7 +71,7 @@ export function timestampFromJson(
       nanos: nanos || undefined,
     };
   } else if (timestampValue !== undefined) {
-    validate.isObject('timestampValue', timestampValue);
+    validateObject('timestampValue', timestampValue);
     timestampProto = {
       seconds: timestampValue.seconds || undefined,
       nanos: timestampValue.nanos || undefined,
@@ -97,10 +97,10 @@ function bytesFromJson(bytesValue: string|Uint8Array): Uint8Array {
 }
 
 /**
- * Detects 'valueType' from a Proto3 JSON `firestore.v1beta1.Value` proto.
+ * Detects 'valueType' from a Proto3 JSON `firestore.v1.Value` proto.
  *
  * @private
- * @param proto The `firestore.v1beta1.Value` proto.
+ * @param proto The `firestore.v1.Value` proto.
  * @return The string value for 'valueType'.
  */
 export function detectValueType(proto: ProtobufJsValue): string {
@@ -153,14 +153,14 @@ export function detectValueType(proto: ProtobufJsValue): string {
 }
 
 /**
- * Converts a `firestore.v1beta1.Value` in Proto3 JSON encoding into the
+ * Converts a `firestore.v1.Value` in Proto3 JSON encoding into the
  * Protobuf JS format expected by this client.
  *
  * @private
- * @param fieldValue The `firestore.v1beta1.Value` in Proto3 JSON format.
- * @return The `firestore.v1beta1.Value` in Protobuf JS format.
+ * @param fieldValue The `firestore.v1.Value` in Proto3 JSON format.
+ * @return The `firestore.v1.Value` in Protobuf JS format.
  */
-export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
+export function valueFromJson(fieldValue: api.IValue): api.IValue {
   const valueType = detectValueType(fieldValue);
 
   switch (valueType) {
@@ -194,7 +194,7 @@ export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
       };
     }
     case 'mapValue': {
-      const mapValue = {};
+      const mapValue: ApiMapValue = {};
       for (const prop in fieldValue.mapValue!.fields!) {
         if (fieldValue.mapValue!.fields!.hasOwnProperty(prop)) {
           mapValue[prop] = valueFromJson(fieldValue.mapValue!.fields![prop]);
@@ -212,17 +212,16 @@ export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
 }
 
 /**
- * Converts a `firestore.v1beta1.Document` in Proto3 JSON encoding into the
- * Protobuf JS format expected by this client. This conversion creates a copy of
- * the underlying document.
+ * Converts a map of IValues in Proto3 JSON encoding into the Protobuf JS format
+ * expected by this client. This conversion creates a copy of the underlying
+ * fields.
  *
  * @private
- * @param document The `firestore.v1beta1.Document` in Proto3 JSON
- * format.
- * @return The `firestore.v1beta1.Document` in Protobuf JS format.
+ * @param document An object with IValues in Proto3 JSON format.
+ * @return The object in Protobuf JS format.
  */
-export function documentFromJson(document: api.IDocument): api.IDocument {
-  const result = {};
+export function fieldsFromJson(document: ApiMapValue): ApiMapValue {
+  const result: ApiMapValue = {};
 
   for (const prop in document) {
     if (document.hasOwnProperty(prop)) {

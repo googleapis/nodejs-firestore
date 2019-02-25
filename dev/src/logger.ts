@@ -16,9 +16,7 @@
 
 import * as util from 'util';
 
-import {createValidator} from './validate';
-
-const validate = createValidator();
+import {validateFunction} from './validate';
 
 /*! The Firestore library version */
 let libVersion: string;
@@ -34,7 +32,7 @@ let logFunction = (msg: string) => {};
  */
 export function logger(
     methodName: string, requestTag: string|null, logMessage: string,
-    ...additionalArgs: Array<string|number|object>): void {
+    ...additionalArgs: unknown[]): void {
   requestTag = requestTag || '#####';
 
   const formattedMessage = util.format(logMessage, ...additionalArgs);
@@ -50,7 +48,7 @@ export function logger(
  * @private
  */
 export function setLogFunction(logger: (msg: string) => void): void {
-  validate.isFunction('logger', logger);
+  validateFunction('logger', logger);
   logFunction = logger;
 }
 

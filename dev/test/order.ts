@@ -16,19 +16,22 @@
 
 import {expect} from 'chai';
 
-import * as Firestore from '../src';
-import {DocumentSnapshot} from '../src/document';
-import {GeoPoint} from '../src/geo-point';
+import {google} from '../protos/firestore_proto_api';
+
+import {Firestore, QueryDocumentSnapshot, setLogFunction, Timestamp} from '../src';
+import {GeoPoint} from '../src';
+import {DocumentReference} from '../src';
 import * as order from '../src/order';
 import {ResourcePath} from '../src/path';
-import {DocumentReference} from '../src/reference';
-import {createInstance, InvalidApiUsage} from '../test/util/helpers';
+import {createInstance, InvalidApiUsage} from './util/helpers';
+
+import api = google.firestore.v1;
 
 // Change the argument to 'console.log' to enable debug output.
-Firestore.setLogFunction(() => {});
+setLogFunction(() => {});
 
 describe('Order', () => {
-  let firestore;
+  let firestore: Firestore;
 
   beforeEach(() => {
     return createInstance().then(firestoreInstance => {
@@ -37,32 +40,34 @@ describe('Order', () => {
   });
 
   /** Converts a value into its proto representation. */
-  function wrap(value) {
-    return firestore['_serializer']!.encodeValue(value);
+  function wrap(value: unknown): api.IValue {
+    const val = firestore._serializer!.encodeValue(value);
+    expect(val).to.not.be.null;
+    return val!;
   }
 
-  function blob(data) {
+  function blob(data: number[]): api.IValue {
     return wrap(Buffer.from(data));
   }
 
-  function resource(pathString) {
+  function resource(pathString: string): api.IValue {
     return wrap(new DocumentReference(
         firestore, ResourcePath.fromSlashSeparatedString(pathString)));
   }
 
-  function geopoint(lat, lng) {
+  function geopoint(lat: number, lng: number): api.IValue {
     return wrap(new GeoPoint(lat, lng));
   }
 
-  function int(n: number) {
+  function int(n: number): api.IValue {
     return {
-      integerValue: '' + n,
+      integerValue: n,
     };
   }
 
-  function double(n: number) {
+  function double(n: number): api.IValue {
     return {
-      doubleValue: '' + n,
+      doubleValue: n,
     };
   }
 
@@ -71,7 +76,7 @@ describe('Order', () => {
       order.compare(
           {valueType: 'foo'} as InvalidApiUsage,
           {valueType: 'foo'} as InvalidApiUsage);
-    }).to.throw('Invalid use of type "object" as a Firestore argument.');
+    }).to.throw('Unexpected value type: foo');
   });
 
   it('throws on invalid blob', () => {
@@ -88,10 +93,18 @@ describe('Order', () => {
 
   it('compares document snapshots by name', () => {
     const docs = [
-      new DocumentSnapshot(firestore.doc('col/doc3')),
-      new DocumentSnapshot(firestore.doc('col/doc2')),
-      new DocumentSnapshot(firestore.doc('col/doc2')),
-      new DocumentSnapshot(firestore.doc('col/doc1')),
+      new QueryDocumentSnapshot(
+          firestore.doc('col/doc3'), {}, Timestamp.now(), Timestamp.now(),
+          Timestamp.now()),
+      new QueryDocumentSnapshot(
+          firestore.doc('col/doc2'), {}, Timestamp.now(), Timestamp.now(),
+          Timestamp.now()),
+      new QueryDocumentSnapshot(
+          firestore.doc('col/doc2'), {}, Timestamp.now(), Timestamp.now(),
+          Timestamp.now()),
+      new QueryDocumentSnapshot(
+          firestore.doc('col/doc1'), {}, Timestamp.now(), Timestamp.now(),
+          Timestamp.now()),
     ];
 
     docs.sort(firestore.collection('col').comparator());

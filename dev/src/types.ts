@@ -18,32 +18,23 @@ import {google} from '../protos/firestore_proto_api';
 import {FieldPath} from './path';
 import {Timestamp} from './timestamp';
 
-import api = google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 /**
- * A union of all of the standard JS types, useful for cases where the type is
- * unknown. Unlike "any" this doesn't lose all type-safety, since the consuming
- * code must still cast to a particular type before using it.
+ * A map in the format of the Proto API
  */
-export type AnyJs = null|undefined|boolean|number|string|object;
-
-// tslint:disable-next-line:no-any
-export type AnyDuringMigration = any;
-
-// A map in the format of the Proto API
 export type ApiMapValue = {
-  [k: string]: google.firestore.v1beta1.IValue
+  [k: string]: google.firestore.v1.IValue
 };
 
-/**
- * @private
- * JavaScript input from the API layer.
- */
-// tslint:disable-next-line:no-any
-export type UserInput = any;
-
+// We don't have type information for the JavaScript GapicClient.
 // tslint:disable-next-line:no-any
 export type GapicClient = any;
+
+// We don't have type information for the npm package
+// `functional-red-black-tree`.
+// tslint:disable-next-line:no-any
+export type RBTree = any;
 
 export class GrpcError extends Error {
   code?: number;
@@ -67,22 +58,23 @@ export interface Settings {
   keyFilename?: string;
 
   /**
-   * Enables the use of `Timestamp`s for timestamp fields in
-   * `DocumentSnapshot`s.
+   * Specifies whether to use `Timestamp` objects for timestamp fields in
+   * `DocumentSnapshot`s. This is enabled by default and should not be disabled.
    *
-   * Currently, Firestore returns timestamp fields as `Date` but `Date` only
+   * Previously, Firestore returned timestamp fields as `Date` but `Date` only
    * supports millisecond precision, which leads to truncation and causes
-   * unexpected behavior when using a timestamp from a snapshot as a part
-   * of a subsequent query.
+   * unexpected behavior when using a timestamp from a snapshot as a part of a
+   * subsequent query.
    *
-   * Setting `timestampsInSnapshots` to true will cause Firestore to return
-   * `Timestamp` values instead of `Date` avoiding this kind of problem. To
-   * make this work you must also change any code that uses `Date` to use
-   * `Timestamp` instead.
+   * So now Firestore returns `Timestamp` values instead of `Date`, avoiding
+   * this kind of problem.
    *
-   * NOTE: in the future `timestampsInSnapshots: true` will become the
-   * default and this option will be removed so you should change your code to
-   * use `Timestamp` now and opt-in to this new behavior as soon as you can.
+   * To opt into the old behavior of returning `Date` objects, you can
+   * temporarily set `timestampsInSnapshots` to false.
+   *
+   * @deprecated This setting will be removed in a future release. You should
+   * update your code to expect `Timestamp` objects and stop using the
+   * `timestampsInSnapshots` setting.
    */
   timestampsInSnapshots?: boolean;
 
@@ -95,7 +87,7 @@ export interface Settings {
  * mapped to values.
  */
 export type DocumentData = {
-  [field: string]: UserInput
+  [field: string]: unknown
 };
 
 /**
@@ -104,8 +96,25 @@ export type DocumentData = {
  * reference nested fields within the document.
  */
 export type UpdateData = {
-  [fieldPath: string]: UserInput
+  [fieldPath: string]: unknown
 };
+
+/**
+ * Update data that has been resolved to a mapping of FieldPaths to values.
+ */
+export type UpdateMap = Map<FieldPath, unknown>;
+
+/**
+ * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
+ * (descending or ascending).
+ */
+export type OrderByDirection = 'desc'|'asc';
+
+/**
+ * Filter conditions in a `Query.where()` clause are specified using the
+ * strings '<', '<=', '==', '>=', '>', and 'array-contains'.
+ */
+export type WhereFilterOp = '<'|'<='|'=='|'>='|'>'|'array-contains';
 
 /**
  * An options object that configures conditional behavior of `update()` and
@@ -167,13 +176,10 @@ export interface ReadOptions {
  */
 export interface ValidationOptions {
   /** At what level field deletes are supported. */
-  allowDeletes?: 'none'|'root'|'all';
+  allowDeletes: 'none'|'root'|'all';
 
   /** Whether server transforms are supported. */
-  allowTransforms?: boolean;
-
-  /** Whether empty documents are supported. */
-  allowEmpty?: boolean;
+  allowTransforms: boolean;
 }
 
 /**

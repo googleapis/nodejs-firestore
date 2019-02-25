@@ -18,14 +18,11 @@ const deepEqual = require('deep-equal');
 
 import * as proto from '../protos/firestore_proto_api';
 
-import {AnyDuringMigration, AnyJs} from './types';
-import {createValidator} from './validate';
-
-import api = proto.google.firestore.v1beta1;
-import {Serializer} from './serializer';
 import {FieldPath} from './path';
+import {Serializer, validateUserInput} from './serializer';
+import {validateMinNumberOfArguments, validateNumber} from './validate';
 
-const validate = createValidator();
+import api = proto.google.firestore.v1;
 
 /**
  * Sentinel values that can be used when writing documents with set(), create()
@@ -111,7 +108,7 @@ export class FieldValue {
    * });
    */
   static increment(n: number): FieldValue {
-    validate.minNumberOfArguments('FieldValue.increment', arguments, 1);
+    validateMinNumberOfArguments('FieldValue.increment', arguments, 1);
     return new NumericIncrementTransform(n);
   }
 
@@ -138,8 +135,8 @@ export class FieldValue {
    *   // doc.get('array') contains field 'foo'
    * });
    */
-  static arrayUnion(...elements: AnyJs[]): FieldValue {
-    validate.minNumberOfArguments('FieldValue.arrayUnion', arguments, 1);
+  static arrayUnion(...elements: unknown[]): FieldValue {
+    validateMinNumberOfArguments('FieldValue.arrayUnion', arguments, 1);
     return new ArrayUnionTransform(elements);
   }
 
@@ -165,8 +162,8 @@ export class FieldValue {
    *   // doc.get('array') no longer contains field 'foo'
    * });
    */
-  static arrayRemove(...elements: AnyJs[]): FieldValue {
-    validate.minNumberOfArguments('FieldValue.arrayRemove', arguments, 1);
+  static arrayRemove(...elements: unknown[]): FieldValue {
+    validateMinNumberOfArguments('FieldValue.arrayRemove', arguments, 1);
     return new ArrayRemoveTransform(elements);
   }
 
@@ -205,7 +202,7 @@ export abstract class FieldTransform extends FieldValue {
   abstract get methodName(): string;
 
   /** Performs input validation on the values of this field transform. */
-  abstract validate(validator: AnyDuringMigration): boolean;
+  abstract validate(): void;
 
   /***
    * The proto representation for this field transform.
@@ -226,6 +223,7 @@ export abstract class FieldTransform extends FieldValue {
 export class DeleteTransform extends FieldTransform {
   /**
    * Sentinel value for a field delete.
+   * @private
    */
   static DELETE_SENTINEL = new DeleteTransform();
 
@@ -235,6 +233,7 @@ export class DeleteTransform extends FieldTransform {
 
   /**
    * Deletes are included in document masks.
+   * @private
    */
   get includeInDocumentMask(): true {
     return true;
@@ -242,6 +241,7 @@ export class DeleteTransform extends FieldTransform {
 
   /**
    * Deletes are are omitted from document transforms.
+   * @private
    */
   get includeInDocumentTransform(): false {
     return false;
@@ -251,9 +251,7 @@ export class DeleteTransform extends FieldTransform {
     return 'FieldValue.delete';
   }
 
-  validate(): true {
-    return true;
-  }
+  validate(): void {}
 
   toProto(serializer: Serializer, fieldPath: FieldPath): never {
     throw new Error(
@@ -300,9 +298,7 @@ class ServerTimestampTransform extends FieldTransform {
     return 'FieldValue.serverTimestamp';
   }
 
-  validate(): true {
-    return true;
-  }
+  validate(): void {}
 
   toProto(serializer: Serializer, fieldPath: FieldPath):
       api.DocumentTransform.IFieldTransform {
@@ -341,8 +337,8 @@ class NumericIncrementTransform extends FieldTransform {
     return 'FieldValue.increment';
   }
 
-  validate(validator: AnyDuringMigration): boolean {
-    return validator.isNumber('FieldValue.increment()', this.operand);
+  validate(): void {
+    validateNumber('FieldValue.increment()', this.operand);
   }
 
   toProto(serializer: Serializer, fieldPath: FieldPath):
@@ -365,12 +361,13 @@ class NumericIncrementTransform extends FieldTransform {
  * @private
  */
 class ArrayUnionTransform extends FieldTransform {
-  constructor(private readonly elements: AnyJs[]) {
+  constructor(private readonly elements: unknown[]) {
     super();
   }
 
   /**
    * Array transforms are omitted from document masks.
+   * @private
    */
   get includeInDocumentMask(): false {
     return false;
@@ -378,6 +375,7 @@ class ArrayUnionTransform extends FieldTransform {
 
   /**
    * Array transforms are included in document transforms.
+   * @private
    */
   get includeInDocumentTransform(): true {
     return true;
@@ -387,13 +385,10 @@ class ArrayUnionTransform extends FieldTransform {
     return 'FieldValue.arrayUnion';
   }
 
-  validate(validator: AnyDuringMigration): boolean {
-    let valid = true;
-    for (let i = 0; valid && i < this.elements.length; ++i) {
-      valid = validator.isArrayElement(
-          i, this.elements[i], {allowDeletes: 'none', allowTransforms: false});
+  validate(): void {
+    for (let i = 0; i < this.elements.length; ++i) {
+      validateArrayElement(i, this.elements[i]);
     }
-    return valid;
   }
 
   toProto(serializer: Serializer, fieldPath: FieldPath):
@@ -419,12 +414,13 @@ class ArrayUnionTransform extends FieldTransform {
  * @private
  */
 class ArrayRemoveTransform extends FieldTransform {
-  constructor(private readonly elements: AnyJs[]) {
+  constructor(private readonly elements: unknown[]) {
     super();
   }
 
   /**
    * Array transforms are omitted from document masks.
+   * @private
    */
   get includeInDocumentMask(): false {
     return false;
@@ -432,6 +428,7 @@ class ArrayRemoveTransform extends FieldTransform {
 
   /**
    * Array transforms are included in document transforms.
+   * @private
    */
   get includeInDocumentTransform(): true {
     return true;
@@ -441,16 +438,13 @@ class ArrayRemoveTransform extends FieldTransform {
     return 'FieldValue.arrayRemove';
   }
 
-  validate(validator: AnyDuringMigration): boolean {
-    let valid = true;
-    for (let i = 0; valid && i < this.elements.length; ++i) {
-      valid = validator.isArrayElement(
-          i, this.elements[i], {allowDeletes: 'none', allowTransforms: false});
+  validate(): void {
+    for (let i = 0; i < this.elements.length; ++i) {
+      validateArrayElement(i, this.elements[i]);
     }
-    return valid;
   }
 
-  toProto(serializer: Serializer, fieldPath):
+  toProto(serializer: Serializer, fieldPath: FieldPath):
       api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
@@ -465,4 +459,20 @@ class ArrayRemoveTransform extends FieldTransform {
         (other instanceof ArrayRemoveTransform &&
          deepEqual(this.elements, other.elements, {strict: true})));
   }
+}
+
+/**
+ * Validates that `value` can be used as an element inside of an array. Certain
+ * field values (such as ServerTimestamps) are rejected.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The value to validate.
+ */
+function validateArrayElement(arg: string|number, value: unknown): void {
+  validateUserInput(
+      arg, value, 'array element',
+      /*path=*/{allowDeletes: 'none', allowTransforms: false},
+      /*path=*/undefined,
+      /*level=*/0, /*inArray=*/true);
 }

@@ -19,7 +19,6 @@ import * as rbtree from 'functional-red-black-tree';
 import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
-
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange, DocumentChangeType} from './document-change';
@@ -27,10 +26,10 @@ import Firestore, {DocumentReference, Query} from './index';
 import {logger} from './logger';
 import {ResourcePath} from './path';
 import {Timestamp} from './timestamp';
+import {GrpcError, RBTree} from './types';
 import {requestTag} from './util';
 
-import api = google.firestore.v1beta1;
-import {GrpcError} from './types';
+import api = google.firestore.v1;
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -385,7 +384,7 @@ export class Watch {
       changeMap.clear();
       resumeToken = null;
 
-      docTree.forEach(snapshot => {
+      docTree.forEach((snapshot: QueryDocumentSnapshot) => {
         // Mark each document as deleted. If documents are not deleted, they
         // will be send again by the server.
         changeMap.set(snapshot.ref.formattedName, REMOVED);
@@ -395,7 +394,7 @@ export class Watch {
     };
 
     /** Closes the stream and calls onError() if the stream is still active. */
-    const closeStream = (err) => {
+    const closeStream = (err: GrpcError) => {
       if (currentStream) {
         currentStream.unpipe(stream);
         currentStream.end();
@@ -533,9 +532,10 @@ export class Watch {
      * Applies the mutations in changeMap to both the document tree and the
      * document lookup map. Modified docMap in-place and returns the updated
      * state.
+     * @private
      */
     const computeSnapshot =
-        (docTree: rbtree, docMap: Map<string, QueryDocumentSnapshot>,
+        (docTree: RBTree, docMap: Map<string, QueryDocumentSnapshot>,
          changes: DocumentChangeSet) => {
           let updatedTree = docTree;
           const updatedMap = docMap;
@@ -548,6 +548,7 @@ export class Watch {
           /**
            * Applies a document delete to the document tree and the document
            * map. Returns the corresponding DocumentChange event.
+           * @private
            */
           function deleteDoc(name: string): DocumentChange {
             assert(updatedMap.has(name), 'Document to delete does not exist');
@@ -563,6 +564,7 @@ export class Watch {
           /**
            * Applies a document add to the document tree and the document map.
            * Returns the corresponding DocumentChange event.
+           * @private
            */
           function addDoc(newDocument: QueryDocumentSnapshot): DocumentChange {
             const name = newDocument.ref.formattedName;
@@ -578,6 +580,7 @@ export class Watch {
            * Applies a document modification to the document tree and the
            * document map. Returns the DocumentChange event for successful
            * modifications.
+           * @private
            */
           function modifyDoc(newDocument: QueryDocumentSnapshot):
               DocumentChange|null {
@@ -748,9 +751,9 @@ export class Watch {
                       ResourcePath.fromSlashSeparatedString(name).relativeName);
                   snapshot.fieldsProto = document.fields || {};
                   snapshot.createTime =
-                      Timestamp.fromProto(document.createTime);
+                      Timestamp.fromProto(document.createTime!);
                   snapshot.updateTime =
-                      Timestamp.fromProto(document.updateTime);
+                      Timestamp.fromProto(document.updateTime!);
                   changeMap.set(name, snapshot);
                 } else if (removed) {
                   logger(

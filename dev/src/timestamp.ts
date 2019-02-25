@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {google} from '../protos/firestore_proto_api';
-import {createValidator} from './validate';
 
-const validate = createValidator();
+import {google} from '../protos/firestore_proto_api';
+import {validateInteger} from './validate';
 
 /*!
  * Number of nanoseconds in a millisecond.
@@ -68,7 +67,7 @@ export class Timestamp {
    * @return {Timestamp} A new `Timestamp` representing the same point in time
    * as the given date.
    */
-  static fromDate(date) {
+  static fromDate(date: Date) {
     return Timestamp.fromMillis(date.getTime());
   }
 
@@ -85,7 +84,7 @@ export class Timestamp {
    * @return {Timestamp}  A new `Timestamp` representing the same point in time
    * as the given number of milliseconds.
    */
-  static fromMillis(milliseconds) {
+  static fromMillis(milliseconds: number) {
     const seconds = Math.floor(milliseconds / 1000);
     const nanos = (milliseconds - seconds * 1000) * MS_TO_NANOS;
     return new Timestamp(seconds, nanos);
@@ -97,7 +96,7 @@ export class Timestamp {
    * @private
    * @param {Object} timestamp The `Timestamp` Protobuf object.
    */
-  static fromProto(timestamp) {
+  static fromProto(timestamp: google.protobuf.ITimestamp) {
     return new Timestamp(
         Number(timestamp.seconds || 0), Number(timestamp.nanos || 0));
   }
@@ -118,9 +117,10 @@ export class Timestamp {
    * have non-negative nanoseconds values that count forward in time. Must be
    * from 0 to 999,999,999 inclusive.
    */
-  constructor(seconds, nanoseconds) {
-    validate.isInteger('seconds', seconds);
-    validate.isInteger('nanoseconds', nanoseconds, 0, 999999999);
+  constructor(seconds: number, nanoseconds: number) {
+    validateInteger('seconds', seconds);
+    validateInteger(
+        'nanoseconds', nanoseconds, {minValue: 0, maxValue: 999999999});
 
     this._seconds = seconds;
     this._nanoseconds = nanoseconds;
@@ -214,7 +214,7 @@ export class Timestamp {
    * @param {any} other The `Timestamp` to compare against.
    * @return {boolean} 'true' if this `Timestamp` is equal to the provided one.
    */
-  isEqual(other) {
+  isEqual(other: Timestamp): boolean {
     return (
         this === other ||
         (other instanceof Timestamp && this._seconds === other.seconds &&

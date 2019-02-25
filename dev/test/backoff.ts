@@ -17,7 +17,6 @@
 import {expect} from 'chai';
 
 import {ExponentialBackoff, setTimeoutHandler} from '../src/backoff';
-import {AnyDuringMigration} from '../src/types';
 
 const nop = () => {};
 
@@ -26,9 +25,9 @@ describe('ExponentialBackoff', () => {
 
   before(() => {
     setTimeoutHandler(((callback, timeout) => {
-                        observedDelays.push(timeout);
-                        callback();
-                      }) as AnyDuringMigration);
+      observedDelays.push(timeout);
+      callback();
+    }));
   });
 
   beforeEach(() => {
@@ -39,11 +38,11 @@ describe('ExponentialBackoff', () => {
     setTimeoutHandler(setTimeout);
   });
 
-  function assertDelayEquals(expected) {
+  function assertDelayEquals(expected: number) {
     expect(observedDelays.shift()).to.equal(expected);
   }
 
-  function assertDelayBetween(low, high) {
+  function assertDelayBetween(low: number, high: number) {
     const actual = observedDelays.shift()!;
     expect(actual).to.be.at.least(low);
     expect(actual).to.be.at.most(high);

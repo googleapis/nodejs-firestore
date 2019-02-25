@@ -14,22 +14,34 @@
  * limitations under the License.
  */
 
-import * as is from 'is';
 
 import * as proto from '../protos/firestore_proto_api';
-import api = proto.google.firestore.v1beta1;
 
-import {Timestamp} from './timestamp';
-import {FieldTransform} from './field-value';
-
-import {customObjectError} from './validate';
-import {ResourcePath} from './path';
 import {detectValueType} from './convert';
-import {AnyDuringMigration, AnyJs, UserInput} from './types';
+import {FieldTransform} from './field-value';
+import {DeleteTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
+import {FieldPath, ResourcePath} from './path';
+import {Timestamp} from './timestamp';
+import {ApiMapValue, DocumentData, ValidationOptions} from './types';
+import {isEmpty, isObject} from './util';
+import {customObjectMessage, invalidArgumentMessage} from './validate';
 
-/** An interface for Firestore types that can be serialized to Protobuf. */
+import api = proto.google.firestore.v1;
+
+/**
+ * The maximum depth of a Firestore object.
+ *
+ * @private
+ */
+const MAX_DEPTH = 20;
+
+/**
+ * An interface for Firestore types that can be serialized to Protobuf.
+ *
+ * @private
+ */
 export interface Serializable {
   toProto(): api.IValue;
 }
@@ -49,7 +61,11 @@ export class Serializer {
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
     this.createReference = path => firestore.doc(path);
-    this.timestampsInSnapshots = !!firestore._settings.timestampsInSnapshots;
+    if (firestore._settings.timestampsInSnapshots === undefined) {
+      this.timestampsInSnapshots = true;
+    } else {
+      this.timestampsInSnapshots = firestore._settings.timestampsInSnapshots;
+    }
   }
 
   /**
@@ -59,8 +75,8 @@ export class Serializer {
    * @param obj The object to encode.
    * @returns The Firestore 'Fields' representation
    */
-  encodeFields(obj: object): {[k: string]: api.IValue} {
-    const fields = {};
+  encodeFields(obj: DocumentData): ApiMapValue {
+    const fields: ApiMapValue = {};
 
     for (const prop in obj) {
       if (obj.hasOwnProperty(prop)) {
@@ -82,12 +98,12 @@ export class Serializer {
    * @param val The object to encode
    * @returns The Firestore Proto or null if we are deleting a field.
    */
-  encodeValue(val: AnyJs|AnyJs[]|Serializable): api.IValue|null {
+  encodeValue(val: unknown): api.IValue|null {
     if (val instanceof FieldTransform) {
       return null;
     }
 
-    if (is.string(val)) {
+    if (typeof val === 'string') {
       return {
         stringValue: val as string,
       };
@@ -99,20 +115,20 @@ export class Serializer {
       };
     }
 
-    if (typeof val === 'number' && is.integer(val)) {
+    if (typeof val === 'number' && !isNaN(val) && val % 1 === 0) {
       return {
         integerValue: val as number,
       };
     }
 
     // Integers are handled above, the remaining numbers are treated as doubles
-    if (is.number(val)) {
+    if (typeof val === 'number') {
       return {
         doubleValue: val as number,
       };
     }
 
-    if (is.date(val)) {
+    if (val instanceof Date) {
       const timestamp = Timestamp.fromDate(val as Date);
       return {
         timestampValue: {
@@ -136,9 +152,9 @@ export class Serializer {
     }
 
 
-    if (typeof val === 'object' && 'toProto' in val &&
-        typeof val.toProto === 'function') {
-      return val.toProto();
+    if (isObject(val) && 'toProto' in val &&
+        typeof (val as Serializable).toProto === 'function') {
+      return (val as Serializable).toProto();
     }
 
     if (val instanceof Array) {
@@ -166,9 +182,9 @@ export class Serializer {
 
       // If we encounter an empty object, we always need to send it to make sure
       // the server creates a map entry.
-      if (!is.empty(val)) {
+      if (!isEmpty(val)) {
         map.mapValue!.fields = this.encodeFields(val);
-        if (is.empty(map.mapValue!.fields)) {
+        if (isEmpty(map.mapValue!.fields!)) {
           return null;
         }
       }
@@ -176,7 +192,7 @@ export class Serializer {
       return map;
     }
 
-    throw customObjectError(val);
+    throw new Error(`Cannot encode value: ${val}`);
   }
 
   /**
@@ -186,7 +202,7 @@ export class Serializer {
    * @param proto A Firestore 'Value' Protobuf.
    * @returns The converted JS type.
    */
-  decodeValue(proto: api.IValue): AnyJs {
+  decodeValue(proto: api.IValue): unknown {
     const valueType = detectValueType(proto);
 
     switch (valueType) {
@@ -203,7 +219,7 @@ export class Serializer {
         return Number(proto.doubleValue);
       }
       case 'timestampValue': {
-        const timestamp = Timestamp.fromProto(proto.timestampValue);
+        const timestamp = Timestamp.fromProto(proto.timestampValue!);
         return this.timestampsInSnapshots ? timestamp : timestamp.toDate();
       }
       case 'referenceValue': {
@@ -212,8 +228,8 @@ export class Serializer {
         return this.createReference(resourcePath.relativeName);
       }
       case 'arrayValue': {
-        const array: AnyJs[] = [];
-        if (is.array(proto.arrayValue!.values)) {
+        const array: unknown[] = [];
+        if (Array.isArray(proto.arrayValue!.values)) {
           for (const value of proto.arrayValue!.values!) {
             array.push(this.decodeValue(value));
           }
@@ -224,7 +240,7 @@ export class Serializer {
         return null;
       }
       case 'mapValue': {
-        const obj = {};
+        const obj: DocumentData = {};
         const fields = proto.mapValue!.fields!;
 
         for (const prop in fields) {
@@ -250,7 +266,6 @@ export class Serializer {
   }
 }
 
-
 /**
  * Verifies that 'obj' is a plain JavaScript object that can be encoded as a
  * 'Map' in Firestore.
@@ -259,9 +274,104 @@ export class Serializer {
  * @param input The argument to verify.
  * @returns 'true' if the input can be a treated as a plain object.
  */
-export function isPlainObject(input: UserInput): boolean {
+export function isPlainObject(input: unknown): input is DocumentData {
   return (
-      typeof input === 'object' && input !== null &&
+      isObject(input) &&
       (Object.getPrototypeOf(input) === Object.prototype ||
        Object.getPrototypeOf(input) === null));
+}
+
+/**
+ * Validates a JavaScript value for usage as a Firestore value.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value JavaScript value to validate.
+ * @param desc A description of the expected type.
+ * @param path The field path to validate.
+ * @param options Validation options
+ * @param level The current depth of the traversal. This is used to decide
+ * whether deletes are allowed in conjunction with `allowDeletes: root`.
+ * @param inArray Whether we are inside an array.
+ * @throws when the object is invalid.
+ */
+export function validateUserInput(
+    arg: string|number, value: unknown, desc: string,
+    options: ValidationOptions, path?: FieldPath, level?: number,
+    inArray?: boolean): void {
+  if (path && path.size > MAX_DEPTH) {
+    throw new Error(
+        `${invalidArgumentMessage(arg, desc)} Input object is deeper than ${
+            MAX_DEPTH} levels or contains a cycle.`);
+  }
+
+  options = options || {};
+  level = level || 0;
+  inArray = inArray || false;
+
+  const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
+
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; ++i) {
+      validateUserInput(
+          arg, value[i]!, desc, options,
+          path ? path.append(String(i)) : new FieldPath(String(i)), level + 1,
+          /* inArray= */ true);
+    }
+  } else if (isPlainObject(value)) {
+    for (const prop in value) {
+      if (value.hasOwnProperty(prop)) {
+        validateUserInput(
+            arg, value[prop]!, desc, options,
+            path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
+            level + 1, inArray);
+      }
+    }
+  } else if (value === undefined) {
+    throw new Error(`${
+        invalidArgumentMessage(
+            arg, desc)} Cannot use "undefined" as a Firestore value${
+        fieldPathMessage}.`);
+  } else if (value instanceof DeleteTransform) {
+    if (inArray) {
+      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
+          value.methodName}() cannot be used inside of an array${
+          fieldPathMessage}.`);
+    } else if (
+        (options.allowDeletes === 'root' && level !== 0) ||
+        options.allowDeletes === 'none') {
+      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
+          value
+              .methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}${
+          fieldPathMessage}.`);
+    }
+  } else if (value instanceof FieldTransform) {
+    if (inArray) {
+      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
+          value.methodName}() cannot be used inside of an array${
+          fieldPathMessage}.`);
+    } else if (!options.allowTransforms) {
+      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
+          value.methodName}() can only be used in set(), create() or update()${
+          fieldPathMessage}.`);
+    }
+  } else if (value instanceof FieldPath) {
+    throw new Error(`${
+        invalidArgumentMessage(
+            arg,
+            desc)} Cannot use object of type "FieldPath" as a Firestore value${
+        fieldPathMessage}.`);
+  } else if (value instanceof DocumentReference) {
+    // Ok.
+  } else if (value instanceof GeoPoint) {
+    // Ok.
+  } else if (value instanceof Timestamp || value instanceof Date) {
+    // Ok.
+  } else if (value instanceof Buffer || value instanceof Uint8Array) {
+    // Ok.
+  } else if (value === null) {
+    // Ok.
+  } else if (typeof value === 'object') {
+    throw new Error(customObjectMessage(arg, value, path));
+  }
 }

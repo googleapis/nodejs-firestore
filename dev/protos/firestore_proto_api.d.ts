@@ -5,8 +5,8 @@ export namespace google {
     /** Namespace firestore. */
     namespace firestore {
 
-        /** Namespace v1beta1. */
-        namespace v1beta1 {
+        /** Namespace v1. */
+        namespace v1 {
 
             /** Properties of a DocumentMask. */
             interface IDocumentMask {
@@ -22,7 +22,7 @@ export namespace google {
                  * Constructs a new DocumentMask.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IDocumentMask);
+                constructor(properties?: google.firestore.v1.IDocumentMask);
 
                 /** DocumentMask fieldPaths. */
                 public fieldPaths: string[];
@@ -45,7 +45,7 @@ export namespace google {
                  * Constructs a new Precondition.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IPrecondition);
+                constructor(properties?: google.firestore.v1.IPrecondition);
 
                 /** Precondition exists. */
                 public exists: boolean;
@@ -61,10 +61,10 @@ export namespace google {
             interface ITransactionOptions {
 
                 /** TransactionOptions readOnly */
-                readOnly?: (google.firestore.v1beta1.TransactionOptions.IReadOnly|null);
+                readOnly?: (google.firestore.v1.TransactionOptions.IReadOnly|null);
 
                 /** TransactionOptions readWrite */
-                readWrite?: (google.firestore.v1beta1.TransactionOptions.IReadWrite|null);
+                readWrite?: (google.firestore.v1.TransactionOptions.IReadWrite|null);
             }
 
             /** Represents a TransactionOptions. */
@@ -74,13 +74,13 @@ export namespace google {
                  * Constructs a new TransactionOptions.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.ITransactionOptions);
+                constructor(properties?: google.firestore.v1.ITransactionOptions);
 
                 /** TransactionOptions readOnly. */
-                public readOnly?: (google.firestore.v1beta1.TransactionOptions.IReadOnly|null);
+                public readOnly?: (google.firestore.v1.TransactionOptions.IReadOnly|null);
 
                 /** TransactionOptions readWrite. */
-                public readWrite?: (google.firestore.v1beta1.TransactionOptions.IReadWrite|null);
+                public readWrite?: (google.firestore.v1.TransactionOptions.IReadWrite|null);
 
                 /** TransactionOptions mode. */
                 public mode?: ("readOnly"|"readWrite");
@@ -102,7 +102,7 @@ export namespace google {
                      * Constructs a new ReadWrite.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.TransactionOptions.IReadWrite);
+                    constructor(properties?: google.firestore.v1.TransactionOptions.IReadWrite);
 
                     /** ReadWrite retryTransaction. */
                     public retryTransaction: Uint8Array;
@@ -122,7 +122,7 @@ export namespace google {
                      * Constructs a new ReadOnly.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.TransactionOptions.IReadOnly);
+                    constructor(properties?: google.firestore.v1.TransactionOptions.IReadOnly);
 
                     /** ReadOnly readTime. */
                     public readTime?: (google.protobuf.ITimestamp|null);
@@ -139,7 +139,7 @@ export namespace google {
                 name?: (string|null);
 
                 /** Document fields */
-                fields?: ({ [k: string]: google.firestore.v1beta1.IValue }|null);
+                fields?: ({ [k: string]: google.firestore.v1.IValue }|null);
 
                 /** Document createTime */
                 createTime?: (google.protobuf.ITimestamp|null);
@@ -155,13 +155,13 @@ export namespace google {
                  * Constructs a new Document.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IDocument);
+                constructor(properties?: google.firestore.v1.IDocument);
 
                 /** Document name. */
                 public name: string;
 
                 /** Document fields. */
-                public fields: { [k: string]: google.firestore.v1beta1.IValue };
+                public fields: { [k: string]: google.firestore.v1.IValue };
 
                 /** Document createTime. */
                 public createTime?: (google.protobuf.ITimestamp|null);
@@ -201,10 +201,10 @@ export namespace google {
                 geoPointValue?: (google.type.ILatLng|null);
 
                 /** Value arrayValue */
-                arrayValue?: (google.firestore.v1beta1.IArrayValue|null);
+                arrayValue?: (google.firestore.v1.IArrayValue|null);
 
                 /** Value mapValue */
-                mapValue?: (google.firestore.v1beta1.IMapValue|null);
+                mapValue?: (google.firestore.v1.IMapValue|null);
             }
 
             /** Represents a Value. */
@@ -214,7 +214,7 @@ export namespace google {
                  * Constructs a new Value.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IValue);
+                constructor(properties?: google.firestore.v1.IValue);
 
                 /** Value nullValue. */
                 public nullValue: google.protobuf.NullValue;
@@ -244,10 +244,10 @@ export namespace google {
                 public geoPointValue?: (google.type.ILatLng|null);
 
                 /** Value arrayValue. */
-                public arrayValue?: (google.firestore.v1beta1.IArrayValue|null);
+                public arrayValue?: (google.firestore.v1.IArrayValue|null);
 
                 /** Value mapValue. */
-                public mapValue?: (google.firestore.v1beta1.IMapValue|null);
+                public mapValue?: (google.firestore.v1.IMapValue|null);
 
                 /** Value valueType. */
                 public valueType?: ("nullValue"|"booleanValue"|"integerValue"|"doubleValue"|"timestampValue"|"stringValue"|"bytesValue"|"referenceValue"|"geoPointValue"|"arrayValue"|"mapValue");
@@ -257,7 +257,7 @@ export namespace google {
             interface IArrayValue {
 
                 /** ArrayValue values */
-                values?: (google.firestore.v1beta1.IValue[]|null);
+                values?: (google.firestore.v1.IValue[]|null);
             }
 
             /** Represents an ArrayValue. */
@@ -267,17 +267,17 @@ export namespace google {
                  * Constructs a new ArrayValue.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IArrayValue);
+                constructor(properties?: google.firestore.v1.IArrayValue);
 
                 /** ArrayValue values. */
-                public values: google.firestore.v1beta1.IValue[];
+                public values: google.firestore.v1.IValue[];
             }
 
             /** Properties of a MapValue. */
             interface IMapValue {
 
                 /** MapValue fields */
-                fields?: ({ [k: string]: google.firestore.v1beta1.IValue }|null);
+                fields?: ({ [k: string]: google.firestore.v1.IValue }|null);
             }
 
             /** Represents a MapValue. */
@@ -287,10 +287,10 @@ export namespace google {
                  * Constructs a new MapValue.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IMapValue);
+                constructor(properties?: google.firestore.v1.IMapValue);
 
                 /** MapValue fields. */
-                public fields: { [k: string]: google.firestore.v1beta1.IValue };
+                public fields: { [k: string]: google.firestore.v1.IValue };
             }
 
             /** Represents a Firestore */
@@ -309,276 +309,276 @@ export namespace google {
                  * @param request GetDocumentRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and Document
                  */
-                public getDocument(request: google.firestore.v1beta1.IGetDocumentRequest, callback: google.firestore.v1beta1.Firestore.GetDocumentCallback): void;
+                public getDocument(request: google.firestore.v1.IGetDocumentRequest, callback: google.firestore.v1.Firestore.GetDocumentCallback): void;
 
                 /**
                  * Calls GetDocument.
                  * @param request GetDocumentRequest message or plain object
                  * @returns Promise
                  */
-                public getDocument(request: google.firestore.v1beta1.IGetDocumentRequest): Promise<google.firestore.v1beta1.Document>;
+                public getDocument(request: google.firestore.v1.IGetDocumentRequest): Promise<google.firestore.v1.Document>;
 
                 /**
                  * Calls ListDocuments.
                  * @param request ListDocumentsRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and ListDocumentsResponse
                  */
-                public listDocuments(request: google.firestore.v1beta1.IListDocumentsRequest, callback: google.firestore.v1beta1.Firestore.ListDocumentsCallback): void;
+                public listDocuments(request: google.firestore.v1.IListDocumentsRequest, callback: google.firestore.v1.Firestore.ListDocumentsCallback): void;
 
                 /**
                  * Calls ListDocuments.
                  * @param request ListDocumentsRequest message or plain object
                  * @returns Promise
                  */
-                public listDocuments(request: google.firestore.v1beta1.IListDocumentsRequest): Promise<google.firestore.v1beta1.ListDocumentsResponse>;
+                public listDocuments(request: google.firestore.v1.IListDocumentsRequest): Promise<google.firestore.v1.ListDocumentsResponse>;
 
                 /**
                  * Calls CreateDocument.
                  * @param request CreateDocumentRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and Document
                  */
-                public createDocument(request: google.firestore.v1beta1.ICreateDocumentRequest, callback: google.firestore.v1beta1.Firestore.CreateDocumentCallback): void;
+                public createDocument(request: google.firestore.v1.ICreateDocumentRequest, callback: google.firestore.v1.Firestore.CreateDocumentCallback): void;
 
                 /**
                  * Calls CreateDocument.
                  * @param request CreateDocumentRequest message or plain object
                  * @returns Promise
                  */
-                public createDocument(request: google.firestore.v1beta1.ICreateDocumentRequest): Promise<google.firestore.v1beta1.Document>;
+                public createDocument(request: google.firestore.v1.ICreateDocumentRequest): Promise<google.firestore.v1.Document>;
 
                 /**
                  * Calls UpdateDocument.
                  * @param request UpdateDocumentRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and Document
                  */
-                public updateDocument(request: google.firestore.v1beta1.IUpdateDocumentRequest, callback: google.firestore.v1beta1.Firestore.UpdateDocumentCallback): void;
+                public updateDocument(request: google.firestore.v1.IUpdateDocumentRequest, callback: google.firestore.v1.Firestore.UpdateDocumentCallback): void;
 
                 /**
                  * Calls UpdateDocument.
                  * @param request UpdateDocumentRequest message or plain object
                  * @returns Promise
                  */
-                public updateDocument(request: google.firestore.v1beta1.IUpdateDocumentRequest): Promise<google.firestore.v1beta1.Document>;
+                public updateDocument(request: google.firestore.v1.IUpdateDocumentRequest): Promise<google.firestore.v1.Document>;
 
                 /**
                  * Calls DeleteDocument.
                  * @param request DeleteDocumentRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and Empty
                  */
-                public deleteDocument(request: google.firestore.v1beta1.IDeleteDocumentRequest, callback: google.firestore.v1beta1.Firestore.DeleteDocumentCallback): void;
+                public deleteDocument(request: google.firestore.v1.IDeleteDocumentRequest, callback: google.firestore.v1.Firestore.DeleteDocumentCallback): void;
 
                 /**
                  * Calls DeleteDocument.
                  * @param request DeleteDocumentRequest message or plain object
                  * @returns Promise
                  */
-                public deleteDocument(request: google.firestore.v1beta1.IDeleteDocumentRequest): Promise<google.protobuf.Empty>;
+                public deleteDocument(request: google.firestore.v1.IDeleteDocumentRequest): Promise<google.protobuf.Empty>;
 
                 /**
                  * Calls BatchGetDocuments.
                  * @param request BatchGetDocumentsRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and BatchGetDocumentsResponse
                  */
-                public batchGetDocuments(request: google.firestore.v1beta1.IBatchGetDocumentsRequest, callback: google.firestore.v1beta1.Firestore.BatchGetDocumentsCallback): void;
+                public batchGetDocuments(request: google.firestore.v1.IBatchGetDocumentsRequest, callback: google.firestore.v1.Firestore.BatchGetDocumentsCallback): void;
 
                 /**
                  * Calls BatchGetDocuments.
                  * @param request BatchGetDocumentsRequest message or plain object
                  * @returns Promise
                  */
-                public batchGetDocuments(request: google.firestore.v1beta1.IBatchGetDocumentsRequest): Promise<google.firestore.v1beta1.BatchGetDocumentsResponse>;
+                public batchGetDocuments(request: google.firestore.v1.IBatchGetDocumentsRequest): Promise<google.firestore.v1.BatchGetDocumentsResponse>;
 
                 /**
                  * Calls BeginTransaction.
                  * @param request BeginTransactionRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and BeginTransactionResponse
                  */
-                public beginTransaction(request: google.firestore.v1beta1.IBeginTransactionRequest, callback: google.firestore.v1beta1.Firestore.BeginTransactionCallback): void;
+                public beginTransaction(request: google.firestore.v1.IBeginTransactionRequest, callback: google.firestore.v1.Firestore.BeginTransactionCallback): void;
 
                 /**
                  * Calls BeginTransaction.
                  * @param request BeginTransactionRequest message or plain object
                  * @returns Promise
                  */
-                public beginTransaction(request: google.firestore.v1beta1.IBeginTransactionRequest): Promise<google.firestore.v1beta1.BeginTransactionResponse>;
+                public beginTransaction(request: google.firestore.v1.IBeginTransactionRequest): Promise<google.firestore.v1.BeginTransactionResponse>;
 
                 /**
                  * Calls Commit.
                  * @param request CommitRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and CommitResponse
                  */
-                public commit(request: google.firestore.v1beta1.ICommitRequest, callback: google.firestore.v1beta1.Firestore.CommitCallback): void;
+                public commit(request: google.firestore.v1.ICommitRequest, callback: google.firestore.v1.Firestore.CommitCallback): void;
 
                 /**
                  * Calls Commit.
                  * @param request CommitRequest message or plain object
                  * @returns Promise
                  */
-                public commit(request: google.firestore.v1beta1.ICommitRequest): Promise<google.firestore.v1beta1.CommitResponse>;
+                public commit(request: google.firestore.v1.ICommitRequest): Promise<google.firestore.v1.CommitResponse>;
 
                 /**
                  * Calls Rollback.
                  * @param request RollbackRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and Empty
                  */
-                public rollback(request: google.firestore.v1beta1.IRollbackRequest, callback: google.firestore.v1beta1.Firestore.RollbackCallback): void;
+                public rollback(request: google.firestore.v1.IRollbackRequest, callback: google.firestore.v1.Firestore.RollbackCallback): void;
 
                 /**
                  * Calls Rollback.
                  * @param request RollbackRequest message or plain object
                  * @returns Promise
                  */
-                public rollback(request: google.firestore.v1beta1.IRollbackRequest): Promise<google.protobuf.Empty>;
+                public rollback(request: google.firestore.v1.IRollbackRequest): Promise<google.protobuf.Empty>;
 
                 /**
                  * Calls RunQuery.
                  * @param request RunQueryRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and RunQueryResponse
                  */
-                public runQuery(request: google.firestore.v1beta1.IRunQueryRequest, callback: google.firestore.v1beta1.Firestore.RunQueryCallback): void;
+                public runQuery(request: google.firestore.v1.IRunQueryRequest, callback: google.firestore.v1.Firestore.RunQueryCallback): void;
 
                 /**
                  * Calls RunQuery.
                  * @param request RunQueryRequest message or plain object
                  * @returns Promise
                  */
-                public runQuery(request: google.firestore.v1beta1.IRunQueryRequest): Promise<google.firestore.v1beta1.RunQueryResponse>;
+                public runQuery(request: google.firestore.v1.IRunQueryRequest): Promise<google.firestore.v1.RunQueryResponse>;
 
                 /**
                  * Calls Write.
                  * @param request WriteRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and WriteResponse
                  */
-                public write(request: google.firestore.v1beta1.IWriteRequest, callback: google.firestore.v1beta1.Firestore.WriteCallback): void;
+                public write(request: google.firestore.v1.IWriteRequest, callback: google.firestore.v1.Firestore.WriteCallback): void;
 
                 /**
                  * Calls Write.
                  * @param request WriteRequest message or plain object
                  * @returns Promise
                  */
-                public write(request: google.firestore.v1beta1.IWriteRequest): Promise<google.firestore.v1beta1.WriteResponse>;
+                public write(request: google.firestore.v1.IWriteRequest): Promise<google.firestore.v1.WriteResponse>;
 
                 /**
                  * Calls Listen.
                  * @param request ListenRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and ListenResponse
                  */
-                public listen(request: google.firestore.v1beta1.IListenRequest, callback: google.firestore.v1beta1.Firestore.ListenCallback): void;
+                public listen(request: google.firestore.v1.IListenRequest, callback: google.firestore.v1.Firestore.ListenCallback): void;
 
                 /**
                  * Calls Listen.
                  * @param request ListenRequest message or plain object
                  * @returns Promise
                  */
-                public listen(request: google.firestore.v1beta1.IListenRequest): Promise<google.firestore.v1beta1.ListenResponse>;
+                public listen(request: google.firestore.v1.IListenRequest): Promise<google.firestore.v1.ListenResponse>;
 
                 /**
                  * Calls ListCollectionIds.
                  * @param request ListCollectionIdsRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and ListCollectionIdsResponse
                  */
-                public listCollectionIds(request: google.firestore.v1beta1.IListCollectionIdsRequest, callback: google.firestore.v1beta1.Firestore.ListCollectionIdsCallback): void;
+                public listCollectionIds(request: google.firestore.v1.IListCollectionIdsRequest, callback: google.firestore.v1.Firestore.ListCollectionIdsCallback): void;
 
                 /**
                  * Calls ListCollectionIds.
                  * @param request ListCollectionIdsRequest message or plain object
                  * @returns Promise
                  */
-                public listCollectionIds(request: google.firestore.v1beta1.IListCollectionIdsRequest): Promise<google.firestore.v1beta1.ListCollectionIdsResponse>;
+                public listCollectionIds(request: google.firestore.v1.IListCollectionIdsRequest): Promise<google.firestore.v1.ListCollectionIdsResponse>;
             }
 
             namespace Firestore {
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#getDocument}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#getDocument}.
                  * @param error Error, if any
                  * @param [response] Document
                  */
-                type GetDocumentCallback = (error: (Error|null), response?: google.firestore.v1beta1.Document) => void;
+                type GetDocumentCallback = (error: (Error|null), response?: google.firestore.v1.Document) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#listDocuments}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#listDocuments}.
                  * @param error Error, if any
                  * @param [response] ListDocumentsResponse
                  */
-                type ListDocumentsCallback = (error: (Error|null), response?: google.firestore.v1beta1.ListDocumentsResponse) => void;
+                type ListDocumentsCallback = (error: (Error|null), response?: google.firestore.v1.ListDocumentsResponse) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#createDocument}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
                  * @param error Error, if any
                  * @param [response] Document
                  */
-                type CreateDocumentCallback = (error: (Error|null), response?: google.firestore.v1beta1.Document) => void;
+                type CreateDocumentCallback = (error: (Error|null), response?: google.firestore.v1.Document) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#updateDocument}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#updateDocument}.
                  * @param error Error, if any
                  * @param [response] Document
                  */
-                type UpdateDocumentCallback = (error: (Error|null), response?: google.firestore.v1beta1.Document) => void;
+                type UpdateDocumentCallback = (error: (Error|null), response?: google.firestore.v1.Document) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#deleteDocument}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#deleteDocument}.
                  * @param error Error, if any
                  * @param [response] Empty
                  */
                 type DeleteDocumentCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#batchGetDocuments}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#batchGetDocuments}.
                  * @param error Error, if any
                  * @param [response] BatchGetDocumentsResponse
                  */
-                type BatchGetDocumentsCallback = (error: (Error|null), response?: google.firestore.v1beta1.BatchGetDocumentsResponse) => void;
+                type BatchGetDocumentsCallback = (error: (Error|null), response?: google.firestore.v1.BatchGetDocumentsResponse) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#beginTransaction}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#beginTransaction}.
                  * @param error Error, if any
                  * @param [response] BeginTransactionResponse
                  */
-                type BeginTransactionCallback = (error: (Error|null), response?: google.firestore.v1beta1.BeginTransactionResponse) => void;
+                type BeginTransactionCallback = (error: (Error|null), response?: google.firestore.v1.BeginTransactionResponse) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#commit}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#commit}.
                  * @param error Error, if any
                  * @param [response] CommitResponse
                  */
-                type CommitCallback = (error: (Error|null), response?: google.firestore.v1beta1.CommitResponse) => void;
+                type CommitCallback = (error: (Error|null), response?: google.firestore.v1.CommitResponse) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#rollback}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#rollback}.
                  * @param error Error, if any
                  * @param [response] Empty
                  */
                 type RollbackCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#runQuery}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#runQuery}.
                  * @param error Error, if any
                  * @param [response] RunQueryResponse
                  */
-                type RunQueryCallback = (error: (Error|null), response?: google.firestore.v1beta1.RunQueryResponse) => void;
+                type RunQueryCallback = (error: (Error|null), response?: google.firestore.v1.RunQueryResponse) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#write}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#write}.
                  * @param error Error, if any
                  * @param [response] WriteResponse
                  */
-                type WriteCallback = (error: (Error|null), response?: google.firestore.v1beta1.WriteResponse) => void;
+                type WriteCallback = (error: (Error|null), response?: google.firestore.v1.WriteResponse) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#listen}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#listen}.
                  * @param error Error, if any
                  * @param [response] ListenResponse
                  */
-                type ListenCallback = (error: (Error|null), response?: google.firestore.v1beta1.ListenResponse) => void;
+                type ListenCallback = (error: (Error|null), response?: google.firestore.v1.ListenResponse) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1beta1.Firestore#listCollectionIds}.
+                 * Callback as used by {@link google.firestore.v1.Firestore#listCollectionIds}.
                  * @param error Error, if any
                  * @param [response] ListCollectionIdsResponse
                  */
-                type ListCollectionIdsCallback = (error: (Error|null), response?: google.firestore.v1beta1.ListCollectionIdsResponse) => void;
+                type ListCollectionIdsCallback = (error: (Error|null), response?: google.firestore.v1.ListCollectionIdsResponse) => void;
             }
 
             /** Properties of a GetDocumentRequest. */
@@ -588,7 +588,7 @@ export namespace google {
                 name?: (string|null);
 
                 /** GetDocumentRequest mask */
-                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** GetDocumentRequest transaction */
                 transaction?: (Uint8Array|null);
@@ -604,13 +604,13 @@ export namespace google {
                  * Constructs a new GetDocumentRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IGetDocumentRequest);
+                constructor(properties?: google.firestore.v1.IGetDocumentRequest);
 
                 /** GetDocumentRequest name. */
                 public name: string;
 
                 /** GetDocumentRequest mask. */
-                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                public mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** GetDocumentRequest transaction. */
                 public transaction: Uint8Array;
@@ -641,7 +641,7 @@ export namespace google {
                 orderBy?: (string|null);
 
                 /** ListDocumentsRequest mask */
-                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** ListDocumentsRequest transaction */
                 transaction?: (Uint8Array|null);
@@ -660,7 +660,7 @@ export namespace google {
                  * Constructs a new ListDocumentsRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IListDocumentsRequest);
+                constructor(properties?: google.firestore.v1.IListDocumentsRequest);
 
                 /** ListDocumentsRequest parent. */
                 public parent: string;
@@ -678,7 +678,7 @@ export namespace google {
                 public orderBy: string;
 
                 /** ListDocumentsRequest mask. */
-                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                public mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** ListDocumentsRequest transaction. */
                 public transaction: Uint8Array;
@@ -697,7 +697,7 @@ export namespace google {
             interface IListDocumentsResponse {
 
                 /** ListDocumentsResponse documents */
-                documents?: (google.firestore.v1beta1.IDocument[]|null);
+                documents?: (google.firestore.v1.IDocument[]|null);
 
                 /** ListDocumentsResponse nextPageToken */
                 nextPageToken?: (string|null);
@@ -710,10 +710,10 @@ export namespace google {
                  * Constructs a new ListDocumentsResponse.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IListDocumentsResponse);
+                constructor(properties?: google.firestore.v1.IListDocumentsResponse);
 
                 /** ListDocumentsResponse documents. */
-                public documents: google.firestore.v1beta1.IDocument[];
+                public documents: google.firestore.v1.IDocument[];
 
                 /** ListDocumentsResponse nextPageToken. */
                 public nextPageToken: string;
@@ -732,10 +732,10 @@ export namespace google {
                 documentId?: (string|null);
 
                 /** CreateDocumentRequest document */
-                document?: (google.firestore.v1beta1.IDocument|null);
+                document?: (google.firestore.v1.IDocument|null);
 
                 /** CreateDocumentRequest mask */
-                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                mask?: (google.firestore.v1.IDocumentMask|null);
             }
 
             /** Represents a CreateDocumentRequest. */
@@ -745,7 +745,7 @@ export namespace google {
                  * Constructs a new CreateDocumentRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.ICreateDocumentRequest);
+                constructor(properties?: google.firestore.v1.ICreateDocumentRequest);
 
                 /** CreateDocumentRequest parent. */
                 public parent: string;
@@ -757,26 +757,26 @@ export namespace google {
                 public documentId: string;
 
                 /** CreateDocumentRequest document. */
-                public document?: (google.firestore.v1beta1.IDocument|null);
+                public document?: (google.firestore.v1.IDocument|null);
 
                 /** CreateDocumentRequest mask. */
-                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                public mask?: (google.firestore.v1.IDocumentMask|null);
             }
 
             /** Properties of an UpdateDocumentRequest. */
             interface IUpdateDocumentRequest {
 
                 /** UpdateDocumentRequest document */
-                document?: (google.firestore.v1beta1.IDocument|null);
+                document?: (google.firestore.v1.IDocument|null);
 
                 /** UpdateDocumentRequest updateMask */
-                updateMask?: (google.firestore.v1beta1.IDocumentMask|null);
+                updateMask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** UpdateDocumentRequest mask */
-                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** UpdateDocumentRequest currentDocument */
-                currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+                currentDocument?: (google.firestore.v1.IPrecondition|null);
             }
 
             /** Represents an UpdateDocumentRequest. */
@@ -786,19 +786,19 @@ export namespace google {
                  * Constructs a new UpdateDocumentRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IUpdateDocumentRequest);
+                constructor(properties?: google.firestore.v1.IUpdateDocumentRequest);
 
                 /** UpdateDocumentRequest document. */
-                public document?: (google.firestore.v1beta1.IDocument|null);
+                public document?: (google.firestore.v1.IDocument|null);
 
                 /** UpdateDocumentRequest updateMask. */
-                public updateMask?: (google.firestore.v1beta1.IDocumentMask|null);
+                public updateMask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** UpdateDocumentRequest mask. */
-                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                public mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** UpdateDocumentRequest currentDocument. */
-                public currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+                public currentDocument?: (google.firestore.v1.IPrecondition|null);
             }
 
             /** Properties of a DeleteDocumentRequest. */
@@ -808,7 +808,7 @@ export namespace google {
                 name?: (string|null);
 
                 /** DeleteDocumentRequest currentDocument */
-                currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+                currentDocument?: (google.firestore.v1.IPrecondition|null);
             }
 
             /** Represents a DeleteDocumentRequest. */
@@ -818,13 +818,13 @@ export namespace google {
                  * Constructs a new DeleteDocumentRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IDeleteDocumentRequest);
+                constructor(properties?: google.firestore.v1.IDeleteDocumentRequest);
 
                 /** DeleteDocumentRequest name. */
                 public name: string;
 
                 /** DeleteDocumentRequest currentDocument. */
-                public currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+                public currentDocument?: (google.firestore.v1.IPrecondition|null);
             }
 
             /** Properties of a BatchGetDocumentsRequest. */
@@ -837,13 +837,13 @@ export namespace google {
                 documents?: (string[]|null);
 
                 /** BatchGetDocumentsRequest mask */
-                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** BatchGetDocumentsRequest transaction */
                 transaction?: (Uint8Array|null);
 
                 /** BatchGetDocumentsRequest newTransaction */
-                newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
+                newTransaction?: (google.firestore.v1.ITransactionOptions|null);
 
                 /** BatchGetDocumentsRequest readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
@@ -856,7 +856,7 @@ export namespace google {
                  * Constructs a new BatchGetDocumentsRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IBatchGetDocumentsRequest);
+                constructor(properties?: google.firestore.v1.IBatchGetDocumentsRequest);
 
                 /** BatchGetDocumentsRequest database. */
                 public database: string;
@@ -865,13 +865,13 @@ export namespace google {
                 public documents: string[];
 
                 /** BatchGetDocumentsRequest mask. */
-                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+                public mask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** BatchGetDocumentsRequest transaction. */
                 public transaction: Uint8Array;
 
                 /** BatchGetDocumentsRequest newTransaction. */
-                public newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
+                public newTransaction?: (google.firestore.v1.ITransactionOptions|null);
 
                 /** BatchGetDocumentsRequest readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -884,7 +884,7 @@ export namespace google {
             interface IBatchGetDocumentsResponse {
 
                 /** BatchGetDocumentsResponse found */
-                found?: (google.firestore.v1beta1.IDocument|null);
+                found?: (google.firestore.v1.IDocument|null);
 
                 /** BatchGetDocumentsResponse missing */
                 missing?: (string|null);
@@ -903,10 +903,10 @@ export namespace google {
                  * Constructs a new BatchGetDocumentsResponse.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IBatchGetDocumentsResponse);
+                constructor(properties?: google.firestore.v1.IBatchGetDocumentsResponse);
 
                 /** BatchGetDocumentsResponse found. */
-                public found?: (google.firestore.v1beta1.IDocument|null);
+                public found?: (google.firestore.v1.IDocument|null);
 
                 /** BatchGetDocumentsResponse missing. */
                 public missing: string;
@@ -928,7 +928,7 @@ export namespace google {
                 database?: (string|null);
 
                 /** BeginTransactionRequest options */
-                options?: (google.firestore.v1beta1.ITransactionOptions|null);
+                options?: (google.firestore.v1.ITransactionOptions|null);
             }
 
             /** Represents a BeginTransactionRequest. */
@@ -938,13 +938,13 @@ export namespace google {
                  * Constructs a new BeginTransactionRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IBeginTransactionRequest);
+                constructor(properties?: google.firestore.v1.IBeginTransactionRequest);
 
                 /** BeginTransactionRequest database. */
                 public database: string;
 
                 /** BeginTransactionRequest options. */
-                public options?: (google.firestore.v1beta1.ITransactionOptions|null);
+                public options?: (google.firestore.v1.ITransactionOptions|null);
             }
 
             /** Properties of a BeginTransactionResponse. */
@@ -961,7 +961,7 @@ export namespace google {
                  * Constructs a new BeginTransactionResponse.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IBeginTransactionResponse);
+                constructor(properties?: google.firestore.v1.IBeginTransactionResponse);
 
                 /** BeginTransactionResponse transaction. */
                 public transaction: Uint8Array;
@@ -974,7 +974,7 @@ export namespace google {
                 database?: (string|null);
 
                 /** CommitRequest writes */
-                writes?: (google.firestore.v1beta1.IWrite[]|null);
+                writes?: (google.firestore.v1.IWrite[]|null);
 
                 /** CommitRequest transaction */
                 transaction?: (Uint8Array|null);
@@ -987,13 +987,13 @@ export namespace google {
                  * Constructs a new CommitRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.ICommitRequest);
+                constructor(properties?: google.firestore.v1.ICommitRequest);
 
                 /** CommitRequest database. */
                 public database: string;
 
                 /** CommitRequest writes. */
-                public writes: google.firestore.v1beta1.IWrite[];
+                public writes: google.firestore.v1.IWrite[];
 
                 /** CommitRequest transaction. */
                 public transaction: Uint8Array;
@@ -1003,7 +1003,7 @@ export namespace google {
             interface ICommitResponse {
 
                 /** CommitResponse writeResults */
-                writeResults?: (google.firestore.v1beta1.IWriteResult[]|null);
+                writeResults?: (google.firestore.v1.IWriteResult[]|null);
 
                 /** CommitResponse commitTime */
                 commitTime?: (google.protobuf.ITimestamp|null);
@@ -1016,10 +1016,10 @@ export namespace google {
                  * Constructs a new CommitResponse.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.ICommitResponse);
+                constructor(properties?: google.firestore.v1.ICommitResponse);
 
                 /** CommitResponse writeResults. */
-                public writeResults: google.firestore.v1beta1.IWriteResult[];
+                public writeResults: google.firestore.v1.IWriteResult[];
 
                 /** CommitResponse commitTime. */
                 public commitTime?: (google.protobuf.ITimestamp|null);
@@ -1042,7 +1042,7 @@ export namespace google {
                  * Constructs a new RollbackRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IRollbackRequest);
+                constructor(properties?: google.firestore.v1.IRollbackRequest);
 
                 /** RollbackRequest database. */
                 public database: string;
@@ -1058,13 +1058,13 @@ export namespace google {
                 parent?: (string|null);
 
                 /** RunQueryRequest structuredQuery */
-                structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
+                structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
 
                 /** RunQueryRequest transaction */
                 transaction?: (Uint8Array|null);
 
                 /** RunQueryRequest newTransaction */
-                newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
+                newTransaction?: (google.firestore.v1.ITransactionOptions|null);
 
                 /** RunQueryRequest readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
@@ -1077,19 +1077,19 @@ export namespace google {
                  * Constructs a new RunQueryRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IRunQueryRequest);
+                constructor(properties?: google.firestore.v1.IRunQueryRequest);
 
                 /** RunQueryRequest parent. */
                 public parent: string;
 
                 /** RunQueryRequest structuredQuery. */
-                public structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
+                public structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
 
                 /** RunQueryRequest transaction. */
                 public transaction: Uint8Array;
 
                 /** RunQueryRequest newTransaction. */
-                public newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
+                public newTransaction?: (google.firestore.v1.ITransactionOptions|null);
 
                 /** RunQueryRequest readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -1108,7 +1108,7 @@ export namespace google {
                 transaction?: (Uint8Array|null);
 
                 /** RunQueryResponse document */
-                document?: (google.firestore.v1beta1.IDocument|null);
+                document?: (google.firestore.v1.IDocument|null);
 
                 /** RunQueryResponse readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
@@ -1124,13 +1124,13 @@ export namespace google {
                  * Constructs a new RunQueryResponse.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IRunQueryResponse);
+                constructor(properties?: google.firestore.v1.IRunQueryResponse);
 
                 /** RunQueryResponse transaction. */
                 public transaction: Uint8Array;
 
                 /** RunQueryResponse document. */
-                public document?: (google.firestore.v1beta1.IDocument|null);
+                public document?: (google.firestore.v1.IDocument|null);
 
                 /** RunQueryResponse readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
@@ -1149,7 +1149,7 @@ export namespace google {
                 streamId?: (string|null);
 
                 /** WriteRequest writes */
-                writes?: (google.firestore.v1beta1.IWrite[]|null);
+                writes?: (google.firestore.v1.IWrite[]|null);
 
                 /** WriteRequest streamToken */
                 streamToken?: (Uint8Array|null);
@@ -1165,7 +1165,7 @@ export namespace google {
                  * Constructs a new WriteRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IWriteRequest);
+                constructor(properties?: google.firestore.v1.IWriteRequest);
 
                 /** WriteRequest database. */
                 public database: string;
@@ -1174,7 +1174,7 @@ export namespace google {
                 public streamId: string;
 
                 /** WriteRequest writes. */
-                public writes: google.firestore.v1beta1.IWrite[];
+                public writes: google.firestore.v1.IWrite[];
 
                 /** WriteRequest streamToken. */
                 public streamToken: Uint8Array;
@@ -1193,7 +1193,7 @@ export namespace google {
                 streamToken?: (Uint8Array|null);
 
                 /** WriteResponse writeResults */
-                writeResults?: (google.firestore.v1beta1.IWriteResult[]|null);
+                writeResults?: (google.firestore.v1.IWriteResult[]|null);
 
                 /** WriteResponse commitTime */
                 commitTime?: (google.protobuf.ITimestamp|null);
@@ -1206,7 +1206,7 @@ export namespace google {
                  * Constructs a new WriteResponse.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IWriteResponse);
+                constructor(properties?: google.firestore.v1.IWriteResponse);
 
                 /** WriteResponse streamId. */
                 public streamId: string;
@@ -1215,7 +1215,7 @@ export namespace google {
                 public streamToken: Uint8Array;
 
                 /** WriteResponse writeResults. */
-                public writeResults: google.firestore.v1beta1.IWriteResult[];
+                public writeResults: google.firestore.v1.IWriteResult[];
 
                 /** WriteResponse commitTime. */
                 public commitTime?: (google.protobuf.ITimestamp|null);
@@ -1228,7 +1228,7 @@ export namespace google {
                 database?: (string|null);
 
                 /** ListenRequest addTarget */
-                addTarget?: (google.firestore.v1beta1.ITarget|null);
+                addTarget?: (google.firestore.v1.ITarget|null);
 
                 /** ListenRequest removeTarget */
                 removeTarget?: (number|null);
@@ -1244,13 +1244,13 @@ export namespace google {
                  * Constructs a new ListenRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IListenRequest);
+                constructor(properties?: google.firestore.v1.IListenRequest);
 
                 /** ListenRequest database. */
                 public database: string;
 
                 /** ListenRequest addTarget. */
-                public addTarget?: (google.firestore.v1beta1.ITarget|null);
+                public addTarget?: (google.firestore.v1.ITarget|null);
 
                 /** ListenRequest removeTarget. */
                 public removeTarget: number;
@@ -1266,19 +1266,19 @@ export namespace google {
             interface IListenResponse {
 
                 /** ListenResponse targetChange */
-                targetChange?: (google.firestore.v1beta1.ITargetChange|null);
+                targetChange?: (google.firestore.v1.ITargetChange|null);
 
                 /** ListenResponse documentChange */
-                documentChange?: (google.firestore.v1beta1.IDocumentChange|null);
+                documentChange?: (google.firestore.v1.IDocumentChange|null);
 
                 /** ListenResponse documentDelete */
-                documentDelete?: (google.firestore.v1beta1.IDocumentDelete|null);
+                documentDelete?: (google.firestore.v1.IDocumentDelete|null);
 
                 /** ListenResponse documentRemove */
-                documentRemove?: (google.firestore.v1beta1.IDocumentRemove|null);
+                documentRemove?: (google.firestore.v1.IDocumentRemove|null);
 
                 /** ListenResponse filter */
-                filter?: (google.firestore.v1beta1.IExistenceFilter|null);
+                filter?: (google.firestore.v1.IExistenceFilter|null);
             }
 
             /** Represents a ListenResponse. */
@@ -1288,22 +1288,22 @@ export namespace google {
                  * Constructs a new ListenResponse.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IListenResponse);
+                constructor(properties?: google.firestore.v1.IListenResponse);
 
                 /** ListenResponse targetChange. */
-                public targetChange?: (google.firestore.v1beta1.ITargetChange|null);
+                public targetChange?: (google.firestore.v1.ITargetChange|null);
 
                 /** ListenResponse documentChange. */
-                public documentChange?: (google.firestore.v1beta1.IDocumentChange|null);
+                public documentChange?: (google.firestore.v1.IDocumentChange|null);
 
                 /** ListenResponse documentDelete. */
-                public documentDelete?: (google.firestore.v1beta1.IDocumentDelete|null);
+                public documentDelete?: (google.firestore.v1.IDocumentDelete|null);
 
                 /** ListenResponse documentRemove. */
-                public documentRemove?: (google.firestore.v1beta1.IDocumentRemove|null);
+                public documentRemove?: (google.firestore.v1.IDocumentRemove|null);
 
                 /** ListenResponse filter. */
-                public filter?: (google.firestore.v1beta1.IExistenceFilter|null);
+                public filter?: (google.firestore.v1.IExistenceFilter|null);
 
                 /** ListenResponse responseType. */
                 public responseType?: ("targetChange"|"documentChange"|"documentDelete"|"documentRemove"|"filter");
@@ -1313,10 +1313,10 @@ export namespace google {
             interface ITarget {
 
                 /** Target query */
-                query?: (google.firestore.v1beta1.Target.IQueryTarget|null);
+                query?: (google.firestore.v1.Target.IQueryTarget|null);
 
                 /** Target documents */
-                documents?: (google.firestore.v1beta1.Target.IDocumentsTarget|null);
+                documents?: (google.firestore.v1.Target.IDocumentsTarget|null);
 
                 /** Target resumeToken */
                 resumeToken?: (Uint8Array|null);
@@ -1338,13 +1338,13 @@ export namespace google {
                  * Constructs a new Target.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.ITarget);
+                constructor(properties?: google.firestore.v1.ITarget);
 
                 /** Target query. */
-                public query?: (google.firestore.v1beta1.Target.IQueryTarget|null);
+                public query?: (google.firestore.v1.Target.IQueryTarget|null);
 
                 /** Target documents. */
-                public documents?: (google.firestore.v1beta1.Target.IDocumentsTarget|null);
+                public documents?: (google.firestore.v1.Target.IDocumentsTarget|null);
 
                 /** Target resumeToken. */
                 public resumeToken: Uint8Array;
@@ -1381,7 +1381,7 @@ export namespace google {
                      * Constructs a new DocumentsTarget.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.Target.IDocumentsTarget);
+                    constructor(properties?: google.firestore.v1.Target.IDocumentsTarget);
 
                     /** DocumentsTarget documents. */
                     public documents: string[];
@@ -1394,7 +1394,7 @@ export namespace google {
                     parent?: (string|null);
 
                     /** QueryTarget structuredQuery */
-                    structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
+                    structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
                 }
 
                 /** Represents a QueryTarget. */
@@ -1404,13 +1404,13 @@ export namespace google {
                      * Constructs a new QueryTarget.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.Target.IQueryTarget);
+                    constructor(properties?: google.firestore.v1.Target.IQueryTarget);
 
                     /** QueryTarget parent. */
                     public parent: string;
 
                     /** QueryTarget structuredQuery. */
-                    public structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
+                    public structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
 
                     /** QueryTarget queryType. */
                     public queryType?: "structuredQuery";
@@ -1421,7 +1421,7 @@ export namespace google {
             interface ITargetChange {
 
                 /** TargetChange targetChangeType */
-                targetChangeType?: (google.firestore.v1beta1.TargetChange.TargetChangeType|null);
+                targetChangeType?: (google.firestore.v1.TargetChange.TargetChangeType|null);
 
                 /** TargetChange targetIds */
                 targetIds?: (number[]|null);
@@ -1443,10 +1443,10 @@ export namespace google {
                  * Constructs a new TargetChange.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.ITargetChange);
+                constructor(properties?: google.firestore.v1.ITargetChange);
 
                 /** TargetChange targetChangeType. */
-                public targetChangeType: google.firestore.v1beta1.TargetChange.TargetChangeType;
+                public targetChangeType: google.firestore.v1.TargetChange.TargetChangeType;
 
                 /** TargetChange targetIds. */
                 public targetIds: number[];
@@ -1488,7 +1488,7 @@ export namespace google {
                  * Constructs a new ListCollectionIdsRequest.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IListCollectionIdsRequest);
+                constructor(properties?: google.firestore.v1.IListCollectionIdsRequest);
 
                 /** ListCollectionIdsRequest parent. */
                 public parent: string;
@@ -1517,7 +1517,7 @@ export namespace google {
                  * Constructs a new ListCollectionIdsResponse.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IListCollectionIdsResponse);
+                constructor(properties?: google.firestore.v1.IListCollectionIdsResponse);
 
                 /** ListCollectionIdsResponse collectionIds. */
                 public collectionIds: string[];
@@ -1530,22 +1530,22 @@ export namespace google {
             interface IStructuredQuery {
 
                 /** StructuredQuery select */
-                select?: (google.firestore.v1beta1.StructuredQuery.IProjection|null);
+                select?: (google.firestore.v1.StructuredQuery.IProjection|null);
 
                 /** StructuredQuery from */
-                from?: (google.firestore.v1beta1.StructuredQuery.ICollectionSelector[]|null);
+                from?: (google.firestore.v1.StructuredQuery.ICollectionSelector[]|null);
 
                 /** StructuredQuery where */
-                where?: (google.firestore.v1beta1.StructuredQuery.IFilter|null);
+                where?: (google.firestore.v1.StructuredQuery.IFilter|null);
 
                 /** StructuredQuery orderBy */
-                orderBy?: (google.firestore.v1beta1.StructuredQuery.IOrder[]|null);
+                orderBy?: (google.firestore.v1.StructuredQuery.IOrder[]|null);
 
                 /** StructuredQuery startAt */
-                startAt?: (google.firestore.v1beta1.ICursor|null);
+                startAt?: (google.firestore.v1.ICursor|null);
 
                 /** StructuredQuery endAt */
-                endAt?: (google.firestore.v1beta1.ICursor|null);
+                endAt?: (google.firestore.v1.ICursor|null);
 
                 /** StructuredQuery offset */
                 offset?: (number|null);
@@ -1561,25 +1561,25 @@ export namespace google {
                  * Constructs a new StructuredQuery.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IStructuredQuery);
+                constructor(properties?: google.firestore.v1.IStructuredQuery);
 
                 /** StructuredQuery select. */
-                public select?: (google.firestore.v1beta1.StructuredQuery.IProjection|null);
+                public select?: (google.firestore.v1.StructuredQuery.IProjection|null);
 
                 /** StructuredQuery from. */
-                public from: google.firestore.v1beta1.StructuredQuery.ICollectionSelector[];
+                public from: google.firestore.v1.StructuredQuery.ICollectionSelector[];
 
                 /** StructuredQuery where. */
-                public where?: (google.firestore.v1beta1.StructuredQuery.IFilter|null);
+                public where?: (google.firestore.v1.StructuredQuery.IFilter|null);
 
                 /** StructuredQuery orderBy. */
-                public orderBy: google.firestore.v1beta1.StructuredQuery.IOrder[];
+                public orderBy: google.firestore.v1.StructuredQuery.IOrder[];
 
                 /** StructuredQuery startAt. */
-                public startAt?: (google.firestore.v1beta1.ICursor|null);
+                public startAt?: (google.firestore.v1.ICursor|null);
 
                 /** StructuredQuery endAt. */
-                public endAt?: (google.firestore.v1beta1.ICursor|null);
+                public endAt?: (google.firestore.v1.ICursor|null);
 
                 /** StructuredQuery offset. */
                 public offset: number;
@@ -1607,7 +1607,7 @@ export namespace google {
                      * Constructs a new CollectionSelector.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.ICollectionSelector);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.ICollectionSelector);
 
                     /** CollectionSelector collectionId. */
                     public collectionId: string;
@@ -1620,13 +1620,13 @@ export namespace google {
                 interface IFilter {
 
                     /** Filter compositeFilter */
-                    compositeFilter?: (google.firestore.v1beta1.StructuredQuery.ICompositeFilter|null);
+                    compositeFilter?: (google.firestore.v1.StructuredQuery.ICompositeFilter|null);
 
                     /** Filter fieldFilter */
-                    fieldFilter?: (google.firestore.v1beta1.StructuredQuery.IFieldFilter|null);
+                    fieldFilter?: (google.firestore.v1.StructuredQuery.IFieldFilter|null);
 
                     /** Filter unaryFilter */
-                    unaryFilter?: (google.firestore.v1beta1.StructuredQuery.IUnaryFilter|null);
+                    unaryFilter?: (google.firestore.v1.StructuredQuery.IUnaryFilter|null);
                 }
 
                 /** Represents a Filter. */
@@ -1636,16 +1636,16 @@ export namespace google {
                      * Constructs a new Filter.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IFilter);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IFilter);
 
                     /** Filter compositeFilter. */
-                    public compositeFilter?: (google.firestore.v1beta1.StructuredQuery.ICompositeFilter|null);
+                    public compositeFilter?: (google.firestore.v1.StructuredQuery.ICompositeFilter|null);
 
                     /** Filter fieldFilter. */
-                    public fieldFilter?: (google.firestore.v1beta1.StructuredQuery.IFieldFilter|null);
+                    public fieldFilter?: (google.firestore.v1.StructuredQuery.IFieldFilter|null);
 
                     /** Filter unaryFilter. */
-                    public unaryFilter?: (google.firestore.v1beta1.StructuredQuery.IUnaryFilter|null);
+                    public unaryFilter?: (google.firestore.v1.StructuredQuery.IUnaryFilter|null);
 
                     /** Filter filterType. */
                     public filterType?: ("compositeFilter"|"fieldFilter"|"unaryFilter");
@@ -1655,10 +1655,10 @@ export namespace google {
                 interface ICompositeFilter {
 
                     /** CompositeFilter op */
-                    op?: (google.firestore.v1beta1.StructuredQuery.CompositeFilter.Operator|null);
+                    op?: (google.firestore.v1.StructuredQuery.CompositeFilter.Operator|null);
 
                     /** CompositeFilter filters */
-                    filters?: (google.firestore.v1beta1.StructuredQuery.IFilter[]|null);
+                    filters?: (google.firestore.v1.StructuredQuery.IFilter[]|null);
                 }
 
                 /** Represents a CompositeFilter. */
@@ -1668,13 +1668,13 @@ export namespace google {
                      * Constructs a new CompositeFilter.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.ICompositeFilter);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.ICompositeFilter);
 
                     /** CompositeFilter op. */
-                    public op: google.firestore.v1beta1.StructuredQuery.CompositeFilter.Operator;
+                    public op: google.firestore.v1.StructuredQuery.CompositeFilter.Operator;
 
                     /** CompositeFilter filters. */
-                    public filters: google.firestore.v1beta1.StructuredQuery.IFilter[];
+                    public filters: google.firestore.v1.StructuredQuery.IFilter[];
                 }
 
                 namespace CompositeFilter {
@@ -1688,13 +1688,13 @@ export namespace google {
                 interface IFieldFilter {
 
                     /** FieldFilter field */
-                    field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+                    field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
 
                     /** FieldFilter op */
-                    op?: (google.firestore.v1beta1.StructuredQuery.FieldFilter.Operator|null);
+                    op?: (google.firestore.v1.StructuredQuery.FieldFilter.Operator|null);
 
                     /** FieldFilter value */
-                    value?: (google.firestore.v1beta1.IValue|null);
+                    value?: (google.firestore.v1.IValue|null);
                 }
 
                 /** Represents a FieldFilter. */
@@ -1704,16 +1704,16 @@ export namespace google {
                      * Constructs a new FieldFilter.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IFieldFilter);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IFieldFilter);
 
                     /** FieldFilter field. */
-                    public field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+                    public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
 
                     /** FieldFilter op. */
-                    public op: google.firestore.v1beta1.StructuredQuery.FieldFilter.Operator;
+                    public op: google.firestore.v1.StructuredQuery.FieldFilter.Operator;
 
                     /** FieldFilter value. */
-                    public value?: (google.firestore.v1beta1.IValue|null);
+                    public value?: (google.firestore.v1.IValue|null);
                 }
 
                 namespace FieldFilter {
@@ -1727,10 +1727,10 @@ export namespace google {
                 interface IUnaryFilter {
 
                     /** UnaryFilter op */
-                    op?: (google.firestore.v1beta1.StructuredQuery.UnaryFilter.Operator|null);
+                    op?: (google.firestore.v1.StructuredQuery.UnaryFilter.Operator|null);
 
                     /** UnaryFilter field */
-                    field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+                    field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
                 }
 
                 /** Represents an UnaryFilter. */
@@ -1740,13 +1740,13 @@ export namespace google {
                      * Constructs a new UnaryFilter.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IUnaryFilter);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IUnaryFilter);
 
                     /** UnaryFilter op. */
-                    public op: google.firestore.v1beta1.StructuredQuery.UnaryFilter.Operator;
+                    public op: google.firestore.v1.StructuredQuery.UnaryFilter.Operator;
 
                     /** UnaryFilter field. */
-                    public field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+                    public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
 
                     /** UnaryFilter operandType. */
                     public operandType?: "field";
@@ -1763,10 +1763,10 @@ export namespace google {
                 interface IOrder {
 
                     /** Order field */
-                    field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+                    field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
 
                     /** Order direction */
-                    direction?: (google.firestore.v1beta1.StructuredQuery.Direction|null);
+                    direction?: (google.firestore.v1.StructuredQuery.Direction|null);
                 }
 
                 /** Represents an Order. */
@@ -1776,13 +1776,13 @@ export namespace google {
                      * Constructs a new Order.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IOrder);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IOrder);
 
                     /** Order field. */
-                    public field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+                    public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
 
                     /** Order direction. */
-                    public direction: google.firestore.v1beta1.StructuredQuery.Direction;
+                    public direction: google.firestore.v1.StructuredQuery.Direction;
                 }
 
                 /** Properties of a FieldReference. */
@@ -1799,7 +1799,7 @@ export namespace google {
                      * Constructs a new FieldReference.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IFieldReference);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IFieldReference);
 
                     /** FieldReference fieldPath. */
                     public fieldPath: string;
@@ -1809,7 +1809,7 @@ export namespace google {
                 interface IProjection {
 
                     /** Projection fields */
-                    fields?: (google.firestore.v1beta1.StructuredQuery.IFieldReference[]|null);
+                    fields?: (google.firestore.v1.StructuredQuery.IFieldReference[]|null);
                 }
 
                 /** Represents a Projection. */
@@ -1819,10 +1819,10 @@ export namespace google {
                      * Constructs a new Projection.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IProjection);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IProjection);
 
                     /** Projection fields. */
-                    public fields: google.firestore.v1beta1.StructuredQuery.IFieldReference[];
+                    public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
                 }
 
                 /** Direction enum. */
@@ -1834,7 +1834,7 @@ export namespace google {
             interface ICursor {
 
                 /** Cursor values */
-                values?: (google.firestore.v1beta1.IValue[]|null);
+                values?: (google.firestore.v1.IValue[]|null);
 
                 /** Cursor before */
                 before?: (boolean|null);
@@ -1847,10 +1847,10 @@ export namespace google {
                  * Constructs a new Cursor.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.ICursor);
+                constructor(properties?: google.firestore.v1.ICursor);
 
                 /** Cursor values. */
-                public values: google.firestore.v1beta1.IValue[];
+                public values: google.firestore.v1.IValue[];
 
                 /** Cursor before. */
                 public before: boolean;
@@ -1860,19 +1860,19 @@ export namespace google {
             interface IWrite {
 
                 /** Write update */
-                update?: (google.firestore.v1beta1.IDocument|null);
+                update?: (google.firestore.v1.IDocument|null);
 
                 /** Write delete */
                 "delete"?: (string|null);
 
                 /** Write transform */
-                transform?: (google.firestore.v1beta1.IDocumentTransform|null);
+                transform?: (google.firestore.v1.IDocumentTransform|null);
 
                 /** Write updateMask */
-                updateMask?: (google.firestore.v1beta1.IDocumentMask|null);
+                updateMask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** Write currentDocument */
-                currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+                currentDocument?: (google.firestore.v1.IPrecondition|null);
             }
 
             /** Represents a Write. */
@@ -1882,22 +1882,22 @@ export namespace google {
                  * Constructs a new Write.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IWrite);
+                constructor(properties?: google.firestore.v1.IWrite);
 
                 /** Write update. */
-                public update?: (google.firestore.v1beta1.IDocument|null);
+                public update?: (google.firestore.v1.IDocument|null);
 
                 /** Write delete. */
                 public delete: string;
 
                 /** Write transform. */
-                public transform?: (google.firestore.v1beta1.IDocumentTransform|null);
+                public transform?: (google.firestore.v1.IDocumentTransform|null);
 
                 /** Write updateMask. */
-                public updateMask?: (google.firestore.v1beta1.IDocumentMask|null);
+                public updateMask?: (google.firestore.v1.IDocumentMask|null);
 
                 /** Write currentDocument. */
-                public currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+                public currentDocument?: (google.firestore.v1.IPrecondition|null);
 
                 /** Write operation. */
                 public operation?: ("update"|"delete"|"transform");
@@ -1910,7 +1910,7 @@ export namespace google {
                 document?: (string|null);
 
                 /** DocumentTransform fieldTransforms */
-                fieldTransforms?: (google.firestore.v1beta1.DocumentTransform.IFieldTransform[]|null);
+                fieldTransforms?: (google.firestore.v1.DocumentTransform.IFieldTransform[]|null);
             }
 
             /** Represents a DocumentTransform. */
@@ -1920,13 +1920,13 @@ export namespace google {
                  * Constructs a new DocumentTransform.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IDocumentTransform);
+                constructor(properties?: google.firestore.v1.IDocumentTransform);
 
                 /** DocumentTransform document. */
                 public document: string;
 
                 /** DocumentTransform fieldTransforms. */
-                public fieldTransforms: google.firestore.v1beta1.DocumentTransform.IFieldTransform[];
+                public fieldTransforms: google.firestore.v1.DocumentTransform.IFieldTransform[];
             }
 
             namespace DocumentTransform {
@@ -1938,16 +1938,22 @@ export namespace google {
                     fieldPath?: (string|null);
 
                     /** FieldTransform setToServerValue */
-                    setToServerValue?: (google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue|null);
+                    setToServerValue?: (google.firestore.v1.DocumentTransform.FieldTransform.ServerValue|null);
 
                     /** FieldTransform increment */
-                    increment?: (google.firestore.v1beta1.IValue|null);
+                    increment?: (google.firestore.v1.IValue|null);
+
+                    /** FieldTransform maximum */
+                    maximum?: (google.firestore.v1.IValue|null);
+
+                    /** FieldTransform minimum */
+                    minimum?: (google.firestore.v1.IValue|null);
 
                     /** FieldTransform appendMissingElements */
-                    appendMissingElements?: (google.firestore.v1beta1.IArrayValue|null);
+                    appendMissingElements?: (google.firestore.v1.IArrayValue|null);
 
                     /** FieldTransform removeAllFromArray */
-                    removeAllFromArray?: (google.firestore.v1beta1.IArrayValue|null);
+                    removeAllFromArray?: (google.firestore.v1.IArrayValue|null);
                 }
 
                 /** Represents a FieldTransform. */
@@ -1957,25 +1963,31 @@ export namespace google {
                      * Constructs a new FieldTransform.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1beta1.DocumentTransform.IFieldTransform);
+                    constructor(properties?: google.firestore.v1.DocumentTransform.IFieldTransform);
 
                     /** FieldTransform fieldPath. */
                     public fieldPath: string;
 
                     /** FieldTransform setToServerValue. */
-                    public setToServerValue: google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue;
+                    public setToServerValue: google.firestore.v1.DocumentTransform.FieldTransform.ServerValue;
 
                     /** FieldTransform increment. */
-                    public increment?: (google.firestore.v1beta1.IValue|null);
+                    public increment?: (google.firestore.v1.IValue|null);
+
+                    /** FieldTransform maximum. */
+                    public maximum?: (google.firestore.v1.IValue|null);
+
+                    /** FieldTransform minimum. */
+                    public minimum?: (google.firestore.v1.IValue|null);
 
                     /** FieldTransform appendMissingElements. */
-                    public appendMissingElements?: (google.firestore.v1beta1.IArrayValue|null);
+                    public appendMissingElements?: (google.firestore.v1.IArrayValue|null);
 
                     /** FieldTransform removeAllFromArray. */
-                    public removeAllFromArray?: (google.firestore.v1beta1.IArrayValue|null);
+                    public removeAllFromArray?: (google.firestore.v1.IArrayValue|null);
 
                     /** FieldTransform transformType. */
-                    public transformType?: ("setToServerValue"|"increment"|"appendMissingElements"|"removeAllFromArray");
+                    public transformType?: ("setToServerValue"|"increment"|"maximum"|"minimum"|"appendMissingElements"|"removeAllFromArray");
                 }
 
                 namespace FieldTransform {
@@ -1993,7 +2005,7 @@ export namespace google {
                 updateTime?: (google.protobuf.ITimestamp|null);
 
                 /** WriteResult transformResults */
-                transformResults?: (google.firestore.v1beta1.IValue[]|null);
+                transformResults?: (google.firestore.v1.IValue[]|null);
             }
 
             /** Represents a WriteResult. */
@@ -2003,20 +2015,20 @@ export namespace google {
                  * Constructs a new WriteResult.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IWriteResult);
+                constructor(properties?: google.firestore.v1.IWriteResult);
 
                 /** WriteResult updateTime. */
                 public updateTime?: (google.protobuf.ITimestamp|null);
 
                 /** WriteResult transformResults. */
-                public transformResults: google.firestore.v1beta1.IValue[];
+                public transformResults: google.firestore.v1.IValue[];
             }
 
             /** Properties of a DocumentChange. */
             interface IDocumentChange {
 
                 /** DocumentChange document */
-                document?: (google.firestore.v1beta1.IDocument|null);
+                document?: (google.firestore.v1.IDocument|null);
 
                 /** DocumentChange targetIds */
                 targetIds?: (number[]|null);
@@ -2032,10 +2044,10 @@ export namespace google {
                  * Constructs a new DocumentChange.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IDocumentChange);
+                constructor(properties?: google.firestore.v1.IDocumentChange);
 
                 /** DocumentChange document. */
-                public document?: (google.firestore.v1beta1.IDocument|null);
+                public document?: (google.firestore.v1.IDocument|null);
 
                 /** DocumentChange targetIds. */
                 public targetIds: number[];
@@ -2064,7 +2076,7 @@ export namespace google {
                  * Constructs a new DocumentDelete.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IDocumentDelete);
+                constructor(properties?: google.firestore.v1.IDocumentDelete);
 
                 /** DocumentDelete document. */
                 public document: string;
@@ -2096,7 +2108,7 @@ export namespace google {
                  * Constructs a new DocumentRemove.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IDocumentRemove);
+                constructor(properties?: google.firestore.v1.IDocumentRemove);
 
                 /** DocumentRemove document. */
                 public document: string;
@@ -2125,7 +2137,7 @@ export namespace google {
                  * Constructs a new ExistenceFilter.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1beta1.IExistenceFilter);
+                constructor(properties?: google.firestore.v1.IExistenceFilter);
 
                 /** ExistenceFilter targetId. */
                 public targetId: number;

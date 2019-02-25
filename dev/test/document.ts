@@ -16,10 +16,11 @@
 
 import {expect} from 'chai';
 
-import * as Firestore from '../src';
-import {AnyDuringMigration} from '../src/types';
+import * as proto from '../protos/firestore_proto_api';
+import {DocumentReference, FieldPath, FieldValue, Firestore, GeoPoint, setLogFunction, Timestamp} from '../src';
+import {ApiOverride, create, createInstance, document, found, InvalidApiUsage, missing, remove, requestEquals, retrieve, serverTimestamp, set, stream, update, updateMask, writeResult} from './util/helpers';
 
-import {create, createInstance, document, found, InvalidApiUsage, missing, remove, requestEquals, retrieve, serverTimestamp, set, stream, update, updateMask, writeResult} from './util/helpers';
+import api = proto.google.firestore.v1;
 
 const PROJECT_ID = 'test-project';
 
@@ -29,11 +30,11 @@ const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
     'that can be followed by an optional precondition.');
 
 // Change the argument to 'console.log' to enable debug output.
-Firestore.setLogFunction(() => {});
+setLogFunction(() => {});
 
 describe('DocumentReference interface', () => {
-  let firestore;
-  let documentRef;
+  let firestore: Firestore;
+  let documentRef: DocumentReference;
 
   beforeEach(() => {
     return createInstance().then(firestoreInstance => {
@@ -43,16 +44,16 @@ describe('DocumentReference interface', () => {
   });
 
   it('has collection() method', () => {
-    expect(() => documentRef.collection(42))
+    expect(() => documentRef.collection(42 as InvalidApiUsage))
         .to.throw(
-            'Value for "collectionPath" is not a valid ResourcePath. Path must be a non-empty string.');
+            'Value for argument "collectionPath" is not a valid resource path. Path must be a non-empty string.');
 
     let collection = documentRef.collection('col');
     expect(collection.id).to.equal('col');
 
     expect(() => documentRef.collection('col/doc'))
         .to.throw(
-            'Value for "collectionPath" must point to a collection, but was "col\/doc". Your path does not contain an odd number of components.');
+            'Value for argument "collectionPath" must point to a collection, but was "col\/doc". Your path does not contain an odd number of components.');
 
     collection = documentRef.collection('col/doc/col');
     expect(collection.id).to.equal('col');
@@ -76,7 +77,7 @@ describe('DocumentReference interface', () => {
 });
 
 describe('serialize document', () => {
-  let firestore;
+  let firestore: Firestore;
 
   beforeEach(() => {
     return createInstance().then(firestoreInstance => {
@@ -85,7 +86,7 @@ describe('serialize document', () => {
   });
 
   it('serializes to Protobuf JS', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId', 'bytes', {
@@ -108,33 +109,33 @@ describe('serialize document', () => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
     })
         .to.throw(
-            'Value for "data" is not a valid Document. Cannot use "undefined" as a Firestore value (found in field foo).');
+            'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field foo).');
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({
-        foo: Firestore.FieldPath.documentId()
+        foo: FieldPath.documentId()
       });
     })
         .to.throw(
-            'Value for "data" is not a valid Document. Cannot use object of type "FieldPath" as a Firestore value (found in field foo).');
+            'Value for argument "data" is not a valid Firestore document. Cannot use object of type "FieldPath" as a Firestore value (found in field foo).');
 
     expect(() => {
       class Foo {}
       firestore.doc('collectionId/documentId').set({foo: new Foo()});
     })
         .to.throw(
-            'Value for "data" is not a valid Document. Couldn\'t serialize object of type "Foo" (found in field foo). Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
+            'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo" (found in field foo). Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
 
     expect(() => {
       class Foo {}
       firestore.doc('collectionId/documentId').set(new Foo());
     })
         .to.throw(
-            'Value for "data" is not a valid Document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
+            'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).');
   });
 
   it('serializes date before 1970', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId', 'moonLanding', {
@@ -156,7 +157,7 @@ describe('serialize document', () => {
   });
 
   it('serializes unicode keys', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId', '😀', '😜'),
@@ -173,7 +174,7 @@ describe('serialize document', () => {
   });
 
   it('accepts both blob formats', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document(
@@ -195,9 +196,9 @@ describe('serialize document', () => {
   });
 
   it('supports NaN and Infinity', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
-        const fields = request.writes[0].update.fields;
+        const fields = request.writes![0].update!.fields!;
         expect(fields.nanValue.doubleValue).to.be.a('number');
         expect(fields.nanValue.doubleValue).to.be.NaN;
         expect(fields.posInfinity.doubleValue).to.equal(Infinity);
@@ -218,51 +219,53 @@ describe('serialize document', () => {
 
   it('with invalid geopoint', () => {
     expect(() => {
-      new Firestore.GeoPoint(57.2999988, 'INVALID' as InvalidApiUsage);
-    }).to.throw('Value for "longitude" is not a valid number');
+      new GeoPoint(57.2999988, 'INVALID' as InvalidApiUsage);
+    }).to.throw('Value for argument "longitude" is not a valid number');
 
     expect(() => {
-      new Firestore.GeoPoint('INVALID' as InvalidApiUsage, -4.4499982);
-    }).to.throw('Value for "latitude" is not a valid number');
+      new GeoPoint('INVALID' as InvalidApiUsage, -4.4499982);
+    }).to.throw('Value for argument "latitude" is not a valid number');
 
     expect(() => {
       new (Firestore as InvalidApiUsage).GeoPoint();
-    }).to.throw('Value for "latitude" is not a valid number');
+    }).to.throw('Value for argument "latitude" is not a valid number');
 
     expect(() => {
-      new Firestore.GeoPoint(NaN as InvalidApiUsage, 0);
-    }).to.throw('Value for "latitude" is not a valid number');
+      new GeoPoint(NaN, 0);
+    }).to.throw('Value for argument "latitude" is not a valid number');
 
     expect(() => {
-      new Firestore.GeoPoint(Infinity as InvalidApiUsage, 0);
-    }).to.throw('Value for "latitude" is not a valid number');
-
-    expect(() => {
-      new Firestore.GeoPoint(91, 0);
+      new GeoPoint(Infinity, 0);
     })
         .to.throw(
-            'Value for "latitude" is not a valid number. Value must be within \[-90, 90] inclusive, but was: 91');
+            'Value for argument "latitude" must be within [-90, 90] inclusive, but was: Infinity');
 
     expect(() => {
-      new Firestore.GeoPoint(90, 181);
+      new GeoPoint(91, 0);
     })
         .to.throw(
-            'Value for "longitude" is not a valid number. Value must be within \[-180, 180] inclusive, but was: 181');
+            'Value for argument "latitude" must be within \[-90, 90] inclusive, but was: 91');
+
+    expect(() => {
+      new GeoPoint(90, 181);
+    })
+        .to.throw(
+            'Value for argument "longitude" must be within \[-180, 180] inclusive, but was: 181');
   });
 
   it('resolves infinite nesting', () => {
-    const obj: AnyDuringMigration = {};
+    const obj: {foo?: {}} = {};
     obj.foo = obj;
 
     expect(() => {
       firestore.doc('collectionId/documentId').update(obj);
     })
         .to.throw(
-            'Value for "dataOrField" is not a valid Document. Input object is deeper than 20 levels or contains a cycle.');
+            'Value for argument "dataOrField" is not a valid Firestore value. Input object is deeper than 20 levels or contains a cycle.');
   });
 
   it('is able to write a document reference with cycles', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(
             request, set({
@@ -282,7 +285,8 @@ describe('serialize document', () => {
       // instances, even if they have cyclic references (we shouldn't try to
       // validate them beyond the instanceof check).
       const ref = firestore.doc('collectionId/documentId');
-      ref.firestore.firestore = firestore;
+      // tslint:disable-next-line:no-any
+      (ref.firestore as any).firestore = firestore;
       return ref.set({ref});
     });
   });
@@ -290,7 +294,7 @@ describe('serialize document', () => {
 
 describe('deserialize document', () => {
   it('deserializes Protobuf JS', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document('documentId', 'foo', {
           bytesValue: Buffer.from('AG=', 'base64'),
@@ -308,7 +312,7 @@ describe('deserialize document', () => {
   it('ignores intermittent stream failures', () => {
     let attempts = 1;
 
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         if (attempts < 3) {
           ++attempts;
@@ -327,7 +331,7 @@ describe('deserialize document', () => {
   });
 
   it('deserializes date before 1970', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document('documentId', 'moonLanding', {
           timestampValue: {
@@ -347,7 +351,7 @@ describe('deserialize document', () => {
   });
 
   it('returns undefined for unknown fields', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document('documentId')));
       }
@@ -362,7 +366,7 @@ describe('deserialize document', () => {
   });
 
   it('supports NaN and Infinity', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document(
             'documentId', 'nanValue', {doubleValue: NaN}, 'posInfinity',
@@ -381,7 +385,7 @@ describe('deserialize document', () => {
   });
 
   it('doesn\'t deserialize unsupported types', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document(
             'documentId', 'moonLanding',
@@ -401,7 +405,7 @@ describe('deserialize document', () => {
   });
 
   it('doesn\'t deserialize invalid latitude', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document('documentId', 'geoPointValue', {
           geoPointValue: {
@@ -415,13 +419,13 @@ describe('deserialize document', () => {
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(doc => {
         expect(() => doc.data())
-            .to.throw('Value for "latitude" is not a valid number.');
+            .to.throw('Value for argument "latitude" is not a valid number.');
       });
     });
   });
 
   it('doesn\'t deserialize invalid longitude', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document('documentId', 'geoPointValue', {
           geoPointValue: {
@@ -435,7 +439,7 @@ describe('deserialize document', () => {
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(doc => {
         expect(() => doc.data())
-            .to.throw('Value for "longitude" is not a valid number.');
+            .to.throw('Value for argument "longitude" is not a valid number.');
       });
     });
   });
@@ -443,7 +447,7 @@ describe('deserialize document', () => {
 
 describe('get document', () => {
   it('returns document', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: request => {
         requestEquals(request, retrieve('documentId'));
 
@@ -464,15 +468,14 @@ describe('get document', () => {
         expect(result.data()).to.deep.eq({foo: {bar: 'foobar'}});
         expect(result.get('foo')).to.deep.eq({bar: 'foobar'});
         expect(result.get('foo.bar')).to.equal('foobar');
-        expect(result.get(new Firestore.FieldPath('foo', 'bar')))
-            .to.equal('foobar');
+        expect(result.get(new FieldPath('foo', 'bar'))).to.equal('foobar');
         expect(result.ref.id).to.equal('documentId');
       });
     });
   });
 
   it('returns read, update and create times', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document('documentId')));
       }
@@ -480,18 +483,15 @@ describe('get document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then((result) => {
-        expect(result.createTime!.isEqual(new Firestore.Timestamp(1, 2)))
-            .to.be.true;
-        expect(result.updateTime!.isEqual(new Firestore.Timestamp(3, 4)))
-            .to.be.true;
-        expect(result.readTime.isEqual(new Firestore.Timestamp(5, 6)))
-            .to.be.true;
+        expect(result.createTime!.isEqual(new Timestamp(1, 2))).to.be.true;
+        expect(result.updateTime!.isEqual(new Timestamp(3, 4))).to.be.true;
+        expect(result.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
       });
     });
   });
 
   it('returns not found', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(missing('documentId'));
       }
@@ -500,8 +500,7 @@ describe('get document', () => {
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').get().then(result => {
         expect(result.exists).to.be.false;
-        expect(result.readTime.isEqual(new Firestore.Timestamp(5, 6)))
-            .to.be.true;
+        expect(result.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
         expect(result.data()).to.not.exist;
         expect(result.get('foo')).to.not.exist;
       });
@@ -509,7 +508,7 @@ describe('get document', () => {
   });
 
   it('throws error', (done) => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(new Error('RPC Error'));
       }
@@ -524,7 +523,7 @@ describe('get document', () => {
   });
 
   it('cannot obtain field value without field path', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document('documentId', 'foo', {
           mapValue: {
@@ -543,14 +542,14 @@ describe('get document', () => {
       return firestore.doc('collectionId/documentId').get().then(doc => {
         expect(() => (doc as InvalidApiUsage).get())
             .to.throw(
-                'Value for "field" is not a valid FieldPath. Path cannot be omitted.');
+                'Value for argument "field" is not a valid field path. The path cannot be omitted.');
       });
     });
   });
 });
 
 describe('delete document', () => {
-  let firestore;
+  let firestore: Firestore;
 
   beforeEach(() => {
     return createInstance().then(firestoreClient => {
@@ -559,7 +558,7 @@ describe('delete document', () => {
   });
 
   it('generates proto', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, remove('documentId'));
 
@@ -573,7 +572,7 @@ describe('delete document', () => {
   });
 
   it('returns update time', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, remove('documentId'));
 
@@ -589,15 +588,14 @@ describe('delete document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').delete().then(res => {
-        expect(res.writeTime.isEqual(
-                   new Firestore.Timestamp(479978400, 123000000)))
+        expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000)))
             .to.be.true;
       });
     });
   });
 
   it('with last update time precondition', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, remove('documentId', {
                         updateTime: {
@@ -615,13 +613,13 @@ describe('delete document', () => {
 
       return Promise.all([
         docRef.delete({
-          lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
+          lastUpdateTime: new Timestamp(479978400, 123000000),
         }),
         docRef.delete({
-          lastUpdateTime: Firestore.Timestamp.fromMillis(479978400123),
+          lastUpdateTime: Timestamp.fromMillis(479978400123),
         }),
         docRef.delete({
-          lastUpdateTime: Firestore.Timestamp.fromDate(new Date(479978400123)),
+          lastUpdateTime: Timestamp.fromDate(new Date(479978400123)),
         }),
       ]);
     });
@@ -630,33 +628,38 @@ describe('delete document', () => {
   it('with invalid last update time precondition', () => {
     expect(() => {
       return firestore.doc('collectionId/documentId').delete({
-        lastUpdateTime: 1337
+        lastUpdateTime: 1337 as InvalidApiUsage
       });
     }).to.throw('"lastUpdateTime" is not a Firestore Timestamp.');
   });
 
   it('throws if "exists" is not a boolean', () => {
     expect(() => {
-      return firestore.doc('collectionId/documentId').delete({exists: 42});
+      return firestore.doc('collectionId/documentId').delete({
+        exists: 42
+      } as InvalidApiUsage);
     }).to.throw('"exists" is not a boolean.');
   });
 
   it('throws if no delete conditions are provided', () => {
     expect(() => {
-      return firestore.doc('collectionId/documentId').delete(42);
+      return firestore.doc('collectionId/documentId')
+          .delete(42 as InvalidApiUsage);
     }).to.throw('Input is not an object.');
   });
 
   it('throws if more than one condition is provided', () => {
     expect(() => {
-      return firestore.doc('collectionId/documentId')
-          .delete({exists: false, lastUpdateTime: Firestore.Timestamp.now()});
-    }).to.throw('Input contains more than one condition.');
+      return firestore.doc('collectionId/documentId').delete({
+        exists: false,
+        lastUpdateTime: Timestamp.now()
+      } as InvalidApiUsage);
+    }).to.throw('Input specifies more than one precondition.');
   });
 });
 
 describe('set document', () => {
-  let firestore;
+  let firestore: Firestore;
 
   beforeEach(() => {
     return createInstance().then(firestoreClient => {
@@ -665,7 +668,7 @@ describe('set document', () => {
   });
 
   it('supports empty map', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId'),
@@ -680,7 +683,7 @@ describe('set document', () => {
   });
 
   it('supports nested empty map', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId', 'a', {
@@ -697,7 +700,7 @@ describe('set document', () => {
   });
 
   it('skips merges with just field transform', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(
             request, set({
@@ -711,15 +714,15 @@ describe('set document', () => {
       return firestore.doc('collectionId/documentId')
           .set(
               {
-                a: Firestore.FieldValue.serverTimestamp(),
-                b: {c: Firestore.FieldValue.serverTimestamp()},
+                a: FieldValue.serverTimestamp(),
+                b: {c: FieldValue.serverTimestamp()},
               },
               {merge: true});
     });
   });
 
   it('sends empty non-merge write even with just field transform', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(
             request, set({
@@ -730,16 +733,16 @@ describe('set document', () => {
       }
     };
 
-    firestore = createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
-        a: Firestore.FieldValue.serverTimestamp(),
-        b: {c: Firestore.FieldValue.serverTimestamp()},
+        a: FieldValue.serverTimestamp(),
+        b: {c: FieldValue.serverTimestamp()},
       });
     });
   });
 
   it('supports document merges', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId', 'a', 'b', 'c', {
@@ -759,14 +762,12 @@ describe('set document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId')
-          .set(
-              {a: 'b', c: {d: 'e'}, f: Firestore.FieldValue.delete()},
-              {merge: true});
+          .set({a: 'b', c: {d: 'e'}, f: FieldValue.delete()}, {merge: true});
     });
   });
 
   it('supports document merges with field mask', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document(
@@ -801,16 +802,16 @@ describe('set document', () => {
                 a: 'foo',
                 b: {c: 'foo'},
                 d: {e: 'foo', ignore: 'foo'},
-                f: Firestore.FieldValue.delete(),
+                f: FieldValue.delete(),
                 ignore: 'foo',
                 ignoreMap: {a: 'foo'},
               },
-              {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']});
+              {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']});
     });
   });
 
   it('supports document merges with empty field mask', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId'),
@@ -828,7 +829,7 @@ describe('set document', () => {
   });
 
   it('supports document merges with field mask and empty maps', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document(
@@ -863,12 +864,12 @@ describe('set document', () => {
                 a: {b: {}},
                 c: {d: {}},
               },
-              {mergeFields: ['a', new Firestore.FieldPath('c', 'd')]});
+              {mergeFields: ['a', new FieldPath('c', 'd')]});
     });
   });
 
   it('supports document merges with field mask and field transform', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId'),
@@ -886,23 +887,23 @@ describe('set document', () => {
       return firestore.doc('collectionId/documentId')
           .set(
               {
-                a: Firestore.FieldValue.serverTimestamp(),
-                b: {c: Firestore.FieldValue.serverTimestamp()},
+                a: FieldValue.serverTimestamp(),
+                b: {c: FieldValue.serverTimestamp()},
                 d: {
-                  e: Firestore.FieldValue.serverTimestamp(),
-                  ignore: Firestore.FieldValue.serverTimestamp(),
+                  e: FieldValue.serverTimestamp(),
+                  ignore: FieldValue.serverTimestamp(),
                 },
-                f: Firestore.FieldValue.delete(),
-                ignore: Firestore.FieldValue.serverTimestamp(),
-                ignoreMap: {a: Firestore.FieldValue.serverTimestamp()},
+                f: FieldValue.delete(),
+                ignore: FieldValue.serverTimestamp(),
+                ignoreMap: {a: FieldValue.serverTimestamp()},
               },
-              {mergeFields: ['a', new Firestore.FieldPath('b'), 'd.e', 'f']});
+              {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']});
     });
   });
 
 
   it('supports empty merge', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId'),
@@ -918,7 +919,7 @@ describe('set document', () => {
   });
 
   it('supports nested empty merge', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId', 'a', {
@@ -938,7 +939,7 @@ describe('set document', () => {
   });
 
   it('doesn\'t split on dots', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, set({
                         document: document('documentId', 'a.b', 'c'),
@@ -954,32 +955,35 @@ describe('set document', () => {
 
   it('validates merge option', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set({foo: 'bar'}, 'foo');
+      firestore.doc('collectionId/documentId')
+          .set({foo: 'bar'}, 'foo' as InvalidApiUsage);
     })
         .to.throw(
-            'Value for "options" is not a valid SetOptions. Input is not an object.');
-
-    expect(() => {
-      firestore.doc('collectionId/documentId').set({foo: 'bar'}, {merge: 42});
-    })
-        .to.throw(
-            'Value for "options" is not a valid SetOptions. "merge" is not a boolean.');
+            'Value for argument "options" is not a valid set() options argument. Input is not an object.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
-        mergeFields: 42
+        merge: 42 as InvalidApiUsage
       });
     })
         .to.throw(
-            'Value for "options" is not a valid SetOptions. "mergeFields" is not an array.');
+            'Value for argument "options" is not a valid set() options argument. "merge" is not a boolean.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
-        mergeFields: [null]
+        mergeFields: 42 as InvalidApiUsage
       });
     })
         .to.throw(
-            'Value for "options" is not a valid SetOptions. Element at index 0 is not a valid FieldPath.');
+            'Value for argument "options" is not a valid set() options argument. "mergeFields" is not an array.');
+
+    expect(() => {
+      firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
+        mergeFields: [null as InvalidApiUsage]
+      });
+    })
+        .to.throw(
+            'Value for argument "options" is not a valid set() options argument. "mergeFields" is not valid: Element at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: 'bar'}, {
@@ -992,25 +996,23 @@ describe('set document', () => {
           .set({foo: 'bar'}, {merge: true, mergeFields: []});
     })
         .to.throw(
-            'Value for "options" is not a valid SetOptions. You cannot specify both "merge" and "mergeFields".');
+            'Value for argument "options" is not a valid set() options argument. You cannot specify both "merge" and "mergeFields".');
   });
 
   it('requires an object', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set(null);
+      firestore.doc('collectionId/documentId').set(null as InvalidApiUsage);
     })
         .to.throw(
-            'Value for "data" is not a valid Document. Input is not a plain JavaScript object.');
+            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 
   it('doesn\'t support non-merge deletes', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set({
-        foo: Firestore.FieldValue.delete()
-      });
+      firestore.doc('collectionId/documentId').set({foo: FieldValue.delete()});
     })
         .to.throw(
-            'Value for "data" is not a valid Document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field foo).');
+            'Value for argument "data" is not a valid Firestore document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field foo).');
   });
 
   it('doesn\'t accept arrays', () => {
@@ -1018,12 +1020,12 @@ describe('set document', () => {
       firestore.doc('collectionId/documentId').set([42]);
     })
         .to.throw(
-            'Value for "data" is not a valid Document. Input is not a plain JavaScript object.');
+            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 });
 
 describe('create document', () => {
-  let firestore;
+  let firestore: Firestore;
 
   beforeEach(() => {
     return createInstance().then(firestoreClient => {
@@ -1032,7 +1034,7 @@ describe('create document', () => {
   });
 
   it('creates document', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, create({document: document('documentId')}));
         callback(null, writeResult(1));
@@ -1045,7 +1047,7 @@ describe('create document', () => {
   });
 
   it('returns update time', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, create({document: document('documentId')}));
 
@@ -1068,15 +1070,14 @@ describe('create document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').create({}).then(res => {
-        expect(res.writeTime.isEqual(
-                   new Firestore.Timestamp(479978400, 123000000)))
+        expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000)))
             .to.be.true;
       });
     });
   });
 
   it('supports field transform', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(
             request, create({
@@ -1089,14 +1090,14 @@ describe('create document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').create({
-        field: Firestore.FieldValue.serverTimestamp(),
-        map: {field: Firestore.FieldValue.serverTimestamp()},
+        field: FieldValue.serverTimestamp(),
+        map: {field: FieldValue.serverTimestamp()},
       });
     });
   });
 
   it('supports nested empty map', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, create({
                         document: document('documentId', 'a', {
@@ -1120,10 +1121,10 @@ describe('create document', () => {
 
   it('requires an object', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').create(null);
+      firestore.doc('collectionId/documentId').create(null as InvalidApiUsage);
     })
         .to.throw(
-            'Value for "data" is not a valid Document. Input is not a plain JavaScript object.');
+            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 
   it('doesn\'t accept arrays', () => {
@@ -1131,12 +1132,12 @@ describe('create document', () => {
       firestore.doc('collectionId/documentId').create([42]);
     })
         .to.throw(
-            'Value for "data" is not a valid Document. Input is not a plain JavaScript object.');
+            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 });
 
 describe('update document', () => {
-  let firestore;
+  let firestore: Firestore;
 
   beforeEach(() => {
     return createInstance().then(firestoreClient => {
@@ -1145,7 +1146,7 @@ describe('update document', () => {
   });
 
   it('generates proto', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({
                         document: document('documentId', 'foo', 'bar'),
@@ -1161,7 +1162,7 @@ describe('update document', () => {
   });
 
   it('supports nested field transform', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(
             request, update({
@@ -1178,14 +1179,14 @@ describe('update document', () => {
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').update({
         foo: {},
-        a: {b: Firestore.FieldValue.serverTimestamp()},
-        'c.d': Firestore.FieldValue.serverTimestamp(),
+        a: {b: FieldValue.serverTimestamp()},
+        'c.d': FieldValue.serverTimestamp(),
       });
     });
   });
 
   it('skips write for single field transform', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({transforms: [serverTimestamp('a')]}));
         callback(null, writeResult(1));
@@ -1194,12 +1195,12 @@ describe('update document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId')
-          .update('a', Firestore.FieldValue.serverTimestamp());
+          .update('a', FieldValue.serverTimestamp());
     });
   });
 
   it('supports nested empty map', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({
                         document: document('documentId', 'a', {
@@ -1217,7 +1218,7 @@ describe('update document', () => {
   });
 
   it('supports nested delete', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(
             request,
@@ -1229,13 +1230,13 @@ describe('update document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').update({
-        'a.b': Firestore.FieldValue.delete()
+        'a.b': FieldValue.delete()
       });
     });
   });
 
   it('returns update time', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({
                         document: document('documentId', 'foo', 'bar'),
@@ -1262,15 +1263,14 @@ describe('update document', () => {
       return firestore.doc('collectionId/documentId')
           .update({foo: 'bar'})
           .then(res => {
-            expect(res.writeTime.isEqual(
-                       new Firestore.Timestamp(479978400, 123000000)))
+            expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000)))
                 .to.be.true;
           });
     });
   });
 
   it('with last update time precondition', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({
                         document: document('documentId', 'foo', 'bar'),
@@ -1289,10 +1289,10 @@ describe('update document', () => {
     return createInstance(overrides).then(firestore => {
       return Promise.all([
         firestore.doc('collectionId/documentId').update({foo: 'bar'}, {
-          lastUpdateTime: new Firestore.Timestamp(479978400, 123000000)
+          lastUpdateTime: new Timestamp(479978400, 123000000)
         }),
         firestore.doc('collectionId/documentId').update('foo', 'bar', {
-          lastUpdateTime: new Firestore.Timestamp(479978400, 123000000),
+          lastUpdateTime: new Timestamp(479978400, 123000000),
         }),
       ]);
     });
@@ -1312,37 +1312,39 @@ describe('update document', () => {
     }).to.throw('At least one field must be updated.');
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update();
-    }).to.throw('Function "update()" requires at least 1 argument.');
+      (firestore.doc('collectionId/documentId') as InvalidApiUsage).update();
+    })
+        .to.throw(
+            'Function "DocumentReference.update()" requires at least 1 argument.');
   });
 
   it('rejects nested deletes', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').update({
-        a: {b: Firestore.FieldValue.delete()}
+        a: {b: FieldValue.delete()}
       });
     })
         .to.throw(
-            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for "dataOrField" is not a valid Document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field a.b).');
+            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field a.b).');
 
     expect(() => {
       firestore.doc('collectionId/documentId').update('a', {
-        b: Firestore.FieldValue.delete()
+        b: FieldValue.delete()
       });
     })
         .to.throw(
-            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 1 is not a valid FieldValue. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field a.b).');
+            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 1 is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field a.b).');
 
     expect(() => {
       firestore.doc('collectionId/documentId')
-          .update(
-              'a',
-              Firestore.FieldValue.arrayUnion(Firestore.FieldValue.delete()));
-    }).to.throw('FieldValue.delete\(\) cannot be used inside of an array.');
+          .update('a', FieldValue.arrayUnion(FieldValue.delete()));
+    })
+        .to.throw(
+            'Element at index 0 is not a valid array element. FieldValue.delete() cannot be used inside of an array.');
   });
 
   it('with top-level document', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({
                         document: document('documentId', 'foo', 'bar'),
@@ -1360,7 +1362,7 @@ describe('update document', () => {
   });
 
   it('with nested document', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({
                         document: document(
@@ -1402,14 +1404,13 @@ describe('update document', () => {
         }),
         firestore.doc('collectionId/documentId')
             .update(
-                'foo.bar', 'foobar', new Firestore.FieldPath('a', 'b', 'c'),
-                'foobar'),
+                'foo.bar', 'foobar', new FieldPath('a', 'b', 'c'), 'foobar'),
       ]);
     });
   });
 
   it('with two nested fields ', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(
             request, update({
@@ -1453,7 +1454,7 @@ describe('update document', () => {
   });
 
   it('with nested field and document transform ', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({
                         document: document('documentId', 'a', {
@@ -1489,16 +1490,16 @@ describe('update document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').update({
-        'a.b.delete': Firestore.FieldValue.delete(),
+        'a.b.delete': FieldValue.delete(),
         'a.b.keep': 'keep',
-        'a.c.delete': Firestore.FieldValue.delete(),
+        'a.c.delete': FieldValue.delete(),
         'a.c.keep': 'keep',
       });
     });
   });
 
   it('with field with dot ', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({
                         document: document('documentId', 'a.b', 'c'),
@@ -1509,7 +1510,7 @@ describe('update document', () => {
     };
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId')
-          .update(new Firestore.FieldPath('a.b'), 'c');
+          .update(new FieldPath('a.b'), 'c');
     });
   });
 
@@ -1521,7 +1522,7 @@ describe('update document', () => {
       });
     })
         .to.throw(
-            'Value for "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times.');
+            'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').update({
@@ -1530,7 +1531,7 @@ describe('update document', () => {
       });
     })
         .to.throw(
-            'Value for "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times.');
+            'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').update({
@@ -1539,7 +1540,7 @@ describe('update document', () => {
       });
     })
         .to.throw(
-            'Value for "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times.');
+            'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').update({
@@ -1548,7 +1549,7 @@ describe('update document', () => {
       });
     })
         .to.throw(
-            'Value for "dataOrField" is not a valid UpdateMap. Field "foo.bar" was specified multiple times.');
+            'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.');
 
     expect(() => {
       firestore.doc('collectionId/documentId').update({
@@ -1557,28 +1558,28 @@ describe('update document', () => {
       });
     })
         .to.throw(
-            'Value for "dataOrField" is not a valid UpdateMap. Field "foo.bar" was specified multiple times.');
+            'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.');
 
     expect(() => {
       firestore.doc('collectionId/documentId')
           .update('foo.bar', 'foobar', 'foo', 'foobar');
     })
         .to.throw(
-            'Value for "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times.');
+            'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.');
 
     expect(() => {
       firestore.doc('collectionId/documentId')
           .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     })
         .to.throw(
-            'Value for "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times.');
+            'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.');
 
     expect(() => {
       firestore.doc('collectionId/documentId')
           .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     })
         .to.throw(
-            'Value for "dataOrField" is not a valid UpdateMap. Field "foo" was specified multiple times.');
+            'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.');
   });
 
   it('with valid field paths', () => {
@@ -1591,12 +1592,11 @@ describe('update document', () => {
 
   it('with empty field path', () => {
     expect(() => {
-      const doc = {};
-      doc[''] = 'foo';
+      const doc = {'': 'foo'};
       firestore.doc('col/doc').update(doc);
     })
         .to.throw(
-            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for \"dataOrField\" is not a valid Document. Element at index 0 should not be an empty string.');
+            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 0 should not be an empty string.');
   });
 
   it('with invalid field paths', () => {
@@ -1613,10 +1613,10 @@ describe('update document', () => {
 
     for (let i = 0; i < invalidFields.length; ++i) {
       expect(() => {
-        const doc = {};
+        const doc: {[k: string]: string} = {};
         doc[invalidFields[i]] = 'foo';
         firestore.doc('col/doc').update(doc);
-      }).to.throw(/Value for ".*" is not a valid FieldPath/);
+      }).to.throw(/Value for argument ".*" is not a valid field path/);
     }
   });
 
@@ -1634,19 +1634,21 @@ describe('update document', () => {
   });
 
   it('accepts an object', () => {
-    expect(() => firestore.doc('collectionId/documentId').update(null))
+    expect(
+        () => firestore.doc('collectionId/documentId')
+                  .update(null as InvalidApiUsage))
         .to.throw(
-            'Value for "dataOrField" is not a valid Document. Input is not a plain JavaScript object.');
+            'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 
   it('doesn\'t accept arrays', () => {
     expect(() => firestore.doc('collectionId/documentId').update([42]))
         .to.throw(
-            'Value for "dataOrField" is not a valid Document. Input is not a plain JavaScript object.');
+            'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 
   it('with field delete', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(request, update({
                         document: document('documentId', 'bar', 'foobar'),
@@ -1658,7 +1660,7 @@ describe('update document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').update({
-        foo: Firestore.FieldValue.delete(),
+        foo: FieldValue.delete(),
         bar: 'foobar',
       });
     });
@@ -1667,7 +1669,7 @@ describe('update document', () => {
 
 describe('listCollections() method', () => {
   it('sorts results', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       listCollectionIds: (request, options, callback) => {
         expect(request).to.deep.eq({
           parent:

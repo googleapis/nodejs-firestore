@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-import {expect} from 'chai';
 const duplexify = require('duplexify');
+
+import {expect} from 'chai';
+import {Transform} from 'stream';
 import * as through2 from 'through2';
 
-import * as proto from '../protos/firestore_proto_api';
-import * as Firestore from '../src';
-import {DocumentData, DocumentReference, QueryDocumentSnapshot, QuerySnapshot} from '../src';
+import {google} from '../protos/firestore_proto_api';
+
+import {CollectionReference, FieldPath, Firestore, GeoPoint, setLogFunction, Timestamp} from '../src';
+import {DocumentData, DocumentReference, DocumentSnapshot, Query, QueryDocumentSnapshot, QuerySnapshot} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
-import {AnyDuringMigration, GrpcError} from '../src/types';
+import {GrpcError} from '../src/types';
+import {createInstance, InvalidApiUsage} from './util/helpers';
 
-import {createInstance} from './util/helpers';
-
-import api = proto.google.firestore.v1beta1;
+import api = google.firestore.v1;
 
 // Change the argument to 'console.log' to enable debug output.
-Firestore.setLogFunction(() => {});
+setLogFunction(() => {});
 
 
 let PROJECT_ID = process.env.PROJECT_ID;
@@ -50,8 +52,8 @@ function docsEqual(
   for (let i = 0; i < actual.length; i++) {
     expect(actual[i].ref.id).to.equal(expected[i].ref.id);
     expect(actual[i].data()).to.deep.eq(expected[i].data());
-    expect(expected[i].createTime).to.be.an.instanceOf(Firestore.Timestamp);
-    expect(expected[i].updateTime).to.be.an.instanceOf(Firestore.Timestamp);
+    expect(expected[i].createTime).to.be.an.instanceOf(Timestamp);
+    expect(expected[i].updateTime).to.be.an.instanceOf(Timestamp);
   }
 }
 
@@ -73,11 +75,15 @@ type TestSnapshot = {
  * @param expected Array of DocumentSnapshot.
  */
 function snapshotsEqual(
-    lastSnapshot: TestSnapshot, version: number, actual: QuerySnapshot,
+    lastSnapshot: TestSnapshot, version: number,
+    actual: Error|QuerySnapshot|undefined,
     expected: TestSnapshot): TestSnapshot {
   const localDocs = ([] as QueryDocumentSnapshot[]).concat(lastSnapshot.docs);
 
-  const actualDocChanges = actual.docChanges();
+  expect(actual).to.be.an.instanceof(QuerySnapshot);
+
+  const actualSnapshot = actual as QuerySnapshot;
+  const actualDocChanges = actualSnapshot.docChanges();
 
   expect(actualDocChanges.length).to.equal(expected.docChanges.length);
   for (let i = 0; i < expected.docChanges.length; i++) {
@@ -88,8 +94,8 @@ function snapshotsEqual(
         .to.deep.eq(expected.docChanges[i].doc.data());
     const readVersion =
         actualDocChanges[i].type === 'removed' ? version - 1 : version;
-    expect(actualDocChanges[i].doc.readTime.isEqual(
-               new Firestore.Timestamp(0, readVersion)))
+    expect(
+        actualDocChanges[i].doc.readTime.isEqual(new Timestamp(0, readVersion)))
         .to.be.true;
 
     if (actualDocChanges[i].oldIndex !== -1) {
@@ -102,13 +108,12 @@ function snapshotsEqual(
     }
   }
 
-  docsEqual(actual.docs, expected.docs);
+  docsEqual(actualSnapshot.docs, expected.docs);
   docsEqual(localDocs, expected.docs);
-  expect(actual.readTime.isEqual(new Firestore.Timestamp(0, version)))
-      .to.be.true;
-  expect(actual.size).to.equal(expected.docs.length);
+  expect(actualSnapshot.readTime.isEqual(new Timestamp(0, version))).to.be.true;
+  expect(actualSnapshot.size).to.equal(expected.docs.length);
 
-  return {docs: actual.docs, docChanges: actualDocChanges};
+  return {docs: actualSnapshot.docs, docChanges: actualDocChanges};
 }
 
 /*
@@ -118,10 +123,10 @@ function snapshot(
     ref: DocumentReference, data: DocumentData): QueryDocumentSnapshot {
   const snapshot = new DocumentSnapshotBuilder();
   snapshot.ref = ref;
-  snapshot.fieldsProto = ref.firestore._serializer.encodeFields(data);
-  snapshot.readTime = new Firestore.Timestamp(0, 0);
-  snapshot.createTime = new Firestore.Timestamp(0, 0);
-  snapshot.updateTime = new Firestore.Timestamp(0, 0);
+  snapshot.fieldsProto = ref.firestore._serializer!.encodeFields(data);
+  snapshot.readTime = new Timestamp(0, 0);
+  snapshot.createTime = new Timestamp(0, 0);
+  snapshot.updateTime = new Timestamp(0, 0);
   return snapshot.build() as QueryDocumentSnapshot;
 }
 
@@ -134,9 +139,12 @@ function docChange(
   return {type, doc: snapshot(ref, data)};
 }
 
-const added = (ref, data) => docChange('added', ref, data);
-const modified = (ref, data) => docChange('modified', ref, data);
-const removed = (ref, data) => docChange('removed', ref, data);
+const added = (ref: DocumentReference, data: DocumentData) =>
+    docChange('added', ref, data);
+const modified = (ref: DocumentReference, data: DocumentData) =>
+    docChange('modified', ref, data);
+const removed = (ref: DocumentReference, data: DocumentData) =>
+    docChange('removed', ref, data);
 
 const EMPTY = {
   docs: [],
@@ -153,7 +161,7 @@ class DeferredListener<T> {
    * Makes stream data available via the Promises set in the 'await' call. If no
    * Promise has been set, the data will be cached.
    */
-  on(type: string, data?: T): void {
+  on(type: string, data?: T|Error): void {
     const listener = this.pendingListeners.shift();
 
     if (listener) {
@@ -200,15 +208,16 @@ class DeferredListener<T> {
  * sequential invocations of the Listen API.
  */
 class StreamHelper {
-  private streamCount = 0;
   private readonly deferredListener =
       new DeferredListener<api.IListenResponse>();
-  private readStream: NodeJS.ReadableStream|null = null;
-  private writeStream: NodeJS.WritableStream|null = null;
   private backendStream: NodeJS.ReadWriteStream|null = null;
 
+  streamCount = 0;  // The number of streams that the client has requested
+  readStream: Transform|null = null;
+  writeStream: Transform|null = null;
+
   /** Returns the GAPIC callback to use with this stream helper. */
-  getListenCallback() {
+  getListenCallback(): () => NodeJS.ReadWriteStream {
     return () => {
       // Create a mock backend whose stream we can return.
       ++this.streamCount;
@@ -226,7 +235,7 @@ class StreamHelper {
       this.deferredListener.on('open', {});
 
       this.backendStream = duplexify.obj(this.readStream, this.writeStream);
-      return this.backendStream;
+      return this.backendStream!;
     };
   }
 
@@ -257,8 +266,11 @@ class StreamHelper {
   /**
    * Sends a message to the currently active stream.
    */
-  write(data): void {
-    this.writeStream!.write(data);
+  write(data: string|object): void {
+    // The stream returned by the Gapic library accepts Protobuf
+    // messages, but the type information does not expose this.
+    // tslint:disable-next-line no-any
+    this.writeStream!.write(data as any);
   }
 
   /**
@@ -272,24 +284,25 @@ class StreamHelper {
    * Destroys the currently active stream with the optionally provided error.
    * If omitted, the stream is closed with a GRPC Status of UNAVAILABLE.
    */
-  destroyStream(err): void {
+  destroyStream(err?: GrpcError): void {
     if (!err) {
-      err = new Error('Server disconnect');
+      err = new GrpcError('Server disconnect');
       err.code = 14;  // Unavailable
     }
-    (this.readStream as AnyDuringMigration).destroy(err);
+    this.readStream!.destroy(err);
   }
 }
 
 /**
  * Encapsulates the stream logic for the Watch API.
  */
-class WatchHelper<T> {
-  private readonly serializer: Serializer;
+class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
   private readonly streamHelper: StreamHelper;
-  private snapshotVersion = 0;
   private readonly deferredListener = new DeferredListener<T>();
   private unsubscribe: (() => void)|null = null;
+
+  snapshotVersion = 0;
+  serializer: Serializer;
 
   /**
    * @param streamHelper The StreamHelper base class for this Watch operation.
@@ -297,7 +310,9 @@ class WatchHelper<T> {
    * watched.
    * @param targetId The target ID of the watch stream.
    */
-  constructor(streamHelper, private reference, private targetId) {
+  constructor(
+      streamHelper: StreamHelper, private reference: DocumentReference|Query,
+      private targetId: number) {
     this.serializer = new Serializer(reference.firestore);
     this.streamHelper = streamHelper;
     this.snapshotVersion = 0;
@@ -307,6 +322,8 @@ class WatchHelper<T> {
   /**
    * Returns a Promise with the next result from the underlying stream.
    */
+  await(type: 'snapshot'): Promise<T>;
+  await(type: 'error'): Promise<Error>;
   await(type: string): Promise<T|Error|undefined> {
     return this.deferredListener.await(type);
   }
@@ -319,10 +336,10 @@ class WatchHelper<T> {
    */
   startWatch(): () => void {
     this.unsubscribe = this.reference.onSnapshot(
-        snapshot => {
-          this.deferredListener.on('snapshot', snapshot);
+        (snapshot: unknown) => {
+          this.deferredListener.on('snapshot', snapshot as T);
         },
-        error => {
+        (error: Error) => {
           this.deferredListener.on('error', error);
         });
     return this.unsubscribe!;
@@ -378,7 +395,7 @@ class WatchHelper<T> {
    * Sends a target change from the backend of type 'NO_CHANGE'. If specified,
    * includes a resume token.
    */
-  sendSnapshot(version: number, resumeToken: Uint8Array): void {
+  sendSnapshot(version: number, resumeToken?: Uint8Array): void {
     this.snapshotVersion = version;
 
     const proto: api.IListenResponse = {
@@ -399,7 +416,7 @@ class WatchHelper<T> {
   /**
    * Sends a target change from the backend of type 'CURRENT'.
    */
-  sendCurrent(resumeToken: Uint8Array): void {
+  sendCurrent(resumeToken?: Uint8Array): void {
     const proto: api.IListenResponse = {
       targetChange: {
         targetChangeType: 'CURRENT',
@@ -469,7 +486,7 @@ class WatchHelper<T> {
   /**
    * A wrapper for writing tests that successfully run a watch.
    */
-  runTest(expectedRequest: api.IListenRequest, func: () => Promise<void>):
+  runTest(expectedRequest: api.IListenRequest, func: () => Promise<unknown>):
       Promise<void> {
     this.startWatch();
 
@@ -485,8 +502,8 @@ class WatchHelper<T> {
    * A wrapper for writing tests that fail to run a watch.
    */
   runFailedTest(
-      expectedRequest: api.IListenRequest, func: () => Promise<void>,
-      expectedError: Error): Promise<void> {
+      expectedRequest: api.IListenRequest, func: () => void|Promise<unknown>,
+      expectedError: string): Promise<void> {
     this.startWatch();
 
     return this.streamHelper.awaitOpen()
@@ -508,17 +525,21 @@ class WatchHelper<T> {
 
 describe('Query watch', () => {
   // The collection to query.
-  let colRef;
+  let colRef: CollectionReference;
 
   // The documents used in this query.
-  let doc1, doc2, doc3, doc4;
+  let doc1: DocumentReference;
+  let doc2: DocumentReference;
+  let doc3: DocumentReference;
+  let doc4: DocumentReference;
 
-  let firestore;
-  let targetId;
-  let watchHelper;
-  let streamHelper;
+  let firestore: Firestore;
+  let targetId: number;
+  let watchHelper: WatchHelper<QuerySnapshot>;
+  let streamHelper: StreamHelper;
 
-  let lastSnapshot;
+  let lastSnapshot:
+      {docs: QueryDocumentSnapshot[], docChanges: DocumentChange[]} = EMPTY;
 
   // The proto JSON that should be sent for the query.
   const collQueryJSON = () => {
@@ -526,7 +547,7 @@ describe('Query watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
           },
@@ -541,12 +562,12 @@ describe('Query watch', () => {
   };
 
   // The proto JSON that should be sent for the query.
-  const includeQueryJSON = () => {
+  const includeQueryJSON: () => api.IListenRequest = () => {
     return {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
             where: {
@@ -568,33 +589,34 @@ describe('Query watch', () => {
   };
 
   // The proto JSON that should be sent for a resumed query.
-  const resumeTokenQuery = resumeToken => {
-    return {
-      database: `projects/${PROJECT_ID}/databases/(default)`,
-      addTarget: {
-        query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
-          structuredQuery: {
-            from: [{collectionId: 'col'}],
+  const resumeTokenQuery: (resumeToken: Buffer) => api.IListenRequest =
+      (resumeToken: Buffer) => {
+        return {
+          database: `projects/${PROJECT_ID}/databases/(default)`,
+          addTarget: {
+            query: {
+              parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
+              structuredQuery: {
+                from: [{collectionId: 'col'}],
+              },
+            },
+            targetId,
+            resumeToken,
           },
-        },
-        targetId,
-        resumeToken,
-      },
-    };
-  };
+        };
+      };
 
   const sortedQuery = () => {
     return colRef.orderBy('foo', 'desc');
   };
 
   // The proto JSON that should be sent for the query.
-  const sortedQueryJSON = () => {
+  const sortedQueryJSON: () => api.IListenRequest = () => {
     return {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         query: {
-          parent: `projects/${PROJECT_ID}/databases/(default)`,
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           structuredQuery: {
             from: [{collectionId: 'col'}],
             orderBy: [{direction: 'DESCENDING', field: {fieldPath: 'foo'}}],
@@ -606,7 +628,7 @@ describe('Query watch', () => {
   };
 
   /** The GAPIC callback that executes the listen. */
-  let listenCallback;
+  let listenCallback: () => NodeJS.ReadWriteStream;
 
   beforeEach(() => {
     // We are intentionally skipping the delays to ensure fast test execution.
@@ -642,11 +664,11 @@ describe('Query watch', () => {
   });
 
   it('with invalid callbacks', () => {
-    expect(() => colRef.onSnapshot('foo'))
-        .to.throw('Value for "onNext" is not a valid function.');
+    expect(() => colRef.onSnapshot('foo' as InvalidApiUsage))
+        .to.throw('Value for argument "onNext" is not a valid function.');
 
-    expect(() => colRef.onSnapshot(() => {}, 'foo'))
-        .to.throw('Value for "onError" is not a valid function.');
+    expect(() => colRef.onSnapshot(() => {}, 'foo' as InvalidApiUsage))
+        .to.throw('Value for argument "onError" is not a valid function.');
   });
 
   it('without error callback', (done) => {
@@ -707,7 +729,7 @@ describe('Query watch', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
-      watchHelper.sendSnapshot(1, [0xabcd]);
+      watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
       return watchHelper.await('snapshot')
           .then(() => {
             streamHelper.close();
@@ -742,7 +764,7 @@ describe('Query watch', () => {
           expect(request).to.deep.eq(collQueryJSON());
           watchHelper.sendAddTarget();
           watchHelper.sendCurrent();
-          watchHelper.sendSnapshot(1, [0xabcd]);
+          watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
           return watchHelper.await('snapshot');
         })
         .then(() => {
@@ -756,7 +778,7 @@ describe('Query watch', () => {
   });
 
   it('retries based on error code', () => {
-    const expectRetry = {
+    const expectRetry: {[k: number]: boolean} = {
       /* Cancelled */ 1: true,
       /* Unknown */ 2: true,
       /* InvalidArgument */ 3: false,
@@ -787,7 +809,7 @@ describe('Query watch', () => {
             return watchHelper.runTest(collQueryJSON(), () => {
               watchHelper.sendAddTarget();
               watchHelper.sendCurrent();
-              watchHelper.sendSnapshot(1, [0xabcd]);
+              watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
               return watchHelper.await('snapshot').then(() => {
                 streamHelper.destroyStream(err);
                 return streamHelper.awaitReopen();
@@ -797,7 +819,7 @@ describe('Query watch', () => {
             return watchHelper.runFailedTest(collQueryJSON(), () => {
               watchHelper.sendAddTarget();
               watchHelper.sendCurrent();
-              watchHelper.sendSnapshot(1, [0xabcd]);
+              watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
               return watchHelper.await('snapshot')
                   .then(() => {
                     streamHelper.destroyStream(err);
@@ -821,7 +843,7 @@ describe('Query watch', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
-      watchHelper.sendSnapshot(1, [0xabcd]);
+      watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
       return watchHelper.await('snapshot').then(() => {
         streamHelper.destroyStream(new Error('Unknown'));
         return streamHelper.awaitReopen();
@@ -876,7 +898,7 @@ describe('Query watch', () => {
   });
 
   it('reconnects after error', () => {
-    let resumeToken = [0xabcd];
+    let resumeToken = Buffer.from([0xabcd]);
 
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
@@ -906,7 +928,7 @@ describe('Query watch', () => {
             watchHelper.sendAddTarget();
             watchHelper.sendDoc(doc2, {foo: 'b'});
 
-            resumeToken = [0xbcde];
+            resumeToken = Buffer.from([0xbcde]);
             watchHelper.sendSnapshot(3, resumeToken);
             return watchHelper.await('snapshot');
           })
@@ -943,7 +965,7 @@ describe('Query watch', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
       watchHelper.sendAddTarget();
-      watchHelper.sendCurrent([0x0]);
+      watchHelper.sendCurrent(Buffer.from([0x0]));
       watchHelper.sendSnapshot(1);
       return watchHelper.await('snapshot')
           .then(results => {
@@ -952,7 +974,7 @@ describe('Query watch', () => {
             // Add a result.
             watchHelper.sendDoc(doc1, {foo: 'a'});
             watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendSnapshot(2, [0x1]);
+            watchHelper.sendSnapshot(2, Buffer.from([0x1]));
             return watchHelper.await('snapshot');
           })
           .then(results => {
@@ -968,7 +990,7 @@ describe('Query watch', () => {
           })
           .then(() => {
             watchHelper.sendDocDelete(doc2);
-            watchHelper.sendSnapshot(3, [0x2]);
+            watchHelper.sendSnapshot(3, Buffer.from([0x2]));
             return watchHelper.await('snapshot');
           })
           .then(results => {
@@ -986,7 +1008,7 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
 
       watchHelper.sendCurrent();
-      let resumeToken = [0x1];
+      let resumeToken = Buffer.from([0x1]);
       watchHelper.sendSnapshot(1, resumeToken);
       return watchHelper.await('snapshot')
           .then(results => {
@@ -1002,11 +1024,11 @@ describe('Query watch', () => {
                 targetChangeType: 'NO_CHANGE',
                 targetIds: [0xfeed],
                 readTime: {seconds: 0, nanos: 0},
-                resumeToken: [0x2],
+                resumeToken: Buffer.from([0x2]),
               },
             });
 
-            resumeToken = [0x3];
+            resumeToken = Buffer.from([0x3]);
             // Send snapshot with matching target id but no resume token.
             // The old token continues to be used.
             streamHelper.write({
@@ -1043,7 +1065,7 @@ describe('Query watch', () => {
               // Mock the server responding to the query.
               watchHelper.sendAddTarget();
               watchHelper.sendCurrent();
-              const resumeToken = [0xabcd];
+              const resumeToken = Buffer.from([0xabcd]);
               watchHelper.sendSnapshot(1, resumeToken);
               return watchHelper.await('snapshot')
                   .then(results => {
@@ -1066,7 +1088,7 @@ describe('Query watch', () => {
                     return streamHelper.await('close');
                   })
                   .then(() => {
-                    streamHelper.writeStream.destroy();
+                    streamHelper.writeStream!.destroy();
                   });
             },
             'Stream Error (6)')
@@ -1171,8 +1193,8 @@ describe('Query watch', () => {
     const expectedJson = sortedQueryJSON();
 
     // Add FieldPath.documentId() sorting
-    query = query.orderBy(Firestore.FieldPath.documentId(), 'desc');
-    expectedJson.addTarget.query.structuredQuery.orderBy.push({
+    query = query.orderBy(FieldPath.documentId(), 'desc');
+    expectedJson.addTarget!.query!.structuredQuery!.orderBy!.push({
       direction: 'DESCENDING',
       field: {fieldPath: '__name__'},
     });
@@ -1375,7 +1397,7 @@ describe('Query watch', () => {
             });
 
             // Delete a result.
-            watchHelper.sendDocRemove(doc2);
+            watchHelper.sendDocRemove(doc2, {foo: 'c'});
             watchHelper.sendSnapshot(4);
             return watchHelper.await('snapshot');
           })
@@ -1565,7 +1587,7 @@ describe('Query watch', () => {
   });
 
   it('handles filter mismatch', () => {
-    let oldRequestStream;
+    let oldRequestStream: NodeJS.WritableStream;
 
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
@@ -1589,7 +1611,7 @@ describe('Query watch', () => {
 
             // Send a filter that doesn't match. Make sure the stream gets
             // reopened.
-            oldRequestStream = streamHelper.writeStream;
+            oldRequestStream = streamHelper.writeStream!;
             streamHelper.write({filter: {count: 0}});
             return streamHelper.await('end');
           })
@@ -1797,32 +1819,36 @@ describe('Query watch', () => {
   });
 
   describe('supports isEqual', () => {
-    let snapshotVersion;
+    let snapshotVersion: number;
 
     beforeEach(() => {
       snapshotVersion = 0;
     });
 
-    function initialSnapshot(watchTest) {
+    function initialSnapshot(
+        watchTest: (initialSnapshot: QuerySnapshot) => Promise<void>| void) {
       return watchHelper.runTest(collQueryJSON(), () => {
         watchHelper.sendAddTarget();
         watchHelper.sendCurrent();
         watchHelper.sendSnapshot(++snapshotVersion);
         return watchHelper.await('snapshot')
-            .then(snapshot => watchTest(snapshot));
+            .then(snapshot => watchTest(snapshot as QuerySnapshot));
       });
     }
 
-    function nextSnapshot(baseSnapshot, watchStep) {
+    function nextSnapshot(
+        baseSnapshot: QuerySnapshot,
+        watchStep: (currentSnapshot: QuerySnapshot) =>
+            Promise<void>| void): Promise<QuerySnapshot> {
       watchStep(baseSnapshot);
       watchHelper.sendSnapshot(++snapshotVersion);
-      return watchHelper.await('snapshot');
+      return watchHelper.await('snapshot') as Promise<QuerySnapshot>;
     }
 
     it('for equal snapshots', () => {
-      let firstSnapshot;
-      let secondSnapshot;
-      let thirdSnapshot;
+      let firstSnapshot: QuerySnapshot;
+      let secondSnapshot: QuerySnapshot;
+      let thirdSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
                return nextSnapshot(
@@ -1878,7 +1904,7 @@ describe('Query watch', () => {
     });
 
     it('for equal snapshots with materialized changes', () => {
-      let firstSnapshot;
+      let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
                return nextSnapshot(snapshot, () => {
@@ -1903,7 +1929,7 @@ describe('Query watch', () => {
     });
 
     it('for snapshots of different size', () => {
-      let firstSnapshot;
+      let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
                return nextSnapshot(snapshot, () => {
@@ -1923,7 +1949,7 @@ describe('Query watch', () => {
     });
 
     it('for snapshots with different kind of changes', () => {
-      let firstSnapshot;
+      let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
                return nextSnapshot(snapshot, () => {
@@ -1948,7 +1974,7 @@ describe('Query watch', () => {
     });
 
     it('for snapshots with different number of changes', () => {
-      let firstSnapshot;
+      let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
                return nextSnapshot(
@@ -1987,7 +2013,7 @@ describe('Query watch', () => {
     });
 
     it('for snapshots with different data types', () => {
-      let originalSnapshot;
+      let originalSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
                return nextSnapshot(snapshot, () => {
@@ -2006,7 +2032,7 @@ describe('Query watch', () => {
     });
 
     it('for snapshots with different queries', () => {
-      let firstSnapshot;
+      let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
                firstSnapshot = snapshot;
@@ -2019,7 +2045,7 @@ describe('Query watch', () => {
               watchHelper.sendCurrent();
               watchHelper.sendSnapshot(1);
               return watchHelper.await('snapshot').then(snapshot => {
-                expect(snapshot.isEqual(firstSnapshot)).to.be.false;
+                expect((snapshot).isEqual(firstSnapshot)).to.be.false;
               });
             });
           });
@@ -2027,9 +2053,10 @@ describe('Query watch', () => {
 
     it('for objects with different type', () => {
       return initialSnapshot(snapshot => {
-        expect(snapshot.isEqual('foo')).to.be.false;
-        expect(snapshot.isEqual({})).to.be.false;
-        expect(snapshot.isEqual(new Firestore.GeoPoint(0, 0))).to.be.false;
+        expect(snapshot.isEqual('foo' as InvalidApiUsage)).to.be.false;
+        expect(snapshot.isEqual({} as InvalidApiUsage)).to.be.false;
+        expect(snapshot.isEqual(new GeoPoint(0, 0) as InvalidApiUsage))
+            .to.be.false;
       });
     });
   });
@@ -2076,12 +2103,12 @@ describe('Query watch', () => {
 
 describe('DocumentReference watch', () => {
   // The document to query.
-  let doc;
+  let doc: DocumentReference;
 
-  let firestore;
-  let targetId;
-  let watchHelper;
-  let streamHelper;
+  let firestore: Firestore;
+  let targetId: number;
+  let watchHelper: WatchHelper<DocumentSnapshot>;
+  let streamHelper: StreamHelper;
 
   // The proto JSON that should be sent for the watch.
   const watchJSON = () => {
@@ -2097,7 +2124,7 @@ describe('DocumentReference watch', () => {
   };
 
   // The proto JSON that should be sent for a resumed query.
-  const resumeTokenJSON = resumeToken => {
+  const resumeTokenJSON = (resumeToken: Uint8Array) => {
     return {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
@@ -2132,11 +2159,11 @@ describe('DocumentReference watch', () => {
   });
 
   it('with invalid callbacks', () => {
-    expect(() => doc.onSnapshot('foo'))
-        .to.throw('Value for "onNext" is not a valid function.');
+    expect(() => doc.onSnapshot('foo' as InvalidApiUsage))
+        .to.throw('Value for argument "onNext" is not a valid function.');
 
-    expect(() => doc.onSnapshot(() => {}, 'foo'))
-        .to.throw('Value for "onError" is not a valid function.');
+    expect(() => doc.onSnapshot(() => {}, 'foo' as InvalidApiUsage))
+        .to.throw('Value for argument "onError" is not a valid function.');
   });
 
   it('without error callback', done => {
@@ -2204,9 +2231,9 @@ describe('DocumentReference watch', () => {
           })
           .then(snapshot => {
             expect(snapshot.exists).to.be.true;
-            expect(snapshot.createTime.isEqual(new Firestore.Timestamp(1, 2)))
+            expect(snapshot.createTime!.isEqual(new Timestamp(1, 2)))
                 .to.be.true;
-            expect(snapshot.updateTime.isEqual(new Firestore.Timestamp(3, 1)))
+            expect(snapshot.updateTime!.isEqual(new Timestamp(3, 1)))
                 .to.be.true;
             expect(snapshot.get('foo')).to.equal('a');
 
@@ -2254,7 +2281,7 @@ describe('DocumentReference watch', () => {
   });
 
   it('reconnects after error', () => {
-    const resumeToken = [0xabcd];
+    const resumeToken = Buffer.from([0xabcd]);
 
     return watchHelper.runTest(watchJSON(), () => {
       // Mock the server responding to the watch.
@@ -2385,7 +2412,7 @@ describe('DocumentReference watch', () => {
             expect(snapshot.exists).to.be.true;
 
             // Remove the document.
-            watchHelper.sendDocRemove(doc);
+            watchHelper.sendDocRemove(doc, {foo: 'c'});
             watchHelper.sendSnapshot(3);
             return watchHelper.await('snapshot');
           })
@@ -2433,9 +2460,12 @@ describe('DocumentReference watch', () => {
 });
 
 describe('Query comparator', () => {
-  let firestore;
-  let colRef;
-  let doc1, doc2, doc3, doc4;
+  let firestore: Firestore;
+  let colRef: Query;
+  let doc1: DocumentReference;
+  let doc2: DocumentReference;
+  let doc3: DocumentReference;
+  let doc4: DocumentReference;
 
   beforeEach(() => {
     return createInstance().then(firestoreClient => {
@@ -2450,7 +2480,9 @@ describe('Query comparator', () => {
     });
   });
 
-  function testSort(query, input, expected) {
+  function testSort(
+      query: Query, input: QueryDocumentSnapshot[],
+      expected: QueryDocumentSnapshot[]) {
     const comparator = query.comparator();
     input.sort(comparator);
     docsEqual(input, expected);

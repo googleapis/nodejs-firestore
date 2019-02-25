@@ -35,7 +35,6 @@ import Precondition = FirebaseFirestore.Precondition;
 import SetOptions = FirebaseFirestore.SetOptions;
 import Timestamp = FirebaseFirestore.Timestamp;
 import Settings = FirebaseFirestore.Settings;
-import {AnyDuringMigration} from '../src/types';
 
 // This test verifies the Typescript typings and is not meant for execution.
 xdescribe('firestore.d.ts', () => {
