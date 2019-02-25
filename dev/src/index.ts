@@ -457,62 +457,32 @@ export class Firestore {
   }
 
   /**
-   * Creates a [DocumentSnapshot]{@link DocumentSnapshot} for a missing
-   * document.
+   * Creates a [DocumentSnapshot]{@link DocumentSnapshot} or a
+   * [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} from a
+   * `firestore.v1.Document` proto (or from a resource name for missing
+   * documents).
+   *
+   * This API is used by Google Cloud Functions and can be called with both
+   * 'Proto3 JSON' and 'Protobuf JS' encoded data.
    *
    * @private
-   * @param documentName The absolute resource name of the missing document.
+   * @param documentOrName The Firestore 'Document' proto or the resource name
+   * of a missing document.
    * @param readTime A 'Timestamp' proto indicating the time this document was
    * read.
-   * @param encoding If set, 'protobufJS' to indicate the format of `readTime`.
-   * @returns The DocumentSnapshot for the missing document.
+   * @param encoding One of 'json' or 'protobufJS'. Applies to both the
+   * 'document' Proto and 'readTime'. Defaults to 'protobufJS'.
+   * @returns A QueryDocumentSnapshot for existing documents, otherwise a
+   * DocumentSnapshot.
    */
   snapshot_(
       documentName: string, readTime?: google.protobuf.ITimestamp,
       encoding?: 'protobufJS'): DocumentSnapshot;
-  /**
-   * Creates a [DocumentSnapshot]{@link DocumentSnapshot} for a missing
-   * document.
-   *
-   * This API is used by Google Cloud Functions.
-   *
-   * @private
-   * @param documentName The absolute resource name of the missing document.
-   * @param readTime An ISO-8601 formatted string indicating the time this
-   * document was read.
-   * @param encoding 'json' to indicate the format of `readTime`.
-   * @returns The DocumentSnapshot for the missing document.
-   */
   snapshot_(documentName: string, readTime: string, encoding: 'json'):
       DocumentSnapshot;
-  /**
-   * Creates a [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} from a
-   * `firestore.v1.Document` proto.
-   *
-   * @private
-   * @param document The Firestore 'Document' proto in Protobuf JS format.
-   * @param readTime A 'Timestamp' proto indicating the time this document was
-   * read.
-   * @param encoding  If set, 'protobufJS' to indicate the format of `document`
-   * and `readTime`.
-   * @returns The QueryDocumentSnapshot with the document's data.
-   */
   snapshot_(
       document: api.IDocument, readTime: google.protobuf.ITimestamp,
       encoding?: 'protobufJS'): QueryDocumentSnapshot;
-  /**
-   * Creates a [QueryDocumentSnapshot]{@link QueryDocumentSnapshot} from a
-   * `firestore.v1.Document` proto.
-   *
-   * This API is used by Google Cloud Functions.
-   *
-   * @private
-   * @param document The Firestore 'Document' proto in JSON format.
-   * @param readTime An ISO-8601 formatted string indicating the time this
-   * document was read.
-   * @param encoding 'json' to indicate the format of `document` and `readTime`.
-   * @returns The QueryDocumentSnapshot with the document's data.
-   */
   snapshot_(
       document: {[k: string]: unknown}, readTime: string,
       encoding: 'json'): QueryDocumentSnapshot;
