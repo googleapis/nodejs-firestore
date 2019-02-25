@@ -32,7 +32,7 @@ let logFunction = (msg: string) => {};
  */
 export function logger(
     methodName: string, requestTag: string|null, logMessage: string,
-    ...additionalArgs: Array<unknown>): void {
+    ...additionalArgs: unknown[]): void {
   requestTag = requestTag || '#####';
 
   const formattedMessage = util.format(logMessage, ...additionalArgs);

@@ -109,13 +109,13 @@ const convertInput = {
 
       return value;
     }
-    function convertArray(arr: Array<unknown>): Array<unknown>|FieldValue {
+    function convertArray(arr: unknown[]): unknown[]|FieldValue {
       if (arr.length > 0 && arr[0] === 'ArrayUnion') {
         return FieldValue.arrayUnion(
-            ...(convertArray(arr.slice(1)) as Array<unknown>));
+            ...(convertArray(arr.slice(1)) as unknown[]));
       } else if (arr.length > 0 && arr[0] === 'ArrayRemove') {
         return FieldValue.arrayRemove(
-            ...(convertArray(arr.slice(1)) as Array<unknown>));
+            ...(convertArray(arr.slice(1)) as unknown[]));
       } else {
         for (let i = 0; i < arr.length; ++i) {
           arr[i] = convertValue(arr[i]);
@@ -159,7 +159,7 @@ const convertInput = {
     return convertedPaths;
   },
   cursor: (cursor: ConformanceProto) => {
-    const args: Array<unknown> = [];
+    const args: unknown[] = [];
     if (cursor.docSnapshot) {
       args.push(DocumentSnapshot.fromObject(
           docRef(cursor.docSnapshot.path),
@@ -281,7 +281,7 @@ function runTest(spec: ConformanceProto) {
   const updateTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      const varargs: Array<unknown> = [];
+      const varargs: unknown[] = [];
 
       if (spec.jsonData) {
         varargs[0] = convertInput.argument(spec.jsonData);
