@@ -38,11 +38,11 @@ describe('ExponentialBackoff', () => {
     setTimeoutHandler(setTimeout);
   });
 
-  function assertDelayEquals(expected) {
+  function assertDelayEquals(expected: number) {
     expect(observedDelays.shift()).to.equal(expected);
   }
 
-  function assertDelayBetween(low, high) {
+  function assertDelayBetween(low: number, high: number) {
     const actual = observedDelays.shift()!;
     expect(actual).to.be.at.least(low);
     expect(actual).to.be.at.most(high);

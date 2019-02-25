@@ -190,7 +190,7 @@ export class DocumentReference {
    * }):
    */
   get parent(): CollectionReference {
-    return new CollectionReference(this._firestore, this._path.parent());
+    return new CollectionReference(this._firestore, this._path.parent()!);
   }
 
   /**
@@ -1495,7 +1495,7 @@ export class Query {
     const docs: QueryDocumentSnapshot[] = [];
 
     return new Promise((resolve, reject) => {
-      let readTime;
+      let readTime: Timestamp;
 
       self._stream(transactionId)
           .on('error',
@@ -1749,10 +1749,10 @@ export class CollectionReference extends Query {
    * @private
    * @hideconstructor
    *
-   * @param {Firestore} firestore The Firestore Database client.
-   * @param {ResourcePath} path The Path of this collection.
+   * @param firestore The Firestore Database client.
+   * @param path The Path of this collection.
    */
-  constructor(firestore, path) {
+  constructor(firestore: Firestore, path: ResourcePath) {
     super(firestore, path);
   }
 

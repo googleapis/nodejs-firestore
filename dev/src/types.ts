@@ -31,6 +31,11 @@ export type ApiMapValue = {
 // tslint:disable-next-line:no-any
 export type GapicClient = any;
 
+// We don't have type information for the npm package
+// `functional-red-black-tree`.
+// tslint:disable-next-line:no-any
+export type RBTree = any;
+
 export class GrpcError extends Error {
   code?: number;
 }

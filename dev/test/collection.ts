@@ -16,15 +16,15 @@
 
 import {expect} from 'chai';
 
-import * as Firestore from '../src/index';
-import DocumentReference = Firestore.DocumentReference;
-import {createInstance, DATABASE_ROOT, document} from './util/helpers';
+import {DocumentReference, Firestore, setLogFunction} from '../src';
+import {ApiOverride, createInstance, DATABASE_ROOT, document, InvalidApiUsage} from './util/helpers';
+
 
 // Change the argument to 'console.log' to enable debug output.
-Firestore.setLogFunction(() => {});
+setLogFunction(() => {});
 
 describe('Collection interface', () => {
-  let firestore;
+  let firestore: Firestore;
 
   beforeEach(() => {
     return createInstance().then(firestoreInstance => {
@@ -41,10 +41,10 @@ describe('Collection interface', () => {
     expect(collectionRef.id).to.equal('colId');
     expect(documentRef.id).to.equal('docId');
 
-    expect(() => collectionRef.doc(false))
+    expect(() => collectionRef.doc(false as InvalidApiUsage))
         .to.throw(
             'Argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
-    expect(() => collectionRef.doc(null))
+    expect(() => collectionRef.doc(null as InvalidApiUsage))
         .to.throw(
             'Argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
     expect(() => collectionRef.doc(''))
@@ -77,13 +77,13 @@ describe('Collection interface', () => {
   });
 
   it('has add() method', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         // Verify that the document name uses an auto-generated id.
         const docIdRe =
             /^projects\/test-project\/databases\/\(default\)\/documents\/collectionId\/[a-zA-Z0-9]{20}$/;
-        expect(request.writes[0].update.name).to.match(docIdRe);
-        delete request.writes[0].update.name;
+        expect(request.writes![0].update!.name).to.match(docIdRe);
+        delete request.writes![0].update!.name;
 
         // Verify that the rest of the protobuf matches.
         expect(request).to.deep.equal({
@@ -131,7 +131,7 @@ describe('Collection interface', () => {
   });
 
   it('has list() method', () => {
-    const overrides = {
+    const overrides: ApiOverride = {
       listDocuments: (request, options, callback) => {
         expect(request).to.deep.eq({
           parent: `${DATABASE_ROOT}/documents/a/b`,

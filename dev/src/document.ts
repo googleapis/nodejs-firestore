@@ -128,7 +128,8 @@ export class DocumentSnapshot {
    * @param obj The object to store in the DocumentSnapshot.
    * @return The created DocumentSnapshot.
    */
-  static fromObject(ref: DocumentReference, obj: {}): DocumentSnapshot {
+  static fromObject(ref: DocumentReference, obj: DocumentData):
+      DocumentSnapshot {
     const serializer = ref.firestore._serializer!;
     return new DocumentSnapshot(ref, serializer.encodeFields(obj));
   }
@@ -416,7 +417,7 @@ export class DocumentSnapshot {
 
     const components = FieldPath.fromArgument(field).toArray();
     while (components.length > 1) {
-      fields = fields![components.shift()!] as api.IValue;
+      fields = (fields as ApiMapValue)[components.shift()!];
 
       if (!fields || !fields.mapValue) {
         return undefined;
@@ -425,7 +426,7 @@ export class DocumentSnapshot {
       fields = fields.mapValue.fields!;
     }
 
-    return fields[components[0]];
+    return (fields as ApiMapValue)[components[0]];
   }
 
   /**
@@ -745,35 +746,37 @@ export class DocumentMask {
    * @param data An object to filter.
    * @return A shallow copy of the object filtered by this document mask.
    */
-  applyTo(data: object): object {
+  applyTo(data: DocumentData): DocumentData {
     /*!
      * Applies this DocumentMask to 'data' and computes the list of field paths
      * that were specified in the mask but are not present in 'data'.
      */
-    const applyDocumentMask = data => {
+    const applyDocumentMask = (data: DocumentData) => {
       const remainingPaths = this._sortedPaths.slice(0);
 
-      const processObject = (currentData, currentPath?) => {
-        let result: {}|null = null;
+      const processObject =
+          (currentData: DocumentData, currentPath?: FieldPath) => {
+            let result: DocumentData|null = null;
 
-        Object.keys(currentData).forEach(key => {
-          const childPath =
-              currentPath ? currentPath.append(key) : new FieldPath(key);
-          if (this.contains(childPath)) {
-            DocumentMask.removeFromSortedArray(remainingPaths, [childPath]);
-            result = result || {};
-            result[key] = currentData[key];
-          } else if (isObject(currentData[key])) {
-            const childObject = processObject(currentData[key], childPath);
-            if (childObject) {
-              result = result || {};
-              result[key] = childObject;
-            }
-          }
-        });
+            Object.keys(currentData).forEach(key => {
+              const childPath =
+                  currentPath ? currentPath.append(key) : new FieldPath(key);
+              if (this.contains(childPath)) {
+                DocumentMask.removeFromSortedArray(remainingPaths, [childPath]);
+                result = result || {};
+                result[key] = currentData[key];
+              } else if (isObject(currentData[key])) {
+                const childObject =
+                    processObject(currentData[key] as DocumentData, childPath);
+                if (childObject) {
+                  result = result || {};
+                  result[key] = childObject;
+                }
+              }
+            });
 
-        return result;
-      };
+            return result;
+          };
 
       // processObject() returns 'null' if the DocumentMask is empty.
       const filteredData = processObject(data) || {};
@@ -826,9 +829,6 @@ export class DocumentMask {
  * @class
  */
 export class DocumentTransform {
-  private readonly _ref: DocumentReference;
-  private readonly _transforms: Map<FieldPath, FieldTransform>;
-
   /**
    * @private
    * @hideconstructor
@@ -836,10 +836,9 @@ export class DocumentTransform {
    * @param ref The DocumentReference for this transform.
    * @param transforms A Map of FieldPaths to FieldTransforms.
    */
-  constructor(ref: DocumentReference, transforms) {
-    this._ref = ref;
-    this._transforms = transforms;
-  }
+  constructor(
+      private readonly ref: DocumentReference,
+      private readonly transforms: Map<FieldPath, FieldTransform>) {}
 
   /**
    * Generates a DocumentTransform from a JavaScript object.
@@ -874,7 +873,7 @@ export class DocumentTransform {
       DocumentTransform {
     const transforms = new Map<FieldPath, FieldTransform>();
 
-    function encode_(val, path, allowTransforms) {
+    function encode_(val: unknown, path: FieldPath, allowTransforms: boolean) {
       if (val instanceof FieldTransform && val.includeInDocumentTransform) {
         if (allowTransforms) {
           transforms.set(path, val);
@@ -910,7 +909,7 @@ export class DocumentTransform {
    * @private
    */
   get isEmpty(): boolean {
-    return this._transforms.size === 0;
+    return this.transforms.size === 0;
   }
 
   /**
@@ -919,7 +918,7 @@ export class DocumentTransform {
    * @private
    */
   get fields(): FieldPath[] {
-    return Array.from(this._transforms.keys());
+    return Array.from(this.transforms.keys());
   }
 
   /**
@@ -927,7 +926,7 @@ export class DocumentTransform {
    * @private
    */
   validate(): void {
-    this._transforms.forEach(transform => transform.validate());
+    this.transforms.forEach(transform => transform.validate());
   }
 
   /**
@@ -944,20 +943,20 @@ export class DocumentTransform {
     }
 
     const protoTransforms: Array<{}> = [];
-    this._transforms.forEach((transform, path) => {
+    this.transforms.forEach((transform, path) => {
       protoTransforms.push(transform.toProto(serializer, path));
     });
 
     return {
       transform: {
-        document: this._ref.formattedName,
+        document: this.ref.formattedName,
         fieldTransforms: protoTransforms,
       },
     };
   }
 }
 
-/*!
+/**
  * A Firestore Precondition encapsulates options for database writes.
  *
  * @private

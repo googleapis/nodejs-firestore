@@ -16,7 +16,7 @@
 
 import {google} from '../protos/firestore_proto_api';
 
-import {ProtobufJsValue} from './types';
+import {ApiMapValue, ProtobufJsValue} from './types';
 import {validateObject} from './validate';
 
 import api = google.firestore.v1;
@@ -160,7 +160,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
  * @param fieldValue The `firestore.v1.Value` in Proto3 JSON format.
  * @return The `firestore.v1.Value` in Protobuf JS format.
  */
-export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
+export function valueFromJson(fieldValue: api.IValue): api.IValue {
   const valueType = detectValueType(fieldValue);
 
   switch (valueType) {
@@ -194,7 +194,7 @@ export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
       };
     }
     case 'mapValue': {
-      const mapValue = {};
+      const mapValue: ApiMapValue = {};
       for (const prop in fieldValue.mapValue!.fields!) {
         if (fieldValue.mapValue!.fields!.hasOwnProperty(prop)) {
           mapValue[prop] = valueFromJson(fieldValue.mapValue!.fields![prop]);
@@ -212,17 +212,16 @@ export function valueFromJson(fieldValue: ProtobufJsValue): api.IValue {
 }
 
 /**
- * Converts a `firestore.v1.Document` in Proto3 JSON encoding into the
- * Protobuf JS format expected by this client. This conversion creates a copy of
- * the underlying document.
+ * Converts a map of IValues in Proto3 JSON encoding into the Protobuf JS format
+ * expected by this client. This conversion creates a copy of the underlying
+ * fields.
  *
  * @private
- * @param document The `firestore.v1.Document` in Proto3 JSON
- * format.
- * @return The `firestore.v1.Document` in Protobuf JS format.
+ * @param document An object with IValues in Proto3 JSON format.
+ * @return The object in Protobuf JS format.
  */
-export function documentFromJson(document: api.IDocument): api.IDocument {
-  const result = {};
+export function fieldsFromJson(document: ApiMapValue): ApiMapValue {
+  const result: ApiMapValue = {};
 
   for (const prop in document) {
     if (document.hasOwnProperty(prop)) {
