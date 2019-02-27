@@ -1174,12 +1174,12 @@ export class Firestore {
    * retried.
    * @returns A Promise with the resulting read-only stream.
    */
-  readStream(
+  async readStream(
       methodName: string, request: {}, requestTag: string,
       allowRetries: boolean): Promise<NodeJS.ReadableStream> {
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
 
-    return this._runRequest(gapicClient => {
+    const res = await this._runRequest(gapicClient => {
       const decorated = this._decorateRequest(request);
       return this._retry(attempts, requestTag, () => {
         return new Promise<NodeJS.ReadableStream>((resolve, reject) => {
@@ -1208,6 +1208,7 @@ export class Firestore {
             .then(stream => this._initializeStream(stream, requestTag));
       });
     });
+    return res
   }
 
   /**
