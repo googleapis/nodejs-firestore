@@ -339,8 +339,9 @@ class FirestoreClient {
    * @param {boolean} [request.showMissing]
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
-   *   be returned with a key but will not have fields, Document.create_time,
-   *   or Document.update_time set.
+   *   be returned with a key but will not have fields,
+   *   Document.create_time, or
+   *   Document.update_time set.
    *
    *   Requests with `show_missing` may not specify `where` or
    *   `order_by`.
@@ -493,8 +494,9 @@ class FirestoreClient {
    * @param {boolean} [request.showMissing]
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
-   *   be returned with a key but will not have fields, Document.create_time,
-   *   or Document.update_time set.
+   *   be returned with a key but will not have fields,
+   *   Document.create_time, or
+   *   Document.update_time set.
    *
    *   Requests with `show_missing` may not specify `where` or
    *   `order_by`.
