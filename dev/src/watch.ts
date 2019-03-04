@@ -681,7 +681,7 @@ export class Watch {
                 const change = proto.targetChange;
                 const noTargetIds =
                     !change.targetIds || change.targetIds.length === 0;
-                if (change.targetChangeType === 'NO_CHANGE') {
+                if (change.targetChangeType === 'NO_CHANGE' || change.targetChangeType === undefined) {
                   if (noTargetIds && change.readTime && current) {
                     // This means everything is up-to-date, so emit the current
                     // set of docs as a snapshot, if there were changes.

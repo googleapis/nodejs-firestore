@@ -47,7 +47,8 @@
     "predocs-test": "npm run docs"
   },
   "dependencies": {
-    "@google-cloud/projectify": "^0.3.0",
+    "@google-cloud/projectify": "^0.3.2",
+    "@grpc/proto-loader": "^0.4.0",
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
     "extend": "^3.0.1",

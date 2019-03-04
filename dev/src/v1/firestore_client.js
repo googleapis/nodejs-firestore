@@ -18,6 +18,8 @@ const gapicConfig = require('./firestore_client_config');
 const gax = require('google-gax');
 const merge = require('lodash.merge');
 const path = require('path');
+const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
 
 const VERSION = require('../../../package.json').version;
 
@@ -104,11 +106,13 @@ class FirestoreClient {
     }
 
     // Load the applicable protos.
-    const protos = merge(
-        {},
-        gaxGrpc.loadProto(
-            path.join(__dirname, '..', '..', 'protos'),
-            'google/firestore/v1/firestore.proto'));
+    const packageDefinition =
+        merge({}, protoLoader.loadSync('google/firestore/v1/firestore.proto', {
+          enums: String,
+          includeDirs: [path.join(__dirname, '..', '..', 'protos')]
+        }));
+
+    const protos = grpc.loadPackageDefinition(packageDefinition);
 
     // This API contains "path templates"; forward-slash-separated
     // identifiers to uniquely identify resources within the API.
