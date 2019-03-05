@@ -257,7 +257,7 @@ export class Watch {
     return new Watch(
         documentRef.firestore, {
           documents: {
-            documents: [documentRef.formattedName],
+            documents: [documentRef.formattedName()],
           },
           targetId: WATCH_TARGET_ID,
         },
@@ -368,7 +368,7 @@ export class Watch {
     const REMOVED = {} as DocumentSnapshotBuilder;
 
     const request: api.IListenRequest = {
-      database: this._firestore.formattedName,
+      database: this._firestore.formattedName(),
       addTarget: this._target,
     };
 
@@ -387,7 +387,7 @@ export class Watch {
       docTree.forEach((snapshot: QueryDocumentSnapshot) => {
         // Mark each document as deleted. If documents are not deleted, they
         // will be send again by the server.
-        changeMap.set(snapshot.ref.formattedName, REMOVED);
+        changeMap.set(snapshot.ref.formattedName(), REMOVED);
       });
 
       current = false;
@@ -567,7 +567,7 @@ export class Watch {
            * @private
            */
           function addDoc(newDocument: QueryDocumentSnapshot): DocumentChange {
-            const name = newDocument.ref.formattedName;
+            const name = newDocument.ref.formattedName();
             assert(!updatedMap.has(name), 'Document to add already exists');
             updatedTree = updatedTree.insert(newDocument, null);
             const newIndex = updatedTree.find(newDocument).index;
@@ -584,7 +584,7 @@ export class Watch {
            */
           function modifyDoc(newDocument: QueryDocumentSnapshot):
               DocumentChange|null {
-            const name = newDocument.ref.formattedName;
+            const name = newDocument.ref.formattedName();
             assert(updatedMap.has(name), 'Document to modify does not exist');
             const oldDocument = updatedMap.get(name)!;
             if (!oldDocument.updateTime.isEqual(newDocument.updateTime)) {

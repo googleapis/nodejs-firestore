@@ -1153,7 +1153,7 @@ describe('Query class', () => {
       const ref = randomCol.doc(id);
       return randomCol.firestore.snapshot_(
           {
-            name: ref.formattedName,
+            name: ref.formattedName(),
             fields: ref.firestore._serializer!.encodeFields(data),
             createTime: {seconds: 0, nanos: 0},
             updateTime: {seconds: 0, nanos: 0},

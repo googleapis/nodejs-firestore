@@ -270,7 +270,7 @@ class ServerTimestampTransform extends FieldTransform {
   toProto(serializer: Serializer, fieldPath: FieldPath):
       api.DocumentTransform.IFieldTransform {
     return {
-      fieldPath: fieldPath.formattedName,
+      fieldPath: fieldPath.formattedName(),
       setToServerValue: 'REQUEST_TIME',
     };
   }
@@ -316,7 +316,7 @@ class ArrayUnionTransform extends FieldTransform {
       api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
-      fieldPath: fieldPath.formattedName,
+      fieldPath: fieldPath.formattedName(),
       appendMissingElements: encodedElements
     };
   }
@@ -369,7 +369,7 @@ class ArrayRemoveTransform extends FieldTransform {
       api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
-      fieldPath: fieldPath.formattedName,
+      fieldPath: fieldPath.formattedName(),
       removeAllFromArray: encodedElements
     };
   }

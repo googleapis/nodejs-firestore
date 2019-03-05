@@ -113,8 +113,8 @@ export class DocumentReference {
    * @type {string}
    * @name DocumentReference#formattedName
    */
-  get formattedName(): string {
-    return this._path.formattedName;
+  formattedName(): string {
+    return this._path.formattedName();
   }
 
   /**
@@ -255,7 +255,7 @@ export class DocumentReference {
    * });
    */
   listCollections(): Promise<CollectionReference[]> {
-    const request = {parent: this._path.formattedName};
+    const request = {parent: this._path.formattedName()};
 
     return this._firestore
         .request<string[]>(
@@ -487,7 +487,7 @@ export class DocumentReference {
    * @private
    */
   toProto(): api.IValue {
-    return {referenceValue: this.formattedName};
+    return {referenceValue: this.formattedName()};
   }
 }
 
@@ -515,7 +515,7 @@ class FieldOrder {
   toProto(): api.StructuredQuery.IOrder {
     return {
       field: {
-        fieldPath: this.field.formattedName,
+        fieldPath: this.field.formattedName(),
       },
       direction: this.direction,
     };
@@ -564,11 +564,13 @@ class FieldFilter {
    * @private
    */
   toProto(): api.StructuredQuery.IFilter {
+    const fieldPath = this.field.formattedName();
+
     if (typeof this.value === 'number' && isNaN(this.value)) {
       return {
         unaryFilter: {
           field: {
-            fieldPath: this.field.formattedName,
+            fieldPath,
           },
           op: 'IS_NAN'
         },
@@ -579,7 +581,7 @@ class FieldFilter {
       return {
         unaryFilter: {
           field: {
-            fieldPath: this.field.formattedName,
+            fieldPath,
           },
           op: 'IS_NULL',
         },
@@ -589,7 +591,7 @@ class FieldFilter {
     return {
       fieldFilter: {
         field: {
-          fieldPath: this.field.formattedName,
+          fieldPath,
         },
         op: this.op,
         value: this.serializer.encodeValue(this.value),
@@ -952,8 +954,8 @@ export class Query {
    * The string representation of the Query's location.
    * @private
    */
-  get formattedName(): string {
-    return this._path.formattedName;
+  formattedName(): string {
+    return this._path.formattedName();
   }
 
   /**
@@ -969,7 +971,7 @@ export class Query {
    *
    * collectionRef.add({foo: 'bar'}).then(documentReference => {
    *   let firestore = documentReference.firestore;
-   *   console.log(`Root location for document is ${firestore.formattedName}`);
+   *   console.log(`Root location for document is ${firestore.path}`);
    * });
    */
   get firestore(): Firestore {
@@ -1054,12 +1056,12 @@ export class Query {
     const fields: api.StructuredQuery.IFieldReference[] = [];
 
     if (fieldPaths.length === 0) {
-      fields.push({fieldPath: FieldPath.documentId().formattedName});
+      fields.push({fieldPath: FieldPath.documentId().formattedName()});
     } else {
       for (let i = 0; i < fieldPaths.length; ++i) {
         validateFieldPath(i, fieldPaths[i]);
         fields.push(
-            {fieldPath: FieldPath.fromArgument(fieldPaths[i]).formattedName});
+            {fieldPath: FieldPath.fromArgument(fieldPaths[i]).formattedName()});
       }
     }
 
@@ -1294,7 +1296,7 @@ export class Query {
    * Throws a validation error or returns a DocumentReference that can
    * directly be used in the Query.
    *
-   * @param reference The value to validate.
+   * @param val The value to validate.
    * @throws If the value cannot be used for this query.
    * @return If valid, returns a DocumentReference that can be used with the
    * query.
@@ -1566,7 +1568,7 @@ export class Query {
    */
   toProto(transactionId?: Uint8Array): api.IRunQueryRequest {
     const reqOpts: api.IRunQueryRequest = {
-      parent: this._path.parent()!.formattedName,
+      parent: this._path.parent()!.formattedName(),
       structuredQuery: {
         from: [
           {
@@ -1833,7 +1835,7 @@ export class CollectionReference extends Query {
    */
   listDocuments(): Promise<DocumentReference[]> {
     const request: api.IListDocumentsRequest = {
-      parent: this._path.parent()!.formattedName,
+      parent: this._path.parent()!.formattedName(),
       collectionId: this.id,
       showMissing: true,
       mask: {fieldPaths: []}

@@ -68,15 +68,6 @@ abstract class Path<T> {
   constructor(protected readonly segments: string[]) {}
 
   /**
-   * String representation as expected by the proto API.
-   *
-   * @private
-   */
-  get formattedName(): string {
-    return this.canonicalString()!;
-  }
-
-  /**
    * Returns the number of segments of this field path.
    *
    * @private
@@ -86,7 +77,6 @@ abstract class Path<T> {
   }
 
   abstract construct(segments: string[]|string): T;
-  abstract canonicalString(): string;
   abstract split(relativePath: string): string[];
 
   /**
@@ -136,16 +126,6 @@ abstract class Path<T> {
     }
 
     return true;
-  }
-
-  /**
-   * Returns a string representation of this path.
-   *
-   * @private
-   * @returns A string representing this path.
-   */
-  toString(): string {
-    return this.formattedName;
   }
 
   /**
@@ -203,7 +183,6 @@ abstract class Path<T> {
  * within Firestore.
  *
  * @private
- * @class
  */
 export class ResourcePath extends Path<ResourcePath> {
   /**
@@ -219,9 +198,6 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * Constructs a Firestore Resource Path.
    *
-   * @private
-   * @hideconstructor
-   *
    * @param projectId The Firestore project id.
    * @param databaseId The Firestore database id.
    * @param segments Sequence of names of the parts of the path.
@@ -235,9 +211,6 @@ export class ResourcePath extends Path<ResourcePath> {
 
   /**
    * String representation of the path relative to the database root.
-   *
-   * @private
-   * @type {string}
    */
   get relativeName(): string {
     return this.segments.join('/');
@@ -279,9 +252,8 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * Creates a resource path from an absolute Firestore path.
    *
-   * @private
-   * @param {string} absolutePath A string representation of a Resource Path.
-   * @returns {ResourcePath} The new ResourcePath.
+   * @param absolutePath A string representation of a Resource Path.
+   * @returns The new ResourcePath.
    */
   static fromSlashSeparatedString(absolutePath: string): ResourcePath {
     const elements = RESOURCE_PATH_RE.exec(absolutePath);
@@ -313,11 +285,9 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * String representation of a ResourcePath as expected by the API.
    *
-   * @private
-   * @override
-   * @returns {string} The representation as expected by the API.
+   * @returns The representation as expected by the API.
    */
-  canonicalString(): string {
+  formattedName(): string {
     const components = [
       'projects', this.projectId, 'databases', this.databaseId, 'documents',
       ...this.segments
@@ -330,10 +300,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * the normal constructor because polymorphic 'this' doesn't work on static
    * methods.
    *
-   * @private
-   * @override
-   * @param {Array.<string>} segments Sequence of names of the parts of the
-   * path.
+   * @param segments Sequence of names of the parts of the path.
    * @returns {ResourcePath} The newly created ResourcePath.
    */
   construct(segments: string[]): ResourcePath {
@@ -375,12 +342,10 @@ export class ResourcePath extends Path<ResourcePath> {
 
   /**
    * Converts this ResourcePath to the Firestore Proto representation.
-   *
-   * @private
    */
   toProto(): api.IValue {
     return {
-      referenceValue: this.formattedName,
+      referenceValue: this.formattedName(),
     };
   }
 }
@@ -489,7 +454,7 @@ export class FieldPath extends Path<FieldPath> {
    * @override
    * @returns {string} The representation as expected by the API.
    */
-  canonicalString(): string {
+  formattedName(): string {
     return this.segments
         .map(str => {
           return UNESCAPED_FIELD_NAME_RE.test(str) ?
@@ -497,6 +462,16 @@ export class FieldPath extends Path<FieldPath> {
               '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
         })
         .join('.');
+  }
+
+  /**
+   * Returns a string representation of this path.
+   *
+   * @private
+   * @returns A string representing this path.
+   */
+  toString(): string {
+    return this.formattedName();
   }
 
   /**

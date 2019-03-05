@@ -320,7 +320,7 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
 
     return firestore['_runRequest'](() => {
-      expect(firestore.formattedName)
+      expect(firestore.formattedName())
           .to.equal(`projects/${PROJECT_ID}/databases/(default)`);
       return Promise.resolve();
     });
@@ -332,13 +332,13 @@ describe('instantiation', () => {
       keyFilename: __dirname + '/fake-certificate.json',
     });
 
-    expect(firestore.formattedName)
+    expect(firestore.formattedName())
         .to.equal('projects/{{projectId}}/databases/(default)');
 
     firestore['_detectProjectId'] = () => Promise.resolve(PROJECT_ID);
 
     return firestore['_runRequest'](() => {
-      expect(firestore.formattedName)
+      expect(firestore.formattedName())
           .to.equal(`projects/${PROJECT_ID}/databases/(default)`);
       return Promise.resolve();
     });
@@ -350,7 +350,7 @@ describe('instantiation', () => {
       keyFilename: './test/fake-certificate.json',
     });
 
-    expect(firestore.formattedName)
+    expect(firestore.formattedName())
         .to.equal('projects/{{projectId}}/databases/(default)');
 
     const gapicClient = {
@@ -371,7 +371,7 @@ describe('instantiation', () => {
 
     firestore.settings({projectId: PROJECT_ID});
 
-    expect(firestore.formattedName)
+    expect(firestore.formattedName())
         .to.equal(`projects/${PROJECT_ID}/databases/(default)`);
   });
 
@@ -458,8 +458,8 @@ describe('snapshot_() method', () => {
     const expected = extend(true, {}, allSupportedTypesOutput);
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
-    expect(actualObject.get('pathValue').formattedName)
-        .to.equal(expected.pathValue.formattedName);
+    expect(actualObject.get('pathValue').formattedName())
+        .to.equal(expected.pathValue.formattedName());
     const data = actualObject.data()!;
     delete data.pathValue;
     delete expected.pathValue;
@@ -708,10 +708,10 @@ describe('getAll() method', () => {
 
       if (doc.found) {
         expect(result[i].exists).to.be.true;
-        expect(result[i].ref.formattedName).to.equal(doc.found.name);
+        expect(result[i].ref.formattedName()).to.equal(doc.found.name);
       } else {
         expect(result[i].exists).to.be.false;
-        expect(result[i].ref.formattedName).to.equal(doc.missing);
+        expect(result[i].ref.formattedName()).to.equal(doc.missing);
       }
     }
   }

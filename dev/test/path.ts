@@ -30,25 +30,25 @@ describe('ResourcePath', () => {
 
   it('has append() method', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)');
-    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
+    expect(path.formattedName()).to.equal(`${DATABASE_ROOT}/documents`);
     path = path.append('foo');
-    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
+    expect(path.formattedName()).to.equal(`${DATABASE_ROOT}/documents/foo`);
   });
 
   it('has parent() method', () => {
     let path = new ResourcePath(PROJECT_ID, '(default)', 'foo');
-    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
+    expect(path.formattedName()).to.equal(`${DATABASE_ROOT}/documents/foo`);
     path = path.parent()!;
-    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
+    expect(path.formattedName()).to.equal(`${DATABASE_ROOT}/documents`);
     expect(path.parent()).to.be.null;
   });
 
   it('parses strings', () => {
     let path = ResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
-    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
+    expect(path.formattedName()).to.equal(`${DATABASE_ROOT}/documents`);
     path =
         ResourcePath.fromSlashSeparatedString(`${DATABASE_ROOT}/documents/foo`);
-    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
+    expect(path.formattedName()).to.equal(`${DATABASE_ROOT}/documents/foo`);
     expect(() => {
       path =
           ResourcePath.fromSlashSeparatedString('projects/project/databases');
@@ -58,7 +58,8 @@ describe('ResourcePath', () => {
   it('accepts newlines', () => {
     const path = ResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/foo\nbar`);
-    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo\nbar`);
+    expect(path.formattedName())
+        .to.equal(`${DATABASE_ROOT}/documents/foo\nbar`);
   });
 });
 
@@ -88,18 +89,18 @@ describe('FieldPath', () => {
   it('has append() method', () => {
     let path = new FieldPath('foo');
     path = path.append('bar');
-    expect(path.formattedName).to.equal('foo.bar');
+    expect(path.formattedName()).to.equal('foo.bar');
   });
 
   it('has parent() method', () => {
     let path = new FieldPath('foo', 'bar');
     path = path.parent()!;
-    expect(path.formattedName).to.equal('foo');
+    expect(path.formattedName()).to.equal('foo');
   });
 
   it('escapes special characters', () => {
     const path = new FieldPath('f.o.o');
-    expect(path.formattedName).to.equal('`f.o.o`');
+    expect(path.formattedName()).to.equal('`f.o.o`');
   });
 
   it('doesn\'t allow empty components', () => {

@@ -211,7 +211,7 @@ export class WriteBatch {
 
     this._writes.push({
       write: {
-        delete: documentRef.formattedName,
+        delete: documentRef.formattedName(),
       },
       precondition: conditions.toProto(),
     });
@@ -459,16 +459,18 @@ export class WriteBatch {
    * this request.
    * @returns  A Promise that resolves when this batch completes.
    */
-  commit_(commitOptions?: {transactionId?: Uint8Array, requestTag?: string}):
+  async commit_(commitOptions?:
+                    {transactionId?: Uint8Array, requestTag?: string}):
       Promise<WriteResult[]> {
+    this._committed = true;
+
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
 
     const explicitTransaction = commitOptions && commitOptions.transactionId;
 
     const tag = (commitOptions && commitOptions.requestTag) || requestTag();
-    const request: api.ICommitRequest = {
-      database: this._firestore.formattedName,
-    };
+    const database = await this._firestore.formattedName();
+    const request: api.ICommitRequest = {database};
 
     // On GCF, we periodically force transactional commits to allow for
     // request retries in case GCF closes our backend connection.

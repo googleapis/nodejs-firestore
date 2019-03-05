@@ -315,10 +315,9 @@ export class Transaction {
    *
    * @private
    */
-  begin(): Promise<void> {
-    const request: api.IBeginTransactionRequest = {
-      database: this._firestore.formattedName,
-    };
+  async begin(): Promise<void> {
+    const database = await this._firestore.formattedName();
+    const request: api.IBeginTransactionRequest = {database};
 
     if (this._previousTransaction) {
       request.options = {
@@ -355,9 +354,10 @@ export class Transaction {
    *
    * @private
    */
-  rollback(): Promise<void> {
+  async rollback(): Promise<void> {
+    const database = await this._firestore.formattedName();
     const request = {
-      database: this._firestore.formattedName,
+      database,
       transaction: this._transactionId,
     };
 

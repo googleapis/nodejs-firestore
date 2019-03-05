@@ -448,7 +448,7 @@ export class DocumentSnapshot {
   toProto(): api.IWrite|null {
     return {
       update: {
-        name: this._ref.formattedName,
+        name: this._ref.formattedName(),
         fields: this._fieldsProto,
       },
     };
@@ -810,7 +810,7 @@ export class DocumentMask {
 
     const encodedPaths: string[] = [];
     for (const fieldPath of this._sortedPaths) {
-      encodedPaths.push(fieldPath.formattedName);
+      encodedPaths.push(fieldPath.formattedName());
     }
 
     return {
@@ -947,9 +947,10 @@ export class DocumentTransform {
       protoTransforms.push(transform.toProto(serializer, path));
     });
 
+    const document = this.ref.formattedName();
     return {
       transform: {
-        document: this.ref.formattedName,
+        document,
         fieldTransforms: protoTransforms,
       },
     };

@@ -441,7 +441,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
     this.streamHelper.write({
       documentChange: {
         document: {
-          name: ref.formattedName,
+          name: ref.formattedName(),
           fields: this.serializer.encodeFields(data),
           createTime: {seconds: 1, nanos: 2},
           updateTime: {seconds: 3, nanos: this.snapshotVersion},
@@ -461,7 +461,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
     this.streamHelper.write({
       documentChange: {
         document: {
-          name: ref.formattedName,
+          name: ref.formattedName(),
           fields: this.serializer.encodeFields(data),
         },
         removedTargetIds: [this.targetId],
@@ -477,7 +477,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
   sendDocDelete(ref: DocumentReference): void {
     this.streamHelper.write({
       documentDelete: {
-        document: ref.formattedName,
+        document: ref.formattedName(),
         removedTargetIds: [this.targetId],
       },
     });
@@ -1798,7 +1798,7 @@ describe('Query watch', () => {
             streamHelper.write({
               documentChange: {
                 document: {
-                  name: doc1.formattedName,
+                  name: doc1.formattedName(),
                   fields: watchHelper.serializer.encodeFields({foo: 'a'}),
                   createTime: {seconds: 1, nanos: 2},
                   updateTime: {seconds: 3, nanos: 5},
@@ -2116,7 +2116,7 @@ describe('DocumentReference watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         documents: {
-          documents: [doc.formattedName],
+          documents: [doc.formattedName()],
         },
         targetId,
       },
@@ -2129,7 +2129,7 @@ describe('DocumentReference watch', () => {
       database: `projects/${PROJECT_ID}/databases/(default)`,
       addTarget: {
         documents: {
-          documents: [doc.formattedName],
+          documents: [doc.formattedName()],
         },
         targetId,
         resumeToken,
@@ -2262,7 +2262,7 @@ describe('DocumentReference watch', () => {
             streamHelper.write({
               documentChange: {
                 document: {
-                  name: doc.parent.formattedName + '/wrong',
+                  name: doc.parent.formattedName() + '/wrong',
                   fields: {},
                   createTime: {seconds: 1, nanos: 2},
                   updateTime: {seconds: 3, nanos: 4},

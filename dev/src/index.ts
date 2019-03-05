@@ -370,10 +370,9 @@ export class Firestore {
 
   /**
    * The root path to the database.
-   *
    * @private
    */
-  get formattedName(): string {
+  formattedName(): string {
     const components = [
       'projects', this._referencePath!.projectId, 'databases',
       this._referencePath!.databaseId
@@ -726,7 +725,7 @@ export class Firestore {
    * @param transactionId The transaction ID to use for this read.
    * @returns A Promise that contains an array with the resulting documents.
    */
-  getAll_(
+  async getAll_(
       docRefs: DocumentReference[], fieldMask: FieldPath[]|null,
       requestTag: string,
       transactionId?: Uint8Array): Promise<DocumentSnapshot[]> {
@@ -734,17 +733,19 @@ export class Firestore {
     const retrievedDocuments = new Map();
 
     for (const docRef of docRefs) {
-      requestedDocuments.add(docRef.formattedName);
+      const name = await docRef.formattedName();
+      requestedDocuments.add(name);
     }
 
+    const database = await this.formattedName();
     const request: api.IBatchGetDocumentsRequest = {
-      database: this.formattedName,
+      database,
       transaction: transactionId,
       documents: Array.from(requestedDocuments)
     };
 
     if (fieldMask) {
-      const fieldPaths = fieldMask.map(fieldPath => fieldPath.formattedName);
+      const fieldPaths = fieldMask.map(fieldPath => fieldPath.formattedName());
       request.mask = {fieldPaths};
     }
 
@@ -928,7 +929,8 @@ export class Firestore {
     const decoratedGax: {
       otherArgs: {headers: {[k: string]: string}}
     } = {otherArgs: {headers: {}}};
-    decoratedGax.otherArgs.headers[CLOUD_RESOURCE_HEADER] = this.formattedName;
+    decoratedGax.otherArgs.headers[CLOUD_RESOURCE_HEADER] =
+        this.formattedName();
 
     return {request: decoratedRequest, gax: decoratedGax};
   }
