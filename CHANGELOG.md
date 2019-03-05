@@ -4,6 +4,43 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## v1.0.2
+
+03-04-2019 13:32 PST
+
+### Implementation Changes
+
+- fix: throw on invalid credentials ([#548](https://github.com/googleapis/nodejs-firestore/pull/548))
+
+### Dependencies
+
+- fix(deps): update dependency google-gax to ^0.25.0 ([#535](https://github.com/googleapis/nodejs-firestore/pull/535))
+- chore(deps): update dependency mocha to v6
+- chore(deps): update dependency duplexify to v4 ([#539](https://github.com/googleapis/nodejs-firestore/pull/539))
+
+### Documentation
+
+- docs: update comments on protos ([#559](https://github.com/googleapis/nodejs-firestore/pull/559))
+- docs: update API doc comments ([#557](https://github.com/googleapis/nodejs-firestore/pull/557))
+- docs: update links in contrib guide ([#550](https://github.com/googleapis/nodejs-firestore/pull/550))
+- docs: add lint/fix example to contributing guide ([#541](https://github.com/googleapis/nodejs-firestore/pull/541))
+- docs: fix example comments ([#540](https://github.com/googleapis/nodejs-firestore/pull/540))
+- doc: show GA message in README.md ([#536](https://github.com/googleapis/nodejs-firestore/pull/536))
+- Add note about Datastore mode ([#552](https://github.com/googleapis/nodejs-firestore/pull/552))
+- chore: move CONTRIBUTING.md to root ([#543](https://github.com/googleapis/nodejs-firestore/pull/543))
+- docs: update contributing path in README ([#544](https://github.com/googleapis/nodejs-firestore/pull/544))
+
+### Internal / Testing Changes
+
+- refactor(typescript): enable noImplicitAny ([#553](https://github.com/googleapis/nodejs-firestore/pull/553))
+- chore: update array types ([#555](https://github.com/googleapis/nodejs-firestore/pull/555))
+- Finish TypeScript Migration ([#512](https://github.com/googleapis/nodejs-firestore/pull/512))
+- refactor: improve generated code style. ([#538](https://github.com/googleapis/nodejs-firestore/pull/538))
+- Remove unhandled Promise rejection warning ([#556](https://github.com/googleapis/nodejs-firestore/pull/556))
+- build: use linkinator for docs test ([#549](https://github.com/googleapis/nodejs-firestore/pull/549))
+- build: create docs test npm scripts ([#547](https://github.com/googleapis/nodejs-firestore/pull/547))
+- build: test using @grpc/grpc-js in CI ([#546](https://github.com/googleapis/nodejs-firestore/pull/546))
+
 ## v1.0.1
 
 01-29-2019 14:02 PST
