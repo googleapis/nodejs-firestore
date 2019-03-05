@@ -220,10 +220,8 @@ type DocumentChangeSet = {
  * @class
  * @private
  */
-export class Watch {
-  private readonly _firestore: Firestore;
-  private readonly _target: api.ITarget;
-  private readonly _comparator: DocumentComparator;
+abstract class Watch {
+  protected readonly _firestore: Firestore;
   private readonly _backoff: ExponentialBackoff;
   private readonly _requestTag: string;
 
@@ -232,53 +230,21 @@ export class Watch {
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
-   * @param target A Firestore 'Target' proto denoting the target to listen on.
-   * @param comparator A comparator for QueryDocumentSnapshots that is used to
-   * order the document snapshots returned by this watch.
    */
-  constructor(
-      firestore: Firestore, target: api.ITarget,
-      comparator: DocumentComparator) {
+  constructor(firestore: Firestore) {
     this._firestore = firestore;
-    this._target = target;
-    this._comparator = comparator;
     this._backoff = new ExponentialBackoff();
     this._requestTag = requestTag();
   }
 
-  /**
-   * Creates a new Watch instance to listen on DocumentReferences.
-   *
-   * @private
-   * @param  documentRef - The document reference for this watch.
-   * @returns A newly created Watch instance.
-   */
-  static forDocument(documentRef: DocumentReference): Watch {
-    return new Watch(
-        documentRef.firestore, {
-          documents: {
-            documents: [documentRef.formattedName],
-          },
-          targetId: WATCH_TARGET_ID,
-        },
-        DOCUMENT_WATCH_COMPARATOR);
-  }
+  /**  Returns a 'Target' proto denoting the target to listen on. */
+  protected abstract getTarget(resumeToken?: Uint8Array): Promise<api.ITarget>;
 
   /**
-   * Creates a new Watch instance to listen on Queries.
-   *
-   * @private
-   * @param query The query used for this watch.
-   * @returns A newly created Watch instance.
+   * Returns a comparator for QueryDocumentSnapshots that is used to order the
+   * document snapshots returned by this watch.
    */
-  static forQuery(query: Query): Watch {
-    return new Watch(
-        query.firestore, {
-          query: query.toProto(),
-          targetId: WATCH_TARGET_ID,
-        },
-        query.comparator());
-  }
+  protected abstract getComparator(): DocumentComparator;
 
   /**
    * Determines whether an error is considered permanent and should not be
@@ -343,7 +309,7 @@ export class Watch {
       onError: (error: Error) => void): () => void {
     // The sorted tree of QueryDocumentSnapshots as sent in the last snapshot.
     // We only look at the keys.
-    let docTree = rbtree(this._comparator);
+    let docTree = rbtree(this.getComparator());
     // A map of document names to QueryDocumentSnapshots for the last sent
     // snapshot.
     let docMap = new Map<string, QueryDocumentSnapshot>();
@@ -358,7 +324,7 @@ export class Watch {
     // aren't docs.
     let hasPushed = false;
     // The server assigns and updates the resume token.
-    let resumeToken: Uint8Array|null = null;
+    let resumeToken: Uint8Array|undefined = undefined;
 
     // Indicates whether we are interested in data from the stream. Set to false
     // in the 'unsubscribe()' callback.
@@ -367,10 +333,7 @@ export class Watch {
     // Sentinel value for a document remove.
     const REMOVED = {} as DocumentSnapshotBuilder;
 
-    const request: api.IListenRequest = {
-      database: this._firestore.formattedName,
-      addTarget: this._target,
-    };
+    const request: api.IListenRequest = {};
 
     // We may need to replace the underlying stream on reset events.
     // This is the one that will be returned and proxy the current one.
@@ -382,7 +345,7 @@ export class Watch {
     const resetDocs = () => {
       logger('Watch.onSnapshot', this._requestTag, 'Resetting documents');
       changeMap.clear();
-      resumeToken = null;
+      resumeToken = undefined;
 
       docTree.forEach((snapshot: QueryDocumentSnapshot) => {
         // Mark each document as deleted. If documents are not deleted, they
@@ -414,45 +377,52 @@ export class Watch {
      * Clears the change map.
      */
     const maybeReopenStream = (err: GrpcError) => {
+      if (currentStream) {
+        currentStream.unpipe(stream);
+        currentStream = null;
+      }
+
       if (isActive && !this.isPermanentError(err)) {
         logger(
             'Watch.onSnapshot', this._requestTag,
             'Stream ended, re-opening after retryable error: ', err);
-        request.addTarget!.resumeToken = resumeToken;
         changeMap.clear();
 
         if (this.isResourceExhaustedError(err)) {
           this._backoff.resetToMax();
         }
 
-        resetStream();
+        initStream();
       } else {
         closeStream(err);
       }
     };
 
     /** Helper to restart the outgoing stream to the backend. */
-    const resetStream = () => {
-      logger('Watch.onSnapshot', this._requestTag, 'Opening new stream');
+    const restartStream = () => {
+      logger('Watch.onSnapshot', this._requestTag, 'Restarting stream');
       if (currentStream) {
         currentStream.unpipe(stream);
         currentStream.end();
         currentStream = null;
-        initStream();
       }
+      initStream();
     };
 
     /**
      * Initializes a new stream to the backend with backoff.
      */
     const initStream = () => {
-      this._backoff.backoffAndWait().then(() => {
+      this._backoff.backoffAndWait().then(async () => {
         if (!isActive) {
           logger(
               'Watch.onSnapshot', this._requestTag,
               'Not initializing inactive stream');
           return;
         }
+
+        request.database = await this._firestore.formattedName;
+        request.addTarget = await this.getTarget(resumeToken);
 
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
@@ -605,7 +575,7 @@ export class Watch {
 
           changes.deletes.sort((name1, name2) => {
             // Deletes are sorted based on the order of the existing document.
-            return this._comparator(
+            return this.getComparator()(
                 updatedMap.get(name1)!, updatedMap.get(name2)!);
           });
           changes.deletes.forEach(name => {
@@ -613,13 +583,13 @@ export class Watch {
             appliedChanges.push(change);
           });
 
-          changes.adds.sort(this._comparator);
+          changes.adds.sort(this.getComparator());
           changes.adds.forEach(snapshot => {
             const change = addDoc(snapshot);
             appliedChanges.push(change);
           });
 
-          changes.updates.sort(this._comparator);
+          changes.updates.sort(this.getComparator());
           changes.updates.forEach(snapshot => {
             const change = modifyDoc(snapshot);
             if (change) {
@@ -639,7 +609,7 @@ export class Watch {
      * Assembles a new snapshot from the current set of changes and invokes the
      * user's callback. Clears the current changes on completion.
      */
-    const push = (readTime: Timestamp, nextResumeToken: Uint8Array|null) => {
+    const push = (readTime: Timestamp, nextResumeToken?: Uint8Array) => {
       const changes = extractChanges(docMap, changeMap, readTime);
       const diff = computeSnapshot(docTree, docMap, changes);
 
@@ -776,7 +746,7 @@ export class Watch {
                   // We need to remove all the current results.
                   resetDocs();
                   // The filter didn't match, so re-issue the query.
-                  resetStream();
+                  restartStream();
                 }
               } else {
                 closeStream(new Error(
@@ -799,5 +769,56 @@ export class Watch {
       onError = () => {};
       stream.end();
     };
+  }
+}
+
+/**
+ * Creates a new Watch instance to listen on DocumentReferences.
+ *
+ * @private
+ */
+export class DocumentWatch extends Watch {
+  constructor(firestore: Firestore, private readonly ref: DocumentReference) {
+    super(firestore);
+  }
+
+  getComparator(): DocumentComparator {
+    return DOCUMENT_WATCH_COMPARATOR;
+  }
+
+  async getTarget(resumeToken?: Uint8Array):
+      Promise<google.firestore.v1.ITarget> {
+    const formattedName = await this.ref.formattedName;
+    return {
+      documents: {
+        documents: [formattedName],
+      },
+      targetId: WATCH_TARGET_ID,
+      resumeToken
+    };
+  }
+}
+
+/**
+ * Creates a new Watch instance to listen on Queries.
+ *
+ * @private
+ */
+export class QueryWatch extends Watch {
+  private comparator: DocumentComparator;
+
+  constructor(firestore: Firestore, private readonly query: Query) {
+    super(firestore);
+    this.comparator = query.comparator();
+  }
+
+  getComparator(): DocumentComparator {
+    return this.query.comparator();
+  }
+
+  async getTarget(resumeToken?: Uint8Array):
+      Promise<google.firestore.v1.ITarget> {
+    const query = await this.query.toProto();
+    return {query, targetId: WATCH_TARGET_ID, resumeToken};
   }
 }

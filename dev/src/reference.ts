@@ -33,7 +33,7 @@ import {Timestamp} from './timestamp';
 import {DocumentData, OrderByDirection, Precondition, SetOptions, UpdateData, WhereFilterOp} from './types';
 import {autoId, requestTag} from './util';
 import {invalidArgumentMessage, validateEnumValue, validateFunction, validateInteger, validateMinNumberOfArguments} from './validate';
-import {Watch} from './watch';
+import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = proto.google.firestore.v1;
@@ -448,7 +448,7 @@ export class DocumentReference {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = Watch.forDocument(this);
+    const watch = new DocumentWatch(this.firestore, this);
 
     return watch.onSnapshot((readTime, size, docs) => {
       for (const document of docs()) {
@@ -1685,7 +1685,7 @@ export class Query {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = Watch.forQuery(this);
+    const watch = new QueryWatch(this.firestore, this);
 
     return watch.onSnapshot((readTime, size, docs, changes) => {
       onNext(new QuerySnapshot(this, readTime, size, docs, changes));
