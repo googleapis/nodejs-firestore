@@ -18,6 +18,8 @@
 import {google} from '../protos/firestore_proto_api';
 import {validateInteger} from './validate';
 
+import api = google.firestore.v1;
+
 /*!
  * Number of nanoseconds in a millisecond.
  *
@@ -227,7 +229,7 @@ export class Timestamp {
    * @private
    * @returns {Object} The `Timestamp` Protobuf object.
    */
-  toProto() {
+  toProto(): api.IValue {
     const timestamp: google.protobuf.ITimestamp = {};
 
     if (this.seconds) {

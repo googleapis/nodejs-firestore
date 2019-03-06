@@ -40,22 +40,22 @@ describe('Order', () => {
   });
 
   /** Converts a value into its proto representation. */
-  async function wrap(value: unknown): Promise<api.IValue> {
-    const val = await firestore._serializer!.encodeValue(value);
+  function wrap(value: unknown): api.IValue {
+    const val = firestore._serializer!.encodeValue(value);
     expect(val).to.not.be.null;
     return val!;
   }
 
-  function blob(data: number[]): Promise<api.IValue> {
+  function blob(data: number[]): api.IValue {
     return wrap(Buffer.from(data));
   }
 
-  function resource(pathString: string): Promise<api.IValue> {
+  function resource(pathString: string): api.IValue {
     return wrap(new DocumentReference(
         firestore, ResourcePath.fromSlashSeparatedString(pathString)));
   }
 
-  function geopoint(lat: number, lng: number): Promise<api.IValue> {
+  function geopoint(lat: number, lng: number): api.IValue {
     return wrap(new GeoPoint(lat, lng));
   }
 
@@ -114,98 +114,98 @@ describe('Order', () => {
     ]);
   });
 
-  it('is correct', async () => {
+  it('is correct', () => {
     const groups = [
       // null first
-      [await wrap(null)],
+      [wrap(null)],
 
       // booleans
-      [await wrap(false)],
-      [await wrap(true)],
+      [wrap(false)],
+      [wrap(true)],
 
       // numbers
-      [await double(NaN), double(NaN)],
-      [await double(-Infinity)],
-      [await double(-Number.MAX_VALUE)],
-      [await int(Number.MIN_SAFE_INTEGER - 1)],
-      [await int(Number.MIN_SAFE_INTEGER)],
-      [await double(-1.1)],
+      [double(NaN), double(NaN)],
+      [double(-Infinity)],
+      [double(-Number.MAX_VALUE)],
+      [int(Number.MIN_SAFE_INTEGER - 1)],
+      [int(Number.MIN_SAFE_INTEGER)],
+      [double(-1.1)],
       // Integers and Doubles order the same.
-      [await int(-1), double(-1.0)],
-      [await double(-Number.MIN_VALUE)],
+      [int(-1), double(-1.0)],
+      [double(-Number.MIN_VALUE)],
       // zeros all compare the same.
-      [await int(0), double(0.0), double(-0)],
-      [await double(Number.MIN_VALUE)],
-      [await int(1), double(1.0)],
-      [await double(1.1)],
-      [await int(2)],
-      [await int(10)],
-      [await int(Number.MAX_SAFE_INTEGER)],
-      [await int(Number.MAX_SAFE_INTEGER + 1)],
-      [await double(Infinity)],
+      [int(0), double(0.0), double(-0)],
+      [double(Number.MIN_VALUE)],
+      [int(1), double(1.0)],
+      [double(1.1)],
+      [int(2)],
+      [int(10)],
+      [int(Number.MAX_SAFE_INTEGER)],
+      [int(Number.MAX_SAFE_INTEGER + 1)],
+      [double(Infinity)],
 
       // timestamps
-      [await wrap(new Date(2016, 5, 20, 10, 20))],
-      [await wrap(new Date(2016, 10, 21, 15, 32))],
+      [wrap(new Date(2016, 5, 20, 10, 20))],
+      [wrap(new Date(2016, 10, 21, 15, 32))],
 
       // strings
-      [await wrap('')],
-      [await wrap('\u0000\ud7ff\ue000\uffff')],
-      [await wrap('(╯°□°）╯︵ ┻━┻')],
-      [await wrap('a')],
-      [await wrap('abc def')],
+      [wrap('')],
+      [wrap('\u0000\ud7ff\ue000\uffff')],
+      [wrap('(╯°□°）╯︵ ┻━┻')],
+      [wrap('a')],
+      [wrap('abc def')],
       // latin small letter e + combining acute accent + latin small letter b
-      [await wrap('e\u0301b')],
-      [await wrap('æ')],
+      [wrap('e\u0301b')],
+      [wrap('æ')],
       // latin small letter e with acute accent + latin small letter a
-      [await wrap('\u00e9a')],
+      [wrap('\u00e9a')],
 
       // blobs
-      [await blob([])],
-      [await blob([0])],
-      [await blob([0, 1, 2, 3, 4])],
-      [await blob([0, 1, 2, 4, 3])],
-      [await blob([255])],
+      [blob([])],
+      [blob([0])],
+      [blob([0, 1, 2, 3, 4])],
+      [blob([0, 1, 2, 4, 3])],
+      [blob([255])],
 
       // resource names
-      [await resource('projects/p1/databases/d1/documents/c1/doc1')],
-      [await resource('projects/p1/databases/d1/documents/c1/doc2')],
-      [await resource('projects/p1/databases/d1/documents/c1/doc2/c2/doc1')],
-      [await resource('projects/p1/databases/d1/documents/c1/doc2/c2/doc2')],
-      [await resource('projects/p1/databases/d1/documents/c10/doc1')],
-      [await resource('projects/p1/databases/d1/documents/c2/doc1')],
-      [await resource('projects/p2/databases/d2/documents/c1/doc1')],
-      [await resource('projects/p2/databases/d2/documents/c1-/doc1')],
-      [await resource('projects/p2/databases/d3/documents/c1-/doc1')],
+      [resource('projects/p1/databases/d1/documents/c1/doc1')],
+      [resource('projects/p1/databases/d1/documents/c1/doc2')],
+      [resource('projects/p1/databases/d1/documents/c1/doc2/c2/doc1')],
+      [resource('projects/p1/databases/d1/documents/c1/doc2/c2/doc2')],
+      [resource('projects/p1/databases/d1/documents/c10/doc1')],
+      [resource('projects/p1/databases/d1/documents/c2/doc1')],
+      [resource('projects/p2/databases/d2/documents/c1/doc1')],
+      [resource('projects/p2/databases/d2/documents/c1-/doc1')],
+      [resource('projects/p2/databases/d3/documents/c1-/doc1')],
 
       // geo points
-      [await geopoint(-90, -180)],
-      [await geopoint(-90, 0)],
-      [await geopoint(-90, 180)],
-      [await geopoint(0, -180)],
-      [await geopoint(0, 0)],
-      [await geopoint(0, 180)],
-      [await geopoint(1, -180)],
-      [await geopoint(1, 0)],
-      [await geopoint(1, 180)],
-      [await geopoint(90, -180)],
-      [await geopoint(90, 0)],
-      [await geopoint(90, 180)],
+      [geopoint(-90, -180)],
+      [geopoint(-90, 0)],
+      [geopoint(-90, 180)],
+      [geopoint(0, -180)],
+      [geopoint(0, 0)],
+      [geopoint(0, 180)],
+      [geopoint(1, -180)],
+      [geopoint(1, 0)],
+      [geopoint(1, 180)],
+      [geopoint(90, -180)],
+      [geopoint(90, 0)],
+      [geopoint(90, 180)],
 
       // arrays
-      [await wrap([])],
-      [await wrap(['bar'])],
-      [await wrap(['foo'])],
-      [await wrap(['foo', 1])],
-      [await wrap(['foo', 2])],
-      [await wrap(['foo', '0'])],
+      [wrap([])],
+      [wrap(['bar'])],
+      [wrap(['foo'])],
+      [wrap(['foo', 1])],
+      [wrap(['foo', 2])],
+      [wrap(['foo', '0'])],
 
       // objects
-      [await wrap({bar: 0})],
-      [await wrap({bar: 0, foo: 1})],
-      [await wrap({foo: 1})],
-      [await wrap({foo: 2})],
-      [await wrap({foo: '0'})],
+      [wrap({bar: 0})],
+      [wrap({bar: 0, foo: 1})],
+      [wrap({foo: 1})],
+      [wrap({foo: 2})],
+      [wrap({foo: '0'})],
     ];
 
     for (let i = 0; i < groups.length; i++) {

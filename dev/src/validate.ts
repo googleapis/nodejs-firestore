@@ -47,7 +47,7 @@ export interface NumericRangeOptions {
  */
 export function customObjectMessage(
     arg: string|number, value: unknown, path?: FieldPath): string {
-  const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
+  const fieldPathMessage = path ? ` (found in field ${path})` : '';
 
   if (isObject(value)) {
     const typeName = value.constructor.name;

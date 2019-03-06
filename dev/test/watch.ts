@@ -1969,16 +1969,11 @@ describe('Query watch', () => {
 
       return initialSnapshot(snapshot => {
                return nextSnapshot(
-                          snapshot,
-                          () => {
-                            watchHelper.sendDoc(doc1, {foo: 'a'});
-                          })
+                          snapshot, () => watchHelper.sendDoc(doc1, {foo: 'a'}))
                    .then(
                        snapshot => nextSnapshot(
                            snapshot,
-                           () => {
-                             watchHelper.sendDoc(doc2, {foo: 'b'});
-                           }))
+                           () => watchHelper.sendDoc(doc2, {foo: 'b'})))
                    .then(snapshot => {
                      firstSnapshot = snapshot;
                    });
@@ -1986,9 +1981,7 @@ describe('Query watch', () => {
           .then(() => initialSnapshot(snapshot => {
                   return nextSnapshot(
                              snapshot,
-                             () => {
-                               watchHelper.sendDoc(doc1, {foo: 'a'});
-                             })
+                             () => watchHelper.sendDoc(doc1, {foo: 'a'}))
                       .then(
                           snapshot => nextSnapshot(
                               snapshot,
@@ -2007,18 +2000,19 @@ describe('Query watch', () => {
       let originalSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
-               return nextSnapshot(snapshot, () => {
-                        watchHelper.sendDoc(doc1, {foo: '1'});
-                      }).then(snapshot => {
-                 originalSnapshot = snapshot;
-               });
+               return nextSnapshot(
+                          snapshot, () => watchHelper.sendDoc(doc1, {foo: '1'}))
+                   .then(snapshot => {
+                     originalSnapshot = snapshot;
+                   });
              })
           .then(() => initialSnapshot(snapshot => {
-                  return nextSnapshot(snapshot, () => {
-                           watchHelper.sendDoc(doc1, {foo: 1});
-                         }).then(snapshot => {
-                    expect(snapshot.isEqual(originalSnapshot)).to.be.false;
-                  });
+                  return nextSnapshot(
+                             snapshot,
+                             () => watchHelper.sendDoc(doc1, {foo: 1}))
+                      .then(snapshot => {
+                        expect(snapshot.isEqual(originalSnapshot)).to.be.false;
+                      });
                 }));
     });
 

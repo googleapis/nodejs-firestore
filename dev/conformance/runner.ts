@@ -287,7 +287,7 @@ function runTest(spec: ConformanceProto) {
         varargs[0] = convertInput.argument(spec.jsonData);
       } else {
         for (let i = 0; i < spec.fieldPaths.length; ++i) {
-          varargs[2 * i] = new FieldPath(spec.fieldPaths[i].field);
+          varargs[2 * i] = new FieldPath(...spec.fieldPaths[i].field);
         }
         for (let i = 0; i < spec.jsonValues.length; ++i) {
           varargs[2 * i + 1] = convertInput.argument(spec.jsonValues[i]);
@@ -324,15 +324,17 @@ function runTest(spec: ConformanceProto) {
       } else if (clause.limit) {
         query = query.limit(clause.limit);
       } else if (clause.startAt) {
-        query = query.startAt.apply(query, convertInput.cursor(clause.startAt));
+        const cursor = convertInput.cursor(clause.startAt);
+        query = query.startAt(...cursor);
       } else if (clause.startAfter) {
-        query = query.startAfter.apply(
-            query, convertInput.cursor(clause.startAfter));
+        const cursor = convertInput.cursor(clause.startAfter);
+        query = query.startAfter(...cursor);
       } else if (clause.endAt) {
-        query = query.endAt.apply(query, convertInput.cursor(clause.endAt));
+        const cursor = convertInput.cursor(clause.endAt);
+        query = query.endAt(...cursor);
       } else if (clause.endBefore) {
-        query =
-            query.endBefore.apply(query, convertInput.cursor(clause.endBefore));
+        const cursor = convertInput.cursor(clause.endBefore);
+        query = query.endBefore(...cursor);
       }
 
       return query;

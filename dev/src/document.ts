@@ -153,7 +153,8 @@ export class DocumentSnapshot {
      * 'target'.
      */
     function merge(
-        target: ApiMapValue, value: unknown, path: string[], pos: number) {
+        target: ApiMapValue, value: unknown, path: string[],
+        pos: number): ApiMapValue|null {
       const key = path[pos];
       const isLast = pos === path.length - 1;
 
@@ -199,10 +200,10 @@ export class DocumentSnapshot {
 
     const res: ApiMapValue = {};
 
-    data.forEach((value, key) => {
-      const components = key.toArray();
-      merge(res, value, components, 0);
-    });
+    for (const [key, value] of data) {
+      const path = key.toArray();
+      merge(res, value, path, 0);
+    }
 
     return new DocumentSnapshot(ref, res);
   }
@@ -445,7 +446,7 @@ export class DocumentSnapshot {
    * @private
    * @returns The document in the format the API expects.
    */
-  toProto(): api.IWrite|null {
+  toProto(): api.IWrite {
     return {
       update: {
         name: this._ref.formattedName,
@@ -790,8 +791,8 @@ export class DocumentMask {
     const result = applyDocumentMask(data);
 
     if (result.remainingPaths.length !== 0) {
-      throw new Error(`Input data is missing for field "${
-          result.remainingPaths[0].toString()}".`);
+      throw new Error(
+          `Input data is missing for field "${result.remainingPaths[0]}".`);
     }
 
     return result.filteredData;
@@ -942,15 +943,15 @@ export class DocumentTransform {
       return null;
     }
 
-    const protoTransforms: Array<{}> = [];
-    this.transforms.forEach((transform, path) => {
-      protoTransforms.push(transform.toProto(serializer, path));
-    });
+    const fieldTransforms: api.DocumentTransform.IFieldTransform[] = [];
+    for (const [path, transform] of this.transforms) {
+      fieldTransforms.push(transform.toProto(serializer, path));
+    }
 
     return {
       transform: {
         document: this.ref.formattedName,
-        fieldTransforms: protoTransforms,
+        fieldTransforms,
       },
     };
   }
@@ -998,7 +999,8 @@ export class Precondition {
     const proto: api.IPrecondition = {};
 
     if (this._lastUpdateTime !== undefined) {
-      proto.updateTime = this._lastUpdateTime!.toProto().timestampValue;
+      const valueProto = this._lastUpdateTime!.toProto();
+      proto.updateTime = valueProto.timestampValue;
     } else {
       proto.exists = this._exists;
     }

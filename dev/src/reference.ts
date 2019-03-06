@@ -28,7 +28,7 @@ import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
 import {FieldPath, ResourcePath, validateFieldPath, validateResourcePath} from './path';
-import {Serializer, validateUserInput} from './serializer';
+import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {DocumentData, OrderByDirection, Precondition, SetOptions, UpdateData, WhereFilterOp} from './types';
 import {autoId, requestTag} from './util';
@@ -96,7 +96,7 @@ const comparisonOperators:
  *
  * @class
  */
-export class DocumentReference {
+export class DocumentReference implements Serializable {
   /**
    * @private
    * @hideconstructor
@@ -1017,7 +1017,7 @@ export class Query {
     fieldPath = FieldPath.fromArgument(fieldPath);
 
     if (FieldPath.documentId().isEqual(fieldPath)) {
-      value = this.convertReference(value);
+      value = this.validateReference(value);
     }
 
     const combinedFilters = this._fieldFilters.concat(new FieldFilter(
@@ -1278,7 +1278,7 @@ export class Query {
       let fieldValue = fieldValues[i];
 
       if (FieldPath.documentId().isEqual(fieldOrders[i].field)) {
-        fieldValue = this.convertReference(fieldValue);
+        fieldValue = this.validateReference(fieldValue);
       }
 
       validateQueryValue(i, fieldValue);
@@ -1294,13 +1294,13 @@ export class Query {
    * Throws a validation error or returns a DocumentReference that can
    * directly be used in the Query.
    *
-   * @param reference The value to validate.
+   * @param val The value to validate.
    * @throws If the value cannot be used for this query.
    * @return If valid, returns a DocumentReference that can be used with the
    * query.
    * @private
    */
-  private convertReference(val: unknown): DocumentReference {
+  private validateReference(val: unknown): DocumentReference {
     let reference: DocumentReference;
 
     if (typeof val === 'string') {
@@ -2000,7 +2000,7 @@ function validateQueryValue(arg: string|number, value: unknown): void {
 }
 
 /**
- * Verifies euqality for an array of objects using the `isEqual` interface.
+ * Verifies equality for an array of objects using the `isEqual` interface.
  *
  * @private
  * @param left Array of objects supporting `isEqual`.
