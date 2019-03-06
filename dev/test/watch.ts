@@ -209,7 +209,7 @@ class DeferredListener<T> {
  */
 class StreamHelper {
   private readonly deferredListener =
-      new DeferredListener<api.IListenResponse>();
+      new DeferredListener<api.IListenRequest>();
   private backendStream: NodeJS.ReadWriteStream|null = null;
 
   streamCount = 0;  // The number of streams that the client has requested
@@ -242,12 +242,12 @@ class StreamHelper {
   /**
    * Returns a Promise with the next results from the underlying stream.
    */
-  await(type: string): Promise<api.IListenResponse|Error|undefined> {
+  await(type: string): Promise<api.IListenRequest|Error|undefined> {
     return this.deferredListener.await(type);
   }
 
   /** Waits for a destroyed stream to be re-opened. */
-  awaitReopen(): Promise<api.IListenResponse> {
+  awaitReopen(): Promise<api.IListenRequest> {
     return this.await('error')
         .then(() => this.await('close'))
         .then(() => this.awaitOpen());
@@ -257,9 +257,9 @@ class StreamHelper {
    * Waits for the stream to open and to receive its first message (the
    * AddTarget message).
    */
-  awaitOpen(): Promise<api.IListenResponse> {
+  awaitOpen(): Promise<api.IListenRequest> {
     return this.await('open').then(() => {
-      return this.await('data') as api.IListenResponse;
+      return this.await('data') as api.IListenRequest;
     });
   }
 
@@ -733,16 +733,10 @@ describe('Query watch', () => {
       return watchHelper.await('snapshot')
           .then(() => {
             streamHelper.close();
-            return streamHelper.await('end');
-          })
-          .then(() => {
             return streamHelper.awaitOpen();
           })
           .then(() => {
             streamHelper.close();
-            return streamHelper.await('end');
-          })
-          .then(() => {
             return streamHelper.awaitOpen();
           })
           .then(() => {
@@ -769,9 +763,6 @@ describe('Query watch', () => {
         })
         .then(() => {
           streamHelper.close();
-          return streamHelper.await('end');
-        })
-        .then(() => {
           unsubscribe();
           expect(streamHelper.streamCount).to.equal(1);
         });

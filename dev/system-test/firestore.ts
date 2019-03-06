@@ -24,7 +24,7 @@ const version = require('../../package.json').version;
 class DeferredPromise<T> {
   resolve: Function;
   reject: Function;
-  promise: Promise<T>;
+  promise: Promise<T>|null;
 
   constructor() {
     this.resolve = () => {
@@ -33,8 +33,7 @@ class DeferredPromise<T> {
     this.reject = () => {
       throw new Error('DeferredPromise.reject has not been initialized');
     };
-    this.promise =
-        Promise.reject('DeferredPromise.promise has not been initialized');
+    this.promise = null;
   }
 }
 
@@ -680,8 +679,7 @@ describe('DocumentReference class', () => {
   });
 
   describe('watch', () => {
-    const currentDeferred = new DeferredPromise();
-
+    const currentDeferred = new DeferredPromise<DocumentSnapshot>();
 
     function resetPromise() {
       currentDeferred.promise = new Promise((resolve, reject) => {
@@ -691,7 +689,7 @@ describe('DocumentReference class', () => {
     }
 
     function waitForSnapshot(): Promise<DocumentSnapshot> {
-      return currentDeferred.promise.then(snapshot => {
+      return currentDeferred.promise!.then(snapshot => {
         resetPromise();
         return snapshot as DocumentSnapshot;
       });
@@ -1201,7 +1199,7 @@ describe('Query class', () => {
     }
 
     function waitForSnapshot(): Promise<QuerySnapshot> {
-      return currentDeferred.promise.then(snapshot => {
+      return currentDeferred.promise!.then(snapshot => {
         resetPromise();
         return snapshot;
       });
