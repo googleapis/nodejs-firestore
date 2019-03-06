@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import {replaceProjectIdToken} from '@google-cloud/projectify';
-import * as assert from 'assert';
 import * as bun from 'bun';
-import * as extend from 'extend';
+import {CallOptions} from 'google-gax';
 import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {logger, setLibVersion} from './logger';
-import {FieldPath, validateResourcePath} from './path';
+import {DATABASE_ID, FieldPath, RelativePath, validateResourcePath} from './path';
 import {ResourcePath} from './path';
 import {ClientPool} from './pool';
 import {CollectionReference} from './reference';
@@ -207,7 +205,7 @@ export class Firestore {
    * to work around a connection limit of 100 concurrent requests per client.
    * @private
    */
-  private _clientPool: ClientPool<GapicClient>|null = null;
+  private _clientPool: ClientPool<GapicClient>;
 
   /**
    * The configuration options for the GAPIC client.
@@ -223,19 +221,19 @@ export class Firestore {
   private _settingsFrozen = false;
 
   /**
-   * A Promise that resolves when client initialization completes. Can be
-   * 'null' if initialization hasn't started yet.
-   * @private
-   */
-  private _clientInitialized: Promise<void>|null = null;
-
-  /**
    * The serializer to use for the Protobuf transformation.
    * @private
    */
   _serializer: Serializer|null = null;
 
-  private _referencePath: ResourcePath|null = null;
+  /**
+   * The project ID for this client.
+   *
+   * The project ID is auto-detected during the first request unless a project
+   * ID is passed to the constructor (or provided via `.settings()`).
+   * @private
+   */
+  private _projectId: string|undefined = undefined;
 
   // GCF currently tears down idle connections after two minutes. Requests
   // that are issued after this period may fail. On GCF, we therefore issue
@@ -311,6 +309,13 @@ export class Firestore {
       logger('Firestore', null, 'Detected GCF environment');
     }
 
+    this._clientPool =
+        new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
+          const client = new module.exports.v1(this._settings);
+          logger('Firestore', null, 'Initialized Firestore GAPIC Client');
+          return client;
+        });
+
     logger('Firestore', null, 'Initialized Firestore');
   }
 
@@ -331,16 +336,9 @@ export class Firestore {
         'settings.timestampsInSnapshots', settings.timestampsInSnapshots,
         {optional: true});
 
-    if (this._clientInitialized) {
-      throw new Error(
-          'Firestore has already been started and its settings can no longer ' +
-          'be changed. You can only call settings() before calling any other ' +
-          'methods on a Firestore object.');
-    }
-
     if (this._settingsFrozen) {
       throw new Error(
-          'Firestore.settings() has already be called. You can only call ' +
+          'Firestore has already been initialized. You can only call ' +
           'settings() once, and only before calling any other methods on a ' +
           'Firestore object.');
     }
@@ -357,11 +355,7 @@ export class Firestore {
 
     if (settings && settings.projectId) {
       validateString('settings.projectId', settings.projectId);
-      this._referencePath = new ResourcePath(settings.projectId, '(default)');
-    } else {
-      // Initialize a temporary reference path that will be overwritten during
-      // project ID detection.
-      this._referencePath = new ResourcePath('{{projectId}}', '(default)');
+      this._projectId = settings.projectId;
     }
 
     this._settings = settings;
@@ -369,16 +363,25 @@ export class Firestore {
   }
 
   /**
-   * The root path to the database.
+   * Returns the Project ID for this Firestore instance. Validates that
+   * `initializeIfNeeded()` was called before.
+   *
+   * @private
+   */
+  get projectId(): string {
+    this.ensureClientInitialized();
+    return this._projectId!;
+  }
+
+  /**
+   * Returns the root path of the database. Validates that
+   * `initializeIfNeeded()` was called before.
    *
    * @private
    */
   get formattedName(): string {
-    const components = [
-      'projects', this._referencePath!.projectId, 'databases',
-      this._referencePath!.databaseId
-    ];
-    return components.join('/');
+    this.ensureClientInitialized();
+    return `projects/${this.projectId}/databases/${DATABASE_ID}`;
   }
 
   /**
@@ -396,7 +399,7 @@ export class Firestore {
   doc(documentPath: string): DocumentReference {
     validateResourcePath('documentPath', documentPath);
 
-    const path = this._referencePath!.append(documentPath);
+    const path = RelativePath.EMPTY.append(documentPath);
     if (!path.isDocument) {
       throw new Error(`Argument "documentPath" must point to a document, but was "${
           documentPath}". Your path does not contain an even number of components.`);
@@ -424,7 +427,7 @@ export class Firestore {
   collection(collectionPath: string): CollectionReference {
     validateResourcePath('collectionPath', collectionPath);
 
-    const path = this._referencePath!.append(collectionPath);
+    const path = RelativePath.EMPTY.append(collectionPath);
     if (!path.isCollection) {
       throw new Error(`Argument "collectionPath" must point to a collection, but was "${
           collectionPath}". Your path does not contain an odd number of components.`);
@@ -592,7 +595,8 @@ export class Firestore {
           {optional: true, minValue: 1});
     }
 
-    return this._runTransaction(updateFunction, transactionOptions);
+    return this.initializeIfNeeded().then(
+        () => this._runTransaction(updateFunction, transactionOptions));
   }
 
   _runTransaction<T>(
@@ -667,7 +671,7 @@ export class Firestore {
    * });
    */
   listCollections() {
-    const rootDocument = new DocumentReference(this, this._referencePath!);
+    const rootDocument = new DocumentReference(this, RelativePath.EMPTY);
     return rootDocument.listCollections();
   }
 
@@ -712,7 +716,8 @@ export class Firestore {
 
     const {documents, fieldMask} =
         parseGetAllArguments(documentRefsOrReadOptions);
-    return this.getAll_(documents, fieldMask, requestTag());
+    return this.initializeIfNeeded().then(
+        () => this.getAll_(documents, fieldMask, requestTag()));
   }
 
   /**
@@ -813,13 +818,14 @@ export class Firestore {
   }
 
   /**
-   * Executes a new request using the first available GAPIC client.
+   * Initializes the client if it is not already initialized. All methods in the
+   * SDK can be used after this method completes.
    *
    * @private
+   * @return A Promise that resolves when the client is initialized.
    */
-  private _runRequest<T>(op: (client: GapicClient) => Promise<T>): Promise<T> {
-    // Initialize the client pool if this is the first request.
-    if (!this._clientInitialized) {
+  async initializeIfNeeded(): Promise<void> {
+    if (!this._settingsFrozen) {
       // Nobody should set timestampsInSnapshots anymore, but the error depends
       // on whether they set it to true or false...
       if (this._settings.timestampsInSnapshots === true) {
@@ -850,87 +856,51 @@ export class Firestore {
   Please audit all existing usages of Date when you enable the new
   behavior.`);
       }
-      this._clientInitialized = this._initClientPool().then(clientPool => {
-        this._clientPool = clientPool;
-      });
     }
 
-    return this._clientInitialized!.then(() => this._clientPool!.run(op));
-  }
+    this._settingsFrozen = true;
 
-  /**
-   * Initializes the client pool and invokes Project ID detection. Returns a
-   * Promise on completion.
-   *
-   * @private
-   */
-  private _initClientPool(): Promise<ClientPool<GapicClient>> {
-    assert(!this._clientInitialized, 'Client pool already initialized');
-
-    const clientPool =
-        new ClientPool(MAX_CONCURRENT_REQUESTS_PER_CLIENT, () => {
-          const client = new module.exports.v1(this._settings);
-          logger('Firestore', null, 'Initialized Firestore GAPIC Client');
-          return client;
-        });
-
-    const projectIdProvided =
-        this._referencePath!.projectId !== '{{projectId}}';
-
-    if (projectIdProvided) {
-      return Promise.resolve(clientPool);
-    } else {
-      return clientPool.run(client => this._detectProjectId(client))
-          .then(projectId => {
-            this._referencePath =
-                new ResourcePath(projectId, this._referencePath!.databaseId);
-            return clientPool;
+    if (this._projectId === undefined) {
+      this._projectId = await this._clientPool.run(gapicClient => {
+        return new Promise((resolve, reject) => {
+          gapicClient.getProjectId((err: Error, projectId: string) => {
+            if (err) {
+              logger(
+                  'Firestore._detectProjectId', null,
+                  'Failed to detect project ID: %s', err);
+              reject(err);
+            } else {
+              logger(
+                  'Firestore._detectProjectId', null, 'Detected project ID: %s',
+                  projectId);
+              resolve(projectId);
+            }
           });
+        });
+      });
     }
   }
 
   /**
-   * Auto-detects the Firestore Project ID.
-   *
+   * Ensures that the client has been fully initialized;
    * @private
-   * @param gapicClient The Firestore GAPIC client.
-   * @return A Promise that resolves with the Project ID.
    */
-  private _detectProjectId(gapicClient: GapicClient): Promise<string> {
-    return new Promise((resolve, reject) => {
-      gapicClient.getProjectId((err: Error, projectId: string) => {
-        if (err) {
-          logger(
-              'Firestore._detectProjectId', null,
-              'Failed to detect project ID: %s', err);
-          reject(err);
-        } else {
-          logger(
-              'Firestore._detectProjectId', null, 'Detected project ID: %s',
-              projectId);
-          resolve(projectId);
-        }
-      });
-    });
+  private ensureClientInitialized(): void {
+    if (this._projectId === undefined) {
+      // Note that we do not mention `initializeIfNeeded()` here to not leak the
+      // private API.
+      throw new Error('INTERNAL ERROR: Client is yet ready to issue requests.');
+    }
   }
 
   /**
-   * Decorate the request options of an API request. This is used to replace
-   * any `{{projectId}}` placeholders with the value detected from the user's
-   * environment, if one wasn't provided manually.
-   *
+   * Returns GAX call options that set the cloud resource header.
    * @private
    */
-  _decorateRequest<T>(request: T): {request: T, gax: {}} {
-    let decoratedRequest = extend(true, {}, request);
-    decoratedRequest =
-        replaceProjectIdToken(decoratedRequest, this._referencePath!.projectId);
-    const decoratedGax: {
-      otherArgs: {headers: {[k: string]: string}}
-    } = {otherArgs: {headers: {}}};
-    decoratedGax.otherArgs.headers[CLOUD_RESOURCE_HEADER] = this.formattedName;
-
-    return {request: decoratedRequest, gax: decoratedGax};
+  private createCallOptions(): CallOptions {
+    const gaxHeaders: CallOptions = {otherArgs: {headers: {}}};
+    gaxHeaders.otherArgs!.headers[CLOUD_RESOURCE_HEADER] = this.formattedName;
+    return gaxHeaders;
   }
 
   /**
@@ -1132,16 +1102,15 @@ export class Firestore {
       methodName: string, request: {}, requestTag: string,
       allowRetries: boolean): Promise<T> {
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
+    const callOptions = this.createCallOptions();
 
-    return this._runRequest(gapicClient => {
-      const decorated = this._decorateRequest(request);
+    return this._clientPool.run(gapicClient => {
       return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
           logger(
-              'Firestore.request', requestTag, 'Sending request: %j',
-              decorated.request);
+              'Firestore.request', requestTag, 'Sending request: %j', request);
           gapicClient[methodName](
-              decorated.request, decorated.gax, (err: GrpcError, result: T) => {
+              request, callOptions, (err: GrpcError, result: T) => {
                 if (err) {
                   logger(
                       'Firestore.request', requestTag, 'Received error:', err);
@@ -1178,17 +1147,16 @@ export class Firestore {
       methodName: string, request: {}, requestTag: string,
       allowRetries: boolean): Promise<NodeJS.ReadableStream> {
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
+    const callOptions = this.createCallOptions();
 
-    return this._runRequest(gapicClient => {
-      const decorated = this._decorateRequest(request);
+    return this._clientPool.run(gapicClient => {
       return this._retry(attempts, requestTag, () => {
         return new Promise<NodeJS.ReadableStream>((resolve, reject) => {
                  try {
                    logger(
                        'Firestore.readStream', requestTag,
-                       'Sending request: %j', decorated.request);
-                   const stream = gapicClient[methodName](
-                       decorated.request, decorated.gax);
+                       'Sending request: %j', request);
+                   const stream = gapicClient[methodName](request, callOptions);
                    const logStream =
                        through2.obj(function(this, chunk, enc, callback) {
                          logger(
@@ -1229,26 +1197,14 @@ export class Firestore {
   readWriteStream(
       methodName: string, request: {}, requestTag: string,
       allowRetries: boolean): Promise<NodeJS.ReadWriteStream> {
-    const self = this;
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
+    const callOptions = this.createCallOptions();
 
-    return this._runRequest(gapicClient => {
-      const decorated = this._decorateRequest(request);
+    return this._clientPool.run(gapicClient => {
       return this._retry(attempts, requestTag, () => {
         return Promise.resolve().then(() => {
           logger('Firestore.readWriteStream', requestTag, 'Opening stream');
-          const requestStream = gapicClient[methodName](decorated.gax);
-
-          // The transform stream to assign the project ID.
-          const transform = through2.obj((chunk, encoding, callback) => {
-            const decoratedChunk = extend(true, {}, chunk);
-            replaceProjectIdToken(
-                decoratedChunk, self._referencePath!.projectId);
-            logger(
-                'Firestore.readWriteStream', requestTag,
-                'Streaming request: %j', decoratedChunk);
-            requestStream.write(decoratedChunk, encoding, callback);
-          });
+          const requestStream = gapicClient[methodName](callOptions);
 
           const logStream = through2.obj(function(this, chunk, enc, callback) {
             logger(
@@ -1258,7 +1214,7 @@ export class Firestore {
             callback();
           });
 
-          const resultStream = bun([transform, requestStream, logStream]);
+          const resultStream = bun([requestStream, logStream]);
           return this._initializeStream(resultStream, requestTag, request);
         });
       });

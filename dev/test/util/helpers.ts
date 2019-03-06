@@ -15,6 +15,7 @@
  */
 
 import {expect} from 'chai';
+import * as extend from 'extend';
 import {CallOptions, GrpcClient} from 'google-gax';
 import * as through2 from 'through2';
 
@@ -83,6 +84,8 @@ export type ApiOverride = {
                        NodeJS.ReadableStream;
   runQuery?: (request: api.IRunQueryRequest) => NodeJS.ReadableStream;
   listen?: () => NodeJS.ReadWriteStream;
+  getProjectId?: (callback: (err?: Error|null, projectId?: string|null) =>
+                      void) => void;
 };
 
 /**
@@ -112,15 +115,18 @@ export function createInstance(
     const gapicClient: GapicClient = new v1(initializationOptions);
     if (apiOverrides) {
       Object.keys(apiOverrides).forEach(override => {
-        gapicClient._innerApiCalls[override] =
-            (apiOverrides as {[k: string]: unknown})[override];
+        const apiOverride = (apiOverrides as {[k: string]: unknown})[override];
+        if (override !== 'getProjectId') {
+          gapicClient._innerApiCalls[override] = apiOverride;
+        } else {
+          gapicClient[override] = apiOverride;
+        }
       });
     }
     return gapicClient;
   });
 
-  // tslint:disable-next-line:no-any
-  (firestore as any)._initClientPool = () => Promise.resolve(clientPool);
+  firestore['_clientPool'] = clientPool;
 
   return Promise.resolve(firestore);
 }
@@ -304,12 +310,12 @@ export function writeResult(count: number): api.IWriteResponse {
 }
 
 export function requestEquals(
-    actual: object, expected: {[k: string]: unknown}): void {
-  const proto = Object.assign(
-      {
-        database: DATABASE_ROOT,
-      },
-      expected);
+    actual: {[k: string]: unknown}, expected: {[k: string]: unknown}): void {
+  // 'extend' removes undefined fields in the request object. The backend
+  // ignores these fields, but we need to manually strip them before we compare
+  // the expected and the actual request.
+  actual = extend(true, {}, actual);
+  const proto = Object.assign({database: DATABASE_ROOT}, expected);
   expect(actual).to.deep.eq(proto);
 }
 

@@ -275,7 +275,7 @@ function formatArgumentName(arg: string|number): string {
  * @throws if the expectation is not met.
  */
 export function validateMinNumberOfArguments(
-    funcName: string, args: IArguments, minSize: number): void {
+    funcName: string, args: IArguments|unknown[], minSize: number): void {
   if (args.length < minSize) {
     throw new Error(
         `Function "${funcName}()" requires at least ` +

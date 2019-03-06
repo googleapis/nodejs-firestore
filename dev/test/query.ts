@@ -247,6 +247,10 @@ function queryEquals(
     extend(true, query.structuredQuery, protoComponent);
   }
 
+  // 'extend' removes undefined fields in the request object. The backend
+  // ignores these fields, but we need to manually strip them before we compare
+  // the expected and the actual request.
+  actual = extend(true, {}, actual);
   expect(actual).to.deep.eq(query);
 }
 
@@ -340,8 +344,7 @@ describe('query interface', () => {
     queryEquals(
         [
           query.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
-          query.orderBy('foo').startAt(
-              firestore.snapshot_(document('c', 'foo', 'b'), {})),
+          query.orderBy('foo').orderBy('__name__').startAt('b', 'c')
         ],
         []);
   });

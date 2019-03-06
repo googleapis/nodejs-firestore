@@ -1151,10 +1151,12 @@ describe('Query class', () => {
 
     const snapshot = (id: string, data: DocumentData) => {
       const ref = randomCol.doc(id);
+      const fields = ref.firestore._serializer!.encodeFields(data);
       return randomCol.firestore.snapshot_(
           {
-            name: ref.formattedName,
-            fields: ref.firestore._serializer!.encodeFields(data),
+            name: 'projects/ignored/databases/(default)/documents/' +
+                ref._path.relativeName,
+            fields,
             createTime: {seconds: 0, nanos: 0},
             updateTime: {seconds: 0, nanos: 0},
           },

@@ -49,6 +49,12 @@ const UNESCAPED_FIELD_NAME_RE = /^[_a-zA-Z][_a-zA-Z0-9]*$/;
  */
 const FIELD_PATH_RE = /^[^*~/[\]]+$/;
 
+/*!
+ * The default database ID for this Firestore client. We do not yet expose the
+ * ability to use different databases.
+ */
+export const DATABASE_ID = '(default)';
+
 /**
  * An abstract class representing a Firestore path.
  *
@@ -68,15 +74,6 @@ abstract class Path<T> {
   constructor(protected readonly segments: string[]) {}
 
   /**
-   * String representation as expected by the proto API.
-   *
-   * @private
-   */
-  get formattedName(): string {
-    return this.canonicalString()!;
-  }
-
-  /**
    * Returns the number of segments of this field path.
    *
    * @private
@@ -86,7 +83,6 @@ abstract class Path<T> {
   }
 
   abstract construct(segments: string[]|string): T;
-  abstract canonicalString(): string;
   abstract split(relativePath: string): string[];
 
   /**
@@ -136,16 +132,6 @@ abstract class Path<T> {
     }
 
     return true;
-  }
-
-  /**
-   * Returns a string representation of this path.
-   *
-   * @private
-   * @returns A string representing this path.
-   */
-  toString(): string {
-    return this.formattedName;
   }
 
   /**
@@ -199,13 +185,96 @@ abstract class Path<T> {
 }
 
 /**
- * A slash-separated path for navigating resources (documents and collections)
- * within Firestore.
+ * A slash-separated path for navigating resources within the current Firestore
+ * instance.
  *
  * @private
- * @class
  */
-export class ResourcePath extends Path<ResourcePath> {
+export class RelativePath extends Path<RelativePath> {
+  /** A default instance pointing to the root collection. */
+  static EMPTY = new RelativePath();
+
+  /**
+   * Constructs a RelativePath.
+   *
+   * @param segments Sequence of names of the parts of the path.
+   */
+  constructor(...segments: string[]) {
+    super(segments);
+  }
+
+  /**
+   * Indicates whether this path points to a document.
+   */
+  get isDocument(): boolean {
+    return this.segments.length > 0 && this.segments.length % 2 === 0;
+  }
+
+  /**
+   * Indicates whether this path points to a collection.
+   */
+  get isCollection(): boolean {
+    return this.segments.length % 2 === 1;
+  }
+
+  /**
+   * The last component of the path.
+   */
+  get id(): string|null {
+    if (this.segments.length > 0) {
+      return this.segments[this.segments.length - 1];
+    }
+    return null;
+  }
+
+  /**
+   * Returns the location of this path relative to the root of the project's
+   * database.
+   */
+  get relativeName() {
+    return this.segments.join('/');
+  }
+
+  /**
+   * Constructs a new instance of RelativePath.
+   *
+   * @param segments Sequence of names of the parts of the path.
+   * @returns The newly created RelativePath.
+   */
+  construct(segments: string[]): RelativePath {
+    return new RelativePath(...segments);
+  }
+
+  /**
+   * Splits a string into path segments, using slashes as separators.
+   *
+   * @param relativePath The path to split.
+   * @returns The split path segments.
+   */
+  split(relativePath: string): string[] {
+    // We may have an empty segment at the beginning or end if they had a
+    // leading or trailing slash (which we allow).
+    return relativePath.split('/').filter(segment => segment.length > 0);
+  }
+
+  /**
+   * Converts this path to a fully qualified ResourcePath.
+   * @param projectId The project ID of the new path.
+   * @param databaseId The database ID of the new path.
+   * @return A fully-qualified resource path pointing to the same element.
+   */
+  toResourcePath(projectId: string): ResourcePath {
+    return new ResourcePath(projectId, DATABASE_ID, ...this.segments);
+  }
+}
+
+/**
+ * A slash-separated path for navigating resources (documents and collections)
+ * within any Firestore project.
+ *
+ * @private
+ */
+export class ResourcePath extends RelativePath {
   /**
    * The project ID of this path.
    */
@@ -219,15 +288,12 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * Constructs a Firestore Resource Path.
    *
-   * @private
-   * @hideconstructor
-   *
    * @param projectId The Firestore project id.
    * @param databaseId The Firestore database id.
    * @param segments Sequence of names of the parts of the path.
    */
   constructor(projectId: string, databaseId: string, ...segments: string[]) {
-    super(segments);
+    super(...segments);
 
     this.projectId = projectId;
     this.databaseId = databaseId;
@@ -235,53 +301,16 @@ export class ResourcePath extends Path<ResourcePath> {
 
   /**
    * String representation of the path relative to the database root.
-   *
-   * @private
-   * @type {string}
    */
   get relativeName(): string {
     return this.segments.join('/');
   }
 
   /**
-   * Indicates whether this ResourcePath points to a document.
-   *
-   * @private
-   * @type {boolean}
-   */
-  get isDocument(): boolean {
-    return this.segments.length > 0 && this.segments.length % 2 === 0;
-  }
-
-  /**
-   * Indicates whether this ResourcePath points to a collection.
-   *
-   * @private
-   * @type {boolean}
-   */
-  get isCollection(): boolean {
-    return this.segments.length % 2 === 1;
-  }
-
-  /**
-   * The last component of the path.
-   *
-   * @private
-   * @type {string|null}
-   */
-  get id(): string|null {
-    if (this.segments.length > 0) {
-      return this.segments[this.segments.length - 1];
-    }
-    return null;
-  }
-
-  /**
    * Creates a resource path from an absolute Firestore path.
    *
-   * @private
-   * @param {string} absolutePath A string representation of a Resource Path.
-   * @returns {ResourcePath} The new ResourcePath.
+   * @param absolutePath A string representation of a Resource Path.
+   * @returns The new ResourcePath.
    */
   static fromSlashSeparatedString(absolutePath: string): ResourcePath {
     const elements = RESOURCE_PATH_RE.exec(absolutePath);
@@ -297,27 +326,31 @@ export class ResourcePath extends Path<ResourcePath> {
   }
 
   /**
-   * Splits a string into path segments, using slashes as separators.
+   * Create a child path beneath the current level.
    *
-   * @private
-   * @override
-   * @param {string} relativePath The path to split.
-   * @returns {Array.<string>} - The split path segments.
+   * @param relativePath Relative path to append to the current path.
+   * @returns The new path.
    */
-  split(relativePath: string): string[] {
-    // We may have an empty segment at the beginning or end if they had a
-    // leading or trailing slash (which we allow).
-    return relativePath.split('/').filter(segment => segment.length > 0);
+  append(relativePath: RelativePath|string): ResourcePath {
+    return super.append(relativePath) as ResourcePath;
+  }
+
+
+  /**
+   * Create a child path beneath the current level.
+   *
+   * @returns The new path.
+   */
+  parent(): ResourcePath|null {
+    return super.parent() as ResourcePath | null;
   }
 
   /**
    * String representation of a ResourcePath as expected by the API.
    *
-   * @private
-   * @override
-   * @returns {string} The representation as expected by the API.
+   * @returns The representation as expected by the API.
    */
-  canonicalString(): string {
+  get formattedName(): string {
     const components = [
       'projects', this.projectId, 'databases', this.databaseId, 'documents',
       ...this.segments
@@ -330,10 +363,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * the normal constructor because polymorphic 'this' doesn't work on static
    * methods.
    *
-   * @private
-   * @override
-   * @param {Array.<string>} segments Sequence of names of the parts of the
-   * path.
+   * @param segments Sequence of names of the parts of the path.
    * @returns {ResourcePath} The newly created ResourcePath.
    */
   construct(segments: string[]): ResourcePath {
@@ -341,33 +371,34 @@ export class ResourcePath extends Path<ResourcePath> {
   }
 
   /**
+   * Convenience method to match the RelativePath API. This method always
+   * returns the current instance. The arguments is ignored.
+   */
+  toResourcePath(projectId: string): ResourcePath {
+    return this;
+  }
+
+  /**
    * Compare the current path against another ResourcePath object.
    *
-   * @private
-   * @override
-   * @param {ResourcePath} other The path to compare to.
-   * @returns {number} -1 if current < other, 1 if current > other, 0 if equal
+   * @param other The path to compare to.
+   * @returns -1 if current < other, 1 if current > other, 0 if equal
    */
-  compareTo(other: ResourcePath): number {
-    // Ignore DocumentReference with {{projectId}} placeholders and assume that
-    // the resolved IDs match the provided ResourcePath. We could alternatively
-    // try to resolve the Project ID here, but this is asynchronous as it
-    // requires Disk I/O.
-    if (this.projectId !== '{{projectId}}' &&
-        other.projectId !== '{{projectId}}') {
+  compareTo(other: RelativePath): number {
+    if (other instanceof ResourcePath) {
       if (this.projectId < other.projectId) {
         return -1;
       }
       if (this.projectId > other.projectId) {
         return 1;
       }
-    }
 
-    if (this.databaseId < other.databaseId) {
-      return -1;
-    }
-    if (this.databaseId > other.databaseId) {
-      return 1;
+      if (this.databaseId < other.databaseId) {
+        return -1;
+      }
+      if (this.databaseId > other.databaseId) {
+        return 1;
+      }
     }
 
     return super.compareTo(other);
@@ -375,8 +406,6 @@ export class ResourcePath extends Path<ResourcePath> {
 
   /**
    * Converts this ResourcePath to the Firestore Proto representation.
-   *
-   * @private
    */
   toProto(): api.IValue {
     return {
@@ -439,11 +468,11 @@ export class FieldPath extends Path<FieldPath> {
    * });
    */
   constructor(...segments: string[]) {
-    validateMinNumberOfArguments('FieldPath', arguments, 1);
-
     const elements: string[] = Array.isArray(segments[0]) ?
         (segments[0] as unknown) as string[] :
         segments;
+
+    validateMinNumberOfArguments('FieldPath', elements, 1);
 
     for (let i = 0; i < elements.length; ++i) {
       validateString(i, elements[i]);
@@ -489,7 +518,7 @@ export class FieldPath extends Path<FieldPath> {
    * @override
    * @returns {string} The representation as expected by the API.
    */
-  canonicalString(): string {
+  get formattedName(): string {
     return this.segments
         .map(str => {
           return UNESCAPED_FIELD_NAME_RE.test(str) ?
@@ -497,6 +526,16 @@ export class FieldPath extends Path<FieldPath> {
               '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
         })
         .join('.');
+  }
+
+  /**
+   * Returns a string representation of this path.
+   *
+   * @private
+   * @returns A string representing this path.
+   */
+  toString(): string {
+    return this.formattedName;
   }
 
   /**

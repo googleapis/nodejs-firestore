@@ -47,14 +47,11 @@
     "predocs-test": "npm run docs"
   },
   "dependencies": {
-    "@google-cloud/projectify": "^0.3.0",
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
-    "extend": "^3.0.1",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^0.25.0",
     "lodash.merge": "^4.6.1",
-    "protobufjs": "^6.8.6",
     "through2": "^3.0.0"
   },
   "devDependencies": {
@@ -71,6 +68,7 @@
     "chai-as-promised": "^7.1.1",
     "codecov": "^3.0.2",
     "duplexify": "^4.0.0",
+    "extend": "^3.0.1",
     "gts": "^0.9.0",
     "hard-rejection": "^1.0.0",
     "jsdoc-baseline": "git+https://github.com/hegemonic/jsdoc-baseline.git",
@@ -79,6 +77,7 @@
     "mocha": "^6.0.0",
     "nyc": "^13.0.0",
     "proxyquire": "^2.0.1",
+    "protobufjs": "^6.8.6",
     "source-map-support": "^0.5.6",
     "ts-node": "^8.0.0",
     "typescript": "~3.3.0",

@@ -16,6 +16,7 @@
 
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import * as extend from 'extend';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
@@ -283,6 +284,7 @@ function runTransaction<T>(
     runQuery: (actual) => {
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('query');
+      actual = extend(true, {}, actual);  // Remove undefined properties
       expect(actual).to.deep.eq(request.request);
       return request.stream!;
     }
