@@ -321,6 +321,8 @@ class NumericIncrementTransform extends FieldTransform {
 
   /**
    * Numeric transforms are omitted from document masks.
+   *
+   * @private
    */
   get includeInDocumentMask(): false {
     return false;
@@ -328,6 +330,8 @@ class NumericIncrementTransform extends FieldTransform {
 
   /**
    * Numeric transforms are included in document transforms.
+   *
+   * @private
    */
   get includeInDocumentTransform(): true {
     return true;
