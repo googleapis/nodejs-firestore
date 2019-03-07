@@ -132,10 +132,10 @@ describe('timestamps', () => {
 
   it('validates nanoseconds', () => {
     expect(() => new Firestore.Timestamp(0.1, 0))
-        .to.throw('Argument "seconds" is not a valid integer.');
+        .to.throw('Value for argument "seconds" is not a valid integer.');
 
     expect(() => new Firestore.Timestamp(0, 0.1))
-        .to.throw('Argument "nanoseconds" is not a valid integer.');
+        .to.throw('Value for argument "nanoseconds" is not a valid integer.');
 
     expect(() => new Firestore.Timestamp(0, -1))
         .to.throw(

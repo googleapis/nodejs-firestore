@@ -20,7 +20,7 @@ import * as proto from '../protos/firestore_proto_api';
 
 import {FieldPath} from './path';
 import {Serializer, validateUserInput} from './serializer';
-import {validateMinNumberOfArguments} from './validate';
+import {validateMinNumberOfArguments, validateNumber} from './validate';
 
 import api = proto.google.firestore.v1;
 
@@ -77,6 +77,39 @@ export class FieldValue {
    */
   static serverTimestamp(): FieldValue {
     return ServerTimestampTransform.SERVER_TIMESTAMP_SENTINEL;
+  }
+
+  /**
+   * Returns a special value that can be used with set(), create() or update()
+   * that tells the server to increment the the field's current value by the
+   * given value.
+   *
+   * If either current field value or the operand uses floating point
+   * precision, both values will be interpreted as floating point numbers and
+   * all arithmetic will follow IEEE 754 semantics. Otherwise, integer
+   * precision is kept and the result is capped between -2^63 and 2^63-1.
+   *
+   * If the current field value is not of type 'number', or if the field does
+   * not yet exist, the transformation will set the field to the given value.
+   *
+   * @param {number} n The value to increment by.
+   * @return {FieldValue} The FieldValue sentinel for use in a call to set(),
+   * create() or update().
+   *
+   * @example
+   * let documentRef = firestore.doc('col/doc');
+   *
+   * documentRef.update(
+   *   'counter', Firestore.FieldValue.increment(1)
+   * ).then(() => {
+   *   return documentRef.get();
+   * }).then(doc => {
+   *   // doc.get('counter') was incremented
+   * });
+   */
+  static increment(n: number): FieldValue {
+    validateMinNumberOfArguments('FieldValue.increment', arguments, 1);
+    return new NumericIncrementTransform(n);
   }
 
   /**
@@ -273,6 +306,56 @@ class ServerTimestampTransform extends FieldTransform {
       fieldPath: fieldPath.formattedName,
       setToServerValue: 'REQUEST_TIME',
     };
+  }
+}
+
+/**
+ * Increments a field value on the backend.
+ *
+ * @private
+ */
+class NumericIncrementTransform extends FieldTransform {
+  constructor(private readonly operand: number) {
+    super();
+  }
+
+  /**
+   * Numeric transforms are omitted from document masks.
+   *
+   * @private
+   */
+  get includeInDocumentMask(): false {
+    return false;
+  }
+
+  /**
+   * Numeric transforms are included in document transforms.
+   *
+   * @private
+   */
+  get includeInDocumentTransform(): true {
+    return true;
+  }
+
+  get methodName(): string {
+    return 'FieldValue.increment';
+  }
+
+  validate(): void {
+    validateNumber('FieldValue.increment()', this.operand);
+  }
+
+  toProto(serializer: Serializer, fieldPath: FieldPath):
+      api.DocumentTransform.IFieldTransform {
+    const encodedOperand = serializer.encodeValue(this.operand)!;
+    return {fieldPath: fieldPath.formattedName, increment: encodedOperand};
+  }
+
+  isEqual(other: FieldValue): boolean {
+    return (
+        this === other ||
+        (other instanceof NumericIncrementTransform &&
+         this.operand === other.operand));
   }
 }
 
