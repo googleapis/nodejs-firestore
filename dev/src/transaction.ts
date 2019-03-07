@@ -129,7 +129,8 @@ export class Transaction {
       return refOrQuery._get(this._transactionId);
     }
 
-    throw new Error('Argument "refOrQuery" must be a DocumentRef or a Query.');
+    throw new Error(
+        'Value for argument "refOrQuery" must be a DocumentReference or a Query.');
   }
 
   /**

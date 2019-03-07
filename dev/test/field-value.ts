@@ -17,7 +17,7 @@
 import {expect} from 'chai';
 
 import {FieldValue} from '../src';
-import {ApiOverride, arrayTransform, createInstance, document, requestEquals, serverTimestamp, set, writeResult} from './util/helpers';
+import {ApiOverride, arrayTransform, createInstance, document, incrementTransform, InvalidApiUsage, requestEquals, serverTimestamp, set, writeResult} from './util/helpers';
 
 function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
   it('can\'t be used inside arrays', () => {
@@ -38,7 +38,7 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: FieldValue.arrayUnion(sentinel)}))
-          .to.throw(`Argument at index 0 is not a valid array element. ${
+          .to.throw(`Element at index 0 is not a valid array element. ${
               methodName}() cannot be used inside of an array.`);
     });
   });
@@ -47,7 +47,7 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: FieldValue.arrayRemove(sentinel)}))
-          .to.throw(`Argument at index 0 is not a valid array element. ${
+          .to.throw(`Element at index 0 is not a valid array element. ${
               methodName}() cannot be used inside of an array.`);
     });
   });
@@ -56,10 +56,11 @@ function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
     return createInstance().then(firestore => {
       const collRef = firestore.collection('coll');
       expect(() => collRef.where('a', '==', sentinel))
-          .to.throw(`Argument "value" is not a valid query constraint. ${
+          .to
+          .throw(`Value for argument "value" is not a valid query constraint. ${
               methodName}() can only be used in set(), create() or update().`);
       expect(() => collRef.orderBy('a').startAt(sentinel))
-          .to.throw(`Argument at index 0 is not a valid query constraint. ${
+          .to.throw(`Element at index 0 is not a valid query constraint. ${
               methodName}() can only be used in set(), create() or update().`);
     });
   });
@@ -107,6 +108,60 @@ describe('FieldValue.arrayUnion()', () => {
   });
 
   genericFieldValueTests('FieldValue.arrayUnion', FieldValue.arrayUnion('foo'));
+});
+
+describe('FieldValue.increment()', () => {
+  it('requires one argument', () => {
+    expect(() => (FieldValue as InvalidApiUsage).increment())
+        .to.throw(
+            'Function "FieldValue.increment()" requires at least 1 argument.');
+  });
+
+  it('validates that operand is number', () => {
+    return createInstance().then(firestore => {
+      expect(() => {
+        return firestore.doc('collectionId/documentId').set({
+          foo: FieldValue.increment('foo' as InvalidApiUsage),
+        });
+      })
+          .to.throw(
+              'Value for argument "FieldValue.increment()" is not a valid number');
+    });
+  });
+
+  it('supports isEqual()', () => {
+    const arrayUnionA = FieldValue.increment(13.37);
+    const arrayUnionB = FieldValue.increment(13.37);
+    const arrayUnionC = FieldValue.increment(42);
+    expect(arrayUnionA.isEqual(arrayUnionB)).to.be.true;
+    expect(arrayUnionC.isEqual(arrayUnionB)).to.be.false;
+  });
+
+  it('can be used with set()', () => {
+    const overrides: ApiOverride = {
+      commit: (request, options, callback) => {
+        const expectedRequest = set({
+          document: document('documentId', 'foo', 'bar'),
+          transforms: [
+            incrementTransform('field', 42),
+            incrementTransform('map.field', 13.37),
+          ]
+        });
+        requestEquals(request, expectedRequest);
+        callback(null, writeResult(2));
+      }
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        foo: 'bar',
+        field: FieldValue.increment(42),
+        map: {field: FieldValue.increment(13.37)},
+      });
+    });
+  });
+
+  genericFieldValueTests('FieldValue.increment', FieldValue.increment(42));
 });
 
 describe('FieldValue.arrayRemove()', () => {

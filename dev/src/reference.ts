@@ -33,7 +33,7 @@ import {Timestamp} from './timestamp';
 import {DocumentData, OrderByDirection, Precondition, SetOptions, UpdateData, WhereFilterOp} from './types';
 import {autoId, requestTag} from './util';
 import {invalidArgumentMessage, validateEnumValue, validateFunction, validateInteger, validateMinNumberOfArguments} from './validate';
-import {Watch} from './watch';
+import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = proto.google.firestore.v1;
@@ -232,7 +232,7 @@ export class DocumentReference {
 
     const path = this._path.append(collectionPath);
     if (!path.isCollection) {
-      throw new Error(`Argument "collectionPath" must point to a collection, but was "${
+      throw new Error(`Value for argument "collectionPath" must point to a collection, but was "${
           collectionPath}". Your path does not contain an odd number of components.`);
     }
 
@@ -448,7 +448,7 @@ export class DocumentReference {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = Watch.forDocument(this);
+    const watch = new DocumentWatch(this.firestore, this);
 
     return watch.onSnapshot((readTime, size, docs) => {
       for (const document of docs()) {
@@ -1685,7 +1685,7 @@ export class Query {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = Watch.forQuery(this);
+    const watch = new QueryWatch(this.firestore, this);
 
     return watch.onSnapshot((readTime, size, docs, changes) => {
       onNext(new QuerySnapshot(this, readTime, size, docs, changes));
@@ -1879,7 +1879,7 @@ export class CollectionReference extends Query {
 
     const path = this._path.append(documentPath!);
     if (!path.isDocument) {
-      throw new Error(`Argument "documentPath" must point to a document, but was "${
+      throw new Error(`Value for argument "documentPath" must point to a document, but was "${
           documentPath}". Your path does not contain an even number of components.`);
     }
 
