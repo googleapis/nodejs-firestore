@@ -68,5 +68,5 @@ export function isEmpty(value: {}): boolean {
  * @private
  */
 export function isFunction(value: unknown): boolean {
-  return value && {}.toString.call(value) === '[object Function]';
+  return typeof value === 'function';
 }
