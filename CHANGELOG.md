@@ -4,6 +4,24 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## v1.1.0
+
+03-10-2019 20:09 PDT
+
+### New Features
+- feature: Added `FieldValue.increment()`, which can be used in `create()`, `update()` and `set(..., {merge:true})` to 
+  increment or decrement numeric field values safely without transactions ([#444](https://github.com/googleapis/nodejs-firestore/pull/444))
+
+### Implementation Changes
+- fix: Allow async functions ([#576](https://github.com/googleapis/nodejs-firestore/pull/576))
+- fix: Don't call stream.end() on Watch ended by server ([#565](https://github.com/googleapis/nodejs-firestore/pull/565))
+
+### Internal / Testing Changes
+- refactor: async/await to test/order.ts ([#566](https://github.com/googleapis/nodejs-firestore/pull/566))
+- build: Add docuploader credentials to node publish jobs ([#572](https://github.com/googleapis/nodejs-firestore/pull/572))
+- build: update release config ([#570](https://github.com/googleapis/nodejs-firestore/pull/570))
+- build: use node10 to run samples-test, system-test etc ([#571](https://github.com/googleapis/nodejs-firestore/pull/571))
+
 ## v1.0.2
 
 03-04-2019 13:32 PST
