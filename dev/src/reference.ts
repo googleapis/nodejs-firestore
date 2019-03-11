@@ -17,7 +17,6 @@
 const deepEqual = require('deep-equal');
 
 import * as bun from 'bun';
-import * as extend from 'extend';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
@@ -1064,7 +1063,7 @@ export class Query {
       }
     }
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
     options.projection = {fields};
 
     return new Query(
@@ -1135,7 +1134,7 @@ export class Query {
   limit(limit: number): Query {
     validateInteger('limit', limit);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
     options.limit = limit;
     return new Query(
         this._firestore, this._path, this._fieldFilters, this._fieldOrders,
@@ -1164,7 +1163,7 @@ export class Query {
   offset(offset: number): Query {
     validateInteger('offset', offset);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
     options.offset = offset;
     return new Query(
         this._firestore, this._path, this._fieldFilters, this._fieldOrders,
@@ -1349,7 +1348,7 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.startAt', arguments, 1);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1384,7 +1383,7 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.startAfter', arguments, 1);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1418,7 +1417,7 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.endBefore', arguments, 1);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1452,7 +1451,7 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.endAt', arguments, 1);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
