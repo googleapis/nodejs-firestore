@@ -191,12 +191,16 @@ abstract class Path<T> {
  * @private
  */
 export class ResourcePath extends Path<ResourcePath> {
-  /** A default instance pointing to the root collection. */
+  /**
+   * A default instance pointing to the root collection.
+   * @private
+   */
   static EMPTY = new ResourcePath();
 
   /**
    * Constructs a ResourcePath.
    *
+   * @private
    * @param segments Sequence of names of the parts of the path.
    */
   constructor(...segments: string[]) {
@@ -205,6 +209,7 @@ export class ResourcePath extends Path<ResourcePath> {
 
   /**
    * Indicates whether this path points to a document.
+   * @private
    */
   get isDocument(): boolean {
     return this.segments.length > 0 && this.segments.length % 2 === 0;
@@ -212,6 +217,7 @@ export class ResourcePath extends Path<ResourcePath> {
 
   /**
    * Indicates whether this path points to a collection.
+   * @private
    */
   get isCollection(): boolean {
     return this.segments.length % 2 === 1;
@@ -219,6 +225,7 @@ export class ResourcePath extends Path<ResourcePath> {
 
   /**
    * The last component of the path.
+   * @private
    */
   get id(): string|null {
     if (this.segments.length > 0) {
@@ -230,6 +237,7 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * Returns the location of this path relative to the root of the project's
    * database.
+   * @private
    */
   get relativeName() {
     return this.segments.join('/');
@@ -238,6 +246,7 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * Constructs a new instance of RelativePath.
    *
+   * @private
    * @param segments Sequence of ResourcePath of the parts of the path.
    * @returns The newly created RelativePath.
    */
@@ -248,6 +257,7 @@ export class ResourcePath extends Path<ResourcePath> {
   /**
    * Splits a string into path segments, using slashes as separators.
    *
+   * @private
    * @param relativePath The path to split.
    * @returns The split path segments.
    */
@@ -259,6 +269,8 @@ export class ResourcePath extends Path<ResourcePath> {
 
   /**
    * Converts this path to a fully qualified ResourcePath.
+   *
+   * @private
    * @param projectId The project ID of the new path.
    * @param databaseId The database ID of the new path.
    * @return A fully-qualified resource path pointing to the same element.
@@ -289,6 +301,7 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * Constructs a Firestore Resource Path.
    *
+   * @private
    * @param projectId The Firestore project id.
    * @param databaseId The Firestore database id.
    * @param segments Sequence of names of the parts of the path.
@@ -302,6 +315,7 @@ export class QualifiedResourcePath extends ResourcePath {
 
   /**
    * String representation of the path relative to the database root.
+   * @private
    */
   get relativeName(): string {
     return this.segments.join('/');
@@ -310,6 +324,7 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * Creates a resource path from an absolute Firestore path.
    *
+   * @private
    * @param absolutePath A string representation of a Resource Path.
    * @returns The new ResourcePath.
    */
@@ -329,6 +344,7 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * Create a child path beneath the current level.
    *
+   * @private
    * @param relativePath Relative path to append to the current path.
    * @returns The new path.
    */
@@ -340,6 +356,7 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * Create a child path beneath the current level.
    *
+   * @private
    * @returns The new path.
    */
   parent(): QualifiedResourcePath|null {
@@ -349,6 +366,7 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * String representation of a ResourcePath as expected by the API.
    *
+   * @private
    * @returns The representation as expected by the API.
    */
   get formattedName(): string {
@@ -364,6 +382,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * the normal constructor because polymorphic 'this' doesn't work on static
    * methods.
    *
+   * @private
    * @param segments Sequence of names of the parts of the path.
    * @returns The newly created QualifiedResourcePath.
    */
@@ -375,6 +394,7 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * Convenience method to match the ResourcePath API. This method always
    * returns the current instance. The arguments is ignored.
+   * @private
    */
   toQualifiedResourcePath(projectId: string): QualifiedResourcePath {
     return this;
@@ -383,6 +403,7 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * Compare the current path against another ResourcePath object.
    *
+   * @private
    * @param other The path to compare to.
    * @returns -1 if current < other, 1 if current > other, 0 if equal
    */
@@ -408,6 +429,7 @@ export class QualifiedResourcePath extends ResourcePath {
 
   /**
    * Converts this ResourcePath to the Firestore Proto representation.
+   * @private
    */
   toProto(): api.IValue {
     return {
