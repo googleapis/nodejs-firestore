@@ -83,7 +83,7 @@ describe('FieldPath', () => {
   it('only accepts strings', () => {
     expect(() => {
       new FieldPath('foo', 'bar', 0 as InvalidApiUsage);
-    }).to.throw('Argument at index 2 is not a valid string.');
+    }).to.throw('Element at index 2 is not a valid string.');
   });
 
   it('has append() method', () => {

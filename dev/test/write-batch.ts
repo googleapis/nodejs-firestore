@@ -39,13 +39,14 @@ describe('set() method', () => {
 
   it('requires document name', () => {
     expect(() => (writeBatch as InvalidApiUsage).set())
-        .to.throw('Argument "documentRef" is not a valid DocumentReference.');
+        .to.throw(
+            'Value for argument "documentRef" is not a valid DocumentReference.');
   });
 
   it('requires object', () => {
     expect(() => (writeBatch as InvalidApiUsage).set(firestore.doc('sub/doc')))
         .to.throw(
-            'Argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
+            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 
   it('accepts preconditions', () => {
@@ -66,7 +67,8 @@ describe('delete() method', () => {
 
   it('requires document name', () => {
     expect(() => (writeBatch as InvalidApiUsage).delete())
-        .to.throw('Argument "documentRef" is not a valid DocumentReference.');
+        .to.throw(
+            'Value for argument "documentRef" is not a valid DocumentReference.');
   });
 
   it('accepts preconditions', () => {
@@ -89,7 +91,8 @@ describe('update() method', () => {
 
   it('requires document name', () => {
     expect(() => writeBatch.update({} as InvalidApiUsage, {}))
-        .to.throw('Argument "documentRef" is not a valid DocumentReference.');
+        .to.throw(
+            'Value for argument "documentRef" is not a valid DocumentReference.');
   });
 
   it('requires object', () => {
@@ -97,7 +100,7 @@ describe('update() method', () => {
       writeBatch.update(firestore.doc('sub/doc'), firestore.doc('sub/doc'));
     })
         .to.throw(
-            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Argument "dataOrField" is not a valid Firestore document. Detected an object of type "DocumentReference" that doesn\'t match the expected instance. Please ensure that the Firestore types you are using are from the same NPM package.');
+            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore document. Detected an object of type "DocumentReference" that doesn\'t match the expected instance. Please ensure that the Firestore types you are using are from the same NPM package.');
   });
 
   it('accepts preconditions', () => {
@@ -120,7 +123,8 @@ describe('create() method', () => {
 
   it('requires document name', () => {
     expect(() => (writeBatch as InvalidApiUsage).create())
-        .to.throw('Argument "documentRef" is not a valid DocumentReference.');
+        .to.throw(
+            'Value for argument "documentRef" is not a valid DocumentReference.');
   });
 
   it('requires object', () => {
@@ -128,7 +132,7 @@ describe('create() method', () => {
       (writeBatch as InvalidApiUsage).create(firestore.doc('sub/doc'));
     })
         .to.throw(
-            'Argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
+            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
   });
 });
 

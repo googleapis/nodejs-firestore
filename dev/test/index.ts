@@ -298,13 +298,18 @@ describe('instantiation', () => {
         projectId: 1337,
       });
       new Firestore.Firestore(settings);
-    }).to.throw('Argument "settings.projectId" is not a valid string.');
+    })
+        .to.throw(
+            'Value for argument "settings.projectId" is not a valid string.');
+
 
     expect(() => {
       new Firestore.Firestore(DEFAULT_SETTINGS).settings({
         projectId: 1337
       } as InvalidApiUsage);
-    }).to.throw('Argument "settings.projectId" is not a valid string.');
+    })
+        .to.throw(
+            'Value for argument "settings.projectId" is not a valid string.');
   });
 
   it('validates timestampsInSnapshots is boolean', () => {
@@ -315,7 +320,7 @@ describe('instantiation', () => {
       new Firestore.Firestore(settings);
     })
         .to.throw(
-            'Argument "settings.timestampsInSnapshots" is not a valid boolean.');
+            'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.');
 
     expect(() => {
       new Firestore.Firestore(DEFAULT_SETTINGS).settings({
@@ -323,7 +328,7 @@ describe('instantiation', () => {
       });
     })
         .to.throw(
-            'Argument "settings.timestampsInSnapshots" is not a valid boolean.');
+            'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.');
   });
 
   it('uses project id from constructor', () => {
@@ -603,19 +608,19 @@ describe('doc() method', () => {
   it('requires document path', () => {
     expect(() => (firestore as InvalidApiUsage).doc())
         .to.throw(
-            'Argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
+            'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
   });
 
   it('doesn\'t accept empty components', () => {
     expect(() => firestore.doc('coll//doc'))
         .to.throw(
-            'Argument "documentPath" is not a valid resource path. Paths must not contain //.');
+            'Value for argument "documentPath" is not a valid resource path. Paths must not contain //.');
   });
 
   it('must point to document', () => {
     expect(() => firestore.doc('collectionId'))
         .to.throw(
-            'Argument "documentPath" must point to a document, but was "collectionId". Your path does not contain an even number of components.');
+            'Value for argument "documentPath" must point to a document, but was "collectionId". Your path does not contain an even number of components.');
   });
 
   it('exposes properties', () => {
@@ -642,14 +647,14 @@ describe('collection() method', () => {
   it('requires collection id', () => {
     expect(() => (firestore as InvalidApiUsage).collection())
         .to.throw(
-            'Argument "collectionPath" is not a valid resource path. Path must be a non-empty string.');
+            'Value for argument "collectionPath" is not a valid resource path. Path must be a non-empty string.');
   });
 
 
   it('must point to a collection', () => {
     expect(() => firestore.collection('collectionId/documentId'))
         .to.throw(
-            'Argument "collectionPath" must point to a collection, but was "collectionId/documentId". Your path does not contain an odd number of components.');
+            'Value for argument "collectionPath" must point to a collection, but was "collectionId/documentId". Your path does not contain an odd number of components.');
   });
 
   it('exposes properties', () => {
@@ -858,7 +863,7 @@ describe('getAll() method', () => {
   it('validates document references', () => {
     return createInstance().then(firestore => {
       expect(() => firestore.getAll(null as InvalidApiUsage))
-          .to.throw('Argument at index 0 is not a valid DocumentReference.');
+          .to.throw('Element at index 0 is not a valid DocumentReference.');
     });
   });
 
@@ -958,13 +963,13 @@ describe('getAll() method', () => {
         fieldMask: null
       } as InvalidApiUsage))
           .to.throw(
-              'Argument "options" is not a valid read option. "fieldMask" is not an array.');
+              'Value for argument "options" is not a valid read option. "fieldMask" is not an array.');
 
       expect(() => firestore.getAll(firestore.doc('collectionId/a'), {
         fieldMask: ['a', new FieldPath('b'), null]
       } as InvalidApiUsage))
           .to.throw(
-              'Argument "options" is not a valid read option. "fieldMask" is not valid: Argument at index 2 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
+              'Value for argument "options" is not a valid read option. "fieldMask" is not valid: Element at index 2 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
     });
   });
 });

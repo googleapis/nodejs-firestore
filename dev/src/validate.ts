@@ -181,9 +181,8 @@ export function validateNumber(
     if (typeof value !== 'number' || isNaN(value)) {
       throw new Error(invalidArgumentMessage(arg, 'number'));
     } else if (value < min || value > max) {
-      throw new Error(
-          `Value for argument ${formatArgumentName(arg)} must be within [${
-              min}, ${max}] inclusive, but was: ${value}`);
+      throw new Error(`${formatArgumentName(arg)} must be within [${min}, ${
+          max}] inclusive, but was: ${value}`);
     }
   }
 }
@@ -210,9 +209,8 @@ export function validateInteger(
     if (typeof value !== 'number' || isNaN(value) || value % 1 !== 0) {
       throw new Error(invalidArgumentMessage(arg, 'integer'));
     } else if (value < min || value > max) {
-      throw new Error(
-          `Value for argument ${formatArgumentName(arg)} must be within [${
-              min}, ${max}] inclusive, but was: ${value}`);
+      throw new Error(`${formatArgumentName(arg)} must be within [${min}, ${
+          max}] inclusive, but was: ${value}`);
     }
   }
 }
@@ -226,7 +224,7 @@ export function validateInteger(
  */
 export function invalidArgumentMessage(
     arg: string|number, expectedType: string) {
-  return `Argument ${formatArgumentName(arg)} is not a valid ${expectedType}.`;
+  return `${formatArgumentName(arg)} is not a valid ${expectedType}.`;
 }
 
 /**
@@ -262,7 +260,8 @@ function formatPlural(num: number, str: string): string {
  * @return Either the argument name or its index description.
  */
 function formatArgumentName(arg: string|number): string {
-  return typeof arg === 'string' ? `"${arg}"` : `at index ${arg}`;
+  return typeof arg === 'string' ? `Value for argument "${arg}"` :
+                                   `Element at index ${arg}`;
 }
 
 /**
@@ -323,8 +322,8 @@ export function validateEnumValue(
       expectedDescription.push(allowed);
     }
 
-    throw new Error(`Invalid value for argument ${
-        formatArgumentName(
-            arg)}. Acceptable values are: ${expectedDescription.join(', ')}`);
+    throw new Error(
+        `${formatArgumentName(arg)} is invalid. Acceptable values are: ${
+            expectedDescription.join(', ')}`);
   }
 }

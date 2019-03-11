@@ -322,6 +322,20 @@ describe('DocumentReference class', () => {
         });
   });
 
+  it('supports increment()', () => {
+    const baseData = {sum: 1};
+    const updateData = {sum: FieldValue.increment(1)};
+    const expectedData = {sum: 2};
+
+    const ref = randomCol.doc('doc');
+    return ref.set(baseData)
+        .then(() => ref.update(updateData))
+        .then(() => ref.get())
+        .then(doc => {
+          expect(doc.data()).to.deep.equal(expectedData);
+        });
+  });
+
   it('supports arrayUnion()', () => {
     const baseObject = {
       a: [],
