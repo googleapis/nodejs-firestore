@@ -22,7 +22,7 @@ import {google} from '../protos/firestore_proto_api';
 
 import * as Firestore from '../src';
 import {DocumentSnapshot, FieldPath} from '../src';
-import {ResourcePath} from '../src/path';
+import {QualifiedResourcePath} from '../src/path';
 import {GrpcError} from '../src/types';
 import {ApiOverride, createInstance, document, DOCUMENT_NAME, found, InvalidApiUsage, missing, stream} from './util/helpers';
 
@@ -222,7 +222,8 @@ const allSupportedTypesInput = {
         _getProjectId: () =>
             ({projectId: PROJECT_ID, databaseId: '(default)'})
       } as any,  // tslint:disable-line no-any
-      new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
+      new QualifiedResourcePath(
+          PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
   nilValue: null,
@@ -250,7 +251,8 @@ const allSupportedTypesOutput = {
         _getProjectId: () =>
             ({projectId: PROJECT_ID, databaseId: '(default)'})
       } as any,  // tslint:disable-line no-any
-      new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
+      new QualifiedResourcePath(
+          PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
   nilValue: null,

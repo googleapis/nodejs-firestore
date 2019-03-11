@@ -22,6 +22,12 @@ import {customObjectMessage, invalidArgumentMessage, validateMinNumberOfArgument
 import api = google.firestore.v1;
 
 /*!
+ * The default database ID for this Firestore client. We do not yet expose the
+ * ability to use different databases.
+ */
+export const DEFAULT_DATABASE_ID = '(default)';
+
+/*!
  * A regular expression to verify an absolute Resource Path in Firestore. It
  * extracts the project ID, the database name and the relative resource path
  * if available.
@@ -48,12 +54,6 @@ const UNESCAPED_FIELD_NAME_RE = /^[_a-zA-Z][_a-zA-Z0-9]*$/;
  * @type {RegExp}
  */
 const FIELD_PATH_RE = /^[^*~/[\]]+$/;
-
-/*!
- * The default database ID for this Firestore client. We do not yet expose the
- * ability to use different databases.
- */
-export const DATABASE_ID = '(default)';
 
 /**
  * An abstract class representing a Firestore path.
@@ -190,12 +190,12 @@ abstract class Path<T> {
  *
  * @private
  */
-export class RelativePath extends Path<RelativePath> {
+export class ResourcePath extends Path<ResourcePath> {
   /** A default instance pointing to the root collection. */
-  static EMPTY = new RelativePath();
+  static EMPTY = new ResourcePath();
 
   /**
-   * Constructs a RelativePath.
+   * Constructs a ResourcePath.
    *
    * @param segments Sequence of names of the parts of the path.
    */
@@ -238,11 +238,11 @@ export class RelativePath extends Path<RelativePath> {
   /**
    * Constructs a new instance of RelativePath.
    *
-   * @param segments Sequence of names of the parts of the path.
+   * @param segments Sequence of ResourcePath of the parts of the path.
    * @returns The newly created RelativePath.
    */
-  construct(segments: string[]): RelativePath {
-    return new RelativePath(...segments);
+  construct(segments: string[]): ResourcePath {
+    return new ResourcePath(...segments);
   }
 
   /**
@@ -263,18 +263,19 @@ export class RelativePath extends Path<RelativePath> {
    * @param databaseId The database ID of the new path.
    * @return A fully-qualified resource path pointing to the same element.
    */
-  toResourcePath(projectId: string): ResourcePath {
-    return new ResourcePath(projectId, DATABASE_ID, ...this.segments);
+  toQualifiedResourcePath(projectId: string): QualifiedResourcePath {
+    return new QualifiedResourcePath(
+        projectId, DEFAULT_DATABASE_ID, ...this.segments);
   }
 }
 
 /**
- * A slash-separated path for navigating resources (documents and collections)
- * within any Firestore project.
+ * A slash-separated path that includes a project and database ID for referring
+ * to resources in any Firestore project.
  *
  * @private
  */
-export class ResourcePath extends RelativePath {
+export class QualifiedResourcePath extends ResourcePath {
   /**
    * The project ID of this path.
    */
@@ -312,14 +313,14 @@ export class ResourcePath extends RelativePath {
    * @param absolutePath A string representation of a Resource Path.
    * @returns The new ResourcePath.
    */
-  static fromSlashSeparatedString(absolutePath: string): ResourcePath {
+  static fromSlashSeparatedString(absolutePath: string): QualifiedResourcePath {
     const elements = RESOURCE_PATH_RE.exec(absolutePath);
 
     if (elements) {
       const project = elements[1];
       const database = elements[2];
       const path = elements[3];
-      return new ResourcePath(project, database).append(path);
+      return new QualifiedResourcePath(project, database).append(path);
     }
 
     throw new Error(`Resource name '${absolutePath}' is not valid.`);
@@ -331,8 +332,8 @@ export class ResourcePath extends RelativePath {
    * @param relativePath Relative path to append to the current path.
    * @returns The new path.
    */
-  append(relativePath: RelativePath|string): ResourcePath {
-    return super.append(relativePath) as ResourcePath;
+  append(relativePath: ResourcePath|string): QualifiedResourcePath {
+    return super.append(relativePath) as QualifiedResourcePath;
   }
 
 
@@ -341,8 +342,8 @@ export class ResourcePath extends RelativePath {
    *
    * @returns The new path.
    */
-  parent(): ResourcePath|null {
-    return super.parent() as ResourcePath | null;
+  parent(): QualifiedResourcePath|null {
+    return super.parent() as QualifiedResourcePath | null;
   }
 
   /**
@@ -364,17 +365,18 @@ export class ResourcePath extends RelativePath {
    * methods.
    *
    * @param segments Sequence of names of the parts of the path.
-   * @returns {ResourcePath} The newly created ResourcePath.
+   * @returns The newly created QualifiedResourcePath.
    */
-  construct(segments: string[]): ResourcePath {
-    return new ResourcePath(this.projectId, this.databaseId, ...segments);
+  construct(segments: string[]): QualifiedResourcePath {
+    return new QualifiedResourcePath(
+        this.projectId, this.databaseId, ...segments);
   }
 
   /**
-   * Convenience method to match the RelativePath API. This method always
+   * Convenience method to match the ResourcePath API. This method always
    * returns the current instance. The arguments is ignored.
    */
-  toResourcePath(projectId: string): ResourcePath {
+  toQualifiedResourcePath(projectId: string): QualifiedResourcePath {
     return this;
   }
 
@@ -384,8 +386,8 @@ export class ResourcePath extends RelativePath {
    * @param other The path to compare to.
    * @returns -1 if current < other, 1 if current > other, 0 if equal
    */
-  compareTo(other: RelativePath): number {
-    if (other instanceof ResourcePath) {
+  compareTo(other: ResourcePath): number {
+    if (other instanceof QualifiedResourcePath) {
       if (this.projectId < other.projectId) {
         return -1;
       }
@@ -557,8 +559,8 @@ export class FieldPath extends Path<FieldPath> {
    *
    * @private
    * @override
-   * @param {Array.<string>} segments Sequence of field names.
-   * @returns {ResourcePath} The newly created FieldPath.
+   * @param segments Sequence of field names.
+   * @returns The newly created FieldPath.
    */
   construct(segments: string[]) {
     return new FieldPath(...segments);

@@ -22,7 +22,7 @@ import {Firestore, QueryDocumentSnapshot, setLogFunction, Timestamp} from '../sr
 import {GeoPoint} from '../src';
 import {DocumentReference} from '../src';
 import * as order from '../src/order';
-import {ResourcePath} from '../src/path';
+import {QualifiedResourcePath} from '../src/path';
 import {createInstance, InvalidApiUsage} from './util/helpers';
 
 import api = google.firestore.v1;
@@ -52,7 +52,7 @@ describe('Order', () => {
 
   function resource(pathString: string): api.IValue {
     return wrap(new DocumentReference(
-        firestore, ResourcePath.fromSlashSeparatedString(pathString)));
+        firestore, QualifiedResourcePath.fromSlashSeparatedString(pathString)));
   }
 
   function geopoint(lat: number, lng: number): api.IValue {

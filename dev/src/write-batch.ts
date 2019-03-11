@@ -103,9 +103,16 @@ interface WriteOp {
 export class WriteBatch {
   private readonly _firestore: Firestore;
   private readonly _serializer: Serializer;
+
+  /**
+   * An array of write operations that are executed as part of the commit. The
+   * resulting `api.IWrite` will be sent to the backend.
+   * @private
+   */
   private readonly _ops: Array<() => WriteOp> = [];
 
   private _committed = false;
+
   /**
    * @private
    * @hideconstructor

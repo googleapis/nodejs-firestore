@@ -16,7 +16,7 @@
 
 import {expect} from 'chai';
 
-import {FieldPath, ResourcePath} from '../src/path';
+import {FieldPath, QualifiedResourcePath} from '../src/path';
 import {InvalidApiUsage} from './util/helpers';
 
 const PROJECT_ID = 'test-project';
@@ -24,19 +24,20 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 describe('ResourcePath', () => {
   it('has id property', () => {
-    expect(new ResourcePath(PROJECT_ID, '(default)', 'foo').id).to.equal('foo');
-    expect(new ResourcePath(PROJECT_ID, '(default)').id).to.be.null;
+    expect(new QualifiedResourcePath(PROJECT_ID, '(default)', 'foo').id)
+        .to.equal('foo');
+    expect(new QualifiedResourcePath(PROJECT_ID, '(default)').id).to.be.null;
   });
 
   it('has append() method', () => {
-    let path = new ResourcePath(PROJECT_ID, '(default)');
+    let path = new QualifiedResourcePath(PROJECT_ID, '(default)');
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
     path = path.append('foo');
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
   });
 
   it('has parent() method', () => {
-    let path = new ResourcePath(PROJECT_ID, '(default)', 'foo');
+    let path = new QualifiedResourcePath(PROJECT_ID, '(default)', 'foo');
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
     path = path.parent()!;
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
@@ -44,19 +45,19 @@ describe('ResourcePath', () => {
   });
 
   it('parses strings', () => {
-    let path = ResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
+    let path = QualifiedResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
-    path =
-        ResourcePath.fromSlashSeparatedString(`${DATABASE_ROOT}/documents/foo`);
+    path = QualifiedResourcePath.fromSlashSeparatedString(
+        `${DATABASE_ROOT}/documents/foo`);
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
     expect(() => {
-      path =
-          ResourcePath.fromSlashSeparatedString('projects/project/databases');
+      path = QualifiedResourcePath.fromSlashSeparatedString(
+          'projects/project/databases');
     }).to.throw('Resource name \'projects\/project\/databases\' is not valid');
   });
 
   it('accepts newlines', () => {
-    const path = ResourcePath.fromSlashSeparatedString(
+    const path = QualifiedResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/foo\nbar`);
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo\nbar`);
   });

@@ -24,7 +24,7 @@ import {DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange, DocumentChangeType} from './document-change';
 import Firestore, {DocumentReference, Query} from './index';
 import {logger} from './logger';
-import {ResourcePath} from './path';
+import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {GrpcError, RBTree} from './types';
 import {requestTag} from './util';
@@ -714,7 +714,8 @@ abstract class Watch {
                 const document = proto.documentChange.document!;
                 const name = document.name!;
                 const relativeName =
-                    ResourcePath.fromSlashSeparatedString(name).relativeName;
+                    QualifiedResourcePath.fromSlashSeparatedString(name)
+                        .relativeName;
 
                 if (changed) {
                   logger(
@@ -741,7 +742,8 @@ abstract class Watch {
                 const name =
                     (proto.documentDelete || proto.documentRemove)!.document!;
                 const relativeName =
-                    ResourcePath.fromSlashSeparatedString(name).relativeName;
+                    QualifiedResourcePath.fromSlashSeparatedString(name)
+                        .relativeName;
                 changeMap.set(relativeName, REMOVED);
               } else if (proto.filter) {
                 logger(

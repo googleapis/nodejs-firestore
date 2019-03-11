@@ -26,7 +26,7 @@ import * as proto from '../protos/firestore_proto_api';
 import {DocumentChange, DocumentSnapshot, FieldPath, FieldValue, Firestore, Query, QueryDocumentSnapshot, QuerySnapshot, Timestamp} from '../src';
 import {fieldsFromJson} from '../src/convert';
 import {DocumentChangeType} from '../src/document-change';
-import {ResourcePath} from '../src/path';
+import {QualifiedResourcePath} from '../src/path';
 import {DocumentData} from '../src/types';
 import {isObject} from '../src/util';
 import {ApiOverride, createInstance as createInstanceHelper} from '../test/util/helpers';
@@ -68,13 +68,13 @@ const COMMIT_REQUEST_TYPE =
 let firestore: Firestore;
 
 const docRef = (path: string) => {
-  const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
-  return firestore.doc(relativePath);
+  const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(path);
+  return firestore.doc(resourcePath.relativeName);
 };
 
 const collRef = (path: string) => {
-  const relativePath = ResourcePath.fromSlashSeparatedString(path).relativeName;
-  return firestore.collection(relativePath);
+  const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(path);
+  return firestore.collection(resourcePath.relativeName);
 };
 
 const watchQuery = () => {

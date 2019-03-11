@@ -27,7 +27,7 @@ import {DocumentChange} from './document-change';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
-import {FieldPath, RelativePath, ResourcePath, validateFieldPath, validateResourcePath} from './path';
+import {FieldPath, QualifiedResourcePath, ResourcePath, validateFieldPath, validateResourcePath} from './path';
 import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {DocumentData, OrderByDirection, Precondition, SetOptions, UpdateData, WhereFilterOp} from './types';
@@ -105,7 +105,7 @@ export class DocumentReference implements Serializable {
    * @param _path The Path of this reference.
    */
   constructor(
-      private readonly _firestore: Firestore, readonly _path: RelativePath) {}
+      private readonly _firestore: Firestore, readonly _path: ResourcePath) {}
 
 
   /**
@@ -116,7 +116,7 @@ export class DocumentReference implements Serializable {
    */
   get formattedName(): string {
     const projectId = this.firestore.projectId;
-    return this._path.toResourcePath(projectId).formattedName;
+    return this._path.toQualifiedResourcePath(projectId).formattedName;
   }
 
   /**
@@ -900,7 +900,7 @@ export class Query {
    * @param _queryOptions Additional query options.
    */
   constructor(
-      private readonly _firestore: Firestore, readonly _path: RelativePath,
+      private readonly _firestore: Firestore, readonly _path: ResourcePath,
       private readonly _fieldFilters: FieldFilter[] = [],
       private readonly _fieldOrders: FieldOrder[] = [],
       private readonly _queryOptions: QueryOptions = {}) {
@@ -1579,7 +1579,7 @@ export class Query {
    */
   toProto(transactionId?: Uint8Array): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
-    const parentPath = this._path.parent()!.toResourcePath(projectId);
+    const parentPath = this._path.parent()!.toQualifiedResourcePath(projectId);
     const reqOpts: api.IRunQueryRequest = {
       parent: parentPath.formattedName,
       structuredQuery: {
@@ -1769,7 +1769,7 @@ export class CollectionReference extends Query {
    * @param firestore The Firestore Database client.
    * @param path The Path of this collection.
    */
-  constructor(firestore: Firestore, path: RelativePath) {
+  constructor(firestore: Firestore, path: ResourcePath) {
     super(firestore, path);
   }
 
@@ -1850,7 +1850,8 @@ export class CollectionReference extends Query {
    */
   listDocuments(): Promise<DocumentReference[]> {
     return this.firestore.initializeIfNeeded().then(() => {
-      const resourcePath = this._path.toResourcePath(this.firestore.projectId);
+      const resourcePath =
+          this._path.toQualifiedResourcePath(this.firestore.projectId);
       const parentPath = resourcePath.parent()!;
 
       const request: api.IListDocumentsRequest = {
@@ -1867,7 +1868,8 @@ export class CollectionReference extends Query {
             // Note that the backend already orders these documents by name,
             // so we do not need to manually sort them.
             return documents.map(doc => {
-              const path = ResourcePath.fromSlashSeparatedString(doc.name!);
+              const path =
+                  QualifiedResourcePath.fromSlashSeparatedString(doc.name!);
               return this.doc(path.id!);
             });
           });

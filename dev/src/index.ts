@@ -22,8 +22,7 @@ import {google} from '../protos/firestore_proto_api';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {logger, setLibVersion} from './logger';
-import {DATABASE_ID, FieldPath, RelativePath, validateResourcePath} from './path';
-import {ResourcePath} from './path';
+import {DEFAULT_DATABASE_ID, FieldPath, QualifiedResourcePath, ResourcePath, validateResourcePath} from './path';
 import {ClientPool} from './pool';
 import {CollectionReference} from './reference';
 import {DocumentReference} from './reference';
@@ -369,8 +368,11 @@ export class Firestore {
    * @private
    */
   get projectId(): string {
-    this.ensureClientInitialized();
-    return this._projectId!;
+    if (this._projectId === undefined) {
+      throw new Error(
+          'INTERNAL ERROR: Client is not yet ready to issue requests.');
+    }
+    return this._projectId;
   }
 
   /**
@@ -380,8 +382,7 @@ export class Firestore {
    * @private
    */
   get formattedName(): string {
-    this.ensureClientInitialized();
-    return `projects/${this.projectId}/databases/${DATABASE_ID}`;
+    return `projects/${this.projectId}/databases/${DEFAULT_DATABASE_ID}`;
   }
 
   /**
@@ -399,7 +400,7 @@ export class Firestore {
   doc(documentPath: string): DocumentReference {
     validateResourcePath('documentPath', documentPath);
 
-    const path = RelativePath.EMPTY.append(documentPath);
+    const path = ResourcePath.EMPTY.append(documentPath);
     if (!path.isDocument) {
       throw new Error(`Argument "documentPath" must point to a document, but was "${
           documentPath}". Your path does not contain an even number of components.`);
@@ -427,7 +428,7 @@ export class Firestore {
   collection(collectionPath: string): CollectionReference {
     validateResourcePath('collectionPath', collectionPath);
 
-    const path = RelativePath.EMPTY.append(collectionPath);
+    const path = ResourcePath.EMPTY.append(collectionPath);
     if (!path.isCollection) {
       throw new Error(`Argument "collectionPath" must point to a collection, but was "${
           collectionPath}". Your path does not contain an odd number of components.`);
@@ -518,11 +519,12 @@ export class Firestore {
 
     if (typeof documentOrName === 'string') {
       document.ref = new DocumentReference(
-          this, ResourcePath.fromSlashSeparatedString(documentOrName));
+          this, QualifiedResourcePath.fromSlashSeparatedString(documentOrName));
     } else {
       document.ref = new DocumentReference(
           this,
-          ResourcePath.fromSlashSeparatedString(documentOrName.name as string));
+          QualifiedResourcePath.fromSlashSeparatedString(
+              documentOrName.name as string));
       document.fieldsProto = documentOrName.fields ?
           convertFields(documentOrName.fields as ApiMapValue) :
           {};
@@ -671,7 +673,7 @@ export class Firestore {
    * });
    */
   listCollections() {
-    const rootDocument = new DocumentReference(this, RelativePath.EMPTY);
+    const rootDocument = new DocumentReference(this, ResourcePath.EMPTY);
     return rootDocument.listCollections();
   }
 
@@ -878,18 +880,6 @@ export class Firestore {
           });
         });
       });
-    }
-  }
-
-  /**
-   * Ensures that the client has been fully initialized;
-   * @private
-   */
-  private ensureClientInitialized(): void {
-    if (this._projectId === undefined) {
-      // Note that we do not mention `initializeIfNeeded()` here to not leak the
-      // private API.
-      throw new Error('INTERNAL ERROR: Client is yet ready to issue requests.');
     }
   }
 

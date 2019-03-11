@@ -16,7 +16,7 @@
 
 import {google} from '../protos/firestore_proto_api';
 import {detectValueType} from './convert';
-import {ResourcePath} from './path';
+import {QualifiedResourcePath} from './path';
 import {ApiMapValue} from './types';
 
 import api = google.firestore.v1;
@@ -151,9 +151,10 @@ function compareBlobs(left: Uint8Array, right: Uint8Array): number {
  * @private
  */
 function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
-  const leftPath = ResourcePath.fromSlashSeparatedString(left.referenceValue!);
+  const leftPath =
+      QualifiedResourcePath.fromSlashSeparatedString(left.referenceValue!);
   const rightPath =
-      ResourcePath.fromSlashSeparatedString(right.referenceValue!);
+      QualifiedResourcePath.fromSlashSeparatedString(right.referenceValue!);
   return leftPath.compareTo(rightPath);
 }
 
