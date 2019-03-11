@@ -244,11 +244,11 @@ export class ResourcePath extends Path<ResourcePath> {
   }
 
   /**
-   * Constructs a new instance of RelativePath.
+   * Constructs a new instance of ResourcePath.
    *
    * @private
-   * @param segments Sequence of ResourcePath of the parts of the path.
-   * @returns The newly created RelativePath.
+   * @param segments Sequence of parts of the path.
+   * @returns The newly created ResourcePath.
    */
   construct(segments: string[]): ResourcePath {
     return new ResourcePath(...segments);
@@ -271,11 +271,12 @@ export class ResourcePath extends Path<ResourcePath> {
    * Converts this path to a fully qualified ResourcePath.
    *
    * @private
-   * @param projectId The project ID of the new path.
-   * @param databaseId The database ID of the new path.
+   * @param projectIdIfMissing The project ID of the current Firestore project.
+   * The project ID is only used if it's not provided as part of this
+   * ResourcePath.
    * @return A fully-qualified resource path pointing to the same element.
    */
-  toQualifiedResourcePath(projectId: string): QualifiedResourcePath {
+  toQualifiedResourcePath(projectIdIfMissing: string): QualifiedResourcePath {
     return new QualifiedResourcePath(
         projectId, DEFAULT_DATABASE_ID, ...this.segments);
   }
@@ -349,6 +350,8 @@ export class QualifiedResourcePath extends ResourcePath {
    * @returns The new path.
    */
   append(relativePath: ResourcePath|string): QualifiedResourcePath {
+    // `super.append()` calls `QualifiedResourcePath.construct()` when invoked
+    // from here and returns a QualifiedResourcePath.
     return super.append(relativePath) as QualifiedResourcePath;
   }
 
@@ -394,9 +397,13 @@ export class QualifiedResourcePath extends ResourcePath {
   /**
    * Convenience method to match the ResourcePath API. This method always
    * returns the current instance. The arguments is ignored.
+   *
+   * @param projectIdIfMissing The project ID of the current Firestore project.
+   * The project ID is only used if it's not provided as part of this
+   * ResourcePath.
    * @private
    */
-  toQualifiedResourcePath(projectId: string): QualifiedResourcePath {
+  toQualifiedResourcePath(projectIdIfMissing: string): QualifiedResourcePath {
     return this;
   }
 
