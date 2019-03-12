@@ -867,15 +867,87 @@ interface QueryCursor {
   values: unknown[];
 }
 
-/** Internal options to customize the Query class. */
-interface QueryOptions {
-  startAt?: QueryCursor;
-  startAfter?: QueryCursor;
-  endAt?: QueryCursor;
-  endBefore?: QueryCursor;
-  limit?: number;
-  offset?: number;
-  projection?: api.StructuredQuery.IProjection;
+/**
+ * Internal class representing custom Query options.
+ *
+ * These options are immutable. Modified options can be created using `with()`.
+ * @private
+ */
+export class QueryOptions {
+  constructor(
+      readonly parentPath: ResourcePath, readonly collectionId: string,
+      readonly allDescendants: boolean, readonly fieldFilters: FieldFilter[],
+      readonly fieldOrders: FieldOrder[], readonly startAt?: QueryCursor,
+      readonly endAt?: QueryCursor, readonly limit?: number,
+      readonly offset?: number,
+      readonly projection?: api.StructuredQuery.IProjection) {}
+
+
+  /**
+   * Returns query options for a collection group query.
+   * @private
+   */
+  static forCollectionGroupQuery(collectionId: string): QueryOptions {
+    return new QueryOptions(
+        /*parentPath=*/ResourcePath.EMPTY, collectionId,
+        /*allDescendants=*/true, /*fieldFilters=*/[], /*fieldOrders=*/[]);
+  }
+
+  /**
+   * Returns query options for a single-collection query.
+   * @private
+   */
+  static forCollectionQuery(collectionRef: ResourcePath): QueryOptions {
+    return new QueryOptions(
+        collectionRef.parent()!, collectionRef.id!, /*allDescendants=*/false,
+        /*fieldFilters=*/[], /*fieldOrders=*/[]);
+  }
+
+  /**
+   * Returns the union of the current and the provided options.
+   * @private
+   */
+  with(settings: {
+    parentPath?: ResourcePath;
+    collectionId?: string;
+    allDescendants?: boolean;
+    fieldFilters?: FieldFilter[];
+    fieldOrders?: FieldOrder[];
+    startAt?: QueryCursor;
+    endAt?: QueryCursor;
+    limit?: number;
+    offset?: number;
+    projection?: api.StructuredQuery.IProjection;
+  }): QueryOptions {
+    return new QueryOptions(
+        coalesce(settings.parentPath, this.parentPath)!,
+        coalesce(settings.collectionId, this.collectionId)!,
+        coalesce(settings.allDescendants, this.allDescendants)!,
+        coalesce(settings.fieldFilters, this.fieldFilters)!,
+        coalesce(settings.fieldOrders, this.fieldOrders)!,
+        coalesce(settings.startAt, this.startAt),
+        coalesce(settings.endAt, this.endAt),
+        coalesce(settings.limit, this.limit),
+        coalesce(settings.offset, this.offset),
+        coalesce(settings.projection, this.projection));
+  }
+
+  isEqual(other: QueryOptions) {
+    if (this === other) {
+      return true;
+    }
+
+    return other instanceof QueryOptions &&
+        this.parentPath.isEqual(other.parentPath) &&
+        this.collectionId === other.collectionId &&
+        this.allDescendants === other.allDescendants &&
+        this.limit === other.limit && this.offset === other.offset &&
+        deepEqual(this.fieldFilters, other.fieldFilters, {strict: true}) &&
+        deepEqual(this.fieldOrders, other.fieldOrders, {strict: true}) &&
+        deepEqual(this.startAt, other.startAt, {strict: true}) &&
+        deepEqual(this.endAt, other.endAt, {strict: true}) &&
+        deepEqual(this.projection, other.projection, {strict: true});
+  }
 }
 
 /**
@@ -892,17 +964,11 @@ export class Query {
    * @hideconstructor
    *
    * @param _firestore The Firestore Database client.
-   * @param _path Path of the collection to be queried.
-   * @param _fieldFilters Sequence of fields constraining the results of the
-   * query.
-   * @param _fieldOrders Sequence of fields to control the order of results.
-   * @param _queryOptions Additional query options.
+   * @param _queryOptions Options that define the query.
    */
   constructor(
-      private readonly _firestore: Firestore, readonly _path: ResourcePath,
-      private readonly _fieldFilters: FieldFilter[] = [],
-      private readonly _fieldOrders: FieldOrder[] = [],
-      private readonly _queryOptions: QueryOptions = {}) {
+      private readonly _firestore: Firestore,
+      protected readonly _queryOptions: QueryOptions) {
     this._serializer = new Serializer(_firestore);
   }
 
@@ -1014,18 +1080,18 @@ export class Query {
           'startAfter(), endBefore() or endAt().');
     }
 
-    fieldPath = FieldPath.fromArgument(fieldPath);
+    const path = FieldPath.fromArgument(fieldPath);
 
-    if (FieldPath.documentId().isEqual(fieldPath)) {
+    if (FieldPath.documentId().isEqual(path)) {
       value = this.validateReference(value);
     }
 
-    const combinedFilters = this._fieldFilters.concat(new FieldFilter(
-        this._serializer, fieldPath, comparisonOperators[opStr], value));
+    const fieldFilter = new FieldFilter(
+        this._serializer, path, comparisonOperators[opStr], value);
 
-    return new Query(
-        this._firestore, this._path, combinedFilters, this._fieldOrders,
-        this._queryOptions);
+    const options = this._queryOptions.with(
+        {fieldFilters: this._queryOptions.fieldFilters.concat(fieldFilter)});
+    return new Query(this._firestore, options);
   }
 
   /**
@@ -1063,12 +1129,8 @@ export class Query {
       }
     }
 
-    const options = Object.assign({}, this._queryOptions);
-    options.projection = {fields};
-
-    return new Query(
-        this._firestore, this._path, this._fieldFilters, this._fieldOrders,
-        options);
+    const options = this._queryOptions.with({projection: {fields}});
+    return new Query(this._firestore, options);
   }
 
   /**
@@ -1106,10 +1168,10 @@ export class Query {
     const newOrder = new FieldOrder(
         FieldPath.fromArgument(fieldPath),
         directionOperators[directionStr || 'asc']);
-    const combinedOrders = this._fieldOrders.concat(newOrder);
-    return new Query(
-        this._firestore, this._path, this._fieldFilters, combinedOrders,
-        this._queryOptions);
+
+    const options = this._queryOptions.with(
+        {fieldOrders: this._queryOptions.fieldOrders.concat(newOrder)});
+    return new Query(this._firestore, options);
   }
 
   /**
@@ -1134,11 +1196,8 @@ export class Query {
   limit(limit: number): Query {
     validateInteger('limit', limit);
 
-    const options = Object.assign({}, this._queryOptions);
-    options.limit = limit;
-    return new Query(
-        this._firestore, this._path, this._fieldFilters, this._fieldOrders,
-        options);
+    const options = this._queryOptions.with({limit});
+    return new Query(this._firestore, options);
   }
 
   /**
@@ -1163,11 +1222,8 @@ export class Query {
   offset(offset: number): Query {
     validateInteger('offset', offset);
 
-    const options = Object.assign({}, this._queryOptions);
-    options.offset = offset;
-    return new Query(
-        this._firestore, this._path, this._fieldFilters, this._fieldOrders,
-        options);
+    const options = this._queryOptions.with({offset});
+    return new Query(this._firestore, options);
   }
 
   /**
@@ -1182,10 +1238,8 @@ export class Query {
     }
 
     return (
-        other instanceof Query && this._path.isEqual(other._path) &&
-        deepEqual(this._fieldFilters, other._fieldFilters, {strict: true}) &&
-        deepEqual(this._fieldOrders, other._fieldOrders, {strict: true}) &&
-        deepEqual(this._queryOptions, other._queryOptions, {strict: true}));
+        other instanceof Query &&
+        this._queryOptions.isEqual(other._queryOptions));
   }
 
   /**
@@ -1200,16 +1254,16 @@ export class Query {
                                     Array<DocumentSnapshot|unknown>):
       FieldOrder[] {
     if (!Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
-      return this._fieldOrders;
+      return this._queryOptions.fieldOrders;
     }
 
-    const fieldOrders = this._fieldOrders.slice();
+    const fieldOrders = this._queryOptions.fieldOrders.slice();
     let hasDocumentId = false;
 
     if (fieldOrders.length === 0) {
       // If no explicit ordering is specified, use the first inequality to
       // define an implicit order.
-      for (const fieldFilter of this._fieldFilters) {
+      for (const fieldFilter of this._queryOptions.fieldFilters) {
         if (fieldFilter.isInequalityFilter()) {
           fieldOrders.push(new FieldOrder(fieldFilter.field));
           break;
@@ -1299,14 +1353,16 @@ export class Query {
    * @private
    */
   private validateReference(val: unknown): DocumentReference {
+    const basePath = this._queryOptions.allDescendants ?
+        this._queryOptions.parentPath :
+        this._queryOptions.parentPath.append(this._queryOptions.collectionId);
     let reference: DocumentReference;
 
     if (typeof val === 'string') {
-      reference =
-          new DocumentReference(this._firestore, this._path.append(val));
+      reference = new DocumentReference(this._firestore, basePath.append(val));
     } else if (val instanceof DocumentReference) {
       reference = val;
-      if (!this._path.isPrefixOf(reference._path)) {
+      if (!basePath.isPrefixOf(reference._path)) {
         throw new Error(
             `"${reference.path}" is not part of the query result set and ` +
             'cannot be used as a query boundary.');
@@ -1317,7 +1373,8 @@ export class Query {
           'string or a DocumentReference.');
     }
 
-    if (reference._path.parent()!.compareTo(this._path) !== 0) {
+    if (!this._queryOptions.allDescendants &&
+        reference._path.parent()!.compareTo(basePath) !== 0) {
       throw new Error(
           'Only a direct child can be used as a query boundary. ' +
           `Found: "${reference.path}".`);
@@ -1348,15 +1405,13 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.startAt', arguments, 1);
 
-    const options = Object.assign({}, this._queryOptions);
-
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
-    options.startAt =
+    const startAt =
         this.createCursor(fieldOrders, fieldValuesOrDocumentSnapshot, true);
 
-    return new Query(
-        this._firestore, this._path, this._fieldFilters, fieldOrders, options);
+    const options = this._queryOptions.with({fieldOrders, startAt});
+    return new Query(this._firestore, options);
   }
 
   /**
@@ -1383,15 +1438,13 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.startAfter', arguments, 1);
 
-    const options = Object.assign({}, this._queryOptions);
-
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
-    options.startAt =
+    const startAt =
         this.createCursor(fieldOrders, fieldValuesOrDocumentSnapshot, false);
 
-    return new Query(
-        this._firestore, this._path, this._fieldFilters, fieldOrders, options);
+    const options = this._queryOptions.with({fieldOrders, startAt});
+    return new Query(this._firestore, options);
   }
 
   /**
@@ -1417,15 +1470,13 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.endBefore', arguments, 1);
 
-    const options = Object.assign({}, this._queryOptions);
-
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
-    options.endAt =
+    const endAt =
         this.createCursor(fieldOrders, fieldValuesOrDocumentSnapshot, true);
 
-    return new Query(
-        this._firestore, this._path, this._fieldFilters, fieldOrders, options);
+    const options = this._queryOptions.with({fieldOrders, endAt});
+    return new Query(this._firestore, options);
   }
 
   /**
@@ -1451,15 +1502,13 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.endAt', arguments, 1);
 
-    const options = Object.assign({}, this._queryOptions);
-
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
-    options.endAt =
+    const endAt =
         this.createCursor(fieldOrders, fieldValuesOrDocumentSnapshot, false);
 
-    return new Query(
-        this._firestore, this._path, this._fieldFilters, fieldOrders, options);
+    const options = this._queryOptions.with({fieldOrders, endAt});
+    return new Query(this._firestore, options);
   }
 
   /**
@@ -1578,25 +1627,31 @@ export class Query {
    */
   toProto(transactionId?: Uint8Array): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
-    const parentPath = this._path.parent()!.toQualifiedResourcePath(projectId);
+    const parentPath =
+        this._queryOptions.parentPath.toQualifiedResourcePath(projectId);
+
     const reqOpts: api.IRunQueryRequest = {
       parent: parentPath.formattedName,
       structuredQuery: {
         from: [
           {
-            collectionId: this._path.id,
+            collectionId: this._queryOptions.collectionId,
           },
         ],
       },
     };
 
+    if (this._queryOptions.allDescendants) {
+      reqOpts.structuredQuery!.from![0].allDescendants = true;
+    }
+
     const structuredQuery = reqOpts.structuredQuery!;
 
-    if (this._fieldFilters.length === 1) {
-      structuredQuery.where = this._fieldFilters[0].toProto();
-    } else if (this._fieldFilters.length > 1) {
+    if (this._queryOptions.fieldFilters.length === 1) {
+      structuredQuery.where = this._queryOptions.fieldFilters[0].toProto();
+    } else if (this._queryOptions.fieldFilters.length > 1) {
       const filters: api.StructuredQuery.IFilter[] = [];
-      for (const fieldFilter of this._fieldFilters) {
+      for (const fieldFilter of this._queryOptions.fieldFilters) {
         filters.push(fieldFilter.toProto());
       }
       structuredQuery.where = {
@@ -1607,9 +1662,9 @@ export class Query {
       };
     }
 
-    if (this._fieldOrders.length) {
+    if (this._queryOptions.fieldOrders.length) {
       const orderBy: api.StructuredQuery.IOrder[] = [];
-      for (const fieldOrder of this._fieldOrders) {
+      for (const fieldOrder of this._queryOptions.fieldOrders) {
         orderBy.push(fieldOrder.toProto());
       }
       structuredQuery.orderBy = orderBy;
@@ -1719,10 +1774,12 @@ export class Query {
     return (doc1, doc2) => {
       // Add implicit sorting by name, using the last specified direction.
       const lastDirection: api.StructuredQuery.Direction =
-          this._fieldOrders.length === 0 ?
+          this._queryOptions.fieldOrders.length === 0 ?
           'ASCENDING' :
-          this._fieldOrders[this._fieldOrders.length - 1].direction;
-      const orderBys = this._fieldOrders.concat(
+          this._queryOptions
+              .fieldOrders[this._queryOptions.fieldOrders.length - 1]
+              .direction;
+      const orderBys = this._queryOptions.fieldOrders.concat(
           new FieldOrder(FieldPath.documentId(), lastDirection));
 
       for (const orderBy of orderBys) {
@@ -1769,7 +1826,16 @@ export class CollectionReference extends Query {
    * @param path The Path of this collection.
    */
   constructor(firestore: Firestore, path: ResourcePath) {
-    super(firestore, path);
+    super(firestore, QueryOptions.forCollectionQuery(path));
+  }
+
+  /**
+   * Returns a resource path for this collection.
+   * @private
+   */
+  private get resourcePath() {
+    return this._queryOptions.parentPath.append(
+        this._queryOptions.collectionId);
   }
 
   /**
@@ -1784,7 +1850,7 @@ export class CollectionReference extends Query {
    * console.log(`ID of the subcollection: ${collectionRef.id}`);
    */
   get id(): string {
-    return this._path.id!;
+    return this._queryOptions.collectionId;
   }
 
   /**
@@ -1801,7 +1867,7 @@ export class CollectionReference extends Query {
    * console.log(`Parent name: ${documentRef.path}`);
    */
   get parent(): DocumentReference {
-    return new DocumentReference(this.firestore, this._path.parent()!);
+    return new DocumentReference(this.firestore, this._queryOptions.parentPath);
   }
 
   /**
@@ -1817,7 +1883,7 @@ export class CollectionReference extends Query {
    * console.log(`Path of the subcollection: ${collectionRef.path}`);
    */
   get path(): string {
-    return this._path.relativeName;
+    return this.resourcePath.relativeName;
   }
 
   /**
@@ -1849,9 +1915,8 @@ export class CollectionReference extends Query {
    */
   listDocuments(): Promise<DocumentReference[]> {
     return this.firestore.initializeIfNeeded().then(() => {
-      const resourcePath =
-          this._path.toQualifiedResourcePath(this.firestore.projectId);
-      const parentPath = resourcePath.parent()!;
+      const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
+          this.firestore.projectId);
 
       const request: api.IListDocumentsRequest = {
         parent: parentPath.formattedName,
@@ -1900,7 +1965,7 @@ export class CollectionReference extends Query {
       validateResourcePath('documentPath', documentPath!);
     }
 
-    const path = this._path.append(documentPath!);
+    const path = this.resourcePath.append(documentPath!);
     if (!path.isDocument) {
       throw new Error(`Value for argument "documentPath" must point to a document, but was "${
           documentPath}". Your path does not contain an even number of components.`);
@@ -2043,4 +2108,12 @@ function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
   }
 
   return true;
+}
+
+/**
+ * Returns the first non-undefined value or `undefined` if no such value exists.
+ * @private
+ */
+function coalesce<T>(...values: Array<T|undefined>): T|undefined {
+  return values.find(value => value !== undefined);
 }
