@@ -278,7 +278,7 @@ export class ResourcePath extends Path<ResourcePath> {
    */
   toQualifiedResourcePath(projectIdIfMissing: string): QualifiedResourcePath {
     return new QualifiedResourcePath(
-        projectId, DEFAULT_DATABASE_ID, ...this.segments);
+        projectIdIfMissing, DEFAULT_DATABASE_ID, ...this.segments);
   }
 }
 
