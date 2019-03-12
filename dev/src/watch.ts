@@ -24,7 +24,7 @@ import {DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange, DocumentChangeType} from './document-change';
 import Firestore, {DocumentReference, Query} from './index';
 import {logger} from './logger';
-import {ResourcePath} from './path';
+import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {GrpcError, RBTree} from './types';
 import {requestTag} from './util';
@@ -238,7 +238,7 @@ abstract class Watch {
   }
 
   /**  Returns a 'Target' proto denoting the target to listen on. */
-  protected abstract getTarget(resumeToken?: Uint8Array): Promise<api.ITarget>;
+  protected abstract getTarget(resumeToken?: Uint8Array): api.ITarget;
 
   /**
    * Returns a comparator for QueryDocumentSnapshots that is used to order the
@@ -350,7 +350,7 @@ abstract class Watch {
       docTree.forEach((snapshot: QueryDocumentSnapshot) => {
         // Mark each document as deleted. If documents are not deleted, they
         // will be send again by the server.
-        changeMap.set(snapshot.ref.formattedName, REMOVED);
+        changeMap.set(snapshot.ref.path, REMOVED);
       });
 
       current = false;
@@ -421,8 +421,10 @@ abstract class Watch {
           return;
         }
 
-        request.database = await this._firestore.formattedName;
-        request.addTarget = await this.getTarget(resumeToken);
+        await this._firestore.initializeIfNeeded();
+
+        request.database = this._firestore.formattedName;
+        request.addTarget = this.getTarget(resumeToken);
 
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
@@ -537,7 +539,7 @@ abstract class Watch {
            * @private
            */
           function addDoc(newDocument: QueryDocumentSnapshot): DocumentChange {
-            const name = newDocument.ref.formattedName;
+            const name = newDocument.ref.path;
             assert(!updatedMap.has(name), 'Document to add already exists');
             updatedTree = updatedTree.insert(newDocument, null);
             const newIndex = updatedTree.find(newDocument).index;
@@ -554,7 +556,7 @@ abstract class Watch {
            */
           function modifyDoc(newDocument: QueryDocumentSnapshot):
               DocumentChange|null {
-            const name = newDocument.ref.formattedName;
+            const name = newDocument.ref.path;
             assert(updatedMap.has(name), 'Document to modify does not exist');
             const oldDocument = updatedMap.get(name)!;
             if (!oldDocument.updateTime.isEqual(newDocument.updateTime)) {
@@ -711,25 +713,27 @@ abstract class Watch {
 
                 const document = proto.documentChange.document!;
                 const name = document.name!;
+                const relativeName =
+                    QualifiedResourcePath.fromSlashSeparatedString(name)
+                        .relativeName;
 
                 if (changed) {
                   logger(
                       'Watch.onSnapshot', this._requestTag,
                       'Received document change');
                   const snapshot = new DocumentSnapshotBuilder();
-                  snapshot.ref = this._firestore.doc(
-                      ResourcePath.fromSlashSeparatedString(name).relativeName);
+                  snapshot.ref = this._firestore.doc(relativeName);
                   snapshot.fieldsProto = document.fields || {};
                   snapshot.createTime =
                       Timestamp.fromProto(document.createTime!);
                   snapshot.updateTime =
                       Timestamp.fromProto(document.updateTime!);
-                  changeMap.set(name, snapshot);
+                  changeMap.set(relativeName, snapshot);
                 } else if (removed) {
                   logger(
                       'Watch.onSnapshot', this._requestTag,
                       'Received document remove');
-                  changeMap.set(name, REMOVED);
+                  changeMap.set(relativeName, REMOVED);
                 }
               } else if (proto.documentDelete || proto.documentRemove) {
                 logger(
@@ -737,7 +741,10 @@ abstract class Watch {
                     'Processing remove event');
                 const name =
                     (proto.documentDelete || proto.documentRemove)!.document!;
-                changeMap.set(name, REMOVED);
+                const relativeName =
+                    QualifiedResourcePath.fromSlashSeparatedString(name)
+                        .relativeName;
+                changeMap.set(relativeName, REMOVED);
               } else if (proto.filter) {
                 logger(
                     'Watch.onSnapshot', this._requestTag,
@@ -786,9 +793,8 @@ export class DocumentWatch extends Watch {
     return DOCUMENT_WATCH_COMPARATOR;
   }
 
-  async getTarget(resumeToken?: Uint8Array):
-      Promise<google.firestore.v1.ITarget> {
-    const formattedName = await this.ref.formattedName;
+  getTarget(resumeToken?: Uint8Array): google.firestore.v1.ITarget {
+    const formattedName = this.ref.formattedName;
     return {
       documents: {
         documents: [formattedName],
@@ -816,9 +822,8 @@ export class QueryWatch extends Watch {
     return this.query.comparator();
   }
 
-  async getTarget(resumeToken?: Uint8Array):
-      Promise<google.firestore.v1.ITarget> {
-    const query = await this.query.toProto();
+  getTarget(resumeToken?: Uint8Array): google.firestore.v1.ITarget {
+    const query = this.query.toProto();
     return {query, targetId: WATCH_TARGET_ID, resumeToken};
   }
 }

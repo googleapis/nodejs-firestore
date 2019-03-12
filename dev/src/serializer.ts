@@ -22,7 +22,7 @@ import {FieldTransform} from './field-value';
 import {DeleteTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
-import {FieldPath, ResourcePath} from './path';
+import {FieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, DocumentData, ValidationOptions} from './types';
 import {isEmpty, isObject} from './util';
@@ -223,8 +223,8 @@ export class Serializer {
         return this.timestampsInSnapshots ? timestamp : timestamp.toDate();
       }
       case 'referenceValue': {
-        const resourcePath =
-            ResourcePath.fromSlashSeparatedString(proto.referenceValue!);
+        const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(
+            proto.referenceValue!);
         return this.createReference(resourcePath.relativeName);
       }
       case 'arrayValue': {
@@ -309,7 +309,7 @@ export function validateUserInput(
   level = level || 0;
   inArray = inArray || false;
 
-  const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
+  const fieldPathMessage = path ? ` (found in field ${path})` : '';
 
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; ++i) {

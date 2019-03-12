@@ -17,6 +17,7 @@
 const duplexify = require('duplexify');
 
 import {expect} from 'chai';
+import * as extend from 'extend';
 import {Transform} from 'stream';
 import * as through2 from 'through2';
 
@@ -145,6 +146,12 @@ const modified = (ref: DocumentReference, data: DocumentData) =>
     docChange('modified', ref, data);
 const removed = (ref: DocumentReference, data: DocumentData) =>
     docChange('removed', ref, data);
+
+function verifyRequest<T>(actual: T, expected: T): void {
+  // Remove undefined value, as these are ignored by the backend.
+  actual = extend(true, {}, actual);
+  expect(actual).to.deep.equal(expected);
+}
 
 const EMPTY = {
   docs: [],
@@ -492,7 +499,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
 
     return this.streamHelper.awaitOpen()
         .then(request => {
-          expect(request).to.deep.eq(expectedRequest);
+          verifyRequest(request, expectedRequest);
           return func();
         })
         .then(() => this.endWatch());
@@ -508,7 +515,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
 
     return this.streamHelper.awaitOpen()
         .then(request => {
-          expect(request).to.deep.eq(expectedRequest);
+          verifyRequest(request, expectedRequest);
           return func();
         })
         .then(() => {
@@ -755,7 +762,7 @@ describe('Query watch', () => {
     const unsubscribe = watchHelper.startWatch();
     return streamHelper.awaitOpen()
         .then(request => {
-          expect(request).to.deep.eq(collQueryJSON());
+          verifyRequest(request, collQueryJSON());
           watchHelper.sendAddTarget();
           watchHelper.sendCurrent();
           watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
@@ -915,7 +922,7 @@ describe('Query watch', () => {
             return streamHelper.awaitReopen();
           })
           .then(request => {
-            expect(request).to.deep.eq(resumeTokenQuery(resumeToken));
+            verifyRequest(request, resumeTokenQuery(resumeToken));
             watchHelper.sendAddTarget();
             watchHelper.sendDoc(doc2, {foo: 'b'});
 
@@ -932,7 +939,7 @@ describe('Query watch', () => {
             return streamHelper.awaitReopen();
           })
           .then(request => {
-            expect(request).to.deep.eq(resumeTokenQuery(resumeToken));
+            verifyRequest(request, resumeTokenQuery(resumeToken));
             watchHelper.sendAddTarget();
             watchHelper.sendDoc(doc3, {foo: 'c'});
             watchHelper.sendSnapshot(4, resumeToken);
@@ -1042,7 +1049,7 @@ describe('Query watch', () => {
             return streamHelper.awaitReopen();
           })
           .then(request => {
-            expect(request).to.deep.eq(resumeTokenQuery(resumeToken));
+            verifyRequest(request, resumeTokenQuery(resumeToken));
             expect(streamHelper.streamCount).to.equal(2);
           });
     });
@@ -1610,7 +1617,7 @@ describe('Query watch', () => {
           .then(request => {
             expect(streamHelper.streamCount).to.equal(2);
             expect(oldRequestStream).to.not.equal(streamHelper.writeStream);
-            expect(collQueryJSON()).to.deep.eq(request);
+            verifyRequest(request, collQueryJSON());
 
             watchHelper.sendAddTarget();
             watchHelper.sendCurrent();
@@ -1823,7 +1830,7 @@ describe('Query watch', () => {
         watchHelper.sendCurrent();
         watchHelper.sendSnapshot(++snapshotVersion);
         return watchHelper.await('snapshot')
-            .then(snapshot => watchTest(snapshot as QuerySnapshot));
+            .then(snapshot => watchTest(snapshot));
       });
     }
 
@@ -1969,16 +1976,11 @@ describe('Query watch', () => {
 
       return initialSnapshot(snapshot => {
                return nextSnapshot(
-                          snapshot,
-                          () => {
-                            watchHelper.sendDoc(doc1, {foo: 'a'});
-                          })
+                          snapshot, () => watchHelper.sendDoc(doc1, {foo: 'a'}))
                    .then(
                        snapshot => nextSnapshot(
                            snapshot,
-                           () => {
-                             watchHelper.sendDoc(doc2, {foo: 'b'});
-                           }))
+                           () => watchHelper.sendDoc(doc2, {foo: 'b'})))
                    .then(snapshot => {
                      firstSnapshot = snapshot;
                    });
@@ -1986,9 +1988,7 @@ describe('Query watch', () => {
           .then(() => initialSnapshot(snapshot => {
                   return nextSnapshot(
                              snapshot,
-                             () => {
-                               watchHelper.sendDoc(doc1, {foo: 'a'});
-                             })
+                             () => watchHelper.sendDoc(doc1, {foo: 'a'}))
                       .then(
                           snapshot => nextSnapshot(
                               snapshot,
@@ -2007,18 +2007,19 @@ describe('Query watch', () => {
       let originalSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
-               return nextSnapshot(snapshot, () => {
-                        watchHelper.sendDoc(doc1, {foo: '1'});
-                      }).then(snapshot => {
-                 originalSnapshot = snapshot;
-               });
+               return nextSnapshot(
+                          snapshot, () => watchHelper.sendDoc(doc1, {foo: '1'}))
+                   .then(snapshot => {
+                     originalSnapshot = snapshot;
+                   });
              })
           .then(() => initialSnapshot(snapshot => {
-                  return nextSnapshot(snapshot, () => {
-                           watchHelper.sendDoc(doc1, {foo: 1});
-                         }).then(snapshot => {
-                    expect(snapshot.isEqual(originalSnapshot)).to.be.false;
-                  });
+                  return nextSnapshot(
+                             snapshot,
+                             () => watchHelper.sendDoc(doc1, {foo: 1}))
+                      .then(snapshot => {
+                        expect(snapshot.isEqual(originalSnapshot)).to.be.false;
+                      });
                 }));
     });
 
@@ -2253,7 +2254,7 @@ describe('DocumentReference watch', () => {
             streamHelper.write({
               documentChange: {
                 document: {
-                  name: doc.parent.formattedName + '/wrong',
+                  name: `projects/${PROJECT_ID}/databases/(default)/col/wrong`,
                   fields: {},
                   createTime: {seconds: 1, nanos: 2},
                   updateTime: {seconds: 3, nanos: 4},
@@ -2296,7 +2297,7 @@ describe('DocumentReference watch', () => {
             return streamHelper.awaitReopen();
           })
           .then(request => {
-            expect(request).to.deep.eq(resumeTokenJSON(resumeToken));
+            verifyRequest(request, resumeTokenJSON(resumeToken));
             // Change the document.
             watchHelper.sendDoc(doc, {foo: 'b'});
             watchHelper.sendSnapshot(3, resumeToken);

@@ -47,7 +47,7 @@ export interface NumericRangeOptions {
  */
 export function customObjectMessage(
     arg: string|number, value: unknown, path?: FieldPath): string {
-  const fieldPathMessage = path ? ` (found in field ${path.toString()})` : '';
+  const fieldPathMessage = path ? ` (found in field ${path})` : '';
 
   if (isObject(value)) {
     const typeName = value.constructor.name;
@@ -274,7 +274,7 @@ function formatArgumentName(arg: string|number): string {
  * @throws if the expectation is not met.
  */
 export function validateMinNumberOfArguments(
-    funcName: string, args: IArguments, minSize: number): void {
+    funcName: string, args: IArguments|unknown[], minSize: number): void {
   if (args.length < minSize) {
     throw new Error(
         `Function "${funcName}()" requires at least ` +

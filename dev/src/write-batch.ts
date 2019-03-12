@@ -103,9 +103,16 @@ interface WriteOp {
 export class WriteBatch {
   private readonly _firestore: Firestore;
   private readonly _serializer: Serializer;
-  private readonly _writes: WriteOp[] = [];
+
+  /**
+   * An array of write operations that are executed as part of the commit. The
+   * resulting `api.IWrite` will be sent to the backend.
+   * @private
+   */
+  private readonly _ops: Array<() => WriteOp> = [];
 
   private _committed = false;
+
   /**
    * @private
    * @hideconstructor
@@ -123,7 +130,7 @@ export class WriteBatch {
    * @private
    */
   get isEmpty(): boolean {
-    return this._writes.length === 0;
+    return this._ops.length === 0;
   }
 
   /**
@@ -163,16 +170,24 @@ export class WriteBatch {
 
     this.verifyNotCommitted();
 
-    const document = DocumentSnapshot.fromObject(documentRef, data);
-    const precondition = new Precondition({exists: false});
     const transform = DocumentTransform.fromObject(documentRef, data);
     transform.validate();
 
-    this._writes.push({
-      write: !document.isEmpty || transform.isEmpty ? document.toProto() : null,
-      transform: transform.toProto(this._serializer),
-      precondition: precondition.toProto(),
-    });
+    const precondition = new Precondition({exists: false});
+
+    const op = () => {
+      const document = DocumentSnapshot.fromObject(documentRef, data);
+      const write =
+          !document.isEmpty || transform.isEmpty ? document.toProto() : null;
+
+      return {
+        write,
+        transform: transform.toProto(this._serializer),
+        precondition: precondition.toProto(),
+      };
+    };
+
+    this._ops.push(op);
 
     return this;
   }
@@ -209,12 +224,16 @@ export class WriteBatch {
 
     const conditions = new Precondition(precondition);
 
-    this._writes.push({
-      write: {
-        delete: documentRef.formattedName,
-      },
-      precondition: conditions.toProto(),
-    });
+    const op = () => {
+      return {
+        write: {
+          delete: documentRef.formattedName,
+        },
+        precondition: conditions.toProto()
+      };
+    };
+
+    this._ops.push(op);
 
     return this;
   }
@@ -271,28 +290,33 @@ export class WriteBatch {
     const transform = DocumentTransform.fromObject(documentRef, data);
     transform.validate();
 
-    const document = DocumentSnapshot.fromObject(documentRef, data);
-    if (mergePaths) {
-      documentMask!.removeFields(transform.fields);
-    } else {
-      documentMask = DocumentMask.fromObject(data);
-    }
+    const op = () => {
+      const document = DocumentSnapshot.fromObject(documentRef, data);
 
-    const hasDocumentData = !document.isEmpty || !documentMask!.isEmpty;
+      if (mergePaths) {
+        documentMask!.removeFields(transform.fields);
+      } else {
+        documentMask = DocumentMask.fromObject(data);
+      }
 
-    let write;
+      const hasDocumentData = !document.isEmpty || !documentMask!.isEmpty;
 
-    if (!mergePaths && !mergeLeaves) {
-      write = document.toProto();
-    } else if (hasDocumentData || transform.isEmpty) {
-      write = document.toProto()!;
-      write.updateMask = documentMask!.toProto();
-    }
+      let write;
 
-    this._writes.push({
-      write,
-      transform: transform.toProto(this._serializer),
-    });
+      if (!mergePaths && !mergeLeaves) {
+        write = document.toProto();
+      } else if (hasDocumentData || transform.isEmpty) {
+        write = document.toProto()!;
+        write.updateMask = documentMask!.toProto();
+      }
+
+      return {
+        write,
+        transform: transform.toProto(this._serializer),
+      };
+    };
+
+    this._ops.push(op);
 
     return this;
   }
@@ -406,24 +430,28 @@ export class WriteBatch {
 
     validateNoConflictingFields('dataOrField', updateMap);
 
-    const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
-    const documentMask = DocumentMask.fromUpdateMap(updateMap);
-
-    let write: api.IWrite|null = null;
-
-    if (!document.isEmpty || !documentMask.isEmpty) {
-      write = document.toProto();
-      write!.updateMask = documentMask.toProto();
-    }
-
     const transform = DocumentTransform.fromUpdateMap(documentRef, updateMap);
     transform.validate();
 
-    this._writes.push({
-      write,
-      transform: transform.toProto(this._serializer),
-      precondition: precondition.toProto(),
-    });
+    const documentMask = DocumentMask.fromUpdateMap(updateMap);
+
+    const op = () => {
+      const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
+      let write: api.IWrite|null = null;
+
+      if (!document.isEmpty || !documentMask.isEmpty) {
+        write = document.toProto();
+        write!.updateMask = documentMask.toProto();
+      }
+
+      return {
+        write,
+        transform: transform.toProto(this._serializer),
+        precondition: precondition.toProto(),
+      };
+    };
+
+    this._ops.push(op);
 
     return this;
   }
@@ -459,16 +487,19 @@ export class WriteBatch {
    * this request.
    * @returns  A Promise that resolves when this batch completes.
    */
-  commit_(commitOptions?: {transactionId?: Uint8Array, requestTag?: string}):
+  async commit_(commitOptions?:
+                    {transactionId?: Uint8Array, requestTag?: string}):
       Promise<WriteResult[]> {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
+    this._committed = true;
+
+    await this._firestore.initializeIfNeeded();
 
     const explicitTransaction = commitOptions && commitOptions.transactionId;
 
     const tag = (commitOptions && commitOptions.requestTag) || requestTag();
-    const request: api.ICommitRequest = {
-      database: this._firestore.formattedName,
-    };
+    const database = this._firestore.formattedName;
+    const request: api.ICommitRequest = {database};
 
     // On GCF, we periodically force transactional commits to allow for
     // request retries in case GCF closes our backend connection.
@@ -482,9 +513,10 @@ export class WriteBatch {
           });
     }
 
+    const writes = this._ops.map(op => op());
     request.writes = [];
 
-    for (const req of this._writes) {
+    for (const req of writes) {
       assert(
           req.write || req.transform,
           'Either a write or transform must be set');
@@ -509,8 +541,6 @@ export class WriteBatch {
       request.transaction = explicitTransaction;
     }
 
-    this._committed = true;
-
     return this._firestore
         .request<api.CommitResponse>(
             'commit', request, tag, /* allowRetries= */ false)
@@ -529,8 +559,8 @@ export class WriteBatch {
 
             let offset = 0;
 
-            for (let i = 0; i < this._writes.length; ++i) {
-              const writeRequest = this._writes[i];
+            for (let i = 0; i < writes.length; ++i) {
+              const writeRequest = writes[i];
 
               // Don't return two write results for a write that contains a
               // transform, as the fact that we have to split one write

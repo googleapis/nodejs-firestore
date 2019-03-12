@@ -22,7 +22,7 @@ import {google} from '../protos/firestore_proto_api';
 
 import * as Firestore from '../src';
 import {DocumentSnapshot, FieldPath} from '../src';
-import {ResourcePath} from '../src/path';
+import {QualifiedResourcePath} from '../src/path';
 import {GrpcError} from '../src/types';
 import {ApiOverride, createInstance, document, DOCUMENT_NAME, found, InvalidApiUsage, missing, stream} from './util/helpers';
 
@@ -217,8 +217,13 @@ const allSupportedTypesInput = {
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new Firestore.DocumentReference(
-      {formattedName: DATABASE_ROOT} as any,  // tslint:disable-line no-any
-      new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
+      {
+        formattedName: DATABASE_ROOT,
+        _getProjectId: () =>
+            ({projectId: PROJECT_ID, databaseId: '(default)'})
+      } as any,  // tslint:disable-line no-any
+      new QualifiedResourcePath(
+          PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
   nilValue: null,
@@ -241,8 +246,13 @@ const allSupportedTypesOutput = {
   timestampValue: Firestore.Timestamp.fromDate(
       new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
   pathValue: new Firestore.DocumentReference(
-      {formattedName: DATABASE_ROOT} as any,  // tslint:disable-line no-any
-      new ResourcePath(PROJECT_ID, '(default)', 'collection', 'document')),
+      {
+        formattedName: DATABASE_ROOT,
+        _getProjectId: () =>
+            ({projectId: PROJECT_ID, databaseId: '(default)'})
+      } as any,  // tslint:disable-line no-any
+      new QualifiedResourcePath(
+          PROJECT_ID, '(default)', 'collection', 'document')),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
   nilValue: null,
@@ -270,16 +280,16 @@ describe('instantiation', () => {
 
     expect(() => firestore.settings({}))
         .to.throw(
-            'Firestore.settings() has already be called. You can only call settings() once, and only before calling any other methods on a Firestore object.');
+            'Firestore has already been initialized. You can only call settings() once, and only before calling any other methods on a Firestore object.');
   });
 
-  it('cannot change settings after client initialized', () => {
+  it('cannot change settings after client initialized', async () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
-    firestore['_runRequest'](() => Promise.resolve());
+    await firestore.initializeIfNeeded();
 
     expect(() => firestore.settings({}))
         .to.throw(
-            'Firestore has already been started and its settings can no longer be changed. You can only call settings() before calling any other methods on a Firestore object.');
+            'Firestore has already been initialized. You can only call settings() once, and only before calling any other methods on a Firestore object.');
   });
 
   it('validates project ID is string', () => {
@@ -322,50 +332,26 @@ describe('instantiation', () => {
   });
 
   it('uses project id from constructor', () => {
-    const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
+    const firestore = new Firestore.Firestore({projectId: 'foo'});
 
-    return firestore['_runRequest'](() => {
-      expect(firestore.formattedName)
-          .to.equal(`projects/${PROJECT_ID}/databases/(default)`);
-      return Promise.resolve();
-    });
+    return expect(firestore.formattedName)
+        .to.equal(`projects/foo/databases/(default)`);
   });
 
-  it('detects project id', () => {
-    const firestore = new Firestore.Firestore({
-      sslCreds: grpc.credentials.createInsecure(),
-      keyFilename: __dirname + '/fake-certificate.json',
-    });
-
-    expect(firestore.formattedName)
-        .to.equal('projects/{{projectId}}/databases/(default)');
-
-    firestore['_detectProjectId'] = () => Promise.resolve(PROJECT_ID);
-
-    return firestore['_runRequest'](() => {
-      expect(firestore.formattedName)
-          .to.equal(`projects/${PROJECT_ID}/databases/(default)`);
-      return Promise.resolve();
-    });
-  });
-
-  it('uses project id from gapic client', () => {
-    const firestore = new Firestore.Firestore({
-      sslCreds: grpc.credentials.createInsecure(),
-      keyFilename: './test/fake-certificate.json',
-    });
-
-    expect(firestore.formattedName)
-        .to.equal('projects/{{projectId}}/databases/(default)');
-
-    const gapicClient = {
-      getProjectId: (callback: (err: GrpcError|null, resp?: string) => void) =>
-          callback(null, PROJECT_ID)
-    };
-
-    return firestore['_detectProjectId'](gapicClient).then(projectId => {
-      expect(projectId).to.equal(PROJECT_ID);
-    });
+  it('uses project id from gapic client', async () => {
+    return createInstance(
+               {
+                 getProjectId: (callback => {
+                   callback(null, 'foo');
+                 })
+               },
+               {projectId: undefined})
+        .then(async firestore => {
+          await firestore.initializeIfNeeded();
+          expect(firestore.projectId).to.equal('foo');
+          expect(firestore.formattedName)
+              .to.equal(`projects/foo/databases/(default)`);
+        });
   });
 
   it('uses project ID from settings()', () => {
@@ -381,19 +367,17 @@ describe('instantiation', () => {
   });
 
   it('handles error from project ID detection', () => {
-    const firestore = new Firestore.Firestore({
-      sslCreds: grpc.credentials.createInsecure(),
-      keyFilename: './test/fake-certificate.json',
-    });
-
-    const gapicClient = {
-      getProjectId: (callback: (err: GrpcError|null, resp?: string) => void) =>
-          callback(new Error('Injected Error'))
-    };
-
-    return firestore['_detectProjectId'](gapicClient)
-        .then(() => expect.fail('Error ignored'))
-        .catch(err => expect('Injected Error').to.equal(err.message));
+    return createInstance(
+               {
+                 getProjectId: (callback => {
+                   callback(new Error('Injected Error'), null);
+                 })
+               },
+               {projectId: undefined})
+        .then(firestore => {
+          return expect(firestore.collection('foo').add({}))
+              .to.eventually.be.rejectedWith('Injected Error');
+        });
   });
 
   it('exports all types', () => {

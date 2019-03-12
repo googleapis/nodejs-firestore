@@ -21,7 +21,7 @@ import {google} from '../protos/firestore_proto_api';
 import {FieldPath, FieldValue, Firestore, setLogFunction} from '../src';
 import {DocumentData, DocumentReference, Query, Timestamp} from '../src';
 import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
-import {ResourcePath} from '../src/path';
+import {QualifiedResourcePath} from '../src/path';
 import {ApiOverride, createInstance, document, InvalidApiUsage, stream} from './util/helpers';
 
 import api = google.firestore.v1;
@@ -36,7 +36,7 @@ function snapshot(
     relativePath: string, data: DocumentData): Promise<DocumentSnapshot> {
   return createInstance().then(firestore => {
     const snapshot = new DocumentSnapshotBuilder();
-    const path = ResourcePath.fromSlashSeparatedString(
+    const path = QualifiedResourcePath.fromSlashSeparatedString(
         `${DATABASE_ROOT}/documents/${relativePath}`);
     snapshot.ref = new DocumentReference(firestore, path);
     snapshot.fieldsProto = firestore['_serializer']!.encodeFields(data);
@@ -247,6 +247,10 @@ function queryEquals(
     extend(true, query.structuredQuery, protoComponent);
   }
 
+  // 'extend' removes undefined fields in the request object. The backend
+  // ignores these fields, but we need to manually strip them before we compare
+  // the expected and the actual request.
+  actual = extend(true, {}, actual);
   expect(actual).to.deep.eq(query);
 }
 
@@ -340,8 +344,7 @@ describe('query interface', () => {
     queryEquals(
         [
           query.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
-          query.orderBy('foo').startAt(
-              firestore.snapshot_(document('c', 'foo', 'b'), {})),
+          query.orderBy('foo').orderBy('__name__').startAt('b', 'c')
         ],
         []);
   });

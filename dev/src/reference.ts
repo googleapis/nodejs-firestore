@@ -17,7 +17,6 @@
 const deepEqual = require('deep-equal');
 
 import * as bun from 'bun';
-import * as extend from 'extend';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_proto_api';
@@ -27,8 +26,8 @@ import {DocumentChange} from './document-change';
 import {Firestore} from './index';
 import {logger} from './logger';
 import {compare} from './order';
-import {FieldPath, ResourcePath, validateFieldPath, validateResourcePath} from './path';
-import {Serializer, validateUserInput} from './serializer';
+import {FieldPath, QualifiedResourcePath, ResourcePath, validateFieldPath, validateResourcePath} from './path';
+import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {DocumentData, OrderByDirection, Precondition, SetOptions, UpdateData, WhereFilterOp} from './types';
 import {autoId, requestTag} from './util';
@@ -96,7 +95,7 @@ const comparisonOperators:
  *
  * @class
  */
-export class DocumentReference {
+export class DocumentReference implements Serializable {
   /**
    * @private
    * @hideconstructor
@@ -107,6 +106,7 @@ export class DocumentReference {
   constructor(
       private readonly _firestore: Firestore, readonly _path: ResourcePath) {}
 
+
   /**
    * The string representation of the DocumentReference's location.
    * @private
@@ -114,7 +114,8 @@ export class DocumentReference {
    * @name DocumentReference#formattedName
    */
   get formattedName(): string {
-    return this._path.formattedName;
+    const projectId = this.firestore.projectId;
+    return this._path.toQualifiedResourcePath(projectId).formattedName;
   }
 
   /**
@@ -255,25 +256,26 @@ export class DocumentReference {
    * });
    */
   listCollections(): Promise<CollectionReference[]> {
-    const request = {parent: this._path.formattedName};
+    return this.firestore.initializeIfNeeded().then(() => {
+      const request = {parent: this.formattedName};
+      return this._firestore
+          .request<string[]>(
+              'listCollectionIds', request, requestTag(),
+              /* allowRetries= */ true)
+          .then(collectionIds => {
+            const collections: CollectionReference[] = [];
 
-    return this._firestore
-        .request<string[]>(
-            'listCollectionIds', request, requestTag(),
-            /* allowRetries= */ true)
-        .then(collectionIds => {
-          const collections: CollectionReference[] = [];
+            // We can just sort this list using the default comparator since it
+            // will only contain collection ids.
+            collectionIds.sort();
 
-          // We can just sort this list using the default comparator since it
-          // will only contain collection ids.
-          collectionIds.sort();
+            for (const collectionId of collectionIds) {
+              collections.push(this.collection(collectionId));
+            }
 
-          for (const collectionId of collectionIds) {
-            collections.push(this.collection(collectionId));
-          }
-
-          return collections;
-        });
+            return collections;
+          });
+    });
   }
 
   /**
@@ -859,12 +861,18 @@ docChangesPropertiesToOverride.forEach(property => {
       {get: () => throwDocChangesMethodError()});
 });
 
+/** Internal representation of a query cursor before serialization. */
+interface QueryCursor {
+  before?: boolean;
+  values: unknown[];
+}
+
 /** Internal options to customize the Query class. */
 interface QueryOptions {
-  startAt?: api.ICursor;
-  startAfter?: api.ICursor;
-  endAt?: api.ICursor;
-  endBefore?: api.ICursor;
+  startAt?: QueryCursor;
+  startAfter?: QueryCursor;
+  endAt?: QueryCursor;
+  endBefore?: QueryCursor;
   limit?: number;
   offset?: number;
   projection?: api.StructuredQuery.IProjection;
@@ -949,14 +957,6 @@ export class Query {
   }
 
   /**
-   * The string representation of the Query's location.
-   * @private
-   */
-  get formattedName(): string {
-    return this._path.formattedName;
-  }
-
-  /**
    * The [Firestore]{@link Firestore} instance for the Firestore
    * database (useful for performing transactions, etc.).
    *
@@ -1017,7 +1017,7 @@ export class Query {
     fieldPath = FieldPath.fromArgument(fieldPath);
 
     if (FieldPath.documentId().isEqual(fieldPath)) {
-      value = this.convertReference(value);
+      value = this.validateReference(value);
     }
 
     const combinedFilters = this._fieldFilters.concat(new FieldFilter(
@@ -1063,7 +1063,7 @@ export class Query {
       }
     }
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
     options.projection = {fields};
 
     return new Query(
@@ -1134,7 +1134,7 @@ export class Query {
   limit(limit: number): Query {
     validateInteger('limit', limit);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
     options.limit = limit;
     return new Query(
         this._firestore, this._path, this._fieldFilters, this._fieldOrders,
@@ -1163,7 +1163,7 @@ export class Query {
   offset(offset: number): Query {
     validateInteger('offset', offset);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
     options.offset = offset;
     return new Query(
         this._firestore, this._path, this._fieldFilters, this._fieldOrders,
@@ -1250,7 +1250,7 @@ export class Query {
   private createCursor(
       fieldOrders: FieldOrder[],
       cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot|unknown>,
-      before: boolean): api.ICursor {
+      before: boolean): QueryCursor {
     let fieldValues;
 
     if (Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
@@ -1266,9 +1266,7 @@ export class Query {
           'values must match the orderBy() constraints of the query.');
     }
 
-    const options: api.ICursor = {
-      values: [],
-    };
+    const options: QueryCursor = {values: []};
 
     if (before) {
       options.before = true;
@@ -1278,11 +1276,11 @@ export class Query {
       let fieldValue = fieldValues[i];
 
       if (FieldPath.documentId().isEqual(fieldOrders[i].field)) {
-        fieldValue = this.convertReference(fieldValue);
+        fieldValue = this.validateReference(fieldValue);
       }
 
       validateQueryValue(i, fieldValue);
-      options.values!.push(this._serializer.encodeValue(fieldValue)!);
+      options.values!.push(fieldValue);
     }
 
     return options;
@@ -1294,13 +1292,13 @@ export class Query {
    * Throws a validation error or returns a DocumentReference that can
    * directly be used in the Query.
    *
-   * @param reference The value to validate.
+   * @param val The value to validate.
    * @throws If the value cannot be used for this query.
    * @return If valid, returns a DocumentReference that can be used with the
    * query.
    * @private
    */
-  private convertReference(val: unknown): DocumentReference {
+  private validateReference(val: unknown): DocumentReference {
     let reference: DocumentReference;
 
     if (typeof val === 'string') {
@@ -1350,7 +1348,7 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.startAt', arguments, 1);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1385,7 +1383,7 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.startAfter', arguments, 1);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1419,7 +1417,7 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.endBefore', arguments, 1);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1453,7 +1451,7 @@ export class Query {
       Query {
     validateMinNumberOfArguments('Query.endAt', arguments, 1);
 
-    const options = extend(true, {}, this._queryOptions);
+    const options = Object.assign({}, this._queryOptions);
 
     const fieldOrders =
         this.createImplicitOrderBy(fieldValuesOrDocumentSnapshot);
@@ -1557,6 +1555,20 @@ export class Query {
   }
 
   /**
+   * Converts a QueryCursor to its proto representation.
+   * @private
+   */
+  private _toCursor(cursor?: QueryCursor): api.ICursor|undefined {
+    if (cursor) {
+      const values = cursor.values.map(
+          val => this._serializer.encodeValue(val) as api.IValue);
+      return {before: cursor.before, values};
+    }
+
+    return undefined;
+  }
+
+  /**
    * Internal method for serializing a query to its RunQuery proto
    * representation with an optional transaction id.
    *
@@ -1565,8 +1577,10 @@ export class Query {
    * @returns Serialized JSON for the query.
    */
   toProto(transactionId?: Uint8Array): api.IRunQueryRequest {
+    const projectId = this.firestore.projectId;
+    const parentPath = this._path.parent()!.toQualifiedResourcePath(projectId);
     const reqOpts: api.IRunQueryRequest = {
-      parent: this._path.parent()!.formattedName,
+      parent: parentPath.formattedName,
       structuredQuery: {
         from: [
           {
@@ -1606,8 +1620,8 @@ export class Query {
     }
 
     structuredQuery.offset = this._queryOptions.offset;
-    structuredQuery.startAt = this._queryOptions.startAt;
-    structuredQuery.endAt = this._queryOptions.endAt;
+    structuredQuery.startAt = this._toCursor(this._queryOptions.startAt);
+    structuredQuery.endAt = this._toCursor(this._queryOptions.endAt);
     structuredQuery.select = this._queryOptions.projection;
 
     reqOpts.transaction = transactionId;
@@ -1623,7 +1637,6 @@ export class Query {
    * @returns A stream of document results.
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
-    const request = this.toProto(transactionId);
     const tag = requestTag();
     const self = this;
 
@@ -1639,19 +1652,22 @@ export class Query {
       callback();
     });
 
-    this._firestore.readStream('runQuery', request, tag, true)
-        .then(backendStream => {
-          backendStream.on('error', err => {
-            logger(
-                'Query._stream', tag, 'Query failed with stream error:', err);
+    this.firestore.initializeIfNeeded().then(() => {
+      const request = this.toProto(transactionId);
+      this._firestore.readStream('runQuery', request, tag, true)
+          .then(backendStream => {
+            backendStream.on('error', err => {
+              logger(
+                  'Query._stream', tag, 'Query failed with stream error:', err);
+              stream.destroy(err);
+            });
+            backendStream.resume();
+            backendStream.pipe(stream);
+          })
+          .catch(err => {
             stream.destroy(err);
           });
-          backendStream.resume();
-          backendStream.pipe(stream);
-        })
-        .catch(err => {
-          stream.destroy(err);
-        });
+    });
 
     return stream;
   }
@@ -1832,24 +1848,31 @@ export class CollectionReference extends Query {
    * });
    */
   listDocuments(): Promise<DocumentReference[]> {
-    const request: api.IListDocumentsRequest = {
-      parent: this._path.parent()!.formattedName,
-      collectionId: this.id,
-      showMissing: true,
-      mask: {fieldPaths: []}
-    };
+    return this.firestore.initializeIfNeeded().then(() => {
+      const resourcePath =
+          this._path.toQualifiedResourcePath(this.firestore.projectId);
+      const parentPath = resourcePath.parent()!;
 
-    return this.firestore
-        .request<api.IDocument[]>(
-            'listDocuments', request, requestTag(), /*allowRetries=*/true)
-        .then(documents => {
-          // Note that the backend already orders these documents by name,
-          // so we do not need to manually sort them.
-          return documents.map(doc => {
-            const path = ResourcePath.fromSlashSeparatedString(doc.name!);
-            return this.doc(path.id!);
+      const request: api.IListDocumentsRequest = {
+        parent: parentPath.formattedName,
+        collectionId: this.id,
+        showMissing: true,
+        mask: {fieldPaths: []}
+      };
+
+      return this.firestore
+          .request<api.IDocument[]>(
+              'listDocuments', request, requestTag(), /*allowRetries=*/true)
+          .then(documents => {
+            // Note that the backend already orders these documents by name,
+            // so we do not need to manually sort them.
+            return documents.map(doc => {
+              const path =
+                  QualifiedResourcePath.fromSlashSeparatedString(doc.name!);
+              return this.doc(path.id!);
+            });
           });
-        });
+    });
   }
 
 
@@ -2000,7 +2023,7 @@ function validateQueryValue(arg: string|number, value: unknown): void {
 }
 
 /**
- * Verifies euqality for an array of objects using the `isEqual` interface.
+ * Verifies equality for an array of objects using the `isEqual` interface.
  *
  * @private
  * @param left Array of objects supporting `isEqual`.
