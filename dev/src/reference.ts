@@ -907,18 +907,7 @@ export class QueryOptions {
    * Returns the union of the current and the provided options.
    * @private
    */
-  with(settings: {
-    parentPath?: ResourcePath;
-    collectionId?: string;
-    allDescendants?: boolean;
-    fieldFilters?: FieldFilter[];
-    fieldOrders?: FieldOrder[];
-    startAt?: QueryCursor;
-    endAt?: QueryCursor;
-    limit?: number;
-    offset?: number;
-    projection?: api.StructuredQuery.IProjection;
-  }): QueryOptions {
+  with(settings: Partial<QueryOptions>): QueryOptions {
     return new QueryOptions(
         coalesce(settings.parentPath, this.parentPath)!,
         coalesce(settings.collectionId, this.collectionId)!,
