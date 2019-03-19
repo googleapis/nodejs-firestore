@@ -70,7 +70,7 @@
     "duplexify": "^4.0.0",
     "extend": "^3.0.1",
     "gts": "^0.9.0",
-    "hard-rejection": "^1.0.0",
+    "hard-rejection": "^2.0.0",
     "jsdoc-baseline": "git+https://github.com/hegemonic/jsdoc-baseline.git",
     "intelli-espower-loader": "^1.0.1",
     "jsdoc": "^3.5.5",
