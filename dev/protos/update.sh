@@ -50,6 +50,10 @@ mkdir -p "${PROTOS_DIR}/google/firestore/v1"
 cp googleapis/google/firestore/v1/*.proto \
    "${PROTOS_DIR}/google/firestore/v1/"
 
+mkdir -p "${PROTOS_DIR}/google/longrunning"
+cp googleapis/google/longrunning/operations.proto \
+   "${PROTOS_DIR}/google/longrunning/"
+
 mkdir -p "${PROTOS_DIR}/google/rpc"
 cp googleapis/google/rpc/status.proto \
    "${PROTOS_DIR}/google/rpc/"
@@ -59,7 +63,7 @@ cp googleapis/google/type/latlng.proto \
    "${PROTOS_DIR}/google/type/"
 
 mkdir -p "${PROTOS_DIR}/google/protobuf"
-cp protobuf/src/google/protobuf/{any,empty,struct,timestamp,wrappers}.proto \
+cp protobuf/src/google/protobuf/{any,empty,field_mask,struct,timestamp,wrappers}.proto \
    "${PROTOS_DIR}/google/protobuf/"
 
 # Generate the Protobuf typings
@@ -68,7 +72,8 @@ cp protobuf/src/google/protobuf/{any,empty,struct,timestamp,wrappers}.proto \
   --no-convert --no-delimited --force-enum-string --force-number -o \
   firestore_proto_api.js  "${PROTOS_DIR}/google/firestore/v1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
-  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
+  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
+  "${PROTOS_DIR}/google/longrunning/*.proto"
 "${PBTS}" -o firestore_proto_api.d.ts firestore_proto_api.js
 
 # Copy typings into source repo
