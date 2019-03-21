@@ -16,8 +16,7 @@
 // to be loaded as the JS file.
 
 /**
- * The request for
- * Firestore.GetDocument.
+ * The request for Firestore.GetDocument.
  *
  * @property {string} name
  *   The resource name of the Document to get. In the format:
@@ -51,8 +50,7 @@ const GetDocumentRequest = {
 };
 
 /**
- * The request for
- * Firestore.ListDocuments.
+ * The request for Firestore.ListDocuments.
  *
  * @property {string} parent
  *   The parent resource name. In the format:
@@ -97,9 +95,8 @@ const GetDocumentRequest = {
  * @property {boolean} showMissing
  *   If the list should show missing documents. A missing document is a
  *   document that does not exist but has sub-documents. These documents will
- *   be returned with a key but will not have fields,
- *   Document.create_time, or
- *   Document.update_time set.
+ *   be returned with a key but will not have fields, Document.create_time,
+ *   or Document.update_time set.
  *
  *   Requests with `show_missing` may not specify `where` or
  *   `order_by`.
@@ -113,8 +110,7 @@ const ListDocumentsRequest = {
 };
 
 /**
- * The response for
- * Firestore.ListDocuments.
+ * The response for Firestore.ListDocuments.
  *
  * @property {Object[]} documents
  *   The Documents found.
@@ -134,8 +130,7 @@ const ListDocumentsResponse = {
 };
 
 /**
- * The request for
- * Firestore.CreateDocument.
+ * The request for Firestore.CreateDocument.
  *
  * @property {string} parent
  *   The parent resource. For example:
@@ -174,8 +169,7 @@ const CreateDocumentRequest = {
 };
 
 /**
- * The request for
- * Firestore.UpdateDocument.
+ * The request for Firestore.UpdateDocument.
  *
  * @property {Object} document
  *   The updated document.
@@ -221,8 +215,7 @@ const UpdateDocumentRequest = {
 };
 
 /**
- * The request for
- * Firestore.DeleteDocument.
+ * The request for Firestore.DeleteDocument.
  *
  * @property {string} name
  *   The resource name of the Document to delete. In the format:
@@ -244,8 +237,7 @@ const DeleteDocumentRequest = {
 };
 
 /**
- * The request for
- * Firestore.BatchGetDocuments.
+ * The request for Firestore.BatchGetDocuments.
  *
  * @property {string} database
  *   The database name. In the format:
@@ -294,8 +286,7 @@ const BatchGetDocumentsRequest = {
 };
 
 /**
- * The streamed response for
- * Firestore.BatchGetDocuments.
+ * The streamed response for Firestore.BatchGetDocuments.
  *
  * @property {Object} found
  *   A document that was requested.
@@ -310,8 +301,7 @@ const BatchGetDocumentsRequest = {
  * @property {string} transaction
  *   The transaction that was started as part of this request.
  *   Will only be set in the first response, and only if
- *   BatchGetDocumentsRequest.new_transaction
- *   was set in the request.
+ *   BatchGetDocumentsRequest.new_transaction was set in the request.
  *
  * @property {Object} readTime
  *   The time at which the document was read.
@@ -331,8 +321,7 @@ const BatchGetDocumentsResponse = {
 };
 
 /**
- * The request for
- * Firestore.BeginTransaction.
+ * The request for Firestore.BeginTransaction.
  *
  * @property {string} database
  *   The database name. In the format:
@@ -354,8 +343,7 @@ const BeginTransactionRequest = {
 };
 
 /**
- * The response for
- * Firestore.BeginTransaction.
+ * The response for Firestore.BeginTransaction.
  *
  * @property {string} transaction
  *   The transaction that was started.
@@ -483,15 +471,13 @@ const RunQueryRequest = {
 };
 
 /**
- * The response for
- * Firestore.RunQuery.
+ * The response for Firestore.RunQuery.
  *
  * @property {string} transaction
  *   The transaction that was started as part of this request.
  *   Can only be set in the first response, and only if
- *   RunQueryRequest.new_transaction
- *   was set in the request. If set, no other fields will be set in this
- *   response.
+ *   RunQueryRequest.new_transaction was set in the request.
+ *   If set, no other fields will be set in this response.
  *
  * @property {Object} document
  *   A query result.
@@ -561,9 +547,9 @@ const RunQueryResponse = {
  *   A stream token that was previously sent by the server.
  *
  *   The client should set this field to the token from the most recent
- *   WriteResponse it has received. This
- *   acknowledges that the client has received responses up to this token. After
- *   sending this token, earlier tokens may not be used anymore.
+ *   WriteResponse it has received. This acknowledges that the client has
+ *   received responses up to this token. After sending this token, earlier
+ *   tokens may not be used anymore.
  *
  *   The server may close the stream if there are too many unacknowledged
  *   responses.
@@ -669,8 +655,8 @@ const ListenRequest = {
  * google.firestore.v1.DocumentDelete}
  *
  * @property {Object} documentRemove
- *   A Document has been removed from a target
- *   (because it is no longer relevant to that target).
+ *   A Document has been removed from a target (because it is no longer
+ *   relevant to that target).
  *
  *   This object should have the same structure as [DocumentRemove]{@link
  * google.firestore.v1.DocumentRemove}
@@ -709,8 +695,7 @@ const ListenResponse = {
  * google.firestore.v1.DocumentsTarget}
  *
  * @property {string} resumeToken
- *   A resume token from a prior
- *   TargetChange for an identical target.
+ *   A resume token from a prior TargetChange for an identical target.
  *
  *   Using a resume token with a different target is unsupported and may fail.
  *
@@ -886,8 +871,7 @@ const TargetChange = {
 };
 
 /**
- * The request for
- * Firestore.ListCollectionIds.
+ * The request for Firestore.ListCollectionIds.
  *
  * @property {string} parent
  *   The parent document. In the format:
@@ -911,8 +895,7 @@ const ListCollectionIdsRequest = {
 };
 
 /**
- * The response from
- * Firestore.ListCollectionIds.
+ * The response from Firestore.ListCollectionIds.
  *
  * @property {string[]} collectionIds
  *   The collection ids.

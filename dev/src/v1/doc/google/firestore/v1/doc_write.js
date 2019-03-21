@@ -93,9 +93,8 @@ const DocumentTransform = {
    * A transformation of a field of the document.
    *
    * @property {string} fieldPath
-   *   The path of the field. See
-   *   Document.fields for the field path
-   *   syntax reference.
+   *   The path of the field. See Document.fields for the field path syntax
+   *   reference.
    *
    * @property {number} setToServerValue
    *   Sets the field to the given server value.
@@ -227,9 +226,8 @@ const DocumentTransform = {
  * google.protobuf.Timestamp}
  *
  * @property {Object[]} transformResults
- *   The results of applying each
- *   DocumentTransform.FieldTransform,
- *   in the same order.
+ *   The results of applying each DocumentTransform.FieldTransform, in the
+ *   same order.
  *
  *   This object should have the same structure as [Value]{@link
  * google.firestore.v1.Value}
@@ -245,12 +243,11 @@ const WriteResult = {
 /**
  * A Document has changed.
  *
- * May be the result of multiple writes, including
- * deletes, that ultimately resulted in a new value for the
- * Document.
+ * May be the result of multiple writes, including deletes, that
+ * ultimately resulted in a new value for the Document.
  *
- * Multiple DocumentChange messages may be
- * returned for the same logical change, if multiple targets are affected.
+ * Multiple DocumentChange messages may be returned for the same logical
+ * change, if multiple targets are affected.
  *
  * @property {Object} document
  *   The new state of the Document.
@@ -277,16 +274,14 @@ const DocumentChange = {
 /**
  * A Document has been deleted.
  *
- * May be the result of multiple writes, including
- * updates, the last of which deleted the
- * Document.
+ * May be the result of multiple writes, including updates, the
+ * last of which deleted the Document.
  *
- * Multiple DocumentDelete messages may be
- * returned for the same logical delete, if multiple targets are affected.
+ * Multiple DocumentDelete messages may be returned for the same logical
+ * delete, if multiple targets are affected.
  *
  * @property {string} document
- *   The resource name of the Document that was
- *   deleted.
+ *   The resource name of the Document that was deleted.
  *
  * @property {number[]} removedTargetIds
  *   A set of target IDs for targets that previously matched this entity.
@@ -308,20 +303,17 @@ const DocumentDelete = {
 };
 
 /**
- * A Document has been removed from the view of
- * the targets.
+ * A Document has been removed from the view of the targets.
  *
  * Sent if the document is no longer relevant to a target and is out of view.
  * Can be sent instead of a DocumentDelete or a DocumentChange if the server
  * can not send the new value of the document.
  *
- * Multiple DocumentRemove messages may be
- * returned for the same logical write or delete, if multiple targets are
- * affected.
+ * Multiple DocumentRemove messages may be returned for the same logical
+ * write or delete, if multiple targets are affected.
  *
  * @property {string} document
- *   The resource name of the Document that has
- *   gone out of view.
+ *   The resource name of the Document that has gone out of view.
  *
  * @property {number[]} removedTargetIds
  *   A set of target IDs for targets that previously matched this document.
@@ -349,8 +341,7 @@ const DocumentRemove = {
  *   The target ID to which this filter applies.
  *
  * @property {number} count
- *   The total count of documents that match
- *   target_id.
+ *   The total count of documents that match target_id.
  *
  *   If different from the count of documents in the client that match, the
  *   client must manually determine which documents no longer match the target.
