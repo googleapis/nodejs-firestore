@@ -54,21 +54,23 @@ setLibVersion(libVersion);
 /*!
  * DO NOT REMOVE THE FOLLOWING NAMESPACE DEFINITIONS
  */
-
 /**
  * @namespace google.protobuf
  */
-
 /**
  * @namespace google.rpc
  */
-
+/**
+ * @namespace google.longrunning
+ */
 /**
  * @namespace google.firestore.v1
  */
-
 /**
  * @namespace google.firestore.v1beta1
+ */
+/**
+ * @namespace google.firestore.admin.v1
  */
 
 /*!
