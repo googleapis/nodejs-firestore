@@ -1340,6 +1340,18 @@ declare namespace FirebaseFirestore {
      */
     isEqual(other: Timestamp): boolean;
   }
+
+  /**
+   * The v1beta1 Veneer client. This client provides access to to the underlying
+   * Firestore v1beta1 RPCs.
+   */
+  export const v1beta1 : any;
+
+  /**
+   * The v1 Veneer clients. These clients provide access to the Firestore Admin
+   * API and the underlying Firestore v1 RPCs.
+   */
+  export const v1: {FirestoreClient: any, FirestoreAdminClient: any};
 }
 
 declare module '@google-cloud/firestore' {

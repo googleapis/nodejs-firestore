@@ -20,13 +20,11 @@
  * Used to restrict a get or update operation on a document to a subset of its
  * fields.
  * This is different from standard field masks, as this is always scoped to a
- * Document, and takes in account the dynamic
- * nature of Value.
+ * Document, and takes in account the dynamic nature of Value.
  *
  * @property {string[]} fieldPaths
- *   The list of field paths in the mask. See
- *   Document.fields for a field path
- *   syntax reference.
+ *   The list of field paths in the mask. See Document.fields for a field
+ *   path syntax reference.
  *
  * @typedef DocumentMask
  * @memberof google.firestore.v1
