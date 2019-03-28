@@ -293,6 +293,10 @@ class FirestoreClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'name': request.name});
 
     return this._innerApiCalls.getDocument(request, options, callback);
   }
@@ -692,6 +696,10 @@ class FirestoreClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'document.name': request.document.name});
 
     return this._innerApiCalls.updateDocument(request, options, callback);
   }
@@ -740,6 +748,10 @@ class FirestoreClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'name': request.name});
 
     return this._innerApiCalls.deleteDocument(request, options, callback);
   }
@@ -811,6 +823,10 @@ class FirestoreClient {
    */
   batchGetDocuments(request, options) {
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'database': request.database});
 
     return this._innerApiCalls.batchGetDocuments(request, options);
   }
@@ -870,6 +886,10 @@ class FirestoreClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'database': request.database});
 
     return this._innerApiCalls.beginTransaction(request, options, callback);
   }
@@ -933,6 +953,10 @@ class FirestoreClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'database': request.database});
 
     return this._innerApiCalls.commit(request, options, callback);
   }
@@ -980,6 +1004,10 @@ class FirestoreClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'database': request.database});
 
     return this._innerApiCalls.rollback(request, options, callback);
   }
@@ -1042,6 +1070,10 @@ class FirestoreClient {
    */
   runQuery(request, options) {
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'parent': request.parent});
 
     return this._innerApiCalls.runQuery(request, options);
   }
@@ -1079,6 +1111,10 @@ class FirestoreClient {
    */
   write(options) {
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'database': request.database});
 
     return this._innerApiCalls.write(options);
   }
@@ -1116,6 +1152,10 @@ class FirestoreClient {
    */
   listen(options) {
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'database': request.database});
 
     return this._innerApiCalls.listen({}, options);
   }
@@ -1221,6 +1261,10 @@ class FirestoreClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'parent': request.parent});
 
     return this._innerApiCalls.listCollectionIds(request, options, callback);
   }

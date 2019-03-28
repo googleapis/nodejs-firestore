@@ -257,6 +257,10 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'parent': request.parent});
 
     return this._innerApiCalls.createIndex(request, options, callback);
   }
@@ -364,6 +368,10 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'parent': request.parent});
 
     return this._innerApiCalls.listIndexes(request, options, callback);
   }
@@ -473,6 +481,10 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'name': request.name});
 
     return this._innerApiCalls.getIndex(request, options, callback);
   }
@@ -515,6 +527,10 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'name': request.name});
 
     return this._innerApiCalls.deleteIndex(request, options, callback);
   }
@@ -579,6 +595,10 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'name': request.name});
 
     return this._innerApiCalls.importDocuments(request, options, callback);
   }
@@ -648,6 +668,10 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'name': request.name});
 
     return this._innerApiCalls.exportDocuments(request, options, callback);
   }
@@ -699,6 +723,10 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'name': request.name});
 
     return this._innerApiCalls.getField(request, options, callback);
   }
@@ -815,6 +843,10 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'parent': request.parent});
 
     return this._innerApiCalls.listFields(request, options, callback);
   }
@@ -948,6 +980,10 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers['x-goog-request-params'] =
+        gax.routingHeader.fromParams({'field.name': request.field.name});
 
     return this._innerApiCalls.updateField(request, options, callback);
   }
