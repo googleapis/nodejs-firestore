@@ -20,6 +20,7 @@ Applications that use Google&#x27;s Server SDKs should not be used in end-user e
 
 * [Before you begin](#before-you-begin)
 * [Samples](#samples)
+  * [Quickstart](#quickstart)
 
 ## Before you begin
 
@@ -28,6 +29,28 @@ Before running the samples, make sure you've followed the steps in the
 library's README.
 
 ## Samples
+
+
+
+### Quickstart
+
+View the [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/quickstart.js).
+
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/quickstart.js,samples/README.md)
+
+__Usage:__
+
+See available commands:
+
+`node quickstart.js --help`
+
+Run the sample:
+
+`node quickstart.js [command] [options]`
+
+
+
+
 
 
 [shell_img]: https://gstatic.com/cloudssh/images/open-btn.png

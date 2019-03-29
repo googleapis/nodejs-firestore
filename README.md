@@ -38,6 +38,7 @@ Google APIs Client Libraries, in [Client Libraries Explained][explained].
   * [Before you begin](#before-you-begin)
   * [Installing the client library](#installing-the-client-library)
   * [Using the client library](#using-the-client-library)
+* [Samples](#samples)
 * [Versioning](#versioning)
 * [Contributing](#contributing)
 * [License](#license)
@@ -97,6 +98,16 @@ main().catch(console.error);
 
 
 
+## Samples
+
+Samples are in the [`samples/`](https://github.com/googleapis/nodejs-firestore/tree/master/samples) directory. The samples' `README.md`
+has instructions for running the samples.
+
+| Sample                      | Source Code                       | Try it |
+| --------------------------- | --------------------------------- | ------ |
+| Quickstart | [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/quickstart.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/quickstart.js,samples/README.md) |
+
+
 
 The [Cloud Firestore Node.js Client API Reference][client-docs] documentation
 also contains samples.
@@ -135,5 +146,5 @@ See [LICENSE](https://github.com/googleapis/nodejs-firestore/blob/master/LICENSE
 [shell_img]: https://gstatic.com/cloudssh/images/open-btn.png
 [projects]: https://console.cloud.google.com/project
 [billing]: https://support.google.com/cloud/answer/6293499#enable-billing
-[enable_api]: https://console.cloud.google.com/flows/enableapi?apiid=cloud-firestore.googleapis.com
+[enable_api]: https://console.cloud.google.com/flows/enableapi?apiid=firestore.googleapis.com
 [auth]: https://cloud.google.com/docs/authentication/getting-started

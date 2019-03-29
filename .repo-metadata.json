@@ -8,6 +8,6 @@
   "language": "nodejs",
   "repo": "googleapis/nodejs-firestore",
   "distribution_name": "@google-cloud/firestore",
-  "api_id": "cloud-firestore.googleapis.com",
+  "api_id": "firestore.googleapis.com",
   "requires_billing ": false
 }
