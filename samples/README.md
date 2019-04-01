@@ -40,13 +40,8 @@ View the [source code](https://github.com/googleapis/nodejs-firestore/blob/maste
 
 __Usage:__
 
-See available commands:
 
-`node quickstart.js --help`
-
-Run the sample:
-
-`node quickstart.js [command] [options]`
+`node quickstart.js`
 
 
 
