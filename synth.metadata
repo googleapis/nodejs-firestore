@@ -1,19 +1,19 @@
 {
-  "updateTime": "2019-03-12T11:14:39.885980Z",
+  "updateTime": "2019-03-21T18:29:41.901142Z",
   "sources": [
     {
       "generator": {
         "name": "artman",
-        "version": "0.16.16",
-        "dockerImage": "googleapis/artman@sha256:30babbfce7f05a62b1892c63c575aa2c8c502eb4bcc8f3bb90ec83e955d5d319"
+        "version": "0.16.18",
+        "dockerImage": "googleapis/artman@sha256:e8ac9200640e76d54643f370db71a1556bf254f565ce46b45a467bbcbacbdb37"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "abd1c9a99c5cd7179d8e5e0c8d4c8e761054cc78",
-        "internalRef": "237945492"
+        "sha": "d542a0b27b6b8a6d3869c3919e53c61a63cc4cc3",
+        "internalRef": "239633958"
       }
     },
     {
@@ -25,6 +25,16 @@
     }
   ],
   "destinations": [
+    {
+      "client": {
+        "source": "googleapis",
+        "apiName": "firestore-admin",
+        "apiVersion": "v1",
+        "language": "nodejs",
+        "generator": "gapic",
+        "config": "google/firestore/admin/artman_firestore_v1.yaml"
+      }
+    },
     {
       "client": {
         "source": "googleapis",

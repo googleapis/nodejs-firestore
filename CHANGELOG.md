@@ -4,6 +4,29 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## v1.2.0
+
+03-21-2019 14:17 PDT
+
+### New Features
+- feature: Release the V1 Admin API ([#590](https://github.com/googleapis/nodejs-firestore/pull/590))
+  The Firestore Node SDK now exposes the Firestore Admin API (via `v1.FirebaseAdminClient()`).
+
+### Implementation Changes
+- deps/refactor: Removing @google-cloud/projectify ([#564](https://github.com/googleapis/nodejs-firestore/pull/564))
+
+### Dependencies
+- chore(deps): update dependency hard-rejection to v2
+
+### Documentation
+- fix(docs): add namespaces so docs are generated ([#591](https://github.com/googleapis/nodejs-firestore/pull/591))
+- docs: fix typo in doc strings ([#585](https://github.com/googleapis/nodejs-firestore/pull/585))
+
+### Internal / Testing Changes
+- chore: publish to npm using wombat ([#586](https://github.com/googleapis/nodejs-firestore/pull/586))
+- build: use per-repo publish token ([#582](https://github.com/googleapis/nodejs-firestore/pull/582))
+- refactor: update json import paths ([#580](https://github.com/googleapis/nodejs-firestore/pull/580))
+
 ## v1.1.0
 
 03-10-2019 20:09 PDT

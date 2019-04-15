@@ -15,5 +15,8 @@
 'use strict';
 
 const FirestoreClient = require('./firestore_client');
+const FirestoreAdminClient = require('./firestore_admin_client');
 
+FirestoreClient.FirestoreClient = FirestoreClient;
+FirestoreClient.FirestoreAdminClient = FirestoreAdminClient;
 module.exports = FirestoreClient;

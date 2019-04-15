@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -31,7 +31,6 @@
     "codecov": "nyc report --reporter=json && codecov -f .coverage/*.json",
     "predocs": "npm run compile",
     "docs": "jsdoc -c .jsdoc.js",
-    "generate-scaffolding": "repo-tools generate all",
     "system-test": "mocha build/system-test --timeout 600000",
     "samples-test": "npm link && cd samples/ && npm link ../ && npm test && cd ../",
     "conformance": "mocha build/conformance",
@@ -39,7 +38,7 @@
     "test": "npm run test-only && npm run conformance",
     "lint": "gts check",
     "clean": "gts clean",
-    "compile": "tsc -p . && cp -r dev/protos build && cp -r dev/test/fake-certificate.json build/test/fake-certificate.json && cp dev/src/v1beta1/firestore_client_config.json build/src/v1beta1/ && cp dev/src/v1/firestore_client_config.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
+    "compile": "tsc -p . && cp -r dev/protos build && cp -r dev/test/fake-certificate.json build/test/fake-certificate.json && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest-only": "npm run compile",
@@ -55,7 +54,6 @@
     "through2": "^3.0.0"
   },
   "devDependencies": {
-    "@google-cloud/nodejs-repo-tools": "^3.0.0",
     "@types/assert": "^1.4.0",
     "@types/chai": "^4.1.7",
     "@types/chai-as-promised": "^7.1.0",
@@ -70,17 +68,18 @@
     "duplexify": "^4.0.0",
     "extend": "^3.0.1",
     "gts": "^0.9.0",
-    "hard-rejection": "^1.0.0",
-    "jsdoc-baseline": "git+https://github.com/hegemonic/jsdoc-baseline.git",
+    "hard-rejection": "^2.0.0",
     "intelli-espower-loader": "^1.0.1",
     "jsdoc": "^3.5.5",
+    "jsdoc-baseline": "git+https://github.com/hegemonic/jsdoc-baseline.git",
+    "linkinator": "^1.1.2",
     "mocha": "^6.0.0",
     "nyc": "^13.0.0",
-    "proxyquire": "^2.0.1",
+    "power-assert": "^1.6.1",
     "protobufjs": "^6.8.6",
+    "proxyquire": "^2.0.1",
     "source-map-support": "^0.5.6",
     "ts-node": "^8.0.0",
-    "typescript": "~3.3.0",
-    "linkinator": "^1.1.2"
+    "typescript": "~3.4.0"
   }
 }
