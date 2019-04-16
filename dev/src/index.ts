@@ -133,6 +133,16 @@ const GRPC_UNAVAILABLE = 14;
  * can be restricted to only apply to documents that match the specified
  * conditions.
  *
+ * @example
+ * const documentRef = firestore.doc('coll/doc');
+ *
+ * documentRef.get().then(snapshot => {
+ *   const updateTime = snapshot.updateTime;
+ *
+ *   console.log(`Deleting document at update time: ${updateTime.toDate()}`);
+ *   return documentRef.delete({ lastUpdateTime: updateTime });
+ * });
+ *
  * @property {string} lastUpdateTime The update time to enforce (specified as
  * an ISO 8601 string).
  * @typedef {Object} Precondition
