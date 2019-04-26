@@ -4,6 +4,21 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## v1.3.0
+
+04-26-2019 16:54 PDT
+
+### New Features
+- feature: Adding CollectionGroup queries ([#578](https://github.com/googleapis/nodejs-firestore/pull/578))([#595](https://github.com/googleapis/nodejs-firestore/pull/595))
+
+### Dependencies
+- chore(deps): update dependency nyc to v14 ([#600](https://github.com/googleapis/nodejs-firestore/pull/600))
+- chore(deps): update dependency typescript to ~3.4.0
+- docs: add .readme-metadata.json and generate new README.md 
+
+### Documentation
+- docs: Add example for Precondition ([#601](https://github.com/googleapis/nodejs-firestore/pull/601))
+
 ## v1.2.0
 
 03-21-2019 14:17 PDT
