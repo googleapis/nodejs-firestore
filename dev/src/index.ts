@@ -24,7 +24,7 @@ import {DocumentSnapshot, DocumentSnapshotBuilder, QueryDocumentSnapshot} from '
 import {logger, setLibVersion} from './logger';
 import {DEFAULT_DATABASE_ID, FieldPath, QualifiedResourcePath, ResourcePath, validateResourcePath} from './path';
 import {ClientPool} from './pool';
-import {CollectionReference} from './reference';
+import {CollectionReference, Query, QueryOptions} from './reference';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
@@ -447,6 +447,37 @@ export class Firestore {
     }
 
     return new CollectionReference(this, path);
+  }
+
+  /**
+   * Creates and returns a new Query that includes all documents in the
+   * database that are contained in a collection or subcollection with the
+   * given collectionId.
+   *
+   * @param {string} collectionId Identifies the collections to query over.
+   * Every collection or subcollection with this ID as the last segment of its
+   * path will be included. Cannot contain a slash.
+   * @returns {Query} The created Query.
+   *
+   * @example
+   * let docA = firestore.doc('mygroup/docA').set({foo: 'bar'});
+   * let docB = firestore.doc('abc/def/mygroup/docB').set({foo: 'bar'});
+   *
+   * Promise.all([docA, docB]).then(() => {
+   *    let query = firestore.collectionGroup('mygroup');
+   *    query = query.where('foo', '==', 'bar');
+   *    return query.get().then(snapshot => {
+   *       console.log(`Found ${snapshot.size} documents.`);
+   *    });
+   * });
+   */
+  collectionGroup(collectionId: string): Query {
+    if (collectionId.indexOf('/') !== -1) {
+      throw new Error(`Invalid collectionId '${
+          collectionId}'. Collection IDs must not contain '/'.`);
+    }
+
+    return new Query(this, QueryOptions.forCollectionGroupQuery(collectionId));
   }
 
   /**
