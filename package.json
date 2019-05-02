@@ -49,7 +49,7 @@
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^0.25.0",
+    "google-gax": "^0.26.0",
     "lodash.merge": "^4.6.1",
     "through2": "^3.0.0"
   },
