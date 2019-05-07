@@ -172,6 +172,10 @@ function offset(n: number): api.IStructuredQuery {
   };
 }
 
+function allDescendants(): api.IStructuredQuery {
+  return {from: [{collectionId: 'collectionId', allDescendants: true}]};
+}
+
 function select(...fields: string[]): api.IStructuredQuery {
   const select: api.StructuredQuery.IProjection = {
     fields: [],
@@ -1625,6 +1629,31 @@ describe('endBefore() interface', () => {
 
         return adjustedQuery.get();
       });
+    });
+  });
+});
+
+describe('collectionGroup queries', () => {
+  it('serialize correctly', () => {
+    const overrides: ApiOverride = {
+      runQuery: (request) => {
+        queryEquals(
+            request, allDescendants(), fieldFilters('foo', 'EQUAL', 'bar'));
+        return stream();
+      }
+    };
+    return createInstance(overrides).then(firestore => {
+      const query =
+          firestore.collectionGroup('collectionId').where('foo', '==', 'bar');
+      return query.get();
+    });
+  });
+
+  it('rejects slashes', () => {
+    return createInstance().then(firestore => {
+      expect(() => firestore.collectionGroup('foo/bar'))
+          .to.throw(
+              'Invalid collectionId \'foo/bar\'. Collection IDs must not contain \'/\'.');
     });
   });
 });

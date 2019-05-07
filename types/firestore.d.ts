@@ -139,6 +139,18 @@ declare namespace FirebaseFirestore {
     doc(documentPath: string): DocumentReference;
 
     /**
+     * Creates and returns a new Query that includes all documents in the
+     * database that are contained in a collection or subcollection with the
+     * given collectionId.
+     *
+     * @param collectionId Identifies the collections to query over. Every
+     * collection or subcollection with this ID as the last segment of its path
+     * will be included. Cannot contain a slash.
+     * @return The created Query.
+     */
+    collectionGroup(collectionId: string): Query;
+
+    /**
      * Retrieves multiple documents from Firestore.
      *
      * The first argument is required and must be of type `DocumentReference`

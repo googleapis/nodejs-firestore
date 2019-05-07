@@ -65,6 +65,7 @@ xdescribe('firestore.d.ts', () => {
     const collRef: CollectionReference = firestore.collection('coll');
     const docRef1: DocumentReference = firestore.doc('coll/doc');
     const docRef2: DocumentReference = firestore.doc('coll/doc');
+    const collectionGroup: Query = firestore.collectionGroup('collectionId');
     firestore.getAll(docRef1, docRef2).then((docs: DocumentSnapshot[]) => {});
     firestore.getAll(docRef1, docRef2, {})
         .then((docs: DocumentSnapshot[]) => {});
