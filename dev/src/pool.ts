@@ -49,7 +49,7 @@ export class ClientPool<T> {
    *
    * @private
    */
-  private acquire(): T {
+  acquire(): T {
     let selectedClient: T|null = null;
     let selectedRequestCount = 0;
 
@@ -77,7 +77,7 @@ export class ClientPool<T> {
    * removing it from the pool of active clients.
    * @private
    */
-  private release(client: T): void {
+  release(client: T): void {
     let requestCount = this.activeClients.get(client) || 0;
     assert(requestCount > 0, 'No active request');
 
