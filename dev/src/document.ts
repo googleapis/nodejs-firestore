@@ -58,18 +58,24 @@ export class DocumentSnapshotBuilder {
    * @returns Returns either a QueryDocumentSnapshot (if `fieldsProto` was
    * provided) or a DocumentSnapshot.
    */
-  build(): QueryDocumentSnapshot|DocumentSnapshot {
+  build(): QueryDocumentSnapshot | DocumentSnapshot {
     assert(
-        (this.fieldsProto !== undefined) === (this.createTime !== undefined),
-        'Create time should be set iff document exists.');
+      (this.fieldsProto !== undefined) === (this.createTime !== undefined),
+      'Create time should be set iff document exists.'
+    );
     assert(
-        (this.fieldsProto !== undefined) === (this.updateTime !== undefined),
-        'Update time should be set iff document exists.');
-    return this.fieldsProto ?
-        new QueryDocumentSnapshot(
-            this.ref!, this.fieldsProto!, this.readTime!, this.createTime!,
-            this.updateTime!) :
-        new DocumentSnapshot(this.ref!, undefined, this.readTime!);
+      (this.fieldsProto !== undefined) === (this.updateTime !== undefined),
+      'Update time should be set iff document exists.'
+    );
+    return this.fieldsProto
+      ? new QueryDocumentSnapshot(
+          this.ref!,
+          this.fieldsProto!,
+          this.readTime!,
+          this.createTime!,
+          this.updateTime!
+        )
+      : new DocumentSnapshot(this.ref!, undefined, this.readTime!);
   }
 }
 
@@ -89,11 +95,11 @@ export class DocumentSnapshotBuilder {
  */
 export class DocumentSnapshot {
   private _ref: DocumentReference;
-  private _fieldsProto: ApiMapValue|undefined;
+  private _fieldsProto: ApiMapValue | undefined;
   private _serializer: Serializer;
-  private _readTime: Timestamp|undefined;
-  private _createTime: Timestamp|undefined;
-  private _updateTime: Timestamp|undefined;
+  private _readTime: Timestamp | undefined;
+  private _createTime: Timestamp | undefined;
+  private _updateTime: Timestamp | undefined;
 
   /**
    * @private
@@ -110,8 +116,12 @@ export class DocumentSnapshot {
    * if the document does not exist).
    */
   constructor(
-      ref: DocumentReference, fieldsProto?: ApiMapValue, readTime?: Timestamp,
-      createTime?: Timestamp, updateTime?: Timestamp) {
+    ref: DocumentReference,
+    fieldsProto?: ApiMapValue,
+    readTime?: Timestamp,
+    createTime?: Timestamp,
+    updateTime?: Timestamp
+  ) {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
     this._serializer = ref.firestore._serializer!;
@@ -128,8 +138,10 @@ export class DocumentSnapshot {
    * @param obj The object to store in the DocumentSnapshot.
    * @return The created DocumentSnapshot.
    */
-  static fromObject(ref: DocumentReference, obj: DocumentData):
-      DocumentSnapshot {
+  static fromObject(
+    ref: DocumentReference,
+    obj: DocumentData
+  ): DocumentSnapshot {
     const serializer = ref.firestore._serializer!;
     return new DocumentSnapshot(ref, serializer.encodeFields(obj));
   }
@@ -144,8 +156,10 @@ export class DocumentSnapshot {
    * @param data The field/value map to expand.
    * @return The created DocumentSnapshot.
    */
-  static fromUpdateMap(ref: DocumentReference, data: UpdateMap):
-      DocumentSnapshot {
+  static fromUpdateMap(
+    ref: DocumentReference,
+    data: UpdateMap
+  ): DocumentSnapshot {
     const serializer = ref.firestore._serializer!;
 
     /**
@@ -153,8 +167,11 @@ export class DocumentSnapshot {
      * 'target'.
      */
     function merge(
-        target: ApiMapValue, value: unknown, path: string[],
-        pos: number): ApiMapValue|null {
+      target: ApiMapValue,
+      value: unknown,
+      path: string[],
+      pos: number
+    ): ApiMapValue | null {
       const key = path[pos];
       const isLast = pos === path.length - 1;
 
@@ -179,8 +196,12 @@ export class DocumentSnapshot {
             },
           };
 
-          const nestedValue =
-              merge(childNode.mapValue.fields, value, path, pos + 1);
+          const nestedValue = merge(
+            childNode.mapValue.fields,
+            value,
+            path,
+            pos + 1
+          );
 
           if (nestedValue) {
             childNode.mapValue.fields = nestedValue;
@@ -191,9 +212,13 @@ export class DocumentSnapshot {
           }
         }
       } else {
-        assert(!isLast, 'Can\'t merge current value into a nested object');
-        target[key].mapValue!.fields =
-            merge(target[key].mapValue!.fields!, value, path, pos + 1);
+        assert(!isLast, "Can't merge current value into a nested object");
+        target[key].mapValue!.fields = merge(
+          target[key].mapValue!.fields!,
+          value,
+          path,
+          pos + 1
+        );
         return target;
       }
     }
@@ -287,7 +312,7 @@ export class DocumentSnapshot {
    *   }
    * });
    */
-  get createTime(): Timestamp|undefined {
+  get createTime(): Timestamp | undefined {
     return this._createTime;
   }
 
@@ -309,7 +334,7 @@ export class DocumentSnapshot {
    *   }
    * });
    */
-  get updateTime(): Timestamp|undefined {
+  get updateTime(): Timestamp | undefined {
     return this._updateTime;
   }
 
@@ -352,7 +377,9 @@ export class DocumentSnapshot {
    */
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
-  data(): {[field: string]: any}|undefined {  // tslint:disable-line no-any
+  // tslint:disable-next-line no-any
+  data(): {[field: string]: any} | undefined {
+    // tslint:disable-line no-any
     const fields = this._fieldsProto;
 
     if (fields === undefined) {
@@ -388,7 +415,9 @@ export class DocumentSnapshot {
    */
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
-  get(field: string|FieldPath): any {  // tslint:disable-line no-any
+  // tslint:disable-next-line no-any
+  get(field: string | FieldPath): any {
+    // tslint:disable-line no-any
     validateFieldPath('field', field);
 
     const protoField = this.protoField(field);
@@ -409,8 +438,8 @@ export class DocumentSnapshot {
    * @returns The Protobuf-encoded data at the specified field location or
    * undefined if no such field exists.
    */
-  protoField(field: string|FieldPath): api.IValue|undefined {
-    let fields: ApiMapValue|api.IValue|undefined = this._fieldsProto;
+  protoField(field: string | FieldPath): api.IValue | undefined {
+    let fields: ApiMapValue | api.IValue | undefined = this._fieldsProto;
 
     if (fields === undefined) {
       return undefined;
@@ -467,9 +496,11 @@ export class DocumentSnapshot {
     // Since the read time is different on every document read, we explicitly
     // ignore all document metadata in this comparison.
     return (
-        this === other ||
-        ((other instanceof DocumentSnapshot) && this._ref.isEqual(other._ref) &&
-         deepEqual(this._fieldsProto, other._fieldsProto, {strict: true})));
+      this === other ||
+      (other instanceof DocumentSnapshot &&
+        this._ref.isEqual(other._ref) &&
+        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
+    );
   }
 }
 
@@ -501,8 +532,12 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
    * @param updateTime The time when the document was last updated.
    */
   constructor(
-      ref: DocumentReference, fieldsProto: ApiMapValue, readTime: Timestamp,
-      createTime: Timestamp, updateTime: Timestamp) {
+    ref: DocumentReference,
+    fieldsProto: ApiMapValue,
+    readTime: Timestamp,
+    createTime: Timestamp,
+    updateTime: Timestamp
+  ) {
     super(ref, fieldsProto, readTime, createTime, updateTime);
   }
 
@@ -564,7 +599,8 @@ export class QueryDocumentSnapshot extends DocumentSnapshot {
     const data = super.data();
     if (!data) {
       throw new Error(
-          'The data in a QueryDocumentSnapshot should always exist.');
+        'The data in a QueryDocumentSnapshot should always exist.'
+      );
     }
     return data;
   }
@@ -615,7 +651,7 @@ export class DocumentMask {
    * @private
    * @param fieldMask A list of field paths.
    */
-  static fromFieldMask(fieldMask: Array<string|FieldPath>): DocumentMask {
+  static fromFieldMask(fieldMask: Array<string | FieldPath>): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
     for (const fieldPath of fieldMask) {
@@ -636,7 +672,9 @@ export class DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
     function extractFieldPaths(
-        currentData: DocumentData, currentPath?: FieldPath): void {
+      currentData: DocumentData,
+      currentPath?: FieldPath
+    ): void {
       let isEmpty = true;
 
       for (const key in currentData) {
@@ -646,8 +684,9 @@ export class DocumentMask {
           // We don't split on dots since fromObject is called with
           // DocumentData.
           const childSegment = new FieldPath(key);
-          const childPath =
-              currentPath ? currentPath.append(childSegment) : childSegment;
+          const childPath = currentPath
+            ? currentPath.append(childSegment)
+            : childSegment;
           const value = currentData[key];
           if (value instanceof FieldTransform) {
             if (value.includeInDocumentMask) {
@@ -689,9 +728,11 @@ export class DocumentMask {
    * @param input A sorted array of FieldPaths.
    * @param values An array of FieldPaths to remove.
    */
-  private static removeFromSortedArray(input: FieldPath[], values: FieldPath[]):
-      void {
-    for (let i = 0; i < input.length;) {
+  private static removeFromSortedArray(
+    input: FieldPath[],
+    values: FieldPath[]
+  ): void {
+    for (let i = 0; i < input.length; ) {
       let removed = false;
 
       for (const fieldPath of values) {
@@ -755,29 +796,34 @@ export class DocumentMask {
     const applyDocumentMask = (data: DocumentData) => {
       const remainingPaths = this._sortedPaths.slice(0);
 
-      const processObject =
-          (currentData: DocumentData, currentPath?: FieldPath) => {
-            let result: DocumentData|null = null;
+      const processObject = (
+        currentData: DocumentData,
+        currentPath?: FieldPath
+      ) => {
+        let result: DocumentData | null = null;
 
-            Object.keys(currentData).forEach(key => {
-              const childPath =
-                  currentPath ? currentPath.append(key) : new FieldPath(key);
-              if (this.contains(childPath)) {
-                DocumentMask.removeFromSortedArray(remainingPaths, [childPath]);
-                result = result || {};
-                result[key] = currentData[key];
-              } else if (isObject(currentData[key])) {
-                const childObject =
-                    processObject(currentData[key] as DocumentData, childPath);
-                if (childObject) {
-                  result = result || {};
-                  result[key] = childObject;
-                }
-              }
-            });
+        Object.keys(currentData).forEach(key => {
+          const childPath = currentPath
+            ? currentPath.append(key)
+            : new FieldPath(key);
+          if (this.contains(childPath)) {
+            DocumentMask.removeFromSortedArray(remainingPaths, [childPath]);
+            result = result || {};
+            result[key] = currentData[key];
+          } else if (isObject(currentData[key])) {
+            const childObject = processObject(
+              currentData[key] as DocumentData,
+              childPath
+            );
+            if (childObject) {
+              result = result || {};
+              result[key] = childObject;
+            }
+          }
+        });
 
-            return result;
-          };
+        return result;
+      };
 
       // processObject() returns 'null' if the DocumentMask is empty.
       const filteredData = processObject(data) || {};
@@ -792,7 +838,8 @@ export class DocumentMask {
 
     if (result.remainingPaths.length !== 0) {
       throw new Error(
-          `Input data is missing for field "${result.remainingPaths[0]}".`);
+        `Input data is missing for field "${result.remainingPaths[0]}".`
+      );
     }
 
     return result.filteredData;
@@ -838,8 +885,9 @@ export class DocumentTransform {
    * @param transforms A Map of FieldPaths to FieldTransforms.
    */
   constructor(
-      private readonly ref: DocumentReference,
-      private readonly transforms: Map<FieldPath, FieldTransform>) {}
+    private readonly ref: DocumentReference,
+    private readonly transforms: Map<FieldPath, FieldTransform>
+  ) {}
 
   /**
    * Generates a DocumentTransform from a JavaScript object.
@@ -849,8 +897,10 @@ export class DocumentTransform {
    * @param obj The object to extract the transformations from.
    * @returns The Document Transform.
    */
-  static fromObject(ref: DocumentReference, obj: DocumentData):
-      DocumentTransform {
+  static fromObject(
+    ref: DocumentReference,
+    obj: DocumentData
+  ): DocumentTransform {
     const updateMap = new Map<FieldPath, unknown>();
 
     for (const prop in obj) {
@@ -870,8 +920,10 @@ export class DocumentTransform {
    * @param data The update data to extract the transformations from.
    * @returns The Document Transform.
    */
-  static fromUpdateMap(ref: DocumentReference, data: UpdateMap):
-      DocumentTransform {
+  static fromUpdateMap(
+    ref: DocumentReference,
+    data: UpdateMap
+  ): DocumentTransform {
     const transforms = new Map<FieldPath, FieldTransform>();
 
     function encode_(val: unknown, path: FieldPath, allowTransforms: boolean) {
@@ -880,7 +932,8 @@ export class DocumentTransform {
           transforms.set(path, val);
         } else {
           throw new Error(
-              `${val.methodName}() is not supported inside of array values.`);
+            `${val.methodName}() is not supported inside of array values.`
+          );
         }
       } else if (Array.isArray(val)) {
         for (let i = 0; i < val.length; ++i) {
@@ -891,7 +944,10 @@ export class DocumentTransform {
         for (const prop in val) {
           if (val.hasOwnProperty(prop)) {
             encode_(
-                val[prop], path.append(new FieldPath(prop)), allowTransforms);
+              val[prop],
+              path.append(new FieldPath(prop)),
+              allowTransforms
+            );
           }
         }
       }
@@ -938,7 +994,7 @@ export class DocumentTransform {
    * @returns A Firestore 'DocumentTransform' Proto or 'null' if this transform
    * is empty.
    */
-  toProto(serializer: Serializer): api.IWrite|null {
+  toProto(serializer: Serializer): api.IWrite | null {
     if (this.isEmpty) {
       return null;
     }
@@ -977,7 +1033,7 @@ export class Precondition {
    * document in Firestore.
    * @param options
    */
-  constructor(options?: {exists?: boolean, lastUpdateTime?: Timestamp}) {
+  constructor(options?: {exists?: boolean; lastUpdateTime?: Timestamp}) {
     if (options !== undefined) {
       this._exists = options.exists;
       this._lastUpdateTime = options.lastUpdateTime;
@@ -991,7 +1047,7 @@ export class Precondition {
    * @returns The `Preconditon` Protobuf object or 'null' if there are no
    * preconditions.
    */
-  toProto(): api.IPrecondition|null {
+  toProto(): api.IPrecondition | null {
     if (this.isEmpty) {
       return null;
     }

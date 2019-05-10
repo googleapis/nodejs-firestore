@@ -171,11 +171,13 @@ const GRPC_STATUS_CODE: {[k: string]: number} = {
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
-const DOCUMENT_WATCH_COMPARATOR =
-    (doc1: QueryDocumentSnapshot, doc2: QueryDocumentSnapshot) => {
-      assert(doc1 === doc2, 'Document watches only support one document.');
-      return 0;
-    };
+const DOCUMENT_WATCH_COMPARATOR = (
+  doc1: QueryDocumentSnapshot,
+  doc2: QueryDocumentSnapshot
+) => {
+  assert(doc1 === doc2, 'Document watches only support one document.');
+  return 0;
+};
 
 /**
  * @private
@@ -204,14 +206,16 @@ const DOCUMENT_WATCH_COMPARATOR =
  * changed documents since the last snapshot delivered for this watch.
  */
 
-type DocumentComparator =
-    (l: QueryDocumentSnapshot, r: QueryDocumentSnapshot) => number;
+type DocumentComparator = (
+  l: QueryDocumentSnapshot,
+  r: QueryDocumentSnapshot
+) => number;
 
-type DocumentChangeSet = {
-  deletes: string[],
-  adds: QueryDocumentSnapshot[],
-  updates: QueryDocumentSnapshot[]
-};
+interface DocumentChangeSet {
+  deletes: string[];
+  adds: QueryDocumentSnapshot[];
+  updates: QueryDocumentSnapshot[];
+}
 
 /**
  * Watch provides listen functionality and exposes the 'onSnapshot' observer. It
@@ -258,8 +262,11 @@ abstract class Watch {
   private isPermanentError(error: GrpcError): boolean {
     if (error.code === undefined) {
       logger(
-          'Watch.onSnapshot', this._requestTag,
-          'Unable to determine error code: ', error);
+        'Watch.onSnapshot',
+        this._requestTag,
+        'Unable to determine error code: ',
+        error
+      );
       return false;
     }
 
@@ -302,11 +309,14 @@ abstract class Watch {
    * listener.
    */
   onSnapshot(
-      onNext:
-          (readTime: Timestamp, size: number,
-           docs: () => QueryDocumentSnapshot[],
-           changes: () => DocumentChange[]) => void,
-      onError: (error: Error) => void): () => void {
+    onNext: (
+      readTime: Timestamp,
+      size: number,
+      docs: () => QueryDocumentSnapshot[],
+      changes: () => DocumentChange[]
+    ) => void,
+    onError: (error: Error) => void
+  ): () => void {
     // The sorted tree of QueryDocumentSnapshots as sent in the last snapshot.
     // We only look at the keys.
     let docTree = rbtree(this.getComparator());
@@ -324,7 +334,7 @@ abstract class Watch {
     // aren't docs.
     let hasPushed = false;
     // The server assigns and updates the resume token.
-    let resumeToken: Uint8Array|undefined = undefined;
+    let resumeToken: Uint8Array | undefined = undefined;
 
     // Indicates whether we are interested in data from the stream. Set to false
     // in the 'unsubscribe()' callback.
@@ -339,7 +349,7 @@ abstract class Watch {
     // This is the one that will be returned and proxy the current one.
     const stream = through2.obj();
     // The current stream to the backend.
-    let currentStream: NodeJS.ReadWriteStream|null = null;
+    let currentStream: NodeJS.ReadWriteStream | null = null;
 
     /** Helper to clear the docs on RESET or filter mismatch. */
     const resetDocs = () => {
@@ -384,8 +394,11 @@ abstract class Watch {
 
       if (isActive && !this.isPermanentError(err)) {
         logger(
-            'Watch.onSnapshot', this._requestTag,
-            'Stream ended, re-opening after retryable error: ', err);
+          'Watch.onSnapshot',
+          this._requestTag,
+          'Stream ended, re-opening after retryable error: ',
+          err
+        );
         changeMap.clear();
 
         if (this.isResourceExhaustedError(err)) {
@@ -416,8 +429,10 @@ abstract class Watch {
       this._backoff.backoffAndWait().then(async () => {
         if (!isActive) {
           logger(
-              'Watch.onSnapshot', this._requestTag,
-              'Not initializing inactive stream');
+            'Watch.onSnapshot',
+            this._requestTag,
+            'Not initializing inactive stream'
+          );
           return;
         }
 
@@ -429,29 +444,31 @@ abstract class Watch {
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
         this._firestore
-            .readWriteStream('listen', request, this._requestTag, true)
-            .then(backendStream => {
-              if (!isActive) {
-                logger(
-                    'Watch.onSnapshot', this._requestTag,
-                    'Closing inactive stream');
-                backendStream.end();
-                return;
-              }
-              logger('Watch.onSnapshot', this._requestTag, 'Opened new stream');
-              currentStream = backendStream;
-              currentStream!.on('error', err => {
-                maybeReopenStream(err);
-              });
-              currentStream!.on('end', () => {
-                const err = new GrpcError('Stream ended unexpectedly');
-                err.code = GRPC_STATUS_CODE.UNKNOWN;
-                maybeReopenStream(err);
-              });
-              currentStream!.pipe(stream);
-              currentStream!.resume();
-            })
-            .catch(closeStream);
+          .readWriteStream('listen', request, this._requestTag, true)
+          .then(backendStream => {
+            if (!isActive) {
+              logger(
+                'Watch.onSnapshot',
+                this._requestTag,
+                'Closing inactive stream'
+              );
+              backendStream.end();
+              return;
+            }
+            logger('Watch.onSnapshot', this._requestTag, 'Opened new stream');
+            currentStream = backendStream;
+            currentStream!.on('error', err => {
+              maybeReopenStream(err);
+            });
+            currentStream!.on('end', () => {
+              const err = new GrpcError('Stream ended unexpectedly');
+              err.code = GRPC_STATUS_CODE.UNKNOWN;
+              maybeReopenStream(err);
+            });
+            currentStream!.pipe(stream);
+            currentStream!.resume();
+          })
+          .catch(closeStream);
       });
     };
 
@@ -460,7 +477,9 @@ abstract class Watch {
      * If no targetIds are provided, returns true.
      */
     function affectsTarget(
-        targetIds: number[]|undefined, currentId: number): boolean {
+      targetIds: number[] | undefined,
+      currentId: number
+    ): boolean {
       if (targetIds === undefined || targetIds.length === 0) {
         return true;
       }
@@ -476,9 +495,10 @@ abstract class Watch {
 
     /** Splits up document changes into removals, additions, and updates. */
     function extractChanges(
-        docMap: Map<string, QueryDocumentSnapshot>,
-        changes: Map<string, DocumentSnapshotBuilder>,
-        readTime: Timestamp): DocumentChangeSet {
+      docMap: Map<string, QueryDocumentSnapshot>,
+      changes: Map<string, DocumentSnapshotBuilder>,
+      readTime: Timestamp
+    ): DocumentChangeSet {
       const deletes: string[] = [];
       const adds: QueryDocumentSnapshot[] = [];
       const updates: QueryDocumentSnapshot[] = [];
@@ -506,106 +526,119 @@ abstract class Watch {
      * state.
      * @private
      */
-    const computeSnapshot =
-        (docTree: RBTree, docMap: Map<string, QueryDocumentSnapshot>,
-         changes: DocumentChangeSet) => {
-          let updatedTree = docTree;
-          const updatedMap = docMap;
+    const computeSnapshot = (
+      docTree: RBTree,
+      docMap: Map<string, QueryDocumentSnapshot>,
+      changes: DocumentChangeSet
+    ) => {
+      let updatedTree = docTree;
+      const updatedMap = docMap;
 
-          assert(
-              docTree.length === docMap.size,
-              'The document tree and document ' +
-                  'map should have the same number of entries.');
+      assert(
+        docTree.length === docMap.size,
+        'The document tree and document ' +
+          'map should have the same number of entries.'
+      );
 
-          /**
-           * Applies a document delete to the document tree and the document
-           * map. Returns the corresponding DocumentChange event.
-           * @private
-           */
-          function deleteDoc(name: string): DocumentChange {
-            assert(updatedMap.has(name), 'Document to delete does not exist');
-            const oldDocument = updatedMap.get(name)!;
-            const existing = updatedTree.find(oldDocument);
-            const oldIndex = existing.index;
-            updatedTree = existing.remove();
-            updatedMap.delete(name);
-            return new DocumentChange(
-                ChangeType.removed, oldDocument, oldIndex, -1);
-          }
+      /**
+       * Applies a document delete to the document tree and the document
+       * map. Returns the corresponding DocumentChange event.
+       * @private
+       */
+      function deleteDoc(name: string): DocumentChange {
+        assert(updatedMap.has(name), 'Document to delete does not exist');
+        const oldDocument = updatedMap.get(name)!;
+        const existing = updatedTree.find(oldDocument);
+        const oldIndex = existing.index;
+        updatedTree = existing.remove();
+        updatedMap.delete(name);
+        return new DocumentChange(
+          ChangeType.removed,
+          oldDocument,
+          oldIndex,
+          -1
+        );
+      }
 
-          /**
-           * Applies a document add to the document tree and the document map.
-           * Returns the corresponding DocumentChange event.
-           * @private
-           */
-          function addDoc(newDocument: QueryDocumentSnapshot): DocumentChange {
-            const name = newDocument.ref.path;
-            assert(!updatedMap.has(name), 'Document to add already exists');
-            updatedTree = updatedTree.insert(newDocument, null);
-            const newIndex = updatedTree.find(newDocument).index;
-            updatedMap.set(name, newDocument);
-            return new DocumentChange(
-                ChangeType.added, newDocument, -1, newIndex);
-          }
+      /**
+       * Applies a document add to the document tree and the document map.
+       * Returns the corresponding DocumentChange event.
+       * @private
+       */
+      function addDoc(newDocument: QueryDocumentSnapshot): DocumentChange {
+        const name = newDocument.ref.path;
+        assert(!updatedMap.has(name), 'Document to add already exists');
+        updatedTree = updatedTree.insert(newDocument, null);
+        const newIndex = updatedTree.find(newDocument).index;
+        updatedMap.set(name, newDocument);
+        return new DocumentChange(ChangeType.added, newDocument, -1, newIndex);
+      }
 
-          /**
-           * Applies a document modification to the document tree and the
-           * document map. Returns the DocumentChange event for successful
-           * modifications.
-           * @private
-           */
-          function modifyDoc(newDocument: QueryDocumentSnapshot):
-              DocumentChange|null {
-            const name = newDocument.ref.path;
-            assert(updatedMap.has(name), 'Document to modify does not exist');
-            const oldDocument = updatedMap.get(name)!;
-            if (!oldDocument.updateTime.isEqual(newDocument.updateTime)) {
-              const removeChange = deleteDoc(name);
-              const addChange = addDoc(newDocument);
-              return new DocumentChange(
-                  ChangeType.modified, newDocument, removeChange.oldIndex,
-                  addChange.newIndex);
-            }
-            return null;
-          }
+      /**
+       * Applies a document modification to the document tree and the
+       * document map. Returns the DocumentChange event for successful
+       * modifications.
+       * @private
+       */
+      function modifyDoc(
+        newDocument: QueryDocumentSnapshot
+      ): DocumentChange | null {
+        const name = newDocument.ref.path;
+        assert(updatedMap.has(name), 'Document to modify does not exist');
+        const oldDocument = updatedMap.get(name)!;
+        if (!oldDocument.updateTime.isEqual(newDocument.updateTime)) {
+          const removeChange = deleteDoc(name);
+          const addChange = addDoc(newDocument);
+          return new DocumentChange(
+            ChangeType.modified,
+            newDocument,
+            removeChange.oldIndex,
+            addChange.newIndex
+          );
+        }
+        return null;
+      }
 
-          // Process the sorted changes in the order that is expected by our
-          // clients (removals, additions, and then modifications). We also need
-          // to sort the individual changes to assure that oldIndex/newIndex
-          // keep incrementing.
-          const appliedChanges: DocumentChange[] = [];
+      // Process the sorted changes in the order that is expected by our
+      // clients (removals, additions, and then modifications). We also need
+      // to sort the individual changes to assure that oldIndex/newIndex
+      // keep incrementing.
+      const appliedChanges: DocumentChange[] = [];
 
-          changes.deletes.sort((name1, name2) => {
-            // Deletes are sorted based on the order of the existing document.
-            return this.getComparator()(
-                updatedMap.get(name1)!, updatedMap.get(name2)!);
-          });
-          changes.deletes.forEach(name => {
-            const change = deleteDoc(name);
-            appliedChanges.push(change);
-          });
+      changes.deletes.sort((name1, name2) => {
+        // Deletes are sorted based on the order of the existing document.
+        return this.getComparator()(
+          updatedMap.get(name1)!,
+          updatedMap.get(name2)!
+        );
+      });
+      changes.deletes.forEach(name => {
+        const change = deleteDoc(name);
+        appliedChanges.push(change);
+      });
 
-          changes.adds.sort(this.getComparator());
-          changes.adds.forEach(snapshot => {
-            const change = addDoc(snapshot);
-            appliedChanges.push(change);
-          });
+      changes.adds.sort(this.getComparator());
+      changes.adds.forEach(snapshot => {
+        const change = addDoc(snapshot);
+        appliedChanges.push(change);
+      });
 
-          changes.updates.sort(this.getComparator());
-          changes.updates.forEach(snapshot => {
-            const change = modifyDoc(snapshot);
-            if (change) {
-              appliedChanges.push(change);
-            }
-          });
+      changes.updates.sort(this.getComparator());
+      changes.updates.forEach(snapshot => {
+        const change = modifyDoc(snapshot);
+        if (change) {
+          appliedChanges.push(change);
+        }
+      });
 
-          assert(
-              updatedTree.length === updatedMap.size,
-              'The update document ' +
-                  'tree and document map should have the same number of entries.');
+      assert(
+        updatedTree.length === updatedMap.size,
+        'The update document ' +
+          'tree and document map should have the same number of entries.'
+      );
 
-          return {updatedTree, updatedMap, appliedChanges};
-        };
+      return {updatedTree, updatedMap, appliedChanges};
+    };
 
     /**
      * Assembles a new snapshot from the current set of changes and invokes the
@@ -617,12 +650,18 @@ abstract class Watch {
 
       if (!hasPushed || diff.appliedChanges.length > 0) {
         logger(
-            'Watch.onSnapshot', this._requestTag,
-            'Sending snapshot with %d changes and %d documents',
-            String(diff.appliedChanges.length), diff.updatedTree.length);
+          'Watch.onSnapshot',
+          this._requestTag,
+          'Sending snapshot with %d changes and %d documents',
+          String(diff.appliedChanges.length),
+          diff.updatedTree.length
+        );
         onNext(
-            readTime, diff.updatedTree.length, () => diff.updatedTree.keys,
-            () => diff.appliedChanges);
+          readTime,
+          diff.updatedTree.length,
+          () => diff.updatedTree.keys,
+          () => diff.appliedChanges
+        );
         hasPushed = true;
       }
 
@@ -644,129 +683,139 @@ abstract class Watch {
     initStream();
 
     stream
-        .on('data',
-            (proto: api.IListenResponse) => {
-              if (proto.targetChange) {
-                logger(
-                    'Watch.onSnapshot', this._requestTag,
-                    'Processing target change');
-                const change = proto.targetChange;
-                const noTargetIds =
-                    !change.targetIds || change.targetIds.length === 0;
-                if (change.targetChangeType === 'NO_CHANGE') {
-                  if (noTargetIds && change.readTime && current) {
-                    // This means everything is up-to-date, so emit the current
-                    // set of docs as a snapshot, if there were changes.
-                    push(
-                        Timestamp.fromProto(change.readTime),
-                        change.resumeToken!);
-                  }
-                } else if (change.targetChangeType === 'ADD') {
-                  if (WATCH_TARGET_ID !== change.targetIds![0]) {
-                    closeStream(Error('Unexpected target ID sent by server'));
-                  }
-                } else if (change.targetChangeType === 'REMOVE') {
-                  let code = 13;
-                  let message = 'internal error';
-                  if (change.cause) {
-                    code = change.cause.code!;
-                    message = change.cause.message!;
-                  }
-                  // @todo: Surface a .code property on the exception.
-                  closeStream(new Error('Error ' + code + ': ' + message));
-                } else if (change.targetChangeType === 'RESET') {
-                  // Whatever changes have happened so far no longer matter.
-                  resetDocs();
-                } else if (change.targetChangeType === 'CURRENT') {
-                  current = true;
-                } else {
-                  closeStream(new Error(
-                      'Unknown target change type: ' + JSON.stringify(change)));
-                }
-
-                if (change.resumeToken &&
-                    affectsTarget(change.targetIds!, WATCH_TARGET_ID)) {
-                  this._backoff.reset();
-                }
-              } else if (proto.documentChange) {
-                logger(
-                    'Watch.onSnapshot', this._requestTag,
-                    'Processing change event');
-
-                // No other targetIds can show up here, but we still need to see
-                // if the targetId was in the added list or removed list.
-                const targetIds = proto.documentChange.targetIds || [];
-                const removedTargetIds =
-                    proto.documentChange.removedTargetIds || [];
-                let changed = false;
-                let removed = false;
-                for (let i = 0; i < targetIds.length; i++) {
-                  if (targetIds[i] === WATCH_TARGET_ID) {
-                    changed = true;
-                  }
-                }
-                for (let i = 0; i < removedTargetIds.length; i++) {
-                  if (removedTargetIds[i] === WATCH_TARGET_ID) {
-                    removed = true;
-                  }
-                }
-
-                const document = proto.documentChange.document!;
-                const name = document.name!;
-                const relativeName =
-                    QualifiedResourcePath.fromSlashSeparatedString(name)
-                        .relativeName;
-
-                if (changed) {
-                  logger(
-                      'Watch.onSnapshot', this._requestTag,
-                      'Received document change');
-                  const snapshot = new DocumentSnapshotBuilder();
-                  snapshot.ref = this._firestore.doc(relativeName);
-                  snapshot.fieldsProto = document.fields || {};
-                  snapshot.createTime =
-                      Timestamp.fromProto(document.createTime!);
-                  snapshot.updateTime =
-                      Timestamp.fromProto(document.updateTime!);
-                  changeMap.set(relativeName, snapshot);
-                } else if (removed) {
-                  logger(
-                      'Watch.onSnapshot', this._requestTag,
-                      'Received document remove');
-                  changeMap.set(relativeName, REMOVED);
-                }
-              } else if (proto.documentDelete || proto.documentRemove) {
-                logger(
-                    'Watch.onSnapshot', this._requestTag,
-                    'Processing remove event');
-                const name =
-                    (proto.documentDelete || proto.documentRemove)!.document!;
-                const relativeName =
-                    QualifiedResourcePath.fromSlashSeparatedString(name)
-                        .relativeName;
-                changeMap.set(relativeName, REMOVED);
-              } else if (proto.filter) {
-                logger(
-                    'Watch.onSnapshot', this._requestTag,
-                    'Processing filter update');
-                if (proto.filter.count !== currentSize()) {
-                  // We need to remove all the current results.
-                  resetDocs();
-                  // The filter didn't match, so re-issue the query.
-                  restartStream();
-                }
-              } else {
-                closeStream(new Error(
-                    'Unknown listen response type: ' + JSON.stringify(proto)));
-              }
-            })
-        .on('end', () => {
-          logger('Watch.onSnapshot', this._requestTag, 'Processing stream end');
-          if (currentStream) {
-            // Pass the event on to the underlying stream.
-            currentStream.end();
+      .on('data', (proto: api.IListenResponse) => {
+        if (proto.targetChange) {
+          logger(
+            'Watch.onSnapshot',
+            this._requestTag,
+            'Processing target change'
+          );
+          const change = proto.targetChange;
+          const noTargetIds =
+            !change.targetIds || change.targetIds.length === 0;
+          if (change.targetChangeType === 'NO_CHANGE') {
+            if (noTargetIds && change.readTime && current) {
+              // This means everything is up-to-date, so emit the current
+              // set of docs as a snapshot, if there were changes.
+              push(Timestamp.fromProto(change.readTime), change.resumeToken!);
+            }
+          } else if (change.targetChangeType === 'ADD') {
+            if (WATCH_TARGET_ID !== change.targetIds![0]) {
+              closeStream(Error('Unexpected target ID sent by server'));
+            }
+          } else if (change.targetChangeType === 'REMOVE') {
+            let code = 13;
+            let message = 'internal error';
+            if (change.cause) {
+              code = change.cause.code!;
+              message = change.cause.message!;
+            }
+            // @todo: Surface a .code property on the exception.
+            closeStream(new Error('Error ' + code + ': ' + message));
+          } else if (change.targetChangeType === 'RESET') {
+            // Whatever changes have happened so far no longer matter.
+            resetDocs();
+          } else if (change.targetChangeType === 'CURRENT') {
+            current = true;
+          } else {
+            closeStream(
+              new Error('Unknown target change type: ' + JSON.stringify(change))
+            );
           }
-        });
+
+          if (
+            change.resumeToken &&
+            affectsTarget(change.targetIds!, WATCH_TARGET_ID)
+          ) {
+            this._backoff.reset();
+          }
+        } else if (proto.documentChange) {
+          logger(
+            'Watch.onSnapshot',
+            this._requestTag,
+            'Processing change event'
+          );
+
+          // No other targetIds can show up here, but we still need to see
+          // if the targetId was in the added list or removed list.
+          const targetIds = proto.documentChange.targetIds || [];
+          const removedTargetIds = proto.documentChange.removedTargetIds || [];
+          let changed = false;
+          let removed = false;
+          for (let i = 0; i < targetIds.length; i++) {
+            if (targetIds[i] === WATCH_TARGET_ID) {
+              changed = true;
+            }
+          }
+          for (let i = 0; i < removedTargetIds.length; i++) {
+            if (removedTargetIds[i] === WATCH_TARGET_ID) {
+              removed = true;
+            }
+          }
+
+          const document = proto.documentChange.document!;
+          const name = document.name!;
+          const relativeName = QualifiedResourcePath.fromSlashSeparatedString(
+            name
+          ).relativeName;
+
+          if (changed) {
+            logger(
+              'Watch.onSnapshot',
+              this._requestTag,
+              'Received document change'
+            );
+            const snapshot = new DocumentSnapshotBuilder();
+            snapshot.ref = this._firestore.doc(relativeName);
+            snapshot.fieldsProto = document.fields || {};
+            snapshot.createTime = Timestamp.fromProto(document.createTime!);
+            snapshot.updateTime = Timestamp.fromProto(document.updateTime!);
+            changeMap.set(relativeName, snapshot);
+          } else if (removed) {
+            logger(
+              'Watch.onSnapshot',
+              this._requestTag,
+              'Received document remove'
+            );
+            changeMap.set(relativeName, REMOVED);
+          }
+        } else if (proto.documentDelete || proto.documentRemove) {
+          logger(
+            'Watch.onSnapshot',
+            this._requestTag,
+            'Processing remove event'
+          );
+          const name = (proto.documentDelete || proto.documentRemove)!
+            .document!;
+          const relativeName = QualifiedResourcePath.fromSlashSeparatedString(
+            name
+          ).relativeName;
+          changeMap.set(relativeName, REMOVED);
+        } else if (proto.filter) {
+          logger(
+            'Watch.onSnapshot',
+            this._requestTag,
+            'Processing filter update'
+          );
+          if (proto.filter.count !== currentSize()) {
+            // We need to remove all the current results.
+            resetDocs();
+            // The filter didn't match, so re-issue the query.
+            restartStream();
+          }
+        } else {
+          closeStream(
+            new Error('Unknown listen response type: ' + JSON.stringify(proto))
+          );
+        }
+      })
+      .on('end', () => {
+        logger('Watch.onSnapshot', this._requestTag, 'Processing stream end');
+        if (currentStream) {
+          // Pass the event on to the underlying stream.
+          currentStream.end();
+        }
+      });
 
     return () => {
       logger('Watch.onSnapshot', this._requestTag, 'Ending stream');
@@ -800,7 +849,7 @@ export class DocumentWatch extends Watch {
         documents: [formattedName],
       },
       targetId: WATCH_TARGET_ID,
-      resumeToken
+      resumeToken,
     };
   }
 }

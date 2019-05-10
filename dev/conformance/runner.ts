@@ -23,18 +23,31 @@ import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
 import * as proto from '../protos/firestore_proto_api';
 
-import {DocumentChange, DocumentSnapshot, FieldPath, FieldValue, Firestore, Query, QueryDocumentSnapshot, QuerySnapshot, Timestamp} from '../src';
+import {
+  DocumentChange,
+  DocumentSnapshot,
+  FieldPath,
+  FieldValue,
+  Firestore,
+  Query,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+  Timestamp,
+} from '../src';
 import {fieldsFromJson} from '../src/convert';
 import {DocumentChangeType} from '../src/document-change';
 import {QualifiedResourcePath} from '../src/path';
 import {DocumentData} from '../src/types';
 import {isObject} from '../src/util';
-import {ApiOverride, createInstance as createInstanceHelper} from '../test/util/helpers';
+import {
+  ApiOverride,
+  createInstance as createInstanceHelper,
+} from '../test/util/helpers';
 
 import api = proto.google.firestore.v1;
 
 // TODO(mrschmidt): Create Protobuf .d.ts file for the conformance proto
-type ConformanceProto = any;  // tslint:disable-line:no-any
+type ConformanceProto = any; // tslint:disable-line:no-any
 
 const REQUEST_TIME = 'REQUEST_TIME';
 
@@ -55,14 +68,17 @@ protobufRoot.resolvePath = (origin, target) => {
   }
   return target;
 };
-const protoDefinition =
-    protobufRoot.loadSync(path.join(__dirname, 'test-definition.proto'));
+const protoDefinition = protobufRoot.loadSync(
+  path.join(__dirname, 'test-definition.proto')
+);
 
 const TEST_SUITE_TYPE = protoDefinition.lookupType('tests.TestSuite');
-const STRUCTURED_QUERY_TYPE =
-    protoDefinition.lookupType('google.firestore.v1.StructuredQuery');
-const COMMIT_REQUEST_TYPE =
-    protoDefinition.lookupType('google.firestore.v1.CommitRequest');
+const STRUCTURED_QUERY_TYPE = protoDefinition.lookupType(
+  'google.firestore.v1.StructuredQuery'
+);
+const COMMIT_REQUEST_TYPE = protoDefinition.lookupType(
+  'google.firestore.v1.CommitRequest'
+);
 
 // Firestore instance initialized by the test runner.
 let firestore: Firestore;
@@ -82,13 +98,12 @@ const watchQuery = () => {
 };
 
 const createInstance = (overrides: ApiOverride) => {
-  return createInstanceHelper(
-             overrides, {projectId: CONFORMANCE_TEST_PROJECT_ID})
-      .then(firestoreClient => {
-        firestore = firestoreClient;
-      });
+  return createInstanceHelper(overrides, {
+    projectId: CONFORMANCE_TEST_PROJECT_ID,
+  }).then(firestoreClient => {
+    firestore = firestoreClient;
+  });
 };
-
 
 /** Converts JSON test data into JavaScript types suitable for the Node API. */
 const convertInput = {
@@ -109,13 +124,15 @@ const convertInput = {
 
       return value;
     }
-    function convertArray(arr: unknown[]): unknown[]|FieldValue {
+    function convertArray(arr: unknown[]): unknown[] | FieldValue {
       if (arr.length > 0 && arr[0] === 'ArrayUnion') {
         return FieldValue.arrayUnion(
-            ...(convertArray(arr.slice(1)) as unknown[]));
+          ...(convertArray(arr.slice(1)) as unknown[])
+        );
       } else if (arr.length > 0 && arr[0] === 'ArrayRemove') {
         return FieldValue.arrayRemove(
-            ...(convertArray(arr.slice(1)) as unknown[]));
+          ...(convertArray(arr.slice(1)) as unknown[])
+        );
       } else {
         for (let i = 0; i < arr.length; ++i) {
           arr[i] = convertValue(arr[i]);
@@ -161,9 +178,12 @@ const convertInput = {
   cursor: (cursor: ConformanceProto) => {
     const args: unknown[] = [];
     if (cursor.docSnapshot) {
-      args.push(DocumentSnapshot.fromObject(
+      args.push(
+        DocumentSnapshot.fromObject(
           docRef(cursor.docSnapshot.path),
-          convertInput.argument(cursor.docSnapshot.jsonData) as DocumentData));
+          convertInput.argument(cursor.docSnapshot.jsonData) as DocumentData
+        )
+      );
     } else {
       for (const jsonValue of cursor.jsonValues) {
         args.push(convertInput.argument(jsonValue));
@@ -179,27 +199,36 @@ const convertInput = {
     for (const doc of snapshot.docs) {
       const deepCopy = JSON.parse(JSON.stringify(doc));
       deepCopy.fields = fieldsFromJson(deepCopy.fields);
-      docs.push(
-          firestore.snapshot_(
-              deepCopy, readTime.toDate().toISOString(), 'json') as
-          QueryDocumentSnapshot);
+      docs.push(firestore.snapshot_(
+        deepCopy,
+        readTime.toDate().toISOString(),
+        'json'
+      ) as QueryDocumentSnapshot);
     }
 
     for (const change of snapshot.changes) {
       const deepCopy = JSON.parse(JSON.stringify(change.doc));
       deepCopy.fields = fieldsFromJson(deepCopy.fields);
       const doc = firestore.snapshot_(
-                      deepCopy, readTime.toDate().toISOString(), 'json') as
-          QueryDocumentSnapshot;
-      const type =
-          (['unspecified', 'added', 'removed', 'modified'][change.kind] as
-           DocumentChangeType);
+        deepCopy,
+        readTime.toDate().toISOString(),
+        'json'
+      ) as QueryDocumentSnapshot;
+      const type = ['unspecified', 'added', 'removed', 'modified'][
+        change.kind
+      ] as DocumentChangeType;
       changes.push(
-          new DocumentChange(type, doc, change.oldIndex, change.newIndex));
+        new DocumentChange(type, doc, change.oldIndex, change.newIndex)
+      );
     }
 
     return new QuerySnapshot(
-        watchQuery(), readTime, docs.length, () => docs, () => changes);
+      watchQuery(),
+      readTime,
+      docs.length,
+      () => docs,
+      () => changes
+    );
   },
 };
 
@@ -209,12 +238,14 @@ const convertProto = {
   listenResponse: (listenRequest: ConformanceProto) => {
     const deepCopy = JSON.parse(JSON.stringify(listenRequest));
     if (deepCopy.targetChange) {
-      deepCopy.targetChange.targetChangeType =
-          convertProto.targetChange(deepCopy.targetChange.targetChangeType);
+      deepCopy.targetChange.targetChangeType = convertProto.targetChange(
+        deepCopy.targetChange.targetChangeType
+      );
     }
     if (deepCopy.documentChange) {
-      deepCopy.documentChange.document.fields =
-          fieldsFromJson(deepCopy.documentChange.document.fields);
+      deepCopy.documentChange.document.fields = fieldsFromJson(
+        deepCopy.documentChange.document.fields
+      );
     }
     return deepCopy;
   },
@@ -222,9 +253,14 @@ const convertProto = {
 
 /** Request handler for _commit. */
 function commitHandler(spec: ConformanceProto) {
-  return (request: api.ICommitRequest, options: CallOptions,
-          callback: (err: Error|null|undefined, resp?: api.ICommitResponse) =>
-              void) => {
+  return (
+    request: api.ICommitRequest,
+    options: CallOptions,
+    callback: (
+      err: Error | null | undefined,
+      resp?: api.ICommitResponse
+    ) => void
+  ) => {
     try {
       const actualCommit = COMMIT_REQUEST_TYPE.fromObject(request);
       const expectedCommit = COMMIT_REQUEST_TYPE.fromObject(spec.request);
@@ -248,8 +284,9 @@ function commitHandler(spec: ConformanceProto) {
 /** Request handler for _runQuery. */
 function queryHandler(spec: ConformanceProto) {
   return (request: api.IRunQueryRequest) => {
-    const actualQuery =
-        STRUCTURED_QUERY_TYPE.fromObject(request.structuredQuery!);
+    const actualQuery = STRUCTURED_QUERY_TYPE.fromObject(
+      request.structuredQuery!
+    );
     const expectedQuery = STRUCTURED_QUERY_TYPE.fromObject(spec.query);
     expect(actualQuery).to.deep.equal(expectedQuery);
     const stream = through2.obj();
@@ -310,8 +347,10 @@ function runTest(spec: ConformanceProto) {
     const overrides = {runQuery: queryHandler(spec)};
     const applyClause = (query: Query, clause: ConformanceProto) => {
       if (clause.select) {
-        query =
-            query.select.apply(query, convertInput.paths(clause.select.fields));
+        query = query.select.apply(
+          query,
+          convertInput.paths(clause.select.fields)
+        );
       } else if (clause.where) {
         const fieldPath = convertInput.path(clause.where.path);
         const value = convertInput.argument(clause.where.jsonValue);
@@ -364,7 +403,7 @@ function runTest(spec: ConformanceProto) {
   const setTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      const setOption: {merge?: boolean, mergeFields?: FieldPath[]} = {};
+      const setOption: {merge?: boolean; mergeFields?: FieldPath[]} = {};
       if (spec.option && spec.option.all) {
         setOption.merge = true;
       } else if (spec.option && spec.option.fields) {
@@ -373,16 +412,19 @@ function runTest(spec: ConformanceProto) {
           setOption.mergeFields.push(new FieldPath(fieldPath.field));
         }
       }
-      return docRef(setSpec.docRefPath)
-          .set(convertInput.argument(spec.jsonData) as DocumentData, setOption);
+      return docRef(setSpec.docRefPath).set(
+        convertInput.argument(spec.jsonData) as DocumentData,
+        setOption
+      );
     });
   };
 
   const createTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      return docRef(spec.docRefPath)
-          .create(convertInput.argument(spec.jsonData) as DocumentData);
+      return docRef(spec.docRefPath).create(convertInput.argument(
+        spec.jsonData
+      ) as DocumentData);
     });
   };
 
@@ -397,34 +439,37 @@ function runTest(spec: ConformanceProto) {
     const expectedSnapshots = spec.snapshots;
     const writeStream = through2.obj();
     const overrides: ApiOverride = {
-      listen: () => duplexify.obj(through2.obj(), writeStream)
+      listen: () => duplexify.obj(through2.obj(), writeStream),
     };
 
     return createInstance(overrides).then(() => {
       return new Promise((resolve, reject) => {
         const unlisten = watchQuery().onSnapshot(
-            actualSnap => {
-              const expectedSnapshot = expectedSnapshots.shift();
-              if (expectedSnapshot) {
-                if (!actualSnap.isEqual(
-                        convertInput.snapshot(expectedSnapshot))) {
-                  reject(
-                      new Error('Expected and actual snapshots do not match.'));
-                }
-
-                if (expectedSnapshots.length === 0 || !spec.isError) {
-                  unlisten();
-                  resolve();
-                }
-              } else {
-                reject(new Error('Received unexpected snapshot'));
+          actualSnap => {
+            const expectedSnapshot = expectedSnapshots.shift();
+            if (expectedSnapshot) {
+              if (
+                !actualSnap.isEqual(convertInput.snapshot(expectedSnapshot))
+              ) {
+                reject(
+                  new Error('Expected and actual snapshots do not match.')
+                );
               }
-            },
-            err => {
-              expect(expectedSnapshots).to.have.length(0);
-              unlisten();
-              reject(err);
-            });
+
+              if (expectedSnapshots.length === 0 || !spec.isError) {
+                unlisten();
+                resolve();
+              }
+            } else {
+              reject(new Error('Received unexpected snapshot'));
+            }
+          },
+          err => {
+            expect(expectedSnapshots).to.have.length(0);
+            unlisten();
+            reject(err);
+          }
+        );
 
         for (const response of spec.responses) {
           writeStream.write(convertProto.listenResponse(response));
@@ -470,20 +515,22 @@ function runTest(spec: ConformanceProto) {
   }
 
   return testPromise.then(
-      () => {
-        expect(testSpec.isError || false).to.be.false;
-      },
-      err => {
-        if (!testSpec.isError) {
-          throw err;
-        }
-      });
+    () => {
+      expect(testSpec.isError || false).to.be.false;
+    },
+    err => {
+      if (!testSpec.isError) {
+        throw err;
+      }
+    }
+  );
 }
 
 describe('Conformance Tests', () => {
   const loadTestCases = () => {
-    const binaryProtoData =
-        require('fs').readFileSync(path.join(__dirname, 'test-suite.binproto'));
+    const binaryProtoData = require('fs').readFileSync(
+      path.join(__dirname, 'test-suite.binproto')
+    );
 
     // We don't have type information for the conformance proto.
     // tslint:disable-next-line:no-any

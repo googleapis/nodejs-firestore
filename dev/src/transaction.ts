@@ -19,11 +19,27 @@ import * as proto from '../protos/firestore_proto_api';
 import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
 import {FieldPath, validateFieldPath} from './path';
-import {DocumentReference, Query, QuerySnapshot, validateDocumentReference} from './reference';
+import {
+  DocumentReference,
+  Query,
+  QuerySnapshot,
+  validateDocumentReference,
+} from './reference';
 import {isPlainObject} from './serializer';
-import {DocumentData, Precondition as PublicPrecondition, ReadOptions, SetOptions, UpdateData} from './types';
+import {
+  DocumentData,
+  Precondition as PublicPrecondition,
+  ReadOptions,
+  SetOptions,
+  UpdateData,
+} from './types';
 import {isObject, requestTag} from './util';
-import {invalidArgumentMessage, RequiredArgumentOptions, validateMinNumberOfArguments, validateOptional} from './validate';
+import {
+  invalidArgumentMessage,
+  RequiredArgumentOptions,
+  validateMinNumberOfArguments,
+  validateOptional,
+} from './validate';
 
 import api = proto.google.firestore.v1;
 
@@ -32,7 +48,7 @@ import api = proto.google.firestore.v1;
  * writes.
  */
 const READ_AFTER_WRITE_ERROR_MSG =
-    'Firestore transactions require all reads to be executed before all writes.';
+  'Firestore transactions require all reads to be executed before all writes.';
 
 /*!
  * Transactions can be retried if the initial stream opening errors out.
@@ -66,8 +82,9 @@ export class Transaction {
     this._firestore = firestore;
     this._previousTransaction = previousTransaction;
     this._writeBatch = firestore.batch();
-    this._requestTag =
-        previousTransaction ? previousTransaction.requestTag : requestTag();
+    this._requestTag = previousTransaction
+      ? previousTransaction.requestTag
+      : requestTag();
   }
 
   /**
@@ -109,20 +126,24 @@ export class Transaction {
    *   });
    * });
    */
-  get(refOrQuery: DocumentReference|
-      Query): Promise<DocumentSnapshot|QuerySnapshot> {
+  get(
+    refOrQuery: DocumentReference | Query
+  ): Promise<DocumentSnapshot | QuerySnapshot> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
     if (refOrQuery instanceof DocumentReference) {
       return this._firestore
-          .getAll_(
-              [refOrQuery], /* fieldMask= */ null, this._requestTag,
-              this._transactionId)
-          .then(res => {
-            return Promise.resolve(res[0]);
-          });
+        .getAll_(
+          [refOrQuery],
+          /* fieldMask= */ null,
+          this._requestTag,
+          this._transactionId
+        )
+        .then(res => {
+          return Promise.resolve(res[0]);
+        });
     }
 
     if (refOrQuery instanceof Query) {
@@ -130,7 +151,8 @@ export class Transaction {
     }
 
     throw new Error(
-        'Value for argument "refOrQuery" must be a DocumentReference or a Query.');
+      'Value for argument "refOrQuery" must be a DocumentReference or a Query.'
+    );
   }
 
   /**
@@ -160,19 +182,25 @@ export class Transaction {
    *   });
    * });
    */
-  getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
-      Promise<DocumentSnapshot[]> {
+  getAll(
+    ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
+  ): Promise<DocumentSnapshot[]> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
     validateMinNumberOfArguments('Transaction.getAll', arguments, 1);
 
-    const {documents, fieldMask} =
-        parseGetAllArguments(documentRefsOrReadOptions);
+    const {documents, fieldMask} = parseGetAllArguments(
+      documentRefsOrReadOptions
+    );
 
     return this._firestore.getAll_(
-        documents, fieldMask, this._requestTag, this._transactionId);
+      documents,
+      fieldMask,
+      this._requestTag,
+      this._transactionId
+    );
   }
 
   /**
@@ -228,8 +256,11 @@ export class Transaction {
    *   return Promise.resolve();
    * });
    */
-  set(documentRef: DocumentReference, data: DocumentData,
-      options?: SetOptions): Transaction {
+  set(
+    documentRef: DocumentReference,
+    data: DocumentData,
+    options?: SetOptions
+  ): Transaction {
     this._writeBatch.set(documentRef, data, options);
     return this;
   }
@@ -273,13 +304,15 @@ export class Transaction {
    * });
    */
   update(
-      documentRef: DocumentReference, dataOrField: UpdateData|string|FieldPath,
-      ...preconditionOrValues: Array<Precondition|unknown|string|FieldPath>):
-      Transaction {
+    documentRef: DocumentReference,
+    dataOrField: UpdateData | string | FieldPath,
+    ...preconditionOrValues: Array<Precondition | unknown | string | FieldPath>
+  ): Transaction {
     validateMinNumberOfArguments('Transaction.update', arguments, 2);
 
     this._writeBatch.update.apply(this._writeBatch, [
-      documentRef, dataOrField
+      documentRef,
+      dataOrField,
     ].concat(preconditionOrValues) as [DocumentReference, string]);
     return this;
   }
@@ -305,8 +338,10 @@ export class Transaction {
    *   return Promise.resolve();
    * });
    */
-  delete(documentRef: DocumentReference, precondition?: PublicPrecondition):
-      this {
+  delete(
+    documentRef: DocumentReference,
+    precondition?: PublicPrecondition
+  ): this {
     this._writeBatch.delete(documentRef, precondition);
     return this;
   }
@@ -330,11 +365,15 @@ export class Transaction {
     }
 
     return this._firestore
-        .request<api.IBeginTransactionResponse>(
-            'beginTransaction', request, this._requestTag, ALLOW_RETRIES)
-        .then(resp => {
-          this._transactionId = resp.transaction!;
-        });
+      .request<api.IBeginTransactionResponse>(
+        'beginTransaction',
+        request,
+        this._requestTag,
+        ALLOW_RETRIES
+      )
+      .then(resp => {
+        this._transactionId = resp.transaction!;
+      });
   }
 
   /**
@@ -344,11 +383,11 @@ export class Transaction {
    */
   commit(): Promise<void> {
     return this._writeBatch
-        .commit_({
-          transactionId: this._transactionId,
-          requestTag: this._requestTag,
-        })
-        .then(() => {});
+      .commit_({
+        transactionId: this._transactionId,
+        requestTag: this._requestTag,
+      })
+      .then(() => {});
   }
 
   /**
@@ -363,7 +402,11 @@ export class Transaction {
     };
 
     return this._firestore.request(
-        'rollback', request, this._requestTag, /* allowRetries= */ false);
+      'rollback',
+      request,
+      this._requestTag,
+      /* allowRetries= */ false
+    );
   }
 
   /**
@@ -385,26 +428,30 @@ export class Transaction {
  * an optional ReadOptions object.
  */
 export function parseGetAllArguments(
-    documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
-    {documents: DocumentReference[], fieldMask: FieldPath[]|null} {
+  documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
+): {documents: DocumentReference[]; fieldMask: FieldPath[] | null} {
   let documents: DocumentReference[];
-  let readOptions: ReadOptions|undefined = undefined;
+  let readOptions: ReadOptions | undefined = undefined;
 
   // In the original release of the SDK, getAll() was documented to accept
   // either a varargs list of DocumentReferences or a single array of
   // DocumentReferences. To support this usage in the TypeScript client, we have
   // to manually verify the arguments to determine which input the user
   // provided.
-  const usesDeprecatedArgumentStyle =
-      Array.isArray(documentRefsOrReadOptions[0]);
+  const usesDeprecatedArgumentStyle = Array.isArray(
+    documentRefsOrReadOptions[0]
+  );
 
   if (usesDeprecatedArgumentStyle) {
     documents = documentRefsOrReadOptions[0] as DocumentReference[];
     readOptions = documentRefsOrReadOptions[1] as ReadOptions;
   } else {
-    if (documentRefsOrReadOptions.length > 0 &&
-        isPlainObject(
-            documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1])) {
+    if (
+      documentRefsOrReadOptions.length > 0 &&
+      isPlainObject(
+        documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1]
+      )
+    ) {
       readOptions = documentRefsOrReadOptions.pop() as ReadOptions;
       documents = documentRefsOrReadOptions as DocumentReference[];
     } else {
@@ -417,10 +464,12 @@ export function parseGetAllArguments(
   }
 
   validateReadOptions('options', readOptions, {optional: true});
-  const fieldMask = readOptions && readOptions.fieldMask ?
-      readOptions.fieldMask.map(
-          fieldPath => FieldPath.fromArgument(fieldPath)) :
-      null;
+  const fieldMask =
+    readOptions && readOptions.fieldMask
+      ? readOptions.fieldMask.map(fieldPath =>
+          FieldPath.fromArgument(fieldPath)
+        )
+      : null;
   return {fieldMask, documents};
 }
 
@@ -434,32 +483,39 @@ export function parseGetAllArguments(
  * @param options Options that specify whether the ReadOptions can be omitted.
  */
 function validateReadOptions(
-    arg: number|string, value: unknown,
-    options?: RequiredArgumentOptions): void {
+  arg: number | string,
+  value: unknown,
+  options?: RequiredArgumentOptions
+): void {
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
-      throw new Error(`${
-          invalidArgumentMessage(
-              arg, 'read option')} Input is not an object.'`);
+      throw new Error(
+        `${invalidArgumentMessage(arg, 'read option')} Input is not an object.'`
+      );
     }
 
     const options = value as {[k: string]: unknown};
 
     if (options.fieldMask !== undefined) {
       if (!Array.isArray(options.fieldMask)) {
-        throw new Error(`${
-            invalidArgumentMessage(
-                arg, 'read option')} "fieldMask" is not an array.`);
+        throw new Error(
+          `${invalidArgumentMessage(
+            arg,
+            'read option'
+          )} "fieldMask" is not an array.`
+        );
       }
 
       for (let i = 0; i < options.fieldMask.length; ++i) {
         try {
           validateFieldPath(i, options.fieldMask[i]);
         } catch (err) {
-          throw new Error(`${
-              invalidArgumentMessage(
-                  arg,
-                  'read option')} "fieldMask" is not valid: ${err.message}`);
+          throw new Error(
+            `${invalidArgumentMessage(
+              arg,
+              'read option'
+            )} "fieldMask" is not valid: ${err.message}`
+          );
         }
       }
     }

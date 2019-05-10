@@ -33,7 +33,7 @@
  * @see [google.firestore.admin.v1.CreateIndexRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const CreateIndexRequest = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -59,7 +59,7 @@ const CreateIndexRequest = {
  * @see [google.firestore.admin.v1.ListIndexesRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const ListIndexesRequest = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -80,7 +80,7 @@ const ListIndexesRequest = {
  * @see [google.firestore.admin.v1.ListIndexesResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const ListIndexesResponse = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -95,7 +95,7 @@ const ListIndexesResponse = {
  * @see [google.firestore.admin.v1.GetIndexRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const GetIndexRequest = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -110,7 +110,7 @@ const GetIndexRequest = {
  * @see [google.firestore.admin.v1.DeleteIndexRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const DeleteIndexRequest = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -134,7 +134,7 @@ const DeleteIndexRequest = {
  * @see [google.firestore.admin.v1.UpdateFieldRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const UpdateFieldRequest = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -149,7 +149,7 @@ const UpdateFieldRequest = {
  * @see [google.firestore.admin.v1.GetFieldRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const GetFieldRequest = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -179,7 +179,7 @@ const GetFieldRequest = {
  * @see [google.firestore.admin.v1.ListFieldsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const ListFieldsRequest = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -200,7 +200,7 @@ const ListFieldsRequest = {
  * @see [google.firestore.admin.v1.ListFieldsResponse definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const ListFieldsResponse = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -228,7 +228,7 @@ const ListFieldsResponse = {
  * @see [google.firestore.admin.v1.ExportDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const ExportDocumentsRequest = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -254,5 +254,5 @@ const ExportDocumentsRequest = {
  * @see [google.firestore.admin.v1.ImportDocumentsRequest definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/firestore_admin.proto}
  */
 const ImportDocumentsRequest = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };

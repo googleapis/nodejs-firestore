@@ -34,7 +34,7 @@ enum TypeOrder {
   REF = 6,
   GEO_POINT = 7,
   ARRAY = 8,
-  OBJECT = 9
+  OBJECT = 9,
 }
 
 /*!
@@ -75,7 +75,9 @@ function typeOrder(val: api.IValue): TypeOrder {
  * @private
  */
 export function primitiveComparator(
-    left: string|boolean|number, right: string|boolean|number): number {
+  left: string | boolean | number,
+  right: string | boolean | number
+): number {
   if (left < right) {
     return -1;
   }
@@ -128,8 +130,9 @@ function compareNumberProtos(left: api.IValue, right: api.IValue): number {
  * @private
  */
 function compareTimestamps(
-    left: google.protobuf.ITimestamp,
-    right: google.protobuf.ITimestamp): number {
+  left: google.protobuf.ITimestamp,
+  right: google.protobuf.ITimestamp
+): number {
   const seconds = primitiveComparator(left.seconds || 0, right.seconds || 0);
   if (seconds !== 0) {
     return seconds;
@@ -151,10 +154,12 @@ function compareBlobs(left: Uint8Array, right: Uint8Array): number {
  * @private
  */
 function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
-  const leftPath =
-      QualifiedResourcePath.fromSlashSeparatedString(left.referenceValue!);
-  const rightPath =
-      QualifiedResourcePath.fromSlashSeparatedString(right.referenceValue!);
+  const leftPath = QualifiedResourcePath.fromSlashSeparatedString(
+    left.referenceValue!
+  );
+  const rightPath = QualifiedResourcePath.fromSlashSeparatedString(
+    right.referenceValue!
+  );
   return leftPath.compareTo(rightPath);
 }
 
@@ -162,10 +167,13 @@ function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
  * @private
  */
 function compareGeoPoints(
-    left: google.type.ILatLng, right: google.type.ILatLng): number {
+  left: google.type.ILatLng,
+  right: google.type.ILatLng
+): number {
   return (
-      primitiveComparator(left.latitude || 0, right.latitude || 0) ||
-      primitiveComparator(left.longitude || 0, right.longitude || 0));
+    primitiveComparator(left.latitude || 0, right.latitude || 0) ||
+    primitiveComparator(left.longitude || 0, right.longitude || 0)
+  );
 }
 
 /*!
@@ -240,10 +248,14 @@ export function compare(left: api.IValue, right: api.IValue): number {
       return compareGeoPoints(left.geoPointValue!, right.geoPointValue!);
     case TypeOrder.ARRAY:
       return compareArrays(
-          left.arrayValue!.values || [], right.arrayValue!.values || []);
+        left.arrayValue!.values || [],
+        right.arrayValue!.values || []
+      );
     case TypeOrder.OBJECT:
       return compareObjects(
-          left.mapValue!.fields || {}, right.mapValue!.fields || {});
+        left.mapValue!.fields || {},
+        right.mapValue!.fields || {}
+      );
     default:
       throw new Error(`Encountered unknown type order: ${leftType}`);
   }

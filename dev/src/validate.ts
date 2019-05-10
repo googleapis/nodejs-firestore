@@ -46,7 +46,10 @@ export interface NumericRangeOptions {
  * @param path The field path that the object is assigned to.
  */
 export function customObjectMessage(
-    arg: string|number, value: unknown, path?: FieldPath): string {
+  arg: string | number,
+  value: unknown,
+  path?: FieldPath
+): string {
   const fieldPathMessage = path ? ` (found in field ${path})` : '';
 
   if (isObject(value)) {
@@ -57,33 +60,34 @@ export function customObjectMessage(
       case 'FieldValue':
       case 'GeoPoint':
       case 'Timestamp':
-        return `${
-                   invalidArgumentMessage(
-                       arg,
-                       'Firestore document')} Detected an object of type "${
-                   typeName}" that doesn't match the ` +
-            `expected instance${fieldPathMessage}. Please ensure that the ` +
-            'Firestore types you are using are from the same NPM package.)';
+        return (
+          `${invalidArgumentMessage(
+            arg,
+            'Firestore document'
+          )} Detected an object of type "${typeName}" that doesn't match the ` +
+          `expected instance${fieldPathMessage}. Please ensure that the ` +
+          'Firestore types you are using are from the same NPM package.)'
+        );
       case 'Object':
-        return `${
-            invalidArgumentMessage(
-                arg, 'Firestore document')} Invalid use of type "${
-            typeof value}" as a Firestore argument${fieldPathMessage}.`;
+        return `${invalidArgumentMessage(
+          arg,
+          'Firestore document'
+        )} Invalid use of type "${typeof value}" as a Firestore argument${fieldPathMessage}.`;
       default:
-        return `${
-                   invalidArgumentMessage(
-                       arg,
-                       'Firestore document')} Couldn't serialize object of type "${
-                   typeName}"${
-                   fieldPathMessage}. Firestore doesn't support JavaScript ` +
-            'objects with custom prototypes (i.e. objects that were created ' +
-            'via the "new" operator).';
+        return (
+          `${invalidArgumentMessage(
+            arg,
+            'Firestore document'
+          )} Couldn't serialize object of type "${typeName}"${fieldPathMessage}. Firestore doesn't support JavaScript ` +
+          'objects with custom prototypes (i.e. objects that were created ' +
+          'via the "new" operator).'
+        );
     }
   } else {
-    return `${
-        invalidArgumentMessage(
-            arg, 'Firestore document')} Input is not a plain JavaScript object${
-        fieldPathMessage}.`;
+    return `${invalidArgumentMessage(
+      arg,
+      'Firestore document'
+    )} Input is not a plain JavaScript object${fieldPathMessage}.`;
   }
 }
 
@@ -96,8 +100,10 @@ export function customObjectMessage(
  * @param options Options that specify whether the function can be omitted.
  */
 export function validateFunction(
-    arg: string|number, value: unknown,
-    options?: RequiredArgumentOptions): void {
+  arg: string | number,
+  value: unknown,
+  options?: RequiredArgumentOptions
+): void {
   if (!validateOptional(value, options)) {
     if (!isFunction(value)) {
       throw new Error(invalidArgumentMessage(arg, 'function'));
@@ -114,8 +120,10 @@ export function validateFunction(
  * @param options Options that specify whether the object can be omitted.
  */
 export function validateObject(
-    arg: string|number, value: unknown,
-    options?: RequiredArgumentOptions): void {
+  arg: string | number,
+  value: unknown,
+  options?: RequiredArgumentOptions
+): void {
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(invalidArgumentMessage(arg, 'object'));
@@ -132,8 +140,10 @@ export function validateObject(
  * @param options Options that specify whether the string can be omitted.
  */
 export function validateString(
-    arg: string|number, value: unknown,
-    options?: RequiredArgumentOptions): void {
+  arg: string | number,
+  value: unknown,
+  options?: RequiredArgumentOptions
+): void {
   if (!validateOptional(value, options)) {
     if (typeof value !== 'string') {
       throw new Error(invalidArgumentMessage(arg, 'string'));
@@ -150,8 +160,10 @@ export function validateString(
  * @param options Options that specify whether the boolean can be omitted.
  */
 export function validateBoolean(
-    arg: string|number, value: unknown,
-    options?: RequiredArgumentOptions): void {
+  arg: string | number,
+  value: unknown,
+  options?: RequiredArgumentOptions
+): void {
   if (!validateOptional(value, options)) {
     if (typeof value !== 'boolean') {
       throw new Error(invalidArgumentMessage(arg, 'boolean'));
@@ -168,21 +180,28 @@ export function validateBoolean(
  * @param options Options that specify whether the number can be omitted.
  */
 export function validateNumber(
-    arg: string|number, value: unknown,
-    options?: RequiredArgumentOptions&NumericRangeOptions): void {
-  const min = options !== undefined && options.minValue !== undefined ?
-      options.minValue :
-      -Infinity;
-  const max = options !== undefined && options.maxValue !== undefined ?
-      options.maxValue :
-      Infinity;
+  arg: string | number,
+  value: unknown,
+  options?: RequiredArgumentOptions & NumericRangeOptions
+): void {
+  const min =
+    options !== undefined && options.minValue !== undefined
+      ? options.minValue
+      : -Infinity;
+  const max =
+    options !== undefined && options.maxValue !== undefined
+      ? options.maxValue
+      : Infinity;
 
   if (!validateOptional(value, options)) {
     if (typeof value !== 'number' || isNaN(value)) {
       throw new Error(invalidArgumentMessage(arg, 'number'));
     } else if (value < min || value > max) {
-      throw new Error(`${formatArgumentName(arg)} must be within [${min}, ${
-          max}] inclusive, but was: ${value}`);
+      throw new Error(
+        `${formatArgumentName(
+          arg
+        )} must be within [${min}, ${max}] inclusive, but was: ${value}`
+      );
     }
   }
 }
@@ -196,21 +215,28 @@ export function validateNumber(
  * @param options Options that specify whether the integer can be omitted.
  */
 export function validateInteger(
-    arg: string|number, value: unknown,
-    options?: RequiredArgumentOptions&NumericRangeOptions): void {
-  const min = options !== undefined && options.minValue !== undefined ?
-      options.minValue :
-      -Infinity;
-  const max = options !== undefined && options.maxValue !== undefined ?
-      options.maxValue :
-      Infinity;
+  arg: string | number,
+  value: unknown,
+  options?: RequiredArgumentOptions & NumericRangeOptions
+): void {
+  const min =
+    options !== undefined && options.minValue !== undefined
+      ? options.minValue
+      : -Infinity;
+  const max =
+    options !== undefined && options.maxValue !== undefined
+      ? options.maxValue
+      : Infinity;
 
   if (!validateOptional(value, options)) {
     if (typeof value !== 'number' || isNaN(value) || value % 1 !== 0) {
       throw new Error(invalidArgumentMessage(arg, 'integer'));
     } else if (value < min || value > max) {
-      throw new Error(`${formatArgumentName(arg)} must be within [${min}, ${
-          max}] inclusive, but was: ${value}`);
+      throw new Error(
+        `${formatArgumentName(
+          arg
+        )} must be within [${min}, ${max}] inclusive, but was: ${value}`
+      );
     }
   }
 }
@@ -223,7 +249,9 @@ export function validateInteger(
  * @param expectedType The expected input type.
  */
 export function invalidArgumentMessage(
-    arg: string|number, expectedType: string) {
+  arg: string | number,
+  expectedType: string
+) {
   return `${formatArgumentName(arg)} is not a valid ${expectedType}.`;
 }
 
@@ -236,9 +264,12 @@ export function invalidArgumentMessage(
  * @return Whether the object is omitted and is allowed to be omitted.
  */
 export function validateOptional(
-    value: unknown, options?: RequiredArgumentOptions): boolean {
-  return value === undefined && options !== undefined &&
-      options.optional === true;
+  value: unknown,
+  options?: RequiredArgumentOptions
+): boolean {
+  return (
+    value === undefined && options !== undefined && options.optional === true
+  );
 }
 
 /**
@@ -259,9 +290,10 @@ function formatPlural(num: number, str: string): string {
  * @param arg The argument name or argument index (for varargs methods).
  * @return Either the argument name or its index description.
  */
-function formatArgumentName(arg: string|number): string {
-  return typeof arg === 'string' ? `Value for argument "${arg}"` :
-                                   `Element at index ${arg}`;
+function formatArgumentName(arg: string | number): string {
+  return typeof arg === 'string'
+    ? `Value for argument "${arg}"`
+    : `Element at index ${arg}`;
 }
 
 /**
@@ -274,11 +306,15 @@ function formatArgumentName(arg: string|number): string {
  * @throws if the expectation is not met.
  */
 export function validateMinNumberOfArguments(
-    funcName: string, args: IArguments|unknown[], minSize: number): void {
+  funcName: string,
+  args: IArguments | unknown[],
+  minSize: number
+): void {
   if (args.length < minSize) {
     throw new Error(
-        `Function "${funcName}()" requires at least ` +
-        `${formatPlural(minSize, 'argument')}.`);
+      `Function "${funcName}()" requires at least ` +
+        `${formatPlural(minSize, 'argument')}.`
+    );
   }
 }
 
@@ -292,11 +328,15 @@ export function validateMinNumberOfArguments(
  * @throws if the expectation is not met.
  */
 export function validateMaxNumberOfArguments(
-    funcName: string, args: IArguments, maxSize: number): void {
+  funcName: string,
+  args: IArguments,
+  maxSize: number
+): void {
   if (args.length > maxSize) {
     throw new Error(
-        `Function "${funcName}()" accepts at most ` +
-        `${formatPlural(maxSize, 'argument')}.`);
+      `Function "${funcName}()" accepts at most ` +
+        `${formatPlural(maxSize, 'argument')}.`
+    );
   }
 }
 
@@ -310,8 +350,11 @@ export function validateMaxNumberOfArguments(
  * @private
  */
 export function validateEnumValue(
-    arg: string|number, value: unknown, allowedValues: string[],
-    options?: RequiredArgumentOptions): void {
+  arg: string | number,
+  value: unknown,
+  allowedValues: string[],
+  options?: RequiredArgumentOptions
+): void {
   if (!validateOptional(value, options)) {
     const expectedDescription: string[] = [];
 
@@ -323,7 +366,9 @@ export function validateEnumValue(
     }
 
     throw new Error(
-        `${formatArgumentName(arg)} is invalid. Acceptable values are: ${
-            expectedDescription.join(', ')}`);
+      `${formatArgumentName(
+        arg
+      )} is invalid. Acceptable values are: ${expectedDescription.join(', ')}`
+    );
   }
 }

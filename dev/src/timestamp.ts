@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {google} from '../protos/firestore_proto_api';
 import {validateInteger} from './validate';
 
@@ -100,7 +99,9 @@ export class Timestamp {
    */
   static fromProto(timestamp: google.protobuf.ITimestamp) {
     return new Timestamp(
-        Number(timestamp.seconds || 0), Number(timestamp.nanos || 0));
+      Number(timestamp.seconds || 0),
+      Number(timestamp.nanos || 0)
+    );
   }
 
   /**
@@ -121,8 +122,10 @@ export class Timestamp {
    */
   constructor(seconds: number, nanoseconds: number) {
     validateInteger('seconds', seconds);
-    validateInteger(
-        'nanoseconds', nanoseconds, {minValue: 0, maxValue: 999999999});
+    validateInteger('nanoseconds', nanoseconds, {
+      minValue: 0,
+      maxValue: 999999999,
+    });
 
     this._seconds = seconds;
     this._nanoseconds = nanoseconds;
@@ -178,7 +181,8 @@ export class Timestamp {
    */
   toDate() {
     return new Date(
-        this._seconds * 1000 + Math.round(this._nanoseconds / MS_TO_NANOS));
+      this._seconds * 1000 + Math.round(this._nanoseconds / MS_TO_NANOS)
+    );
   }
 
   /**
@@ -218,9 +222,11 @@ export class Timestamp {
    */
   isEqual(other: Timestamp): boolean {
     return (
-        this === other ||
-        (other instanceof Timestamp && this._seconds === other.seconds &&
-         this._nanoseconds === other.nanoseconds));
+      this === other ||
+      (other instanceof Timestamp &&
+        this._seconds === other.seconds &&
+        this._nanoseconds === other.nanoseconds)
+    );
   }
 
   /**

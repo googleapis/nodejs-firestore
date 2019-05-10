@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import * as proto from '../protos/firestore_proto_api';
 
 import {detectValueType} from './convert';
@@ -61,9 +60,11 @@ export class Serializer {
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
     this.createReference = path => firestore.doc(path);
+    // tslint:disable-next-line deprecation
     if (firestore._settings.timestampsInSnapshots === undefined) {
       this.timestampsInSnapshots = true;
     } else {
+      // tslint:disable-next-line deprecation
       this.timestampsInSnapshots = firestore._settings.timestampsInSnapshots;
     }
   }
@@ -98,7 +99,7 @@ export class Serializer {
    * @param val The object to encode
    * @returns The Firestore Proto or null if we are deleting a field.
    */
-  encodeValue(val: unknown): api.IValue|null {
+  encodeValue(val: unknown): api.IValue | null {
     if (val instanceof FieldTransform) {
       return null;
     }
@@ -144,16 +145,17 @@ export class Serializer {
       };
     }
 
-
     if (val instanceof Buffer || val instanceof Uint8Array) {
       return {
         bytesValue: val,
       };
     }
 
-
-    if (isObject(val) && 'toProto' in val &&
-        typeof (val as Serializable).toProto === 'function') {
+    if (
+      isObject(val) &&
+      'toProto' in val &&
+      typeof (val as Serializable).toProto === 'function'
+    ) {
       return (val as Serializable).toProto();
     }
 
@@ -224,7 +226,8 @@ export class Serializer {
       }
       case 'referenceValue': {
         const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(
-            proto.referenceValue!);
+          proto.referenceValue!
+        );
         return this.createReference(resourcePath.relativeName);
       }
       case 'arrayValue': {
@@ -259,8 +262,8 @@ export class Serializer {
       }
       default: {
         throw new Error(
-            'Cannot decode type from Firestore Value: ' +
-            JSON.stringify(proto));
+          'Cannot decode type from Firestore Value: ' + JSON.stringify(proto)
+        );
       }
     }
   }
@@ -276,9 +279,10 @@ export class Serializer {
  */
 export function isPlainObject(input: unknown): input is DocumentData {
   return (
-      isObject(input) &&
-      (Object.getPrototypeOf(input) === Object.prototype ||
-       Object.getPrototypeOf(input) === null));
+    isObject(input) &&
+    (Object.getPrototypeOf(input) === Object.prototype ||
+      Object.getPrototypeOf(input) === null)
+  );
 }
 
 /**
@@ -296,13 +300,21 @@ export function isPlainObject(input: unknown): input is DocumentData {
  * @throws when the object is invalid.
  */
 export function validateUserInput(
-    arg: string|number, value: unknown, desc: string,
-    options: ValidationOptions, path?: FieldPath, level?: number,
-    inArray?: boolean): void {
+  arg: string | number,
+  value: unknown,
+  desc: string,
+  options: ValidationOptions,
+  path?: FieldPath,
+  level?: number,
+  inArray?: boolean
+): void {
   if (path && path.size > MAX_DEPTH) {
     throw new Error(
-        `${invalidArgumentMessage(arg, desc)} Input object is deeper than ${
-            MAX_DEPTH} levels or contains a cycle.`);
+      `${invalidArgumentMessage(
+        arg,
+        desc
+      )} Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`
+    );
   }
 
   options = options || {};
@@ -314,53 +326,74 @@ export function validateUserInput(
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; ++i) {
       validateUserInput(
-          arg, value[i]!, desc, options,
-          path ? path.append(String(i)) : new FieldPath(String(i)), level + 1,
-          /* inArray= */ true);
+        arg,
+        value[i]!,
+        desc,
+        options,
+        path ? path.append(String(i)) : new FieldPath(String(i)),
+        level + 1,
+        /* inArray= */ true
+      );
     }
   } else if (isPlainObject(value)) {
     for (const prop in value) {
       if (value.hasOwnProperty(prop)) {
         validateUserInput(
-            arg, value[prop]!, desc, options,
-            path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
-            level + 1, inArray);
+          arg,
+          value[prop]!,
+          desc,
+          options,
+          path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
+          level + 1,
+          inArray
+        );
       }
     }
   } else if (value === undefined) {
-    throw new Error(`${
-        invalidArgumentMessage(
-            arg, desc)} Cannot use "undefined" as a Firestore value${
-        fieldPathMessage}.`);
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        desc
+      )} Cannot use "undefined" as a Firestore value${fieldPathMessage}.`
+    );
   } else if (value instanceof DeleteTransform) {
     if (inArray) {
-      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
-          value.methodName}() cannot be used inside of an array${
-          fieldPathMessage}.`);
+      throw new Error(
+        `${invalidArgumentMessage(arg, desc)} ${
+          value.methodName
+        }() cannot be used inside of an array${fieldPathMessage}.`
+      );
     } else if (
-        (options.allowDeletes === 'root' && level !== 0) ||
-        options.allowDeletes === 'none') {
-      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
-          value
-              .methodName}() must appear at the top-level and can only be used in update() or set() with {merge:true}${
-          fieldPathMessage}.`);
+      (options.allowDeletes === 'root' && level !== 0) ||
+      options.allowDeletes === 'none'
+    ) {
+      throw new Error(
+        `${invalidArgumentMessage(arg, desc)} ${
+          value.methodName
+        }() must appear at the top-level and can only be used in update() or set() with {merge:true}${fieldPathMessage}.`
+      );
     }
   } else if (value instanceof FieldTransform) {
     if (inArray) {
-      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
-          value.methodName}() cannot be used inside of an array${
-          fieldPathMessage}.`);
+      throw new Error(
+        `${invalidArgumentMessage(arg, desc)} ${
+          value.methodName
+        }() cannot be used inside of an array${fieldPathMessage}.`
+      );
     } else if (!options.allowTransforms) {
-      throw new Error(`${invalidArgumentMessage(arg, desc)} ${
-          value.methodName}() can only be used in set(), create() or update()${
-          fieldPathMessage}.`);
+      throw new Error(
+        `${invalidArgumentMessage(arg, desc)} ${
+          value.methodName
+        }() can only be used in set(), create() or update()${fieldPathMessage}.`
+      );
     }
   } else if (value instanceof FieldPath) {
-    throw new Error(`${
-        invalidArgumentMessage(
-            arg,
-            desc)} Cannot use object of type "FieldPath" as a Firestore value${
-        fieldPathMessage}.`);
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        desc
+      )} Cannot use object of type "FieldPath" as a Firestore value${fieldPathMessage}.`
+    );
   } else if (value instanceof DocumentReference) {
     // Ok.
   } else if (value instanceof GeoPoint) {

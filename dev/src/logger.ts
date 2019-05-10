@@ -31,15 +31,19 @@ let logFunction = (msg: string) => {};
  * @private
  */
 export function logger(
-    methodName: string, requestTag: string|null, logMessage: string,
-    ...additionalArgs: unknown[]): void {
+  methodName: string,
+  requestTag: string | null,
+  logMessage: string,
+  ...additionalArgs: unknown[]
+): void {
   requestTag = requestTag || '#####';
 
   const formattedMessage = util.format(logMessage, ...additionalArgs);
   const time = new Date().toISOString();
   logFunction(
-      `Firestore (${libVersion}) ${time} ${requestTag} [${methodName}]: ` +
-      formattedMessage);
+    `Firestore (${libVersion}) ${time} ${requestTag} [${methodName}]: ` +
+      formattedMessage
+  );
 }
 
 /**

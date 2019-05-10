@@ -40,8 +40,9 @@ export class ClientPool<T> {
    * are required.
    */
   constructor(
-      private readonly concurrentOperationLimit: number,
-      private readonly clientFactory: () => T) {}
+    private readonly concurrentOperationLimit: number,
+    private readonly clientFactory: () => T
+  ) {}
 
   /**
    * Returns an already existing client if it has less than the maximum number
@@ -50,7 +51,7 @@ export class ClientPool<T> {
    * @private
    */
   acquire(): T {
-    let selectedClient: T|null = null;
+    let selectedClient: T | null = null;
     let selectedRequestCount = 0;
 
     this.activeClients.forEach((requestCount, client) => {
@@ -63,8 +64,9 @@ export class ClientPool<T> {
     if (!selectedClient) {
       selectedClient = this.clientFactory();
       assert(
-          !this.activeClients.has(selectedClient),
-          'The provided client factory returned an existing instance');
+        !this.activeClients.has(selectedClient),
+        'The provided client factory returned an existing instance'
+      );
     }
 
     this.activeClients.set(selectedClient, selectedRequestCount + 1);
@@ -134,14 +136,14 @@ export class ClientPool<T> {
     const client = this.acquire();
 
     return op(client)
-        .catch(err => {
-          this.release(client);
-          return Promise.reject(err);
-        })
-        .then(res => {
-          this.release(client);
-          return res;
-        });
+      .catch(err => {
+        this.release(client);
+        return Promise.reject(err);
+      })
+      .then(res => {
+        this.release(client);
+        return res;
+      });
   }
 
   /**

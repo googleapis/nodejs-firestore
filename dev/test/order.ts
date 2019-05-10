@@ -18,7 +18,12 @@ import {expect} from 'chai';
 
 import {google} from '../protos/firestore_proto_api';
 
-import {Firestore, QueryDocumentSnapshot, setLogFunction, Timestamp} from '../src';
+import {
+  Firestore,
+  QueryDocumentSnapshot,
+  setLogFunction,
+  Timestamp,
+} from '../src';
 import {GeoPoint} from '../src';
 import {DocumentReference} from '../src';
 import * as order from '../src/order';
@@ -51,8 +56,12 @@ describe('Order', () => {
   }
 
   function resource(pathString: string): api.IValue {
-    return wrap(new DocumentReference(
-        firestore, QualifiedResourcePath.fromSlashSeparatedString(pathString)));
+    return wrap(
+      new DocumentReference(
+        firestore,
+        QualifiedResourcePath.fromSlashSeparatedString(pathString)
+      )
+    );
   }
 
   function geopoint(lat: number, lng: number): api.IValue {
@@ -74,43 +83,64 @@ describe('Order', () => {
   it('throws on invalid value', () => {
     expect(() => {
       order.compare(
-          {valueType: 'foo'} as InvalidApiUsage,
-          {valueType: 'foo'} as InvalidApiUsage);
+        {valueType: 'foo'} as InvalidApiUsage,
+        {valueType: 'foo'} as InvalidApiUsage
+      );
     }).to.throw('Unexpected value type: foo');
   });
 
   it('throws on invalid blob', () => {
     expect(() => {
       order.compare(
-          {
-            bytesValue: new Uint8Array([1, 2, 3]),
-          },
-          {
-            bytesValue: new Uint8Array([1, 2, 3]),
-          });
+        {
+          bytesValue: new Uint8Array([1, 2, 3]),
+        },
+        {
+          bytesValue: new Uint8Array([1, 2, 3]),
+        }
+      );
     }).to.throw('Blobs can only be compared if they are Buffers');
   });
 
   it('compares document snapshots by name', () => {
     const docs = [
       new QueryDocumentSnapshot(
-          firestore.doc('col/doc3'), {}, Timestamp.now(), Timestamp.now(),
-          Timestamp.now()),
+        firestore.doc('col/doc3'),
+        {},
+        Timestamp.now(),
+        Timestamp.now(),
+        Timestamp.now()
+      ),
       new QueryDocumentSnapshot(
-          firestore.doc('col/doc2'), {}, Timestamp.now(), Timestamp.now(),
-          Timestamp.now()),
+        firestore.doc('col/doc2'),
+        {},
+        Timestamp.now(),
+        Timestamp.now(),
+        Timestamp.now()
+      ),
       new QueryDocumentSnapshot(
-          firestore.doc('col/doc2'), {}, Timestamp.now(), Timestamp.now(),
-          Timestamp.now()),
+        firestore.doc('col/doc2'),
+        {},
+        Timestamp.now(),
+        Timestamp.now(),
+        Timestamp.now()
+      ),
       new QueryDocumentSnapshot(
-          firestore.doc('col/doc1'), {}, Timestamp.now(), Timestamp.now(),
-          Timestamp.now()),
+        firestore.doc('col/doc1'),
+        {},
+        Timestamp.now(),
+        Timestamp.now(),
+        Timestamp.now()
+      ),
     ];
 
     docs.sort(firestore.collection('col').comparator());
 
     expect(docs.map(doc => doc.id)).to.deep.eq([
-      'doc1', 'doc2', 'doc2', 'doc3'
+      'doc1',
+      'doc2',
+      'doc2',
+      'doc3',
     ]);
   });
 
@@ -213,20 +243,40 @@ describe('Order', () => {
         for (let j = 0; j < groups.length; j++) {
           for (const right of groups[j]) {
             let expected = order.primitiveComparator(i, j);
-            expect(order.compare(left, right))
-                .to.equal(
-                    expected,
-                    'comparing ' + left + ' (' + JSON.stringify(left) +
-                        ') to ' + right + ' (' + JSON.stringify(right) +
-                        ') at (' + i + ', ' + j + ')');
+            expect(order.compare(left, right)).to.equal(
+              expected,
+              'comparing ' +
+                left +
+                ' (' +
+                JSON.stringify(left) +
+                ') to ' +
+                right +
+                ' (' +
+                JSON.stringify(right) +
+                ') at (' +
+                i +
+                ', ' +
+                j +
+                ')'
+            );
 
             expected = order.primitiveComparator(j, i);
-            expect(order.compare(right, left))
-                .to.equal(
-                    expected,
-                    'comparing ' + right + ' (' + JSON.stringify(right) +
-                        ') to ' + left + ' (' + JSON.stringify(left) +
-                        ') at (' + j + ', ' + i + ')');
+            expect(order.compare(right, left)).to.equal(
+              expected,
+              'comparing ' +
+                right +
+                ' (' +
+                JSON.stringify(right) +
+                ') to ' +
+                left +
+                ' (' +
+                JSON.stringify(left) +
+                ') at (' +
+                j +
+                ', ' +
+                i +
+                ')'
+            );
           }
         }
       }

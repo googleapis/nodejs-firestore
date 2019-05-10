@@ -77,12 +77,13 @@ class FirestoreClient {
 
     // Ensure that options include the service address and port.
     opts = Object.assign(
-        {
-          clientConfig: {},
-          port: this.constructor.port,
-          servicePath: this.constructor.servicePath,
-        },
-        opts);
+      {
+        clientConfig: {},
+        port: this.constructor.port,
+        servicePath: this.constructor.servicePath,
+      },
+      opts
+    );
 
     // Create a `gaxGrpc` object, with any grpc-specific options
     // sent to the client.
@@ -105,40 +106,53 @@ class FirestoreClient {
 
     // Load the applicable protos.
     const protos = merge(
-        {},
-        gaxGrpc.loadProto(
-            path.join(__dirname, '..', '..', 'protos'),
-            'google/firestore/v1beta1/firestore.proto'));
+      {},
+      gaxGrpc.loadProto(
+        path.join(__dirname, '..', '..', 'protos'),
+        'google/firestore/v1beta1/firestore.proto'
+      )
+    );
 
     // This API contains "path templates"; forward-slash-separated
     // identifiers to uniquely identify resources within the API.
     // Create useful helper objects for these.
     this._pathTemplates = {
-      databaseRootPathTemplate:
-          new gax.PathTemplate('projects/{project}/databases/{database}'),
+      databaseRootPathTemplate: new gax.PathTemplate(
+        'projects/{project}/databases/{database}'
+      ),
       documentRootPathTemplate: new gax.PathTemplate(
-          'projects/{project}/databases/{database}/documents'),
+        'projects/{project}/databases/{database}/documents'
+      ),
       documentPathPathTemplate: new gax.PathTemplate(
-          'projects/{project}/databases/{database}/documents/{document_path=**}'),
+        'projects/{project}/databases/{database}/documents/{document_path=**}'
+      ),
       anyPathPathTemplate: new gax.PathTemplate(
-          'projects/{project}/databases/{database}/documents/{document}/{any_path=**}'),
+        'projects/{project}/databases/{database}/documents/{document}/{any_path=**}'
+      ),
     };
 
     // Some of the methods on this service return "paged" results,
     // (e.g. 50 results at a time, with tokens to get subsequent
     // pages). Denote the keys used for pagination and results.
     this._descriptors.page = {
-      listDocuments:
-          new gax.PageDescriptor('pageToken', 'nextPageToken', 'documents'),
-      listCollectionIds:
-          new gax.PageDescriptor('pageToken', 'nextPageToken', 'collectionIds'),
+      listDocuments: new gax.PageDescriptor(
+        'pageToken',
+        'nextPageToken',
+        'documents'
+      ),
+      listCollectionIds: new gax.PageDescriptor(
+        'pageToken',
+        'nextPageToken',
+        'collectionIds'
+      ),
     };
 
     // Some of the methods on this service provide streaming responses.
     // Provide descriptors for these.
     this._descriptors.stream = {
-      batchGetDocuments:
-          new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
+      batchGetDocuments: new gax.StreamDescriptor(
+        gax.StreamType.SERVER_STREAMING
+      ),
       runQuery: new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
       write: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
       listen: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
@@ -146,8 +160,11 @@ class FirestoreClient {
 
     // Put together the default options sent with requests.
     const defaults = gaxGrpc.constructSettings(
-        'google.firestore.v1beta1.Firestore', gapicConfig, opts.clientConfig,
-        {'x-goog-api-client': clientHeader.join(' ')});
+      'google.firestore.v1beta1.Firestore',
+      gapicConfig,
+      opts.clientConfig,
+      {'x-goog-api-client': clientHeader.join(' ')}
+    );
 
     // Set up a dictionary of "inner API calls"; the core implementation
     // of calling the API is handled in `google-gax`, with this code
@@ -156,8 +173,10 @@ class FirestoreClient {
 
     // Put together the "service stub" for
     // google.firestore.v1beta1.Firestore.
-    const firestoreStub =
-        gaxGrpc.createStub(protos.google.firestore.v1beta1.Firestore, opts);
+    const firestoreStub = gaxGrpc.createStub(
+      protos.google.firestore.v1beta1.Firestore,
+      opts
+    );
 
     // Iterate over each of the methods that the service provides
     // and create an API call method for each.
@@ -178,13 +197,17 @@ class FirestoreClient {
     ];
     for (const methodName of firestoreStubMethods) {
       this._innerApiCalls[methodName] = gax.createApiCall(
-          firestoreStub.then(stub => function() {
-            const args = Array.prototype.slice.call(arguments, 0);
-            return stub[methodName].apply(stub, args);
-          }),
-          defaults[methodName],
-          this._descriptors.page[methodName] ||
-              this._descriptors.stream[methodName]);
+        firestoreStub.then(
+          stub =>
+            function() {
+              const args = Array.prototype.slice.call(arguments, 0);
+              return stub[methodName].apply(stub, args);
+            }
+        ),
+        defaults[methodName],
+        this._descriptors.page[methodName] ||
+          this._descriptors.stream[methodName]
+      );
     }
   }
 
@@ -528,8 +551,11 @@ class FirestoreClient {
     options = options || {};
 
     return this._descriptors.page.listDocuments.createStream(
-        this._innerApiCalls.listDocuments, request, options);
-  };
+      this._innerApiCalls.listDocuments,
+      request,
+      options
+    );
+  }
 
   /**
    * Creates a new document.
@@ -1279,8 +1305,11 @@ class FirestoreClient {
     options = options || {};
 
     return this._descriptors.page.listCollectionIds.createStream(
-        this._innerApiCalls.listCollectionIds, request, options);
-  };
+      this._innerApiCalls.listCollectionIds,
+      request,
+      options
+    );
+  }
 
   // --------------------
   // -- Path templates --
@@ -1357,7 +1386,7 @@ class FirestoreClient {
    */
   matchProjectFromDatabaseRootName(databaseRootName) {
     return this._pathTemplates.databaseRootPathTemplate.match(databaseRootName)
-        .project;
+      .project;
   }
 
   /**
@@ -1369,7 +1398,7 @@ class FirestoreClient {
    */
   matchDatabaseFromDatabaseRootName(databaseRootName) {
     return this._pathTemplates.databaseRootPathTemplate.match(databaseRootName)
-        .database;
+      .database;
   }
 
   /**
@@ -1381,7 +1410,7 @@ class FirestoreClient {
    */
   matchProjectFromDocumentRootName(documentRootName) {
     return this._pathTemplates.documentRootPathTemplate.match(documentRootName)
-        .project;
+      .project;
   }
 
   /**
@@ -1393,7 +1422,7 @@ class FirestoreClient {
    */
   matchDatabaseFromDocumentRootName(documentRootName) {
     return this._pathTemplates.documentRootPathTemplate.match(documentRootName)
-        .database;
+      .database;
   }
 
   /**
@@ -1405,7 +1434,7 @@ class FirestoreClient {
    */
   matchProjectFromDocumentPathName(documentPathName) {
     return this._pathTemplates.documentPathPathTemplate.match(documentPathName)
-        .project;
+      .project;
   }
 
   /**
@@ -1417,7 +1446,7 @@ class FirestoreClient {
    */
   matchDatabaseFromDocumentPathName(documentPathName) {
     return this._pathTemplates.documentPathPathTemplate.match(documentPathName)
-        .database;
+      .database;
   }
 
   /**
@@ -1429,7 +1458,7 @@ class FirestoreClient {
    */
   matchDocumentPathFromDocumentPathName(documentPathName) {
     return this._pathTemplates.documentPathPathTemplate.match(documentPathName)
-        .document_path;
+      .document_path;
   }
 
   /**
@@ -1476,6 +1505,5 @@ class FirestoreClient {
     return this._pathTemplates.anyPathPathTemplate.match(anyPathName).any_path;
   }
 }
-
 
 module.exports = FirestoreClient;

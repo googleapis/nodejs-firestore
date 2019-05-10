@@ -62,5 +62,5 @@
  * @see [google.longrunning.Operation definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/longrunning/operations.proto}
  */
 const Operation = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
