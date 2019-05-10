@@ -57,7 +57,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = proto.google.firestore.v1;
-import {PassThrough} from 'stream';
+import {Transform} from 'stream';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1701,7 +1701,7 @@ export class Query {
   stream(): NodeJS.ReadableStream {
     const responseStream = this._stream();
 
-    const transform = new PassThrough({
+    const transform = new Transform({
       objectMode: true,
       transform(chunk, encoding, callback) {
         // Only send chunks with documents.
@@ -1809,7 +1809,7 @@ export class Query {
     const tag = requestTag();
     const self = this;
 
-    const stream = new PassThrough({
+    const stream = new Transform({
       objectMode: true,
       transform(proto, enc, callback) {
         const readTime = Timestamp.fromProto(proto.readTime);

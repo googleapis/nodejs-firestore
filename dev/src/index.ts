@@ -16,7 +16,7 @@
 
 import * as bun from 'bun';
 import {CallOptions} from 'google-gax';
-import {PassThrough, Transform} from 'stream';
+import {Transform} from 'stream';
 
 import {google} from '../protos/firestore_proto_api';
 import {fieldsFromJson, timestampFromJson} from './convert';
@@ -1372,7 +1372,7 @@ export class Firestore {
             request
           );
           const stream = gapicClient[methodName](request, callOptions);
-          const logStream = new PassThrough({
+          const logStream = new Transform({
             objectMode: true,
             transform(chunk, enc, callback) {
               logger(
@@ -1426,7 +1426,7 @@ export class Firestore {
       return Promise.resolve().then(() => {
         logger('Firestore.readWriteStream', requestTag, 'Opening stream');
         const requestStream = gapicClient[methodName](callOptions);
-        const logStream = new PassThrough({
+        const logStream = new Transform({
           objectMode: true,
           transform(chunk, enc, callback) {
             logger(
