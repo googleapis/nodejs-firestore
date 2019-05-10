@@ -17,8 +17,13 @@
 import {expect} from 'chai';
 
 import {DocumentReference, Firestore, setLogFunction} from '../src';
-import {ApiOverride, createInstance, DATABASE_ROOT, document, InvalidApiUsage} from './util/helpers';
-
+import {
+  ApiOverride,
+  createInstance,
+  DATABASE_ROOT,
+  document,
+  InvalidApiUsage,
+} from './util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(() => {});
@@ -41,21 +46,21 @@ describe('Collection interface', () => {
     expect(collectionRef.id).to.equal('colId');
     expect(documentRef.id).to.equal('docId');
 
-    expect(() => collectionRef.doc(false as InvalidApiUsage))
-        .to.throw(
-            'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
-    expect(() => collectionRef.doc(null as InvalidApiUsage))
-        .to.throw(
-            'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
-    expect(() => collectionRef.doc(''))
-        .to.throw(
-            'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
-    expect(() => collectionRef.doc(undefined))
-        .to.throw(
-            'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
-    expect(() => collectionRef.doc('doc/coll'))
-        .to.throw(
-            'Value for argument "documentPath" must point to a document, but was "doc\/coll". Your path does not contain an even number of components.');
+    expect(() => collectionRef.doc(false as InvalidApiUsage)).to.throw(
+      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+    );
+    expect(() => collectionRef.doc(null as InvalidApiUsage)).to.throw(
+      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+    );
+    expect(() => collectionRef.doc('')).to.throw(
+      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+    );
+    expect(() => collectionRef.doc(undefined)).to.throw(
+      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+    );
+    expect(() => collectionRef.doc('doc/coll')).to.throw(
+      'Value for argument "documentPath" must point to a document, but was "doc/coll". Your path does not contain an even number of components.'
+    );
 
     documentRef = collectionRef.doc('docId/colId/docId');
     expect(documentRef).to.be.an.instanceOf(DocumentReference);
@@ -80,8 +85,7 @@ describe('Collection interface', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         // Verify that the document name uses an auto-generated id.
-        const docIdRe =
-            /^projects\/test-project\/databases\/\(default\)\/documents\/collectionId\/[a-zA-Z0-9]{20}$/;
+        const docIdRe = /^projects\/test-project\/databases\/\(default\)\/documents\/collectionId\/[a-zA-Z0-9]{20}$/;
         expect(request.writes![0].update!.name).to.match(docIdRe);
         delete request.writes![0].update!.name;
 
@@ -114,7 +118,7 @@ describe('Collection interface', () => {
             },
           ],
         });
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
@@ -137,19 +141,21 @@ describe('Collection interface', () => {
           parent: `${DATABASE_ROOT}/documents/a/b`,
           collectionId: 'c',
           showMissing: true,
-          mask: {fieldPaths: []}
+          mask: {fieldPaths: []},
         });
 
         callback(null, [document('first'), document('second')]);
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
-      return firestore.collection('a/b/c').listDocuments().then(
-          documentRefs => {
-            expect(documentRefs[0].id).to.equal('first');
-            expect(documentRefs[1].id).to.equal('second');
-          });
+      return firestore
+        .collection('a/b/c')
+        .listDocuments()
+        .then(documentRefs => {
+          expect(documentRefs[0].id).to.equal('first');
+          expect(documentRefs[1].id).to.equal('second');
+        });
     });
   });
 

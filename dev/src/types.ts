@@ -23,9 +23,9 @@ import api = google.firestore.v1;
 /**
  * A map in the format of the Proto API
  */
-export type ApiMapValue = {
-  [k: string]: google.firestore.v1.IValue
-};
+export interface ApiMapValue {
+  [k: string]: google.firestore.v1.IValue;
+}
 
 // We don't have type information for the JavaScript GapicClient.
 // tslint:disable-next-line:no-any
@@ -79,25 +79,25 @@ export interface Settings {
   timestampsInSnapshots?: boolean;
 
   // tslint:disable-next-line:no-any
-  [key: string]: any;  // Accept other properties, such as GRPC settings.
+  [key: string]: any; // Accept other properties, such as GRPC settings.
 }
 
 /**
  * Document data (for use with `DocumentReference.set()`) consists of fields
  * mapped to values.
  */
-export type DocumentData = {
-  [field: string]: unknown
-};
+export interface DocumentData {
+  [field: string]: unknown;
+}
 
 /**
  * Update data (for use with `DocumentReference.update()`) consists of field
  * paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that contain dots
  * reference nested fields within the document.
  */
-export type UpdateData = {
-  [fieldPath: string]: unknown
-};
+export interface UpdateData {
+  [fieldPath: string]: unknown;
+}
 
 /**
  * Update data that has been resolved to a mapping of FieldPaths to values.
@@ -108,13 +108,13 @@ export type UpdateMap = Map<FieldPath, unknown>;
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
  * (descending or ascending).
  */
-export type OrderByDirection = 'desc'|'asc';
+export type OrderByDirection = 'desc' | 'asc';
 
 /**
  * Filter conditions in a `Query.where()` clause are specified using the
  * strings '<', '<=', '==', '>=', '>', and 'array-contains'.
  */
-export type WhereFilterOp = '<'|'<='|'=='|'>='|'>'|'array-contains';
+export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains';
 
 /**
  * An options object that configures conditional behavior of `update()` and
@@ -151,7 +151,7 @@ export interface SetOptions {
    * It is an error to pass a SetOptions object to a set() call that is
    * missing a value for any of the fields specified here.
    */
-  readonly mergeFields?: Array<string|FieldPath>;
+  readonly mergeFields?: Array<string | FieldPath>;
 }
 
 /**
@@ -167,7 +167,7 @@ export interface ReadOptions {
    * Adding a field mask does not filter results. Documents do not need to
    * contain values for all the fields in the mask to be part of the result set.
    */
-  readonly fieldMask?: Array<string|FieldPath>;
+  readonly fieldMask?: Array<string | FieldPath>;
 }
 
 /**
@@ -176,7 +176,7 @@ export interface ReadOptions {
  */
 export interface ValidationOptions {
   /** At what level field deletes are supported. */
-  allowDeletes: 'none'|'root'|'all';
+  allowDeletes: 'none' | 'root' | 'all';
 
   /** Whether server transforms are supported. */
   allowTransforms: boolean;

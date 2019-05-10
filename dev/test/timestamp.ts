@@ -20,7 +20,11 @@ import * as through2 from 'through2';
 import {google} from '../protos/firestore_proto_api';
 
 import * as Firestore from '../src/index';
-import {ApiOverride, createInstance as createInstanceHelper, document} from '../test/util/helpers';
+import {
+  ApiOverride,
+  createInstance as createInstanceHelper,
+  document,
+} from '../test/util/helpers';
 
 import api = google.firestore.v1;
 
@@ -34,7 +38,7 @@ function createInstance(opts: {}, document: api.IDocument) {
       });
 
       return stream;
-    }
+    },
   };
 
   return createInstanceHelper(overrides, opts);
@@ -55,10 +59,13 @@ describe('timestamps', () => {
   it('returned by default', () => {
     return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
       const expected = new Firestore.Timestamp(-14182920, 123000123);
-      return firestore.doc('collectionId/documentId').get().then(res => {
-        expect(res.data()!['moonLanding'].isEqual(expected)).to.be.true;
-        expect(res.get('moonLanding')!.isEqual(expected)).to.be.true;
-      });
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(res => {
+          expect(res.data()!['moonLanding'].isEqual(expected)).to.be.true;
+          expect(res.get('moonLanding')!.isEqual(expected)).to.be.true;
+        });
     });
   });
 
@@ -69,42 +76,56 @@ describe('timestamps', () => {
     console.error = () => {};
 
     return createInstance(
-               {timestampsInSnapshots: false}, DOCUMENT_WITH_TIMESTAMP)
-        .then(firestore => {
-          return firestore.doc('collectionId/documentId').get().then(res => {
-            expect(res.data()!['moonLanding']).to.be.instanceOf(Date);
-            expect(res.get('moonLanding')).to.be.instanceOf(Date);
-            console.error = oldErrorLog;
-          });
+      {timestampsInSnapshots: false},
+      DOCUMENT_WITH_TIMESTAMP
+    ).then(firestore => {
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(res => {
+          expect(res.data()!['moonLanding']).to.be.instanceOf(Date);
+          expect(res.get('moonLanding')).to.be.instanceOf(Date);
+          console.error = oldErrorLog;
         });
+    });
   });
 
   it('retain seconds and nanoseconds', () => {
     return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
-      return firestore.doc('collectionId/documentId').get().then(res => {
-        const timestamp = res.get('moonLanding');
-        expect(timestamp.seconds).to.equal(-14182920);
-        expect(timestamp.nanoseconds).to.equal(123000123);
-      });
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(res => {
+          const timestamp = res.get('moonLanding');
+          expect(timestamp.seconds).to.equal(-14182920);
+          expect(timestamp.nanoseconds).to.equal(123000123);
+        });
     });
   });
 
   it('convert to date', () => {
     return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
-      return firestore.doc('collectionId/documentId').get().then(res => {
-        const timestamp = res.get('moonLanding');
-        expect(new Date(-14182920 * 1000 + 123).getTime())
-            .to.equal(timestamp.toDate().getTime());
-      });
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(res => {
+          const timestamp = res.get('moonLanding');
+          expect(new Date(-14182920 * 1000 + 123).getTime()).to.equal(
+            timestamp.toDate().getTime()
+          );
+        });
     });
   });
 
   it('convert to millis', () => {
     return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
-      return firestore.doc('collectionId/documentId').get().then(res => {
-        const timestamp = res.get('moonLanding');
-        expect(-14182920 * 1000 + 123).to.equal(timestamp.toMillis());
-      });
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(res => {
+          const timestamp = res.get('moonLanding');
+          expect(-14182920 * 1000 + 123).to.equal(timestamp.toMillis());
+        });
     });
   });
 
@@ -112,9 +133,12 @@ describe('timestamps', () => {
     return createInstance({}, DOCUMENT_WITH_EMPTY_TIMESTAMP).then(firestore => {
       const expected = new Firestore.Timestamp(0, 0);
 
-      return firestore.doc('collectionId/documentId').get().then(res => {
-        expect(res.get('moonLanding').isEqual(expected)).to.be.true;
-      });
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(res => {
+          expect(res.get('moonLanding').isEqual(expected)).to.be.true;
+        });
     });
   });
 
@@ -131,18 +155,20 @@ describe('timestamps', () => {
   });
 
   it('validates nanoseconds', () => {
-    expect(() => new Firestore.Timestamp(0.1, 0))
-        .to.throw('Value for argument "seconds" is not a valid integer.');
+    expect(() => new Firestore.Timestamp(0.1, 0)).to.throw(
+      'Value for argument "seconds" is not a valid integer.'
+    );
 
-    expect(() => new Firestore.Timestamp(0, 0.1))
-        .to.throw('Value for argument "nanoseconds" is not a valid integer.');
+    expect(() => new Firestore.Timestamp(0, 0.1)).to.throw(
+      'Value for argument "nanoseconds" is not a valid integer.'
+    );
 
-    expect(() => new Firestore.Timestamp(0, -1))
-        .to.throw(
-            'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: -1');
+    expect(() => new Firestore.Timestamp(0, -1)).to.throw(
+      'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: -1'
+    );
 
-    expect(() => new Firestore.Timestamp(0, 1000000000))
-        .to.throw(
-            'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: 1000000000');
+    expect(() => new Firestore.Timestamp(0, 1000000000)).to.throw(
+      'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: 1000000000'
+    );
   });
 });

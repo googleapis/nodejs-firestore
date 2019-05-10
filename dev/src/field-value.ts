@@ -211,8 +211,10 @@ export abstract class FieldTransform extends FieldValue {
    * @param fieldPath The field path to apply this transformation to.
    * @return The 'FieldTransform' proto message.
    */
-  abstract toProto(serializer: Serializer, fieldPath: FieldPath):
-      api.DocumentTransform.IFieldTransform;
+  abstract toProto(
+    serializer: Serializer,
+    fieldPath: FieldPath
+  ): api.DocumentTransform.IFieldTransform;
 }
 
 /**
@@ -255,7 +257,8 @@ export class DeleteTransform extends FieldTransform {
 
   toProto(serializer: Serializer, fieldPath: FieldPath): never {
     throw new Error(
-        'FieldValue.delete() should not be included in a FieldTransform');
+      'FieldValue.delete() should not be included in a FieldTransform'
+    );
   }
 }
 
@@ -300,8 +303,10 @@ class ServerTimestampTransform extends FieldTransform {
 
   validate(): void {}
 
-  toProto(serializer: Serializer, fieldPath: FieldPath):
-      api.DocumentTransform.IFieldTransform {
+  toProto(
+    serializer: Serializer,
+    fieldPath: FieldPath
+  ): api.DocumentTransform.IFieldTransform {
     return {
       fieldPath: fieldPath.formattedName,
       setToServerValue: 'REQUEST_TIME',
@@ -345,17 +350,20 @@ class NumericIncrementTransform extends FieldTransform {
     validateNumber('FieldValue.increment()', this.operand);
   }
 
-  toProto(serializer: Serializer, fieldPath: FieldPath):
-      api.DocumentTransform.IFieldTransform {
+  toProto(
+    serializer: Serializer,
+    fieldPath: FieldPath
+  ): api.DocumentTransform.IFieldTransform {
     const encodedOperand = serializer.encodeValue(this.operand)!;
     return {fieldPath: fieldPath.formattedName, increment: encodedOperand};
   }
 
   isEqual(other: FieldValue): boolean {
     return (
-        this === other ||
-        (other instanceof NumericIncrementTransform &&
-         this.operand === other.operand));
+      this === other ||
+      (other instanceof NumericIncrementTransform &&
+        this.operand === other.operand)
+    );
   }
 }
 
@@ -395,20 +403,23 @@ class ArrayUnionTransform extends FieldTransform {
     }
   }
 
-  toProto(serializer: Serializer, fieldPath: FieldPath):
-      api.DocumentTransform.IFieldTransform {
+  toProto(
+    serializer: Serializer,
+    fieldPath: FieldPath
+  ): api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
       fieldPath: fieldPath.formattedName,
-      appendMissingElements: encodedElements
+      appendMissingElements: encodedElements,
     };
   }
 
   isEqual(other: FieldValue): boolean {
     return (
-        this === other ||
-        (other instanceof ArrayUnionTransform &&
-         deepEqual(this.elements, other.elements, {strict: true})));
+      this === other ||
+      (other instanceof ArrayUnionTransform &&
+        deepEqual(this.elements, other.elements, {strict: true}))
+    );
   }
 }
 
@@ -448,20 +459,23 @@ class ArrayRemoveTransform extends FieldTransform {
     }
   }
 
-  toProto(serializer: Serializer, fieldPath: FieldPath):
-      api.DocumentTransform.IFieldTransform {
+  toProto(
+    serializer: Serializer,
+    fieldPath: FieldPath
+  ): api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
       fieldPath: fieldPath.formattedName,
-      removeAllFromArray: encodedElements
+      removeAllFromArray: encodedElements,
     };
   }
 
   isEqual(other: FieldValue): boolean {
     return (
-        this === other ||
-        (other instanceof ArrayRemoveTransform &&
-         deepEqual(this.elements, other.elements, {strict: true})));
+      this === other ||
+      (other instanceof ArrayRemoveTransform &&
+        deepEqual(this.elements, other.elements, {strict: true}))
+    );
   }
 }
 
@@ -473,10 +487,14 @@ class ArrayRemoveTransform extends FieldTransform {
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The value to validate.
  */
-function validateArrayElement(arg: string|number, value: unknown): void {
+function validateArrayElement(arg: string | number, value: unknown): void {
   validateUserInput(
-      arg, value, 'array element',
-      /*path=*/{allowDeletes: 'none', allowTransforms: false},
-      /*path=*/undefined,
-      /*level=*/0, /*inArray=*/true);
+    arg,
+    value,
+    'array element',
+    /*path=*/ {allowDeletes: 'none', allowTransforms: false},
+    /*path=*/ undefined,
+    /*level=*/ 0,
+    /*inArray=*/ true
+  );
 }

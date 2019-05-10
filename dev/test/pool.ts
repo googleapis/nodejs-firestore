@@ -60,8 +60,9 @@ describe('Client pool', () => {
 
     const operationPromises = deferredPromises(5);
 
-    const completionPromise =
-        clientPool.run(() => operationPromises[0].promise);
+    const completionPromise = clientPool.run(
+      () => operationPromises[0].promise
+    );
     expect(clientPool.size).to.equal(1);
     clientPool.run(() => operationPromises[1].promise);
     expect(clientPool.size).to.equal(1);
@@ -125,10 +126,11 @@ describe('Client pool', () => {
 
     operationPromises.forEach(deferred => deferred.reject());
 
-    return Promise.all(completionPromises.map(p => p.catch(() => {})))
-        .then(() => {
-          expect(clientPool.size).to.equal(1);
-        });
+    return Promise.all(completionPromises.map(p => p.catch(() => {}))).then(
+      () => {
+        expect(clientPool.size).to.equal(1);
+      }
+    );
   });
 
   it('forwards success', () => {

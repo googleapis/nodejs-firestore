@@ -16,7 +16,14 @@
 
 import {expect} from 'chai';
 
-import {FieldValue, Firestore, setLogFunction, Timestamp, WriteBatch, WriteResult} from '../src';
+import {
+  FieldValue,
+  Firestore,
+  setLogFunction,
+  Timestamp,
+  WriteBatch,
+  WriteResult,
+} from '../src';
 import {ApiOverride, createInstance, InvalidApiUsage} from './util/helpers';
 
 const REQUEST_TIME = 'REQUEST_TIME';
@@ -38,15 +45,17 @@ describe('set() method', () => {
   });
 
   it('requires document name', () => {
-    expect(() => (writeBatch as InvalidApiUsage).set())
-        .to.throw(
-            'Value for argument "documentRef" is not a valid DocumentReference.');
+    expect(() => (writeBatch as InvalidApiUsage).set()).to.throw(
+      'Value for argument "documentRef" is not a valid DocumentReference.'
+    );
   });
 
   it('requires object', () => {
-    expect(() => (writeBatch as InvalidApiUsage).set(firestore.doc('sub/doc')))
-        .to.throw(
-            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
+    expect(() =>
+      (writeBatch as InvalidApiUsage).set(firestore.doc('sub/doc'))
+    ).to.throw(
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+    );
   });
 
   it('accepts preconditions', () => {
@@ -66,9 +75,9 @@ describe('delete() method', () => {
   });
 
   it('requires document name', () => {
-    expect(() => (writeBatch as InvalidApiUsage).delete())
-        .to.throw(
-            'Value for argument "documentRef" is not a valid DocumentReference.');
+    expect(() => (writeBatch as InvalidApiUsage).delete()).to.throw(
+      'Value for argument "documentRef" is not a valid DocumentReference.'
+    );
   });
 
   it('accepts preconditions', () => {
@@ -90,23 +99,25 @@ describe('update() method', () => {
   });
 
   it('requires document name', () => {
-    expect(() => writeBatch.update({} as InvalidApiUsage, {}))
-        .to.throw(
-            'Value for argument "documentRef" is not a valid DocumentReference.');
+    expect(() => writeBatch.update({} as InvalidApiUsage, {})).to.throw(
+      'Value for argument "documentRef" is not a valid DocumentReference.'
+    );
   });
 
   it('requires object', () => {
     expect(() => {
       writeBatch.update(firestore.doc('sub/doc'), firestore.doc('sub/doc'));
-    })
-        .to.throw(
-            'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore document. Detected an object of type "DocumentReference" that doesn\'t match the expected instance. Please ensure that the Firestore types you are using are from the same NPM package.');
+    }).to.throw(
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore document. Detected an object of type "DocumentReference" that doesn\'t match the expected instance. Please ensure that the Firestore types you are using are from the same NPM package.'
+    );
   });
 
   it('accepts preconditions', () => {
     writeBatch.update(
-        firestore.doc('sub/doc'), {foo: 'bar'},
-        {lastUpdateTime: new Timestamp(479978400, 123000000)});
+      firestore.doc('sub/doc'),
+      {foo: 'bar'},
+      {lastUpdateTime: new Timestamp(479978400, 123000000)}
+    );
   });
 });
 
@@ -122,23 +133,22 @@ describe('create() method', () => {
   });
 
   it('requires document name', () => {
-    expect(() => (writeBatch as InvalidApiUsage).create())
-        .to.throw(
-            'Value for argument "documentRef" is not a valid DocumentReference.');
+    expect(() => (writeBatch as InvalidApiUsage).create()).to.throw(
+      'Value for argument "documentRef" is not a valid DocumentReference.'
+    );
   });
 
   it('requires object', () => {
     expect(() => {
       (writeBatch as InvalidApiUsage).create(firestore.doc('sub/doc'));
-    })
-        .to.throw(
-            'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.');
+    }).to.throw(
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+    );
   });
 });
 
 describe('batch support', () => {
-  const documentName =
-      `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
+  const documentName = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
 
   let firestore: Firestore;
   let writeBatch: WriteBatch;
@@ -236,7 +246,7 @@ describe('batch support', () => {
             },
           ],
         });
-      }
+      },
     };
     return createInstance(overrides).then(firestoreClient => {
       firestore = firestoreClient;
@@ -267,14 +277,15 @@ describe('batch support', () => {
   it('chains multiple operations', () => {
     const documentName = firestore.doc('col/doc');
 
-    return writeBatch.set(documentName, {foo: FieldValue.serverTimestamp()})
-        .update(documentName, {foo: 'bar'})
-        .create(documentName, {})
-        .delete(documentName)
-        .commit()
-        .then(resp => {
-          verifyResponse(resp);
-        });
+    return writeBatch
+      .set(documentName, {foo: FieldValue.serverTimestamp()})
+      .update(documentName, {foo: 'bar'})
+      .create(documentName, {})
+      .delete(documentName)
+      .commit()
+      .then(resp => {
+        verifyResponse(resp);
+      });
   });
 
   it('handles exception', () => {
@@ -282,14 +293,15 @@ describe('batch support', () => {
       return Promise.reject(new Error('Expected exception'));
     };
 
-    return firestore.batch()
-        .commit()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('Expected exception');
-        });
+    return firestore
+      .batch()
+      .commit()
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        expect(err.message).to.equal('Expected exception');
+      });
   });
 
   it('cannot append to committed batch', () => {
@@ -340,7 +352,7 @@ describe('batch support', () => {
             },
           ],
         });
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
@@ -377,34 +389,35 @@ describe('batch support', () => {
             seconds: 0,
           },
         });
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
       firestore['_preferTransactions'] = true;
       firestore['_lastSuccessfulRequest'] = 0;
 
-      return firestore.batch()
-          .commit()
-          .then(() => {
-            // The first commit always uses a transcation.
-            expect(beginCalled).to.equal(1);
-            expect(commitCalled).to.equal(1);
-            return firestore.batch().commit();
-          })
-          .then(() => {
-            // The following commits don't use transactions if they happen
-            // within two minutes.
-            expect(beginCalled).to.equal(1);
-            expect(commitCalled).to.equal(2);
-            firestore['_lastSuccessfulRequest'] = 1337;
-            return firestore.batch().commit();
-          })
-          .then(() => {
-            expect(beginCalled).to.equal(2);
-            expect(commitCalled).to.equal(3);
-            delete process.env.FUNCTION_TRIGGER_TYPE;
-          });
+      return firestore
+        .batch()
+        .commit()
+        .then(() => {
+          // The first commit always uses a transcation.
+          expect(beginCalled).to.equal(1);
+          expect(commitCalled).to.equal(1);
+          return firestore.batch().commit();
+        })
+        .then(() => {
+          // The following commits don't use transactions if they happen
+          // within two minutes.
+          expect(beginCalled).to.equal(1);
+          expect(commitCalled).to.equal(2);
+          firestore['_lastSuccessfulRequest'] = 1337;
+          return firestore.batch().commit();
+        })
+        .then(() => {
+          expect(beginCalled).to.equal(2);
+          expect(commitCalled).to.equal(3);
+          delete process.env.FUNCTION_TRIGGER_TYPE;
+        });
     });
   });
 });

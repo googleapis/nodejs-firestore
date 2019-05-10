@@ -89,5 +89,5 @@
  * @see [google.rpc.Status definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto}
  */
 const Status = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };

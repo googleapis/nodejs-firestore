@@ -45,48 +45,60 @@ export type InvalidApiUsage = any;
 /** A Promise implementation that supports deferred resolution. */
 export class Deferred<R> {
   promise: Promise<R>;
-  resolve: (value?: R|Promise<R>) => void = () => {};
+  resolve: (value?: R | Promise<R>) => void = () => {};
   reject: (reason?: Error) => void = () => {};
 
   constructor() {
     this.promise = new Promise(
-        (resolve: (value?: R|Promise<R>) => void,
-         reject: (reason?: Error) => void) => {
-          this.resolve = resolve;
-          this.reject = reject;
-        });
+      (
+        resolve: (value?: R | Promise<R>) => void,
+        reject: (reason?: Error) => void
+      ) => {
+        this.resolve = resolve;
+        this.reject = reject;
+      }
+    );
   }
 }
 
 /**
  * Interface that defines the request handlers used by Firestore.
  */
-export type ApiOverride = {
-  beginTransaction?: (request: api.IBeginTransactionRequest,
-                      options: CallOptions,
-                      callback: (
-                          err?: Error|null,
-                          resp?: api.IBeginTransactionResponse) => void) =>
-                      void;
-  commit?: (request: api.ICommitRequest, options: CallOptions,
-            callback: (err?: Error|null, resp?: api.ICommitResponse) => void) =>
-            void;
-  rollback?: (request: api.IRollbackRequest, options: CallOptions,
-              callback: (err?: Error|null, resp?: void) => void) => void;
-  listCollectionIds?: (request: api.IListCollectionIdsRequest,
-                       options: CallOptions,
-                       callback: (err?: Error|null, resp?: string[]) => void) =>
-                       void;
-  listDocuments?: (request: api.IListDocumentsRequest, options: CallOptions,
-                   callback: (err?: GrpcError|null, resp?: api.IDocument[]) =>
-                       void) => void;
-  batchGetDocuments?: (request: api.IBatchGetDocumentsRequest) =>
-                       NodeJS.ReadableStream;
+export interface ApiOverride {
+  beginTransaction?: (
+    request: api.IBeginTransactionRequest,
+    options: CallOptions,
+    callback: (err?: Error | null, resp?: api.IBeginTransactionResponse) => void
+  ) => void;
+  commit?: (
+    request: api.ICommitRequest,
+    options: CallOptions,
+    callback: (err?: Error | null, resp?: api.ICommitResponse) => void
+  ) => void;
+  rollback?: (
+    request: api.IRollbackRequest,
+    options: CallOptions,
+    callback: (err?: Error | null, resp?: void) => void
+  ) => void;
+  listCollectionIds?: (
+    request: api.IListCollectionIdsRequest,
+    options: CallOptions,
+    callback: (err?: Error | null, resp?: string[]) => void
+  ) => void;
+  listDocuments?: (
+    request: api.IListDocumentsRequest,
+    options: CallOptions,
+    callback: (err?: GrpcError | null, resp?: api.IDocument[]) => void
+  ) => void;
+  batchGetDocuments?: (
+    request: api.IBatchGetDocumentsRequest
+  ) => NodeJS.ReadableStream;
   runQuery?: (request: api.IRunQueryRequest) => NodeJS.ReadableStream;
   listen?: () => NodeJS.ReadWriteStream;
-  getProjectId?: (callback: (err?: Error|null, projectId?: string|null) =>
-                      void) => void;
-};
+  getProjectId?: (
+    callback: (err?: Error | null, projectId?: string | null) => void
+  ) => void;
+}
 
 /**
  * Creates a new Firestore instance for testing. Request handlers can be
@@ -99,14 +111,17 @@ export type ApiOverride = {
  * client.
  */
 export function createInstance(
-    apiOverrides?: ApiOverride, firestoreSettings?: {}): Promise<Firestore> {
+  apiOverrides?: ApiOverride,
+  firestoreSettings?: {}
+): Promise<Firestore> {
   const initializationOptions = Object.assign(
-      {
-        projectId: PROJECT_ID,
-        sslCreds: SSL_CREDENTIALS,
-        keyFilename: __dirname + '/../fake-certificate.json',
-      },
-      firestoreSettings);
+    {
+      projectId: PROJECT_ID,
+      sslCreds: SSL_CREDENTIALS,
+      keyFilename: __dirname + '/../fake-certificate.json',
+    },
+    firestoreSettings
+  );
 
   const firestore = new Firestore();
   firestore.settings(initializationOptions);
@@ -132,9 +147,11 @@ export function createInstance(
 }
 
 function write(
-    document: api.IDocument|null, mask: api.IDocumentMask|null,
-    transforms: api.DocumentTransform.IFieldTransform[]|null,
-    precondition: api.IPrecondition|null): api.ICommitRequest {
+  document: api.IDocument | null,
+  mask: api.IDocumentMask | null,
+  transforms: api.DocumentTransform.IFieldTransform[] | null,
+  precondition: api.IPrecondition | null
+): api.ICommitRequest {
   const writes: api.IWrite[] = [];
 
   if (document) {
@@ -148,8 +165,9 @@ function write(
   }
 
   if (transforms) {
-    writes.push(
-        {transform: {document: DOCUMENT_NAME, fieldTransforms: transforms}});
+    writes.push({
+      transform: {document: DOCUMENT_NAME, fieldTransforms: transforms},
+    });
   }
 
   if (precondition) {
@@ -164,38 +182,50 @@ export function updateMask(...fieldPaths: string[]): api.IDocumentMask {
 }
 
 export function set(opts: {
-  document?: api.IDocument,
+  document?: api.IDocument;
   transforms?: api.DocumentTransform.IFieldTransform[];
-  mask?: api.IDocumentMask,
+  mask?: api.IDocumentMask;
 }): api.ICommitRequest {
   return write(
-      opts.document || null, opts.mask || null, opts.transforms || null, null);
+    opts.document || null,
+    opts.mask || null,
+    opts.transforms || null,
+    null
+  );
 }
 
 export function update(opts: {
-  document?: api.IDocument,
+  document?: api.IDocument;
   transforms?: api.DocumentTransform.IFieldTransform[];
-  mask?: api.IDocumentMask,
-  precondition?: api.IPrecondition
+  mask?: api.IDocumentMask;
+  precondition?: api.IPrecondition;
 }): api.ICommitRequest {
   const precondition = opts.precondition || {exists: true};
   const mask = opts.mask || updateMask();
   return write(
-      opts.document || null, mask, opts.transforms || null, precondition);
+    opts.document || null,
+    mask,
+    opts.transforms || null,
+    precondition
+  );
 }
 
 export function create(opts: {
-  document?: api.IDocument,
+  document?: api.IDocument;
   transforms?: api.DocumentTransform.IFieldTransform[];
-  mask?: api.IDocumentMask
+  mask?: api.IDocumentMask;
 }): api.ICommitRequest {
   return write(
-      opts.document || null, /* updateMask */ null, opts.transforms || null, {
-        exists: false,
-      });
+    opts.document || null,
+    /* updateMask */ null,
+    opts.transforms || null,
+    {
+      exists: false,
+    }
+  );
 }
 
-function value(value: string|api.IValue): api.IValue {
+function value(value: string | api.IValue): api.IValue {
   if (typeof value === 'string') {
     return {
       stringValue: value,
@@ -205,13 +235,14 @@ function value(value: string|api.IValue): api.IValue {
   }
 }
 
-
 export function retrieve(id: string): api.IBatchGetDocumentsRequest {
   return {documents: [`${DATABASE_ROOT}/documents/collectionId/${id}`]};
 }
 
 export function remove(
-    id: string, precondition?: api.IPrecondition): api.ICommitRequest {
+  id: string,
+  precondition?: api.IPrecondition
+): api.ICommitRequest {
   const writes: api.IWrite[] = [
     {delete: `${DATABASE_ROOT}/documents/collectionId/${id}`},
   ];
@@ -223,24 +254,28 @@ export function remove(
   return {writes};
 }
 
-export function found(dataOrId: api.IDocument|
-                      string): api.IBatchGetDocumentsResponse {
+export function found(
+  dataOrId: api.IDocument | string
+): api.IBatchGetDocumentsResponse {
   return {
     found: typeof dataOrId === 'string' ? document(dataOrId) : dataOrId,
-    readTime: {seconds: 5, nanos: 6}
+    readTime: {seconds: 5, nanos: 6},
   };
 }
 
 export function missing(id: string): api.IBatchGetDocumentsResponse {
   return {
     missing: `${DATABASE_ROOT}/documents/collectionId/${id}`,
-    readTime: {seconds: 5, nanos: 6}
+    readTime: {seconds: 5, nanos: 6},
   };
 }
 
 export function document(
-    id: string, field?: string, value?: string|api.IValue,
-    ...fieldOrValues: Array<string|api.IValue>): api.IDocument {
+  id: string,
+  field?: string,
+  value?: string | api.IValue,
+  ...fieldOrValues: Array<string | api.IValue>
+): api.IDocument {
   const document: api.IDocument = {
     name: `${DATABASE_ROOT}/documents/collectionId/${id}`,
     fields: {},
@@ -268,25 +303,30 @@ export function document(
   return document;
 }
 
-export function serverTimestamp(field: string):
-    api.DocumentTransform.IFieldTransform {
+export function serverTimestamp(
+  field: string
+): api.DocumentTransform.IFieldTransform {
   return {fieldPath: field, setToServerValue: 'REQUEST_TIME'};
 }
 
 export function incrementTransform(
-    field: string, n: number): api.DocumentTransform.IFieldTransform {
+  field: string,
+  n: number
+): api.DocumentTransform.IFieldTransform {
   return {
     fieldPath: field,
-    increment: Number.isInteger(n) ? {integerValue: n} : {doubleValue: n}
+    increment: Number.isInteger(n) ? {integerValue: n} : {doubleValue: n},
   };
 }
 
 export function arrayTransform(
-    field: string, transform: 'appendMissingElements'|'removeAllFromArray',
-    ...values: Array<string|api.IValue>):
-    api.DocumentTransform.IFieldTransform {
-  const fieldTransform:
-      api.DocumentTransform.IFieldTransform = {fieldPath: field};
+  field: string,
+  transform: 'appendMissingElements' | 'removeAllFromArray',
+  ...values: Array<string | api.IValue>
+): api.DocumentTransform.IFieldTransform {
+  const fieldTransform: api.DocumentTransform.IFieldTransform = {
+    fieldPath: field,
+  };
 
   fieldTransform[transform] = {values: values.map(val => value(val))};
 
@@ -318,7 +358,9 @@ export function writeResult(count: number): api.IWriteResponse {
 }
 
 export function requestEquals(
-    actual: {[k: string]: unknown}, expected: {[k: string]: unknown}): void {
+  actual: {[k: string]: unknown},
+  expected: {[k: string]: unknown}
+): void {
   // 'extend' removes undefined fields in the request object. The backend
   // ignores these fields, but we need to manually strip them before we compare
   // the expected and the actual request.
@@ -327,7 +369,9 @@ export function requestEquals(
   expect(actual).to.deep.eq(proto);
 }
 
-export function stream<T>(...elements: Array<T|Error>): NodeJS.ReadableStream {
+export function stream<T>(
+  ...elements: Array<T | Error>
+): NodeJS.ReadableStream {
   const stream = through2.obj();
 
   setImmediate(() => {

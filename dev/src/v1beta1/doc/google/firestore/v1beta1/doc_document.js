@@ -75,7 +75,7 @@
  * @see [google.firestore.v1beta1.Document definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 const Document = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -148,7 +148,7 @@ const Document = {
  * @see [google.firestore.v1beta1.Value definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 const Value = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -165,7 +165,7 @@ const Value = {
  * @see [google.firestore.v1beta1.ArrayValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 const ArrayValue = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -184,5 +184,5 @@ const ArrayValue = {
  * @see [google.firestore.v1beta1.MapValue definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/document.proto}
  */
 const MapValue = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };

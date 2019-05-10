@@ -84,9 +84,11 @@ export class GeoPoint implements Serializable {
    */
   isEqual(other: GeoPoint): boolean {
     return (
-        this === other ||
-        (other instanceof GeoPoint && this.latitude === other.latitude &&
-         this.longitude === other.longitude));
+      this === other ||
+      (other instanceof GeoPoint &&
+        this.latitude === other.latitude &&
+        this.longitude === other.longitude)
+    );
   }
 
   /**
@@ -98,7 +100,7 @@ export class GeoPoint implements Serializable {
       geoPointValue: {
         latitude: this.latitude,
         longitude: this.longitude,
-      }
+      },
     };
   }
 

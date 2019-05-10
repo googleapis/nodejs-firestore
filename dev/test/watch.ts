@@ -23,8 +23,22 @@ import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_proto_api';
 
-import {CollectionReference, FieldPath, Firestore, GeoPoint, setLogFunction, Timestamp} from '../src';
-import {DocumentData, DocumentReference, DocumentSnapshot, Query, QueryDocumentSnapshot, QuerySnapshot} from '../src';
+import {
+  CollectionReference,
+  FieldPath,
+  Firestore,
+  GeoPoint,
+  setLogFunction,
+  Timestamp,
+} from '../src';
+import {
+  DocumentData,
+  DocumentReference,
+  DocumentSnapshot,
+  Query,
+  QueryDocumentSnapshot,
+  QuerySnapshot,
+} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
@@ -37,7 +51,6 @@ import api = google.firestore.v1;
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(() => {});
 
-
 let PROJECT_ID = process.env.PROJECT_ID;
 if (!PROJECT_ID) {
   PROJECT_ID = 'test-project';
@@ -48,7 +61,9 @@ if (!PROJECT_ID) {
  * @param expected The expected docs array.
  */
 function docsEqual(
-    actual: QueryDocumentSnapshot[], expected: QueryDocumentSnapshot[]): void {
+  actual: QueryDocumentSnapshot[],
+  expected: QueryDocumentSnapshot[]
+): void {
   expect(actual.length).to.equal(expected.length);
   for (let i = 0; i < actual.length; i++) {
     expect(actual[i].ref.id).to.equal(expected[i].ref.id);
@@ -58,15 +73,15 @@ function docsEqual(
   }
 }
 
-type TestChange = {
-  type: DocumentChangeType,
-  doc: QueryDocumentSnapshot
-};
+interface TestChange {
+  type: DocumentChangeType;
+  doc: QueryDocumentSnapshot;
+}
 
-type TestSnapshot = {
-  docs: QueryDocumentSnapshot[],
-  docChanges: TestChange[]
-};
+interface TestSnapshot {
+  docs: QueryDocumentSnapshot[];
+  docChanges: TestChange[];
+}
 
 /**
  * Asserts that the given query snapshot matches the expected results.
@@ -76,9 +91,11 @@ type TestSnapshot = {
  * @param expected Array of DocumentSnapshot.
  */
 function snapshotsEqual(
-    lastSnapshot: TestSnapshot, version: number,
-    actual: Error|QuerySnapshot|undefined,
-    expected: TestSnapshot): TestSnapshot {
+  lastSnapshot: TestSnapshot,
+  version: number,
+  actual: Error | QuerySnapshot | undefined,
+  expected: TestSnapshot
+): TestSnapshot {
   const localDocs = ([] as QueryDocumentSnapshot[]).concat(lastSnapshot.docs);
 
   expect(actual).to.be.an.instanceof(QuerySnapshot);
@@ -89,15 +106,17 @@ function snapshotsEqual(
   expect(actualDocChanges.length).to.equal(expected.docChanges.length);
   for (let i = 0; i < expected.docChanges.length; i++) {
     expect(actualDocChanges[i].type).to.equal(expected.docChanges[i].type);
-    expect(actualDocChanges[i].doc.ref.id)
-        .to.equal(expected.docChanges[i].doc.ref.id);
-    expect(actualDocChanges[i].doc.data())
-        .to.deep.eq(expected.docChanges[i].doc.data());
+    expect(actualDocChanges[i].doc.ref.id).to.equal(
+      expected.docChanges[i].doc.ref.id
+    );
+    expect(actualDocChanges[i].doc.data()).to.deep.eq(
+      expected.docChanges[i].doc.data()
+    );
     const readVersion =
-        actualDocChanges[i].type === 'removed' ? version - 1 : version;
+      actualDocChanges[i].type === 'removed' ? version - 1 : version;
     expect(
-        actualDocChanges[i].doc.readTime.isEqual(new Timestamp(0, readVersion)))
-        .to.be.true;
+      actualDocChanges[i].doc.readTime.isEqual(new Timestamp(0, readVersion))
+    ).to.be.true;
 
     if (actualDocChanges[i].oldIndex !== -1) {
       localDocs.splice(actualDocChanges[i].oldIndex, 1);
@@ -105,7 +124,10 @@ function snapshotsEqual(
 
     if (actualDocChanges[i].newIndex !== -1) {
       localDocs.splice(
-          actualDocChanges[i].newIndex, 0, actualDocChanges[i].doc);
+        actualDocChanges[i].newIndex,
+        0,
+        actualDocChanges[i].doc
+      );
     }
   }
 
@@ -121,7 +143,9 @@ function snapshotsEqual(
  * Helper for constructing a snapshot.
  */
 function snapshot(
-    ref: DocumentReference, data: DocumentData): QueryDocumentSnapshot {
+  ref: DocumentReference,
+  data: DocumentData
+): QueryDocumentSnapshot {
   const snapshot = new DocumentSnapshotBuilder();
   snapshot.ref = ref;
   snapshot.fieldsProto = ref.firestore._serializer!.encodeFields(data);
@@ -135,17 +159,19 @@ function snapshot(
  * Helpers for constructing document changes.
  */
 function docChange(
-    type: DocumentChangeType, ref: DocumentReference, data: DocumentData):
-    {type: DocumentChangeType, doc: QueryDocumentSnapshot} {
+  type: DocumentChangeType,
+  ref: DocumentReference,
+  data: DocumentData
+): {type: DocumentChangeType; doc: QueryDocumentSnapshot} {
   return {type, doc: snapshot(ref, data)};
 }
 
 const added = (ref: DocumentReference, data: DocumentData) =>
-    docChange('added', ref, data);
+  docChange('added', ref, data);
 const modified = (ref: DocumentReference, data: DocumentData) =>
-    docChange('modified', ref, data);
+  docChange('modified', ref, data);
 const removed = (ref: DocumentReference, data: DocumentData) =>
-    docChange('removed', ref, data);
+  docChange('removed', ref, data);
 
 function verifyRequest<T>(actual: T, expected: T): void {
   // Remove undefined value, as these are ignored by the backend.
@@ -155,28 +181,30 @@ function verifyRequest<T>(actual: T, expected: T): void {
 
 const EMPTY = {
   docs: [],
-  docChanges: []
+  docChanges: [],
 };
 
 /** Captures stream data and makes it available via deferred Promises. */
 class DeferredListener<T> {
-  private readonly pendingData: Array<{type: string, data?: T|Error}> = [];
-  private readonly pendingListeners:
-      Array<{type: string, resolve: ((r: T|Error|undefined) => void)}> = [];
+  private readonly pendingData: Array<{type: string; data?: T | Error}> = [];
+  private readonly pendingListeners: Array<{
+    type: string;
+    resolve: (r: T | Error | undefined) => void;
+  }> = [];
 
   /**
    * Makes stream data available via the Promises set in the 'await' call. If no
    * Promise has been set, the data will be cached.
    */
-  on(type: string, data?: T|Error): void {
+  on(type: string, data?: T | Error): void {
     const listener = this.pendingListeners.shift();
 
     if (listener) {
-      expect(listener.type)
-          .to.equal(
-              type,
-              `Expected message of type '${listener.type}' but got '${type}' ` +
-                  `with '${JSON.stringify(data)}'.`);
+      expect(listener.type).to.equal(
+        type,
+        `Expected message of type '${listener.type}' but got '${type}' ` +
+          `with '${JSON.stringify(data)}'.`
+      );
       listener.resolve(data);
     } else {
       this.pendingData.push({
@@ -191,21 +219,24 @@ class DeferredListener<T> {
    * Promise resolves immediately if pending data is available, otherwise it
    * resolves when the next chunk arrives.
    */
-  await(expectedType: string): Promise<T|Error|undefined> {
+  await(expectedType: string): Promise<T | Error | undefined> {
     const data = this.pendingData.shift();
 
     if (data) {
       expect(data.type).to.equal(
-          expectedType,
-          `Expected message of type '${expectedType}' but got '${data.type}' ` +
-              `with '${JSON.stringify(data.data)}'.`);
+        expectedType,
+        `Expected message of type '${expectedType}' but got '${data.type}' ` +
+          `with '${JSON.stringify(data.data)}'.`
+      );
       return Promise.resolve(data.data);
     }
 
-    return new Promise(resolve => this.pendingListeners.push({
-      type: expectedType,
-      resolve,
-    }));
+    return new Promise(resolve =>
+      this.pendingListeners.push({
+        type: expectedType,
+        resolve,
+      })
+    );
   }
 }
 
@@ -215,13 +246,14 @@ class DeferredListener<T> {
  * sequential invocations of the Listen API.
  */
 class StreamHelper {
-  private readonly deferredListener =
-      new DeferredListener<api.IListenRequest>();
-  private backendStream: NodeJS.ReadWriteStream|null = null;
+  private readonly deferredListener = new DeferredListener<
+    api.IListenRequest
+  >();
+  private backendStream: NodeJS.ReadWriteStream | null = null;
 
-  streamCount = 0;  // The number of streams that the client has requested
-  readStream: Transform|null = null;
-  writeStream: Transform|null = null;
+  streamCount = 0; // The number of streams that the client has requested
+  readStream: Transform | null = null;
+  writeStream: Transform | null = null;
 
   /** Returns the GAPIC callback to use with this stream helper. */
   getListenCallback(): () => NodeJS.ReadWriteStream {
@@ -232,10 +264,12 @@ class StreamHelper {
       this.readStream = through2.obj();
       this.writeStream = through2.obj();
 
-      this.readStream!.once(
-          'data', result => this.deferredListener.on('data', result));
-      this.readStream!.on(
-          'error', error => this.deferredListener.on('error', error));
+      this.readStream!.once('data', result =>
+        this.deferredListener.on('data', result)
+      );
+      this.readStream!.on('error', error =>
+        this.deferredListener.on('error', error)
+      );
       this.readStream!.on('end', () => this.deferredListener.on('end'));
       this.readStream!.on('close', () => this.deferredListener.on('close'));
 
@@ -249,15 +283,15 @@ class StreamHelper {
   /**
    * Returns a Promise with the next results from the underlying stream.
    */
-  await(type: string): Promise<api.IListenRequest|Error|undefined> {
+  await(type: string): Promise<api.IListenRequest | Error | undefined> {
     return this.deferredListener.await(type);
   }
 
   /** Waits for a destroyed stream to be re-opened. */
   awaitReopen(): Promise<api.IListenRequest> {
     return this.await('error')
-        .then(() => this.await('close'))
-        .then(() => this.awaitOpen());
+      .then(() => this.await('close'))
+      .then(() => this.awaitOpen());
   }
 
   /**
@@ -273,7 +307,7 @@ class StreamHelper {
   /**
    * Sends a message to the currently active stream.
    */
-  write(data: string|object): void {
+  write(data: string | object): void {
     // The stream returned by the Gapic library accepts Protobuf
     // messages, but the type information does not expose this.
     // tslint:disable-next-line no-any
@@ -294,7 +328,7 @@ class StreamHelper {
   destroyStream(err?: GrpcError): void {
     if (!err) {
       err = new GrpcError('Server disconnect');
-      err.code = 14;  // Unavailable
+      err.code = 14; // Unavailable
     }
     this.readStream!.destroy(err);
   }
@@ -306,7 +340,7 @@ class StreamHelper {
 class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
   private readonly streamHelper: StreamHelper;
   private readonly deferredListener = new DeferredListener<T>();
-  private unsubscribe: (() => void)|null = null;
+  private unsubscribe: (() => void) | null = null;
 
   snapshotVersion = 0;
   serializer: Serializer;
@@ -318,8 +352,10 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
    * @param targetId The target ID of the watch stream.
    */
   constructor(
-      streamHelper: StreamHelper, private reference: DocumentReference|Query,
-      private targetId: number) {
+    streamHelper: StreamHelper,
+    private reference: DocumentReference | Query,
+    private targetId: number
+  ) {
     this.serializer = new Serializer(reference.firestore);
     this.streamHelper = streamHelper;
     this.snapshotVersion = 0;
@@ -331,7 +367,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
    */
   await(type: 'snapshot'): Promise<T>;
   await(type: 'error'): Promise<Error>;
-  await(type: string): Promise<T|Error|undefined> {
+  await(type: string): Promise<T | Error | undefined> {
     return this.deferredListener.await(type);
   }
 
@@ -343,12 +379,13 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
    */
   startWatch(): () => void {
     this.unsubscribe = this.reference.onSnapshot(
-        (snapshot: unknown) => {
-          this.deferredListener.on('snapshot', snapshot as T);
-        },
-        (error: Error) => {
-          this.deferredListener.on('error', error);
-        });
+      (snapshot: unknown) => {
+        this.deferredListener.on('snapshot', snapshot as T);
+      },
+      (error: Error) => {
+        this.deferredListener.on('error', error);
+      }
+    );
     return this.unsubscribe!;
   }
 
@@ -493,40 +530,46 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
   /**
    * A wrapper for writing tests that successfully run a watch.
    */
-  runTest(expectedRequest: api.IListenRequest, func: () => Promise<unknown>):
-      Promise<void> {
+  runTest(
+    expectedRequest: api.IListenRequest,
+    func: () => Promise<unknown>
+  ): Promise<void> {
     this.startWatch();
 
-    return this.streamHelper.awaitOpen()
-        .then(request => {
-          verifyRequest(request, expectedRequest);
-          return func();
-        })
-        .then(() => this.endWatch());
+    return this.streamHelper
+      .awaitOpen()
+      .then(request => {
+        verifyRequest(request, expectedRequest);
+        return func();
+      })
+      .then(() => this.endWatch());
   }
 
   /**
    * A wrapper for writing tests that fail to run a watch.
    */
   runFailedTest(
-      expectedRequest: api.IListenRequest, func: () => void|Promise<unknown>,
-      expectedError: string): Promise<void> {
+    expectedRequest: api.IListenRequest,
+    func: () => void | Promise<unknown>,
+    expectedError: string
+  ): Promise<void> {
     this.startWatch();
 
-    return this.streamHelper.awaitOpen()
-        .then(request => {
-          verifyRequest(request, expectedRequest);
-          return func();
-        })
-        .then(() => {
-          return this.await('error');
-        })
-        .then(err => {
-          if (!(err instanceof Error)) {
-            throw new Error('Expected error from Watch');
-          }
-          expect(err.message).to.equal(expectedError);
-        });
+    return this.streamHelper
+      .awaitOpen()
+      .then(request => {
+        verifyRequest(request, expectedRequest);
+        return func();
+      })
+      .then(() => {
+        return this.await('error');
+      })
+      .then(err => {
+        if (!(err instanceof Error)) {
+          throw new Error('Expected error from Watch');
+        }
+        expect(err.message).to.equal(expectedError);
+      });
   }
 }
 
@@ -545,8 +588,10 @@ describe('Query watch', () => {
   let watchHelper: WatchHelper<QuerySnapshot>;
   let streamHelper: StreamHelper;
 
-  let lastSnapshot:
-      {docs: QueryDocumentSnapshot[], docChanges: DocumentChange[]} = EMPTY;
+  let lastSnapshot: {
+    docs: QueryDocumentSnapshot[];
+    docChanges: DocumentChange[];
+  } = EMPTY;
 
   // The proto JSON that should be sent for the query.
   const collQueryJSON = () => {
@@ -596,22 +641,23 @@ describe('Query watch', () => {
   };
 
   // The proto JSON that should be sent for a resumed query.
-  const resumeTokenQuery: (resumeToken: Buffer) => api.IListenRequest =
-      (resumeToken: Buffer) => {
-        return {
-          database: `projects/${PROJECT_ID}/databases/(default)`,
-          addTarget: {
-            query: {
-              parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
-              structuredQuery: {
-                from: [{collectionId: 'col'}],
-              },
-            },
-            targetId,
-            resumeToken,
+  const resumeTokenQuery: (resumeToken: Buffer) => api.IListenRequest = (
+    resumeToken: Buffer
+  ) => {
+    return {
+      database: `projects/${PROJECT_ID}/databases/(default)`,
+      addTarget: {
+        query: {
+          parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
+          structuredQuery: {
+            from: [{collectionId: 'col'}],
           },
-        };
-      };
+        },
+        targetId,
+        resumeToken,
+      },
+    };
+  };
 
   const sortedQuery = () => {
     return colRef.orderBy('foo', 'desc');
@@ -648,22 +694,26 @@ describe('Query watch', () => {
     streamHelper = new StreamHelper();
     listenCallback = streamHelper.getListenCallback();
 
-    return createInstance({listen: () => listenCallback()})
-        .then(firestoreClient => {
-          firestore = firestoreClient;
+    return createInstance({listen: () => listenCallback()}).then(
+      firestoreClient => {
+        firestore = firestoreClient;
 
-          watchHelper = new WatchHelper(
-              streamHelper, firestore.collection('col'), targetId);
+        watchHelper = new WatchHelper(
+          streamHelper,
+          firestore.collection('col'),
+          targetId
+        );
 
-          colRef = firestore.collection('col');
+        colRef = firestore.collection('col');
 
-          doc1 = firestore.doc('col/doc1');
-          doc2 = firestore.doc('col/doc2');
-          doc3 = firestore.doc('col/doc3');
-          doc4 = firestore.doc('col/doc4');
+        doc1 = firestore.doc('col/doc1');
+        doc2 = firestore.doc('col/doc2');
+        doc3 = firestore.doc('col/doc3');
+        doc4 = firestore.doc('col/doc4');
 
-          lastSnapshot = EMPTY;
-        });
+        lastSnapshot = EMPTY;
+      }
+    );
   });
 
   afterEach(() => {
@@ -671,14 +721,16 @@ describe('Query watch', () => {
   });
 
   it('with invalid callbacks', () => {
-    expect(() => colRef.onSnapshot('foo' as InvalidApiUsage))
-        .to.throw('Value for argument "onNext" is not a valid function.');
+    expect(() => colRef.onSnapshot('foo' as InvalidApiUsage)).to.throw(
+      'Value for argument "onNext" is not a valid function.'
+    );
 
-    expect(() => colRef.onSnapshot(() => {}, 'foo' as InvalidApiUsage))
-        .to.throw('Value for argument "onError" is not a valid function.');
+    expect(() =>
+      colRef.onSnapshot(() => {}, 'foo' as InvalidApiUsage)
+    ).to.throw('Value for argument "onError" is not a valid function.');
   });
 
-  it('without error callback', (done) => {
+  it('without error callback', done => {
     const unsubscribe = colRef.onSnapshot(() => {
       unsubscribe();
       done();
@@ -692,44 +744,61 @@ describe('Query watch', () => {
   });
 
   it('handles invalid listen protos', () => {
-    return watchHelper.runFailedTest(collQueryJSON(), () => {
-      // Mock the server responding to the query with an invalid proto.
-      streamHelper.write({invalid: true});
-    }, 'Unknown listen response type: {"invalid":true}');
+    return watchHelper.runFailedTest(
+      collQueryJSON(),
+      () => {
+        // Mock the server responding to the query with an invalid proto.
+        streamHelper.write({invalid: true});
+      },
+      'Unknown listen response type: {"invalid":true}'
+    );
   });
 
   it('handles invalid target change protos', () => {
     return watchHelper.runFailedTest(
-        collQueryJSON(),
-        () => {
-          // Mock the server responding to the query with an invalid proto.
-          streamHelper.write({
-            targetChange: {
-              targetChangeType: 'INVALID',
-              targetIds: [0xfeed],
-            },
-          });
-        },
-        'Unknown target change type: {"targetChangeType":"INVALID",' +
-            '"targetIds":[65261]}');
+      collQueryJSON(),
+      () => {
+        // Mock the server responding to the query with an invalid proto.
+        streamHelper.write({
+          targetChange: {
+            targetChangeType: 'INVALID',
+            targetIds: [0xfeed],
+          },
+        });
+      },
+      'Unknown target change type: {"targetChangeType":"INVALID",' +
+        '"targetIds":[65261]}'
+    );
   });
 
   it('handles remove target change protos', () => {
-    return watchHelper.runFailedTest(collQueryJSON(), () => {
-      watchHelper.sendRemoveTarget();
-    }, 'Error 13: internal error');
+    return watchHelper.runFailedTest(
+      collQueryJSON(),
+      () => {
+        watchHelper.sendRemoveTarget();
+      },
+      'Error 13: internal error'
+    );
   });
 
   it('handles remove target change with code', () => {
-    return watchHelper.runFailedTest(collQueryJSON(), () => {
-      watchHelper.sendRemoveTarget(7);
-    }, 'Error 7: test remove');
+    return watchHelper.runFailedTest(
+      collQueryJSON(),
+      () => {
+        watchHelper.sendRemoveTarget(7);
+      },
+      'Error 7: test remove'
+    );
   });
 
   it('rejects an unknown target', () => {
-    return watchHelper.runFailedTest(collQueryJSON(), () => {
-      watchHelper.sendAddTarget(2);
-    }, 'Unexpected target ID sent by server');
+    return watchHelper.runFailedTest(
+      collQueryJSON(),
+      () => {
+        watchHelper.sendAddTarget(2);
+      },
+      'Unexpected target ID sent by server'
+    );
   });
 
   it('re-opens on unexpected stream end', () => {
@@ -737,22 +806,23 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-      return watchHelper.await('snapshot')
-          .then(() => {
-            streamHelper.close();
-            return streamHelper.awaitOpen();
-          })
-          .then(() => {
-            streamHelper.close();
-            return streamHelper.awaitOpen();
-          })
-          .then(() => {
-            expect(streamHelper.streamCount).to.equal(3);
-          });
+      return watchHelper
+        .await('snapshot')
+        .then(() => {
+          streamHelper.close();
+          return streamHelper.awaitOpen();
+        })
+        .then(() => {
+          streamHelper.close();
+          return streamHelper.awaitOpen();
+        })
+        .then(() => {
+          expect(streamHelper.streamCount).to.equal(3);
+        });
     });
   });
 
-  it('doesn\'t re-open inactive stream', () => {
+  it("doesn't re-open inactive stream", () => {
     // This test uses the normal timeout handler since it relies on the actual
     // backoff window during the the stream recovery. We then use this window to
     // unsubscribe from the Watch stream and make sure that we don't
@@ -760,19 +830,20 @@ describe('Query watch', () => {
     setTimeoutHandler(setTimeout);
 
     const unsubscribe = watchHelper.startWatch();
-    return streamHelper.awaitOpen()
-        .then(request => {
-          verifyRequest(request, collQueryJSON());
-          watchHelper.sendAddTarget();
-          watchHelper.sendCurrent();
-          watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-          return watchHelper.await('snapshot');
-        })
-        .then(() => {
-          streamHelper.close();
-          unsubscribe();
-          expect(streamHelper.streamCount).to.equal(1);
-        });
+    return streamHelper
+      .awaitOpen()
+      .then(request => {
+        verifyRequest(request, collQueryJSON());
+        watchHelper.sendAddTarget();
+        watchHelper.sendCurrent();
+        watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
+        return watchHelper.await('snapshot');
+      })
+      .then(() => {
+        streamHelper.close();
+        unsubscribe();
+        expect(streamHelper.streamCount).to.equal(1);
+      });
   });
 
   it('retries based on error code', () => {
@@ -814,11 +885,14 @@ describe('Query watch', () => {
               });
             });
           } else {
-            return watchHelper.runFailedTest(collQueryJSON(), () => {
-              watchHelper.sendAddTarget();
-              watchHelper.sendCurrent();
-              watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-              return watchHelper.await('snapshot')
+            return watchHelper.runFailedTest(
+              collQueryJSON(),
+              () => {
+                watchHelper.sendAddTarget();
+                watchHelper.sendCurrent();
+                watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
+                return watchHelper
+                  .await('snapshot')
                   .then(() => {
                     streamHelper.destroyStream(err);
                   })
@@ -828,7 +902,9 @@ describe('Query watch', () => {
                   .then(() => {
                     return streamHelper.await('close');
                   });
-            }, 'GRPC Error');
+              },
+              'GRPC Error'
+            );
           }
         });
       }
@@ -855,43 +931,44 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            // Add another result.
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
-              docChanges: [added(doc2, {foo: 'b'})],
-            });
-
-            // Change a result.
-            watchHelper.sendDoc(doc2, {bar: 'c'});
-            watchHelper.sendSnapshot(4);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 4, results, {
-              docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {bar: 'c'})],
-              docChanges: [modified(doc2, {bar: 'c'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          // Add another result.
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
+            docChanges: [added(doc2, {foo: 'b'})],
+          });
+
+          // Change a result.
+          watchHelper.sendDoc(doc2, {bar: 'c'});
+          watchHelper.sendSnapshot(4);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 4, results, {
+            docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {bar: 'c'})],
+            docChanges: [modified(doc2, {bar: 'c'})],
+          });
+        });
     });
   });
 
@@ -903,59 +980,60 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent(resumeToken);
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(2, resumeToken);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-            expect(streamHelper.streamCount).to.equal(1);
-            streamHelper.destroyStream();
-            return streamHelper.awaitReopen();
-          })
-          .then(request => {
-            verifyRequest(request, resumeTokenQuery(resumeToken));
-            watchHelper.sendAddTarget();
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-
-            resumeToken = Buffer.from([0xbcde]);
-            watchHelper.sendSnapshot(3, resumeToken);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
-              docChanges: [added(doc2, {foo: 'b'})],
-            });
-            streamHelper.destroyStream();
-            return streamHelper.awaitReopen();
-          })
-          .then(request => {
-            verifyRequest(request, resumeTokenQuery(resumeToken));
-            watchHelper.sendAddTarget();
-            watchHelper.sendDoc(doc3, {foo: 'c'});
-            watchHelper.sendSnapshot(4, resumeToken);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            expect(streamHelper.streamCount).to.equal(3);
-            snapshotsEqual(lastSnapshot, 4, results, {
-              docs: [
-                snapshot(doc1, {foo: 'a'}),
-                snapshot(doc2, {foo: 'b'}),
-                snapshot(doc3, {foo: 'c'}),
-              ],
-              docChanges: [added(doc3, {foo: 'c'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(2, resumeToken);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+          expect(streamHelper.streamCount).to.equal(1);
+          streamHelper.destroyStream();
+          return streamHelper.awaitReopen();
+        })
+        .then(request => {
+          verifyRequest(request, resumeTokenQuery(resumeToken));
+          watchHelper.sendAddTarget();
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+
+          resumeToken = Buffer.from([0xbcde]);
+          watchHelper.sendSnapshot(3, resumeToken);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
+            docChanges: [added(doc2, {foo: 'b'})],
+          });
+          streamHelper.destroyStream();
+          return streamHelper.awaitReopen();
+        })
+        .then(request => {
+          verifyRequest(request, resumeTokenQuery(resumeToken));
+          watchHelper.sendAddTarget();
+          watchHelper.sendDoc(doc3, {foo: 'c'});
+          watchHelper.sendSnapshot(4, resumeToken);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          expect(streamHelper.streamCount).to.equal(3);
+          snapshotsEqual(lastSnapshot, 4, results, {
+            docs: [
+              snapshot(doc1, {foo: 'a'}),
+              snapshot(doc2, {foo: 'b'}),
+              snapshot(doc3, {foo: 'c'}),
+            ],
+            docChanges: [added(doc3, {foo: 'c'})],
+          });
+        });
     });
   });
 
@@ -965,38 +1043,39 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent(Buffer.from([0x0]));
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendSnapshot(2, Buffer.from([0x1]));
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
-              docChanges: [added(doc1, {foo: 'a'}), added(doc2, {foo: 'b'})],
-            });
-            expect(streamHelper.streamCount).to.equal(1);
-            // This document delete will be ignored.
-            watchHelper.sendDocDelete(doc1);
-            streamHelper.destroyStream();
-            return streamHelper.awaitReopen();
-          })
-          .then(() => {
-            watchHelper.sendDocDelete(doc2);
-            watchHelper.sendSnapshot(3, Buffer.from([0x2]));
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [removed(doc2, {foo: 'b'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendSnapshot(2, Buffer.from([0x1]));
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
+            docChanges: [added(doc1, {foo: 'a'}), added(doc2, {foo: 'b'})],
           });
+          expect(streamHelper.streamCount).to.equal(1);
+          // This document delete will be ignored.
+          watchHelper.sendDocDelete(doc1);
+          streamHelper.destroyStream();
+          return streamHelper.awaitReopen();
+        })
+        .then(() => {
+          watchHelper.sendDocDelete(doc2);
+          watchHelper.sendSnapshot(3, Buffer.from([0x2]));
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [removed(doc2, {foo: 'b'})],
+          });
+        });
     });
   });
 
@@ -1008,94 +1087,97 @@ describe('Query watch', () => {
       watchHelper.sendCurrent();
       let resumeToken = Buffer.from([0x1]);
       watchHelper.sendSnapshot(1, resumeToken);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
 
-            // Send snapshot with non-matching target id. No snapshot will be
-            // send.
-            streamHelper.write({
-              targetChange: {
-                targetChangeType: 'NO_CHANGE',
-                targetIds: [0xfeed],
-                readTime: {seconds: 0, nanos: 0},
-                resumeToken: Buffer.from([0x2]),
-              },
-            });
-
-            resumeToken = Buffer.from([0x3]);
-            // Send snapshot with matching target id but no resume token.
-            // The old token continues to be used.
-            streamHelper.write({
-              targetChange: {
-                targetChangeType: 'NO_CHANGE',
-                targetIds: [],
-                readTime: {seconds: 0, nanos: 0},
-                resumeToken,
-              },
-            });
-
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 0, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-            streamHelper.destroyStream();
-            return streamHelper.awaitReopen();
-          })
-          .then(request => {
-            verifyRequest(request, resumeTokenQuery(resumeToken));
-            expect(streamHelper.streamCount).to.equal(2);
+          // Send snapshot with non-matching target id. No snapshot will be
+          // send.
+          streamHelper.write({
+            targetChange: {
+              targetChangeType: 'NO_CHANGE',
+              targetIds: [0xfeed],
+              readTime: {seconds: 0, nanos: 0},
+              resumeToken: Buffer.from([0x2]),
+            },
           });
+
+          resumeToken = Buffer.from([0x3]);
+          // Send snapshot with matching target id but no resume token.
+          // The old token continues to be used.
+          streamHelper.write({
+            targetChange: {
+              targetChangeType: 'NO_CHANGE',
+              targetIds: [],
+              readTime: {seconds: 0, nanos: 0},
+              resumeToken,
+            },
+          });
+
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 0, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
+          });
+          streamHelper.destroyStream();
+          return streamHelper.awaitReopen();
+        })
+        .then(request => {
+          verifyRequest(request, resumeTokenQuery(resumeToken));
+          expect(streamHelper.streamCount).to.equal(2);
+        });
     });
   });
 
   it('reconnects with multiple attempts', () => {
     return watchHelper
-        .runFailedTest(
-            collQueryJSON(),
-            () => {
-              // Mock the server responding to the query.
-              watchHelper.sendAddTarget();
-              watchHelper.sendCurrent();
-              const resumeToken = Buffer.from([0xabcd]);
-              watchHelper.sendSnapshot(1, resumeToken);
-              return watchHelper.await('snapshot')
-                  .then(results => {
-                    lastSnapshot =
-                        snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      .runFailedTest(
+        collQueryJSON(),
+        () => {
+          // Mock the server responding to the query.
+          watchHelper.sendAddTarget();
+          watchHelper.sendCurrent();
+          const resumeToken = Buffer.from([0xabcd]);
+          watchHelper.sendSnapshot(1, resumeToken);
+          return watchHelper
+            .await('snapshot')
+            .then(results => {
+              lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-                    listenCallback = () => {
-                      // Return a stream that always errors on write
-                      ++streamHelper.streamCount;
-                      return through2.obj((chunk, enc, callback) => {
-                        callback(new Error(
-                            `Stream Error (${streamHelper.streamCount})`));
-                      });
-                    };
+              listenCallback = () => {
+                // Return a stream that always errors on write
+                ++streamHelper.streamCount;
+                return through2.obj((chunk, enc, callback) => {
+                  callback(
+                    new Error(`Stream Error (${streamHelper.streamCount})`)
+                  );
+                });
+              };
 
-                    streamHelper.destroyStream();
-                    return streamHelper.await('error');
-                  })
-                  .then(() => {
-                    return streamHelper.await('close');
-                  })
-                  .then(() => {
-                    streamHelper.writeStream!.destroy();
-                  });
-            },
-            'Stream Error (6)')
-        .then(() => {
-          expect(streamHelper.streamCount)
-              .to.equal(
-                  6,
-                  'Expected stream to be opened once and retried five times');
-        });
+              streamHelper.destroyStream();
+              return streamHelper.await('error');
+            })
+            .then(() => {
+              return streamHelper.await('close');
+            })
+            .then(() => {
+              streamHelper.writeStream!.destroy();
+            });
+        },
+        'Stream Error (6)'
+      )
+      .then(() => {
+        expect(streamHelper.streamCount).to.equal(
+          6,
+          'Expected stream to be opened once and retried five times'
+        );
+      });
   });
 
   it('sorts docs', () => {
@@ -1106,37 +1188,38 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add two result.
-            watchHelper.sendDoc(doc1, {foo: 'b'});
-            watchHelper.sendDoc(doc2, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'b'}), snapshot(doc2, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'b'}), added(doc2, {foo: 'a'})],
-            });
-
-            // Change the results so they sort in a different order.
-            watchHelper.sendDoc(doc1, {foo: 'c'});
-            watchHelper.sendDoc(doc2, {foo: 'd'});
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [snapshot(doc2, {foo: 'd'}), snapshot(doc1, {foo: 'c'})],
-              docChanges: [
-                modified(doc2, {foo: 'd'}),
-                modified(doc1, {foo: 'c'}),
-              ],
-            });
+          // Add two result.
+          watchHelper.sendDoc(doc1, {foo: 'b'});
+          watchHelper.sendDoc(doc2, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'b'}), snapshot(doc2, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'b'}), added(doc2, {foo: 'a'})],
           });
+
+          // Change the results so they sort in a different order.
+          watchHelper.sendDoc(doc1, {foo: 'c'});
+          watchHelper.sendDoc(doc2, {foo: 'd'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [snapshot(doc2, {foo: 'd'}), snapshot(doc1, {foo: 'c'})],
+            docChanges: [
+              modified(doc2, {foo: 'd'}),
+              modified(doc1, {foo: 'c'}),
+            ],
+          });
+        });
     });
   });
 
@@ -1151,38 +1234,39 @@ describe('Query watch', () => {
       watchHelper.sendDoc(doc1, {foo: 'b'});
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
-              docs: [snapshot(doc1, {foo: 'b'})],
-              docChanges: [added(doc1, {foo: 'b'})],
-            });
-
-            // Modify it two more times.
-            watchHelper.sendDoc(doc1, {foo: 'c'});
-            watchHelper.sendDoc(doc1, {foo: 'd'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'd'})],
-              docChanges: [modified(doc1, {foo: 'd'})],
-            });
-
-            // Remove it, delete it, and then add it again.
-            watchHelper.sendDocRemove(doc1, {foo: 'e'});
-            watchHelper.sendDocDelete(doc1);
-            watchHelper.sendDoc(doc1, {foo: 'f'});
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [snapshot(doc1, {foo: 'f'})],
-              docChanges: [modified(doc1, {foo: 'f'})],
-            });
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
+            docs: [snapshot(doc1, {foo: 'b'})],
+            docChanges: [added(doc1, {foo: 'b'})],
           });
+
+          // Modify it two more times.
+          watchHelper.sendDoc(doc1, {foo: 'c'});
+          watchHelper.sendDoc(doc1, {foo: 'd'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'd'})],
+            docChanges: [modified(doc1, {foo: 'd'})],
+          });
+
+          // Remove it, delete it, and then add it again.
+          watchHelper.sendDocRemove(doc1, {foo: 'e'});
+          watchHelper.sendDocDelete(doc1);
+          watchHelper.sendDoc(doc1, {foo: 'f'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [snapshot(doc1, {foo: 'f'})],
+            docChanges: [modified(doc1, {foo: 'f'})],
+          });
+        });
     });
   });
 
@@ -1203,19 +1287,20 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(() => {
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendDoc(doc2, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc2, {foo: 'a'}), snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc2, {foo: 'a'}), added(doc1, {foo: 'a'})],
-            });
+      return watchHelper
+        .await('snapshot')
+        .then(() => {
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendDoc(doc2, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc2, {foo: 'a'}), snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc2, {foo: 'a'}), added(doc1, {foo: 'a'})],
           });
+        });
     });
   });
 
@@ -1229,43 +1314,44 @@ describe('Query watch', () => {
       watchHelper.sendDoc(doc4, {foo: 'a'});
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
-              docs: [
-                snapshot(doc1, {foo: 'a'}),
-                snapshot(doc2, {foo: 'a'}),
-                snapshot(doc4, {foo: 'a'}),
-              ],
-              docChanges: [
-                added(doc1, {foo: 'a'}),
-                added(doc2, {foo: 'a'}),
-                added(doc4, {foo: 'a'}),
-              ],
-            });
-
-            watchHelper.sendDocDelete(doc1);
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendDoc(doc3, {foo: 'b'});
-            watchHelper.sendDocDelete(doc4);
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc2, {foo: 'b'}), snapshot(doc3, {foo: 'b'})],
-              docChanges: [
-                removed(doc1, {foo: 'a'}),
-                removed(doc4, {foo: 'a'}),
-                added(doc3, {foo: 'b'}),
-                modified(doc2, {foo: 'b'}),
-              ],
-            });
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
+            docs: [
+              snapshot(doc1, {foo: 'a'}),
+              snapshot(doc2, {foo: 'a'}),
+              snapshot(doc4, {foo: 'a'}),
+            ],
+            docChanges: [
+              added(doc1, {foo: 'a'}),
+              added(doc2, {foo: 'a'}),
+              added(doc4, {foo: 'a'}),
+            ],
           });
+
+          watchHelper.sendDocDelete(doc1);
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendDoc(doc3, {foo: 'b'});
+          watchHelper.sendDocDelete(doc4);
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc2, {foo: 'b'}), snapshot(doc3, {foo: 'b'})],
+            docChanges: [
+              removed(doc1, {foo: 'a'}),
+              removed(doc4, {foo: 'a'}),
+              added(doc3, {foo: 'b'}),
+              modified(doc2, {foo: 'b'}),
+            ],
+          });
+        });
     });
   });
 
-  it('handles changing a doc so it doesn\'t match', () => {
+  it("handles changing a doc so it doesn't match", () => {
     watchHelper = new WatchHelper(streamHelper, includeQuery(), targetId);
 
     return watchHelper.runTest(includeQueryJSON(), () => {
@@ -1273,46 +1359,47 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {included: 'yes'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {included: 'yes'})],
-              docChanges: [added(doc1, {included: 'yes'})],
-            });
-
-            // Add another result.
-            watchHelper.sendDoc(doc2, {included: 'yes'});
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [
-                snapshot(doc1, {included: 'yes'}),
-                snapshot(doc2, {included: 'yes'}),
-              ],
-              docChanges: [added(doc2, {included: 'yes'})],
-            });
-
-            // Change a result.
-            watchHelper.sendDocRemove(doc2, {included: 'no'});
-            watchHelper.sendSnapshot(4);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 4, results, {
-              docs: [snapshot(doc1, {included: 'yes'})],
-              docChanges: [removed(doc2, {included: 'yes'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {included: 'yes'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {included: 'yes'})],
+            docChanges: [added(doc1, {included: 'yes'})],
           });
+
+          // Add another result.
+          watchHelper.sendDoc(doc2, {included: 'yes'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [
+              snapshot(doc1, {included: 'yes'}),
+              snapshot(doc2, {included: 'yes'}),
+            ],
+            docChanges: [added(doc2, {included: 'yes'})],
+          });
+
+          // Change a result.
+          watchHelper.sendDocRemove(doc2, {included: 'no'});
+          watchHelper.sendSnapshot(4);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 4, results, {
+            docs: [snapshot(doc1, {included: 'yes'})],
+            docChanges: [removed(doc2, {included: 'yes'})],
+          });
+        });
     });
   });
 
@@ -1322,43 +1409,44 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            // Add another result.
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
-              docChanges: [added(doc2, {foo: 'b'})],
-            });
-
-            // Delete a result.
-            watchHelper.sendDocDelete(doc2);
-            watchHelper.sendSnapshot(4);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 4, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [removed(doc2, {foo: 'b'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          // Add another result.
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
+            docChanges: [added(doc2, {foo: 'b'})],
+          });
+
+          // Delete a result.
+          watchHelper.sendDocDelete(doc2);
+          watchHelper.sendSnapshot(4);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 4, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [removed(doc2, {foo: 'b'})],
+          });
+        });
     });
   });
 
@@ -1368,43 +1456,44 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            // Add another result.
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
-              docChanges: [added(doc2, {foo: 'b'})],
-            });
-
-            // Delete a result.
-            watchHelper.sendDocRemove(doc2, {foo: 'c'});
-            watchHelper.sendSnapshot(4);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 4, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [removed(doc2, {foo: 'b'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          // Add another result.
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
+            docChanges: [added(doc2, {foo: 'b'})],
+          });
+
+          // Delete a result.
+          watchHelper.sendDocRemove(doc2, {foo: 'c'});
+          watchHelper.sendSnapshot(4);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 4, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [removed(doc2, {foo: 'b'})],
+          });
+        });
     });
   });
 
@@ -1414,25 +1503,26 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            // Delete a different doc.
-            watchHelper.sendDocDelete(doc2);
-            watchHelper.sendSnapshot(3);
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          // Delete a different doc.
+          watchHelper.sendDocDelete(doc2);
+          watchHelper.sendSnapshot(3);
+        });
     });
   });
 
@@ -1442,66 +1532,67 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add three results.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendDoc(doc3, {foo: 'c'});
+          // Add three results.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendDoc(doc3, {foo: 'c'});
 
-            // Send the snapshot. Note that we do not increment the snapshot
-            // version to keep the update time the same.
-            watchHelper.sendSnapshot(1);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
-              docs: [
-                snapshot(doc1, {foo: 'a'}),
-                snapshot(doc2, {foo: 'b'}),
-                snapshot(doc3, {foo: 'c'}),
-              ],
-              docChanges: [
-                added(doc1, {foo: 'a'}),
-                added(doc2, {foo: 'b'}),
-                added(doc3, {foo: 'c'}),
-              ],
-            });
-
-            // Send a RESET.
-            streamHelper.write({
-              targetChange: {
-                targetChangeType: 'RESET',
-                targetIds: [],
-              },
-            });
-
-            // Send the same doc1, a modified doc2, no doc3, and a new doc4.
-            // Send a different result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.snapshotVersion = 2;
-            watchHelper.sendDoc(doc2, {foo: 'bb'});
-            watchHelper.sendDoc(doc4, {foo: 'd'});
-            watchHelper.sendCurrent();
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [
-                snapshot(doc1, {foo: 'a'}),
-                snapshot(doc2, {foo: 'bb'}),
-                snapshot(doc4, {foo: 'd'}),
-              ],
-              docChanges: [
-                removed(doc3, {foo: 'c'}),
-                added(doc4, {foo: 'd'}),
-                modified(doc2, {foo: 'bb'}),
-              ],
-            });
+          // Send the snapshot. Note that we do not increment the snapshot
+          // version to keep the update time the same.
+          watchHelper.sendSnapshot(1);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
+            docs: [
+              snapshot(doc1, {foo: 'a'}),
+              snapshot(doc2, {foo: 'b'}),
+              snapshot(doc3, {foo: 'c'}),
+            ],
+            docChanges: [
+              added(doc1, {foo: 'a'}),
+              added(doc2, {foo: 'b'}),
+              added(doc3, {foo: 'c'}),
+            ],
           });
+
+          // Send a RESET.
+          streamHelper.write({
+            targetChange: {
+              targetChangeType: 'RESET',
+              targetIds: [],
+            },
+          });
+
+          // Send the same doc1, a modified doc2, no doc3, and a new doc4.
+          // Send a different result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.snapshotVersion = 2;
+          watchHelper.sendDoc(doc2, {foo: 'bb'});
+          watchHelper.sendDoc(doc4, {foo: 'd'});
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [
+              snapshot(doc1, {foo: 'a'}),
+              snapshot(doc2, {foo: 'bb'}),
+              snapshot(doc4, {foo: 'd'}),
+            ],
+            docChanges: [
+              removed(doc3, {foo: 'c'}),
+              added(doc4, {foo: 'd'}),
+              modified(doc2, {foo: 'bb'}),
+            ],
+          });
+        });
     });
   });
 
@@ -1511,48 +1602,49 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            // Change the first doc.
-            watchHelper.sendDoc(doc1, {foo: 'b'});
-            // Send a doc change that should be ignored after reset.
-            watchHelper.sendDoc(doc2, {foo: 'c'});
-
-            // Send a RESET.
-            streamHelper.write({
-              targetChange: {
-                targetChangeType: 'RESET',
-                targetIds: [],
-              },
-            });
-
-            // Change the first doc again.
-            watchHelper.sendDoc(doc1, {foo: 'd'});
-
-            // Take a snapshot.
-            watchHelper.sendCurrent();
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [snapshot(doc1, {foo: 'd'})],
-              docChanges: [modified(doc1, {foo: 'd'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          // Change the first doc.
+          watchHelper.sendDoc(doc1, {foo: 'b'});
+          // Send a doc change that should be ignored after reset.
+          watchHelper.sendDoc(doc2, {foo: 'c'});
+
+          // Send a RESET.
+          streamHelper.write({
+            targetChange: {
+              targetChangeType: 'RESET',
+              targetIds: [],
+            },
+          });
+
+          // Change the first doc again.
+          watchHelper.sendDoc(doc1, {foo: 'd'});
+
+          // Take a snapshot.
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [snapshot(doc1, {foo: 'd'})],
+            docChanges: [modified(doc1, {foo: 'd'})],
+          });
+        });
     });
   });
 
@@ -1562,25 +1654,26 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            watchHelper.sendSnapshot(3);
-            watchHelper.sendSnapshot(4);
-            watchHelper.sendSnapshot(5);
-            watchHelper.sendSnapshot(6);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          watchHelper.sendSnapshot(3);
+          watchHelper.sendSnapshot(4);
+          watchHelper.sendSnapshot(5);
+          watchHelper.sendSnapshot(6);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+        });
     });
   });
 
@@ -1592,44 +1685,45 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            // Send a filter that doesn't match. Make sure the stream gets
-            // reopened.
-            oldRequestStream = streamHelper.writeStream!;
-            streamHelper.write({filter: {count: 0}});
-            return streamHelper.await('end');
-          })
-          .then(() => streamHelper.awaitOpen())
-          .then(request => {
-            expect(streamHelper.streamCount).to.equal(2);
-            expect(oldRequestStream).to.not.equal(streamHelper.writeStream);
-            verifyRequest(request, collQueryJSON());
-
-            watchHelper.sendAddTarget();
-            watchHelper.sendCurrent();
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [],
-              docChanges: [removed(doc1, {foo: 'a'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          // Send a filter that doesn't match. Make sure the stream gets
+          // reopened.
+          oldRequestStream = streamHelper.writeStream!;
+          streamHelper.write({filter: {count: 0}});
+          return streamHelper.await('end');
+        })
+        .then(() => streamHelper.awaitOpen())
+        .then(request => {
+          expect(streamHelper.streamCount).to.equal(2);
+          expect(oldRequestStream).to.not.equal(streamHelper.writeStream);
+          verifyRequest(request, collQueryJSON());
+
+          watchHelper.sendAddTarget();
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [],
+            docChanges: [removed(doc1, {foo: 'a'})],
+          });
+        });
     });
   });
 
@@ -1640,32 +1734,33 @@ describe('Query watch', () => {
       watchHelper.sendDoc(doc1, {foo: 'a'});
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            // Send the filter count for the previously added documents.
-            streamHelper.write({filter: {count: 1}});
-
-            // Even sending a new snapshot version should be a no-op.
-            watchHelper.sendCurrent();
-            watchHelper.sendSnapshot(2);
-
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendCurrent();
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            expect(streamHelper.streamCount).to.equal(1);
-            snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
-              docChanges: [added(doc2, {foo: 'b'})],
-            });
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          // Send the filter count for the previously added documents.
+          streamHelper.write({filter: {count: 1}});
+
+          // Even sending a new snapshot version should be a no-op.
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(2);
+
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          expect(streamHelper.streamCount).to.equal(1);
+          snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
+            docChanges: [added(doc2, {foo: 'b'})],
+          });
+        });
     });
   });
 
@@ -1676,34 +1771,35 @@ describe('Query watch', () => {
       watchHelper.sendDoc(doc1, {foo: 'a'});
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            watchHelper.sendDoc(doc1, {foo: 'b'});
-            watchHelper.sendDoc(doc2, {foo: 'c'});
-            watchHelper.sendDoc(doc3, {foo: 'd'});
-            streamHelper.write({filter: {count: 3}});
-
-            watchHelper.sendDoc(doc1, {foo: 'd'});
-            watchHelper.sendDoc(doc2, {foo: 'e'});
-            watchHelper.sendDocDelete(doc3);
-            streamHelper.write({filter: {count: 2}});
-
-            watchHelper.sendCurrent();
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            expect(streamHelper.streamCount).to.equal(1);
-            snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'd'}), snapshot(doc2, {foo: 'e'})],
-              docChanges: [added(doc2, {foo: 'e'}), modified(doc1, {foo: 'd'})],
-            });
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          watchHelper.sendDoc(doc1, {foo: 'b'});
+          watchHelper.sendDoc(doc2, {foo: 'c'});
+          watchHelper.sendDoc(doc3, {foo: 'd'});
+          streamHelper.write({filter: {count: 3}});
+
+          watchHelper.sendDoc(doc1, {foo: 'd'});
+          watchHelper.sendDoc(doc2, {foo: 'e'});
+          watchHelper.sendDocDelete(doc3);
+          streamHelper.write({filter: {count: 2}});
+
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          expect(streamHelper.streamCount).to.equal(1);
+          snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'd'}), snapshot(doc2, {foo: 'e'})],
+            docChanges: [added(doc2, {foo: 'e'}), modified(doc1, {foo: 'd'})],
+          });
+        });
     });
   });
 
@@ -1713,23 +1809,24 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendDocDelete(doc1);
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc2, {foo: 'b'})],
-              docChanges: [added(doc2, {foo: 'b'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendDocDelete(doc1);
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc2, {foo: 'b'})],
+            docChanges: [added(doc2, {foo: 'b'})],
           });
+        });
     });
   });
 
@@ -1739,35 +1836,36 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            // Send the snapshot. Note that we do not increment the snapshot
-            // version to keep the update time the same.
-            watchHelper.sendSnapshot(1);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendDoc(doc1, {foo: 'b'});
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendDoc(doc2, {foo: 'c'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'c'})],
-              docChanges: [added(doc2, {foo: 'c'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          // Send the snapshot. Note that we do not increment the snapshot
+          // version to keep the update time the same.
+          watchHelper.sendSnapshot(1);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendDoc(doc1, {foo: 'b'});
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendDoc(doc2, {foo: 'c'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'c'})],
+            docChanges: [added(doc2, {foo: 'c'})],
+          });
+        });
     });
   });
 
@@ -1777,42 +1875,43 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            // Send the same document but with a different update time
-            streamHelper.write({
-              documentChange: {
-                document: {
-                  name: doc1.formattedName,
-                  fields: watchHelper.serializer.encodeFields({foo: 'a'}),
-                  createTime: {seconds: 1, nanos: 2},
-                  updateTime: {seconds: 3, nanos: 5},
-                },
-                targetIds: [targetId],
-              },
-            });
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 3, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [modified(doc1, {foo: 'a'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          // Send the same document but with a different update time
+          streamHelper.write({
+            documentChange: {
+              document: {
+                name: doc1.formattedName,
+                fields: watchHelper.serializer.encodeFields({foo: 'a'}),
+                createTime: {seconds: 1, nanos: 2},
+                updateTime: {seconds: 3, nanos: 5},
+              },
+              targetIds: [targetId],
+            },
+          });
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 3, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [modified(doc1, {foo: 'a'})],
+          });
+        });
     });
   });
 
@@ -1824,20 +1923,22 @@ describe('Query watch', () => {
     });
 
     function initialSnapshot(
-        watchTest: (initialSnapshot: QuerySnapshot) => Promise<void>| void) {
+      watchTest: (initialSnapshot: QuerySnapshot) => Promise<void> | void
+    ) {
       return watchHelper.runTest(collQueryJSON(), () => {
         watchHelper.sendAddTarget();
         watchHelper.sendCurrent();
         watchHelper.sendSnapshot(++snapshotVersion);
-        return watchHelper.await('snapshot')
-            .then(snapshot => watchTest(snapshot));
+        return watchHelper
+          .await('snapshot')
+          .then(snapshot => watchTest(snapshot));
       });
     }
 
     function nextSnapshot(
-        baseSnapshot: QuerySnapshot,
-        watchStep: (currentSnapshot: QuerySnapshot) =>
-            Promise<void>| void): Promise<QuerySnapshot> {
+      baseSnapshot: QuerySnapshot,
+      watchStep: (currentSnapshot: QuerySnapshot) => Promise<void> | void
+    ): Promise<QuerySnapshot> {
       watchStep(baseSnapshot);
       watchHelper.sendSnapshot(++snapshotVersion);
       return watchHelper.await('snapshot') as Promise<QuerySnapshot>;
@@ -1849,206 +1950,198 @@ describe('Query watch', () => {
       let thirdSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
-               return nextSnapshot(
-                          snapshot,
-                          snapshot => {
-                            firstSnapshot = snapshot;
-                            expect(firstSnapshot.isEqual(firstSnapshot))
-                                .to.be.true;
-                            watchHelper.sendDoc(doc1, {foo: 'a'});
-                            watchHelper.sendDoc(doc2, {foo: 'b'});
-                            watchHelper.sendDoc(doc3, {foo: 'c'});
-                          })
-                   .then(
-                       snapshot => nextSnapshot(
-                           snapshot,
-                           snapshot => {
-                             secondSnapshot = snapshot;
-                             expect(secondSnapshot.isEqual(secondSnapshot))
-                                 .to.be.true;
-                             watchHelper.sendDocDelete(doc1);
-                             watchHelper.sendDoc(doc2, {foo: 'bar'});
-                             watchHelper.sendDoc(doc4, {foo: 'd'});
-                           }))
-                   .then(snapshot => {
-                     thirdSnapshot = snapshot;
-                     expect(thirdSnapshot.isEqual(thirdSnapshot)).to.be.true;
-                   });
-             })
-          .then(
-              () => initialSnapshot(snapshot => {
-                return nextSnapshot(
-                           snapshot,
-                           snapshot => {
-                             expect(snapshot.isEqual(firstSnapshot)).to.be.true;
-                             watchHelper.sendDoc(doc1, {foo: 'a'});
-                             watchHelper.sendDoc(doc2, {foo: 'b'});
-                             watchHelper.sendDoc(doc3, {foo: 'c'});
-                           })
-                    .then(
-                        snapshot => nextSnapshot(
-                            snapshot,
-                            snapshot => {
-                              expect(snapshot.isEqual(secondSnapshot))
-                                  .to.be.true;
-                              watchHelper.sendDocDelete(doc1);
-                              watchHelper.sendDoc(doc2, {foo: 'bar'});
-                              watchHelper.sendDoc(doc4, {foo: 'd'});
-                            }))
-                    .then(snapshot => {
-                      expect(snapshot.isEqual(thirdSnapshot)).to.be.true;
-                    });
-              }));
+        return nextSnapshot(snapshot, snapshot => {
+          firstSnapshot = snapshot;
+          expect(firstSnapshot.isEqual(firstSnapshot)).to.be.true;
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendDoc(doc3, {foo: 'c'});
+        })
+          .then(snapshot =>
+            nextSnapshot(snapshot, snapshot => {
+              secondSnapshot = snapshot;
+              expect(secondSnapshot.isEqual(secondSnapshot)).to.be.true;
+              watchHelper.sendDocDelete(doc1);
+              watchHelper.sendDoc(doc2, {foo: 'bar'});
+              watchHelper.sendDoc(doc4, {foo: 'd'});
+            })
+          )
+          .then(snapshot => {
+            thirdSnapshot = snapshot;
+            expect(thirdSnapshot.isEqual(thirdSnapshot)).to.be.true;
+          });
+      }).then(() =>
+        initialSnapshot(snapshot => {
+          return nextSnapshot(snapshot, snapshot => {
+            expect(snapshot.isEqual(firstSnapshot)).to.be.true;
+            watchHelper.sendDoc(doc1, {foo: 'a'});
+            watchHelper.sendDoc(doc2, {foo: 'b'});
+            watchHelper.sendDoc(doc3, {foo: 'c'});
+          })
+            .then(snapshot =>
+              nextSnapshot(snapshot, snapshot => {
+                expect(snapshot.isEqual(secondSnapshot)).to.be.true;
+                watchHelper.sendDocDelete(doc1);
+                watchHelper.sendDoc(doc2, {foo: 'bar'});
+                watchHelper.sendDoc(doc4, {foo: 'd'});
+              })
+            )
+            .then(snapshot => {
+              expect(snapshot.isEqual(thirdSnapshot)).to.be.true;
+            });
+        })
+      );
     });
 
     it('for equal snapshots with materialized changes', () => {
       let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
-               return nextSnapshot(snapshot, () => {
-                        watchHelper.sendDoc(doc1, {foo: 'a'});
-                        watchHelper.sendDoc(doc2, {foo: 'b'});
-                        watchHelper.sendDoc(doc3, {foo: 'c'});
-                      }).then(snapshot => {
-                 firstSnapshot = snapshot;
-               });
-             })
-          .then(() => initialSnapshot(snapshot => {
-                  return nextSnapshot(snapshot, () => {
-                           watchHelper.sendDoc(doc1, {foo: 'a'});
-                           watchHelper.sendDoc(doc2, {foo: 'b'});
-                           watchHelper.sendDoc(doc3, {foo: 'c'});
-                         }).then(snapshot => {
-                    const materializedDocs = snapshot.docs;
-                    expect(materializedDocs.length).to.equal(3);
-                    expect(snapshot.isEqual(firstSnapshot)).to.be.true;
-                  });
-                }));
+        return nextSnapshot(snapshot, () => {
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendDoc(doc3, {foo: 'c'});
+        }).then(snapshot => {
+          firstSnapshot = snapshot;
+        });
+      }).then(() =>
+        initialSnapshot(snapshot => {
+          return nextSnapshot(snapshot, () => {
+            watchHelper.sendDoc(doc1, {foo: 'a'});
+            watchHelper.sendDoc(doc2, {foo: 'b'});
+            watchHelper.sendDoc(doc3, {foo: 'c'});
+          }).then(snapshot => {
+            const materializedDocs = snapshot.docs;
+            expect(materializedDocs.length).to.equal(3);
+            expect(snapshot.isEqual(firstSnapshot)).to.be.true;
+          });
+        })
+      );
     });
 
     it('for snapshots of different size', () => {
       let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
-               return nextSnapshot(snapshot, () => {
-                        watchHelper.sendDoc(doc1, {foo: 'a'});
-                        watchHelper.sendDoc(doc2, {foo: 'b'});
-                      }).then(snapshot => {
-                 firstSnapshot = snapshot;
-               });
-             })
-          .then(() => initialSnapshot(snapshot => {
-                  return nextSnapshot(snapshot, () => {
-                           watchHelper.sendDoc(doc1, {foo: 'a'});
-                         }).then(snapshot => {
-                    expect(snapshot.isEqual(firstSnapshot)).to.be.false;
-                  });
-                }));
+        return nextSnapshot(snapshot, () => {
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+        }).then(snapshot => {
+          firstSnapshot = snapshot;
+        });
+      }).then(() =>
+        initialSnapshot(snapshot => {
+          return nextSnapshot(snapshot, () => {
+            watchHelper.sendDoc(doc1, {foo: 'a'});
+          }).then(snapshot => {
+            expect(snapshot.isEqual(firstSnapshot)).to.be.false;
+          });
+        })
+      );
     });
 
     it('for snapshots with different kind of changes', () => {
       let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
-               return nextSnapshot(snapshot, () => {
-                        watchHelper.sendDoc(doc1, {foo: 'a'});
-                      }).then(snapshot => {
-                 firstSnapshot = snapshot;
-                 expect(snapshot.docChanges()[0].isEqual(
-                            firstSnapshot.docChanges()[0]))
-                     .to.be.true;
-               });
-             })
-          .then(() => initialSnapshot(snapshot => {
-                  return nextSnapshot(snapshot, () => {
-                           watchHelper.sendDoc(doc1, {foo: 'b'});
-                         }).then(snapshot => {
-                    expect(snapshot.isEqual(firstSnapshot)).to.be.false;
-                    expect(snapshot.docChanges()[0].isEqual(
-                               firstSnapshot.docChanges()[0]))
-                        .to.be.false;
-                  });
-                }));
+        return nextSnapshot(snapshot, () => {
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+        }).then(snapshot => {
+          firstSnapshot = snapshot;
+          expect(
+            snapshot.docChanges()[0].isEqual(firstSnapshot.docChanges()[0])
+          ).to.be.true;
+        });
+      }).then(() =>
+        initialSnapshot(snapshot => {
+          return nextSnapshot(snapshot, () => {
+            watchHelper.sendDoc(doc1, {foo: 'b'});
+          }).then(snapshot => {
+            expect(snapshot.isEqual(firstSnapshot)).to.be.false;
+            expect(
+              snapshot.docChanges()[0].isEqual(firstSnapshot.docChanges()[0])
+            ).to.be.false;
+          });
+        })
+      );
     });
 
     it('for snapshots with different number of changes', () => {
       let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
-               return nextSnapshot(
-                          snapshot, () => watchHelper.sendDoc(doc1, {foo: 'a'}))
-                   .then(
-                       snapshot => nextSnapshot(
-                           snapshot,
-                           () => watchHelper.sendDoc(doc2, {foo: 'b'})))
-                   .then(snapshot => {
-                     firstSnapshot = snapshot;
-                   });
-             })
-          .then(() => initialSnapshot(snapshot => {
-                  return nextSnapshot(
-                             snapshot,
-                             () => watchHelper.sendDoc(doc1, {foo: 'a'}))
-                      .then(
-                          snapshot => nextSnapshot(
-                              snapshot,
-                              () => {
-                                watchHelper.sendDocDelete(doc1);
-                                watchHelper.sendDoc(doc2, {foo: 'b'});
-                                watchHelper.sendDoc(doc3, {foo: 'c'});
-                              }))
-                      .then(snapshot => {
-                        expect(snapshot.isEqual(firstSnapshot)).to.be.false;
-                      });
-                }));
+        return nextSnapshot(snapshot, () =>
+          watchHelper.sendDoc(doc1, {foo: 'a'})
+        )
+          .then(snapshot =>
+            nextSnapshot(snapshot, () => watchHelper.sendDoc(doc2, {foo: 'b'}))
+          )
+          .then(snapshot => {
+            firstSnapshot = snapshot;
+          });
+      }).then(() =>
+        initialSnapshot(snapshot => {
+          return nextSnapshot(snapshot, () =>
+            watchHelper.sendDoc(doc1, {foo: 'a'})
+          )
+            .then(snapshot =>
+              nextSnapshot(snapshot, () => {
+                watchHelper.sendDocDelete(doc1);
+                watchHelper.sendDoc(doc2, {foo: 'b'});
+                watchHelper.sendDoc(doc3, {foo: 'c'});
+              })
+            )
+            .then(snapshot => {
+              expect(snapshot.isEqual(firstSnapshot)).to.be.false;
+            });
+        })
+      );
     });
 
     it('for snapshots with different data types', () => {
       let originalSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
-               return nextSnapshot(
-                          snapshot, () => watchHelper.sendDoc(doc1, {foo: '1'}))
-                   .then(snapshot => {
-                     originalSnapshot = snapshot;
-                   });
-             })
-          .then(() => initialSnapshot(snapshot => {
-                  return nextSnapshot(
-                             snapshot,
-                             () => watchHelper.sendDoc(doc1, {foo: 1}))
-                      .then(snapshot => {
-                        expect(snapshot.isEqual(originalSnapshot)).to.be.false;
-                      });
-                }));
+        return nextSnapshot(snapshot, () =>
+          watchHelper.sendDoc(doc1, {foo: '1'})
+        ).then(snapshot => {
+          originalSnapshot = snapshot;
+        });
+      }).then(() =>
+        initialSnapshot(snapshot => {
+          return nextSnapshot(snapshot, () =>
+            watchHelper.sendDoc(doc1, {foo: 1})
+          ).then(snapshot => {
+            expect(snapshot.isEqual(originalSnapshot)).to.be.false;
+          });
+        })
+      );
     });
 
     it('for snapshots with different queries', () => {
       let firstSnapshot: QuerySnapshot;
 
       return initialSnapshot(snapshot => {
-               firstSnapshot = snapshot;
-             })
-          .then(() => {
-            watchHelper =
-                new WatchHelper(streamHelper, includeQuery(), targetId);
-            return watchHelper.runTest(includeQueryJSON(), () => {
-              watchHelper.sendAddTarget();
-              watchHelper.sendCurrent();
-              watchHelper.sendSnapshot(1);
-              return watchHelper.await('snapshot').then(snapshot => {
-                expect((snapshot).isEqual(firstSnapshot)).to.be.false;
-              });
-            });
+        firstSnapshot = snapshot;
+      }).then(() => {
+        watchHelper = new WatchHelper(streamHelper, includeQuery(), targetId);
+        return watchHelper.runTest(includeQueryJSON(), () => {
+          watchHelper.sendAddTarget();
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(1);
+          return watchHelper.await('snapshot').then(snapshot => {
+            expect(snapshot.isEqual(firstSnapshot)).to.be.false;
           });
+        });
+      });
     });
 
     it('for objects with different type', () => {
       return initialSnapshot(snapshot => {
         expect(snapshot.isEqual('foo' as InvalidApiUsage)).to.be.false;
         expect(snapshot.isEqual({} as InvalidApiUsage)).to.be.false;
-        expect(snapshot.isEqual(new GeoPoint(0, 0) as InvalidApiUsage))
-            .to.be.false;
+        expect(snapshot.isEqual(new GeoPoint(0, 0) as InvalidApiUsage)).to.be
+          .false;
       });
     });
   });
@@ -2059,36 +2152,37 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
+      return watchHelper
+        .await('snapshot')
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, EMPTY);
 
-            // Add a result.
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-            watchHelper.sendSnapshot(1);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
-              docs: [snapshot(doc1, {foo: 'a'})],
-              docChanges: [added(doc1, {foo: 'a'})],
-            });
-
-            // Delete a doc and send the same doc again. Note that we did not
-            // increment the snapshot version to keep the update time the same.
-            watchHelper.sendDocDelete(doc1);
-            watchHelper.sendDoc(doc1, {foo: 'a'});
-
-            watchHelper.sendDoc(doc2, {foo: 'b'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(results => {
-            snapshotsEqual(lastSnapshot, 2, results, {
-              docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
-              docChanges: [added(doc2, {foo: 'b'})],
-            });
+          // Add a result.
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+          watchHelper.sendSnapshot(1);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          lastSnapshot = snapshotsEqual(lastSnapshot, 1, results, {
+            docs: [snapshot(doc1, {foo: 'a'})],
+            docChanges: [added(doc1, {foo: 'a'})],
           });
+
+          // Delete a doc and send the same doc again. Note that we did not
+          // increment the snapshot version to keep the update time the same.
+          watchHelper.sendDocDelete(doc1);
+          watchHelper.sendDoc(doc1, {foo: 'a'});
+
+          watchHelper.sendDoc(doc2, {foo: 'b'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(results => {
+          snapshotsEqual(lastSnapshot, 2, results, {
+            docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
+            docChanges: [added(doc2, {foo: 'b'})],
+          });
+        });
     });
   });
 });
@@ -2151,11 +2245,13 @@ describe('DocumentReference watch', () => {
   });
 
   it('with invalid callbacks', () => {
-    expect(() => doc.onSnapshot('foo' as InvalidApiUsage))
-        .to.throw('Value for argument "onNext" is not a valid function.');
+    expect(() => doc.onSnapshot('foo' as InvalidApiUsage)).to.throw(
+      'Value for argument "onNext" is not a valid function.'
+    );
 
-    expect(() => doc.onSnapshot(() => {}, 'foo' as InvalidApiUsage))
-        .to.throw('Value for argument "onError" is not a valid function.');
+    expect(() => doc.onSnapshot(() => {}, 'foo' as InvalidApiUsage)).to.throw(
+      'Value for argument "onError" is not a valid function.'
+    );
   });
 
   it('without error callback', done => {
@@ -2172,38 +2268,51 @@ describe('DocumentReference watch', () => {
   });
 
   it('handles invalid listen protos', () => {
-    return watchHelper.runFailedTest(watchJSON(), () => {
-      // Mock the server responding to the watch with an invalid proto.
-      streamHelper.write({invalid: true});
-    }, 'Unknown listen response type: {"invalid":true}');
+    return watchHelper.runFailedTest(
+      watchJSON(),
+      () => {
+        // Mock the server responding to the watch with an invalid proto.
+        streamHelper.write({invalid: true});
+      },
+      'Unknown listen response type: {"invalid":true}'
+    );
   });
 
   it('handles invalid target change protos', () => {
     return watchHelper.runFailedTest(
-        watchJSON(),
-        () => {
-          // Mock the server responding to the watch with an invalid proto.
-          streamHelper.write({
-            targetChange: {
-              targetChangeType: 'INVALID',
-              targetIds: [0xfeed],
-            },
-          });
-        },
-        'Unknown target change type: {"targetChangeType":"INVALID",' +
-            '"targetIds":[65261]}');
+      watchJSON(),
+      () => {
+        // Mock the server responding to the watch with an invalid proto.
+        streamHelper.write({
+          targetChange: {
+            targetChangeType: 'INVALID',
+            targetIds: [0xfeed],
+          },
+        });
+      },
+      'Unknown target change type: {"targetChangeType":"INVALID",' +
+        '"targetIds":[65261]}'
+    );
   });
 
   it('handles remove target change protos', () => {
-    return watchHelper.runFailedTest(watchJSON(), () => {
-      watchHelper.sendRemoveTarget();
-    }, 'Error 13: internal error');
+    return watchHelper.runFailedTest(
+      watchJSON(),
+      () => {
+        watchHelper.sendRemoveTarget();
+      },
+      'Error 13: internal error'
+    );
   });
 
   it('handles remove target change with code', () => {
-    return watchHelper.runFailedTest(watchJSON(), () => {
-      watchHelper.sendRemoveTarget(7);
-    }, 'Error 7: test remove');
+    return watchHelper.runFailedTest(
+      watchJSON(),
+      () => {
+        watchHelper.sendRemoveTarget(7);
+      },
+      'Error 7: test remove'
+    );
   });
 
   it('handles changing a doc', () => {
@@ -2212,32 +2321,31 @@ describe('DocumentReference watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.false;
+      return watchHelper
+        .await('snapshot')
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.false;
 
-            // Add a result.
-            watchHelper.sendDoc(doc, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.true;
-            expect(snapshot.createTime!.isEqual(new Timestamp(1, 2)))
-                .to.be.true;
-            expect(snapshot.updateTime!.isEqual(new Timestamp(3, 1)))
-                .to.be.true;
-            expect(snapshot.get('foo')).to.equal('a');
+          // Add a result.
+          watchHelper.sendDoc(doc, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.true;
+          expect(snapshot.createTime!.isEqual(new Timestamp(1, 2))).to.be.true;
+          expect(snapshot.updateTime!.isEqual(new Timestamp(3, 1))).to.be.true;
+          expect(snapshot.get('foo')).to.equal('a');
 
-            // Change the document.
-            watchHelper.sendDoc(doc, {foo: 'b'});
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.true;
-            expect(snapshot.get('foo')).to.equal('b');
-          });
+          // Change the document.
+          watchHelper.sendDoc(doc, {foo: 'b'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.true;
+          expect(snapshot.get('foo')).to.equal('b');
+        });
     });
   });
 
@@ -2247,28 +2355,29 @@ describe('DocumentReference watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.false;
+      return watchHelper
+        .await('snapshot')
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.false;
 
-            streamHelper.write({
-              documentChange: {
-                document: {
-                  name: `projects/${PROJECT_ID}/databases/(default)/col/wrong`,
-                  fields: {},
-                  createTime: {seconds: 1, nanos: 2},
-                  updateTime: {seconds: 3, nanos: 4},
-                },
-                targetIds: [targetId],
+          streamHelper.write({
+            documentChange: {
+              document: {
+                name: `projects/${PROJECT_ID}/databases/(default)/col/wrong`,
+                fields: {},
+                createTime: {seconds: 1, nanos: 2},
+                updateTime: {seconds: 3, nanos: 4},
               },
-            });
-
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.false;
+              targetIds: [targetId],
+            },
           });
+
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.false;
+        });
     });
   });
 
@@ -2280,42 +2389,43 @@ describe('DocumentReference watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.false;
+      return watchHelper
+        .await('snapshot')
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.false;
 
-            // Add a result.
-            watchHelper.sendDoc(doc, {foo: 'a'});
-            watchHelper.sendSnapshot(2, resumeToken);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.true;
-            expect(snapshot.get('foo')).to.equal('a');
+          // Add a result.
+          watchHelper.sendDoc(doc, {foo: 'a'});
+          watchHelper.sendSnapshot(2, resumeToken);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.true;
+          expect(snapshot.get('foo')).to.equal('a');
 
-            streamHelper.destroyStream();
-            return streamHelper.awaitReopen();
-          })
-          .then(request => {
-            verifyRequest(request, resumeTokenJSON(resumeToken));
-            // Change the document.
-            watchHelper.sendDoc(doc, {foo: 'b'});
-            watchHelper.sendSnapshot(3, resumeToken);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.true;
-            expect(snapshot.get('foo')).to.equal('b');
+          streamHelper.destroyStream();
+          return streamHelper.awaitReopen();
+        })
+        .then(request => {
+          verifyRequest(request, resumeTokenJSON(resumeToken));
+          // Change the document.
+          watchHelper.sendDoc(doc, {foo: 'b'});
+          watchHelper.sendSnapshot(3, resumeToken);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.true;
+          expect(snapshot.get('foo')).to.equal('b');
 
-            // Remove the document.
-            watchHelper.sendDocDelete(doc);
-            watchHelper.sendSnapshot(4);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.false;
-            expect(streamHelper.streamCount).to.equal(2);
-          });
+          // Remove the document.
+          watchHelper.sendDocDelete(doc);
+          watchHelper.sendSnapshot(4);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.false;
+          expect(streamHelper.streamCount).to.equal(2);
+        });
     });
   });
 
@@ -2330,29 +2440,30 @@ describe('DocumentReference watch', () => {
       watchHelper.sendDoc(doc, {foo: 'b'});
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(snapshot => {
-            expect(snapshot.get('foo')).to.equal('b');
+      return watchHelper
+        .await('snapshot')
+        .then(snapshot => {
+          expect(snapshot.get('foo')).to.equal('b');
 
-            // Modify it two more times.
-            watchHelper.sendDoc(doc, {foo: 'c'});
-            watchHelper.sendDoc(doc, {foo: 'd'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.get('foo')).to.equal('d');
+          // Modify it two more times.
+          watchHelper.sendDoc(doc, {foo: 'c'});
+          watchHelper.sendDoc(doc, {foo: 'd'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.get('foo')).to.equal('d');
 
-            // Remove it, delete it, and then add it again.
-            watchHelper.sendDocRemove(doc, {foo: 'e'});
-            watchHelper.sendDocDelete(doc);
-            watchHelper.sendDoc(doc, {foo: 'f'});
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.get('foo')).to.equal('f');
-          });
+          // Remove it, delete it, and then add it again.
+          watchHelper.sendDocRemove(doc, {foo: 'e'});
+          watchHelper.sendDocDelete(doc);
+          watchHelper.sendDoc(doc, {foo: 'f'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.get('foo')).to.equal('f');
+        });
     });
   });
 
@@ -2362,26 +2473,27 @@ describe('DocumentReference watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.false;
+      return watchHelper
+        .await('snapshot')
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.false;
 
-            // Add a result.
-            watchHelper.sendDoc(doc, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.true;
+          // Add a result.
+          watchHelper.sendDoc(doc, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.true;
 
-            // Delete the document.
-            watchHelper.sendDocDelete(doc);
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.false;
-          });
+          // Delete the document.
+          watchHelper.sendDocDelete(doc);
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.false;
+        });
     });
   });
 
@@ -2391,26 +2503,27 @@ describe('DocumentReference watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.false;
+      return watchHelper
+        .await('snapshot')
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.false;
 
-            // Add a result.
-            watchHelper.sendDoc(doc, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.true;
+          // Add a result.
+          watchHelper.sendDoc(doc, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.true;
 
-            // Remove the document.
-            watchHelper.sendDocRemove(doc, {foo: 'c'});
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.exists).to.be.false;
-          });
+          // Remove the document.
+          watchHelper.sendDocRemove(doc, {foo: 'c'});
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.exists).to.be.false;
+        });
     });
   });
 
@@ -2420,33 +2533,34 @@ describe('DocumentReference watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
-      return watchHelper.await('snapshot')
-          .then(() => {
-            // Add three results.
-            watchHelper.sendDoc(doc, {foo: 'a'});
-            watchHelper.sendSnapshot(2);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.get('foo')).to.equal('a');
+      return watchHelper
+        .await('snapshot')
+        .then(() => {
+          // Add three results.
+          watchHelper.sendDoc(doc, {foo: 'a'});
+          watchHelper.sendSnapshot(2);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.get('foo')).to.equal('a');
 
-            // Send a RESET.
-            streamHelper.write({
-              targetChange: {
-                targetChangeType: 'RESET',
-                targetIds: [],
-              },
-            });
-
-            // Send the modified doc.
-            watchHelper.sendDoc(doc, {foo: 'b'});
-            watchHelper.sendCurrent();
-            watchHelper.sendSnapshot(3);
-            return watchHelper.await('snapshot');
-          })
-          .then(snapshot => {
-            expect(snapshot.get('foo')).to.equal('b');
+          // Send a RESET.
+          streamHelper.write({
+            targetChange: {
+              targetChangeType: 'RESET',
+              targetIds: [],
+            },
           });
+
+          // Send the modified doc.
+          watchHelper.sendDoc(doc, {foo: 'b'});
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(3);
+          return watchHelper.await('snapshot');
+        })
+        .then(snapshot => {
+          expect(snapshot.get('foo')).to.equal('b');
+        });
     });
   });
 });
@@ -2473,8 +2587,10 @@ describe('Query comparator', () => {
   });
 
   function testSort(
-      query: Query, input: QueryDocumentSnapshot[],
-      expected: QueryDocumentSnapshot[]) {
+    query: Query,
+    input: QueryDocumentSnapshot[],
+    expected: QueryDocumentSnapshot[]
+  ) {
     const comparator = query.comparator();
     input.sort(comparator);
     docsEqual(input, expected);
@@ -2544,7 +2660,8 @@ describe('Query comparator', () => {
     ];
 
     const comparator = query.comparator();
-    expect(() => input.sort(comparator))
-        .to.throw('Trying to compare documents on fields that don\'t exist');
+    expect(() => input.sort(comparator)).to.throw(
+      "Trying to compare documents on fields that don't exist"
+    );
   });
 });

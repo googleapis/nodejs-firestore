@@ -24,10 +24,10 @@ describe('ExponentialBackoff', () => {
   let observedDelays: number[] = [];
 
   before(() => {
-    setTimeoutHandler(((callback, timeout) => {
+    setTimeoutHandler((callback, timeout) => {
       observedDelays.push(timeout);
       callback();
-    }));
+    });
   });
 
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('ExponentialBackoff', () => {
     expect(actual).to.be.at.most(high);
   }
 
-  it('doesn\'t delay first attempt', async () => {
+  it("doesn't delay first attempt", async () => {
     const backoff = new ExponentialBackoff();
     await backoff.backoffAndWait().then(nop);
     assertDelayEquals(0);

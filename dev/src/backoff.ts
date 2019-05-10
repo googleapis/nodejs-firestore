@@ -51,7 +51,7 @@ const DEFAULT_JITTER_FACTOR = 1.0;
 /*!
  * The timeout handler used by `ExponentialBackoff`.
  */
-let delayExecution: ((f: () => void, ms: number) => void) = setTimeout;
+let delayExecution: (f: () => void, ms: number) => void = setTimeout;
 
 /**
  * Allows overriding of the timeout handler used by the exponential backoff
@@ -63,7 +63,8 @@ let delayExecution: ((f: () => void, ms: number) => void) = setTimeout;
  * @param {function} handler A handler than matches the API of `setTimeout()`.
  */
 export function setTimeoutHandler(
-    handler: ((f: () => void, ms: number) => void)): void {
+  handler: (f: () => void, ms: number) => void
+): void {
   delayExecution = handler;
 }
 
@@ -142,18 +143,22 @@ export class ExponentialBackoff {
   private currentBaseMs = 0;
 
   constructor(options: ExponentialBackoffOptions = {}) {
-    this.initialDelayMs = options.initialDelayMs !== undefined ?
-        options.initialDelayMs :
-        DEFAULT_BACKOFF_INITIAL_DELAY_MS;
-    this.backoffFactor = options.backoffFactor !== undefined ?
-        options.backoffFactor :
-        DEFAULT_BACKOFF_FACTOR;
-    this.maxDelayMs = options.maxDelayMs !== undefined ?
-        options.maxDelayMs :
-        DEFAULT_BACKOFF_MAX_DELAY_MS;
-    this.jitterFactor = options.jitterFactor !== undefined ?
-        options.jitterFactor :
-        DEFAULT_JITTER_FACTOR;
+    this.initialDelayMs =
+      options.initialDelayMs !== undefined
+        ? options.initialDelayMs
+        : DEFAULT_BACKOFF_INITIAL_DELAY_MS;
+    this.backoffFactor =
+      options.backoffFactor !== undefined
+        ? options.backoffFactor
+        : DEFAULT_BACKOFF_FACTOR;
+    this.maxDelayMs =
+      options.maxDelayMs !== undefined
+        ? options.maxDelayMs
+        : DEFAULT_BACKOFF_MAX_DELAY_MS;
+    this.jitterFactor =
+      options.jitterFactor !== undefined
+        ? options.jitterFactor
+        : DEFAULT_JITTER_FACTOR;
   }
 
   /**
@@ -192,9 +197,11 @@ export class ExponentialBackoff {
     const delayWithJitterMs = this.currentBaseMs + this.jitterDelayMs();
     if (this.currentBaseMs > 0) {
       logger(
-          'ExponentialBackoff.backoffAndWait', null,
-          `Backing off for ${delayWithJitterMs} ms ` +
-              `(base delay: ${this.currentBaseMs} ms)`);
+        'ExponentialBackoff.backoffAndWait',
+        null,
+        `Backing off for ${delayWithJitterMs} ms ` +
+          `(base delay: ${this.currentBaseMs} ms)`
+      );
     }
 
     // Apply backoff factor to determine next delay and ensure it is within

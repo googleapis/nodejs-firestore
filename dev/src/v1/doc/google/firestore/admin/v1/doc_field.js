@@ -99,6 +99,6 @@ const Field = {
    * @see [google.firestore.admin.v1.Field.IndexConfig definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/admin/v1/field.proto}
    */
   IndexConfig: {
-      // This is for documentation. Actual contents will be loaded by gRPC.
-  }
+    // This is for documentation. Actual contents will be loaded by gRPC.
+  },
 };

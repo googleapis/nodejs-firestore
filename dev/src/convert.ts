@@ -44,9 +44,10 @@ import api = google.firestore.v1;
  * provided.
  */
 export function timestampFromJson(
-    timestampValue?: string|google.protobuf.ITimestamp,
-    argumentName?: string): google.protobuf.ITimestamp|undefined {
-  let timestampProto: google.protobuf.ITimestamp|undefined;
+  timestampValue?: string | google.protobuf.ITimestamp,
+  argumentName?: string
+): google.protobuf.ITimestamp | undefined {
+  let timestampProto: google.protobuf.ITimestamp | undefined;
 
   if (typeof timestampValue === 'string') {
     const date = new Date(timestampValue);
@@ -54,8 +55,10 @@ export function timestampFromJson(
     let nanos = 0;
 
     if (timestampValue.length > 20) {
-      const nanoString =
-          timestampValue.substring(20, timestampValue.length - 1);
+      const nanoString = timestampValue.substring(
+        20,
+        timestampValue.length - 1
+      );
       const trailingZeroes = 9 - nanoString.length;
       nanos = Number(nanoString) * Math.pow(10, trailingZeroes);
     }
@@ -63,7 +66,8 @@ export function timestampFromJson(
     if (isNaN(seconds) || isNaN(nanos)) {
       argumentName = argumentName || 'timestampValue';
       throw new Error(
-          `Specify a valid ISO 8601 timestamp for "${argumentName}".`);
+        `Specify a valid ISO 8601 timestamp for "${argumentName}".`
+      );
     }
 
     timestampProto = {
@@ -88,7 +92,7 @@ export function timestampFromJson(
  * @param bytesValue The value to convert.
  * @return The value as expected by Protobuf JS.
  */
-function bytesFromJson(bytesValue: string|Uint8Array): Uint8Array {
+function bytesFromJson(bytesValue: string | Uint8Array): Uint8Array {
   if (typeof bytesValue === 'string') {
     return Buffer.from(bytesValue, 'base64');
   } else {
@@ -146,7 +150,8 @@ export function detectValueType(proto: ProtobufJsValue): string {
 
   if (detectedValues.length !== 1) {
     throw new Error(
-        `Unable to infer type value fom '${JSON.stringify(proto)}'.`);
+      `Unable to infer type value fom '${JSON.stringify(proto)}'.`
+    );
   }
 
   return detectedValues[0];

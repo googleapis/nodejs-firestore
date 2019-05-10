@@ -105,7 +105,6 @@ const Index = {
      * @memberof google.firestore.admin.v1
      */
     ArrayConfig: {
-
       /**
        * The index does not support additional array queries.
        */
@@ -114,7 +113,7 @@ const Index = {
       /**
        * The index supports array containment queries.
        */
-      CONTAINS: 1
+      CONTAINS: 1,
     },
 
     /**
@@ -124,7 +123,6 @@ const Index = {
      * @memberof google.firestore.admin.v1
      */
     Order: {
-
       /**
        * The ordering is unspecified. Not a valid option.
        */
@@ -138,8 +136,8 @@ const Index = {
       /**
        * The field is ordered by descending field value.
        */
-      DESCENDING: 2
-    }
+      DESCENDING: 2,
+    },
   },
 
   /**
@@ -150,7 +148,6 @@ const Index = {
    * @memberof google.firestore.admin.v1
    */
   QueryScope: {
-
     /**
      * The query scope is unspecified. Not a valid option.
      */
@@ -161,7 +158,7 @@ const Index = {
      * against a collection that is the child of a specific document, specified
      * at query time, and that has the collection id specified by the index.
      */
-    COLLECTION: 1
+    COLLECTION: 1,
   },
 
   /**
@@ -174,7 +171,6 @@ const Index = {
    * @memberof google.firestore.admin.v1
    */
   State: {
-
     /**
      * The state is unspecified.
      */
@@ -205,6 +201,6 @@ const Index = {
      * that last attempted to create this index failed, then re-create the
      * index.
      */
-    NEEDS_REPAIR: 3
-  }
+    NEEDS_REPAIR: 3,
+  },
 };
