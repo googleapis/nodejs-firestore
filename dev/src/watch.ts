@@ -16,8 +16,6 @@
 
 import * as assert from 'assert';
 import * as rbtree from 'functional-red-black-tree';
-import * as through2 from 'through2';
-
 import {google} from '../protos/firestore_proto_api';
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
@@ -30,6 +28,7 @@ import {GrpcError, RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
+import {PassThrough} from 'stream';
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -347,7 +346,7 @@ abstract class Watch {
 
     // We may need to replace the underlying stream on reset events.
     // This is the one that will be returned and proxy the current one.
-    const stream = through2.obj();
+    const stream = new PassThrough({objectMode: true});
     // The current stream to the backend.
     let currentStream: NodeJS.ReadWriteStream | null = null;
 
