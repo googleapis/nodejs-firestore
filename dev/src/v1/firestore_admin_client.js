@@ -49,10 +49,8 @@ class FirestoreAdminClient {
    *     Developer's Console, e.g. 'grape-spaceship-123'. We will also check
    *     the environment variable GCLOUD_PROJECT for your project ID. If your
    *     app is running in an environment which supports
-   *     {@link
-   * https://developers.google.com/identity/protocols/application-default-credentials
-   * Application Default Credentials}, your project ID will be detected
-   * automatically.
+   *     {@link https://developers.google.com/identity/protocols/application-default-credentials Application Default Credentials},
+   *     your project ID will be detected automatically.
    * @param {function} [options.promise] - Custom promise module to use instead
    *     of native Promises.
    * @param {string} [options.servicePath] - The domain name of the
@@ -106,14 +104,14 @@ class FirestoreAdminClient {
       databasePathTemplate: new gax.PathTemplate(
         'projects/{project}/databases/{database}'
       ),
-      parentPathTemplate: new gax.PathTemplate(
-        'projects/{project}/databases/{database}/collectionGroups/{collection_id}'
+      fieldPathTemplate: new gax.PathTemplate(
+        'projects/{project}/databases/{database}/collectionGroups/{collection_id}/fields/{field_id}'
       ),
       indexPathTemplate: new gax.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection_id}/indexes/{index_id}'
       ),
-      fieldPathTemplate: new gax.PathTemplate(
-        'projects/{project}/databases/{database}/collectionGroups/{collection_id}/fields/{field_id}'
+      parentPathTemplate: new gax.PathTemplate(
+        'projects/{project}/databases/{database}/collectionGroups/{collection_id}'
       ),
     };
 
@@ -236,22 +234,17 @@ class FirestoreAdminClient {
    * @param {Object} request.index
    *   The composite index to create.
    *
-   *   This object should have the same structure as [Index]{@link
-   * google.firestore.admin.v1.Index}
+   *   This object should have the same structure as [Index]{@link google.firestore.admin.v1.Index}
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing
-   * [Operation]{@link google.longrunning.Operation}.
+   *   The second parameter to the callback is an object representing [Operation]{@link google.longrunning.Operation}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing
-   * [Operation]{@link google.longrunning.Operation}. The promise has a method
-   * named "cancel" which cancels the ongoing API call.
+   *   The first element of the array is an object representing [Operation]{@link google.longrunning.Operation}.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -261,9 +254,11 @@ class FirestoreAdminClient {
    *   // optional auth parameters.
    * });
    *
-   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]'); const index = {}; const request = { parent:
-   * formattedParent, index: index,
+   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]');
+   * const index = {};
+   * const request = {
+   *   parent: formattedParent,
+   *   index: index,
    * };
    * client.createIndex(request)
    *   .then(responses => {
@@ -280,6 +275,13 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent,
+    });
 
     return this._innerApiCalls.createIndex(request, options, callback);
   }
@@ -301,35 +303,27 @@ class FirestoreAdminClient {
    *   performed per-page, this determines the maximum number of
    *   resources in a page.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @param {function(?Error, ?Array, ?Object, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is Array of [Index]{@link
-   * google.firestore.admin.v1.Index}.
+   *   The second parameter to the callback is Array of [Index]{@link google.firestore.admin.v1.Index}.
    *
-   *   When autoPaginate: false is specified through options, it contains the
-   * result in a single response. If the response indicates the next page
-   * exists, the third parameter is set to be used for the next request object.
-   * The fourth parameter keeps the raw response object of an object
-   * representing [ListIndexesResponse]{@link
-   * google.firestore.admin.v1.ListIndexesResponse}.
+   *   When autoPaginate: false is specified through options, it contains the result
+   *   in a single response. If the response indicates the next page exists, the third
+   *   parameter is set to be used for the next request object. The fourth parameter keeps
+   *   the raw response object of an object representing [ListIndexesResponse]{@link google.firestore.admin.v1.ListIndexesResponse}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is Array of [Index]{@link
-   * google.firestore.admin.v1.Index}.
+   *   The first element of the array is Array of [Index]{@link google.firestore.admin.v1.Index}.
    *
-   *   When autoPaginate: false is specified through options, the array has
-   * three elements. The first element is Array of [Index]{@link
-   * google.firestore.admin.v1.Index} in a single response. The second element
-   * is the next request object if the response indicates the next page exists,
-   * or null. The third element is an object representing
-   * [ListIndexesResponse]{@link google.firestore.admin.v1.ListIndexesResponse}.
+   *   When autoPaginate: false is specified through options, the array has three elements.
+   *   The first element is Array of [Index]{@link google.firestore.admin.v1.Index} in a single response.
+   *   The second element is the next request object if the response
+   *   indicates the next page exists, or null. The third element is
+   *   an object representing [ListIndexesResponse]{@link google.firestore.admin.v1.ListIndexesResponse}.
    *
-   *   The promise has a method named "cancel" which cancels the ongoing API
-   * call.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -340,8 +334,7 @@ class FirestoreAdminClient {
    * });
    *
    * // Iterate over all elements.
-   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]');
+   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]');
    *
    * client.listIndexes({parent: formattedParent})
    *   .then(responses => {
@@ -355,8 +348,7 @@ class FirestoreAdminClient {
    *   });
    *
    * // Or obtain the paged response.
-   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]');
+   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]');
    *
    *
    * const options = {autoPaginate: false};
@@ -387,6 +379,13 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent,
+    });
 
     return this._innerApiCalls.listIndexes(request, options, callback);
   }
@@ -395,8 +394,8 @@ class FirestoreAdminClient {
    * Equivalent to {@link listIndexes}, but returns a NodeJS Stream object.
    *
    * This fetches the paged responses for {@link listIndexes} continuously
-   * and invokes the callback registered for 'data' event for each element in
-   * the responses.
+   * and invokes the callback registered for 'data' event for each element in the
+   * responses.
    *
    * The returned object has 'end' method when no more elements are required.
    *
@@ -418,13 +417,10 @@ class FirestoreAdminClient {
    *   performed per-page, this determines the maximum number of
    *   resources in a page.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @returns {Stream}
-   *   An object stream which emits an object representing [Index]{@link
-   * google.firestore.admin.v1.Index} on 'data' event.
+   *   An object stream which emits an object representing [Index]{@link google.firestore.admin.v1.Index} on 'data' event.
    *
    * @example
    *
@@ -434,8 +430,8 @@ class FirestoreAdminClient {
    *   // optional auth parameters.
    * });
    *
-   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]'); client.listIndexesStream({parent: formattedParent})
+   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]');
+   * client.listIndexesStream({parent: formattedParent})
    *   .on('data', element => {
    *     // doThingsWith(element)
    *   }).on('error', err => {
@@ -461,19 +457,15 @@ class FirestoreAdminClient {
    *   A name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}`
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing
-   * [Index]{@link google.firestore.admin.v1.Index}.
+   *   The second parameter to the callback is an object representing [Index]{@link google.firestore.admin.v1.Index}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Index]{@link
-   * google.firestore.admin.v1.Index}. The promise has a method named "cancel"
-   * which cancels the ongoing API call.
+   *   The first element of the array is an object representing [Index]{@link google.firestore.admin.v1.Index}.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -483,8 +475,8 @@ class FirestoreAdminClient {
    *   // optional auth parameters.
    * });
    *
-   * const formattedName = client.indexPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]', '[INDEX_ID]'); client.getIndex({name: formattedName})
+   * const formattedName = client.indexPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]', '[INDEX_ID]');
+   * client.getIndex({name: formattedName})
    *   .then(responses => {
    *     const response = responses[0];
    *     // doThingsWith(response)
@@ -499,6 +491,13 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      name: request.name,
+    });
 
     return this._innerApiCalls.getIndex(request, options, callback);
   }
@@ -512,15 +511,12 @@ class FirestoreAdminClient {
    *   A name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}`
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @param {function(?Error)} [callback]
    *   The function which will be called with the result of the API call.
    * @returns {Promise} - The promise which resolves when API call finishes.
-   *   The promise has a method named "cancel" which cancels the ongoing API
-   * call.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -530,9 +526,9 @@ class FirestoreAdminClient {
    *   // optional auth parameters.
    * });
    *
-   * const formattedName = client.indexPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]', '[INDEX_ID]'); client.deleteIndex({name:
-   * formattedName}).catch(err => { console.error(err);
+   * const formattedName = client.indexPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]', '[INDEX_ID]');
+   * client.deleteIndex({name: formattedName}).catch(err => {
+   *   console.error(err);
    * });
    */
   deleteIndex(request, options, callback) {
@@ -541,6 +537,13 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      name: request.name,
+    });
 
     return this._innerApiCalls.deleteIndex(request, options, callback);
   }
@@ -558,8 +561,8 @@ class FirestoreAdminClient {
    *   Database to import into. Should be of the form:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} [request.collectionIds]
-   *   Which collection ids to import. Unspecified means all collections
-   * included in the import.
+   *   Which collection ids to import. Unspecified means all collections included
+   *   in the import.
    * @param {string} [request.inputUriPrefix]
    *   Location of the exported files.
    *   This must match the output_uri_prefix of an ExportDocumentsResponse from
@@ -567,19 +570,15 @@ class FirestoreAdminClient {
    *   See:
    *   google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing
-   * [Operation]{@link google.longrunning.Operation}.
+   *   The second parameter to the callback is an object representing [Operation]{@link google.longrunning.Operation}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing
-   * [Operation]{@link google.longrunning.Operation}. The promise has a method
-   * named "cancel" which cancels the ongoing API call.
+   *   The first element of the array is an object representing [Operation]{@link google.longrunning.Operation}.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -605,6 +604,13 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      name: request.name,
+    });
 
     return this._innerApiCalls.importDocuments(request, options, callback);
   }
@@ -628,27 +634,23 @@ class FirestoreAdminClient {
    *   Which collection ids to export. Unspecified means all collections.
    * @param {string} [request.outputUriPrefix]
    *   The output URI. Currently only supports Google Cloud Storage URIs of the
-   *   form: `gs://BUCKET_NAME[/NAMESPACE_PATH]`, where `BUCKET_NAME` is the
-   * name of the Google Cloud Storage bucket and `NAMESPACE_PATH` is an optional
+   *   form: `gs://BUCKET_NAME[/NAMESPACE_PATH]`, where `BUCKET_NAME` is the name
+   *   of the Google Cloud Storage bucket and `NAMESPACE_PATH` is an optional
    *   Google Cloud Storage namespace path. When
    *   choosing a name, be sure to consider Google Cloud Storage naming
    *   guidelines: https://cloud.google.com/storage/docs/naming.
    *   If the URI is a bucket (without a namespace path), a prefix will be
    *   generated based on the start time.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing
-   * [Operation]{@link google.longrunning.Operation}.
+   *   The second parameter to the callback is an object representing [Operation]{@link google.longrunning.Operation}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing
-   * [Operation]{@link google.longrunning.Operation}. The promise has a method
-   * named "cancel" which cancels the ongoing API call.
+   *   The first element of the array is an object representing [Operation]{@link google.longrunning.Operation}.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -674,6 +676,13 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      name: request.name,
+    });
 
     return this._innerApiCalls.exportDocuments(request, options, callback);
   }
@@ -687,19 +696,15 @@ class FirestoreAdminClient {
    *   A name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/fields/{field_id}`
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing
-   * [Field]{@link google.firestore.admin.v1.Field}.
+   *   The second parameter to the callback is an object representing [Field]{@link google.firestore.admin.v1.Field}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Field]{@link
-   * google.firestore.admin.v1.Field}. The promise has a method named "cancel"
-   * which cancels the ongoing API call.
+   *   The first element of the array is an object representing [Field]{@link google.firestore.admin.v1.Field}.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -709,8 +714,8 @@ class FirestoreAdminClient {
    *   // optional auth parameters.
    * });
    *
-   * const formattedName = client.fieldPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]', '[FIELD_ID]'); client.getField({name: formattedName})
+   * const formattedName = client.fieldPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]', '[FIELD_ID]');
+   * client.getField({name: formattedName})
    *   .then(responses => {
    *     const response = responses[0];
    *     // doThingsWith(response)
@@ -725,6 +730,13 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      name: request.name,
+    });
 
     return this._innerApiCalls.getField(request, options, callback);
   }
@@ -755,35 +767,27 @@ class FirestoreAdminClient {
    *   performed per-page, this determines the maximum number of
    *   resources in a page.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @param {function(?Error, ?Array, ?Object, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is Array of [Field]{@link
-   * google.firestore.admin.v1.Field}.
+   *   The second parameter to the callback is Array of [Field]{@link google.firestore.admin.v1.Field}.
    *
-   *   When autoPaginate: false is specified through options, it contains the
-   * result in a single response. If the response indicates the next page
-   * exists, the third parameter is set to be used for the next request object.
-   * The fourth parameter keeps the raw response object of an object
-   * representing [ListFieldsResponse]{@link
-   * google.firestore.admin.v1.ListFieldsResponse}.
+   *   When autoPaginate: false is specified through options, it contains the result
+   *   in a single response. If the response indicates the next page exists, the third
+   *   parameter is set to be used for the next request object. The fourth parameter keeps
+   *   the raw response object of an object representing [ListFieldsResponse]{@link google.firestore.admin.v1.ListFieldsResponse}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is Array of [Field]{@link
-   * google.firestore.admin.v1.Field}.
+   *   The first element of the array is Array of [Field]{@link google.firestore.admin.v1.Field}.
    *
-   *   When autoPaginate: false is specified through options, the array has
-   * three elements. The first element is Array of [Field]{@link
-   * google.firestore.admin.v1.Field} in a single response. The second element
-   * is the next request object if the response indicates the next page exists,
-   * or null. The third element is an object representing
-   * [ListFieldsResponse]{@link google.firestore.admin.v1.ListFieldsResponse}.
+   *   When autoPaginate: false is specified through options, the array has three elements.
+   *   The first element is Array of [Field]{@link google.firestore.admin.v1.Field} in a single response.
+   *   The second element is the next request object if the response
+   *   indicates the next page exists, or null. The third element is
+   *   an object representing [ListFieldsResponse]{@link google.firestore.admin.v1.ListFieldsResponse}.
    *
-   *   The promise has a method named "cancel" which cancels the ongoing API
-   * call.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -794,8 +798,7 @@ class FirestoreAdminClient {
    * });
    *
    * // Iterate over all elements.
-   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]');
+   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]');
    *
    * client.listFields({parent: formattedParent})
    *   .then(responses => {
@@ -809,8 +812,7 @@ class FirestoreAdminClient {
    *   });
    *
    * // Or obtain the paged response.
-   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]');
+   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]');
    *
    *
    * const options = {autoPaginate: false};
@@ -841,6 +843,13 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent,
+    });
 
     return this._innerApiCalls.listFields(request, options, callback);
   }
@@ -849,8 +858,8 @@ class FirestoreAdminClient {
    * Equivalent to {@link listFields}, but returns a NodeJS Stream object.
    *
    * This fetches the paged responses for {@link listFields} continuously
-   * and invokes the callback registered for 'data' event for each element in
-   * the responses.
+   * and invokes the callback registered for 'data' event for each element in the
+   * responses.
    *
    * The returned object has 'end' method when no more elements are required.
    *
@@ -876,13 +885,10 @@ class FirestoreAdminClient {
    *   performed per-page, this determines the maximum number of
    *   resources in a page.
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @returns {Stream}
-   *   An object stream which emits an object representing [Field]{@link
-   * google.firestore.admin.v1.Field} on 'data' event.
+   *   An object stream which emits an object representing [Field]{@link google.firestore.admin.v1.Field} on 'data' event.
    *
    * @example
    *
@@ -892,8 +898,8 @@ class FirestoreAdminClient {
    *   // optional auth parameters.
    * });
    *
-   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]',
-   * '[COLLECTION_ID]'); client.listFieldsStream({parent: formattedParent})
+   * const formattedParent = client.parentPath('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]');
+   * client.listFieldsStream({parent: formattedParent})
    *   .on('data', element => {
    *     // doThingsWith(element)
    *   }).on('error', err => {
@@ -930,28 +936,22 @@ class FirestoreAdminClient {
    * @param {Object} request.field
    *   The field to be updated.
    *
-   *   This object should have the same structure as [Field]{@link
-   * google.firestore.admin.v1.Field}
+   *   This object should have the same structure as [Field]{@link google.firestore.admin.v1.Field}
    * @param {Object} [request.updateMask]
    *   A mask, relative to the field. If specified, only configuration specified
    *   by this field_mask will be updated in the field.
    *
-   *   This object should have the same structure as [FieldMask]{@link
-   * google.protobuf.FieldMask}
+   *   This object should have the same structure as [FieldMask]{@link google.protobuf.FieldMask}
    * @param {Object} [options]
-   *   Optional parameters. You can override the default settings for this call,
-   * e.g, timeout, retries, paginations, etc. See [gax.CallOptions]{@link
-   * https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the
-   * details.
+   *   Optional parameters. You can override the default settings for this call, e.g, timeout,
+   *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/global.html#CallOptions} for the details.
    * @param {function(?Error, ?Object)} [callback]
    *   The function which will be called with the result of the API call.
    *
-   *   The second parameter to the callback is an object representing
-   * [Operation]{@link google.longrunning.Operation}.
+   *   The second parameter to the callback is an object representing [Operation]{@link google.longrunning.Operation}.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing
-   * [Operation]{@link google.longrunning.Operation}. The promise has a method
-   * named "cancel" which cancels the ongoing API call.
+   *   The first element of the array is an object representing [Operation]{@link google.longrunning.Operation}.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
    *
    * @example
    *
@@ -977,6 +977,13 @@ class FirestoreAdminClient {
       options = {};
     }
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      'field.name': request.field.name,
+    });
 
     return this._innerApiCalls.updateField(request, options, callback);
   }
@@ -1000,18 +1007,20 @@ class FirestoreAdminClient {
   }
 
   /**
-   * Return a fully-qualified parent resource name string.
+   * Return a fully-qualified field resource name string.
    *
    * @param {String} project
    * @param {String} database
    * @param {String} collectionId
+   * @param {String} fieldId
    * @returns {String}
    */
-  parentPath(project, database, collectionId) {
-    return this._pathTemplates.parentPathTemplate.render({
+  fieldPath(project, database, collectionId, fieldId) {
+    return this._pathTemplates.fieldPathTemplate.render({
       project: project,
       database: database,
       collection_id: collectionId,
+      field_id: fieldId,
     });
   }
 
@@ -1034,20 +1043,18 @@ class FirestoreAdminClient {
   }
 
   /**
-   * Return a fully-qualified field resource name string.
+   * Return a fully-qualified parent resource name string.
    *
    * @param {String} project
    * @param {String} database
    * @param {String} collectionId
-   * @param {String} fieldId
    * @returns {String}
    */
-  fieldPath(project, database, collectionId, fieldId) {
-    return this._pathTemplates.fieldPathTemplate.render({
+  parentPath(project, database, collectionId) {
+    return this._pathTemplates.parentPathTemplate.render({
       project: project,
       database: database,
       collection_id: collectionId,
-      field_id: fieldId,
     });
   }
 
@@ -1075,37 +1082,47 @@ class FirestoreAdminClient {
   }
 
   /**
-   * Parse the parentName from a parent resource.
+   * Parse the fieldName from a field resource.
    *
-   * @param {String} parentName
-   *   A fully-qualified path representing a parent resources.
+   * @param {String} fieldName
+   *   A fully-qualified path representing a field resources.
    * @returns {String} - A string representing the project.
    */
-  matchProjectFromParentName(parentName) {
-    return this._pathTemplates.parentPathTemplate.match(parentName).project;
+  matchProjectFromFieldName(fieldName) {
+    return this._pathTemplates.fieldPathTemplate.match(fieldName).project;
   }
 
   /**
-   * Parse the parentName from a parent resource.
+   * Parse the fieldName from a field resource.
    *
-   * @param {String} parentName
-   *   A fully-qualified path representing a parent resources.
+   * @param {String} fieldName
+   *   A fully-qualified path representing a field resources.
    * @returns {String} - A string representing the database.
    */
-  matchDatabaseFromParentName(parentName) {
-    return this._pathTemplates.parentPathTemplate.match(parentName).database;
+  matchDatabaseFromFieldName(fieldName) {
+    return this._pathTemplates.fieldPathTemplate.match(fieldName).database;
   }
 
   /**
-   * Parse the parentName from a parent resource.
+   * Parse the fieldName from a field resource.
    *
-   * @param {String} parentName
-   *   A fully-qualified path representing a parent resources.
+   * @param {String} fieldName
+   *   A fully-qualified path representing a field resources.
    * @returns {String} - A string representing the collection_id.
    */
-  matchCollectionIdFromParentName(parentName) {
-    return this._pathTemplates.parentPathTemplate.match(parentName)
-      .collection_id;
+  matchCollectionIdFromFieldName(fieldName) {
+    return this._pathTemplates.fieldPathTemplate.match(fieldName).collection_id;
+  }
+
+  /**
+   * Parse the fieldName from a field resource.
+   *
+   * @param {String} fieldName
+   *   A fully-qualified path representing a field resources.
+   * @returns {String} - A string representing the field_id.
+   */
+  matchFieldIdFromFieldName(fieldName) {
+    return this._pathTemplates.fieldPathTemplate.match(fieldName).field_id;
   }
 
   /**
@@ -1153,47 +1170,37 @@ class FirestoreAdminClient {
   }
 
   /**
-   * Parse the fieldName from a field resource.
+   * Parse the parentName from a parent resource.
    *
-   * @param {String} fieldName
-   *   A fully-qualified path representing a field resources.
+   * @param {String} parentName
+   *   A fully-qualified path representing a parent resources.
    * @returns {String} - A string representing the project.
    */
-  matchProjectFromFieldName(fieldName) {
-    return this._pathTemplates.fieldPathTemplate.match(fieldName).project;
+  matchProjectFromParentName(parentName) {
+    return this._pathTemplates.parentPathTemplate.match(parentName).project;
   }
 
   /**
-   * Parse the fieldName from a field resource.
+   * Parse the parentName from a parent resource.
    *
-   * @param {String} fieldName
-   *   A fully-qualified path representing a field resources.
+   * @param {String} parentName
+   *   A fully-qualified path representing a parent resources.
    * @returns {String} - A string representing the database.
    */
-  matchDatabaseFromFieldName(fieldName) {
-    return this._pathTemplates.fieldPathTemplate.match(fieldName).database;
+  matchDatabaseFromParentName(parentName) {
+    return this._pathTemplates.parentPathTemplate.match(parentName).database;
   }
 
   /**
-   * Parse the fieldName from a field resource.
+   * Parse the parentName from a parent resource.
    *
-   * @param {String} fieldName
-   *   A fully-qualified path representing a field resources.
+   * @param {String} parentName
+   *   A fully-qualified path representing a parent resources.
    * @returns {String} - A string representing the collection_id.
    */
-  matchCollectionIdFromFieldName(fieldName) {
-    return this._pathTemplates.fieldPathTemplate.match(fieldName).collection_id;
-  }
-
-  /**
-   * Parse the fieldName from a field resource.
-   *
-   * @param {String} fieldName
-   *   A fully-qualified path representing a field resources.
-   * @returns {String} - A string representing the field_id.
-   */
-  matchFieldIdFromFieldName(fieldName) {
-    return this._pathTemplates.fieldPathTemplate.match(fieldName).field_id;
+  matchCollectionIdFromParentName(parentName) {
+    return this._pathTemplates.parentPathTemplate.match(parentName)
+      .collection_id;
   }
 }
 

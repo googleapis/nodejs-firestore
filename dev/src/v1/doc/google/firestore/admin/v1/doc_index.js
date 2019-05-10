@@ -35,8 +35,7 @@
  *   all collections descended from a specific document, specified at query
  *   time, and that have the same collection id as this index.
  *
- *   The number should be among the values of [QueryScope]{@link
- * google.firestore.admin.v1.QueryScope}
+ *   The number should be among the values of [QueryScope]{@link google.firestore.admin.v1.QueryScope}
  *
  * @property {Object[]} fields
  *   The fields supported by this index.
@@ -51,15 +50,13 @@
  *   For single field indexes, this will always be exactly one entry with a
  *   field path equal to the field path of the associated field.
  *
- *   This object should have the same structure as [IndexField]{@link
- * google.firestore.admin.v1.IndexField}
+ *   This object should have the same structure as [IndexField]{@link google.firestore.admin.v1.IndexField}
  *
  * @property {number} state
  *   Output only.
  *   The serving state of the index.
  *
- *   The number should be among the values of [State]{@link
- * google.firestore.admin.v1.State}
+ *   The number should be among the values of [State]{@link google.firestore.admin.v1.State}
  *
  * @typedef Index
  * @memberof google.firestore.admin.v1
@@ -82,14 +79,12 @@ const Index = {
    *   Indicates that this field supports ordering by the specified order or
    *   comparing using =, <, <=, >, >=.
    *
-   *   The number should be among the values of [Order]{@link
-   * google.firestore.admin.v1.Order}
+   *   The number should be among the values of [Order]{@link google.firestore.admin.v1.Order}
    *
    * @property {number} arrayConfig
    *   Indicates that this field supports operations on `array_value`s.
    *
-   *   The number should be among the values of [ArrayConfig]{@link
-   * google.firestore.admin.v1.ArrayConfig}
+   *   The number should be among the values of [ArrayConfig]{@link google.firestore.admin.v1.ArrayConfig}
    *
    * @typedef IndexField
    * @memberof google.firestore.admin.v1

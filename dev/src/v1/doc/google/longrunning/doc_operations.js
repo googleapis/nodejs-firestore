@@ -30,8 +30,7 @@
  *   Some services might not provide such metadata.  Any method that returns a
  *   long-running operation should document the metadata type, if any.
  *
- *   This object should have the same structure as [Any]{@link
- * google.protobuf.Any}
+ *   This object should have the same structure as [Any]{@link google.protobuf.Any}
  *
  * @property {boolean} done
  *   If the value is `false`, it means the operation is still in progress.
@@ -41,8 +40,7 @@
  * @property {Object} error
  *   The error result of the operation in case of failure or cancellation.
  *
- *   This object should have the same structure as [Status]{@link
- * google.rpc.Status}
+ *   This object should have the same structure as [Status]{@link google.rpc.Status}
  *
  * @property {Object} response
  *   The normal response of the operation in case of success.  If the original
@@ -54,8 +52,7 @@
  *   is `TakeSnapshot()`, the inferred response type is
  *   `TakeSnapshotResponse`.
  *
- *   This object should have the same structure as [Any]{@link
- * google.protobuf.Any}
+ *   This object should have the same structure as [Any]{@link google.protobuf.Any}
  *
  * @typedef Operation
  * @memberof google.longrunning

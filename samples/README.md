@@ -24,9 +24,8 @@ Applications that use Google&#x27;s Server SDKs should not be used in end-user e
 
 ## Before you begin
 
-Before running the samples, make sure you've followed the steps in the
-[Using the client library](https://github.com/googleapis/nodejs-firestore#using-the-client-library) of the client
-library's README.
+Before running the samples, make sure you've followed the steps outlined in
+[Using the client library](https://github.com/googleapis/nodejs-firestore#using-the-client-library).
 
 ## Samples
 
