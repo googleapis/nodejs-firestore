@@ -25,8 +25,7 @@
  * @property {Object} index
  *   The composite index to create.
  *
- *   This object should have the same structure as [Index]{@link
- * google.firestore.admin.v1.Index}
+ *   This object should have the same structure as [Index]{@link google.firestore.admin.v1.Index}
  *
  * @typedef CreateIndexRequest
  * @memberof google.firestore.admin.v1
@@ -68,8 +67,7 @@ const ListIndexesRequest = {
  * @property {Object[]} indexes
  *   The requested indexes.
  *
- *   This object should have the same structure as [Index]{@link
- * google.firestore.admin.v1.Index}
+ *   This object should have the same structure as [Index]{@link google.firestore.admin.v1.Index}
  *
  * @property {string} nextPageToken
  *   A page token that may be used to request another page of results. If blank,
@@ -119,15 +117,13 @@ const DeleteIndexRequest = {
  * @property {Object} field
  *   The field to be updated.
  *
- *   This object should have the same structure as [Field]{@link
- * google.firestore.admin.v1.Field}
+ *   This object should have the same structure as [Field]{@link google.firestore.admin.v1.Field}
  *
  * @property {Object} updateMask
  *   A mask, relative to the field. If specified, only configuration specified
  *   by this field_mask will be updated in the field.
  *
- *   This object should have the same structure as [FieldMask]{@link
- * google.protobuf.FieldMask}
+ *   This object should have the same structure as [FieldMask]{@link google.protobuf.FieldMask}
  *
  * @typedef UpdateFieldRequest
  * @memberof google.firestore.admin.v1
@@ -188,8 +184,7 @@ const ListFieldsRequest = {
  * @property {Object[]} fields
  *   The requested fields.
  *
- *   This object should have the same structure as [Field]{@link
- * google.firestore.admin.v1.Field}
+ *   This object should have the same structure as [Field]{@link google.firestore.admin.v1.Field}
  *
  * @property {string} nextPageToken
  *   A page token that may be used to request another page of results. If blank,

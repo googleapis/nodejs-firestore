@@ -84,8 +84,7 @@
  *   A list of messages that carry the error details.  There is a common set of
  *   message types for APIs to use.
  *
- *   This object should have the same structure as [Any]{@link
- * google.protobuf.Any}
+ *   This object should have the same structure as [Any]{@link google.protobuf.Any}
  *
  * @typedef Status
  * @memberof google.rpc

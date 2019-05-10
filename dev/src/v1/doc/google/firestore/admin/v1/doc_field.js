@@ -55,8 +55,7 @@
  *   explicitly remove all indexes for this field, specify an index config
  *   with an empty list of indexes.
  *
- *   This object should have the same structure as [IndexConfig]{@link
- * google.firestore.admin.v1.IndexConfig}
+ *   This object should have the same structure as [IndexConfig]{@link google.firestore.admin.v1.IndexConfig}
  *
  * @typedef Field
  * @memberof google.firestore.admin.v1
@@ -71,8 +70,7 @@ const Field = {
    * @property {Object[]} indexes
    *   The indexes supported for this field.
    *
-   *   This object should have the same structure as [Index]{@link
-   * google.firestore.admin.v1.Index}
+   *   This object should have the same structure as [Index]{@link google.firestore.admin.v1.Index}
    *
    * @property {boolean} usesAncestorConfig
    *   Output only.
