@@ -90,6 +90,26 @@ export class ClientPool<T> {
   }
 
   /**
+   * Creates a new function that will release the given client, when called.
+   *
+   * This guarantees that the given client can only be released once.
+   *
+   * @private
+   */
+  createReleaser(client: T): () => void {
+    // Unfortunately, once the release() call is disconnected from the Promise
+    // returned from _initializeStream, there's no single callback in which the
+    // releaser can be guaranteed to be called once.
+    let released = false;
+    return () => {
+      if (!released) {
+        released = true;
+        this.release(client);
+      }
+    };
+  }
+
+  /**
    * The number of currently registered clients.
    *
    * @return Number of currently registered clients.
