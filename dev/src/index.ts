@@ -380,8 +380,8 @@ export class Firestore {
     validateObject('settings', settings);
     validateString('settings.projectId', settings.projectId, {optional: true});
     validateBoolean(
-      // tslint:disable-next-line deprecation
       'settings.timestampsInSnapshots',
+      // tslint:disable-next-line deprecation
       settings.timestampsInSnapshots,
       {optional: true}
     );
@@ -401,8 +401,8 @@ export class Firestore {
 
   private validateAndApplySettings(settings: Settings): void {
     validateBoolean(
-      // tslint:disable-next-line deprecation
       'settings.timestampsInSnapshots',
+      // tslint:disable-next-line deprecation
       settings.timestampsInSnapshots,
       {optional: true}
     );

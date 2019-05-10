@@ -377,6 +377,7 @@ export class DocumentSnapshot {
    */
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
+  // tslint:disable-next-line no-any
   data(): {[field: string]: any} | undefined {
     // tslint:disable-line no-any
     const fields = this._fieldsProto;
@@ -414,6 +415,7 @@ export class DocumentSnapshot {
    */
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
+  // tslint:disable-next-line no-any
   get(field: string | FieldPath): any {
     // tslint:disable-line no-any
     validateFieldPath('field', field);
