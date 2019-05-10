@@ -1027,7 +1027,7 @@ export class Firestore {
      * Whether we have resolved the Promise and returned the stream to the
      * caller.
      */
-    let streamReleased = false;
+    let streamInitialized = false;
 
     /**
      * Whether the stream end has been reached. This has to be forwarded to the
@@ -1036,16 +1036,16 @@ export class Firestore {
     let endCalled = false;
 
     return new Promise((resolve, reject) => {
-      const releaseStream = () => {
+      const streamReady = () => {
         if (errorReceived) {
           logger(
               'Firestore._initializeStream', requestTag,
               'Emit error:', errorReceived);
           resultStream.emit('error', errorReceived);
           errorReceived = null;
-        } else if (!streamReleased) {
+        } else if (!streamInitialized) {
           logger('Firestore._initializeStream', requestTag, 'Releasing stream');
-          streamReleased = true;
+          streamInitialized = true;
           resultStream.pause();
 
           // Calling 'stream.pause()' only holds up 'data' events and not the
@@ -1073,14 +1073,14 @@ export class Firestore {
       // possible to avoid the default stream behavior (which is just to log and
       // continue).
       resultStream.on('readable', () => {
-        releaseStream();
+        streamReady();
       });
 
       resultStream.on('end', () => {
         logger(
             'Firestore._initializeStream', requestTag, 'Received stream end');
         endCalled = true;
-        releaseStream();
+        streamReady();
       });
 
       resultStream.on('error', err => {
@@ -1089,11 +1089,11 @@ export class Firestore {
             'Received stream error:', err);
         // If we receive an error before we were able to receive any data,
         // reject this stream.
-        if (!streamReleased) {
+        if (!streamInitialized) {
           logger(
               'Firestore._initializeStream', requestTag,
               'Received initial error:', err);
-          streamReleased = true;
+          streamInitialized = true;
           reject(err);
         } else {
           errorReceived = err;
@@ -1112,7 +1112,7 @@ export class Firestore {
               logger(
                   'Firestore._initializeStream', requestTag,
                   'Marking stream as healthy');
-              releaseStream();
+              streamReady();
             });
       }
     });
