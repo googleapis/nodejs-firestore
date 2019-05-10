@@ -49,7 +49,7 @@ export class ClientPool<T> {
    *
    * @private
    */
-  private acquire(): T {
+  acquire(): T {
     let selectedClient: T|null = null;
     let selectedRequestCount = 0;
 
@@ -77,7 +77,7 @@ export class ClientPool<T> {
    * removing it from the pool of active clients.
    * @private
    */
-  private release(client: T): void {
+  release(client: T): void {
     let requestCount = this.activeClients.get(client) || 0;
     assert(requestCount > 0, 'No active request');
 
@@ -87,6 +87,26 @@ export class ClientPool<T> {
     if (requestCount === 0) {
       this.garbageCollect();
     }
+  }
+
+  /**
+   * Creates a new function that will release the given client, when called.
+   *
+   * This guarantees that the given client can only be released once.
+   *
+   * @private
+   */
+  createReleaser(client: T): () => void {
+    // Unfortunately, once the release() call is disconnected from the Promise
+    // returned from _initializeStream, there's no single callback in which the
+    // releaser can be guaranteed to be called once.
+    let released = false;
+    return () => {
+      if (!released) {
+        released = true;
+        this.release(client);
+      }
+    };
   }
 
   /**
