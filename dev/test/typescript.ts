@@ -42,7 +42,7 @@ xdescribe('firestore.d.ts', () => {
     keyFilename: 'foo',
     projectId: 'foo',
     timestampsInSnapshots: true,
-    otherOption: 'foo'
+    otherOption: 'foo',
   } as Settings);
 
   const precondition: Precondition = {lastUpdateTime: Timestamp.now()};
@@ -60,25 +60,29 @@ xdescribe('firestore.d.ts', () => {
       keyFilename: 'foo',
       projectId: 'foo',
       timestampsInSnapshots: true,
-      otherOption: 'foo'
+      otherOption: 'foo',
     });
     const collRef: CollectionReference = firestore.collection('coll');
     const docRef1: DocumentReference = firestore.doc('coll/doc');
     const docRef2: DocumentReference = firestore.doc('coll/doc');
     const collectionGroup: Query = firestore.collectionGroup('collectionId');
     firestore.getAll(docRef1, docRef2).then((docs: DocumentSnapshot[]) => {});
-    firestore.getAll(docRef1, docRef2, {})
-        .then((docs: DocumentSnapshot[]) => {});
     firestore
-        .getAll(docRef1, docRef2, {fieldMask: ['foo', new FieldPath('foo')]})
-        .then((docs: DocumentSnapshot[]) => {});
+      .getAll(docRef1, docRef2, {})
+      .then((docs: DocumentSnapshot[]) => {});
+    firestore
+      .getAll(docRef1, docRef2, {fieldMask: ['foo', new FieldPath('foo')]})
+      .then((docs: DocumentSnapshot[]) => {});
+    // tslint:disable-next-line deprecation
     firestore.getCollections().then((collections: CollectionReference[]) => {});
-    firestore.listCollections().then(
-        (collections: CollectionReference[]) => {});
-    const transactionResult: Promise<string> =
-        firestore.runTransaction((updateFunction: Transaction) => {
-          return Promise.resolve('string');
-        });
+    firestore
+      .listCollections()
+      .then((collections: CollectionReference[]) => {});
+    const transactionResult: Promise<string> = firestore.runTransaction(
+      (updateFunction: Transaction) => {
+        return Promise.resolve('string');
+      }
+    );
     const batch: WriteBatch = firestore.batch();
   });
 
@@ -102,8 +106,12 @@ xdescribe('firestore.d.ts', () => {
       transaction = transaction.update(docRef, 'foo', 'bar');
       transaction = transaction.update(docRef, 'foo', 'bar', precondition);
       transaction = transaction.update(docRef, new FieldPath('foo'), 'bar');
-      transaction =
-          transaction.update(docRef, new FieldPath('foo'), 'bar', precondition);
+      transaction = transaction.update(
+        docRef,
+        new FieldPath('foo'),
+        'bar',
+        precondition
+      );
       transaction = transaction.delete(docRef);
       transaction = transaction.delete(docRef, precondition);
       return Promise.resolve();
@@ -146,34 +154,48 @@ xdescribe('firestore.d.ts', () => {
     const parent: CollectionReference = docRef.parent;
     const path: string = docRef.path;
     const subcollection: CollectionReference = docRef.collection('coll');
+    // tslint:disable-next-line deprecation
     docRef.getCollections().then((collections: CollectionReference[]) => {});
     docRef.listCollections().then((collections: CollectionReference[]) => {});
     docRef.get().then((snapshot: DocumentSnapshot) => {});
-    docRef.create(documentData)
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
-    docRef.set(documentData)
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
-    docRef.set(documentData, setOptions)
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
-    docRef.update(updateData)
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
-    docRef.update(updateData, precondition)
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
-    docRef.update('foo', 'bar')
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
-    docRef.update('foo', 'bar', precondition)
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
-    docRef.update(new FieldPath('foo'), 'bar')
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
-    docRef.update(new FieldPath('foo'), 'bar', precondition)
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    docRef
+      .create(documentData)
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    docRef
+      .set(documentData)
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    docRef
+      .set(documentData, setOptions)
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    docRef
+      .update(updateData)
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    docRef
+      .update(updateData, precondition)
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    docRef
+      .update('foo', 'bar')
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    docRef
+      .update('foo', 'bar', precondition)
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    docRef
+      .update(new FieldPath('foo'), 'bar')
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    docRef
+      .update(new FieldPath('foo'), 'bar', precondition)
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
     docRef.delete().then((writeResult: FirebaseFirestore.WriteResult) => {});
-    docRef.delete(precondition)
-        .then((writeResult: FirebaseFirestore.WriteResult) => {});
-    let unsubscribe: () => void =
-        docRef.onSnapshot((snapshot: DocumentSnapshot) => {});
+    docRef
+      .delete(precondition)
+      .then((writeResult: FirebaseFirestore.WriteResult) => {});
+    let unsubscribe: () => void = docRef.onSnapshot(
+      (snapshot: DocumentSnapshot) => {}
+    );
     unsubscribe = docRef.onSnapshot(
-        (snapshot: DocumentSnapshot) => {}, (error: Error) => {});
+      (snapshot: DocumentSnapshot) => {},
+      (error: Error) => {}
+    );
     const equals: boolean = docRef.isEqual(docRef);
   });
 
@@ -243,10 +265,13 @@ xdescribe('firestore.d.ts', () => {
       query = query.endBefore('foo', 'bar');
       query.get().then((results: QuerySnapshot) => {});
       query.stream().on('data', () => {});
-      let unsubscribe: () => void =
-          query.onSnapshot((snapshot: QuerySnapshot) => {});
+      let unsubscribe: () => void = query.onSnapshot(
+        (snapshot: QuerySnapshot) => {}
+      );
       unsubscribe = query.onSnapshot(
-          (snapshot: QuerySnapshot) => {}, (error: Error) => {});
+        (snapshot: QuerySnapshot) => {},
+        (error: Error) => {}
+      );
       const equals: boolean = query.isEqual(query);
     });
   });
@@ -277,7 +302,7 @@ xdescribe('firestore.d.ts', () => {
 
   it('has typings for CollectionReference', () => {
     const firestore: Firestore = collRef.firestore;
-    const parent: DocumentReference|null = collRef.parent;
+    const parent: DocumentReference | null = collRef.parent;
     const path: string = collRef.path;
     const id: string = collRef.id;
     const docRef1: DocumentReference = collRef.doc();
@@ -289,18 +314,19 @@ xdescribe('firestore.d.ts', () => {
 
   it('has typings for FieldValue', () => {
     const documentData: UpdateData = {
-      'a': FieldValue.serverTimestamp(),
-      'b': FieldValue.delete(),
-      'c': FieldValue.arrayUnion('foo'),
-      'd': FieldValue.arrayRemove('bar'),
-      'e': FieldValue.increment(0)
+      a: FieldValue.serverTimestamp(),
+      b: FieldValue.delete(),
+      c: FieldValue.arrayUnion('foo'),
+      d: FieldValue.arrayRemove('bar'),
+      e: FieldValue.increment(0),
     };
     const serverTimestamp: FieldValue = FieldValue.serverTimestamp();
     const deleteField: FieldValue = FieldValue.delete();
     const arrayUnion: FieldValue = FieldValue.arrayUnion('foo', 'bar');
     const arrayRemove: FieldValue = FieldValue.arrayRemove('foo', 'bar');
-    const equals: boolean =
-        FieldValue.serverTimestamp().isEqual(FieldValue.serverTimestamp());
+    const equals: boolean = FieldValue.serverTimestamp().isEqual(
+      FieldValue.serverTimestamp()
+    );
   });
 
   it('has typings for SetOptions', () => {

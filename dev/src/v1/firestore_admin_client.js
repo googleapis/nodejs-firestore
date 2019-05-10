@@ -63,12 +63,13 @@ class FirestoreAdminClient {
 
     // Ensure that options include the service address and port.
     opts = Object.assign(
-        {
-          clientConfig: {},
-          port: this.constructor.port,
-          servicePath: this.constructor.servicePath,
-        },
-        opts);
+      {
+        clientConfig: {},
+        port: this.constructor.port,
+        servicePath: this.constructor.servicePath,
+      },
+      opts
+    );
 
     // Create a `gaxGrpc` object, with any grpc-specific options
     // sent to the client.
@@ -91,39 +92,54 @@ class FirestoreAdminClient {
 
     // Load the applicable protos.
     const protos = merge(
-        {},
-        gaxGrpc.loadProto(
-            path.join(__dirname, '..', '..', 'protos'),
-            'google/firestore/admin/v1/firestore_admin.proto'));
+      {},
+      gaxGrpc.loadProto(
+        path.join(__dirname, '..', '..', 'protos'),
+        'google/firestore/admin/v1/firestore_admin.proto'
+      )
+    );
 
     // This API contains "path templates"; forward-slash-separated
     // identifiers to uniquely identify resources within the API.
     // Create useful helper objects for these.
     this._pathTemplates = {
-      databasePathTemplate:
-          new gax.PathTemplate('projects/{project}/databases/{database}'),
+      databasePathTemplate: new gax.PathTemplate(
+        'projects/{project}/databases/{database}'
+      ),
       parentPathTemplate: new gax.PathTemplate(
-          'projects/{project}/databases/{database}/collectionGroups/{collection_id}'),
+        'projects/{project}/databases/{database}/collectionGroups/{collection_id}'
+      ),
       indexPathTemplate: new gax.PathTemplate(
-          'projects/{project}/databases/{database}/collectionGroups/{collection_id}/indexes/{index_id}'),
+        'projects/{project}/databases/{database}/collectionGroups/{collection_id}/indexes/{index_id}'
+      ),
       fieldPathTemplate: new gax.PathTemplate(
-          'projects/{project}/databases/{database}/collectionGroups/{collection_id}/fields/{field_id}'),
+        'projects/{project}/databases/{database}/collectionGroups/{collection_id}/fields/{field_id}'
+      ),
     };
 
     // Some of the methods on this service return "paged" results,
     // (e.g. 50 results at a time, with tokens to get subsequent
     // pages). Denote the keys used for pagination and results.
     this._descriptors.page = {
-      listIndexes:
-          new gax.PageDescriptor('pageToken', 'nextPageToken', 'indexes'),
-      listFields:
-          new gax.PageDescriptor('pageToken', 'nextPageToken', 'fields'),
+      listIndexes: new gax.PageDescriptor(
+        'pageToken',
+        'nextPageToken',
+        'indexes'
+      ),
+      listFields: new gax.PageDescriptor(
+        'pageToken',
+        'nextPageToken',
+        'fields'
+      ),
     };
 
     // Put together the default options sent with requests.
     const defaults = gaxGrpc.constructSettings(
-        'google.firestore.admin.v1.FirestoreAdmin', gapicConfig,
-        opts.clientConfig, {'x-goog-api-client': clientHeader.join(' ')});
+      'google.firestore.admin.v1.FirestoreAdmin',
+      gapicConfig,
+      opts.clientConfig,
+      {'x-goog-api-client': clientHeader.join(' ')}
+    );
 
     // Set up a dictionary of "inner API calls"; the core implementation
     // of calling the API is handled in `google-gax`, with this code
@@ -133,7 +149,9 @@ class FirestoreAdminClient {
     // Put together the "service stub" for
     // google.firestore.admin.v1.FirestoreAdmin.
     const firestoreAdminStub = gaxGrpc.createStub(
-        protos.google.firestore.admin.v1.FirestoreAdmin, opts);
+      protos.google.firestore.admin.v1.FirestoreAdmin,
+      opts
+    );
 
     // Iterate over each of the methods that the service provides
     // and create an API call method for each.
@@ -150,15 +168,20 @@ class FirestoreAdminClient {
     ];
     for (const methodName of firestoreAdminStubMethods) {
       this._innerApiCalls[methodName] = gax.createApiCall(
-          firestoreAdminStub.then(
-              stub => function() {
-                const args = Array.prototype.slice.call(arguments, 0);
-                return stub[methodName].apply(stub, args);
-              },
-              err => function() {
-                throw err;
-              }),
-          defaults[methodName], this._descriptors.page[methodName]);
+        firestoreAdminStub.then(
+          stub =>
+            function() {
+              const args = Array.prototype.slice.call(arguments, 0);
+              return stub[methodName].apply(stub, args);
+            },
+          err =>
+            function() {
+              throw err;
+            }
+        ),
+        defaults[methodName],
+        this._descriptors.page[methodName]
+      );
     }
   }
 
@@ -423,8 +446,11 @@ class FirestoreAdminClient {
     options = options || {};
 
     return this._descriptors.page.listIndexes.createStream(
-        this._innerApiCalls.listIndexes, request, options);
-  };
+      this._innerApiCalls.listIndexes,
+      request,
+      options
+    );
+  }
 
   /**
    * Gets a composite index.
@@ -878,8 +904,11 @@ class FirestoreAdminClient {
     options = options || {};
 
     return this._descriptors.page.listFields.createStream(
-        this._innerApiCalls.listFields, request, options);
-  };
+      this._innerApiCalls.listFields,
+      request,
+      options
+    );
+  }
 
   /**
    * Updates a field configuration. Currently, field updates apply only to
@@ -1042,7 +1071,7 @@ class FirestoreAdminClient {
    */
   matchDatabaseFromDatabaseName(databaseName) {
     return this._pathTemplates.databasePathTemplate.match(databaseName)
-        .database;
+      .database;
   }
 
   /**
@@ -1076,7 +1105,7 @@ class FirestoreAdminClient {
    */
   matchCollectionIdFromParentName(parentName) {
     return this._pathTemplates.parentPathTemplate.match(parentName)
-        .collection_id;
+      .collection_id;
   }
 
   /**
@@ -1167,6 +1196,5 @@ class FirestoreAdminClient {
     return this._pathTemplates.fieldPathTemplate.match(fieldName).field_id;
   }
 }
-
 
 module.exports = FirestoreAdminClient;

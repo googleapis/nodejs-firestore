@@ -24,7 +24,16 @@ import * as Firestore from '../src';
 import {DocumentSnapshot, FieldPath} from '../src';
 import {QualifiedResourcePath} from '../src/path';
 import {GrpcError} from '../src/types';
-import {ApiOverride, createInstance, document, DOCUMENT_NAME, found, InvalidApiUsage, missing, stream} from './util/helpers';
+import {
+  ApiOverride,
+  createInstance,
+  document,
+  DOCUMENT_NAME,
+  found,
+  InvalidApiUsage,
+  missing,
+  stream,
+} from './util/helpers';
 
 import api = google.firestore.v1;
 
@@ -35,7 +44,7 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 const DEFAULT_SETTINGS = {
   projectId: PROJECT_ID,
   sslCreds: grpc.credentials.createInsecure(),
-  keyFilename: __dirname + '/fake-certificate.json'
+  keyFilename: __dirname + '/fake-certificate.json',
 };
 
 // Change the argument to 'console.log' to enable debug output.
@@ -44,84 +53,103 @@ Firestore.setLogFunction(() => {});
 const bytesData = Buffer.from('AQI=', 'base64');
 
 const allSupportedTypesProtobufJs = document(
-    'documentId', 'arrayValue', {
-      arrayValue: {
-        values: [
-          {
-            stringValue: 'foo',
-          },
-          {
-            integerValue: 42,
-          },
-          {
-            stringValue: 'bar',
-          },
-        ],
-      },
+  'documentId',
+  'arrayValue',
+  {
+    arrayValue: {
+      values: [
+        {
+          stringValue: 'foo',
+        },
+        {
+          integerValue: 42,
+        },
+        {
+          stringValue: 'bar',
+        },
+      ],
     },
-    'emptyArray', {
-      arrayValue: {},
+  },
+  'emptyArray',
+  {
+    arrayValue: {},
+  },
+  'dateValue',
+  {
+    timestampValue: {
+      nanos: 123000000,
+      seconds: 479978400,
     },
-    'dateValue', {
-      timestampValue: {
-        nanos: 123000000,
-        seconds: 479978400,
-      }
+  },
+  'timestampValue',
+  {
+    timestampValue: {
+      nanos: 123000000,
+      seconds: 479978400,
     },
-    'timestampValue', {
-      timestampValue: {
-        nanos: 123000000,
-        seconds: 479978400,
-      }
-    },
-    'doubleValue', {
-      doubleValue: 0.1,
-    },
-    'falseValue', {
-      booleanValue: false,
-    },
-    'infinityValue', {
-      doubleValue: Infinity,
-    },
-    'integerValue', {
-      integerValue: 0,
-    },
-    'negativeInfinityValue', {
-      doubleValue: -Infinity,
-    },
-    'nilValue', {
-      nullValue: 'NULL_VALUE',
-    },
-    'objectValue', {
-      mapValue: {
-        fields: {
-          foo: {
-            stringValue: 'bar',
-          },
+  },
+  'doubleValue',
+  {
+    doubleValue: 0.1,
+  },
+  'falseValue',
+  {
+    booleanValue: false,
+  },
+  'infinityValue',
+  {
+    doubleValue: Infinity,
+  },
+  'integerValue',
+  {
+    integerValue: 0,
+  },
+  'negativeInfinityValue',
+  {
+    doubleValue: -Infinity,
+  },
+  'nilValue',
+  {
+    nullValue: 'NULL_VALUE',
+  },
+  'objectValue',
+  {
+    mapValue: {
+      fields: {
+        foo: {
+          stringValue: 'bar',
         },
       },
     },
-    'emptyObject', {
-      mapValue: {},
+  },
+  'emptyObject',
+  {
+    mapValue: {},
+  },
+  'pathValue',
+  {
+    referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
+  },
+  'stringValue',
+  {
+    stringValue: 'a',
+  },
+  'trueValue',
+  {
+    booleanValue: true,
+  },
+  'geoPointValue',
+  {
+    geoPointValue: {
+      latitude: 50.1430847,
+      longitude: -122.947778,
     },
-    'pathValue', {
-      referenceValue: `${DATABASE_ROOT}/documents/collection/document`,
-    },
-    'stringValue', {
-      stringValue: 'a',
-    },
-    'trueValue', {
-      booleanValue: true,
-    },
-    'geoPointValue', {
-      geoPointValue: {
-        latitude: 50.1430847,
-        longitude: -122.947778,
-      },
-    },
-    'bytesValue', {
-      bytesValue: Buffer.from('AQI=', 'base64'),
-    });
+  },
+  'bytesValue',
+  {
+    bytesValue: Buffer.from('AQI=', 'base64'),
+  }
+);
 
 const allSupportedTypesJson = {
   name: `${DOCUMENT_NAME}`,
@@ -215,15 +243,15 @@ const allSupportedTypesInput = {
   emptyObject: {},
   dateValue: new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)'),
   timestampValue: Firestore.Timestamp.fromDate(
-      new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
+    new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
+  ),
   pathValue: new Firestore.DocumentReference(
-      {
-        formattedName: DATABASE_ROOT,
-        _getProjectId: () =>
-            ({projectId: PROJECT_ID, databaseId: '(default)'})
-      } as any,  // tslint:disable-line no-any
-      new QualifiedResourcePath(
-          PROJECT_ID, '(default)', 'collection', 'document')),
+    {
+      formattedName: DATABASE_ROOT,
+      _getProjectId: () => ({projectId: PROJECT_ID, databaseId: '(default)'}),
+    } as any, // tslint:disable-line no-any
+    new QualifiedResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
+  ),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
   nilValue: null,
@@ -242,17 +270,18 @@ const allSupportedTypesOutput = {
   objectValue: {foo: 'bar'},
   emptyObject: {},
   dateValue: Firestore.Timestamp.fromDate(
-      new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
+    new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
+  ),
   timestampValue: Firestore.Timestamp.fromDate(
-      new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')),
+    new Date('Mar 18, 1985 08:20:00.123 GMT+0100 (CET)')
+  ),
   pathValue: new Firestore.DocumentReference(
-      {
-        formattedName: DATABASE_ROOT,
-        _getProjectId: () =>
-            ({projectId: PROJECT_ID, databaseId: '(default)'})
-      } as any,  // tslint:disable-line no-any
-      new QualifiedResourcePath(
-          PROJECT_ID, '(default)', 'collection', 'document')),
+    {
+      formattedName: DATABASE_ROOT,
+      _getProjectId: () => ({projectId: PROJECT_ID, databaseId: '(default)'}),
+    } as any, // tslint:disable-line no-any
+    new QualifiedResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
+  ),
   arrayValue: ['foo', 42, 'bar'],
   emptyArray: [],
   nilValue: null,
@@ -278,18 +307,18 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({});
 
-    expect(() => firestore.settings({}))
-        .to.throw(
-            'Firestore has already been initialized. You can only call settings() once, and only before calling any other methods on a Firestore object.');
+    expect(() => firestore.settings({})).to.throw(
+      'Firestore has already been initialized. You can only call settings() once, and only before calling any other methods on a Firestore object.'
+    );
   });
 
   it('cannot change settings after client initialized', async () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     await firestore.initializeIfNeeded();
 
-    expect(() => firestore.settings({}))
-        .to.throw(
-            'Firestore has already been initialized. You can only call settings() once, and only before calling any other methods on a Firestore object.');
+    expect(() => firestore.settings({})).to.throw(
+      'Firestore has already been initialized. You can only call settings() once, and only before calling any other methods on a Firestore object.'
+    );
   });
 
   it('validates project ID is string', () => {
@@ -298,18 +327,17 @@ describe('instantiation', () => {
         projectId: 1337,
       });
       new Firestore.Firestore(settings);
-    })
-        .to.throw(
-            'Value for argument "settings.projectId" is not a valid string.');
-
+    }).to.throw(
+      'Value for argument "settings.projectId" is not a valid string.'
+    );
 
     expect(() => {
       new Firestore.Firestore(DEFAULT_SETTINGS).settings({
-        projectId: 1337
+        projectId: 1337,
       } as InvalidApiUsage);
-    })
-        .to.throw(
-            'Value for argument "settings.projectId" is not a valid string.');
+    }).to.throw(
+      'Value for argument "settings.projectId" is not a valid string.'
+    );
   });
 
   it('validates timestampsInSnapshots is boolean', () => {
@@ -318,40 +346,42 @@ describe('instantiation', () => {
         timestampsInSnapshots: 1337,
       });
       new Firestore.Firestore(settings);
-    })
-        .to.throw(
-            'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.');
+    }).to.throw(
+      'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.'
+    );
 
     expect(() => {
       new Firestore.Firestore(DEFAULT_SETTINGS).settings({
-        timestampsInSnapshots: 1337 as InvalidApiUsage
+        timestampsInSnapshots: 1337 as InvalidApiUsage,
       });
-    })
-        .to.throw(
-            'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.');
+    }).to.throw(
+      'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.'
+    );
   });
 
   it('uses project id from constructor', () => {
     const firestore = new Firestore.Firestore({projectId: 'foo'});
 
-    return expect(firestore.formattedName)
-        .to.equal(`projects/foo/databases/(default)`);
+    return expect(firestore.formattedName).to.equal(
+      `projects/foo/databases/(default)`
+    );
   });
 
   it('uses project id from gapic client', async () => {
     return createInstance(
-               {
-                 getProjectId: (callback => {
-                   callback(null, 'foo');
-                 })
-               },
-               {projectId: undefined})
-        .then(async firestore => {
-          await firestore.initializeIfNeeded();
-          expect(firestore.projectId).to.equal('foo');
-          expect(firestore.formattedName)
-              .to.equal(`projects/foo/databases/(default)`);
-        });
+      {
+        getProjectId: callback => {
+          callback(null, 'foo');
+        },
+      },
+      {projectId: undefined}
+    ).then(async firestore => {
+      await firestore.initializeIfNeeded();
+      expect(firestore.projectId).to.equal('foo');
+      expect(firestore.formattedName).to.equal(
+        `projects/foo/databases/(default)`
+      );
+    });
   });
 
   it('uses project ID from settings()', () => {
@@ -362,58 +392,63 @@ describe('instantiation', () => {
 
     firestore.settings({projectId: PROJECT_ID});
 
-    expect(firestore.formattedName)
-        .to.equal(`projects/${PROJECT_ID}/databases/(default)`);
+    expect(firestore.formattedName).to.equal(
+      `projects/${PROJECT_ID}/databases/(default)`
+    );
   });
 
   it('handles error from project ID detection', () => {
     return createInstance(
-               {
-                 getProjectId: (callback => {
-                   callback(new Error('Injected Error'), null);
-                 })
-               },
-               {projectId: undefined})
-        .then(firestore => {
-          return expect(firestore.collection('foo').add({}))
-              .to.eventually.be.rejectedWith('Injected Error');
-        });
+      {
+        getProjectId: callback => {
+          callback(new Error('Injected Error'), null);
+        },
+      },
+      {projectId: undefined}
+    ).then(firestore => {
+      return expect(
+        firestore.collection('foo').add({})
+      ).to.eventually.be.rejectedWith('Injected Error');
+    });
   });
 
   it('exports all types', () => {
     // Ordering as per firestore.d.ts
-    expect((Firestore.Firestore)).to.exist;
+    expect(Firestore.Firestore).to.exist;
     expect(Firestore.Firestore.name).to.equal('Firestore');
-    expect((Firestore.Timestamp)).to.exist;
+    expect(Firestore.Timestamp).to.exist;
     expect(Firestore.Timestamp.name).to.equal('Timestamp');
-    expect((Firestore.GeoPoint)).to.exist;
+    expect(Firestore.GeoPoint).to.exist;
     expect(Firestore.GeoPoint.name).to.equal('GeoPoint');
-    expect((Firestore.Transaction)).to.exist;
+    expect(Firestore.Transaction).to.exist;
     expect(Firestore.Transaction.name).to.equal('Transaction');
-    expect((Firestore.WriteBatch)).to.exist;
+    expect(Firestore.WriteBatch).to.exist;
     expect(Firestore.WriteBatch.name).to.equal('WriteBatch');
-    expect((Firestore.DocumentReference)).to.exist;
+    expect(Firestore.DocumentReference).to.exist;
     expect(Firestore.DocumentReference.name).to.equal('DocumentReference');
-    expect((Firestore.WriteResult)).to.exist;
+    expect(Firestore.WriteResult).to.exist;
     expect(Firestore.WriteResult.name).to.equal('WriteResult');
-    expect((Firestore.DocumentSnapshot)).to.exist;
+    expect(Firestore.DocumentSnapshot).to.exist;
     expect(Firestore.DocumentSnapshot.name).to.equal('DocumentSnapshot');
-    expect((Firestore.QueryDocumentSnapshot)).to.exist;
-    expect(Firestore.QueryDocumentSnapshot.name)
-        .to.equal('QueryDocumentSnapshot');
-    expect((Firestore.Query)).to.exist;
+    expect(Firestore.QueryDocumentSnapshot).to.exist;
+    expect(Firestore.QueryDocumentSnapshot.name).to.equal(
+      'QueryDocumentSnapshot'
+    );
+    expect(Firestore.Query).to.exist;
     expect(Firestore.Query.name).to.equal('Query');
     expect(Firestore.QuerySnapshot).to.exist;
     expect(Firestore.QuerySnapshot.name).to.equal('QuerySnapshot');
-    expect((Firestore.CollectionReference)).to.exist;
+    expect(Firestore.CollectionReference).to.exist;
     expect(Firestore.CollectionReference.name).to.equal('CollectionReference');
-    expect((Firestore.FieldValue)).to.exist;
+    expect(Firestore.FieldValue).to.exist;
     expect(Firestore.FieldValue.name).to.equal('FieldValue');
-    expect((Firestore.FieldPath)).to.exist;
+    expect(Firestore.FieldPath).to.exist;
     expect(Firestore.Firestore.name).to.equal('Firestore');
-    expect(Firestore.FieldValue.serverTimestamp().isEqual(
-               Firestore.FieldValue.delete()))
-        .to.be.false;
+    expect(
+      Firestore.FieldValue.serverTimestamp().isEqual(
+        Firestore.FieldValue.delete()
+      )
+    ).to.be.false;
   });
 });
 
@@ -421,8 +456,9 @@ describe('serializer', () => {
   it('supports all types', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
-        expect(allSupportedTypesProtobufJs.fields)
-            .to.deep.eq(request.writes![0].update!.fields);
+        expect(allSupportedTypesProtobufJs.fields).to.deep.eq(
+          request.writes![0].update!.fields
+        );
         callback(null, {
           commitTime: {},
           writeResults: [
@@ -431,7 +467,7 @@ describe('serializer', () => {
             },
           ],
         });
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
@@ -447,8 +483,9 @@ describe('snapshot_() method', () => {
     const expected = extend(true, {}, allSupportedTypesOutput);
     // Deep Equal doesn't support matching instances of DocumentRefs, so we
     // compare them manually and remove them from the resulting object.
-    expect(actualObject.get('pathValue').formattedName)
-        .to.equal(expected.pathValue.formattedName);
+    expect(actualObject.get('pathValue').formattedName).to.equal(
+      expected.pathValue.formattedName
+    );
     const data = actualObject.data()!;
     delete data.pathValue;
     delete expected.pathValue;
@@ -458,9 +495,11 @@ describe('snapshot_() method', () => {
     // coverage.
     expect(data.geoPointValue.latitude).to.equal(50.1430847);
     expect(data.geoPointValue.longitude).to.equal(-122.947778);
-    expect(data.geoPointValue.isEqual(
-               new Firestore.GeoPoint(50.1430847, -122.947778)))
-        .to.be.true;
+    expect(
+      data.geoPointValue.isEqual(
+        new Firestore.GeoPoint(50.1430847, -122.947778)
+      )
+    ).to.be.true;
   }
 
   beforeEach(() => {
@@ -475,8 +514,9 @@ describe('snapshot_() method', () => {
 
   it('handles ProtobufJS', () => {
     const doc = firestore.snapshot_(
-        document('doc', 'foo', {bytesValue: bytesData}),
-        {seconds: 5, nanos: 6});
+      document('doc', 'foo', {bytesValue: bytesData}),
+      {seconds: 5, nanos: 6}
+    );
 
     expect(doc.exists).to.be.true;
     expect({foo: bytesData}).to.deep.eq(doc.data());
@@ -489,20 +529,22 @@ describe('snapshot_() method', () => {
     // Google Cloud Functions must be able to call snapshot_() with Proto3 JSON
     // data.
     const doc = firestore.snapshot_(
-        {
-          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
-          fields: {
-            a: {bytesValue: 'AQI='},
-            b: {timestampValue: '1985-03-18T07:20:00.000Z'},
-            c: {
-              valueType: 'bytesValue',
-              bytesValue: Buffer.from('AQI=', 'base64'),
-            },
+      {
+        name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+        fields: {
+          a: {bytesValue: 'AQI='},
+          b: {timestampValue: '1985-03-18T07:20:00.000Z'},
+          c: {
+            valueType: 'bytesValue',
+            bytesValue: Buffer.from('AQI=', 'base64'),
           },
-          createTime: '1970-01-01T00:00:01.002Z',
-          updateTime: '1970-01-01T00:00:03.000004Z',
         },
-        '1970-01-01T00:00:05.000000006Z', 'json');
+        createTime: '1970-01-01T00:00:01.002Z',
+        updateTime: '1970-01-01T00:00:03.000004Z',
+      },
+      '1970-01-01T00:00:05.000000006Z',
+      'json'
+    );
 
     expect(doc.exists).to.be.true;
     expect(doc.data()).to.deep.eq({
@@ -510,10 +552,10 @@ describe('snapshot_() method', () => {
       b: Firestore.Timestamp.fromDate(new Date('1985-03-18T07:20:00.000Z')),
       c: bytesData,
     });
-    expect(doc.createTime!.isEqual(new Firestore.Timestamp(1, 2000000)))
-        .to.be.true;
-    expect(doc.updateTime!.isEqual(new Firestore.Timestamp(3, 4000)))
-        .to.be.true;
+    expect(doc.createTime!.isEqual(new Firestore.Timestamp(1, 2000000))).to.be
+      .true;
+    expect(doc.updateTime!.isEqual(new Firestore.Timestamp(3, 4000))).to.be
+      .true;
     expect(doc.readTime.isEqual(new Firestore.Timestamp(5, 6))).to.be.true;
   });
 
@@ -528,53 +570,64 @@ describe('snapshot_() method', () => {
 
   it('deserializes all supported types from Proto3 JSON', () => {
     const doc = firestore.snapshot_(
-        allSupportedTypesJson, '1970-01-01T00:00:05.000000006Z', 'json');
+      allSupportedTypesJson,
+      '1970-01-01T00:00:05.000000006Z',
+      'json'
+    );
     verifyAllSupportedTypes(doc);
   });
 
   it('handles invalid Proto3 JSON', () => {
     expect(() => {
       firestore.snapshot_(
-          {
-            name: `${DATABASE_ROOT}/documents/collectionId/doc`,
-            fields: {foo: {}},
-            createTime: '1970-01-01T00:00:01.000000002Z',
-            updateTime: '1970-01-01T00:00:03.000000004Z',
-          },
-          '1970-01-01T00:00:05.000000006Z', 'json');
-    }).to.throw('Unable to infer type value fom \'{}\'.');
+        {
+          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+          fields: {foo: {}},
+          createTime: '1970-01-01T00:00:01.000000002Z',
+          updateTime: '1970-01-01T00:00:03.000000004Z',
+        },
+        '1970-01-01T00:00:05.000000006Z',
+        'json'
+      );
+    }).to.throw("Unable to infer type value fom '{}'.");
 
     expect(() => {
       firestore.snapshot_(
-          {
-            name: `${DATABASE_ROOT}/documents/collectionId/doc`,
-            fields: {foo: {stringValue: 'bar', integerValue: 42}},
-            createTime: '1970-01-01T00:00:01.000000002Z',
-            updateTime: '1970-01-01T00:00:03.000000004Z',
-          },
-          '1970-01-01T00:00:05.000000006Z', 'json');
-    })
-        .to.throw(
-            'Unable to infer type value fom \'{"stringValue":"bar","integerValue":42}\'.');
+        {
+          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+          fields: {foo: {stringValue: 'bar', integerValue: 42}},
+          createTime: '1970-01-01T00:00:01.000000002Z',
+          updateTime: '1970-01-01T00:00:03.000000004Z',
+        },
+        '1970-01-01T00:00:05.000000006Z',
+        'json'
+      );
+    }).to.throw(
+      'Unable to infer type value fom \'{"stringValue":"bar","integerValue":42}\'.'
+    );
 
     expect(() => {
       firestore.snapshot_(
-          {
-            name: `${DATABASE_ROOT}/documents/collectionId/doc`,
-            fields: {foo: {stringValue: 'bar'}},
-            createTime: '1970-01-01T00:00:01.NaNZ',
-            updateTime: '1970-01-01T00:00:03.000000004Z',
-          },
-          '1970-01-01T00:00:05.000000006Z', 'json');
-    })
-        .to.throw(
-            'Specify a valid ISO 8601 timestamp for "documentOrName.createTime".');
+        {
+          name: `${DATABASE_ROOT}/documents/collectionId/doc`,
+          fields: {foo: {stringValue: 'bar'}},
+          createTime: '1970-01-01T00:00:01.NaNZ',
+          updateTime: '1970-01-01T00:00:03.000000004Z',
+        },
+        '1970-01-01T00:00:05.000000006Z',
+        'json'
+      );
+    }).to.throw(
+      'Specify a valid ISO 8601 timestamp for "documentOrName.createTime".'
+    );
   });
 
   it('handles missing document ', () => {
     const doc = firestore.snapshot_(
-        `${DATABASE_ROOT}/documents/collectionId/doc`,
-        '1970-01-01T00:00:05.000000006Z', 'json');
+      `${DATABASE_ROOT}/documents/collectionId/doc`,
+      '1970-01-01T00:00:05.000000006Z',
+      'json'
+    );
 
     expect(doc.exists).to.be.false;
     expect(doc.readTime.isEqual(new Firestore.Timestamp(5, 6))).to.be.true;
@@ -583,11 +636,13 @@ describe('snapshot_() method', () => {
   it('handles invalid encoding format ', () => {
     expect(() => {
       firestore.snapshot_(
-          `${DATABASE_ROOT}/documents/collectionId/doc`,
-          '1970-01-01T00:00:05.000000006Z', 'ascii' as InvalidApiUsage);
-    })
-        .to.throw(
-            'Unsupported encoding format. Expected "json" or "protobufJS", but was "ascii".');
+        `${DATABASE_ROOT}/documents/collectionId/doc`,
+        '1970-01-01T00:00:05.000000006Z',
+        'ascii' as InvalidApiUsage
+      );
+    }).to.throw(
+      'Unsupported encoding format. Expected "json" or "protobufJS", but was "ascii".'
+    );
   });
 });
 
@@ -606,21 +661,21 @@ describe('doc() method', () => {
   });
 
   it('requires document path', () => {
-    expect(() => (firestore as InvalidApiUsage).doc())
-        .to.throw(
-            'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.');
+    expect(() => (firestore as InvalidApiUsage).doc()).to.throw(
+      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+    );
   });
 
-  it('doesn\'t accept empty components', () => {
-    expect(() => firestore.doc('coll//doc'))
-        .to.throw(
-            'Value for argument "documentPath" is not a valid resource path. Paths must not contain //.');
+  it("doesn't accept empty components", () => {
+    expect(() => firestore.doc('coll//doc')).to.throw(
+      'Value for argument "documentPath" is not a valid resource path. Paths must not contain //.'
+    );
   });
 
   it('must point to document', () => {
-    expect(() => firestore.doc('collectionId'))
-        .to.throw(
-            'Value for argument "documentPath" must point to a document, but was "collectionId". Your path does not contain an even number of components.');
+    expect(() => firestore.doc('collectionId')).to.throw(
+      'Value for argument "documentPath" must point to a document, but was "collectionId". Your path does not contain an even number of components.'
+    );
   });
 
   it('exposes properties', () => {
@@ -645,16 +700,15 @@ describe('collection() method', () => {
   });
 
   it('requires collection id', () => {
-    expect(() => (firestore as InvalidApiUsage).collection())
-        .to.throw(
-            'Value for argument "collectionPath" is not a valid resource path. Path must be a non-empty string.');
+    expect(() => (firestore as InvalidApiUsage).collection()).to.throw(
+      'Value for argument "collectionPath" is not a valid resource path. Path must be a non-empty string.'
+    );
   });
 
-
   it('must point to a collection', () => {
-    expect(() => firestore.collection('collectionId/documentId'))
-        .to.throw(
-            'Value for argument "collectionPath" must point to a collection, but was "collectionId/documentId". Your path does not contain an odd number of components.');
+    expect(() => firestore.collection('collectionId/documentId')).to.throw(
+      'Value for argument "collectionPath" must point to a collection, but was "collectionId/documentId". Your path does not contain an odd number of components.'
+    );
   });
 
   it('exposes properties', () => {
@@ -674,11 +728,12 @@ describe('listCollections() method', () => {
         });
 
         callback(null, ['first', 'second']);
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
       // We are using `getCollections()` to ensure 100% code coverage
+      // tslint:disable-next-line deprecation
       return firestore.getCollections().then(collections => {
         expect(collections[0].path).to.equal('first');
         expect(collections[1].path).to.equal('second');
@@ -689,7 +744,9 @@ describe('listCollections() method', () => {
 
 describe('getAll() method', () => {
   function resultEquals(
-      result: DocumentSnapshot[], ...docs: api.IBatchGetDocumentsResponse[]) {
+    result: DocumentSnapshot[],
+    ...docs: api.IBatchGetDocumentsResponse[]
+  ) {
     expect(result.length).to.equal(arguments.length - 1);
 
     for (let i = 0; i < result.length; ++i) {
@@ -709,14 +766,15 @@ describe('getAll() method', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found('documentId'));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
-      return firestore.getAll(firestore.doc('collectionId/documentId'))
-          .then(result => {
-            resultEquals(result, found('documentId'));
-          });
+      return firestore
+        .getAll(firestore.doc('collectionId/documentId'))
+        .then(result => {
+          resultEquals(result, found('documentId'));
+        });
     });
   });
 
@@ -724,19 +782,20 @@ describe('getAll() method', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found('documentId2'));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
-      return firestore.getAll(firestore.doc('collectionId/documentId'))
-          .then(() => {
-            throw new Error('Unexpected success in Promise');
-          })
-          .catch(err => {
-            expect(err.message)
-                .to.equal(
-                    'Did not receive document for "collectionId/documentId".');
-          });
+      return firestore
+        .getAll(firestore.doc('collectionId/documentId'))
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal(
+            'Did not receive document for "collectionId/documentId".'
+          );
+        });
     });
   });
 
@@ -744,17 +803,18 @@ describe('getAll() method', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(new Error('Expected exception'));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
-      return firestore.getAll(firestore.doc('collectionId/documentId'))
-          .then(() => {
-            throw new Error('Unexpected success in Promise');
-          })
-          .catch(err => {
-            expect(err.message).to.equal('Expected exception');
-          });
+      return firestore
+        .getAll(firestore.doc('collectionId/documentId'))
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('Expected exception');
+        });
     });
   });
 
@@ -762,17 +822,18 @@ describe('getAll() method', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found('documentId'), new Error('Expected exception'));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
-      return firestore.getAll(firestore.doc('collectionId/documentId'))
-          .then(() => {
-            throw new Error('Unexpected success in Promise');
-          })
-          .catch(err => {
-            expect(err.message).to.equal('Expected exception');
-          });
+      return firestore
+        .getAll(firestore.doc('collectionId/documentId'))
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('Expected exception');
+        });
     });
   });
 
@@ -780,7 +841,7 @@ describe('getAll() method', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found('documentId'));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
@@ -788,13 +849,14 @@ describe('getAll() method', () => {
         throw new Error('Expected exception');
       };
 
-      return firestore.getAll(firestore.doc('collectionId/documentId'))
-          .then(() => {
-            throw new Error('Unexpected success in Promise');
-          })
-          .catch(err => {
-            expect(err.message).to.equal('Expected exception');
-          });
+      return firestore
+        .getAll(firestore.doc('collectionId/documentId'))
+        .then(() => {
+          throw new Error('Unexpected success in Promise');
+        })
+        .catch(err => {
+          expect(err.message).to.equal('Expected exception');
+        });
     });
   });
 
@@ -824,11 +886,11 @@ describe('getAll() method', () => {
       batchGetDocuments: request => {
         const errorCode = Number(request.documents![0].split('/').pop());
         actualErrorAttempts[errorCode] =
-            (actualErrorAttempts[errorCode] || 0) + 1;
+          (actualErrorAttempts[errorCode] || 0) + 1;
         const error = new GrpcError('Expected exception');
         error.code = errorCode;
         return stream(error);
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
@@ -837,13 +899,16 @@ describe('getAll() method', () => {
       const promises: Array<Promise<void>> = [];
 
       Object.keys(expectedErrorAttempts).forEach(errorCode => {
-        promises.push(firestore.getAll(coll.doc(`${errorCode}`))
-                          .then(() => {
-                            throw new Error('Unexpected success in Promise');
-                          })
-                          .catch(err => {
-                            expect(err.code).to.equal(Number(errorCode));
-                          }));
+        promises.push(
+          firestore
+            .getAll(coll.doc(`${errorCode}`))
+            .then(() => {
+              throw new Error('Unexpected success in Promise');
+            })
+            .catch(err => {
+              expect(err.code).to.equal(Number(errorCode));
+            })
+        );
       });
 
       return Promise.all(promises).then(() => {
@@ -854,45 +919,48 @@ describe('getAll() method', () => {
 
   it('requires at least one argument', () => {
     return createInstance().then(firestore => {
-      expect(() => (firestore as InvalidApiUsage).getAll())
-          .to.throw(
-              'Function "Firestore.getAll()" requires at least 1 argument.');
+      expect(() => (firestore as InvalidApiUsage).getAll()).to.throw(
+        'Function "Firestore.getAll()" requires at least 1 argument.'
+      );
     });
   });
 
   it('validates document references', () => {
     return createInstance().then(firestore => {
-      expect(() => firestore.getAll(null as InvalidApiUsage))
-          .to.throw('Element at index 0 is not a valid DocumentReference.');
+      expect(() => firestore.getAll(null as InvalidApiUsage)).to.throw(
+        'Element at index 0 is not a valid DocumentReference.'
+      );
     });
   });
 
   it('accepts array', () => {
-    const overrides:
-        ApiOverride = {batchGetDocuments: () => stream(found('documentId'))};
+    const overrides: ApiOverride = {
+      batchGetDocuments: () => stream(found('documentId')),
+    };
 
     return createInstance(overrides).then(firestore => {
       return (firestore as InvalidApiUsage)
-          .getAll([firestore.doc('collectionId/documentId')])
-          .then((result: DocumentSnapshot[]) => {
-            resultEquals(result, found('documentId'));
-          });
+        .getAll([firestore.doc('collectionId/documentId')])
+        .then((result: DocumentSnapshot[]) => {
+          resultEquals(result, found('documentId'));
+        });
     });
   });
 
   it('returns not found for missing documents', () => {
     const overrides: ApiOverride = {
-      batchGetDocuments: () => stream(found('exists'), missing('missing'))
+      batchGetDocuments: () => stream(found('exists'), missing('missing')),
     };
 
     return createInstance(overrides).then(firestore => {
       return firestore
-          .getAll(
-              firestore.doc('collectionId/exists'),
-              firestore.doc('collectionId/missing'))
-          .then(result => {
-            resultEquals(result, found('exists'), missing('missing'));
-          });
+        .getAll(
+          firestore.doc('collectionId/exists'),
+          firestore.doc('collectionId/missing')
+        )
+        .then(result => {
+          resultEquals(result, found('exists'), missing('missing'));
+        });
     });
   });
 
@@ -900,23 +968,32 @@ describe('getAll() method', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(
-            // Note that these are out of order.
-            found('second'), found('first'), found('fourth'), found('third'));
-      }
+          // Note that these are out of order.
+          found('second'),
+          found('first'),
+          found('fourth'),
+          found('third')
+        );
+      },
     };
 
     return createInstance(overrides).then(firestore => {
       return firestore
-          .getAll(
-              firestore.doc('collectionId/first'),
-              firestore.doc('collectionId/second'),
-              firestore.doc('collectionId/third'),
-              firestore.doc('collectionId/fourth'))
-          .then(result => {
-            resultEquals(
-                result, found('first'), found('second'), found('third'),
-                found(document(('fourth'))));
-          });
+        .getAll(
+          firestore.doc('collectionId/first'),
+          firestore.doc('collectionId/second'),
+          firestore.doc('collectionId/third'),
+          firestore.doc('collectionId/fourth')
+        )
+        .then(result => {
+          resultEquals(
+            result,
+            found('first'),
+            found('second'),
+            found('third'),
+            found(document('fourth'))
+          );
+        });
     });
   });
 
@@ -925,18 +1002,20 @@ describe('getAll() method', () => {
       batchGetDocuments: request => {
         expect(request.documents!.length).to.equal(2);
         return stream(found('a'), found('b'));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
       return firestore
-          .getAll(
-              firestore.doc('collectionId/a'), firestore.doc('collectionId/a'),
-              firestore.doc('collectionId/b'), firestore.doc('collectionId/a'))
-          .then(result => {
-            resultEquals(
-                result, found('a'), found('a'), found('b'), found('a'));
-          });
+        .getAll(
+          firestore.doc('collectionId/a'),
+          firestore.doc('collectionId/a'),
+          firestore.doc('collectionId/b'),
+          firestore.doc('collectionId/a')
+        )
+        .then(result => {
+          resultEquals(result, found('a'), found('a'), found('b'), found('a'));
+        });
     });
   });
 
@@ -944,32 +1023,37 @@ describe('getAll() method', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: request => {
         expect(request.mask!.fieldPaths).to.have.members([
-          'foo.bar', '`foo.bar`'
+          'foo.bar',
+          '`foo.bar`',
         ]);
         return stream(found('a'));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
-      return firestore.getAll(
-          firestore.doc('collectionId/a'),
-          {fieldMask: ['foo.bar', new FieldPath('foo.bar')]});
+      return firestore.getAll(firestore.doc('collectionId/a'), {
+        fieldMask: ['foo.bar', new FieldPath('foo.bar')],
+      });
     });
   });
 
   it('validates field mask', () => {
     return createInstance().then(firestore => {
-      expect(() => firestore.getAll(firestore.doc('collectionId/a'), {
-        fieldMask: null
-      } as InvalidApiUsage))
-          .to.throw(
-              'Value for argument "options" is not a valid read option. "fieldMask" is not an array.');
+      expect(() =>
+        firestore.getAll(firestore.doc('collectionId/a'), {
+          fieldMask: null,
+        } as InvalidApiUsage)
+      ).to.throw(
+        'Value for argument "options" is not a valid read option. "fieldMask" is not an array.'
+      );
 
-      expect(() => firestore.getAll(firestore.doc('collectionId/a'), {
-        fieldMask: ['a', new FieldPath('b'), null]
-      } as InvalidApiUsage))
-          .to.throw(
-              'Value for argument "options" is not a valid read option. "fieldMask" is not valid: Element at index 2 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.');
+      expect(() =>
+        firestore.getAll(firestore.doc('collectionId/a'), {
+          fieldMask: ['a', new FieldPath('b'), null],
+        } as InvalidApiUsage)
+      ).to.throw(
+        'Value for argument "options" is not a valid read option. "fieldMask" is not valid: Element at index 2 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.'
+      );
     });
   });
 });

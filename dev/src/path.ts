@@ -17,7 +17,12 @@
 import {google} from '../protos/firestore_proto_api';
 
 import {isObject} from './util';
-import {customObjectMessage, invalidArgumentMessage, validateMinNumberOfArguments, validateString} from './validate';
+import {
+  customObjectMessage,
+  invalidArgumentMessage,
+  validateMinNumberOfArguments,
+  validateString,
+} from './validate';
 
 import api = google.firestore.v1;
 
@@ -35,8 +40,8 @@ export const DEFAULT_DATABASE_ID = '(default)';
  * @type {RegExp}
  */
 const RESOURCE_PATH_RE =
-    // Note: [\s\S] matches all characters including newlines.
-    /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?([\s\S]*)$/;
+  // Note: [\s\S] matches all characters including newlines.
+  /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?([\s\S]*)$/;
 
 /*!
  * A regular expression to verify whether a field name can be passed to the
@@ -82,7 +87,7 @@ abstract class Path<T> {
     return this.segments.length;
   }
 
-  abstract construct(segments: string[]|string): T;
+  abstract construct(segments: string[] | string): T;
   abstract split(relativePath: string): string[];
 
   /**
@@ -92,7 +97,7 @@ abstract class Path<T> {
    * @param relativePath Relative path to append to the current path.
    * @returns The new path.
    */
-  append(relativePath: Path<T>|string): T {
+  append(relativePath: Path<T> | string): T {
     if (relativePath instanceof Path) {
       return this.construct(this.segments.concat(relativePath.segments));
     }
@@ -105,7 +110,7 @@ abstract class Path<T> {
    * @private
    * @returns The new path or null if we are already at the root.
    */
-  parent(): T|null {
+  parent(): T | null {
     if (this.segments.length === 0) {
       return null;
     }
@@ -179,8 +184,9 @@ abstract class Path<T> {
    */
   isEqual(other: Path<T>): boolean {
     return (
-        this === other ||
-        (other instanceof this.constructor && this.compareTo(other) === 0));
+      this === other ||
+      (other instanceof this.constructor && this.compareTo(other) === 0)
+    );
   }
 }
 
@@ -227,7 +233,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * The last component of the path.
    * @private
    */
-  get id(): string|null {
+  get id(): string | null {
     if (this.segments.length > 0) {
       return this.segments[this.segments.length - 1];
     }
@@ -278,7 +284,10 @@ export class ResourcePath extends Path<ResourcePath> {
    */
   toQualifiedResourcePath(projectIdIfMissing: string): QualifiedResourcePath {
     return new QualifiedResourcePath(
-        projectIdIfMissing, DEFAULT_DATABASE_ID, ...this.segments);
+      projectIdIfMissing,
+      DEFAULT_DATABASE_ID,
+      ...this.segments
+    );
   }
 }
 
@@ -349,12 +358,11 @@ export class QualifiedResourcePath extends ResourcePath {
    * @param relativePath Relative path to append to the current path.
    * @returns The new path.
    */
-  append(relativePath: ResourcePath|string): QualifiedResourcePath {
+  append(relativePath: ResourcePath | string): QualifiedResourcePath {
     // `super.append()` calls `QualifiedResourcePath.construct()` when invoked
     // from here and returns a QualifiedResourcePath.
     return super.append(relativePath) as QualifiedResourcePath;
   }
-
 
   /**
    * Create a child path beneath the current level.
@@ -362,7 +370,7 @@ export class QualifiedResourcePath extends ResourcePath {
    * @private
    * @returns The new path.
    */
-  parent(): QualifiedResourcePath|null {
+  parent(): QualifiedResourcePath | null {
     return super.parent() as QualifiedResourcePath | null;
   }
 
@@ -374,8 +382,12 @@ export class QualifiedResourcePath extends ResourcePath {
    */
   get formattedName(): string {
     const components = [
-      'projects', this.projectId, 'databases', this.databaseId, 'documents',
-      ...this.segments
+      'projects',
+      this.projectId,
+      'databases',
+      this.databaseId,
+      'documents',
+      ...this.segments,
     ];
     return components.join('/');
   }
@@ -391,7 +403,10 @@ export class QualifiedResourcePath extends ResourcePath {
    */
   construct(segments: string[]): QualifiedResourcePath {
     return new QualifiedResourcePath(
-        this.projectId, this.databaseId, ...segments);
+      this.projectId,
+      this.databaseId,
+      ...segments
+    );
   }
 
   /**
@@ -455,17 +470,25 @@ export class QualifiedResourcePath extends ResourcePath {
  * @throws if the string can't be used as a resource path.
  */
 export function validateResourcePath(
-    arg: string|number, resourcePath: string): void {
+  arg: string | number,
+  resourcePath: string
+): void {
   if (typeof resourcePath !== 'string' || resourcePath === '') {
-    throw new Error(`${
-        invalidArgumentMessage(
-            arg, 'resource path')} Path must be a non-empty string.`);
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        'resource path'
+      )} Path must be a non-empty string.`
+    );
   }
 
   if (resourcePath.indexOf('//') >= 0) {
-    throw new Error(`${
-        invalidArgumentMessage(
-            arg, 'resource path')} Paths must not contain //.`);
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        'resource path'
+      )} Paths must not contain //.`
+    );
   }
 }
 
@@ -499,9 +522,9 @@ export class FieldPath extends Path<FieldPath> {
    * });
    */
   constructor(...segments: string[]) {
-    const elements: string[] = Array.isArray(segments[0]) ?
-        (segments[0] as unknown) as string[] :
-        segments;
+    const elements: string[] = Array.isArray(segments[0])
+      ? ((segments[0] as unknown) as string[])
+      : segments;
 
     validateMinNumberOfArguments('FieldPath', elements, 1);
 
@@ -534,12 +557,12 @@ export class FieldPath extends Path<FieldPath> {
    * @param {string|FieldPath} fieldPath The FieldPath to create.
    * @returns {FieldPath} A field path representation.
    */
-  static fromArgument(fieldPath: string|FieldPath) {
+  static fromArgument(fieldPath: string | FieldPath) {
     // validateFieldPath() is used in all public API entry points to validate
     // that fromArgument() is only called with a Field Path or a string.
-    return fieldPath instanceof FieldPath ?
-        fieldPath :
-        new FieldPath(...fieldPath.split('.'));
+    return fieldPath instanceof FieldPath
+      ? fieldPath
+      : new FieldPath(...fieldPath.split('.'));
   }
 
   /**
@@ -551,12 +574,12 @@ export class FieldPath extends Path<FieldPath> {
    */
   get formattedName(): string {
     return this.segments
-        .map(str => {
-          return UNESCAPED_FIELD_NAME_RE.test(str) ?
-              str :
-              '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
-        })
-        .join('.');
+      .map(str => {
+        return UNESCAPED_FIELD_NAME_RE.test(str)
+          ? str
+          : '`' + str.replace('\\', '\\\\').replace('`', '\\`') + '`';
+      })
+      .join('.');
   }
 
   /**
@@ -615,15 +638,17 @@ export class FieldPath extends Path<FieldPath> {
  * @throws if the string can't be used as a field path.
  */
 export function validateFieldPath(
-    arg: string|number, fieldPath: unknown): void {
+  arg: string | number,
+  fieldPath: unknown
+): void {
   if (fieldPath instanceof FieldPath) {
     return;
   }
 
   if (fieldPath === undefined) {
     throw new Error(
-        invalidArgumentMessage(arg, 'field path') +
-        ' The path cannot be omitted.');
+      invalidArgumentMessage(arg, 'field path') + ' The path cannot be omitted.'
+    );
   }
 
   if (isObject(fieldPath) && fieldPath.constructor.name === 'FieldPath') {
@@ -631,28 +656,37 @@ export function validateFieldPath(
   }
 
   if (typeof fieldPath !== 'string') {
-    throw new Error(`${
-        invalidArgumentMessage(
-            arg,
-            'field path')} Paths can only be specified as strings or via a FieldPath object.`);
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        'field path'
+      )} Paths can only be specified as strings or via a FieldPath object.`
+    );
   }
 
   if (fieldPath.indexOf('..') >= 0) {
-    throw new Error(`${
-        invalidArgumentMessage(
-            arg, 'field path')} Paths must not contain ".." in them.`);
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        'field path'
+      )} Paths must not contain ".." in them.`
+    );
   }
 
   if (fieldPath.startsWith('.') || fieldPath.endsWith('.')) {
-    throw new Error(`${
-        invalidArgumentMessage(
-            arg, 'field path')} Paths must not start or end with ".".`);
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        'field path'
+      )} Paths must not start or end with ".".`
+    );
   }
 
   if (!FIELD_PATH_RE.test(fieldPath)) {
-    throw new Error(`${
-        invalidArgumentMessage(
-            arg, 'field path')} Paths can't be empty and must not contain
+    throw new Error(`${invalidArgumentMessage(
+      arg,
+      'field path'
+    )} Paths can't be empty and must not contain
     "*~/[]".`);
   }
 }

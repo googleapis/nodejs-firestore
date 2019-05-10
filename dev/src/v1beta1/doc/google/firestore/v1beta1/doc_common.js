@@ -31,7 +31,7 @@
  * @see [google.firestore.v1beta1.DocumentMask definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
 const DocumentMask = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -53,7 +53,7 @@ const DocumentMask = {
  * @see [google.firestore.v1beta1.Precondition definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
  */
 const Precondition = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
 
 /**
@@ -89,7 +89,7 @@ const TransactionOptions = {
    * @see [google.firestore.v1beta1.TransactionOptions.ReadWrite definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
    */
   ReadWrite: {
-      // This is for documentation. Actual contents will be loaded by gRPC.
+    // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
   /**
@@ -107,6 +107,6 @@ const TransactionOptions = {
    * @see [google.firestore.v1beta1.TransactionOptions.ReadOnly definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/common.proto}
    */
   ReadOnly: {
-      // This is for documentation. Actual contents will be loaded by gRPC.
-  }
+    // This is for documentation. Actual contents will be loaded by gRPC.
+  },
 };

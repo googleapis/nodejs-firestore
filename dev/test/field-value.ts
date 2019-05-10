@@ -17,60 +17,75 @@
 import {expect} from 'chai';
 
 import {FieldValue} from '../src';
-import {ApiOverride, arrayTransform, createInstance, document, incrementTransform, InvalidApiUsage, requestEquals, serverTimestamp, set, writeResult} from './util/helpers';
+import {
+  ApiOverride,
+  arrayTransform,
+  createInstance,
+  document,
+  incrementTransform,
+  InvalidApiUsage,
+  requestEquals,
+  serverTimestamp,
+  set,
+  writeResult,
+} from './util/helpers';
 
 function genericFieldValueTests(methodName: string, sentinel: FieldValue) {
-  it('can\'t be used inside arrays', () => {
+  it("can't be used inside arrays", () => {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('coll/doc');
-      const expectedErr =
-          new RegExp(`${methodName}\\(\\) cannot be used inside of an array`);
+      const expectedErr = new RegExp(
+        `${methodName}\\(\\) cannot be used inside of an array`
+      );
       expect(() => docRef.set({a: [sentinel]})).to.throw(expectedErr);
       expect(() => docRef.set({a: {b: [sentinel]}})).to.throw(expectedErr);
-      expect(() => docRef.set({
-        a: [{b: sentinel}],
-      })).to.throw(expectedErr);
+      expect(() =>
+        docRef.set({
+          a: [{b: sentinel}],
+        })
+      ).to.throw(expectedErr);
       expect(() => docRef.set({a: {b: {c: [sentinel]}}})).to.throw(expectedErr);
     });
   });
 
-  it('can\'t be used inside arrayUnion()', () => {
+  it("can't be used inside arrayUnion()", () => {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
-      expect(() => docRef.set({foo: FieldValue.arrayUnion(sentinel)}))
-          .to.throw(`Element at index 0 is not a valid array element. ${
-              methodName}() cannot be used inside of an array.`);
+      expect(() => docRef.set({foo: FieldValue.arrayUnion(sentinel)})).to.throw(
+        `Element at index 0 is not a valid array element. ${methodName}() cannot be used inside of an array.`
+      );
     });
   });
 
-  it('can\'t be used inside arrayRemove()', () => {
+  it("can't be used inside arrayRemove()", () => {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
-      expect(() => docRef.set({foo: FieldValue.arrayRemove(sentinel)}))
-          .to.throw(`Element at index 0 is not a valid array element. ${
-              methodName}() cannot be used inside of an array.`);
+      expect(() =>
+        docRef.set({foo: FieldValue.arrayRemove(sentinel)})
+      ).to.throw(
+        `Element at index 0 is not a valid array element. ${methodName}() cannot be used inside of an array.`
+      );
     });
   });
 
-  it('can\'t be used with queries', () => {
+  it("can't be used with queries", () => {
     return createInstance().then(firestore => {
       const collRef = firestore.collection('coll');
-      expect(() => collRef.where('a', '==', sentinel))
-          .to
-          .throw(`Value for argument "value" is not a valid query constraint. ${
-              methodName}() can only be used in set(), create() or update().`);
-      expect(() => collRef.orderBy('a').startAt(sentinel))
-          .to.throw(`Element at index 0 is not a valid query constraint. ${
-              methodName}() can only be used in set(), create() or update().`);
+      expect(() => collRef.where('a', '==', sentinel)).to.throw(
+        `Value for argument "value" is not a valid query constraint. ${methodName}() can only be used in set(), create() or update().`
+      );
+      expect(() => collRef.orderBy('a').startAt(sentinel)).to.throw(
+        `Element at index 0 is not a valid query constraint. ${methodName}() can only be used in set(), create() or update().`
+      );
     });
   });
 }
 
 describe('FieldValue.arrayUnion()', () => {
   it('requires one argument', () => {
-    expect(() => FieldValue.arrayUnion())
-        .to.throw(
-            'Function "FieldValue.arrayUnion()" requires at least 1 argument.');
+    expect(() => FieldValue.arrayUnion()).to.throw(
+      'Function "FieldValue.arrayUnion()" requires at least 1 argument.'
+    );
   });
 
   it('supports isEqual()', () => {
@@ -88,14 +103,14 @@ describe('FieldValue.arrayUnion()', () => {
           document: document('documentId', 'foo', 'bar'),
           transforms: [
             arrayTransform('field', 'appendMissingElements', 'foo', 'bar'),
-            arrayTransform('map.field', 'appendMissingElements', 'foo', 'bar')
-          ]
+            arrayTransform('map.field', 'appendMissingElements', 'foo', 'bar'),
+          ],
         });
 
         requestEquals(request, expectedRequest);
 
         callback(null, writeResult(2));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
@@ -112,9 +127,9 @@ describe('FieldValue.arrayUnion()', () => {
 
 describe('FieldValue.increment()', () => {
   it('requires one argument', () => {
-    expect(() => (FieldValue as InvalidApiUsage).increment())
-        .to.throw(
-            'Function "FieldValue.increment()" requires at least 1 argument.');
+    expect(() => (FieldValue as InvalidApiUsage).increment()).to.throw(
+      'Function "FieldValue.increment()" requires at least 1 argument.'
+    );
   });
 
   it('validates that operand is number', () => {
@@ -123,9 +138,9 @@ describe('FieldValue.increment()', () => {
         return firestore.doc('collectionId/documentId').set({
           foo: FieldValue.increment('foo' as InvalidApiUsage),
         });
-      })
-          .to.throw(
-              'Value for argument "FieldValue.increment()" is not a valid number');
+      }).to.throw(
+        'Value for argument "FieldValue.increment()" is not a valid number'
+      );
     });
   });
 
@@ -145,11 +160,11 @@ describe('FieldValue.increment()', () => {
           transforms: [
             incrementTransform('field', 42),
             incrementTransform('map.field', 13.37),
-          ]
+          ],
         });
         requestEquals(request, expectedRequest);
         callback(null, writeResult(2));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
@@ -166,9 +181,9 @@ describe('FieldValue.increment()', () => {
 
 describe('FieldValue.arrayRemove()', () => {
   it('requires one argument', () => {
-    expect(() => FieldValue.arrayRemove())
-        .to.throw(
-            'Function "FieldValue.arrayRemove()" requires at least 1 argument.');
+    expect(() => FieldValue.arrayRemove()).to.throw(
+      'Function "FieldValue.arrayRemove()" requires at least 1 argument.'
+    );
   });
 
   it('supports isEqual()', () => {
@@ -186,13 +201,13 @@ describe('FieldValue.arrayRemove()', () => {
           document: document('documentId', 'foo', 'bar'),
           transforms: [
             arrayTransform('field', 'removeAllFromArray', 'foo', 'bar'),
-            arrayTransform('map.field', 'removeAllFromArray', 'foo', 'bar')
-          ]
+            arrayTransform('map.field', 'removeAllFromArray', 'foo', 'bar'),
+          ],
         });
         requestEquals(request, expectedRequest);
 
         callback(null, writeResult(2));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
@@ -205,7 +220,9 @@ describe('FieldValue.arrayRemove()', () => {
   });
 
   genericFieldValueTests(
-      'FieldValue.arrayRemove', FieldValue.arrayRemove('foo'));
+    'FieldValue.arrayRemove',
+    FieldValue.arrayRemove('foo')
+  );
 });
 
 describe('FieldValue.serverTimestamp()', () => {
@@ -220,13 +237,12 @@ describe('FieldValue.serverTimestamp()', () => {
       commit: (request, options, callback) => {
         const expectedRequest = set({
           document: document('documentId', 'foo', 'bar'),
-          transforms:
-              [serverTimestamp('field'), serverTimestamp('map.field')]
+          transforms: [serverTimestamp('field'), serverTimestamp('map.field')],
         });
         requestEquals(request, expectedRequest);
 
         callback(null, writeResult(2));
-      }
+      },
     };
 
     return createInstance(overrides).then(firestore => {
@@ -239,5 +255,7 @@ describe('FieldValue.serverTimestamp()', () => {
   });
 
   genericFieldValueTests(
-      'FieldValue.serverTimestamp', FieldValue.serverTimestamp());
+    'FieldValue.serverTimestamp',
+    FieldValue.serverTimestamp()
+  );
 });

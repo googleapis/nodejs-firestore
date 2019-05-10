@@ -110,7 +110,7 @@ const StructuredQuery = {
    * @see [google.firestore.v1beta1.StructuredQuery.CollectionSelector definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   CollectionSelector: {
-      // This is for documentation. Actual contents will be loaded by gRPC.
+    // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
   /**
@@ -139,7 +139,7 @@ const StructuredQuery = {
    * @see [google.firestore.v1beta1.StructuredQuery.Filter definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   Filter: {
-      // This is for documentation. Actual contents will be loaded by gRPC.
+    // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
   /**
@@ -172,7 +172,6 @@ const StructuredQuery = {
      * @memberof google.firestore.v1beta1
      */
     Operator: {
-
       /**
        * Unspecified. This value must not be used.
        */
@@ -181,8 +180,8 @@ const StructuredQuery = {
       /**
        * The results are required to satisfy each of the combined filters.
        */
-      AND: 1
-    }
+      AND: 1,
+    },
   },
 
   /**
@@ -220,7 +219,6 @@ const StructuredQuery = {
      * @memberof google.firestore.v1beta1
      */
     Operator: {
-
       /**
        * Unspecified. This value must not be used.
        */
@@ -255,8 +253,8 @@ const StructuredQuery = {
       /**
        * Contains. Requires that the field is an array.
        */
-      ARRAY_CONTAINS: 7
-    }
+      ARRAY_CONTAINS: 7,
+    },
   },
 
   /**
@@ -288,7 +286,6 @@ const StructuredQuery = {
      * @memberof google.firestore.v1beta1
      */
     Operator: {
-
       /**
        * Unspecified. This value must not be used.
        */
@@ -302,8 +299,8 @@ const StructuredQuery = {
       /**
        * Test if an exprestion evaluates to Null.
        */
-      IS_NULL: 3
-    }
+      IS_NULL: 3,
+    },
   },
 
   /**
@@ -326,7 +323,7 @@ const StructuredQuery = {
    * @see [google.firestore.v1beta1.StructuredQuery.Order definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   Order: {
-      // This is for documentation. Actual contents will be loaded by gRPC.
+    // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
   /**
@@ -339,7 +336,7 @@ const StructuredQuery = {
    * @see [google.firestore.v1beta1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   FieldReference: {
-      // This is for documentation. Actual contents will be loaded by gRPC.
+    // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
   /**
@@ -359,7 +356,7 @@ const StructuredQuery = {
    * @see [google.firestore.v1beta1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   Projection: {
-      // This is for documentation. Actual contents will be loaded by gRPC.
+    // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
   /**
@@ -369,7 +366,6 @@ const StructuredQuery = {
    * @memberof google.firestore.v1beta1
    */
   Direction: {
-
     /**
      * Unspecified.
      */
@@ -383,8 +379,8 @@ const StructuredQuery = {
     /**
      * Descending.
      */
-    DESCENDING: 2
-  }
+    DESCENDING: 2,
+  },
 };
 
 /**
@@ -408,5 +404,5 @@ const StructuredQuery = {
  * @see [google.firestore.v1beta1.Cursor definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
  */
 const Cursor = {
-    // This is for documentation. Actual contents will be loaded by gRPC.
+  // This is for documentation. Actual contents will be loaded by gRPC.
 };
