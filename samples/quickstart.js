@@ -22,8 +22,8 @@ const Firestore = require('@google-cloud/firestore');
 const firestore = new Firestore();
 
 async function quickstart() {
+  // Obtain a document reference.
   const document = firestore.doc('posts/intro-to-firestore');
-  console.log('Document created');
 
   // Enter new data into the document.
   await document.set({
