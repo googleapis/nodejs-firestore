@@ -4,6 +4,26 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [2.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v1.3.0...v2.0.0) (2019-05-14)
+
+
+### Bug Fixes
+
+* run the generator ([#616](https://www.github.com/googleapis/nodejs-firestore/issues/616)) ([92b0add](https://www.github.com/googleapis/nodejs-firestore/commit/92b0add))
+* **deps:** update dependency google-gax to v1 ([#615](https://www.github.com/googleapis/nodejs-firestore/issues/615)) ([687a353](https://www.github.com/googleapis/nodejs-firestore/commit/687a353))
+* Fix client pooling for long-lived listens ([#614](https://www.github.com/googleapis/nodejs-firestore/issues/614)) ([479bc9c](https://www.github.com/googleapis/nodejs-firestore/commit/479bc9c)), closes [firebase/firebase-admin-node#499](https://www.github.com/googleapis/nodejs-firestore/issues/499) [#256](https://www.github.com/googleapis/nodejs-firestore/issues/256)
+* **deps:** update dependency google-gax to ^0.26.0 ([#606](https://www.github.com/googleapis/nodejs-firestore/issues/606)) ([a637a68](https://www.github.com/googleapis/nodejs-firestore/commit/a637a68))
+
+
+### Build System
+
+* upgrade engines field to >=8.10.0 ([#608](https://www.github.com/googleapis/nodejs-firestore/issues/608)) ([32485f4](https://www.github.com/googleapis/nodejs-firestore/commit/32485f4))
+
+
+### BREAKING CHANGES
+
+* upgrade engines field to >=8.10.0 (#608)
+
 ## v1.3.0
 
 04-26-2019 16:54 PDT
@@ -198,4 +218,3 @@ API is 100% identical.
 - make synth.py generate library to ./dev ([#337](https://github.com/googleapis/nodejs-firestore/pull/337))
 - Revert "Re-generate library using /synth.py ([#331](https://github.com/googleapis/nodejs-firestore/pull/331))" ([#334](https://github.com/googleapis/nodejs-firestore/pull/334))
 - Re-generate library using /synth.py ([#331](https://github.com/googleapis/nodejs-firestore/pull/331))
-
