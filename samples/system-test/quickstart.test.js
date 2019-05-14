@@ -28,7 +28,6 @@ describe('should make some API calls',() =>{
   it('firestore_inspect_string', async () => {
       const output =  await tools.runAsync(cmd,cwd);
 
-      assert.strictEqual(output.includes('Document created'), true);
       assert.strictEqual(output.includes('Entered new data into the document'), true);
       assert.strictEqual(output.includes('Updated an existing document'), true);
       assert.strictEqual(output.includes('Read the document'), true);
