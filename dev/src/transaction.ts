@@ -70,8 +70,8 @@ export class Transaction {
   private _writeBatch: WriteBatch;
   private _requestTag: string;
   private _transactionId?: Uint8Array;
+
   /**
-   * @private
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.

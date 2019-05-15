@@ -29,8 +29,8 @@ export class DocumentChange {
   private readonly _document: QueryDocumentSnapshot;
   private readonly _oldIndex: number;
   private readonly _newIndex: number;
+
   /**
-   * @private
    * @hideconstructor
    *
    * @param {string} type 'added' | 'removed' | 'modified'.
