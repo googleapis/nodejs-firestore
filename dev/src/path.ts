@@ -508,8 +508,7 @@ export class FieldPath extends Path<FieldPath> {
   /**
    * Constructs a Firestore Field Path.
    *
-   * @param {...string|string[]} segments Sequence of field names that form
-   * this path.
+   * @param {...string} segments Sequence of field names that form this path.
    *
    * @example
    * let query = firestore.collection('col');
