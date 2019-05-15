@@ -1454,7 +1454,6 @@ export class Firestore {
         resultStream.on('error', lifetime.resolve);
 
         await this._initializeStream(resultStream, requestTag, request);
-
         result.resolve(resultStream);
       }).catch(err => {
         lifetime.resolve();
