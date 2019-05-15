@@ -1147,17 +1147,17 @@ export class Firestore {
   private _initializeStream(
     resultStream: NodeJS.ReadableStream,
     requestTag: string
-  ): Promise<NodeJS.ReadableStream>;
+  ): Promise<void>;
   private _initializeStream(
     resultStream: NodeJS.ReadWriteStream,
     requestTag: string,
     request: {}
-  ): Promise<NodeJS.ReadWriteStream>;
+  ): Promise<void>;
   private _initializeStream(
     resultStream: NodeJS.ReadableStream | NodeJS.ReadWriteStream,
     requestTag: string,
     request?: {}
-  ): Promise<NodeJS.ReadableStream | NodeJS.ReadWriteStream> {
+  ): Promise<void> {
     /** The last error we received and have not forwarded yet. */
     let errorReceived: Error | null = null;
 
@@ -1165,7 +1165,7 @@ export class Firestore {
      * Whether we have resolved the Promise and returned the stream to the
      * caller.
      */
-    let streamReleased = false;
+    let streamInitialized = false;
 
     /**
      * Whether the stream end has been reached. This has to be forwarded to the
@@ -1174,7 +1174,7 @@ export class Firestore {
     let endCalled = false;
 
     return new Promise((resolve, reject) => {
-      const releaseStream = () => {
+      const streamReady = () => {
         if (errorReceived) {
           logger(
             'Firestore._initializeStream',
@@ -1184,16 +1184,16 @@ export class Firestore {
           );
           resultStream.emit('error', errorReceived);
           errorReceived = null;
-        } else if (!streamReleased) {
+        } else if (!streamInitialized) {
           logger('Firestore._initializeStream', requestTag, 'Releasing stream');
-          streamReleased = true;
+          streamInitialized = true;
           resultStream.pause();
 
           // Calling 'stream.pause()' only holds up 'data' events and not the
           // 'end' event we intend to forward here. We therefore need to wait
           // until the API consumer registers their listeners (in the .then()
           // call) before emitting any further events.
-          resolve(resultStream);
+          resolve();
 
           // We execute the forwarding of the 'end' event via setTimeout() as
           // V8 guarantees that the above the Promise chain is resolved before
@@ -1216,7 +1216,7 @@ export class Firestore {
       // possible to avoid the default stream behavior (which is just to log and
       // continue).
       resultStream.on('readable', () => {
-        releaseStream();
+        streamReady();
       });
 
       resultStream.on('end', () => {
@@ -1226,7 +1226,7 @@ export class Firestore {
           'Received stream end'
         );
         endCalled = true;
-        releaseStream();
+        streamReady();
       });
 
       resultStream.on('error', err => {
@@ -1238,14 +1238,14 @@ export class Firestore {
         );
         // If we receive an error before we were able to receive any data,
         // reject this stream.
-        if (!streamReleased) {
+        if (!streamInitialized) {
           logger(
             'Firestore._initializeStream',
             requestTag,
             'Received initial error:',
             err
           );
-          streamReleased = true;
+          streamInitialized = true;
           reject(err);
         } else {
           errorReceived = err;
@@ -1269,7 +1269,7 @@ export class Firestore {
               requestTag,
               'Marking stream as healthy'
             );
-            releaseStream();
+            streamReady();
           });
       }
     });
@@ -1380,17 +1380,16 @@ export class Firestore {
           this.push(chunk);
           callback();
         });
+
         const resultStream = bun([stream, logStream]);
-        return this._initializeStream(resultStream, requestTag);
-      })
-        .then(stream => {
-          stream.on('close', lifetime.resolve);
-          result.resolve(stream);
-        })
-        .catch(err => {
-          lifetime.resolve();
-          result.reject(err);
-        });
+        resultStream.on('close', lifetime.resolve);
+
+        await this._initializeStream(resultStream, requestTag);
+        result.resolve(resultStream);
+      }).catch(err => {
+        lifetime.resolve();
+        result.reject(err);
+      });
 
       return lifetime.promise;
     });
@@ -1447,16 +1446,14 @@ export class Firestore {
         });
 
         const resultStream = bun([requestStream, logStream]);
-        return this._initializeStream(resultStream, requestTag, request);
-      })
-        .then(stream => {
-          stream.on('close', lifetime.resolve);
-          result.resolve(stream);
-        })
-        .catch(err => {
-          lifetime.resolve();
-          result.reject(err);
-        });
+        resultStream.on('close', lifetime.resolve);
+        await this._initializeStream(resultStream, requestTag, request);
+
+        result.resolve(resultStream);
+      }).catch(err => {
+        lifetime.resolve();
+        result.reject(err);
+      });
 
       return lifetime.promise;
     });
