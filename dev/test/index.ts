@@ -732,9 +732,7 @@ describe('listCollections() method', () => {
     };
 
     return createInstance(overrides).then(firestore => {
-      // We are using `getCollections()` to ensure 100% code coverage
-      // tslint:disable-next-line deprecation
-      return firestore.getCollections().then(collections => {
+      return firestore.listCollections().then(collections => {
         expect(collections[0].path).to.equal('first');
         expect(collections[1].path).to.equal('second');
       });

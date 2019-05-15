@@ -170,16 +170,6 @@ declare namespace FirebaseFirestore {
      * Fetches the root collections that are associated with this Firestore
      * database.
      *
-     * @deprecated Use `.listCollections()`.
-     *
-     * @returns A Promise that resolves with an array of CollectionReferences.
-     */
-    getCollections() : Promise<CollectionReference[]>;
-
-    /**
-     * Fetches the root collections that are associated with this Firestore
-     * database.
-     *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
     listCollections() : Promise<CollectionReference[]>;
@@ -570,15 +560,6 @@ declare namespace FirebaseFirestore {
      * @return The `CollectionReference` instance.
      */
     collection(collectionPath: string): CollectionReference;
-
-    /**
-     * Fetches the subcollections that are direct children of this document.
-     *
-     * @deprecated Use `.listCollections()`.
-     *
-     * @returns A Promise that resolves with an array of CollectionReferences.
-     */
-    getCollections() : Promise<CollectionReference[]>;
 
     /**
      * Fetches the subcollections that are direct children of this document.
