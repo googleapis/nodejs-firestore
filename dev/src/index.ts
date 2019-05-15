@@ -58,6 +58,7 @@ import {
 import {WriteBatch} from './write-batch';
 
 import api = google.firestore.v1;
+import {Deferred} from '../test/util/helpers';
 
 export {
   CollectionReference,
@@ -1353,40 +1354,48 @@ export class Firestore {
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 
-    return this._clientPool.run(gapicClient => {
-      return this._retry(attempts, requestTag, () => {
-        return new Promise<NodeJS.ReadableStream>((resolve, reject) => {
-          try {
-            logger(
-              'Firestore.readStream',
-              requestTag,
-              'Sending request: %j',
-              request
-            );
-            const stream = gapicClient[methodName](request, callOptions);
-            const logStream = through2.obj(function(
-              this,
-              chunk,
-              enc,
-              callback
-            ) {
-              logger(
-                'Firestore.readStream',
-                requestTag,
-                'Received response: %j',
-                chunk
-              );
-              this.push(chunk);
-              callback();
-            });
-            resolve(bun([stream, logStream]));
-          } catch (err) {
-            logger('Firestore.readStream', requestTag, 'Received error:', err);
-            reject(err);
-          }
-        }).then(stream => this._initializeStream(stream, requestTag));
-      });
+    const result = new Deferred<NodeJS.ReadableStream>();
+
+    this._clientPool.run(gapicClient => {
+      // While we return the stream to the callee early, we don't want to
+      // release the GAPIC client until the callee has finished processing the
+      // stream.
+      const lifetime = new Deferred<void>();
+
+      this._retry(attempts, requestTag, async () => {
+        logger(
+          'Firestore.readStream',
+          requestTag,
+          'Sending request: %j',
+          request
+        );
+        const stream = gapicClient[methodName](request, callOptions);
+        const logStream = through2.obj(function(this, chunk, enc, callback) {
+          logger(
+            'Firestore.readStream',
+            requestTag,
+            'Received response: %j',
+            chunk
+          );
+          this.push(chunk);
+          callback();
+        });
+        const resultStream = bun([stream, logStream]);
+        return this._initializeStream(resultStream, requestTag);
+      })
+        .then(stream => {
+          stream.on('close', lifetime.resolve);
+          result.resolve(stream);
+        })
+        .catch(err => {
+          lifetime.resolve();
+          result.reject(err);
+        });
+
+      return lifetime.promise;
     });
+
+    return result.promise;
   }
 
   /**
@@ -1414,28 +1423,45 @@ export class Firestore {
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 
-    return this._clientPool.run(gapicClient => {
-      return this._retry(attempts, requestTag, () => {
-        return Promise.resolve().then(() => {
-          logger('Firestore.readWriteStream', requestTag, 'Opening stream');
-          const requestStream = gapicClient[methodName](callOptions);
+    const result = new Deferred<NodeJS.ReadWriteStream>();
 
-          const logStream = through2.obj(function(this, chunk, enc, callback) {
-            logger(
-              'Firestore.readWriteStream',
-              requestTag,
-              'Received response: %j',
-              chunk
-            );
-            this.push(chunk);
-            callback();
-          });
+    this._clientPool.run(gapicClient => {
+      // While we return the stream to the callee early, we don't want to
+      // release the GAPIC client until the callee has finished processing the
+      // stream.
+      const lifetime = new Deferred<void>();
 
-          const resultStream = bun([requestStream, logStream]);
-          return this._initializeStream(resultStream, requestTag, request);
+      this._retry(attempts, requestTag, async () => {
+        logger('Firestore.readWriteStream', requestTag, 'Opening stream');
+        const requestStream = gapicClient[methodName](callOptions);
+
+        const logStream = through2.obj(function(this, chunk, enc, callback) {
+          logger(
+            'Firestore.readWriteStream',
+            requestTag,
+            'Received response: %j',
+            chunk
+          );
+          this.push(chunk);
+          callback();
         });
-      });
+
+        const resultStream = bun([requestStream, logStream]);
+        return this._initializeStream(resultStream, requestTag, request);
+      })
+        .then(stream => {
+          stream.on('close', lifetime.resolve);
+          result.resolve(stream);
+        })
+        .catch(err => {
+          lifetime.resolve();
+          result.reject(err);
+        });
+
+      return lifetime.promise;
     });
+
+    return result.promise;
   }
 }
 

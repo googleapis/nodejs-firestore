@@ -31,6 +31,7 @@ import {
   Timestamp,
 } from '../src';
 import {autoId} from '../src/util';
+import {Deferred} from '../test/util/helpers';
 
 const version = require('../../package.json').version;
 
@@ -912,6 +913,37 @@ describe('DocumentReference class', () => {
         expect(snapshot.exists).to.equal(exists2.shift());
         maybeRun();
       });
+    });
+
+    it('handles more than 100 concurrent listeners', async () => {
+      const ref = randomCol.doc('doc');
+
+      const emptyResults: Array<Deferred<void>> = [];
+      const documentResults: Array<Deferred<void>> = [];
+      const unsubscribeCallbacks: Array<() => void> = [];
+
+      // A single GAPIC client can only handle 100 concurrent streams. We set
+      // up 100+ long-lived listeners to verify that Firestore pools requests
+      // across multiple clients.
+      for (let i = 0; i < 150; ++i) {
+        emptyResults[i] = new Deferred<void>();
+        documentResults[i] = new Deferred<void>();
+
+        unsubscribeCallbacks[i] = randomCol
+          .where('i', '>', i)
+          .onSnapshot(snapshot => {
+            if (snapshot.size === 0) {
+              emptyResults[i].resolve();
+            } else if (snapshot.size === 1) {
+              documentResults[i].resolve();
+            }
+          });
+      }
+
+      await Promise.all(emptyResults.map(d => d.promise));
+      ref.set({i: 1337});
+      await Promise.all(documentResults.map(d => d.promise));
+      unsubscribeCallbacks.forEach(c => c());
     });
   });
 });
