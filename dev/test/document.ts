@@ -1952,17 +1952,13 @@ describe('listCollections() method', () => {
     };
 
     return createInstance(overrides).then(firestore => {
-      // We are using `getCollections()` to ensure 100% code coverage
-      return (
-        firestore
-          .doc('coll/doc')
-          // tslint:disable-next-line deprecation
-          .getCollections()
-          .then(collections => {
-            expect(collections[0].path).to.equal('coll/doc/first');
-            expect(collections[1].path).to.equal('coll/doc/second');
-          })
-      );
+      return firestore
+        .doc('coll/doc')
+        .listCollections()
+        .then(collections => {
+          expect(collections[0].path).to.equal('coll/doc/first');
+          expect(collections[1].path).to.equal('coll/doc/second');
+        });
     });
   });
 });
