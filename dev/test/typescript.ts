@@ -73,8 +73,6 @@ xdescribe('firestore.d.ts', () => {
     firestore
       .getAll(docRef1, docRef2, {fieldMask: ['foo', new FieldPath('foo')]})
       .then((docs: DocumentSnapshot[]) => {});
-    // tslint:disable-next-line deprecation
-    firestore.getCollections().then((collections: CollectionReference[]) => {});
     firestore
       .listCollections()
       .then((collections: CollectionReference[]) => {});
@@ -154,8 +152,6 @@ xdescribe('firestore.d.ts', () => {
     const parent: CollectionReference = docRef.parent;
     const path: string = docRef.path;
     const subcollection: CollectionReference = docRef.collection('coll');
-    // tslint:disable-next-line deprecation
-    docRef.getCollections().then((collections: CollectionReference[]) => {});
     docRef.listCollections().then((collections: CollectionReference[]) => {});
     docRef.get().then((snapshot: DocumentSnapshot) => {});
     docRef
