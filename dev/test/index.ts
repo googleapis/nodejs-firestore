@@ -933,20 +933,6 @@ describe('getAll() method', () => {
     });
   });
 
-  it('accepts array', () => {
-    const overrides: ApiOverride = {
-      batchGetDocuments: () => stream(found('documentId')),
-    };
-
-    return createInstance(overrides).then(firestore => {
-      return (firestore as InvalidApiUsage)
-        .getAll([firestore.doc('collectionId/documentId')])
-        .then((result: DocumentSnapshot[]) => {
-          resultEquals(result, found('documentId'));
-        });
-    });
-  });
-
   it('returns not found for missing documents', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => stream(found('exists'), missing('missing')),

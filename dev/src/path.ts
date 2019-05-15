@@ -522,20 +522,23 @@ export class FieldPath extends Path<FieldPath> {
    * });
    */
   constructor(...segments: string[]) {
-    const elements: string[] = Array.isArray(segments[0])
-      ? ((segments[0] as unknown) as string[])
-      : segments;
+    if (Array.isArray(segments[0])) {
+      throw new Error(
+        'The FieldPath constructor no longer supports an array as its first argument. ' +
+          'Please unpack your array and call FieldPath() with individual arguments.'
+      );
+    }
 
-    validateMinNumberOfArguments('FieldPath', elements, 1);
+    validateMinNumberOfArguments('FieldPath', segments, 1);
 
-    for (let i = 0; i < elements.length; ++i) {
-      validateString(i, elements[i]);
-      if (elements[i].length === 0) {
+    for (let i = 0; i < segments.length; ++i) {
+      validateString(i, segments[i]);
+      if (segments[i].length === 0) {
         throw new Error(`Element at index ${i} should not be an empty string.`);
       }
     }
 
-    super(elements);
+    super(segments);
   }
 
   /**
