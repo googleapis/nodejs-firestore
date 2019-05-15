@@ -146,6 +146,14 @@ export function createInstance(
   return Promise.resolve(firestore);
 }
 
+/**
+ * Verifies that all streams have been properly shutdown at the end of a test
+ * run.
+ */
+export function verifyInstance(firestore: Firestore): void {
+  expect(firestore['_clientPool'].opCount).to.equal(0);
+}
+
 function write(
   document: api.IDocument | null,
   mask: api.IDocumentMask | null,

@@ -103,6 +103,19 @@ export class ClientPool<T> {
   }
 
   /**
+   * The number of currently active operations.
+   *
+   * @return Number of currently active operations.
+   * @private
+   */
+  // Visible for testing.
+  get opCount(): number {
+    let activeOperationCount = 0;
+    this.activeClients.forEach(count => (activeOperationCount += count));
+    return activeOperationCount;
+  }
+
+  /**
    * Runs the provided operation in this pool. This function may create an
    * additional client if all existing clients already operate at the concurrent
    * operation limit.

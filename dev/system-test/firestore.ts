@@ -31,7 +31,7 @@ import {
   Timestamp,
 } from '../src';
 import {autoId} from '../src/util';
-import {Deferred} from '../test/util/helpers';
+import {Deferred, verifyInstance} from '../test/util/helpers';
 
 const version = require('../../package.json').version;
 
@@ -67,6 +67,8 @@ describe('Firestore class', () => {
     firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has collection() method', () => {
     const ref = firestore.collection('col');
@@ -137,6 +139,8 @@ describe('CollectionReference class', () => {
     randomCol = getTestRoot(firestore);
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('has firestore property', () => {
     const ref = firestore.collection('col');
     expect(ref.firestore).to.be.an.instanceOf(Firestore);
@@ -202,6 +206,8 @@ describe('DocumentReference class', () => {
     firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has firestore property', () => {
     const ref = firestore.doc('col/doc');
@@ -840,20 +846,22 @@ describe('DocumentReference class', () => {
       const exists1 = [false, true, false];
       const exists2 = [false, true, false];
 
+      const promises: Array<Promise<WriteResult>> = [];
+
       // Code blocks to run after each step.
       const run = [
         () => {
-          doc1.set({foo: 'foo'});
-          doc2.set({foo: 'foo'});
+          promises.push(doc1.set({foo: 'foo'}));
+          promises.push(doc2.set({foo: 'foo'}));
         },
         () => {
-          doc1.delete();
-          doc2.delete();
+          promises.push(doc1.delete());
+          promises.push(doc2.delete());
         },
         () => {
           unsubscribe1();
           unsubscribe2();
-          done();
+          Promise.all(promises).then(() => done());
         },
       ];
 
@@ -883,18 +891,20 @@ describe('DocumentReference class', () => {
       const exists1 = [false, true, false];
       const exists2 = [false, true, false];
 
+      const promises: Array<Promise<WriteResult>> = [];
+
       // Code blocks to run after each step.
       const run = [
         () => {
-          doc.set({foo: 'foo'});
+          promises.push(doc.set({foo: 'foo'}));
         },
         () => {
-          doc.delete();
+          promises.push(doc.delete());
         },
         () => {
           unsubscribe1();
           unsubscribe2();
-          done();
+          Promise.all(promises).then(() => done());
         },
       ];
 
@@ -984,6 +994,8 @@ describe('Query class', () => {
     firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has firestore property', () => {
     const ref = randomCol.limit(0);
@@ -1655,6 +1667,8 @@ describe('Transaction class', () => {
     randomCol = getTestRoot(firestore);
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('has get() method', () => {
     const ref = randomCol.doc('doc');
     return ref
@@ -1835,6 +1849,8 @@ describe('WriteBatch class', () => {
     randomCol = getTestRoot(firestore);
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('supports empty batches', () => {
     return firestore.batch().commit();
   });
@@ -1943,6 +1959,8 @@ describe('QuerySnapshot class', () => {
       return randomCol.get();
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has query property', () => {
     return querySnapshot

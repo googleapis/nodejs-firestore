@@ -1383,6 +1383,8 @@ export class Firestore {
 
         const resultStream = bun([stream, logStream]);
         resultStream.on('close', lifetime.resolve);
+        resultStream.on('end', lifetime.resolve);
+        resultStream.on('error', lifetime.resolve);
 
         await this._initializeStream(resultStream, requestTag);
         result.resolve(resultStream);
@@ -1447,6 +1449,10 @@ export class Firestore {
 
         const resultStream = bun([requestStream, logStream]);
         resultStream.on('close', lifetime.resolve);
+        resultStream.on('finish', lifetime.resolve);
+        resultStream.on('end', lifetime.resolve);
+        resultStream.on('error', lifetime.resolve);
+
         await this._initializeStream(resultStream, requestTag, request);
 
         result.resolve(resultStream);

@@ -44,7 +44,7 @@ import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
 import {GrpcError} from '../src/types';
-import {createInstance, InvalidApiUsage} from './util/helpers';
+import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
 
 import api = google.firestore.v1;
 
@@ -200,8 +200,8 @@ class DeferredListener<T> {
     const listener = this.pendingListeners.shift();
 
     if (listener) {
-      expect(listener.type).to.equal(
-        type,
+      expect(type).to.equal(
+        listener.type,
         `Expected message of type '${listener.type}' but got '${type}' ` +
           `with '${JSON.stringify(data)}'.`
       );
@@ -319,6 +319,7 @@ class StreamHelper {
    */
   close(): void {
     this.backendStream!.emit('end');
+    this.backendStream!.end();
   }
 
   /**
@@ -718,6 +719,7 @@ describe('Query watch', () => {
 
   afterEach(() => {
     setTimeoutHandler(setTimeout);
+    verifyInstance(firestore);
   });
 
   it('with invalid callbacks', () => {
@@ -806,19 +808,17 @@ describe('Query watch', () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-      return watchHelper
-        .await('snapshot')
-        .then(() => {
-          streamHelper.close();
-          return streamHelper.awaitOpen();
-        })
-        .then(() => {
-          streamHelper.close();
-          return streamHelper.awaitOpen();
-        })
-        .then(() => {
-          expect(streamHelper.streamCount).to.equal(3);
-        });
+      return watchHelper.await('snapshot').then(async () => {
+        streamHelper.close();
+        await streamHelper.await('end');
+        await streamHelper.awaitOpen();
+
+        streamHelper.close();
+        await streamHelper.await('end');
+        await streamHelper.awaitOpen();
+
+        expect(streamHelper.streamCount).to.equal(3);
+      });
     });
   });
 
@@ -2242,6 +2242,7 @@ describe('DocumentReference watch', () => {
 
   afterEach(() => {
     setTimeoutHandler(setTimeout);
+    verifyInstance(firestore);
   });
 
   it('with invalid callbacks', () => {
@@ -2585,6 +2586,8 @@ describe('Query comparator', () => {
       doc4 = firestore.doc('col/doc4');
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   function testSort(
     query: Query,

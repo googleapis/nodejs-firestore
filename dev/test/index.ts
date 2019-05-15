@@ -33,6 +33,7 @@ import {
   InvalidApiUsage,
   missing,
   stream,
+  verifyInstance,
 } from './util/helpers';
 
 import api = google.firestore.v1;
@@ -512,6 +513,8 @@ describe('snapshot_() method', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('handles ProtobufJS', () => {
     const doc = firestore.snapshot_(
       document('doc', 'foo', {bytesValue: bytesData}),
@@ -655,6 +658,8 @@ describe('doc() method', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('returns DocumentReference', () => {
     const documentRef = firestore.doc('collectionId/documentId');
     expect(documentRef).to.be.an.instanceOf(Firestore.DocumentReference);
@@ -693,6 +698,8 @@ describe('collection() method', () => {
       firestore = firestoreInstance;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('returns collection', () => {
     const collection = firestore.collection('col1/doc1/col2');

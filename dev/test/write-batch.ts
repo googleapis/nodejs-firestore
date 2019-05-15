@@ -24,7 +24,12 @@ import {
   WriteBatch,
   WriteResult,
 } from '../src';
-import {ApiOverride, createInstance, InvalidApiUsage} from './util/helpers';
+import {
+  ApiOverride,
+  createInstance,
+  InvalidApiUsage,
+  verifyInstance,
+} from './util/helpers';
 
 const REQUEST_TIME = 'REQUEST_TIME';
 
@@ -43,6 +48,8 @@ describe('set() method', () => {
       writeBatch = firestore.batch();
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('requires document name', () => {
     expect(() => (writeBatch as InvalidApiUsage).set()).to.throw(
@@ -74,6 +81,8 @@ describe('delete() method', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('requires document name', () => {
     expect(() => (writeBatch as InvalidApiUsage).delete()).to.throw(
       'Value for argument "documentRef" is not a valid DocumentReference.'
@@ -97,6 +106,8 @@ describe('update() method', () => {
       writeBatch = firestore.batch();
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('requires document name', () => {
     expect(() => writeBatch.update({} as InvalidApiUsage, {})).to.throw(
@@ -131,6 +142,8 @@ describe('create() method', () => {
       writeBatch = firestore.batch();
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('requires document name', () => {
     expect(() => (writeBatch as InvalidApiUsage).create()).to.throw(
@@ -253,6 +266,8 @@ describe('batch support', () => {
       writeBatch = firestore.batch();
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   function verifyResponse(writeResults: WriteResult[]) {
     expect(writeResults[0].writeTime.isEqual(new Timestamp(0, 0))).to.be.true;
