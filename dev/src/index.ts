@@ -1144,18 +1144,15 @@ export class Firestore {
    * @returns The given Stream once it is considered healthy.
    */
   private _initializeStream(
-    releaser: () => void,
     resultStream: NodeJS.ReadableStream,
     requestTag: string
   ): Promise<NodeJS.ReadableStream>;
   private _initializeStream(
-    releaser: () => void,
     resultStream: NodeJS.ReadWriteStream,
     requestTag: string,
     request: {}
   ): Promise<NodeJS.ReadWriteStream>;
   private _initializeStream(
-    releaser: () => void,
     resultStream: NodeJS.ReadableStream | NodeJS.ReadWriteStream,
     requestTag: string,
     request?: {}
@@ -1167,7 +1164,7 @@ export class Firestore {
      * Whether we have resolved the Promise and returned the stream to the
      * caller.
      */
-    let streamInitialized = false;
+    let streamReleased = false;
 
     /**
      * Whether the stream end has been reached. This has to be forwarded to the
@@ -1176,7 +1173,7 @@ export class Firestore {
     let endCalled = false;
 
     return new Promise((resolve, reject) => {
-      const streamReady = () => {
+      const releaseStream = () => {
         if (errorReceived) {
           logger(
             'Firestore._initializeStream',
@@ -1185,11 +1182,10 @@ export class Firestore {
             errorReceived
           );
           resultStream.emit('error', errorReceived);
-          releaser();
           errorReceived = null;
-        } else if (!streamInitialized) {
+        } else if (!streamReleased) {
           logger('Firestore._initializeStream', requestTag, 'Releasing stream');
-          streamInitialized = true;
+          streamReleased = true;
           resultStream.pause();
 
           // Calling 'stream.pause()' only holds up 'data' events and not the
@@ -1209,7 +1205,6 @@ export class Firestore {
                 'Forwarding stream close'
               );
               resultStream.emit('end');
-              releaser();
             }
           }, 0);
         }
@@ -1220,7 +1215,7 @@ export class Firestore {
       // possible to avoid the default stream behavior (which is just to log and
       // continue).
       resultStream.on('readable', () => {
-        streamReady();
+        releaseStream();
       });
 
       resultStream.on('end', () => {
@@ -1230,7 +1225,7 @@ export class Firestore {
           'Received stream end'
         );
         endCalled = true;
-        streamReady();
+        releaseStream();
       });
 
       resultStream.on('error', err => {
@@ -1242,16 +1237,15 @@ export class Firestore {
         );
         // If we receive an error before we were able to receive any data,
         // reject this stream.
-        if (!streamInitialized) {
+        if (!streamReleased) {
           logger(
             'Firestore._initializeStream',
             requestTag,
             'Received initial error:',
             err
           );
-          streamInitialized = true;
+          streamReleased = true;
           reject(err);
-          releaser();
         } else {
           errorReceived = err;
         }
@@ -1274,7 +1268,7 @@ export class Firestore {
               requestTag,
               'Marking stream as healthy'
             );
-            streamReady();
+            releaseStream();
           });
       }
     });
@@ -1359,35 +1353,39 @@ export class Firestore {
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 
-    const gapicClient = this._clientPool.acquire();
-    const releaser = this._clientPool.createReleaser(gapicClient);
-
-    return this._retry(attempts, requestTag, () => {
-      return new Promise<NodeJS.ReadableStream>((resolve, reject) => {
-        try {
-          logger(
-            'Firestore.readStream',
-            requestTag,
-            'Sending request: %j',
-            request
-          );
-          const stream = gapicClient[methodName](request, callOptions);
-          const logStream = through2.obj(function(this, chunk, enc, callback) {
+    return this._clientPool.run(gapicClient => {
+      return this._retry(attempts, requestTag, () => {
+        return new Promise<NodeJS.ReadableStream>((resolve, reject) => {
+          try {
             logger(
               'Firestore.readStream',
               requestTag,
-              'Received response: %j',
-              chunk
+              'Sending request: %j',
+              request
             );
-            this.push(chunk);
-            callback();
-          });
-          resolve(bun([stream, logStream]));
-        } catch (err) {
-          logger('Firestore.readStream', requestTag, 'Received error:', err);
-          reject(err);
-        }
-      }).then(stream => this._initializeStream(releaser, stream, requestTag));
+            const stream = gapicClient[methodName](request, callOptions);
+            const logStream = through2.obj(function(
+              this,
+              chunk,
+              enc,
+              callback
+            ) {
+              logger(
+                'Firestore.readStream',
+                requestTag,
+                'Received response: %j',
+                chunk
+              );
+              this.push(chunk);
+              callback();
+            });
+            resolve(bun([stream, logStream]));
+          } catch (err) {
+            logger('Firestore.readStream', requestTag, 'Received error:', err);
+            reject(err);
+          }
+        }).then(stream => this._initializeStream(stream, requestTag));
+      });
     });
   }
 
@@ -1416,32 +1414,26 @@ export class Firestore {
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 
-    const gapicClient = this._clientPool.acquire();
-    const releaser = this._clientPool.createReleaser(gapicClient);
+    return this._clientPool.run(gapicClient => {
+      return this._retry(attempts, requestTag, () => {
+        return Promise.resolve().then(() => {
+          logger('Firestore.readWriteStream', requestTag, 'Opening stream');
+          const requestStream = gapicClient[methodName](callOptions);
 
-    return this._retry(attempts, requestTag, () => {
-      return Promise.resolve().then(() => {
-        logger('Firestore.readWriteStream', requestTag, 'Opening stream');
-        const requestStream = gapicClient[methodName](callOptions);
+          const logStream = through2.obj(function(this, chunk, enc, callback) {
+            logger(
+              'Firestore.readWriteStream',
+              requestTag,
+              'Received response: %j',
+              chunk
+            );
+            this.push(chunk);
+            callback();
+          });
 
-        const logStream = through2.obj(function(this, chunk, enc, callback) {
-          logger(
-            'Firestore.readWriteStream',
-            requestTag,
-            'Received response: %j',
-            chunk
-          );
-          this.push(chunk);
-          callback();
+          const resultStream = bun([requestStream, logStream]);
+          return this._initializeStream(resultStream, requestTag, request);
         });
-
-        const resultStream = bun([requestStream, logStream]);
-        return this._initializeStream(
-          releaser,
-          resultStream,
-          requestTag,
-          request
-        );
       });
     });
   }
