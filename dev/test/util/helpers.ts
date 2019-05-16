@@ -132,7 +132,7 @@ export function createInstance(
  * run.
  */
 export function verifyInstance(firestore: Firestore): Promise<void> {
-  // Allow the setTimeout() call in _initializeStream to run d before
+  // Allow the setTimeout() call in _initializeStream to run before
   // verifying that all operations have finished executing.
   return new Promise<void>(resolve => {
     setTimeout(() => {
