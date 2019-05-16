@@ -28,6 +28,7 @@ import {
   document,
   InvalidApiUsage,
   stream,
+  verifyInstance,
 } from './util/helpers';
 
 import api = google.firestore.v1;
@@ -291,6 +292,8 @@ describe('query interface', () => {
       firestore = firestoreInstance;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has isEqual() method', () => {
     const query = firestore.collection('collectionId');
@@ -624,6 +627,8 @@ describe('where() interface', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('generates proto', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
@@ -904,6 +909,8 @@ describe('orderBy() interface', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('accepts empty string', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
@@ -1071,6 +1078,8 @@ describe('limit() interface', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('generates proto', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
@@ -1121,6 +1130,8 @@ describe('offset() interface', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('generates proto', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
@@ -1170,6 +1181,8 @@ describe('select() interface', () => {
       firestore = firestoreInstance;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('generates proto', () => {
     const overrides: ApiOverride = {
@@ -1239,6 +1252,8 @@ describe('startAt() interface', () => {
       firestore = firestoreInstance;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('accepts fields', () => {
     const overrides: ApiOverride = {
@@ -1622,6 +1637,8 @@ describe('startAfter() interface', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('accepts fields', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
@@ -1685,6 +1702,8 @@ describe('endAt() interface', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('accepts fields', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
@@ -1743,6 +1762,8 @@ describe('endBefore() interface', () => {
       firestore = firestoreInstance;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('accepts fields', () => {
     const overrides: ApiOverride = {
