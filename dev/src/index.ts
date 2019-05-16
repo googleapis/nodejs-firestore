@@ -46,7 +46,7 @@ import {
   ReadOptions,
   Settings,
 } from './types';
-import {requestTag} from './util';
+import {Deferred, requestTag} from './util';
 import {
   validateBoolean,
   validateFunction,
@@ -58,7 +58,6 @@ import {
 import {WriteBatch} from './write-batch';
 
 import api = google.firestore.v1;
-import {Deferred} from '../test/util/helpers';
 
 export {
   CollectionReference,

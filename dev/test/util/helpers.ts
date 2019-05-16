@@ -42,25 +42,6 @@ export const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 // tslint:disable-next-line:no-any
 export type InvalidApiUsage = any;
 
-/** A Promise implementation that supports deferred resolution. */
-export class Deferred<R> {
-  promise: Promise<R>;
-  resolve: (value?: R | Promise<R>) => void = () => {};
-  reject: (reason?: Error) => void = () => {};
-
-  constructor() {
-    this.promise = new Promise(
-      (
-        resolve: (value?: R | Promise<R>) => void,
-        reject: (reason?: Error) => void
-      ) => {
-        this.resolve = resolve;
-        this.reject = reject;
-      }
-    );
-  }
-}
-
 /**
  * Interface that defines the request handlers used by Firestore.
  */

@@ -30,8 +30,8 @@ import {
   setLogFunction,
   Timestamp,
 } from '../src';
-import {autoId} from '../src/util';
-import {Deferred, verifyInstance} from '../test/util/helpers';
+import {autoId, Deferred} from '../src/util';
+import {verifyInstance} from '../test/util/helpers';
 
 const version = require('../../package.json').version;
 
