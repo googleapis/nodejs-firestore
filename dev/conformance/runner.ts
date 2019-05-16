@@ -162,7 +162,7 @@ const convertInput = {
     if (path.field.length === 1 && path.field[0] === '__name__') {
       return FieldPath.documentId();
     }
-    return new FieldPath(path.field);
+    return new FieldPath(...path.field);
   },
   paths: (fields: ConformanceProto): FieldPath[] => {
     const convertedPaths: FieldPath[] = [];
@@ -409,7 +409,7 @@ function runTest(spec: ConformanceProto) {
       } else if (spec.option && spec.option.fields) {
         setOption.mergeFields = [];
         for (const fieldPath of spec.option.fields) {
-          setOption.mergeFields.push(new FieldPath(fieldPath.field));
+          setOption.mergeFields.push(new FieldPath(...fieldPath.field));
         }
       }
       return docRef(setSpec.docRefPath).set(

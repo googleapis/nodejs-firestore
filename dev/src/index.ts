@@ -819,9 +819,8 @@ export class Firestore {
    * followed by any additional `DocumentReference` documents. If used, the
    * optional `ReadOptions` must be the last argument.
    *
-   * @param {Array.<DocumentReference|ReadOptions>} documentRefsOrReadOptions
-   * The `DocumentReferences` to receive, followed by an optional field
-   * mask.
+   * @param {...DocumentReference|ReadOptions} documentRefsOrReadOptions The
+   * `DocumentReferences` to receive, followed by an optional field mask.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
    *

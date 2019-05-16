@@ -163,9 +163,8 @@ export class Transaction {
    * followed by any additional `DocumentReference` documents. If used, the
    * optional `ReadOptions` must be the last argument.
    *
-   * @param {Array.<DocumentReference|ReadOptions>} documentRefsOrReadOptions
-   * The `DocumentReferences` to receive, followed by an optional field
-   * mask.
+   * @param {...DocumentReference|ReadOptions} documentRefsOrReadOptions The
+   * `DocumentReferences` to receive, followed by an optional field mask.
    * @returns {Promise<Array.<DocumentSnapshot>>} A Promise that
    * contains an array with the resulting document snapshots.
    *
@@ -433,30 +432,23 @@ export function parseGetAllArguments(
   let documents: DocumentReference[];
   let readOptions: ReadOptions | undefined = undefined;
 
-  // In the original release of the SDK, getAll() was documented to accept
-  // either a varargs list of DocumentReferences or a single array of
-  // DocumentReferences. To support this usage in the TypeScript client, we have
-  // to manually verify the arguments to determine which input the user
-  // provided.
-  const usesDeprecatedArgumentStyle = Array.isArray(
-    documentRefsOrReadOptions[0]
-  );
+  if (Array.isArray(documentRefsOrReadOptions[0])) {
+    throw new Error(
+      'getAll() no longer accepts an array as its first argument. ' +
+        'Please unpack your array and call getAll() with individual arguments.'
+    );
+  }
 
-  if (usesDeprecatedArgumentStyle) {
-    documents = documentRefsOrReadOptions[0] as DocumentReference[];
-    readOptions = documentRefsOrReadOptions[1] as ReadOptions;
+  if (
+    documentRefsOrReadOptions.length > 0 &&
+    isPlainObject(
+      documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1]
+    )
+  ) {
+    readOptions = documentRefsOrReadOptions.pop() as ReadOptions;
+    documents = documentRefsOrReadOptions as DocumentReference[];
   } else {
-    if (
-      documentRefsOrReadOptions.length > 0 &&
-      isPlainObject(
-        documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1]
-      )
-    ) {
-      readOptions = documentRefsOrReadOptions.pop() as ReadOptions;
-      documents = documentRefsOrReadOptions as DocumentReference[];
-    } else {
-      documents = documentRefsOrReadOptions as DocumentReference[];
-    }
+    documents = documentRefsOrReadOptions as DocumentReference[];
   }
 
   for (let i = 0; i < documents.length; ++i) {
