@@ -308,18 +308,6 @@ export class DocumentReference implements Serializable {
   }
 
   /**
-   * Fetches the subcollections that are direct children of this document.
-   *
-   * @deprecated Use `.listCollections()`.
-   *
-   * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
-   * with an array of CollectionReferences.
-   */
-  getCollections(): Promise<CollectionReference[]> {
-    return this.listCollections();
-  }
-
-  /**
    * Create a document with the provided object values. This will fail the write
    * if a document exists at its location.
    *
