@@ -150,8 +150,15 @@ export function createInstance(
  * Verifies that all streams have been properly shutdown at the end of a test
  * run.
  */
-export function verifyInstance(firestore: Firestore): void {
-  expect(firestore['_clientPool'].opCount).to.equal(0);
+export function verifyInstance(firestore: Firestore): Promise<void> {
+  // Allow the setTimeout() call in _initializeStream to run d before
+  // verifying that all operations have finished executing.
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      expect(firestore['_clientPool'].opCount).to.equal(0);
+      resolve();
+    }, 10);
+  });
 }
 
 function write(

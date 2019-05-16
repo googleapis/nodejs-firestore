@@ -319,7 +319,6 @@ class StreamHelper {
    */
   close(): void {
     this.backendStream!.emit('end');
-    this.backendStream!.end();
   }
 
   /**
@@ -719,7 +718,7 @@ describe('Query watch', () => {
 
   afterEach(() => {
     setTimeoutHandler(setTimeout);
-    verifyInstance(firestore);
+    return verifyInstance(firestore);
   });
 
   it('with invalid callbacks', () => {
@@ -810,11 +809,9 @@ describe('Query watch', () => {
       watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
       return watchHelper.await('snapshot').then(async () => {
         streamHelper.close();
-        await streamHelper.await('end');
         await streamHelper.awaitOpen();
 
         streamHelper.close();
-        await streamHelper.await('end');
         await streamHelper.awaitOpen();
 
         expect(streamHelper.streamCount).to.equal(3);
@@ -2242,7 +2239,7 @@ describe('DocumentReference watch', () => {
 
   afterEach(() => {
     setTimeoutHandler(setTimeout);
-    verifyInstance(firestore);
+    return verifyInstance(firestore);
   });
 
   it('with invalid callbacks', () => {
