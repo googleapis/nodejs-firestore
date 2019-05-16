@@ -23,6 +23,7 @@ import {
   DATABASE_ROOT,
   document,
   InvalidApiUsage,
+  verifyInstance,
 } from './util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
@@ -36,6 +37,8 @@ describe('Collection interface', () => {
       firestore = firestoreInstance;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has doc() method', () => {
     const collectionRef = firestore.collection('colId');
