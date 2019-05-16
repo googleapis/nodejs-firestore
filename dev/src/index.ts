@@ -814,19 +814,6 @@ export class Firestore {
   }
 
   /**
-   * Fetches the root collections that are associated with this Firestore
-   * database.
-   *
-   * @deprecated Use `.listCollections()`.
-   *
-   * @returns {Promise.<Array.<CollectionReference>>} A Promise that resolves
-   * with an array of CollectionReferences.
-   */
-  getCollections() {
-    return this.listCollections();
-  }
-
-  /**
    * Retrieves multiple documents from Firestore.
    *
    * The first argument is required and must be of type `DocumentReference`
