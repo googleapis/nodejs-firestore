@@ -274,7 +274,7 @@ describe('serialize document', () => {
     }).to.throw('Value for argument "latitude" is not a valid number');
 
     expect(() => {
-      new (Firestore as InvalidApiUsage).GeoPoint();
+      new (GeoPoint as InvalidApiUsage)();
     }).to.throw('Value for argument "latitude" is not a valid number');
 
     expect(() => {

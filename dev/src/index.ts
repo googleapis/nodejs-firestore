@@ -1459,48 +1459,6 @@ export class Firestore {
  * @param {string} Log message
  */
 
-// tslint:disable-next-line:no-default-export
-/**
- * The default export of the `@google-cloud/firestore` package is the
- * {@link Firestore} class.
- *
- * See {@link Firestore} and {@link ClientConfig} for client methods and
- * configuration options.
- *
- * @module {Firestore} @google-cloud/firestore
- * @alias nodejs-firestore
- *
- * @example <caption>Install the client library with <a
- * href="https://www.npmjs.com/">npm</a>:</caption> npm install --save
- * @google-cloud/firestore
- *
- * @example <caption>Import the client library</caption>
- * var Firestore = require('@google-cloud/firestore');
- *
- * @example <caption>Create a client that uses <a
- * href="https://cloud.google.com/docs/authentication/production#providing_credentials_to_your_application">Application
- * Default Credentials (ADC)</a>:</caption> var firestore = new Firestore();
- *
- * @example <caption>Create a client with <a
- * href="https://cloud.google.com/docs/authentication/production#obtaining_and_providing_service_account_credentials_manually">explicit
- * credentials</a>:</caption> var firestore = new Firestore({ projectId:
- * 'your-project-id', keyFilename: '/path/to/keyfile.json'
- * });
- *
- * @example <caption>include:samples/quickstart.js</caption>
- * region_tag:firestore_quickstart
- * Full quickstart example:
- */
-// tslint:disable-next-line:no-default-export
-export default Firestore;
-
-// Horrible hack to ensure backwards compatibility with <= 17.0, which allows
-// users to call the default constructor via
-// `const Fs = require(`@google-cloud/firestore`); new Fs()`;
-const existingExports = module.exports;
-module.exports = Firestore;
-module.exports = Object.assign(module.exports, existingExports);
-
 /**
  * {@link v1beta1} factory function.
  *
