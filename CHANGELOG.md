@@ -4,6 +4,38 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [2.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v1.3.0...v2.0.0) (2019-05-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency google-gax to ^0.26.0 ([#606](https://www.github.com/googleapis/nodejs-firestore/issues/606)) ([a637a68](https://www.github.com/googleapis/nodejs-firestore/commit/a637a68))
+* Fix client pooling for long-lived listens ([#614](https://www.github.com/googleapis/nodejs-firestore/issues/614)) ([479bc9c](https://www.github.com/googleapis/nodejs-firestore/commit/479bc9c)), closes [firebase/firebase-admin-node#499](https://www.github.com/googleapis/nodejs-firestore/issues/499) [#256](https://www.github.com/googleapis/nodejs-firestore/issues/256)
+* **deps:** update dependency google-gax to v1 ([#615](https://www.github.com/googleapis/nodejs-firestore/issues/615)) ([687a353](https://www.github.com/googleapis/nodejs-firestore/commit/687a353))
+* run the generator ([#616](https://www.github.com/googleapis/nodejs-firestore/issues/616)) ([92b0add](https://www.github.com/googleapis/nodejs-firestore/commit/92b0add))
+* **docs:** revert jsdoc and pin to 3.5.5 ([#627](https://www.github.com/googleapis/nodejs-firestore/issues/627)) ([e22f9c6](https://www.github.com/googleapis/nodejs-firestore/commit/e22f9c6))
+* Support more than 100 long-lived streams ([#623](https://www.github.com/googleapis/nodejs-firestore/issues/623)) ([9474e3f](https://www.github.com/googleapis/nodejs-firestore/commit/9474e3f))
+
+
+### Build System
+
+* upgrade engines field to >=8.10.0 ([#608](https://www.github.com/googleapis/nodejs-firestore/issues/608)) ([32485f4](https://www.github.com/googleapis/nodejs-firestore/commit/32485f4))
+* upgrade engines field to >=8.13.0 ([#636](https://www.github.com/googleapis/nodejs-firestore/issues/636)) ([a5db7d8](https://www.github.com/googleapis/nodejs-firestore/commit/a5db7d8))
+
+
+### Code Refactoring
+
+* **deprecation:** remove deprecated getCollections() ([#624](https://www.github.com/googleapis/nodejs-firestore/issues/624)) ([43ac9c6](https://www.github.com/googleapis/nodejs-firestore/commit/43ac9c6))
+* **deprecation:** remove legacy support for array arguments ([#625](https://www.github.com/googleapis/nodejs-firestore/issues/625)) ([54dd405](https://www.github.com/googleapis/nodejs-firestore/commit/54dd405))
+
+
+### BREAKING CHANGES
+
+* library now requires Node >= 8.13.0
+* **deprecation:** remove legacy support for array arguments (#625)
+* **deprecation:** remove deprecated getCollections() (#624)
+* upgrade engines field to >=8.10.0 (#608)
+
 ## v1.3.0
 
 04-26-2019 16:54 PDT
@@ -198,4 +230,3 @@ API is 100% identical.
 - make synth.py generate library to ./dev ([#337](https://github.com/googleapis/nodejs-firestore/pull/337))
 - Revert "Re-generate library using /synth.py ([#331](https://github.com/googleapis/nodejs-firestore/pull/331))" ([#334](https://github.com/googleapis/nodejs-firestore/pull/334))
 - Re-generate library using /synth.py ([#331](https://github.com/googleapis/nodejs-firestore/pull/331))
-
