@@ -130,7 +130,6 @@ export class WriteBatch {
   private _committed = false;
 
   /**
-   * @private
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
