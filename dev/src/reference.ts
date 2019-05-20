@@ -121,7 +121,6 @@ const comparisonOperators: {
  */
 export class DocumentReference implements Serializable {
   /**
-   * @private
    * @hideconstructor
    *
    * @param _firestore The Firestore Database client.
@@ -644,7 +643,6 @@ export class QuerySnapshot {
   private _changes: (() => DocumentChange[]) | null = null;
 
   /**
-   * @private
    * @hideconstructor
    *
    * @param _query The originating query.
@@ -1000,7 +998,6 @@ export class Query {
   private readonly _serializer: Serializer;
 
   /**
-   * @private
    * @hideconstructor
    *
    * @param _firestore The Firestore Database client.
@@ -1931,7 +1928,6 @@ export class Query {
  */
 export class CollectionReference extends Query {
   /**
-   * @private
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
