@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
+/** A Promise implementation that supports deferred resolution. */
+export class Deferred<R> {
+  promise: Promise<R>;
+  resolve: (value?: R | Promise<R>) => void = () => {};
+  reject: (reason?: Error) => void = () => {};
+
+  constructor() {
+    this.promise = new Promise(
+      (
+        resolve: (value?: R | Promise<R>) => void,
+        reject: (reason?: Error) => void
+      ) => {
+        this.resolve = resolve;
+        this.reject = reject;
+      }
+    );
+  }
+}
+
 /**
  * Generate a unique client-side identifier.
  *

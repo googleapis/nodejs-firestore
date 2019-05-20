@@ -42,25 +42,6 @@ export const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 // tslint:disable-next-line:no-any
 export type InvalidApiUsage = any;
 
-/** A Promise implementation that supports deferred resolution. */
-export class Deferred<R> {
-  promise: Promise<R>;
-  resolve: (value?: R | Promise<R>) => void = () => {};
-  reject: (reason?: Error) => void = () => {};
-
-  constructor() {
-    this.promise = new Promise(
-      (
-        resolve: (value?: R | Promise<R>) => void,
-        reject: (reason?: Error) => void
-      ) => {
-        this.resolve = resolve;
-        this.reject = reject;
-      }
-    );
-  }
-}
-
 /**
  * Interface that defines the request handlers used by Firestore.
  */
@@ -144,6 +125,21 @@ export function createInstance(
   firestore['_clientPool'] = clientPool;
 
   return Promise.resolve(firestore);
+}
+
+/**
+ * Verifies that all streams have been properly shutdown at the end of a test
+ * run.
+ */
+export function verifyInstance(firestore: Firestore): Promise<void> {
+  // Allow the setTimeout() call in _initializeStream to run before
+  // verifying that all operations have finished executing.
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      expect(firestore['_clientPool'].opCount).to.equal(0);
+      resolve();
+    }, 10);
+  });
 }
 
 function write(

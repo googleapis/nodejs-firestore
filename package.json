@@ -1,11 +1,11 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
-    "node": ">=8.10.0"
+    "node": "^8.13.0 || >=10.10.0"
   },
   "repository": "googleapis/nodejs-firestore",
   "main": "./build/src/index.js",

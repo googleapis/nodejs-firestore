@@ -28,7 +28,7 @@ import {GeoPoint} from '../src';
 import {DocumentReference} from '../src';
 import * as order from '../src/order';
 import {QualifiedResourcePath} from '../src/path';
-import {createInstance, InvalidApiUsage} from './util/helpers';
+import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
 
 import api = google.firestore.v1;
 
@@ -43,6 +43,8 @@ describe('Order', () => {
       firestore = firestoreInstance;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   /** Converts a value into its proto representation. */
   function wrap(value: unknown): api.IValue {

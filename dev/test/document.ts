@@ -42,6 +42,7 @@ import {
   stream,
   update,
   updateMask,
+  verifyInstance,
   writeResult,
 } from './util/helpers';
 
@@ -68,6 +69,8 @@ describe('DocumentReference interface', () => {
       documentRef = firestore.doc('collectionId/documentId');
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has collection() method', () => {
     expect(() => documentRef.collection(42 as InvalidApiUsage)).to.throw(
@@ -110,6 +113,8 @@ describe('serialize document', () => {
       firestore = firestoreInstance;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('serializes to Protobuf JS', () => {
     const overrides: ApiOverride = {
@@ -269,7 +274,7 @@ describe('serialize document', () => {
     }).to.throw('Value for argument "latitude" is not a valid number');
 
     expect(() => {
-      new (Firestore as InvalidApiUsage).GeoPoint();
+      new (GeoPoint as InvalidApiUsage)();
     }).to.throw('Value for argument "latitude" is not a valid number');
 
     expect(() => {
@@ -680,6 +685,8 @@ describe('delete document', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('generates proto', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
@@ -796,6 +803,8 @@ describe('set document', () => {
       firestore = firestoreClient;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('supports empty map', () => {
     const overrides: ApiOverride = {
@@ -1228,6 +1237,8 @@ describe('create document', () => {
     });
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('creates document', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
@@ -1349,6 +1360,8 @@ describe('update document', () => {
       firestore = firestoreClient;
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('generates proto', () => {
     const overrides: ApiOverride = {

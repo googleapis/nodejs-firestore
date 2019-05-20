@@ -30,7 +30,8 @@ import {
   setLogFunction,
   Timestamp,
 } from '../src';
-import {autoId} from '../src/util';
+import {autoId, Deferred} from '../src/util';
+import {verifyInstance} from '../test/util/helpers';
 
 const version = require('../../package.json').version;
 
@@ -66,6 +67,8 @@ describe('Firestore class', () => {
     firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has collection() method', () => {
     const ref = firestore.collection('col');
@@ -136,6 +139,8 @@ describe('CollectionReference class', () => {
     randomCol = getTestRoot(firestore);
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('has firestore property', () => {
     const ref = firestore.collection('col');
     expect(ref.firestore).to.be.an.instanceOf(Firestore);
@@ -201,6 +206,8 @@ describe('DocumentReference class', () => {
     firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has firestore property', () => {
     const ref = firestore.doc('col/doc');
@@ -839,20 +846,22 @@ describe('DocumentReference class', () => {
       const exists1 = [false, true, false];
       const exists2 = [false, true, false];
 
+      const promises: Array<Promise<WriteResult>> = [];
+
       // Code blocks to run after each step.
       const run = [
         () => {
-          doc1.set({foo: 'foo'});
-          doc2.set({foo: 'foo'});
+          promises.push(doc1.set({foo: 'foo'}));
+          promises.push(doc2.set({foo: 'foo'}));
         },
         () => {
-          doc1.delete();
-          doc2.delete();
+          promises.push(doc1.delete());
+          promises.push(doc2.delete());
         },
         () => {
           unsubscribe1();
           unsubscribe2();
-          done();
+          Promise.all(promises).then(() => done());
         },
       ];
 
@@ -882,18 +891,20 @@ describe('DocumentReference class', () => {
       const exists1 = [false, true, false];
       const exists2 = [false, true, false];
 
+      const promises: Array<Promise<WriteResult>> = [];
+
       // Code blocks to run after each step.
       const run = [
         () => {
-          doc.set({foo: 'foo'});
+          promises.push(doc.set({foo: 'foo'}));
         },
         () => {
-          doc.delete();
+          promises.push(doc.delete());
         },
         () => {
           unsubscribe1();
           unsubscribe2();
-          done();
+          Promise.all(promises).then(() => done());
         },
       ];
 
@@ -912,6 +923,37 @@ describe('DocumentReference class', () => {
         expect(snapshot.exists).to.equal(exists2.shift());
         maybeRun();
       });
+    });
+
+    it('handles more than 100 concurrent listeners', async () => {
+      const ref = randomCol.doc('doc');
+
+      const emptyResults: Array<Deferred<void>> = [];
+      const documentResults: Array<Deferred<void>> = [];
+      const unsubscribeCallbacks: Array<() => void> = [];
+
+      // A single GAPIC client can only handle 100 concurrent streams. We set
+      // up 100+ long-lived listeners to verify that Firestore pools requests
+      // across multiple clients.
+      for (let i = 0; i < 150; ++i) {
+        emptyResults[i] = new Deferred<void>();
+        documentResults[i] = new Deferred<void>();
+
+        unsubscribeCallbacks[i] = randomCol
+          .where('i', '>', i)
+          .onSnapshot(snapshot => {
+            if (snapshot.size === 0) {
+              emptyResults[i].resolve();
+            } else if (snapshot.size === 1) {
+              documentResults[i].resolve();
+            }
+          });
+      }
+
+      await Promise.all(emptyResults.map(d => d.promise));
+      ref.set({i: 1337});
+      await Promise.all(documentResults.map(d => d.promise));
+      unsubscribeCallbacks.forEach(c => c());
     });
   });
 });
@@ -952,6 +994,8 @@ describe('Query class', () => {
     firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has firestore property', () => {
     const ref = randomCol.limit(0);
@@ -1623,6 +1667,8 @@ describe('Transaction class', () => {
     randomCol = getTestRoot(firestore);
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('has get() method', () => {
     const ref = randomCol.doc('doc');
     return ref
@@ -1803,6 +1849,8 @@ describe('WriteBatch class', () => {
     randomCol = getTestRoot(firestore);
   });
 
+  afterEach(() => verifyInstance(firestore));
+
   it('supports empty batches', () => {
     return firestore.batch().commit();
   });
@@ -1911,6 +1959,8 @@ describe('QuerySnapshot class', () => {
       return randomCol.get();
     });
   });
+
+  afterEach(() => verifyInstance(firestore));
 
   it('has query property', () => {
     return querySnapshot
