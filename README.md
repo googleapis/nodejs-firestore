@@ -62,7 +62,7 @@ npm install @google-cloud/firestore
 ### Using the client library
 
 ```javascript
-const Firestore = require('@google-cloud/firestore');
+const {Firestore} = require('@google-cloud/firestore');
 
 // Create a new client
 const firestore = new Firestore();
