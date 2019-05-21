@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,8 +45,7 @@ const DocumentMask = {
  *   When set, the target document must exist and have been last updated at
  *   that time.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef Precondition
  * @memberof google.firestore.v1beta1
@@ -62,14 +61,12 @@ const Precondition = {
  * @property {Object} readOnly
  *   The transaction can only be used for read operations.
  *
- *   This object should have the same structure as [ReadOnly]{@link
- * google.firestore.v1beta1.ReadOnly}
+ *   This object should have the same structure as [ReadOnly]{@link google.firestore.v1beta1.ReadOnly}
  *
  * @property {Object} readWrite
  *   The transaction can be used for both read and write operations.
  *
- *   This object should have the same structure as [ReadWrite]{@link
- * google.firestore.v1beta1.ReadWrite}
+ *   This object should have the same structure as [ReadWrite]{@link google.firestore.v1beta1.ReadWrite}
  *
  * @typedef TransactionOptions
  * @memberof google.firestore.v1beta1
@@ -99,8 +96,7 @@ const TransactionOptions = {
    *   Reads documents at the given time.
    *   This may not be older than 60 seconds.
    *
-   *   This object should have the same structure as [Timestamp]{@link
-   * google.protobuf.Timestamp}
+   *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
    *
    * @typedef ReadOnly
    * @memberof google.firestore.v1beta1
