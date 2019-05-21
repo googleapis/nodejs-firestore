@@ -47,7 +47,6 @@ s.replace(
     "return this._innerApiCalls.listen({}, options);",
 )
 
-
 # Copy template files
 common_templates = gcp.CommonTemplates()
 templates = common_templates.node_library(
