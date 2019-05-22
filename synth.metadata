@@ -1,5 +1,5 @@
 {
-  "updateTime": "2019-05-21T11:15:25.573770Z",
+  "updateTime": "2019-05-22T00:06:48.951662Z",
   "sources": [
     {
       "generator": {
@@ -12,8 +12,8 @@
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "32a10f69e2c9ce15bba13ab1ff928bacebb25160",
-        "internalRef": "249058354"
+        "sha": "6ea045ad2ed95863557b9856760fa8760d8daee0",
+        "internalRef": "249345152"
       }
     },
     {
@@ -33,6 +33,16 @@
         "language": "nodejs",
         "generator": "gapic",
         "config": "google/firestore/admin/artman_firestore_v1.yaml"
+      }
+    },
+    {
+      "client": {
+        "source": "googleapis",
+        "apiName": "firestore",
+        "apiVersion": "v1beta1",
+        "language": "nodejs",
+        "generator": "gapic",
+        "config": "google/firestore/artman_firestore.yaml"
       }
     },
     {
