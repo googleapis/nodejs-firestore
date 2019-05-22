@@ -63,7 +63,6 @@ const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
  */
 export class WriteResult {
   /**
-   * @private
    * @hideconstructor
    *
    * @param _writeTime The time of the corresponding document write.
@@ -131,7 +130,6 @@ export class WriteBatch {
   private _committed = false;
 
   /**
-   * @private
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
