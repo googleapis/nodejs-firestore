@@ -1038,9 +1038,12 @@ export class Firestore {
    * @private
    */
   private createCallOptions(): CallOptions {
-    const gaxHeaders: CallOptions = {otherArgs: {headers: {}}};
-    gaxHeaders.otherArgs!.headers[CLOUD_RESOURCE_HEADER] = this.formattedName;
-    return gaxHeaders;
+    const headers: any = {};
+    headers[CLOUD_RESOURCE_HEADER] = this.formattedName;
+    if (this._settings.additionalHeaders) {
+      Object.assign(headers, this._settings.additionalHeaders);
+    }
+    return {otherArgs: { headers }};
   }
 
   /**
