@@ -1038,12 +1038,14 @@ export class Firestore {
    * @private
    */
   private createCallOptions(): CallOptions {
-    const headers: any = {};
-    headers[CLOUD_RESOURCE_HEADER] = this.formattedName;
-    if (this._settings.additionalHeaders) {
-      Object.assign(headers, this._settings.additionalHeaders);
-    }
-    return {otherArgs: { headers }};
+    return {
+      otherArgs: {
+        headers: {
+          [CLOUD_RESOURCE_HEADER]: this.formattedName,
+          ...this._settings.customHeaders
+        }
+      }
+    };
   }
 
   /**
