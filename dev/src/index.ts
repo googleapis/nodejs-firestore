@@ -1042,9 +1042,9 @@ export class Firestore {
       otherArgs: {
         headers: {
           [CLOUD_RESOURCE_HEADER]: this.formattedName,
-          ...this._settings.customHeaders
-        }
-      }
+          ...this._settings.customHeaders,
+        },
+      },
     };
   }
 
