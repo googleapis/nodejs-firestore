@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,4 +16,7 @@
 
 const FirestoreClient = require('./firestore_client');
 
+// For backwards compatibility, we continue to support the default
+// export.
 module.exports = FirestoreClient;
+module.exports.FirestoreClient = FirestoreClient;

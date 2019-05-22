@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,13 +27,14 @@
  *
  * The `Status` message contains three pieces of data: error code, error
  * message, and error details. The error code should be an enum value of
- * google.rpc.Code, but it may accept additional error codes if needed.  The
- * error message should be a developer-facing English message that helps
- * developers *understand* and *resolve* the error. If a localized user-facing
- * error message is needed, put the localized message in the error details or
- * localize it in the client. The optional error details may contain arbitrary
- * information about the error. There is a predefined set of error detail types
- * in the package `google.rpc` that can be used for common error conditions.
+ * google.rpc.Code, but it may accept additional error codes
+ * if needed.  The error message should be a developer-facing English message
+ * that helps developers *understand* and *resolve* the error. If a localized
+ * user-facing error message is needed, put the localized message in the error
+ * details or localize it in the client. The optional error details may contain
+ * arbitrary information about the error. There is a predefined set of error
+ * detail types in the package `google.rpc` that can be used for common error
+ * conditions.
  *
  * # Language mapping
  *
@@ -70,19 +71,20 @@
  *     be used directly after any stripping needed for security/privacy reasons.
  *
  * @property {number} code
- *   The status code, which should be an enum value of google.rpc.Code.
+ *   The status code, which should be an enum value of
+ *   google.rpc.Code.
  *
  * @property {string} message
  *   A developer-facing error message, which should be in English. Any
  *   user-facing error message should be localized and sent in the
- *   google.rpc.Status.details field, or localized by the client.
+ *   google.rpc.Status.details field, or localized
+ *   by the client.
  *
  * @property {Object[]} details
  *   A list of messages that carry the error details.  There is a common set of
  *   message types for APIs to use.
  *
- *   This object should have the same structure as [Any]{@link
- * google.protobuf.Any}
+ *   This object should have the same structure as [Any]{@link google.protobuf.Any}
  *
  * @typedef Status
  * @memberof google.rpc

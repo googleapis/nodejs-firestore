@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,20 +21,17 @@
  * @property {Object} select
  *   The projection to return.
  *
- *   This object should have the same structure as [Projection]{@link
- * google.firestore.v1beta1.Projection}
+ *   This object should have the same structure as [Projection]{@link google.firestore.v1beta1.Projection}
  *
  * @property {Object[]} from
  *   The collections to query.
  *
- *   This object should have the same structure as [CollectionSelector]{@link
- * google.firestore.v1beta1.CollectionSelector}
+ *   This object should have the same structure as [CollectionSelector]{@link google.firestore.v1beta1.CollectionSelector}
  *
  * @property {Object} where
  *   The filter to apply.
  *
- *   This object should have the same structure as [Filter]{@link
- * google.firestore.v1beta1.Filter}
+ *   This object should have the same structure as [Filter]{@link google.firestore.v1beta1.Filter}
  *
  * @property {Object[]} orderBy
  *   The order to apply to the query results.
@@ -56,20 +53,17 @@
  *    * `SELECT * FROM Foo WHERE A > 1` becomes
  *      `SELECT * FROM Foo WHERE A > 1 ORDER BY A, __name__`
  *
- *   This object should have the same structure as [Order]{@link
- * google.firestore.v1beta1.Order}
+ *   This object should have the same structure as [Order]{@link google.firestore.v1beta1.Order}
  *
  * @property {Object} startAt
  *   A starting point for the query results.
  *
- *   This object should have the same structure as [Cursor]{@link
- * google.firestore.v1beta1.Cursor}
+ *   This object should have the same structure as [Cursor]{@link google.firestore.v1beta1.Cursor}
  *
  * @property {Object} endAt
  *   A end point for the query results.
  *
- *   This object should have the same structure as [Cursor]{@link
- * google.firestore.v1beta1.Cursor}
+ *   This object should have the same structure as [Cursor]{@link google.firestore.v1beta1.Cursor}
  *
  * @property {number} offset
  *   The number of results to skip.
@@ -83,8 +77,7 @@
  *   Applies after all other constraints.
  *   Must be >= 0 if specified.
  *
- *   This object should have the same structure as [Int32Value]{@link
- * google.protobuf.Int32Value}
+ *   This object should have the same structure as [Int32Value]{@link google.protobuf.Int32Value}
  *
  * @typedef StructuredQuery
  * @memberof google.firestore.v1beta1
@@ -119,20 +112,17 @@ const StructuredQuery = {
    * @property {Object} compositeFilter
    *   A composite filter.
    *
-   *   This object should have the same structure as [CompositeFilter]{@link
-   * google.firestore.v1beta1.CompositeFilter}
+   *   This object should have the same structure as [CompositeFilter]{@link google.firestore.v1beta1.CompositeFilter}
    *
    * @property {Object} fieldFilter
    *   A filter on a document field.
    *
-   *   This object should have the same structure as [FieldFilter]{@link
-   * google.firestore.v1beta1.FieldFilter}
+   *   This object should have the same structure as [FieldFilter]{@link google.firestore.v1beta1.FieldFilter}
    *
    * @property {Object} unaryFilter
    *   A filter that takes exactly one argument.
    *
-   *   This object should have the same structure as [UnaryFilter]{@link
-   * google.firestore.v1beta1.UnaryFilter}
+   *   This object should have the same structure as [UnaryFilter]{@link google.firestore.v1beta1.UnaryFilter}
    *
    * @typedef Filter
    * @memberof google.firestore.v1beta1
@@ -148,15 +138,13 @@ const StructuredQuery = {
    * @property {number} op
    *   The operator for combining multiple filters.
    *
-   *   The number should be among the values of [Operator]{@link
-   * google.firestore.v1beta1.Operator}
+   *   The number should be among the values of [Operator]{@link google.firestore.v1beta1.Operator}
    *
    * @property {Object[]} filters
    *   The list of filters to combine.
    *   Must contain at least one filter.
    *
-   *   This object should have the same structure as [Filter]{@link
-   * google.firestore.v1beta1.Filter}
+   *   This object should have the same structure as [Filter]{@link google.firestore.v1beta1.Filter}
    *
    * @typedef CompositeFilter
    * @memberof google.firestore.v1beta1
@@ -190,20 +178,17 @@ const StructuredQuery = {
    * @property {Object} field
    *   The field to filter by.
    *
-   *   This object should have the same structure as [FieldReference]{@link
-   * google.firestore.v1beta1.FieldReference}
+   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1beta1.FieldReference}
    *
    * @property {number} op
    *   The operator to filter by.
    *
-   *   The number should be among the values of [Operator]{@link
-   * google.firestore.v1beta1.Operator}
+   *   The number should be among the values of [Operator]{@link google.firestore.v1beta1.Operator}
    *
    * @property {Object} value
    *   The value to compare to.
    *
-   *   This object should have the same structure as [Value]{@link
-   * google.firestore.v1beta1.Value}
+   *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
    *
    * @typedef FieldFilter
    * @memberof google.firestore.v1beta1
@@ -258,19 +243,36 @@ const StructuredQuery = {
   },
 
   /**
+   * The projection of document's fields to return.
+   *
+   * @property {Object[]} fields
+   *   The fields to return.
+   *
+   *   If empty, all fields are returned. To only return the name
+   *   of the document, use `['__name__']`.
+   *
+   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1beta1.FieldReference}
+   *
+   * @typedef Projection
+   * @memberof google.firestore.v1beta1
+   * @see [google.firestore.v1beta1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   */
+  Projection: {
+    // This is for documentation. Actual contents will be loaded by gRPC.
+  },
+
+  /**
    * A filter with a single operand.
    *
    * @property {number} op
    *   The unary operator to apply.
    *
-   *   The number should be among the values of [Operator]{@link
-   * google.firestore.v1beta1.Operator}
+   *   The number should be among the values of [Operator]{@link google.firestore.v1beta1.Operator}
    *
    * @property {Object} field
    *   The field to which to apply the operator.
    *
-   *   This object should have the same structure as [FieldReference]{@link
-   * google.firestore.v1beta1.FieldReference}
+   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1beta1.FieldReference}
    *
    * @typedef UnaryFilter
    * @memberof google.firestore.v1beta1
@@ -309,14 +311,12 @@ const StructuredQuery = {
    * @property {Object} field
    *   The field to order by.
    *
-   *   This object should have the same structure as [FieldReference]{@link
-   * google.firestore.v1beta1.FieldReference}
+   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1beta1.FieldReference}
    *
    * @property {number} direction
    *   The direction to order by. Defaults to `ASCENDING`.
    *
-   *   The number should be among the values of [Direction]{@link
-   * google.firestore.v1beta1.Direction}
+   *   The number should be among the values of [Direction]{@link google.firestore.v1beta1.Direction}
    *
    * @typedef Order
    * @memberof google.firestore.v1beta1
@@ -336,26 +336,6 @@ const StructuredQuery = {
    * @see [google.firestore.v1beta1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   FieldReference: {
-    // This is for documentation. Actual contents will be loaded by gRPC.
-  },
-
-  /**
-   * The projection of document's fields to return.
-   *
-   * @property {Object[]} fields
-   *   The fields to return.
-   *
-   *   If empty, all fields are returned. To only return the name
-   *   of the document, use `['__name__']`.
-   *
-   *   This object should have the same structure as [FieldReference]{@link
-   * google.firestore.v1beta1.FieldReference}
-   *
-   * @typedef Projection
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
-   */
-  Projection: {
     // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
@@ -392,8 +372,7 @@ const StructuredQuery = {
  *
  *   Can contain fewer values than specified in the order by clause.
  *
- *   This object should have the same structure as [Value]{@link
- * google.firestore.v1beta1.Value}
+ *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
  *
  * @property {boolean} before
  *   If the position is just before or just after the given values, relative
