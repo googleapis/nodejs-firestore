@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,21 +21,19 @@
  * @property {Object} update
  *   A document to write.
  *
- *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
  *
  * @property {string} delete
  *   A document name to delete. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *
  * @property {Object} transform
- *   Applies a tranformation to a document.
+ *   Applies a transformation to a document.
  *   At most one `transform` per document is allowed in a given request.
  *   An `update` cannot follow a `transform` on the same document in a given
  *   request.
  *
- *   This object should have the same structure as [DocumentTransform]{@link
- * google.firestore.v1beta1.DocumentTransform}
+ *   This object should have the same structure as [DocumentTransform]{@link google.firestore.v1beta1.DocumentTransform}
  *
  * @property {Object} updateMask
  *   The fields to update in this write.
@@ -49,16 +47,14 @@
  *   deleted from the document on the server.
  *   The field paths in this mask must not contain a reserved field name.
  *
- *   This object should have the same structure as [DocumentMask]{@link
- * google.firestore.v1beta1.DocumentMask}
+ *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1beta1.DocumentMask}
  *
  * @property {Object} currentDocument
  *   An optional precondition on the document.
  *
  *   The write will fail if this is set and not met by the target document.
  *
- *   This object should have the same structure as [Precondition]{@link
- * google.firestore.v1beta1.Precondition}
+ *   This object should have the same structure as [Precondition]{@link google.firestore.v1beta1.Precondition}
  *
  * @typedef Write
  * @memberof google.firestore.v1beta1
@@ -79,8 +75,7 @@ const Write = {
  *   order.
  *   This must not be empty.
  *
- *   This object should have the same structure as [FieldTransform]{@link
- * google.firestore.v1beta1.FieldTransform}
+ *   This object should have the same structure as [FieldTransform]{@link google.firestore.v1beta1.FieldTransform}
  *
  * @typedef DocumentTransform
  * @memberof google.firestore.v1beta1
@@ -99,8 +94,7 @@ const DocumentTransform = {
    * @property {number} setToServerValue
    *   Sets the field to the given server value.
    *
-   *   The number should be among the values of [ServerValue]{@link
-   * google.firestore.v1beta1.ServerValue}
+   *   The number should be among the values of [ServerValue]{@link google.firestore.v1beta1.ServerValue}
    *
    * @property {Object} increment
    *   Adds the given value to the field's current value.
@@ -114,8 +108,7 @@ const DocumentTransform = {
    *   If there is positive/negative integer overflow, the field is resolved
    *   to the largest magnitude positive/negative integer.
    *
-   *   This object should have the same structure as [Value]{@link
-   * google.firestore.v1beta1.Value}
+   *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
    *
    * @property {Object} maximum
    *   Sets the field to the maximum of its current value and the given value.
@@ -131,8 +124,7 @@ const DocumentTransform = {
    *   zero input value is always the stored value.
    *   The maximum of any numeric value x and NaN is NaN.
    *
-   *   This object should have the same structure as [Value]{@link
-   * google.firestore.v1beta1.Value}
+   *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
    *
    * @property {Object} minimum
    *   Sets the field to the minimum of its current value and the given value.
@@ -148,8 +140,7 @@ const DocumentTransform = {
    *   zero input value is always the stored value.
    *   The minimum of any numeric value x and NaN is NaN.
    *
-   *   This object should have the same structure as [Value]{@link
-   * google.firestore.v1beta1.Value}
+   *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
    *
    * @property {Object} appendMissingElements
    *   Append the given elements in order if they are not already present in
@@ -165,8 +156,7 @@ const DocumentTransform = {
    *
    *   The corresponding transform_result will be the null value.
    *
-   *   This object should have the same structure as [ArrayValue]{@link
-   * google.firestore.v1beta1.ArrayValue}
+   *   This object should have the same structure as [ArrayValue]{@link google.firestore.v1beta1.ArrayValue}
    *
    * @property {Object} removeAllFromArray
    *   Remove all of the given elements from the array in the field.
@@ -180,8 +170,7 @@ const DocumentTransform = {
    *
    *   The corresponding transform_result will be the null value.
    *
-   *   This object should have the same structure as [ArrayValue]{@link
-   * google.firestore.v1beta1.ArrayValue}
+   *   This object should have the same structure as [ArrayValue]{@link google.firestore.v1beta1.ArrayValue}
    *
    * @typedef FieldTransform
    * @memberof google.firestore.v1beta1
@@ -221,15 +210,13 @@ const DocumentTransform = {
  *   If the write did not actually change the document, this will be the
  *   previous update_time.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {Object[]} transformResults
  *   The results of applying each DocumentTransform.FieldTransform, in the
  *   same order.
  *
- *   This object should have the same structure as [Value]{@link
- * google.firestore.v1beta1.Value}
+ *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
  *
  * @typedef WriteResult
  * @memberof google.firestore.v1beta1
@@ -253,8 +240,7 @@ const WriteResult = {
  *
  *   If `mask` is set, contains only fields that were updated or added.
  *
- *   This object should have the same structure as [Document]{@link
- * google.firestore.v1beta1.Document}
+ *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
  *
  * @property {number[]} targetIds
  *   A set of target IDs of targets that match this document.
@@ -290,8 +276,7 @@ const DocumentChange = {
  *
  *   Greater or equal to the `commit_time` of the delete.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef DocumentDelete
  * @memberof google.firestore.v1beta1
@@ -322,8 +307,7 @@ const DocumentDelete = {
  *
  *   Greater or equal to the `commit_time` of the change/delete/remove.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef DocumentRemove
  * @memberof google.firestore.v1beta1
