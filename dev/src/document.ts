@@ -102,7 +102,6 @@ export class DocumentSnapshot {
   private _updateTime: Timestamp | undefined;
 
   /**
-   * @private
    * @hideconstructor
    *
    * @param ref The reference to the document.
@@ -521,7 +520,6 @@ export class DocumentSnapshot {
  */
 export class QueryDocumentSnapshot extends DocumentSnapshot {
   /**
-   * @private
    * @hideconstructor
    *
    * @param ref The reference to the document.

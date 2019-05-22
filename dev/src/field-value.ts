@@ -32,7 +32,6 @@ import api = proto.google.firestore.v1;
  */
 export class FieldValue {
   /**
-   * @private
    * @hideconstructor
    */
   constructor() {}
