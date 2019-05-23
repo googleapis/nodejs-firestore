@@ -1,3 +1,4 @@
+import {DEFAULT_MAX_RETRY_ATTEMPTS} from './../src/watch';
 /**
  * Copyright 2017 Google Inc. All Rights Reserved.
  *
@@ -44,7 +45,12 @@ import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
 import {GrpcError} from '../src/types';
-import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
+import {
+  createInstance,
+  InvalidApiUsage,
+  verifyInstance,
+  stream,
+} from './util/helpers';
 
 import api = google.firestore.v1;
 
@@ -819,6 +825,38 @@ describe('Query watch', () => {
     });
   });
 
+  it('stops attempts after maximum retry attempts', () => {
+    const err = new GrpcError('GRPC Error');
+    err.code = Number(10 /* ABORTED */);
+    return watchHelper.runFailedTest(
+      collQueryJSON(),
+      async () => {
+        let chain: Promise<
+          void | Error | api.IListenRequest
+        > = Promise.resolve();
+        // Retry for the maximum of retry attempts.
+        for (let i = 0; i < DEFAULT_MAX_RETRY_ATTEMPTS; i++) {
+          chain = chain.then(async () => {
+            streamHelper.destroyStream(err);
+            await streamHelper.awaitReopen();
+          });
+        }
+        // The next retry should fail with an error.
+        chain = chain
+          .then(() => {
+            streamHelper.destroyStream(err);
+          })
+          .then(() => {
+            return streamHelper.await('error');
+          })
+          .then(() => {
+            return streamHelper.await('close');
+          });
+      },
+      'Exceeded maximum number of retries before any response was received.'
+    );
+  });
+
   it("doesn't re-open inactive stream", () => {
     // This test uses the normal timeout handler since it relies on the actual
     // backoff window during the the stream recovery. We then use this window to
@@ -854,7 +892,7 @@ describe('Query watch', () => {
       /* PermissionDenied */ 7: false,
       /* ResourceExhausted */ 8: true,
       /* FailedPrecondition */ 9: false,
-      /* Aborted */ 10: false,
+      /* Aborted */ 10: true,
       /* OutOfRange */ 11: false,
       /* Unimplemented */ 12: false,
       /* Internal */ 13: true,

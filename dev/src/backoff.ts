@@ -136,6 +136,13 @@ export class ExponentialBackoff {
   private readonly jitterFactor: number;
 
   /**
+   * The number of retries that has been attempted.
+   * 
+   * @private
+   */
+  private retryCount = 0;
+
+  /**
    * The backoff delay of the current attempt.
    *
    * @private
@@ -162,7 +169,7 @@ export class ExponentialBackoff {
   }
 
   /**
-   * Resets the backoff delay.
+   * Resets the backoff delay and retry count.
    *
    * The very next backoffAndWait() will have no delay. If it is called again
    * (i.e. due to an error), initialDelayMs (plus jitter) will be used, and
@@ -171,6 +178,7 @@ export class ExponentialBackoff {
    * @private
    */
   reset(): void {
+    this.retryCount = 0;
     this.currentBaseMs = 0;
   }
 
@@ -209,10 +217,14 @@ export class ExponentialBackoff {
     this.currentBaseMs *= this.backoffFactor;
     this.currentBaseMs = Math.max(this.currentBaseMs, this.initialDelayMs);
     this.currentBaseMs = Math.min(this.currentBaseMs, this.maxDelayMs);
-
+    this.retryCount += 1;
     return new Promise(resolve => {
       delayExecution(resolve, delayWithJitterMs);
     });
+  }
+
+  getRetryCount(): number {
+    return this.retryCount;
   }
 
   /**

@@ -41,6 +41,12 @@ import api = google.firestore.v1;
 const WATCH_TARGET_ID = 0x1;
 
 /*!
+ * The default maximum number of retries that will be attempted by backoff
+ * before stopping all retry attempts.
+ */
+export const DEFAULT_MAX_RETRY_ATTEMPTS = 10;
+
+/*!
  * The change type for document change events.
  */
 // tslint:disable-next-line:variable-name
@@ -271,6 +277,7 @@ abstract class Watch {
     }
 
     switch (error.code) {
+      case GRPC_STATUS_CODE.ABORTED:
       case GRPC_STATUS_CODE.CANCELLED:
       case GRPC_STATUS_CODE.UNKNOWN:
       case GRPC_STATUS_CODE.DEADLINE_EXCEEDED:
@@ -426,6 +433,15 @@ abstract class Watch {
      * Initializes a new stream to the backend with backoff.
      */
     const initStream = () => {
+      if (this._backoff.getRetryCount() > DEFAULT_MAX_RETRY_ATTEMPTS) {
+        closeStream(
+          new Error(
+            'Exceeded maximum number of retries before any ' +
+              'response was received.'
+          )
+        );
+        return;
+      }
       this._backoff.backoffAndWait().then(async () => {
         if (!isActive) {
           logger(
