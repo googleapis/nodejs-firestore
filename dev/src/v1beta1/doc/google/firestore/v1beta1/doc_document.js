@@ -1,4 +1,4 @@
-// Copyright 2018 Google LLC
+// Copyright 2019 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,8 +57,7 @@
  *   recreated. It can also be compared to values from other documents and
  *   the `read_time` of a query.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {Object} updateTime
  *   Output only. The time at which the document was last changed.
@@ -67,8 +66,7 @@
  *   monotonically with each change to the document. It can also be
  *   compared to values from other documents and the `read_time` of a query.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @typedef Document
  * @memberof google.firestore.v1beta1
@@ -84,8 +82,7 @@ const Document = {
  * @property {number} nullValue
  *   A null value.
  *
- *   The number should be among the values of [NullValue]{@link
- * google.protobuf.NullValue}
+ *   The number should be among the values of [NullValue]{@link google.protobuf.NullValue}
  *
  * @property {boolean} booleanValue
  *   A boolean value.
@@ -102,8 +99,7 @@ const Document = {
  *   Precise only to microseconds. When stored, any additional precision is
  *   rounded down.
  *
- *   This object should have the same structure as [Timestamp]{@link
- * google.protobuf.Timestamp}
+ *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {string} stringValue
  *   A string value.
@@ -125,8 +121,7 @@ const Document = {
  * @property {Object} geoPointValue
  *   A geo point value representing a point on the surface of Earth.
  *
- *   This object should have the same structure as [LatLng]{@link
- * google.type.LatLng}
+ *   This object should have the same structure as [LatLng]{@link google.type.LatLng}
  *
  * @property {Object} arrayValue
  *   An array value.
@@ -134,14 +129,12 @@ const Document = {
  *   Cannot directly contain another array value, though can contain an
  *   map which contains another array.
  *
- *   This object should have the same structure as [ArrayValue]{@link
- * google.firestore.v1beta1.ArrayValue}
+ *   This object should have the same structure as [ArrayValue]{@link google.firestore.v1beta1.ArrayValue}
  *
  * @property {Object} mapValue
  *   A map value.
  *
- *   This object should have the same structure as [MapValue]{@link
- * google.firestore.v1beta1.MapValue}
+ *   This object should have the same structure as [MapValue]{@link google.firestore.v1beta1.MapValue}
  *
  * @typedef Value
  * @memberof google.firestore.v1beta1
@@ -157,8 +150,7 @@ const Value = {
  * @property {Object[]} values
  *   Values in the array.
  *
- *   This object should have the same structure as [Value]{@link
- * google.firestore.v1beta1.Value}
+ *   This object should have the same structure as [Value]{@link google.firestore.v1beta1.Value}
  *
  * @typedef ArrayValue
  * @memberof google.firestore.v1beta1
