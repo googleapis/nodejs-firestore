@@ -1,4 +1,3 @@
-import {DEFAULT_MAX_RETRY_ATTEMPTS} from './../src/watch';
 /**
  * Copyright 2017 Google Inc. All Rights Reserved.
  *
@@ -45,10 +44,10 @@ import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
 import {GrpcError} from '../src/types';
+import {DEFAULT_MAX_RETRY_ATTEMPTS} from './../src/watch';
 import {
   createInstance,
   InvalidApiUsage,
-  stream,
   verifyInstance,
 } from './util/helpers';
 
