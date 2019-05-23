@@ -50,7 +50,6 @@
     "deep-equal": "^1.0.1",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^1.0.0",
-    "lodash.merge": "^4.6.1",
     "through2": "^3.0.0"
   },
   "devDependencies": {
@@ -71,7 +70,7 @@
     "hard-rejection": "^2.0.0",
     "intelli-espower-loader": "^1.0.1",
     "jsdoc": "^3.6.2",
-    "jsdoc-baseline": "git+https://github.com/hegemonic/jsdoc-baseline.git",
+    "jsdoc-baseline": "^0.1.0",
     "linkinator": "^1.1.2",
     "mocha": "^6.0.0",
     "nyc": "^14.0.0",
