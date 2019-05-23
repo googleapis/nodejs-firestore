@@ -48,8 +48,8 @@ import {GrpcError} from '../src/types';
 import {
   createInstance,
   InvalidApiUsage,
-  verifyInstance,
   stream,
+  verifyInstance,
 } from './util/helpers';
 
 import api = google.firestore.v1;
@@ -840,7 +840,8 @@ describe('Query watch', () => {
           });
         }
         // The next retry should fail with an error.
-        chain.then(() => {
+        chain
+          .then(() => {
             streamHelper.destroyStream(err);
           })
           .then(() => {

@@ -137,7 +137,7 @@ export class ExponentialBackoff {
 
   /**
    * The number of retries that has been attempted.
-   * 
+   *
    * @private
    */
   private retryCount = 0;
