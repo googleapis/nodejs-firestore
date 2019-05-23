@@ -831,9 +831,7 @@ describe('Query watch', () => {
     return watchHelper.runFailedTest(
       collQueryJSON(),
       async () => {
-        let chain: Promise<
-          void | Error | api.IListenRequest
-        > = Promise.resolve();
+        let chain = Promise.resolve();
         // Retry for the maximum of retry attempts.
         for (let i = 0; i < DEFAULT_MAX_RETRY_ATTEMPTS; i++) {
           chain = chain.then(async () => {
@@ -842,8 +840,7 @@ describe('Query watch', () => {
           });
         }
         // The next retry should fail with an error.
-        chain = chain
-          .then(() => {
+        chain.then(() => {
             streamHelper.destroyStream(err);
           })
           .then(() => {
