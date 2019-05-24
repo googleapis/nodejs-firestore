@@ -209,7 +209,7 @@ export class ExponentialBackoff {
     if (this.retryCount > MAX_RETRY_ATTEMPTS) {
       return Promise.reject(
         new Error(
-          'Exceeded maximum number of retries before any response was received.'
+          'Exceeded maximum number of retries allowed.'
         )
       );
     }
@@ -236,6 +236,7 @@ export class ExponentialBackoff {
     });
   }
 
+  // Visible for testing.
   get retryCount(): number {
     return this._retryCount;
   }

@@ -431,6 +431,7 @@ abstract class Watch {
         .backoffAndWait()
         .catch(err => {
           closeStream(err);
+          return Promise.reject(err);
         })
         .then(async () => {
           if (!isActive) {
