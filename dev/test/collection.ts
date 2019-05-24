@@ -58,9 +58,6 @@ describe('Collection interface', () => {
     expect(() => collectionRef.doc('')).to.throw(
       'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
     );
-    expect(() => collectionRef.doc(undefined)).to.throw(
-      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
-    );
     expect(() => collectionRef.doc('doc/coll')).to.throw(
       'Value for argument "documentPath" must point to a document, but was "doc/coll". Your path does not contain an even number of components.'
     );
@@ -82,6 +79,10 @@ describe('Collection interface', () => {
     expect(documentRef).to.be.an.instanceOf(DocumentReference);
     expect(collectionRef.id).to.equal('collectionId');
     expect(documentRef.id).to.have.length(20);
+    
+    const documentRefUndefined = collectionRef.doc(undefined);
+    expect(documentRefUndefined).to.be.an.instanceOf(DocumentReference);
+    expect(documentRefUndefined.id).to.have.length(20);
   });
 
   it('has add() method', () => {
