@@ -2073,7 +2073,7 @@ export class CollectionReference extends Query {
    * console.log(`Reference with auto-id: ${documentRefWithAutoId.path}`);
    */
   doc(documentPath?: string): DocumentReference {
-    if (arguments.length === 0) {
+    if (documentPath === undefined) {
       documentPath = autoId();
     } else {
       validateResourcePath('documentPath', documentPath!);
