@@ -75,14 +75,14 @@ describe('Collection interface', () => {
 
   it('supports auto-generated ids', () => {
     const collectionRef = firestore.collection('collectionId');
-    const documentRef = collectionRef.doc();
+    let documentRef = collectionRef.doc();
     expect(documentRef).to.be.an.instanceOf(DocumentReference);
     expect(collectionRef.id).to.equal('collectionId');
     expect(documentRef.id).to.have.length(20);
     
-    const documentRefUndefined = collectionRef.doc(undefined);
-    expect(documentRefUndefined).to.be.an.instanceOf(DocumentReference);
-    expect(documentRefUndefined.id).to.have.length(20);
+    documentRef = collectionRef.doc(undefined);
+    expect(documentRef).to.be.an.instanceOf(DocumentReference);
+    expect(documentRef.id).to.have.length(20);
   });
 
   it('has add() method', () => {
