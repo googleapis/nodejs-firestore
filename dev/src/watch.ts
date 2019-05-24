@@ -41,12 +41,6 @@ import api = google.firestore.v1;
 const WATCH_TARGET_ID = 0x1;
 
 /*!
- * The default maximum number of retries that will be attempted by backoff
- * before stopping all retry attempts.
- */
-export const DEFAULT_MAX_RETRY_ATTEMPTS = 10;
-
-/*!
  * The change type for document change events.
  */
 // tslint:disable-next-line:variable-name
@@ -433,59 +427,55 @@ abstract class Watch {
      * Initializes a new stream to the backend with backoff.
      */
     const initStream = () => {
-      if (this._backoff.getRetryCount() > DEFAULT_MAX_RETRY_ATTEMPTS) {
-        closeStream(
-          new Error(
-            'Exceeded maximum number of retries before any ' +
-              'response was received.'
-          )
-        );
-        return;
-      }
-      this._backoff.backoffAndWait().then(async () => {
-        if (!isActive) {
-          logger(
-            'Watch.onSnapshot',
-            this._requestTag,
-            'Not initializing inactive stream'
-          );
-          return;
-        }
+      this._backoff
+        .backoffAndWait()
+        .catch(err => {
+          closeStream(err);
+        })
+        .then(async () => {
+          if (!isActive) {
+            logger(
+              'Watch.onSnapshot',
+              this._requestTag,
+              'Not initializing inactive stream'
+            );
+            return;
+          }
 
-        await this._firestore.initializeIfNeeded();
+          await this._firestore.initializeIfNeeded();
 
-        request.database = this._firestore.formattedName;
-        request.addTarget = this.getTarget(resumeToken);
+          request.database = this._firestore.formattedName;
+          request.addTarget = this.getTarget(resumeToken);
 
-        // Note that we need to call the internal _listen API to pass additional
-        // header values in readWriteStream.
-        this._firestore
-          .readWriteStream('listen', request, this._requestTag, true)
-          .then(backendStream => {
-            if (!isActive) {
-              logger(
-                'Watch.onSnapshot',
-                this._requestTag,
-                'Closing inactive stream'
-              );
-              backendStream.end();
-              return;
-            }
-            logger('Watch.onSnapshot', this._requestTag, 'Opened new stream');
-            currentStream = backendStream;
-            currentStream!.on('error', err => {
-              maybeReopenStream(err);
-            });
-            currentStream!.on('end', () => {
-              const err = new GrpcError('Stream ended unexpectedly');
-              err.code = GRPC_STATUS_CODE.UNKNOWN;
-              maybeReopenStream(err);
-            });
-            currentStream!.pipe(stream);
-            currentStream!.resume();
-          })
-          .catch(closeStream);
-      });
+          // Note that we need to call the internal _listen API to pass additional
+          // header values in readWriteStream.
+          this._firestore
+            .readWriteStream('listen', request, this._requestTag, true)
+            .then(backendStream => {
+              if (!isActive) {
+                logger(
+                  'Watch.onSnapshot',
+                  this._requestTag,
+                  'Closing inactive stream'
+                );
+                backendStream.end();
+                return;
+              }
+              logger('Watch.onSnapshot', this._requestTag, 'Opened new stream');
+              currentStream = backendStream;
+              currentStream!.on('error', err => {
+                maybeReopenStream(err);
+              });
+              currentStream!.on('end', () => {
+                const err = new GrpcError('Stream ended unexpectedly');
+                err.code = GRPC_STATUS_CODE.UNKNOWN;
+                maybeReopenStream(err);
+              });
+              currentStream!.pipe(stream);
+              currentStream!.resume();
+            })
+            .catch(closeStream);
+        });
     };
 
     /**

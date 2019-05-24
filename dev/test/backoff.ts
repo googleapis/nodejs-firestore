@@ -151,12 +151,12 @@ describe('ExponentialBackoff', () => {
       backoffFactor: 2,
       jitterFactor: 0.1,
     });
-    expect(backoff.getRetryCount()).to.equal(0);
+    expect(backoff.retryCount).to.equal(0);
     await backoff.backoffAndWait().then(nop);
-    expect(backoff.getRetryCount()).to.equal(1);
+    expect(backoff.retryCount).to.equal(1);
     await backoff.backoffAndWait().then(nop);
-    expect(backoff.getRetryCount()).to.equal(2);
+    expect(backoff.retryCount).to.equal(2);
     backoff.reset();
-    expect(backoff.getRetryCount()).to.equal(0);
+    expect(backoff.retryCount).to.equal(0);
   });
 });

@@ -49,6 +49,12 @@ const DEFAULT_BACKOFF_FACTOR = 1.5;
 const DEFAULT_JITTER_FACTOR = 1.0;
 
 /*!
+ * The maximum number of retries that will be attempted by backoff
+ * before stopping all retry attempts.
+ */
+export const MAX_RETRY_ATTEMPTS = 10;
+
+/*!
  * The timeout handler used by `ExponentialBackoff`.
  */
 let delayExecution: (f: () => void, ms: number) => void = setTimeout;
@@ -140,7 +146,7 @@ export class ExponentialBackoff {
    *
    * @private
    */
-  private retryCount = 0;
+  private _retryCount = 0;
 
   /**
    * The backoff delay of the current attempt.
@@ -178,7 +184,7 @@ export class ExponentialBackoff {
    * @private
    */
   reset(): void {
-    this.retryCount = 0;
+    this._retryCount = 0;
     this.currentBaseMs = 0;
   }
 
@@ -200,6 +206,13 @@ export class ExponentialBackoff {
    * @private
    */
   backoffAndWait(): Promise<void> {
+    if (this.retryCount > MAX_RETRY_ATTEMPTS) {
+      return Promise.reject(
+        new Error(
+          'Exceeded maximum number of retries before any response was received.'
+        )
+      );
+    }
     // First schedule using the current base (which may be 0 and should be
     // honored as such).
     const delayWithJitterMs = this.currentBaseMs + this.jitterDelayMs();
@@ -217,14 +230,14 @@ export class ExponentialBackoff {
     this.currentBaseMs *= this.backoffFactor;
     this.currentBaseMs = Math.max(this.currentBaseMs, this.initialDelayMs);
     this.currentBaseMs = Math.min(this.currentBaseMs, this.maxDelayMs);
-    this.retryCount += 1;
+    this._retryCount += 1;
     return new Promise(resolve => {
       delayExecution(resolve, delayWithJitterMs);
     });
   }
 
-  getRetryCount(): number {
-    return this.retryCount;
+  get retryCount(): number {
+    return this._retryCount;
   }
 
   /**

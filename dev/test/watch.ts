@@ -39,17 +39,12 @@ import {
   QueryDocumentSnapshot,
   QuerySnapshot,
 } from '../src';
-import {setTimeoutHandler} from '../src/backoff';
+import {MAX_RETRY_ATTEMPTS, setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
 import {GrpcError} from '../src/types';
-import {DEFAULT_MAX_RETRY_ATTEMPTS} from './../src/watch';
-import {
-  createInstance,
-  InvalidApiUsage,
-  verifyInstance,
-} from './util/helpers';
+import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
 
 import api = google.firestore.v1;
 
@@ -830,25 +825,15 @@ describe('Query watch', () => {
     return watchHelper.runFailedTest(
       collQueryJSON(),
       async () => {
-        let chain = Promise.resolve();
         // Retry for the maximum of retry attempts.
-        for (let i = 0; i < DEFAULT_MAX_RETRY_ATTEMPTS; i++) {
-          chain = chain.then(async () => {
-            streamHelper.destroyStream(err);
-            await streamHelper.awaitReopen();
-          });
+        for (let i = 0; i < MAX_RETRY_ATTEMPTS; i++) {
+          streamHelper.destroyStream(err);
+          await streamHelper.awaitReopen();
         }
         // The next retry should fail with an error.
-        chain
-          .then(() => {
-            streamHelper.destroyStream(err);
-          })
-          .then(() => {
-            return streamHelper.await('error');
-          })
-          .then(() => {
-            return streamHelper.await('close');
-          });
+        streamHelper.destroyStream(err);
+        await streamHelper.await('error');
+        await streamHelper.await('close');
       },
       'Exceeded maximum number of retries before any response was received.'
     );
