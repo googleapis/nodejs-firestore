@@ -835,7 +835,7 @@ describe('Query watch', () => {
         await streamHelper.await('error');
         await streamHelper.await('close');
       },
-      'Exceeded maximum number of retries before any response was received.'
+      'Exceeded maximum number of retries allowed.'
     );
   });
 

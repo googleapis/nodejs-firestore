@@ -429,10 +429,6 @@ abstract class Watch {
     const initStream = () => {
       this._backoff
         .backoffAndWait()
-        .catch(err => {
-          closeStream(err);
-          return Promise.reject(err);
-        })
         .then(async () => {
           if (!isActive) {
             logger(
@@ -476,7 +472,8 @@ abstract class Watch {
               currentStream!.resume();
             })
             .catch(closeStream);
-        });
+        })
+        .catch(closeStream);
     };
 
     /**
