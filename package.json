@@ -35,7 +35,7 @@
     "test:system": "mocha build/system-test --timeout 600000",
     "test:samples": "npm link && cd samples/ && npm link ../ && npm test && cd ../",
     "test:unit": "nyc mocha build/test",
-    "test": "npm run test-only && npm run conformance",
+    "test": "npm run test:unit && npm run test:conformance",
     "lint": "gts check",
     "clean": "gts clean",
     "compile": "tsc -p . && cp -r dev/protos build && cp -r dev/test/fake-certificate.json build/test/fake-certificate.json && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
