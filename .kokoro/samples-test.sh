@@ -40,7 +40,7 @@ if [ -f samples/package.json ]; then
     npm install
     cd ..
 
-    npm run samples-test
+    npm run test:samples
 fi
 
 # codecov combines coverage across integration and unit tests. Include

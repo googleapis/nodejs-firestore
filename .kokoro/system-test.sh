@@ -33,7 +33,7 @@ fi
 
 npm install
 
-npm run system-test
+npm run test:system
 
 # codecov combines coverage across integration and unit tests. Include
 # the logic below for any environment you wish to collect coverage for:

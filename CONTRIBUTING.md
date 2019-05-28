@@ -46,7 +46,7 @@ accept your pull requests.
 
 1.  Run the tests:
 
-        # Run all tests
+        # Run all tests.
         npm test
         
         # Run all unit tests.
