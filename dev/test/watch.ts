@@ -39,7 +39,7 @@ import {
   QueryDocumentSnapshot,
   QuerySnapshot,
 } from '../src';
-import {setTimeoutHandler} from '../src/backoff';
+import {MAX_RETRY_ATTEMPTS, setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
@@ -819,6 +819,26 @@ describe('Query watch', () => {
     });
   });
 
+  it('stops attempts after maximum retry attempts', () => {
+    const err = new GrpcError('GRPC Error');
+    err.code = Number(10 /* ABORTED */);
+    return watchHelper.runFailedTest(
+      collQueryJSON(),
+      async () => {
+        // Retry for the maximum of retry attempts.
+        for (let i = 0; i < MAX_RETRY_ATTEMPTS; i++) {
+          streamHelper.destroyStream(err);
+          await streamHelper.awaitReopen();
+        }
+        // The next retry should fail with an error.
+        streamHelper.destroyStream(err);
+        await streamHelper.await('error');
+        await streamHelper.await('close');
+      },
+      'Exceeded maximum number of retries allowed.'
+    );
+  });
+
   it("doesn't re-open inactive stream", () => {
     // This test uses the normal timeout handler since it relies on the actual
     // backoff window during the the stream recovery. We then use this window to
@@ -854,7 +874,7 @@ describe('Query watch', () => {
       /* PermissionDenied */ 7: false,
       /* ResourceExhausted */ 8: true,
       /* FailedPrecondition */ 9: false,
-      /* Aborted */ 10: false,
+      /* Aborted */ 10: true,
       /* OutOfRange */ 11: false,
       /* Unimplemented */ 12: false,
       /* Internal */ 13: true,

@@ -271,6 +271,7 @@ abstract class Watch {
     }
 
     switch (error.code) {
+      case GRPC_STATUS_CODE.ABORTED:
       case GRPC_STATUS_CODE.CANCELLED:
       case GRPC_STATUS_CODE.UNKNOWN:
       case GRPC_STATUS_CODE.DEADLINE_EXCEEDED:
@@ -426,50 +427,52 @@ abstract class Watch {
      * Initializes a new stream to the backend with backoff.
      */
     const initStream = () => {
-      this._backoff.backoffAndWait().then(async () => {
-        if (!isActive) {
-          logger(
-            'Watch.onSnapshot',
-            this._requestTag,
-            'Not initializing inactive stream'
-          );
-          return;
-        }
+      this._backoff
+        .backoffAndWait()
+        .then(async () => {
+          if (!isActive) {
+            logger(
+              'Watch.onSnapshot',
+              this._requestTag,
+              'Not initializing inactive stream'
+            );
+            return;
+          }
 
-        await this._firestore.initializeIfNeeded();
+          await this._firestore.initializeIfNeeded();
 
-        request.database = this._firestore.formattedName;
-        request.addTarget = this.getTarget(resumeToken);
+          request.database = this._firestore.formattedName;
+          request.addTarget = this.getTarget(resumeToken);
 
-        // Note that we need to call the internal _listen API to pass additional
-        // header values in readWriteStream.
-        this._firestore
-          .readWriteStream('listen', request, this._requestTag, true)
-          .then(backendStream => {
-            if (!isActive) {
-              logger(
-                'Watch.onSnapshot',
-                this._requestTag,
-                'Closing inactive stream'
-              );
-              backendStream.end();
-              return;
-            }
-            logger('Watch.onSnapshot', this._requestTag, 'Opened new stream');
-            currentStream = backendStream;
-            currentStream!.on('error', err => {
-              maybeReopenStream(err);
+          // Note that we need to call the internal _listen API to pass additional
+          // header values in readWriteStream.
+          return this._firestore
+            .readWriteStream('listen', request, this._requestTag, true)
+            .then(backendStream => {
+              if (!isActive) {
+                logger(
+                  'Watch.onSnapshot',
+                  this._requestTag,
+                  'Closing inactive stream'
+                );
+                backendStream.end();
+                return;
+              }
+              logger('Watch.onSnapshot', this._requestTag, 'Opened new stream');
+              currentStream = backendStream;
+              currentStream!.on('error', err => {
+                maybeReopenStream(err);
+              });
+              currentStream!.on('end', () => {
+                const err = new GrpcError('Stream ended unexpectedly');
+                err.code = GRPC_STATUS_CODE.UNKNOWN;
+                maybeReopenStream(err);
+              });
+              currentStream!.pipe(stream);
+              currentStream!.resume();
             });
-            currentStream!.on('end', () => {
-              const err = new GrpcError('Stream ended unexpectedly');
-              err.code = GRPC_STATUS_CODE.UNKNOWN;
-              maybeReopenStream(err);
-            });
-            currentStream!.pipe(stream);
-            currentStream!.resume();
-          })
-          .catch(closeStream);
-      });
+        })
+        .catch(closeStream);
     };
 
     /**
