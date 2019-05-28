@@ -446,7 +446,7 @@ abstract class Watch {
 
           // Note that we need to call the internal _listen API to pass additional
           // header values in readWriteStream.
-          this._firestore
+          return this._firestore
             .readWriteStream('listen', request, this._requestTag, true)
             .then(backendStream => {
               if (!isActive) {
@@ -470,8 +470,7 @@ abstract class Watch {
               });
               currentStream!.pipe(stream);
               currentStream!.resume();
-            })
-            .catch(closeStream);
+            });
         })
         .catch(closeStream);
     };
