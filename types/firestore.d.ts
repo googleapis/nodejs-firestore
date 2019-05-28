@@ -1113,14 +1113,22 @@ declare namespace FirebaseFirestore {
     listDocuments(): Promise<DocumentReference[]>;
 
     /**
+     * Get a `DocumentReference` for a randomly-named document within this
+     * collection. An automatically-generated unique ID will be used as the
+     * document ID.
+     *
+     * @return The `DocumentReference` instance.
+     */
+    doc(): DocumentReference;
+
+    /**
      * Get a `DocumentReference` for the document within the collection at the
-     * specified path. If no path is specified, an automatically-generated
-     * unique ID will be used for the returned DocumentReference.
+     * specified path.
      *
      * @param documentPath A slash-separated path to a document.
      * @return The `DocumentReference` instance.
      */
-    doc(documentPath?: string): DocumentReference;
+    doc(documentPath: string): DocumentReference;
 
     /**
      * Add a new document to this collection with the specified data, assigning
