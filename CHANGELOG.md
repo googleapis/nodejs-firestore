@@ -4,6 +4,19 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [2.1.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.0.0...v2.1.0) (2019-05-28)
+
+
+### Bug Fixes
+
+* Add overloads for doc() and doc(id:string) ([#662](https://www.github.com/googleapis/nodejs-firestore/issues/662)) ([cb189e9](https://www.github.com/googleapis/nodejs-firestore/commit/cb189e9))
+* retry on abort and limit retry count to 10 ([#655](https://www.github.com/googleapis/nodejs-firestore/issues/655)) ([9e97656](https://www.github.com/googleapis/nodejs-firestore/commit/9e97656))
+
+
+### Features
+
+* Support listDocuments()/listCollections() via the Firestore Emulator ([#654](https://www.github.com/googleapis/nodejs-firestore/issues/654)) ([eaf5a4e](https://www.github.com/googleapis/nodejs-firestore/commit/eaf5a4e))
+
 ## [2.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v1.3.0...v2.0.0) (2019-05-20)
 
 
