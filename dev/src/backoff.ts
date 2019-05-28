@@ -49,6 +49,12 @@ const DEFAULT_BACKOFF_FACTOR = 1.5;
 const DEFAULT_JITTER_FACTOR = 1.0;
 
 /*!
+ * The maximum number of retries that will be attempted by backoff
+ * before stopping all retry attempts.
+ */
+export const MAX_RETRY_ATTEMPTS = 10;
+
+/*!
  * The timeout handler used by `ExponentialBackoff`.
  */
 let delayExecution: (f: () => void, ms: number) => void = setTimeout;
@@ -136,6 +142,13 @@ export class ExponentialBackoff {
   private readonly jitterFactor: number;
 
   /**
+   * The number of retries that has been attempted.
+   *
+   * @private
+   */
+  private _retryCount = 0;
+
+  /**
    * The backoff delay of the current attempt.
    *
    * @private
@@ -162,7 +175,7 @@ export class ExponentialBackoff {
   }
 
   /**
-   * Resets the backoff delay.
+   * Resets the backoff delay and retry count.
    *
    * The very next backoffAndWait() will have no delay. If it is called again
    * (i.e. due to an error), initialDelayMs (plus jitter) will be used, and
@@ -171,6 +184,7 @@ export class ExponentialBackoff {
    * @private
    */
   reset(): void {
+    this._retryCount = 0;
     this.currentBaseMs = 0;
   }
 
@@ -192,6 +206,11 @@ export class ExponentialBackoff {
    * @private
    */
   backoffAndWait(): Promise<void> {
+    if (this.retryCount > MAX_RETRY_ATTEMPTS) {
+      return Promise.reject(
+        new Error('Exceeded maximum number of retries allowed.')
+      );
+    }
     // First schedule using the current base (which may be 0 and should be
     // honored as such).
     const delayWithJitterMs = this.currentBaseMs + this.jitterDelayMs();
@@ -209,10 +228,15 @@ export class ExponentialBackoff {
     this.currentBaseMs *= this.backoffFactor;
     this.currentBaseMs = Math.max(this.currentBaseMs, this.initialDelayMs);
     this.currentBaseMs = Math.min(this.currentBaseMs, this.maxDelayMs);
-
+    this._retryCount += 1;
     return new Promise(resolve => {
       delayExecution(resolve, delayWithJitterMs);
     });
+  }
+
+  // Visible for testing.
+  get retryCount(): number {
+    return this._retryCount;
   }
 
   /**

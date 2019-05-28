@@ -144,4 +144,19 @@ describe('ExponentialBackoff', () => {
     await backoff.backoffAndWait().then(nop);
     assertDelayBetween(36, 44);
   });
+
+  it('tracks the number of retry attempts', async () => {
+    const backoff = new ExponentialBackoff({
+      initialDelayMs: 10,
+      backoffFactor: 2,
+      jitterFactor: 0.1,
+    });
+    expect(backoff.retryCount).to.equal(0);
+    await backoff.backoffAndWait().then(nop);
+    expect(backoff.retryCount).to.equal(1);
+    await backoff.backoffAndWait().then(nop);
+    expect(backoff.retryCount).to.equal(2);
+    backoff.reset();
+    expect(backoff.retryCount).to.equal(0);
+  });
 });
