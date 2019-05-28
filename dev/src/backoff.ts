@@ -208,9 +208,7 @@ export class ExponentialBackoff {
   backoffAndWait(): Promise<void> {
     if (this.retryCount > MAX_RETRY_ATTEMPTS) {
       return Promise.reject(
-        new Error(
-          'Exceeded maximum number of retries allowed.'
-        )
+        new Error('Exceeded maximum number of retries allowed.')
       );
     }
     // First schedule using the current base (which may be 0 and should be
