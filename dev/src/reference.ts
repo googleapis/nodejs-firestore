@@ -2055,6 +2055,8 @@ export class CollectionReference extends Query {
     });
   }
 
+  doc(): DocumentReference;
+  doc(documentPath: string): DocumentReference;
   /**
    * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path. If no path is specified, an
