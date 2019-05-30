@@ -4,7 +4,8 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
-## v2.1.1
+## v2.1.1(https://www.github.com/googleapis/nodejs-firestore/compare/v2.1.0...v2.1.1) (2019-05-30)
+
 
 ### Dependencies
 - deps: Pin @gprc/grpc-js to 0.4.0 ([#668](https://github.com/googleapis/nodejs-firestore/pull/668))
