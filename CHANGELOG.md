@@ -4,6 +4,17 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## vp
+
+05-30-2019 08:26 PDT
+
+### Dependencies
+- deps: Pin @gprc/grpc-js to 0.4.0 ([#668](https://github.com/googleapis/nodejs-firestore/pull/668))
+
+### Internal / Testing Changes
+- build: remove verbose logging from test scripts ([#665](https://github.com/googleapis/nodejs-firestore/pull/665))
+- build: ignore proto files in test coverage ([#664](https://github.com/googleapis/nodejs-firestore/pull/664))
+
 ## [2.1.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.0.0...v2.1.0) (2019-05-28)
 
 
