@@ -171,6 +171,28 @@ export class FieldValue {
    *
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `FieldValue` is equal to the provided value.
+   *
+   * @example
+   * let fieldValues = [
+   *   Firestore.FieldValue.increment(-1.0),
+   *   Firestore.FieldValue.increment(-1),
+   *   Firestore.FieldValue.increment(-0.0),
+   *   Firestore.FieldValue.increment(-0),
+   *   Firestore.FieldValue.increment(0),
+   *   Firestore.FieldValue.increment(0.0),
+   *   Firestore.FieldValue.increment(1),
+   *   Firestore.FieldValue.increment(1.0)
+   * ];
+   *
+   * let equal = 0;
+   * for (let i = 0; i < fieldValues.length; ++i) {
+   *   for (let j = i + 1; j < fieldValues.length; ++j) {
+   *     if (fieldValues[i].isEqual(fieldValues[j])) {
+   *       ++equal;
+   *     }
+   *   }
+   * }
+   * console.log(`Found ${equal} equalities.`);
    */
   isEqual(other: FieldValue): boolean {
     return this === other;
