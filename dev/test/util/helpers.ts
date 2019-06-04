@@ -353,10 +353,7 @@ export function writeResult(count: number): api.IWriteResponse {
   return response;
 }
 
-export function requestEquals(
-  actual: {[k: string]: unknown},
-  expected: {[k: string]: unknown}
-): void {
+export function requestEquals(actual: object, expected: object): void {
   // 'extend' removes undefined fields in the request object. The backend
   // ignores these fields, but we need to manually strip them before we compare
   // the expected and the actual request.

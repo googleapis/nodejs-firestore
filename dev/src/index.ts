@@ -863,8 +863,8 @@ export class Firestore {
     requestTag: string,
     transactionId?: Uint8Array
   ): Promise<DocumentSnapshot[]> {
-    const requestedDocuments = new Set();
-    const retrievedDocuments = new Map();
+    const requestedDocuments = new Set<string>();
+    const retrievedDocuments = new Map<string, DocumentSnapshot>();
 
     for (const docRef of docRefs) {
       requestedDocuments.add(docRef.formattedName);
@@ -947,12 +947,13 @@ export class Firestore {
               const orderedDocuments: DocumentSnapshot[] = [];
               for (const docRef of docRefs) {
                 const document = retrievedDocuments.get(docRef.path);
-                if (document === undefined) {
+                if (document !== undefined) {
+                  orderedDocuments.push(document);
+                } else {
                   reject(
                     new Error(`Did not receive document for "${docRef.path}".`)
                   );
                 }
-                orderedDocuments.push(document);
               }
               resolve(orderedDocuments);
             });
