@@ -312,7 +312,8 @@ export class Transaction {
     this._writeBatch.update.apply(this._writeBatch, [
       documentRef,
       dataOrField,
-    ].concat(preconditionOrValues) as [DocumentReference, string]);
+      ...preconditionOrValues,
+    ]);
     return this;
   }
 

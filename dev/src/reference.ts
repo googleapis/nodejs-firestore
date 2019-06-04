@@ -429,10 +429,7 @@ export class DocumentReference implements Serializable {
 
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch.update
-      .apply(writeBatch, [this, dataOrField].concat(preconditionOrValues) as [
-        DocumentReference,
-        string
-      ])
+      .apply(writeBatch, [this, dataOrField, ...preconditionOrValues])
       .commit()
       .then(([writeResult]) => writeResult);
   }

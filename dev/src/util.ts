@@ -68,7 +68,7 @@ export function requestTag(): string {
  *
  * @private
  */
-export function isObject(value: unknown): value is object {
+export function isObject(value: unknown): value is {[k: string]: unknown} {
   return Object.prototype.toString.call(value) === '[object Object]';
 }
 
