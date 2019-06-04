@@ -162,7 +162,9 @@ describe('serialize document', () => {
 
     expect(() => {
       class Foo {}
-      firestore.doc('collectionId/documentId').set(new Foo());
+      firestore
+        .doc('collectionId/documentId')
+        .set(new Foo() as InvalidApiUsage);
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
     );
@@ -652,7 +654,6 @@ describe('get document', () => {
               mapValue: {
                 fields: {
                   bar: {
-                    valueType: 'stringValue',
                     stringValue: 'foobar',
                   },
                 },
@@ -1221,7 +1222,7 @@ describe('set document', () => {
 
   it("doesn't accept arrays", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set([42]);
+      firestore.doc('collectionId/documentId').set([42] as InvalidApiUsage);
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
     );
@@ -1345,7 +1346,7 @@ describe('create document', () => {
 
   it("doesn't accept arrays", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').create([42]);
+      firestore.doc('collectionId/documentId').create([42] as InvalidApiUsage);
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
     );
@@ -1923,7 +1924,7 @@ describe('update document', () => {
 
   it("doesn't accept arrays", () => {
     expect(() =>
-      firestore.doc('collectionId/documentId').update([42])
+      firestore.doc('collectionId/documentId').update([42] as InvalidApiUsage)
     ).to.throw(
       'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.'
     );

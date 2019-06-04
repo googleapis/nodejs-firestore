@@ -151,12 +151,11 @@ export class Serializer {
       };
     }
 
-    if (
-      isObject(val) &&
-      'toProto' in val &&
-      typeof (val as Serializable).toProto === 'function'
-    ) {
-      return (val as Serializable).toProto();
+    if (isObject(val)) {
+      const toProto = val['toProto'];
+      if (typeof toProto === 'function') {
+        return toProto.bind(val)();
+      }
     }
 
     if (val instanceof Array) {
