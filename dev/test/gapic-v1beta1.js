@@ -24,6 +24,22 @@ const error = new Error();
 error.code = FAKE_STATUS_CODE;
 
 describe('FirestoreClient', () => {
+  it('has servicePath', () => {
+    const servicePath = firestoreModule.v1beta1.FirestoreClient.servicePath;
+    assert(servicePath);
+  });
+
+  it('has apiEndpoint', () => {
+    const apiEndpoint = firestoreModule.v1beta1.FirestoreClient.apiEndpoint;
+    assert(apiEndpoint);
+  });
+
+  it('has port', () => {
+    const port = firestoreModule.v1beta1.FirestoreClient.port;
+    assert(port);
+    assert(typeof port === 'number');
+  });
+
   describe('getDocument', () => {
     it('invokes getDocument without error', done => {
       const client = new firestoreModule.v1beta1.FirestoreClient({
