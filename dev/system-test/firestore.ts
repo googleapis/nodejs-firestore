@@ -1405,6 +1405,19 @@ describe('Query class', () => {
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
   });
 
+  it('can query large collections', async () => {
+    // @grpc/grpc-js v0.4.1 failed to deliver the full set of query results for
+    // larger collections (https://github.com/grpc/grpc-node/issues/895);
+    const batch = firestore.batch();
+    for (let i = 0; i < 100; ++i) {
+      batch.create(randomCol.doc(), {});
+    }
+    await batch.commit();
+
+    const snapshot = await randomCol.get();
+    expect(snapshot.size).to.equal(100);
+  });
+
   describe('watch', () => {
     interface ExpectedChange {
       type: string;
