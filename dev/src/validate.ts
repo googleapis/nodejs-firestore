@@ -159,7 +159,6 @@ export function validateString(
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  * @param options Options that specify whether the host can be omitted.
- * whether it can contain a port.
  */
 export function validateHost(
   arg: string | number,

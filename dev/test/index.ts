@@ -447,7 +447,7 @@ describe('instantiation', () => {
 
     expect(() => {
       new Firestore.Firestore({host: 'foo', servicePath: 'foo'});
-    }).to.throw('Cannot set both "settings.hos" and "settings.servicePath".');
+    }).to.throw('Cannot set both "settings.host" and "settings.servicePath".');
   });
 
   it('uses project id from constructor', () => {

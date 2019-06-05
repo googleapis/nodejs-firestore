@@ -449,7 +449,7 @@ export class Firestore {
       validateHost('settings.host', settings.host);
       if (settings.servicePath !== undefined) {
         throw new Error(
-          'Cannot set both "settings.hos" and "settings.servicePath".'
+          'Cannot set both "settings.host" and "settings.servicePath".'
         );
       }
       if (settings.apiEndpoint !== undefined) {
