@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 // Untyped Number alias we can use to check for ES6 methods / properties.
 // tslint:disable-next-line:no-any variable-name
 const NumberAsAny = Number as any;
