@@ -378,6 +378,7 @@ describe('instantiation', () => {
       'foobar/foobaz',
       'foobar/?foo',
       'foo@foobar',
+      'foo:80:81',
     ];
     for (const value of invalidValues) {
       expect(() => {
@@ -407,6 +408,7 @@ describe('instantiation', () => {
         'foobar/foobaz',
         'foobar/?foo',
         'foo@foobar',
+        'foo:80:81',
       ];
       for (const value of invalidValues) {
         expect(() => {
@@ -498,6 +500,19 @@ describe('instantiation', () => {
       return expect(
         firestore.collection('foo').add({})
       ).to.eventually.be.rejectedWith('Injected Error');
+    });
+  });
+
+  it('can instantiate client with ssl:false', async () => {
+    return createInstance(
+      {
+        getProjectId: callback => {
+          callback(null, 'foo');
+        },
+      },
+      {ssl: false}
+    ).then(async firestore => {
+      await firestore.initializeIfNeeded();
     });
   });
 
