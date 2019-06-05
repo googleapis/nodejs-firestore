@@ -506,9 +506,9 @@ describe('instantiation', () => {
   it('can instantiate client with ssl:false', async () => {
     const firestore = new Firestore.Firestore({
       ssl: false,
-      projectId: undefined,
+      projectId: 'foo',
     });
-    await firestore.initializeIfNeeded();
+    await firestore['_clientPool'].run(() => Promise.resolve());
   });
 
   it('exports all types', () => {
