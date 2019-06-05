@@ -40,6 +40,11 @@ describe('FirestoreClient', () => {
     assert(typeof port === 'number');
   });
 
+  it('should create a client with no options', () => {
+    const client = new firestoreModule.v1beta1.FirestoreClient();
+    assert(client);
+  });
+
   describe('getDocument', () => {
     it('invokes getDocument without error', done => {
       const client = new firestoreModule.v1beta1.FirestoreClient({
