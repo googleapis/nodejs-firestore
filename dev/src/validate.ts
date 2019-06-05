@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {URL} from 'url';
 import {FieldPath} from './path';
 import {isFunction, isObject} from './util';
 
@@ -147,6 +148,40 @@ export function validateString(
   if (!validateOptional(value, options)) {
     if (typeof value !== 'string') {
       throw new Error(invalidArgumentMessage(arg, 'string'));
+    }
+  }
+}
+
+/**
+ * Validates that 'value' is a host.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ * @param options Options that specify whether the host can be omitted.
+ * whether it can contain a port.
+ */
+export function validateHost(
+  arg: string | number,
+  value: unknown,
+  options?: RequiredArgumentOptions
+): void {
+  if (!validateOptional(value, options)) {
+    validateString(arg, value);
+    const urlString = `http://${value}/`;
+    let parsed;
+    try {
+      parsed = new URL(urlString);
+    } catch (e) {
+      throw new Error(invalidArgumentMessage(arg, 'host'));
+    }
+
+    if (
+      parsed.search !== '' ||
+      parsed.pathname !== '/' ||
+      parsed.username !== ''
+    ) {
+      throw new Error(invalidArgumentMessage(arg, 'host'));
     }
   }
 }

@@ -17,6 +17,7 @@
 import * as bun from 'bun';
 import {CallOptions} from 'google-gax';
 import * as through2 from 'through2';
+import {URL} from 'url';
 
 import {google} from '../protos/firestore_proto_api';
 import {fieldsFromJson, timestampFromJson} from './convert';
@@ -50,6 +51,7 @@ import {Deferred, requestTag} from './util';
 import {
   validateBoolean,
   validateFunction,
+  validateHost,
   validateInteger,
   validateMinNumberOfArguments,
   validateObject,
@@ -338,7 +340,29 @@ export class Firestore {
       libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
     }
 
-    this.validateAndApplySettings(Object.assign({}, settings, libraryHeader));
+    if (process.env.FIRESTORE_EMULATOR_HOST) {
+      validateHost(
+        'FIRESTORE_EMULATOR_HOST',
+        process.env.FIRESTORE_EMULATOR_HOST
+      );
+
+      const url = new URL('http://' + process.env.FIRESTORE_EMULATOR_HOST);
+      const host = url.hostname;
+      const port = url.port !== '' ? Number(url.port) : undefined;
+
+      this.validateAndApplySettings({
+        host,
+        port,
+        ssl: false,
+        customHeaders: {
+          Authorization: 'Bearer owner',
+        },
+        ...settings,
+        ...libraryHeader,
+      });
+    } else {
+      this.validateAndApplySettings({...settings, ...libraryHeader});
+    }
 
     // GCF currently tears down idle connections after two minutes. Requests
     // that are issued after this period may fail. On GCF, we therefore issue
@@ -357,7 +381,16 @@ export class Firestore {
     this._clientPool = new ClientPool(
       MAX_CONCURRENT_REQUESTS_PER_CLIENT,
       () => {
-        const client = new module.exports.v1(this._settings);
+        let client: GapicClient;
+
+        if (this._settings.ssl === false) {
+          const grpc = require('@grpc/grpc-js');
+          const sslCreds = grpc.credentials.createInsecure();
+          client = new module.exports.v1({sslCreds, ...this._settings});
+        } else {
+          client = new module.exports.v1(this._settings);
+        }
+
         logger('Firestore', null, 'Initialized Firestore GAPIC Client');
         return client;
       }
@@ -394,7 +427,7 @@ export class Firestore {
       );
     }
 
-    const mergedSettings = Object.assign({}, this._settings, settings);
+    const mergedSettings = {...this._settings, ...settings};
     this.validateAndApplySettings(mergedSettings);
     this._settingsFrozen = true;
   }
@@ -407,9 +440,28 @@ export class Firestore {
       {optional: true}
     );
 
-    if (settings && settings.projectId) {
+    if (settings.projectId !== undefined) {
       validateString('settings.projectId', settings.projectId);
       this._projectId = settings.projectId;
+    }
+
+    if (settings.host !== undefined) {
+      validateHost('settings.host', settings.host);
+      if (settings.servicePath !== undefined) {
+        throw new Error(
+          'Cannot set both "settings.hos" and "settings.servicePath".'
+        );
+      }
+      if (settings.apiEndpoint !== undefined) {
+        throw new Error(
+          'Cannot set both "settings.host" and "settings.apiEndpoint".'
+        );
+      }
+      settings.servicePath = settings.host;
+    }
+
+    if (settings.ssl !== undefined) {
+      validateBoolean('settings.ssl', settings.ssl);
     }
 
     this._settings = settings;

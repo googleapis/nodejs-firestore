@@ -52,6 +52,12 @@ declare namespace FirebaseFirestore {
      */
     projectId?: string;
 
+    /** The hostname to connect to. */
+    host?: string;
+
+    /** The port to connect to. */
+    port?: number;
+
     /**
      * Local file containing the Service Account credentials as downloaded from
      * the Google Developers Console. Can  be omitted in environments that
@@ -91,6 +97,9 @@ declare namespace FirebaseFirestore {
      * `timestampsInSnapshots` setting.
      */
     timestampsInSnapshots?: boolean;
+
+    /** Whether to use SSL when connecting. */
+    ssl?: boolean;
 
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }

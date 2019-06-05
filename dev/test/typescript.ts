@@ -42,6 +42,8 @@ xdescribe('firestore.d.ts', () => {
     keyFilename: 'foo',
     projectId: 'foo',
     timestampsInSnapshots: true,
+    host: 'localhost',
+    ssl: false,
     otherOption: 'foo',
   } as Settings);
 
