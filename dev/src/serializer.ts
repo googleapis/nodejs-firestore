@@ -46,7 +46,7 @@ export interface Serializable {
 }
 
 /**
- * Serializer that is used to convert between JavaScripts types and their
+ * Serializer that is used to convert between JavaScript types and their
  * Firestore Protobuf representation.
  *
  * @private
@@ -70,7 +70,7 @@ export class Serializer {
   }
 
   /**
-   * Encodes a JavaScrip object into the Firestore 'Fields' representation.
+   * Encodes a JavaScript object into the Firestore 'Fields' representation.
    *
    * @private
    * @param obj The object to encode.
@@ -116,17 +116,16 @@ export class Serializer {
       };
     }
 
-    if (typeof val === 'number' && !isNaN(val) && val % 1 === 0) {
-      return {
-        integerValue: val as number,
-      };
-    }
-
-    // Integers are handled above, the remaining numbers are treated as doubles
     if (typeof val === 'number') {
-      return {
-        doubleValue: val as number,
-      };
+      if (Number.isSafeInteger(val)) {
+        return {
+          integerValue: val as number,
+        };
+      } else {
+        return {
+          doubleValue: val as number,
+        };
+      }
     }
 
     if (val instanceof Date) {
