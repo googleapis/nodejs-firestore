@@ -24,7 +24,7 @@ import {DocumentReference, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, DocumentData, ValidationOptions} from './types';
-import {isEmpty, isObject, isSafeInteger} from './util';
+import {isEmpty, isObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
@@ -117,7 +117,7 @@ export class Serializer {
     }
 
     if (typeof val === 'number') {
-      if (isSafeInteger(val)) {
+      if (Number.isSafeInteger(val)) {
         return {
           integerValue: val as number,
         };

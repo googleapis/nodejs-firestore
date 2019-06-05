@@ -176,7 +176,7 @@ describe('serialize document', () => {
         requestEquals(
           request,
           set({
-            document: document('documentId', 'someNumber', {
+            document: document('documentId', 'largeNumber', {
               doubleValue: 18014398509481984,
             }),
           })
@@ -187,7 +187,8 @@ describe('serialize document', () => {
 
     return createInstance(overrides).then(firestore => {
       return firestore.doc('collectionId/documentId').set({
-        someNumber: 18014398509481984,
+        // Set to 2^54, which should be stored as a double.
+        largeNumber: 18014398509481984,
       });
     });
   });

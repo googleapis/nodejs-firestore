@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-// Untyped Number alias we can use to check for ES6 methods / properties.
-// tslint:disable-next-line:no-any variable-name
-const NumberAsAny = Number as any;
-
-/**
- * Minimum safe integer in Javascript because of floating point precision.
- * Added to not rely on ES6 features.
- */
-export let MIN_SAFE_INTEGER: number =
-  NumberAsAny.MIN_SAFE_INTEGER || -(Math.pow(2, 53) - 1);
-
-/**
- * Maximum safe integer in Javascript because of floating point precision.
- * Added to not rely on ES6 features.
- */
-export let MAX_SAFE_INTEGER: number =
-  NumberAsAny.MAX_SAFE_INTEGER || Math.pow(2, 53) - 1;
-
 /** A Promise implementation that supports deferred resolution. */
 export class Deferred<R> {
   promise: Promise<R>;
@@ -106,29 +88,4 @@ export function isEmpty(value: {}): boolean {
  */
 export function isFunction(value: unknown): boolean {
   return typeof value === 'function';
-}
-
-/**
- * Returns whether an number is an integer, uses native implementation if
- * available.
- * Added to not rely on ES6 features.
- * @param value The value to test for being an integer
- */
-export let isInteger: (value: unknown) => boolean =
-  NumberAsAny.isInteger ||
-  (value =>
-    typeof value === 'number' &&
-    isFinite(value) &&
-    Math.floor(value) === value);
-
-/**
- * Returns whether a value is an integer and in the safe integer range
- * @param value The value to test for being an integer and in the safe range
- */
-export function isSafeInteger(value: unknown): boolean {
-  return (
-    isInteger(value) &&
-    (value as number) <= MAX_SAFE_INTEGER &&
-    (value as number) >= MIN_SAFE_INTEGER
-  );
 }
