@@ -170,7 +170,29 @@ describe('serialize document', () => {
     );
   });
 
-  it('serializes date before 1970', () => {
+  it.only('serializes large numbers into doubles', () => {
+    const overrides: ApiOverride = {
+      commit: (request, options, callback) => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'someNumber', {
+                doubleValue: 18014398509481984,
+            }),
+          })
+        );
+        callback(null, writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+          someNumber: 18014398509481984,
+        });
+    });
+  });
+
+  it.only('serializes date before 1970', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
         requestEquals(
