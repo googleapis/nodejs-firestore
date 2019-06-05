@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {expect} from 'chai';
+import {expect, use} from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 import * as gax from 'google-gax';
 
@@ -37,6 +38,8 @@ import {
 } from './util/helpers';
 
 import api = google.firestore.v1;
+
+use(chaiAsPromised);
 
 const {grpc} = new gax.GrpcClient({});
 
@@ -324,10 +327,8 @@ describe('instantiation', () => {
 
   it('validates project ID is string', () => {
     expect(() => {
-      const settings = Object.assign({}, DEFAULT_SETTINGS, {
-        projectId: 1337,
-      });
-      new Firestore.Firestore(settings);
+      const settings = {...DEFAULT_SETTINGS, projectId: 1337};
+      new Firestore.Firestore(settings as InvalidApiUsage);
     }).to.throw(
       'Value for argument "settings.projectId" is not a valid string.'
     );
@@ -343,10 +344,8 @@ describe('instantiation', () => {
 
   it('validates timestampsInSnapshots is boolean', () => {
     expect(() => {
-      const settings = Object.assign({}, DEFAULT_SETTINGS, {
-        timestampsInSnapshots: 1337,
-      });
-      new Firestore.Firestore(settings);
+      const settings = {...DEFAULT_SETTINGS, timestampsInSnapshots: 1337};
+      new Firestore.Firestore(settings as InvalidApiUsage);
     }).to.throw(
       'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.'
     );
@@ -358,6 +357,97 @@ describe('instantiation', () => {
     }).to.throw(
       'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.'
     );
+  });
+
+  it('validates ssl is a boolean', () => {
+    const invalidValues = ['true', 1337];
+
+    for (const value of invalidValues) {
+      expect(() => {
+        const settings = {...DEFAULT_SETTINGS, ssl: value};
+        new Firestore.Firestore(settings as InvalidApiUsage);
+      }).to.throw('Value for argument "settings.ssl" is not a valid boolean.');
+    }
+
+    new Firestore.Firestore({ssl: true});
+  });
+
+  it('validates host is a valid host', () => {
+    const invalidValues = [
+      'foo://bar',
+      'foobar/foobaz',
+      'foobar/?foo',
+      'foo@foobar',
+      'foo:80:81',
+    ];
+    for (const value of invalidValues) {
+      expect(() => {
+        new Firestore.Firestore({host: value});
+      }).to.throw('Value for argument "settings.host" is not a valid host.');
+    }
+
+    const validValues = [
+      '127.0.0.1',
+      '127.0.0.1:8080',
+      '[::1]',
+      '[::1]:8080',
+      'foo',
+      'foo:8080',
+    ];
+    for (const value of validValues) {
+      new Firestore.Firestore({host: value});
+    }
+  });
+
+  it('validates FIRESTORE_EMULATOR_HOST is a valid host', () => {
+    const oldValue = process.env.FIRESTORE_EMULATOR_HOST;
+
+    try {
+      const invalidValues = [
+        'foo://bar',
+        'foobar/foobaz',
+        'foobar/?foo',
+        'foo@foobar',
+        'foo:80:81',
+      ];
+      for (const value of invalidValues) {
+        expect(() => {
+          process.env.FIRESTORE_EMULATOR_HOST = value;
+          new Firestore.Firestore();
+        }).to.throw(
+          'Value for argument "FIRESTORE_EMULATOR_HOST" is not a valid host.'
+        );
+      }
+
+      const validValues = [
+        '127.0.0.1',
+        '127.0.0.1:8080',
+        '[::1]',
+        '[::1]:8080',
+        'foo',
+        'foo:8080',
+      ];
+      for (const value of validValues) {
+        process.env.FIRESTORE_EMULATOR_HOST = value;
+        new Firestore.Firestore();
+      }
+    } finally {
+      if (oldValue) {
+        process.env.FIRESTORE_EMULATOR_HOST = oldValue;
+      } else {
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+      }
+    }
+  });
+
+  it('validates only one endpoint is provided', () => {
+    expect(() => {
+      new Firestore.Firestore({host: 'foo', apiEndpoint: 'foo'});
+    }).to.throw('Cannot set both "settings.host" and "settings.apiEndpoint".');
+
+    expect(() => {
+      new Firestore.Firestore({host: 'foo', servicePath: 'foo'});
+    }).to.throw('Cannot set both "settings.host" and "settings.servicePath".');
   });
 
   it('uses project id from constructor', () => {
@@ -411,6 +501,14 @@ describe('instantiation', () => {
         firestore.collection('foo').add({})
       ).to.eventually.be.rejectedWith('Injected Error');
     });
+  });
+
+  it('can instantiate client with ssl:false', async () => {
+    const firestore = new Firestore.Firestore({
+      ssl: false,
+      projectId: 'foo',
+    });
+    await firestore['_clientPool'].run(() => Promise.resolve());
   });
 
   it('exports all types', () => {
