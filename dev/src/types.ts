@@ -50,12 +50,24 @@ export interface Settings {
    */
   projectId?: string;
 
+  /** The host to connect to. */
+  host?: string;
+
   /**
    * Local file containing the Service Account credentials. Can be omitted
    * in environments that support `Application Default Credentials`
    * {@see https://cloud.google.com/docs/authentication}
    */
   keyFilename?: string;
+
+  /**
+   * The 'client_email' and 'private_key' properties of the service account
+   * to use with your Firestore project. Can be omitted in environments that
+   * support {@link https://cloud.google.com/docs/authentication Application
+   * Default Credentials}. If your credentials are stored in a JSON file, you
+   * can specify a `keyFilename` instead.
+   */
+  credentials?: {client_email?: string; private_key?: string};
 
   /**
    * Specifies whether to use `Timestamp` objects for timestamp fields in
@@ -77,6 +89,9 @@ export interface Settings {
    * `timestampsInSnapshots` setting.
    */
   timestampsInSnapshots?: boolean;
+
+  /** Whether to use SSL when connecting. */
+  ssl?: boolean;
 
   // tslint:disable-next-line:no-any
   [key: string]: any; // Accept other properties, such as GRPC settings.
