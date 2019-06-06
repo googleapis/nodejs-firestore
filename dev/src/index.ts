@@ -315,6 +315,8 @@ export class Firestore {
    * support {@link https://cloud.google.com/docs/authentication Application
    * Default Credentials}. If your credentials are stored in a JSON file, you
    * can specify a `keyFilename` instead.
+   * @param {string=} settings.host The host to connect to.
+   * @param {boolean=} settings.ssl Whether to use SSL when connecting.
    * @param {boolean=} settings.timestampsInSnapshots Specifies whether to use
    * `Timestamp` objects for timestamp fields in `DocumentSnapshot`s. This is
    * enabled by default and should not be disabled.
