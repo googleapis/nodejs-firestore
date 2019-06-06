@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-/** A Promise implementation that supports deferred resolution. */
+/**
+ * A Promise implementation that supports deferred resolution.
+ * @private
+ */
 export class Deferred<R> {
   promise: Promise<R>;
   resolve: (value?: R | Promise<R>) => void = () => {};

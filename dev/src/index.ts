@@ -315,6 +315,8 @@ export class Firestore {
    * support {@link https://cloud.google.com/docs/authentication Application
    * Default Credentials}. If your credentials are stored in a JSON file, you
    * can specify a `keyFilename` instead.
+   * @param {string=} settings.host The host to connect to.
+   * @param {boolean=} settings.ssl Whether to use SSL when connecting.
    * @param {boolean=} settings.timestampsInSnapshots Specifies whether to use
    * `Timestamp` objects for timestamp fields in `DocumentSnapshot`s. This is
    * enabled by default and should not be disabled.
@@ -346,13 +348,8 @@ export class Firestore {
         process.env.FIRESTORE_EMULATOR_HOST
       );
 
-      const url = new URL('http://' + process.env.FIRESTORE_EMULATOR_HOST);
-      const host = url.hostname;
-      const port = url.port !== '' ? Number(url.port) : undefined;
-
       this.validateAndApplySettings({
-        host,
-        port,
+        host: process.env.FIRESTORE_EMULATOR_HOST,
         ssl: false,
         customHeaders: {
           Authorization: 'Bearer owner',
@@ -457,7 +454,12 @@ export class Firestore {
           'Cannot set both "settings.host" and "settings.apiEndpoint".'
         );
       }
-      settings.servicePath = settings.host;
+
+      const url = new URL(`http://${settings.host}`);
+      settings.servicePath = url.hostname;
+      if (url.port !== '' && settings.port === undefined) {
+        settings.port = Number(url.port);
+      }
     }
 
     if (settings.ssl !== undefined) {
