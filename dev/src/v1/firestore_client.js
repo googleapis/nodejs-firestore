@@ -274,7 +274,7 @@ class FirestoreClient {
    *   will not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1.DocumentMask}
-   * @param {string} [request.transaction]
+   * @param {Buffer} [request.transaction]
    *   Reads the document in a transaction.
    * @param {Object} [request.readTime]
    *   Reads the version of the document at the given time.
@@ -357,7 +357,7 @@ class FirestoreClient {
    *   will not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1.DocumentMask}
-   * @param {string} [request.transaction]
+   * @param {Buffer} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.readTime]
    *   Reads documents as they were at the given time.
@@ -503,7 +503,7 @@ class FirestoreClient {
    *   will not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1.DocumentMask}
-   * @param {string} [request.transaction]
+   * @param {Buffer} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.readTime]
    *   Reads documents as they were at the given time.
@@ -786,7 +786,7 @@ class FirestoreClient {
    *   not be returned in the response.
    *
    *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1.DocumentMask}
-   * @param {string} [request.transaction]
+   * @param {Buffer} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.newTransaction]
    *   Starts a new transaction and reads the documents.
@@ -910,7 +910,7 @@ class FirestoreClient {
    *   Always executed atomically and in order.
    *
    *   This object should have the same structure as [Write]{@link google.firestore.v1.Write}
-   * @param {string} [request.transaction]
+   * @param {Buffer} [request.transaction]
    *   If set, applies all writes in this transaction, and commits it.
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call, e.g, timeout,
@@ -971,7 +971,7 @@ class FirestoreClient {
    * @param {string} request.database
    *   The database name. In the format:
    *   `projects/{project_id}/databases/{database_id}`.
-   * @param {string} request.transaction
+   * @param {Buffer} request.transaction
    *   The transaction to roll back.
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call, e.g, timeout,
@@ -990,7 +990,7 @@ class FirestoreClient {
    * });
    *
    * const formattedDatabase = client.databaseRootPath('[PROJECT]', '[DATABASE]');
-   * const transaction = '';
+   * const transaction = Buffer.from('');
    * const request = {
    *   database: formattedDatabase,
    *   transaction: transaction,
@@ -1032,7 +1032,7 @@ class FirestoreClient {
    *   A structured query.
    *
    *   This object should have the same structure as [StructuredQuery]{@link google.firestore.v1.StructuredQuery}
-   * @param {string} [request.transaction]
+   * @param {Buffer} [request.transaction]
    *   Reads documents in a transaction.
    * @param {Object} [request.newTransaction]
    *   Starts a new transaction and reads the documents.

@@ -30,7 +30,7 @@
  *
  *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1.DocumentMask}
  *
- * @property {string} transaction
+ * @property {Buffer} transaction
  *   Reads the document in a transaction.
  *
  * @property {Object} readTime
@@ -79,7 +79,7 @@ const GetDocumentRequest = {
  *
  *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1.DocumentMask}
  *
- * @property {string} transaction
+ * @property {Buffer} transaction
  *   Reads documents in a transaction.
  *
  * @property {Object} readTime
@@ -245,7 +245,7 @@ const DeleteDocumentRequest = {
  *
  *   This object should have the same structure as [DocumentMask]{@link google.firestore.v1.DocumentMask}
  *
- * @property {string} transaction
+ * @property {Buffer} transaction
  *   Reads documents in a transaction.
  *
  * @property {Object} newTransaction
@@ -282,7 +282,7 @@ const BatchGetDocumentsRequest = {
  *   A document name that was requested but does not exist. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *
- * @property {string} transaction
+ * @property {Buffer} transaction
  *   The transaction that was started as part of this request.
  *   Will only be set in the first response, and only if
  *   BatchGetDocumentsRequest.new_transaction was set in the request.
@@ -327,7 +327,7 @@ const BeginTransactionRequest = {
 /**
  * The response for Firestore.BeginTransaction.
  *
- * @property {string} transaction
+ * @property {Buffer} transaction
  *   The transaction that was started.
  *
  * @typedef BeginTransactionResponse
@@ -352,7 +352,7 @@ const BeginTransactionResponse = {
  *
  *   This object should have the same structure as [Write]{@link google.firestore.v1.Write}
  *
- * @property {string} transaction
+ * @property {Buffer} transaction
  *   If set, applies all writes in this transaction, and commits it.
  *
  * @typedef CommitRequest
@@ -394,7 +394,7 @@ const CommitResponse = {
  *   The database name. In the format:
  *   `projects/{project_id}/databases/{database_id}`.
  *
- * @property {string} transaction
+ * @property {Buffer} transaction
  *   The transaction to roll back.
  *
  * @typedef RollbackRequest
@@ -421,7 +421,7 @@ const RollbackRequest = {
  *
  *   This object should have the same structure as [StructuredQuery]{@link google.firestore.v1.StructuredQuery}
  *
- * @property {string} transaction
+ * @property {Buffer} transaction
  *   Reads documents in a transaction.
  *
  * @property {Object} newTransaction
@@ -449,7 +449,7 @@ const RunQueryRequest = {
 /**
  * The response for Firestore.RunQuery.
  *
- * @property {string} transaction
+ * @property {Buffer} transaction
  *   The transaction that was started as part of this request.
  *   Can only be set in the first response, and only if
  *   RunQueryRequest.new_transaction was set in the request.
@@ -516,7 +516,7 @@ const RunQueryResponse = {
  *
  *   This object should have the same structure as [Write]{@link google.firestore.v1.Write}
  *
- * @property {string} streamToken
+ * @property {Buffer} streamToken
  *   A stream token that was previously sent by the server.
  *
  *   The client should set this field to the token from the most recent
@@ -550,7 +550,7 @@ const WriteRequest = {
  *   The ID of the stream.
  *   Only set on the first message, when a new stream was created.
  *
- * @property {string} streamToken
+ * @property {Buffer} streamToken
  *   A token that represents the position of this response in the stream.
  *   This can be used by a client to resume the stream at this point.
  *
@@ -657,7 +657,7 @@ const ListenResponse = {
  *
  *   This object should have the same structure as [DocumentsTarget]{@link google.firestore.v1.DocumentsTarget}
  *
- * @property {string} resumeToken
+ * @property {Buffer} resumeToken
  *   A resume token from a prior TargetChange for an identical target.
  *
  *   Using a resume token with a different target is unsupported and may fail.
@@ -755,7 +755,7 @@ const Target = {
  *
  *   This object should have the same structure as [Status]{@link google.rpc.Status}
  *
- * @property {string} resumeToken
+ * @property {Buffer} resumeToken
  *   A token that can be used to resume the stream for the given `target_ids`,
  *   or all targets if `target_ids` is empty.
  *
