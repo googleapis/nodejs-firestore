@@ -108,7 +108,7 @@ const Document = {
  *   Only the first 1,500 bytes of the UTF-8 representation are considered by
  *   queries.
  *
- * @property {string} bytesValue
+ * @property {Buffer} bytesValue
  *   A bytes value.
  *
  *   Must not exceed 1 MiB - 89 bytes.

@@ -78,7 +78,7 @@ const TransactionOptions = {
   /**
    * Options for a transaction that can be used to read and write documents.
    *
-   * @property {string} retryTransaction
+   * @property {Buffer} retryTransaction
    *   An optional transaction to retry.
    *
    * @typedef ReadWrite
