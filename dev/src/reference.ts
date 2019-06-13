@@ -411,7 +411,7 @@ export class DocumentReference implements Serializable {
    * ...(*|string|FieldPath|Precondition)} preconditionOrValues An alternating
    * list of field paths and values to update or a Precondition to restrict
    * this update.
-   * @returns Promise.<WriteResult> A Promise that resolves once the
+   * @returns {Promise.<WriteResult>} A Promise that resolves once the
    * data has been successfully written to the backend.
    *
    * @example
