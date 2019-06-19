@@ -1048,7 +1048,9 @@ export class Query {
         const fieldValue = documentSnapshot.get(fieldOrder.field);
         if (fieldValue === undefined) {
           throw new Error(
-            `Field "${fieldOrder.field}" is missing in the provided DocumentSnapshot. ` +
+            `Field "${
+              fieldOrder.field
+            }" is missing in the provided DocumentSnapshot. ` +
               'Please provide a document that contains values for all specified ' +
               'orderBy() and where() constraints.'
           );

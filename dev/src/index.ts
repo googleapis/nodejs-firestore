@@ -347,7 +347,7 @@ export class Firestore {
         'FIRESTORE_EMULATOR_HOST',
         process.env.FIRESTORE_EMULATOR_HOST
       );
-      
+
       const emulatorSettings: Settings = {
         ...settings,
         ...libraryHeader,
