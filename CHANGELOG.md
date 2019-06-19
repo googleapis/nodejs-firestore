@@ -4,18 +4,25 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
-## [2.2.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.1.1...v2.2.0) (2019-06-05)
+### [2.2.1](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.0...v2.2.1) (2019-06-14)
 
 
 ### Bug Fixes
 
+* **docs:** move to new client docs URL ([#689](https://www.github.com/googleapis/nodejs-firestore/issues/689)) ([58acc46](https://www.github.com/googleapis/nodejs-firestore/commit/58acc46))
+
+## [2.2.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.1.1...v2.2.0) (2019-06-06)
+
+
+### Bug Fixes
+
+* Split settings.host into servicePath and port ([#684](https://www.github.com/googleapis/nodejs-firestore/issues/684)) ([b2cbca5](https://www.github.com/googleapis/nodejs-firestore/commit/b2cbca5))
 * Store large numbers as doubles ([#683](https://www.github.com/googleapis/nodejs-firestore/issues/683)) ([607b3c0](https://www.github.com/googleapis/nodejs-firestore/commit/607b3c0))
 
 
 ### Features
 
 * support apiEndpoint override in client constructor ([368bc5c](https://www.github.com/googleapis/nodejs-firestore/commit/368bc5c))
-* support apiEndpoint override in client constructor ([#679](https://www.github.com/googleapis/nodejs-firestore/issues/679)) ([8cbac6b](https://www.github.com/googleapis/nodejs-firestore/commit/8cbac6b))
 * Support host, ssl and FIRESTORE_EMULATOR_HOST for endpoint configuration ([#680](https://www.github.com/googleapis/nodejs-firestore/issues/680)) ([d15f29d](https://www.github.com/googleapis/nodejs-firestore/commit/d15f29d))
 
 ## [2.1.1](https://www.github.com/googleapis/nodejs-firestore/compare/v2.1.0...v2.1.1) (2019-05-30)

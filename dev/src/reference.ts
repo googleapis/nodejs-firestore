@@ -411,7 +411,7 @@ export class DocumentReference implements Serializable {
    * ...(*|string|FieldPath|Precondition)} preconditionOrValues An alternating
    * list of field paths and values to update or a Precondition to restrict
    * this update.
-   * @returns Promise.<WriteResult> A Promise that resolves once the
+   * @returns {Promise.<WriteResult>} A Promise that resolves once the
    * data has been successfully written to the backend.
    *
    * @example
@@ -1048,9 +1048,7 @@ export class Query {
         const fieldValue = documentSnapshot.get(fieldOrder.field);
         if (fieldValue === undefined) {
           throw new Error(
-            `Field "${
-              fieldOrder.field
-            }" is missing in the provided DocumentSnapshot. ` +
+            `Field "${fieldOrder.field}" is missing in the provided DocumentSnapshot. ` +
               'Please provide a document that contains values for all specified ' +
               'orderBy() and where() constraints.'
           );
