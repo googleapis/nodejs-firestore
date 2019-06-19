@@ -350,16 +350,27 @@ export class Firestore {
       const host = url.hostname;
       const port = url.port !== '' ? Number(url.port) : undefined;
 
-      this.validateAndApplySettings({
+      const emulatorSettings: Settings = {
+        ...settings,
+        ...libraryHeader,
         host,
         port,
         ssl: false,
-        customHeaders: {
-          Authorization: 'Bearer owner',
-        },
-        ...settings,
-        ...libraryHeader,
-      });
+      };
+
+      // If FIRESTORE_EMULATOR_HOST is set, we unset `servicePath` and `apiEndpoint` to
+      // ensure that only one endpoint setting is provided.
+      delete emulatorSettings.servicePath;
+      delete emulatorSettings.apiEndpoint;
+
+      // Manually merge the Authorization header to preserve user-provided headers
+      emulatorSettings.customHeaders = Object.assign(
+        {},
+        emulatorSettings.customHeaders,
+        {Authorization: 'Bearer owner'}
+      );
+
+      this.validateAndApplySettings(emulatorSettings);
     } else {
       this.validateAndApplySettings({...settings, ...libraryHeader});
     }
