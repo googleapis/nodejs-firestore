@@ -682,6 +682,7 @@ abstract class Watch {
     readTime: Timestamp,
     nextResumeToken?: Uint8Array
   ): void {
+    console.warn('push snapshot readtime: ', readTime);
     const changes = this.extractChanges(readTime);
     const appliedChanges = this.computeSnapshot(readTime);
 
@@ -727,6 +728,7 @@ abstract class Watch {
    * @private
    */
   private addDoc(newDocument: QueryDocumentSnapshot): DocumentChange {
+    console.warn('add doc: ', newDocument.readTime);
     const name = newDocument.ref.path;
     assert(!this.docMap.has(name), 'Document to add already exists');
     this.docTree = this.docTree.insert(newDocument, null);
@@ -742,6 +744,7 @@ abstract class Watch {
    * @private
    */
   private modifyDoc(newDocument: QueryDocumentSnapshot): DocumentChange | null {
+    console.warn('modify doc: ', newDocument.readTime);
     const name = newDocument.ref.path;
     assert(this.docMap.has(name), 'Document to modify does not exist');
     const oldDocument = this.docMap.get(name)!;

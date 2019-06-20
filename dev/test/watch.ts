@@ -1969,7 +1969,6 @@ describe('Query watch', () => {
       return initialSnapshot(snapshot => {
         return nextSnapshot(snapshot, snapshot => {
           firstSnapshot = snapshot;
-          console.warn('test start');
           expect(firstSnapshot.isEqual(firstSnapshot)).to.be.true;
           watchHelper.sendDoc(doc1, {foo: 'a'});
           watchHelper.sendDoc(doc2, {foo: 'b'});
@@ -1978,7 +1977,6 @@ describe('Query watch', () => {
           .then(snapshot =>
             nextSnapshot(snapshot, snapshot => {
               secondSnapshot = snapshot;
-              console.warn('test start 2');
               expect(secondSnapshot.isEqual(secondSnapshot)).to.be.true;
               watchHelper.sendDocDelete(doc1);
               watchHelper.sendDoc(doc2, {foo: 'bar'});
@@ -1987,7 +1985,6 @@ describe('Query watch', () => {
           )
           .then(snapshot => {
             thirdSnapshot = snapshot;
-            console.warn('test start 3'); 
             expect(thirdSnapshot.isEqual(thirdSnapshot)).to.be.true;
           });
       }).then(() =>
@@ -1996,6 +1993,7 @@ describe('Query watch', () => {
             console.warn('test start 4', snapshot);
             console.warn('firstSnapshot', firstSnapshot);
             expect(snapshot.isEqual(firstSnapshot)).to.be.true;
+            console.warn('FINISH');
             watchHelper.sendDoc(doc1, {foo: 'a'});
             watchHelper.sendDoc(doc2, {foo: 'b'});
             watchHelper.sendDoc(doc3, {foo: 'c'});
