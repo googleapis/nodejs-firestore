@@ -1166,6 +1166,13 @@ describe('Query class', () => {
       });
   });
 
+  it('supports Unicode in document names', async () => {
+    const collRef = randomCol.doc('доброеутро').collection('coll');
+    await collRef.add({});
+    const snapshot = await collRef.get();
+    expect(snapshot.size).to.equal(1);
+  });
+
   it('supports pagination', () => {
     const batch = firestore.batch();
 
