@@ -694,10 +694,12 @@ abstract class Watch {
         String(appliedChanges.length),
         this.docTree.length
       );
+      // Pass doctree in as a const, so we don't lose reference to 'this'.
+      const updatedTree = this.docTree;
       this.onNext(
         readTime,
-        this.docTree.length,
-        () => this.docTree.keys,
+        updatedTree.length,
+        () => updatedTree.keys,
         () => appliedChanges
       );
       this.hasPushed = true;
