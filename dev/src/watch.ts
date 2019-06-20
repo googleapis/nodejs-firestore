@@ -331,18 +331,20 @@ abstract class Watch {
     onError: (error: Error) => void
   ): () => void {
     assert(
-      this.onNext.toString() === EMPTY_FUNCTION.toString(), 
+      this.onNext.toString() === EMPTY_FUNCTION.toString(),
       'onNext should not already be defined.'
     );
     assert(
       this.onError.toString() === EMPTY_FUNCTION.toString(),
       'onError should not already be defined.'
     );
-    assert(this.docTree === undefined, 'docTree should not already be defined.');
+    assert(
+      this.docTree === undefined,
+      'docTree should not already be defined.'
+    );
     this.onNext = onNext;
     this.onError = onError;
     this.docTree = rbtree(this.getComparator());
-
 
     this.initStream();
 
@@ -648,7 +650,7 @@ abstract class Watch {
             this.currentStream!.resume();
           });
       })
-      .catch((err) => { 
+      .catch(err => {
         this.closeStream(err);
       });
   }
@@ -772,7 +774,7 @@ abstract class Watch {
   private computeSnapshot(readTime: Timestamp): DocumentChange[] {
     const changeSet = this.extractChanges(readTime);
     const appliedChanges: DocumentChange[] = [];
-    
+
     // Process the sorted changes in the order that is expected by our
     // clients (removals, additions, and then modifications). We also need
     // to sort the individual changes to assure that oldIndex/newIndex
