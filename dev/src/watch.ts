@@ -499,14 +499,18 @@ abstract class Watch {
   /**
    * Returns the current count of all documents, including the changes from
    * the current changeMap.
+   * @private
    */
   private currentSize(): number {
-    const changes = this.extractChanges(Timestamp.now());
+    const changes = this.extractCurrentChanges(Timestamp.now());
     return this.docMap.size + changes.adds.length - changes.deletes.length;
   }
 
-  /** Splits up document changes into removals, additions, and updates. */
-  private extractChanges(readTime: Timestamp): DocumentChangeSet {
+  /** 
+   * Splits up document changes into removals, additions, and updates. 
+   * @private
+   */
+  private extractCurrentChanges(readTime: Timestamp): DocumentChangeSet {
     const deletes: string[] = [];
     const adds: QueryDocumentSnapshot[] = [];
     const updates: QueryDocumentSnapshot[] = [];
@@ -528,7 +532,10 @@ abstract class Watch {
     return {deletes, adds, updates};
   }
 
-  /** Helper to clear the docs on RESET or filter mismatch. */
+  /** 
+   * Helper to clear the docs on RESET or filter mismatch. 
+   * @private
+   */
   private resetDocs(): void {
     logger('Watch.resetDocs', this.requestTag, 'Resetting documents');
     this.changeMap.clear();
@@ -543,7 +550,10 @@ abstract class Watch {
     this.current = false;
   }
 
-  /** Closes the stream and calls onError() if the stream is still active. */
+  /** 
+   * Closes the stream and calls onError() if the stream is still active. 
+   * @private
+   */
   private closeStream(err: GrpcError): void {
     if (this.currentStream) {
       this.currentStream.unpipe(this.stream);
@@ -562,6 +572,7 @@ abstract class Watch {
   /**
    * Re-opens the stream unless the specified error is considered permanent.
    * Clears the change map.
+   * @private
    */
   private maybeReopenStream(err: GrpcError): void {
     if (this.currentStream) {
@@ -588,7 +599,10 @@ abstract class Watch {
     }
   }
 
-  /** Helper to restart the outgoing stream to the backend. */
+  /**
+   *  Helper to restart the outgoing stream to the backend. 
+   * @private
+   */
   private resetStream(): void {
     logger('Watch.resetStream', this.requestTag, 'Restarting stream');
     if (this.currentStream) {
@@ -601,6 +615,7 @@ abstract class Watch {
 
   /**
    * Initializes a new stream to the backend with backoff.
+   * @private
    */
   private initStream(): void {
     this.backoff
@@ -658,6 +673,7 @@ abstract class Watch {
   /**
    * Checks if the current target id is included in the list of target ids.
    * If no targetIds are provided, returns true.
+   * @private
    */
   private affectsTarget(
     targetIds: number[] | undefined,
@@ -679,13 +695,14 @@ abstract class Watch {
   /**
    * Assembles a new snapshot from the current set of changes and invokes the
    * user's callback. Clears the current changes on completion.
+   * @private
    */
   private pushSnapshot(
     readTime: Timestamp,
     nextResumeToken?: Uint8Array
   ): void {
     console.warn('push snapshot readtime: ', readTime);
-    const changes = this.extractChanges(readTime);
+    const changes = this.extractCurrentChanges(readTime);
     const appliedChanges = this.computeSnapshot(readTime);
 
     if (!this.hasPushed || appliedChanges.length > 0) {
@@ -771,7 +788,7 @@ abstract class Watch {
    * @private
    */
   private computeSnapshot(readTime: Timestamp): DocumentChange[] {
-    const changeSet = this.extractChanges(readTime);
+    const changeSet = this.extractCurrentChanges(readTime);
     const appliedChanges: DocumentChange[] = [];
 
     // Process the sorted changes in the order that is expected by our clients
