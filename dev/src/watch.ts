@@ -259,7 +259,7 @@ abstract class Watch {
   private current = false;
 
   /**
-   *  The sorted tree of QueryDocumentSnapshots as sent in the last snapshot.
+   * The sorted tree of QueryDocumentSnapshots as sent in the last snapshot.
    * We only look at the keys.
    */
   private docTree: RBTree | undefined;
@@ -331,11 +331,11 @@ abstract class Watch {
     onError: (error: Error) => void
   ): () => void {
     assert(
-      this.onNext.toString() === EMPTY_FUNCTION.toString(),
+      this.onNext === EMPTY_FUNCTION,
       'onNext should not already be defined.'
     );
     assert(
-      this.onError.toString() === EMPTY_FUNCTION.toString(),
+      this.onError === EMPTY_FUNCTION,
       'onError should not already be defined.'
     );
     assert(
@@ -530,7 +530,7 @@ abstract class Watch {
 
   /** Helper to clear the docs on RESET or filter mismatch. */
   private resetDocs(): void {
-    logger('Watch.onSnapshot', this.requestTag, 'Resetting documents');
+    logger('Watch.resetDocs', this.requestTag, 'Resetting documents');
     this.changeMap.clear();
     this.resumeToken = undefined;
 
@@ -554,7 +554,7 @@ abstract class Watch {
 
     if (this.isActive) {
       this.isActive = false;
-      logger('Watch.onSnapshot', this.requestTag, 'Invoking onError: ', err);
+      logger('Watch.closeStream', this.requestTag, 'Invoking onError: ', err);
       this.onError(err);
     }
   }
@@ -571,7 +571,7 @@ abstract class Watch {
 
     if (this.isActive && !this.isPermanentError(err)) {
       logger(
-        'Watch.onSnapshot',
+        'Watch.maybeReopenStream',
         this.requestTag,
         'Stream ended, re-opening after retryable error: ',
         err
@@ -590,7 +590,7 @@ abstract class Watch {
 
   /** Helper to restart the outgoing stream to the backend. */
   private resetStream(): void {
-    logger('Watch.onSnapshot', this.requestTag, 'Restarting stream');
+    logger('Watch.resetStream', this.requestTag, 'Restarting stream');
     if (this.currentStream) {
       this.currentStream.unpipe(this.stream);
       this.currentStream.end();
@@ -608,7 +608,7 @@ abstract class Watch {
       .then(async () => {
         if (!this.isActive) {
           logger(
-            'Watch.onSnapshot',
+            'Watch.initStream',
             this.requestTag,
             'Not initializing inactive stream'
           );
@@ -628,14 +628,14 @@ abstract class Watch {
           .then(backendStream => {
             if (!this.isActive) {
               logger(
-                'Watch.onSnapshot',
+                'Watch.initStream',
                 this.requestTag,
                 'Closing inactive stream'
               );
               backendStream.end();
               return;
             }
-            logger('Watch.onSnapshot', this.requestTag, 'Opened new stream');
+            logger('Watch.initStream', this.requestTag, 'Opened new stream');
             this.currentStream = backendStream;
             assert(this.currentStream !== undefined, 'CHECCK 1');
             this.currentStream!.on('error', err => {
@@ -690,18 +690,18 @@ abstract class Watch {
 
     if (!this.hasPushed || appliedChanges.length > 0) {
       logger(
-        'Watch.onSnapshot',
+        'Watch.pushSnapshot',
         this.requestTag,
         'Sending snapshot with %d changes and %d documents',
         String(appliedChanges.length),
         this.docTree.length
       );
-      // Pass doctree in as a const, so we don't lose reference to 'this'.
-      const updatedTree = this.docTree;
+      // We pass the current set of changes, even if `docTree` is modified later.
+      const currentTree = this.docTree;
       this.onNext(
         readTime,
-        updatedTree.length,
-        () => updatedTree.keys,
+        currentTree.length,
+        () => currentTree.keys,
         () => appliedChanges
       );
       this.hasPushed = true;
@@ -712,8 +712,8 @@ abstract class Watch {
   }
 
   /**
-   * Applies a document delete to the document tree and the document
-   * map. Returns the corresponding DocumentChange event.
+   * Applies a document delete to the document tree and the document map.
+   * Returns the corresponding DocumentChange event.
    * @private
    */
   private deleteDoc(name: string): DocumentChange {
@@ -727,8 +727,8 @@ abstract class Watch {
   }
 
   /**
-   * Applies a document add to the document tree and the document map.
-   * Returns the corresponding DocumentChange event.
+   * Applies a document add to the document tree and the document map. Returns
+   * the corresponding DocumentChange event.
    * @private
    */
   private addDoc(newDocument: QueryDocumentSnapshot): DocumentChange {
@@ -742,9 +742,8 @@ abstract class Watch {
   }
 
   /**
-   * Applies a document modification to the document tree and the
-   * document map. Returns the DocumentChange event for successful
-   * modifications.
+   * Applies a document modification to the document tree and the document map.
+   * Returns the DocumentChange event for successful modifications.
    * @private
    */
   private modifyDoc(newDocument: QueryDocumentSnapshot): DocumentChange | null {
@@ -775,10 +774,9 @@ abstract class Watch {
     const changeSet = this.extractChanges(readTime);
     const appliedChanges: DocumentChange[] = [];
 
-    // Process the sorted changes in the order that is expected by our
-    // clients (removals, additions, and then modifications). We also need
-    // to sort the individual changes to assure that oldIndex/newIndex
-    // keep incrementing.
+    // Process the sorted changes in the order that is expected by our clients
+    // (removals, additions, and then modifications). We also need to sort the
+    // individual changes to assure that oldIndex/newIndex keep incrementing.
     changeSet.deletes.sort((name1, name2) => {
       // Deletes are sorted based on the order of the existing document.
       return this.getComparator()(
@@ -826,7 +824,7 @@ abstract class Watch {
   private isPermanentError(error: GrpcError): boolean {
     if (error.code === undefined) {
       logger(
-        'Watch.onSnapshot',
+        'Watch.isPermanentError',
         this.requestTag,
         'Unable to determine error code: ',
         error
