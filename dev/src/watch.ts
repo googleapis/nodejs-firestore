@@ -506,8 +506,8 @@ abstract class Watch {
     return this.docMap.size + changes.adds.length - changes.deletes.length;
   }
 
-  /** 
-   * Splits up document changes into removals, additions, and updates. 
+  /**
+   * Splits up document changes into removals, additions, and updates.
    * @private
    */
   private extractCurrentChanges(readTime: Timestamp): DocumentChangeSet {
@@ -532,8 +532,8 @@ abstract class Watch {
     return {deletes, adds, updates};
   }
 
-  /** 
-   * Helper to clear the docs on RESET or filter mismatch. 
+  /**
+   * Helper to clear the docs on RESET or filter mismatch.
    * @private
    */
   private resetDocs(): void {
@@ -550,8 +550,8 @@ abstract class Watch {
     this.current = false;
   }
 
-  /** 
-   * Closes the stream and calls onError() if the stream is still active. 
+  /**
+   * Closes the stream and calls onError() if the stream is still active.
    * @private
    */
   private closeStream(err: GrpcError): void {
@@ -600,7 +600,7 @@ abstract class Watch {
   }
 
   /**
-   *  Helper to restart the outgoing stream to the backend. 
+   *  Helper to restart the outgoing stream to the backend.
    * @private
    */
   private resetStream(): void {
