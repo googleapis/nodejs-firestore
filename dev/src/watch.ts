@@ -34,13 +34,13 @@ import api = google.firestore.v1;
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
  * one target per stream.
- *
- * @private
  * @type {number}
  */
 const WATCH_TARGET_ID = 0x1;
 
-/** Sentinel value for a document remove. */
+/*!
+ * Sentinel value for a document remove.
+ */
 const REMOVED = {} as DocumentSnapshotBuilder;
 
 /*!
@@ -600,7 +600,7 @@ abstract class Watch {
   }
 
   /**
-   *  Helper to restart the outgoing stream to the backend.
+   * Helper to restart the outgoing stream to the backend.
    * @private
    */
   private resetStream(): void {
