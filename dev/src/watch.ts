@@ -237,36 +237,52 @@ abstract class Watch {
   /**
    * Indicates whether we are interested in data from the stream. Set to false in the
    * 'unsubscribe()' callback.
+   * @private
    */
   private isActive = true;
 
-  /** The current stream to the backend. */
+  /**
+   * The current stream to the backend.
+   * @private
+   */
   private currentStream: NodeJS.ReadWriteStream | null = null;
 
-  /** The server assigns and updates the resume token. */
+  /**
+   * The server assigns and updates the resume token.
+   * @private
+   */
   private resumeToken: Uint8Array | undefined = undefined;
 
-  /** A map of document names to QueryDocumentSnapshots for the last sent snapshot. */
+  /**
+   * A map of document names to QueryDocumentSnapshots for the last sent snapshot.
+   * @private
+   */
   private docMap = new Map<string, QueryDocumentSnapshot>();
 
   /**
    * The accumulated map of document changes (keyed by document name) for the
    * current snapshot.
+   * @private
    */
   private changeMap = new Map<string, DocumentSnapshotBuilder>();
 
-  /** The current state of the query results. */
+  /**
+   * The current state of the query results. *
+   * @private
+   */
   private current = false;
 
   /**
    * The sorted tree of QueryDocumentSnapshots as sent in the last snapshot.
    * We only look at the keys.
+   * @private
    */
   private docTree: RBTree | undefined;
 
   /**
    * We may need to replace the underlying stream on reset events.
    * This is the one that will be returned and proxy the current one.
+   * @private
    */
   private stream = through2.obj();
 
@@ -274,6 +290,7 @@ abstract class Watch {
    * We need this to track whether we've pushed an initial set of changes,
    * since we should push those even when there are no changes, if there
    * aren't docs.
+   * @private
    */
   private hasPushed = false;
 
