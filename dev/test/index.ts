@@ -450,6 +450,46 @@ describe('instantiation', () => {
     }).to.throw('Cannot set both "settings.host" and "settings.servicePath".');
   });
 
+  it('FIRESTORE_EMULATOR_HOST overrides other endpoint', done => {
+    const oldValue = process.env.FIRESTORE_EMULATOR_HOST;
+
+    try {
+      process.env.FIRESTORE_EMULATOR_HOST = 'new';
+      const firestore = new Firestore.Firestore({servicePath: 'old'});
+      firestore['validateAndApplySettings'] = settings => {
+        expect(settings.host).to.equal('new');
+        done();
+      };
+      firestore.settings({});
+    } finally {
+      if (oldValue) {
+        process.env.FIRESTORE_EMULATOR_HOST = oldValue;
+      } else {
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+      }
+    }
+  });
+
+  it('FIRESTORE_EMULATOR_HOST keeps user-provided headers', done => {
+    const oldValue = process.env.FIRESTORE_EMULATOR_HOST;
+
+    try {
+      process.env.FIRESTORE_EMULATOR_HOST = 'new';
+      const firestore = new Firestore.Firestore({customHeaders: {foo: 'bar'}});
+      firestore['validateAndApplySettings'] = settings => {
+        expect(settings.customHeaders.foo).to.equal('bar');
+        done();
+      };
+      firestore.settings({});
+    } finally {
+      if (oldValue) {
+        process.env.FIRESTORE_EMULATOR_HOST = oldValue;
+      } else {
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+      }
+    }
+  });
+
   it('uses project id from constructor', () => {
     const firestore = new Firestore.Firestore({projectId: 'foo'});
 

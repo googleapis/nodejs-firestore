@@ -348,15 +348,26 @@ export class Firestore {
         process.env.FIRESTORE_EMULATOR_HOST
       );
 
-      this.validateAndApplySettings({
-        host: process.env.FIRESTORE_EMULATOR_HOST,
-        ssl: false,
-        customHeaders: {
-          Authorization: 'Bearer owner',
-        },
+      const emulatorSettings: Settings = {
         ...settings,
         ...libraryHeader,
-      });
+        host: process.env.FIRESTORE_EMULATOR_HOST,
+        ssl: false,
+      };
+
+      // If FIRESTORE_EMULATOR_HOST is set, we unset `servicePath` and `apiEndpoint` to
+      // ensure that only one endpoint setting is provided.
+      delete emulatorSettings.servicePath;
+      delete emulatorSettings.apiEndpoint;
+
+      // Manually merge the Authorization header to preserve user-provided headers
+      emulatorSettings.customHeaders = Object.assign(
+        {},
+        emulatorSettings.customHeaders,
+        {Authorization: 'Bearer owner'}
+      );
+
+      this.validateAndApplySettings(emulatorSettings);
     } else {
       this.validateAndApplySettings({...settings, ...libraryHeader});
     }
