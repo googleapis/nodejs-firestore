@@ -547,7 +547,7 @@ abstract class Watch {
    */
   private onData(proto: api.IListenResponse): void {
     if (proto.targetChange) {
-      logger('Watch.onSnapshot', this.requestTag, 'Processing target change');
+      logger('Watch.onData', this.requestTag, 'Processing target change');
       const change = proto.targetChange;
       const noTargetIds = !change.targetIds || change.targetIds.length === 0;
       if (change.targetChangeType === 'NO_CHANGE') {
