@@ -590,7 +590,7 @@ abstract class Watch {
         this.backoff.reset();
       }
     } else if (proto.documentChange) {
-      logger('Watch.onSnapshot', this.requestTag, 'Processing change event');
+      logger('Watch.onData', this.requestTag, 'Processing change event');
 
       // No other targetIds can show up here, but we still need to see
       // if the targetId was in the added list or removed list.
@@ -615,7 +615,7 @@ abstract class Watch {
         .relativeName;
 
       if (changed) {
-        logger('Watch.onSnapshot', this.requestTag, 'Received document change');
+        logger('Watch.onData', this.requestTag, 'Received document change');
         const snapshot = new DocumentSnapshotBuilder();
         snapshot.ref = this.firestore.doc(relativeName);
         snapshot.fieldsProto = document.fields || {};
@@ -623,17 +623,17 @@ abstract class Watch {
         snapshot.updateTime = Timestamp.fromProto(document.updateTime!);
         this.changeMap.set(relativeName, snapshot);
       } else if (removed) {
-        logger('Watch.onSnapshot', this.requestTag, 'Received document remove');
+        logger('Watch.onData', this.requestTag, 'Received document remove');
         this.changeMap.set(relativeName, REMOVED);
       }
     } else if (proto.documentDelete || proto.documentRemove) {
-      logger('Watch.onSnapshot', this.requestTag, 'Processing remove event');
+      logger('Watch.onData', this.requestTag, 'Processing remove event');
       const name = (proto.documentDelete || proto.documentRemove)!.document!;
       const relativeName = QualifiedResourcePath.fromSlashSeparatedString(name)
         .relativeName;
       this.changeMap.set(relativeName, REMOVED);
     } else if (proto.filter) {
-      logger('Watch.onSnapshot', this.requestTag, 'Processing filter update');
+      logger('Watch.onData', this.requestTag, 'Processing filter update');
       if (proto.filter.count !== this.currentSize()) {
         // We need to remove all the current results.
         this.resetDocs();
