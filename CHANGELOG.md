@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [2.2.2](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.1...v2.2.2) (2019-06-25)
+
+
+### Bug Fixes
+
+* Support non-ISO-8859-1 Collection Names in Queries ([fc6f839](https://www.github.com/googleapis/nodejs-firestore/commit/fc6f839))
+* Unset servicePath when FIRESTORE_EMULATOR_HOST is set ([#696](https://www.github.com/googleapis/nodejs-firestore/issues/696)) ([5a19931](https://www.github.com/googleapis/nodejs-firestore/commit/5a19931))
+* Use new stream rather than pipe ([#700](https://www.github.com/googleapis/nodejs-firestore/issues/700)) ([0370e03](https://www.github.com/googleapis/nodejs-firestore/commit/0370e03))
+
 ### [2.2.1](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.0...v2.2.1) (2019-06-14)
 
 
