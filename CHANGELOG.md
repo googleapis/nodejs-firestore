@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [2.2.3](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.2...v2.2.3) (2019-06-26)
+
+
+### Bug Fixes
+
+* **docs:** link to reference docs section on googleapis.dev ([#701](https://www.github.com/googleapis/nodejs-firestore/issues/701)) ([d7c89a8](https://www.github.com/googleapis/nodejs-firestore/commit/d7c89a8))
+* Relax validation of FIRESTORE_EMULATOR_HOST in settings() ([#703](https://www.github.com/googleapis/nodejs-firestore/issues/703)) ([daff9de](https://www.github.com/googleapis/nodejs-firestore/commit/daff9de))
+
 ### [2.2.2](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.1...v2.2.2) (2019-06-25)
 
 
