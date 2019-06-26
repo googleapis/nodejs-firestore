@@ -471,6 +471,10 @@ export class Firestore {
       if (url.port !== '' && settings.port === undefined) {
         settings.port = Number(url.port);
       }
+      // We need to remove the `host` setting, in case a user calls `settings()`,
+      // which will again enforce that `host` and `servicePath` are not both
+      // specified.
+      delete settings.host;
     }
 
     if (settings.ssl !== undefined) {

@@ -450,6 +450,24 @@ describe('instantiation', () => {
     }).to.throw('Cannot set both "settings.host" and "settings.servicePath".');
   });
 
+  it('FIRESTORE_EMULATOR_HOST ignores servicePath', () => {
+    const oldValue = process.env.FIRESTORE_EMULATOR_HOST;
+
+    try {
+      process.env.FIRESTORE_EMULATOR_HOST = 'foo';
+      const firestore = new Firestore.Firestore({servicePath: 'bar'});
+      // The call to `settings()` used to throw ("Cannot set both 'settings.host' and 'settings.servicePath'").
+      // See https://github.com/googleapis/nodejs-firestore/pull/696#issuecomment-505822099
+      firestore.settings({});
+    } finally {
+      if (oldValue) {
+        process.env.FIRESTORE_EMULATOR_HOST = oldValue;
+      } else {
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+      }
+    }
+  });
+
   it('FIRESTORE_EMULATOR_HOST overrides other endpoint', done => {
     const oldValue = process.env.FIRESTORE_EMULATOR_HOST;
 
@@ -457,7 +475,7 @@ describe('instantiation', () => {
       process.env.FIRESTORE_EMULATOR_HOST = 'new';
       const firestore = new Firestore.Firestore({servicePath: 'old'});
       firestore['validateAndApplySettings'] = settings => {
-        expect(settings.host).to.equal('new');
+        expect(settings.servicePath).to.equal('new');
         done();
       };
       firestore.settings({});
