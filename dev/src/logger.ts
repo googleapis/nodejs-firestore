@@ -48,8 +48,6 @@ export function logger(
 
 /**
  * Sets the log function for all active Firestore instances.
- *
- * @private
  */
 export function setLogFunction(logger: (msg: string) => void): void {
   validateFunction('logger', logger);
