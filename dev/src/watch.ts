@@ -446,10 +446,6 @@ abstract class Watch {
    * @private
    */
   private maybeReopenStream(err: GrpcError): void {
-    if (this.currentStream) {
-      this.currentStream = null;
-    }
-
     if (this.isActive && !this.isPermanentError(err)) {
       logger(
         'Watch.maybeReopenStream',
@@ -525,12 +521,19 @@ abstract class Watch {
               this.onData(proto);
             })
               .on('error', err => {
-                this.maybeReopenStream(err);
+                if (this.currentStream === backendStream) {
+                  this.currentStream = null;
+                  this.maybeReopenStream(err);
+                }
               })
               .on('end', () => {
-                const err = new GrpcError('Stream ended unexpectedly');
-                err.code = GRPC_STATUS_CODE.UNKNOWN;
-                this.maybeReopenStream(err);
+                if (this.currentStream === backendStream) {
+                  this.currentStream = null;
+
+                  const err = new GrpcError('Stream ended unexpectedly');
+                  err.code = GRPC_STATUS_CODE.UNKNOWN;
+                  this.maybeReopenStream(err);
+                }
               });
             this.currentStream!.resume();
           });
