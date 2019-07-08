@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [2.2.4](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.3...v2.2.4) (2019-07-08)
+
+
+### Bug Fixes
+
+* Don't re-open streams on 'error' and 'end' ([#713](https://www.github.com/googleapis/nodejs-firestore/issues/713)) ([104a965](https://www.github.com/googleapis/nodejs-firestore/commit/104a965))
+
 ### [2.2.3](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.2...v2.2.3) (2019-06-26)
 
 
