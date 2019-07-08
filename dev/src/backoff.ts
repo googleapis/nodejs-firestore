@@ -155,6 +155,11 @@ export class ExponentialBackoff {
    */
   private currentBaseMs = 0;
 
+  /**
+   * Whether we are currently waiting for backoff to complete.
+   */
+  private awaitingBackoffCompletion = false;
+
   constructor(options: ExponentialBackoffOptions = {}) {
     this.initialDelayMs =
       options.initialDelayMs !== undefined
@@ -206,6 +211,12 @@ export class ExponentialBackoff {
    * @private
    */
   backoffAndWait(): Promise<void> {
+    if (this.awaitingBackoffCompletion) {
+      return Promise.reject(
+        new Error('A backoff operation is already in progress.')
+      );
+    }
+
     if (this.retryCount > MAX_RETRY_ATTEMPTS) {
       return Promise.reject(
         new Error('Exceeded maximum number of retries allowed.')
@@ -229,8 +240,14 @@ export class ExponentialBackoff {
     this.currentBaseMs = Math.max(this.currentBaseMs, this.initialDelayMs);
     this.currentBaseMs = Math.min(this.currentBaseMs, this.maxDelayMs);
     this._retryCount += 1;
+
     return new Promise(resolve => {
-      delayExecution(resolve, delayWithJitterMs);
+      this.awaitingBackoffCompletion = true;
+
+      delayExecution(() => {
+        this.awaitingBackoffCompletion = false;
+        resolve();
+      }, delayWithJitterMs);
     });
   }
 

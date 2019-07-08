@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {expect} from 'chai';
+import {expect, use} from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 
 import {ExponentialBackoff, setTimeoutHandler} from '../src/backoff';
+
+use(chaiAsPromised);
 
 const nop = () => {};
 
@@ -158,5 +161,17 @@ describe('ExponentialBackoff', () => {
     expect(backoff.retryCount).to.equal(2);
     backoff.reset();
     expect(backoff.retryCount).to.equal(0);
+  });
+
+  it('cannot queue two backoffAndWait() operations simultaneously', async () => {
+    const backoff = new ExponentialBackoff();
+
+    // The timeout handler for this test simply idles forever.
+    setTimeoutHandler(() => {});
+
+    backoff.backoffAndWait().then(nop);
+    await expect(backoff.backoffAndWait()).to.eventually.be.rejectedWith(
+      'A backoff operation is already in progress.'
+    );
   });
 });
