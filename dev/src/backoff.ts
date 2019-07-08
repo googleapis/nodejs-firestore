@@ -157,6 +157,8 @@ export class ExponentialBackoff {
 
   /**
    * Whether we are currently waiting for backoff to complete.
+   *
+   * @private
    */
   private awaitingBackoffCompletion = false;
 
