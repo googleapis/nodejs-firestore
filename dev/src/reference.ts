@@ -74,7 +74,7 @@ const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
 /**
  * Filter conditions in a `Query.where()` clause are specified using the
  * strings '<', '<=', '==', '>=', '>', 'array-contains', 'in', and
- * 'array-contains.
+ * 'array-contains'.
  *
  * @private
  */
