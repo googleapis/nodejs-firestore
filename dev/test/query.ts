@@ -645,6 +645,15 @@ describe('where() interface', () => {
   });
 
   it('concatenates all accepted filters', () => {
+    const arrValue: api.IValue = {
+      arrayValue: {
+        values: [
+          {
+            stringValue: 'barArray',
+          },
+        ],
+      },
+    };
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -670,7 +679,13 @@ describe('where() interface', () => {
             'barGreater',
             'fooContains',
             'ARRAY_CONTAINS',
-            'barContains'
+            'barContains',
+            'fooIn',
+            'IN',
+            arrValue,
+            'fooContainsAny',
+            'ARRAY_CONTAINS_ANY',
+            arrValue
           )
         );
 
@@ -687,6 +702,8 @@ describe('where() interface', () => {
       query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
       query = query.where('fooGreater', '>', 'barGreater');
       query = query.where('fooContains', 'array-contains', 'barContains');
+      query = query.where('fooIn', 'in', ['barArray']);
+      query = query.where('fooContainsAny', 'array-contains-any', ['barArray']);
       return query.get();
     });
   });
@@ -895,7 +912,7 @@ describe('where() interface', () => {
     expect(() => {
       query = query.where('foo', '@' as InvalidApiUsage, 'foobar');
     }).to.throw(
-      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, >, >=, array-contains'
+      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, >, >=, array-contains, in, array-contains-any'
     );
   });
 });

@@ -127,9 +127,18 @@ export type OrderByDirection = 'desc' | 'asc';
 
 /**
  * Filter conditions in a `Query.where()` clause are specified using the
- * strings '<', '<=', '==', '>=', '>', and 'array-contains'.
+ * strings '<', '<=', '==', '>=', '>','array-contains', 'in', and
+ * 'array-contains-any'.
  */
-export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains';
+export type WhereFilterOp =
+  | '<'
+  | '<='
+  | '=='
+  | '>='
+  | '>'
+  | 'array-contains'
+  | 'in'
+  | 'array-contains-any';
 
 /**
  * An options object that configures conditional behavior of `update()` and

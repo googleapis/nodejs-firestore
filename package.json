@@ -31,7 +31,7 @@
     "codecov": "nyc report --reporter=json && codecov -f .coverage/*.json",
     "predocs": "npm run compile",
     "docs": "jsdoc -c .jsdoc.js",
-    "system-test": "mocha build/system-test --timeout 600000",
+    "system-test": "FIRESTORE_EMULATOR_HOST=localhost:8080 mocha build/system-test --timeout 600000",
     "presystem-test": "npm run compile",
     "samples-test": "npm link && cd samples/ && npm link ../ && npm test && cd ../",
     "conformance": "mocha build/conformance",

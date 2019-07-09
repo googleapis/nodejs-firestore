@@ -5485,6 +5485,8 @@ $root.google = (function() {
                      * @property {string} GREATER_THAN_OR_EQUAL=GREATER_THAN_OR_EQUAL GREATER_THAN_OR_EQUAL value
                      * @property {string} EQUAL=EQUAL EQUAL value
                      * @property {string} ARRAY_CONTAINS=ARRAY_CONTAINS ARRAY_CONTAINS value
+                     * @property {string} IN=IN IN value
+                     * @property {string} ARRAY_CONTAINS_ANY=ARRAY_CONTAINS_ANY ARRAY_CONTAINS_ANY value
                      */
                     FieldFilter.Operator = (function() {
                         var valuesById = {}, values = Object.create(valuesById);
@@ -5495,6 +5497,8 @@ $root.google = (function() {
                         values[valuesById[4] = "GREATER_THAN_OR_EQUAL"] = "GREATER_THAN_OR_EQUAL";
                         values[valuesById[5] = "EQUAL"] = "EQUAL";
                         values[valuesById[7] = "ARRAY_CONTAINS"] = "ARRAY_CONTAINS";
+                        values[valuesById[8] = "IN"] = "IN";
+                        values[valuesById[9] = "ARRAY_CONTAINS_ANY"] = "ARRAY_CONTAINS_ANY";
                         return values;
                     })();
 

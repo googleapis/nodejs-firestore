@@ -1070,6 +1070,31 @@ describe('Query class', () => {
       });
   });
 
+  it('supports in', () => {
+    return Promise.all([
+      randomCol.add({foo: 'bar'}),
+      randomCol.add({foo: 'baz'}),
+      randomCol.add({foo: 'boo'}),
+    ])
+      .then(() => randomCol.where('foo', 'in', ['baz']).get())
+      .then(res => {
+        expect(res.size).to.equal(1);
+        expect(res.docs[0].get('foo')).to.deep.equal('baz');
+      });
+  });
+
+  it('supports array-contains-any', () => {
+    return Promise.all([
+      randomCol.add({foo: ['bar']}),
+      randomCol.add({foo: ['boo']}),
+    ])
+      .then(() => randomCol.where('foo', 'array-contains-any', ['bar']).get())
+      .then(res => {
+        expect(res.size).to.equal(1);
+        expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
+      });
+  });
+
   it('can query by FieldPath.documentId()', () => {
     const ref = randomCol.doc('foo');
 

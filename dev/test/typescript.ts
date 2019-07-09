@@ -238,6 +238,8 @@ xdescribe('firestore.d.ts', () => {
       query = query.where('foo', '>=', 'bar');
       query = query.where('foo', '>', 'bar');
       query = query.where('foo', 'array-contains', 'bar');
+      query = query.where('foo', 'in', ['bar']);
+      query = query.where('foo', 'array-contains-any', ['bar']);
       query = query.where(new FieldPath('foo'), '==', 'bar');
       query = query.orderBy('foo');
       query = query.orderBy('foo', 'asc');
