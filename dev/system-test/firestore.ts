@@ -1071,27 +1071,64 @@ describe('Query class', () => {
   });
 
   it('supports in', () => {
+    const testDocs = {
+      a: {zip: 98101},
+      b: {zip: 91102},
+      c: {zip: 98103},
+      d: {zip: [98101]},
+      e: {zip: ['98101', {zip: 98101}]},
+      f: {zip: {code: 500}},
+    };
+
     return Promise.all([
-      randomCol.add({foo: 'bar'}),
-      randomCol.add({foo: 'baz'}),
-      randomCol.add({foo: 'boo'}),
+      randomCol.doc('a').set({zip: 98101}),
+      randomCol.doc('b').set({zip: 91102}),
+      randomCol.doc('c').set({zip: 98103}),
+      randomCol.doc('d').set({zip: [98101]}),
+      randomCol.doc('e').set({zip: ['98101', {zip: 98101}]}),
+      randomCol.doc('f').set({zip: {zip: 98101}}),
     ])
-      .then(() => randomCol.where('foo', 'in', ['baz']).get())
+      .then(() => randomCol.where('zip', 'in', [98101, 98103]).get())
       .then(res => {
-        expect(res.size).to.equal(1);
-        expect(res.docs[0].get('foo')).to.deep.equal('baz');
+        expect(res.size).to.equal(2);
+        expect(res.docs.map(d => d.data())).to.deep.equal([
+          {zip: 98101},
+          {zip: 98103},
+        ]);
       });
   });
 
   it('supports array-contains-any', () => {
+    const testDocs = {
+      a: {array: [42]},
+      b: {array: ['a', 42, 'c']},
+      c: {array: [41.999, '42', {a: [42]}]},
+      d: {array: [42], array2: ['bingo']},
+      e: {array: [43]},
+      f: {array: [{a: 42}]},
+      g: {array: 42},
+    };
+
     return Promise.all([
-      randomCol.add({foo: ['bar']}),
-      randomCol.add({foo: ['boo']}),
+      randomCol.doc('a').set({array: [42]}),
+      randomCol.doc('b').set({array: ['a', 42, 'c']}),
+      randomCol.doc('c').set({array: [41.999, '42', {a: [42]}]}),
+      randomCol.doc('d').set({array: [42], array2: ['sigh']}),
+      randomCol.doc('e').set({array: [43]}),
+      randomCol.doc('f').set({array: [{a: 42}]}),
+      randomCol.doc('g').set({array: 42}),
     ])
-      .then(() => randomCol.where('foo', 'array-contains-any', ['bar']).get())
+      .then(() =>
+        randomCol.where('array', 'array-contains-any', [42, 43]).get()
+      )
       .then(res => {
-        expect(res.size).to.equal(1);
-        expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
+        expect(res.size).to.equal(4);
+        expect(res.docs.map(d => d.data())).to.deep.equal([
+          {array: [42]},
+          {array: ['a', 42, 'c']},
+          {array: [42], array2: ['sigh']},
+          {array: [43]},
+        ]);
       });
   });
 
