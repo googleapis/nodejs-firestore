@@ -17,7 +17,7 @@
 import {expect} from 'chai';
 import * as extend from 'extend';
 import {CallOptions, GrpcClient} from 'google-gax';
-import * as through2 from 'through2';
+import {PassThrough} from 'stream';
 
 import * as proto from '../../protos/firestore_proto_api';
 import {Firestore} from '../../src';
@@ -365,7 +365,7 @@ export function requestEquals(actual: object, expected: object): void {
 export function stream<T>(
   ...elements: Array<T | Error>
 ): NodeJS.ReadableStream {
-  const stream = through2.obj();
+  const stream = new PassThrough({objectMode: true});
 
   setImmediate(() => {
     for (const el of elements) {

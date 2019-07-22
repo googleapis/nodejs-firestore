@@ -51,8 +51,7 @@
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^1.1.2",
-    "through2": "^3.0.0"
+    "google-gax": "^1.1.2"
   },
   "devDependencies": {
     "@types/assert": "^1.4.0",
@@ -62,7 +61,6 @@
     "@types/extend": "^3.0.0",
     "@types/mocha": "^5.2.3",
     "@types/node": "^10.3.5",
-    "@types/through2": "^2.0.34",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "codecov": "^3.0.2",

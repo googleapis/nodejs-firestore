@@ -15,7 +15,7 @@
  */
 
 import {expect} from 'chai';
-import * as through2 from 'through2';
+import {PassThrough} from 'stream';
 
 import {google} from '../protos/firestore_proto_api';
 
@@ -31,7 +31,7 @@ import api = google.firestore.v1;
 function createInstance(opts: {}, document: api.IDocument) {
   const overrides: ApiOverride = {
     batchGetDocuments: () => {
-      const stream = through2.obj();
+      const stream = new PassThrough({objectMode: true});
       setImmediate(() => {
         stream.push({found: document, readTime: {seconds: 5, nanos: 6}});
         stream.push(null);

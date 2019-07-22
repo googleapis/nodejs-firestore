@@ -17,7 +17,7 @@
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
-import * as through2 from 'through2';
+import {PassThrough} from 'stream';
 
 import * as proto from '../protos/firestore_proto_api';
 import * as Firestore from '../src';
@@ -150,7 +150,7 @@ function getDocument(transaction?: Uint8Array | string): TransactionStep {
     transaction: transactionId(transaction),
   };
 
-  const stream = through2.obj();
+  const stream = new PassThrough({objectMode: true});
 
   setImmediate(() => {
     stream.push({
@@ -182,7 +182,7 @@ function getAll(docs: string[], fieldMask?: string[]): TransactionStep {
     request.mask = {fieldPaths: fieldMask};
   }
 
-  const stream = through2.obj();
+  const stream = new PassThrough({objectMode: true});
 
   for (const doc of docs) {
     const name = `${COLLECTION_ROOT}/${doc}`;
@@ -235,7 +235,7 @@ function query(transaction?: Uint8Array): TransactionStep {
     transaction: transaction || Buffer.from('foo'),
   };
 
-  const stream = through2.obj();
+  const stream = new PassThrough({objectMode: true});
 
   setImmediate(() => {
     stream.push({

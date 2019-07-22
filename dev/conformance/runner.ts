@@ -20,7 +20,7 @@ import {expect} from 'chai';
 import {CallOptions} from 'google-gax';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
-import * as through2 from 'through2';
+import {PassThrough} from 'stream';
 import * as proto from '../protos/firestore_proto_api';
 
 import {
@@ -289,7 +289,7 @@ function queryHandler(spec: ConformanceProto) {
     );
     const expectedQuery = STRUCTURED_QUERY_TYPE.fromObject(spec.query);
     expect(actualQuery).to.deep.equal(expectedQuery);
-    const stream = through2.obj();
+    const stream = new PassThrough({objectMode: true});
     setImmediate(() => stream.push(null));
     return stream;
   };
@@ -300,7 +300,7 @@ function getHandler(spec: ConformanceProto) {
   return (request: api.IBatchGetDocumentsRequest) => {
     const getDocument = spec.request;
     expect(request.documents![0]).to.equal(getDocument.name);
-    const stream = through2.obj();
+    const stream = new PassThrough({objectMode: true});
     setImmediate(() => {
       stream.push({
         missing: getDocument.name,
@@ -437,9 +437,10 @@ function runTest(spec: ConformanceProto) {
 
   const watchTest = (spec: ConformanceProto) => {
     const expectedSnapshots = spec.snapshots;
-    const writeStream = through2.obj();
+    const writeStream = new PassThrough({objectMode: true});
     const overrides: ApiOverride = {
-      listen: () => duplexify.obj(through2.obj(), writeStream),
+      listen: () =>
+        duplexify.obj(new PassThrough({objectMode: true}), writeStream),
     };
 
     return createInstance(overrides).then(() => {

@@ -19,7 +19,7 @@ const duplexify = require('duplexify');
 import {expect} from 'chai';
 import * as extend from 'extend';
 import {Transform} from 'stream';
-import * as through2 from 'through2';
+import {PassThrough} from 'stream';
 
 import {google} from '../protos/firestore_proto_api';
 
@@ -261,8 +261,8 @@ class StreamHelper {
       // Create a mock backend whose stream we can return.
       ++this.streamCount;
 
-      this.readStream = through2.obj();
-      this.writeStream = through2.obj();
+      this.readStream = new PassThrough({objectMode: true});
+      this.writeStream = new PassThrough({objectMode: true});
 
       this.readStream!.once('data', result =>
         this.deferredListener.on('data', result)
@@ -1170,10 +1170,13 @@ describe('Query watch', () => {
               listenCallback = () => {
                 // Return a stream that always errors on write
                 ++streamHelper.streamCount;
-                return through2.obj((chunk, enc, callback) => {
-                  callback(
-                    new Error(`Stream Error (${streamHelper.streamCount})`)
-                  );
+                return new PassThrough({
+                  objectMode: true,
+                  transform: (chunk, enc, callback) => {
+                    callback(
+                      new Error(`Stream Error (${streamHelper.streamCount})`)
+                    );
+                  },
                 });
               };
 

@@ -17,7 +17,7 @@
 const deepEqual = require('deep-equal');
 
 import * as bun from 'bun';
-import * as through2 from 'through2';
+import {PassThrough} from 'stream';
 
 import * as proto from '../protos/firestore_proto_api';
 
@@ -1682,12 +1682,15 @@ export class Query {
   stream(): NodeJS.ReadableStream {
     const responseStream = this._stream();
 
-    const transform = through2.obj(function(this, chunk, encoding, callback) {
-      // Only send chunks with documents.
-      if (chunk.document) {
-        this.push(chunk.document);
-      }
-      callback();
+    const transform = new PassThrough({
+      objectMode: true,
+      transform(this, chunk, encoding, callback) {
+        // Only send chunks with documents.
+        if (chunk.document) {
+          this.push(chunk.document);
+        }
+        callback();
+      },
     });
 
     return bun([responseStream, transform]);
@@ -1787,18 +1790,21 @@ export class Query {
     const tag = requestTag();
     const self = this;
 
-    const stream = through2.obj(function(this, proto, enc, callback) {
-      const readTime = Timestamp.fromProto(proto.readTime);
-      if (proto.document) {
-        const document = self.firestore.snapshot_(
-          proto.document,
-          proto.readTime
-        );
-        this.push({document, readTime});
-      } else {
-        this.push({readTime});
-      }
-      callback();
+    const stream = new PassThrough({
+      objectMode: true,
+      transform(this, proto, enc, callback) {
+        const readTime = Timestamp.fromProto(proto.readTime);
+        if (proto.document) {
+          const document = self.firestore.snapshot_(
+            proto.document,
+            proto.readTime
+          );
+          this.push({document, readTime});
+        } else {
+          this.push({readTime});
+        }
+        callback();
+      },
     });
 
     this.firestore.initializeIfNeeded().then(() => {
