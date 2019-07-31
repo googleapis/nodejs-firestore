@@ -1356,8 +1356,8 @@ describe('startAt() interface', () => {
     expect(() => {
       query.orderBy(FieldPath.documentId()).startAt('doc/coll');
     }).to.throw(
-      "When querying a collection and ordering by FieldPath.documentId(), " +
-        "the corresponding value must be a plain document ID, but " +
+      'When querying a collection and ordering by FieldPath.documentId(), ' +
+        'the corresponding value must be a plain document ID, but ' +
         "'doc/coll' contains a slash."
     );
   });
@@ -1877,10 +1877,10 @@ describe('collectionGroup queries', () => {
       expect(() => {
         query.orderBy(FieldPath.documentId()).startAt('coll');
       }).to.throw(
-        "When querying a collection group and ordering by " +
-          "FieldPath.documentId(), the corresponding value must result in a " +
+        'When querying a collection group and ordering by ' +
+          'FieldPath.documentId(), the corresponding value must result in a ' +
           "valid document path, but 'coll' is not because it contains an odd " +
-          "number of segments."
+          'number of segments.'
       );
     });
   });
