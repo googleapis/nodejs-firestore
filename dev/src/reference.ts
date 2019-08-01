@@ -1432,7 +1432,7 @@ export class Query {
       } else if (val.indexOf('/') !== -1) {
         throw new Error(
           'When querying a collection and ordering by FieldPath.documentId(), ' +
-            `the corresponding value must be a plain document ID, but '${val}'` +
+            `the corresponding value must be a plain document ID, but '${val}' ` +
             'contains a slash.'
         );
       }
