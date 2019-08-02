@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [2.2.5](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.4...v2.2.5) (2019-08-02)
+
+
+### Bug Fixes
+
+* Better error for Collection Group Queries with documentId() cursors ([#720](https://www.github.com/googleapis/nodejs-firestore/issues/720)) ([169286d](https://www.github.com/googleapis/nodejs-firestore/commit/169286d))
+
 ### [2.2.4](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.3...v2.2.4) (2019-07-08)
 
 
