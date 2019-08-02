@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [2.2.6](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.5...v2.2.6) (2019-08-02)
+
+
+### Bug Fixes
+
+*  allow calls with no request, add JSON proto ([#725](https://www.github.com/googleapis/nodejs-firestore/issues/725)) ([8b0624b](https://www.github.com/googleapis/nodejs-firestore/commit/8b0624b))
+
 ### [2.2.5](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.4...v2.2.5) (2019-08-02)
 
 
