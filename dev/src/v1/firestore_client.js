@@ -315,6 +315,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -458,6 +459,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
 
     return this._innerApiCalls.listDocuments(request, options, callback);
@@ -624,6 +626,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
 
     return this._innerApiCalls.createDocument(request, options, callback);
@@ -700,6 +703,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -751,6 +755,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -825,6 +830,7 @@ class FirestoreClient {
    * });
    */
   batchGetDocuments(request, options) {
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -884,6 +890,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -951,6 +958,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -1004,6 +1012,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -1066,6 +1075,7 @@ class FirestoreClient {
    * });
    */
   runQuery(request, options) {
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -1240,6 +1250,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
