@@ -495,7 +495,7 @@ abstract class Watch {
           return;
         }
 
-        await this.firestore.initializeIfNeeded();
+        await this.firestore.initializeIfNeeded(this.requestTag);
 
         const request: api.IListenRequest = {};
         request.database = this.firestore.formattedName;

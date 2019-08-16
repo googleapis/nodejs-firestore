@@ -527,16 +527,15 @@ export class WriteBatch {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
     this._committed = true;
 
-    await this._firestore.initializeIfNeeded();
-
-    const explicitTransaction = commitOptions && commitOptions.transactionId;
-
     const tag = (commitOptions && commitOptions.requestTag) || requestTag();
+    await this._firestore.initializeIfNeeded(tag);
+
     const database = this._firestore.formattedName;
     const request: api.ICommitRequest = {database};
 
     // On GCF, we periodically force transactional commits to allow for
     // request retries in case GCF closes our backend connection.
+    const explicitTransaction = commitOptions && commitOptions.transactionId;
     if (!explicitTransaction && this._shouldCreateTransaction()) {
       logger('WriteBatch.commit', tag, 'Using transaction for commit');
       return this._firestore

@@ -281,13 +281,14 @@ export class DocumentReference implements Serializable {
    * });
    */
   listCollections(): Promise<CollectionReference[]> {
-    return this.firestore.initializeIfNeeded().then(() => {
+    const tag = requestTag();
+    return this.firestore.initializeIfNeeded(tag).then(() => {
       const request = {parent: this.formattedName};
       return this._firestore
         .request<string[]>(
           'listCollectionIds',
           request,
-          requestTag(),
+          tag,
           /* allowRetries= */ true
         )
         .then(collectionIds => {
@@ -1820,7 +1821,7 @@ export class Query {
       callback();
     });
 
-    this.firestore.initializeIfNeeded().then(() => {
+    this.firestore.initializeIfNeeded(tag).then(() => {
       const request = this.toProto(transactionId);
       this._firestore
         .readStream('runQuery', request, tag, true)
@@ -2037,7 +2038,8 @@ export class CollectionReference extends Query {
    * });
    */
   listDocuments(): Promise<DocumentReference[]> {
-    return this.firestore.initializeIfNeeded().then(() => {
+    const tag = requestTag();
+    return this.firestore.initializeIfNeeded(tag).then(() => {
       const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
         this.firestore.projectId
       );
@@ -2053,7 +2055,7 @@ export class CollectionReference extends Query {
         .request<api.IDocument[]>(
           'listDocuments',
           request,
-          requestTag(),
+          tag,
           /*allowRetries=*/ true
         )
         .then(documents => {

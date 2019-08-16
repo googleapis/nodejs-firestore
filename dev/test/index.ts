@@ -318,7 +318,7 @@ describe('instantiation', () => {
 
   it('cannot change settings after client initialized', async () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
-    await firestore.initializeIfNeeded();
+    await firestore.initializeIfNeeded('tag');
 
     expect(() => firestore.settings({})).to.throw(
       'Firestore has already been initialized. You can only call settings() once, and only before calling any other methods on a Firestore object.'
@@ -525,7 +525,7 @@ describe('instantiation', () => {
       },
       {projectId: undefined}
     ).then(async firestore => {
-      await firestore.initializeIfNeeded();
+      await firestore.initializeIfNeeded('tag');
       expect(firestore.projectId).to.equal('foo');
       expect(firestore.formattedName).to.equal(
         `projects/foo/databases/(default)`
@@ -566,7 +566,7 @@ describe('instantiation', () => {
       ssl: false,
       projectId: 'foo',
     });
-    await firestore['_clientPool'].run(() => Promise.resolve());
+    await firestore['_clientPool'].run('tag', () => Promise.resolve());
   });
 
   it('exports all types', () => {
