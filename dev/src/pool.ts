@@ -161,6 +161,7 @@ export class ClientPool<T> {
    * Deletes clients that are no longer executing operations. Keeps up to one
    * idle client to reduce future initialization costs.
    *
+   * @return Number of clients deleted.
    * @private
    */
   private garbageCollect(): number {

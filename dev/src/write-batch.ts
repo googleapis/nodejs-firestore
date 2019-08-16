@@ -528,8 +528,6 @@ export class WriteBatch {
     this._committed = true;
 
     const tag = (commitOptions && commitOptions.requestTag) || requestTag();
-    const explicitTransaction = commitOptions && commitOptions.transactionId;
-
     await this._firestore.initializeIfNeeded(tag);
 
     const database = this._firestore.formattedName;
@@ -537,6 +535,7 @@ export class WriteBatch {
 
     // On GCF, we periodically force transactional commits to allow for
     // request retries in case GCF closes our backend connection.
+    const explicitTransaction = commitOptions && commitOptions.transactionId;
     if (!explicitTransaction && this._shouldCreateTransaction()) {
       logger('WriteBatch.commit', tag, 'Using transaction for commit');
       return this._firestore
