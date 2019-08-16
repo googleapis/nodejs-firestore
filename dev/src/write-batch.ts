@@ -527,11 +527,11 @@ export class WriteBatch {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
     this._committed = true;
 
-    await this._firestore.initializeIfNeeded();
-
+    const tag = (commitOptions && commitOptions.requestTag) || requestTag();
     const explicitTransaction = commitOptions && commitOptions.transactionId;
 
-    const tag = (commitOptions && commitOptions.requestTag) || requestTag();
+    await this._firestore.initializeIfNeeded(tag);
+
     const database = this._firestore.formattedName;
     const request: api.ICommitRequest = {database};
 

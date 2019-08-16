@@ -16,6 +16,8 @@
 
 import * as assert from 'assert';
 
+import {logger} from './logger';
+
 /**
  * An auto-resizing pool that distributes concurrent operations over multiple
  * clients of type `T`.
@@ -50,18 +52,25 @@ export class ClientPool<T> {
    *
    * @private
    */
-  private acquire(): T {
+  private acquire(requestTag: string): T {
     let selectedClient: T | null = null;
     let selectedRequestCount = 0;
 
     this.activeClients.forEach((requestCount, client) => {
       if (!selectedClient && requestCount < this.concurrentOperationLimit) {
+        logger(
+          'ClientPool.acquire',
+          requestTag,
+          'Re-using existing client with %s remaining operations',
+          this.concurrentOperationLimit - requestCount
+        );
         selectedClient = client;
         selectedRequestCount = requestCount;
       }
     });
 
     if (!selectedClient) {
+      logger('ClientPool.acquire', requestTag, 'Creating a new client');
       selectedClient = this.clientFactory();
       assert(
         !this.activeClients.has(selectedClient),
@@ -79,7 +88,7 @@ export class ClientPool<T> {
    * removing it from the pool of active clients.
    * @private
    */
-  private release(client: T): void {
+  private release(requestTag: string, client: T): void {
     let requestCount = this.activeClients.get(client) || 0;
     assert(requestCount > 0, 'No active request');
 
@@ -87,7 +96,15 @@ export class ClientPool<T> {
     this.activeClients.set(client, requestCount);
 
     if (requestCount === 0) {
-      this.garbageCollect();
+      const deletedCount = this.garbageCollect();
+      if (deletedCount) {
+        logger(
+          'ClientPool.release',
+          requestTag,
+          'Garbage collected %s clients',
+          deletedCount
+        );
+      }
     }
   }
 
@@ -120,21 +137,22 @@ export class ClientPool<T> {
    * additional client if all existing clients already operate at the concurrent
    * operation limit.
    *
+   * @param requestTag A unique client-assigned identifier for this operation.
    * @param op A callback function that returns a Promise. The client T will
    * be returned to the pool when callback finishes.
    * @return A Promise that resolves with the result of `op`.
    * @private
    */
-  run<V>(op: (client: T) => Promise<V>): Promise<V> {
-    const client = this.acquire();
+  run<V>(requestTag: string, op: (client: T) => Promise<V>): Promise<V> {
+    const client = this.acquire(requestTag);
 
     return op(client)
       .catch(err => {
-        this.release(client);
+        this.release(requestTag, client);
         return Promise.reject(err);
       })
       .then(res => {
-        this.release(client);
+        this.release(requestTag, client);
         return res;
       });
   }
@@ -145,7 +163,7 @@ export class ClientPool<T> {
    *
    * @private
    */
-  private garbageCollect(): void {
+  private garbageCollect(): number {
     let idleClients = 0;
     this.activeClients.forEach((requestCount, client) => {
       if (requestCount === 0) {
@@ -156,5 +174,6 @@ export class ClientPool<T> {
         }
       }
     });
+    return idleClients - 1;
   }
 }
