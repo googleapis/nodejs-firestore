@@ -20,7 +20,12 @@ import {detectValueType} from './convert';
 import {FieldTransform} from './field-value';
 import {DeleteTransform} from './field-value';
 import {GeoPoint} from './geo-point';
-import {DocumentReference, Firestore} from './index';
+import {
+  DocumentReference,
+  Firestore,
+  getObjectOwnProperties,
+  getPropValue,
+} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, DocumentData, ValidationOptions} from './types';
@@ -79,13 +84,11 @@ export class Serializer {
   encodeFields(obj: DocumentData): ApiMapValue {
     const fields: ApiMapValue = {};
 
-    for (const prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        const val = this.encodeValue(obj[prop]);
+    for (const prop of getObjectOwnProperties(obj)) {
+      const val = this.encodeValue(getPropValue(obj, prop));
 
-        if (val) {
-          fields[prop] = val;
-        }
+      if (val) {
+        fields[prop] = val;
       }
     }
 
@@ -244,10 +247,8 @@ export class Serializer {
         const obj: DocumentData = {};
         const fields = proto.mapValue!.fields!;
 
-        for (const prop in fields) {
-          if (fields.hasOwnProperty(prop)) {
-            obj[prop] = this.decodeValue(fields[prop]);
-          }
+        for (const prop of getObjectOwnProperties(fields)) {
+          obj[prop] = this.decodeValue(getPropValue(fields, prop));
         }
 
         return obj;
@@ -334,18 +335,16 @@ export function validateUserInput(
       );
     }
   } else if (isPlainObject(value)) {
-    for (const prop in value) {
-      if (value.hasOwnProperty(prop)) {
-        validateUserInput(
-          arg,
-          value[prop]!,
-          desc,
-          options,
-          path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
-          level + 1,
-          inArray
-        );
-      }
+    for (const prop of getObjectOwnProperties(value)) {
+      validateUserInput(
+        arg,
+        getPropValue(value, prop)!,
+        desc,
+        options,
+        path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
+        level + 1,
+        inArray
+      );
     }
   } else if (value === undefined) {
     throw new Error(
