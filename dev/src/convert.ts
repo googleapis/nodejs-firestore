@@ -20,6 +20,7 @@ import {ApiMapValue, ProtobufJsValue} from './types';
 import {validateObject} from './validate';
 
 import api = google.firestore.v1;
+import {getObjectOwnProperties, getPropValue} from '.';
 
 /*!
  * @module firestore/convert
@@ -200,10 +201,10 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
     }
     case 'mapValue': {
       const mapValue: ApiMapValue = {};
-      for (const prop in fieldValue.mapValue!.fields!) {
-        if (fieldValue.mapValue!.fields!.hasOwnProperty(prop)) {
-          mapValue[prop] = valueFromJson(fieldValue.mapValue!.fields![prop]);
-        }
+      for (const prop of getObjectOwnProperties(fieldValue.mapValue!.fields!)) {
+        mapValue[prop] = valueFromJson(
+          getPropValue(fieldValue.mapValue!.fields!, prop)
+        );
       }
       return {
         mapValue: {
@@ -228,11 +229,8 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
 export function fieldsFromJson(document: ApiMapValue): ApiMapValue {
   const result: ApiMapValue = {};
 
-  for (const prop in document) {
-    if (document.hasOwnProperty(prop)) {
-      result[prop] = valueFromJson(document[prop]);
-    }
+  for (const prop of getObjectOwnProperties(document)) {
+    result[prop] = valueFromJson(getPropValue(document, prop));
   }
-
   return result;
 }

@@ -23,7 +23,7 @@ import {
   DocumentTransform,
   Precondition,
 } from './document';
-import {Firestore} from './index';
+import {Firestore, getObjectOwnProperties, getPropValue} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference, validateDocumentReference} from './reference';
@@ -848,19 +848,17 @@ export function validateDocumentData(
     throw new Error(customObjectMessage(arg, obj));
   }
 
-  for (const prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      validateUserInput(
-        arg,
-        obj[prop],
-        'Firestore document',
-        {
-          allowDeletes: allowDeletes ? 'all' : 'none',
-          allowTransforms: true,
-        },
-        new FieldPath(prop)
-      );
-    }
+  for (const prop of getObjectOwnProperties(obj)) {
+    validateUserInput(
+      arg,
+      getPropValue(obj, prop),
+      'Firestore document',
+      {
+        allowDeletes: allowDeletes ? 'all' : 'none',
+        allowTransforms: true,
+      },
+      new FieldPath(prop)
+    );
   }
 }
 
@@ -931,11 +929,9 @@ function validateUpdateMap(arg: string | number, obj: unknown): void {
 
   let isEmpty = true;
 
-  for (const prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      isEmpty = false;
-      validateFieldValue(arg, obj[prop], new FieldPath(prop));
-    }
+  for (const prop of getObjectOwnProperties(obj)) {
+    isEmpty = false;
+    validateFieldValue(arg, getPropValue(obj, prop), new FieldPath(prop));
   }
 
   if (isEmpty) {

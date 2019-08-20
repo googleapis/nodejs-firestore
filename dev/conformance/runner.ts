@@ -29,6 +29,8 @@ import {
   FieldPath,
   FieldValue,
   Firestore,
+  getObjectOwnProperties,
+  getPropValue,
   Query,
   QueryDocumentSnapshot,
   QuerySnapshot,
@@ -141,10 +143,8 @@ const convertInput = {
       }
     }
     function convertObject(obj: {[k: string]: unknown}) {
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          obj[key] = convertValue(obj[key]);
-        }
+      for (const key of getObjectOwnProperties(obj)) {
+        obj[key] = convertValue(getPropValue(obj, key));
       }
       return obj;
     }
