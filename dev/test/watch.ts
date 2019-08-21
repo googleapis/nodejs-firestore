@@ -28,8 +28,6 @@ import {
   FieldPath,
   Firestore,
   GeoPoint,
-  getObjectOwnProperties,
-  getPropValue,
   setLogFunction,
   Timestamp,
 } from '../src';
@@ -887,44 +885,46 @@ describe('Query watch', () => {
 
     let result = Promise.resolve();
 
-    for (const statusCode of getObjectOwnProperties(expectRetry)) {
-      result = result.then(() => {
-        const err = new GrpcError('GRPC Error');
-        err.code = Number(statusCode);
+    for (const statusCode in expectRetry) {
+      if (expectRetry.hasOwnProperty(statusCode)) {
+        result = result.then(() => {
+          const err = new GrpcError('GRPC Error');
+          err.code = Number(statusCode);
 
-        if (getPropValue(expectRetry, +statusCode)) {
-          return watchHelper.runTest(collQueryJSON(), () => {
-            watchHelper.sendAddTarget();
-            watchHelper.sendCurrent();
-            watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-            return watchHelper.await('snapshot').then(() => {
-              streamHelper.destroyStream(err);
-              return streamHelper.awaitReopen();
-            });
-          });
-        } else {
-          return watchHelper.runFailedTest(
-            collQueryJSON(),
-            () => {
+          if (expectRetry[statusCode]) {
+            return watchHelper.runTest(collQueryJSON(), () => {
               watchHelper.sendAddTarget();
               watchHelper.sendCurrent();
               watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-              return watchHelper
-                .await('snapshot')
-                .then(() => {
-                  streamHelper.destroyStream(err);
-                })
-                .then(() => {
-                  return streamHelper.await('error');
-                })
-                .then(() => {
-                  return streamHelper.await('close');
-                });
-            },
-            'GRPC Error'
-          );
-        }
-      });
+              return watchHelper.await('snapshot').then(() => {
+                streamHelper.destroyStream(err);
+                return streamHelper.awaitReopen();
+              });
+            });
+          } else {
+            return watchHelper.runFailedTest(
+              collQueryJSON(),
+              () => {
+                watchHelper.sendAddTarget();
+                watchHelper.sendCurrent();
+                watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
+                return watchHelper
+                  .await('snapshot')
+                  .then(() => {
+                    streamHelper.destroyStream(err);
+                  })
+                  .then(() => {
+                    return streamHelper.await('error');
+                  })
+                  .then(() => {
+                    return streamHelper.await('close');
+                  });
+              },
+              'GRPC Error'
+            );
+          }
+        });
+      }
     }
 
     return result;

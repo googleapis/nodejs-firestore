@@ -28,7 +28,6 @@ import {ApiMapValue, DocumentData, UpdateMap} from './types';
 import {isEmpty, isObject} from './util';
 
 import api = google.firestore.v1;
-import {getObjectOwnProperties, getPropValue} from '.';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -387,8 +386,8 @@ export class DocumentSnapshot {
     }
 
     const obj: DocumentData = {};
-    for (const prop of getObjectOwnProperties(fields)) {
-      obj[prop] = this._serializer.decodeValue(getPropValue(fields, prop));
+    for (const prop of Object.keys(fields)) {
+      obj[prop] = this._serializer.decodeValue(fields[prop]);
     }
     return obj;
   }
@@ -674,7 +673,7 @@ export class DocumentMask {
     ): void {
       let isEmpty = true;
 
-      for (const key of getObjectOwnProperties(currentData)) {
+      for (const key of Object.keys(currentData)) {
         isEmpty = false;
 
         // We don't split on dots since fromObject is called with
@@ -683,7 +682,7 @@ export class DocumentMask {
         const childPath = currentPath
           ? currentPath.append(childSegment)
           : childSegment;
-        const value = getPropValue(currentData, key);
+        const value = currentData[key];
         if (value instanceof FieldTransform) {
           if (value.includeInDocumentMask) {
             fieldPaths.push(childPath);
@@ -898,8 +897,8 @@ export class DocumentTransform {
   ): DocumentTransform {
     const updateMap = new Map<FieldPath, unknown>();
 
-    for (const prop of getObjectOwnProperties(obj)) {
-      updateMap.set(new FieldPath(prop), getPropValue(obj, prop));
+    for (const prop of Object.keys(obj)) {
+      updateMap.set(new FieldPath(prop), obj[prop]);
     }
 
     return DocumentTransform.fromUpdateMap(ref, updateMap);
@@ -934,12 +933,8 @@ export class DocumentTransform {
           encode_(val[i], path.append(String(i)), false);
         }
       } else if (isPlainObject(val)) {
-        for (const prop of getObjectOwnProperties(val)) {
-          encode_(
-            getPropValue(val, prop),
-            path.append(new FieldPath(prop)),
-            allowTransforms
-          );
+        for (const prop of Object.keys(val)) {
+          encode_(val[prop], path.append(new FieldPath(prop)), allowTransforms);
         }
       }
     }

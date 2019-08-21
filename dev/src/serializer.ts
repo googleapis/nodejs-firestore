@@ -20,12 +20,7 @@ import {detectValueType} from './convert';
 import {FieldTransform} from './field-value';
 import {DeleteTransform} from './field-value';
 import {GeoPoint} from './geo-point';
-import {
-  DocumentReference,
-  Firestore,
-  getObjectOwnProperties,
-  getPropValue,
-} from './index';
+import {DocumentReference, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, DocumentData, ValidationOptions} from './types';
@@ -84,8 +79,8 @@ export class Serializer {
   encodeFields(obj: DocumentData): ApiMapValue {
     const fields: ApiMapValue = {};
 
-    for (const prop of getObjectOwnProperties(obj)) {
-      const val = this.encodeValue(getPropValue(obj, prop));
+    for (const prop of Object.keys(obj)) {
+      const val = this.encodeValue(obj[prop]);
 
       if (val) {
         fields[prop] = val;
@@ -245,10 +240,11 @@ export class Serializer {
       }
       case 'mapValue': {
         const obj: DocumentData = {};
-        const fields = proto.mapValue!.fields!;
-
-        for (const prop of getObjectOwnProperties(fields)) {
-          obj[prop] = this.decodeValue(getPropValue(fields, prop));
+        const fields = proto.mapValue!.fields;
+        if (fields) {
+          for (const prop of Object.keys(fields)) {
+            obj[prop] = this.decodeValue(fields[prop]);
+          }
         }
 
         return obj;
@@ -335,10 +331,10 @@ export function validateUserInput(
       );
     }
   } else if (isPlainObject(value)) {
-    for (const prop of getObjectOwnProperties(value)) {
+    for (const prop of Object.keys(value)) {
       validateUserInput(
         arg,
-        getPropValue(value, prop)!,
+        value[prop]!,
         desc,
         options,
         path ? path.append(new FieldPath(prop)) : new FieldPath(prop),

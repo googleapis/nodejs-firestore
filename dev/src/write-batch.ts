@@ -23,7 +23,7 @@ import {
   DocumentTransform,
   Precondition,
 } from './document';
-import {Firestore, getObjectOwnProperties, getPropValue} from './index';
+import {Firestore} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference, validateDocumentReference} from './reference';
@@ -848,10 +848,10 @@ export function validateDocumentData(
     throw new Error(customObjectMessage(arg, obj));
   }
 
-  for (const prop of getObjectOwnProperties(obj)) {
+  for (const prop of Object.keys(obj)) {
     validateUserInput(
       arg,
-      getPropValue(obj, prop),
+      obj[prop],
       'Firestore document',
       {
         allowDeletes: allowDeletes ? 'all' : 'none',
@@ -929,9 +929,9 @@ function validateUpdateMap(arg: string | number, obj: unknown): void {
 
   let isEmpty = true;
 
-  for (const prop of getObjectOwnProperties(obj)) {
+  for (const prop of Object.keys(obj)) {
     isEmpty = false;
-    validateFieldValue(arg, getPropValue(obj, prop), new FieldPath(prop));
+    validateFieldValue(arg, obj[prop], new FieldPath(prop));
   }
 
   if (isEmpty) {

@@ -87,28 +87,6 @@ export {
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
 
-/**
- * find value of given property in object.
- *
- * @property {Object} obj
- * @property {string} key Property in object
- */
-export const getPropValue = <T, K extends keyof T>(obj: T, key: K) => {
-  return obj[key];
-};
-
-/**
- * find all own enumerable property names in object.
- *
- * @property {Object} obj
- */
-export const getObjectOwnProperties = <T>(obj: T) => {
-  if (obj) {
-    return Object.keys(obj);
-  }
-  return [];
-};
-
 /*!
  * DO NOT REMOVE THE FOLLOWING NAMESPACE DEFINITIONS
  */
