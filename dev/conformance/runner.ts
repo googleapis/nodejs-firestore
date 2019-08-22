@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,10 +141,8 @@ const convertInput = {
       }
     }
     function convertObject(obj: {[k: string]: unknown}) {
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          obj[key] = convertValue(obj[key]);
-        }
+      for (const key of Object.keys(obj)) {
+        obj[key] = convertValue(obj[key]);
       }
       return obj;
     }

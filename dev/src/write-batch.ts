@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -848,19 +848,17 @@ export function validateDocumentData(
     throw new Error(customObjectMessage(arg, obj));
   }
 
-  for (const prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      validateUserInput(
-        arg,
-        obj[prop],
-        'Firestore document',
-        {
-          allowDeletes: allowDeletes ? 'all' : 'none',
-          allowTransforms: true,
-        },
-        new FieldPath(prop)
-      );
-    }
+  for (const prop of Object.keys(obj)) {
+    validateUserInput(
+      arg,
+      obj[prop],
+      'Firestore document',
+      {
+        allowDeletes: allowDeletes ? 'all' : 'none',
+        allowTransforms: true,
+      },
+      new FieldPath(prop)
+    );
   }
 }
 
@@ -930,9 +928,8 @@ function validateUpdateMap(arg: string | number, obj: unknown): void {
   }
 
   let isEmpty = true;
-
-  for (const prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
+  if (obj) {
+    for (const prop of Object.keys(obj)) {
       isEmpty = false;
       validateFieldValue(arg, obj[prop], new FieldPath(prop));
     }

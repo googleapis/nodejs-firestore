@@ -1,5 +1,5 @@
 /*!
- * Copyright 2018 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,13 +79,11 @@ export class Serializer {
   encodeFields(obj: DocumentData): ApiMapValue {
     const fields: ApiMapValue = {};
 
-    for (const prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        const val = this.encodeValue(obj[prop]);
+    for (const prop of Object.keys(obj)) {
+      const val = this.encodeValue(obj[prop]);
 
-        if (val) {
-          fields[prop] = val;
-        }
+      if (val) {
+        fields[prop] = val;
       }
     }
 
@@ -242,10 +240,9 @@ export class Serializer {
       }
       case 'mapValue': {
         const obj: DocumentData = {};
-        const fields = proto.mapValue!.fields!;
-
-        for (const prop in fields) {
-          if (fields.hasOwnProperty(prop)) {
+        const fields = proto.mapValue!.fields;
+        if (fields) {
+          for (const prop of Object.keys(fields)) {
             obj[prop] = this.decodeValue(fields[prop]);
           }
         }
@@ -334,18 +331,16 @@ export function validateUserInput(
       );
     }
   } else if (isPlainObject(value)) {
-    for (const prop in value) {
-      if (value.hasOwnProperty(prop)) {
-        validateUserInput(
-          arg,
-          value[prop]!,
-          desc,
-          options,
-          path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
-          level + 1,
-          inArray
-        );
-      }
+    for (const prop of Object.keys(value)) {
+      validateUserInput(
+        arg,
+        value[prop]!,
+        desc,
+        options,
+        path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
+        level + 1,
+        inArray
+      );
     }
   } else if (value === undefined) {
     throw new Error(
