@@ -928,10 +928,11 @@ function validateUpdateMap(arg: string | number, obj: unknown): void {
   }
 
   let isEmpty = true;
-
-  for (const prop of Object.keys(obj)) {
-    isEmpty = false;
-    validateFieldValue(arg, obj[prop], new FieldPath(prop));
+  if (obj) {
+    for (const prop of Object.keys(obj)) {
+      isEmpty = false;
+      validateFieldValue(arg, obj[prop], new FieldPath(prop));
+    }
   }
 
   if (isEmpty) {
