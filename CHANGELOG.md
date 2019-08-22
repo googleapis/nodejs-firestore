@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [2.2.8](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.7...v2.2.8) (2019-08-22)
+
+
+### Bug Fixes
+
+* serialization does not work with null objects ([#736](https://www.github.com/googleapis/nodejs-firestore/issues/736)) ([870d6a7](https://www.github.com/googleapis/nodejs-firestore/commit/870d6a7))
+
 ### [2.2.7](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.6...v2.2.7) (2019-08-16)
 
 
