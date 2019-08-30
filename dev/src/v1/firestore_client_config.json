@@ -4,7 +4,6 @@
       "retry_codes": {
         "idempotent": [
           "DEADLINE_EXCEEDED",
-          "INTERNAL",
           "UNAVAILABLE"
         ],
         "non_idempotent": []
