@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [2.2.9](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.8...v2.2.9) (2019-08-30)
+
+
+### Bug Fixes
+
+* retrying 13 INTERNAL RPC errors ([#742](https://www.github.com/googleapis/nodejs-firestore/issues/742)) ([431edcb](https://www.github.com/googleapis/nodejs-firestore/commit/431edcb))
+
 ### [2.2.8](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.7...v2.2.8) (2019-08-22)
 
 
