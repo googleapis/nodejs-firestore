@@ -11,7 +11,7 @@
     "test": "mocha --timeout 600000"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^2.2.9"
+    "@google-cloud/firestore": "^2.2.8"
   },
   "devDependencies": {
     "chai": "^4.2.0",
