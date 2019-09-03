@@ -22,6 +22,8 @@ import {Deferred} from '../src/util';
 
 use(chaiAsPromised);
 
+const REQUEST_TAG = 'tag';
+
 function deferredPromises(count: number): Array<Deferred<void>> {
   const deferred: Array<Deferred<void>> = [];
   for (let i = 0; i < count; ++i) {
@@ -40,14 +42,14 @@ describe('Client pool', () => {
 
     const operationPromises = deferredPromises(4);
 
-    clientPool.run(() => operationPromises[0].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[0].promise);
     expect(clientPool.size).to.equal(1);
-    clientPool.run(() => operationPromises[1].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[1].promise);
     expect(clientPool.size).to.equal(1);
-    clientPool.run(() => operationPromises[2].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[2].promise);
     expect(clientPool.size).to.equal(1);
 
-    clientPool.run(() => operationPromises[3].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[3].promise);
     expect(clientPool.size).to.equal(2);
   });
 
@@ -61,20 +63,21 @@ describe('Client pool', () => {
     const operationPromises = deferredPromises(5);
 
     const completionPromise = clientPool.run(
+      REQUEST_TAG,
       () => operationPromises[0].promise
     );
     expect(clientPool.size).to.equal(1);
-    clientPool.run(() => operationPromises[1].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[1].promise);
     expect(clientPool.size).to.equal(1);
-    clientPool.run(() => operationPromises[2].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[2].promise);
     expect(clientPool.size).to.equal(2);
-    clientPool.run(() => operationPromises[3].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[3].promise);
     expect(clientPool.size).to.equal(2);
 
     operationPromises[0].resolve();
 
     return completionPromise.then(() => {
-      clientPool.run(() => operationPromises[4].promise);
+      clientPool.run(REQUEST_TAG, () => operationPromises[4].promise);
       expect(clientPool.size).to.equal(2);
     });
   });
@@ -89,13 +92,21 @@ describe('Client pool', () => {
     const operationPromises = deferredPromises(4);
     const completionPromises: Array<Promise<void>> = [];
 
-    completionPromises.push(clientPool.run(() => operationPromises[0].promise));
+    completionPromises.push(
+      clientPool.run(REQUEST_TAG, () => operationPromises[0].promise)
+    );
     expect(clientPool.size).to.equal(1);
-    completionPromises.push(clientPool.run(() => operationPromises[1].promise));
+    completionPromises.push(
+      clientPool.run(REQUEST_TAG, () => operationPromises[1].promise)
+    );
     expect(clientPool.size).to.equal(1);
-    completionPromises.push(clientPool.run(() => operationPromises[2].promise));
+    completionPromises.push(
+      clientPool.run(REQUEST_TAG, () => operationPromises[2].promise)
+    );
     expect(clientPool.size).to.equal(2);
-    completionPromises.push(clientPool.run(() => operationPromises[3].promise));
+    completionPromises.push(
+      clientPool.run(REQUEST_TAG, () => operationPromises[3].promise)
+    );
     expect(clientPool.size).to.equal(2);
 
     operationPromises.forEach(deferred => deferred.resolve());
@@ -115,13 +126,21 @@ describe('Client pool', () => {
     const operationPromises = deferredPromises(4);
     const completionPromises: Array<Promise<void>> = [];
 
-    completionPromises.push(clientPool.run(() => operationPromises[0].promise));
+    completionPromises.push(
+      clientPool.run(REQUEST_TAG, () => operationPromises[0].promise)
+    );
     expect(clientPool.size).to.equal(1);
-    completionPromises.push(clientPool.run(() => operationPromises[1].promise));
+    completionPromises.push(
+      clientPool.run(REQUEST_TAG, () => operationPromises[1].promise)
+    );
     expect(clientPool.size).to.equal(1);
-    completionPromises.push(clientPool.run(() => operationPromises[2].promise));
+    completionPromises.push(
+      clientPool.run(REQUEST_TAG, () => operationPromises[2].promise)
+    );
     expect(clientPool.size).to.equal(2);
-    completionPromises.push(clientPool.run(() => operationPromises[3].promise));
+    completionPromises.push(
+      clientPool.run(REQUEST_TAG, () => operationPromises[3].promise)
+    );
     expect(clientPool.size).to.equal(2);
 
     operationPromises.forEach(deferred => deferred.reject());
@@ -138,7 +157,7 @@ describe('Client pool', () => {
       return {};
     });
 
-    const op = clientPool.run(() => Promise.resolve('Success'));
+    const op = clientPool.run(REQUEST_TAG, () => Promise.resolve('Success'));
     return expect(op).to.become('Success');
   });
 
@@ -147,7 +166,9 @@ describe('Client pool', () => {
       return {};
     });
 
-    const op = clientPool.run(() => Promise.reject('Generated error'));
+    const op = clientPool.run(REQUEST_TAG, () =>
+      Promise.reject('Generated error')
+    );
     return expect(op).to.eventually.be.rejectedWith('Generated error');
   });
 });

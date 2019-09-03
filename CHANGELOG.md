@@ -4,6 +4,28 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [2.2.9](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.8...v2.2.9) (2019-08-30)
+
+
+### Bug Fixes
+
+* retrying 13 INTERNAL RPC errors ([#742](https://www.github.com/googleapis/nodejs-firestore/issues/742)) ([431edcb](https://www.github.com/googleapis/nodejs-firestore/commit/431edcb))
+
+### [2.2.8](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.7...v2.2.8) (2019-08-22)
+
+
+### Bug Fixes
+
+* serialization does not work with null objects ([#736](https://www.github.com/googleapis/nodejs-firestore/issues/736)) ([870d6a7](https://www.github.com/googleapis/nodejs-firestore/commit/870d6a7))
+
+### [2.2.7](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.6...v2.2.7) (2019-08-16)
+
+
+### Bug Fixes
+
+* **deps:** use the latest extend ([#728](https://www.github.com/googleapis/nodejs-firestore/issues/728)) ([425bf3d](https://www.github.com/googleapis/nodejs-firestore/commit/425bf3d))
+* add logging to client pool ([#733](https://www.github.com/googleapis/nodejs-firestore/issues/733)) ([a4efa09](https://www.github.com/googleapis/nodejs-firestore/commit/a4efa09))
+
 ### [2.2.6](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.5...v2.2.6) (2019-08-02)
 
 

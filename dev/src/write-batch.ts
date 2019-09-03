@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -527,16 +527,15 @@ export class WriteBatch {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
     this._committed = true;
 
-    await this._firestore.initializeIfNeeded();
-
-    const explicitTransaction = commitOptions && commitOptions.transactionId;
-
     const tag = (commitOptions && commitOptions.requestTag) || requestTag();
+    await this._firestore.initializeIfNeeded(tag);
+
     const database = this._firestore.formattedName;
     const request: api.ICommitRequest = {database};
 
     // On GCF, we periodically force transactional commits to allow for
     // request retries in case GCF closes our backend connection.
+    const explicitTransaction = commitOptions && commitOptions.transactionId;
     if (!explicitTransaction && this._shouldCreateTransaction()) {
       logger('WriteBatch.commit', tag, 'Using transaction for commit');
       return this._firestore
@@ -849,19 +848,17 @@ export function validateDocumentData(
     throw new Error(customObjectMessage(arg, obj));
   }
 
-  for (const prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      validateUserInput(
-        arg,
-        obj[prop],
-        'Firestore document',
-        {
-          allowDeletes: allowDeletes ? 'all' : 'none',
-          allowTransforms: true,
-        },
-        new FieldPath(prop)
-      );
-    }
+  for (const prop of Object.keys(obj)) {
+    validateUserInput(
+      arg,
+      obj[prop],
+      'Firestore document',
+      {
+        allowDeletes: allowDeletes ? 'all' : 'none',
+        allowTransforms: true,
+      },
+      new FieldPath(prop)
+    );
   }
 }
 
@@ -931,9 +928,8 @@ function validateUpdateMap(arg: string | number, obj: unknown): void {
   }
 
   let isEmpty = true;
-
-  for (const prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
+  if (obj) {
+    for (const prop of Object.keys(obj)) {
       isEmpty = false;
       validateFieldValue(arg, obj[prop], new FieldPath(prop));
     }

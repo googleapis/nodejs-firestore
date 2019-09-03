@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -386,10 +386,8 @@ export class DocumentSnapshot {
     }
 
     const obj: DocumentData = {};
-    for (const prop in fields) {
-      if (fields.hasOwnProperty(prop)) {
-        obj[prop] = this._serializer.decodeValue(fields[prop]);
-      }
+    for (const prop of Object.keys(fields)) {
+      obj[prop] = this._serializer.decodeValue(fields[prop]);
     }
     return obj;
   }
@@ -675,26 +673,24 @@ export class DocumentMask {
     ): void {
       let isEmpty = true;
 
-      for (const key in currentData) {
-        if (currentData.hasOwnProperty(key)) {
-          isEmpty = false;
+      for (const key of Object.keys(currentData)) {
+        isEmpty = false;
 
-          // We don't split on dots since fromObject is called with
-          // DocumentData.
-          const childSegment = new FieldPath(key);
-          const childPath = currentPath
-            ? currentPath.append(childSegment)
-            : childSegment;
-          const value = currentData[key];
-          if (value instanceof FieldTransform) {
-            if (value.includeInDocumentMask) {
-              fieldPaths.push(childPath);
-            }
-          } else if (isPlainObject(value)) {
-            extractFieldPaths(value, childPath);
-          } else {
+        // We don't split on dots since fromObject is called with
+        // DocumentData.
+        const childSegment = new FieldPath(key);
+        const childPath = currentPath
+          ? currentPath.append(childSegment)
+          : childSegment;
+        const value = currentData[key];
+        if (value instanceof FieldTransform) {
+          if (value.includeInDocumentMask) {
             fieldPaths.push(childPath);
           }
+        } else if (isPlainObject(value)) {
+          extractFieldPaths(value, childPath);
+        } else {
+          fieldPaths.push(childPath);
         }
       }
 
@@ -901,10 +897,8 @@ export class DocumentTransform {
   ): DocumentTransform {
     const updateMap = new Map<FieldPath, unknown>();
 
-    for (const prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        updateMap.set(new FieldPath(prop), obj[prop]);
-      }
+    for (const prop of Object.keys(obj)) {
+      updateMap.set(new FieldPath(prop), obj[prop]);
     }
 
     return DocumentTransform.fromUpdateMap(ref, updateMap);
@@ -939,14 +933,8 @@ export class DocumentTransform {
           encode_(val[i], path.append(String(i)), false);
         }
       } else if (isPlainObject(val)) {
-        for (const prop in val) {
-          if (val.hasOwnProperty(prop)) {
-            encode_(
-              val[prop],
-              path.append(new FieldPath(prop)),
-              allowTransforms
-            );
-          }
+        for (const prop of Object.keys(val)) {
+          encode_(val[prop], path.append(new FieldPath(prop)), allowTransforms);
         }
       }
     }

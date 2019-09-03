@@ -1,5 +1,5 @@
 /*!
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,8 +200,9 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
     }
     case 'mapValue': {
       const mapValue: ApiMapValue = {};
-      for (const prop in fieldValue.mapValue!.fields!) {
-        if (fieldValue.mapValue!.fields!.hasOwnProperty(prop)) {
+      const fields = fieldValue.mapValue!.fields;
+      if (fields) {
+        for (const prop of Object.keys(fields)) {
           mapValue[prop] = valueFromJson(fieldValue.mapValue!.fields![prop]);
         }
       }
@@ -228,11 +229,8 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
 export function fieldsFromJson(document: ApiMapValue): ApiMapValue {
   const result: ApiMapValue = {};
 
-  for (const prop in document) {
-    if (document.hasOwnProperty(prop)) {
-      result[prop] = valueFromJson(document[prop]);
-    }
+  for (const prop of Object.keys(document)) {
+    result[prop] = valueFromJson(document[prop]);
   }
-
   return result;
 }
