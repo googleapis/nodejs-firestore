@@ -45,6 +45,13 @@ describe('FirestoreClient', () => {
     assert(client);
   });
 
+  it('should create a client with gRPC fallback', () => {
+    const client = new firestoreModule.v1beta1.FirestoreClient({
+      fallback: true,
+    });
+    assert(client);
+  });
+
   describe('getDocument', () => {
     it('invokes getDocument without error', done => {
       const client = new firestoreModule.v1beta1.FirestoreClient({
