@@ -68,6 +68,7 @@ s.replace('**/doc/google/protobuf/doc_timestamp.js',
 
 # remove browser.js, it does not work with TypeScript yet
 os.unlink('dev/src/browser.js')
+os.unlink('dev/webpack.config.js')
 
 # Node.js specific cleanup
 subprocess.run(["npm", "install"])
