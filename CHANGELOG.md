@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [2.3.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.9...v2.3.0) (2019-09-09)
+
+
+### Features
+
+* load protos from JSON, grpc-fallback support ([#749](https://www.github.com/googleapis/nodejs-firestore/issues/749)) ([6cb9d68](https://www.github.com/googleapis/nodejs-firestore/commit/6cb9d68))
+
 ### [2.2.9](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.8...v2.2.9) (2019-08-30)
 
 
