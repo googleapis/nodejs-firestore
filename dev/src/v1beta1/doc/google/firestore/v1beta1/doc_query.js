@@ -243,25 +243,6 @@ const StructuredQuery = {
   },
 
   /**
-   * The projection of document's fields to return.
-   *
-   * @property {Object[]} fields
-   *   The fields to return.
-   *
-   *   If empty, all fields are returned. To only return the name
-   *   of the document, use `['__name__']`.
-   *
-   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1beta1.FieldReference}
-   *
-   * @typedef Projection
-   * @memberof google.firestore.v1beta1
-   * @see [google.firestore.v1beta1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
-   */
-  Projection: {
-    // This is for documentation. Actual contents will be loaded by gRPC.
-  },
-
-  /**
    * A filter with a single operand.
    *
    * @property {number} op
@@ -299,7 +280,7 @@ const StructuredQuery = {
       IS_NAN: 2,
 
       /**
-       * Test if an exprestion evaluates to Null.
+       * Test if an expression evaluates to Null.
        */
       IS_NULL: 3,
     },
@@ -336,6 +317,25 @@ const StructuredQuery = {
    * @see [google.firestore.v1beta1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
    */
   FieldReference: {
+    // This is for documentation. Actual contents will be loaded by gRPC.
+  },
+
+  /**
+   * The projection of document's fields to return.
+   *
+   * @property {Object[]} fields
+   *   The fields to return.
+   *
+   *   If empty, all fields are returned. To only return the name
+   *   of the document, use `['__name__']`.
+   *
+   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1beta1.FieldReference}
+   *
+   * @typedef Projection
+   * @memberof google.firestore.v1beta1
+   * @see [google.firestore.v1beta1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1beta1/query.proto}
+   */
+  Projection: {
     // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
