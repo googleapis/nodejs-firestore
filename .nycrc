@@ -6,7 +6,6 @@
     "**/.coverage",
     "**/apis",
     "**/benchmark",
-    "**/conformance",
     "**/docs",
     "**/samples",
     "**/scripts",
