@@ -52,4 +52,13 @@ accept your pull requests.
 
         npm run fix
 
+1. Run backend tests:
+        
+        // Authenticate application default credentials to connect to the backend
+        gcloud auth application-default login
+
+        // Run system tests
+        npm run system-test
+
+
 [setup]: https://cloud.google.com/nodejs/docs/setup
