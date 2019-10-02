@@ -18,6 +18,10 @@
                   },
                   "nested": {
                     "FirestoreAdmin": {
+                      "options": {
+                        "(google.api.default_host)": "firestore.googleapis.com",
+                        "(google.api.oauth_scopes)": "https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore"
+                      },
                       "methods": {
                         "CreateIndex": {
                           "requestType": "CreateIndexRequest",
@@ -334,7 +338,8 @@
                         "QueryScope": {
                           "values": {
                             "QUERY_SCOPE_UNSPECIFIED": 0,
-                            "COLLECTION": 1
+                            "COLLECTION": 1,
+                            "COLLECTION_GROUP": 2
                           }
                         },
                         "State": {
@@ -363,6 +368,10 @@
               },
               "nested": {
                 "Firestore": {
+                  "options": {
+                    "(google.api.default_host)": "firestore.googleapis.com",
+                    "(google.api.oauth_scopes)": "https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore"
+                  },
                   "methods": {
                     "GetDocument": {
                       "requestType": "GetDocumentRequest",
@@ -1359,6 +1368,13 @@
                         }
                       }
                     },
+                    "Direction": {
+                      "values": {
+                        "DIRECTION_UNSPECIFIED": 0,
+                        "ASCENDING": 1,
+                        "DESCENDING": 2
+                      }
+                    },
                     "UnaryFilter": {
                       "oneofs": {
                         "operandType": {
@@ -1387,14 +1403,6 @@
                         }
                       }
                     },
-                    "FieldReference": {
-                      "fields": {
-                        "fieldPath": {
-                          "type": "string",
-                          "id": 2
-                        }
-                      }
-                    },
                     "Order": {
                       "fields": {
                         "field": {
@@ -1407,6 +1415,14 @@
                         }
                       }
                     },
+                    "FieldReference": {
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
+                          "id": 2
+                        }
+                      }
+                    },
                     "Projection": {
                       "fields": {
                         "fields": {
@@ -1414,13 +1430,6 @@
                           "type": "FieldReference",
                           "id": 2
                         }
-                      }
-                    },
-                    "Direction": {
-                      "values": {
-                        "DIRECTION_UNSPECIFIED": 0,
-                        "ASCENDING": 1,
-                        "DESCENDING": 2
                       }
                     }
                   }
@@ -1629,6 +1638,10 @@
               },
               "nested": {
                 "Firestore": {
+                  "options": {
+                    "(google.api.default_host)": "firestore.googleapis.com",
+                    "(google.api.oauth_scopes)": "https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore"
+                  },
                   "methods": {
                     "GetDocument": {
                       "requestType": "GetDocumentRequest",
@@ -2625,15 +2638,6 @@
                         }
                       }
                     },
-                    "Projection": {
-                      "fields": {
-                        "fields": {
-                          "rule": "repeated",
-                          "type": "FieldReference",
-                          "id": 2
-                        }
-                      }
-                    },
                     "UnaryFilter": {
                       "oneofs": {
                         "operandType": {
@@ -2674,6 +2678,14 @@
                         }
                       }
                     },
+                    "FieldReference": {
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
+                          "id": 2
+                        }
+                      }
+                    },
                     "Direction": {
                       "values": {
                         "DIRECTION_UNSPECIFIED": 0,
@@ -2681,10 +2693,11 @@
                         "DESCENDING": 2
                       }
                     },
-                    "FieldReference": {
+                    "Projection": {
                       "fields": {
-                        "fieldPath": {
-                          "type": "string",
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "FieldReference",
                           "id": 2
                         }
                       }
@@ -2889,7 +2902,7 @@
           "options": {
             "go_package": "google.golang.org/genproto/googleapis/api/annotations;annotations",
             "java_multiple_files": true,
-            "java_outer_classname": "HttpProto",
+            "java_outer_classname": "ClientProto",
             "java_package": "com.google.api",
             "objc_class_prefix": "GAPI",
             "cc_enable_arenas": true
@@ -2981,6 +2994,22 @@
                   "id": 2
                 }
               }
+            },
+            "methodSignature": {
+              "rule": "repeated",
+              "type": "string",
+              "id": 1051,
+              "extend": "google.protobuf.MethodOptions"
+            },
+            "defaultHost": {
+              "type": "string",
+              "id": 1049,
+              "extend": "google.protobuf.ServiceOptions"
+            },
+            "oauthScopes": {
+              "type": "string",
+              "id": 1050,
+              "extend": "google.protobuf.ServiceOptions"
             }
           }
         },

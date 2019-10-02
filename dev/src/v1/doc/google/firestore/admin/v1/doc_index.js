@@ -20,8 +20,7 @@
  * documents in a database.
  *
  * @property {string} name
- *   Output only.
- *   A server defined name for this index.
+ *   Output only. A server defined name for this index.
  *   The form of this name for composite indexes will be:
  *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{composite_index_id}`
  *   For single field indexes, this field will be empty.
@@ -53,8 +52,7 @@
  *   This object should have the same structure as [IndexField]{@link google.firestore.admin.v1.IndexField}
  *
  * @property {number} state
- *   Output only.
- *   The serving state of the index.
+ *   Output only. The serving state of the index.
  *
  *   The number should be among the values of [State]{@link google.firestore.admin.v1.State}
  *
@@ -154,6 +152,13 @@ const Index = {
      * at query time, and that has the collection id specified by the index.
      */
     COLLECTION: 1,
+
+    /**
+     * Indexes with a collection group query scope specified allow queries
+     * against all collections that has the collection id specified by the
+     * index.
+     */
+    COLLECTION_GROUP: 2,
   },
 
   /**

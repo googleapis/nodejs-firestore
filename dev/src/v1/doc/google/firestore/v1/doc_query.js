@@ -280,23 +280,10 @@ const StructuredQuery = {
       IS_NAN: 2,
 
       /**
-       * Test if an exprestion evaluates to Null.
+       * Test if an expression evaluates to Null.
        */
       IS_NULL: 3,
     },
-  },
-
-  /**
-   * A reference to a field, such as `max(messages.time) as max_time`.
-   *
-   * @property {string} fieldPath
-   *
-   * @typedef FieldReference
-   * @memberof google.firestore.v1
-   * @see [google.firestore.v1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
-   */
-  FieldReference: {
-    // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
   /**
@@ -317,6 +304,19 @@ const StructuredQuery = {
    * @see [google.firestore.v1.StructuredQuery.Order definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   Order: {
+    // This is for documentation. Actual contents will be loaded by gRPC.
+  },
+
+  /**
+   * A reference to a field, such as `max(messages.time) as max_time`.
+   *
+   * @property {string} fieldPath
+   *
+   * @typedef FieldReference
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
+   */
+  FieldReference: {
     // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
