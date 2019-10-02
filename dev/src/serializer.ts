@@ -143,6 +143,7 @@ export class Serializer {
     }
 
     if (val instanceof Buffer || val instanceof Uint8Array) {
+      console.error('encoder', val);
       return {
         bytesValue: val,
       };
@@ -253,6 +254,7 @@ export class Serializer {
         return GeoPoint.fromProto(proto.geoPointValue!);
       }
       case 'bytesValue': {
+        console.error('bytesValue', proto.bytesValue);
         return proto.bytesValue;
       }
       default: {

@@ -94,8 +94,10 @@ export function timestampFromJson(
  */
 function bytesFromJson(bytesValue: string | Uint8Array): Uint8Array {
   if (typeof bytesValue === 'string') {
+    console.error('string bytesfromjson');
     return Buffer.from(bytesValue, 'base64');
   } else {
+    console.error('NOT string bytesfromjson');
     return bytesValue;
   }
 }
@@ -145,6 +147,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
     detectedValues.push('geoPointValue');
   }
   if (proto.bytesValue !== undefined) {
+    console.error('DETECTEDVALUE', proto.bytesValue);
     detectedValues.push('bytesValue');
   }
 
@@ -174,6 +177,7 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
         timestampValue: timestampFromJson(fieldValue.timestampValue!),
       };
     case 'bytesValue':
+      console.error('valuefromjson', fieldValue.bytesValue);
       return {
         bytesValue: bytesFromJson(fieldValue.bytesValue!),
       };
