@@ -246,8 +246,7 @@ describe('DocumentReference class', () => {
       });
   });
 
-  it.only('has set() method', () => {
-    setLogFunction(console.log);
+  it('has set() method', () => {
     const allSupportedTypesObject = {
       stringValue: 'a',
       trueValue: true,
@@ -267,7 +266,7 @@ describe('DocumentReference class', () => {
       nilValue: null,
       geoPointValue: new GeoPoint(50.1430847, -122.947778),
       zeroGeoPointValue: new GeoPoint(0, 0),
-      bytesValue: Buffer.alloc(2)
+      bytesValue: Buffer.from([0x01, 0x02]),
     };
     const ref = randomCol.doc('doc');
     return ref
