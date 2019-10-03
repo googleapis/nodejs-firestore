@@ -43,16 +43,18 @@
     "clean": "gts clean",
     "compile": "tsc -p . && cp -r dev/protos build && cp -r dev/test/fake-certificate.json build/test/fake-certificate.json && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
     "fix": "gts fix",
-    "prepare": "npm run compile",
+    "prepare": "npm run snyk-protect && npm run compile",
     "docs-test": "linkinator docs",
-    "predocs-test": "npm run docs"
+    "predocs-test": "npm run docs",
+    "snyk-protect": "snyk protect"
   },
   "dependencies": {
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^1.6.3",
-    "through2": "^3.0.0"
+    "through2": "^3.0.0",
+    "snyk": "^1.230.5"
   },
   "devDependencies": {
     "@types/assert": "^1.4.0",
@@ -82,5 +84,6 @@
     "source-map-support": "^0.5.6",
     "ts-node": "^8.0.0",
     "typescript": "~3.6.0"
-  }
+  },
+  "snyk": true
 }
