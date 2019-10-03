@@ -170,6 +170,29 @@ describe('serialize document', () => {
     );
   });
 
+  it('provides custom error for objects from different Firestore instance', () => {
+    class FieldPath {}
+    class CustomFieldPath extends FieldPath {}
+    class VeryCustomFieldPath extends CustomFieldPath {}
+
+    const customClasses = [
+      new FieldPath(),
+      new CustomFieldPath(),
+      new VeryCustomFieldPath(),
+    ];
+
+    for (const customClass of customClasses) {
+      expect(() => {
+        firestore
+          .doc('collectionId/documentId')
+          .set(customClass as InvalidApiUsage);
+      }).to.throw(
+        'Value for argument "data" is not a valid Firestore document. ' +
+          'Detected an object of type "FieldPath" that doesn\'t match the expected instance.'
+      );
+    }
+  });
+
   it('serializes large numbers into doubles', () => {
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
