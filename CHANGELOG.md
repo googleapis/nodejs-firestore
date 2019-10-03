@@ -4,6 +4,19 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [2.4.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.3.0...v2.4.0) (2019-10-03)
+
+
+### Bug Fixes
+
+* provide custom error for FieldValue subclasses ([#771](https://www.github.com/googleapis/nodejs-firestore/issues/771)) ([29c3e9b](https://www.github.com/googleapis/nodejs-firestore/commit/29c3e9b))
+* use compatible version of google-gax ([b0c89c5](https://www.github.com/googleapis/nodejs-firestore/commit/b0c89c5))
+
+
+### Features
+
+* ability to specify the Collection Group query scope in the V1 Admin API ([#762](https://www.github.com/googleapis/nodejs-firestore/issues/762)) ([b16cd40](https://www.github.com/googleapis/nodejs-firestore/commit/b16cd40))
+
 ## [2.3.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.9...v2.3.0) (2019-09-09)
 
 
