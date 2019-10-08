@@ -53,9 +53,6 @@ accept your pull requests.
         # Run all unit tests.
         npm run test-only
 
-        # Run all conformance tests.
-        npm run conformance
-
         # Run all system tests.
         gcloud auth application-default login
         npm run system-test
@@ -63,6 +60,5 @@ accept your pull requests.
 1.  Lint (and maybe fix) any changes:
 
         npm run fix
-
 
 [setup]: https://cloud.google.com/nodejs/docs/setup
