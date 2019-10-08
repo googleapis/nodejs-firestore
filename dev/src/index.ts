@@ -388,7 +388,7 @@ export class Firestore {
 
     this._clientPool = new ClientPool(
       MAX_CONCURRENT_REQUESTS_PER_CLIENT,
-      () => {
+      /* clientFactory= */ () => {
         let client: GapicClient;
 
         if (this._settings.ssl === false) {
@@ -401,7 +401,8 @@ export class Firestore {
 
         logger('Firestore', null, 'Initialized Firestore GAPIC Client');
         return client;
-      }
+      },
+      /* clientDestructor= */ (client: GapicClient) => client.close()
     );
 
     logger('Firestore', null, 'Initialized Firestore');

@@ -152,6 +152,27 @@ describe('Client pool', () => {
     );
   });
 
+  it('garbage collection calls destructor', () => {
+    const garbageCollect = new Deferred();
+
+    const clientPool = new ClientPool<{}>(
+      1,
+      () => {
+        return {};
+      },
+      () => garbageCollect.resolve()
+    );
+
+    const operationPromises = deferredPromises(2);
+
+    clientPool.run(REQUEST_TAG, () => operationPromises[0].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[1].promise);
+
+    operationPromises.forEach(deferred => deferred.resolve());
+
+    return garbageCollect.promise;
+  });
+
   it('forwards success', () => {
     const clientPool = new ClientPool<{}>(1, () => {
       return {};

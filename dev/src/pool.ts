@@ -40,10 +40,13 @@ export class ClientPool<T> {
    * can handle.
    * @param clientFactory A factory function called as needed when new clients
    * are required.
+   * @param clientDestructor A cleanup function that is called when a client is
+   * disposed of.
    */
   constructor(
     private readonly concurrentOperationLimit: number,
-    private readonly clientFactory: () => T
+    private readonly clientFactory: () => T,
+    private readonly clientDestructor: (client: T) => void = () => {}
   ) {}
 
   /**
@@ -171,6 +174,7 @@ export class ClientPool<T> {
         ++idleClients;
 
         if (idleClients > 1) {
+          this.clientDestructor(client);
           this.activeClients.delete(client);
         }
       }

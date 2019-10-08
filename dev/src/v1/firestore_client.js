@@ -196,7 +196,7 @@ class FirestoreClient {
 
     // Put together the "service stub" for
     // google.firestore.v1.Firestore.
-    const firestoreStub = gaxGrpc.createStub(
+    this._firestoreStub = gaxGrpc.createStub(
       opts.fallback
         ? protos.lookupService('google.firestore.v1.Firestore')
         : protos.google.firestore.v1.Firestore,
@@ -221,7 +221,7 @@ class FirestoreClient {
       'listCollectionIds',
     ];
     for (const methodName of firestoreStubMethods) {
-      const innerCallPromise = firestoreStub.then(
+      const innerCallPromise = this._firestoreStub.then(
         stub => (...args) => {
           return stub[methodName].apply(stub, args);
         },
@@ -269,6 +269,15 @@ class FirestoreClient {
       'https://www.googleapis.com/auth/cloud-platform',
       'https://www.googleapis.com/auth/datastore',
     ];
+  }
+
+  /**
+   * Terminate the GRPC channel and close the client.
+   *
+   * The client will no longer be usable and all future behavior is undefined.
+   */
+  close() {
+    this._firestoreStub.then(grpcClient => grpcClient.close());
   }
 
   /**
