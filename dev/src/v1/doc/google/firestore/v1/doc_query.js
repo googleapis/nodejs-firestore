@@ -239,6 +239,18 @@ const StructuredQuery = {
        * Contains. Requires that the field is an array.
        */
       ARRAY_CONTAINS: 7,
+
+      /**
+       * In. Requires that `value` is a non-empty ArrayValue with at most 10
+       * values.
+       */
+      IN: 8,
+
+      /**
+       * Contains any. Requires that the field is an array and
+       * `value` is a non-empty ArrayValue with at most 10 values.
+       */
+      ARRAY_CONTAINS_ANY: 9,
     },
   },
 
@@ -287,6 +299,25 @@ const StructuredQuery = {
   },
 
   /**
+   * The projection of document's fields to return.
+   *
+   * @property {Object[]} fields
+   *   The fields to return.
+   *
+   *   If empty, all fields are returned. To only return the name
+   *   of the document, use `['__name__']`.
+   *
+   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1.FieldReference}
+   *
+   * @typedef Projection
+   * @memberof google.firestore.v1
+   * @see [google.firestore.v1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
+   */
+  Projection: {
+    // This is for documentation. Actual contents will be loaded by gRPC.
+  },
+
+  /**
    * An order on a field.
    *
    * @property {Object} field
@@ -317,25 +348,6 @@ const StructuredQuery = {
    * @see [google.firestore.v1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
   FieldReference: {
-    // This is for documentation. Actual contents will be loaded by gRPC.
-  },
-
-  /**
-   * The projection of document's fields to return.
-   *
-   * @property {Object[]} fields
-   *   The fields to return.
-   *
-   *   If empty, all fields are returned. To only return the name
-   *   of the document, use `['__name__']`.
-   *
-   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1.FieldReference}
-   *
-   * @typedef Projection
-   * @memberof google.firestore.v1
-   * @see [google.firestore.v1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
-   */
-  Projection: {
     // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
