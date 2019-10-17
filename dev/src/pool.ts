@@ -157,6 +157,12 @@ export class ClientPool<T> {
       });
   }
 
+  async terminate(): Promise<void> {
+    for (const client of this.activeClients) {
+      await client.close();
+    }
+  }
+
   /**
    * Deletes clients that are no longer executing operations. Keeps up to one
    * idle client to reduce future initialization costs.
@@ -177,4 +183,5 @@ export class ClientPool<T> {
     });
     return idleClients - 1;
   }
+  
 }

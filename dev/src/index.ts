@@ -1033,6 +1033,15 @@ export class Firestore {
       });
   }
 
+  async terminate(): Promise<void> {
+    // close grpc channel
+    
+
+
+    // mark client as shutdown, fail all subsequent calls
+    return Promise.resolve();
+  }
+
   /**
    * Initializes the client if it is not already initialized. All methods in the
    * SDK can be used after this method completes.
