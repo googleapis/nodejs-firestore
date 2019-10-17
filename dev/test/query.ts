@@ -1373,7 +1373,9 @@ describe('startAt() interface', () => {
     expect(() => {
       query.orderBy(FieldPath.documentId()).startAt('doc/coll');
     }).to.throw(
-      'Only a direct child can be used as a query boundary. Found: "coll/doc/coll/doc/coll".'
+      'When querying a collection and ordering by FieldPath.documentId(), ' +
+        'the corresponding value must be a plain document ID, but ' +
+        "'doc/coll' contains a slash."
     );
   });
 
@@ -1881,6 +1883,21 @@ describe('collectionGroup queries', () => {
     return createInstance().then(firestore => {
       expect(() => firestore.collectionGroup('foo/bar')).to.throw(
         "Invalid collectionId 'foo/bar'. Collection IDs must not contain '/'."
+      );
+    });
+  });
+
+  it('rejects slashes', () => {
+    return createInstance().then(firestore => {
+      const query = firestore.collectionGroup('collectionId');
+
+      expect(() => {
+        query.orderBy(FieldPath.documentId()).startAt('coll');
+      }).to.throw(
+        'When querying a collection group and ordering by ' +
+          'FieldPath.documentId(), the corresponding value must result in a ' +
+          "valid document path, but 'coll' is not because it contains an odd " +
+          'number of segments.'
       );
     });
   });

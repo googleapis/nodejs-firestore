@@ -13,6 +13,7 @@
     "dev/test/*.ts",
     "dev/test/**/*.ts",
     "dev/system-test/*.ts",
-    "dev/conformance/*.ts"
+    "dev/conformance/*.ts",
+    "types/*.d.ts"
   ]
 }

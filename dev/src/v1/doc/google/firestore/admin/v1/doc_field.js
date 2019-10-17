@@ -73,14 +73,12 @@ const Field = {
    *   This object should have the same structure as [Index]{@link google.firestore.admin.v1.Index}
    *
    * @property {boolean} usesAncestorConfig
-   *   Output only.
-   *   When true, the `Field`'s index configuration is set from the
+   *   Output only. When true, the `Field`'s index configuration is set from the
    *   configuration specified by the `ancestor_field`.
    *   When false, the `Field`'s index configuration is defined explicitly.
    *
    * @property {string} ancestorField
-   *   Output only.
-   *   Specifies the resource name of the `Field` from which this field's
+   *   Output only. Specifies the resource name of the `Field` from which this field's
    *   index configuration is set (when `uses_ancestor_config` is true),
    *   or from which it *would* be set if this field had no index configuration
    *   (when `uses_ancestor_config` is false).

@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "2.2.4",
+  "version": "2.4.0",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -51,7 +51,7 @@
     "bun": "^0.0.12",
     "deep-equal": "^1.0.1",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^1.1.2",
+    "google-gax": "^1.6.3",
     "through2": "^3.0.0"
   },
   "devDependencies": {
@@ -67,12 +67,12 @@
     "chai-as-promised": "^7.1.1",
     "codecov": "^3.0.2",
     "duplexify": "^4.0.0",
-    "extend": "^3.0.1",
+    "extend": "^3.0.2",
     "gts": "^1.0.0",
     "hard-rejection": "^2.0.0",
     "intelli-espower-loader": "^1.0.1",
     "jsdoc": "^3.6.2",
-    "jsdoc-baseline": "^0.1.0",
+    "jsdoc-fresh": "^1.0.1",
     "linkinator": "^1.5.0",
     "mocha": "^6.0.0",
     "nyc": "^14.0.0",
@@ -81,6 +81,6 @@
     "proxyquire": "^2.0.1",
     "source-map-support": "^0.5.6",
     "ts-node": "^8.0.0",
-    "typescript": "~3.5.0"
+    "typescript": "~3.6.0"
   }
 }

@@ -951,7 +951,7 @@ describe('DocumentReference class', () => {
       }
 
       await Promise.all(emptyResults.map(d => d.promise));
-      ref.set({i: 1337});
+      await ref.set({i: 1337});
       await Promise.all(documentResults.map(d => d.promise));
       unsubscribeCallbacks.forEach(c => c());
     });

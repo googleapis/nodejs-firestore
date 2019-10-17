@@ -66,7 +66,6 @@ const ALLOW_RETRIES = true;
  */
 export class Transaction {
   private _firestore: Firestore;
-  private _previousTransaction?: Transaction;
   private _writeBatch: WriteBatch;
   private _requestTag: string;
   private _transactionId?: Uint8Array;
@@ -75,16 +74,21 @@ export class Transaction {
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
+   * @param requestTag A unique client-assigned identifier for the scope of
+   * this transaction.
    * @param previousTransaction If available, the failed transaction that is
    * being retried.
    */
-  constructor(firestore: Firestore, previousTransaction?: Transaction) {
+  constructor(
+    firestore: Firestore,
+    requestTag: string,
+    previousTransaction?: Transaction
+  ) {
     this._firestore = firestore;
-    this._previousTransaction = previousTransaction;
+    this._transactionId =
+      previousTransaction && previousTransaction._transactionId;
     this._writeBatch = firestore.batch();
-    this._requestTag = previousTransaction
-      ? previousTransaction.requestTag
-      : requestTag();
+    this._requestTag = requestTag;
   }
 
   /**
@@ -356,10 +360,10 @@ export class Transaction {
       database: this._firestore.formattedName,
     };
 
-    if (this._previousTransaction) {
+    if (this._transactionId) {
       request.options = {
         readWrite: {
-          retryTransaction: this._previousTransaction._transactionId,
+          retryTransaction: this._transactionId,
         },
       };
     }

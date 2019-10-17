@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 Google Inc. All Rights Reserved.
+ * Copyright 2019 Google Inc. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,12 @@ describe('set() method', () => {
   it('accepts preconditions', () => {
     writeBatch.set(firestore.doc('sub/doc'), {exists: false});
   });
+
+  it('works with null objects', () => {
+    const nullObject = Object.create(null);
+    nullObject.bar = 'ack';
+    writeBatch.set(firestore.doc('sub/doc'), nullObject);
+  });
 });
 
 describe('delete() method', () => {
@@ -132,6 +138,12 @@ describe('update() method', () => {
       {lastUpdateTime: new Timestamp(479978400, 123000000)}
     );
   });
+
+  it('works with null objects', () => {
+    const nullObject = Object.create(null);
+    nullObject.bar = 'ack';
+    writeBatch.update(firestore.doc('sub/doc'), nullObject);
+  });
 });
 
 describe('create() method', () => {
@@ -159,6 +171,12 @@ describe('create() method', () => {
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
     );
+  });
+
+  it('works with null objects', () => {
+    const nullObject = Object.create(null);
+    nullObject.bar = 'ack';
+    writeBatch.create(firestore.doc('sub/doc'), nullObject);
   });
 });
 

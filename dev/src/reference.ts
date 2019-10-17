@@ -284,13 +284,14 @@ export class DocumentReference implements Serializable {
    * });
    */
   listCollections(): Promise<CollectionReference[]> {
-    return this.firestore.initializeIfNeeded().then(() => {
+    const tag = requestTag();
+    return this.firestore.initializeIfNeeded(tag).then(() => {
       const request = {parent: this.formattedName};
       return this._firestore
         .request<string[]>(
           'listCollectionIds',
           request,
-          requestTag(),
+          tag,
           /* allowRetries= */ true
         )
         .then(collectionIds => {
@@ -1421,6 +1422,25 @@ export class Query {
     let reference: DocumentReference;
 
     if (typeof val === 'string') {
+      const path = basePath.append(val);
+
+      if (this._queryOptions.allDescendants) {
+        if (!path.isDocument) {
+          throw new Error(
+            'When querying a collection group and ordering by ' +
+              'FieldPath.documentId(), the corresponding value must result in ' +
+              `a valid document path, but '${val}' is not because it ` +
+              'contains an odd number of segments.'
+          );
+        }
+      } else if (val.indexOf('/') !== -1) {
+        throw new Error(
+          'When querying a collection and ordering by FieldPath.documentId(), ' +
+            `the corresponding value must be a plain document ID, but '${val}' ` +
+            'contains a slash.'
+        );
+      }
+
       reference = new DocumentReference(this._firestore, basePath.append(val));
     } else if (val instanceof DocumentReference) {
       reference = val;
@@ -1804,7 +1824,7 @@ export class Query {
       callback();
     });
 
-    this.firestore.initializeIfNeeded().then(() => {
+    this.firestore.initializeIfNeeded(tag).then(() => {
       const request = this.toProto(transactionId);
       this._firestore
         .readStream('runQuery', request, tag, true)
@@ -2021,7 +2041,8 @@ export class CollectionReference extends Query {
    * });
    */
   listDocuments(): Promise<DocumentReference[]> {
-    return this.firestore.initializeIfNeeded().then(() => {
+    const tag = requestTag();
+    return this.firestore.initializeIfNeeded(tag).then(() => {
       const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
         this.firestore.projectId
       );
@@ -2037,7 +2058,7 @@ export class CollectionReference extends Query {
         .request<api.IDocument[]>(
           'listDocuments',
           request,
-          requestTag(),
+          tag,
           /*allowRetries=*/ true
         )
         .then(documents => {

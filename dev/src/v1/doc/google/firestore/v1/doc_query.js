@@ -239,6 +239,18 @@ const StructuredQuery = {
        * Contains. Requires that the field is an array.
        */
       ARRAY_CONTAINS: 7,
+
+      /**
+       * In. Requires that `value` is a non-empty ArrayValue with at most 10
+       * values.
+       */
+      IN: 8,
+
+      /**
+       * Contains any. Requires that the field is an array and
+       * `value` is a non-empty ArrayValue with at most 10 values.
+       */
+      ARRAY_CONTAINS_ANY: 9,
     },
   },
 
@@ -280,22 +292,28 @@ const StructuredQuery = {
       IS_NAN: 2,
 
       /**
-       * Test if an exprestion evaluates to Null.
+       * Test if an expression evaluates to Null.
        */
       IS_NULL: 3,
     },
   },
 
   /**
-   * A reference to a field, such as `max(messages.time) as max_time`.
+   * The projection of document's fields to return.
    *
-   * @property {string} fieldPath
+   * @property {Object[]} fields
+   *   The fields to return.
    *
-   * @typedef FieldReference
+   *   If empty, all fields are returned. To only return the name
+   *   of the document, use `['__name__']`.
+   *
+   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1.FieldReference}
+   *
+   * @typedef Projection
    * @memberof google.firestore.v1
-   * @see [google.firestore.v1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
+   * @see [google.firestore.v1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
-  FieldReference: {
+  Projection: {
     // This is for documentation. Actual contents will be loaded by gRPC.
   },
 
@@ -321,21 +339,15 @@ const StructuredQuery = {
   },
 
   /**
-   * The projection of document's fields to return.
+   * A reference to a field, such as `max(messages.time) as max_time`.
    *
-   * @property {Object[]} fields
-   *   The fields to return.
+   * @property {string} fieldPath
    *
-   *   If empty, all fields are returned. To only return the name
-   *   of the document, use `['__name__']`.
-   *
-   *   This object should have the same structure as [FieldReference]{@link google.firestore.v1.FieldReference}
-   *
-   * @typedef Projection
+   * @typedef FieldReference
    * @memberof google.firestore.v1
-   * @see [google.firestore.v1.StructuredQuery.Projection definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
+   * @see [google.firestore.v1.StructuredQuery.FieldReference definition in proto format]{@link https://github.com/googleapis/googleapis/blob/master/google/firestore/v1/query.proto}
    */
-  Projection: {
+  FieldReference: {
     // This is for documentation. Actual contents will be loaded by gRPC.
   },
 

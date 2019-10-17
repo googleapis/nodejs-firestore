@@ -670,14 +670,8 @@ const ListenResponse = {
  *   This object should have the same structure as [Timestamp]{@link google.protobuf.Timestamp}
  *
  * @property {number} targetId
- *   A client provided target ID.
- *
- *   If not set, the server will assign an ID for the target.
- *
- *   Used for resuming a target without changing IDs. The IDs can either be
- *   client-assigned or be server-assigned in a previous stream. All targets
- *   with client provided IDs must be added before adding a target that needs
- *   a server-assigned id.
+ *   The target ID that identifies the target on the stream. Must be a positive
+ *   number and non-zero.
  *
  * @property {boolean} once
  *   If the target should be removed once it is current and consistent.
@@ -744,11 +738,7 @@ const Target = {
  *
  *   If empty, the change applies to all targets.
  *
- *   For `target_change_type=ADD`, the order of the target IDs matches the order
- *   of the requests to add the targets. This allows clients to unambiguously
- *   associate server-assigned target IDs with added targets.
- *
- *   For other states, the order of the target IDs is not defined.
+ *   The order of the target IDs is not defined.
  *
  * @property {Object} cause
  *   The error that resulted in this change, if applicable.

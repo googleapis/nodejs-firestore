@@ -4,6 +4,62 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [2.4.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.3.0...v2.4.0) (2019-10-03)
+
+
+### Bug Fixes
+
+* provide custom error for FieldValue subclasses ([#771](https://www.github.com/googleapis/nodejs-firestore/issues/771)) ([29c3e9b](https://www.github.com/googleapis/nodejs-firestore/commit/29c3e9b))
+* use compatible version of google-gax ([b0c89c5](https://www.github.com/googleapis/nodejs-firestore/commit/b0c89c5))
+
+
+### Features
+
+* ability to specify the Collection Group query scope in the V1 Admin API ([#762](https://www.github.com/googleapis/nodejs-firestore/issues/762)) ([b16cd40](https://www.github.com/googleapis/nodejs-firestore/commit/b16cd40))
+
+## [2.3.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.9...v2.3.0) (2019-09-09)
+
+
+### Features
+
+* load protos from JSON, grpc-fallback support ([#749](https://www.github.com/googleapis/nodejs-firestore/issues/749)) ([6cb9d68](https://www.github.com/googleapis/nodejs-firestore/commit/6cb9d68))
+
+### [2.2.9](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.8...v2.2.9) (2019-08-30)
+
+
+### Bug Fixes
+
+* retrying 13 INTERNAL RPC errors ([#742](https://www.github.com/googleapis/nodejs-firestore/issues/742)) ([431edcb](https://www.github.com/googleapis/nodejs-firestore/commit/431edcb))
+
+### [2.2.8](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.7...v2.2.8) (2019-08-22)
+
+
+### Bug Fixes
+
+* serialization does not work with null objects ([#736](https://www.github.com/googleapis/nodejs-firestore/issues/736)) ([870d6a7](https://www.github.com/googleapis/nodejs-firestore/commit/870d6a7))
+
+### [2.2.7](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.6...v2.2.7) (2019-08-16)
+
+
+### Bug Fixes
+
+* **deps:** use the latest extend ([#728](https://www.github.com/googleapis/nodejs-firestore/issues/728)) ([425bf3d](https://www.github.com/googleapis/nodejs-firestore/commit/425bf3d))
+* add logging to client pool ([#733](https://www.github.com/googleapis/nodejs-firestore/issues/733)) ([a4efa09](https://www.github.com/googleapis/nodejs-firestore/commit/a4efa09))
+
+### [2.2.6](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.5...v2.2.6) (2019-08-02)
+
+
+### Bug Fixes
+
+*  allow calls with no request, add JSON proto ([#725](https://www.github.com/googleapis/nodejs-firestore/issues/725)) ([8b0624b](https://www.github.com/googleapis/nodejs-firestore/commit/8b0624b))
+
+### [2.2.5](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.4...v2.2.5) (2019-08-02)
+
+
+### Bug Fixes
+
+* Better error for Collection Group Queries with documentId() cursors ([#720](https://www.github.com/googleapis/nodejs-firestore/issues/720)) ([169286d](https://www.github.com/googleapis/nodejs-firestore/commit/169286d))
+
 ### [2.2.4](https://www.github.com/googleapis/nodejs-firestore/compare/v2.2.3...v2.2.4) (2019-07-08)
 
 

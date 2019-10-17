@@ -66,12 +66,22 @@ class FirestoreClient {
    *     your project ID will be detected automatically.
    * @param {function} [options.promise] - Custom promise module to use instead
    *     of native Promises.
-   * @param {string} [options.servicePath] - The domain name of the
+   * @param {string} [options.apiEndpoint] - The domain name of the
    *     API remote host.
    */
   constructor(opts) {
     opts = opts || {};
     this._descriptors = {};
+
+    if (global.isBrowser) {
+      // If we're in browser, we use gRPC fallback.
+      opts.fallback = true;
+    }
+
+    // If we are in browser, we are already using fallback because of the
+    // "browser" field in package.json.
+    // But if we were explicitly requested to use fallback, let's do it now.
+    const gaxModule = !global.isBrowser && opts.fallback ? gax.fallback : gax;
 
     const servicePath =
       opts.servicePath || opts.apiEndpoint || this.constructor.servicePath;
@@ -89,42 +99,57 @@ class FirestoreClient {
     // Create a `gaxGrpc` object, with any grpc-specific options
     // sent to the client.
     opts.scopes = this.constructor.scopes;
-    const gaxGrpc = new gax.GrpcClient(opts);
+    const gaxGrpc = new gaxModule.GrpcClient(opts);
 
     // Save the auth object to the client, for use by other methods.
     this.auth = gaxGrpc.auth;
 
     // Determine the client header string.
-    const clientHeader = [
-      `gl-node/${process.version}`,
-      `grpc/${gaxGrpc.grpcVersion}`,
-      `gax/${gax.version}`,
-      `gapic/${VERSION}`,
-    ];
+    const clientHeader = [];
+
+    if (typeof process !== 'undefined' && 'versions' in process) {
+      clientHeader.push(`gl-node/${process.versions.node}`);
+    }
+    clientHeader.push(`gax/${gaxModule.version}`);
+    if (opts.fallback) {
+      clientHeader.push(`gl-web/${gaxModule.version}`);
+    } else {
+      clientHeader.push(`grpc/${gaxGrpc.grpcVersion}`);
+    }
+    clientHeader.push(`gapic/${VERSION}`);
     if (opts.libName && opts.libVersion) {
       clientHeader.push(`${opts.libName}/${opts.libVersion}`);
     }
 
     // Load the applicable protos.
+    // For Node.js, pass the path to JSON proto file.
+    // For browsers, pass the JSON content.
+
+    const nodejsProtoPath = path.join(
+      __dirname,
+      '..',
+      '..',
+      'protos',
+      'protos.json'
+    );
     const protos = gaxGrpc.loadProto(
-      path.join(__dirname, '..', '..', 'protos'),
-      ['google/firestore/v1beta1/firestore.proto']
+      opts.fallback ? require('../../protos/protos.json') : nodejsProtoPath
     );
 
     // This API contains "path templates"; forward-slash-separated
     // identifiers to uniquely identify resources within the API.
     // Create useful helper objects for these.
     this._pathTemplates = {
-      anyPathPathTemplate: new gax.PathTemplate(
+      anyPathPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/documents/{document}/{any_path=**}'
       ),
-      databaseRootPathTemplate: new gax.PathTemplate(
+      databaseRootPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}'
       ),
-      documentPathPathTemplate: new gax.PathTemplate(
+      documentPathPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/documents/{document_path=**}'
       ),
-      documentRootPathTemplate: new gax.PathTemplate(
+      documentRootPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/documents'
       ),
     };
@@ -133,12 +158,12 @@ class FirestoreClient {
     // (e.g. 50 results at a time, with tokens to get subsequent
     // pages). Denote the keys used for pagination and results.
     this._descriptors.page = {
-      listDocuments: new gax.PageDescriptor(
+      listDocuments: new gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
         'documents'
       ),
-      listCollectionIds: new gax.PageDescriptor(
+      listCollectionIds: new gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
         'collectionIds'
@@ -148,12 +173,12 @@ class FirestoreClient {
     // Some of the methods on this service provide streaming responses.
     // Provide descriptors for these.
     this._descriptors.stream = {
-      batchGetDocuments: new gax.StreamDescriptor(
+      batchGetDocuments: new gaxModule.StreamDescriptor(
         gax.StreamType.SERVER_STREAMING
       ),
-      runQuery: new gax.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
-      write: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
-      listen: new gax.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
+      runQuery: new gaxModule.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
+      write: new gaxModule.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
+      listen: new gaxModule.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
     };
 
     // Put together the default options sent with requests.
@@ -172,7 +197,9 @@ class FirestoreClient {
     // Put together the "service stub" for
     // google.firestore.v1beta1.Firestore.
     const firestoreStub = gaxGrpc.createStub(
-      protos.google.firestore.v1beta1.Firestore,
+      opts.fallback
+        ? protos.lookupService('google.firestore.v1beta1.Firestore')
+        : protos.google.firestore.v1beta1.Firestore,
       opts
     );
 
@@ -194,18 +221,16 @@ class FirestoreClient {
       'listCollectionIds',
     ];
     for (const methodName of firestoreStubMethods) {
-      this._innerApiCalls[methodName] = gax.createApiCall(
-        firestoreStub.then(
-          stub =>
-            function() {
-              const args = Array.prototype.slice.call(arguments, 0);
-              return stub[methodName].apply(stub, args);
-            },
-          err =>
-            function() {
-              throw err;
-            }
-        ),
+      const innerCallPromise = firestoreStub.then(
+        stub => (...args) => {
+          return stub[methodName].apply(stub, args);
+        },
+        err => () => {
+          throw err;
+        }
+      );
+      this._innerApiCalls[methodName] = gaxModule.createApiCall(
+        innerCallPromise,
         defaults[methodName],
         this._descriptors.page[methodName] ||
           this._descriptors.stream[methodName]
@@ -315,6 +340,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -458,6 +484,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
 
     return this._innerApiCalls.listDocuments(request, options, callback);
@@ -624,6 +651,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
 
     return this._innerApiCalls.createDocument(request, options, callback);
@@ -700,6 +728,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -751,6 +780,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -825,6 +855,7 @@ class FirestoreClient {
    * });
    */
   batchGetDocuments(request, options) {
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -884,6 +915,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -951,6 +983,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -1004,6 +1037,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -1066,6 +1100,7 @@ class FirestoreClient {
    * });
    */
   runQuery(request, options) {
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};
@@ -1240,6 +1275,7 @@ class FirestoreClient {
       callback = options;
       options = {};
     }
+    request = request || {};
     options = options || {};
     options.otherArgs = options.otherArgs || {};
     options.otherArgs.headers = options.otherArgs.headers || {};

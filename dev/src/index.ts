@@ -773,6 +773,11 @@ export class Firestore {
   ): Promise<T> {
     validateFunction('updateFunction', updateFunction);
 
+    const defaultAttempts = 5;
+    const tag = requestTag();
+
+    let attemptsRemaining: number;
+
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
       validateInteger(
@@ -780,35 +785,30 @@ export class Firestore {
         transactionOptions.maxAttempts,
         {optional: true, minValue: 1}
       );
+      attemptsRemaining = transactionOptions.maxAttempts || defaultAttempts;
+    } else {
+      attemptsRemaining = defaultAttempts;
     }
 
-    return this.initializeIfNeeded().then(() =>
-      this._runTransaction(updateFunction, transactionOptions)
+    return this.initializeIfNeeded(tag).then(() =>
+      this._runTransaction(updateFunction, {requestTag: tag, attemptsRemaining})
     );
   }
 
   _runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>,
-    transactionOptions?: {
-      maxAttempts?: number;
+    transactionOptions: {
+      requestTag: string;
+      attemptsRemaining: number;
       previousTransaction?: Transaction;
     }
   ): Promise<T> {
-    const defaultAttempts = 5;
+    const requestTag = transactionOptions.requestTag;
+    const attemptsRemaining = transactionOptions.attemptsRemaining;
+    const previousTransaction = transactionOptions.previousTransaction;
 
-    let attemptsRemaining = defaultAttempts;
-    let previousTransaction;
-
-    if (transactionOptions) {
-      attemptsRemaining = transactionOptions.maxAttempts || attemptsRemaining;
-      previousTransaction = transactionOptions.previousTransaction;
-    }
-
-    const transaction = new Transaction(this, previousTransaction);
-    const requestTag = transaction.requestTag;
+    const transaction = new Transaction(this, requestTag, previousTransaction);
     let result: Promise<T>;
-
-    --attemptsRemaining;
 
     return transaction
       .begin()
@@ -840,7 +840,7 @@ export class Firestore {
           .commit()
           .then(() => result)
           .catch(err => {
-            if (attemptsRemaining > 0) {
+            if (attemptsRemaining > 1) {
               logger(
                 'Firestore.runTransaction',
                 requestTag,
@@ -848,7 +848,8 @@ export class Firestore {
               );
               return this._runTransaction(updateFunction, {
                 previousTransaction: transaction,
-                maxAttempts: attemptsRemaining,
+                requestTag,
+                attemptsRemaining: attemptsRemaining - 1,
               });
             }
             logger(
@@ -910,8 +911,9 @@ export class Firestore {
     const {documents, fieldMask} = parseGetAllArguments(
       documentRefsOrReadOptions
     );
-    return this.initializeIfNeeded().then(() =>
-      this.getAll_(documents, fieldMask, requestTag())
+    const tag = requestTag();
+    return this.initializeIfNeeded(tag).then(() =>
+      this.getAll_(documents, fieldMask, tag)
     );
   }
 
@@ -1036,9 +1038,11 @@ export class Firestore {
    * SDK can be used after this method completes.
    *
    * @private
+   * @param requestTag A unique client-assigned identifier that caused this
+   * initialization.
    * @return A Promise that resolves when the client is initialized.
    */
-  async initializeIfNeeded(): Promise<void> {
+  async initializeIfNeeded(requestTag: string): Promise<void> {
     if (!this._settingsFrozen) {
       // Nobody should set timestampsInSnapshots anymore, but the error depends
       // on whether they set it to true or false...
@@ -1077,7 +1081,7 @@ export class Firestore {
     this._settingsFrozen = true;
 
     if (this._projectId === undefined) {
-      this._projectId = await this._clientPool.run(gapicClient => {
+      this._projectId = await this._clientPool.run(requestTag, gapicClient => {
         return new Promise((resolve, reject) => {
           gapicClient.getProjectId((err: Error, projectId: string) => {
             if (err) {
@@ -1357,7 +1361,7 @@ export class Firestore {
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 
-    return this._clientPool.run(gapicClient => {
+    return this._clientPool.run(requestTag, gapicClient => {
       return this._retry(attempts, requestTag, () => {
         return new Promise((resolve, reject) => {
           logger(
@@ -1416,7 +1420,7 @@ export class Firestore {
 
     const result = new Deferred<NodeJS.ReadableStream>();
 
-    this._clientPool.run(gapicClient => {
+    this._clientPool.run(requestTag, gapicClient => {
       // While we return the stream to the callee early, we don't want to
       // release the GAPIC client until the callee has finished processing the
       // stream.
@@ -1486,7 +1490,7 @@ export class Firestore {
 
     const result = new Deferred<NodeJS.ReadWriteStream>();
 
-    this._clientPool.run(gapicClient => {
+    this._clientPool.run(requestTag, gapicClient => {
       // While we return the stream to the callee early, we don't want to
       // release the GAPIC client until the callee has finished processing the
       // stream.
