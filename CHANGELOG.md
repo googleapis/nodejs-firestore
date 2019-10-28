@@ -4,6 +4,18 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [2.5.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.4.0...v2.5.0) (2019-10-22)
+
+
+### Features
+
+* introduces ARRAY_CONTAINS_ANY and IN to operator enum ([2c8869d](https://www.github.com/googleapis/nodejs-firestore/commit/2c8869d23ad1aef024273b640579624cde97849f))
+
+
+### Bug Fixes
+
+* **deps:** bump google-gax to 1.7.5 ([#786](https://www.github.com/googleapis/nodejs-firestore/issues/786)) ([e5763ba](https://www.github.com/googleapis/nodejs-firestore/commit/e5763baadf7cc424620913a09ca0ed6af4a0971a))
+
 ## [2.4.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.3.0...v2.4.0) (2019-10-03)
 
 
