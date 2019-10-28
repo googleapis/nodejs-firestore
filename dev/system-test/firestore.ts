@@ -1071,15 +1071,6 @@ describe('Query class', () => {
   });
 
   it('supports in', () => {
-    const testDocs = {
-      a: {zip: 98101},
-      b: {zip: 91102},
-      c: {zip: 98103},
-      d: {zip: [98101]},
-      e: {zip: ['98101', {zip: 98101}]},
-      f: {zip: {code: 500}},
-    };
-
     return Promise.all([
       randomCol.doc('a').set({zip: 98101}),
       randomCol.doc('b').set({zip: 91102}),
@@ -1091,24 +1082,12 @@ describe('Query class', () => {
       .then(() => randomCol.where('zip', 'in', [98101, 98103]).get())
       .then(res => {
         expect(res.size).to.equal(2);
-        expect(res.docs.map(d => d.data())).to.deep.equal([
-          {zip: 98101},
-          {zip: 98103},
-        ]);
+        expect(res.docs[0].data()).to.deep.equal({zip: 98101});
+        expect(res.docs[1].data()).to.deep.equal({zip: 98103});
       });
   });
 
   it('supports array-contains-any', () => {
-    const testDocs = {
-      a: {array: [42]},
-      b: {array: ['a', 42, 'c']},
-      c: {array: [41.999, '42', {a: [42]}]},
-      d: {array: [42], array2: ['bingo']},
-      e: {array: [43]},
-      f: {array: [{a: 42}]},
-      g: {array: 42},
-    };
-
     return Promise.all([
       randomCol.doc('a').set({array: [42]}),
       randomCol.doc('b').set({array: ['a', 42, 'c']}),
@@ -1123,12 +1102,13 @@ describe('Query class', () => {
       )
       .then(res => {
         expect(res.size).to.equal(4);
-        expect(res.docs.map(d => d.data())).to.deep.equal([
-          {array: [42]},
-          {array: ['a', 42, 'c']},
-          {array: [42], array2: ['sigh']},
-          {array: [43]},
-        ]);
+        expect(res.docs[0].data()).to.deep.equal({array: [42]});
+        expect(res.docs[1].data()).to.deep.equal({array: ['a', 42, 'c']});
+        expect(res.docs[2].data()).to.deep.equal({
+          array: [42],
+          array2: ['sigh'],
+        });
+        expect(res.docs[3].data()).to.deep.equal({array: [43]});
       });
   });
 
