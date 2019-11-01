@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [2.6.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.5.0...v2.6.0) (2019-11-01)
+
+
+### Features
+
+* add IN queries support  ([#715](https://www.github.com/googleapis/nodejs-firestore/issues/715)) ([00bdf8f](https://www.github.com/googleapis/nodejs-firestore/commit/00bdf8ff81f658c4534adea8d2010a1f68195f45))
+
 ## [2.5.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.4.0...v2.5.0) (2019-10-22)
 
 
