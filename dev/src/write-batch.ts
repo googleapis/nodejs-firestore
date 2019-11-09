@@ -444,9 +444,11 @@ export class WriteBatch {
             'preconditionOrValues',
             preconditionOrValues[0]
           );
-          precondition = new Precondition(preconditionOrValues[0] as {
-            lastUpdateTime?: Timestamp;
-          });
+          precondition = new Precondition(
+            preconditionOrValues[0] as {
+              lastUpdateTime?: Timestamp;
+            }
+          );
         }
       } catch (err) {
         logger(
