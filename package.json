@@ -52,6 +52,7 @@
     "deep-equal": "^1.0.1",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^1.7.5",
+    "jsdoc-region-tag": "^1.0.2",
     "through2": "^3.0.0"
   },
   "devDependencies": {
