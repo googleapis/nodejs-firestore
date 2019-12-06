@@ -16,7 +16,7 @@
 
 import * as assert from 'assert';
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 import {
   DocumentMask,
   DocumentSnapshot,
@@ -444,11 +444,9 @@ export class WriteBatch {
             'preconditionOrValues',
             preconditionOrValues[0]
           );
-          precondition = new Precondition(
-            preconditionOrValues[0] as {
-              lastUpdateTime?: Timestamp;
-            }
-          );
+          precondition = new Precondition(preconditionOrValues[0] as {
+            lastUpdateTime?: Timestamp;
+          });
         }
       } catch (err) {
         logger(

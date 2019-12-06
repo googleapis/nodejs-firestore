@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 import {Serializable} from './serializer';
 import {validateNumber} from './validate';
 

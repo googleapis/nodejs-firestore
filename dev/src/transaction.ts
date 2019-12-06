@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as proto from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_v1_proto_api';
 
 import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';

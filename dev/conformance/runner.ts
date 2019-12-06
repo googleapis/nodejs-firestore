@@ -21,7 +21,7 @@ import {CallOptions} from 'google-gax';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
-import * as proto from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_v1_proto_api';
 
 import {
   DocumentChange,
@@ -195,13 +195,11 @@ const convertInput = {
     for (const doc of snapshot.docs) {
       const deepCopy = JSON.parse(JSON.stringify(doc));
       deepCopy.fields = fieldsFromJson(deepCopy.fields);
-      docs.push(
-        firestore.snapshot_(
-          deepCopy,
-          readTime.toDate().toISOString(),
-          'json'
-        ) as QueryDocumentSnapshot
-      );
+      docs.push(firestore.snapshot_(
+        deepCopy,
+        readTime.toDate().toISOString(),
+        'json'
+      ) as QueryDocumentSnapshot);
     }
 
     for (const change of snapshot.changes) {
@@ -420,9 +418,9 @@ function runTest(spec: ConformanceProto) {
   const createTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      return docRef(spec.docRefPath).create(
-        convertInput.argument(spec.jsonData) as DocumentData
-      );
+      return docRef(spec.docRefPath).create(convertInput.argument(
+        spec.jsonData
+      ) as DocumentData);
     });
   };
 
