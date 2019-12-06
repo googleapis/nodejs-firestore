@@ -701,6 +701,9 @@ export namespace google {
 
             /** FieldOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+
+            /** FieldOptions .google.api.fieldBehavior */
+            ".google.api.fieldBehavior"?: (google.api.FieldBehavior[]|null);
         }
 
         /** Represents a FieldOptions. */
@@ -831,6 +834,12 @@ export namespace google {
 
             /** ServiceOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+
+            /** ServiceOptions .google.api.defaultHost */
+            ".google.api.defaultHost"?: (string|null);
+
+            /** ServiceOptions .google.api.oauthScopes */
+            ".google.api.oauthScopes"?: (string|null);
         }
 
         /** Represents a ServiceOptions. */
@@ -860,6 +869,9 @@ export namespace google {
 
             /** MethodOptions .google.api.http */
             ".google.api.http"?: (google.api.IHttpRule|null);
+
+            /** MethodOptions .google.api.methodSignature */
+            ".google.api.methodSignature"?: (string[]|null);
 
             /** MethodOptions .google.longrunning.operationInfo */
             ".google.longrunning.operationInfo"?: (google.longrunning.IOperationInfo|null);
@@ -6861,6 +6873,10 @@ export namespace google {
             /** CustomHttpPattern path. */
             public path: string;
         }
+
+        /** FieldBehavior enum. */
+        type FieldBehavior =
+            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE";
     }
 
     /** Namespace type. */
