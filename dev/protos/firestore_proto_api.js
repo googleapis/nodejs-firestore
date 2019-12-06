@@ -1181,6 +1181,7 @@ $root.google = (function() {
              * @property {boolean|null} [deprecated] FieldOptions deprecated
              * @property {boolean|null} [weak] FieldOptions weak
              * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] FieldOptions uninterpretedOption
+             * @property {Array.<google.api.FieldBehavior>|null} [".google.api.fieldBehavior"] FieldOptions .google.api.fieldBehavior
              */
 
             /**
@@ -1193,6 +1194,7 @@ $root.google = (function() {
              */
             function FieldOptions(properties) {
                 this.uninterpretedOption = [];
+                this[".google.api.fieldBehavior"] = [];
                 if (properties)
                     for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
@@ -1254,6 +1256,14 @@ $root.google = (function() {
              * @instance
              */
             FieldOptions.prototype.uninterpretedOption = $util.emptyArray;
+
+            /**
+             * FieldOptions .google.api.fieldBehavior.
+             * @member {Array.<google.api.FieldBehavior>} .google.api.fieldBehavior
+             * @memberof google.protobuf.FieldOptions
+             * @instance
+             */
+            FieldOptions.prototype[".google.api.fieldBehavior"] = $util.emptyArray;
 
             /**
              * CType enum.
@@ -1433,6 +1443,8 @@ $root.google = (function() {
              * @interface IServiceOptions
              * @property {boolean|null} [deprecated] ServiceOptions deprecated
              * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] ServiceOptions uninterpretedOption
+             * @property {string|null} [".google.api.defaultHost"] ServiceOptions .google.api.defaultHost
+             * @property {string|null} [".google.api.oauthScopes"] ServiceOptions .google.api.oauthScopes
              */
 
             /**
@@ -1467,6 +1479,22 @@ $root.google = (function() {
              */
             ServiceOptions.prototype.uninterpretedOption = $util.emptyArray;
 
+            /**
+             * ServiceOptions .google.api.defaultHost.
+             * @member {string} .google.api.defaultHost
+             * @memberof google.protobuf.ServiceOptions
+             * @instance
+             */
+            ServiceOptions.prototype[".google.api.defaultHost"] = "";
+
+            /**
+             * ServiceOptions .google.api.oauthScopes.
+             * @member {string} .google.api.oauthScopes
+             * @memberof google.protobuf.ServiceOptions
+             * @instance
+             */
+            ServiceOptions.prototype[".google.api.oauthScopes"] = "";
+
             return ServiceOptions;
         })();
 
@@ -1479,6 +1507,7 @@ $root.google = (function() {
              * @property {boolean|null} [deprecated] MethodOptions deprecated
              * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] MethodOptions uninterpretedOption
              * @property {google.api.IHttpRule|null} [".google.api.http"] MethodOptions .google.api.http
+             * @property {Array.<string>|null} [".google.api.methodSignature"] MethodOptions .google.api.methodSignature
              * @property {google.longrunning.IOperationInfo|null} [".google.longrunning.operationInfo"] MethodOptions .google.longrunning.operationInfo
              */
 
@@ -1492,6 +1521,7 @@ $root.google = (function() {
              */
             function MethodOptions(properties) {
                 this.uninterpretedOption = [];
+                this[".google.api.methodSignature"] = [];
                 if (properties)
                     for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
@@ -1521,6 +1551,14 @@ $root.google = (function() {
              * @instance
              */
             MethodOptions.prototype[".google.api.http"] = null;
+
+            /**
+             * MethodOptions .google.api.methodSignature.
+             * @member {Array.<string>} .google.api.methodSignature
+             * @memberof google.protobuf.MethodOptions
+             * @instance
+             */
+            MethodOptions.prototype[".google.api.methodSignature"] = $util.emptyArray;
 
             /**
              * MethodOptions .google.longrunning.operationInfo.
@@ -11900,6 +11938,28 @@ $root.google = (function() {
             CustomHttpPattern.prototype.path = "";
 
             return CustomHttpPattern;
+        })();
+
+        /**
+         * FieldBehavior enum.
+         * @name google.api.FieldBehavior
+         * @enum {number}
+         * @property {string} FIELD_BEHAVIOR_UNSPECIFIED=FIELD_BEHAVIOR_UNSPECIFIED FIELD_BEHAVIOR_UNSPECIFIED value
+         * @property {string} OPTIONAL=OPTIONAL OPTIONAL value
+         * @property {string} REQUIRED=REQUIRED REQUIRED value
+         * @property {string} OUTPUT_ONLY=OUTPUT_ONLY OUTPUT_ONLY value
+         * @property {string} INPUT_ONLY=INPUT_ONLY INPUT_ONLY value
+         * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
+         */
+        api.FieldBehavior = (function() {
+            var valuesById = {}, values = Object.create(valuesById);
+            values[valuesById[0] = "FIELD_BEHAVIOR_UNSPECIFIED"] = "FIELD_BEHAVIOR_UNSPECIFIED";
+            values[valuesById[1] = "OPTIONAL"] = "OPTIONAL";
+            values[valuesById[2] = "REQUIRED"] = "REQUIRED";
+            values[valuesById[3] = "OUTPUT_ONLY"] = "OUTPUT_ONLY";
+            values[valuesById[4] = "INPUT_ONLY"] = "INPUT_ONLY";
+            values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
+            return values;
         })();
 
         return api;

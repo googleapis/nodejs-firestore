@@ -43,7 +43,7 @@ git clone https://github.com/google/protobuf.git
 
 # Copy necessary protos.
 mkdir -p "${PROTOS_DIR}/google/api"
-cp googleapis/google/api/{annotations.proto,http.proto} \
+cp googleapis/google/api/{annotations,client,field_behavior,http}.proto \
    "${PROTOS_DIR}/google/api/"
 
 mkdir -p "${PROTOS_DIR}/google/firestore/v1"
