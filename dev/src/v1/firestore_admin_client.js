@@ -262,10 +262,10 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   A parent name of the form
+   *   Required. A parent name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {Object} request.index
-   *   The composite index to create.
+   *   Required. The composite index to create.
    *
    *   This object should have the same structure as [Index]{@link google.firestore.admin.v1.Index}
    * @param {Object} [options]
@@ -326,7 +326,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   A parent name of the form
+   *   Required. A parent name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} [request.filter]
    *   The filter to apply to list results.
@@ -441,7 +441,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   A parent name of the form
+   *   Required. A parent name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} [request.filter]
    *   The filter to apply to list results.
@@ -489,7 +489,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.name
-   *   A name of the form
+   *   Required. A name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}`
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call, e.g, timeout,
@@ -544,7 +544,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.name
-   *   A name of the form
+   *   Required. A name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}`
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call, e.g, timeout,
@@ -595,7 +595,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.name
-   *   Database to import into. Should be of the form:
+   *   Required. Database to import into. Should be of the form:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} [request.collectionIds]
    *   Which collection ids to import. Unspecified means all collections included
@@ -666,7 +666,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.name
-   *   Database to export. Should be of the form:
+   *   Required. Database to export. Should be of the form:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} [request.collectionIds]
    *   Which collection ids to export. Unspecified means all collections.
@@ -732,7 +732,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.name
-   *   A name of the form
+   *   Required. A name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/fields/{field_id}`
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call, e.g, timeout,
@@ -792,7 +792,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   A parent name of the form
+   *   Required. A parent name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} [request.filter]
    *   The filter to apply to list results. Currently,
@@ -911,7 +911,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   A parent name of the form
+   *   Required. A parent name of the form
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} [request.filter]
    *   The filter to apply to list results. Currently,
@@ -975,7 +975,7 @@ class FirestoreAdminClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {Object} request.field
-   *   The field to be updated.
+   *   Required. The field to be updated.
    *
    *   This object should have the same structure as [Field]{@link google.firestore.admin.v1.Field}
    * @param {Object} [request.updateMask]
