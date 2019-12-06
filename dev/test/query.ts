@@ -1,18 +1,16 @@
-/**
- * Copyright 2017 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the 'License');
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 import {expect} from 'chai';
 import * as extend from 'extend';
@@ -645,6 +643,15 @@ describe('where() interface', () => {
   });
 
   it('concatenates all accepted filters', () => {
+    const arrValue: api.IValue = {
+      arrayValue: {
+        values: [
+          {
+            stringValue: 'barArray',
+          },
+        ],
+      },
+    };
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -670,7 +677,13 @@ describe('where() interface', () => {
             'barGreater',
             'fooContains',
             'ARRAY_CONTAINS',
-            'barContains'
+            'barContains',
+            'fooIn',
+            'IN',
+            arrValue,
+            'fooContainsAny',
+            'ARRAY_CONTAINS_ANY',
+            arrValue
           )
         );
 
@@ -687,6 +700,8 @@ describe('where() interface', () => {
       query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
       query = query.where('fooGreater', '>', 'barGreater');
       query = query.where('fooContains', 'array-contains', 'barContains');
+      query = query.where('fooIn', 'in', ['barArray']);
+      query = query.where('fooContainsAny', 'array-contains-any', ['barArray']);
       return query.get();
     });
   });
@@ -895,7 +910,7 @@ describe('where() interface', () => {
     expect(() => {
       query = query.where('foo', '@' as InvalidApiUsage, 'foobar');
     }).to.throw(
-      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, >, >=, array-contains'
+      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, >, >=, array-contains, in, array-contains-any'
     );
   });
 });

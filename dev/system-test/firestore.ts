@@ -1,18 +1,16 @@
-/**
- * Copyright 2017 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 import {expect} from 'chai';
 
@@ -1067,6 +1065,48 @@ describe('Query class', () => {
       .then(res => {
         expect(res.size).to.equal(1);
         expect(res.docs[0].get('foo')).to.deep.equal(['bar']);
+      });
+  });
+
+  it('supports in', () => {
+    return Promise.all([
+      randomCol.doc('a').set({zip: 98101}),
+      randomCol.doc('b').set({zip: 91102}),
+      randomCol.doc('c').set({zip: 98103}),
+      randomCol.doc('d').set({zip: [98101]}),
+      randomCol.doc('e').set({zip: ['98101', {zip: 98101}]}),
+      randomCol.doc('f').set({zip: {zip: 98101}}),
+    ])
+      .then(() => randomCol.where('zip', 'in', [98101, 98103]).get())
+      .then(res => {
+        expect(res.size).to.equal(2);
+        expect(res.docs[0].data()).to.deep.equal({zip: 98101});
+        expect(res.docs[1].data()).to.deep.equal({zip: 98103});
+      });
+  });
+
+  it('supports array-contains-any', () => {
+    return Promise.all([
+      randomCol.doc('a').set({array: [42]}),
+      randomCol.doc('b').set({array: ['a', 42, 'c']}),
+      randomCol.doc('c').set({array: [41.999, '42', {a: [42]}]}),
+      randomCol.doc('d').set({array: [42], array2: ['sigh']}),
+      randomCol.doc('e').set({array: [43]}),
+      randomCol.doc('f').set({array: [{a: 42}]}),
+      randomCol.doc('g').set({array: 42}),
+    ])
+      .then(() =>
+        randomCol.where('array', 'array-contains-any', [42, 43]).get()
+      )
+      .then(res => {
+        expect(res.size).to.equal(4);
+        expect(res.docs[0].data()).to.deep.equal({array: [42]});
+        expect(res.docs[1].data()).to.deep.equal({array: ['a', 42, 'c']});
+        expect(res.docs[2].data()).to.deep.equal({
+          array: [42],
+          array2: ['sigh'],
+        });
+        expect(res.docs[3].data()).to.deep.equal({array: [43]});
       });
   });
 

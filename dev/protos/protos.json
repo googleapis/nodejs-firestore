@@ -1363,16 +1363,11 @@
                             "GREATER_THAN": 3,
                             "GREATER_THAN_OR_EQUAL": 4,
                             "EQUAL": 5,
-                            "ARRAY_CONTAINS": 7
+                            "ARRAY_CONTAINS": 7,
+                            "IN": 8,
+                            "ARRAY_CONTAINS_ANY": 9
                           }
                         }
-                      }
-                    },
-                    "Direction": {
-                      "values": {
-                        "DIRECTION_UNSPECIFIED": 0,
-                        "ASCENDING": 1,
-                        "DESCENDING": 2
                       }
                     },
                     "UnaryFilter": {
@@ -1403,6 +1398,15 @@
                         }
                       }
                     },
+                    "Projection": {
+                      "fields": {
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "FieldReference",
+                          "id": 2
+                        }
+                      }
+                    },
                     "Order": {
                       "fields": {
                         "field": {
@@ -1423,13 +1427,11 @@
                         }
                       }
                     },
-                    "Projection": {
-                      "fields": {
-                        "fields": {
-                          "rule": "repeated",
-                          "type": "FieldReference",
-                          "id": 2
-                        }
+                    "Direction": {
+                      "values": {
+                        "DIRECTION_UNSPECIFIED": 0,
+                        "ASCENDING": 1,
+                        "DESCENDING": 2
                       }
                     }
                   }
@@ -2633,7 +2635,9 @@
                             "GREATER_THAN": 3,
                             "GREATER_THAN_OR_EQUAL": 4,
                             "EQUAL": 5,
-                            "ARRAY_CONTAINS": 7
+                            "ARRAY_CONTAINS": 7,
+                            "IN": 8,
+                            "ARRAY_CONTAINS_ANY": 9
                           }
                         }
                       }
@@ -2678,6 +2682,15 @@
                         }
                       }
                     },
+                    "Projection": {
+                      "fields": {
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "FieldReference",
+                          "id": 2
+                        }
+                      }
+                    },
                     "FieldReference": {
                       "fields": {
                         "fieldPath": {
@@ -2691,15 +2704,6 @@
                         "DIRECTION_UNSPECIFIED": 0,
                         "ASCENDING": 1,
                         "DESCENDING": 2
-                      }
-                    },
-                    "Projection": {
-                      "fields": {
-                        "fields": {
-                          "rule": "repeated",
-                          "type": "FieldReference",
-                          "id": 2
-                        }
                       }
                     }
                   }

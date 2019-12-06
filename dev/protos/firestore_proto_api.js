@@ -1,3 +1,17 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 // Common aliases
 var $util = $protobuf.util;
 
@@ -5485,6 +5499,8 @@ $root.google = (function() {
                      * @property {string} GREATER_THAN_OR_EQUAL=GREATER_THAN_OR_EQUAL GREATER_THAN_OR_EQUAL value
                      * @property {string} EQUAL=EQUAL EQUAL value
                      * @property {string} ARRAY_CONTAINS=ARRAY_CONTAINS ARRAY_CONTAINS value
+                     * @property {string} IN=IN IN value
+                     * @property {string} ARRAY_CONTAINS_ANY=ARRAY_CONTAINS_ANY ARRAY_CONTAINS_ANY value
                      */
                     FieldFilter.Operator = (function() {
                         var valuesById = {}, values = Object.create(valuesById);
@@ -5495,6 +5511,8 @@ $root.google = (function() {
                         values[valuesById[4] = "GREATER_THAN_OR_EQUAL"] = "GREATER_THAN_OR_EQUAL";
                         values[valuesById[5] = "EQUAL"] = "EQUAL";
                         values[valuesById[7] = "ARRAY_CONTAINS"] = "ARRAY_CONTAINS";
+                        values[valuesById[8] = "IN"] = "IN";
+                        values[valuesById[9] = "ARRAY_CONTAINS_ANY"] = "ARRAY_CONTAINS_ANY";
                         return values;
                     })();
 
@@ -5575,24 +5593,25 @@ $root.google = (function() {
                     return UnaryFilter;
                 })();
 
-                StructuredQuery.FieldReference = (function() {
+                StructuredQuery.Projection = (function() {
 
                     /**
-                     * Properties of a FieldReference.
+                     * Properties of a Projection.
                      * @memberof google.firestore.v1.StructuredQuery
-                     * @interface IFieldReference
-                     * @property {string|null} [fieldPath] FieldReference fieldPath
+                     * @interface IProjection
+                     * @property {Array.<google.firestore.v1.StructuredQuery.IFieldReference>|null} [fields] Projection fields
                      */
 
                     /**
-                     * Constructs a new FieldReference.
+                     * Constructs a new Projection.
                      * @memberof google.firestore.v1.StructuredQuery
-                     * @classdesc Represents a FieldReference.
-                     * @implements IFieldReference
+                     * @classdesc Represents a Projection.
+                     * @implements IProjection
                      * @constructor
-                     * @param {google.firestore.v1.StructuredQuery.IFieldReference=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.IProjection=} [properties] Properties to set
                      */
-                    function FieldReference(properties) {
+                    function Projection(properties) {
+                        this.fields = [];
                         if (properties)
                             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                 if (properties[keys[i]] != null)
@@ -5600,14 +5619,14 @@ $root.google = (function() {
                     }
 
                     /**
-                     * FieldReference fieldPath.
-                     * @member {string} fieldPath
-                     * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                     * Projection fields.
+                     * @member {Array.<google.firestore.v1.StructuredQuery.IFieldReference>} fields
+                     * @memberof google.firestore.v1.StructuredQuery.Projection
                      * @instance
                      */
-                    FieldReference.prototype.fieldPath = "";
+                    Projection.prototype.fields = $util.emptyArray;
 
-                    return FieldReference;
+                    return Projection;
                 })();
 
                 StructuredQuery.Order = (function() {
@@ -5654,25 +5673,24 @@ $root.google = (function() {
                     return Order;
                 })();
 
-                StructuredQuery.Projection = (function() {
+                StructuredQuery.FieldReference = (function() {
 
                     /**
-                     * Properties of a Projection.
+                     * Properties of a FieldReference.
                      * @memberof google.firestore.v1.StructuredQuery
-                     * @interface IProjection
-                     * @property {Array.<google.firestore.v1.StructuredQuery.IFieldReference>|null} [fields] Projection fields
+                     * @interface IFieldReference
+                     * @property {string|null} [fieldPath] FieldReference fieldPath
                      */
 
                     /**
-                     * Constructs a new Projection.
+                     * Constructs a new FieldReference.
                      * @memberof google.firestore.v1.StructuredQuery
-                     * @classdesc Represents a Projection.
-                     * @implements IProjection
+                     * @classdesc Represents a FieldReference.
+                     * @implements IFieldReference
                      * @constructor
-                     * @param {google.firestore.v1.StructuredQuery.IProjection=} [properties] Properties to set
+                     * @param {google.firestore.v1.StructuredQuery.IFieldReference=} [properties] Properties to set
                      */
-                    function Projection(properties) {
-                        this.fields = [];
+                    function FieldReference(properties) {
                         if (properties)
                             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                 if (properties[keys[i]] != null)
@@ -5680,14 +5698,14 @@ $root.google = (function() {
                     }
 
                     /**
-                     * Projection fields.
-                     * @member {Array.<google.firestore.v1.StructuredQuery.IFieldReference>} fields
-                     * @memberof google.firestore.v1.StructuredQuery.Projection
+                     * FieldReference fieldPath.
+                     * @member {string} fieldPath
+                     * @memberof google.firestore.v1.StructuredQuery.FieldReference
                      * @instance
                      */
-                    Projection.prototype.fields = $util.emptyArray;
+                    FieldReference.prototype.fieldPath = "";
 
-                    return Projection;
+                    return FieldReference;
                 })();
 
                 /**
