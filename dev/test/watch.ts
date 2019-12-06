@@ -590,7 +590,7 @@ describe('Query watch', () => {
 
   let lastSnapshot: {
     docs: QueryDocumentSnapshot[];
-    docChanges: DocumentChange[];
+    docChanges: TestChange[];
   } = EMPTY;
 
   // The proto JSON that should be sent for the query.

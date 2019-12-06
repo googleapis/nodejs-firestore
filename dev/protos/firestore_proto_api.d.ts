@@ -1,17 +1,3 @@
-// Copyright 2019 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import * as $protobuf from "protobufjs";
 /** Namespace google. */
 export namespace google {
@@ -1399,6 +1385,26 @@ export namespace google {
             public value: Uint8Array;
         }
 
+        /** Properties of a FieldMask. */
+        interface IFieldMask {
+
+            /** FieldMask paths */
+            paths?: (string[]|null);
+        }
+
+        /** Represents a FieldMask. */
+        class FieldMask implements IFieldMask {
+
+            /**
+             * Constructs a new FieldMask.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFieldMask);
+
+            /** FieldMask paths. */
+            public paths: string[];
+        }
+
         /** Properties of an Any. */
         interface IAny {
 
@@ -1423,26 +1429,6 @@ export namespace google {
 
             /** Any value. */
             public value: Uint8Array;
-        }
-
-        /** Properties of a FieldMask. */
-        interface IFieldMask {
-
-            /** FieldMask paths */
-            paths?: (string[]|null);
-        }
-
-        /** Represents a FieldMask. */
-        class FieldMask implements IFieldMask {
-
-            /**
-             * Constructs a new FieldMask.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IFieldMask);
-
-            /** FieldMask paths. */
-            public paths: string[];
         }
 
         /** Properties of a Duration. */
@@ -3229,26 +3215,6 @@ export namespace google {
                         "OPERATOR_UNSPECIFIED"| "IS_NAN"| "IS_NULL";
                 }
 
-                /** Properties of a Projection. */
-                interface IProjection {
-
-                    /** Projection fields */
-                    fields?: (google.firestore.v1.StructuredQuery.IFieldReference[]|null);
-                }
-
-                /** Represents a Projection. */
-                class Projection implements IProjection {
-
-                    /**
-                     * Constructs a new Projection.
-                     * @param [properties] Properties to set
-                     */
-                    constructor(properties?: google.firestore.v1.StructuredQuery.IProjection);
-
-                    /** Projection fields. */
-                    public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
-                }
-
                 /** Properties of an Order. */
                 interface IOrder {
 
@@ -3275,6 +3241,10 @@ export namespace google {
                     public direction: google.firestore.v1.StructuredQuery.Direction;
                 }
 
+                /** Direction enum. */
+                type Direction =
+                    "DIRECTION_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
+
                 /** Properties of a FieldReference. */
                 interface IFieldReference {
 
@@ -3295,9 +3265,25 @@ export namespace google {
                     public fieldPath: string;
                 }
 
-                /** Direction enum. */
-                type Direction =
-                    "DIRECTION_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
+                /** Properties of a Projection. */
+                interface IProjection {
+
+                    /** Projection fields */
+                    fields?: (google.firestore.v1.StructuredQuery.IFieldReference[]|null);
+                }
+
+                /** Represents a Projection. */
+                class Projection implements IProjection {
+
+                    /**
+                     * Constructs a new Projection.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IProjection);
+
+                    /** Projection fields. */
+                    public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
+                }
             }
 
             /** Properties of a Cursor. */
@@ -3608,6 +3594,3144 @@ export namespace google {
                  * @param [properties] Properties to set
                  */
                 constructor(properties?: google.firestore.v1.IExistenceFilter);
+
+                /** ExistenceFilter targetId. */
+                public targetId: number;
+
+                /** ExistenceFilter count. */
+                public count: number;
+            }
+        }
+
+        /** Namespace admin. */
+        namespace admin {
+
+            /** Namespace v1. */
+            namespace v1 {
+
+                /** Properties of a Field. */
+                interface IField {
+
+                    /** Field name */
+                    name?: (string|null);
+
+                    /** Field indexConfig */
+                    indexConfig?: (google.firestore.admin.v1.Field.IIndexConfig|null);
+                }
+
+                /** Represents a Field. */
+                class Field implements IField {
+
+                    /**
+                     * Constructs a new Field.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IField);
+
+                    /** Field name. */
+                    public name: string;
+
+                    /** Field indexConfig. */
+                    public indexConfig?: (google.firestore.admin.v1.Field.IIndexConfig|null);
+                }
+
+                namespace Field {
+
+                    /** Properties of an IndexConfig. */
+                    interface IIndexConfig {
+
+                        /** IndexConfig indexes */
+                        indexes?: (google.firestore.admin.v1.IIndex[]|null);
+
+                        /** IndexConfig usesAncestorConfig */
+                        usesAncestorConfig?: (boolean|null);
+
+                        /** IndexConfig ancestorField */
+                        ancestorField?: (string|null);
+
+                        /** IndexConfig reverting */
+                        reverting?: (boolean|null);
+                    }
+
+                    /** Represents an IndexConfig. */
+                    class IndexConfig implements IIndexConfig {
+
+                        /**
+                         * Constructs a new IndexConfig.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.Field.IIndexConfig);
+
+                        /** IndexConfig indexes. */
+                        public indexes: google.firestore.admin.v1.IIndex[];
+
+                        /** IndexConfig usesAncestorConfig. */
+                        public usesAncestorConfig: boolean;
+
+                        /** IndexConfig ancestorField. */
+                        public ancestorField: string;
+
+                        /** IndexConfig reverting. */
+                        public reverting: boolean;
+                    }
+                }
+
+                /** Represents a FirestoreAdmin */
+                class FirestoreAdmin extends $protobuf.rpc.Service {
+
+                    /**
+                     * Constructs a new FirestoreAdmin service.
+                     * @param rpcImpl RPC implementation
+                     * @param [requestDelimited=false] Whether requests are length-delimited
+                     * @param [responseDelimited=false] Whether responses are length-delimited
+                     */
+                    constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
+
+                    /**
+                     * Calls CreateIndex.
+                     * @param request CreateIndexRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public createIndex(request: google.firestore.admin.v1.ICreateIndexRequest, callback: google.firestore.admin.v1.FirestoreAdmin.CreateIndexCallback): void;
+
+                    /**
+                     * Calls CreateIndex.
+                     * @param request CreateIndexRequest message or plain object
+                     * @returns Promise
+                     */
+                    public createIndex(request: google.firestore.admin.v1.ICreateIndexRequest): Promise<google.longrunning.Operation>;
+
+                    /**
+                     * Calls ListIndexes.
+                     * @param request ListIndexesRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and ListIndexesResponse
+                     */
+                    public listIndexes(request: google.firestore.admin.v1.IListIndexesRequest, callback: google.firestore.admin.v1.FirestoreAdmin.ListIndexesCallback): void;
+
+                    /**
+                     * Calls ListIndexes.
+                     * @param request ListIndexesRequest message or plain object
+                     * @returns Promise
+                     */
+                    public listIndexes(request: google.firestore.admin.v1.IListIndexesRequest): Promise<google.firestore.admin.v1.ListIndexesResponse>;
+
+                    /**
+                     * Calls GetIndex.
+                     * @param request GetIndexRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Index
+                     */
+                    public getIndex(request: google.firestore.admin.v1.IGetIndexRequest, callback: google.firestore.admin.v1.FirestoreAdmin.GetIndexCallback): void;
+
+                    /**
+                     * Calls GetIndex.
+                     * @param request GetIndexRequest message or plain object
+                     * @returns Promise
+                     */
+                    public getIndex(request: google.firestore.admin.v1.IGetIndexRequest): Promise<google.firestore.admin.v1.Index>;
+
+                    /**
+                     * Calls DeleteIndex.
+                     * @param request DeleteIndexRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Empty
+                     */
+                    public deleteIndex(request: google.firestore.admin.v1.IDeleteIndexRequest, callback: google.firestore.admin.v1.FirestoreAdmin.DeleteIndexCallback): void;
+
+                    /**
+                     * Calls DeleteIndex.
+                     * @param request DeleteIndexRequest message or plain object
+                     * @returns Promise
+                     */
+                    public deleteIndex(request: google.firestore.admin.v1.IDeleteIndexRequest): Promise<google.protobuf.Empty>;
+
+                    /**
+                     * Calls GetField.
+                     * @param request GetFieldRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Field
+                     */
+                    public getField(request: google.firestore.admin.v1.IGetFieldRequest, callback: google.firestore.admin.v1.FirestoreAdmin.GetFieldCallback): void;
+
+                    /**
+                     * Calls GetField.
+                     * @param request GetFieldRequest message or plain object
+                     * @returns Promise
+                     */
+                    public getField(request: google.firestore.admin.v1.IGetFieldRequest): Promise<google.firestore.admin.v1.Field>;
+
+                    /**
+                     * Calls UpdateField.
+                     * @param request UpdateFieldRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public updateField(request: google.firestore.admin.v1.IUpdateFieldRequest, callback: google.firestore.admin.v1.FirestoreAdmin.UpdateFieldCallback): void;
+
+                    /**
+                     * Calls UpdateField.
+                     * @param request UpdateFieldRequest message or plain object
+                     * @returns Promise
+                     */
+                    public updateField(request: google.firestore.admin.v1.IUpdateFieldRequest): Promise<google.longrunning.Operation>;
+
+                    /**
+                     * Calls ListFields.
+                     * @param request ListFieldsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and ListFieldsResponse
+                     */
+                    public listFields(request: google.firestore.admin.v1.IListFieldsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.ListFieldsCallback): void;
+
+                    /**
+                     * Calls ListFields.
+                     * @param request ListFieldsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public listFields(request: google.firestore.admin.v1.IListFieldsRequest): Promise<google.firestore.admin.v1.ListFieldsResponse>;
+
+                    /**
+                     * Calls ExportDocuments.
+                     * @param request ExportDocumentsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public exportDocuments(request: google.firestore.admin.v1.IExportDocumentsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.ExportDocumentsCallback): void;
+
+                    /**
+                     * Calls ExportDocuments.
+                     * @param request ExportDocumentsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public exportDocuments(request: google.firestore.admin.v1.IExportDocumentsRequest): Promise<google.longrunning.Operation>;
+
+                    /**
+                     * Calls ImportDocuments.
+                     * @param request ImportDocumentsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public importDocuments(request: google.firestore.admin.v1.IImportDocumentsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.ImportDocumentsCallback): void;
+
+                    /**
+                     * Calls ImportDocuments.
+                     * @param request ImportDocumentsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public importDocuments(request: google.firestore.admin.v1.IImportDocumentsRequest): Promise<google.longrunning.Operation>;
+                }
+
+                namespace FirestoreAdmin {
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createIndex}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type CreateIndexCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listIndexes}.
+                     * @param error Error, if any
+                     * @param [response] ListIndexesResponse
+                     */
+                    type ListIndexesCallback = (error: (Error|null), response?: google.firestore.admin.v1.ListIndexesResponse) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getIndex}.
+                     * @param error Error, if any
+                     * @param [response] Index
+                     */
+                    type GetIndexCallback = (error: (Error|null), response?: google.firestore.admin.v1.Index) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteIndex}.
+                     * @param error Error, if any
+                     * @param [response] Empty
+                     */
+                    type DeleteIndexCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getField}.
+                     * @param error Error, if any
+                     * @param [response] Field
+                     */
+                    type GetFieldCallback = (error: (Error|null), response?: google.firestore.admin.v1.Field) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#updateField}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type UpdateFieldCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listFields}.
+                     * @param error Error, if any
+                     * @param [response] ListFieldsResponse
+                     */
+                    type ListFieldsCallback = (error: (Error|null), response?: google.firestore.admin.v1.ListFieldsResponse) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#exportDocuments}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type ExportDocumentsCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#importDocuments}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type ImportDocumentsCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+                }
+
+                /** Properties of a CreateIndexRequest. */
+                interface ICreateIndexRequest {
+
+                    /** CreateIndexRequest parent */
+                    parent?: (string|null);
+
+                    /** CreateIndexRequest index */
+                    index?: (google.firestore.admin.v1.IIndex|null);
+                }
+
+                /** Represents a CreateIndexRequest. */
+                class CreateIndexRequest implements ICreateIndexRequest {
+
+                    /**
+                     * Constructs a new CreateIndexRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICreateIndexRequest);
+
+                    /** CreateIndexRequest parent. */
+                    public parent: string;
+
+                    /** CreateIndexRequest index. */
+                    public index?: (google.firestore.admin.v1.IIndex|null);
+                }
+
+                /** Properties of a ListIndexesRequest. */
+                interface IListIndexesRequest {
+
+                    /** ListIndexesRequest parent */
+                    parent?: (string|null);
+
+                    /** ListIndexesRequest filter */
+                    filter?: (string|null);
+
+                    /** ListIndexesRequest pageSize */
+                    pageSize?: (number|null);
+
+                    /** ListIndexesRequest pageToken */
+                    pageToken?: (string|null);
+                }
+
+                /** Represents a ListIndexesRequest. */
+                class ListIndexesRequest implements IListIndexesRequest {
+
+                    /**
+                     * Constructs a new ListIndexesRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListIndexesRequest);
+
+                    /** ListIndexesRequest parent. */
+                    public parent: string;
+
+                    /** ListIndexesRequest filter. */
+                    public filter: string;
+
+                    /** ListIndexesRequest pageSize. */
+                    public pageSize: number;
+
+                    /** ListIndexesRequest pageToken. */
+                    public pageToken: string;
+                }
+
+                /** Properties of a ListIndexesResponse. */
+                interface IListIndexesResponse {
+
+                    /** ListIndexesResponse indexes */
+                    indexes?: (google.firestore.admin.v1.IIndex[]|null);
+
+                    /** ListIndexesResponse nextPageToken */
+                    nextPageToken?: (string|null);
+                }
+
+                /** Represents a ListIndexesResponse. */
+                class ListIndexesResponse implements IListIndexesResponse {
+
+                    /**
+                     * Constructs a new ListIndexesResponse.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListIndexesResponse);
+
+                    /** ListIndexesResponse indexes. */
+                    public indexes: google.firestore.admin.v1.IIndex[];
+
+                    /** ListIndexesResponse nextPageToken. */
+                    public nextPageToken: string;
+                }
+
+                /** Properties of a GetIndexRequest. */
+                interface IGetIndexRequest {
+
+                    /** GetIndexRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a GetIndexRequest. */
+                class GetIndexRequest implements IGetIndexRequest {
+
+                    /**
+                     * Constructs a new GetIndexRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IGetIndexRequest);
+
+                    /** GetIndexRequest name. */
+                    public name: string;
+                }
+
+                /** Properties of a DeleteIndexRequest. */
+                interface IDeleteIndexRequest {
+
+                    /** DeleteIndexRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a DeleteIndexRequest. */
+                class DeleteIndexRequest implements IDeleteIndexRequest {
+
+                    /**
+                     * Constructs a new DeleteIndexRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDeleteIndexRequest);
+
+                    /** DeleteIndexRequest name. */
+                    public name: string;
+                }
+
+                /** Properties of an UpdateFieldRequest. */
+                interface IUpdateFieldRequest {
+
+                    /** UpdateFieldRequest field */
+                    field?: (google.firestore.admin.v1.IField|null);
+
+                    /** UpdateFieldRequest updateMask */
+                    updateMask?: (google.protobuf.IFieldMask|null);
+                }
+
+                /** Represents an UpdateFieldRequest. */
+                class UpdateFieldRequest implements IUpdateFieldRequest {
+
+                    /**
+                     * Constructs a new UpdateFieldRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IUpdateFieldRequest);
+
+                    /** UpdateFieldRequest field. */
+                    public field?: (google.firestore.admin.v1.IField|null);
+
+                    /** UpdateFieldRequest updateMask. */
+                    public updateMask?: (google.protobuf.IFieldMask|null);
+                }
+
+                /** Properties of a GetFieldRequest. */
+                interface IGetFieldRequest {
+
+                    /** GetFieldRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a GetFieldRequest. */
+                class GetFieldRequest implements IGetFieldRequest {
+
+                    /**
+                     * Constructs a new GetFieldRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IGetFieldRequest);
+
+                    /** GetFieldRequest name. */
+                    public name: string;
+                }
+
+                /** Properties of a ListFieldsRequest. */
+                interface IListFieldsRequest {
+
+                    /** ListFieldsRequest parent */
+                    parent?: (string|null);
+
+                    /** ListFieldsRequest filter */
+                    filter?: (string|null);
+
+                    /** ListFieldsRequest pageSize */
+                    pageSize?: (number|null);
+
+                    /** ListFieldsRequest pageToken */
+                    pageToken?: (string|null);
+                }
+
+                /** Represents a ListFieldsRequest. */
+                class ListFieldsRequest implements IListFieldsRequest {
+
+                    /**
+                     * Constructs a new ListFieldsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListFieldsRequest);
+
+                    /** ListFieldsRequest parent. */
+                    public parent: string;
+
+                    /** ListFieldsRequest filter. */
+                    public filter: string;
+
+                    /** ListFieldsRequest pageSize. */
+                    public pageSize: number;
+
+                    /** ListFieldsRequest pageToken. */
+                    public pageToken: string;
+                }
+
+                /** Properties of a ListFieldsResponse. */
+                interface IListFieldsResponse {
+
+                    /** ListFieldsResponse fields */
+                    fields?: (google.firestore.admin.v1.IField[]|null);
+
+                    /** ListFieldsResponse nextPageToken */
+                    nextPageToken?: (string|null);
+                }
+
+                /** Represents a ListFieldsResponse. */
+                class ListFieldsResponse implements IListFieldsResponse {
+
+                    /**
+                     * Constructs a new ListFieldsResponse.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListFieldsResponse);
+
+                    /** ListFieldsResponse fields. */
+                    public fields: google.firestore.admin.v1.IField[];
+
+                    /** ListFieldsResponse nextPageToken. */
+                    public nextPageToken: string;
+                }
+
+                /** Properties of an ExportDocumentsRequest. */
+                interface IExportDocumentsRequest {
+
+                    /** ExportDocumentsRequest name */
+                    name?: (string|null);
+
+                    /** ExportDocumentsRequest collectionIds */
+                    collectionIds?: (string[]|null);
+
+                    /** ExportDocumentsRequest outputUriPrefix */
+                    outputUriPrefix?: (string|null);
+                }
+
+                /** Represents an ExportDocumentsRequest. */
+                class ExportDocumentsRequest implements IExportDocumentsRequest {
+
+                    /**
+                     * Constructs a new ExportDocumentsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IExportDocumentsRequest);
+
+                    /** ExportDocumentsRequest name. */
+                    public name: string;
+
+                    /** ExportDocumentsRequest collectionIds. */
+                    public collectionIds: string[];
+
+                    /** ExportDocumentsRequest outputUriPrefix. */
+                    public outputUriPrefix: string;
+                }
+
+                /** Properties of an ImportDocumentsRequest. */
+                interface IImportDocumentsRequest {
+
+                    /** ImportDocumentsRequest name */
+                    name?: (string|null);
+
+                    /** ImportDocumentsRequest collectionIds */
+                    collectionIds?: (string[]|null);
+
+                    /** ImportDocumentsRequest inputUriPrefix */
+                    inputUriPrefix?: (string|null);
+                }
+
+                /** Represents an ImportDocumentsRequest. */
+                class ImportDocumentsRequest implements IImportDocumentsRequest {
+
+                    /**
+                     * Constructs a new ImportDocumentsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IImportDocumentsRequest);
+
+                    /** ImportDocumentsRequest name. */
+                    public name: string;
+
+                    /** ImportDocumentsRequest collectionIds. */
+                    public collectionIds: string[];
+
+                    /** ImportDocumentsRequest inputUriPrefix. */
+                    public inputUriPrefix: string;
+                }
+
+                /** Properties of an Index. */
+                interface IIndex {
+
+                    /** Index name */
+                    name?: (string|null);
+
+                    /** Index queryScope */
+                    queryScope?: (google.firestore.admin.v1.Index.QueryScope|null);
+
+                    /** Index fields */
+                    fields?: (google.firestore.admin.v1.Index.IIndexField[]|null);
+
+                    /** Index state */
+                    state?: (google.firestore.admin.v1.Index.State|null);
+                }
+
+                /** Represents an Index. */
+                class Index implements IIndex {
+
+                    /**
+                     * Constructs a new Index.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IIndex);
+
+                    /** Index name. */
+                    public name: string;
+
+                    /** Index queryScope. */
+                    public queryScope: google.firestore.admin.v1.Index.QueryScope;
+
+                    /** Index fields. */
+                    public fields: google.firestore.admin.v1.Index.IIndexField[];
+
+                    /** Index state. */
+                    public state: google.firestore.admin.v1.Index.State;
+                }
+
+                namespace Index {
+
+                    /** Properties of an IndexField. */
+                    interface IIndexField {
+
+                        /** IndexField fieldPath */
+                        fieldPath?: (string|null);
+
+                        /** IndexField order */
+                        order?: (google.firestore.admin.v1.Index.IndexField.Order|null);
+
+                        /** IndexField arrayConfig */
+                        arrayConfig?: (google.firestore.admin.v1.Index.IndexField.ArrayConfig|null);
+                    }
+
+                    /** Represents an IndexField. */
+                    class IndexField implements IIndexField {
+
+                        /**
+                         * Constructs a new IndexField.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.Index.IIndexField);
+
+                        /** IndexField fieldPath. */
+                        public fieldPath: string;
+
+                        /** IndexField order. */
+                        public order: google.firestore.admin.v1.Index.IndexField.Order;
+
+                        /** IndexField arrayConfig. */
+                        public arrayConfig: google.firestore.admin.v1.Index.IndexField.ArrayConfig;
+
+                        /** IndexField valueMode. */
+                        public valueMode?: ("order"|"arrayConfig");
+                    }
+
+                    namespace IndexField {
+
+                        /** Order enum. */
+                        type Order =
+                            "ORDER_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
+
+                        /** ArrayConfig enum. */
+                        type ArrayConfig =
+                            "ARRAY_CONFIG_UNSPECIFIED"| "CONTAINS";
+                    }
+
+                    /** QueryScope enum. */
+                    type QueryScope =
+                        "QUERY_SCOPE_UNSPECIFIED"| "COLLECTION"| "COLLECTION_GROUP";
+
+                    /** State enum. */
+                    type State =
+                        "STATE_UNSPECIFIED"| "CREATING"| "READY"| "NEEDS_REPAIR";
+                }
+
+                /** Properties of a LocationMetadata. */
+                interface ILocationMetadata {
+                }
+
+                /** Represents a LocationMetadata. */
+                class LocationMetadata implements ILocationMetadata {
+
+                    /**
+                     * Constructs a new LocationMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ILocationMetadata);
+                }
+
+                /** Properties of an IndexOperationMetadata. */
+                interface IIndexOperationMetadata {
+
+                    /** IndexOperationMetadata startTime */
+                    startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** IndexOperationMetadata endTime */
+                    endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** IndexOperationMetadata index */
+                    index?: (string|null);
+
+                    /** IndexOperationMetadata state */
+                    state?: (google.firestore.admin.v1.OperationState|null);
+
+                    /** IndexOperationMetadata progressDocuments */
+                    progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** IndexOperationMetadata progressBytes */
+                    progressBytes?: (google.firestore.admin.v1.IProgress|null);
+                }
+
+                /** Represents an IndexOperationMetadata. */
+                class IndexOperationMetadata implements IIndexOperationMetadata {
+
+                    /**
+                     * Constructs a new IndexOperationMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IIndexOperationMetadata);
+
+                    /** IndexOperationMetadata startTime. */
+                    public startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** IndexOperationMetadata endTime. */
+                    public endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** IndexOperationMetadata index. */
+                    public index: string;
+
+                    /** IndexOperationMetadata state. */
+                    public state: google.firestore.admin.v1.OperationState;
+
+                    /** IndexOperationMetadata progressDocuments. */
+                    public progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** IndexOperationMetadata progressBytes. */
+                    public progressBytes?: (google.firestore.admin.v1.IProgress|null);
+                }
+
+                /** Properties of a FieldOperationMetadata. */
+                interface IFieldOperationMetadata {
+
+                    /** FieldOperationMetadata startTime */
+                    startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** FieldOperationMetadata endTime */
+                    endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** FieldOperationMetadata field */
+                    field?: (string|null);
+
+                    /** FieldOperationMetadata indexConfigDeltas */
+                    indexConfigDeltas?: (google.firestore.admin.v1.FieldOperationMetadata.IIndexConfigDelta[]|null);
+
+                    /** FieldOperationMetadata state */
+                    state?: (google.firestore.admin.v1.OperationState|null);
+
+                    /** FieldOperationMetadata progressDocuments */
+                    progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** FieldOperationMetadata progressBytes */
+                    progressBytes?: (google.firestore.admin.v1.IProgress|null);
+                }
+
+                /** Represents a FieldOperationMetadata. */
+                class FieldOperationMetadata implements IFieldOperationMetadata {
+
+                    /**
+                     * Constructs a new FieldOperationMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IFieldOperationMetadata);
+
+                    /** FieldOperationMetadata startTime. */
+                    public startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** FieldOperationMetadata endTime. */
+                    public endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** FieldOperationMetadata field. */
+                    public field: string;
+
+                    /** FieldOperationMetadata indexConfigDeltas. */
+                    public indexConfigDeltas: google.firestore.admin.v1.FieldOperationMetadata.IIndexConfigDelta[];
+
+                    /** FieldOperationMetadata state. */
+                    public state: google.firestore.admin.v1.OperationState;
+
+                    /** FieldOperationMetadata progressDocuments. */
+                    public progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** FieldOperationMetadata progressBytes. */
+                    public progressBytes?: (google.firestore.admin.v1.IProgress|null);
+                }
+
+                namespace FieldOperationMetadata {
+
+                    /** Properties of an IndexConfigDelta. */
+                    interface IIndexConfigDelta {
+
+                        /** IndexConfigDelta changeType */
+                        changeType?: (google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType|null);
+
+                        /** IndexConfigDelta index */
+                        index?: (google.firestore.admin.v1.IIndex|null);
+                    }
+
+                    /** Represents an IndexConfigDelta. */
+                    class IndexConfigDelta implements IIndexConfigDelta {
+
+                        /**
+                         * Constructs a new IndexConfigDelta.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.FieldOperationMetadata.IIndexConfigDelta);
+
+                        /** IndexConfigDelta changeType. */
+                        public changeType: google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType;
+
+                        /** IndexConfigDelta index. */
+                        public index?: (google.firestore.admin.v1.IIndex|null);
+                    }
+
+                    namespace IndexConfigDelta {
+
+                        /** ChangeType enum. */
+                        type ChangeType =
+                            "CHANGE_TYPE_UNSPECIFIED"| "ADD"| "REMOVE";
+                    }
+                }
+
+                /** Properties of an ExportDocumentsMetadata. */
+                interface IExportDocumentsMetadata {
+
+                    /** ExportDocumentsMetadata startTime */
+                    startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ExportDocumentsMetadata endTime */
+                    endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ExportDocumentsMetadata operationState */
+                    operationState?: (google.firestore.admin.v1.OperationState|null);
+
+                    /** ExportDocumentsMetadata progressDocuments */
+                    progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** ExportDocumentsMetadata progressBytes */
+                    progressBytes?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** ExportDocumentsMetadata collectionIds */
+                    collectionIds?: (string[]|null);
+
+                    /** ExportDocumentsMetadata outputUriPrefix */
+                    outputUriPrefix?: (string|null);
+                }
+
+                /** Represents an ExportDocumentsMetadata. */
+                class ExportDocumentsMetadata implements IExportDocumentsMetadata {
+
+                    /**
+                     * Constructs a new ExportDocumentsMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IExportDocumentsMetadata);
+
+                    /** ExportDocumentsMetadata startTime. */
+                    public startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ExportDocumentsMetadata endTime. */
+                    public endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ExportDocumentsMetadata operationState. */
+                    public operationState: google.firestore.admin.v1.OperationState;
+
+                    /** ExportDocumentsMetadata progressDocuments. */
+                    public progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** ExportDocumentsMetadata progressBytes. */
+                    public progressBytes?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** ExportDocumentsMetadata collectionIds. */
+                    public collectionIds: string[];
+
+                    /** ExportDocumentsMetadata outputUriPrefix. */
+                    public outputUriPrefix: string;
+                }
+
+                /** Properties of an ImportDocumentsMetadata. */
+                interface IImportDocumentsMetadata {
+
+                    /** ImportDocumentsMetadata startTime */
+                    startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ImportDocumentsMetadata endTime */
+                    endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ImportDocumentsMetadata operationState */
+                    operationState?: (google.firestore.admin.v1.OperationState|null);
+
+                    /** ImportDocumentsMetadata progressDocuments */
+                    progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** ImportDocumentsMetadata progressBytes */
+                    progressBytes?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** ImportDocumentsMetadata collectionIds */
+                    collectionIds?: (string[]|null);
+
+                    /** ImportDocumentsMetadata inputUriPrefix */
+                    inputUriPrefix?: (string|null);
+                }
+
+                /** Represents an ImportDocumentsMetadata. */
+                class ImportDocumentsMetadata implements IImportDocumentsMetadata {
+
+                    /**
+                     * Constructs a new ImportDocumentsMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IImportDocumentsMetadata);
+
+                    /** ImportDocumentsMetadata startTime. */
+                    public startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ImportDocumentsMetadata endTime. */
+                    public endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ImportDocumentsMetadata operationState. */
+                    public operationState: google.firestore.admin.v1.OperationState;
+
+                    /** ImportDocumentsMetadata progressDocuments. */
+                    public progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** ImportDocumentsMetadata progressBytes. */
+                    public progressBytes?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** ImportDocumentsMetadata collectionIds. */
+                    public collectionIds: string[];
+
+                    /** ImportDocumentsMetadata inputUriPrefix. */
+                    public inputUriPrefix: string;
+                }
+
+                /** Properties of an ExportDocumentsResponse. */
+                interface IExportDocumentsResponse {
+
+                    /** ExportDocumentsResponse outputUriPrefix */
+                    outputUriPrefix?: (string|null);
+                }
+
+                /** Represents an ExportDocumentsResponse. */
+                class ExportDocumentsResponse implements IExportDocumentsResponse {
+
+                    /**
+                     * Constructs a new ExportDocumentsResponse.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IExportDocumentsResponse);
+
+                    /** ExportDocumentsResponse outputUriPrefix. */
+                    public outputUriPrefix: string;
+                }
+
+                /** Properties of a Progress. */
+                interface IProgress {
+
+                    /** Progress estimatedWork */
+                    estimatedWork?: (number|null);
+
+                    /** Progress completedWork */
+                    completedWork?: (number|null);
+                }
+
+                /** Represents a Progress. */
+                class Progress implements IProgress {
+
+                    /**
+                     * Constructs a new Progress.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IProgress);
+
+                    /** Progress estimatedWork. */
+                    public estimatedWork: number;
+
+                    /** Progress completedWork. */
+                    public completedWork: number;
+                }
+
+                /** OperationState enum. */
+                type OperationState =
+                    "OPERATION_STATE_UNSPECIFIED"| "INITIALIZING"| "PROCESSING"| "CANCELLING"| "FINALIZING"| "SUCCESSFUL"| "FAILED"| "CANCELLED";
+            }
+        }
+
+        /** Namespace v1beta1. */
+        namespace v1beta1 {
+
+            /** Properties of a DocumentMask. */
+            interface IDocumentMask {
+
+                /** DocumentMask fieldPaths */
+                fieldPaths?: (string[]|null);
+            }
+
+            /** Represents a DocumentMask. */
+            class DocumentMask implements IDocumentMask {
+
+                /**
+                 * Constructs a new DocumentMask.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IDocumentMask);
+
+                /** DocumentMask fieldPaths. */
+                public fieldPaths: string[];
+            }
+
+            /** Properties of a Precondition. */
+            interface IPrecondition {
+
+                /** Precondition exists */
+                exists?: (boolean|null);
+
+                /** Precondition updateTime */
+                updateTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a Precondition. */
+            class Precondition implements IPrecondition {
+
+                /**
+                 * Constructs a new Precondition.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IPrecondition);
+
+                /** Precondition exists. */
+                public exists: boolean;
+
+                /** Precondition updateTime. */
+                public updateTime?: (google.protobuf.ITimestamp|null);
+
+                /** Precondition conditionType. */
+                public conditionType?: ("exists"|"updateTime");
+            }
+
+            /** Properties of a TransactionOptions. */
+            interface ITransactionOptions {
+
+                /** TransactionOptions readOnly */
+                readOnly?: (google.firestore.v1beta1.TransactionOptions.IReadOnly|null);
+
+                /** TransactionOptions readWrite */
+                readWrite?: (google.firestore.v1beta1.TransactionOptions.IReadWrite|null);
+            }
+
+            /** Represents a TransactionOptions. */
+            class TransactionOptions implements ITransactionOptions {
+
+                /**
+                 * Constructs a new TransactionOptions.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.ITransactionOptions);
+
+                /** TransactionOptions readOnly. */
+                public readOnly?: (google.firestore.v1beta1.TransactionOptions.IReadOnly|null);
+
+                /** TransactionOptions readWrite. */
+                public readWrite?: (google.firestore.v1beta1.TransactionOptions.IReadWrite|null);
+
+                /** TransactionOptions mode. */
+                public mode?: ("readOnly"|"readWrite");
+            }
+
+            namespace TransactionOptions {
+
+                /** Properties of a ReadWrite. */
+                interface IReadWrite {
+
+                    /** ReadWrite retryTransaction */
+                    retryTransaction?: (Uint8Array|null);
+                }
+
+                /** Represents a ReadWrite. */
+                class ReadWrite implements IReadWrite {
+
+                    /**
+                     * Constructs a new ReadWrite.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.TransactionOptions.IReadWrite);
+
+                    /** ReadWrite retryTransaction. */
+                    public retryTransaction: Uint8Array;
+                }
+
+                /** Properties of a ReadOnly. */
+                interface IReadOnly {
+
+                    /** ReadOnly readTime */
+                    readTime?: (google.protobuf.ITimestamp|null);
+                }
+
+                /** Represents a ReadOnly. */
+                class ReadOnly implements IReadOnly {
+
+                    /**
+                     * Constructs a new ReadOnly.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.TransactionOptions.IReadOnly);
+
+                    /** ReadOnly readTime. */
+                    public readTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ReadOnly consistencySelector. */
+                    public consistencySelector?: "readTime";
+                }
+            }
+
+            /** Properties of a Document. */
+            interface IDocument {
+
+                /** Document name */
+                name?: (string|null);
+
+                /** Document fields */
+                fields?: ({ [k: string]: google.firestore.v1beta1.IValue }|null);
+
+                /** Document createTime */
+                createTime?: (google.protobuf.ITimestamp|null);
+
+                /** Document updateTime */
+                updateTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a Document. */
+            class Document implements IDocument {
+
+                /**
+                 * Constructs a new Document.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IDocument);
+
+                /** Document name. */
+                public name: string;
+
+                /** Document fields. */
+                public fields: { [k: string]: google.firestore.v1beta1.IValue };
+
+                /** Document createTime. */
+                public createTime?: (google.protobuf.ITimestamp|null);
+
+                /** Document updateTime. */
+                public updateTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Properties of a Value. */
+            interface IValue {
+
+                /** Value nullValue */
+                nullValue?: (google.protobuf.NullValue|null);
+
+                /** Value booleanValue */
+                booleanValue?: (boolean|null);
+
+                /** Value integerValue */
+                integerValue?: (number|null);
+
+                /** Value doubleValue */
+                doubleValue?: (number|null);
+
+                /** Value timestampValue */
+                timestampValue?: (google.protobuf.ITimestamp|null);
+
+                /** Value stringValue */
+                stringValue?: (string|null);
+
+                /** Value bytesValue */
+                bytesValue?: (Uint8Array|null);
+
+                /** Value referenceValue */
+                referenceValue?: (string|null);
+
+                /** Value geoPointValue */
+                geoPointValue?: (google.type.ILatLng|null);
+
+                /** Value arrayValue */
+                arrayValue?: (google.firestore.v1beta1.IArrayValue|null);
+
+                /** Value mapValue */
+                mapValue?: (google.firestore.v1beta1.IMapValue|null);
+            }
+
+            /** Represents a Value. */
+            class Value implements IValue {
+
+                /**
+                 * Constructs a new Value.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IValue);
+
+                /** Value nullValue. */
+                public nullValue: google.protobuf.NullValue;
+
+                /** Value booleanValue. */
+                public booleanValue: boolean;
+
+                /** Value integerValue. */
+                public integerValue: number;
+
+                /** Value doubleValue. */
+                public doubleValue: number;
+
+                /** Value timestampValue. */
+                public timestampValue?: (google.protobuf.ITimestamp|null);
+
+                /** Value stringValue. */
+                public stringValue: string;
+
+                /** Value bytesValue. */
+                public bytesValue: Uint8Array;
+
+                /** Value referenceValue. */
+                public referenceValue: string;
+
+                /** Value geoPointValue. */
+                public geoPointValue?: (google.type.ILatLng|null);
+
+                /** Value arrayValue. */
+                public arrayValue?: (google.firestore.v1beta1.IArrayValue|null);
+
+                /** Value mapValue. */
+                public mapValue?: (google.firestore.v1beta1.IMapValue|null);
+
+                /** Value valueType. */
+                public valueType?: ("nullValue"|"booleanValue"|"integerValue"|"doubleValue"|"timestampValue"|"stringValue"|"bytesValue"|"referenceValue"|"geoPointValue"|"arrayValue"|"mapValue");
+            }
+
+            /** Properties of an ArrayValue. */
+            interface IArrayValue {
+
+                /** ArrayValue values */
+                values?: (google.firestore.v1beta1.IValue[]|null);
+            }
+
+            /** Represents an ArrayValue. */
+            class ArrayValue implements IArrayValue {
+
+                /**
+                 * Constructs a new ArrayValue.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IArrayValue);
+
+                /** ArrayValue values. */
+                public values: google.firestore.v1beta1.IValue[];
+            }
+
+            /** Properties of a MapValue. */
+            interface IMapValue {
+
+                /** MapValue fields */
+                fields?: ({ [k: string]: google.firestore.v1beta1.IValue }|null);
+            }
+
+            /** Represents a MapValue. */
+            class MapValue implements IMapValue {
+
+                /**
+                 * Constructs a new MapValue.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IMapValue);
+
+                /** MapValue fields. */
+                public fields: { [k: string]: google.firestore.v1beta1.IValue };
+            }
+
+            /** Represents a Firestore */
+            class Firestore extends $protobuf.rpc.Service {
+
+                /**
+                 * Constructs a new Firestore service.
+                 * @param rpcImpl RPC implementation
+                 * @param [requestDelimited=false] Whether requests are length-delimited
+                 * @param [responseDelimited=false] Whether responses are length-delimited
+                 */
+                constructor(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean);
+
+                /**
+                 * Calls GetDocument.
+                 * @param request GetDocumentRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and Document
+                 */
+                public getDocument(request: google.firestore.v1beta1.IGetDocumentRequest, callback: google.firestore.v1beta1.Firestore.GetDocumentCallback): void;
+
+                /**
+                 * Calls GetDocument.
+                 * @param request GetDocumentRequest message or plain object
+                 * @returns Promise
+                 */
+                public getDocument(request: google.firestore.v1beta1.IGetDocumentRequest): Promise<google.firestore.v1beta1.Document>;
+
+                /**
+                 * Calls ListDocuments.
+                 * @param request ListDocumentsRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and ListDocumentsResponse
+                 */
+                public listDocuments(request: google.firestore.v1beta1.IListDocumentsRequest, callback: google.firestore.v1beta1.Firestore.ListDocumentsCallback): void;
+
+                /**
+                 * Calls ListDocuments.
+                 * @param request ListDocumentsRequest message or plain object
+                 * @returns Promise
+                 */
+                public listDocuments(request: google.firestore.v1beta1.IListDocumentsRequest): Promise<google.firestore.v1beta1.ListDocumentsResponse>;
+
+                /**
+                 * Calls CreateDocument.
+                 * @param request CreateDocumentRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and Document
+                 */
+                public createDocument(request: google.firestore.v1beta1.ICreateDocumentRequest, callback: google.firestore.v1beta1.Firestore.CreateDocumentCallback): void;
+
+                /**
+                 * Calls CreateDocument.
+                 * @param request CreateDocumentRequest message or plain object
+                 * @returns Promise
+                 */
+                public createDocument(request: google.firestore.v1beta1.ICreateDocumentRequest): Promise<google.firestore.v1beta1.Document>;
+
+                /**
+                 * Calls UpdateDocument.
+                 * @param request UpdateDocumentRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and Document
+                 */
+                public updateDocument(request: google.firestore.v1beta1.IUpdateDocumentRequest, callback: google.firestore.v1beta1.Firestore.UpdateDocumentCallback): void;
+
+                /**
+                 * Calls UpdateDocument.
+                 * @param request UpdateDocumentRequest message or plain object
+                 * @returns Promise
+                 */
+                public updateDocument(request: google.firestore.v1beta1.IUpdateDocumentRequest): Promise<google.firestore.v1beta1.Document>;
+
+                /**
+                 * Calls DeleteDocument.
+                 * @param request DeleteDocumentRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and Empty
+                 */
+                public deleteDocument(request: google.firestore.v1beta1.IDeleteDocumentRequest, callback: google.firestore.v1beta1.Firestore.DeleteDocumentCallback): void;
+
+                /**
+                 * Calls DeleteDocument.
+                 * @param request DeleteDocumentRequest message or plain object
+                 * @returns Promise
+                 */
+                public deleteDocument(request: google.firestore.v1beta1.IDeleteDocumentRequest): Promise<google.protobuf.Empty>;
+
+                /**
+                 * Calls BatchGetDocuments.
+                 * @param request BatchGetDocumentsRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and BatchGetDocumentsResponse
+                 */
+                public batchGetDocuments(request: google.firestore.v1beta1.IBatchGetDocumentsRequest, callback: google.firestore.v1beta1.Firestore.BatchGetDocumentsCallback): void;
+
+                /**
+                 * Calls BatchGetDocuments.
+                 * @param request BatchGetDocumentsRequest message or plain object
+                 * @returns Promise
+                 */
+                public batchGetDocuments(request: google.firestore.v1beta1.IBatchGetDocumentsRequest): Promise<google.firestore.v1beta1.BatchGetDocumentsResponse>;
+
+                /**
+                 * Calls BeginTransaction.
+                 * @param request BeginTransactionRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and BeginTransactionResponse
+                 */
+                public beginTransaction(request: google.firestore.v1beta1.IBeginTransactionRequest, callback: google.firestore.v1beta1.Firestore.BeginTransactionCallback): void;
+
+                /**
+                 * Calls BeginTransaction.
+                 * @param request BeginTransactionRequest message or plain object
+                 * @returns Promise
+                 */
+                public beginTransaction(request: google.firestore.v1beta1.IBeginTransactionRequest): Promise<google.firestore.v1beta1.BeginTransactionResponse>;
+
+                /**
+                 * Calls Commit.
+                 * @param request CommitRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and CommitResponse
+                 */
+                public commit(request: google.firestore.v1beta1.ICommitRequest, callback: google.firestore.v1beta1.Firestore.CommitCallback): void;
+
+                /**
+                 * Calls Commit.
+                 * @param request CommitRequest message or plain object
+                 * @returns Promise
+                 */
+                public commit(request: google.firestore.v1beta1.ICommitRequest): Promise<google.firestore.v1beta1.CommitResponse>;
+
+                /**
+                 * Calls Rollback.
+                 * @param request RollbackRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and Empty
+                 */
+                public rollback(request: google.firestore.v1beta1.IRollbackRequest, callback: google.firestore.v1beta1.Firestore.RollbackCallback): void;
+
+                /**
+                 * Calls Rollback.
+                 * @param request RollbackRequest message or plain object
+                 * @returns Promise
+                 */
+                public rollback(request: google.firestore.v1beta1.IRollbackRequest): Promise<google.protobuf.Empty>;
+
+                /**
+                 * Calls RunQuery.
+                 * @param request RunQueryRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and RunQueryResponse
+                 */
+                public runQuery(request: google.firestore.v1beta1.IRunQueryRequest, callback: google.firestore.v1beta1.Firestore.RunQueryCallback): void;
+
+                /**
+                 * Calls RunQuery.
+                 * @param request RunQueryRequest message or plain object
+                 * @returns Promise
+                 */
+                public runQuery(request: google.firestore.v1beta1.IRunQueryRequest): Promise<google.firestore.v1beta1.RunQueryResponse>;
+
+                /**
+                 * Calls Write.
+                 * @param request WriteRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and WriteResponse
+                 */
+                public write(request: google.firestore.v1beta1.IWriteRequest, callback: google.firestore.v1beta1.Firestore.WriteCallback): void;
+
+                /**
+                 * Calls Write.
+                 * @param request WriteRequest message or plain object
+                 * @returns Promise
+                 */
+                public write(request: google.firestore.v1beta1.IWriteRequest): Promise<google.firestore.v1beta1.WriteResponse>;
+
+                /**
+                 * Calls Listen.
+                 * @param request ListenRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and ListenResponse
+                 */
+                public listen(request: google.firestore.v1beta1.IListenRequest, callback: google.firestore.v1beta1.Firestore.ListenCallback): void;
+
+                /**
+                 * Calls Listen.
+                 * @param request ListenRequest message or plain object
+                 * @returns Promise
+                 */
+                public listen(request: google.firestore.v1beta1.IListenRequest): Promise<google.firestore.v1beta1.ListenResponse>;
+
+                /**
+                 * Calls ListCollectionIds.
+                 * @param request ListCollectionIdsRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and ListCollectionIdsResponse
+                 */
+                public listCollectionIds(request: google.firestore.v1beta1.IListCollectionIdsRequest, callback: google.firestore.v1beta1.Firestore.ListCollectionIdsCallback): void;
+
+                /**
+                 * Calls ListCollectionIds.
+                 * @param request ListCollectionIdsRequest message or plain object
+                 * @returns Promise
+                 */
+                public listCollectionIds(request: google.firestore.v1beta1.IListCollectionIdsRequest): Promise<google.firestore.v1beta1.ListCollectionIdsResponse>;
+            }
+
+            namespace Firestore {
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#getDocument}.
+                 * @param error Error, if any
+                 * @param [response] Document
+                 */
+                type GetDocumentCallback = (error: (Error|null), response?: google.firestore.v1beta1.Document) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#listDocuments}.
+                 * @param error Error, if any
+                 * @param [response] ListDocumentsResponse
+                 */
+                type ListDocumentsCallback = (error: (Error|null), response?: google.firestore.v1beta1.ListDocumentsResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#createDocument}.
+                 * @param error Error, if any
+                 * @param [response] Document
+                 */
+                type CreateDocumentCallback = (error: (Error|null), response?: google.firestore.v1beta1.Document) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#updateDocument}.
+                 * @param error Error, if any
+                 * @param [response] Document
+                 */
+                type UpdateDocumentCallback = (error: (Error|null), response?: google.firestore.v1beta1.Document) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#deleteDocument}.
+                 * @param error Error, if any
+                 * @param [response] Empty
+                 */
+                type DeleteDocumentCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#batchGetDocuments}.
+                 * @param error Error, if any
+                 * @param [response] BatchGetDocumentsResponse
+                 */
+                type BatchGetDocumentsCallback = (error: (Error|null), response?: google.firestore.v1beta1.BatchGetDocumentsResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#beginTransaction}.
+                 * @param error Error, if any
+                 * @param [response] BeginTransactionResponse
+                 */
+                type BeginTransactionCallback = (error: (Error|null), response?: google.firestore.v1beta1.BeginTransactionResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#commit}.
+                 * @param error Error, if any
+                 * @param [response] CommitResponse
+                 */
+                type CommitCallback = (error: (Error|null), response?: google.firestore.v1beta1.CommitResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#rollback}.
+                 * @param error Error, if any
+                 * @param [response] Empty
+                 */
+                type RollbackCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#runQuery}.
+                 * @param error Error, if any
+                 * @param [response] RunQueryResponse
+                 */
+                type RunQueryCallback = (error: (Error|null), response?: google.firestore.v1beta1.RunQueryResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#write}.
+                 * @param error Error, if any
+                 * @param [response] WriteResponse
+                 */
+                type WriteCallback = (error: (Error|null), response?: google.firestore.v1beta1.WriteResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#listen}.
+                 * @param error Error, if any
+                 * @param [response] ListenResponse
+                 */
+                type ListenCallback = (error: (Error|null), response?: google.firestore.v1beta1.ListenResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1beta1.Firestore#listCollectionIds}.
+                 * @param error Error, if any
+                 * @param [response] ListCollectionIdsResponse
+                 */
+                type ListCollectionIdsCallback = (error: (Error|null), response?: google.firestore.v1beta1.ListCollectionIdsResponse) => void;
+            }
+
+            /** Properties of a GetDocumentRequest. */
+            interface IGetDocumentRequest {
+
+                /** GetDocumentRequest name */
+                name?: (string|null);
+
+                /** GetDocumentRequest mask */
+                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** GetDocumentRequest transaction */
+                transaction?: (Uint8Array|null);
+
+                /** GetDocumentRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a GetDocumentRequest. */
+            class GetDocumentRequest implements IGetDocumentRequest {
+
+                /**
+                 * Constructs a new GetDocumentRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IGetDocumentRequest);
+
+                /** GetDocumentRequest name. */
+                public name: string;
+
+                /** GetDocumentRequest mask. */
+                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** GetDocumentRequest transaction. */
+                public transaction: Uint8Array;
+
+                /** GetDocumentRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** GetDocumentRequest consistencySelector. */
+                public consistencySelector?: ("transaction"|"readTime");
+            }
+
+            /** Properties of a ListDocumentsRequest. */
+            interface IListDocumentsRequest {
+
+                /** ListDocumentsRequest parent */
+                parent?: (string|null);
+
+                /** ListDocumentsRequest collectionId */
+                collectionId?: (string|null);
+
+                /** ListDocumentsRequest pageSize */
+                pageSize?: (number|null);
+
+                /** ListDocumentsRequest pageToken */
+                pageToken?: (string|null);
+
+                /** ListDocumentsRequest orderBy */
+                orderBy?: (string|null);
+
+                /** ListDocumentsRequest mask */
+                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** ListDocumentsRequest transaction */
+                transaction?: (Uint8Array|null);
+
+                /** ListDocumentsRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+
+                /** ListDocumentsRequest showMissing */
+                showMissing?: (boolean|null);
+            }
+
+            /** Represents a ListDocumentsRequest. */
+            class ListDocumentsRequest implements IListDocumentsRequest {
+
+                /**
+                 * Constructs a new ListDocumentsRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IListDocumentsRequest);
+
+                /** ListDocumentsRequest parent. */
+                public parent: string;
+
+                /** ListDocumentsRequest collectionId. */
+                public collectionId: string;
+
+                /** ListDocumentsRequest pageSize. */
+                public pageSize: number;
+
+                /** ListDocumentsRequest pageToken. */
+                public pageToken: string;
+
+                /** ListDocumentsRequest orderBy. */
+                public orderBy: string;
+
+                /** ListDocumentsRequest mask. */
+                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** ListDocumentsRequest transaction. */
+                public transaction: Uint8Array;
+
+                /** ListDocumentsRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** ListDocumentsRequest showMissing. */
+                public showMissing: boolean;
+
+                /** ListDocumentsRequest consistencySelector. */
+                public consistencySelector?: ("transaction"|"readTime");
+            }
+
+            /** Properties of a ListDocumentsResponse. */
+            interface IListDocumentsResponse {
+
+                /** ListDocumentsResponse documents */
+                documents?: (google.firestore.v1beta1.IDocument[]|null);
+
+                /** ListDocumentsResponse nextPageToken */
+                nextPageToken?: (string|null);
+            }
+
+            /** Represents a ListDocumentsResponse. */
+            class ListDocumentsResponse implements IListDocumentsResponse {
+
+                /**
+                 * Constructs a new ListDocumentsResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IListDocumentsResponse);
+
+                /** ListDocumentsResponse documents. */
+                public documents: google.firestore.v1beta1.IDocument[];
+
+                /** ListDocumentsResponse nextPageToken. */
+                public nextPageToken: string;
+            }
+
+            /** Properties of a CreateDocumentRequest. */
+            interface ICreateDocumentRequest {
+
+                /** CreateDocumentRequest parent */
+                parent?: (string|null);
+
+                /** CreateDocumentRequest collectionId */
+                collectionId?: (string|null);
+
+                /** CreateDocumentRequest documentId */
+                documentId?: (string|null);
+
+                /** CreateDocumentRequest document */
+                document?: (google.firestore.v1beta1.IDocument|null);
+
+                /** CreateDocumentRequest mask */
+                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+            }
+
+            /** Represents a CreateDocumentRequest. */
+            class CreateDocumentRequest implements ICreateDocumentRequest {
+
+                /**
+                 * Constructs a new CreateDocumentRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.ICreateDocumentRequest);
+
+                /** CreateDocumentRequest parent. */
+                public parent: string;
+
+                /** CreateDocumentRequest collectionId. */
+                public collectionId: string;
+
+                /** CreateDocumentRequest documentId. */
+                public documentId: string;
+
+                /** CreateDocumentRequest document. */
+                public document?: (google.firestore.v1beta1.IDocument|null);
+
+                /** CreateDocumentRequest mask. */
+                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+            }
+
+            /** Properties of an UpdateDocumentRequest. */
+            interface IUpdateDocumentRequest {
+
+                /** UpdateDocumentRequest document */
+                document?: (google.firestore.v1beta1.IDocument|null);
+
+                /** UpdateDocumentRequest updateMask */
+                updateMask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** UpdateDocumentRequest mask */
+                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** UpdateDocumentRequest currentDocument */
+                currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+            }
+
+            /** Represents an UpdateDocumentRequest. */
+            class UpdateDocumentRequest implements IUpdateDocumentRequest {
+
+                /**
+                 * Constructs a new UpdateDocumentRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IUpdateDocumentRequest);
+
+                /** UpdateDocumentRequest document. */
+                public document?: (google.firestore.v1beta1.IDocument|null);
+
+                /** UpdateDocumentRequest updateMask. */
+                public updateMask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** UpdateDocumentRequest mask. */
+                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** UpdateDocumentRequest currentDocument. */
+                public currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+            }
+
+            /** Properties of a DeleteDocumentRequest. */
+            interface IDeleteDocumentRequest {
+
+                /** DeleteDocumentRequest name */
+                name?: (string|null);
+
+                /** DeleteDocumentRequest currentDocument */
+                currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+            }
+
+            /** Represents a DeleteDocumentRequest. */
+            class DeleteDocumentRequest implements IDeleteDocumentRequest {
+
+                /**
+                 * Constructs a new DeleteDocumentRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IDeleteDocumentRequest);
+
+                /** DeleteDocumentRequest name. */
+                public name: string;
+
+                /** DeleteDocumentRequest currentDocument. */
+                public currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+            }
+
+            /** Properties of a BatchGetDocumentsRequest. */
+            interface IBatchGetDocumentsRequest {
+
+                /** BatchGetDocumentsRequest database */
+                database?: (string|null);
+
+                /** BatchGetDocumentsRequest documents */
+                documents?: (string[]|null);
+
+                /** BatchGetDocumentsRequest mask */
+                mask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** BatchGetDocumentsRequest transaction */
+                transaction?: (Uint8Array|null);
+
+                /** BatchGetDocumentsRequest newTransaction */
+                newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
+
+                /** BatchGetDocumentsRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a BatchGetDocumentsRequest. */
+            class BatchGetDocumentsRequest implements IBatchGetDocumentsRequest {
+
+                /**
+                 * Constructs a new BatchGetDocumentsRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IBatchGetDocumentsRequest);
+
+                /** BatchGetDocumentsRequest database. */
+                public database: string;
+
+                /** BatchGetDocumentsRequest documents. */
+                public documents: string[];
+
+                /** BatchGetDocumentsRequest mask. */
+                public mask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** BatchGetDocumentsRequest transaction. */
+                public transaction: Uint8Array;
+
+                /** BatchGetDocumentsRequest newTransaction. */
+                public newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
+
+                /** BatchGetDocumentsRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** BatchGetDocumentsRequest consistencySelector. */
+                public consistencySelector?: ("transaction"|"newTransaction"|"readTime");
+            }
+
+            /** Properties of a BatchGetDocumentsResponse. */
+            interface IBatchGetDocumentsResponse {
+
+                /** BatchGetDocumentsResponse found */
+                found?: (google.firestore.v1beta1.IDocument|null);
+
+                /** BatchGetDocumentsResponse missing */
+                missing?: (string|null);
+
+                /** BatchGetDocumentsResponse transaction */
+                transaction?: (Uint8Array|null);
+
+                /** BatchGetDocumentsResponse readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a BatchGetDocumentsResponse. */
+            class BatchGetDocumentsResponse implements IBatchGetDocumentsResponse {
+
+                /**
+                 * Constructs a new BatchGetDocumentsResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IBatchGetDocumentsResponse);
+
+                /** BatchGetDocumentsResponse found. */
+                public found?: (google.firestore.v1beta1.IDocument|null);
+
+                /** BatchGetDocumentsResponse missing. */
+                public missing: string;
+
+                /** BatchGetDocumentsResponse transaction. */
+                public transaction: Uint8Array;
+
+                /** BatchGetDocumentsResponse readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** BatchGetDocumentsResponse result. */
+                public result?: ("found"|"missing");
+            }
+
+            /** Properties of a BeginTransactionRequest. */
+            interface IBeginTransactionRequest {
+
+                /** BeginTransactionRequest database */
+                database?: (string|null);
+
+                /** BeginTransactionRequest options */
+                options?: (google.firestore.v1beta1.ITransactionOptions|null);
+            }
+
+            /** Represents a BeginTransactionRequest. */
+            class BeginTransactionRequest implements IBeginTransactionRequest {
+
+                /**
+                 * Constructs a new BeginTransactionRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IBeginTransactionRequest);
+
+                /** BeginTransactionRequest database. */
+                public database: string;
+
+                /** BeginTransactionRequest options. */
+                public options?: (google.firestore.v1beta1.ITransactionOptions|null);
+            }
+
+            /** Properties of a BeginTransactionResponse. */
+            interface IBeginTransactionResponse {
+
+                /** BeginTransactionResponse transaction */
+                transaction?: (Uint8Array|null);
+            }
+
+            /** Represents a BeginTransactionResponse. */
+            class BeginTransactionResponse implements IBeginTransactionResponse {
+
+                /**
+                 * Constructs a new BeginTransactionResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IBeginTransactionResponse);
+
+                /** BeginTransactionResponse transaction. */
+                public transaction: Uint8Array;
+            }
+
+            /** Properties of a CommitRequest. */
+            interface ICommitRequest {
+
+                /** CommitRequest database */
+                database?: (string|null);
+
+                /** CommitRequest writes */
+                writes?: (google.firestore.v1beta1.IWrite[]|null);
+
+                /** CommitRequest transaction */
+                transaction?: (Uint8Array|null);
+            }
+
+            /** Represents a CommitRequest. */
+            class CommitRequest implements ICommitRequest {
+
+                /**
+                 * Constructs a new CommitRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.ICommitRequest);
+
+                /** CommitRequest database. */
+                public database: string;
+
+                /** CommitRequest writes. */
+                public writes: google.firestore.v1beta1.IWrite[];
+
+                /** CommitRequest transaction. */
+                public transaction: Uint8Array;
+            }
+
+            /** Properties of a CommitResponse. */
+            interface ICommitResponse {
+
+                /** CommitResponse writeResults */
+                writeResults?: (google.firestore.v1beta1.IWriteResult[]|null);
+
+                /** CommitResponse commitTime */
+                commitTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a CommitResponse. */
+            class CommitResponse implements ICommitResponse {
+
+                /**
+                 * Constructs a new CommitResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.ICommitResponse);
+
+                /** CommitResponse writeResults. */
+                public writeResults: google.firestore.v1beta1.IWriteResult[];
+
+                /** CommitResponse commitTime. */
+                public commitTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Properties of a RollbackRequest. */
+            interface IRollbackRequest {
+
+                /** RollbackRequest database */
+                database?: (string|null);
+
+                /** RollbackRequest transaction */
+                transaction?: (Uint8Array|null);
+            }
+
+            /** Represents a RollbackRequest. */
+            class RollbackRequest implements IRollbackRequest {
+
+                /**
+                 * Constructs a new RollbackRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IRollbackRequest);
+
+                /** RollbackRequest database. */
+                public database: string;
+
+                /** RollbackRequest transaction. */
+                public transaction: Uint8Array;
+            }
+
+            /** Properties of a RunQueryRequest. */
+            interface IRunQueryRequest {
+
+                /** RunQueryRequest parent */
+                parent?: (string|null);
+
+                /** RunQueryRequest structuredQuery */
+                structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
+
+                /** RunQueryRequest transaction */
+                transaction?: (Uint8Array|null);
+
+                /** RunQueryRequest newTransaction */
+                newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
+
+                /** RunQueryRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a RunQueryRequest. */
+            class RunQueryRequest implements IRunQueryRequest {
+
+                /**
+                 * Constructs a new RunQueryRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IRunQueryRequest);
+
+                /** RunQueryRequest parent. */
+                public parent: string;
+
+                /** RunQueryRequest structuredQuery. */
+                public structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
+
+                /** RunQueryRequest transaction. */
+                public transaction: Uint8Array;
+
+                /** RunQueryRequest newTransaction. */
+                public newTransaction?: (google.firestore.v1beta1.ITransactionOptions|null);
+
+                /** RunQueryRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunQueryRequest queryType. */
+                public queryType?: "structuredQuery";
+
+                /** RunQueryRequest consistencySelector. */
+                public consistencySelector?: ("transaction"|"newTransaction"|"readTime");
+            }
+
+            /** Properties of a RunQueryResponse. */
+            interface IRunQueryResponse {
+
+                /** RunQueryResponse transaction */
+                transaction?: (Uint8Array|null);
+
+                /** RunQueryResponse document */
+                document?: (google.firestore.v1beta1.IDocument|null);
+
+                /** RunQueryResponse readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunQueryResponse skippedResults */
+                skippedResults?: (number|null);
+            }
+
+            /** Represents a RunQueryResponse. */
+            class RunQueryResponse implements IRunQueryResponse {
+
+                /**
+                 * Constructs a new RunQueryResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IRunQueryResponse);
+
+                /** RunQueryResponse transaction. */
+                public transaction: Uint8Array;
+
+                /** RunQueryResponse document. */
+                public document?: (google.firestore.v1beta1.IDocument|null);
+
+                /** RunQueryResponse readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunQueryResponse skippedResults. */
+                public skippedResults: number;
+            }
+
+            /** Properties of a WriteRequest. */
+            interface IWriteRequest {
+
+                /** WriteRequest database */
+                database?: (string|null);
+
+                /** WriteRequest streamId */
+                streamId?: (string|null);
+
+                /** WriteRequest writes */
+                writes?: (google.firestore.v1beta1.IWrite[]|null);
+
+                /** WriteRequest streamToken */
+                streamToken?: (Uint8Array|null);
+
+                /** WriteRequest labels */
+                labels?: ({ [k: string]: string }|null);
+            }
+
+            /** Represents a WriteRequest. */
+            class WriteRequest implements IWriteRequest {
+
+                /**
+                 * Constructs a new WriteRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IWriteRequest);
+
+                /** WriteRequest database. */
+                public database: string;
+
+                /** WriteRequest streamId. */
+                public streamId: string;
+
+                /** WriteRequest writes. */
+                public writes: google.firestore.v1beta1.IWrite[];
+
+                /** WriteRequest streamToken. */
+                public streamToken: Uint8Array;
+
+                /** WriteRequest labels. */
+                public labels: { [k: string]: string };
+            }
+
+            /** Properties of a WriteResponse. */
+            interface IWriteResponse {
+
+                /** WriteResponse streamId */
+                streamId?: (string|null);
+
+                /** WriteResponse streamToken */
+                streamToken?: (Uint8Array|null);
+
+                /** WriteResponse writeResults */
+                writeResults?: (google.firestore.v1beta1.IWriteResult[]|null);
+
+                /** WriteResponse commitTime */
+                commitTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a WriteResponse. */
+            class WriteResponse implements IWriteResponse {
+
+                /**
+                 * Constructs a new WriteResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IWriteResponse);
+
+                /** WriteResponse streamId. */
+                public streamId: string;
+
+                /** WriteResponse streamToken. */
+                public streamToken: Uint8Array;
+
+                /** WriteResponse writeResults. */
+                public writeResults: google.firestore.v1beta1.IWriteResult[];
+
+                /** WriteResponse commitTime. */
+                public commitTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Properties of a ListenRequest. */
+            interface IListenRequest {
+
+                /** ListenRequest database */
+                database?: (string|null);
+
+                /** ListenRequest addTarget */
+                addTarget?: (google.firestore.v1beta1.ITarget|null);
+
+                /** ListenRequest removeTarget */
+                removeTarget?: (number|null);
+
+                /** ListenRequest labels */
+                labels?: ({ [k: string]: string }|null);
+            }
+
+            /** Represents a ListenRequest. */
+            class ListenRequest implements IListenRequest {
+
+                /**
+                 * Constructs a new ListenRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IListenRequest);
+
+                /** ListenRequest database. */
+                public database: string;
+
+                /** ListenRequest addTarget. */
+                public addTarget?: (google.firestore.v1beta1.ITarget|null);
+
+                /** ListenRequest removeTarget. */
+                public removeTarget: number;
+
+                /** ListenRequest labels. */
+                public labels: { [k: string]: string };
+
+                /** ListenRequest targetChange. */
+                public targetChange?: ("addTarget"|"removeTarget");
+            }
+
+            /** Properties of a ListenResponse. */
+            interface IListenResponse {
+
+                /** ListenResponse targetChange */
+                targetChange?: (google.firestore.v1beta1.ITargetChange|null);
+
+                /** ListenResponse documentChange */
+                documentChange?: (google.firestore.v1beta1.IDocumentChange|null);
+
+                /** ListenResponse documentDelete */
+                documentDelete?: (google.firestore.v1beta1.IDocumentDelete|null);
+
+                /** ListenResponse documentRemove */
+                documentRemove?: (google.firestore.v1beta1.IDocumentRemove|null);
+
+                /** ListenResponse filter */
+                filter?: (google.firestore.v1beta1.IExistenceFilter|null);
+            }
+
+            /** Represents a ListenResponse. */
+            class ListenResponse implements IListenResponse {
+
+                /**
+                 * Constructs a new ListenResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IListenResponse);
+
+                /** ListenResponse targetChange. */
+                public targetChange?: (google.firestore.v1beta1.ITargetChange|null);
+
+                /** ListenResponse documentChange. */
+                public documentChange?: (google.firestore.v1beta1.IDocumentChange|null);
+
+                /** ListenResponse documentDelete. */
+                public documentDelete?: (google.firestore.v1beta1.IDocumentDelete|null);
+
+                /** ListenResponse documentRemove. */
+                public documentRemove?: (google.firestore.v1beta1.IDocumentRemove|null);
+
+                /** ListenResponse filter. */
+                public filter?: (google.firestore.v1beta1.IExistenceFilter|null);
+
+                /** ListenResponse responseType. */
+                public responseType?: ("targetChange"|"documentChange"|"documentDelete"|"documentRemove"|"filter");
+            }
+
+            /** Properties of a Target. */
+            interface ITarget {
+
+                /** Target query */
+                query?: (google.firestore.v1beta1.Target.IQueryTarget|null);
+
+                /** Target documents */
+                documents?: (google.firestore.v1beta1.Target.IDocumentsTarget|null);
+
+                /** Target resumeToken */
+                resumeToken?: (Uint8Array|null);
+
+                /** Target readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+
+                /** Target targetId */
+                targetId?: (number|null);
+
+                /** Target once */
+                once?: (boolean|null);
+            }
+
+            /** Represents a Target. */
+            class Target implements ITarget {
+
+                /**
+                 * Constructs a new Target.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.ITarget);
+
+                /** Target query. */
+                public query?: (google.firestore.v1beta1.Target.IQueryTarget|null);
+
+                /** Target documents. */
+                public documents?: (google.firestore.v1beta1.Target.IDocumentsTarget|null);
+
+                /** Target resumeToken. */
+                public resumeToken: Uint8Array;
+
+                /** Target readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** Target targetId. */
+                public targetId: number;
+
+                /** Target once. */
+                public once: boolean;
+
+                /** Target targetType. */
+                public targetType?: ("query"|"documents");
+
+                /** Target resumeType. */
+                public resumeType?: ("resumeToken"|"readTime");
+            }
+
+            namespace Target {
+
+                /** Properties of a DocumentsTarget. */
+                interface IDocumentsTarget {
+
+                    /** DocumentsTarget documents */
+                    documents?: (string[]|null);
+                }
+
+                /** Represents a DocumentsTarget. */
+                class DocumentsTarget implements IDocumentsTarget {
+
+                    /**
+                     * Constructs a new DocumentsTarget.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.Target.IDocumentsTarget);
+
+                    /** DocumentsTarget documents. */
+                    public documents: string[];
+                }
+
+                /** Properties of a QueryTarget. */
+                interface IQueryTarget {
+
+                    /** QueryTarget parent */
+                    parent?: (string|null);
+
+                    /** QueryTarget structuredQuery */
+                    structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
+                }
+
+                /** Represents a QueryTarget. */
+                class QueryTarget implements IQueryTarget {
+
+                    /**
+                     * Constructs a new QueryTarget.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.Target.IQueryTarget);
+
+                    /** QueryTarget parent. */
+                    public parent: string;
+
+                    /** QueryTarget structuredQuery. */
+                    public structuredQuery?: (google.firestore.v1beta1.IStructuredQuery|null);
+
+                    /** QueryTarget queryType. */
+                    public queryType?: "structuredQuery";
+                }
+            }
+
+            /** Properties of a TargetChange. */
+            interface ITargetChange {
+
+                /** TargetChange targetChangeType */
+                targetChangeType?: (google.firestore.v1beta1.TargetChange.TargetChangeType|null);
+
+                /** TargetChange targetIds */
+                targetIds?: (number[]|null);
+
+                /** TargetChange cause */
+                cause?: (google.rpc.IStatus|null);
+
+                /** TargetChange resumeToken */
+                resumeToken?: (Uint8Array|null);
+
+                /** TargetChange readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a TargetChange. */
+            class TargetChange implements ITargetChange {
+
+                /**
+                 * Constructs a new TargetChange.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.ITargetChange);
+
+                /** TargetChange targetChangeType. */
+                public targetChangeType: google.firestore.v1beta1.TargetChange.TargetChangeType;
+
+                /** TargetChange targetIds. */
+                public targetIds: number[];
+
+                /** TargetChange cause. */
+                public cause?: (google.rpc.IStatus|null);
+
+                /** TargetChange resumeToken. */
+                public resumeToken: Uint8Array;
+
+                /** TargetChange readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            namespace TargetChange {
+
+                /** TargetChangeType enum. */
+                type TargetChangeType =
+                    "NO_CHANGE"| "ADD"| "REMOVE"| "CURRENT"| "RESET";
+            }
+
+            /** Properties of a ListCollectionIdsRequest. */
+            interface IListCollectionIdsRequest {
+
+                /** ListCollectionIdsRequest parent */
+                parent?: (string|null);
+
+                /** ListCollectionIdsRequest pageSize */
+                pageSize?: (number|null);
+
+                /** ListCollectionIdsRequest pageToken */
+                pageToken?: (string|null);
+            }
+
+            /** Represents a ListCollectionIdsRequest. */
+            class ListCollectionIdsRequest implements IListCollectionIdsRequest {
+
+                /**
+                 * Constructs a new ListCollectionIdsRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IListCollectionIdsRequest);
+
+                /** ListCollectionIdsRequest parent. */
+                public parent: string;
+
+                /** ListCollectionIdsRequest pageSize. */
+                public pageSize: number;
+
+                /** ListCollectionIdsRequest pageToken. */
+                public pageToken: string;
+            }
+
+            /** Properties of a ListCollectionIdsResponse. */
+            interface IListCollectionIdsResponse {
+
+                /** ListCollectionIdsResponse collectionIds */
+                collectionIds?: (string[]|null);
+
+                /** ListCollectionIdsResponse nextPageToken */
+                nextPageToken?: (string|null);
+            }
+
+            /** Represents a ListCollectionIdsResponse. */
+            class ListCollectionIdsResponse implements IListCollectionIdsResponse {
+
+                /**
+                 * Constructs a new ListCollectionIdsResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IListCollectionIdsResponse);
+
+                /** ListCollectionIdsResponse collectionIds. */
+                public collectionIds: string[];
+
+                /** ListCollectionIdsResponse nextPageToken. */
+                public nextPageToken: string;
+            }
+
+            /** Properties of a StructuredQuery. */
+            interface IStructuredQuery {
+
+                /** StructuredQuery select */
+                select?: (google.firestore.v1beta1.StructuredQuery.IProjection|null);
+
+                /** StructuredQuery from */
+                from?: (google.firestore.v1beta1.StructuredQuery.ICollectionSelector[]|null);
+
+                /** StructuredQuery where */
+                where?: (google.firestore.v1beta1.StructuredQuery.IFilter|null);
+
+                /** StructuredQuery orderBy */
+                orderBy?: (google.firestore.v1beta1.StructuredQuery.IOrder[]|null);
+
+                /** StructuredQuery startAt */
+                startAt?: (google.firestore.v1beta1.ICursor|null);
+
+                /** StructuredQuery endAt */
+                endAt?: (google.firestore.v1beta1.ICursor|null);
+
+                /** StructuredQuery offset */
+                offset?: (number|null);
+
+                /** StructuredQuery limit */
+                limit?: (google.protobuf.IInt32Value|null);
+            }
+
+            /** Represents a StructuredQuery. */
+            class StructuredQuery implements IStructuredQuery {
+
+                /**
+                 * Constructs a new StructuredQuery.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IStructuredQuery);
+
+                /** StructuredQuery select. */
+                public select?: (google.firestore.v1beta1.StructuredQuery.IProjection|null);
+
+                /** StructuredQuery from. */
+                public from: google.firestore.v1beta1.StructuredQuery.ICollectionSelector[];
+
+                /** StructuredQuery where. */
+                public where?: (google.firestore.v1beta1.StructuredQuery.IFilter|null);
+
+                /** StructuredQuery orderBy. */
+                public orderBy: google.firestore.v1beta1.StructuredQuery.IOrder[];
+
+                /** StructuredQuery startAt. */
+                public startAt?: (google.firestore.v1beta1.ICursor|null);
+
+                /** StructuredQuery endAt. */
+                public endAt?: (google.firestore.v1beta1.ICursor|null);
+
+                /** StructuredQuery offset. */
+                public offset: number;
+
+                /** StructuredQuery limit. */
+                public limit?: (google.protobuf.IInt32Value|null);
+            }
+
+            namespace StructuredQuery {
+
+                /** Properties of a CollectionSelector. */
+                interface ICollectionSelector {
+
+                    /** CollectionSelector collectionId */
+                    collectionId?: (string|null);
+
+                    /** CollectionSelector allDescendants */
+                    allDescendants?: (boolean|null);
+                }
+
+                /** Represents a CollectionSelector. */
+                class CollectionSelector implements ICollectionSelector {
+
+                    /**
+                     * Constructs a new CollectionSelector.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.ICollectionSelector);
+
+                    /** CollectionSelector collectionId. */
+                    public collectionId: string;
+
+                    /** CollectionSelector allDescendants. */
+                    public allDescendants: boolean;
+                }
+
+                /** Properties of a Filter. */
+                interface IFilter {
+
+                    /** Filter compositeFilter */
+                    compositeFilter?: (google.firestore.v1beta1.StructuredQuery.ICompositeFilter|null);
+
+                    /** Filter fieldFilter */
+                    fieldFilter?: (google.firestore.v1beta1.StructuredQuery.IFieldFilter|null);
+
+                    /** Filter unaryFilter */
+                    unaryFilter?: (google.firestore.v1beta1.StructuredQuery.IUnaryFilter|null);
+                }
+
+                /** Represents a Filter. */
+                class Filter implements IFilter {
+
+                    /**
+                     * Constructs a new Filter.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IFilter);
+
+                    /** Filter compositeFilter. */
+                    public compositeFilter?: (google.firestore.v1beta1.StructuredQuery.ICompositeFilter|null);
+
+                    /** Filter fieldFilter. */
+                    public fieldFilter?: (google.firestore.v1beta1.StructuredQuery.IFieldFilter|null);
+
+                    /** Filter unaryFilter. */
+                    public unaryFilter?: (google.firestore.v1beta1.StructuredQuery.IUnaryFilter|null);
+
+                    /** Filter filterType. */
+                    public filterType?: ("compositeFilter"|"fieldFilter"|"unaryFilter");
+                }
+
+                /** Properties of a CompositeFilter. */
+                interface ICompositeFilter {
+
+                    /** CompositeFilter op */
+                    op?: (google.firestore.v1beta1.StructuredQuery.CompositeFilter.Operator|null);
+
+                    /** CompositeFilter filters */
+                    filters?: (google.firestore.v1beta1.StructuredQuery.IFilter[]|null);
+                }
+
+                /** Represents a CompositeFilter. */
+                class CompositeFilter implements ICompositeFilter {
+
+                    /**
+                     * Constructs a new CompositeFilter.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.ICompositeFilter);
+
+                    /** CompositeFilter op. */
+                    public op: google.firestore.v1beta1.StructuredQuery.CompositeFilter.Operator;
+
+                    /** CompositeFilter filters. */
+                    public filters: google.firestore.v1beta1.StructuredQuery.IFilter[];
+                }
+
+                namespace CompositeFilter {
+
+                    /** Operator enum. */
+                    type Operator =
+                        "OPERATOR_UNSPECIFIED"| "AND";
+                }
+
+                /** Properties of a FieldFilter. */
+                interface IFieldFilter {
+
+                    /** FieldFilter field */
+                    field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+
+                    /** FieldFilter op */
+                    op?: (google.firestore.v1beta1.StructuredQuery.FieldFilter.Operator|null);
+
+                    /** FieldFilter value */
+                    value?: (google.firestore.v1beta1.IValue|null);
+                }
+
+                /** Represents a FieldFilter. */
+                class FieldFilter implements IFieldFilter {
+
+                    /**
+                     * Constructs a new FieldFilter.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IFieldFilter);
+
+                    /** FieldFilter field. */
+                    public field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+
+                    /** FieldFilter op. */
+                    public op: google.firestore.v1beta1.StructuredQuery.FieldFilter.Operator;
+
+                    /** FieldFilter value. */
+                    public value?: (google.firestore.v1beta1.IValue|null);
+                }
+
+                namespace FieldFilter {
+
+                    /** Operator enum. */
+                    type Operator =
+                        "OPERATOR_UNSPECIFIED"| "LESS_THAN"| "LESS_THAN_OR_EQUAL"| "GREATER_THAN"| "GREATER_THAN_OR_EQUAL"| "EQUAL"| "ARRAY_CONTAINS"| "IN"| "ARRAY_CONTAINS_ANY";
+                }
+
+                /** Properties of an UnaryFilter. */
+                interface IUnaryFilter {
+
+                    /** UnaryFilter op */
+                    op?: (google.firestore.v1beta1.StructuredQuery.UnaryFilter.Operator|null);
+
+                    /** UnaryFilter field */
+                    field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+                }
+
+                /** Represents an UnaryFilter. */
+                class UnaryFilter implements IUnaryFilter {
+
+                    /**
+                     * Constructs a new UnaryFilter.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IUnaryFilter);
+
+                    /** UnaryFilter op. */
+                    public op: google.firestore.v1beta1.StructuredQuery.UnaryFilter.Operator;
+
+                    /** UnaryFilter field. */
+                    public field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+
+                    /** UnaryFilter operandType. */
+                    public operandType?: "field";
+                }
+
+                namespace UnaryFilter {
+
+                    /** Operator enum. */
+                    type Operator =
+                        "OPERATOR_UNSPECIFIED"| "IS_NAN"| "IS_NULL";
+                }
+
+                /** Properties of an Order. */
+                interface IOrder {
+
+                    /** Order field */
+                    field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+
+                    /** Order direction */
+                    direction?: (google.firestore.v1beta1.StructuredQuery.Direction|null);
+                }
+
+                /** Represents an Order. */
+                class Order implements IOrder {
+
+                    /**
+                     * Constructs a new Order.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IOrder);
+
+                    /** Order field. */
+                    public field?: (google.firestore.v1beta1.StructuredQuery.IFieldReference|null);
+
+                    /** Order direction. */
+                    public direction: google.firestore.v1beta1.StructuredQuery.Direction;
+                }
+
+                /** Properties of a FieldReference. */
+                interface IFieldReference {
+
+                    /** FieldReference fieldPath */
+                    fieldPath?: (string|null);
+                }
+
+                /** Represents a FieldReference. */
+                class FieldReference implements IFieldReference {
+
+                    /**
+                     * Constructs a new FieldReference.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IFieldReference);
+
+                    /** FieldReference fieldPath. */
+                    public fieldPath: string;
+                }
+
+                /** Properties of a Projection. */
+                interface IProjection {
+
+                    /** Projection fields */
+                    fields?: (google.firestore.v1beta1.StructuredQuery.IFieldReference[]|null);
+                }
+
+                /** Represents a Projection. */
+                class Projection implements IProjection {
+
+                    /**
+                     * Constructs a new Projection.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.StructuredQuery.IProjection);
+
+                    /** Projection fields. */
+                    public fields: google.firestore.v1beta1.StructuredQuery.IFieldReference[];
+                }
+
+                /** Direction enum. */
+                type Direction =
+                    "DIRECTION_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
+            }
+
+            /** Properties of a Cursor. */
+            interface ICursor {
+
+                /** Cursor values */
+                values?: (google.firestore.v1beta1.IValue[]|null);
+
+                /** Cursor before */
+                before?: (boolean|null);
+            }
+
+            /** Represents a Cursor. */
+            class Cursor implements ICursor {
+
+                /**
+                 * Constructs a new Cursor.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.ICursor);
+
+                /** Cursor values. */
+                public values: google.firestore.v1beta1.IValue[];
+
+                /** Cursor before. */
+                public before: boolean;
+            }
+
+            /** Properties of a Write. */
+            interface IWrite {
+
+                /** Write update */
+                update?: (google.firestore.v1beta1.IDocument|null);
+
+                /** Write delete */
+                "delete"?: (string|null);
+
+                /** Write transform */
+                transform?: (google.firestore.v1beta1.IDocumentTransform|null);
+
+                /** Write updateMask */
+                updateMask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** Write currentDocument */
+                currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+            }
+
+            /** Represents a Write. */
+            class Write implements IWrite {
+
+                /**
+                 * Constructs a new Write.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IWrite);
+
+                /** Write update. */
+                public update?: (google.firestore.v1beta1.IDocument|null);
+
+                /** Write delete. */
+                public delete: string;
+
+                /** Write transform. */
+                public transform?: (google.firestore.v1beta1.IDocumentTransform|null);
+
+                /** Write updateMask. */
+                public updateMask?: (google.firestore.v1beta1.IDocumentMask|null);
+
+                /** Write currentDocument. */
+                public currentDocument?: (google.firestore.v1beta1.IPrecondition|null);
+
+                /** Write operation. */
+                public operation?: ("update"|"delete"|"transform");
+            }
+
+            /** Properties of a DocumentTransform. */
+            interface IDocumentTransform {
+
+                /** DocumentTransform document */
+                document?: (string|null);
+
+                /** DocumentTransform fieldTransforms */
+                fieldTransforms?: (google.firestore.v1beta1.DocumentTransform.IFieldTransform[]|null);
+            }
+
+            /** Represents a DocumentTransform. */
+            class DocumentTransform implements IDocumentTransform {
+
+                /**
+                 * Constructs a new DocumentTransform.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IDocumentTransform);
+
+                /** DocumentTransform document. */
+                public document: string;
+
+                /** DocumentTransform fieldTransforms. */
+                public fieldTransforms: google.firestore.v1beta1.DocumentTransform.IFieldTransform[];
+            }
+
+            namespace DocumentTransform {
+
+                /** Properties of a FieldTransform. */
+                interface IFieldTransform {
+
+                    /** FieldTransform fieldPath */
+                    fieldPath?: (string|null);
+
+                    /** FieldTransform setToServerValue */
+                    setToServerValue?: (google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue|null);
+
+                    /** FieldTransform increment */
+                    increment?: (google.firestore.v1beta1.IValue|null);
+
+                    /** FieldTransform maximum */
+                    maximum?: (google.firestore.v1beta1.IValue|null);
+
+                    /** FieldTransform minimum */
+                    minimum?: (google.firestore.v1beta1.IValue|null);
+
+                    /** FieldTransform appendMissingElements */
+                    appendMissingElements?: (google.firestore.v1beta1.IArrayValue|null);
+
+                    /** FieldTransform removeAllFromArray */
+                    removeAllFromArray?: (google.firestore.v1beta1.IArrayValue|null);
+                }
+
+                /** Represents a FieldTransform. */
+                class FieldTransform implements IFieldTransform {
+
+                    /**
+                     * Constructs a new FieldTransform.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1beta1.DocumentTransform.IFieldTransform);
+
+                    /** FieldTransform fieldPath. */
+                    public fieldPath: string;
+
+                    /** FieldTransform setToServerValue. */
+                    public setToServerValue: google.firestore.v1beta1.DocumentTransform.FieldTransform.ServerValue;
+
+                    /** FieldTransform increment. */
+                    public increment?: (google.firestore.v1beta1.IValue|null);
+
+                    /** FieldTransform maximum. */
+                    public maximum?: (google.firestore.v1beta1.IValue|null);
+
+                    /** FieldTransform minimum. */
+                    public minimum?: (google.firestore.v1beta1.IValue|null);
+
+                    /** FieldTransform appendMissingElements. */
+                    public appendMissingElements?: (google.firestore.v1beta1.IArrayValue|null);
+
+                    /** FieldTransform removeAllFromArray. */
+                    public removeAllFromArray?: (google.firestore.v1beta1.IArrayValue|null);
+
+                    /** FieldTransform transformType. */
+                    public transformType?: ("setToServerValue"|"increment"|"maximum"|"minimum"|"appendMissingElements"|"removeAllFromArray");
+                }
+
+                namespace FieldTransform {
+
+                    /** ServerValue enum. */
+                    type ServerValue =
+                        "SERVER_VALUE_UNSPECIFIED"| "REQUEST_TIME";
+                }
+            }
+
+            /** Properties of a WriteResult. */
+            interface IWriteResult {
+
+                /** WriteResult updateTime */
+                updateTime?: (google.protobuf.ITimestamp|null);
+
+                /** WriteResult transformResults */
+                transformResults?: (google.firestore.v1beta1.IValue[]|null);
+            }
+
+            /** Represents a WriteResult. */
+            class WriteResult implements IWriteResult {
+
+                /**
+                 * Constructs a new WriteResult.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IWriteResult);
+
+                /** WriteResult updateTime. */
+                public updateTime?: (google.protobuf.ITimestamp|null);
+
+                /** WriteResult transformResults. */
+                public transformResults: google.firestore.v1beta1.IValue[];
+            }
+
+            /** Properties of a DocumentChange. */
+            interface IDocumentChange {
+
+                /** DocumentChange document */
+                document?: (google.firestore.v1beta1.IDocument|null);
+
+                /** DocumentChange targetIds */
+                targetIds?: (number[]|null);
+
+                /** DocumentChange removedTargetIds */
+                removedTargetIds?: (number[]|null);
+            }
+
+            /** Represents a DocumentChange. */
+            class DocumentChange implements IDocumentChange {
+
+                /**
+                 * Constructs a new DocumentChange.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IDocumentChange);
+
+                /** DocumentChange document. */
+                public document?: (google.firestore.v1beta1.IDocument|null);
+
+                /** DocumentChange targetIds. */
+                public targetIds: number[];
+
+                /** DocumentChange removedTargetIds. */
+                public removedTargetIds: number[];
+            }
+
+            /** Properties of a DocumentDelete. */
+            interface IDocumentDelete {
+
+                /** DocumentDelete document */
+                document?: (string|null);
+
+                /** DocumentDelete removedTargetIds */
+                removedTargetIds?: (number[]|null);
+
+                /** DocumentDelete readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a DocumentDelete. */
+            class DocumentDelete implements IDocumentDelete {
+
+                /**
+                 * Constructs a new DocumentDelete.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IDocumentDelete);
+
+                /** DocumentDelete document. */
+                public document: string;
+
+                /** DocumentDelete removedTargetIds. */
+                public removedTargetIds: number[];
+
+                /** DocumentDelete readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Properties of a DocumentRemove. */
+            interface IDocumentRemove {
+
+                /** DocumentRemove document */
+                document?: (string|null);
+
+                /** DocumentRemove removedTargetIds */
+                removedTargetIds?: (number[]|null);
+
+                /** DocumentRemove readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a DocumentRemove. */
+            class DocumentRemove implements IDocumentRemove {
+
+                /**
+                 * Constructs a new DocumentRemove.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IDocumentRemove);
+
+                /** DocumentRemove document. */
+                public document: string;
+
+                /** DocumentRemove removedTargetIds. */
+                public removedTargetIds: number[];
+
+                /** DocumentRemove readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Properties of an ExistenceFilter. */
+            interface IExistenceFilter {
+
+                /** ExistenceFilter targetId */
+                targetId?: (number|null);
+
+                /** ExistenceFilter count */
+                count?: (number|null);
+            }
+
+            /** Represents an ExistenceFilter. */
+            class ExistenceFilter implements IExistenceFilter {
+
+                /**
+                 * Constructs a new ExistenceFilter.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1beta1.IExistenceFilter);
 
                 /** ExistenceFilter targetId. */
                 public targetId: number;

@@ -50,6 +50,14 @@ mkdir -p "${PROTOS_DIR}/google/firestore/v1"
 cp googleapis/google/firestore/v1/*.proto \
    "${PROTOS_DIR}/google/firestore/v1/"
 
+mkdir -p "${PROTOS_DIR}/google/firestore/v1beta1"
+cp googleapis/google/firestore/v1beta1/*.proto \
+   "${PROTOS_DIR}/google/firestore/v1beta1/"
+
+mkdir -p "${PROTOS_DIR}/google/firestore/admin/v1"
+cp googleapis/google/firestore/admin/v1/*.proto \
+   "${PROTOS_DIR}/google/firestore/admin/v1/"
+
 mkdir -p "${PROTOS_DIR}/google/longrunning"
 cp googleapis/google/longrunning/operations.proto \
    "${PROTOS_DIR}/google/longrunning/"
@@ -71,6 +79,8 @@ cp protobuf/src/google/protobuf/{any,empty,field_mask,struct,timestamp,wrappers}
   --target=static --no-create --no-encode --no-decode --no-verify \
   --no-convert --no-delimited --force-enum-string --force-number -o \
   firestore_proto_api.js  "${PROTOS_DIR}/google/firestore/v1/*.proto" \
+  "${PROTOS_DIR}/google/firestore/admin/v1/*.proto" \
+  "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
   "${PROTOS_DIR}/google/longrunning/*.proto"

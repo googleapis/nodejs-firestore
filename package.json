@@ -61,7 +61,7 @@
     "@types/duplexify": "^3.5.0",
     "@types/extend": "^3.0.0",
     "@types/mocha": "^5.2.3",
-    "@types/node": "^10.3.5",
+    "@types/node": "^12.0.0",
     "@types/through2": "^2.0.34",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",

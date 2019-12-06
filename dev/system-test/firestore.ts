@@ -29,6 +29,7 @@ import {
   QuerySnapshot,
   setLogFunction,
   Timestamp,
+  WriteResult,
 } from '../src';
 import {autoId, Deferred} from '../src/util';
 import {verifyInstance} from '../test/util/helpers';
