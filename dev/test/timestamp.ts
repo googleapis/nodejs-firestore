@@ -17,7 +17,7 @@
 import {expect} from 'chai';
 import * as through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 
 import * as Firestore from '../src/index';
 import {

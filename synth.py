@@ -52,14 +52,34 @@ s.copy(templates)
 
 # use the existing proto .js / .d.ts files
 s.replace(
-  "dev/src/**/*_client.ts",
+   "dev/src/v1/firestore_client.ts",
+   "/protos/protos'",
+   "/protos/firestore_v1_proto_api'"
+ )
+s.replace(
+  "dev/test/gapic-firestore-v1.ts",
   "/protos/protos'",
-  "/protos/firestore_proto_api'"
+  "/protos/firestore_v1_proto_api'"
 )
 s.replace(
-  "dev/test/gapic-*.ts",
+   "dev/src/v1/firestore_admin_client.ts",
+   "/protos/protos'",
+   "/protos/firestore_admin_v1_proto_api'"
+ )
+s.replace(
+  "dev/test/gapic-firestore_admin-v1.ts",
   "/protos/protos'",
-  "/protos/firestore_proto_api'"
+  "/protos/firestore_admin_v1_proto_api'"
+)
+s.replace(
+   "dev/src/v1beta1/firestore_client.ts",
+   "/protos/protos'",
+   "/protos/firestore_v1beta1_proto_api'"
+ )
+s.replace(
+  "dev/test/gapic-firestore-v1beta1.ts",
+  "/protos/protos'",
+  "/protos/firestore_v1beta1_proto_api'"
 )
 
 # Remove auto-generated packaging tests

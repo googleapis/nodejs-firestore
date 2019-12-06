@@ -17,7 +17,7 @@
 // ** All changes to this file may be overwritten. **
 
 import * as assert from 'assert';
-import * as protosTypes from '../protos/firestore_proto_api';
+import * as protosTypes from '../protos/firestore_v1_proto_api';
 const firestoreModule = require('../src');
 
 import {PassThrough} from 'stream';

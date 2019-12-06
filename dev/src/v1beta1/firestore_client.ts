@@ -29,7 +29,7 @@ import {
 import * as path from 'path';
 
 import {Transform} from 'stream';
-import * as protosTypes from '../../protos/firestore_proto_api';
+import * as protosTypes from '../../protos/firestore_v1beta1_proto_api';
 import * as gapicConfig from './firestore_client_config.json';
 
 const version = require('../../../package.json').version;

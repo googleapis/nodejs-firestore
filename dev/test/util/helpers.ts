@@ -19,7 +19,7 @@ import * as extend from 'extend';
 import {CallOptions, GrpcClient} from 'google-gax';
 import * as through2 from 'through2';
 
-import * as proto from '../../protos/firestore_proto_api';
+import * as proto from '../../protos/firestore_v1_proto_api';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {GapicClient, GrpcError} from '../../src/types';
