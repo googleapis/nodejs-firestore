@@ -41,7 +41,6 @@ xdescribe('firestore.d.ts', () => {
   const firestore: Firestore = new Firestore({
     keyFilename: 'foo',
     projectId: 'foo',
-    timestampsInSnapshots: true,
     host: 'localhost',
     ssl: false,
     otherOption: 'foo',
@@ -61,7 +60,6 @@ xdescribe('firestore.d.ts', () => {
     firestore.settings({
       keyFilename: 'foo',
       projectId: 'foo',
-      timestampsInSnapshots: true,
       otherOption: 'foo',
     });
     const collRef: CollectionReference = firestore.collection('coll');
