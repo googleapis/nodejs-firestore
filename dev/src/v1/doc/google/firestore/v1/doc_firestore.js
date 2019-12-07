@@ -19,7 +19,7 @@
  * The request for Firestore.GetDocument.
  *
  * @property {string} name
- *   The resource name of the Document to get. In the format:
+ *   Required. The resource name of the Document to get. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *
  * @property {Object} mask
@@ -51,7 +51,7 @@ const GetDocumentRequest = {
  * The request for Firestore.ListDocuments.
  *
  * @property {string} parent
- *   The parent resource name. In the format:
+ *   Required. The parent resource name. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents` or
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *   For example:
@@ -59,7 +59,7 @@ const GetDocumentRequest = {
  *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
  *
  * @property {string} collectionId
- *   The collection ID, relative to `parent`, to list. For example: `chatrooms`
+ *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`
  *   or `messages`.
  *
  * @property {number} pageSize
@@ -128,12 +128,12 @@ const ListDocumentsResponse = {
  * The request for Firestore.CreateDocument.
  *
  * @property {string} parent
- *   The parent resource. For example:
+ *   Required. The parent resource. For example:
  *   `projects/{project_id}/databases/{database_id}/documents` or
  *   `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
  *
  * @property {string} collectionId
- *   The collection ID, relative to `parent`, to list. For example: `chatrooms`.
+ *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`.
  *
  * @property {string} documentId
  *   The client-assigned document ID to use for this document.
@@ -141,7 +141,7 @@ const ListDocumentsResponse = {
  *   Optional. If not specified, an ID will be assigned by the service.
  *
  * @property {Object} document
- *   The document to create. `name` must not be set.
+ *   Required. The document to create. `name` must not be set.
  *
  *   This object should have the same structure as [Document]{@link google.firestore.v1.Document}
  *
@@ -165,7 +165,7 @@ const CreateDocumentRequest = {
  * The request for Firestore.UpdateDocument.
  *
  * @property {Object} document
- *   The updated document.
+ *   Required. The updated document.
  *   Creates the document if it does not already exist.
  *
  *   This object should have the same structure as [Document]{@link google.firestore.v1.Document}
@@ -207,7 +207,7 @@ const UpdateDocumentRequest = {
  * The request for Firestore.DeleteDocument.
  *
  * @property {string} name
- *   The resource name of the Document to delete. In the format:
+ *   Required. The resource name of the Document to delete. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *
  * @property {Object} currentDocument
@@ -228,7 +228,7 @@ const DeleteDocumentRequest = {
  * The request for Firestore.BatchGetDocuments.
  *
  * @property {string} database
- *   The database name. In the format:
+ *   Required. The database name. In the format:
  *   `projects/{project_id}/databases/{database_id}`.
  *
  * @property {string[]} documents
@@ -307,7 +307,7 @@ const BatchGetDocumentsResponse = {
  * The request for Firestore.BeginTransaction.
  *
  * @property {string} database
- *   The database name. In the format:
+ *   Required. The database name. In the format:
  *   `projects/{project_id}/databases/{database_id}`.
  *
  * @property {Object} options
@@ -342,7 +342,7 @@ const BeginTransactionResponse = {
  * The request for Firestore.Commit.
  *
  * @property {string} database
- *   The database name. In the format:
+ *   Required. The database name. In the format:
  *   `projects/{project_id}/databases/{database_id}`.
  *
  * @property {Object[]} writes
@@ -391,11 +391,11 @@ const CommitResponse = {
  * The request for Firestore.Rollback.
  *
  * @property {string} database
- *   The database name. In the format:
+ *   Required. The database name. In the format:
  *   `projects/{project_id}/databases/{database_id}`.
  *
  * @property {Buffer} transaction
- *   The transaction to roll back.
+ *   Required. The transaction to roll back.
  *
  * @typedef RollbackRequest
  * @memberof google.firestore.v1
@@ -409,7 +409,7 @@ const RollbackRequest = {
  * The request for Firestore.RunQuery.
  *
  * @property {string} parent
- *   The parent resource name. In the format:
+ *   Required. The parent resource name. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents` or
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *   For example:
@@ -497,7 +497,7 @@ const RunQueryResponse = {
  * the next request.
  *
  * @property {string} database
- *   The database name. In the format:
+ *   Required. The database name. In the format:
  *   `projects/{project_id}/databases/{database_id}`.
  *   This is only required in the first message.
  *
@@ -581,7 +581,7 @@ const WriteResponse = {
  * A request for Firestore.Listen
  *
  * @property {string} database
- *   The database name. In the format:
+ *   Required. The database name. In the format:
  *   `projects/{project_id}/databases/{database_id}`.
  *
  * @property {Object} addTarget
@@ -821,7 +821,7 @@ const TargetChange = {
  * The request for Firestore.ListCollectionIds.
  *
  * @property {string} parent
- *   The parent document. In the format:
+ *   Required. The parent document. In the format:
  *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
  *   For example:
  *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
