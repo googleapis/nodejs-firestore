@@ -258,7 +258,7 @@ export class Firestore {
    * The configuration options for the GAPIC client.
    * @private
    */
-  _settings: Settings = {};
+  private _settings: Settings = {};
 
   /**
    * Whether the initialization settings can still be changed by invoking
@@ -317,20 +317,6 @@ export class Firestore {
    * can specify a `keyFilename` instead.
    * @param {string=} settings.host The host to connect to.
    * @param {boolean=} settings.ssl Whether to use SSL when connecting.
-   * @param {boolean=} settings.timestampsInSnapshots Specifies whether to use
-   * `Timestamp` objects for timestamp fields in `DocumentSnapshot`s. This is
-   * enabled by default and should not be disabled.
-   * <br/>Previously, Firestore returned timestamp fields as `Date` but `Date`
-   * only supports millisecond precision, which leads to truncation and causes
-   * unexpected behavior when using a timestamp from a snapshot as a part of a
-   * subsequent query.
-   * <br/>So now Firestore returns `Timestamp` values instead of `Date`,
-   * avoiding this kind of problem.
-   * <br/>To opt into the old behavior of returning `Date` objects, you can
-   * temporarily set `timestampsInSnapshots` to false.
-   * <br/>WARNING: This setting will be removed in a future release. You should
-   * update your code to expect `Timestamp` objects and stop using the
-   * `timestampsInSnapshots` setting.
    */
   constructor(settings?: Settings) {
     const libraryHeader = {
@@ -420,12 +406,6 @@ export class Firestore {
   settings(settings: Settings): void {
     validateObject('settings', settings);
     validateString('settings.projectId', settings.projectId, {optional: true});
-    validateBoolean(
-      'settings.timestampsInSnapshots',
-      // tslint:disable-next-line deprecation
-      settings.timestampsInSnapshots,
-      {optional: true}
-    );
 
     if (this._settingsFrozen) {
       throw new Error(
@@ -441,13 +421,6 @@ export class Firestore {
   }
 
   private validateAndApplySettings(settings: Settings): void {
-    validateBoolean(
-      'settings.timestampsInSnapshots',
-      // tslint:disable-next-line deprecation
-      settings.timestampsInSnapshots,
-      {optional: true}
-    );
-
     if (settings.projectId !== undefined) {
       validateString('settings.projectId', settings.projectId);
       this._projectId = settings.projectId;
@@ -1043,41 +1016,6 @@ export class Firestore {
    * @return A Promise that resolves when the client is initialized.
    */
   async initializeIfNeeded(requestTag: string): Promise<void> {
-    if (!this._settingsFrozen) {
-      // Nobody should set timestampsInSnapshots anymore, but the error depends
-      // on whether they set it to true or false...
-      // tslint:disable-next-line deprecation
-      if (this._settings.timestampsInSnapshots === true) {
-        console.error(`
-  The timestampsInSnapshots setting now defaults to true and you no
-  longer need to explicitly set it. In a future release, the setting
-  will be removed entirely and so it is recommended that you remove it
-  from your firestore.settings() call now.`);
-        // tslint:disable-next-line deprecation
-      } else if (this._settings.timestampsInSnapshots === false) {
-        console.error(`
-  The timestampsInSnapshots setting will soon be removed. YOU MUST UPDATE
-  YOUR CODE.
-
-  To hide this warning, stop using the timestampsInSnapshots setting in your
-  firestore.settings({ ... }) call.
-
-  Once you remove the setting, Timestamps stored in Cloud Firestore will be
-  read back as Firebase Timestamp objects instead of as system Date objects.
-  So you will also need to update code expecting a Date to instead expect a
-  Timestamp. For example:
-
-  // Old:
-  const date = snapshot.get('created_at');
-  // New:
-  const timestamp = snapshot.get('created_at');
-  const date = timestamp.toDate();
-
-  Please audit all existing usages of Date when you enable the new
-  behavior.`);
-      }
-    }
-
     this._settingsFrozen = true;
 
     if (this._projectId === undefined) {

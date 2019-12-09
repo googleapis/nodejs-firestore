@@ -67,27 +67,6 @@ describe('timestamps', () => {
     });
   });
 
-  it('converted to dates when disabled', () => {
-    const oldErrorLog = console.error;
-    // Prevent error message that prompts to enable `timestampsInSnapshots`
-    // behavior.
-    console.error = () => {};
-
-    return createInstance(
-      {timestampsInSnapshots: false},
-      DOCUMENT_WITH_TIMESTAMP
-    ).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(res => {
-          expect(res.data()!['moonLanding']).to.be.instanceOf(Date);
-          expect(res.get('moonLanding')).to.be.instanceOf(Date);
-          console.error = oldErrorLog;
-        });
-    });
-  });
-
   it('retain seconds and nanoseconds', () => {
     return createInstance({}, DOCUMENT_WITH_TIMESTAMP).then(firestore => {
       return firestore

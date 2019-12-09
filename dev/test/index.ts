@@ -301,8 +301,10 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    expect(firestore._settings.projectId).to.equal(PROJECT_ID);
-    expect(firestore._settings.foo).to.equal('bar');
+    /* tslint:disable:no-any */
+    expect((firestore as any)._settings.projectId).to.equal(PROJECT_ID);
+    expect((firestore as any)._settings.foo).to.equal('bar');
+    /* tslint:enable:no-any */
   });
 
   it('can only call settings() once', () => {
@@ -337,23 +339,6 @@ describe('instantiation', () => {
       } as InvalidApiUsage);
     }).to.throw(
       'Value for argument "settings.projectId" is not a valid string.'
-    );
-  });
-
-  it('validates timestampsInSnapshots is boolean', () => {
-    expect(() => {
-      const settings = {...DEFAULT_SETTINGS, timestampsInSnapshots: 1337};
-      new Firestore.Firestore(settings as InvalidApiUsage);
-    }).to.throw(
-      'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.'
-    );
-
-    expect(() => {
-      new Firestore.Firestore(DEFAULT_SETTINGS).settings({
-        timestampsInSnapshots: 1337 as InvalidApiUsage,
-      });
-    }).to.throw(
-      'Value for argument "settings.timestampsInSnapshots" is not a valid boolean.'
     );
   });
 
