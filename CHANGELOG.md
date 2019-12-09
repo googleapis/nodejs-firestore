@@ -4,6 +4,17 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [3.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.6.1...v3.0.0) (2019-12-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove deprecated timestampInSnapshots setting (#808)
+
+### Features
+
+* remove deprecated timestampInSnapshots setting ([#808](https://www.github.com/googleapis/nodejs-firestore/issues/808)) ([f37fffc](https://www.github.com/googleapis/nodejs-firestore/commit/f37fffc44fb1ddc8177bd24dfb44d830221e2479))
+
 ### [2.6.1](https://www.github.com/googleapis/nodejs-firestore/compare/v2.6.0...v2.6.1) (2019-12-05)
 
 
