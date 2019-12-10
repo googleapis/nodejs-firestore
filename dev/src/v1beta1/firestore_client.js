@@ -290,7 +290,7 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.name
-   *   The resource name of the Document to get. In the format:
+   *   Required. The resource name of the Document to get. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
    * @param {Object} [request.mask]
    *   The fields to return. If not set, returns all fields.
@@ -359,14 +359,14 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   The parent resource name. In the format:
+   *   Required. The parent resource name. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents` or
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
    *   For example:
    *   `projects/my-project/databases/my-database/documents` or
    *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
    * @param {string} request.collectionId
-   *   The collection ID, relative to `parent`, to list. For example: `chatrooms`
+   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`
    *   or `messages`.
    * @param {number} [request.pageSize]
    *   The maximum number of resources contained in the underlying API
@@ -506,14 +506,14 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   The parent resource name. In the format:
+   *   Required. The parent resource name. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents` or
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
    *   For example:
    *   `projects/my-project/databases/my-database/documents` or
    *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
    * @param {string} request.collectionId
-   *   The collection ID, relative to `parent`, to list. For example: `chatrooms`
+   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`
    *   or `messages`.
    * @param {number} [request.pageSize]
    *   The maximum number of resources contained in the underlying API
@@ -588,17 +588,17 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   The parent resource. For example:
+   *   Required. The parent resource. For example:
    *   `projects/{project_id}/databases/{database_id}/documents` or
    *   `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
    * @param {string} request.collectionId
-   *   The collection ID, relative to `parent`, to list. For example: `chatrooms`.
+   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`.
    * @param {string} request.documentId
    *   The client-assigned document ID to use for this document.
    *
    *   Optional. If not specified, an ID will be assigned by the service.
    * @param {Object} request.document
-   *   The document to create. `name` must not be set.
+   *   Required. The document to create. `name` must not be set.
    *
    *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
    * @param {Object} [request.mask]
@@ -663,7 +663,7 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {Object} request.document
-   *   The updated document.
+   *   Required. The updated document.
    *   Creates the document if it does not already exist.
    *
    *   This object should have the same structure as [Document]{@link google.firestore.v1beta1.Document}
@@ -747,7 +747,7 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.name
-   *   The resource name of the Document to delete. In the format:
+   *   Required. The resource name of the Document to delete. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
    * @param {Object} [request.currentDocument]
    *   An optional precondition on the document.
@@ -802,7 +802,7 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.database
-   *   The database name. In the format:
+   *   Required. The database name. In the format:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {string[]} request.documents
    *   The names of the documents to retrieve. In the format:
@@ -874,7 +874,7 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.database
-   *   The database name. In the format:
+   *   Required. The database name. In the format:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {Object} [request.options]
    *   The options for the transaction.
@@ -934,7 +934,7 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.database
-   *   The database name. In the format:
+   *   Required. The database name. In the format:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {Object[]} request.writes
    *   The writes to apply.
@@ -1002,10 +1002,10 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.database
-   *   The database name. In the format:
+   *   Required. The database name. In the format:
    *   `projects/{project_id}/databases/{database_id}`.
    * @param {Buffer} request.transaction
-   *   The transaction to roll back.
+   *   Required. The transaction to roll back.
    * @param {Object} [options]
    *   Optional parameters. You can override the default settings for this call, e.g, timeout,
    *   retries, paginations, etc. See [gax.CallOptions]{@link https://googleapis.github.io/gax-nodejs/interfaces/CallOptions.html} for the details.
@@ -1056,7 +1056,7 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   The parent resource name. In the format:
+   *   Required. The parent resource name. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents` or
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
    *   For example:
@@ -1189,7 +1189,7 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   The parent document. In the format:
+   *   Required. The parent document. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
    *   For example:
    *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
@@ -1304,7 +1304,7 @@ class FirestoreClient {
    * @param {Object} request
    *   The request object that will be sent.
    * @param {string} request.parent
-   *   The parent document. In the format:
+   *   Required. The parent document. In the format:
    *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
    *   For example:
    *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`

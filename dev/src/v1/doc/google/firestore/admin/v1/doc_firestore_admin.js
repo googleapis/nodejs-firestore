@@ -19,11 +19,11 @@
  * The request for FirestoreAdmin.CreateIndex.
  *
  * @property {string} parent
- *   A parent name of the form
+ *   Required. A parent name of the form
  *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
  *
  * @property {Object} index
- *   The composite index to create.
+ *   Required. The composite index to create.
  *
  *   This object should have the same structure as [Index]{@link google.firestore.admin.v1.Index}
  *
@@ -39,7 +39,7 @@ const CreateIndexRequest = {
  * The request for FirestoreAdmin.ListIndexes.
  *
  * @property {string} parent
- *   A parent name of the form
+ *   Required. A parent name of the form
  *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
  *
  * @property {string} filter
@@ -85,7 +85,7 @@ const ListIndexesResponse = {
  * The request for FirestoreAdmin.GetIndex.
  *
  * @property {string} name
- *   A name of the form
+ *   Required. A name of the form
  *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}`
  *
  * @typedef GetIndexRequest
@@ -100,7 +100,7 @@ const GetIndexRequest = {
  * The request for FirestoreAdmin.DeleteIndex.
  *
  * @property {string} name
- *   A name of the form
+ *   Required. A name of the form
  *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}`
  *
  * @typedef DeleteIndexRequest
@@ -115,7 +115,7 @@ const DeleteIndexRequest = {
  * The request for FirestoreAdmin.UpdateField.
  *
  * @property {Object} field
- *   The field to be updated.
+ *   Required. The field to be updated.
  *
  *   This object should have the same structure as [Field]{@link google.firestore.admin.v1.Field}
  *
@@ -137,7 +137,7 @@ const UpdateFieldRequest = {
  * The request for FirestoreAdmin.GetField.
  *
  * @property {string} name
- *   A name of the form
+ *   Required. A name of the form
  *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/fields/{field_id}`
  *
  * @typedef GetFieldRequest
@@ -152,7 +152,7 @@ const GetFieldRequest = {
  * The request for FirestoreAdmin.ListFields.
  *
  * @property {string} parent
- *   A parent name of the form
+ *   Required. A parent name of the form
  *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
  *
  * @property {string} filter
@@ -202,7 +202,7 @@ const ListFieldsResponse = {
  * The request for FirestoreAdmin.ExportDocuments.
  *
  * @property {string} name
- *   Database to export. Should be of the form:
+ *   Required. Database to export. Should be of the form:
  *   `projects/{project_id}/databases/{database_id}`.
  *
  * @property {string[]} collectionIds
@@ -230,7 +230,7 @@ const ExportDocumentsRequest = {
  * The request for FirestoreAdmin.ImportDocuments.
  *
  * @property {string} name
- *   Database to import into. Should be of the form:
+ *   Required. Database to import into. Should be of the form:
  *   `projects/{project_id}/databases/{database_id}`.
  *
  * @property {string[]} collectionIds
