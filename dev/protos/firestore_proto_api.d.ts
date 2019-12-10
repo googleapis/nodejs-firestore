@@ -1,3 +1,17 @@
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import * as $protobuf from "protobufjs";
 /** Namespace google. */
 export namespace google {
@@ -3176,7 +3190,7 @@ export namespace google {
 
                     /** Operator enum. */
                     type Operator =
-                        "OPERATOR_UNSPECIFIED"| "LESS_THAN"| "LESS_THAN_OR_EQUAL"| "GREATER_THAN"| "GREATER_THAN_OR_EQUAL"| "EQUAL"| "ARRAY_CONTAINS";
+                        "OPERATOR_UNSPECIFIED"| "LESS_THAN"| "LESS_THAN_OR_EQUAL"| "GREATER_THAN"| "GREATER_THAN_OR_EQUAL"| "EQUAL"| "ARRAY_CONTAINS"| "IN"| "ARRAY_CONTAINS_ANY";
                 }
 
                 /** Properties of an UnaryFilter. */
@@ -3215,24 +3229,24 @@ export namespace google {
                         "OPERATOR_UNSPECIFIED"| "IS_NAN"| "IS_NULL";
                 }
 
-                /** Properties of a FieldReference. */
-                interface IFieldReference {
+                /** Properties of a Projection. */
+                interface IProjection {
 
-                    /** FieldReference fieldPath */
-                    fieldPath?: (string|null);
+                    /** Projection fields */
+                    fields?: (google.firestore.v1.StructuredQuery.IFieldReference[]|null);
                 }
 
-                /** Represents a FieldReference. */
-                class FieldReference implements IFieldReference {
+                /** Represents a Projection. */
+                class Projection implements IProjection {
 
                     /**
-                     * Constructs a new FieldReference.
+                     * Constructs a new Projection.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1.StructuredQuery.IFieldReference);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IProjection);
 
-                    /** FieldReference fieldPath. */
-                    public fieldPath: string;
+                    /** Projection fields. */
+                    public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
                 }
 
                 /** Properties of an Order. */
@@ -3261,24 +3275,24 @@ export namespace google {
                     public direction: google.firestore.v1.StructuredQuery.Direction;
                 }
 
-                /** Properties of a Projection. */
-                interface IProjection {
+                /** Properties of a FieldReference. */
+                interface IFieldReference {
 
-                    /** Projection fields */
-                    fields?: (google.firestore.v1.StructuredQuery.IFieldReference[]|null);
+                    /** FieldReference fieldPath */
+                    fieldPath?: (string|null);
                 }
 
-                /** Represents a Projection. */
-                class Projection implements IProjection {
+                /** Represents a FieldReference. */
+                class FieldReference implements IFieldReference {
 
                     /**
-                     * Constructs a new Projection.
+                     * Constructs a new FieldReference.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.v1.StructuredQuery.IProjection);
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IFieldReference);
 
-                    /** Projection fields. */
-                    public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
+                    /** FieldReference fieldPath. */
+                    public fieldPath: string;
                 }
 
                 /** Direction enum. */

@@ -1,18 +1,16 @@
-/**
- * Copyright 2017 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2017 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 import * as FirebaseFirestore from '../src';
 
@@ -41,7 +39,6 @@ xdescribe('firestore.d.ts', () => {
   const firestore: Firestore = new Firestore({
     keyFilename: 'foo',
     projectId: 'foo',
-    timestampsInSnapshots: true,
     host: 'localhost',
     ssl: false,
     otherOption: 'foo',
@@ -61,7 +58,6 @@ xdescribe('firestore.d.ts', () => {
     firestore.settings({
       keyFilename: 'foo',
       projectId: 'foo',
-      timestampsInSnapshots: true,
       otherOption: 'foo',
     });
     const collRef: CollectionReference = firestore.collection('coll');
@@ -238,6 +234,8 @@ xdescribe('firestore.d.ts', () => {
       query = query.where('foo', '>=', 'bar');
       query = query.where('foo', '>', 'bar');
       query = query.where('foo', 'array-contains', 'bar');
+      query = query.where('foo', 'in', ['bar']);
+      query = query.where('foo', 'array-contains-any', ['bar']);
       query = query.where(new FieldPath('foo'), '==', 'bar');
       query = query.orderBy('foo');
       query = query.orderBy('foo', 'asc');
