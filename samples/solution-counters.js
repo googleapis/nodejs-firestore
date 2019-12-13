@@ -19,18 +19,21 @@ async function main() {
   // [START increment_counter]
   function incrementCounter(docRef, numShards) {
     const shardId = Math.floor(Math.random() * numShards);
-    const shardRef = docRef.collection("shards").doc(shardId.toString());
+    const shardRef = docRef.collection('shards').doc(shardId.toString());
     return shardRef.set({ count: FieldValue.increment(1) }, { merge: true });
   }
   // [END increment_counter]
 
   // [START get_count]
   async function getCount(docRef) {
-    const snapshotList = await docRef.collection("shards").select('count').get();
+    const querySnapshot = await docRef.collection('shards').get();
+    const documents = querySnapshot.docs;
 
-    return snapshotList.docs.reduce((count, documentSnapshot) => {
-      return count + documentSnapshot.data().count;
-    }, 0)
+    let count = 0;
+    for (const doc of documents) {
+      count += doc.get('count');
+    }
+    return count;
   }
   // [END get_count]
 
