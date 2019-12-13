@@ -26,7 +26,7 @@ async function main() {
 
   // [START get_count]
   async function getCount(docRef) {
-    const snapshotList = await docRef.collection("shards").get();
+    const snapshotList = await docRef.collection("shards").select('count').get();
 
     return snapshotList.docs.reduce((count, documentSnapshot) => {
       return count + documentSnapshot.data().count;
@@ -37,10 +37,12 @@ async function main() {
   // [START delete_Docs]
   async function deleteDocs(docRef) {
     const shardsCollectionRef = docRef.collection('shards');
-    const shardDocs = await shardsCollectionRef.get();
+    const shardDocs = await shardsCollectionRef.select('id').get();
+    let promises = [];
     shardDocs.forEach(async (doc) => {
-      await shardsCollectionRef.doc(doc.id).delete();
+      promises.push(shardsCollectionRef.doc(doc.id).delete());
     });
+    return Promise.all(promises);
   }
   // [END delete_Docs]
 
@@ -49,7 +51,7 @@ async function main() {
   const docRef = firestore.doc('distributed_counter_samples/distributed_counter');
   const numberOfShards = 10;
   // Increase the document count
-  incrementCounter(docRef, numberOfShards).then(async () => {
+  return incrementCounter(docRef, numberOfShards).then(async () => {
     console.log('counter increased');
     // Get document count
     let count = await getCount(docRef);
