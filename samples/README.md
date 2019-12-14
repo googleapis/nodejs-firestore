@@ -21,6 +21,7 @@ Applications that use Google&#x27;s Server SDKs should not be used in end-user e
 * [Before you begin](#before-you-begin)
 * [Samples](#samples)
   * [Quickstart](#quickstart)
+  * [Solution-counters](#solution-counters)
 
 ## Before you begin
 
@@ -41,6 +42,23 @@ __Usage:__
 
 
 `node quickstart.js`
+
+
+-----
+
+
+
+
+### Solution-counters
+
+View the [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/solution-counters.js).
+
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/solution-counters.js,samples/README.md)
+
+__Usage:__
+
+
+`node solution-counters.js`
 
 
 
