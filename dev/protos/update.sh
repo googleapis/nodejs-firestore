@@ -108,6 +108,8 @@ PBJS_ARGS=( --proto_path=. \
   "${PROTOS_DIR}/google/longrunning/*.proto"
 "${PBTS}" -o firestore_v1beta1_proto_api.d.ts firestore_v1beta1_proto_api.js
 
+"${PROTOS_DIR}"/insert-license.sh *.d.ts *.js
+
 # Copy typings into source repo
 cp {firestore_v1_proto_api.d.ts,firestore_v1_proto_api.js} ${PROTOS_DIR}
 cp {firestore_admin_v1_proto_api.d.ts,firestore_admin_v1_proto_api.js} ${PROTOS_DIR}
