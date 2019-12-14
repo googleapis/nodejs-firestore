@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [2.6.1](https://www.github.com/googleapis/nodejs-firestore/compare/v2.6.0...v2.6.1) (2019-12-05)
+
+
+### Bug Fixes
+
+* **deps:** pin TypeScript below 3.7.0 ([0d4e558](https://www.github.com/googleapis/nodejs-firestore/commit/0d4e558be4111b3524aa3b855b14e63cb486d2c8))
+* **docs:** snippets are now replaced in jsdoc comments ([#795](https://www.github.com/googleapis/nodejs-firestore/issues/795)) ([396bebb](https://www.github.com/googleapis/nodejs-firestore/commit/396bebbe21b4df16b3017d144fd9e505eb99feda))
+
 ## [2.6.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.5.0...v2.6.0) (2019-11-01)
 
 

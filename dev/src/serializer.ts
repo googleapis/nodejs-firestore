@@ -52,7 +52,6 @@ export interface Serializable {
  * @private
  */
 export class Serializer {
-  private timestampsInSnapshots: boolean;
   private createReference: (path: string) => DocumentReference;
 
   constructor(firestore: Firestore) {
@@ -60,13 +59,6 @@ export class Serializer {
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
     this.createReference = path => firestore.doc(path);
-    // tslint:disable-next-line deprecation
-    if (firestore._settings.timestampsInSnapshots === undefined) {
-      this.timestampsInSnapshots = true;
-    } else {
-      // tslint:disable-next-line deprecation
-      this.timestampsInSnapshots = firestore._settings.timestampsInSnapshots;
-    }
   }
 
   /**
@@ -218,7 +210,7 @@ export class Serializer {
       }
       case 'timestampValue': {
         const timestamp = Timestamp.fromProto(proto.timestampValue!);
-        return this.timestampsInSnapshots ? timestamp : timestamp.toDate();
+        return timestamp;
       }
       case 'referenceValue': {
         const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(
