@@ -4,6 +4,24 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [3.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.6.1...v3.0.0) (2019-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* convert Gapic client to TypeScript (#805)
+* remove deprecated timestampInSnapshots setting (#808)
+
+### Features
+
+* convert Gapic client to TypeScript ([#805](https://www.github.com/googleapis/nodejs-firestore/issues/805)) ([5000b2d](https://www.github.com/googleapis/nodejs-firestore/commit/5000b2d4b5c528b66c5a71db343c0e4163d5d8f7))
+* remove deprecated timestampInSnapshots setting ([#808](https://www.github.com/googleapis/nodejs-firestore/issues/808)) ([f37fffc](https://www.github.com/googleapis/nodejs-firestore/commit/f37fffc44fb1ddc8177bd24dfb44d830221e2479))
+
+
+### Bug Fixes
+
+* close GRPC channel when we dispose of clients ([#779](https://www.github.com/googleapis/nodejs-firestore/issues/779)) ([22ef0d0](https://www.github.com/googleapis/nodejs-firestore/commit/22ef0d0229569f0d97ff908b5866264a8de2ca78))
+
 ### [2.6.1](https://www.github.com/googleapis/nodejs-firestore/compare/v2.6.0...v2.6.1) (2019-12-05)
 
 
