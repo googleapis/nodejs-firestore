@@ -11,271 +11,19 @@
                     "csharp_namespace": "Google.Cloud.Firestore.Admin.V1",
                     "go_package": "google.golang.org/genproto/googleapis/firestore/admin/v1;admin",
                     "java_multiple_files": true,
-                    "java_outer_classname": "IndexProto",
+                    "java_outer_classname": "LocationProto",
                     "java_package": "com.google.firestore.admin.v1",
                     "objc_class_prefix": "GCFS",
-                    "php_namespace": "Google\\Cloud\\Firestore\\Admin\\V1"
+                    "php_namespace": "Google\\Cloud\\Firestore\\Admin\\V1",
+                    "(google.api.resource_definition).type": "firestore.googleapis.com/CollectionGroup",
+                    "(google.api.resource_definition).pattern": "projects/{project}/databases/{database}/collectionGroups/{collection}"
                   },
                   "nested": {
-                    "FirestoreAdmin": {
-                      "options": {
-                        "(google.api.default_host)": "firestore.googleapis.com",
-                        "(google.api.oauth_scopes)": "https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore"
-                      },
-                      "methods": {
-                        "CreateIndex": {
-                          "requestType": "CreateIndexRequest",
-                          "responseType": "google.longrunning.Operation",
-                          "options": {
-                            "(google.api.http).post": "/v1/{parent=projects/*/databases/*/collectionGroups/*}/indexes",
-                            "(google.api.http).body": "index"
-                          }
-                        },
-                        "ListIndexes": {
-                          "requestType": "ListIndexesRequest",
-                          "responseType": "ListIndexesResponse",
-                          "options": {
-                            "(google.api.http).get": "/v1/{parent=projects/*/databases/*/collectionGroups/*}/indexes"
-                          }
-                        },
-                        "GetIndex": {
-                          "requestType": "GetIndexRequest",
-                          "responseType": "Index",
-                          "options": {
-                            "(google.api.http).get": "/v1/{name=projects/*/databases/*/collectionGroups/*/indexes/*}"
-                          }
-                        },
-                        "DeleteIndex": {
-                          "requestType": "DeleteIndexRequest",
-                          "responseType": "google.protobuf.Empty",
-                          "options": {
-                            "(google.api.http).delete": "/v1/{name=projects/*/databases/*/collectionGroups/*/indexes/*}"
-                          }
-                        },
-                        "GetField": {
-                          "requestType": "GetFieldRequest",
-                          "responseType": "Field",
-                          "options": {
-                            "(google.api.http).get": "/v1/{name=projects/*/databases/*/collectionGroups/*/fields/*}"
-                          }
-                        },
-                        "UpdateField": {
-                          "requestType": "UpdateFieldRequest",
-                          "responseType": "google.longrunning.Operation",
-                          "options": {
-                            "(google.api.http).patch": "/v1/{field.name=projects/*/databases/*/collectionGroups/*/fields/*}",
-                            "(google.api.http).body": "field"
-                          }
-                        },
-                        "ListFields": {
-                          "requestType": "ListFieldsRequest",
-                          "responseType": "ListFieldsResponse",
-                          "options": {
-                            "(google.api.http).get": "/v1/{parent=projects/*/databases/*/collectionGroups/*}/fields"
-                          }
-                        },
-                        "ExportDocuments": {
-                          "requestType": "ExportDocumentsRequest",
-                          "responseType": "google.longrunning.Operation",
-                          "options": {
-                            "(google.api.http).post": "/v1/{name=projects/*/databases/*}:exportDocuments",
-                            "(google.api.http).body": "*"
-                          }
-                        },
-                        "ImportDocuments": {
-                          "requestType": "ImportDocumentsRequest",
-                          "responseType": "google.longrunning.Operation",
-                          "options": {
-                            "(google.api.http).post": "/v1/{name=projects/*/databases/*}:importDocuments",
-                            "(google.api.http).body": "*"
-                          }
-                        }
-                      }
-                    },
-                    "CreateIndexRequest": {
-                      "fields": {
-                        "parent": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "index": {
-                          "type": "Index",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "ListIndexesRequest": {
-                      "fields": {
-                        "parent": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "filter": {
-                          "type": "string",
-                          "id": 2
-                        },
-                        "pageSize": {
-                          "type": "int32",
-                          "id": 3
-                        },
-                        "pageToken": {
-                          "type": "string",
-                          "id": 4
-                        }
-                      }
-                    },
-                    "ListIndexesResponse": {
-                      "fields": {
-                        "indexes": {
-                          "rule": "repeated",
-                          "type": "Index",
-                          "id": 1
-                        },
-                        "nextPageToken": {
-                          "type": "string",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "GetIndexRequest": {
-                      "fields": {
-                        "name": {
-                          "type": "string",
-                          "id": 1
-                        }
-                      }
-                    },
-                    "DeleteIndexRequest": {
-                      "fields": {
-                        "name": {
-                          "type": "string",
-                          "id": 1
-                        }
-                      }
-                    },
-                    "UpdateFieldRequest": {
-                      "fields": {
-                        "field": {
-                          "type": "Field",
-                          "id": 1
-                        },
-                        "updateMask": {
-                          "type": "google.protobuf.FieldMask",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "GetFieldRequest": {
-                      "fields": {
-                        "name": {
-                          "type": "string",
-                          "id": 1
-                        }
-                      }
-                    },
-                    "ListFieldsRequest": {
-                      "fields": {
-                        "parent": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "filter": {
-                          "type": "string",
-                          "id": 2
-                        },
-                        "pageSize": {
-                          "type": "int32",
-                          "id": 3
-                        },
-                        "pageToken": {
-                          "type": "string",
-                          "id": 4
-                        }
-                      }
-                    },
-                    "ListFieldsResponse": {
-                      "fields": {
-                        "fields": {
-                          "rule": "repeated",
-                          "type": "Field",
-                          "id": 1
-                        },
-                        "nextPageToken": {
-                          "type": "string",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "ExportDocumentsRequest": {
-                      "fields": {
-                        "name": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "collectionIds": {
-                          "rule": "repeated",
-                          "type": "string",
-                          "id": 2
-                        },
-                        "outputUriPrefix": {
-                          "type": "string",
-                          "id": 3
-                        }
-                      }
-                    },
-                    "ImportDocumentsRequest": {
-                      "fields": {
-                        "name": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "collectionIds": {
-                          "rule": "repeated",
-                          "type": "string",
-                          "id": 2
-                        },
-                        "inputUriPrefix": {
-                          "type": "string",
-                          "id": 3
-                        }
-                      }
-                    },
-                    "Field": {
-                      "fields": {
-                        "name": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "indexConfig": {
-                          "type": "IndexConfig",
-                          "id": 2
-                        }
-                      },
-                      "nested": {
-                        "IndexConfig": {
-                          "fields": {
-                            "indexes": {
-                              "rule": "repeated",
-                              "type": "Index",
-                              "id": 1
-                            },
-                            "usesAncestorConfig": {
-                              "type": "bool",
-                              "id": 2
-                            },
-                            "ancestorField": {
-                              "type": "string",
-                              "id": 3
-                            },
-                            "reverting": {
-                              "type": "bool",
-                              "id": 4
-                            }
-                          }
-                        }
-                      }
-                    },
                     "Index": {
+                      "options": {
+                        "(google.api.resource).type": "firestore.googleapis.com/Index",
+                        "(google.api.resource).pattern": "projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}"
+                      },
                       "fields": {
                         "name": {
                           "type": "string",
@@ -351,6 +99,508 @@
                           }
                         }
                       }
+                    },
+                    "Field": {
+                      "options": {
+                        "(google.api.resource).type": "firestore.googleapis.com/Field",
+                        "(google.api.resource).pattern": "projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}"
+                      },
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "indexConfig": {
+                          "type": "IndexConfig",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "IndexConfig": {
+                          "fields": {
+                            "indexes": {
+                              "rule": "repeated",
+                              "type": "Index",
+                              "id": 1
+                            },
+                            "usesAncestorConfig": {
+                              "type": "bool",
+                              "id": 2
+                            },
+                            "ancestorField": {
+                              "type": "string",
+                              "id": 3
+                            },
+                            "reverting": {
+                              "type": "bool",
+                              "id": 4
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "FirestoreAdmin": {
+                      "options": {
+                        "(google.api.default_host)": "firestore.googleapis.com",
+                        "(google.api.oauth_scopes)": "https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore"
+                      },
+                      "methods": {
+                        "CreateIndex": {
+                          "requestType": "CreateIndexRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).post": "/v1/{parent=projects/*/databases/*/collectionGroups/*}/indexes",
+                            "(google.api.http).body": "index",
+                            "(google.api.method_signature)": "parent,index",
+                            "(google.longrunning.operation_info).response_type": "Index",
+                            "(google.longrunning.operation_info).metadata_type": "IndexOperationMetadata"
+                          }
+                        },
+                        "ListIndexes": {
+                          "requestType": "ListIndexesRequest",
+                          "responseType": "ListIndexesResponse",
+                          "options": {
+                            "(google.api.http).get": "/v1/{parent=projects/*/databases/*/collectionGroups/*}/indexes",
+                            "(google.api.method_signature)": "parent"
+                          }
+                        },
+                        "GetIndex": {
+                          "requestType": "GetIndexRequest",
+                          "responseType": "Index",
+                          "options": {
+                            "(google.api.http).get": "/v1/{name=projects/*/databases/*/collectionGroups/*/indexes/*}",
+                            "(google.api.method_signature)": "name"
+                          }
+                        },
+                        "DeleteIndex": {
+                          "requestType": "DeleteIndexRequest",
+                          "responseType": "google.protobuf.Empty",
+                          "options": {
+                            "(google.api.http).delete": "/v1/{name=projects/*/databases/*/collectionGroups/*/indexes/*}",
+                            "(google.api.method_signature)": "name"
+                          }
+                        },
+                        "GetField": {
+                          "requestType": "GetFieldRequest",
+                          "responseType": "Field",
+                          "options": {
+                            "(google.api.http).get": "/v1/{name=projects/*/databases/*/collectionGroups/*/fields/*}",
+                            "(google.api.method_signature)": "name"
+                          }
+                        },
+                        "UpdateField": {
+                          "requestType": "UpdateFieldRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).patch": "/v1/{field.name=projects/*/databases/*/collectionGroups/*/fields/*}",
+                            "(google.api.http).body": "field",
+                            "(google.api.method_signature)": "field",
+                            "(google.longrunning.operation_info).response_type": "Field",
+                            "(google.longrunning.operation_info).metadata_type": "FieldOperationMetadata"
+                          }
+                        },
+                        "ListFields": {
+                          "requestType": "ListFieldsRequest",
+                          "responseType": "ListFieldsResponse",
+                          "options": {
+                            "(google.api.http).get": "/v1/{parent=projects/*/databases/*/collectionGroups/*}/fields",
+                            "(google.api.method_signature)": "parent"
+                          }
+                        },
+                        "ExportDocuments": {
+                          "requestType": "ExportDocumentsRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*}:exportDocuments",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name",
+                            "(google.longrunning.operation_info).response_type": "ExportDocumentsResponse",
+                            "(google.longrunning.operation_info).metadata_type": "ExportDocumentsMetadata"
+                          }
+                        },
+                        "ImportDocuments": {
+                          "requestType": "ImportDocumentsRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*}:importDocuments",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name",
+                            "(google.longrunning.operation_info).response_type": "google.protobuf.Empty",
+                            "(google.longrunning.operation_info).metadata_type": "ImportDocumentsMetadata"
+                          }
+                        }
+                      }
+                    },
+                    "CreateIndexRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/CollectionGroup"
+                          }
+                        },
+                        "index": {
+                          "type": "Index",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        }
+                      }
+                    },
+                    "ListIndexesRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/CollectionGroup"
+                          }
+                        },
+                        "filter": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "pageSize": {
+                          "type": "int32",
+                          "id": 3
+                        },
+                        "pageToken": {
+                          "type": "string",
+                          "id": 4
+                        }
+                      }
+                    },
+                    "ListIndexesResponse": {
+                      "fields": {
+                        "indexes": {
+                          "rule": "repeated",
+                          "type": "Index",
+                          "id": 1
+                        },
+                        "nextPageToken": {
+                          "type": "string",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "GetIndexRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Index"
+                          }
+                        }
+                      }
+                    },
+                    "DeleteIndexRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Index"
+                          }
+                        }
+                      }
+                    },
+                    "UpdateFieldRequest": {
+                      "fields": {
+                        "field": {
+                          "type": "Field",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "updateMask": {
+                          "type": "google.protobuf.FieldMask",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "GetFieldRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Field"
+                          }
+                        }
+                      }
+                    },
+                    "ListFieldsRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/CollectionGroup"
+                          }
+                        },
+                        "filter": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "pageSize": {
+                          "type": "int32",
+                          "id": 3
+                        },
+                        "pageToken": {
+                          "type": "string",
+                          "id": 4
+                        }
+                      }
+                    },
+                    "ListFieldsResponse": {
+                      "fields": {
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "Field",
+                          "id": 1
+                        },
+                        "nextPageToken": {
+                          "type": "string",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "ExportDocumentsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Database"
+                          }
+                        },
+                        "collectionIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 2
+                        },
+                        "outputUriPrefix": {
+                          "type": "string",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "ImportDocumentsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Database"
+                          }
+                        },
+                        "collectionIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 2
+                        },
+                        "inputUriPrefix": {
+                          "type": "string",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "IndexOperationMetadata": {
+                      "fields": {
+                        "startTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 1
+                        },
+                        "endTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2
+                        },
+                        "index": {
+                          "type": "string",
+                          "id": 3
+                        },
+                        "state": {
+                          "type": "OperationState",
+                          "id": 4
+                        },
+                        "progressDocuments": {
+                          "type": "Progress",
+                          "id": 5
+                        },
+                        "progressBytes": {
+                          "type": "Progress",
+                          "id": 6
+                        }
+                      }
+                    },
+                    "FieldOperationMetadata": {
+                      "fields": {
+                        "startTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 1
+                        },
+                        "endTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2
+                        },
+                        "field": {
+                          "type": "string",
+                          "id": 3
+                        },
+                        "indexConfigDeltas": {
+                          "rule": "repeated",
+                          "type": "IndexConfigDelta",
+                          "id": 4
+                        },
+                        "state": {
+                          "type": "OperationState",
+                          "id": 5
+                        },
+                        "progressDocuments": {
+                          "type": "Progress",
+                          "id": 6
+                        },
+                        "progressBytes": {
+                          "type": "Progress",
+                          "id": 7
+                        }
+                      },
+                      "nested": {
+                        "IndexConfigDelta": {
+                          "fields": {
+                            "changeType": {
+                              "type": "ChangeType",
+                              "id": 1
+                            },
+                            "index": {
+                              "type": "Index",
+                              "id": 2
+                            }
+                          },
+                          "nested": {
+                            "ChangeType": {
+                              "values": {
+                                "CHANGE_TYPE_UNSPECIFIED": 0,
+                                "ADD": 1,
+                                "REMOVE": 2
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "ExportDocumentsMetadata": {
+                      "fields": {
+                        "startTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 1
+                        },
+                        "endTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2
+                        },
+                        "operationState": {
+                          "type": "OperationState",
+                          "id": 3
+                        },
+                        "progressDocuments": {
+                          "type": "Progress",
+                          "id": 4
+                        },
+                        "progressBytes": {
+                          "type": "Progress",
+                          "id": 5
+                        },
+                        "collectionIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 6
+                        },
+                        "outputUriPrefix": {
+                          "type": "string",
+                          "id": 7
+                        }
+                      }
+                    },
+                    "ImportDocumentsMetadata": {
+                      "fields": {
+                        "startTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 1
+                        },
+                        "endTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2
+                        },
+                        "operationState": {
+                          "type": "OperationState",
+                          "id": 3
+                        },
+                        "progressDocuments": {
+                          "type": "Progress",
+                          "id": 4
+                        },
+                        "progressBytes": {
+                          "type": "Progress",
+                          "id": 5
+                        },
+                        "collectionIds": {
+                          "rule": "repeated",
+                          "type": "string",
+                          "id": 6
+                        },
+                        "inputUriPrefix": {
+                          "type": "string",
+                          "id": 7
+                        }
+                      }
+                    },
+                    "ExportDocumentsResponse": {
+                      "fields": {
+                        "outputUriPrefix": {
+                          "type": "string",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "Progress": {
+                      "fields": {
+                        "estimatedWork": {
+                          "type": "int64",
+                          "id": 1
+                        },
+                        "completedWork": {
+                          "type": "int64",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "OperationState": {
+                      "values": {
+                        "OPERATION_STATE_UNSPECIFIED": 0,
+                        "INITIALIZING": 1,
+                        "PROCESSING": 2,
+                        "CANCELLING": 3,
+                        "FINALIZING": 4,
+                        "SUCCESSFUL": 5,
+                        "FAILED": 6,
+                        "CANCELLED": 7
+                      }
+                    },
+                    "LocationMetadata": {
+                      "fields": {}
                     }
                   }
                 }
@@ -361,12 +611,573 @@
                 "csharp_namespace": "Google.Cloud.Firestore.V1",
                 "go_package": "google.golang.org/genproto/googleapis/firestore/v1;firestore",
                 "java_multiple_files": true,
-                "java_outer_classname": "WriteProto",
+                "java_outer_classname": "FirestoreProto",
                 "java_package": "com.google.firestore.v1",
                 "objc_class_prefix": "GCFS",
                 "php_namespace": "Google\\Cloud\\Firestore\\V1"
               },
               "nested": {
+                "DocumentMask": {
+                  "fields": {
+                    "fieldPaths": {
+                      "rule": "repeated",
+                      "type": "string",
+                      "id": 1
+                    }
+                  }
+                },
+                "Precondition": {
+                  "oneofs": {
+                    "conditionType": {
+                      "oneof": [
+                        "exists",
+                        "updateTime"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "exists": {
+                      "type": "bool",
+                      "id": 1
+                    },
+                    "updateTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 2
+                    }
+                  }
+                },
+                "TransactionOptions": {
+                  "oneofs": {
+                    "mode": {
+                      "oneof": [
+                        "readOnly",
+                        "readWrite"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "readOnly": {
+                      "type": "ReadOnly",
+                      "id": 2
+                    },
+                    "readWrite": {
+                      "type": "ReadWrite",
+                      "id": 3
+                    }
+                  },
+                  "nested": {
+                    "ReadWrite": {
+                      "fields": {
+                        "retryTransaction": {
+                          "type": "bytes",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "ReadOnly": {
+                      "oneofs": {
+                        "consistencySelector": {
+                          "oneof": [
+                            "readTime"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "readTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                "Document": {
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "fields": {
+                      "keyType": "string",
+                      "type": "Value",
+                      "id": 2
+                    },
+                    "createTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 3
+                    },
+                    "updateTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 4
+                    }
+                  }
+                },
+                "Value": {
+                  "oneofs": {
+                    "valueType": {
+                      "oneof": [
+                        "nullValue",
+                        "booleanValue",
+                        "integerValue",
+                        "doubleValue",
+                        "timestampValue",
+                        "stringValue",
+                        "bytesValue",
+                        "referenceValue",
+                        "geoPointValue",
+                        "arrayValue",
+                        "mapValue"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "nullValue": {
+                      "type": "google.protobuf.NullValue",
+                      "id": 11
+                    },
+                    "booleanValue": {
+                      "type": "bool",
+                      "id": 1
+                    },
+                    "integerValue": {
+                      "type": "int64",
+                      "id": 2
+                    },
+                    "doubleValue": {
+                      "type": "double",
+                      "id": 3
+                    },
+                    "timestampValue": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 10
+                    },
+                    "stringValue": {
+                      "type": "string",
+                      "id": 17
+                    },
+                    "bytesValue": {
+                      "type": "bytes",
+                      "id": 18
+                    },
+                    "referenceValue": {
+                      "type": "string",
+                      "id": 5
+                    },
+                    "geoPointValue": {
+                      "type": "google.type.LatLng",
+                      "id": 8
+                    },
+                    "arrayValue": {
+                      "type": "ArrayValue",
+                      "id": 9
+                    },
+                    "mapValue": {
+                      "type": "MapValue",
+                      "id": 6
+                    }
+                  }
+                },
+                "ArrayValue": {
+                  "fields": {
+                    "values": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 1
+                    }
+                  }
+                },
+                "MapValue": {
+                  "fields": {
+                    "fields": {
+                      "keyType": "string",
+                      "type": "Value",
+                      "id": 1
+                    }
+                  }
+                },
+                "Write": {
+                  "oneofs": {
+                    "operation": {
+                      "oneof": [
+                        "update",
+                        "delete",
+                        "transform"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "update": {
+                      "type": "Document",
+                      "id": 1
+                    },
+                    "delete": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "transform": {
+                      "type": "DocumentTransform",
+                      "id": 6
+                    },
+                    "updateMask": {
+                      "type": "DocumentMask",
+                      "id": 3
+                    },
+                    "currentDocument": {
+                      "type": "Precondition",
+                      "id": 4
+                    }
+                  }
+                },
+                "DocumentTransform": {
+                  "fields": {
+                    "document": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "fieldTransforms": {
+                      "rule": "repeated",
+                      "type": "FieldTransform",
+                      "id": 2
+                    }
+                  },
+                  "nested": {
+                    "FieldTransform": {
+                      "oneofs": {
+                        "transformType": {
+                          "oneof": [
+                            "setToServerValue",
+                            "increment",
+                            "maximum",
+                            "minimum",
+                            "appendMissingElements",
+                            "removeAllFromArray"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "setToServerValue": {
+                          "type": "ServerValue",
+                          "id": 2
+                        },
+                        "increment": {
+                          "type": "Value",
+                          "id": 3
+                        },
+                        "maximum": {
+                          "type": "Value",
+                          "id": 4
+                        },
+                        "minimum": {
+                          "type": "Value",
+                          "id": 5
+                        },
+                        "appendMissingElements": {
+                          "type": "ArrayValue",
+                          "id": 6
+                        },
+                        "removeAllFromArray": {
+                          "type": "ArrayValue",
+                          "id": 7
+                        }
+                      },
+                      "nested": {
+                        "ServerValue": {
+                          "values": {
+                            "SERVER_VALUE_UNSPECIFIED": 0,
+                            "REQUEST_TIME": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "WriteResult": {
+                  "fields": {
+                    "updateTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 1
+                    },
+                    "transformResults": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 2
+                    }
+                  }
+                },
+                "DocumentChange": {
+                  "fields": {
+                    "document": {
+                      "type": "Document",
+                      "id": 1
+                    },
+                    "targetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 5
+                    },
+                    "removedTargetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 6
+                    }
+                  }
+                },
+                "DocumentDelete": {
+                  "fields": {
+                    "document": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "removedTargetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 6
+                    },
+                    "readTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 4
+                    }
+                  }
+                },
+                "DocumentRemove": {
+                  "fields": {
+                    "document": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "removedTargetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "readTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 4
+                    }
+                  }
+                },
+                "ExistenceFilter": {
+                  "fields": {
+                    "targetId": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "count": {
+                      "type": "int32",
+                      "id": 2
+                    }
+                  }
+                },
+                "StructuredQuery": {
+                  "fields": {
+                    "select": {
+                      "type": "Projection",
+                      "id": 1
+                    },
+                    "from": {
+                      "rule": "repeated",
+                      "type": "CollectionSelector",
+                      "id": 2
+                    },
+                    "where": {
+                      "type": "Filter",
+                      "id": 3
+                    },
+                    "orderBy": {
+                      "rule": "repeated",
+                      "type": "Order",
+                      "id": 4
+                    },
+                    "startAt": {
+                      "type": "Cursor",
+                      "id": 7
+                    },
+                    "endAt": {
+                      "type": "Cursor",
+                      "id": 8
+                    },
+                    "offset": {
+                      "type": "int32",
+                      "id": 6
+                    },
+                    "limit": {
+                      "type": "google.protobuf.Int32Value",
+                      "id": 5
+                    }
+                  },
+                  "nested": {
+                    "CollectionSelector": {
+                      "fields": {
+                        "collectionId": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "allDescendants": {
+                          "type": "bool",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "Filter": {
+                      "oneofs": {
+                        "filterType": {
+                          "oneof": [
+                            "compositeFilter",
+                            "fieldFilter",
+                            "unaryFilter"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "compositeFilter": {
+                          "type": "CompositeFilter",
+                          "id": 1
+                        },
+                        "fieldFilter": {
+                          "type": "FieldFilter",
+                          "id": 2
+                        },
+                        "unaryFilter": {
+                          "type": "UnaryFilter",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "CompositeFilter": {
+                      "fields": {
+                        "op": {
+                          "type": "Operator",
+                          "id": 1
+                        },
+                        "filters": {
+                          "rule": "repeated",
+                          "type": "Filter",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "Operator": {
+                          "values": {
+                            "OPERATOR_UNSPECIFIED": 0,
+                            "AND": 1
+                          }
+                        }
+                      }
+                    },
+                    "FieldFilter": {
+                      "fields": {
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 1
+                        },
+                        "op": {
+                          "type": "Operator",
+                          "id": 2
+                        },
+                        "value": {
+                          "type": "Value",
+                          "id": 3
+                        }
+                      },
+                      "nested": {
+                        "Operator": {
+                          "values": {
+                            "OPERATOR_UNSPECIFIED": 0,
+                            "LESS_THAN": 1,
+                            "LESS_THAN_OR_EQUAL": 2,
+                            "GREATER_THAN": 3,
+                            "GREATER_THAN_OR_EQUAL": 4,
+                            "EQUAL": 5,
+                            "ARRAY_CONTAINS": 7,
+                            "IN": 8,
+                            "ARRAY_CONTAINS_ANY": 9
+                          }
+                        }
+                      }
+                    },
+                    "UnaryFilter": {
+                      "oneofs": {
+                        "operandType": {
+                          "oneof": [
+                            "field"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "op": {
+                          "type": "Operator",
+                          "id": 1
+                        },
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "Operator": {
+                          "values": {
+                            "OPERATOR_UNSPECIFIED": 0,
+                            "IS_NAN": 2,
+                            "IS_NULL": 3
+                          }
+                        }
+                      }
+                    },
+                    "Order": {
+                      "fields": {
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 1
+                        },
+                        "direction": {
+                          "type": "Direction",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Direction": {
+                      "values": {
+                        "DIRECTION_UNSPECIFIED": 0,
+                        "ASCENDING": 1,
+                        "DESCENDING": 2
+                      }
+                    },
+                    "FieldReference": {
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Projection": {
+                      "fields": {
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "FieldReference",
+                          "id": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                "Cursor": {
+                  "fields": {
+                    "values": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 1
+                    },
+                    "before": {
+                      "type": "bool",
+                      "id": 2
+                    }
+                  }
+                },
                 "Firestore": {
                   "options": {
                     "(google.api.default_host)": "firestore.googleapis.com",
@@ -400,14 +1211,16 @@
                       "responseType": "Document",
                       "options": {
                         "(google.api.http).patch": "/v1/{document.name=projects/*/databases/*/documents/*/**}",
-                        "(google.api.http).body": "document"
+                        "(google.api.http).body": "document",
+                        "(google.api.method_signature)": "document,update_mask"
                       }
                     },
                     "DeleteDocument": {
                       "requestType": "DeleteDocumentRequest",
                       "responseType": "google.protobuf.Empty",
                       "options": {
-                        "(google.api.http).delete": "/v1/{name=projects/*/databases/*/documents/*/**}"
+                        "(google.api.http).delete": "/v1/{name=projects/*/databases/*/documents/*/**}",
+                        "(google.api.method_signature)": "name"
                       }
                     },
                     "BatchGetDocuments": {
@@ -424,7 +1237,8 @@
                       "responseType": "BeginTransactionResponse",
                       "options": {
                         "(google.api.http).post": "/v1/{database=projects/*/databases/*}/documents:beginTransaction",
-                        "(google.api.http).body": "*"
+                        "(google.api.http).body": "*",
+                        "(google.api.method_signature)": "database"
                       }
                     },
                     "Commit": {
@@ -432,7 +1246,8 @@
                       "responseType": "CommitResponse",
                       "options": {
                         "(google.api.http).post": "/v1/{database=projects/*/databases/*}/documents:commit",
-                        "(google.api.http).body": "*"
+                        "(google.api.http).body": "*",
+                        "(google.api.method_signature)": "database,writes"
                       }
                     },
                     "Rollback": {
@@ -440,7 +1255,8 @@
                       "responseType": "google.protobuf.Empty",
                       "options": {
                         "(google.api.http).post": "/v1/{database=projects/*/databases/*}/documents:rollback",
-                        "(google.api.http).body": "*"
+                        "(google.api.http).body": "*",
+                        "(google.api.method_signature)": "database,transaction"
                       }
                     },
                     "RunQuery": {
@@ -481,7 +1297,8 @@
                         "(google.api.http).post": "/v1/{parent=projects/*/databases/*/documents}:listCollectionIds",
                         "(google.api.http).body": "*",
                         "(google.api.http).additional_bindings.post": "/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds",
-                        "(google.api.http).additional_bindings.body": "*"
+                        "(google.api.http).additional_bindings.body": "*",
+                        "(google.api.method_signature)": "parent"
                       }
                     }
                   }
@@ -498,7 +1315,10 @@
                   "fields": {
                     "name": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "mask": {
                       "type": "DocumentMask",
@@ -526,11 +1346,17 @@
                   "fields": {
                     "parent": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "collectionId": {
                       "type": "string",
-                      "id": 2
+                      "id": 2,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "pageSize": {
                       "type": "int32",
@@ -579,11 +1405,17 @@
                   "fields": {
                     "parent": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "collectionId": {
                       "type": "string",
-                      "id": 2
+                      "id": 2,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "documentId": {
                       "type": "string",
@@ -591,7 +1423,10 @@
                     },
                     "document": {
                       "type": "Document",
-                      "id": 4
+                      "id": 4,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "mask": {
                       "type": "DocumentMask",
@@ -603,7 +1438,10 @@
                   "fields": {
                     "document": {
                       "type": "Document",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "updateMask": {
                       "type": "DocumentMask",
@@ -623,7 +1461,10 @@
                   "fields": {
                     "name": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "currentDocument": {
                       "type": "Precondition",
@@ -644,7 +1485,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "documents": {
                       "rule": "repeated",
@@ -701,7 +1545,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "options": {
                       "type": "TransactionOptions",
@@ -721,7 +1568,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "writes": {
                       "rule": "repeated",
@@ -751,11 +1601,17 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "transaction": {
                       "type": "bytes",
-                      "id": 2
+                      "id": 2,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     }
                   }
                 },
@@ -777,7 +1633,10 @@
                   "fields": {
                     "parent": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "structuredQuery": {
                       "type": "StructuredQuery",
@@ -821,7 +1680,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "streamId": {
                       "type": "string",
@@ -876,7 +1738,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "addTarget": {
                       "type": "Target",
@@ -1040,7 +1905,10 @@
                   "fields": {
                     "parent": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "pageSize": {
                       "type": "int32",
@@ -1064,7 +1932,20 @@
                       "id": 2
                     }
                   }
-                },
+                }
+              }
+            },
+            "v1beta1": {
+              "options": {
+                "csharp_namespace": "Google.Cloud.Firestore.V1Beta1",
+                "go_package": "google.golang.org/genproto/googleapis/firestore/v1beta1;firestore",
+                "java_multiple_files": true,
+                "java_outer_classname": "FirestoreProto",
+                "java_package": "com.google.firestore.v1beta1",
+                "objc_class_prefix": "GCFS",
+                "php_namespace": "Google\\Cloud\\Firestore\\V1beta1"
+              },
+              "nested": {
                 "DocumentMask": {
                   "fields": {
                     "fieldPaths": {
@@ -1240,212 +2121,6 @@
                       "keyType": "string",
                       "type": "Value",
                       "id": 1
-                    }
-                  }
-                },
-                "StructuredQuery": {
-                  "fields": {
-                    "select": {
-                      "type": "Projection",
-                      "id": 1
-                    },
-                    "from": {
-                      "rule": "repeated",
-                      "type": "CollectionSelector",
-                      "id": 2
-                    },
-                    "where": {
-                      "type": "Filter",
-                      "id": 3
-                    },
-                    "orderBy": {
-                      "rule": "repeated",
-                      "type": "Order",
-                      "id": 4
-                    },
-                    "startAt": {
-                      "type": "Cursor",
-                      "id": 7
-                    },
-                    "endAt": {
-                      "type": "Cursor",
-                      "id": 8
-                    },
-                    "offset": {
-                      "type": "int32",
-                      "id": 6
-                    },
-                    "limit": {
-                      "type": "google.protobuf.Int32Value",
-                      "id": 5
-                    }
-                  },
-                  "nested": {
-                    "CollectionSelector": {
-                      "fields": {
-                        "collectionId": {
-                          "type": "string",
-                          "id": 2
-                        },
-                        "allDescendants": {
-                          "type": "bool",
-                          "id": 3
-                        }
-                      }
-                    },
-                    "Filter": {
-                      "oneofs": {
-                        "filterType": {
-                          "oneof": [
-                            "compositeFilter",
-                            "fieldFilter",
-                            "unaryFilter"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "compositeFilter": {
-                          "type": "CompositeFilter",
-                          "id": 1
-                        },
-                        "fieldFilter": {
-                          "type": "FieldFilter",
-                          "id": 2
-                        },
-                        "unaryFilter": {
-                          "type": "UnaryFilter",
-                          "id": 3
-                        }
-                      }
-                    },
-                    "CompositeFilter": {
-                      "fields": {
-                        "op": {
-                          "type": "Operator",
-                          "id": 1
-                        },
-                        "filters": {
-                          "rule": "repeated",
-                          "type": "Filter",
-                          "id": 2
-                        }
-                      },
-                      "nested": {
-                        "Operator": {
-                          "values": {
-                            "OPERATOR_UNSPECIFIED": 0,
-                            "AND": 1
-                          }
-                        }
-                      }
-                    },
-                    "FieldFilter": {
-                      "fields": {
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 1
-                        },
-                        "op": {
-                          "type": "Operator",
-                          "id": 2
-                        },
-                        "value": {
-                          "type": "Value",
-                          "id": 3
-                        }
-                      },
-                      "nested": {
-                        "Operator": {
-                          "values": {
-                            "OPERATOR_UNSPECIFIED": 0,
-                            "LESS_THAN": 1,
-                            "LESS_THAN_OR_EQUAL": 2,
-                            "GREATER_THAN": 3,
-                            "GREATER_THAN_OR_EQUAL": 4,
-                            "EQUAL": 5,
-                            "ARRAY_CONTAINS": 7,
-                            "IN": 8,
-                            "ARRAY_CONTAINS_ANY": 9
-                          }
-                        }
-                      }
-                    },
-                    "UnaryFilter": {
-                      "oneofs": {
-                        "operandType": {
-                          "oneof": [
-                            "field"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "op": {
-                          "type": "Operator",
-                          "id": 1
-                        },
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 2
-                        }
-                      },
-                      "nested": {
-                        "Operator": {
-                          "values": {
-                            "OPERATOR_UNSPECIFIED": 0,
-                            "IS_NAN": 2,
-                            "IS_NULL": 3
-                          }
-                        }
-                      }
-                    },
-                    "Projection": {
-                      "fields": {
-                        "fields": {
-                          "rule": "repeated",
-                          "type": "FieldReference",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "Order": {
-                      "fields": {
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 1
-                        },
-                        "direction": {
-                          "type": "Direction",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "FieldReference": {
-                      "fields": {
-                        "fieldPath": {
-                          "type": "string",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "Direction": {
-                      "values": {
-                        "DIRECTION_UNSPECIFIED": 0,
-                        "ASCENDING": 1,
-                        "DESCENDING": 2
-                      }
-                    }
-                  }
-                },
-                "Cursor": {
-                  "fields": {
-                    "values": {
-                      "rule": "repeated",
-                      "type": "Value",
-                      "id": 1
-                    },
-                    "before": {
-                      "type": "bool",
-                      "id": 2
                     }
                   }
                 },
@@ -1625,20 +2300,213 @@
                       "id": 2
                     }
                   }
-                }
-              }
-            },
-            "v1beta1": {
-              "options": {
-                "csharp_namespace": "Google.Cloud.Firestore.V1Beta1",
-                "go_package": "google.golang.org/genproto/googleapis/firestore/v1beta1;firestore",
-                "java_multiple_files": true,
-                "java_outer_classname": "WriteProto",
-                "java_package": "com.google.firestore.v1beta1",
-                "objc_class_prefix": "GCFS",
-                "php_namespace": "Google\\Cloud\\Firestore\\V1beta1"
-              },
-              "nested": {
+                },
+                "StructuredQuery": {
+                  "fields": {
+                    "select": {
+                      "type": "Projection",
+                      "id": 1
+                    },
+                    "from": {
+                      "rule": "repeated",
+                      "type": "CollectionSelector",
+                      "id": 2
+                    },
+                    "where": {
+                      "type": "Filter",
+                      "id": 3
+                    },
+                    "orderBy": {
+                      "rule": "repeated",
+                      "type": "Order",
+                      "id": 4
+                    },
+                    "startAt": {
+                      "type": "Cursor",
+                      "id": 7
+                    },
+                    "endAt": {
+                      "type": "Cursor",
+                      "id": 8
+                    },
+                    "offset": {
+                      "type": "int32",
+                      "id": 6
+                    },
+                    "limit": {
+                      "type": "google.protobuf.Int32Value",
+                      "id": 5
+                    }
+                  },
+                  "nested": {
+                    "CollectionSelector": {
+                      "fields": {
+                        "collectionId": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "allDescendants": {
+                          "type": "bool",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "Filter": {
+                      "oneofs": {
+                        "filterType": {
+                          "oneof": [
+                            "compositeFilter",
+                            "fieldFilter",
+                            "unaryFilter"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "compositeFilter": {
+                          "type": "CompositeFilter",
+                          "id": 1
+                        },
+                        "fieldFilter": {
+                          "type": "FieldFilter",
+                          "id": 2
+                        },
+                        "unaryFilter": {
+                          "type": "UnaryFilter",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "CompositeFilter": {
+                      "fields": {
+                        "op": {
+                          "type": "Operator",
+                          "id": 1
+                        },
+                        "filters": {
+                          "rule": "repeated",
+                          "type": "Filter",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "Operator": {
+                          "values": {
+                            "OPERATOR_UNSPECIFIED": 0,
+                            "AND": 1
+                          }
+                        }
+                      }
+                    },
+                    "FieldFilter": {
+                      "fields": {
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 1
+                        },
+                        "op": {
+                          "type": "Operator",
+                          "id": 2
+                        },
+                        "value": {
+                          "type": "Value",
+                          "id": 3
+                        }
+                      },
+                      "nested": {
+                        "Operator": {
+                          "values": {
+                            "OPERATOR_UNSPECIFIED": 0,
+                            "LESS_THAN": 1,
+                            "LESS_THAN_OR_EQUAL": 2,
+                            "GREATER_THAN": 3,
+                            "GREATER_THAN_OR_EQUAL": 4,
+                            "EQUAL": 5,
+                            "ARRAY_CONTAINS": 7,
+                            "IN": 8,
+                            "ARRAY_CONTAINS_ANY": 9
+                          }
+                        }
+                      }
+                    },
+                    "UnaryFilter": {
+                      "oneofs": {
+                        "operandType": {
+                          "oneof": [
+                            "field"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "op": {
+                          "type": "Operator",
+                          "id": 1
+                        },
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "Operator": {
+                          "values": {
+                            "OPERATOR_UNSPECIFIED": 0,
+                            "IS_NAN": 2,
+                            "IS_NULL": 3
+                          }
+                        }
+                      }
+                    },
+                    "Order": {
+                      "fields": {
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 1
+                        },
+                        "direction": {
+                          "type": "Direction",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "FieldReference": {
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Projection": {
+                      "fields": {
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "FieldReference",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Direction": {
+                      "values": {
+                        "DIRECTION_UNSPECIFIED": 0,
+                        "ASCENDING": 1,
+                        "DESCENDING": 2
+                      }
+                    }
+                  }
+                },
+                "Cursor": {
+                  "fields": {
+                    "values": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 1
+                    },
+                    "before": {
+                      "type": "bool",
+                      "id": 2
+                    }
+                  }
+                },
                 "Firestore": {
                   "options": {
                     "(google.api.default_host)": "firestore.googleapis.com",
@@ -1672,14 +2540,16 @@
                       "responseType": "Document",
                       "options": {
                         "(google.api.http).patch": "/v1beta1/{document.name=projects/*/databases/*/documents/*/**}",
-                        "(google.api.http).body": "document"
+                        "(google.api.http).body": "document",
+                        "(google.api.method_signature)": "document,update_mask"
                       }
                     },
                     "DeleteDocument": {
                       "requestType": "DeleteDocumentRequest",
                       "responseType": "google.protobuf.Empty",
                       "options": {
-                        "(google.api.http).delete": "/v1beta1/{name=projects/*/databases/*/documents/*/**}"
+                        "(google.api.http).delete": "/v1beta1/{name=projects/*/databases/*/documents/*/**}",
+                        "(google.api.method_signature)": "name"
                       }
                     },
                     "BatchGetDocuments": {
@@ -1696,7 +2566,8 @@
                       "responseType": "BeginTransactionResponse",
                       "options": {
                         "(google.api.http).post": "/v1beta1/{database=projects/*/databases/*}/documents:beginTransaction",
-                        "(google.api.http).body": "*"
+                        "(google.api.http).body": "*",
+                        "(google.api.method_signature)": "database"
                       }
                     },
                     "Commit": {
@@ -1704,7 +2575,8 @@
                       "responseType": "CommitResponse",
                       "options": {
                         "(google.api.http).post": "/v1beta1/{database=projects/*/databases/*}/documents:commit",
-                        "(google.api.http).body": "*"
+                        "(google.api.http).body": "*",
+                        "(google.api.method_signature)": "database,writes"
                       }
                     },
                     "Rollback": {
@@ -1712,7 +2584,8 @@
                       "responseType": "google.protobuf.Empty",
                       "options": {
                         "(google.api.http).post": "/v1beta1/{database=projects/*/databases/*}/documents:rollback",
-                        "(google.api.http).body": "*"
+                        "(google.api.http).body": "*",
+                        "(google.api.method_signature)": "database,transaction"
                       }
                     },
                     "RunQuery": {
@@ -1753,7 +2626,8 @@
                         "(google.api.http).post": "/v1beta1/{parent=projects/*/databases/*/documents}:listCollectionIds",
                         "(google.api.http).body": "*",
                         "(google.api.http).additional_bindings.post": "/v1beta1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds",
-                        "(google.api.http).additional_bindings.body": "*"
+                        "(google.api.http).additional_bindings.body": "*",
+                        "(google.api.method_signature)": "parent"
                       }
                     }
                   }
@@ -1770,7 +2644,10 @@
                   "fields": {
                     "name": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "mask": {
                       "type": "DocumentMask",
@@ -1798,11 +2675,17 @@
                   "fields": {
                     "parent": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "collectionId": {
                       "type": "string",
-                      "id": 2
+                      "id": 2,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "pageSize": {
                       "type": "int32",
@@ -1851,11 +2734,17 @@
                   "fields": {
                     "parent": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "collectionId": {
                       "type": "string",
-                      "id": 2
+                      "id": 2,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "documentId": {
                       "type": "string",
@@ -1863,7 +2752,10 @@
                     },
                     "document": {
                       "type": "Document",
-                      "id": 4
+                      "id": 4,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "mask": {
                       "type": "DocumentMask",
@@ -1875,7 +2767,10 @@
                   "fields": {
                     "document": {
                       "type": "Document",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "updateMask": {
                       "type": "DocumentMask",
@@ -1895,7 +2790,10 @@
                   "fields": {
                     "name": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "currentDocument": {
                       "type": "Precondition",
@@ -1916,7 +2814,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "documents": {
                       "rule": "repeated",
@@ -1973,7 +2874,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "options": {
                       "type": "TransactionOptions",
@@ -1993,7 +2897,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "writes": {
                       "rule": "repeated",
@@ -2023,11 +2930,17 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "transaction": {
                       "type": "bytes",
-                      "id": 2
+                      "id": 2,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     }
                   }
                 },
@@ -2049,7 +2962,10 @@
                   "fields": {
                     "parent": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "structuredQuery": {
                       "type": "StructuredQuery",
@@ -2093,7 +3009,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "streamId": {
                       "type": "string",
@@ -2148,7 +3067,10 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "addTarget": {
                       "type": "Target",
@@ -2312,7 +3234,10 @@
                   "fields": {
                     "parent": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "pageSize": {
                       "type": "int32",
@@ -2336,567 +3261,6 @@
                       "id": 2
                     }
                   }
-                },
-                "DocumentMask": {
-                  "fields": {
-                    "fieldPaths": {
-                      "rule": "repeated",
-                      "type": "string",
-                      "id": 1
-                    }
-                  }
-                },
-                "Precondition": {
-                  "oneofs": {
-                    "conditionType": {
-                      "oneof": [
-                        "exists",
-                        "updateTime"
-                      ]
-                    }
-                  },
-                  "fields": {
-                    "exists": {
-                      "type": "bool",
-                      "id": 1
-                    },
-                    "updateTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 2
-                    }
-                  }
-                },
-                "TransactionOptions": {
-                  "oneofs": {
-                    "mode": {
-                      "oneof": [
-                        "readOnly",
-                        "readWrite"
-                      ]
-                    }
-                  },
-                  "fields": {
-                    "readOnly": {
-                      "type": "ReadOnly",
-                      "id": 2
-                    },
-                    "readWrite": {
-                      "type": "ReadWrite",
-                      "id": 3
-                    }
-                  },
-                  "nested": {
-                    "ReadWrite": {
-                      "fields": {
-                        "retryTransaction": {
-                          "type": "bytes",
-                          "id": 1
-                        }
-                      }
-                    },
-                    "ReadOnly": {
-                      "oneofs": {
-                        "consistencySelector": {
-                          "oneof": [
-                            "readTime"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "readTime": {
-                          "type": "google.protobuf.Timestamp",
-                          "id": 2
-                        }
-                      }
-                    }
-                  }
-                },
-                "Document": {
-                  "fields": {
-                    "name": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "fields": {
-                      "keyType": "string",
-                      "type": "Value",
-                      "id": 2
-                    },
-                    "createTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 3
-                    },
-                    "updateTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 4
-                    }
-                  }
-                },
-                "Value": {
-                  "oneofs": {
-                    "valueType": {
-                      "oneof": [
-                        "nullValue",
-                        "booleanValue",
-                        "integerValue",
-                        "doubleValue",
-                        "timestampValue",
-                        "stringValue",
-                        "bytesValue",
-                        "referenceValue",
-                        "geoPointValue",
-                        "arrayValue",
-                        "mapValue"
-                      ]
-                    }
-                  },
-                  "fields": {
-                    "nullValue": {
-                      "type": "google.protobuf.NullValue",
-                      "id": 11
-                    },
-                    "booleanValue": {
-                      "type": "bool",
-                      "id": 1
-                    },
-                    "integerValue": {
-                      "type": "int64",
-                      "id": 2
-                    },
-                    "doubleValue": {
-                      "type": "double",
-                      "id": 3
-                    },
-                    "timestampValue": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 10
-                    },
-                    "stringValue": {
-                      "type": "string",
-                      "id": 17
-                    },
-                    "bytesValue": {
-                      "type": "bytes",
-                      "id": 18
-                    },
-                    "referenceValue": {
-                      "type": "string",
-                      "id": 5
-                    },
-                    "geoPointValue": {
-                      "type": "google.type.LatLng",
-                      "id": 8
-                    },
-                    "arrayValue": {
-                      "type": "ArrayValue",
-                      "id": 9
-                    },
-                    "mapValue": {
-                      "type": "MapValue",
-                      "id": 6
-                    }
-                  }
-                },
-                "ArrayValue": {
-                  "fields": {
-                    "values": {
-                      "rule": "repeated",
-                      "type": "Value",
-                      "id": 1
-                    }
-                  }
-                },
-                "MapValue": {
-                  "fields": {
-                    "fields": {
-                      "keyType": "string",
-                      "type": "Value",
-                      "id": 1
-                    }
-                  }
-                },
-                "StructuredQuery": {
-                  "fields": {
-                    "select": {
-                      "type": "Projection",
-                      "id": 1
-                    },
-                    "from": {
-                      "rule": "repeated",
-                      "type": "CollectionSelector",
-                      "id": 2
-                    },
-                    "where": {
-                      "type": "Filter",
-                      "id": 3
-                    },
-                    "orderBy": {
-                      "rule": "repeated",
-                      "type": "Order",
-                      "id": 4
-                    },
-                    "startAt": {
-                      "type": "Cursor",
-                      "id": 7
-                    },
-                    "endAt": {
-                      "type": "Cursor",
-                      "id": 8
-                    },
-                    "offset": {
-                      "type": "int32",
-                      "id": 6
-                    },
-                    "limit": {
-                      "type": "google.protobuf.Int32Value",
-                      "id": 5
-                    }
-                  },
-                  "nested": {
-                    "CollectionSelector": {
-                      "fields": {
-                        "collectionId": {
-                          "type": "string",
-                          "id": 2
-                        },
-                        "allDescendants": {
-                          "type": "bool",
-                          "id": 3
-                        }
-                      }
-                    },
-                    "Filter": {
-                      "oneofs": {
-                        "filterType": {
-                          "oneof": [
-                            "compositeFilter",
-                            "fieldFilter",
-                            "unaryFilter"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "compositeFilter": {
-                          "type": "CompositeFilter",
-                          "id": 1
-                        },
-                        "fieldFilter": {
-                          "type": "FieldFilter",
-                          "id": 2
-                        },
-                        "unaryFilter": {
-                          "type": "UnaryFilter",
-                          "id": 3
-                        }
-                      }
-                    },
-                    "CompositeFilter": {
-                      "fields": {
-                        "op": {
-                          "type": "Operator",
-                          "id": 1
-                        },
-                        "filters": {
-                          "rule": "repeated",
-                          "type": "Filter",
-                          "id": 2
-                        }
-                      },
-                      "nested": {
-                        "Operator": {
-                          "values": {
-                            "OPERATOR_UNSPECIFIED": 0,
-                            "AND": 1
-                          }
-                        }
-                      }
-                    },
-                    "FieldFilter": {
-                      "fields": {
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 1
-                        },
-                        "op": {
-                          "type": "Operator",
-                          "id": 2
-                        },
-                        "value": {
-                          "type": "Value",
-                          "id": 3
-                        }
-                      },
-                      "nested": {
-                        "Operator": {
-                          "values": {
-                            "OPERATOR_UNSPECIFIED": 0,
-                            "LESS_THAN": 1,
-                            "LESS_THAN_OR_EQUAL": 2,
-                            "GREATER_THAN": 3,
-                            "GREATER_THAN_OR_EQUAL": 4,
-                            "EQUAL": 5,
-                            "ARRAY_CONTAINS": 7,
-                            "IN": 8,
-                            "ARRAY_CONTAINS_ANY": 9
-                          }
-                        }
-                      }
-                    },
-                    "UnaryFilter": {
-                      "oneofs": {
-                        "operandType": {
-                          "oneof": [
-                            "field"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "op": {
-                          "type": "Operator",
-                          "id": 1
-                        },
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 2
-                        }
-                      },
-                      "nested": {
-                        "Operator": {
-                          "values": {
-                            "OPERATOR_UNSPECIFIED": 0,
-                            "IS_NAN": 2,
-                            "IS_NULL": 3
-                          }
-                        }
-                      }
-                    },
-                    "Order": {
-                      "fields": {
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 1
-                        },
-                        "direction": {
-                          "type": "Direction",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "Projection": {
-                      "fields": {
-                        "fields": {
-                          "rule": "repeated",
-                          "type": "FieldReference",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "FieldReference": {
-                      "fields": {
-                        "fieldPath": {
-                          "type": "string",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "Direction": {
-                      "values": {
-                        "DIRECTION_UNSPECIFIED": 0,
-                        "ASCENDING": 1,
-                        "DESCENDING": 2
-                      }
-                    }
-                  }
-                },
-                "Cursor": {
-                  "fields": {
-                    "values": {
-                      "rule": "repeated",
-                      "type": "Value",
-                      "id": 1
-                    },
-                    "before": {
-                      "type": "bool",
-                      "id": 2
-                    }
-                  }
-                },
-                "Write": {
-                  "oneofs": {
-                    "operation": {
-                      "oneof": [
-                        "update",
-                        "delete",
-                        "transform"
-                      ]
-                    }
-                  },
-                  "fields": {
-                    "update": {
-                      "type": "Document",
-                      "id": 1
-                    },
-                    "delete": {
-                      "type": "string",
-                      "id": 2
-                    },
-                    "transform": {
-                      "type": "DocumentTransform",
-                      "id": 6
-                    },
-                    "updateMask": {
-                      "type": "DocumentMask",
-                      "id": 3
-                    },
-                    "currentDocument": {
-                      "type": "Precondition",
-                      "id": 4
-                    }
-                  }
-                },
-                "DocumentTransform": {
-                  "fields": {
-                    "document": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "fieldTransforms": {
-                      "rule": "repeated",
-                      "type": "FieldTransform",
-                      "id": 2
-                    }
-                  },
-                  "nested": {
-                    "FieldTransform": {
-                      "oneofs": {
-                        "transformType": {
-                          "oneof": [
-                            "setToServerValue",
-                            "increment",
-                            "maximum",
-                            "minimum",
-                            "appendMissingElements",
-                            "removeAllFromArray"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "fieldPath": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "setToServerValue": {
-                          "type": "ServerValue",
-                          "id": 2
-                        },
-                        "increment": {
-                          "type": "Value",
-                          "id": 3
-                        },
-                        "maximum": {
-                          "type": "Value",
-                          "id": 4
-                        },
-                        "minimum": {
-                          "type": "Value",
-                          "id": 5
-                        },
-                        "appendMissingElements": {
-                          "type": "ArrayValue",
-                          "id": 6
-                        },
-                        "removeAllFromArray": {
-                          "type": "ArrayValue",
-                          "id": 7
-                        }
-                      },
-                      "nested": {
-                        "ServerValue": {
-                          "values": {
-                            "SERVER_VALUE_UNSPECIFIED": 0,
-                            "REQUEST_TIME": 1
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "WriteResult": {
-                  "fields": {
-                    "updateTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 1
-                    },
-                    "transformResults": {
-                      "rule": "repeated",
-                      "type": "Value",
-                      "id": 2
-                    }
-                  }
-                },
-                "DocumentChange": {
-                  "fields": {
-                    "document": {
-                      "type": "Document",
-                      "id": 1
-                    },
-                    "targetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 5
-                    },
-                    "removedTargetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 6
-                    }
-                  }
-                },
-                "DocumentDelete": {
-                  "fields": {
-                    "document": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "removedTargetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 6
-                    },
-                    "readTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 4
-                    }
-                  }
-                },
-                "DocumentRemove": {
-                  "fields": {
-                    "document": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "removedTargetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 2
-                    },
-                    "readTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 4
-                    }
-                  }
-                },
-                "ExistenceFilter": {
-                  "fields": {
-                    "targetId": {
-                      "type": "int32",
-                      "id": 1
-                    },
-                    "count": {
-                      "type": "int32",
-                      "id": 2
-                    }
-                  }
                 }
               }
             }
@@ -2904,14 +3268,80 @@
         },
         "api": {
           "options": {
+            "cc_enable_arenas": true,
             "go_package": "google.golang.org/genproto/googleapis/api/annotations;annotations",
             "java_multiple_files": true,
-            "java_outer_classname": "ClientProto",
+            "java_outer_classname": "FieldBehaviorProto",
             "java_package": "com.google.api",
-            "objc_class_prefix": "GAPI",
-            "cc_enable_arenas": true
+            "objc_class_prefix": "GAPI"
           },
           "nested": {
+            "resourceReference": {
+              "type": "google.api.ResourceReference",
+              "id": 1055,
+              "extend": "google.protobuf.FieldOptions"
+            },
+            "resourceDefinition": {
+              "rule": "repeated",
+              "type": "google.api.ResourceDescriptor",
+              "id": 1053,
+              "extend": "google.protobuf.FileOptions"
+            },
+            "resource": {
+              "type": "google.api.ResourceDescriptor",
+              "id": 1053,
+              "extend": "google.protobuf.MessageOptions"
+            },
+            "ResourceDescriptor": {
+              "fields": {
+                "type": {
+                  "type": "string",
+                  "id": 1
+                },
+                "pattern": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 2
+                },
+                "nameField": {
+                  "type": "string",
+                  "id": 3
+                },
+                "history": {
+                  "type": "History",
+                  "id": 4
+                },
+                "plural": {
+                  "type": "string",
+                  "id": 5
+                },
+                "singular": {
+                  "type": "string",
+                  "id": 6
+                }
+              },
+              "nested": {
+                "History": {
+                  "values": {
+                    "HISTORY_UNSPECIFIED": 0,
+                    "ORIGINALLY_SINGLE_PATTERN": 1,
+                    "FUTURE_MULTI_PATTERN": 2
+                  }
+                }
+              }
+            },
+            "ResourceReference": {
+              "fields": {
+                "type": {
+                  "type": "string",
+                  "id": 1
+                },
+                "childType": {
+                  "type": "string",
+                  "id": 2
+                }
+              }
+            },
             "http": {
               "type": "HttpRule",
               "id": 72295728,
@@ -3014,6 +3444,22 @@
               "type": "string",
               "id": 1050,
               "extend": "google.protobuf.ServiceOptions"
+            },
+            "fieldBehavior": {
+              "rule": "repeated",
+              "type": "google.api.FieldBehavior",
+              "id": 1052,
+              "extend": "google.protobuf.FieldOptions"
+            },
+            "FieldBehavior": {
+              "values": {
+                "FIELD_BEHAVIOR_UNSPECIFIED": 0,
+                "OPTIONAL": 1,
+                "REQUIRED": 2,
+                "OUTPUT_ONLY": 3,
+                "INPUT_ONLY": 4,
+                "IMMUTABLE": 5
+              }
             }
           }
         },

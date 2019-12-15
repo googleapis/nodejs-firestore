@@ -15,7 +15,7 @@
 import {expect} from 'chai';
 import * as extend from 'extend';
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath, FieldValue, Firestore, setLogFunction} from '../src';
 import {DocumentData, DocumentReference, Query, Timestamp} from '../src';
 import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';

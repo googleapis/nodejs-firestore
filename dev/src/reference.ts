@@ -19,7 +19,7 @@ const deepEqual = require('deep-equal');
 import * as bun from 'bun';
 import * as through2 from 'through2';
 
-import * as proto from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_v1_proto_api';
 
 import {
   DocumentSnapshot,

@@ -17,7 +17,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 import * as gax from 'google-gax';
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 
 import * as Firestore from '../src';
 import {DocumentSnapshot, FieldPath} from '../src';

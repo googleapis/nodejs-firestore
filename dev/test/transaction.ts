@@ -17,7 +17,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 import * as through2 from 'through2';
 
-import * as proto from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_v1_proto_api';
 import * as Firestore from '../src';
 import {DocumentReference, FieldPath, Transaction} from '../src';
 import {ApiOverride, createInstance, InvalidApiUsage} from './util/helpers';

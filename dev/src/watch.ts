@@ -17,7 +17,7 @@
 import * as assert from 'assert';
 import * as rbtree from 'functional-red-black-tree';
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange, DocumentChangeType} from './document-change';

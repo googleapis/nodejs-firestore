@@ -19,7 +19,7 @@ import {CallOptions} from 'google-gax';
 import * as through2 from 'through2';
 import {URL} from 'url';
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
   DocumentSnapshot,

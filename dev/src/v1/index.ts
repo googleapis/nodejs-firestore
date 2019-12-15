@@ -12,21 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Note: this file is purely for documentation. Any contents are not expected
-// to be loaded as the JS file.
+import {FirestoreAdminClient} from './firestore_admin_client';
+import {FirestoreClient} from './firestore_client';
 
-/**
- * Wrapper message for `int32`.
- *
- * The JSON representation for `Int32Value` is JSON number.
- *
- * @property {number} value
- *   The int32 value.
- *
- * @typedef Int32Value
- * @memberof google.protobuf
- * @see [google.protobuf.Int32Value definition in proto format]{@link https://github.com/google/protobuf/blob/master/src/google/protobuf/wrappers.proto}
- */
-const Int32Value = {
-  // This is for documentation. Actual contents will be loaded by gRPC.
-};
+export {FirestoreClient, FirestoreAdminClient};
+
+// Doing something really horrible for reverse compatibility with original JavaScript exports
+const existingExports = module.exports;
+module.exports = FirestoreClient;
+module.exports = Object.assign(module.exports, existingExports);

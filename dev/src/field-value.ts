@@ -16,7 +16,7 @@
 
 const deepEqual = require('deep-equal');
 
-import * as proto from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_v1_proto_api';
 
 import {FieldPath} from './path';
 import {Serializer, validateUserInput} from './serializer';
