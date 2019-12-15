@@ -163,6 +163,7 @@ describe('Client pool', () => {
 
     const operationPromises = deferredPromises(2);
 
+    // Create two pending operations that each spawn their own client
     clientPool.run(REQUEST_TAG, () => operationPromises[0].promise);
     clientPool.run(REQUEST_TAG, () => operationPromises[1].promise);
 
