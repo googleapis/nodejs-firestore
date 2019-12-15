@@ -7,7 +7,7 @@
           "DEADLINE_EXCEEDED",
           "UNAVAILABLE"
         ],
-        "d_e_a_d_l_i_n_e_e_x_c_e_e_d_e_d_i_n_t_e_r_n_a_l_u_n_a_v_a_i_l_a_b_l_e": [
+        "deadline_exceeded_internal_unavailable": [
           "DEADLINE_EXCEEDED",
           "INTERNAL",
           "UNAVAILABLE"
@@ -32,22 +32,22 @@
         },
         "ListIndexes": {
           "timeout_millis": 60000,
-          "retry_codes_name": "d_e_a_d_l_i_n_e_e_x_c_e_e_d_e_d_i_n_t_e_r_n_a_l_u_n_a_v_a_i_l_a_b_l_e",
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
         "GetIndex": {
           "timeout_millis": 60000,
-          "retry_codes_name": "d_e_a_d_l_i_n_e_e_x_c_e_e_d_e_d_i_n_t_e_r_n_a_l_u_n_a_v_a_i_l_a_b_l_e",
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
         "DeleteIndex": {
           "timeout_millis": 60000,
-          "retry_codes_name": "d_e_a_d_l_i_n_e_e_x_c_e_e_d_e_d_i_n_t_e_r_n_a_l_u_n_a_v_a_i_l_a_b_l_e",
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
         "GetField": {
           "timeout_millis": 60000,
-          "retry_codes_name": "d_e_a_d_l_i_n_e_e_x_c_e_e_d_e_d_i_n_t_e_r_n_a_l_u_n_a_v_a_i_l_a_b_l_e",
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
         "UpdateField": {
@@ -57,7 +57,7 @@
         },
         "ListFields": {
           "timeout_millis": 60000,
-          "retry_codes_name": "d_e_a_d_l_i_n_e_e_x_c_e_e_d_e_d_i_n_t_e_r_n_a_l_u_n_a_v_a_i_l_a_b_l_e",
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
         "ExportDocuments": {

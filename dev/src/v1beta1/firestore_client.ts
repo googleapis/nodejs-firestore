@@ -56,10 +56,10 @@ const version = require('../../../package.json').version;
  */
 export class FirestoreClient {
   private _descriptors: Descriptors = {page: {}, stream: {}, longrunning: {}};
-  private _firestoreStub: Promise<{[name: string]: Function}>;
   private _innerApiCalls: {[name: string]: Function};
   private _terminated = false;
   auth: gax.GoogleAuth;
+  firestoreStub: Promise<{[name: string]: Function}>;
 
   /**
    * Construct an instance of FirestoreClient.
@@ -164,7 +164,7 @@ export class FirestoreClient {
       listCollectionIds: new gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
-        'collection_ids'
+        'collectionIds'
       ),
     };
 
@@ -194,7 +194,7 @@ export class FirestoreClient {
 
     // Put together the "service stub" for
     // google.firestore.v1beta1.Firestore.
-    this._firestoreStub = gaxGrpc.createStub(
+    this.firestoreStub = gaxGrpc.createStub(
       opts.fallback
         ? (protos as protobuf.Root).lookupService(
             'google.firestore.v1beta1.Firestore'
@@ -223,7 +223,7 @@ export class FirestoreClient {
     ];
 
     for (const methodName of firestoreStubMethods) {
-      const innerCallPromise = this._firestoreStub.then(
+      const innerCallPromise = this.firestoreStub.then(
         stub => (...args: Array<{}>) => {
           return stub[methodName].apply(stub, args);
         },
@@ -902,16 +902,8 @@ export class FirestoreClient {
    *   This may not be older than 60 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
-   * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [BatchGetDocumentsResponse]{@link google.firestore.v1beta1.BatchGetDocumentsResponse}.
-   *
-   *   When autoPaginate: false is specified through options, the array has three elements.
-   *   The first element is Array of [BatchGetDocumentsResponse]{@link google.firestore.v1beta1.BatchGetDocumentsResponse} in a single response.
-   *   The second element is the next request object if the response
-   *   indicates the next page exists, or null. The third element is
-   *   an object representing [BatchGetDocumentsResponse]{@link google.firestore.v1beta1.BatchGetDocumentsResponse}.
-   *
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   * @returns {Stream}
+   *   An object stream which emits [BatchGetDocumentsResponse]{@link google.firestore.v1beta1.BatchGetDocumentsResponse} on 'data' event.
    */
   batchGetDocuments(
     request?: protosTypes.google.firestore.v1beta1.IBatchGetDocumentsRequest,
@@ -948,16 +940,8 @@ export class FirestoreClient {
    *   This may not be older than 60 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
-   * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [RunQueryResponse]{@link google.firestore.v1beta1.RunQueryResponse}.
-   *
-   *   When autoPaginate: false is specified through options, the array has three elements.
-   *   The first element is Array of [RunQueryResponse]{@link google.firestore.v1beta1.RunQueryResponse} in a single response.
-   *   The second element is the next request object if the response
-   *   indicates the next page exists, or null. The third element is
-   *   an object representing [RunQueryResponse]{@link google.firestore.v1beta1.RunQueryResponse}.
-   *
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   * @returns {Stream}
+   *   An object stream which emits [RunQueryResponse]{@link google.firestore.v1beta1.RunQueryResponse} on 'data' event.
    */
   runQuery(
     request?: protosTypes.google.firestore.v1beta1.IRunQueryRequest,
@@ -1059,13 +1043,18 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [ListDocumentsResponse]{@link google.firestore.v1beta1.ListDocumentsResponse}.
+   *   The first element of the array is Array of [Document]{@link google.firestore.v1beta1.Document}.
+   *   The client library support auto-pagination by default: it will call the API as many
+   *   times as needed and will merge results from all the pages into this array.
    *
    *   When autoPaginate: false is specified through options, the array has three elements.
-   *   The first element is Array of [ListDocumentsResponse]{@link google.firestore.v1beta1.ListDocumentsResponse} in a single response.
-   *   The second element is the next request object if the response
-   *   indicates the next page exists, or null. The third element is
-   *   an object representing [ListDocumentsResponse]{@link google.firestore.v1beta1.ListDocumentsResponse}.
+   *   The first element is Array of [Document]{@link google.firestore.v1beta1.Document} that corresponds to
+   *   the one page received from the API server.
+   *   If the second element is not null it contains the request object of type [ListDocumentsRequest]{@link google.firestore.v1beta1.ListDocumentsRequest}
+   *   that can be used to obtain the next page of the results.
+   *   If it is null, the next page does not exist.
+   *   The third element contains the raw response received from the API server. Its type is
+   *   [ListDocumentsResponse]{@link google.firestore.v1beta1.ListDocumentsResponse}.
    *
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
@@ -1212,13 +1201,18 @@ export class FirestoreClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [ListCollectionIdsResponse]{@link google.firestore.v1beta1.ListCollectionIdsResponse}.
+   *   The first element of the array is Array of string.
+   *   The client library support auto-pagination by default: it will call the API as many
+   *   times as needed and will merge results from all the pages into this array.
    *
    *   When autoPaginate: false is specified through options, the array has three elements.
-   *   The first element is Array of [ListCollectionIdsResponse]{@link google.firestore.v1beta1.ListCollectionIdsResponse} in a single response.
-   *   The second element is the next request object if the response
-   *   indicates the next page exists, or null. The third element is
-   *   an object representing [ListCollectionIdsResponse]{@link google.firestore.v1beta1.ListCollectionIdsResponse}.
+   *   The first element is Array of string that corresponds to
+   *   the one page received from the API server.
+   *   If the second element is not null it contains the request object of type [ListCollectionIdsRequest]{@link google.firestore.v1beta1.ListCollectionIdsRequest}
+   *   that can be used to obtain the next page of the results.
+   *   If it is null, the next page does not exist.
+   *   The third element contains the raw response received from the API server. Its type is
+   *   [ListCollectionIdsResponse]{@link google.firestore.v1beta1.ListCollectionIdsResponse}.
    *
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
@@ -1312,7 +1306,7 @@ export class FirestoreClient {
    */
   close(): Promise<void> {
     if (!this._terminated) {
-      return this._firestoreStub.then(stub => {
+      return this.firestoreStub.then(stub => {
         this._terminated = true;
         stub.close();
       });

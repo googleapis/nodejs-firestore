@@ -43,11 +43,12 @@ const version = require('../../../package.json').version;
  */
 export class FirestoreAdminClient {
   private _descriptors: Descriptors = {page: {}, stream: {}, longrunning: {}};
-  private _firestoreAdminStub: Promise<{[name: string]: Function}>;
   private _innerApiCalls: {[name: string]: Function};
   private _pathTemplates: {[name: string]: gax.PathTemplate};
   private _terminated = false;
   auth: gax.GoogleAuth;
+  operationsClient: gax.OperationsClient;
+  firestoreAdminStub: Promise<{[name: string]: Function}>;
 
   /**
    * Construct an instance of FirestoreAdminClient.
@@ -144,11 +145,17 @@ export class FirestoreAdminClient {
     // identifiers to uniquely identify resources within the API.
     // Create useful helper objects for these.
     this._pathTemplates = {
+      collectionGroupPathTemplate: new gaxModule.PathTemplate(
+        'projects/{project}/databases/{database}/collectionGroups/{collection}'
+      ),
       indexPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}'
       ),
       fieldPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}'
+      ),
+      databasePathTemplate: new gaxModule.PathTemplate(
+        'projects/{project}/databases/{database}'
       ),
     };
 
@@ -175,7 +182,7 @@ export class FirestoreAdminClient {
       ? gaxModule.protobuf.Root.fromJSON(require('../../protos/protos.json'))
       : gaxModule.protobuf.loadSync(nodejsProtoPath);
 
-    const operationsClient = gaxModule
+    this.operationsClient = gaxModule
       .lro({
         auth: this.auth,
         grpc: 'grpc' in gaxGrpc ? gaxGrpc.grpc : undefined,
@@ -208,22 +215,22 @@ export class FirestoreAdminClient {
 
     this._descriptors.longrunning = {
       createIndex: new gaxModule.LongrunningDescriptor(
-        operationsClient,
+        this.operationsClient,
         createIndexResponse.decode.bind(createIndexResponse),
         createIndexMetadata.decode.bind(createIndexMetadata)
       ),
       updateField: new gaxModule.LongrunningDescriptor(
-        operationsClient,
+        this.operationsClient,
         updateFieldResponse.decode.bind(updateFieldResponse),
         updateFieldMetadata.decode.bind(updateFieldMetadata)
       ),
       exportDocuments: new gaxModule.LongrunningDescriptor(
-        operationsClient,
+        this.operationsClient,
         exportDocumentsResponse.decode.bind(exportDocumentsResponse),
         exportDocumentsMetadata.decode.bind(exportDocumentsMetadata)
       ),
       importDocuments: new gaxModule.LongrunningDescriptor(
-        operationsClient,
+        this.operationsClient,
         importDocumentsResponse.decode.bind(importDocumentsResponse),
         importDocumentsMetadata.decode.bind(importDocumentsMetadata)
       ),
@@ -244,7 +251,7 @@ export class FirestoreAdminClient {
 
     // Put together the "service stub" for
     // google.firestore.admin.v1.FirestoreAdmin.
-    this._firestoreAdminStub = gaxGrpc.createStub(
+    this.firestoreAdminStub = gaxGrpc.createStub(
       opts.fallback
         ? (protos as protobuf.Root).lookupService(
             'google.firestore.admin.v1.FirestoreAdmin'
@@ -269,7 +276,7 @@ export class FirestoreAdminClient {
     ];
 
     for (const methodName of firestoreAdminStubMethods) {
-      const innerCallPromise = this._firestoreAdminStub.then(
+      const innerCallPromise = this.firestoreAdminStub.then(
         stub => (...args: Array<{}>) => {
           return stub[methodName].apply(stub, args);
         },
@@ -1004,13 +1011,18 @@ export class FirestoreAdminClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [ListIndexesResponse]{@link google.firestore.admin.v1.ListIndexesResponse}.
+   *   The first element of the array is Array of [Index]{@link google.firestore.admin.v1.Index}.
+   *   The client library support auto-pagination by default: it will call the API as many
+   *   times as needed and will merge results from all the pages into this array.
    *
    *   When autoPaginate: false is specified through options, the array has three elements.
-   *   The first element is Array of [ListIndexesResponse]{@link google.firestore.admin.v1.ListIndexesResponse} in a single response.
-   *   The second element is the next request object if the response
-   *   indicates the next page exists, or null. The third element is
-   *   an object representing [ListIndexesResponse]{@link google.firestore.admin.v1.ListIndexesResponse}.
+   *   The first element is Array of [Index]{@link google.firestore.admin.v1.Index} that corresponds to
+   *   the one page received from the API server.
+   *   If the second element is not null it contains the request object of type [ListIndexesRequest]{@link google.firestore.admin.v1.ListIndexesRequest}
+   *   that can be used to obtain the next page of the results.
+   *   If it is null, the next page does not exist.
+   *   The third element contains the raw response received from the API server. Its type is
+   *   [ListIndexesResponse]{@link google.firestore.admin.v1.ListIndexesResponse}.
    *
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
@@ -1144,13 +1156,18 @@ export class FirestoreAdminClient {
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [ListFieldsResponse]{@link google.firestore.admin.v1.ListFieldsResponse}.
+   *   The first element of the array is Array of [Field]{@link google.firestore.admin.v1.Field}.
+   *   The client library support auto-pagination by default: it will call the API as many
+   *   times as needed and will merge results from all the pages into this array.
    *
    *   When autoPaginate: false is specified through options, the array has three elements.
-   *   The first element is Array of [ListFieldsResponse]{@link google.firestore.admin.v1.ListFieldsResponse} in a single response.
-   *   The second element is the next request object if the response
-   *   indicates the next page exists, or null. The third element is
-   *   an object representing [ListFieldsResponse]{@link google.firestore.admin.v1.ListFieldsResponse}.
+   *   The first element is Array of [Field]{@link google.firestore.admin.v1.Field} that corresponds to
+   *   the one page received from the API server.
+   *   If the second element is not null it contains the request object of type [ListFieldsRequest]{@link google.firestore.admin.v1.ListFieldsRequest}
+   *   that can be used to obtain the next page of the results.
+   *   If it is null, the next page does not exist.
+   *   The third element contains the raw response received from the API server. Its type is
+   *   [ListFieldsResponse]{@link google.firestore.admin.v1.ListFieldsResponse}.
    *
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
@@ -1244,6 +1261,61 @@ export class FirestoreAdminClient {
   // --------------------
   // -- Path templates --
   // --------------------
+
+  /**
+   * Return a fully-qualified collectiongroup resource name string.
+   *
+   * @param {string} project
+   * @param {string} database
+   * @param {string} collection
+   * @returns {string} Resource name string.
+   */
+  collectiongroupPath(project: string, database: string, collection: string) {
+    return this._pathTemplates.collectiongroupPathTemplate.render({
+      project,
+      database,
+      collection,
+    });
+  }
+
+  /**
+   * Parse the project from CollectionGroup resource.
+   *
+   * @param {string} collectiongroupName
+   *   A fully-qualified path representing CollectionGroup resource.
+   * @returns {string} A string representing the project.
+   */
+  matchProjectFromCollectionGroupName(collectiongroupName: string) {
+    return this._pathTemplates.collectiongroupPathTemplate.match(
+      collectiongroupName
+    ).project;
+  }
+
+  /**
+   * Parse the database from CollectionGroup resource.
+   *
+   * @param {string} collectiongroupName
+   *   A fully-qualified path representing CollectionGroup resource.
+   * @returns {string} A string representing the database.
+   */
+  matchDatabaseFromCollectionGroupName(collectiongroupName: string) {
+    return this._pathTemplates.collectiongroupPathTemplate.match(
+      collectiongroupName
+    ).database;
+  }
+
+  /**
+   * Parse the collection from CollectionGroup resource.
+   *
+   * @param {string} collectiongroupName
+   *   A fully-qualified path representing CollectionGroup resource.
+   * @returns {string} A string representing the collection.
+   */
+  matchCollectionFromCollectionGroupName(collectiongroupName: string) {
+    return this._pathTemplates.collectiongroupPathTemplate.match(
+      collectiongroupName
+    ).collection;
+  }
 
   /**
    * Return a fully-qualified index resource name string.
@@ -1380,13 +1452,50 @@ export class FirestoreAdminClient {
   }
 
   /**
+   * Return a fully-qualified database resource name string.
+   *
+   * @param {string} project
+   * @param {string} database
+   * @returns {string} Resource name string.
+   */
+  databasePath(project: string, database: string) {
+    return this._pathTemplates.databasePathTemplate.render({
+      project,
+      database,
+    });
+  }
+
+  /**
+   * Parse the project from Database resource.
+   *
+   * @param {string} databaseName
+   *   A fully-qualified path representing Database resource.
+   * @returns {string} A string representing the project.
+   */
+  matchProjectFromDatabaseName(databaseName: string) {
+    return this._pathTemplates.databasePathTemplate.match(databaseName).project;
+  }
+
+  /**
+   * Parse the database from Database resource.
+   *
+   * @param {string} databaseName
+   *   A fully-qualified path representing Database resource.
+   * @returns {string} A string representing the database.
+   */
+  matchDatabaseFromDatabaseName(databaseName: string) {
+    return this._pathTemplates.databasePathTemplate.match(databaseName)
+      .database;
+  }
+
+  /**
    * Terminate the GRPC channel and close the client.
    *
    * The client will no longer be usable and all future behavior is undefined.
    */
   close(): Promise<void> {
     if (!this._terminated) {
-      return this._firestoreAdminStub.then(stub => {
+      return this.firestoreAdminStub.then(stub => {
         this._terminated = true;
         stub.close();
       });
