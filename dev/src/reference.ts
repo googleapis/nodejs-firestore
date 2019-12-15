@@ -19,7 +19,7 @@ const deepEqual = require('deep-equal');
 import * as bun from 'bun';
 import * as through2 from 'through2';
 
-import * as proto from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_v1_proto_api';
 
 import {
   DocumentSnapshot,
@@ -73,7 +73,8 @@ const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
 
 /**
  * Filter conditions in a `Query.where()` clause are specified using the
- * strings '<', '<=', '==', '>=', and '>'.
+ * strings '<', '<=', '==', '>=', '>', 'array-contains', 'in', and
+ * 'array-contains-any'.
  *
  * @private
  */
@@ -86,6 +87,8 @@ const comparisonOperators: {
   '>': 'GREATER_THAN',
   '>=': 'GREATER_THAN_OR_EQUAL',
   'array-contains': 'ARRAY_CONTAINS',
+  in: 'IN',
+  'array-contains-any': 'ARRAY_CONTAINS_ANY',
 };
 
 /**

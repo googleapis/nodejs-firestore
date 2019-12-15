@@ -1,18 +1,16 @@
-/**
- * Copyright 2019 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2019 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 const duplexify = require('duplexify');
 
@@ -21,10 +19,11 @@ import {CallOptions} from 'google-gax';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
-import * as proto from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_v1_proto_api';
 
 import {
   DocumentChange,
+  DocumentData,
   DocumentSnapshot,
   FieldPath,
   FieldValue,
@@ -37,7 +36,6 @@ import {
 import {fieldsFromJson} from '../src/convert';
 import {DocumentChangeType} from '../src/document-change';
 import {QualifiedResourcePath} from '../src/path';
-import {DocumentData} from '../src/types';
 import {isObject} from '../src/util';
 import {
   ApiOverride,
@@ -48,8 +46,6 @@ import api = proto.google.firestore.v1;
 
 // TODO(mrschmidt): Create Protobuf .d.ts file for the conformance proto
 type ConformanceProto = any; // tslint:disable-line:no-any
-
-const REQUEST_TIME = 'REQUEST_TIME';
 
 /** List of test cases that are ignored. */
 const ignoredRe: RegExp[] = [];
@@ -197,11 +193,13 @@ const convertInput = {
     for (const doc of snapshot.docs) {
       const deepCopy = JSON.parse(JSON.stringify(doc));
       deepCopy.fields = fieldsFromJson(deepCopy.fields);
-      docs.push(firestore.snapshot_(
-        deepCopy,
-        readTime.toDate().toISOString(),
-        'json'
-      ) as QueryDocumentSnapshot);
+      docs.push(
+        firestore.snapshot_(
+          deepCopy,
+          readTime.toDate().toISOString(),
+          'json'
+        ) as QueryDocumentSnapshot
+      );
     }
 
     for (const change of snapshot.changes) {
@@ -420,9 +418,9 @@ function runTest(spec: ConformanceProto) {
   const createTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      return docRef(spec.docRefPath).create(convertInput.argument(
-        spec.jsonData
-      ) as DocumentData);
+      return docRef(spec.docRefPath).create(
+        convertInput.argument(spec.jsonData) as DocumentData
+      );
     });
   };
 

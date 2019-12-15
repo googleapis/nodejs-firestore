@@ -102,6 +102,14 @@ message StructuredQuery {
 
       // Contains. Requires that the field is an array.
       ARRAY_CONTAINS = 7;
+
+      // In. Requires that `value` is a non-empty ArrayValue with at most 10
+      // values.
+      IN = 8;
+
+      // Contains any. Requires that the field is an array and
+      // `value` is a non-empty ArrayValue with at most 10 values.
+      ARRAY_CONTAINS_ANY = 9;
     }
 
     // The field to filter by.
@@ -112,18 +120,6 @@ message StructuredQuery {
 
     // The value to compare to.
     Value value = 3;
-  }
-
-  // A sort direction.
-  enum Direction {
-    // Unspecified.
-    DIRECTION_UNSPECIFIED = 0;
-
-    // Ascending.
-    ASCENDING = 1;
-
-    // Descending.
-    DESCENDING = 2;
   }
 
   // A filter with a single operand.
@@ -157,6 +153,18 @@ message StructuredQuery {
 
     // The direction to order by. Defaults to `ASCENDING`.
     Direction direction = 2;
+  }
+
+  // A sort direction.
+  enum Direction {
+    // Unspecified.
+    DIRECTION_UNSPECIFIED = 0;
+
+    // Ascending.
+    ASCENDING = 1;
+
+    // Descending.
+    DESCENDING = 2;
   }
 
   // A reference to a field, such as `max(messages.time) as max_time`.

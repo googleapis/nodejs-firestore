@@ -77,27 +77,6 @@ declare namespace FirebaseFirestore {
      */
     credentials?: {client_email?:string, private_key?:string};
 
-    /**
-     * Specifies whether to use `Timestamp` objects for timestamp fields in
-     * `DocumentSnapshot`s. This is enabled by default and should not be disabled.
-     *
-     * Previously, Firestore returned timestamp fields as `Date` but `Date` only
-     * supports millisecond precision, which leads to truncation and causes
-     * unexpected behavior when using a timestamp from a snapshot as a part of a
-     * subsequent query.
-     *
-     * So now Firestore returns `Timestamp` values instead of `Date`, avoiding
-     * this kind of problem.
-     *
-     * To opt into the old behavior of returning `Date` objects, you can
-     * temporarily set `timestampsInSnapshots` to false.
-     *
-     * @deprecated This setting will be removed in a future release. You should
-     * update your code to expect `Timestamp` objects and stop using the
-     * `timestampsInSnapshots` setting.
-     */
-    timestampsInSnapshots?: boolean;
-
     /** Whether to use SSL when connecting. */
     ssl?: boolean;
 
@@ -778,9 +757,11 @@ declare namespace FirebaseFirestore {
 
   /**
    * Filter conditions in a `Query.where()` clause are specified using the
-   * strings '<', '<=', '==', '>=', '>', and 'array-contains'.
+   * strings '<', '<=', '==', '>=', '>', 'array-contains', 'in', and 
+   * 'array-contains-any'.
    */
-  export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains';
+  export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains' | 
+  'in' | 'array-contains-any';
 
   /**
    * A `Query` refers to a Query which you can read or listen to. You can also

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 import {validateInteger} from './validate';
 
 import api = google.firestore.v1;

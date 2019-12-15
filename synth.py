@@ -6,44 +6,38 @@ import os
 
 logging.basicConfig(level=logging.DEBUG)
 
-gapic = gcp.GAPICGenerator()
+gapic_micro = gcp.GAPICMicrogenerator()
 
-# tasks has two product names, and a poorly named artman yaml
-v1_admin_library = gapic.node_library(
-    "firestore-admin", "v1", config_path="/google/firestore/admin/artman_firestore_v1.yaml"
+v1_admin_library = gapic_micro.typescript_library(
+    "firestore-admin", "v1", proto_path="/google/firestore/admin/v1",
+    generator_args={'grpc-service-config': 'google/firestore/admin/v1/firestore_admin_grpc_service_config.json'}
 )
-v1beta1_library = gapic.node_library(
-    "firestore", "v1beta1", config_path="/google/firestore/artman_firestore.yaml"
+v1beta1_library = gapic_micro.typescript_library(
+    "firestore", "v1beta1", proto_path="/google/firestore/v1beta1",
+    generator_args={'grpc-service-config': 'google/firestore/v1beta1/firestore_grpc_service_config.json'}
 )
-v1_library = gapic.node_library(
-    "firestore", "v1", config_path="/google/firestore/artman_firestore_v1.yaml"
+v1_library = gapic_micro.typescript_library(
+    "firestore", "v1", proto_path="/google/firestore/v1",
+    generator_args={'grpc-service-config': 'google/firestore/v1/firestore_grpc_service_config.json'}
 )
 
 # skip index, protos, package.json, and README.md
-s.copy(v1_admin_library, "dev", excludes=["package.json", "README.md", "src/index.js", "src/v1/index.js"])
-s.copy(v1beta1_library, "dev", excludes=["package.json", "README.md", "src/index.js", "src/v1beta1/index.js"])
-s.copy(v1_library, "dev", excludes=["package.json", "README.md", "src/index.js", "src/v1/index.js"])
-
-# package.json is one level deeper since firestore's src/ is under dev/
-s.replace(
-    "dev/src/v1/firestore_admin_client.js", "../../package.json", "../../../package.json"
-)
-s.replace(
-    "dev/src/v1beta1/firestore_client.js", "../../package.json", "../../../package.json"
-)
-s.replace(
-    "dev/src/v1/firestore_client.js", "../../package.json", "../../../package.json"
-)
+s.copy(v1_admin_library, "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1/index.ts", 
+    "tsconfig.json", "tslint.json", "linkinator.config.json", "webpack.config.js"])
+s.copy(v1beta1_library, "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1beta1/index.ts",
+    "tsconfig.json", "tslint.json", "linkinator.config.json", "webpack.config.js"])
+s.copy(v1_library, "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1/index.ts",
+    "tsconfig.json", "tslint.json", "linkinator.config.json", "webpack.config.js"])
 
 # Fix dropping of google-cloud-resource-header
 # See: https://github.com/googleapis/nodejs-firestore/pull/375
 s.replace(
-    "dev/src/v1beta1/firestore_client.js",
+    "dev/src/v1beta1/firestore_client.ts",
     "return this\._innerApiCalls\.listen\(options\);",
     "return this._innerApiCalls.listen({}, options);",
 )
 s.replace(
-    "dev/src/v1/firestore_client.js",
+    "dev/src/v1/firestore_client.ts",
     "return this\._innerApiCalls\.listen\(options\);",
     "return this._innerApiCalls.listen({}, options);",
 )
@@ -56,19 +50,40 @@ templates = common_templates.node_library(
 
 s.copy(templates)
 
-# [START fix-dead-link]
-s.replace('**/doc/google/protobuf/doc_timestamp.js',
-        'https:\/\/cloud\.google\.com[\s\*]*http:\/\/(.*)[\s\*]*\)',
-        r"https://\1)")
+# use the existing proto .js / .d.ts files
+s.replace(
+   "dev/src/v1/firestore_client.ts",
+   "/protos/protos'",
+   "/protos/firestore_v1_proto_api'"
+ )
+s.replace(
+  "dev/test/gapic-firestore-v1.ts",
+  "/protos/protos'",
+  "/protos/firestore_v1_proto_api'"
+)
+s.replace(
+   "dev/src/v1/firestore_admin_client.ts",
+   "/protos/protos'",
+   "/protos/firestore_admin_v1_proto_api'"
+ )
+s.replace(
+  "dev/test/gapic-firestore_admin-v1.ts",
+  "/protos/protos'",
+  "/protos/firestore_admin_v1_proto_api'"
+)
+s.replace(
+   "dev/src/v1beta1/firestore_client.ts",
+   "/protos/protos'",
+   "/protos/firestore_v1beta1_proto_api'"
+ )
+s.replace(
+  "dev/test/gapic-firestore-v1beta1.ts",
+  "/protos/protos'",
+  "/protos/firestore_v1beta1_proto_api'"
+)
 
-s.replace('**/doc/google/protobuf/doc_timestamp.js',
-        'toISOString\]',
-        'toISOString)')
-# [END fix-dead-link]
-
-# remove browser.js, it does not work with TypeScript yet
-os.unlink('dev/src/browser.js')
-os.unlink('dev/webpack.config.js')
+# Remove auto-generated packaging tests
+os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
 
 # Node.js specific cleanup
 subprocess.run(["npm", "install"])
@@ -77,3 +92,4 @@ os.chdir("dev")
 subprocess.run(["npx", "compileProtos", "src"])
 os.unlink('protos/protos.js')
 os.unlink('protos/protos.d.ts')
+os.unlink('.jsdoc.js')

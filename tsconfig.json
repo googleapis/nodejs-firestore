@@ -1,15 +1,17 @@
 {
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
-    "allowJs": true,
-    "declaration": false, // TODO: Remove when all source are migrated to TS
-    "outDir": "build"
+    "resolveJsonModule": true,
+    "outDir": "build",
+    "lib": [
+      "es2016",
+      "dom"
+    ]
   },
   "include": [
     "dev/src/*.d.ts",
     "dev/src/*.ts",
-    "dev/src/**/*.js",
-    "dev/test/*.js",
+    "dev/src/**/*.ts",
     "dev/test/*.ts",
     "dev/test/**/*.ts",
     "dev/system-test/*.ts",
