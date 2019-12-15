@@ -170,16 +170,18 @@ export class ClientPool<T> {
    */
   private async garbageCollect(): Promise<number> {
     let idleClients = 0;
+    const cleanUpTasks: Array<Promise<void>> = [];
     for (const [client, requestCount] of this.activeClients) {
       if (requestCount === 0) {
         ++idleClients;
 
         if (idleClients > 1) {
-          await this.clientDestructor(client);
           this.activeClients.delete(client);
+          cleanUpTasks.push(this.clientDestructor(client));
         }
       }
     }
+    await Promise.all(cleanUpTasks);
     return idleClients - 1;
   }
 }
