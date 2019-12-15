@@ -46,7 +46,8 @@ export class ClientPool<T> {
   constructor(
     private readonly concurrentOperationLimit: number,
     private readonly clientFactory: () => T,
-    private readonly clientDestructor: (client: T) => void = () => {}
+    private readonly clientDestructor: (client: T) => Promise<void> = () =>
+      Promise.resolve()
   ) {}
 
   /**
@@ -91,7 +92,7 @@ export class ClientPool<T> {
    * removing it from the pool of active clients.
    * @private
    */
-  private release(requestTag: string, client: T): void {
+  private async release(requestTag: string, client: T): Promise<void> {
     let requestCount = this.activeClients.get(client) || 0;
     assert(requestCount > 0, 'No active request');
 
@@ -99,7 +100,7 @@ export class ClientPool<T> {
     this.activeClients.set(client, requestCount);
 
     if (requestCount === 0) {
-      const deletedCount = this.garbageCollect();
+      const deletedCount = await this.garbageCollect();
       if (deletedCount) {
         logger(
           'ClientPool.release',
@@ -150,12 +151,12 @@ export class ClientPool<T> {
     const client = this.acquire(requestTag);
 
     return op(client)
-      .catch(err => {
-        this.release(requestTag, client);
+      .catch(async err => {
+        await this.release(requestTag, client);
         return Promise.reject(err);
       })
-      .then(res => {
-        this.release(requestTag, client);
+      .then(async res => {
+        await this.release(requestTag, client);
         return res;
       });
   }
@@ -167,18 +168,18 @@ export class ClientPool<T> {
    * @return Number of clients deleted.
    * @private
    */
-  private garbageCollect(): number {
+  private async garbageCollect(): Promise<number> {
     let idleClients = 0;
-    this.activeClients.forEach((requestCount, client) => {
+    for (const [client, requestCount] of this.activeClients) {
       if (requestCount === 0) {
         ++idleClients;
 
         if (idleClients > 1) {
-          this.clientDestructor(client);
+          await this.clientDestructor(client);
           this.activeClients.delete(client);
         }
       }
-    });
+    }
     return idleClients - 1;
   }
 }

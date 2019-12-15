@@ -158,7 +158,7 @@ describe('Client pool', () => {
       () => {
         return {};
       },
-      () => garbageCollect.resolve()
+      () => Promise.resolve(garbageCollect.resolve())
     );
 
     const operationPromises = deferredPromises(2);
