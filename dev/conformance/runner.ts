@@ -193,11 +193,13 @@ const convertInput = {
     for (const doc of snapshot.docs) {
       const deepCopy = JSON.parse(JSON.stringify(doc));
       deepCopy.fields = fieldsFromJson(deepCopy.fields);
-      docs.push(firestore.snapshot_(
-        deepCopy,
-        readTime.toDate().toISOString(),
-        'json'
-      ) as QueryDocumentSnapshot);
+      docs.push(
+        firestore.snapshot_(
+          deepCopy,
+          readTime.toDate().toISOString(),
+          'json'
+        ) as QueryDocumentSnapshot
+      );
     }
 
     for (const change of snapshot.changes) {
@@ -416,9 +418,9 @@ function runTest(spec: ConformanceProto) {
   const createTest = (spec: ConformanceProto) => {
     const overrides = {commit: commitHandler(spec)};
     return createInstance(overrides).then(() => {
-      return docRef(spec.docRefPath).create(convertInput.argument(
-        spec.jsonData
-      ) as DocumentData);
+      return docRef(spec.docRefPath).create(
+        convertInput.argument(spec.jsonData) as DocumentData
+      );
     });
   };
 
