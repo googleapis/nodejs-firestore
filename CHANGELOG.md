@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.0.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.0.0...v3.0.1) (2019-12-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency deep-equal to v2 ([#821](https://www.github.com/googleapis/nodejs-firestore/issues/821)) ([25472e1](https://www.github.com/googleapis/nodejs-firestore/commit/25472e11a0e1a4a5e1931b1652d125f9c8cabf11))
+
 ## [3.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.6.1...v3.0.0) (2019-12-15)
 
 
