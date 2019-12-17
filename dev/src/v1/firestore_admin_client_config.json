@@ -2,12 +2,16 @@
   "interfaces": {
     "google.firestore.admin.v1.FirestoreAdmin": {
       "retry_codes": {
+        "non_idempotent": [],
         "idempotent": [
+          "DEADLINE_EXCEEDED",
+          "UNAVAILABLE"
+        ],
+        "deadline_exceeded_internal_unavailable": [
           "DEADLINE_EXCEEDED",
           "INTERNAL",
           "UNAVAILABLE"
-        ],
-        "non_idempotent": []
+        ]
       },
       "retry_params": {
         "default": {
@@ -15,7 +19,7 @@
           "retry_delay_multiplier": 1.3,
           "max_retry_delay_millis": 60000,
           "initial_rpc_timeout_millis": 60000,
-          "rpc_timeout_multiplier": 1.0,
+          "rpc_timeout_multiplier": 1,
           "max_rpc_timeout_millis": 60000,
           "total_timeout_millis": 600000
         }
@@ -28,22 +32,32 @@
         },
         "ListIndexes": {
           "timeout_millis": 60000,
-          "retry_codes_name": "idempotent",
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
         "GetIndex": {
           "timeout_millis": 60000,
-          "retry_codes_name": "idempotent",
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
         "DeleteIndex": {
           "timeout_millis": 60000,
-          "retry_codes_name": "idempotent",
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
-        "ImportDocuments": {
+        "GetField": {
+          "timeout_millis": 60000,
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_params_name": "default"
+        },
+        "UpdateField": {
           "timeout_millis": 60000,
           "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "ListFields": {
+          "timeout_millis": 60000,
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
         "ExportDocuments": {
@@ -51,17 +65,7 @@
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
-        "GetField": {
-          "timeout_millis": 60000,
-          "retry_codes_name": "idempotent",
-          "retry_params_name": "default"
-        },
-        "ListFields": {
-          "timeout_millis": 60000,
-          "retry_codes_name": "idempotent",
-          "retry_params_name": "default"
-        },
-        "UpdateField": {
+        "ImportDocuments": {
           "timeout_millis": 60000,
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"

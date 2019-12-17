@@ -19,7 +19,7 @@ import * as extend from 'extend';
 import {Transform} from 'stream';
 import * as through2 from 'through2';
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 
 import {
   CollectionReference,
@@ -588,7 +588,7 @@ describe('Query watch', () => {
 
   let lastSnapshot: {
     docs: QueryDocumentSnapshot[];
-    docChanges: DocumentChange[];
+    docChanges: TestChange[];
   } = EMPTY;
 
   // The proto JSON that should be sent for the query.

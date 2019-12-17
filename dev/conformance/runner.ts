@@ -19,10 +19,11 @@ import {CallOptions} from 'google-gax';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
-import * as proto from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_v1_proto_api';
 
 import {
   DocumentChange,
+  DocumentData,
   DocumentSnapshot,
   FieldPath,
   FieldValue,
@@ -35,7 +36,6 @@ import {
 import {fieldsFromJson} from '../src/convert';
 import {DocumentChangeType} from '../src/document-change';
 import {QualifiedResourcePath} from '../src/path';
-import {DocumentData} from '../src/types';
 import {isObject} from '../src/util';
 import {
   ApiOverride,
@@ -46,8 +46,6 @@ import api = proto.google.firestore.v1;
 
 // TODO(mrschmidt): Create Protobuf .d.ts file for the conformance proto
 type ConformanceProto = any; // tslint:disable-line:no-any
-
-const REQUEST_TIME = 'REQUEST_TIME';
 
 /** List of test cases that are ignored. */
 const ignoredRe: RegExp[] = [];

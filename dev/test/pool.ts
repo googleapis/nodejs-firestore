@@ -150,6 +150,28 @@ describe('Client pool', () => {
     );
   });
 
+  it('garbage collection calls destructor', () => {
+    const garbageCollect = new Deferred();
+
+    const clientPool = new ClientPool<{}>(
+      1,
+      () => {
+        return {};
+      },
+      () => Promise.resolve(garbageCollect.resolve())
+    );
+
+    const operationPromises = deferredPromises(2);
+
+    // Create two pending operations that each spawn their own client
+    clientPool.run(REQUEST_TAG, () => operationPromises[0].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[1].promise);
+
+    operationPromises.forEach(deferred => deferred.resolve());
+
+    return garbageCollect.promise;
+  });
+
   it('forwards success', () => {
     const clientPool = new ClientPool<{}>(1, () => {
       return {};

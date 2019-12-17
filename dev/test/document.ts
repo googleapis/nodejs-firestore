@@ -14,7 +14,7 @@
 
 import {expect} from 'chai';
 
-import * as proto from '../protos/firestore_proto_api';
+import * as proto from '../protos/firestore_v1_proto_api';
 import {
   DocumentReference,
   FieldPath,

@@ -14,7 +14,7 @@
 
 import {expect} from 'chai';
 
-import {google} from '../protos/firestore_proto_api';
+import {google} from '../protos/firestore_v1_proto_api';
 
 import {
   Firestore,
