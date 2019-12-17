@@ -268,6 +268,13 @@ export class Firestore {
   private _settingsFrozen = false;
 
   /**
+   * Whether is client has been terminated. Once the Firestore instance is
+   * terminated, terminated cannot be set to false again and all subsequent
+   * calls to this client will fail.
+   */
+  private _terminated = false;
+
+  /**
    * The serializer to use for the Protobuf transformation.
    * @private
    */
@@ -405,6 +412,7 @@ export class Firestore {
    * @param {object} settings The settings to use for all Firestore operations.
    */
   settings(settings: Settings): void {
+    this.verifyNotTerminated();
     validateObject('settings', settings);
     validateString('settings.projectId', settings.projectId, {optional: true});
 
@@ -497,6 +505,7 @@ export class Firestore {
    * console.log(`Path of document is ${documentRef.path}`);
    */
   doc(documentPath: string): DocumentReference {
+    this.verifyNotTerminated();
     validateResourcePath('documentPath', documentPath);
 
     const path = ResourcePath.EMPTY.append(documentPath);
@@ -526,6 +535,7 @@ export class Firestore {
    * });
    */
   collection(collectionPath: string): CollectionReference {
+    this.verifyNotTerminated();
     validateResourcePath('collectionPath', collectionPath);
 
     const path = ResourcePath.EMPTY.append(collectionPath);
@@ -561,6 +571,7 @@ export class Firestore {
    * });
    */
   collectionGroup(collectionId: string): Query {
+    this.verifyNotTerminated();
     if (collectionId.indexOf('/') !== -1) {
       throw new Error(
         `Invalid collectionId '${collectionId}'. Collection IDs must not contain '/'.`
@@ -590,6 +601,7 @@ export class Firestore {
    * });
    */
   batch(): WriteBatch {
+    this.verifyNotTerminated();
     return new WriteBatch(this);
   }
 
@@ -639,6 +651,7 @@ export class Firestore {
   ): DocumentSnapshot {
     // TODO: Assert that Firestore Project ID is valid.
 
+    this.verifyNotTerminated();
     let convertTimestamp: (
       timestampValue?: string | google.protobuf.ITimestamp,
       argumentName?: string
@@ -1009,11 +1022,17 @@ export class Firestore {
 
   async terminate(): Promise<void> {
     // close grpc channel
-    
-
-
+    await this._clientPool.terminate();
+    this._terminated = true;
     // mark client as shutdown, fail all subsequent calls
-    return Promise.resolve();
+  }
+
+  private verifyNotTerminated(): void {
+    if (this._terminated) {
+      throw new Error(
+        'The client has already been terminated.'
+      );
+    }
   }
 
   /**
