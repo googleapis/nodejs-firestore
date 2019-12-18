@@ -36,6 +36,12 @@ export class ClientPool<T> {
   private activeClients: Map<T, number> = new Map();
 
   /**
+   * Whether the Firestore instance has been terminated. Once terminated, the
+   * ClientPool can longer schedule new operations.
+   */
+  private terminated = false;
+
+  /**
    * @param concurrentOperationLimit The number of operations that each client
    * can handle.
    * @param clientFactory A factory function called as needed when new clients
@@ -148,6 +154,9 @@ export class ClientPool<T> {
    * @private
    */
   run<V>(requestTag: string, op: (client: T) => Promise<V>): Promise<V> {
+    if (this.terminated) {
+      throw new Error('The client has already been terminated');
+    }
     const client = this.acquire(requestTag);
 
     return op(client)
@@ -162,8 +171,10 @@ export class ClientPool<T> {
   }
 
   async terminate(): Promise<void> {
-    for (const client of this.activeClients) {
-      await client.close();
+    this.terminated = true;
+    for (const [client, _requestCount] of this.activeClients) {
+      this.activeClients.delete(client);
+      await this.clientDestructor(client);
     }
   }
 
@@ -190,5 +201,4 @@ export class ClientPool<T> {
     await Promise.all(cleanUpTasks);
     return idleClients - 1;
   }
-  
 }
