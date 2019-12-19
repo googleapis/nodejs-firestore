@@ -1012,8 +1012,8 @@ export class Firestore {
    *
    * @return A Promise that resolves when the client is terminated.
    */
-  async terminate(): Promise<void> {
-    await this._clientPool.terminate();
+  terminate(): Promise<void> {
+    return this._clientPool.terminate();
   }
 
   /**
