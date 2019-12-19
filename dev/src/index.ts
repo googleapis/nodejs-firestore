@@ -1008,6 +1008,15 @@ export class Firestore {
   }
 
   /**
+   * Terminates the Firestore client and closes all open streams.
+   *
+   * @return A Promise that resolves when the client is terminated.
+   */
+  terminate(): Promise<void> {
+    return this._clientPool.terminate();
+  }
+
+  /**
    * Initializes the client if it is not already initialized. All methods in the
    * SDK can be used after this method completes.
    *

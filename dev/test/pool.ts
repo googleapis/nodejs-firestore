@@ -191,4 +191,21 @@ describe('Client pool', () => {
     );
     return expect(op).to.eventually.be.rejectedWith('Generated error');
   });
+
+  it('rejects subsequent operations after being terminated', () => {
+    const clientPool = new ClientPool<{}>(1, () => {
+      return {};
+    });
+
+    return clientPool
+      .terminate()
+      .then(() => {
+        clientPool.run(REQUEST_TAG, () =>
+          Promise.reject('Call to run() should have failed')
+        );
+      })
+      .catch((err: Error) => {
+        expect(err.message).to.equal('The client has already been terminated');
+      });
+  });
 });
