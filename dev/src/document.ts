@@ -28,8 +28,6 @@ import {ApiMapValue, DocumentData, UpdateMap} from './types';
 import {isEmpty, isObject} from './util';
 
 import api = google.firestore.v1;
-import {FirestoreDataConverter} from '@google-cloud/firestore';
-import {defaultConverter} from './watch';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -39,7 +37,7 @@ import {defaultConverter} from './watch';
  */
 export class DocumentSnapshotBuilder<T = DocumentData> {
   /** The reference to the document. */
-  ref?: DocumentReference<T>;
+  ref: DocumentReference<T>;
 
   /** The fields of the Firestore `Document` Protobuf backing this document. */
   fieldsProto?: ApiMapValue;
@@ -53,11 +51,12 @@ export class DocumentSnapshotBuilder<T = DocumentData> {
   /** The time when this document was last updated. */
   updateTime?: Timestamp;
 
-  private readonly _converter: FirestoreDataConverter<T>;
-
-  constructor(converter?: FirestoreDataConverter<T>) {
-    this._converter =
-      converter || (defaultConverter as FirestoreDataConverter<T>);
+  /**
+   * We include the DocumentReference in the constructor in order to allow the
+   * DocumentSnapshotBuilder to be typed with <T> when it is constructed.
+   */
+  constructor(ref: DocumentReference<T>) {
+    this.ref = ref;
   }
 
   /**
@@ -82,16 +81,12 @@ export class DocumentSnapshotBuilder<T = DocumentData> {
           this.fieldsProto!,
           this.readTime!,
           this.createTime!,
-          this.updateTime!,
-          this.ref!._converter
+          this.updateTime!
         )
       : new DocumentSnapshot(
           this.ref!,
           undefined,
-          this.readTime!,
-          undefined,
-          undefined,
-          this.ref!._converter
+          this.readTime!
         );
   }
 }
@@ -117,7 +112,6 @@ export class DocumentSnapshot<T = DocumentData> {
   private _readTime: Timestamp | undefined;
   private _createTime: Timestamp | undefined;
   private _updateTime: Timestamp | undefined;
-  private readonly _converter: FirestoreDataConverter<T>;
 
   /**
    * @hideconstructor
@@ -137,8 +131,7 @@ export class DocumentSnapshot<T = DocumentData> {
     fieldsProto?: ApiMapValue,
     readTime?: Timestamp,
     createTime?: Timestamp,
-    updateTime?: Timestamp,
-    converter?: FirestoreDataConverter<T>
+    updateTime?: Timestamp
   ) {
     this._ref = ref;
     this._fieldsProto = fieldsProto;
@@ -146,8 +139,6 @@ export class DocumentSnapshot<T = DocumentData> {
     this._readTime = readTime;
     this._createTime = createTime;
     this._updateTime = updateTime;
-    this._converter =
-      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**
@@ -384,7 +375,7 @@ export class DocumentSnapshot<T = DocumentData> {
    * Retrieves all fields in the document as an object. Returns 'undefined' if
    * the document doesn't exist.
    *
-   * @returns {DocumentData|undefined} An object containing all fields in the
+   * @returns {T|undefined} An object containing all fields in the
    * document or 'undefined' if the document doesn't exist.
    *
    * @example
@@ -395,8 +386,6 @@ export class DocumentSnapshot<T = DocumentData> {
    *   console.log(`Retrieved data: ${JSON.stringify(data)}`);
    * });
    */
-  // We deliberately use `any` in the external API to not impose type-checking
-  // on end users.
   data(): T | undefined {
     const fields = this._fieldsProto;
 
@@ -408,7 +397,7 @@ export class DocumentSnapshot<T = DocumentData> {
     for (const prop of Object.keys(fields)) {
       obj[prop] = this._serializer.decodeValue(fields[prop]);
     }
-    return this._converter.fromFirestore(obj);
+    return this.ref._converter.fromFirestore(obj);
   }
 
   /**
@@ -515,8 +504,7 @@ export class DocumentSnapshot<T = DocumentData> {
       this === other ||
       (other instanceof DocumentSnapshot &&
         this._ref.isEqual(other._ref) &&
-        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}) &&
-        this._converter === other._converter)
+        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
     );
   }
 }
@@ -554,10 +542,9 @@ export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<
     fieldsProto: ApiMapValue,
     readTime: Timestamp,
     createTime: Timestamp,
-    updateTime: Timestamp,
-    converter?: FirestoreDataConverter<T>
+    updateTime: Timestamp
   ) {
-    super(ref, fieldsProto, readTime, createTime, updateTime, converter);
+    super(ref, fieldsProto, readTime, createTime, updateTime);
   }
 
   /**

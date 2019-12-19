@@ -25,6 +25,7 @@ import {
   createInstance,
   document,
   InvalidApiUsage,
+  postConverter,
   stream,
   verifyInstance,
 } from './util/helpers';
@@ -42,11 +43,11 @@ function snapshot(
   data: DocumentData
 ): Promise<DocumentSnapshot> {
   return createInstance().then(firestore => {
-    const snapshot = new DocumentSnapshotBuilder();
     const path = QualifiedResourcePath.fromSlashSeparatedString(
       `${DATABASE_ROOT}/documents/${relativePath}`
     );
-    snapshot.ref = new DocumentReference(firestore, path);
+    const ref = new DocumentReference(firestore, path);
+    const snapshot = new DocumentSnapshotBuilder(ref);
     snapshot.fieldsProto = firestore['_serializer']!.encodeFields(data);
     snapshot.readTime = Timestamp.fromMillis(0);
     snapshot.createTime = Timestamp.fromMillis(0);
@@ -613,6 +614,21 @@ describe('query interface', () => {
         );
       });
     });
+  });
+
+  it('for Query.withConverter()', async () => {
+    await firestore
+      .doc('postings/post1')
+      .set({title: 'post1', author: 'author1'});
+    await firestore
+      .doc('postings/post2')
+      .set({title: 'post2', author: 'author2'});
+    const posts = await firestore
+      .collectionGroup('postings')
+      .withConverter(postConverter)
+      .get();
+    expect(posts.size).to.equal(2);
+    expect(posts.docs[0].data()!.byline()).to.equal('post1, by author1');
   });
 });
 

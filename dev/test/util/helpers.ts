@@ -20,7 +20,7 @@ import * as through2 from 'through2';
 import * as proto from '../../protos/firestore_v1_proto_api';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
-import {GapicClient, GrpcError} from '../../src/types';
+import {DocumentData, GapicClient, GrpcError} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
@@ -378,3 +378,19 @@ export function stream<T>(
 
   return stream;
 }
+
+export class Post {
+  constructor(readonly title: string, readonly author: string) {}
+  byline(): string {
+    return this.title + ', by ' + this.author;
+  }
+}
+
+export const postConverter = {
+  toFirestore(post: Post): DocumentData {
+    return {title: post.title, author: post.author};
+  },
+  fromFirestore(data: DocumentData): Post {
+    return new Post(data.title, data.author);
+  },
+};

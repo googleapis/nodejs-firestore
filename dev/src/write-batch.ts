@@ -185,16 +185,15 @@ export class WriteBatch {
 
     this.verifyNotCommitted();
 
-    const firestoreData = documentRef._converter
-      ? documentRef._converter.toFirestore(data)
-      : (data as T);
+    const firestoreData = documentRef._converter.toFirestore(data);
     const transform = DocumentTransform.fromObject(documentRef, firestoreData);
     transform.validate();
 
     const precondition = new Precondition({exists: false});
 
     const op = () => {
-      const document = DocumentSnapshot.fromObject(documentRef, data);
+      // TODO: chenbrian why is this data and not firestoreDAta
+      const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
       const write =
         !document.isEmpty || transform.isEmpty ? document.toProto() : null;
 
@@ -296,19 +295,17 @@ export class WriteBatch {
     validateSetOptions('options', options, {optional: true});
     const mergeLeaves = options && options.merge === true;
     const mergePaths = options && options.mergeFields;
-
     validateDocumentReference('documentRef', documentRef);
+    let firestoreData: DocumentData = documentRef._converter.toFirestore(data);
     validateDocumentData(
       'data',
-      data,
+      firestoreData,
       /* allowDeletes= */ !!(mergePaths || mergeLeaves)
     );
 
     this.verifyNotCommitted();
 
     let documentMask: DocumentMask;
-
-    let firestoreData = documentRef._converter.toFirestore(data);
 
     if (mergePaths) {
       documentMask = DocumentMask.fromFieldMask(options!.mergeFields!);

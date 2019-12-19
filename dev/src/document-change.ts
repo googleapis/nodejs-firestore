@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {FirestoreDataConverter} from '@google-cloud/firestore';
 import {QueryDocumentSnapshot} from './document';
-import {DocumentData} from './types';
+import {DocumentData, FirestoreDataConverter} from './types';
 import {defaultConverter} from './watch';
 
 export type DocumentChangeType = 'added' | 'removed' | 'modified';
@@ -32,7 +31,6 @@ export class DocumentChange<T = DocumentData> {
   private readonly _document: QueryDocumentSnapshot<T>;
   private readonly _oldIndex: number;
   private readonly _newIndex: number;
-  private readonly _converter?: FirestoreDataConverter<T>;
 
   /**
    * @hideconstructor
@@ -48,15 +46,12 @@ export class DocumentChange<T = DocumentData> {
     type: DocumentChangeType,
     document: QueryDocumentSnapshot<T>,
     oldIndex: number,
-    newIndex: number,
-    converter?: FirestoreDataConverter<T>
+    newIndex: number
   ) {
     this._type = type;
     this._document = document;
     this._oldIndex = oldIndex;
     this._newIndex = newIndex;
-    this._converter =
-      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**
@@ -186,8 +181,7 @@ export class DocumentChange<T = DocumentData> {
       this._type === other._type &&
       this._oldIndex === other._oldIndex &&
       this._newIndex === other._newIndex &&
-      this._document.isEqual(other._document) &&
-      this._converter === other._converter
+      this._document.isEqual(other._document)
     );
   }
 }

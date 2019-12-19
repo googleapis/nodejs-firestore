@@ -42,6 +42,7 @@ import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
+  DocumentData,
   GapicClient,
   GrpcError,
   ReadOptions,
@@ -60,7 +61,6 @@ import {
 import {WriteBatch} from './write-batch';
 
 import api = google.firestore.v1;
-import {DocumentData} from '@google-cloud/firestore';
 
 export {
   CollectionReference,
@@ -661,20 +661,22 @@ export class Firestore {
       );
     }
 
-    const document = new DocumentSnapshotBuilder<T>();
-
+    let ref;
+    let document;
     if (typeof documentOrName === 'string') {
-      document.ref = new DocumentReference<T>(
+      ref = new DocumentReference<T>(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(documentOrName)
       );
+      document = new DocumentSnapshotBuilder(ref);
     } else {
-      document.ref = new DocumentReference<T>(
+      ref = new DocumentReference<T>(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(
           documentOrName.name as string
         )
       );
+      document = new DocumentSnapshotBuilder(ref);
       document.fieldsProto = documentOrName.fields
         ? convertFields(documentOrName.fields as ApiMapValue)
         : {};

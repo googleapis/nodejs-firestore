@@ -25,11 +25,10 @@ import {DocumentReference, Firestore, Query} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {DocumentData, GrpcError, RBTree} from './types';
+import {DocumentData, FirestoreDataConverter, GrpcError, RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
-import {FirestoreDataConverter} from '@google-cloud/firestore';
 
 export const defaultConverter = {
   toFirestore(
@@ -637,9 +636,10 @@ abstract class Watch<T = DocumentData> {
 
       if (changed) {
         logger('Watch.onData', this.requestTag, 'Received document change');
-        const snapshot = new DocumentSnapshotBuilder(this._converter);
         const ref = this.firestore.doc(relativeName);
-        snapshot.ref = ref.withConverter(this._converter);
+        const snapshot = new DocumentSnapshotBuilder(
+          ref.withConverter(this._converter)
+        );
         snapshot.fieldsProto = document.fields || {};
         snapshot.createTime = Timestamp.fromProto(document.createTime!);
         snapshot.updateTime = Timestamp.fromProto(document.updateTime!);

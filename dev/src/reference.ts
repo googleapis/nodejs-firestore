@@ -41,6 +41,7 @@ import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {
   DocumentData,
+  FirestoreDataConverter,
   OrderByDirection,
   Precondition,
   SetOptions,
@@ -59,7 +60,6 @@ import {defaultConverter, DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = proto.google.firestore.v1;
-import {FirestoreDataConverter} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -497,12 +497,12 @@ export class DocumentReference<T = DocumentData> implements Serializable {
       }
 
       // The document is missing.
-      const document = new DocumentSnapshotBuilder<T>();
-      document.ref = new DocumentReference(
+      const ref = new DocumentReference(
         this._firestore,
         this._path,
         this._converter
       );
+      const document = new DocumentSnapshotBuilder<T>(ref);
       document.readTime = readTime;
       onNext(document.build());
     }, onError || console.error);
@@ -675,7 +675,6 @@ export class QuerySnapshot<T = DocumentData> {
   private _materializedChanges: Array<DocumentChange<T>> | null = null;
   private _docs: (() => Array<QueryDocumentSnapshot<T>>) | null = null;
   private _changes: (() => Array<DocumentChange<T>>) | null = null;
-  private readonly _converter: FirestoreDataConverter<T>;
 
   /**
    * @hideconstructor
@@ -695,13 +694,10 @@ export class QuerySnapshot<T = DocumentData> {
     private readonly _readTime: Timestamp,
     private readonly _size: number,
     docs: () => Array<QueryDocumentSnapshot<T>>,
-    changes: () => Array<DocumentChange<T>>,
-    converter?: FirestoreDataConverter<T>
+    changes: () => Array<DocumentChange<T>>
   ) {
     this._docs = docs;
     this._changes = changes;
-    this._converter =
-      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**
@@ -901,10 +897,6 @@ export class QuerySnapshot<T = DocumentData> {
       );
     }
 
-    if (this._converter !== other._converter) {
-      return false;
-    }
-
     // Otherwise, we compare the changes first as we expect there to be fewer.
     return (
       isArrayEqual(this.docChanges(), other.docChanges()) &&
@@ -1040,7 +1032,7 @@ export class QueryOptions {
  */
 export class Query<T = DocumentData> {
   private readonly _serializer: Serializer;
-  private readonly _converter: FirestoreDataConverter<T>;
+  readonly _converter: FirestoreDataConverter<T>;
 
   /**
    * @hideconstructor
@@ -1724,13 +1716,10 @@ export class Query<T = DocumentData> {
               () => {
                 const changes: Array<DocumentChange<T>> = [];
                 for (let i = 0; i < docs.length; ++i) {
-                  changes.push(
-                    new DocumentChange('added', docs[i], -1, i, this._converter)
-                  );
+                  changes.push(new DocumentChange('added', docs[i], -1, i));
                 }
                 return changes;
-              },
-              this._converter
+              }
             )
           );
         });
@@ -2178,7 +2167,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
       );
     }
 
-    return new DocumentReference(this.firestore, path);
+    return new DocumentReference(this.firestore, path, this._converter);
   }
 
   /**
@@ -2256,13 +2245,6 @@ export function validateQueryOrder(
   op = typeof op === 'string' ? op.toLowerCase() : op;
   validateEnumValue(arg, op, Object.keys(directionOperators), {optional: true});
   return op as OrderByDirection | undefined;
-}
-
-export function defaultDataConverter(): FirestoreDataConverter<DocumentData> {
-  return {
-    toFirestore: data => data,
-    fromFirestore: data => data as DocumentData,
-  };
 }
 
 /**

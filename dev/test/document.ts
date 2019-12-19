@@ -32,6 +32,8 @@ import {
   found,
   InvalidApiUsage,
   missing,
+  Post,
+  postConverter,
   remove,
   requestEquals,
   retrieve,
@@ -2018,5 +2020,30 @@ describe('listCollections() method', () => {
           expect(collections[1].path).to.equal('coll/doc/second');
         });
     });
+  });
+});
+
+describe('withConverter() support', () => {
+  let firestore: Firestore;
+
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('for DocumentReference.withConverter()', async () => {
+    const docRef = firestore
+      .collection('posts')
+      .doc()
+      .withConverter(postConverter);
+
+    await docRef.set(new Post('post', 'author'));
+    const postData = await docRef.get();
+    const post = postData.data();
+    expect(post).to.not.equal(undefined);
+    expect(post!.byline()).to.equal('post, by author');
   });
 });

@@ -14,13 +14,20 @@
 
 import {expect} from 'chai';
 
-import {DocumentReference, Firestore, setLogFunction} from '../src';
+import {
+  DocumentData,
+  DocumentReference,
+  Firestore,
+  setLogFunction,
+} from '../src';
 import {
   ApiOverride,
   createInstance,
   DATABASE_ROOT,
   document,
   InvalidApiUsage,
+  Post,
+  postConverter,
   verifyInstance,
 } from './util/helpers';
 
@@ -166,5 +173,27 @@ describe('Collection interface', () => {
     const coll2 = firestore.collection('coll2');
     expect(coll1.isEqual(coll1Equals)).to.be.ok;
     expect(coll1.isEqual(coll2)).to.not.be.ok;
+  });
+
+  it('for CollectionReference.withConverter()', async () => {
+    const docRef = firestore
+      .collection('posts')
+      .withConverter(postConverter)
+      .doc();
+
+    await docRef.set(new Post('post', 'author'));
+    const postData = await docRef.get();
+    const post = postData.data();
+    expect(post).to.not.equal(undefined);
+    expect(post!.byline()).to.equal('post, by author');
+  });
+
+  it('drops the converter when calling CollectionReference<T>.parent()', () => {
+    const postsCollection = firestore
+      .collection('users/user1/posts')
+      .withConverter(postConverter);
+
+    const usersCollection = postsCollection.parent;
+    expect(usersCollection!.isEqual(firestore.doc('users/user1'))).to.be.true;
   });
 });
