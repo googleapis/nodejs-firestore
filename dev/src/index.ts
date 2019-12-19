@@ -268,12 +268,6 @@ export class Firestore {
   private _settingsFrozen = false;
 
   /**
-   * Whether is client has been terminated. Once the Firestore instance is
-   * terminated, all subsequent calls to this client will fail.
-   */
-  private _terminated = false;
-
-  /**
    * The serializer to use for the Protobuf transformation.
    * @private
    */
@@ -1019,7 +1013,6 @@ export class Firestore {
    * @return A Promise that resolves when the client is terminated.
    */
   async terminate(): Promise<void> {
-    this._terminated = true;
     await this._clientPool.terminate();
   }
 
