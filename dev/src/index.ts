@@ -60,6 +60,7 @@ import {
 import {WriteBatch} from './write-batch';
 
 import api = google.firestore.v1;
+import { DocumentData } from '@google-cloud/firestore';
 
 export {
   CollectionReference,
@@ -612,31 +613,31 @@ export class Firestore {
    * @returns A QueryDocumentSnapshot for existing documents, otherwise a
    * DocumentSnapshot.
    */
-  snapshot_(
+  snapshot_<T = DocumentData>(
     documentName: string,
     readTime?: google.protobuf.ITimestamp,
     encoding?: 'protobufJS'
-  ): DocumentSnapshot;
-  snapshot_(
+  ): DocumentSnapshot<T>;
+  snapshot_<T = DocumentData>(
     documentName: string,
     readTime: string,
     encoding: 'json'
-  ): DocumentSnapshot;
-  snapshot_(
+  ): DocumentSnapshot<T>;
+  snapshot_<T = DocumentData>(
     document: api.IDocument,
     readTime: google.protobuf.ITimestamp,
     encoding?: 'protobufJS'
-  ): QueryDocumentSnapshot;
-  snapshot_(
+  ): QueryDocumentSnapshot<T>;
+  snapshot_<T = DocumentData>(
     document: {[k: string]: unknown},
     readTime: string,
     encoding: 'json'
-  ): QueryDocumentSnapshot;
-  snapshot_(
+  ): QueryDocumentSnapshot<T>;
+  snapshot_<T = DocumentData>(
     documentOrName: api.IDocument | {[k: string]: unknown} | string,
     readTime?: google.protobuf.ITimestamp | string,
     encoding?: 'json' | 'protobufJS'
-  ): DocumentSnapshot {
+  ): DocumentSnapshot<T> {
     // TODO: Assert that Firestore Project ID is valid.
 
     let convertTimestamp: (
@@ -660,15 +661,15 @@ export class Firestore {
       );
     }
 
-    const document = new DocumentSnapshotBuilder();
+    const document = new DocumentSnapshotBuilder<T>();
 
     if (typeof documentOrName === 'string') {
-      document.ref = new DocumentReference(
+      document.ref = new DocumentReference<T>(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(documentOrName)
       );
     } else {
-      document.ref = new DocumentReference(
+      document.ref = new DocumentReference<T>(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(
           documentOrName.name as string
@@ -851,7 +852,7 @@ export class Firestore {
    *   }
    * });
    */
-  listCollections() {
+  listCollections(): Promise<CollectionReference[]> {
     const rootDocument = new DocumentReference(this, ResourcePath.EMPTY);
     return rootDocument.listCollections();
   }
@@ -877,9 +878,9 @@ export class Firestore {
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
    */
-  getAll(
-    ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
-  ): Promise<DocumentSnapshot[]> {
+  getAll<T>(
+    ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+  ): Promise<Array<DocumentSnapshot<T>>> {
     validateMinNumberOfArguments('Firestore.getAll', arguments, 1);
 
     const {documents, fieldMask} = parseGetAllArguments(
@@ -902,14 +903,14 @@ export class Firestore {
    * @param transactionId The transaction ID to use for this read.
    * @returns A Promise that contains an array with the resulting documents.
    */
-  getAll_(
-    docRefs: DocumentReference[],
+  getAll_<T>(
+    docRefs: Array<DocumentReference<T>>,
     fieldMask: FieldPath[] | null,
     requestTag: string,
     transactionId?: Uint8Array
-  ): Promise<DocumentSnapshot[]> {
+  ): Promise<Array<DocumentSnapshot<T>>> {
     const requestedDocuments = new Set<string>();
-    const retrievedDocuments = new Map<string, DocumentSnapshot>();
+    const retrievedDocuments = new Map<string, DocumentSnapshot<T>>();
 
     for (const docRef of docRefs) {
       requestedDocuments.add(docRef.formattedName);
@@ -931,7 +932,7 @@ export class Firestore {
     return self
       .readStream('batchGetDocuments', request, requestTag, true)
       .then(stream => {
-        return new Promise<DocumentSnapshot[]>((resolve, reject) => {
+        return new Promise<Array<DocumentSnapshot<T>>>((resolve, reject) => {
           stream
             .on('error', err => {
               logger(
@@ -953,7 +954,7 @@ export class Firestore {
                     'Received document: %s',
                     response.found.name!
                   );
-                  document = self.snapshot_(response.found, response.readTime!);
+                  document = self.snapshot_<T>(response.found, response.readTime!);
                 } else {
                   logger(
                     'Firestore.getAll_',
@@ -961,7 +962,7 @@ export class Firestore {
                     'Document missing: %s',
                     response.missing!
                   );
-                  document = self.snapshot_(
+                  document = self.snapshot_<T>(
                     response.missing!,
                     response.readTime!
                   );
@@ -989,7 +990,7 @@ export class Firestore {
 
               // BatchGetDocuments doesn't preserve document order. We use
               // the request order to sort the resulting documents.
-              const orderedDocuments: DocumentSnapshot[] = [];
+              const orderedDocuments: Array<DocumentSnapshot<T>> = [];
               for (const docRef of docRefs) {
                 const document = retrievedDocuments.get(docRef.path);
                 if (document !== undefined) {

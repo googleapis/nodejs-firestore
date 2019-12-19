@@ -25,11 +25,21 @@ import {DocumentReference, Firestore, Query} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {GrpcError, RBTree} from './types';
+import {DocumentData, GrpcError, RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
+import { FirestoreDataConverter } from '@google-cloud/firestore';
 
+export const defaultConverter = {
+    toFirestore(modelObject: FirebaseFirestore.DocumentData): FirebaseFirestore.DocumentData {
+       return modelObject;
+      },
+    fromFirestore(data: FirebaseFirestore.DocumentData):FirebaseFirestore.DocumentData {
+        return data;
+      }
+  };
+  
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
  * one target per stream.
@@ -40,7 +50,8 @@ const WATCH_TARGET_ID = 0x1;
 /*!
  * Sentinel value for a document remove.
  */
-const REMOVED = {} as DocumentSnapshotBuilder;
+// tslint:disable-next-line:no-any
+const REMOVED = {} as DocumentSnapshotBuilder<any>;
 
 /*!
  * The change type for document change events.
@@ -173,9 +184,9 @@ const GRPC_STATUS_CODE: {[k: string]: number} = {
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
-const DOCUMENT_WATCH_COMPARATOR = (
-  doc1: QueryDocumentSnapshot,
-  doc2: QueryDocumentSnapshot
+const DOCUMENT_WATCH_COMPARATOR = <T>(
+  doc1: QueryDocumentSnapshot<T>,
+  doc2: QueryDocumentSnapshot<T>
 ) => {
   assert(doc1 === doc2, 'Document watches only support one document.');
   return 0;
@@ -210,15 +221,15 @@ const EMPTY_FUNCTION = () => {};
  * changed documents since the last snapshot delivered for this watch.
  */
 
-type DocumentComparator = (
-  l: QueryDocumentSnapshot,
-  r: QueryDocumentSnapshot
+type DocumentComparator<T> = (
+  l: QueryDocumentSnapshot<T>,
+  r: QueryDocumentSnapshot<T>
 ) => number;
 
-interface DocumentChangeSet {
+interface DocumentChangeSet<T = DocumentData> {
   deletes: string[];
-  adds: QueryDocumentSnapshot[];
-  updates: QueryDocumentSnapshot[];
+  adds: Array<QueryDocumentSnapshot<T>>;
+  updates: Array<QueryDocumentSnapshot<T>>;
 }
 
 /**
@@ -228,10 +239,11 @@ interface DocumentChangeSet {
  * @class
  * @private
  */
-abstract class Watch {
+abstract class Watch<T = DocumentData> {
   protected readonly firestore: Firestore;
   private readonly backoff: ExponentialBackoff;
   private readonly requestTag: string;
+  private readonly _converter: FirestoreDataConverter<T>;
 
   /**
    * Indicates whether we are interested in data from the stream. Set to false in the
@@ -256,14 +268,14 @@ abstract class Watch {
    * A map of document names to QueryDocumentSnapshots for the last sent snapshot.
    * @private
    */
-  private docMap = new Map<string, QueryDocumentSnapshot>();
+  private docMap = new Map<string, QueryDocumentSnapshot<T>>();
 
   /**
    * The accumulated map of document changes (keyed by document name) for the
    * current snapshot.
    * @private
    */
-  private changeMap = new Map<string, DocumentSnapshotBuilder>();
+  private changeMap = new Map<string, DocumentSnapshotBuilder<T>>();
 
   /**
    * The current state of the query results. *
@@ -289,8 +301,8 @@ abstract class Watch {
   private onNext: (
     readTime: Timestamp,
     size: number,
-    docs: () => QueryDocumentSnapshot[],
-    changes: () => DocumentChange[]
+    docs: () => Array<QueryDocumentSnapshot<T>>,
+    changes: () => Array<DocumentChange<T>>
   ) => void;
 
   private onError: (error: Error) => void;
@@ -301,12 +313,13 @@ abstract class Watch {
    *
    * @param firestore The Firestore Database client.
    */
-  constructor(firestore: Firestore) {
+  constructor(firestore: Firestore, converter?: FirestoreDataConverter<T>) {
     this.firestore = firestore;
     this.backoff = new ExponentialBackoff();
     this.requestTag = requestTag();
     this.onNext = EMPTY_FUNCTION;
     this.onError = EMPTY_FUNCTION;
+    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
   }
 
   /**  Returns a 'Target' proto denoting the target to listen on. */
@@ -316,7 +329,7 @@ abstract class Watch {
    * Returns a comparator for QueryDocumentSnapshots that is used to order the
    * document snapshots returned by this watch.
    */
-  protected abstract getComparator(): DocumentComparator;
+  protected abstract getComparator(): DocumentComparator<T>;
 
   /**
    * Starts a watch and attaches a listener for document change events.
@@ -334,8 +347,8 @@ abstract class Watch {
     onNext: (
       readTime: Timestamp,
       size: number,
-      docs: () => QueryDocumentSnapshot[],
-      changes: () => DocumentChange[]
+      docs: () => Array<QueryDocumentSnapshot<T>>,
+      changes: () => Array<DocumentChange<T>>
     ) => void,
     onError: (error: Error) => void
   ): () => void {
@@ -383,10 +396,10 @@ abstract class Watch {
    * Splits up document changes into removals, additions, and updates.
    * @private
    */
-  private extractCurrentChanges(readTime: Timestamp): DocumentChangeSet {
+  private extractCurrentChanges(readTime: Timestamp): DocumentChangeSet<T> {
     const deletes: string[] = [];
-    const adds: QueryDocumentSnapshot[] = [];
-    const updates: QueryDocumentSnapshot[] = [];
+    const adds: Array<QueryDocumentSnapshot<T>> = [];
+    const updates: Array<QueryDocumentSnapshot<T>> = [];
 
     this.changeMap.forEach((value, name) => {
       if (value === REMOVED) {
@@ -395,10 +408,10 @@ abstract class Watch {
         }
       } else if (this.docMap.has(name)) {
         value.readTime = readTime;
-        updates.push(value.build() as QueryDocumentSnapshot);
+        updates.push(value.build() as QueryDocumentSnapshot<T>);
       } else {
         value.readTime = readTime;
-        adds.push(value.build() as QueryDocumentSnapshot);
+        adds.push(value.build() as QueryDocumentSnapshot<T>);
       }
     });
 
@@ -548,7 +561,7 @@ abstract class Watch {
    * invalid.
    * @private
    */
-  private onData(proto: api.IListenResponse): void {
+  private onData<T>(proto: api.IListenResponse): void {
     if (proto.targetChange) {
       logger('Watch.onData', this.requestTag, 'Processing target change');
       const change = proto.targetChange;
@@ -619,8 +632,9 @@ abstract class Watch {
 
       if (changed) {
         logger('Watch.onData', this.requestTag, 'Received document change');
-        const snapshot = new DocumentSnapshotBuilder();
-        snapshot.ref = this.firestore.doc(relativeName);
+        const snapshot = new DocumentSnapshotBuilder(this._converter);
+        const ref = this.firestore.doc(relativeName);
+        snapshot.ref = ref.withConverter(this._converter);
         snapshot.fieldsProto = document.fields || {};
         snapshot.createTime = Timestamp.fromProto(document.createTime!);
         snapshot.updateTime = Timestamp.fromProto(document.updateTime!);
@@ -711,7 +725,7 @@ abstract class Watch {
    * Returns the corresponding DocumentChange event.
    * @private
    */
-  private deleteDoc(name: string): DocumentChange {
+  private deleteDoc(name: string): DocumentChange<T> {
     assert(this.docMap.has(name), 'Document to delete does not exist');
     const oldDocument = this.docMap.get(name)!;
     const existing = this.docTree.find(oldDocument);
@@ -726,7 +740,7 @@ abstract class Watch {
    * the corresponding DocumentChange event.
    * @private
    */
-  private addDoc(newDocument: QueryDocumentSnapshot): DocumentChange {
+  private addDoc(newDocument: QueryDocumentSnapshot<T>): DocumentChange<T> {
     const name = newDocument.ref.path;
     assert(!this.docMap.has(name), 'Document to add already exists');
     this.docTree = this.docTree.insert(newDocument, null);
@@ -740,7 +754,7 @@ abstract class Watch {
    * Returns the DocumentChange event for successful modifications.
    * @private
    */
-  private modifyDoc(newDocument: QueryDocumentSnapshot): DocumentChange | null {
+  private modifyDoc(newDocument: QueryDocumentSnapshot<T>): DocumentChange<T> | null {
     const name = newDocument.ref.path;
     assert(this.docMap.has(name), 'Document to modify does not exist');
     const oldDocument = this.docMap.get(name)!;
@@ -763,9 +777,9 @@ abstract class Watch {
    * state.
    * @private
    */
-  private computeSnapshot(readTime: Timestamp): DocumentChange[] {
+  private computeSnapshot(readTime: Timestamp): Array<DocumentChange<T>> {
     const changeSet = this.extractCurrentChanges(readTime);
-    const appliedChanges: DocumentChange[] = [];
+    const appliedChanges: Array<DocumentChange<T>> = [];
 
     // Process the sorted changes in the order that is expected by our clients
     // (removals, additions, and then modifications). We also need to sort the
@@ -858,12 +872,13 @@ abstract class Watch {
  *
  * @private
  */
-export class DocumentWatch extends Watch {
-  constructor(firestore: Firestore, private readonly ref: DocumentReference) {
-    super(firestore);
+export class DocumentWatch<T = DocumentData> extends Watch<T> {
+  constructor(firestore: Firestore, private readonly ref: DocumentReference<T>,
+    converter?: FirestoreDataConverter<T>) {
+    super(firestore, converter);
   }
 
-  getComparator(): DocumentComparator {
+  getComparator(): DocumentComparator<T> {
     return DOCUMENT_WATCH_COMPARATOR;
   }
 
@@ -884,15 +899,16 @@ export class DocumentWatch extends Watch {
  *
  * @private
  */
-export class QueryWatch extends Watch {
-  private comparator: DocumentComparator;
+export class QueryWatch<T = DocumentData> extends Watch<T> {
+  private comparator: DocumentComparator<T>;
 
-  constructor(firestore: Firestore, private readonly query: Query) {
-    super(firestore);
+  constructor(firestore: Firestore, private readonly query: Query<T>,
+    converter?: FirestoreDataConverter<T>) {
+    super(firestore, converter);
     this.comparator = query.comparator();
   }
 
-  getComparator(): DocumentComparator {
+  getComparator(): DocumentComparator<T> {
     return this.query.comparator();
   }
 

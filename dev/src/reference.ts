@@ -55,10 +55,11 @@ import {
   validateInteger,
   validateMinNumberOfArguments,
 } from './validate';
-import {DocumentWatch, QueryWatch} from './watch';
+import {defaultConverter, DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = proto.google.firestore.v1;
+import { FirestoreDataConverter } from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -122,7 +123,9 @@ const comparisonOperators: {
  *
  * @class
  */
-export class DocumentReference implements Serializable {
+export class DocumentReference<T = DocumentData> implements Serializable {
+  readonly _converter: FirestoreDataConverter<T>;
+  
   /**
    * @hideconstructor
    *
@@ -131,8 +134,11 @@ export class DocumentReference implements Serializable {
    */
   constructor(
     private readonly _firestore: Firestore,
-    readonly _path: ResourcePath
-  ) {}
+    readonly _path: ResourcePath,
+    converter?: FirestoreDataConverter<T>
+  ) {
+    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
+  }
 
   /**
    * The string representation of the DocumentReference's location.
@@ -217,8 +223,8 @@ export class DocumentReference implements Serializable {
    *   console.log(`Found ${results.size} matches in parent collection`);
    * }):
    */
-  get parent(): CollectionReference {
-    return new CollectionReference(this._firestore, this._path.parent()!);
+  get parent(): CollectionReference<T> {
+    return new CollectionReference(this._firestore, this._path.parent()!, this._converter);
   }
 
   /**
@@ -238,7 +244,7 @@ export class DocumentReference implements Serializable {
    *   }
    * });
    */
-  get(): Promise<DocumentSnapshot> {
+  get(): Promise<DocumentSnapshot<T>> {
     return this._firestore.getAll(this).then(([result]) => result);
   }
 
@@ -255,7 +261,7 @@ export class DocumentReference implements Serializable {
    * let subcollection = documentRef.collection('subcollection');
    * console.log(`Path to subcollection: ${subcollection.path}`);
    */
-  collection(collectionPath: string): CollectionReference {
+  collection(collectionPath: string): CollectionReference<DocumentData> {
     validateResourcePath('collectionPath', collectionPath);
 
     const path = this._path.append(collectionPath);
@@ -283,7 +289,7 @@ export class DocumentReference implements Serializable {
    *   }
    * });
    */
-  listCollections(): Promise<CollectionReference[]> {
+  listCollections(): Promise<Array<CollectionReference<DocumentData>>> {
     const tag = requestTag();
     return this.firestore.initializeIfNeeded(tag).then(() => {
       const request = {parent: this.formattedName};
@@ -295,7 +301,7 @@ export class DocumentReference implements Serializable {
           /* allowRetries= */ true
         )
         .then(collectionIds => {
-          const collections: CollectionReference[] = [];
+          const collections: Array<CollectionReference<DocumentData>> = [];
 
           // We can just sort this list using the default comparator since it
           // will only contain collection ids.
@@ -328,7 +334,7 @@ export class DocumentReference implements Serializable {
    *   console.log(`Failed to create document: ${err}`);
    * });
    */
-  create(data: DocumentData): Promise<WriteResult> {
+  create(data: T): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .create(this, data)
@@ -371,7 +377,7 @@ export class DocumentReference implements Serializable {
    * [SetOptions]{@link SetOptions}, the provided data can be merged into an
    * existing document.
    *
-   * @param {DocumentData} data A map of the fields and values for the document.
+   * @param {T} data A map of the fields and values for the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge If true, set() merges the values specified
    * in its data argument. Fields omitted from this set() call remain untouched.
@@ -388,7 +394,7 @@ export class DocumentReference implements Serializable {
    *   console.log(`Document written at ${res.updateTime}`);
    * });
    */
-  set(data: DocumentData, options?: SetOptions): Promise<WriteResult> {
+  set(data: T, options?: SetOptions): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .set(this, data, options)
@@ -433,7 +439,7 @@ export class DocumentReference implements Serializable {
 
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch.update
-      .apply(writeBatch, [this, dataOrField, ...preconditionOrValues])
+      .apply(writeBatch, [this as DocumentReference<unknown>, dataOrField, ...preconditionOrValues])
       .commit()
       .then(([writeResult]) => writeResult);
   }
@@ -465,13 +471,13 @@ export class DocumentReference implements Serializable {
    * unsubscribe();
    */
   onSnapshot(
-    onNext: (snapshot: DocumentSnapshot) => void,
+    onNext: (snapshot: DocumentSnapshot<T>) => void,
     onError?: (error: Error) => void
   ): () => void {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = new DocumentWatch(this.firestore, this);
+    const watch = new DocumentWatch(this.firestore, this, this._converter);
 
     return watch.onSnapshot((readTime, size, docs) => {
       for (const document of docs()) {
@@ -482,8 +488,8 @@ export class DocumentReference implements Serializable {
       }
 
       // The document is missing.
-      const document = new DocumentSnapshotBuilder();
-      document.ref = new DocumentReference(this._firestore, this._path);
+      const document = new DocumentSnapshotBuilder<T>();
+      document.ref = new DocumentReference(this._firestore, this._path, this._converter);
       document.readTime = readTime;
       onNext(document.build());
     }, onError || console.error);
@@ -496,7 +502,7 @@ export class DocumentReference implements Serializable {
    * @return {boolean} true if this `DocumentReference` is equal to the provided
    * value.
    */
-  isEqual(other: DocumentReference): boolean {
+  isEqual(other: DocumentReference<T>): boolean {
     return (
       this === other ||
       (other instanceof DocumentReference &&
@@ -512,6 +518,22 @@ export class DocumentReference implements Serializable {
    */
   toProto(): api.IValue {
     return {referenceValue: this.formattedName};
+  }
+
+  /**
+   * Applies a custom data converter to this DocumentReference, allowing you
+   * to use your own custom model objects with Firestore. When you call
+   * set(), get(), etc. on the returned DocumentReference instance, the
+   * provided converter will convert between Firestore data and your custom
+   * type U.
+   *
+   * @param converter Converts objects to and from Firestore.
+   * @return A DocumentReference<U> that uses the provided converter.
+   */
+  withConverter<U>(
+    converter: FirestoreDataConverter<U>
+  ): DocumentReference<U> {
+    return new DocumentReference<U>(this.firestore, this._path, converter);
   }
 }
 
@@ -637,11 +659,12 @@ class FieldFilter {
  *
  * @class QuerySnapshot
  */
-export class QuerySnapshot {
-  private _materializedDocs: QueryDocumentSnapshot[] | null = null;
-  private _materializedChanges: DocumentChange[] | null = null;
-  private _docs: (() => QueryDocumentSnapshot[]) | null = null;
-  private _changes: (() => DocumentChange[]) | null = null;
+export class QuerySnapshot<T = DocumentData> {
+  private _materializedDocs: Array<QueryDocumentSnapshot<T>> | null = null;
+  private _materializedChanges: Array<DocumentChange<T>> | null = null;
+  private _docs: (() => Array<QueryDocumentSnapshot<T>>) | null = null;
+  private _changes: (() => Array<DocumentChange<T>>) | null = null;
+  private readonly _converter: FirestoreDataConverter<T>;
 
   /**
    * @hideconstructor
@@ -653,16 +676,20 @@ export class QuerySnapshot {
    * this query
    * @param changes A callback returning a sorted array of document change
    * events for this snapshot.
+   * @param _converter The converter used to converter between Firestore and
+   * user objects.
    */
   constructor(
-    private readonly _query: Query,
+    private readonly _query: Query<T>,
     private readonly _readTime: Timestamp,
     private readonly _size: number,
-    docs: () => QueryDocumentSnapshot[],
-    changes: () => DocumentChange[]
+    docs: () => Array<QueryDocumentSnapshot<T>>,
+    changes: () => Array<DocumentChange<T>>,
+    converter?: FirestoreDataConverter<T>
   ) {
     this._docs = docs;
     this._changes = changes;
+    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
   }
 
   /**
@@ -684,7 +711,7 @@ export class QuerySnapshot {
    *   console.log(`Returned second batch of results`);
    * });
    */
-  get query(): Query {
+  get query(): Query<T> {
     return this._query;
   }
 
@@ -705,7 +732,7 @@ export class QuerySnapshot {
    *   }
    * });
    */
-  get docs(): QueryDocumentSnapshot[] {
+  get docs(): Array<QueryDocumentSnapshot<T>> {
     if (this._materializedDocs) {
       return this._materializedDocs!;
     }
@@ -787,7 +814,7 @@ export class QuerySnapshot {
    *   }
    * });
    */
-  docChanges(): DocumentChange[] {
+  docChanges(): Array<DocumentChange<T>> {
     if (this._materializedChanges) {
       return this._materializedChanges!;
     }
@@ -816,7 +843,7 @@ export class QuerySnapshot {
    * });
    */
   forEach(
-    callback: (result: QueryDocumentSnapshot) => void,
+    callback: (result: QueryDocumentSnapshot<T>) => void,
     thisArg?: unknown
   ): void {
     validateFunction('callback', callback);
@@ -834,7 +861,7 @@ export class QuerySnapshot {
    * @return {boolean} true if this `QuerySnapshot` is equal to the provided
    * value.
    */
-  isEqual(other: QuerySnapshot): boolean {
+  isEqual(other: QuerySnapshot<T>): boolean {
     // Since the read time is different on every query read, we explicitly
     // ignore all metadata in this comparison.
 
@@ -860,6 +887,10 @@ export class QuerySnapshot {
         isArrayEqual(this.docs, other.docs) &&
         isArrayEqual(this.docChanges(), other.docChanges())
       );
+    }
+
+    if (this._converter !== other._converter) {
+      return false;
     }
 
     // Otherwise, we compare the changes first as we expect there to be fewer.
@@ -995,8 +1026,9 @@ export class QueryOptions {
  *
  * @class Query
  */
-export class Query {
+export class Query<T = DocumentData> {
   private readonly _serializer: Serializer;
+  private readonly _converter: FirestoreDataConverter<T>;
 
   /**
    * @hideconstructor
@@ -1006,9 +1038,11 @@ export class Query {
    */
   constructor(
     private readonly _firestore: Firestore,
-    protected readonly _queryOptions: QueryOptions
+    protected readonly _queryOptions: QueryOptions,
+    converter?: FirestoreDataConverter<T>
   ) {
     this._serializer = new Serializer(_firestore);
+    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
   }
 
   /**
@@ -1020,7 +1054,7 @@ export class Query {
    * @returns 'true' if the input is a single DocumentSnapshot..
    */
   static _isDocumentSnapshot(
-    fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot | unknown>
+    fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): boolean {
     return (
       fieldValuesOrDocumentSnapshot.length === 1 &&
@@ -1114,7 +1148,7 @@ export class Query {
     fieldPath: string | FieldPath,
     opStr: WhereFilterOp,
     value: unknown
-  ): Query {
+  ): Query<T> {
     validateFieldPath('fieldPath', fieldPath);
     opStr = validateQueryOperator('opStr', opStr, value);
     validateQueryValue('value', value);
@@ -1142,7 +1176,7 @@ export class Query {
     const options = this._queryOptions.with({
       fieldFilters: this._queryOptions.fieldFilters.concat(fieldFilter),
     });
-    return new Query(this._firestore, options);
+    return new Query(this._firestore, options, this._converter);
   }
 
   /**
@@ -1167,7 +1201,7 @@ export class Query {
    *   console.log(`y is ${res.docs[0].get('y')}.`);
    * });
    */
-  select(...fieldPaths: Array<string | FieldPath>): Query {
+  select(...fieldPaths: Array<string | FieldPath>): Query<T> {
     const fields: api.StructuredQuery.IFieldReference[] = [];
 
     if (fieldPaths.length === 0) {
@@ -1182,7 +1216,7 @@ export class Query {
     }
 
     const options = this._queryOptions.with({projection: {fields}});
-    return new Query(this._firestore, options);
+    return new Query(this._firestore, options, this._converter);
   }
 
   /**
@@ -1210,7 +1244,7 @@ export class Query {
   orderBy(
     fieldPath: string | FieldPath,
     directionStr?: OrderByDirection
-  ): Query {
+  ): Query<T> {
     validateFieldPath('fieldPath', fieldPath);
     directionStr = validateQueryOrder('directionStr', directionStr);
 
@@ -1229,7 +1263,7 @@ export class Query {
     const options = this._queryOptions.with({
       fieldOrders: this._queryOptions.fieldOrders.concat(newOrder),
     });
-    return new Query(this._firestore, options);
+    return new Query(this._firestore, options, this._converter);
   }
 
   /**
@@ -1251,11 +1285,11 @@ export class Query {
    *   });
    * });
    */
-  limit(limit: number): Query {
+  limit(limit: number): Query<T> {
     validateInteger('limit', limit);
 
     const options = this._queryOptions.with({limit});
-    return new Query(this._firestore, options);
+    return new Query(this._firestore, options, this._converter);
   }
 
   /**
@@ -1277,11 +1311,11 @@ export class Query {
    *   });
    * });
    */
-  offset(offset: number): Query {
+  offset(offset: number): Query<T> {
     validateInteger('offset', offset);
 
     const options = this._queryOptions.with({offset});
-    return new Query(this._firestore, options);
+    return new Query(this._firestore, options, this._converter);
   }
 
   /**
@@ -1290,7 +1324,7 @@ export class Query {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `Query` is equal to the provided value.
    */
-  isEqual(other: Query): boolean {
+  isEqual(other: Query<T>): boolean {
     if (this === other) {
       return true;
     }
@@ -1309,7 +1343,7 @@ export class Query {
    * @returns The implicit ordering semantics.
    */
   private createImplicitOrderBy(
-    cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot | unknown>
+    cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): FieldOrder[] {
     if (!Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
       return this._queryOptions.fieldOrders;
@@ -1415,11 +1449,11 @@ export class Query {
    * query.
    * @private
    */
-  private validateReference(val: unknown): DocumentReference {
+  private validateReference(val: unknown): DocumentReference<T> {
     const basePath = this._queryOptions.allDescendants
       ? this._queryOptions.parentPath
       : this._queryOptions.parentPath.append(this._queryOptions.collectionId);
-    let reference: DocumentReference;
+    let reference: DocumentReference<T>;
 
     if (typeof val === 'string') {
       const path = basePath.append(val);
@@ -1441,7 +1475,7 @@ export class Query {
         );
       }
 
-      reference = new DocumentReference(this._firestore, basePath.append(val));
+      reference = new DocumentReference(this._firestore, basePath.append(val), this._converter);
     } else if (val instanceof DocumentReference) {
       reference = val;
       if (!basePath.isPrefixOf(reference._path)) {
@@ -1489,8 +1523,8 @@ export class Query {
    * });
    */
   startAt(
-    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot | unknown>
-  ): Query {
+    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+  ): Query<T> {
     validateMinNumberOfArguments('Query.startAt', arguments, 1);
 
     const fieldOrders = this.createImplicitOrderBy(
@@ -1503,7 +1537,7 @@ export class Query {
     );
 
     const options = this._queryOptions.with({fieldOrders, startAt});
-    return new Query(this._firestore, options);
+    return new Query(this._firestore, options, this._converter);
   }
 
   /**
@@ -1527,8 +1561,8 @@ export class Query {
    * });
    */
   startAfter(
-    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot | unknown>
-  ): Query {
+    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+  ): Query<T> {
     validateMinNumberOfArguments('Query.startAfter', arguments, 1);
 
     const fieldOrders = this.createImplicitOrderBy(
@@ -1541,7 +1575,7 @@ export class Query {
     );
 
     const options = this._queryOptions.with({fieldOrders, startAt});
-    return new Query(this._firestore, options);
+    return new Query(this._firestore, options, this._converter);
   }
 
   /**
@@ -1564,8 +1598,8 @@ export class Query {
    * });
    */
   endBefore(
-    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot | unknown>
-  ): Query {
+    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+  ): Query<T> {
     validateMinNumberOfArguments('Query.endBefore', arguments, 1);
 
     const fieldOrders = this.createImplicitOrderBy(
@@ -1578,7 +1612,7 @@ export class Query {
     );
 
     const options = this._queryOptions.with({fieldOrders, endAt});
-    return new Query(this._firestore, options);
+    return new Query(this._firestore, options, this._converter);
   }
 
   /**
@@ -1601,8 +1635,8 @@ export class Query {
    * });
    */
   endAt(
-    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot | unknown>
-  ): Query {
+    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+  ): Query<T> {
     validateMinNumberOfArguments('Query.endAt', arguments, 1);
 
     const fieldOrders = this.createImplicitOrderBy(
@@ -1615,7 +1649,7 @@ export class Query {
     );
 
     const options = this._queryOptions.with({fieldOrders, endAt});
-    return new Query(this._firestore, options);
+    return new Query(this._firestore, options, this._converter);
   }
 
   /**
@@ -1634,7 +1668,7 @@ export class Query {
    *   });
    * });
    */
-  get(): Promise<QuerySnapshot> {
+  get(): Promise<QuerySnapshot<T>> {
     return this._get();
   }
 
@@ -1644,9 +1678,9 @@ export class Query {
    * @private
    * @param {bytes=} transactionId A transaction ID.
    */
-  _get(transactionId?: Uint8Array): Promise<QuerySnapshot> {
+  _get(transactionId?: Uint8Array): Promise<QuerySnapshot<T>> {
     const self = this;
-    const docs: QueryDocumentSnapshot[] = [];
+    const docs: Array<QueryDocumentSnapshot<T>> = [];
 
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
@@ -1671,12 +1705,13 @@ export class Query {
               docs.length,
               () => docs,
               () => {
-                const changes: DocumentChange[] = [];
+                const changes: Array<DocumentChange<T>> = [];
                 for (let i = 0; i < docs.length; ++i) {
-                  changes.push(new DocumentChange('added', docs[i], -1, i));
+                  changes.push(new DocumentChange('added', docs[i], -1, i, this._converter));
                 }
                 return changes;
-              }
+              },
+              this._converter
             )
           );
         });
@@ -1873,13 +1908,13 @@ export class Query {
    * unsubscribe();
    */
   onSnapshot(
-    onNext: (snapshot: QuerySnapshot) => void,
+    onNext: (snapshot: QuerySnapshot<T>) => void,
     onError?: (error: Error) => void
   ): () => void {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = new QueryWatch(this.firestore, this);
+    const watch = new QueryWatch(this.firestore, this, this._converter);
 
     return watch.onSnapshot((readTime, size, docs, changes) => {
       onNext(new QuerySnapshot(this, readTime, size, docs, changes));
@@ -1893,8 +1928,8 @@ export class Query {
    * @private
    */
   comparator(): (
-    s1: QueryDocumentSnapshot,
-    s2: QueryDocumentSnapshot
+    s1: QueryDocumentSnapshot<T>,
+    s2: QueryDocumentSnapshot<T>
   ) => number {
     return (doc1, doc2) => {
       // Add implicit sorting by name, using the last specified direction.
@@ -1934,6 +1969,21 @@ export class Query {
       return 0;
     };
   }
+
+  /**
+   * Applies a custom data converter to this Query, allowing you to use your
+   * own custom model objects with Firestore. When you call get() on the
+   * returned Query, the provided converter will convert between Firestore
+   * data and your custom type U.
+   *
+   * @param converter Converts objects to and from Firestore.
+   * @return A Query<U> that uses the provided converter.
+   */
+  withConverter<U>(
+    converter: FirestoreDataConverter<U>
+  ): Query<U> {
+    return new Query<U>(this.firestore, this._queryOptions, converter);
+  }
 }
 
 /**
@@ -1944,15 +1994,15 @@ export class Query {
  * @class
  * @extends Query
  */
-export class CollectionReference extends Query {
+export class CollectionReference<T=DocumentData> extends Query<T> {
   /**
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
    * @param path The Path of this collection.
    */
-  constructor(firestore: Firestore, path: ResourcePath) {
-    super(firestore, QueryOptions.forCollectionQuery(path));
+    constructor(firestore: Firestore, path: ResourcePath, _converter?: FirestoreDataConverter<T>) {
+    super(firestore, QueryOptions.forCollectionQuery(path), _converter);
   }
 
   /**
@@ -1993,7 +2043,7 @@ export class CollectionReference extends Query {
    * let documentRef = collectionRef.parent;
    * console.log(`Parent name: ${documentRef.path}`);
    */
-  get parent(): DocumentReference {
+  get parent(): DocumentReference<DocumentData> {
     return new DocumentReference(this.firestore, this._queryOptions.parentPath);
   }
 
@@ -2040,7 +2090,7 @@ export class CollectionReference extends Query {
    *    }
    * });
    */
-  listDocuments(): Promise<DocumentReference[]> {
+  listDocuments(): Promise<Array<DocumentReference<T>>> {
     const tag = requestTag();
     return this.firestore.initializeIfNeeded(tag).then(() => {
       const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
@@ -2074,8 +2124,8 @@ export class CollectionReference extends Query {
     });
   }
 
-  doc(): DocumentReference;
-  doc(documentPath: string): DocumentReference;
+  doc(): DocumentReference<T>;
+  doc(documentPath: string): DocumentReference<T>;
   /**
    * Gets a [DocumentReference]{@link DocumentReference} instance that
    * refers to the document at the specified path. If no path is specified, an
@@ -2093,7 +2143,7 @@ export class CollectionReference extends Query {
    * console.log(`Reference with name: ${documentRefWithName.path}`);
    * console.log(`Reference with auto-id: ${documentRefWithAutoId.path}`);
    */
-  doc(documentPath?: string): DocumentReference {
+  doc(documentPath?: string): DocumentReference<T> {
     if (arguments.length === 0) {
       documentPath = autoId();
     } else {
@@ -2126,7 +2176,7 @@ export class CollectionReference extends Query {
    *   console.log(`Added document with name: ${documentReference.id}`);
    * });
    */
-  add(data: DocumentData): Promise<DocumentReference> {
+  add(data: T): Promise<DocumentReference<T>> {
     validateDocumentData('data', data, /*allowDeletes=*/ false);
 
     const documentRef = this.doc();
@@ -2140,11 +2190,26 @@ export class CollectionReference extends Query {
    * @return {boolean} true if this `CollectionReference` is equal to the
    * provided value.
    */
-  isEqual(other: CollectionReference): boolean {
+  isEqual(other: CollectionReference<T>): boolean {
     return (
       this === other ||
       (other instanceof CollectionReference && super.isEqual(other))
     );
+  }
+
+  /**
+   * Applies a custom data converter to this CollectionReference, allowing you
+   * to use your own custom model objects with Firestore. When you call add()
+   * on the returned CollectionReference instance, the provided converter will
+   * convert between Firestore data and your custom type U.
+   *
+   * @param converter Converts objects to and from Firestore.
+   * @return A CollectionReference<U> that uses the provided converter.
+   */
+  withConverter<U>(
+    converter: FirestoreDataConverter<U>
+  ): CollectionReference<U> {
+    return new CollectionReference<U>(this.firestore, this.resourcePath, converter);
   }
 }
 
@@ -2166,6 +2231,13 @@ export function validateQueryOrder(
   op = typeof op === 'string' ? op.toLowerCase() : op;
   validateEnumValue(arg, op, Object.keys(directionOperators), {optional: true});
   return op as OrderByDirection | undefined;
+}
+
+export function defaultDataConverter(): FirestoreDataConverter<DocumentData> {
+  return {
+    toFirestore: data => data,
+    fromFirestore: data => data as DocumentData
+  }
 }
 
 /**

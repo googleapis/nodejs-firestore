@@ -17,6 +17,7 @@ import {expect} from 'chai';
 import {
   CollectionReference,
   DocumentData,
+  DocumentReference,
   DocumentSnapshot,
   FieldPath,
   FieldValue,
@@ -275,7 +276,7 @@ describe('DocumentReference class', () => {
       })
       .then(doc => {
         const data = doc.data()!;
-        expect(data.pathValue.path).to.equal(
+        expect((data.pathValue as DocumentReference).path).to.equal(
           allSupportedTypesObject.pathValue.path
         );
         delete data.pathValue;

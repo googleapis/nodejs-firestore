@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { FirestoreDataConverter } from '@google-cloud/firestore';
 import {QueryDocumentSnapshot} from './document';
+import { DocumentData } from './types';
+import { defaultConverter } from './watch';
 
 export type DocumentChangeType = 'added' | 'removed' | 'modified';
 
@@ -24,11 +27,12 @@ export type DocumentChangeType = 'added' | 'removed' | 'modified';
  *
  * @class
  */
-export class DocumentChange {
+export class DocumentChange<T = DocumentData> {
   private readonly _type: DocumentChangeType;
-  private readonly _document: QueryDocumentSnapshot;
+  private readonly _document: QueryDocumentSnapshot<T>;
   private readonly _oldIndex: number;
   private readonly _newIndex: number;
+  private readonly _converter?: FirestoreDataConverter<T>;
 
   /**
    * @hideconstructor
@@ -42,14 +46,16 @@ export class DocumentChange {
    */
   constructor(
     type: DocumentChangeType,
-    document: QueryDocumentSnapshot,
+    document: QueryDocumentSnapshot<T>,
     oldIndex: number,
-    newIndex: number
+    newIndex: number,
+    converter?: FirestoreDataConverter<T>
   ) {
     this._type = type;
     this._document = document;
     this._oldIndex = oldIndex;
     this._newIndex = newIndex;
+    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
   }
 
   /**
@@ -169,7 +175,7 @@ export class DocumentChange {
    * @param {*} other The value to compare against.
    * @return true if this `DocumentChange` is equal to the provided value.
    */
-  isEqual(other: DocumentChange): boolean {
+  isEqual(other: DocumentChange<T>): boolean {
     if (this === other) {
       return true;
     }
@@ -179,7 +185,8 @@ export class DocumentChange {
       this._type === other._type &&
       this._oldIndex === other._oldIndex &&
       this._newIndex === other._newIndex &&
-      this._document.isEqual(other._document)
+      this._document.isEqual(other._document) &&
+      this._converter === other._converter
     );
   }
 }
