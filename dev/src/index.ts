@@ -269,8 +269,7 @@ export class Firestore {
 
   /**
    * Whether is client has been terminated. Once the Firestore instance is
-   * terminated, terminated cannot be set to false again, and all subsequent
-   * calls to this client will fail.
+   * terminated, all subsequent calls to this client will fail.
    */
   private _terminated = false;
 
@@ -412,7 +411,6 @@ export class Firestore {
    * @param {object} settings The settings to use for all Firestore operations.
    */
   settings(settings: Settings): void {
-    this.verifyNotTerminated();
     validateObject('settings', settings);
     validateString('settings.projectId', settings.projectId, {optional: true});
 
@@ -505,7 +503,6 @@ export class Firestore {
    * console.log(`Path of document is ${documentRef.path}`);
    */
   doc(documentPath: string): DocumentReference {
-    this.verifyNotTerminated();
     validateResourcePath('documentPath', documentPath);
 
     const path = ResourcePath.EMPTY.append(documentPath);
@@ -535,7 +532,6 @@ export class Firestore {
    * });
    */
   collection(collectionPath: string): CollectionReference {
-    this.verifyNotTerminated();
     validateResourcePath('collectionPath', collectionPath);
 
     const path = ResourcePath.EMPTY.append(collectionPath);
@@ -571,7 +567,6 @@ export class Firestore {
    * });
    */
   collectionGroup(collectionId: string): Query {
-    this.verifyNotTerminated();
     if (collectionId.indexOf('/') !== -1) {
       throw new Error(
         `Invalid collectionId '${collectionId}'. Collection IDs must not contain '/'.`
@@ -601,7 +596,6 @@ export class Firestore {
    * });
    */
   batch(): WriteBatch {
-    this.verifyNotTerminated();
     return new WriteBatch(this);
   }
 
@@ -651,7 +645,6 @@ export class Firestore {
   ): DocumentSnapshot {
     // TODO: Assert that Firestore Project ID is valid.
 
-    this.verifyNotTerminated();
     let convertTimestamp: (
       timestampValue?: string | google.protobuf.ITimestamp,
       argumentName?: string
@@ -758,7 +751,6 @@ export class Firestore {
     updateFunction: (transaction: Transaction) => Promise<T>,
     transactionOptions?: {maxAttempts?: number}
   ): Promise<T> {
-    this.verifyNotTerminated();
     validateFunction('updateFunction', updateFunction);
 
     const defaultAttempts = 5;
@@ -791,7 +783,6 @@ export class Firestore {
       previousTransaction?: Transaction;
     }
   ): Promise<T> {
-    this.verifyNotTerminated();
     const requestTag = transactionOptions.requestTag;
     const attemptsRemaining = transactionOptions.attemptsRemaining;
     const previousTransaction = transactionOptions.previousTransaction;
@@ -867,7 +858,6 @@ export class Firestore {
    * });
    */
   listCollections() {
-    this.verifyNotTerminated();
     const rootDocument = new DocumentReference(this, ResourcePath.EMPTY);
     return rootDocument.listCollections();
   }
@@ -896,7 +886,6 @@ export class Firestore {
   getAll(
     ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
   ): Promise<DocumentSnapshot[]> {
-    this.verifyNotTerminated();
     validateMinNumberOfArguments('Firestore.getAll', arguments, 1);
 
     const {documents, fieldMask} = parseGetAllArguments(
@@ -925,7 +914,6 @@ export class Firestore {
     requestTag: string,
     transactionId?: Uint8Array
   ): Promise<DocumentSnapshot[]> {
-    this.verifyNotTerminated();
     const requestedDocuments = new Set<string>();
     const retrievedDocuments = new Map<string, DocumentSnapshot>();
 
@@ -1027,17 +1015,12 @@ export class Firestore {
 
   /**
    * Terminates the Firestore client and closes all open streams.
+   *
    * @return A Promise that resolves when the client is terminated.
    */
   async terminate(): Promise<void> {
-    await this._clientPool.terminate();
     this._terminated = true;
-  }
-
-  private verifyNotTerminated(): void {
-    if (this._terminated) {
-      throw new Error('The client has already been terminated.');
-    }
+    await this._clientPool.terminate();
   }
 
   /**
@@ -1050,7 +1033,6 @@ export class Firestore {
    * @return A Promise that resolves when the client is initialized.
    */
   async initializeIfNeeded(requestTag: string): Promise<void> {
-    this.verifyNotTerminated();
     this._settingsFrozen = true;
 
     if (this._projectId === undefined) {
@@ -1331,7 +1313,6 @@ export class Firestore {
     requestTag: string,
     allowRetries: boolean
   ): Promise<T> {
-    this.verifyNotTerminated();
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 
@@ -1389,7 +1370,6 @@ export class Firestore {
     requestTag: string,
     allowRetries: boolean
   ): Promise<NodeJS.ReadableStream> {
-    this.verifyNotTerminated();
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 
@@ -1460,7 +1440,6 @@ export class Firestore {
     requestTag: string,
     allowRetries: boolean
   ): Promise<NodeJS.ReadWriteStream> {
-    this.verifyNotTerminated();
     const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 

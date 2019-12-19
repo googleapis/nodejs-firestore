@@ -127,18 +127,6 @@ describe('Firestore class', () => {
         expect(docs[1].data()).to.deep.equal({f: 'a'});
       });
   });
-
-  it('rejects subsequent method calls after terminate() is called', () => {
-    return firestore
-      .terminate()
-      .then(() => {
-        firestore.listCollections();
-        return Promise.reject('Call to listCollections() should have failed');
-      })
-      .catch((err: Error) => {
-        expect(err.message).to.equal('The client has already been terminated.');
-      });
-  });
 });
 
 describe('CollectionReference class', () => {
