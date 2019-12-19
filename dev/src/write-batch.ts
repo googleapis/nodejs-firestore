@@ -185,7 +185,9 @@ export class WriteBatch {
 
     this.verifyNotCommitted();
 
-    const firestoreData = documentRef._converter ? documentRef._converter.toFirestore(data) : data as T;
+    const firestoreData = documentRef._converter
+      ? documentRef._converter.toFirestore(data)
+      : (data as T);
     const transform = DocumentTransform.fromObject(documentRef, firestoreData);
     transform.validate();
 

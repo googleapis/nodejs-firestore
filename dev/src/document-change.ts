@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { FirestoreDataConverter } from '@google-cloud/firestore';
+import {FirestoreDataConverter} from '@google-cloud/firestore';
 import {QueryDocumentSnapshot} from './document';
-import { DocumentData } from './types';
-import { defaultConverter } from './watch';
+import {DocumentData} from './types';
+import {defaultConverter} from './watch';
 
 export type DocumentChangeType = 'added' | 'removed' | 'modified';
 
@@ -55,7 +55,8 @@ export class DocumentChange<T = DocumentData> {
     this._document = document;
     this._oldIndex = oldIndex;
     this._newIndex = newIndex;
-    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
+    this._converter =
+      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**

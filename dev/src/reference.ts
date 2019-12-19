@@ -59,7 +59,7 @@ import {defaultConverter, DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = proto.google.firestore.v1;
-import { FirestoreDataConverter } from '@google-cloud/firestore';
+import {FirestoreDataConverter} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -125,7 +125,7 @@ const comparisonOperators: {
  */
 export class DocumentReference<T = DocumentData> implements Serializable {
   readonly _converter: FirestoreDataConverter<T>;
-  
+
   /**
    * @hideconstructor
    *
@@ -137,7 +137,8 @@ export class DocumentReference<T = DocumentData> implements Serializable {
     readonly _path: ResourcePath,
     converter?: FirestoreDataConverter<T>
   ) {
-    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
+    this._converter =
+      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**
@@ -224,7 +225,11 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    * }):
    */
   get parent(): CollectionReference<T> {
-    return new CollectionReference(this._firestore, this._path.parent()!, this._converter);
+    return new CollectionReference(
+      this._firestore,
+      this._path.parent()!,
+      this._converter
+    );
   }
 
   /**
@@ -439,7 +444,11 @@ export class DocumentReference<T = DocumentData> implements Serializable {
 
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch.update
-      .apply(writeBatch, [this as DocumentReference<unknown>, dataOrField, ...preconditionOrValues])
+      .apply(writeBatch, [
+        this as DocumentReference<unknown>,
+        dataOrField,
+        ...preconditionOrValues,
+      ])
       .commit()
       .then(([writeResult]) => writeResult);
   }
@@ -489,7 +498,11 @@ export class DocumentReference<T = DocumentData> implements Serializable {
 
       // The document is missing.
       const document = new DocumentSnapshotBuilder<T>();
-      document.ref = new DocumentReference(this._firestore, this._path, this._converter);
+      document.ref = new DocumentReference(
+        this._firestore,
+        this._path,
+        this._converter
+      );
       document.readTime = readTime;
       onNext(document.build());
     }, onError || console.error);
@@ -530,9 +543,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    * @param converter Converts objects to and from Firestore.
    * @return A DocumentReference<U> that uses the provided converter.
    */
-  withConverter<U>(
-    converter: FirestoreDataConverter<U>
-  ): DocumentReference<U> {
+  withConverter<U>(converter: FirestoreDataConverter<U>): DocumentReference<U> {
     return new DocumentReference<U>(this.firestore, this._path, converter);
   }
 }
@@ -689,7 +700,8 @@ export class QuerySnapshot<T = DocumentData> {
   ) {
     this._docs = docs;
     this._changes = changes;
-    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
+    this._converter =
+      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**
@@ -1042,7 +1054,8 @@ export class Query<T = DocumentData> {
     converter?: FirestoreDataConverter<T>
   ) {
     this._serializer = new Serializer(_firestore);
-    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
+    this._converter =
+      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**
@@ -1475,7 +1488,11 @@ export class Query<T = DocumentData> {
         );
       }
 
-      reference = new DocumentReference(this._firestore, basePath.append(val), this._converter);
+      reference = new DocumentReference(
+        this._firestore,
+        basePath.append(val),
+        this._converter
+      );
     } else if (val instanceof DocumentReference) {
       reference = val;
       if (!basePath.isPrefixOf(reference._path)) {
@@ -1707,7 +1724,9 @@ export class Query<T = DocumentData> {
               () => {
                 const changes: Array<DocumentChange<T>> = [];
                 for (let i = 0; i < docs.length; ++i) {
-                  changes.push(new DocumentChange('added', docs[i], -1, i, this._converter));
+                  changes.push(
+                    new DocumentChange('added', docs[i], -1, i, this._converter)
+                  );
                 }
                 return changes;
               },
@@ -1979,9 +1998,7 @@ export class Query<T = DocumentData> {
    * @param converter Converts objects to and from Firestore.
    * @return A Query<U> that uses the provided converter.
    */
-  withConverter<U>(
-    converter: FirestoreDataConverter<U>
-  ): Query<U> {
+  withConverter<U>(converter: FirestoreDataConverter<U>): Query<U> {
     return new Query<U>(this.firestore, this._queryOptions, converter);
   }
 }
@@ -1994,14 +2011,18 @@ export class Query<T = DocumentData> {
  * @class
  * @extends Query
  */
-export class CollectionReference<T=DocumentData> extends Query<T> {
+export class CollectionReference<T = DocumentData> extends Query<T> {
   /**
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
    * @param path The Path of this collection.
    */
-    constructor(firestore: Firestore, path: ResourcePath, _converter?: FirestoreDataConverter<T>) {
+  constructor(
+    firestore: Firestore,
+    path: ResourcePath,
+    _converter?: FirestoreDataConverter<T>
+  ) {
     super(firestore, QueryOptions.forCollectionQuery(path), _converter);
   }
 
@@ -2209,7 +2230,11 @@ export class CollectionReference<T=DocumentData> extends Query<T> {
   withConverter<U>(
     converter: FirestoreDataConverter<U>
   ): CollectionReference<U> {
-    return new CollectionReference<U>(this.firestore, this.resourcePath, converter);
+    return new CollectionReference<U>(
+      this.firestore,
+      this.resourcePath,
+      converter
+    );
   }
 }
 
@@ -2236,8 +2261,8 @@ export function validateQueryOrder(
 export function defaultDataConverter(): FirestoreDataConverter<DocumentData> {
   return {
     toFirestore: data => data,
-    fromFirestore: data => data as DocumentData
-  }
+    fromFirestore: data => data as DocumentData,
+  };
 }
 
 /**

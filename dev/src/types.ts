@@ -81,7 +81,7 @@ export interface Settings {
  * mapped to values.
  */
 export interface DocumentData {
-    // tslint:disable-next-line:no-any
+  // tslint:disable-next-line:no-any
   [field: string]: any;
 }
 

@@ -28,8 +28,8 @@ import {ApiMapValue, DocumentData, UpdateMap} from './types';
 import {isEmpty, isObject} from './util';
 
 import api = google.firestore.v1;
-import { FirestoreDataConverter } from '@google-cloud/firestore';
-import { defaultConverter } from './watch';
+import {FirestoreDataConverter} from '@google-cloud/firestore';
+import {defaultConverter} from './watch';
 
 /**
  * Returns a builder for DocumentSnapshot and QueryDocumentSnapshot instances.
@@ -56,7 +56,8 @@ export class DocumentSnapshotBuilder<T = DocumentData> {
   private readonly _converter: FirestoreDataConverter<T>;
 
   constructor(converter?: FirestoreDataConverter<T>) {
-    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
+    this._converter =
+      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**
@@ -84,7 +85,14 @@ export class DocumentSnapshotBuilder<T = DocumentData> {
           this.updateTime!,
           this.ref!._converter
         )
-      : new DocumentSnapshot(this.ref!, undefined, this.readTime!, undefined, undefined, this.ref!._converter);
+      : new DocumentSnapshot(
+          this.ref!,
+          undefined,
+          this.readTime!,
+          undefined,
+          undefined,
+          this.ref!._converter
+        );
   }
 }
 
@@ -109,7 +117,7 @@ export class DocumentSnapshot<T = DocumentData> {
   private _readTime: Timestamp | undefined;
   private _createTime: Timestamp | undefined;
   private _updateTime: Timestamp | undefined;
-  private readonly _converter: FirestoreDataConverter<T>; 
+  private readonly _converter: FirestoreDataConverter<T>;
 
   /**
    * @hideconstructor
@@ -138,8 +146,9 @@ export class DocumentSnapshot<T = DocumentData> {
     this._readTime = readTime;
     this._createTime = createTime;
     this._updateTime = updateTime;
-    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
-   }
+    this._converter =
+      converter || (defaultConverter as FirestoreDataConverter<T>);
+  }
 
   /**
    * Creates a DocumentSnapshot from an object.
@@ -507,7 +516,7 @@ export class DocumentSnapshot<T = DocumentData> {
       (other instanceof DocumentSnapshot &&
         this._ref.isEqual(other._ref) &&
         deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}) &&
-        this._converter === other._converter) 
+        this._converter === other._converter)
     );
   }
 }
@@ -527,7 +536,9 @@ export class DocumentSnapshot<T = DocumentData> {
  * @class
  * @extends DocumentSnapshot
  */
-export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<T> {
+export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<
+  T
+> {
   /**
    * @hideconstructor
    *

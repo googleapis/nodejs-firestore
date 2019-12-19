@@ -60,7 +60,7 @@ import {
 import {WriteBatch} from './write-batch';
 
 import api = google.firestore.v1;
-import { DocumentData } from '@google-cloud/firestore';
+import {DocumentData} from '@google-cloud/firestore';
 
 export {
   CollectionReference,
@@ -954,7 +954,10 @@ export class Firestore {
                     'Received document: %s',
                     response.found.name!
                   );
-                  document = self.snapshot_<T>(response.found, response.readTime!);
+                  document = self.snapshot_<T>(
+                    response.found,
+                    response.readTime!
+                  );
                 } else {
                   logger(
                     'Firestore.getAll_',

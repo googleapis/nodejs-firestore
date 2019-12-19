@@ -29,17 +29,21 @@ import {DocumentData, GrpcError, RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
-import { FirestoreDataConverter } from '@google-cloud/firestore';
+import {FirestoreDataConverter} from '@google-cloud/firestore';
 
 export const defaultConverter = {
-    toFirestore(modelObject: FirebaseFirestore.DocumentData): FirebaseFirestore.DocumentData {
-       return modelObject;
-      },
-    fromFirestore(data: FirebaseFirestore.DocumentData):FirebaseFirestore.DocumentData {
-        return data;
-      }
-  };
-  
+  toFirestore(
+    modelObject: FirebaseFirestore.DocumentData
+  ): FirebaseFirestore.DocumentData {
+    return modelObject;
+  },
+  fromFirestore(
+    data: FirebaseFirestore.DocumentData
+  ): FirebaseFirestore.DocumentData {
+    return data;
+  },
+};
+
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
  * one target per stream.
@@ -319,7 +323,8 @@ abstract class Watch<T = DocumentData> {
     this.requestTag = requestTag();
     this.onNext = EMPTY_FUNCTION;
     this.onError = EMPTY_FUNCTION;
-    this._converter = converter || defaultConverter as FirestoreDataConverter<T>;
+    this._converter =
+      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**  Returns a 'Target' proto denoting the target to listen on. */
@@ -754,7 +759,9 @@ abstract class Watch<T = DocumentData> {
    * Returns the DocumentChange event for successful modifications.
    * @private
    */
-  private modifyDoc(newDocument: QueryDocumentSnapshot<T>): DocumentChange<T> | null {
+  private modifyDoc(
+    newDocument: QueryDocumentSnapshot<T>
+  ): DocumentChange<T> | null {
     const name = newDocument.ref.path;
     assert(this.docMap.has(name), 'Document to modify does not exist');
     const oldDocument = this.docMap.get(name)!;
@@ -873,8 +880,11 @@ abstract class Watch<T = DocumentData> {
  * @private
  */
 export class DocumentWatch<T = DocumentData> extends Watch<T> {
-  constructor(firestore: Firestore, private readonly ref: DocumentReference<T>,
-    converter?: FirestoreDataConverter<T>) {
+  constructor(
+    firestore: Firestore,
+    private readonly ref: DocumentReference<T>,
+    converter?: FirestoreDataConverter<T>
+  ) {
     super(firestore, converter);
   }
 
@@ -902,8 +912,11 @@ export class DocumentWatch<T = DocumentData> extends Watch<T> {
 export class QueryWatch<T = DocumentData> extends Watch<T> {
   private comparator: DocumentComparator<T>;
 
-  constructor(firestore: Firestore, private readonly query: Query<T>,
-    converter?: FirestoreDataConverter<T>) {
+  constructor(
+    firestore: Firestore,
+    private readonly query: Query<T>,
+    converter?: FirestoreDataConverter<T>
+  ) {
     super(firestore, converter);
     this.comparator = query.comparator();
   }
