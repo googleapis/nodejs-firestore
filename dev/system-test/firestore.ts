@@ -128,21 +128,19 @@ describe('Firestore class', () => {
       });
   });
 
-  it('cannot make calls after the client has been terminated', () => {
+  it('cannot make calls after the client has been terminated', done => {
     const ref1 = randomCol.doc('doc1');
-    ref1.onSnapshot(snapshot => {
-      return Promise.reject('onSnapshot() should be called');
-    });
-    return firestore
+    firestore
       .terminate()
       .then(() => {
         return ref1.set({foo: 100});
       })
       .then(() => {
-        Promise.reject('set() should have failed');
+        done(new Error('Call to set() should have failed'));
       })
       .catch(err => {
         expect(err.message).to.equal('The client has already been terminated');
+        done();
       });
   });
 });
