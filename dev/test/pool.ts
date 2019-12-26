@@ -32,7 +32,7 @@ function deferredPromises(count: number): Array<Deferred<void>> {
 
 describe('Client pool', () => {
   it('creates new instances as needed', () => {
-    const clientPool = new ClientPool<{}>(3, () => {
+    const clientPool = new ClientPool<{}>(3, 0, () => {
       return {};
     });
 
@@ -52,7 +52,7 @@ describe('Client pool', () => {
   });
 
   it('re-uses idle instances', () => {
-    const clientPool = new ClientPool<{}>(2, () => {
+    const clientPool = new ClientPool<{}>(2, 0, () => {
       return {};
     });
 
@@ -80,8 +80,51 @@ describe('Client pool', () => {
     });
   });
 
+  it('bin packs operations', async () => {
+    let clientCount = 0;
+    const clientPool = new ClientPool<number>(2, 0, () => {
+      return ++clientCount;
+    });
+
+    expect(clientPool.size).to.equal(0);
+
+    // Create 5 operations, which should schedule 2 operations on the first
+    // client, 2 on the second and 1 on the third.
+    const operationPromises = deferredPromises(7);
+    clientPool.run(REQUEST_TAG, client => {
+      expect(client).to.be.equal(1);
+      return operationPromises[0].promise;
+    });
+    clientPool.run(REQUEST_TAG, client => {
+      expect(client).to.be.equal(1);
+      return operationPromises[1].promise;
+    });
+    const thirdOperation = clientPool.run(REQUEST_TAG, client => {
+      expect(client).to.be.equal(2);
+      return operationPromises[2].promise;
+    });
+    clientPool.run(REQUEST_TAG, client => {
+      expect(client).to.be.equal(2);
+      return operationPromises[3].promise;
+    });
+    clientPool.run(REQUEST_TAG, client => {
+      expect(client).to.be.equal(3);
+      return operationPromises[4].promise;
+    });
+
+    // Free one slow on the second client.
+    operationPromises[2].resolve();
+    await thirdOperation;
+
+    // A newly scheduled operation should use the first client that has a free
+    // slot.
+    clientPool.run(REQUEST_TAG, async client => {
+      expect(client).to.be.equal(2);
+    });
+  });
+
   it('garbage collects after success', () => {
-    const clientPool = new ClientPool<{}>(2, () => {
+    const clientPool = new ClientPool<{}>(2, 0, () => {
       return {};
     });
 
@@ -110,12 +153,12 @@ describe('Client pool', () => {
     operationPromises.forEach(deferred => deferred.resolve());
 
     return Promise.all(completionPromises).then(() => {
-      expect(clientPool.size).to.equal(1);
+      expect(clientPool.size).to.equal(0);
     });
   });
 
   it('garbage collects after error', () => {
-    const clientPool = new ClientPool<{}>(2, () => {
+    const clientPool = new ClientPool<{}>(2, 0, () => {
       return {};
     });
 
@@ -145,7 +188,7 @@ describe('Client pool', () => {
 
     return Promise.all(completionPromises.map(p => p.catch(() => {}))).then(
       () => {
-        expect(clientPool.size).to.equal(1);
+        expect(clientPool.size).to.equal(0);
       }
     );
   });
@@ -155,9 +198,8 @@ describe('Client pool', () => {
 
     const clientPool = new ClientPool<{}>(
       1,
-      () => {
-        return {};
-      },
+      0,
+      () => ({}),
       () => Promise.resolve(garbageCollect.resolve())
     );
 
@@ -173,7 +215,7 @@ describe('Client pool', () => {
   });
 
   it('forwards success', () => {
-    const clientPool = new ClientPool<{}>(1, () => {
+    const clientPool = new ClientPool<{}>(1, 0, () => {
       return {};
     });
 
@@ -182,7 +224,7 @@ describe('Client pool', () => {
   });
 
   it('forwards failure', () => {
-    const clientPool = new ClientPool<{}>(1, () => {
+    const clientPool = new ClientPool<{}>(1, 0, () => {
       return {};
     });
 
@@ -192,8 +234,53 @@ describe('Client pool', () => {
     return expect(op).to.eventually.be.rejectedWith('Generated error');
   });
 
+  it('keeps pool of idle clients', async () => {
+    const clientPool = new ClientPool<{}>(
+      /* concurrentOperationLimit= */ 1,
+      /* maxIdleClients= */ 3,
+      () => {
+        return {};
+      }
+    );
+
+    const operationPromises = deferredPromises(4);
+    clientPool.run(REQUEST_TAG, () => operationPromises[0].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[1].promise);
+    clientPool.run(REQUEST_TAG, () => operationPromises[2].promise);
+    const lastOp = clientPool.run(
+      REQUEST_TAG,
+      () => operationPromises[3].promise
+    );
+    expect(clientPool.size).to.equal(4);
+
+    // Resolve all pending operations. Note that one client is removed, while
+    // 3 are kept for further usage.
+    operationPromises.forEach(deferred => deferred.resolve());
+    await lastOp;
+    expect(clientPool.size).to.equal(3);
+  });
+
+  it('default setting keeps at least one idle client', async () => {
+    const clientPool = new ClientPool<{}>(1, /* maxIdleClients=*/ 1, () => {
+      return {};
+    });
+
+    const operationPromises = deferredPromises(2);
+    clientPool.run(REQUEST_TAG, () => operationPromises[0].promise);
+    const completionPromise = clientPool.run(
+      REQUEST_TAG,
+      () => operationPromises[1].promise
+    );
+    expect(clientPool.size).to.equal(2);
+
+    operationPromises[0].resolve();
+    operationPromises[1].resolve();
+    await completionPromise;
+    expect(clientPool.size).to.equal(1);
+  });
+
   it('rejects subsequent operations after being terminated', () => {
-    const clientPool = new ClientPool<{}>(1, () => {
+    const clientPool = new ClientPool<{}>(1, 0, () => {
       return {};
     });
 

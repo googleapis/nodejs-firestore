@@ -44,6 +44,8 @@ export class ClientPool<T> {
   /**
    * @param concurrentOperationLimit The number of operations that each client
    * can handle.
+   * @param maxIdleClients The maximum number of idle clients to keep before
+   * garbage collecting.
    * @param clientFactory A factory function called as needed when new clients
    * are required.
    * @param clientDestructor A cleanup function that is called when a client is
@@ -51,6 +53,7 @@ export class ClientPool<T> {
    */
   constructor(
     private readonly concurrentOperationLimit: number,
+    private readonly maxIdleClients: number,
     private readonly clientFactory: () => T,
     private readonly clientDestructor: (client: T) => Promise<void> = () =>
       Promise.resolve()
@@ -66,8 +69,13 @@ export class ClientPool<T> {
     let selectedClient: T | null = null;
     let selectedRequestCount = 0;
 
-    this.activeClients.forEach((requestCount, client) => {
-      if (!selectedClient && requestCount < this.concurrentOperationLimit) {
+    for (const [client, requestCount] of this.activeClients) {
+      // Bin pack requests to reduce the maximize the number of idle clients as
+      // operations start to complete
+      if (
+        requestCount > selectedRequestCount &&
+        requestCount < this.concurrentOperationLimit
+      ) {
         logger(
           'ClientPool.acquire',
           requestTag,
@@ -77,7 +85,7 @@ export class ClientPool<T> {
         selectedClient = client;
         selectedRequestCount = requestCount;
       }
-    });
+    }
 
     if (!selectedClient) {
       logger('ClientPool.acquire', requestTag, 'Creating a new client');
@@ -99,23 +107,43 @@ export class ClientPool<T> {
    * @private
    */
   private async release(requestTag: string, client: T): Promise<void> {
-    let requestCount = this.activeClients.get(client) || 0;
+    const requestCount = this.activeClients.get(client) || 0;
     assert(requestCount > 0, 'No active request');
+    this.activeClients.set(client, requestCount! - 1);
 
-    requestCount = requestCount! - 1;
-    this.activeClients.set(client, requestCount);
-
-    if (requestCount === 0) {
-      const deletedCount = await this.garbageCollect();
-      if (deletedCount) {
-        logger(
-          'ClientPool.release',
-          requestTag,
-          'Garbage collected %s clients',
-          deletedCount
-        );
-      }
+    if (this.shouldGarbageCollectClient(client)) {
+      this.activeClients.delete(client);
+      await this.clientDestructor(client);
+      logger('ClientPool.release', requestTag, 'Garbage collected 1 client');
     }
+  }
+
+  /**
+   * Given the current operation counts, determines if the given client should
+   * be garbage collected.
+   * @private
+   */
+  private shouldGarbageCollectClient(client: T): boolean {
+    if (this.activeClients.get(client) !== 0) {
+      return false;
+    }
+
+    // Compute the remaining capacity of the ClientPool. If the capacity exceeds
+    // the total capacity that `maxIdleClients` could hold, garbage collect. We
+    // look at the capacity rather than just at the current request count to
+    // allows us to:
+    // - Use `maxIdleClients:1` to preserve legacy behavior (there is always at
+    //   least one active client as a single client can never exceed the
+    //   concurrent operation limit by itself).
+    // - Use `maxIdleClients:0` to shut down the client pool completely when all
+    //   clients are idle.
+    let idleCapacityCount = 0;
+    for (const [_, count] of this.activeClients) {
+      idleCapacityCount += this.concurrentOperationLimit - count;
+    }
+    return (
+      idleCapacityCount > this.maxIdleClients * this.concurrentOperationLimit
+    );
   }
 
   /**
@@ -176,29 +204,5 @@ export class ClientPool<T> {
       this.activeClients.delete(client);
       await this.clientDestructor(client);
     }
-  }
-
-  /**
-   * Deletes clients that are no longer executing operations. Keeps up to one
-   * idle client to reduce future initialization costs.
-   *
-   * @return Number of clients deleted.
-   * @private
-   */
-  private async garbageCollect(): Promise<number> {
-    let idleClients = 0;
-    const cleanUpTasks: Array<Promise<void>> = [];
-    for (const [client, requestCount] of this.activeClients) {
-      if (requestCount === 0) {
-        ++idleClients;
-
-        if (idleClients > 1) {
-          this.activeClients.delete(client);
-          cleanUpTasks.push(this.clientDestructor(client));
-        }
-      }
-    }
-    await Promise.all(cleanUpTasks);
-    return idleClients - 1;
   }
 }

@@ -491,6 +491,19 @@ describe('instantiation', () => {
     }
   });
 
+  it('validates maxIdleChannels', () => {
+    const invalidValues = [-1, 'foo', 1.3];
+
+    for (const value of invalidValues) {
+      expect(() => {
+        const settings = {...DEFAULT_SETTINGS, maxIdleChannels: value};
+        new Firestore.Firestore(settings as InvalidApiUsage);
+      }).to.throw();
+    }
+
+    new Firestore.Firestore({maxIdleChannels: 1});
+  });
+
   it('uses project id from constructor', () => {
     const firestore = new Firestore.Firestore({projectId: 'foo'});
 
