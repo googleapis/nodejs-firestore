@@ -286,7 +286,13 @@ export class DocumentReference implements Serializable {
   listCollections(): Promise<CollectionReference[]> {
     const tag = requestTag();
     return this.firestore.initializeIfNeeded(tag).then(() => {
-      const request = {parent: this.formattedName};
+      const request: api.IListCollectionIdsRequest = {
+        parent: this.formattedName,
+        // Setting `pageSize` to an arbitrarily large value lets the backend cap
+        // the page size (currently to 300). Note that the backend rejects
+        // MAX_INT32 (b/146883794).
+        pageSize: Math.pow(2, 16) - 1,
+      };
       return this._firestore
         .request<string[]>(
           'listCollectionIds',
@@ -2051,6 +2057,9 @@ export class CollectionReference extends Query {
         parent: parentPath.formattedName,
         collectionId: this.id,
         showMissing: true,
+        // Setting `pageSize` to the maximum allowed value lets the backend cap
+        // the page size (currently to 300).
+        pageSize: Math.pow(2, 32) - 1,
         mask: {fieldPaths: []},
       };
 
