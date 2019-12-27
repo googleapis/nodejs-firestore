@@ -67,13 +67,14 @@ export class ClientPool<T> {
    */
   private acquire(requestTag: string): T {
     let selectedClient: T | null = null;
-    let selectedRequestCount = 0;
+    let selectedClientRequestCount = 0;
 
     for (const [client, requestCount] of this.activeClients) {
-      // Bin pack requests to reduce the maximize the number of idle clients as
-      // operations start to complete
+      // Use the "most-full" client that can still accommodate the request
+      // in order to maximize the number of idle clients as operations start to
+      // complete.
       if (
-        requestCount > selectedRequestCount &&
+        requestCount > selectedClientRequestCount &&
         requestCount < this.concurrentOperationLimit
       ) {
         logger(
@@ -83,11 +84,18 @@ export class ClientPool<T> {
           this.concurrentOperationLimit - requestCount
         );
         selectedClient = client;
-        selectedRequestCount = requestCount;
+        selectedClientRequestCount = requestCount;
       }
     }
 
-    if (!selectedClient) {
+    if (selectedClient) {
+      logger(
+        'ClientPool.acquire',
+        requestTag,
+        'Re-using existing client with %s remaining operations',
+        this.concurrentOperationLimit - selectedClientRequestCount
+      );
+    } else {
       logger('ClientPool.acquire', requestTag, 'Creating a new client');
       selectedClient = this.clientFactory();
       assert(
@@ -96,7 +104,7 @@ export class ClientPool<T> {
       );
     }
 
-    this.activeClients.set(selectedClient, selectedRequestCount + 1);
+    this.activeClients.set(selectedClient, selectedClientRequestCount + 1);
 
     return selectedClient!;
   }
@@ -109,7 +117,7 @@ export class ClientPool<T> {
   private async release(requestTag: string, client: T): Promise<void> {
     const requestCount = this.activeClients.get(client) || 0;
     assert(requestCount > 0, 'No active request');
-    this.activeClients.set(client, requestCount! - 1);
+    this.activeClients.set(client, requestCount - 1);
 
     if (this.shouldGarbageCollectClient(client)) {
       this.activeClients.delete(client);
@@ -128,15 +136,6 @@ export class ClientPool<T> {
       return false;
     }
 
-    // Compute the remaining capacity of the ClientPool. If the capacity exceeds
-    // the total capacity that `maxIdleClients` could hold, garbage collect. We
-    // look at the capacity rather than just at the current request count to
-    // allows us to:
-    // - Use `maxIdleClients:1` to preserve legacy behavior (there is always at
-    //   least one active client as a single client can never exceed the
-    //   concurrent operation limit by itself).
-    // - Use `maxIdleClients:0` to shut down the client pool completely when all
-    //   clients are idle.
     let idleCapacityCount = 0;
     for (const [_, count] of this.activeClients) {
       idleCapacityCount += this.concurrentOperationLimit - count;

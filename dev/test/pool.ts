@@ -112,7 +112,7 @@ describe('Client pool', () => {
       return operationPromises[4].promise;
     });
 
-    // Free one slow on the second client.
+    // Free one slot on the second client.
     operationPromises[2].resolve();
     await thirdOperation;
 
@@ -261,7 +261,7 @@ describe('Client pool', () => {
   });
 
   it('default setting keeps at least one idle client', async () => {
-    const clientPool = new ClientPool<{}>(1, /* maxIdleClients=*/ 1, () => {
+    const clientPool = new ClientPool<{}>(1, /* maxIdleClients= git c*/ 1, () => {
       return {};
     });
 
