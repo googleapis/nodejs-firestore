@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.1.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.1.0...v3.1.1) (2019-12-27)
+
+
+### Bug Fixes
+
+* reduce overhead for listDocuments()/listCollections() ([#838](https://www.github.com/googleapis/nodejs-firestore/issues/838)) ([5c870e6](https://www.github.com/googleapis/nodejs-firestore/commit/5c870e615e4774d3d50fc33c17b5da45dcacea4f))
+
 ## [3.1.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.0.0...v3.1.0) (2019-12-19)
 
 
