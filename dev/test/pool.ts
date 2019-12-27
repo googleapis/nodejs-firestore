@@ -261,9 +261,13 @@ describe('Client pool', () => {
   });
 
   it('default setting keeps at least one idle client', async () => {
-    const clientPool = new ClientPool<{}>(1, /* maxIdleClients= git c*/ 1, () => {
-      return {};
-    });
+    const clientPool = new ClientPool<{}>(
+      1,
+      /* maxIdleClients= git c*/ 1,
+      () => {
+        return {};
+      }
+    );
 
     const operationPromises = deferredPromises(2);
     clientPool.run(REQUEST_TAG, () => operationPromises[0].promise);
