@@ -72,6 +72,14 @@ export interface Settings {
   /** Whether to use SSL when connecting. */
   ssl?: boolean;
 
+  /**
+   * The maximum number of idle GRPC channels to keep. A smaller number of idle
+   * channels reduces memory usage but increases request latency for clients
+   * with fluctuating request rates. If set to 0, shuts down all GRPC channels
+   * when the client becomes idle. Defaults to 1.
+   */
+  maxIdleChannels?: number;
+
   // tslint:disable-next-line:no-any
   [key: string]: any; // Accept other properties, such as GRPC settings.
 }

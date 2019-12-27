@@ -131,6 +131,11 @@ const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 const MAX_REQUEST_RETRIES = 5;
 
 /*!
+ * The default number of idle GRPC channel to keep.
+ */
+const DEFAULT_MAX_IDLE_CHANNELS = 1;
+
+/*!
  * The maximum number of concurrent requests supported by a single GRPC channel,
  * as enforced by Google's Frontend. If the SDK issues more than 100 concurrent
  * operations, we need to use more than one GAPIC client since these clients
@@ -317,6 +322,11 @@ export class Firestore {
    * can specify a `keyFilename` instead.
    * @param {string=} settings.host The host to connect to.
    * @param {boolean=} settings.ssl Whether to use SSL when connecting.
+   * @param {number=} settings.maxIdleChannels  The maximum number of idle GRPC
+   * channels to keep. A smaller number of idle channels reduces memory usage
+   * but increases request latency for clients with fluctuating request rates.
+   * If set to 0, shuts down all GRPC channels when the client becomes idle.
+   * Defaults to 1.
    */
   constructor(settings?: Settings) {
     const libraryHeader = {
@@ -372,8 +382,13 @@ export class Firestore {
       logger('Firestore', null, 'Detected GCF environment');
     }
 
+    const maxIdleChannels =
+      this._settings.maxIdleChannels === undefined
+        ? DEFAULT_MAX_IDLE_CHANNELS
+        : this._settings.maxIdleChannels;
     this._clientPool = new ClientPool(
       MAX_CONCURRENT_REQUESTS_PER_CLIENT,
+      maxIdleChannels,
       /* clientFactory= */ () => {
         let client: GapicClient;
 
@@ -453,6 +468,12 @@ export class Firestore {
 
     if (settings.ssl !== undefined) {
       validateBoolean('settings.ssl', settings.ssl);
+    }
+
+    if (settings.maxIdleChannels !== undefined) {
+      validateInteger('settings.maxIdleChannels', settings.maxIdleChannels, {
+        minValue: 0,
+      });
     }
 
     this._settings = settings;

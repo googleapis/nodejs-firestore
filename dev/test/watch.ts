@@ -926,7 +926,7 @@ describe('Query watch', () => {
     }
 
     return result;
-  });
+  }).timeout(5000);
 
   it('retries with unknown code', () => {
     return watchHelper.runTest(collQueryJSON(), () => {

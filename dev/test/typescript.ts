@@ -58,6 +58,7 @@ xdescribe('firestore.d.ts', () => {
     firestore.settings({
       keyFilename: 'foo',
       projectId: 'foo',
+      maxIdleChannels: 42,
       otherOption: 'foo',
     });
     const collRef: CollectionReference = firestore.collection('coll');

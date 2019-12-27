@@ -105,20 +105,26 @@ export function createInstance(
   const firestore = new Firestore();
   firestore.settings(initializationOptions);
 
-  const clientPool = new ClientPool(/* concurrentRequestLimit= */ 1, () => {
-    const gapicClient: GapicClient = new v1(initializationOptions);
-    if (apiOverrides) {
-      Object.keys(apiOverrides).forEach(override => {
-        const apiOverride = (apiOverrides as {[k: string]: unknown})[override];
-        if (override !== 'getProjectId') {
-          gapicClient._innerApiCalls[override] = apiOverride;
-        } else {
-          gapicClient[override] = apiOverride;
-        }
-      });
+  const clientPool = new ClientPool(
+    /* concurrentRequestLimit= */ 1,
+    /* maxIdleClients= */ 0,
+    () => {
+      const gapicClient: GapicClient = new v1(initializationOptions);
+      if (apiOverrides) {
+        Object.keys(apiOverrides).forEach(override => {
+          const apiOverride = (apiOverrides as {[k: string]: unknown})[
+            override
+          ];
+          if (override !== 'getProjectId') {
+            gapicClient._innerApiCalls[override] = apiOverride;
+          } else {
+            gapicClient[override] = apiOverride;
+          }
+        });
+      }
+      return gapicClient;
     }
-    return gapicClient;
-  });
+  );
 
   firestore['_clientPool'] = clientPool;
 
