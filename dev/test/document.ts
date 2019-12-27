@@ -2003,6 +2003,7 @@ describe('listCollections() method', () => {
       listCollectionIds: (request, options, callback) => {
         expect(request).to.deep.eq({
           parent: `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
+          pageSize: 65535,
         });
 
         callback(null, ['second', 'first']);
