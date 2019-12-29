@@ -15,6 +15,7 @@
  */
 
 import * as assert from 'assert';
+import {describe, it} from 'mocha';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {

@@ -15,6 +15,7 @@
  */
 
 import * as assert from 'assert';
+import {describe, it} from 'mocha';
 import * as rbtree from 'functional-red-black-tree';
 
 import {google} from '../protos/firestore_v1_proto_api';
