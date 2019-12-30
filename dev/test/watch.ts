@@ -801,15 +801,18 @@ describe('Query watch', () => {
   });
 
   it('re-opens on unexpected stream end', () => {
+    setLogFunction(console.log);
     return watchHelper.runTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
       return watchHelper.await('snapshot').then(async () => {
         streamHelper.close();
+        await streamHelper.await('end');
         await streamHelper.awaitOpen();
 
         streamHelper.close();
+        await streamHelper.await('end');
         await streamHelper.awaitOpen();
 
         expect(streamHelper.streamCount).to.equal(3);

@@ -1073,7 +1073,7 @@ describe('getAll() method', () => {
         expect(actualErrorAttempts).to.deep.eq(expectedErrorAttempts);
       });
     });
-  });
+  }).timeout(5000);
 
   it('requires at least one argument', () => {
     return createInstance().then(firestore => {

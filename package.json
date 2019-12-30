@@ -47,7 +47,6 @@
     "predocs-test": "npm run docs"
   },
   "dependencies": {
-    "bun": "^0.0.12",
     "deep-equal": "^2.0.0",
     "functional-red-black-tree": "^1.0.1",
     "google-gax": "^1.12.0",

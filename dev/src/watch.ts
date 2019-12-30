@@ -17,6 +17,7 @@
 import * as assert from 'assert';
 import * as rbtree from 'functional-red-black-tree';
 import {describe, it} from 'mocha';
+import {Duplex} from 'stream';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff} from './backoff';
@@ -245,7 +246,7 @@ abstract class Watch {
    * The current stream to the backend.
    * @private
    */
-  private currentStream: NodeJS.ReadWriteStream | null = null;
+  private currentStream: Duplex | null = null;
 
   /**
    * The server assigns and updates the resume token.
@@ -359,7 +360,7 @@ abstract class Watch {
     this.initStream();
 
     return () => {
-      logger('Watch.onSnapshot', this.requestTag, 'Ending stream');
+      logger('Watch.onSnapshot', this.requestTag, 'Unsubscribe called');
       // Prevent further callbacks.
       this.isActive = false;
       this.onNext = () => {};
@@ -505,7 +506,7 @@ abstract class Watch {
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
         return this.firestore
-          .readWriteStream('listen', request, this.requestTag, true)
+          .requestStream('listen', 'bidirectional', request, this.requestTag)
           .then(backendStream => {
             if (!this.isActive) {
               logger(
@@ -513,7 +514,7 @@ abstract class Watch {
                 this.requestTag,
                 'Closing inactive stream'
               );
-              backendStream.end();
+              backendStream.emit('end');
               return;
             }
             logger('Watch.initStream', this.requestTag, 'Opened new stream');
