@@ -17,6 +17,7 @@
 // ** All changes to this file may be overwritten. **
 
 import * as assert from 'assert';
+import {describe, it} from 'mocha';
 import * as protosTypes from '../protos/firestore_v1beta1_proto_api';
 const firestoreModule = require('../src');
 
