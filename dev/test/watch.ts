@@ -16,6 +16,7 @@ const duplexify = require('duplexify');
 
 import {expect} from 'chai';
 import * as extend from 'extend';
+import {GoogleError} from 'google-gax';
 import {Transform} from 'stream';
 import * as through2 from 'through2';
 
@@ -41,7 +42,6 @@ import {MAX_RETRY_ATTEMPTS, setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
-import {GrpcError} from '../src/types';
 import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
 
 import api = google.firestore.v1;
@@ -323,9 +323,9 @@ class StreamHelper {
    * Destroys the currently active stream with the optionally provided error.
    * If omitted, the stream is closed with a GRPC Status of UNAVAILABLE.
    */
-  destroyStream(err?: GrpcError): void {
+  destroyStream(err?: GoogleError): void {
     if (!err) {
-      err = new GrpcError('Server disconnect');
+      err = new GoogleError('Server disconnect');
       err.code = 14; // Unavailable
     }
     this.readStream!.destroy(err);
@@ -818,7 +818,7 @@ describe('Query watch', () => {
   });
 
   it('stops attempts after maximum retry attempts', () => {
-    const err = new GrpcError('GRPC Error');
+    const err = new GoogleError('GRPC Error');
     err.code = Number(10 /* ABORTED */);
     return watchHelper.runFailedTest(
       collQueryJSON(),
@@ -886,7 +886,7 @@ describe('Query watch', () => {
     for (const statusCode in expectRetry) {
       if (expectRetry.hasOwnProperty(statusCode)) {
         result = result.then(() => {
-          const err = new GrpcError('GRPC Error');
+          const err = new GoogleError('GRPC Error');
           err.code = Number(statusCode);
 
           if (expectRetry[statusCode]) {

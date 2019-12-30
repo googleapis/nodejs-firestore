@@ -44,7 +44,7 @@ import {
   writeResult,
 } from './util/helpers';
 
-import api = proto.google.firestore.v1;
+import {GoogleError} from 'google-gax';
 
 const PROJECT_ID = 'test-project';
 
@@ -410,30 +410,6 @@ describe('deserialize document', () => {
     });
   });
 
-  it('ignores intermittent stream failures', () => {
-    let attempts = 1;
-
-    const overrides: ApiOverride = {
-      batchGetDocuments: () => {
-        if (attempts < 3) {
-          ++attempts;
-          throw new Error('Expected error');
-        } else {
-          return stream(found(document('documentId')));
-        }
-      },
-    };
-
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(() => {
-          expect(attempts).to.equal(3);
-        });
-    });
-  });
-
   it('deserializes date before 1970', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
@@ -674,7 +650,9 @@ describe('get document', () => {
   it('throws error', done => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
-        return stream(new Error('RPC Error'));
+        const error = new GoogleError('RPC Error');
+        error.code = 7; // PERMISSION_DENIED
+        return stream(error);
       },
     };
 

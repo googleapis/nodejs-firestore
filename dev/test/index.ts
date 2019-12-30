@@ -21,8 +21,8 @@ import {google} from '../protos/firestore_v1_proto_api';
 
 import * as Firestore from '../src';
 import {DocumentSnapshot, FieldPath} from '../src';
+import {setTimeoutHandler} from '../src/backoff';
 import {QualifiedResourcePath} from '../src/path';
-import {GrpcError} from '../src/types';
 import {
   ApiOverride,
   createInstance,
@@ -901,6 +901,14 @@ describe('listCollections() method', () => {
 });
 
 describe('getAll() method', () => {
+  before(() => {
+    setTimeoutHandler(setImmediate);
+  });
+
+  after(() => {
+    setTimeoutHandler(setTimeout);
+  });
+
   function resultEquals(
     result: DocumentSnapshot[],
     ...docs: api.IBatchGetDocumentsResponse[]
@@ -995,6 +1003,30 @@ describe('getAll() method', () => {
     });
   });
 
+  it('handles intermittent stream exception', () => {
+    let attempts = 1;
+
+    const overrides: ApiOverride = {
+      batchGetDocuments: () => {
+        if (attempts < 3) {
+          ++attempts;
+          throw new Error('Expected error');
+        } else {
+          return stream(found(document('documentId')));
+        }
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(() => {
+          expect(attempts).to.equal(3);
+        });
+    });
+  });
+
   it('handles serialization error', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
@@ -1018,12 +1050,12 @@ describe('getAll() method', () => {
     });
   });
 
-  it('only retries on GRPC unavailable', () => {
+  it('retries based on error code', () => {
     const expectedErrorAttempts = {
       /* Cancelled */ 1: 1,
       /* Unknown */ 2: 1,
       /* InvalidArgument */ 3: 1,
-      /* DeadlineExceeded */ 4: 1,
+      /* DeadlineExceeded */ 4: 5,
       /* NotFound */ 5: 1,
       /* AlreadyExists */ 6: 1,
       /* PermissionDenied */ 7: 1,
@@ -1032,7 +1064,7 @@ describe('getAll() method', () => {
       /* Aborted */ 10: 1,
       /* OutOfRange */ 11: 1,
       /* Unimplemented */ 12: 1,
-      /* Internal */ 13: 1,
+      /* Internal */ 13: 5,
       /* Unavailable */ 14: 5,
       /* DataLoss */ 15: 1,
       /* Unauthenticated */ 16: 1,
@@ -1045,7 +1077,7 @@ describe('getAll() method', () => {
         const errorCode = Number(request.documents![0].split('/').pop());
         actualErrorAttempts[errorCode] =
           (actualErrorAttempts[errorCode] || 0) + 1;
-        const error = new GrpcError('Expected exception');
+        const error = new gax.GoogleError('Expected exception');
         error.code = errorCode;
         return stream(error);
       },

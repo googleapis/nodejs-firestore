@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+import {ClientConfig, GoogleError} from 'google-gax';
+
+import {GRPC_STATUS_CODE} from './types';
+
 /**
  * A Promise implementation that supports deferred resolution.
  * @private
@@ -91,4 +95,25 @@ export function isEmpty(value: {}): boolean {
  */
 export function isFunction(value: unknown): boolean {
   return typeof value === 'function';
+}
+
+/**
+ * Determines whether the provided error is considered permanent for the given
+ * RPC.
+ *
+ * @private
+ */
+export function isPermanentRpcError(
+  err: GoogleError,
+  methodName: string,
+  config: ClientConfig
+): boolean {
+  const serviceConfig = config.interfaces!['google.firestore.v1.Firestore']!;
+  const serviceConfigName = methodName[0].toUpperCase() + methodName.slice(1);
+  const retryCodeNames = serviceConfig.methods[serviceConfigName]!
+    .retry_codes_name;
+  const retryCodes = serviceConfig.retry_codes[retryCodeNames].map(
+    errorName => GRPC_STATUS_CODE[errorName]
+  );
+  return retryCodes.indexOf(err.code as number) === -1;
 }

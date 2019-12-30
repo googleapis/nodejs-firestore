@@ -20,7 +20,7 @@ import * as through2 from 'through2';
 import * as proto from '../../protos/firestore_v1_proto_api';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
-import {GapicClient, GrpcError} from '../../src/types';
+import {GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
@@ -67,7 +67,7 @@ export interface ApiOverride {
   listDocuments?: (
     request: api.IListDocumentsRequest,
     options: CallOptions,
-    callback: (err?: GrpcError | null, resp?: api.IDocument[]) => void
+    callback: (err?: Error | null, resp?: api.IDocument[]) => void
   ) => void;
   batchGetDocuments?: (
     request: api.IBatchGetDocumentsRequest

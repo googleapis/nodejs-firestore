@@ -15,11 +15,12 @@
  */
 
 import * as bun from 'bun';
-import {CallOptions} from 'google-gax';
+import {CallOptions, ClientConfig, GoogleError} from 'google-gax';
 import * as through2 from 'through2';
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
+import {ExponentialBackoff} from './backoff';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
   DocumentSnapshot,
@@ -40,14 +41,8 @@ import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
-import {
-  ApiMapValue,
-  GapicClient,
-  GrpcError,
-  ReadOptions,
-  Settings,
-} from './types';
-import {Deferred, requestTag} from './util';
+import {ApiMapValue, GapicClient, ReadOptions, Settings} from './types';
+import {Deferred, isPermanentRpcError, requestTag} from './util';
 import {
   validateBoolean,
   validateFunction,
@@ -60,6 +55,8 @@ import {
 import {WriteBatch} from './write-batch';
 
 import api = google.firestore.v1;
+
+import * as clientConfig from './v1/firestore_client_config.json';
 
 export {
   CollectionReference,
@@ -950,7 +947,7 @@ export class Firestore {
     const self = this;
 
     return self
-      .readStream('batchGetDocuments', request, requestTag, true)
+      .readStream('batchGetDocuments', request, requestTag)
       .then(stream => {
         return new Promise<DocumentSnapshot[]>((resolve, reject) => {
           stream
@@ -1107,62 +1104,55 @@ export class Firestore {
    * for further attempts.
    *
    * @private
-   * @param attemptsRemaining The number of available attempts.
+   * @param methodName Name of the Veneer API endpoint that takes a request
+   * and GAX options.
    * @param requestTag A unique client-assigned identifier for this request.
    * @param func Method returning a Promise than can be retried.
-   * @param delayMs How long to wait before issuing a this retry. Defaults to
-   * zero.
    * @returns  - A Promise with the function's result if successful within
    * `attemptsRemaining`. Otherwise, returns the last rejected Promise.
    */
-  private _retry<T>(
-    attemptsRemaining: number,
+  private async _retry<T>(
+    methodName: string,
     requestTag: string,
-    func: () => Promise<T>,
-    delayMs = 0
+    func: () => Promise<T>
   ): Promise<T> {
-    const self = this;
+    const backoff = new ExponentialBackoff();
 
-    const currentDelay = delayMs;
-    const nextDelay = delayMs || 100;
+    let lastError: Error | undefined = undefined;
 
-    --attemptsRemaining;
-
-    return new Promise(resolve => {
-      setTimeout(resolve, currentDelay);
-    })
-      .then(func)
-      .then(result => {
-        self._lastSuccessfulRequest = new Date().getTime();
-        return result;
-      })
-      .catch(err => {
-        if (err.code !== undefined && err.code !== GRPC_UNAVAILABLE) {
-          logger(
-            'Firestore._retry',
-            requestTag,
-            'Request failed with unrecoverable error:',
-            err
-          );
-          return Promise.reject(err);
-        }
-        if (attemptsRemaining === 0) {
-          logger(
-            'Firestore._retry',
-            requestTag,
-            'Request failed with error:',
-            err
-          );
-          return Promise.reject(err);
-        }
+    for (let attempt = 0; attempt < MAX_REQUEST_RETRIES; ++attempt) {
+      if (lastError) {
         logger(
           'Firestore._retry',
           requestTag,
           'Retrying request that failed with error:',
-          err
+          lastError
         );
-        return self._retry(attemptsRemaining, requestTag, func, nextDelay);
-      });
+      }
+
+      try {
+        const result = await backoff.backoffAndWait().then(func);
+        this._lastSuccessfulRequest = new Date().getTime();
+        return result;
+      } catch (err) {
+        lastError = err;
+
+        if (
+          err.code !== undefined &&
+          isPermanentRpcError(err, methodName, clientConfig)
+        ) {
+          break;
+        }
+      }
+    }
+
+    logger(
+      'Firestore._retry',
+      requestTag,
+      'Request failed with error:',
+      lastError
+    );
+    return Promise.reject(lastError);
   }
 
   /**
@@ -1313,51 +1303,37 @@ export class Firestore {
    *  necessary within the request options.
    *
    * @private
-   * @param methodName Name of the veneer API endpoint that takes a request
+   * @param methodName Name of the Veneer API endpoint that takes a request
    * and GAX options.
    * @param request The Protobuf request to send.
    * @param requestTag A unique client-assigned identifier for this request.
-   * @param allowRetries Whether this is an idempotent request that can be
-   * retried.
    * @returns A Promise with the request result.
    */
-  request<T>(
-    methodName: string,
-    request: {},
-    requestTag: string,
-    allowRetries: boolean
-  ): Promise<T> {
-    const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
+  request<T>(methodName: string, request: {}, requestTag: string): Promise<T> {
     const callOptions = this.createCallOptions();
 
     return this._clientPool.run(requestTag, gapicClient => {
-      return this._retry(attempts, requestTag, () => {
-        return new Promise((resolve, reject) => {
-          logger(
-            'Firestore.request',
-            requestTag,
-            'Sending request: %j',
-            request
-          );
-          gapicClient[methodName](
-            request,
-            callOptions,
-            (err: GrpcError, result: T) => {
-              if (err) {
-                logger('Firestore.request', requestTag, 'Received error:', err);
-                reject(err);
-              } else {
-                logger(
-                  'Firestore.request',
-                  requestTag,
-                  'Received response: %j',
-                  result
-                );
-                resolve(result);
-              }
+      return new Promise((resolve, reject) => {
+        logger('Firestore.request', requestTag, 'Sending request: %j', request);
+        gapicClient[methodName](
+          request,
+          callOptions,
+          (err: GoogleError, result: T) => {
+            if (err) {
+              logger('Firestore.request', requestTag, 'Received error:', err);
+              reject(err);
+            } else {
+              logger(
+                'Firestore.request',
+                requestTag,
+                'Received response: %j',
+                result
+              );
+              this._lastSuccessfulRequest = new Date().getTime();
+              resolve(result);
             }
-          );
-        });
+          }
+        );
       });
     });
   }
@@ -1374,17 +1350,13 @@ export class Firestore {
    * takes a request and GAX options.
    * @param request The Protobuf request to send.
    * @param requestTag A unique client-assigned identifier for this request.
-   * @param allowRetries Whether this is an idempotent request that can be
-   * retried.
    * @returns A Promise with the resulting read-only stream.
    */
   readStream(
     methodName: string,
     request: {},
-    requestTag: string,
-    allowRetries: boolean
+    requestTag: string
   ): Promise<NodeJS.ReadableStream> {
-    const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 
     const result = new Deferred<NodeJS.ReadableStream>();
@@ -1395,7 +1367,7 @@ export class Firestore {
       // stream.
       const lifetime = new Deferred<void>();
 
-      this._retry(attempts, requestTag, async () => {
+      this._retry(methodName, requestTag, async () => {
         logger(
           'Firestore.readStream',
           requestTag,
@@ -1444,17 +1416,13 @@ export class Firestore {
    * GAX options.
    * @param request The Protobuf request to send as the first stream message.
    * @param requestTag A unique client-assigned identifier for this request.
-   * @param allowRetries Whether this is an idempotent request that can be
-   * retried.
    * @returns A Promise with the resulting read/write stream.
    */
   readWriteStream(
     methodName: string,
     request: {},
-    requestTag: string,
-    allowRetries: boolean
+    requestTag: string
   ): Promise<NodeJS.ReadWriteStream> {
-    const attempts = allowRetries ? MAX_REQUEST_RETRIES : 1;
     const callOptions = this.createCallOptions();
 
     const result = new Deferred<NodeJS.ReadWriteStream>();
@@ -1465,7 +1433,7 @@ export class Firestore {
       // stream.
       const lifetime = new Deferred<void>();
 
-      this._retry(attempts, requestTag, async () => {
+      this._retry(methodName, requestTag, async () => {
         logger('Firestore.readWriteStream', requestTag, 'Opening stream');
         const requestStream = gapicClient[methodName](callOptions);
 
