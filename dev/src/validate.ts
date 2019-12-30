@@ -38,22 +38,6 @@ export interface NumericRangeOptions {
 }
 
 /**
- * Returns the name of the base class (ignoring Object).
- *
- * @private
- * @param value The object whose base class name to extract.
- * @returns The name of the base class constructor or "Object" if value does not
- * extend a custom class.
- */
-function extractBaseClassName(value: object): string {
-  let constructorName = 'Object';
-  while (Object.getPrototypeOf(value) !== Object.prototype) {
-    value = Object.getPrototypeOf(value);
-    constructorName = value.constructor.name;
-  }
-  return constructorName;
-}
-/**
  * Generates an error message to use with custom objects that cannot be
  * serialized.
  *
@@ -73,7 +57,7 @@ export function customObjectMessage(
     // We use the base class name as the type name as the sentinel classes
     // returned by the public FieldValue API are subclasses of FieldValue. By
     // using the base name, we reduce the number of special cases below.
-    const typeName = extractBaseClassName(value);
+    const typeName = value.constructor.name;
     switch (typeName) {
       case 'DocumentReference':
       case 'FieldPath':

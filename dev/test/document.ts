@@ -166,18 +166,42 @@ describe('serialize document', () => {
     }).to.throw(
       'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
     );
+
+    expect(() => {
+      class Foo {}
+      class Bar extends Foo {}
+      firestore
+        .doc('collectionId/documentId')
+        .set(new Bar() as InvalidApiUsage);
+    }).to.throw(
+      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Bar". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+    );
+  });
+
+  it('supports objects created with Object.create({})', () => {
+    const overrides: ApiOverride = {
+      commit: (request, options, callback) => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId'),
+          })
+        );
+        callback(null, writeResult(1));
+      },
+    };
+    return createInstance(overrides).then(firestore => {
+      const plainObject = Object.create({});
+      return firestore.doc('collectionId/documentId').set(plainObject);
+    });
   });
 
   it('provides custom error for objects from different Firestore instance', () => {
     class FieldPath {}
-    class CustomFieldPath extends FieldPath {}
-    class VeryCustomFieldPath extends CustomFieldPath {}
+    class GeoPoint {}
+    class Timestamp {}
 
-    const customClasses = [
-      new FieldPath(),
-      new CustomFieldPath(),
-      new VeryCustomFieldPath(),
-    ];
+    const customClasses = [new FieldPath(), new GeoPoint(), new Timestamp()];
 
     for (const customClass of customClasses) {
       expect(() => {
@@ -186,7 +210,7 @@ describe('serialize document', () => {
           .set(customClass as InvalidApiUsage);
       }).to.throw(
         'Value for argument "data" is not a valid Firestore document. ' +
-          'Detected an object of type "FieldPath" that doesn\'t match the expected instance.'
+          `Detected an object of type "${customClass.constructor.name}" that doesn't match the expected instance.`
       );
     }
   });
