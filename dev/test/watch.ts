@@ -801,7 +801,6 @@ describe('Query watch', () => {
   });
 
   it('re-opens on unexpected stream end', () => {
-    setLogFunction(console.log);
     return watchHelper.runTest(collQueryJSON(), () => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();

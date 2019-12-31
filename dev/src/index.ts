@@ -1235,9 +1235,9 @@ export class Firestore {
           );
           // We execute the forwarding of the 'error' event via setTimeout() as
           // V8 guarantees that the Promise chain returned from this method
-          // is resolved before any code executed via setTimeout(). This allows
-          // the caller to attach an error handler.
-          setTimeout(() => {
+          // is resolved before any code executed via setImmediate(). This
+          // allows the caller to attach an error handler.
+          setImmediate(() => {
             resultStream.emit('error', err);
           }, 0);
         }
