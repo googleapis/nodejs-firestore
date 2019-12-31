@@ -1223,7 +1223,7 @@ export class Firestore {
             'Received stream error:',
             err
           );
-          // We execute the forwarding of the 'error' event via setTimeout() as
+          // We execute the forwarding of the 'error' event via setImmediate() as
           // V8 guarantees that the Promise chain returned from this method
           // is resolved before any code executed via setImmediate(). This
           // allows the caller to attach an error handler.
