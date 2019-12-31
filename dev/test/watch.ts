@@ -807,9 +807,11 @@ describe('Query watch', () => {
       watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
       return watchHelper.await('snapshot').then(async () => {
         streamHelper.close();
+        await streamHelper.await('end');
         await streamHelper.awaitOpen();
 
         streamHelper.close();
+        await streamHelper.await('end');
         await streamHelper.awaitOpen();
 
         expect(streamHelper.streamCount).to.equal(3);
