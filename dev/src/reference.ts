@@ -16,7 +16,6 @@
 
 const deepEqual = require('deep-equal');
 
-import * as bun from 'bun';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_v1_proto_api';
@@ -1719,7 +1718,9 @@ export class Query {
       callback();
     });
 
-    return bun([responseStream, transform]);
+    responseStream.pipe(transform);
+    responseStream.on('error', transform.destroy);
+    return transform;
   }
 
   /**
@@ -1833,7 +1834,7 @@ export class Query {
     this.firestore.initializeIfNeeded(tag).then(() => {
       const request = this.toProto(transactionId);
       this._firestore
-        .readStream('runQuery', request, tag, true)
+        .requestStream('runQuery', 'unidirectional', request, tag)
         .then(backendStream => {
           backendStream.on('error', err => {
             logger(
