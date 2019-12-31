@@ -1138,10 +1138,7 @@ export class Firestore {
       } catch (err) {
         lastError = err;
 
-        if (
-          err.code !== undefined &&
-          isPermanentRpcError(err, methodName, clientConfig)
-        ) {
+        if (isPermanentRpcError(err, methodName, clientConfig)) {
           break;
         }
       }

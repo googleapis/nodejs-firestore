@@ -16,7 +16,7 @@
 
 import * as assert from 'assert';
 import * as rbtree from 'functional-red-black-tree';
-import {GoogleError} from 'google-gax';
+import {GoogleError, Status} from 'google-gax';
 import {describe, it} from 'mocha';
 import {Duplex} from 'stream';
 
@@ -28,7 +28,7 @@ import {DocumentReference, Firestore, Query} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {GRPC_STATUS_CODE, RBTree} from './types';
+import {RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
@@ -417,7 +417,7 @@ abstract class Watch {
                   this.currentStream = null;
 
                   const err = new GoogleError('Stream ended unexpectedly');
-                  err.code = GRPC_STATUS_CODE.UNKNOWN;
+                  err.code = Status.UNKNOWN;
                   this.maybeReopenStream(err);
                 }
               });
@@ -712,14 +712,14 @@ abstract class Watch {
     }
 
     switch (error.code) {
-      case GRPC_STATUS_CODE.ABORTED:
-      case GRPC_STATUS_CODE.CANCELLED:
-      case GRPC_STATUS_CODE.UNKNOWN:
-      case GRPC_STATUS_CODE.DEADLINE_EXCEEDED:
-      case GRPC_STATUS_CODE.RESOURCE_EXHAUSTED:
-      case GRPC_STATUS_CODE.INTERNAL:
-      case GRPC_STATUS_CODE.UNAVAILABLE:
-      case GRPC_STATUS_CODE.UNAUTHENTICATED:
+      case Status.ABORTED:
+      case Status.CANCELLED:
+      case Status.UNKNOWN:
+      case Status.DEADLINE_EXCEEDED:
+      case Status.RESOURCE_EXHAUSTED:
+      case Status.INTERNAL:
+      case Status.UNAVAILABLE:
+      case Status.UNAUTHENTICATED:
         return false;
       default:
         return true;
@@ -735,7 +735,7 @@ abstract class Watch {
    * @return Whether we need to back off our retries.
    */
   private isResourceExhaustedError(error: GoogleError): boolean {
-    return error.code === GRPC_STATUS_CODE.RESOURCE_EXHAUSTED;
+    return error.code === Status.RESOURCE_EXHAUSTED;
   }
 }
 
