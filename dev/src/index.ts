@@ -1131,7 +1131,8 @@ export class Firestore {
       }
 
       try {
-        const result = await backoff.backoffAndWait().then(func);
+        await backoff.backoffAndWait();
+        const result = await func();
         this._lastSuccessfulRequest = new Date().getTime();
         return result;
       } catch (err) {
