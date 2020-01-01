@@ -20,7 +20,7 @@ import * as through2 from 'through2';
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
-import {ExponentialBackoff} from './backoff';
+import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
   DocumentSnapshot,
@@ -54,7 +54,8 @@ import {
 } from './validate';
 import {WriteBatch} from './write-batch';
 
-import * as clientConfig from './v1/firestore_client_config.json';
+import {interfaces} from './v1/firestore_client_config.json';
+const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
 
@@ -139,11 +140,6 @@ const DEFAULT_MAX_IDLE_CHANNELS = 1;
  * multiplex all requests over a single channel.
  */
 const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
-
-/*!
- * GRPC Error code for 'UNAVAILABLE'.
- */
-const GRPC_UNAVAILABLE = 14;
 
 /**
  * Document data (e.g. for use with
@@ -263,6 +259,12 @@ export class Firestore {
   private _settings: Settings = {};
 
   /**
+   * Settings for the exponential backoff used by the Streaming endpoints.
+   * @private
+   */
+  private _backoffSettings: ExponentialBackoffSetting;
+
+  /**
    * Whether the initialization settings can still be changed by invoking
    * `settings()`.
    * @private
@@ -364,6 +366,13 @@ export class Firestore {
     } else {
       this.validateAndApplySettings({...settings, ...libraryHeader});
     }
+
+    const retryConfig = serviceConfig.retry_params.default;
+    this._backoffSettings = {
+      initialDelayMs: retryConfig.initial_retry_delay_millis,
+      maxDelayMs: retryConfig.max_retry_delay_millis,
+      backoffFactor: retryConfig.retry_delay_multiplier,
+    };
 
     // GCF currently tears down idle connections after two minutes. Requests
     // that are issued after this period may fail. On GCF, we therefore issue
@@ -1138,7 +1147,7 @@ export class Firestore {
       } catch (err) {
         lastError = err;
 
-        if (isPermanentRpcError(err, methodName, clientConfig)) {
+        if (isPermanentRpcError(err, methodName, serviceConfig)) {
           break;
         }
       }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ClientConfig, GoogleError, Status} from 'google-gax';
+import {GoogleError, ServiceConfig, Status} from 'google-gax';
 
 /**
  * A Promise implementation that supports deferred resolution.
@@ -104,14 +104,12 @@ export function isFunction(value: unknown): boolean {
 export function isPermanentRpcError(
   err: GoogleError,
   methodName: string,
-  config: ClientConfig
+  config: ServiceConfig
 ): boolean {
   if (err.code !== undefined) {
-    const serviceConfig = config.interfaces!['google.firestore.v1.Firestore']!;
     const serviceConfigName = methodName[0].toUpperCase() + methodName.slice(1);
-    const retryCodeNames = serviceConfig.methods[serviceConfigName]!
-      .retry_codes_name;
-    const retryCodes = serviceConfig.retry_codes[retryCodeNames].map(
+    const retryCodeNames = config.methods[serviceConfigName]!.retry_codes_name;
+    const retryCodes = config.retry_codes[retryCodeNames].map(
       errorName => Status[errorName as keyof typeof Status]
     );
     return retryCodes.indexOf(err.code) === -1;
