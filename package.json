@@ -9,12 +9,12 @@
   },
   "repository": "googleapis/nodejs-firestore",
   "main": "./build/src/index.js",
-  "types": "./types/firestore.d.ts",
+  "types": "./build/types/firestore.d.ts",
   "files": [
     "build/protos",
     "build/src",
-    "!build/src/**/*.map",
-    "types"
+    "build/types",
+    "!build/src/**/*.map"
   ],
   "keywords": [
     "google apis client",
@@ -40,7 +40,8 @@
     "test": "npm run test-only && npm run conformance",
     "lint": "gts check",
     "clean": "gts clean",
-    "compile": "tsc -p . && cp -r dev/protos build && cp -r dev/test/fake-certificate.json build/test/fake-certificate.json && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
+    "compile": "tsc -p .&& cp -r dev/protos build && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp build/src/v1beta1/firestore_client.d.ts dev/types/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp build/src/v1/firestore_client.d.ts build/src/v1/firestore_admin_client.d.ts dev/types/v1/ && cp -r dev/types build && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/test-suite.binproto build/conformance",
+    "postcompile": "node scripts/license.js dev/types/v1/firestore_client.d.ts dev/types/v1/firestore_admin_client.d.ts dev/types/v1beta1/firestore_client.d.ts",
     "fix": "gts fix",
     "prepare": "npm run compile",
     "docs-test": "linkinator docs",

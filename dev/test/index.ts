@@ -47,7 +47,6 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 const DEFAULT_SETTINGS = {
   projectId: PROJECT_ID,
   sslCreds: grpc.credentials.createInsecure(),
-  keyFilename: __dirname + '/fake-certificate.json',
 };
 
 // Change the argument to 'console.log' to enable debug output.
@@ -533,7 +532,6 @@ describe('instantiation', () => {
   it('uses project ID from settings()', () => {
     const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
-      keyFilename: './test/fake-certificate.json',
     });
 
     firestore.settings({projectId: PROJECT_ID});
@@ -662,7 +660,6 @@ describe('snapshot_() method', () => {
     firestore = new Firestore.Firestore({
       projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
-      keyFilename: './test/fake-certificate.json',
     });
   });
 
