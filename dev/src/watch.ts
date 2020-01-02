@@ -453,7 +453,7 @@ abstract class Watch {
           this.closeStream(Error('Unexpected target ID sent by server'));
         }
       } else if (change.targetChangeType === 'REMOVE') {
-        let code = 13;
+        let code = Status.INTERNAL;
         let message = 'internal error';
         if (change.cause) {
           code = change.cause.code!;

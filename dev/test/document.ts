@@ -44,7 +44,7 @@ import {
   writeResult,
 } from './util/helpers';
 
-import {GoogleError} from 'google-gax';
+import {GoogleError, Status} from 'google-gax';
 
 const PROJECT_ID = 'test-project';
 
@@ -651,7 +651,7 @@ describe('get document', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         const error = new GoogleError('RPC Error');
-        error.code = 7; // PERMISSION_DENIED
+        error.code = Status.PERMISSION_DENIED;
         return stream(error);
       },
     };

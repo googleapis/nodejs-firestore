@@ -259,7 +259,7 @@ export class Firestore {
   private _settings: Settings = {};
 
   /**
-   * Settings for the exponential backoff used by the Streaming endpoints.
+   * Settings for the exponential backoff used by the streaming endpoints.
    * @private
    */
   private _backoffSettings: ExponentialBackoffSetting;

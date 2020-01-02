@@ -108,8 +108,8 @@ export function isPermanentRpcError(
 ): boolean {
   if (err.code !== undefined) {
     const serviceConfigName = methodName[0].toUpperCase() + methodName.slice(1);
-    const retryCodeNames = config.methods[serviceConfigName]!.retry_codes_name;
-    const retryCodes = config.retry_codes[retryCodeNames].map(
+    const retryCodeNames = config.methods[serviceConfigName]!.retry_codes_name!;
+    const retryCodes = config.retry_codes![retryCodeNames].map(
       errorName => Status[errorName as keyof typeof Status]
     );
     return retryCodes.indexOf(err.code) === -1;

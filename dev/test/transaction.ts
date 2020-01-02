@@ -15,7 +15,7 @@
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
-import {GoogleError} from 'google-gax';
+import {GoogleError, Status} from 'google-gax';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_v1_proto_api';
@@ -438,7 +438,7 @@ describe('failed transactions', () => {
 
   it('limits the retry attempts', () => {
     const err = new GoogleError('Server disconnect');
-    err.code = 14; // Unavailable
+    err.code = Status.UNAVAILABLE;
 
     return expect(
       runTransaction(
