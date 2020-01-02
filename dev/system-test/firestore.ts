@@ -1340,7 +1340,8 @@ describe('Query class', () => {
     Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})]).then(() => {
       return randomCol
         .stream()
-        .on('data', () => {
+        .on('data', d => {
+          expect(d).to.be.an.instanceOf(DocumentSnapshot);
           ++received;
         })
         .on('end', () => {
@@ -1348,6 +1349,19 @@ describe('Query class', () => {
           done();
         });
     });
+  });
+
+  it('stream() supports readable[Symbol.asyncIterator]()', async () => {
+    let received = 0;
+    await randomCol.doc().set({foo: 'bar'});
+    await randomCol.doc().set({foo: 'bar'});
+
+    const stream = randomCol.stream();
+    for await (const chunk of stream) {
+      ++received;
+    }
+
+    expect(received).to.equal(2);
   });
 
   it('can query collection groups', async () => {
