@@ -1,5 +1,5 @@
 /*!
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -3278,10 +3278,6 @@ export namespace google {
                     public direction: google.firestore.v1.StructuredQuery.Direction;
                 }
 
-                /** Direction enum. */
-                type Direction =
-                    "DIRECTION_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
-
                 /** Properties of a FieldReference. */
                 interface IFieldReference {
 
@@ -3321,6 +3317,10 @@ export namespace google {
                     /** Projection fields. */
                     public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
                 }
+
+                /** Direction enum. */
+                type Direction =
+                    "DIRECTION_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
             }
 
             /** Properties of a Cursor. */
