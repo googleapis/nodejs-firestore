@@ -36,6 +36,7 @@ import {
 } from './util/helpers';
 
 import api = google.firestore.v1;
+import {Status} from 'google-gax';
 
 use(chaiAsPromised);
 
@@ -1051,26 +1052,26 @@ describe('getAll() method', () => {
   });
 
   it('retries based on error code', () => {
-    const expectedErrorAttempts = {
-      /* Cancelled */ 1: 1,
-      /* Unknown */ 2: 1,
-      /* InvalidArgument */ 3: 1,
-      /* DeadlineExceeded */ 4: 5,
-      /* NotFound */ 5: 1,
-      /* AlreadyExists */ 6: 1,
-      /* PermissionDenied */ 7: 1,
-      /* ResourceExhausted */ 8: 1,
-      /* FailedPrecondition */ 9: 1,
-      /* Aborted */ 10: 1,
-      /* OutOfRange */ 11: 1,
-      /* Unimplemented */ 12: 1,
-      /* Internal */ 13: 5,
-      /* Unavailable */ 14: 5,
-      /* DataLoss */ 15: 1,
-      /* Unauthenticated */ 16: 1,
+    const expectedErrorAttempts: {[key: number]: number} = {
+      [Status.CANCELLED]: 1,
+      [Status.UNKNOWN]: 1,
+      [Status.INVALID_ARGUMENT]: 1,
+      [Status.DEADLINE_EXCEEDED]: 5,
+      [Status.NOT_FOUND]: 1,
+      [Status.ALREADY_EXISTS]: 1,
+      [Status.PERMISSION_DENIED]: 1,
+      [Status.RESOURCE_EXHAUSTED]: 1,
+      [Status.FAILED_PRECONDITION]: 1,
+      [Status.ABORTED]: 1,
+      [Status.OUT_OF_RANGE]: 1,
+      [Status.UNIMPLEMENTED]: 1,
+      [Status.INTERNAL]: 5,
+      [Status.UNAVAILABLE]: 5,
+      [Status.DATA_LOSS]: 1,
+      [Status.UNAUTHENTICATED]: 1,
     };
 
-    const actualErrorAttempts: {[k: number]: number} = {};
+    const actualErrorAttempts: {[key: number]: number} = {};
 
     const overrides: ApiOverride = {
       batchGetDocuments: request => {
@@ -1083,27 +1084,21 @@ describe('getAll() method', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(async firestore => {
       const coll = firestore.collection('collectionId');
 
-      const promises: Array<Promise<void>> = [];
+      for (const errorCode of Object.keys(expectedErrorAttempts)) {
+        await firestore
+          .getAll(coll.doc(`${errorCode}`))
+          .then(() => {
+            throw new Error('Unexpected success in Promise');
+          })
+          .catch(err => {
+            expect(err.code).to.equal(Number(errorCode));
+          });
+      }
 
-      Object.keys(expectedErrorAttempts).forEach(errorCode => {
-        promises.push(
-          firestore
-            .getAll(coll.doc(`${errorCode}`))
-            .then(() => {
-              throw new Error('Unexpected success in Promise');
-            })
-            .catch(err => {
-              expect(err.code).to.equal(Number(errorCode));
-            })
-        );
-      });
-
-      return Promise.all(promises).then(() => {
-        expect(actualErrorAttempts).to.deep.eq(expectedErrorAttempts);
-      });
+      expect(actualErrorAttempts).to.deep.eq(expectedErrorAttempts);
     });
   }).timeout(5000);
 
