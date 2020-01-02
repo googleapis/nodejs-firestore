@@ -80,7 +80,7 @@ export function setTimeoutHandler(
  *
  * @private
  */
-export interface ExponentialBackoffOptions {
+export interface ExponentialBackoffSetting {
   /** Optional override for the initial retry delay. */
   initialDelayMs?: number;
   /** Optional override for the exponential backoff factor. */
@@ -162,7 +162,7 @@ export class ExponentialBackoff {
    */
   private awaitingBackoffCompletion = false;
 
-  constructor(options: ExponentialBackoffOptions = {}) {
+  constructor(options: ExponentialBackoffSetting = {}) {
     this.initialDelayMs =
       options.initialDelayMs !== undefined
         ? options.initialDelayMs

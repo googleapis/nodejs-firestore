@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {GoogleError, ServiceConfig, Status} from 'google-gax';
+
 /**
  * A Promise implementation that supports deferred resolution.
  * @private
@@ -91,4 +93,27 @@ export function isEmpty(value: {}): boolean {
  */
 export function isFunction(value: unknown): boolean {
   return typeof value === 'function';
+}
+
+/**
+ * Determines whether the provided error is considered permanent for the given
+ * RPC.
+ *
+ * @private
+ */
+export function isPermanentRpcError(
+  err: GoogleError,
+  methodName: string,
+  config: ServiceConfig
+): boolean {
+  if (err.code !== undefined) {
+    const serviceConfigName = methodName[0].toUpperCase() + methodName.slice(1);
+    const retryCodeNames = config.methods[serviceConfigName]!.retry_codes_name!;
+    const retryCodes = config.retry_codes![retryCodeNames].map(
+      errorName => Status[errorName as keyof typeof Status]
+    );
+    return retryCodes.indexOf(err.code) === -1;
+  } else {
+    return false;
+  }
 }
