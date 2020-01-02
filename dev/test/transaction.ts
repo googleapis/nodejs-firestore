@@ -15,6 +15,7 @@
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
+import {GoogleError, Status} from 'google-gax';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_v1_proto_api';
@@ -436,7 +437,8 @@ describe('failed transactions', () => {
   });
 
   it('limits the retry attempts', () => {
-    const err = new Error('Retryable error');
+    const err = new GoogleError('Server disconnect');
+    err.code = Status.UNAVAILABLE;
 
     return expect(
       runTransaction(
@@ -455,21 +457,6 @@ describe('failed transactions', () => {
         commit('foo5', [], new Error('Final exception'))
       )
     ).to.eventually.be.rejectedWith('Final exception');
-  });
-
-  it('fails on beginTransaction', () => {
-    return expect(
-      runTransaction(
-        () => {
-          return Promise.resolve('success');
-        },
-        begin('foo', undefined, new Error('Fails (1) on beginTransaction')),
-        begin('foo', undefined, new Error('Fails (2) on beginTransaction')),
-        begin('foo', undefined, new Error('Fails (3) on beginTransaction')),
-        begin('foo', undefined, new Error('Fails (4) on beginTransaction')),
-        begin('foo', undefined, new Error('Fails (5) on beginTransaction'))
-      )
-    ).to.eventually.be.rejectedWith('Fails (5) on beginTransaction');
   });
 
   it('fails on rollback', () => {
