@@ -16,6 +16,9 @@
 
 import * as assert from 'assert';
 import * as rbtree from 'functional-red-black-tree';
+import {GoogleError, Status} from 'google-gax';
+import {describe, it} from 'mocha';
+import {Duplex} from 'stream';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff} from './backoff';
@@ -25,7 +28,7 @@ import {DocumentReference, Firestore, Query} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {GrpcError, RBTree} from './types';
+import {RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
@@ -50,123 +53,6 @@ const ChangeType: {[k: string]: DocumentChangeType} = {
   added: 'added',
   modified: 'modified',
   removed: 'removed',
-};
-
-/*!
- * List of GRPC Error Codes.
- *
- * This corresponds to
- * {@link https://github.com/grpc/grpc/blob/master/doc/statuscodes.md}.
- */
-const GRPC_STATUS_CODE: {[k: string]: number} = {
-  // Not an error; returned on success.
-  OK: 0,
-
-  // The operation was cancelled (typically by the caller).
-  CANCELLED: 1,
-
-  // Unknown error. An example of where this error may be returned is if a
-  // Status value received from another address space belongs to an error-space
-  // that is not known in this address space. Also errors raised by APIs that
-  // do not return enough error information may be converted to this error.
-  UNKNOWN: 2,
-
-  // Client specified an invalid argument. Note that this differs from
-  // FAILED_PRECONDITION. INVALID_ARGUMENT indicates arguments that are
-  // problematic regardless of the state of the system (e.g., a malformed file
-  // name).
-  INVALID_ARGUMENT: 3,
-
-  // Deadline expired before operation could complete. For operations that
-  // change the state of the system, this error may be returned even if the
-  // operation has completed successfully. For example, a successful response
-  // from a server could have been delayed long enough for the deadline to
-  // expire.
-  DEADLINE_EXCEEDED: 4,
-
-  // Some requested entity (e.g., file or directory) was not found.
-  NOT_FOUND: 5,
-
-  // Some entity that we attempted to create (e.g., file or directory) already
-  // exists.
-  ALREADY_EXISTS: 6,
-
-  // The caller does not have permission to execute the specified operation.
-  // PERMISSION_DENIED must not be used for rejections caused by exhausting
-  // some resource (use RESOURCE_EXHAUSTED instead for those errors).
-  // PERMISSION_DENIED must not be used if the caller can not be identified
-  // (use UNAUTHENTICATED instead for those errors).
-  PERMISSION_DENIED: 7,
-
-  // The request does not have valid authentication credentials for the
-  // operation.
-  UNAUTHENTICATED: 16,
-
-  // Some resource has been exhausted, perhaps a per-user quota, or perhaps the
-  // entire file system is out of space.
-  RESOURCE_EXHAUSTED: 8,
-
-  // Operation was rejected because the system is not in a state required for
-  // the operation's execution. For example, directory to be deleted may be
-  // non-empty, an rmdir operation is applied to a non-directory, etc.
-  //
-  // A litmus test that may help a service implementor in deciding
-  // between FAILED_PRECONDITION, ABORTED, and UNAVAILABLE:
-  //  (a) Use UNAVAILABLE if the client can retry just the failing call.
-  //  (b) Use ABORTED if the client should retry at a higher-level
-  //      (e.g., restarting a read-modify-write sequence).
-  //  (c) Use FAILED_PRECONDITION if the client should not retry until
-  //      the system state has been explicitly fixed. E.g., if an "rmdir"
-  //      fails because the directory is non-empty, FAILED_PRECONDITION
-  //      should be returned since the client should not retry unless
-  //      they have first fixed up the directory by deleting files from it.
-  //  (d) Use FAILED_PRECONDITION if the client performs conditional
-  //      REST Get/Update/Delete on a resource and the resource on the
-  //      server does not match the condition. E.g., conflicting
-  //      read-modify-write on the same resource.
-  FAILED_PRECONDITION: 9,
-
-  // The operation was aborted, typically due to a concurrency issue like
-  // sequencer check failures, transaction aborts, etc.
-  //
-  // See litmus test above for deciding between FAILED_PRECONDITION, ABORTED,
-  // and UNAVAILABLE.
-  ABORTED: 10,
-
-  // Operation was attempted past the valid range. E.g., seeking or reading
-  // past end of file.
-  //
-  // Unlike INVALID_ARGUMENT, this error indicates a problem that may be fixed
-  // if the system state changes. For example, a 32-bit file system will
-  // generate INVALID_ARGUMENT if asked to read at an offset that is not in the
-  // range [0,2^32-1], but it will generate OUT_OF_RANGE if asked to read from
-  // an offset past the current file size.
-  //
-  // There is a fair bit of overlap between FAILED_PRECONDITION and
-  // OUT_OF_RANGE. We recommend using OUT_OF_RANGE (the more specific error)
-  // when it applies so that callers who are iterating through a space can
-  // easily look for an OUT_OF_RANGE error to detect when they are done.
-  OUT_OF_RANGE: 11,
-
-  // Operation is not implemented or not supported/enabled in this service.
-  UNIMPLEMENTED: 12,
-
-  // Internal errors. Means some invariants expected by underlying System has
-  // been broken. If you see one of these errors, Something is very broken.
-  INTERNAL: 13,
-
-  // The service is currently unavailable. This is a most likely a transient
-  // condition and may be corrected by retrying with a backoff.
-  //
-  // See litmus test above for deciding between FAILED_PRECONDITION, ABORTED,
-  // and UNAVAILABLE.
-  UNAVAILABLE: 14,
-
-  // Unrecoverable data loss or corruption.
-  DATA_LOSS: 15,
-
-  // Force users to include a default branch:
-  DO_NOT_USE: -1,
 };
 
 /*!
@@ -244,7 +130,7 @@ abstract class Watch {
    * The current stream to the backend.
    * @private
    */
-  private currentStream: NodeJS.ReadWriteStream | null = null;
+  private currentStream: Duplex | null = null;
 
   /**
    * The server assigns and updates the resume token.
@@ -358,7 +244,7 @@ abstract class Watch {
     this.initStream();
 
     return () => {
-      logger('Watch.onSnapshot', this.requestTag, 'Ending stream');
+      logger('Watch.onSnapshot', this.requestTag, 'Unsubscribe called');
       // Prevent further callbacks.
       this.isActive = false;
       this.onNext = () => {};
@@ -427,7 +313,7 @@ abstract class Watch {
    * Closes the stream and calls onError() if the stream is still active.
    * @private
    */
-  private closeStream(err: GrpcError): void {
+  private closeStream(err: GoogleError): void {
     if (this.currentStream) {
       this.currentStream.end();
       this.currentStream = null;
@@ -445,8 +331,8 @@ abstract class Watch {
    * Clears the change map.
    * @private
    */
-  private maybeReopenStream(err: GrpcError): void {
-    if (this.isActive && !this.isPermanentError(err)) {
+  private maybeReopenStream(err: GoogleError): void {
+    if (this.isActive && !this.isPermanentWatchError(err)) {
       logger(
         'Watch.maybeReopenStream',
         this.requestTag,
@@ -504,7 +390,7 @@ abstract class Watch {
         // Note that we need to call the internal _listen API to pass additional
         // header values in readWriteStream.
         return this.firestore
-          .readWriteStream('listen', request, this.requestTag, true)
+          .requestStream('listen', 'bidirectional', request, this.requestTag)
           .then(backendStream => {
             if (!this.isActive) {
               logger(
@@ -512,7 +398,7 @@ abstract class Watch {
                 this.requestTag,
                 'Closing inactive stream'
               );
-              backendStream.end();
+              backendStream.emit('end');
               return;
             }
             logger('Watch.initStream', this.requestTag, 'Opened new stream');
@@ -530,8 +416,8 @@ abstract class Watch {
                 if (this.currentStream === backendStream) {
                   this.currentStream = null;
 
-                  const err = new GrpcError('Stream ended unexpectedly');
-                  err.code = GRPC_STATUS_CODE.UNKNOWN;
+                  const err = new GoogleError('Stream ended unexpectedly');
+                  err.code = Status.UNKNOWN;
                   this.maybeReopenStream(err);
                 }
               });
@@ -567,7 +453,7 @@ abstract class Watch {
           this.closeStream(Error('Unexpected target ID sent by server'));
         }
       } else if (change.targetChangeType === 'REMOVE') {
-        let code = 13;
+        let code = Status.INTERNAL;
         let message = 'internal error';
         if (change.cause) {
           code = change.cause.code!;
@@ -806,7 +692,7 @@ abstract class Watch {
   }
 
   /**
-   * Determines whether an error is considered permanent and should not be
+   * Determines whether a watch error is considered permanent and should not be
    * retried. Errors that don't provide a GRPC error code are always considered
    * transient in this context.
    *
@@ -814,7 +700,7 @@ abstract class Watch {
    * @param error An error object.
    * @return Whether the error is permanent.
    */
-  private isPermanentError(error: GrpcError): boolean {
+  private isPermanentWatchError(error: GoogleError): boolean {
     if (error.code === undefined) {
       logger(
         'Watch.isPermanentError',
@@ -826,14 +712,14 @@ abstract class Watch {
     }
 
     switch (error.code) {
-      case GRPC_STATUS_CODE.ABORTED:
-      case GRPC_STATUS_CODE.CANCELLED:
-      case GRPC_STATUS_CODE.UNKNOWN:
-      case GRPC_STATUS_CODE.DEADLINE_EXCEEDED:
-      case GRPC_STATUS_CODE.RESOURCE_EXHAUSTED:
-      case GRPC_STATUS_CODE.INTERNAL:
-      case GRPC_STATUS_CODE.UNAVAILABLE:
-      case GRPC_STATUS_CODE.UNAUTHENTICATED:
+      case Status.ABORTED:
+      case Status.CANCELLED:
+      case Status.UNKNOWN:
+      case Status.DEADLINE_EXCEEDED:
+      case Status.RESOURCE_EXHAUSTED:
+      case Status.INTERNAL:
+      case Status.UNAVAILABLE:
+      case Status.UNAUTHENTICATED:
         return false;
       default:
         return true;
@@ -848,8 +734,8 @@ abstract class Watch {
    * @param error A GRPC Error object that exposes an error code.
    * @return Whether we need to back off our retries.
    */
-  private isResourceExhaustedError(error: GrpcError): boolean {
-    return error.code === GRPC_STATUS_CODE.RESOURCE_EXHAUSTED;
+  private isResourceExhaustedError(error: GoogleError): boolean {
+    return error.code === Status.RESOURCE_EXHAUSTED;
   }
 }
 

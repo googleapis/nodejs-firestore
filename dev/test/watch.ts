@@ -16,6 +16,7 @@ const duplexify = require('duplexify');
 
 import {expect} from 'chai';
 import * as extend from 'extend';
+import {GoogleError, Status} from 'google-gax';
 import {Transform} from 'stream';
 import * as through2 from 'through2';
 
@@ -23,27 +24,23 @@ import {google} from '../protos/firestore_v1_proto_api';
 
 import {
   CollectionReference,
-  FieldPath,
-  Firestore,
-  GeoPoint,
-  setLogFunction,
-  Timestamp,
-} from '../src';
-import {
   DocumentData,
   DocumentReference,
   DocumentSnapshot,
+  FieldPath,
+  Firestore,
+  GeoPoint,
   Query,
   QueryDocumentSnapshot,
   QuerySnapshot,
+  setLogFunction,
+  Timestamp,
 } from '../src';
 import {MAX_RETRY_ATTEMPTS, setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
-import {GrpcError} from '../src/types';
 import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
-
 import api = google.firestore.v1;
 
 // Change the argument to 'console.log' to enable debug output.
@@ -323,10 +320,10 @@ class StreamHelper {
    * Destroys the currently active stream with the optionally provided error.
    * If omitted, the stream is closed with a GRPC Status of UNAVAILABLE.
    */
-  destroyStream(err?: GrpcError): void {
+  destroyStream(err?: GoogleError): void {
     if (!err) {
-      err = new GrpcError('Server disconnect');
-      err.code = 14; // Unavailable
+      err = new GoogleError('Server disconnect');
+      err.code = Status.UNAVAILABLE;
     }
     this.readStream!.destroy(err);
   }
@@ -807,9 +804,11 @@ describe('Query watch', () => {
       watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
       return watchHelper.await('snapshot').then(async () => {
         streamHelper.close();
+        await streamHelper.await('end');
         await streamHelper.awaitOpen();
 
         streamHelper.close();
+        await streamHelper.await('end');
         await streamHelper.awaitOpen();
 
         expect(streamHelper.streamCount).to.equal(3);
@@ -818,8 +817,8 @@ describe('Query watch', () => {
   });
 
   it('stops attempts after maximum retry attempts', () => {
-    const err = new GrpcError('GRPC Error');
-    err.code = Number(10 /* ABORTED */);
+    const err = new GoogleError('GRPC Error');
+    err.code = Status.ABORTED;
     return watchHelper.runFailedTest(
       collQueryJSON(),
       async () => {
@@ -861,72 +860,63 @@ describe('Query watch', () => {
       });
   });
 
-  it('retries based on error code', () => {
-    const expectRetry: {[k: number]: boolean} = {
-      /* Cancelled */ 1: true,
-      /* Unknown */ 2: true,
-      /* InvalidArgument */ 3: false,
-      /* DeadlineExceeded */ 4: true,
-      /* NotFound */ 5: false,
-      /* AlreadyExists */ 6: false,
-      /* PermissionDenied */ 7: false,
-      /* ResourceExhausted */ 8: true,
-      /* FailedPrecondition */ 9: false,
-      /* Aborted */ 10: true,
-      /* OutOfRange */ 11: false,
-      /* Unimplemented */ 12: false,
-      /* Internal */ 13: true,
-      /* Unavailable */ 14: true,
-      /* DataLoss */ 15: false,
-      /* Unauthenticated */ 16: true,
-    };
+  it('retries based on error code', async () => {
+    const testCases = new Map<Status, boolean>();
+    testCases.set(Status.CANCELLED, true);
+    testCases.set(Status.UNKNOWN, true);
+    testCases.set(Status.INVALID_ARGUMENT, false);
+    testCases.set(Status.DEADLINE_EXCEEDED, true);
+    testCases.set(Status.NOT_FOUND, false);
+    testCases.set(Status.ALREADY_EXISTS, false);
+    testCases.set(Status.PERMISSION_DENIED, false);
+    testCases.set(Status.RESOURCE_EXHAUSTED, true);
+    testCases.set(Status.FAILED_PRECONDITION, false);
+    testCases.set(Status.ABORTED, true);
+    testCases.set(Status.OUT_OF_RANGE, false);
+    testCases.set(Status.UNIMPLEMENTED, false);
+    testCases.set(Status.INTERNAL, true);
+    testCases.set(Status.UNAVAILABLE, true);
+    testCases.set(Status.DATA_LOSS, false);
+    testCases.set(Status.UNAUTHENTICATED, true);
 
-    let result = Promise.resolve();
+    for (const [statusCode, expectRetry] of testCases) {
+      const err = new GoogleError('GRPC Error');
+      err.code = statusCode;
 
-    for (const statusCode in expectRetry) {
-      if (expectRetry.hasOwnProperty(statusCode)) {
-        result = result.then(() => {
-          const err = new GrpcError('GRPC Error');
-          err.code = Number(statusCode);
-
-          if (expectRetry[statusCode]) {
-            return watchHelper.runTest(collQueryJSON(), () => {
-              watchHelper.sendAddTarget();
-              watchHelper.sendCurrent();
-              watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-              return watchHelper.await('snapshot').then(() => {
-                streamHelper.destroyStream(err);
-                return streamHelper.awaitReopen();
-              });
-            });
-          } else {
-            return watchHelper.runFailedTest(
-              collQueryJSON(),
-              () => {
-                watchHelper.sendAddTarget();
-                watchHelper.sendCurrent();
-                watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
-                return watchHelper
-                  .await('snapshot')
-                  .then(() => {
-                    streamHelper.destroyStream(err);
-                  })
-                  .then(() => {
-                    return streamHelper.await('error');
-                  })
-                  .then(() => {
-                    return streamHelper.await('close');
-                  });
-              },
-              'GRPC Error'
-            );
-          }
+      if (expectRetry) {
+        await watchHelper.runTest(collQueryJSON(), () => {
+          watchHelper.sendAddTarget();
+          watchHelper.sendCurrent();
+          watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
+          return watchHelper.await('snapshot').then(() => {
+            streamHelper.destroyStream(err);
+            return streamHelper.awaitReopen();
+          });
         });
+      } else {
+        await watchHelper.runFailedTest(
+          collQueryJSON(),
+          () => {
+            watchHelper.sendAddTarget();
+            watchHelper.sendCurrent();
+            watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
+            return watchHelper
+              .await('snapshot')
+              .then(() => {
+                streamHelper.destroyStream(err);
+              })
+              .then(() => {
+                return streamHelper.await('error');
+              })
+              .then(() => {
+                return streamHelper.await('close');
+              });
+          },
+          'GRPC Error'
+        );
       }
     }
-
-    return result;
-  });
+  }).timeout(5000);
 
   it('retries with unknown code', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
