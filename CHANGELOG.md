@@ -4,6 +4,21 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [3.3.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.2.0...v3.3.0) (2020-01-03)
+
+
+### Features
+
+* add Symbol.asyncInterator to Query.stream() ([#843](https://www.github.com/googleapis/nodejs-firestore/issues/843)) ([68795c4](https://www.github.com/googleapis/nodejs-firestore/commit/68795c43ae9ef6b286650228746c7c16f59347f7))
+* use GAX retry config for streams ([#847](https://www.github.com/googleapis/nodejs-firestore/issues/847)) ([218a4c6](https://www.github.com/googleapis/nodejs-firestore/commit/218a4c65afcc55158aac45b98a4ccb28b88c00a1))
+
+
+### Bug Fixes
+
+* increase test timeout ([#846](https://www.github.com/googleapis/nodejs-firestore/issues/846)) ([b94c367](https://www.github.com/googleapis/nodejs-firestore/commit/b94c367e9655f8a6a3553610ebc655877be502ec))
+* **deps:** roll back dependency @google-cloud/firestore to ^3.1.0 ([#848](https://www.github.com/googleapis/nodejs-firestore/issues/848)) ([2ad8acc](https://www.github.com/googleapis/nodejs-firestore/commit/2ad8acc6101f7b20c6881b66ed6eb66f99a699b3))
+* retry writes that fail with status code ABORTED ([#854](https://www.github.com/googleapis/nodejs-firestore/issues/854)) ([96f085f](https://www.github.com/googleapis/nodejs-firestore/commit/96f085f3df7c8e6e20dbffb14ebf6ebb533fc036))
+
 ## [3.2.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.1.0...v3.2.0) (2019-12-30)
 
 
