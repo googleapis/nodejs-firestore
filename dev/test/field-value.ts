@@ -23,6 +23,7 @@ import {
   incrementTransform,
   InvalidApiUsage,
   requestEquals,
+  response,
   serverTimestamp,
   set,
   writeResult,
@@ -96,7 +97,7 @@ describe('FieldValue.arrayUnion()', () => {
 
   it('can be used with set()', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         const expectedRequest = set({
           document: document('documentId', 'foo', 'bar'),
           transforms: [
@@ -107,7 +108,7 @@ describe('FieldValue.arrayUnion()', () => {
 
         requestEquals(request, expectedRequest);
 
-        callback(null, writeResult(2));
+        return response(writeResult(2));
       },
     };
 
@@ -152,7 +153,7 @@ describe('FieldValue.increment()', () => {
 
   it('can be used with set()', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         const expectedRequest = set({
           document: document('documentId', 'foo', 'bar'),
           transforms: [
@@ -161,7 +162,7 @@ describe('FieldValue.increment()', () => {
           ],
         });
         requestEquals(request, expectedRequest);
-        callback(null, writeResult(2));
+        return response(writeResult(2));
       },
     };
 
@@ -194,7 +195,7 @@ describe('FieldValue.arrayRemove()', () => {
 
   it('can be used with set()', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         const expectedRequest = set({
           document: document('documentId', 'foo', 'bar'),
           transforms: [
@@ -204,7 +205,7 @@ describe('FieldValue.arrayRemove()', () => {
         });
         requestEquals(request, expectedRequest);
 
-        callback(null, writeResult(2));
+        return response(writeResult(2));
       },
     };
 
@@ -232,14 +233,14 @@ describe('FieldValue.serverTimestamp()', () => {
 
   it('can be used with set()', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         const expectedRequest = set({
           document: document('documentId', 'foo', 'bar'),
           transforms: [serverTimestamp('field'), serverTimestamp('map.field')],
         });
         requestEquals(request, expectedRequest);
 
-        callback(null, writeResult(2));
+        return response(writeResult(2));
       },
     };
 

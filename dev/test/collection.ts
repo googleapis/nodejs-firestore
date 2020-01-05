@@ -21,6 +21,7 @@ import {
   DATABASE_ROOT,
   document,
   InvalidApiUsage,
+  response,
   verifyInstance,
 } from './util/helpers';
 
@@ -84,7 +85,7 @@ describe('Collection interface', () => {
 
   it('has add() method', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         // Verify that the document name uses an auto-generated id.
         const docIdRe = /^projects\/test-project\/databases\/\(default\)\/documents\/collectionId\/[a-zA-Z0-9]{20}$/;
         expect(request.writes![0].update!.name).to.match(docIdRe);
@@ -105,7 +106,7 @@ describe('Collection interface', () => {
           ],
         });
 
-        callback(null, {
+        return response({
           commitTime: {
             nanos: 0,
             seconds: 0,
@@ -137,7 +138,7 @@ describe('Collection interface', () => {
 
   it('has list() method', () => {
     const overrides: ApiOverride = {
-      listDocuments: (request, options, callback) => {
+      listDocuments: (request, options) => {
         expect(request).to.deep.eq({
           parent: `${DATABASE_ROOT}/documents/a/b`,
           collectionId: 'c',
@@ -146,7 +147,7 @@ describe('Collection interface', () => {
           mask: {fieldPaths: []},
         });
 
-        callback(null, [document('first'), document('second')]);
+        return response([document('first'), document('second')]);
       },
     };
 

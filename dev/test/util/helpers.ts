@@ -14,7 +14,8 @@
 
 import {expect} from 'chai';
 import * as extend from 'extend';
-import {CallOptions, GrpcClient} from 'google-gax';
+import {GrpcClient} from 'google-gax';
+import {Duplex} from 'stream';
 import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
@@ -40,93 +41,34 @@ export const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 // tslint:disable-next-line:no-any
 export type InvalidApiUsage = any;
 
-/**
- * Interface that defines the request handlers used by Firestore.
- */
-export interface ApiOverride {
-  beginTransaction?: (
-    request: api.IBeginTransactionRequest,
-    options: CallOptions,
-    callback: (err?: Error | null, resp?: api.IBeginTransactionResponse) => void
-  ) => void;
-  commit?: (
-    request: api.ICommitRequest,
-    options: CallOptions,
-    callback: (err?: Error | null, resp?: api.ICommitResponse) => void
-  ) => void;
-  rollback?: (
-    request: api.IRollbackRequest,
-    options: CallOptions,
-    callback: (err?: Error | null, resp?: void) => void
-  ) => void;
-  listCollectionIds?: (
-    request: api.IListCollectionIdsRequest,
-    options: CallOptions,
-    callback: (err?: Error | null, resp?: string[]) => void
-  ) => void;
-  listDocuments?: (
-    request: api.IListDocumentsRequest,
-    options: CallOptions,
-    callback: (err?: Error | null, resp?: api.IDocument[]) => void
-  ) => void;
-  batchGetDocuments?: (
-    request: api.IBatchGetDocumentsRequest
-  ) => NodeJS.ReadableStream;
-  runQuery?: (request: api.IRunQueryRequest) => NodeJS.ReadableStream;
-  listen?: () => NodeJS.ReadWriteStream;
-  getProjectId?: (
-    callback: (err?: Error | null, projectId?: string | null) => void
-  ) => void;
-}
+/** Defines the request handlers used by Firestore. */
+export type ApiOverride = Partial<GapicClient>;
 
 /**
  * Creates a new Firestore instance for testing. Request handlers can be
  * overridden by providing `apiOverrides`.
  *
- * @param {ApiOverride} apiOverrides An object with the request handlers to
- * override.
- * @param {Object} firestoreSettings Firestore Settings to configure the client.
- * @return {Promise<Firestore>} A Promise that resolves with the new Firestore
- * client.
+ * @param apiOverrides An object with request handlers to override.
+ * @param firestoreSettings Firestore Settings to configure the client.
+ * @return A Promise that resolves with the new Firestore client.
  */
 export function createInstance(
   apiOverrides?: ApiOverride,
   firestoreSettings?: {}
 ): Promise<Firestore> {
-  const initializationOptions = Object.assign(
-    {
-      projectId: PROJECT_ID,
-      sslCreds: SSL_CREDENTIALS,
-      keyFilename: __dirname + '/../fake-certificate.json',
-    },
-    firestoreSettings
-  );
+  const initializationOptions = {
+    ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS},
+    ...firestoreSettings,
+  };
 
   const firestore = new Firestore();
   firestore.settings(initializationOptions);
 
-  const clientPool = new ClientPool(
+  firestore['_clientPool'] = new ClientPool<GapicClient>(
     /* concurrentRequestLimit= */ 1,
     /* maxIdleClients= */ 0,
-    () => {
-      const gapicClient: GapicClient = new v1(initializationOptions);
-      if (apiOverrides) {
-        Object.keys(apiOverrides).forEach(override => {
-          const apiOverride = (apiOverrides as {[k: string]: unknown})[
-            override
-          ];
-          if (override !== 'getProjectId') {
-            gapicClient._innerApiCalls[override] = apiOverride;
-          } else {
-            gapicClient[override] = apiOverride;
-          }
-        });
-      }
-      return gapicClient;
-    }
+    () => ({...new v1(initializationOptions), ...apiOverrides})
   );
-
-  firestore['_clientPool'] = clientPool;
 
   return Promise.resolve(firestore);
 }
@@ -357,7 +299,12 @@ export function writeResult(count: number): api.IWriteResponse {
   return response;
 }
 
-export function requestEquals(actual: object, expected: object): void {
+export function requestEquals(
+  actual: object | undefined,
+  expected: object
+): void {
+  expect(actual).to.not.be.undefined;
+
   // 'extend' removes undefined fields in the request object. The backend
   // ignores these fields, but we need to manually strip them before we compare
   // the expected and the actual request.
@@ -366,9 +313,7 @@ export function requestEquals(actual: object, expected: object): void {
   expect(actual).to.deep.eq(proto);
 }
 
-export function stream<T>(
-  ...elements: Array<T | Error>
-): NodeJS.ReadableStream {
+export function stream<T>(...elements: Array<T | Error>): Duplex {
   const stream = through2.obj();
 
   setImmediate(() => {
@@ -383,4 +328,9 @@ export function stream<T>(
   });
 
   return stream;
+}
+
+/** Creates a response as formatted by the GAPIC request methods.  */
+export function response<T>(result: T): Promise<[T, unknown, unknown]> {
+  return Promise.resolve([result, undefined, undefined]);
 }
