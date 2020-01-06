@@ -51,7 +51,7 @@ describe('Client pool', () => {
     expect(clientPool.size).to.equal(2);
   });
 
-  it('re-uses idle instances', () => {
+  it('re-uses instances with remaining capacity', () => {
     const clientPool = new ClientPool<{}>(2, 0, () => {
       return {};
     });
@@ -78,6 +78,34 @@ describe('Client pool', () => {
       clientPool.run(REQUEST_TAG, () => operationPromises[4].promise);
       expect(clientPool.size).to.equal(2);
     });
+  });
+
+  it('re-uses idle instances', async () => {
+    let instanceCount = 0;
+    const clientPool = new ClientPool<{}>(1, 1, () => {
+      ++instanceCount;
+      return {};
+    });
+
+    const operationPromises = deferredPromises(2);
+
+    let completionPromise = clientPool.run(
+      REQUEST_TAG,
+      () => operationPromises[0].promise
+    );
+    expect(clientPool.size).to.equal(1);
+    operationPromises[0].resolve();
+    await completionPromise;
+
+    completionPromise = clientPool.run(
+      REQUEST_TAG,
+      () => operationPromises[1].promise
+    );
+    expect(clientPool.size).to.equal(1);
+    operationPromises[1].resolve();
+    await completionPromise;
+
+    expect(instanceCount).to.equal(1);
   });
 
   it('bin packs operations', async () => {
