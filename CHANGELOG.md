@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.3.2](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.1...v3.3.2) (2020-01-06)
+
+
+### Bug Fixes
+
+* add quotes to field name to avoid ambiguity ([#860](https://www.github.com/googleapis/nodejs-firestore/issues/860)) ([8caee71](https://www.github.com/googleapis/nodejs-firestore/commit/8caee71f6105e82faf3f6334e69ed5890f977a3a))
+
 ### [3.3.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.0...v3.3.1) (2020-01-06)
 
 
