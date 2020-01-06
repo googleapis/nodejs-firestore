@@ -68,7 +68,7 @@ export class ClientPool<T> {
    */
   private acquire(requestTag: string): T {
     let selectedClient: T | null = null;
-    let selectedClientRequestCount = 0;
+    let selectedClientRequestCount = -1;
 
     for (const [client, requestCount] of this.activeClients) {
       // Use the "most-full" client that can still accommodate the request
@@ -99,6 +99,7 @@ export class ClientPool<T> {
     } else {
       logger('ClientPool.acquire', requestTag, 'Creating a new client');
       selectedClient = this.clientFactory();
+      selectedClientRequestCount = 0;
       assert(
         !this.activeClients.has(selectedClient),
         'The provided client factory returned an existing instance'
