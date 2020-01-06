@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.3.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.0...v3.3.1) (2020-01-06)
+
+
+### Bug Fixes
+
+* don't recreate instances when client is idle ([0aa2a8b](https://www.github.com/googleapis/nodejs-firestore/commit/0aa2a8b8d0c76e0cfc6d29c37d143cc9c0b45fec))
+
 ## [3.3.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.2.0...v3.3.0) (2020-01-03)
 
 
