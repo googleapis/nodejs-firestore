@@ -135,6 +135,14 @@ declare namespace FirebaseFirestore {
     /** Whether to use SSL when connecting. */
     ssl?: boolean;
 
+    /**
+     * The maximum number of idle GRPC channels to keep. A smaller number of idle
+     * channels reduces memory usage but increases request latency for clients
+     * with fluctuating request rates. If set to 0, shuts down all GRPC channels
+     * when the client becomes idle. Defaults to 1.
+     */
+    maxIdleChannels?: number;
+    
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
 
@@ -208,6 +216,13 @@ declare namespace FirebaseFirestore {
      */
     getAll(...documentRefsOrReadOptions: Array<DocumentReference<DocumentData> | ReadOptions>):
         Promise<Array<DocumentSnapshot<DocumentData>>>;
+
+    /**
+     * Terminates the Firestore client and closes all open streams.
+     *
+     * @return A Promise that resolves when the client is terminated.
+     */
+    terminate(): Promise<void>;
 
     /**
      * Fetches the root collections that are associated with this Firestore

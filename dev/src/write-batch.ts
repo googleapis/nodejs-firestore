@@ -15,6 +15,7 @@
  */
 
 import * as assert from 'assert';
+import {describe, it} from 'mocha';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {
@@ -546,8 +547,7 @@ export class WriteBatch {
         .request<api.IBeginTransactionResponse>(
           'beginTransaction',
           request,
-          tag,
-          true
+          tag
         )
         .then(resp => {
           return this.commit_({transactionId: resp.transaction!});
@@ -588,12 +588,7 @@ export class WriteBatch {
     }
 
     return this._firestore
-      .request<api.CommitResponse>(
-        'commit',
-        request,
-        tag,
-        /* allowRetries= */ false
-      )
+      .request<api.CommitResponse>('commit', request, tag)
       .then(resp => {
         const writeResults: WriteResult[] = [];
 

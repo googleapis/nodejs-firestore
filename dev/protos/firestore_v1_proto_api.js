@@ -1,5 +1,5 @@
 /*!
- * Copyright 2019 Google LLC
+ * Copyright 2020 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -5705,22 +5705,6 @@ $root.google = (function() {
                     return Order;
                 })();
 
-                /**
-                 * Direction enum.
-                 * @name google.firestore.v1.StructuredQuery.Direction
-                 * @enum {number}
-                 * @property {string} DIRECTION_UNSPECIFIED=DIRECTION_UNSPECIFIED DIRECTION_UNSPECIFIED value
-                 * @property {string} ASCENDING=ASCENDING ASCENDING value
-                 * @property {string} DESCENDING=DESCENDING DESCENDING value
-                 */
-                StructuredQuery.Direction = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[0] = "DIRECTION_UNSPECIFIED"] = "DIRECTION_UNSPECIFIED";
-                    values[valuesById[1] = "ASCENDING"] = "ASCENDING";
-                    values[valuesById[2] = "DESCENDING"] = "DESCENDING";
-                    return values;
-                })();
-
                 StructuredQuery.FieldReference = (function() {
 
                     /**
@@ -5790,6 +5774,22 @@ $root.google = (function() {
                     Projection.prototype.fields = $util.emptyArray;
 
                     return Projection;
+                })();
+
+                /**
+                 * Direction enum.
+                 * @name google.firestore.v1.StructuredQuery.Direction
+                 * @enum {number}
+                 * @property {string} DIRECTION_UNSPECIFIED=DIRECTION_UNSPECIFIED DIRECTION_UNSPECIFIED value
+                 * @property {string} ASCENDING=ASCENDING ASCENDING value
+                 * @property {string} DESCENDING=DESCENDING DESCENDING value
+                 */
+                StructuredQuery.Direction = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "DIRECTION_UNSPECIFIED"] = "DIRECTION_UNSPECIFIED";
+                    values[valuesById[1] = "ASCENDING"] = "ASCENDING";
+                    values[valuesById[2] = "DESCENDING"] = "DESCENDING";
+                    return values;
                 })();
 
                 return StructuredQuery;

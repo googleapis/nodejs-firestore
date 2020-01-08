@@ -50,11 +50,6 @@ import api = proto.google.firestore.v1;
 const READ_AFTER_WRITE_ERROR_MSG =
   'Firestore transactions require all reads to be executed before all writes.';
 
-/*!
- * Transactions can be retried if the initial stream opening errors out.
- */
-const ALLOW_RETRIES = true;
-
 /**
  * A reference to a transaction.
  *
@@ -372,8 +367,7 @@ export class Transaction {
       .request<api.IBeginTransactionResponse>(
         'beginTransaction',
         request,
-        this._requestTag,
-        ALLOW_RETRIES
+        this._requestTag
       )
       .then(resp => {
         this._transactionId = resp.transaction!;
@@ -405,12 +399,7 @@ export class Transaction {
       transaction: this._transactionId,
     };
 
-    return this._firestore.request(
-      'rollback',
-      request,
-      this._requestTag,
-      /* allowRetries= */ false
-    );
+    return this._firestore.request('rollback', request, this._requestTag);
   }
 
   /**

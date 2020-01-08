@@ -4,6 +4,58 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.3.2](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.1...v3.3.2) (2020-01-06)
+
+
+### Bug Fixes
+
+* add quotes to field name to avoid ambiguity ([#860](https://www.github.com/googleapis/nodejs-firestore/issues/860)) ([8caee71](https://www.github.com/googleapis/nodejs-firestore/commit/8caee71f6105e82faf3f6334e69ed5890f977a3a))
+
+### [3.3.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.0...v3.3.1) (2020-01-06)
+
+
+### Bug Fixes
+
+* don't recreate instances when client is idle ([0aa2a8b](https://www.github.com/googleapis/nodejs-firestore/commit/0aa2a8b8d0c76e0cfc6d29c37d143cc9c0b45fec))
+
+## [3.3.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.2.0...v3.3.0) (2020-01-03)
+
+
+### Features
+
+* add Symbol.asyncInterator to Query.stream() ([#843](https://www.github.com/googleapis/nodejs-firestore/issues/843)) ([68795c4](https://www.github.com/googleapis/nodejs-firestore/commit/68795c43ae9ef6b286650228746c7c16f59347f7))
+* use GAX retry config for streams ([#847](https://www.github.com/googleapis/nodejs-firestore/issues/847)) ([218a4c6](https://www.github.com/googleapis/nodejs-firestore/commit/218a4c65afcc55158aac45b98a4ccb28b88c00a1))
+
+
+### Bug Fixes
+
+* increase test timeout ([#846](https://www.github.com/googleapis/nodejs-firestore/issues/846)) ([b94c367](https://www.github.com/googleapis/nodejs-firestore/commit/b94c367e9655f8a6a3553610ebc655877be502ec))
+* retry writes that fail with status code ABORTED ([#854](https://www.github.com/googleapis/nodejs-firestore/issues/854)) ([96f085f](https://www.github.com/googleapis/nodejs-firestore/commit/96f085f3df7c8e6e20dbffb14ebf6ebb533fc036))
+
+## [3.2.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.1.0...v3.2.0) (2019-12-30)
+
+
+### Features
+
+* allow specifying how many idle GRPC channels to keep ([#837](https://www.github.com/googleapis/nodejs-firestore/issues/837)) ([37e93da](https://www.github.com/googleapis/nodejs-firestore/commit/37e93da689f985b6b0f30645435b12179513eb64))
+
+
+### Bug Fixes
+
+* reduce overhead for listDocuments()/listCollections() ([#838](https://www.github.com/googleapis/nodejs-firestore/issues/838)) ([5c870e6](https://www.github.com/googleapis/nodejs-firestore/commit/5c870e615e4774d3d50fc33c17b5da45dcacea4f))
+
+## [3.1.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.0.0...v3.1.0) (2019-12-19)
+
+
+### Features
+
+* add ability to close channels ([#824](https://www.github.com/googleapis/nodejs-firestore/issues/824)) ([9ef582a](https://www.github.com/googleapis/nodejs-firestore/commit/9ef582aa0508a3d02fb036f741c8c51e5ff4307c))
+
+
+### Bug Fixes
+
+* **deps:** update dependency deep-equal to v2 ([#821](https://www.github.com/googleapis/nodejs-firestore/issues/821)) ([25472e1](https://www.github.com/googleapis/nodejs-firestore/commit/25472e11a0e1a4a5e1931b1652d125f9c8cabf11))
+
 ## [3.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v2.6.1...v3.0.0) (2019-12-15)
 
 

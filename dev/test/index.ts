@@ -21,8 +21,8 @@ import {google} from '../protos/firestore_v1_proto_api';
 
 import * as Firestore from '../src';
 import {DocumentSnapshot, FieldPath} from '../src';
+import {setTimeoutHandler} from '../src/backoff';
 import {QualifiedResourcePath} from '../src/path';
-import {GrpcError} from '../src/types';
 import {
   ApiOverride,
   createInstance,
@@ -36,6 +36,7 @@ import {
 } from './util/helpers';
 
 import api = google.firestore.v1;
+import {Status} from 'google-gax';
 
 use(chaiAsPromised);
 
@@ -491,6 +492,19 @@ describe('instantiation', () => {
     }
   });
 
+  it('validates maxIdleChannels', () => {
+    const invalidValues = [-1, 'foo', 1.3];
+
+    for (const value of invalidValues) {
+      expect(() => {
+        const settings = {...DEFAULT_SETTINGS, maxIdleChannels: value};
+        new Firestore.Firestore(settings as InvalidApiUsage);
+      }).to.throw();
+    }
+
+    new Firestore.Firestore({maxIdleChannels: 1});
+  });
+
   it('uses project id from constructor', () => {
     const firestore = new Firestore.Firestore({projectId: 'foo'});
 
@@ -871,6 +885,7 @@ describe('listCollections() method', () => {
       listCollectionIds: (request, options, callback) => {
         expect(request).to.deep.eq({
           parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
+          pageSize: 65535,
         });
 
         callback(null, ['first', 'second']);
@@ -887,6 +902,14 @@ describe('listCollections() method', () => {
 });
 
 describe('getAll() method', () => {
+  before(() => {
+    setTimeoutHandler(setImmediate);
+  });
+
+  after(() => {
+    setTimeoutHandler(setTimeout);
+  });
+
   function resultEquals(
     result: DocumentSnapshot[],
     ...docs: api.IBatchGetDocumentsResponse[]
@@ -981,6 +1004,30 @@ describe('getAll() method', () => {
     });
   });
 
+  it('handles intermittent stream exception', () => {
+    let attempts = 1;
+
+    const overrides: ApiOverride = {
+      batchGetDocuments: () => {
+        if (attempts < 3) {
+          ++attempts;
+          throw new Error('Expected error');
+        } else {
+          return stream(found(document('documentId')));
+        }
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(() => {
+          expect(attempts).to.equal(3);
+        });
+    });
+  });
+
   it('handles serialization error', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
@@ -1004,62 +1051,56 @@ describe('getAll() method', () => {
     });
   });
 
-  it('only retries on GRPC unavailable', () => {
-    const expectedErrorAttempts = {
-      /* Cancelled */ 1: 1,
-      /* Unknown */ 2: 1,
-      /* InvalidArgument */ 3: 1,
-      /* DeadlineExceeded */ 4: 1,
-      /* NotFound */ 5: 1,
-      /* AlreadyExists */ 6: 1,
-      /* PermissionDenied */ 7: 1,
-      /* ResourceExhausted */ 8: 1,
-      /* FailedPrecondition */ 9: 1,
-      /* Aborted */ 10: 1,
-      /* OutOfRange */ 11: 1,
-      /* Unimplemented */ 12: 1,
-      /* Internal */ 13: 1,
-      /* Unavailable */ 14: 5,
-      /* DataLoss */ 15: 1,
-      /* Unauthenticated */ 16: 1,
+  it('retries based on error code', () => {
+    const expectedErrorAttempts: {[key: number]: number} = {
+      [Status.CANCELLED]: 1,
+      [Status.UNKNOWN]: 1,
+      [Status.INVALID_ARGUMENT]: 1,
+      [Status.DEADLINE_EXCEEDED]: 5,
+      [Status.NOT_FOUND]: 1,
+      [Status.ALREADY_EXISTS]: 1,
+      [Status.PERMISSION_DENIED]: 1,
+      [Status.RESOURCE_EXHAUSTED]: 1,
+      [Status.FAILED_PRECONDITION]: 1,
+      [Status.ABORTED]: 5,
+      [Status.OUT_OF_RANGE]: 1,
+      [Status.UNIMPLEMENTED]: 1,
+      [Status.INTERNAL]: 5,
+      [Status.UNAVAILABLE]: 5,
+      [Status.DATA_LOSS]: 1,
+      [Status.UNAUTHENTICATED]: 1,
     };
 
-    const actualErrorAttempts: {[k: number]: number} = {};
+    const actualErrorAttempts: {[key: number]: number} = {};
 
     const overrides: ApiOverride = {
       batchGetDocuments: request => {
         const errorCode = Number(request.documents![0].split('/').pop());
         actualErrorAttempts[errorCode] =
           (actualErrorAttempts[errorCode] || 0) + 1;
-        const error = new GrpcError('Expected exception');
+        const error = new gax.GoogleError('Expected exception');
         error.code = errorCode;
         return stream(error);
       },
     };
 
-    return createInstance(overrides).then(firestore => {
+    return createInstance(overrides).then(async firestore => {
       const coll = firestore.collection('collectionId');
 
-      const promises: Array<Promise<void>> = [];
+      for (const errorCode of Object.keys(expectedErrorAttempts)) {
+        await firestore
+          .getAll(coll.doc(`${errorCode}`))
+          .then(() => {
+            throw new Error('Unexpected success in Promise');
+          })
+          .catch(err => {
+            expect(err.code).to.equal(Number(errorCode));
+          });
+      }
 
-      Object.keys(expectedErrorAttempts).forEach(errorCode => {
-        promises.push(
-          firestore
-            .getAll(coll.doc(`${errorCode}`))
-            .then(() => {
-              throw new Error('Unexpected success in Promise');
-            })
-            .catch(err => {
-              expect(err.code).to.equal(Number(errorCode));
-            })
-        );
-      });
-
-      return Promise.all(promises).then(() => {
-        expect(actualErrorAttempts).to.deep.eq(expectedErrorAttempts);
-      });
+      expect(actualErrorAttempts).to.deep.eq(expectedErrorAttempts);
     });
-  });
+  }).timeout(5000);
 
   it('requires at least one argument', () => {
     return createInstance().then(firestore => {

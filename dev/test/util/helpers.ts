@@ -20,7 +20,7 @@ import * as through2 from 'through2';
 import * as proto from '../../protos/firestore_v1_proto_api';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
-import {DocumentData, GapicClient, GrpcError} from '../../src/types';
+import {DocumentData, GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
@@ -67,7 +67,7 @@ export interface ApiOverride {
   listDocuments?: (
     request: api.IListDocumentsRequest,
     options: CallOptions,
-    callback: (err?: GrpcError | null, resp?: api.IDocument[]) => void
+    callback: (err?: Error | null, resp?: api.IDocument[]) => void
   ) => void;
   batchGetDocuments?: (
     request: api.IBatchGetDocumentsRequest
@@ -105,20 +105,26 @@ export function createInstance(
   const firestore = new Firestore();
   firestore.settings(initializationOptions);
 
-  const clientPool = new ClientPool(/* concurrentRequestLimit= */ 1, () => {
-    const gapicClient: GapicClient = new v1(initializationOptions);
-    if (apiOverrides) {
-      Object.keys(apiOverrides).forEach(override => {
-        const apiOverride = (apiOverrides as {[k: string]: unknown})[override];
-        if (override !== 'getProjectId') {
-          gapicClient._innerApiCalls[override] = apiOverride;
-        } else {
-          gapicClient[override] = apiOverride;
-        }
-      });
+  const clientPool = new ClientPool(
+    /* concurrentRequestLimit= */ 1,
+    /* maxIdleClients= */ 0,
+    () => {
+      const gapicClient: GapicClient = new v1(initializationOptions);
+      if (apiOverrides) {
+        Object.keys(apiOverrides).forEach(override => {
+          const apiOverride = (apiOverrides as {[k: string]: unknown})[
+            override
+          ];
+          if (override !== 'getProjectId') {
+            gapicClient._innerApiCalls[override] = apiOverride;
+          } else {
+            gapicClient[override] = apiOverride;
+          }
+        });
+      }
+      return gapicClient;
     }
-    return gapicClient;
-  });
+  );
 
   firestore['_clientPool'] = clientPool;
 

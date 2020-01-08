@@ -18,6 +18,7 @@ import * as extend from 'extend';
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath, FieldValue, Firestore, setLogFunction} from '../src';
 import {DocumentData, DocumentReference, Query, Timestamp} from '../src';
+import {setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {QualifiedResourcePath} from '../src/path';
 import {
@@ -287,12 +288,16 @@ describe('query interface', () => {
   let firestore: Firestore;
 
   beforeEach(() => {
+    setTimeoutHandler(setImmediate);
     return createInstance().then(firestoreInstance => {
       firestore = firestoreInstance;
     });
   });
 
-  afterEach(() => verifyInstance(firestore));
+  afterEach(() => {
+    verifyInstance(firestore);
+    setTimeoutHandler(setTimeout);
+  });
 
   it('has isEqual() method', () => {
     const query = firestore.collection('collectionId');
