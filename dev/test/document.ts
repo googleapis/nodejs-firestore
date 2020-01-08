@@ -140,7 +140,7 @@ describe('serialize document', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: undefined});
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field foo).'
+      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "foo").'
     );
 
     expect(() => {
@@ -148,14 +148,14 @@ describe('serialize document', () => {
         foo: FieldPath.documentId(),
       });
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Cannot use object of type "FieldPath" as a Firestore value (found in field foo).'
+      'Value for argument "data" is not a valid Firestore document. Cannot use object of type "FieldPath" as a Firestore value (found in field "foo").'
     );
 
     expect(() => {
       class Foo {}
       firestore.doc('collectionId/documentId').set({foo: new Foo()});
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo" (found in field foo). Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo" (found in field "foo"). Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
     );
 
     expect(() => {
@@ -1238,7 +1238,7 @@ describe('set document', () => {
     expect(() => {
       firestore.doc('collectionId/documentId').set({foo: FieldValue.delete()});
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field foo).'
+      'Value for argument "data" is not a valid Firestore document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "foo").'
     );
   });
 
@@ -1587,7 +1587,7 @@ describe('update document', () => {
         a: {b: FieldValue.delete()},
       });
     }).to.throw(
-      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field a.b).'
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").'
     );
 
     expect(() => {
@@ -1595,7 +1595,7 @@ describe('update document', () => {
         b: FieldValue.delete(),
       });
     }).to.throw(
-      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 1 is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field a.b).'
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 1 is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").'
     );
 
     expect(() => {

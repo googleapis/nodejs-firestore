@@ -308,7 +308,7 @@ export function validateUserInput(
   level = level || 0;
   inArray = inArray || false;
 
-  const fieldPathMessage = path ? ` (found in field ${path})` : '';
+  const fieldPathMessage = path ? ` (found in field "${path}")` : '';
 
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; ++i) {

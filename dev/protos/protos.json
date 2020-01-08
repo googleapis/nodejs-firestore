@@ -1139,13 +1139,6 @@
                         }
                       }
                     },
-                    "Direction": {
-                      "values": {
-                        "DIRECTION_UNSPECIFIED": 0,
-                        "ASCENDING": 1,
-                        "DESCENDING": 2
-                      }
-                    },
                     "FieldReference": {
                       "fields": {
                         "fieldPath": {
@@ -1161,6 +1154,13 @@
                           "type": "FieldReference",
                           "id": 2
                         }
+                      }
+                    },
+                    "Direction": {
+                      "values": {
+                        "DIRECTION_UNSPECIFIED": 0,
+                        "ASCENDING": 1,
+                        "DESCENDING": 2
                       }
                     }
                   }
