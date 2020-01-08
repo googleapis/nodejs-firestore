@@ -41,7 +41,13 @@ import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
-import {ApiMapValue, DocumentData, GapicClient, ReadOptions, Settings} from './types';
+import {
+  ApiMapValue,
+  DocumentData,
+  GapicClient,
+  ReadOptions,
+  Settings,
+} from './types';
 import {Deferred, isPermanentRpcError, requestTag} from './util';
 import {
   validateBoolean,

@@ -84,11 +84,7 @@ export class DocumentSnapshotBuilder<T = DocumentData> {
           this.createTime!,
           this.updateTime!
         )
-      : new DocumentSnapshot(
-          this.ref!,
-          undefined,
-          this.readTime!
-        );
+      : new DocumentSnapshot(this.ref!, undefined, this.readTime!);
   }
 }
 
