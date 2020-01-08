@@ -36,10 +36,6 @@ export type GapicClient = any;
 // tslint:disable-next-line:no-any
 export type RBTree = any;
 
-export class GrpcError extends Error {
-  code?: number;
-}
-
 /**
  * Settings used to directly configure a `Firestore` instance.
  */

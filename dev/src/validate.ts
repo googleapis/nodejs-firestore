@@ -51,7 +51,7 @@ export function customObjectMessage(
   value: unknown,
   path?: FieldPath
 ): string {
-  const fieldPathMessage = path ? ` (found in field ${path})` : '';
+  const fieldPathMessage = path ? ` (found in field "${path}")` : '';
 
   if (isObject(value)) {
     // We use the base class name as the type name as the sentinel classes

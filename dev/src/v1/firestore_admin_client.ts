@@ -278,6 +278,9 @@ export class FirestoreAdminClient {
     for (const methodName of firestoreAdminStubMethods) {
       const innerCallPromise = this.firestoreAdminStub.then(
         stub => (...args: Array<{}>) => {
+          if (this._terminated) {
+            return Promise.reject('The client has already been closed.');
+          }
           return stub[methodName].apply(stub, args);
         },
         (err: Error | null | undefined) => () => {
@@ -298,9 +301,6 @@ export class FirestoreAdminClient {
         callOptions?: CallOptions,
         callback?: APICallback
       ) => {
-        if (this._terminated) {
-          return Promise.reject('The client has already been closed.');
-        }
         return apiCall(argument, callOptions, callback);
       };
     }
@@ -1270,7 +1270,7 @@ export class FirestoreAdminClient {
    * @param {string} collection
    * @returns {string} Resource name string.
    */
-  collectiongroupPath(project: string, database: string, collection: string) {
+  collectionGroupPath(project: string, database: string, collection: string) {
     return this._pathTemplates.collectiongroupPathTemplate.render({
       project,
       database,

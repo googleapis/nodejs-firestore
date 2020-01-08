@@ -16,7 +16,6 @@
 
 const deepEqual = require('deep-equal');
 
-import * as bun from 'bun';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_v1_proto_api';
@@ -294,12 +293,7 @@ export class DocumentReference implements Serializable {
         pageSize: Math.pow(2, 16) - 1,
       };
       return this._firestore
-        .request<string[]>(
-          'listCollectionIds',
-          request,
-          tag,
-          /* allowRetries= */ true
-        )
+        .request<string[]>('listCollectionIds', request, tag)
         .then(collectionIds => {
           const collections: CollectionReference[] = [];
 
@@ -1719,7 +1713,9 @@ export class Query {
       callback();
     });
 
-    return bun([responseStream, transform]);
+    responseStream.pipe(transform);
+    responseStream.on('error', transform.destroy);
+    return transform;
   }
 
   /**
@@ -1833,7 +1829,7 @@ export class Query {
     this.firestore.initializeIfNeeded(tag).then(() => {
       const request = this.toProto(transactionId);
       this._firestore
-        .readStream('runQuery', request, tag, true)
+        .requestStream('runQuery', 'unidirectional', request, tag)
         .then(backendStream => {
           backendStream.on('error', err => {
             logger(
@@ -2064,12 +2060,7 @@ export class CollectionReference extends Query {
       };
 
       return this.firestore
-        .request<api.IDocument[]>(
-          'listDocuments',
-          request,
-          tag,
-          /*allowRetries=*/ true
-        )
+        .request<api.IDocument[]>('listDocuments', request, tag)
         .then(documents => {
           // Note that the backend already orders these documents by name,
           // so we do not need to manually sort them.

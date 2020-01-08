@@ -130,19 +130,14 @@ describe('Firestore class', () => {
 
   it('cannot make calls after the client has been terminated', () => {
     const ref1 = randomCol.doc('doc1');
-    ref1.onSnapshot(snapshot => {
-      return Promise.reject('onSnapshot() should be called');
-    });
     return firestore
       .terminate()
       .then(() => {
         return ref1.set({foo: 100});
       })
-      .then(() => {
-        Promise.reject('set() should have failed');
-      })
+      .then(() => Promise.reject('set() should have failed'))
       .catch(err => {
-        expect(err.message).to.equal('The client has already been terminated');
+        expect(err).to.equal('The client has already been terminated');
       });
   });
 });
@@ -1345,7 +1340,8 @@ describe('Query class', () => {
     Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})]).then(() => {
       return randomCol
         .stream()
-        .on('data', () => {
+        .on('data', d => {
+          expect(d).to.be.an.instanceOf(DocumentSnapshot);
           ++received;
         })
         .on('end', () => {
@@ -1353,6 +1349,19 @@ describe('Query class', () => {
           done();
         });
     });
+  });
+
+  it('stream() supports readable[Symbol.asyncIterator]()', async () => {
+    let received = 0;
+    await randomCol.doc().set({foo: 'bar'});
+    await randomCol.doc().set({foo: 'bar'});
+
+    const stream = randomCol.stream();
+    for await (const chunk of stream) {
+      ++received;
+    }
+
+    expect(received).to.equal(2);
   });
 
   it('can query collection groups', async () => {
