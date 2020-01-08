@@ -15,7 +15,7 @@
 import {expect} from 'chai';
 import {isPlainObject} from '../src/util';
 
-describe('isPlainObject', () => {
+describe('isPlainObject()', () => {
   it('allows Object.create()', () => {
     expect(isPlainObject(Object.create({}))).to.be.true;
     expect(isPlainObject(Object.create(Object.prototype))).to.be.true;
