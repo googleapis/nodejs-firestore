@@ -28,7 +28,7 @@ import {Firestore} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference, validateDocumentReference} from './reference';
-import {isPlainObject, Serializer, validateUserInput} from './serializer';
+import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {
   Precondition as PublicPrecondition,
@@ -37,7 +37,7 @@ import {
   UpdateMap,
 } from './types';
 import {DocumentData} from './types';
-import {isObject, requestTag} from './util';
+import {isObject, isPlainObject, requestTag} from './util';
 import {
   customObjectMessage,
   invalidArgumentMessage,
