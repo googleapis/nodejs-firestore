@@ -16,13 +16,13 @@ import {expect} from 'chai';
 import {isPlainObject} from '../src/util';
 
 describe('util', () => {
-  it('isPlainObject supports Object.create()', () => {
+  it('isPlainObject allows Object.create()', () => {
     expect(isPlainObject(Object.create({}))).to.be.true;
     expect(isPlainObject(Object.create(Object.prototype))).to.be.true;
     expect(isPlainObject(Object.create(null))).to.be.true;
   });
 
-  it('isPlainObject supports plain types', () => {
+  it('isPlainObject allows plain types', () => {
     expect(isPlainObject({foo: 'bar'})).to.be.true;
     expect(isPlainObject({})).to.be.true;
   });
