@@ -30,5 +30,6 @@ describe('util', () => {
   it('isPlainObject rejects custom types', () => {
     class Foo {}
     expect(isPlainObject(new Foo())).to.be.false;
+    expect(isPlainObject(Object.create(new Foo()))).to.be.false;
   });
 });
