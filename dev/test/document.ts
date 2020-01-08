@@ -178,24 +178,6 @@ describe('serialize document', () => {
     );
   });
 
-  it('supports objects created with Object.create({})', () => {
-    const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
-        requestEquals(
-          request,
-          set({
-            document: document('documentId'),
-          })
-        );
-        callback(null, writeResult(1));
-      },
-    };
-    return createInstance(overrides).then(firestore => {
-      const plainObject = Object.create({});
-      return firestore.doc('collectionId/documentId').set(plainObject);
-    });
-  });
-
   it('provides custom error for objects from different Firestore instance', () => {
     class FieldPath {}
     class GeoPoint {}
