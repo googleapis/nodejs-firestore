@@ -15,19 +15,19 @@
 import {expect} from 'chai';
 import {isPlainObject} from '../src/util';
 
-describe('util', () => {
-  it('isPlainObject allows Object.create()', () => {
+describe('isPlainObject', () => {
+  it('allows Object.create()', () => {
     expect(isPlainObject(Object.create({}))).to.be.true;
     expect(isPlainObject(Object.create(Object.prototype))).to.be.true;
     expect(isPlainObject(Object.create(null))).to.be.true;
   });
 
-  it('isPlainObject allows plain types', () => {
+  it(' allows plain types', () => {
     expect(isPlainObject({foo: 'bar'})).to.be.true;
     expect(isPlainObject({})).to.be.true;
   });
 
-  it('isPlainObject rejects custom types', () => {
+  it('rejects custom types', () => {
     class Foo {}
     expect(isPlainObject(new Foo())).to.be.false;
     expect(isPlainObject(Object.create(new Foo()))).to.be.false;
