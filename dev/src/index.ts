@@ -1034,7 +1034,7 @@ export class Firestore {
                   // Recreate the DocumentSnapshot with the DocumentReference
                   // containing the original converter.
                   const finalDoc = new DocumentSnapshotBuilder(docRef);
-                  finalDoc.fieldsProto = document._fieldsProto;
+                  finalDoc.fieldsProto = document.fieldsProto;
                   finalDoc.readTime = document.readTime;
                   finalDoc.createTime = document.createTime;
                   finalDoc.updateTime = document.updateTime;

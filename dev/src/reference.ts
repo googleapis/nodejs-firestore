@@ -1708,7 +1708,7 @@ export class Query<T = DocumentData> {
             );
             // Recreate the QueryDocumentSnapshot with the DocumentReference
             // containing the original converter.
-            finalDoc.fieldsProto = document._fieldsProto;
+            finalDoc.fieldsProto = document.fieldsProto;
             finalDoc.readTime = document.readTime;
             finalDoc.createTime = document.createTime;
             finalDoc.updateTime = document.updateTime;

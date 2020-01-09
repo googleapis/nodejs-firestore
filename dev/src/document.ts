@@ -472,6 +472,16 @@ export class DocumentSnapshot<T = DocumentData> {
   }
 
   /**
+   * Returns the original field proto of the DocumentSnapshot.
+   *
+   * @private
+   * @return {ApiMapValue | undefined}
+   */
+  get fieldsProto(): ApiMapValue | undefined {
+    return this._fieldsProto;
+  }
+
+  /**
    * Convert a document snapshot to the Firestore 'Document' Protobuf.
    *
    * @private
