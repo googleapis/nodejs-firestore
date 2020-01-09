@@ -1702,8 +1702,17 @@ export class Query<T = DocumentData> {
         .on('data', result => {
           readTime = result.readTime;
           if (result.document) {
-            const document = result.document;
-            docs.push(document);
+            const document: QueryDocumentSnapshot<T> = result.document;
+            const finalDoc = new DocumentSnapshotBuilder(
+              document.ref.withConverter(this._converter)
+            );
+            // Recreate the QueryDocumentSnapshot with the DocumentReference
+            // containing the original converter.
+            finalDoc.fieldsProto = document._fieldsProto;
+            finalDoc.readTime = document.readTime;
+            finalDoc.createTime = document.createTime;
+            finalDoc.updateTime = document.updateTime;
+            docs.push(finalDoc.build() as QueryDocumentSnapshot<T>);
           }
         })
         .on('end', () => {

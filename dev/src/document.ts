@@ -104,7 +104,7 @@ export class DocumentSnapshotBuilder<T = DocumentData> {
  */
 export class DocumentSnapshot<T = DocumentData> {
   private _ref: DocumentReference<T>;
-  private _fieldsProto: ApiMapValue | undefined;
+  readonly _fieldsProto: ApiMapValue | undefined;
   private _serializer: Serializer;
   private _readTime: Timestamp | undefined;
   private _createTime: Timestamp | undefined;

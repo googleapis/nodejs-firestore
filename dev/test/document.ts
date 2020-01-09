@@ -47,6 +47,7 @@ import {
 } from './util/helpers';
 
 import {GoogleError, Status} from 'google-gax';
+import through2 = require('through2');
 
 const PROJECT_ID = 'test-project';
 
@@ -2014,15 +2015,38 @@ describe('withConverter() support', () => {
   afterEach(() => verifyInstance(firestore));
 
   it('for DocumentReference.withConverter()', async () => {
-    const docRef = firestore
-      .collection('posts')
-      .doc()
-      .withConverter(postConverter);
+    const doc = document('documentId', 'author', 'author', 'title', 'post');
+    const overrides: ApiOverride = {
+      commit: (request, options, callback) => {
+        const expectedRequest = set({
+          document: doc,
+        });
+        requestEquals(request, expectedRequest);
 
-    await docRef.set(new Post('post', 'author'));
-    const postData = await docRef.get();
-    const post = postData.data();
-    expect(post).to.not.equal(undefined);
-    expect(post!.byline()).to.equal('post, by author');
+        callback(null, writeResult(1));
+      },
+      batchGetDocuments: () => {
+        const stream = through2.obj();
+        setImmediate(() => {
+          stream.push({found: doc, readTime: {seconds: 5, nanos: 6}});
+          stream.push(null);
+        });
+
+        return stream;
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const docRef = firestore
+        .collection('collectionId')
+        .doc('documentId')
+        .withConverter(postConverter);
+
+      await docRef.set(new Post('post', 'author'));
+      const postData = await docRef.get();
+      const post = postData.data();
+      expect(post).to.not.equal(undefined);
+      expect(post!.byline()).to.equal('post, by author');
+    });
   });
 });

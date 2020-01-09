@@ -26,12 +26,17 @@ import {
   createInstance,
   document,
   InvalidApiUsage,
+  Post,
   postConverter,
+  requestEquals,
+  set,
   stream,
   verifyInstance,
+  writeResult,
 } from './util/helpers';
 
 import api = google.firestore.v1;
+import through2 = require('through2');
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -622,18 +627,35 @@ describe('query interface', () => {
   });
 
   it('for Query.withConverter()', async () => {
-    await firestore
-      .doc('postings/post1')
-      .set({title: 'post1', author: 'author1'});
-    await firestore
-      .doc('postings/post2')
-      .set({title: 'post2', author: 'author2'});
-    const posts = await firestore
-      .collectionGroup('postings')
-      .withConverter(postConverter)
-      .get();
-    expect(posts.size).to.equal(2);
-    expect(posts.docs[0].data()!.byline()).to.equal('post1, by author1');
+    const doc = document('documentId', 'author', 'author', 'title', 'post');
+    const overrides: ApiOverride = {
+      commit: (request, options, callback) => {
+        const expectedRequest = set({
+          document: doc,
+        });
+        requestEquals(request, expectedRequest);
+
+        callback(null, writeResult(1));
+      },
+      runQuery: request => {
+        queryEquals(request, fieldFilters('title', 'EQUAL', 'post'));
+        return stream({document: doc, readTime: {seconds: 5, nanos: 6}});
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      await firestore
+        .collection('collectionId')
+        .doc('documentId')
+        .set({title: 'post', author: 'author'});
+      const posts = await firestore
+        .collection('collectionId')
+        .where('title', '==', 'post')
+        .withConverter(postConverter)
+        .get();
+      expect(posts.size).to.equal(1);
+      expect(posts.docs[0].data()!.byline()).to.equal('post, by author');
+    });
   });
 });
 

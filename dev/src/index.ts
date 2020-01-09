@@ -962,7 +962,6 @@ export class Firestore {
     }
 
     const self = this;
-
     return self
       .requestStream('batchGetDocuments', 'unidirectional', request, requestTag)
       .then(stream => {
@@ -1028,10 +1027,18 @@ export class Firestore {
               // BatchGetDocuments doesn't preserve document order. We use
               // the request order to sort the resulting documents.
               const orderedDocuments: Array<DocumentSnapshot<T>> = [];
+
               for (const docRef of docRefs) {
                 const document = retrievedDocuments.get(docRef.path);
                 if (document !== undefined) {
-                  orderedDocuments.push(document);
+                  // Recreate the DocumentSnapshot with the DocumentReference
+                  // containing the original converter.
+                  const finalDoc = new DocumentSnapshotBuilder(docRef);
+                  finalDoc.fieldsProto = document._fieldsProto;
+                  finalDoc.readTime = document.readTime;
+                  finalDoc.createTime = document.createTime;
+                  finalDoc.updateTime = document.updateTime;
+                  orderedDocuments.push(finalDoc.build());
                 } else {
                   reject(
                     new Error(`Did not receive document for "${docRef.path}".`)

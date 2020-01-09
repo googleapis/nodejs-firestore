@@ -14,6 +14,7 @@
 
 import {expect} from 'chai';
 
+import through2 = require('through2');
 import {
   DocumentData,
   DocumentReference,
@@ -28,7 +29,10 @@ import {
   InvalidApiUsage,
   Post,
   postConverter,
+  requestEquals,
+  set,
   verifyInstance,
+  writeResult,
 } from './util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
@@ -177,24 +181,49 @@ describe('Collection interface', () => {
   });
 
   it('for CollectionReference.withConverter()', async () => {
-    const docRef = firestore
-      .collection('posts')
-      .withConverter(postConverter)
-      .doc();
+    const doc = document('documentId', 'author', 'author', 'title', 'post');
+    const overrides: ApiOverride = {
+      commit: (request, options, callback) => {
+        const expectedRequest = set({
+          document: doc,
+        });
+        requestEquals(request, expectedRequest);
 
-    await docRef.set(new Post('post', 'author'));
-    const postData = await docRef.get();
-    const post = postData.data();
-    expect(post).to.not.equal(undefined);
-    expect(post!.byline()).to.equal('post, by author');
+        callback(null, writeResult(1));
+      },
+      batchGetDocuments: () => {
+        const stream = through2.obj();
+        setImmediate(() => {
+          stream.push({found: doc, readTime: {seconds: 5, nanos: 6}});
+          stream.push(null);
+        });
+
+        return stream;
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const docRef = firestore
+        .collection('collectionId')
+        .withConverter(postConverter)
+        .doc('documentId');
+
+      await docRef.set(new Post('post', 'author'));
+      const postData = await docRef.get();
+      const post = postData.data();
+      expect(post).to.not.equal(undefined);
+      expect(post!.byline()).to.equal('post, by author');
+    });
   });
 
   it('drops the converter when calling CollectionReference<T>.parent()', () => {
-    const postsCollection = firestore
-      .collection('users/user1/posts')
-      .withConverter(postConverter);
+    return createInstance().then(async firestore => {
+      const postsCollection = firestore
+        .collection('users/user1/posts')
+        .withConverter(postConverter);
 
-    const usersCollection = postsCollection.parent;
-    expect(usersCollection!.isEqual(firestore.doc('users/user1'))).to.be.true;
+      const usersCollection = postsCollection.parent;
+      expect(usersCollection!.isEqual(firestore.doc('users/user1'))).to.be.true;
+    });
   });
 });
