@@ -23,10 +23,10 @@ import {google} from '../protos/firestore_v1_proto_api';
 import {FieldTransform} from './field-value';
 import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference} from './reference';
-import {isPlainObject, Serializer} from './serializer';
+import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, DocumentData, UpdateMap} from './types';
-import {isEmpty, isObject} from './util';
+import {isEmpty, isObject, isPlainObject} from './util';
 
 import api = google.firestore.v1;
 
