@@ -41,7 +41,15 @@ import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
-import {ApiMapValue, GapicClient, ReadOptions, Settings} from './types';
+import {
+  ApiMapValue,
+  FirestoreStreamingMethod,
+  FirestoreUnaryMethod,
+  GapicClient,
+  ReadOptions,
+  Settings,
+  UnaryMethod,
+} from './types';
 import {Deferred, isPermanentRpcError, requestTag} from './util';
 import {
   validateBoolean,
@@ -392,7 +400,7 @@ export class Firestore {
       this._settings.maxIdleChannels === undefined
         ? DEFAULT_MAX_IDLE_CHANNELS
         : this._settings.maxIdleChannels;
-    this._clientPool = new ClientPool(
+    this._clientPool = new ClientPool<GapicClient>(
       MAX_CONCURRENT_REQUESTS_PER_CLIENT,
       maxIdleChannels,
       /* clientFactory= */ () => {
@@ -409,7 +417,7 @@ export class Firestore {
         logger('Firestore', null, 'Initialized Firestore GAPIC Client');
         return client;
       },
-      /* clientDestructor= */ (client: GapicClient) => client.close()
+      /* clientDestructor= */ client => client.close()
     );
 
     logger('Firestore', null, 'Initialized Firestore');
@@ -956,7 +964,7 @@ export class Firestore {
     const self = this;
 
     return self
-      .requestStream('batchGetDocuments', 'unidirectional', request, requestTag)
+      .requestStream('batchGetDocuments', request, requestTag)
       .then(stream => {
         return new Promise<DocumentSnapshot[]>((resolve, reject) => {
           stream
@@ -1056,29 +1064,25 @@ export class Firestore {
     this._settingsFrozen = true;
 
     if (this._projectId === undefined) {
-      this._projectId = await this._clientPool.run(requestTag, gapicClient => {
-        return new Promise((resolve, reject) => {
-          gapicClient.getProjectId((err: Error, projectId: string) => {
-            if (err) {
-              logger(
-                'Firestore._detectProjectId',
-                null,
-                'Failed to detect project ID: %s',
-                err
-              );
-              reject(err);
-            } else {
-              logger(
-                'Firestore._detectProjectId',
-                null,
-                'Detected project ID: %s',
-                projectId
-              );
-              resolve(projectId);
-            }
-          });
-        });
-      });
+      try {
+        this._projectId = await this._clientPool.run(requestTag, gapicClient =>
+          gapicClient.getProjectId()
+        );
+        logger(
+          'Firestore.initializeIfNeeded',
+          null,
+          'Detected project ID: %s',
+          this._projectId
+        );
+      } catch (err) {
+        logger(
+          'Firestore.initializeIfNeeded',
+          null,
+          'Failed to detect project ID: %s',
+          err
+        );
+        return Promise.reject(err);
+      }
     }
   }
 
@@ -1263,7 +1267,7 @@ export class Firestore {
 
   /**
    * A funnel for all non-streaming API requests, assigning a project ID where
-   *  necessary within the request options.
+   * necessary within the request options.
    *
    * @private
    * @param methodName Name of the Veneer API endpoint that takes a request
@@ -1272,32 +1276,32 @@ export class Firestore {
    * @param requestTag A unique client-assigned identifier for this request.
    * @returns A Promise with the request result.
    */
-  request<T>(methodName: string, request: {}, requestTag: string): Promise<T> {
+  request<Req, Resp>(
+    methodName: FirestoreUnaryMethod,
+    request: Req,
+    requestTag: string
+  ): Promise<Resp> {
     const callOptions = this.createCallOptions();
 
-    return this._clientPool.run(requestTag, gapicClient => {
-      return new Promise((resolve, reject) => {
+    return this._clientPool.run(requestTag, async gapicClient => {
+      try {
         logger('Firestore.request', requestTag, 'Sending request: %j', request);
-        gapicClient[methodName](
-          request,
-          callOptions,
-          (err: GoogleError, result: T) => {
-            if (err) {
-              logger('Firestore.request', requestTag, 'Received error:', err);
-              reject(err);
-            } else {
-              logger(
-                'Firestore.request',
-                requestTag,
-                'Received response: %j',
-                result
-              );
-              this._lastSuccessfulRequest = new Date().getTime();
-              resolve(result);
-            }
-          }
+        const [result] = await (gapicClient[methodName] as UnaryMethod<
+          Req,
+          Resp
+        >)(request, callOptions);
+        logger(
+          'Firestore.request',
+          requestTag,
+          'Received response: %j',
+          result
         );
-      });
+        this._lastSuccessfulRequest = new Date().getTime();
+        return result;
+      } catch (err) {
+        logger('Firestore.request', requestTag, 'Received error:', err);
+        return Promise.reject(err);
+      }
     });
   }
 
@@ -1311,19 +1315,18 @@ export class Firestore {
    * @private
    * @param methodName Name of the streaming Veneer API endpoint that
    * takes a request and GAX options.
-   * @param mode Whether this a unidirectional or bidirectional call.
    * @param request The Protobuf request to send.
    * @param requestTag A unique client-assigned identifier for this request.
    * @returns A Promise with the resulting read-only stream.
    */
   requestStream(
-    methodName: string,
-    mode: 'unidirectional' | 'bidirectional',
+    methodName: FirestoreStreamingMethod,
     request: {},
     requestTag: string
   ): Promise<Duplex> {
     const callOptions = this.createCallOptions();
 
+    const bidrectional = methodName === 'listen';
     const result = new Deferred<Duplex>();
 
     this._clientPool.run(requestTag, gapicClient => {
@@ -1339,10 +1342,9 @@ export class Firestore {
           'Sending request: %j',
           request
         );
-        const stream: Duplex =
-          mode === 'unidirectional'
-            ? gapicClient[methodName](request, callOptions)
-            : gapicClient[methodName](callOptions);
+        const stream = bidrectional
+          ? gapicClient[methodName](callOptions)
+          : gapicClient[methodName](request, callOptions);
         const logStream = through2.obj(function(this, chunk, enc, callback) {
           logger(
             'Firestore.requestStream',
@@ -1362,7 +1364,7 @@ export class Firestore {
         const resultStream = await this._initializeStream(
           stream,
           requestTag,
-          mode === 'bidirectional' ? request : undefined
+          bidrectional ? request : undefined
         );
 
         resultStream.on('end', () => stream.end());

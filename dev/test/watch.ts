@@ -17,7 +17,7 @@ const duplexify = require('duplexify');
 import {expect} from 'chai';
 import * as extend from 'extend';
 import {GoogleError, Status} from 'google-gax';
-import {Transform} from 'stream';
+import {Duplex, Transform} from 'stream';
 import * as through2 from 'through2';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -244,14 +244,14 @@ class StreamHelper {
   private readonly deferredListener = new DeferredListener<
     api.IListenRequest
   >();
-  private backendStream: NodeJS.ReadWriteStream | null = null;
+  private backendStream: Duplex | null = null;
 
   streamCount = 0; // The number of streams that the client has requested
   readStream: Transform | null = null;
   writeStream: Transform | null = null;
 
   /** Returns the GAPIC callback to use with this stream helper. */
-  getListenCallback(): () => NodeJS.ReadWriteStream {
+  getListenCallback(): () => Duplex {
     return () => {
       // Create a mock backend whose stream we can return.
       ++this.streamCount;
@@ -676,7 +676,7 @@ describe('Query watch', () => {
   };
 
   /** The GAPIC callback that executes the listen. */
-  let listenCallback: () => NodeJS.ReadWriteStream;
+  let listenCallback: () => Duplex;
 
   beforeEach(() => {
     // We are intentionally skipping the delays to ensure fast test execution.

@@ -534,7 +534,6 @@ export class WriteBatch {
     await this._firestore.initializeIfNeeded(tag);
 
     const database = this._firestore.formattedName;
-    const request: api.ICommitRequest = {database};
 
     // On GCF, we periodically force transactional commits to allow for
     // request retries in case GCF closes our backend connection.
@@ -542,9 +541,9 @@ export class WriteBatch {
     if (!explicitTransaction && this._shouldCreateTransaction()) {
       logger('WriteBatch.commit', tag, 'Using transaction for commit');
       return this._firestore
-        .request<api.IBeginTransactionResponse>(
+        .request<api.IBeginTransactionRequest, api.IBeginTransactionResponse>(
           'beginTransaction',
-          request,
+          {database},
           tag
         )
         .then(resp => {
@@ -552,6 +551,7 @@ export class WriteBatch {
         });
     }
 
+    const request: api.ICommitRequest = {database};
     const writes = this._ops.map(op => op());
     request.writes = [];
 
@@ -586,7 +586,7 @@ export class WriteBatch {
     }
 
     return this._firestore
-      .request<api.CommitResponse>('commit', request, tag)
+      .request<api.ICommitRequest, api.CommitResponse>('commit', request, tag)
       .then(resp => {
         const writeResults: WriteResult[] = [];
 
