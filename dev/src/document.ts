@@ -104,7 +104,7 @@ export class DocumentSnapshotBuilder<T = DocumentData> {
  */
 export class DocumentSnapshot<T = DocumentData> {
   private _ref: DocumentReference<T>;
-  readonly _fieldsProto: ApiMapValue | undefined;
+  private _fieldsProto: ApiMapValue | undefined;
   private _serializer: Serializer;
   private _readTime: Timestamp | undefined;
   private _createTime: Timestamp | undefined;
@@ -372,8 +372,8 @@ export class DocumentSnapshot<T = DocumentData> {
    * Retrieves all fields in the document as an object. Returns 'undefined' if
    * the document doesn't exist.
    *
-   * @returns {T|undefined} An object containing all fields in the
-   * document or 'undefined' if the document doesn't exist.
+   * @returns {T|undefined} An object containing all fields in the document or
+   * 'undefined' if the document doesn't exist.
    *
    * @example
    * let documentRef = firestore.doc('col/doc');
@@ -472,7 +472,8 @@ export class DocumentSnapshot<T = DocumentData> {
   }
 
   /**
-   * Returns the original field proto of the DocumentSnapshot.
+   * Returns the original field proto of the DocumentSnapshot. This is used
+   * when reconstructing the DocumentSnapshot with a DocumentSnapshotBuilder.
    *
    * @private
    * @return {ApiMapValue | undefined}

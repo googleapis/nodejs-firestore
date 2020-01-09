@@ -193,7 +193,6 @@ export class WriteBatch {
     const precondition = new Precondition({exists: false});
 
     const op = () => {
-      // TODO: chenbrian why is this data and not firestoreDAta
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
       const write =
         !document.isEmpty || transform.isEmpty ? document.toProto() : null;
