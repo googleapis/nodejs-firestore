@@ -13,8 +13,9 @@
 // limitations under the License.
 
 import {expect} from 'chai';
+import {GoogleError, Status} from 'google-gax';
+import through2 = require('through2');
 
-import * as proto from '../protos/firestore_v1_proto_api';
 import {
   DocumentReference,
   FieldPath,
@@ -36,6 +37,7 @@ import {
   postConverter,
   remove,
   requestEquals,
+  response,
   retrieve,
   serverTimestamp,
   set,
@@ -45,9 +47,6 @@ import {
   verifyInstance,
   writeResult,
 } from './util/helpers';
-
-import {GoogleError, Status} from 'google-gax';
-import through2 = require('through2');
 
 const PROJECT_ID = 'test-project';
 
@@ -119,7 +118,7 @@ describe('serialize document', () => {
 
   it('serializes to Protobuf JS', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -128,7 +127,7 @@ describe('serialize document', () => {
             }),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -202,7 +201,7 @@ describe('serialize document', () => {
 
   it('serializes large numbers into doubles', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -211,7 +210,7 @@ describe('serialize document', () => {
             }),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -225,7 +224,7 @@ describe('serialize document', () => {
 
   it('serializes date before 1970', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -237,7 +236,7 @@ describe('serialize document', () => {
             }),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -250,14 +249,14 @@ describe('serialize document', () => {
 
   it('serializes unicode keys', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
             document: document('documentId', '😀', '😜'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -270,7 +269,7 @@ describe('serialize document', () => {
 
   it('accepts both blob formats', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -285,7 +284,7 @@ describe('serialize document', () => {
             ),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -299,14 +298,14 @@ describe('serialize document', () => {
 
   it('supports NaN and Infinity', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         const fields = request.writes![0].update!.fields!;
         expect(fields.nanValue.doubleValue).to.be.a('number');
         expect(fields.nanValue.doubleValue).to.be.NaN;
         expect(fields.posInfinity.doubleValue).to.equal(Infinity);
         expect(fields.negInfinity.doubleValue).to.equal(-Infinity);
 
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -368,7 +367,7 @@ describe('serialize document', () => {
 
   it('is able to write a document reference with cycles', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -377,7 +376,7 @@ describe('serialize document', () => {
             }),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -721,10 +720,10 @@ describe('delete document', () => {
 
   it('generates proto', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(request, remove('documentId'));
 
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -735,10 +734,10 @@ describe('delete document', () => {
 
   it('returns update time', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(request, remove('documentId'));
 
-        callback(null, {
+        return response({
           commitTime: {
             nanos: 123000000,
             seconds: 479978400,
@@ -761,7 +760,7 @@ describe('delete document', () => {
 
   it('with last update time precondition', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           remove('documentId', {
@@ -772,7 +771,7 @@ describe('delete document', () => {
           })
         );
 
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -840,14 +839,14 @@ describe('set document', () => {
 
   it('supports empty map', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
             document: document('documentId'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -858,7 +857,7 @@ describe('set document', () => {
 
   it('supports nested empty map', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -867,7 +866,7 @@ describe('set document', () => {
             }),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -878,14 +877,14 @@ describe('set document', () => {
 
   it('skips merges with just field transform', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -902,7 +901,7 @@ describe('set document', () => {
 
   it('sends empty non-merge write even with just field transform', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -910,7 +909,7 @@ describe('set document', () => {
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
           })
         );
-        callback(null, writeResult(2));
+        return response(writeResult(2));
       },
     };
 
@@ -924,7 +923,7 @@ describe('set document', () => {
 
   it('supports document merges', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -940,7 +939,7 @@ describe('set document', () => {
             mask: updateMask('a', 'c.d', 'f'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -953,7 +952,7 @@ describe('set document', () => {
 
   it('supports document merges with field mask', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -985,7 +984,7 @@ describe('set document', () => {
             mask: updateMask('a', 'b', 'd.e', 'f'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1006,7 +1005,7 @@ describe('set document', () => {
 
   it('supports document merges with empty field mask', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -1014,7 +1013,7 @@ describe('set document', () => {
             mask: updateMask(),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1030,7 +1029,7 @@ describe('set document', () => {
 
   it('supports document merges with field mask and empty maps', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -1060,7 +1059,7 @@ describe('set document', () => {
             mask: updateMask('a', 'c.d'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1077,7 +1076,7 @@ describe('set document', () => {
 
   it('supports document merges with field mask and field transform', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -1090,7 +1089,7 @@ describe('set document', () => {
             ],
           })
         );
-        callback(null, writeResult(2));
+        return response(writeResult(2));
       },
     };
 
@@ -1114,7 +1113,7 @@ describe('set document', () => {
 
   it('supports empty merge', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -1122,7 +1121,7 @@ describe('set document', () => {
             mask: updateMask(),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1133,7 +1132,7 @@ describe('set document', () => {
 
   it('supports nested empty merge', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
@@ -1143,7 +1142,7 @@ describe('set document', () => {
             mask: updateMask('a'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1159,14 +1158,14 @@ describe('set document', () => {
 
   it("doesn't split on dots", () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           set({
             document: document('documentId', 'a.b', 'c'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1273,9 +1272,9 @@ describe('create document', () => {
 
   it('creates document', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(request, create({document: document('documentId')}));
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1286,10 +1285,10 @@ describe('create document', () => {
 
   it('returns update time', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(request, create({document: document('documentId')}));
 
-        callback(null, {
+        return response({
           commitTime: {
             nanos: 0,
             seconds: 0,
@@ -1319,7 +1318,7 @@ describe('create document', () => {
 
   it('supports field transform', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           create({
@@ -1329,7 +1328,7 @@ describe('create document', () => {
             ],
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1343,7 +1342,7 @@ describe('create document', () => {
 
   it('supports nested empty map', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           create({
@@ -1358,7 +1357,7 @@ describe('create document', () => {
             }),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1397,7 +1396,7 @@ describe('update document', () => {
 
   it('generates proto', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1405,7 +1404,7 @@ describe('update document', () => {
             mask: updateMask('foo'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1416,7 +1415,7 @@ describe('update document', () => {
 
   it('supports nested field transform', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1427,7 +1426,7 @@ describe('update document', () => {
             mask: updateMask('a', 'foo'),
           })
         );
-        callback(null, writeResult(2));
+        return response(writeResult(2));
       },
     };
 
@@ -1442,9 +1441,9 @@ describe('update document', () => {
 
   it('skips write for single field transform', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(request, update({transforms: [serverTimestamp('a')]}));
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1457,7 +1456,7 @@ describe('update document', () => {
 
   it('supports nested empty map', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1467,7 +1466,7 @@ describe('update document', () => {
             mask: updateMask('a'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1478,12 +1477,12 @@ describe('update document', () => {
 
   it('supports nested delete', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({document: document('documentId'), mask: updateMask('a.b')})
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1496,7 +1495,7 @@ describe('update document', () => {
 
   it('returns update time', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1504,7 +1503,7 @@ describe('update document', () => {
             mask: updateMask('foo'),
           })
         );
-        callback(null, {
+        return response({
           commitTime: {
             nanos: 0,
             seconds: 0,
@@ -1534,7 +1533,7 @@ describe('update document', () => {
 
   it('with last update time precondition', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1548,7 +1547,7 @@ describe('update document', () => {
             },
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1618,7 +1617,7 @@ describe('update document', () => {
 
   it('with top-level document', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1626,7 +1625,7 @@ describe('update document', () => {
             mask: updateMask('foo'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1639,7 +1638,7 @@ describe('update document', () => {
 
   it('with nested document', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1675,7 +1674,7 @@ describe('update document', () => {
             mask: updateMask('a.b.c', 'foo.bar'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1694,7 +1693,7 @@ describe('update document', () => {
 
   it('with two nested fields ', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1722,7 +1721,7 @@ describe('update document', () => {
             ),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1752,7 +1751,7 @@ describe('update document', () => {
 
   it('with nested field and document transform ', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1788,7 +1787,7 @@ describe('update document', () => {
             ),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1804,7 +1803,7 @@ describe('update document', () => {
 
   it('with field with dot ', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1812,7 +1811,7 @@ describe('update document', () => {
             mask: updateMask('`a.b`'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
     return createInstance(overrides).then(firestore => {
@@ -1963,7 +1962,7 @@ describe('update document', () => {
 
   it('with field delete', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         requestEquals(
           request,
           update({
@@ -1971,7 +1970,7 @@ describe('update document', () => {
             mask: updateMask('bar', 'foo'),
           })
         );
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
     };
 
@@ -1987,13 +1986,13 @@ describe('update document', () => {
 describe('listCollections() method', () => {
   it('sorts results', () => {
     const overrides: ApiOverride = {
-      listCollectionIds: (request, options, callback) => {
+      listCollectionIds: request => {
         expect(request).to.deep.eq({
           parent: `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
           pageSize: 65535,
         });
 
-        callback(null, ['second', 'first']);
+        return response(['second', 'first']);
       },
     };
 
@@ -2023,13 +2022,13 @@ describe('withConverter() support', () => {
   it('for DocumentReference.withConverter()', async () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         const expectedRequest = set({
           document: doc,
         });
         requestEquals(request, expectedRequest);
 
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
       batchGetDocuments: () => {
         const stream = through2.obj();

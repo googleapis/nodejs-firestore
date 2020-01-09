@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {CallOptions} from 'google-gax';
+import {Duplex} from 'stream';
+
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldPath} from './path';
 import {Timestamp} from './timestamp';
@@ -27,9 +30,62 @@ export interface ApiMapValue {
   [k: string]: google.firestore.v1.IValue;
 }
 
-// We don't have type information for the JavaScript GapicClient.
-// tslint:disable-next-line:no-any
-export type GapicClient = any;
+/**
+ * The subset of methods we use from FirestoreClient.
+ *
+ * We don't depend on the actual Gapic client to avoid loading the GAX stack at
+ * module initialization time.
+ */
+export interface GapicClient {
+  getProjectId(): Promise<string>;
+  beginTransaction(
+    request: api.IBeginTransactionRequest,
+    options?: CallOptions
+  ): Promise<[api.IBeginTransactionResponse, unknown, unknown]>;
+  commit(
+    request: api.ICommitRequest,
+    options?: CallOptions
+  ): Promise<[api.ICommitResponse, unknown, unknown]>;
+  rollback(
+    request: api.IRollbackRequest,
+    options?: CallOptions
+  ): Promise<[google.protobuf.IEmpty, unknown, unknown]>;
+  batchGetDocuments(
+    request?: api.IBatchGetDocumentsRequest,
+    options?: CallOptions
+  ): Duplex;
+  runQuery(request?: api.IRunQueryRequest, options?: CallOptions): Duplex;
+  listDocuments(
+    request: api.IListDocumentsRequest,
+    options?: CallOptions
+  ): Promise<[api.IDocument[], unknown, unknown]>;
+  listCollectionIds(
+    request: api.IListCollectionIdsRequest,
+    options?: CallOptions
+  ): Promise<[string[], unknown, unknown]>;
+  listen(options?: CallOptions): Duplex;
+  close(): Promise<void>;
+}
+
+/** Request/response methods used in the Firestore SDK. */
+export type FirestoreUnaryMethod =
+  | 'listDocuments'
+  | 'listCollectionIds'
+  | 'rollback'
+  | 'beginTransaction'
+  | 'commit';
+
+/** Streaming methods used in the Firestore SDK. */
+export type FirestoreStreamingMethod =
+  | 'listen'
+  | 'runQuery'
+  | 'batchGetDocuments';
+
+/** Type signature for the unary methods in the GAPIC layer. */
+export type UnaryMethod<Req, Resp> = (
+  request: Req,
+  callOptions: CallOptions
+) => Promise<[Resp, unknown, unknown]>;
 
 // We don't have type information for the npm package
 // `functional-red-black-tree`.

@@ -15,7 +15,7 @@
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
-import * as gax from 'google-gax';
+import {GoogleError, GrpcClient, Status} from 'google-gax';
 
 import {google} from '../protos/firestore_v1_proto_api';
 
@@ -31,23 +31,22 @@ import {
   found,
   InvalidApiUsage,
   missing,
+  response,
   stream,
   verifyInstance,
 } from './util/helpers';
 
 import api = google.firestore.v1;
-import {Status} from 'google-gax';
 
 use(chaiAsPromised);
 
-const {grpc} = new gax.GrpcClient({});
+const {grpc} = new GrpcClient({});
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 const DEFAULT_SETTINGS = {
   projectId: PROJECT_ID,
   sslCreds: grpc.credentials.createInsecure(),
-  keyFilename: __dirname + '/fake-certificate.json',
 };
 
 // Change the argument to 'console.log' to enable debug output.
@@ -516,9 +515,7 @@ describe('instantiation', () => {
   it('uses project id from gapic client', async () => {
     return createInstance(
       {
-        getProjectId: callback => {
-          callback(null, 'foo');
-        },
+        getProjectId: () => Promise.resolve('foo'),
       },
       {projectId: undefined}
     ).then(async firestore => {
@@ -533,7 +530,6 @@ describe('instantiation', () => {
   it('uses project ID from settings()', () => {
     const firestore = new Firestore.Firestore({
       sslCreds: grpc.credentials.createInsecure(),
-      keyFilename: './test/fake-certificate.json',
     });
 
     firestore.settings({projectId: PROJECT_ID});
@@ -546,9 +542,7 @@ describe('instantiation', () => {
   it('handles error from project ID detection', () => {
     return createInstance(
       {
-        getProjectId: callback => {
-          callback(new Error('Injected Error'), null);
-        },
+        getProjectId: () => Promise.reject(new Error('Injected Error')),
       },
       {projectId: undefined}
     ).then(firestore => {
@@ -609,11 +603,11 @@ describe('instantiation', () => {
 describe('serializer', () => {
   it('supports all types', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         expect(allSupportedTypesProtobufJs.fields).to.deep.eq(
           request.writes![0].update!.fields
         );
-        callback(null, {
+        return response({
           commitTime: {},
           writeResults: [
             {
@@ -662,7 +656,6 @@ describe('snapshot_() method', () => {
     firestore = new Firestore.Firestore({
       projectId: PROJECT_ID,
       sslCreds: grpc.credentials.createInsecure(),
-      keyFilename: './test/fake-certificate.json',
     });
   });
 
@@ -882,13 +875,13 @@ describe('collection() method', () => {
 describe('listCollections() method', () => {
   it('returns collections', () => {
     const overrides: ApiOverride = {
-      listCollectionIds: (request, options, callback) => {
+      listCollectionIds: request => {
         expect(request).to.deep.eq({
           parent: `projects/${PROJECT_ID}/databases/(default)/documents`,
           pageSize: 65535,
         });
 
-        callback(null, ['first', 'second']);
+        return response(['first', 'second']);
       },
     };
 
@@ -1075,10 +1068,10 @@ describe('getAll() method', () => {
 
     const overrides: ApiOverride = {
       batchGetDocuments: request => {
-        const errorCode = Number(request.documents![0].split('/').pop());
+        const errorCode = Number(request!.documents![0].split('/').pop());
         actualErrorAttempts[errorCode] =
           (actualErrorAttempts[errorCode] || 0) + 1;
-        const error = new gax.GoogleError('Expected exception');
+        const error = new GoogleError('Expected exception');
         error.code = errorCode;
         return stream(error);
       },
@@ -1171,7 +1164,7 @@ describe('getAll() method', () => {
   it('accepts same document multiple times', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: request => {
-        expect(request.documents!.length).to.equal(2);
+        expect(request!.documents!.length).to.equal(2);
         return stream(found('a'), found('b'));
       },
     };
@@ -1193,7 +1186,7 @@ describe('getAll() method', () => {
   it('applies field mask', () => {
     const overrides: ApiOverride = {
       batchGetDocuments: request => {
-        expect(request.mask!.fieldPaths).to.have.members([
+        expect(request!.mask!.fieldPaths).to.have.members([
           'foo.bar',
           '`foo.bar`',
         ]);
