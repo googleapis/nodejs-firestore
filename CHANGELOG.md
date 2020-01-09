@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.3.3](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.2...v3.3.3) (2020-01-08)
+
+
+### Bug Fixes
+
+* support Objects created with Object.create({}) ([#842](https://www.github.com/googleapis/nodejs-firestore/issues/842)) ([a85f0c3](https://www.github.com/googleapis/nodejs-firestore/commit/a85f0c32eca5d8cf677d621a8ff326623ad5266e))
+* use rejected Promise for terminate() ([#845](https://www.github.com/googleapis/nodejs-firestore/issues/845)) ([f2c4d91](https://www.github.com/googleapis/nodejs-firestore/commit/f2c4d911077c8e5b7713263fc8b2c21bbd50ca11))
+
 ### [3.3.2](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.1...v3.3.2) (2020-01-06)
 
 

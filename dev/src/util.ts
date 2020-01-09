@@ -16,6 +16,8 @@
 
 import {GoogleError, ServiceConfig, Status} from 'google-gax';
 
+import {DocumentData} from './types';
+
 /**
  * A Promise implementation that supports deferred resolution.
  * @private
@@ -75,6 +77,23 @@ export function requestTag(): string {
  */
 export function isObject(value: unknown): value is {[k: string]: unknown} {
   return Object.prototype.toString.call(value) === '[object Object]';
+}
+
+/**
+ * Verifies that 'obj' is a plain JavaScript object that can be encoded as a
+ * 'Map' in Firestore.
+ *
+ * @private
+ * @param input The argument to verify.
+ * @returns 'true' if the input can be a treated as a plain object.
+ */
+export function isPlainObject(input: unknown): input is DocumentData {
+  return (
+    isObject(input) &&
+    (Object.getPrototypeOf(input) === Object.prototype ||
+      Object.getPrototypeOf(input) === null ||
+      input.constructor.name === 'Object')
+  );
 }
 
 /**

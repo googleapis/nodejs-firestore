@@ -25,7 +25,6 @@ import {
   QuerySnapshot,
   validateDocumentReference,
 } from './reference';
-import {isPlainObject} from './serializer';
 import {
   DocumentData,
   Precondition as PublicPrecondition,
@@ -33,7 +32,7 @@ import {
   SetOptions,
   UpdateData,
 } from './types';
-import {isObject, requestTag} from './util';
+import {isObject, isPlainObject} from './util';
 import {
   invalidArgumentMessage,
   RequiredArgumentOptions,
