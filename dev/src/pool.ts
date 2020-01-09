@@ -78,12 +78,6 @@ export class ClientPool<T> {
         requestCount > selectedClientRequestCount &&
         requestCount < this.concurrentOperationLimit
       ) {
-        logger(
-          'ClientPool.acquire',
-          requestTag,
-          'Re-using existing client with %s remaining operations',
-          this.concurrentOperationLimit - requestCount
-        );
         selectedClient = client;
         selectedClientRequestCount = requestCount;
       }
