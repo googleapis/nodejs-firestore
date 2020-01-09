@@ -24,7 +24,7 @@ import {DocumentReference, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, DocumentData, ValidationOptions} from './types';
-import {isEmpty, isObject} from './util';
+import {isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
 
 import api = proto.google.firestore.v1;
@@ -257,22 +257,6 @@ export class Serializer {
 }
 
 /**
- * Verifies that 'obj' is a plain JavaScript object that can be encoded as a
- * 'Map' in Firestore.
- *
- * @private
- * @param input The argument to verify.
- * @returns 'true' if the input can be a treated as a plain object.
- */
-export function isPlainObject(input: unknown): input is DocumentData {
-  return (
-    isObject(input) &&
-    (Object.getPrototypeOf(input) === Object.prototype ||
-      Object.getPrototypeOf(input) === null)
-  );
-}
-
-/**
  * Validates a JavaScript value for usage as a Firestore value.
  *
  * @private
@@ -308,7 +292,7 @@ export function validateUserInput(
   level = level || 0;
   inArray = inArray || false;
 
-  const fieldPathMessage = path ? ` (found in field ${path})` : '';
+  const fieldPathMessage = path ? ` (found in field "${path}")` : '';
 
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; ++i) {

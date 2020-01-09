@@ -4,6 +4,28 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.3.3](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.2...v3.3.3) (2020-01-08)
+
+
+### Bug Fixes
+
+* support Objects created with Object.create({}) ([#842](https://www.github.com/googleapis/nodejs-firestore/issues/842)) ([a85f0c3](https://www.github.com/googleapis/nodejs-firestore/commit/a85f0c32eca5d8cf677d621a8ff326623ad5266e))
+* use rejected Promise for terminate() ([#845](https://www.github.com/googleapis/nodejs-firestore/issues/845)) ([f2c4d91](https://www.github.com/googleapis/nodejs-firestore/commit/f2c4d911077c8e5b7713263fc8b2c21bbd50ca11))
+
+### [3.3.2](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.1...v3.3.2) (2020-01-06)
+
+
+### Bug Fixes
+
+* add quotes to field name to avoid ambiguity ([#860](https://www.github.com/googleapis/nodejs-firestore/issues/860)) ([8caee71](https://www.github.com/googleapis/nodejs-firestore/commit/8caee71f6105e82faf3f6334e69ed5890f977a3a))
+
+### [3.3.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.0...v3.3.1) (2020-01-06)
+
+
+### Bug Fixes
+
+* don't recreate instances when client is idle ([0aa2a8b](https://www.github.com/googleapis/nodejs-firestore/commit/0aa2a8b8d0c76e0cfc6d29c37d143cc9c0b45fec))
+
 ## [3.3.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.2.0...v3.3.0) (2020-01-03)
 
 
