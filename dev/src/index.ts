@@ -1173,6 +1173,8 @@ export class Firestore {
    *
    * @private
    * @param backendStream The Node stream to monitor.
+   * @param lifetime A Promise that resolves when the stream receives an 'end',
+   * 'close' or 'finish' message.
    * @param requestTag A unique client-assigned identifier for this request.
    * @param request If specified, the request that should be written to the
    * stream after opening.
@@ -1181,6 +1183,7 @@ export class Firestore {
    */
   private _initializeStream(
     backendStream: Duplex,
+    liftime: Deferred<void>,
     requestTag: string,
     request?: {}
   ): Promise<Duplex> {
@@ -1208,13 +1211,15 @@ export class Firestore {
           requestTag,
           'Received stream end'
         );
-        streamReady();
         resultStream.unpipe(backendStream);
+        resolve(resultStream);
+        liftime.resolve();
       }
 
       backendStream.on('data', () => streamReady());
       backendStream.on('end', () => streamEnded());
       backendStream.on('close', () => streamEnded());
+      backendStream.on('finish', () => streamEnded());
 
       backendStream.on('error', err => {
         if (!streamInitialized) {
@@ -1240,7 +1245,7 @@ export class Firestore {
           // allows the caller to attach an error handler.
           setImmediate(() => {
             resultStream.emit('error', err);
-          }, 0);
+          });
         }
       });
 
@@ -1326,58 +1331,55 @@ export class Firestore {
   ): Promise<Duplex> {
     const callOptions = this.createCallOptions();
 
-    const bidrectional = methodName === 'listen';
-    const result = new Deferred<Duplex>();
+    const bidirectional = methodName === 'listen';
 
-    this._clientPool.run(requestTag, gapicClient => {
-      // While we return the stream to the callee early, we don't want to
-      // release the GAPIC client until the callee has finished processing the
-      // stream.
-      const lifetime = new Deferred<void>();
+    return this._retry(methodName, requestTag, () => {
+      const result = new Deferred<Duplex>();
 
-      this._retry(methodName, requestTag, async () => {
+      this._clientPool.run(requestTag, async gapicClient => {
+        const lifetime = new Deferred<void>();
         logger(
           'Firestore.requestStream',
           requestTag,
           'Sending request: %j',
           request
         );
-        const stream = bidrectional
-          ? gapicClient[methodName](callOptions)
-          : gapicClient[methodName](request, callOptions);
-        const logStream = through2.obj(function(this, chunk, enc, callback) {
-          logger(
-            'Firestore.requestStream',
+        try {
+          const stream = bidirectional
+            ? gapicClient[methodName](callOptions)
+            : gapicClient[methodName](request, callOptions);
+          const logStream = through2.obj(function(this, chunk, enc, callback) {
+            logger(
+              'Firestore.requestStream',
+              requestTag,
+              'Received response: %j',
+              chunk
+            );
+            callback();
+          });
+          stream.pipe(logStream);
+
+          const resultStream = await this._initializeStream(
+            stream,
+            lifetime,
             requestTag,
-            'Received response: %j',
-            chunk
+            bidirectional ? request : undefined
           );
-          callback();
-        });
+          resultStream.on('end', () => stream.end());
+          result.resolve(resultStream);
+        } catch (e) {
+          result.reject(e);
+          lifetime.resolve();
+        }
 
-        stream.pipe(logStream);
-        stream.on('close', lifetime.resolve);
-        stream.on('end', lifetime.resolve);
-        stream.on('finish', lifetime.resolve);
-        stream.on('error', lifetime.resolve);
-
-        const resultStream = await this._initializeStream(
-          stream,
-          requestTag,
-          bidrectional ? request : undefined
-        );
-
-        resultStream.on('end', () => stream.end());
-        result.resolve(resultStream);
-      }).catch(err => {
-        lifetime.resolve();
-        result.reject(err);
+        // While we return the stream to the callee early, we don't want to
+        // release the GAPIC client until the callee has finished processing the
+        // stream.
+        return lifetime.promise;
       });
 
-      return lifetime.promise;
+      return result.promise;
     });
-
-    return result.promise;
   }
 }
 

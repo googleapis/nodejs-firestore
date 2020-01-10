@@ -960,8 +960,11 @@ describe('getAll() method', () => {
   });
 
   it('handles stream exception during initialization', () => {
+    let attempts = 0;
+
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
+        ++attempts;
         return stream(new Error('Expected exception'));
       },
     };
@@ -973,14 +976,18 @@ describe('getAll() method', () => {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
+          expect(attempts).to.equal(5);
           expect(err.message).to.equal('Expected exception');
         });
     });
   });
 
   it('handles stream exception after initialization', () => {
+    let attempts = 0;
+
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
+        ++attempts;
         return stream(found('documentId'), new Error('Expected exception'));
       },
     };
@@ -992,13 +999,16 @@ describe('getAll() method', () => {
           throw new Error('Unexpected success in Promise');
         })
         .catch(err => {
+          // We don't retry since the stream might have already been released
+          // to the end user.
+          expect(attempts).to.equal(1);
           expect(err.message).to.equal('Expected exception');
         });
     });
   });
 
   it('handles intermittent stream exception', () => {
-    let attempts = 1;
+    let attempts = 0;
 
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
