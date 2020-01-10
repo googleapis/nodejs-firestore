@@ -1357,7 +1357,7 @@ export class Firestore {
             callback();
           });
           stream.pipe(logStream);
-          
+
           const lifetime = new Deferred<void>();
           const resultStream = await this._initializeStream(
             stream,
@@ -1367,7 +1367,7 @@ export class Firestore {
           );
           resultStream.on('end', () => stream.end());
           result.resolve(resultStream);
-          
+
           // While we return the stream to the callee early, we don't want to
           // release the GAPIC client until the callee has finished processing the
           // stream.
