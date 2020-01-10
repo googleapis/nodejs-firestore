@@ -335,6 +335,7 @@ export function response<T>(result: T): Promise<[T, unknown, unknown]> {
   return Promise.resolve([result, undefined, undefined]);
 }
 
+/** Sample user object class used in tests. */
 export class Post {
   constructor(readonly title: string, readonly author: string) {}
   toString(): string {
@@ -342,6 +343,7 @@ export class Post {
   }
 }
 
+/** Converts Post objects to and from Firestore in tests. */
 export const postConverter = {
   toFirestore(post: Post): DocumentData {
     return {title: post.title, author: post.author};

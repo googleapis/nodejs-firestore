@@ -31,7 +31,7 @@ import {
   WriteResult,
 } from '../src';
 import {autoId, Deferred} from '../src/util';
-import {verifyInstance} from '../test/util/helpers';
+import {Post, postConverter, verifyInstance} from '../test/util/helpers';
 
 const version = require('../../package.json').version;
 
@@ -129,6 +129,17 @@ describe('Firestore class', () => {
       });
   });
 
+  it('getAll() supports generics', async () => {
+    const ref1 = randomCol.doc('doc1').withConverter(postConverter);
+    const ref2 = randomCol.doc('doc2').withConverter(postConverter);
+    await ref1.set(new Post('post1', 'author1'));
+    await ref2.set(new Post('post2', 'author2'));
+
+    const docs = await firestore.getAll(ref1, ref2);
+    expect(docs[0].data()!.toString()).to.deep.equal('post1, by author1');
+    expect(docs[1].data()!.toString()).to.deep.equal('post2, by author2');
+  });
+
   it('cannot make calls after the client has been terminated', () => {
     const ref1 = randomCol.doc('doc1');
     return firestore
@@ -208,6 +219,18 @@ describe('CollectionReference class', () => {
 
     expect(existingDocs.map(doc => doc.id)).to.have.members(['a', 'c']);
     expect(missingDocs.map(doc => doc.id)).to.have.members(['b']);
+  });
+
+  it('supports withConverter()', async () => {
+    const ref = firestore
+      .collection('col')
+      .withConverter(postConverter)
+      .doc('doc');
+    await ref.set(new Post('post', 'author'));
+    const postData = await ref.get();
+    const post = postData.data();
+    expect(post).to.not.be.undefined;
+    expect(post!.toString()).to.equal('post, by author');
   });
 });
 
@@ -968,6 +991,41 @@ describe('DocumentReference class', () => {
       await Promise.all(documentResults.map(d => d.promise));
       unsubscribeCallbacks.forEach(c => c());
     });
+
+    it('handles query snapshots with converters', async () => {
+      const setupDeferred = new Deferred<void>();
+      const resultsDeferred = new Deferred<QuerySnapshot<Post>>();
+      const ref = randomCol.doc('doc').withConverter(postConverter);
+      const unsubscribe = randomCol
+        .where('title', '==', 'post')
+        .withConverter(postConverter)
+        .onSnapshot(snapshot => {
+          if (snapshot.size === 0) {
+            setupDeferred.resolve();
+          }
+          if (snapshot.size === 1) {
+            resultsDeferred.resolve(snapshot);
+          }
+        });
+
+      await setupDeferred.promise;
+      await ref.set(new Post('post', 'author'));
+      const snapshot = await resultsDeferred.promise;
+      expect(snapshot.docs[0].data().toString()).to.equal('post, by author');
+      unsubscribe();
+    });
+  });
+
+  it('supports withConverter()', async () => {
+    const ref = firestore
+      .collection('col')
+      .doc('doc')
+      .withConverter(postConverter);
+    await ref.set(new Post('post', 'author'));
+    const postData = await ref.get();
+    const post = postData.data();
+    expect(post).to.not.be.undefined;
+    expect(post!.toString()).to.equal('post, by author');
   });
 });
 
@@ -1839,6 +1897,31 @@ describe('Transaction class', () => {
           expect(docs[1].data()).to.deep.equal({f: 'a'});
         });
     });
+  });
+
+  it('getAll() supports withConverter()', async () => {
+    const ref1 = randomCol.doc('doc1').withConverter(postConverter);
+    const ref2 = randomCol.doc('doc2').withConverter(postConverter);
+    await ref1.set(new Post('post1', 'author1'));
+    await ref2.set(new Post('post2', 'author2'));
+
+    const docs = await firestore.runTransaction(updateFunction => {
+      return updateFunction.getAll(ref1, ref2);
+    });
+
+    expect(docs[0].data()!.toString()).to.equal('post1, by author1');
+    expect(docs[1].data()!.toString()).to.equal('post2, by author2');
+  });
+
+  it('set() and get() support withConverter()', async () => {
+    const ref = randomCol.doc('doc1').withConverter(postConverter);
+    await ref.set(new Post('post', 'author'));
+    await firestore.runTransaction(async txn => {
+      await txn.get(ref);
+      await txn.set(ref, new Post('new post', 'author'));
+    });
+    const doc = await ref.get();
+    expect(doc.data()!.toString()).to.equal('new post, by author');
   });
 
   it('has get() with query', () => {
