@@ -15,7 +15,6 @@
 const duplexify = require('duplexify');
 
 import {expect} from 'chai';
-import {CallOptions} from 'google-gax';
 import * as path from 'path';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
@@ -36,10 +35,12 @@ import {
 import {fieldsFromJson} from '../src/convert';
 import {DocumentChangeType} from '../src/document-change';
 import {QualifiedResourcePath} from '../src/path';
+import {UnaryMethod} from '../src/types';
 import {isObject} from '../src/util';
 import {
   ApiOverride,
   createInstance as createInstanceHelper,
+  response,
 } from '../test/util/helpers';
 
 import api = proto.google.firestore.v1;
@@ -248,32 +249,23 @@ const convertProto = {
 };
 
 /** Request handler for _commit. */
-function commitHandler(spec: ConformanceProto) {
-  return (
-    request: api.ICommitRequest,
-    options: CallOptions,
-    callback: (
-      err: Error | null | undefined,
-      resp?: api.ICommitResponse
-    ) => void
-  ) => {
-    try {
-      const actualCommit = COMMIT_REQUEST_TYPE.fromObject(request);
-      const expectedCommit = COMMIT_REQUEST_TYPE.fromObject(spec.request);
-      expect(actualCommit).to.deep.equal(expectedCommit);
-      const res: api.IWriteResponse = {
-        commitTime: {},
-        writeResults: [],
-      };
-      for (let i = 1; i <= request.writes!.length; ++i) {
-        res.writeResults!.push({
-          updateTime: {},
-        });
-      }
-      callback(null, res);
-    } catch (err) {
-      callback(err);
+function commitHandler(
+  spec: ConformanceProto
+): UnaryMethod<api.ICommitRequest, api.ICommitResponse> {
+  return request => {
+    const actualCommit = COMMIT_REQUEST_TYPE.fromObject(request);
+    const expectedCommit = COMMIT_REQUEST_TYPE.fromObject(spec.request);
+    expect(actualCommit).to.deep.equal(expectedCommit);
+    const res: api.ICommitResponse = {
+      commitTime: {},
+      writeResults: [],
+    };
+    for (let i = 1; i <= request.writes!.length; ++i) {
+      res.writeResults!.push({
+        updateTime: {},
+      });
     }
+    return response(res);
   };
 }
 

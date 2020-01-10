@@ -550,7 +550,7 @@ export class FirestoreClient {
     options.otherArgs.headers[
       'x-goog-request-params'
     ] = gax.routingHeader.fromParams({
-      document_name: request.document!.name || '',
+      'document.name': request.document!.name || '',
     });
     return this._innerApiCalls.updateDocument(request, options, callback);
   }

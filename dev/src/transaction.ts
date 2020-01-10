@@ -359,7 +359,7 @@ export class Transaction {
     }
 
     return this._firestore
-      .request<api.IBeginTransactionResponse>(
+      .request<api.IBeginTransactionRequest, api.IBeginTransactionResponse>(
         'beginTransaction',
         request,
         this._requestTag

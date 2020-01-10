@@ -300,7 +300,11 @@ export class DocumentReference<T = DocumentData> implements Serializable {
         pageSize: Math.pow(2, 16) - 1,
       };
       return this._firestore
-        .request<string[]>('listCollectionIds', request, tag)
+        .request<api.IListCollectionIdsRequest, string[]>(
+          'listCollectionIds',
+          request,
+          tag
+        )
         .then(collectionIds => {
           const collections: Array<CollectionReference<DocumentData>> = [];
 
@@ -1875,7 +1879,7 @@ export class Query<T = DocumentData> {
     this.firestore.initializeIfNeeded(tag).then(() => {
       const request = this.toProto(transactionId);
       this._firestore
-        .requestStream('runQuery', 'unidirectional', request, tag)
+        .requestStream('runQuery', request, tag)
         .then(backendStream => {
           backendStream.on('error', err => {
             logger(
@@ -2123,7 +2127,11 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
       };
 
       return this.firestore
-        .request<api.IDocument[]>('listDocuments', request, tag)
+        .request<api.IListDocumentsRequest, api.IDocument[]>(
+          'listDocuments',
+          request,
+          tag
+        )
         .then(documents => {
           // Note that the backend already orders these documents by name,
           // so we do not need to manually sort them.

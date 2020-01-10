@@ -259,9 +259,11 @@ function endAt(
 }
 
 function queryEquals(
-  actual: api.IRunQueryRequest,
+  actual: api.IRunQueryRequest | undefined,
   ...protoComponents: api.IStructuredQuery[]
 ) {
+  expect(actual).to.not.be.undefined;
+
   const query: api.IRunQueryRequest = {
     parent: DATABASE_ROOT + '/documents',
     structuredQuery: {

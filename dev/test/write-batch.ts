@@ -26,6 +26,7 @@ import {
   ApiOverride,
   createInstance,
   InvalidApiUsage,
+  response,
   verifyInstance,
 } from './util/helpers';
 
@@ -187,7 +188,7 @@ describe('batch support', () => {
 
   beforeEach(() => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         expect(request).to.deep.eq({
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
@@ -238,7 +239,7 @@ describe('batch support', () => {
             },
           ],
         });
-        callback(null, {
+        return response({
           commitTime: {
             nanos: 0,
             seconds: 0,
@@ -368,8 +369,8 @@ describe('batch support', () => {
 
   it('can return same write result', () => {
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
-        callback(null, {
+      commit: request => {
+        return response({
           commitTime: {
             nanos: 0,
             seconds: 0,
@@ -411,13 +412,13 @@ describe('batch support', () => {
     let commitCalled = 0;
 
     const overrides: ApiOverride = {
-      beginTransaction: (actual, options, callback) => {
+      beginTransaction: () => {
         ++beginCalled;
-        callback(null, {transaction: Buffer.from('foo')});
+        return response({transaction: Buffer.from('foo')});
       },
-      commit: (request, options, callback) => {
+      commit: () => {
         ++commitCalled;
-        callback(null, {
+        return response({
           commitTime: {
             nanos: 0,
             seconds: 0,

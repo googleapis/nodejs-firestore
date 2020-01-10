@@ -16,12 +16,18 @@ import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 import {GoogleError, Status} from 'google-gax';
+import {Duplex} from 'stream';
 import * as through2 from 'through2';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 import * as Firestore from '../src';
 import {DocumentReference, FieldPath, Transaction} from '../src';
-import {ApiOverride, createInstance, InvalidApiUsage} from './util/helpers';
+import {
+  ApiOverride,
+  createInstance,
+  InvalidApiUsage,
+  response,
+} from './util/helpers';
 
 import api = proto.google.firestore.v1;
 
@@ -58,7 +64,7 @@ interface TransactionStep {
     | api.IRunQueryRequest;
   error?: Error;
   response?: api.ICommitResponse | api.IBeginTransactionResponse;
-  stream?: NodeJS.ReadableStream;
+  stream?: Duplex;
 }
 
 function commit(
@@ -267,26 +273,35 @@ function runTransaction<T>(
   ...expectedRequests: TransactionStep[]
 ) {
   const overrides: ApiOverride = {
-    beginTransaction: (actual, _, callback) => {
+    beginTransaction: actual => {
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('begin');
       expect(actual).to.deep.eq(request.request);
-      callback(
-        request.error,
-        request.response as api.IBeginTransactionResponse
-      );
+      if (request.error) {
+        return Promise.reject(request.error);
+      } else {
+        return response(request.response as api.IBeginTransactionResponse);
+      }
     },
-    commit: (actual, _, callback) => {
+    commit: actual => {
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('commit');
       expect(actual).to.deep.eq(request.request);
-      callback(request.error, request.response as api.ICommitResponse);
+      if (request.error) {
+        return Promise.reject(request.error);
+      } else {
+        return response(request.response as api.ICommitResponse);
+      }
     },
-    rollback: (actual, _, callback) => {
+    rollback: actual => {
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('rollback');
       expect(actual).to.deep.eq(request.request);
-      callback(request.error);
+      if (request.error) {
+        return Promise.reject(request.error);
+      } else {
+        return response({});
+      }
     },
     batchGetDocuments: actual => {
       const request = expectedRequests.shift()!;
@@ -347,9 +362,7 @@ describe('successful transactions', () => {
 describe('failed transactions', () => {
   it('requires update function', () => {
     const overrides: ApiOverride = {
-      beginTransaction: () => {
-        expect.fail();
-      },
+      beginTransaction: () => Promise.reject(),
     };
 
     return createInstance(overrides).then(firestore => {
@@ -361,9 +374,7 @@ describe('failed transactions', () => {
 
   it('requires valid retry number', () => {
     const overrides: ApiOverride = {
-      beginTransaction: () => {
-        expect.fail();
-      },
+      beginTransaction: () => Promise.reject(),
     };
 
     return createInstance(overrides).then(firestore => {
