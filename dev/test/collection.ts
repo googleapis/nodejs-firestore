@@ -15,11 +15,7 @@
 import {expect} from 'chai';
 
 import * as through2 from 'through2';
-import {
-  DocumentReference,
-  Firestore,
-  setLogFunction,
-} from '../src';
+import {DocumentReference, Firestore, setLogFunction} from '../src';
 import {
   ApiOverride,
   createInstance,

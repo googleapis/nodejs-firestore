@@ -29,6 +29,7 @@ import {
   Post,
   postConverter,
   requestEquals,
+  response,
   set,
   stream,
   verifyInstance,
@@ -630,13 +631,12 @@ describe('query interface', () => {
   it('for Query.withConverter()', async () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
-      commit: (request, options, callback) => {
+      commit: request => {
         const expectedRequest = set({
           document: doc,
         });
         requestEquals(request, expectedRequest);
-
-        callback(null, writeResult(1));
+        return response(writeResult(1));
       },
       runQuery: request => {
         queryEquals(request, fieldFilters('title', 'EQUAL', 'post'));
