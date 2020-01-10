@@ -36,7 +36,6 @@ import {
 } from './util/helpers';
 
 import api = google.firestore.v1;
-import through2 = require('through2');
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -654,7 +653,7 @@ describe('query interface', () => {
         .withConverter(postConverter)
         .get();
       expect(posts.size).to.equal(1);
-      expect(posts.docs[0].data()!.byline()).to.equal('post, by author');
+      expect(posts.docs[0].data().toString()).to.equal('post, by author');
     });
   });
 });

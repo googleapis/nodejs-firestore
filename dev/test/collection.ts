@@ -14,7 +14,7 @@
 
 import {expect} from 'chai';
 
-import through2 = require('through2');
+import * as through2 from 'through2';
 import {
   DocumentData,
   DocumentReference,
@@ -211,8 +211,8 @@ describe('Collection interface', () => {
       await docRef.set(new Post('post', 'author'));
       const postData = await docRef.get();
       const post = postData.data();
-      expect(post).to.not.equal(undefined);
-      expect(post!.byline()).to.equal('post, by author');
+      expect(post).to.not.be.undefined;
+      expect(post!.toString()).to.equal('post, by author');
     });
   });
 

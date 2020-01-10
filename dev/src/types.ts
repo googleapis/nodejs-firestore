@@ -92,6 +92,22 @@ export interface FirestoreDataConverter<T> {
 }
 
 /**
+ * A default converter to use when none is provided.
+ */
+export const defaultConverter = {
+  toFirestore(
+    modelObject: FirebaseFirestore.DocumentData
+  ): FirebaseFirestore.DocumentData {
+    return modelObject;
+  },
+  fromFirestore(
+    data: FirebaseFirestore.DocumentData
+  ): FirebaseFirestore.DocumentData {
+    return data;
+  },
+};
+
+/**
  * Settings used to directly configure a `Firestore` instance.
  */
 export interface Settings {

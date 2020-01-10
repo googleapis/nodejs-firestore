@@ -28,23 +28,15 @@ import {DocumentReference, Firestore, Query} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {DocumentData, FirestoreDataConverter, RBTree} from './types';
+import {
+  defaultConverter,
+  DocumentData,
+  FirestoreDataConverter,
+  RBTree,
+} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
-
-export const defaultConverter = {
-  toFirestore(
-    modelObject: FirebaseFirestore.DocumentData
-  ): FirebaseFirestore.DocumentData {
-    return modelObject;
-  },
-  fromFirestore(
-    data: FirebaseFirestore.DocumentData
-  ): FirebaseFirestore.DocumentData {
-    return data;
-  },
-};
 
 /*!
  * Target ID used by watch. Watch uses a fixed target id since we only support
@@ -132,7 +124,6 @@ abstract class Watch<T = DocumentData> {
   protected readonly firestore: Firestore;
   private readonly backoff: ExponentialBackoff;
   private readonly requestTag: string;
-  private readonly _converter: FirestoreDataConverter<T>;
 
   /**
    * Indicates whether we are interested in data from the stream. Set to false in the
@@ -202,14 +193,15 @@ abstract class Watch<T = DocumentData> {
    *
    * @param firestore The Firestore Database client.
    */
-  constructor(firestore: Firestore, converter?: FirestoreDataConverter<T>) {
+  constructor(
+    firestore: Firestore,
+    readonly _converter = defaultConverter as FirestoreDataConverter<T>
+  ) {
     this.firestore = firestore;
     this.backoff = new ExponentialBackoff();
     this.requestTag = requestTag();
     this.onNext = EMPTY_FUNCTION;
     this.onError = EMPTY_FUNCTION;
-    this._converter =
-      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**  Returns a 'Target' proto denoting the target to listen on. */
@@ -451,7 +443,7 @@ abstract class Watch<T = DocumentData> {
    * invalid.
    * @private
    */
-  private onData<T>(proto: api.IListenResponse): void {
+  private onData(proto: api.IListenResponse): void {
     if (proto.targetChange) {
       logger('Watch.onData', this.requestTag, 'Processing target change');
       const change = proto.targetChange;
@@ -768,10 +760,9 @@ abstract class Watch<T = DocumentData> {
 export class DocumentWatch<T = DocumentData> extends Watch<T> {
   constructor(
     firestore: Firestore,
-    private readonly ref: DocumentReference<T>,
-    converter?: FirestoreDataConverter<T>
+    private readonly ref: DocumentReference<T>
   ) {
-    super(firestore, converter);
+    super(firestore, ref._converter);
   }
 
   getComparator(): DocumentComparator<T> {

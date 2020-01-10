@@ -693,8 +693,8 @@ export class Firestore {
       );
     }
 
-    let ref;
-    let document;
+    let ref: DocumentReference<T>;
+    let document: DocumentSnapshotBuilder<T>;
     if (typeof documentOrName === 'string') {
       ref = new DocumentReference<T>(
         this,

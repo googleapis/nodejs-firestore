@@ -15,8 +15,7 @@
  */
 
 import {QueryDocumentSnapshot} from './document';
-import {DocumentData, FirestoreDataConverter} from './types';
-import {defaultConverter} from './watch';
+import {DocumentData} from './types';
 
 export type DocumentChangeType = 'added' | 'removed' | 'modified';
 

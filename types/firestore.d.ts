@@ -333,8 +333,8 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
-        Promise<DocumentSnapshot[]>;
+    getAll<T>(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
+        Promise<Array<DocumentSnapshot<T>>>;
 
     /**
      * Create the document referred to by the provided `DocumentReference`.

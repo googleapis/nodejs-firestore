@@ -17,6 +17,7 @@ import {expect} from 'chai';
 import * as proto from '../protos/firestore_v1_proto_api';
 import {
   DocumentReference,
+  DocumentSnapshot,
   FieldPath,
   FieldValue,
   Firestore,
@@ -47,7 +48,8 @@ import {
 } from './util/helpers';
 
 import {GoogleError, Status} from 'google-gax';
-import through2 = require('through2');
+import * as through2 from 'through2';
+import {Deferred} from '../src/util';
 
 const PROJECT_ID = 'test-project';
 
@@ -2020,7 +2022,7 @@ describe('withConverter() support', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('for DocumentReference.withConverter()', async () => {
+  it('for DocumentReference.withConverter().get()', async () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
       commit: (request, options, callback) => {
@@ -2051,8 +2053,8 @@ describe('withConverter() support', () => {
       await docRef.set(new Post('post', 'author'));
       const postData = await docRef.get();
       const post = postData.data();
-      expect(post).to.not.equal(undefined);
-      expect(post!.byline()).to.equal('post, by author');
+      expect(post).to.not.be.undefined;
+      expect(post!.toString()).to.equal('post, by author');
     });
   });
 });

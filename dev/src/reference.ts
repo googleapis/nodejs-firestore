@@ -39,6 +39,7 @@ import {
 import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {
+  defaultConverter,
   DocumentData,
   FirestoreDataConverter,
   OrderByDirection,
@@ -55,7 +56,7 @@ import {
   validateInteger,
   validateMinNumberOfArguments,
 } from './validate';
-import {defaultConverter, DocumentWatch, QueryWatch} from './watch';
+import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = proto.google.firestore.v1;
@@ -123,8 +124,6 @@ const comparisonOperators: {
  * @class
  */
 export class DocumentReference<T = DocumentData> implements Serializable {
-  readonly _converter: FirestoreDataConverter<T>;
-
   /**
    * @hideconstructor
    *
@@ -134,11 +133,8 @@ export class DocumentReference<T = DocumentData> implements Serializable {
   constructor(
     private readonly _firestore: Firestore,
     readonly _path: ResourcePath,
-    converter?: FirestoreDataConverter<T>
-  ) {
-    this._converter =
-      converter || (defaultConverter as FirestoreDataConverter<T>);
-  }
+    readonly _converter = defaultConverter as FirestoreDataConverter<T>
+  ) {}
 
   /**
    * The string representation of the DocumentReference's location.
@@ -265,7 +261,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    * let subcollection = documentRef.collection('subcollection');
    * console.log(`Path to subcollection: ${subcollection.path}`);
    */
-  collection(collectionPath: string): CollectionReference<DocumentData> {
+  collection(collectionPath: string): CollectionReference {
     validateResourcePath('collectionPath', collectionPath);
 
     const path = this._path.append(collectionPath);
@@ -443,12 +439,12 @@ export class DocumentReference<T = DocumentData> implements Serializable {
     validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
     const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch.update
-      .apply(writeBatch, [
+    return writeBatch
+      .update(
         this as DocumentReference<unknown>,
         dataOrField,
-        ...preconditionOrValues,
-      ])
+        ...preconditionOrValues
+      )
       .commit()
       .then(([writeResult]) => writeResult);
   }
@@ -486,7 +482,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
 
-    const watch = new DocumentWatch(this.firestore, this, this._converter);
+    const watch = new DocumentWatch(this.firestore, this);
 
     return watch.onSnapshot((readTime, size, docs) => {
       for (const document of docs()) {
@@ -520,7 +516,8 @@ export class DocumentReference<T = DocumentData> implements Serializable {
       this === other ||
       (other instanceof DocumentReference &&
         this._firestore === other._firestore &&
-        this._path.isEqual(other._path))
+        this._path.isEqual(other._path) &&
+        this._converter === other._converter)
     );
   }
 
@@ -686,8 +683,6 @@ export class QuerySnapshot<T = DocumentData> {
    * this query
    * @param changes A callback returning a sorted array of document change
    * events for this snapshot.
-   * @param _converter The converter used to converter between Firestore and
-   * user objects.
    */
   constructor(
     private readonly _query: Query<T>,
@@ -1032,7 +1027,6 @@ export class QueryOptions {
  */
 export class Query<T = DocumentData> {
   private readonly _serializer: Serializer;
-  readonly _converter: FirestoreDataConverter<T>;
 
   /**
    * @hideconstructor
@@ -1043,11 +1037,9 @@ export class Query<T = DocumentData> {
   constructor(
     private readonly _firestore: Firestore,
     protected readonly _queryOptions: QueryOptions,
-    converter?: FirestoreDataConverter<T>
+    readonly _converter = defaultConverter as FirestoreDataConverter<T>
   ) {
     this._serializer = new Serializer(_firestore);
-    this._converter =
-      converter || (defaultConverter as FirestoreDataConverter<T>);
   }
 
   /**
@@ -1335,7 +1327,9 @@ export class Query<T = DocumentData> {
     }
 
     return (
-      other instanceof Query && this._queryOptions.isEqual(other._queryOptions)
+      other instanceof Query &&
+      this._queryOptions.isEqual(other._queryOptions) &&
+      this._converter === other._converter
     );
   }
 

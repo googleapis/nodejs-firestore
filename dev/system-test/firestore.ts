@@ -289,7 +289,7 @@ describe('DocumentReference class', () => {
       })
       .then(doc => {
         const data = doc.data()!;
-        expect((data.pathValue as DocumentReference).path).to.equal(
+        expect(data.pathValue.path).to.equal(
           allSupportedTypesObject.pathValue.path
         );
         delete data.pathValue;

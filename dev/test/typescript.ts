@@ -33,6 +33,7 @@ import Precondition = FirebaseFirestore.Precondition;
 import SetOptions = FirebaseFirestore.SetOptions;
 import Timestamp = FirebaseFirestore.Timestamp;
 import Settings = FirebaseFirestore.Settings;
+import {defaultConverter} from '../src/types';
 
 // This test verifies the Typescript typings and is not meant for execution.
 xdescribe('firestore.d.ts', () => {
@@ -153,6 +154,7 @@ xdescribe('firestore.d.ts', () => {
     const subcollection: CollectionReference = docRef.collection('coll');
     docRef.listCollections().then((collections: CollectionReference[]) => {});
     docRef.get().then((snapshot: DocumentSnapshot) => {});
+    docRef.withConverter(defaultConverter);
     docRef
       .create(documentData)
       .then((writeResult: FirebaseFirestore.WriteResult) => {});
@@ -260,6 +262,7 @@ xdescribe('firestore.d.ts', () => {
       query = query.endBefore(snapshot);
       query = query.endBefore('foo');
       query = query.endBefore('foo', 'bar');
+      query = query.withConverter(defaultConverter);
       query.get().then((results: QuerySnapshot) => {});
       query.stream().on('data', () => {});
       let unsubscribe: () => void = query.onSnapshot(
@@ -305,6 +308,7 @@ xdescribe('firestore.d.ts', () => {
     const docRef1: DocumentReference = collRef.doc();
     const docRef2: DocumentReference = collRef.doc('doc');
     collRef.add(documentData).then((docRef: DocumentReference) => {});
+    collRef.withConverter(defaultConverter);
     const list: Promise<DocumentReference[]> = collRef.listDocuments();
     const equals: boolean = collRef.isEqual(collRef);
   });

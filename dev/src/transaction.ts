@@ -307,11 +307,7 @@ export class Transaction {
   ): Transaction {
     validateMinNumberOfArguments('Transaction.update', arguments, 2);
 
-    this._writeBatch.update.apply(this._writeBatch, [
-      documentRef as DocumentReference<unknown>,
-      dataOrField,
-      ...preconditionOrValues,
-    ]);
+    this._writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
     return this;
   }
 

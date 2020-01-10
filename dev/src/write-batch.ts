@@ -296,7 +296,7 @@ export class WriteBatch {
     const mergeLeaves = options && options.merge === true;
     const mergePaths = options && options.mergeFields;
     validateDocumentReference('documentRef', documentRef);
-    let firestoreData: DocumentData = documentRef._converter.toFirestore(data);
+    let firestoreData = documentRef._converter.toFirestore(data);
     validateDocumentData(
       'data',
       firestoreData,
