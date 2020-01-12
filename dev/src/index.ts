@@ -1183,7 +1183,7 @@ export class Firestore {
    */
   private _initializeStream(
     backendStream: Duplex,
-    liftime: Deferred<void>,
+    lifetime: Deferred<void>,
     requestTag: string,
     request?: {}
   ): Promise<Duplex> {
@@ -1204,6 +1204,8 @@ export class Firestore {
           resolve(resultStream);
         }
       }
+      
+      backendStream.on('data', () => streamReady());
 
       function streamEnded() {
         logger(
@@ -1213,10 +1215,9 @@ export class Firestore {
         );
         resultStream.unpipe(backendStream);
         resolve(resultStream);
-        liftime.resolve();
+        lifetime.resolve();
       }
 
-      backendStream.on('data', () => streamReady());
       backendStream.on('end', () => streamEnded());
       backendStream.on('close', () => streamEnded());
       backendStream.on('finish', () => streamEnded());
