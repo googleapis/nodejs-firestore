@@ -1204,7 +1204,7 @@ export class Firestore {
           resolve(resultStream);
         }
       }
-      
+
       backendStream.on('data', () => streamReady());
 
       function streamEnded() {
