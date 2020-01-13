@@ -18,6 +18,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
+import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {
   DocumentReference,
@@ -61,28 +62,17 @@ const READ_AFTER_WRITE_ERROR_MSG =
 export class Transaction {
   private _firestore: Firestore;
   private _writeBatch: WriteBatch;
-  private _requestTag: string;
+  private _requestTag?: string;
   private _transactionId?: Uint8Array;
 
   /**
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
-   * @param requestTag A unique client-assigned identifier for the scope of
-   * this transaction.
-   * @param previousTransaction If available, the failed transaction that is
-   * being retried.
    */
-  constructor(
-    firestore: Firestore,
-    requestTag: string,
-    previousTransaction?: Transaction
-  ) {
+  constructor(firestore: Firestore) {
     this._firestore = firestore;
-    this._transactionId =
-      previousTransaction && previousTransaction._transactionId;
     this._writeBatch = firestore.batch();
-    this._requestTag = requestTag;
   }
 
   /**
@@ -136,7 +126,7 @@ export class Transaction {
         .getAll_(
           [refOrQuery],
           /* fieldMask= */ null,
-          this._requestTag,
+          this._requestTag!,
           this._transactionId
         )
         .then(res => {
@@ -195,7 +185,7 @@ export class Transaction {
     return this._firestore.getAll_(
       documents,
       fieldMask,
-      this._requestTag,
+      this._requestTag!,
       this._transactionId
     );
   }
@@ -366,7 +356,7 @@ export class Transaction {
       .request<api.IBeginTransactionRequest, api.IBeginTransactionResponse>(
         'beginTransaction',
         request,
-        this._requestTag
+        this._requestTag!
       )
       .then(resp => {
         this._transactionId = resp.transaction!;
@@ -398,16 +388,73 @@ export class Transaction {
       transaction: this._transactionId,
     };
 
-    return this._firestore.request('rollback', request, this._requestTag);
+    return this._firestore.request('rollback', request, this._requestTag!);
   }
 
   /**
-   * Returns the tag to use with with all request for this Transaction.
+   * Executes `updateFunction()` and commits the transaction with retry.
+   *
    * @private
-   * @return A unique client-generated identifier for this transaction.
+   * @param updateFunction The user function to execute within the transaction
+   * context.
+   * @param requestTag A unique client-assigned identifier for the scope of
+   * this transaction.
+   * @param maxAttempts The maximum number of attempts for this transaction.
    */
-  get requestTag(): string {
-    return this._requestTag;
+  async runTransaction<T>(
+    updateFunction: (transaction: Transaction) => Promise<T>,
+    requestTag: string,
+    maxAttempts: number
+  ): Promise<T> {
+    let result: T;
+    let lastError: Error | undefined = undefined;
+
+    for (let attempt = 0; attempt < maxAttempts; ++attempt) {
+      if (lastError) {
+        logger(
+          'Firestore.runTransaction',
+          requestTag,
+          `Retrying transaction after error:`,
+          lastError
+        );
+      }
+
+      await this.begin();
+
+      try {
+        const promise = updateFunction(this);
+        if (!(promise instanceof Promise)) {
+          throw new Error(
+            'You must return a Promise in your transaction()-callback.'
+          );
+        }
+        result = await promise;
+      } catch (err) {
+        logger(
+          'Firestore.runTransaction',
+          requestTag,
+          'Rolling back transaction after callback error:',
+          err
+        );
+        await this.rollback();
+        return Promise.reject(err); // User callback failed
+      }
+
+      try {
+        await this.commit();
+        return result; // Success
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    logger(
+      'Firestore.runTransaction',
+      requestTag,
+      'Exhausted transaction retries, returning error: %s',
+      lastError
+    );
+    return Promise.reject(lastError);
   }
 }
 
