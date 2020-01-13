@@ -33,7 +33,7 @@ import Precondition = FirebaseFirestore.Precondition;
 import SetOptions = FirebaseFirestore.SetOptions;
 import Timestamp = FirebaseFirestore.Timestamp;
 import Settings = FirebaseFirestore.Settings;
-import {defaultConverter} from '../src/types';
+import {FirestoreDataConverter} from '@google-cloud/firestore';
 
 // This test verifies the Typescript typings and is not meant for execution.
 xdescribe('firestore.d.ts', () => {
@@ -52,6 +52,15 @@ xdescribe('firestore.d.ts', () => {
   const collRef: CollectionReference = firestore.collection('coll');
   const updateData: UpdateData = {};
   const documentData: DocumentData = {};
+
+  const defaultConverter: FirestoreDataConverter<DocumentData> = {
+    toFirestore(modelObject: DocumentData): DocumentData {
+      return modelObject;
+    },
+    fromFirestore(data: DocumentData): DocumentData {
+      return data;
+    },
+  };
 
   FirebaseFirestore.setLogFunction(console.log);
 

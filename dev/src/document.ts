@@ -49,10 +49,8 @@ export class DocumentSnapshotBuilder<T = DocumentData> {
   /** The time when this document was last updated. */
   updateTime?: Timestamp;
 
-  /**
-   * We include the DocumentReference in the constructor in order to allow the
-   * DocumentSnapshotBuilder to be typed with <T> when it is constructed.
-   */
+  // We include the DocumentReference in the constructor in order to allow the
+  // DocumentSnapshotBuilder to be typed with <T> when it is constructed.
   constructor(readonly ref: DocumentReference<T>) {}
 
   /**
@@ -108,7 +106,7 @@ export class DocumentSnapshot<T = DocumentData> {
    * @hideconstructor
    *
    * @param ref The reference to the document.
-   * @param fieldsProto The fields of the Firestore `Document` Protobuf backing
+   * @param _fieldsProto The fields of the Firestore `Document` Protobuf backing
    * this document (or undefined if the document does not exist).
    * @param readTime The time when this snapshot was read  (or undefined if
    * the document exists only locally).
@@ -119,7 +117,7 @@ export class DocumentSnapshot<T = DocumentData> {
    */
   constructor(
     ref: DocumentReference<T>,
-    readonly fieldsProto?: ApiMapValue,
+    readonly _fieldsProto?: ApiMapValue,
     readTime?: Timestamp,
     createTime?: Timestamp,
     updateTime?: Timestamp
@@ -251,7 +249,7 @@ export class DocumentSnapshot<T = DocumentData> {
    * });
    */
   get exists(): boolean {
-    return this.fieldsProto !== undefined;
+    return this._fieldsProto !== undefined;
   }
 
   /**
@@ -377,7 +375,7 @@ export class DocumentSnapshot<T = DocumentData> {
    * });
    */
   data(): T | undefined {
-    const fields = this.fieldsProto;
+    const fields = this._fieldsProto;
 
     if (fields === undefined) {
       return undefined;
@@ -434,7 +432,7 @@ export class DocumentSnapshot<T = DocumentData> {
    * undefined if no such field exists.
    */
   protoField(field: string | FieldPath): api.IValue | undefined {
-    let fields: ApiMapValue | api.IValue | undefined = this.fieldsProto;
+    let fields: ApiMapValue | api.IValue | undefined = this._fieldsProto;
 
     if (fields === undefined) {
       return undefined;
@@ -461,7 +459,7 @@ export class DocumentSnapshot<T = DocumentData> {
    * @return {boolean}
    */
   get isEmpty(): boolean {
-    return this.fieldsProto === undefined || isEmpty(this.fieldsProto);
+    return this._fieldsProto === undefined || isEmpty(this._fieldsProto);
   }
 
   /**
@@ -474,7 +472,7 @@ export class DocumentSnapshot<T = DocumentData> {
     return {
       update: {
         name: this._ref.formattedName,
-        fields: this.fieldsProto,
+        fields: this._fieldsProto,
       },
     };
   }
@@ -494,7 +492,7 @@ export class DocumentSnapshot<T = DocumentData> {
       this === other ||
       (other instanceof DocumentSnapshot &&
         this._ref.isEqual(other._ref) &&
-        deepEqual(this.fieldsProto, other.fieldsProto, {strict: true}))
+        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
     );
   }
 }

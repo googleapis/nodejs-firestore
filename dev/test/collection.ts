@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {expect} from 'chai';
-
 import * as through2 from 'through2';
+
 import {DocumentReference, Firestore, setLogFunction} from '../src';
 import {
   ApiOverride,
@@ -176,7 +176,7 @@ describe('Collection interface', () => {
     expect(coll1.isEqual(coll2)).to.not.be.ok;
   });
 
-  it('for CollectionReference.withConverter()', async () => {
+  it('for CollectionReference.withConverter().doc()', async () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
       commit: request => {
@@ -203,7 +203,6 @@ describe('Collection interface', () => {
         .collection('collectionId')
         .withConverter(postConverter)
         .doc('documentId');
-
       await docRef.set(new Post('post', 'author'));
       const postData = await docRef.get();
       const post = postData.data();

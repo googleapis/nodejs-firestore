@@ -648,31 +648,31 @@ export class Firestore {
    * @returns A QueryDocumentSnapshot for existing documents, otherwise a
    * DocumentSnapshot.
    */
-  snapshot_<T = DocumentData>(
+  snapshot_(
     documentName: string,
     readTime?: google.protobuf.ITimestamp,
     encoding?: 'protobufJS'
-  ): DocumentSnapshot<T>;
-  snapshot_<T = DocumentData>(
+  ): DocumentSnapshot;
+  snapshot_(
     documentName: string,
     readTime: string,
     encoding: 'json'
-  ): DocumentSnapshot<T>;
-  snapshot_<T = DocumentData>(
+  ): DocumentSnapshot;
+  snapshot_(
     document: api.IDocument,
     readTime: google.protobuf.ITimestamp,
     encoding?: 'protobufJS'
-  ): QueryDocumentSnapshot<T>;
-  snapshot_<T = DocumentData>(
+  ): QueryDocumentSnapshot;
+  snapshot_(
     document: {[k: string]: unknown},
     readTime: string,
     encoding: 'json'
-  ): QueryDocumentSnapshot<T>;
-  snapshot_<T = DocumentData>(
+  ): QueryDocumentSnapshot;
+  snapshot_(
     documentOrName: api.IDocument | {[k: string]: unknown} | string,
     readTime?: google.protobuf.ITimestamp | string,
     encoding?: 'json' | 'protobufJS'
-  ): DocumentSnapshot<T> {
+  ): DocumentSnapshot {
     // TODO: Assert that Firestore Project ID is valid.
 
     let convertTimestamp: (
@@ -696,16 +696,16 @@ export class Firestore {
       );
     }
 
-    let ref: DocumentReference<T>;
-    let document: DocumentSnapshotBuilder<T>;
+    let ref: DocumentReference;
+    let document: DocumentSnapshotBuilder;
     if (typeof documentOrName === 'string') {
-      ref = new DocumentReference<T>(
+      ref = new DocumentReference(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(documentOrName)
       );
       document = new DocumentSnapshotBuilder(ref);
     } else {
-      ref = new DocumentReference<T>(
+      ref = new DocumentReference(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(
           documentOrName.name as string
@@ -947,7 +947,7 @@ export class Firestore {
     transactionId?: Uint8Array
   ): Promise<Array<DocumentSnapshot<T>>> {
     const requestedDocuments = new Set<string>();
-    const retrievedDocuments = new Map<string, DocumentSnapshot<T>>();
+    const retrievedDocuments = new Map<string, DocumentSnapshot>();
 
     for (const docRef of docRefs) {
       requestedDocuments.add(docRef.formattedName);
@@ -990,10 +990,7 @@ export class Firestore {
                     'Received document: %s',
                     response.found.name!
                   );
-                  document = self.snapshot_<T>(
-                    response.found,
-                    response.readTime!
-                  );
+                  document = self.snapshot_(response.found, response.readTime!);
                 } else {
                   logger(
                     'Firestore.getAll_',
@@ -1001,7 +998,7 @@ export class Firestore {
                     'Document missing: %s',
                     response.missing!
                   );
-                  document = self.snapshot_<T>(
+                  document = self.snapshot_(
                     response.missing!,
                     response.readTime!
                   );
@@ -1037,7 +1034,7 @@ export class Firestore {
                   // Recreate the DocumentSnapshot with the DocumentReference
                   // containing the original converter.
                   const finalDoc = new DocumentSnapshotBuilder(docRef);
-                  finalDoc.fieldsProto = document.fieldsProto;
+                  finalDoc.fieldsProto = document._fieldsProto;
                   finalDoc.readTime = document.readTime;
                   finalDoc.createTime = document.createTime;
                   finalDoc.updateTime = document.updateTime;
