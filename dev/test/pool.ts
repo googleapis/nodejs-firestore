@@ -319,12 +319,12 @@ describe('Client pool', () => {
     return clientPool
       .terminate()
       .then(() => {
-        clientPool.run(REQUEST_TAG, () =>
+        return clientPool.run(REQUEST_TAG, () =>
           Promise.reject('Call to run() should have failed')
         );
       })
       .catch((err: Error) => {
-        expect(err.message).to.equal('The client has already been terminated');
+        expect(err).to.equal('The client has already been terminated');
       });
   });
 });
