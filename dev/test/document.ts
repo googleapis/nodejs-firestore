@@ -14,9 +14,11 @@
 
 import {expect} from 'chai';
 import {GoogleError, Status} from 'google-gax';
+import * as through2 from 'through2';
 
 import {
   DocumentReference,
+  DocumentSnapshot,
   FieldPath,
   FieldValue,
   Firestore,
@@ -32,6 +34,8 @@ import {
   found,
   InvalidApiUsage,
   missing,
+  Post,
+  postConverter,
   remove,
   requestEquals,
   response,
@@ -2032,6 +2036,54 @@ describe('listCollections() method', () => {
           expect(collections[0].path).to.equal('coll/doc/first');
           expect(collections[1].path).to.equal('coll/doc/second');
         });
+    });
+  });
+});
+
+describe('withConverter() support', () => {
+  let firestore: Firestore;
+
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('for DocumentReference.get()', async () => {
+    const doc = document('documentId', 'author', 'author', 'title', 'post');
+    const overrides: ApiOverride = {
+      commit: request => {
+        const expectedRequest = set({
+          document: doc,
+        });
+        requestEquals(request, expectedRequest);
+
+        return response(writeResult(1));
+      },
+      batchGetDocuments: () => {
+        const stream = through2.obj();
+        setImmediate(() => {
+          stream.push({found: doc, readTime: {seconds: 5, nanos: 6}});
+          stream.push(null);
+        });
+
+        return stream;
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const docRef = firestore
+        .collection('collectionId')
+        .doc('documentId')
+        .withConverter(postConverter);
+
+      await docRef.set(new Post('post', 'author'));
+      const postData = await docRef.get();
+      const post = postData.data();
+      expect(post).to.not.be.undefined;
+      expect(post!.toString()).to.equal('post, by author');
     });
   });
 });
