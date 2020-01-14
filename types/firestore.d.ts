@@ -35,9 +35,12 @@ declare namespace FirebaseFirestore {
   export type UpdateData = {[fieldPath: string]: any};
 
   /**
-   * Sets the log function for all active Firestore instances.
+   * Sets or disables the log function for all active Firestore instances.
+   * 
+   * @param logger A log function that takes a message (such as `console.log`) or
+   * `null` to turn off logging.
    */
-  function setLogFunction(logger: (msg:string) => void): void;
+  function setLogFunction(logger: ((msg:string) => void) | null) : void;
 
   /**
    * Settings used to directly configure a `Firestore` instance.
