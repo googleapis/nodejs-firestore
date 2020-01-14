@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.3.4](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.3...v3.3.4) (2020-01-12)
+
+
+### Bug Fixes
+
+* do not release client before retry ([#870](https://www.github.com/googleapis/nodejs-firestore/issues/870)) ([47f7ab5](https://www.github.com/googleapis/nodejs-firestore/commit/47f7ab52f9133064785754ee924d9f8736853eba))
+* proper routing headers ([43472f6](https://www.github.com/googleapis/nodejs-firestore/commit/43472f6bd51a22a5ee27d7fc0f88a9dd97c22336))
+* remove redundant log line ([#868](https://www.github.com/googleapis/nodejs-firestore/issues/868)) ([af3196f](https://www.github.com/googleapis/nodejs-firestore/commit/af3196fe8da2018e0a9842f4f62588ce2c740597))
+
 ### [3.3.3](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.2...v3.3.3) (2020-01-08)
 
 
