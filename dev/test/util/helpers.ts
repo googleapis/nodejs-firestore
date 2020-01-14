@@ -21,7 +21,7 @@ import * as through2 from 'through2';
 import * as proto from '../../protos/firestore_v1_proto_api';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
-import {GapicClient} from '../../src/types';
+import {DocumentData, GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
@@ -334,3 +334,21 @@ export function stream<T>(...elements: Array<T | Error>): Duplex {
 export function response<T>(result: T): Promise<[T, unknown, unknown]> {
   return Promise.resolve([result, undefined, undefined]);
 }
+
+/** Sample user object class used in tests. */
+export class Post {
+  constructor(readonly title: string, readonly author: string) {}
+  toString(): string {
+    return this.title + ', by ' + this.author;
+  }
+}
+
+/** Converts Post objects to and from Firestore in tests. */
+export const postConverter = {
+  toFirestore(post: Post): DocumentData {
+    return {title: post.title, author: post.author};
+  },
+  fromFirestore(data: DocumentData): Post {
+    return new Post(data.title, data.author);
+  },
+};

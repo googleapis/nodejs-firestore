@@ -166,7 +166,7 @@ export class WriteBatch {
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * created.
-   * @param {DocumentData} data The object to serialize as the document.
+   * @param {T} data The object to serialize as the document.
    * @returns {WriteBatch} This WriteBatch instance. Used for chaining
    * method calls.
    *
@@ -180,19 +180,20 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  create(documentRef: DocumentReference, data: DocumentData): WriteBatch {
+  create<T>(documentRef: DocumentReference<T>, data: T): WriteBatch {
     validateDocumentReference('documentRef', documentRef);
     validateDocumentData('data', data, /* allowDeletes= */ false);
 
     this.verifyNotCommitted();
 
-    const transform = DocumentTransform.fromObject(documentRef, data);
+    const firestoreData = documentRef._converter.toFirestore(data);
+    const transform = DocumentTransform.fromObject(documentRef, firestoreData);
     transform.validate();
 
     const precondition = new Precondition({exists: false});
 
     const op = () => {
-      const document = DocumentSnapshot.fromObject(documentRef, data);
+      const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
       const write =
         !document.isEmpty || transform.isEmpty ? document.toProto() : null;
 
@@ -231,8 +232,8 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  delete(
-    documentRef: DocumentReference,
+  delete<T>(
+    documentRef: DocumentReference<T>,
     precondition?: PublicPrecondition
   ): WriteBatch {
     validateDocumentReference('documentRef', documentRef);
@@ -265,7 +266,7 @@ export class WriteBatch {
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
-   * @param {DocumentData} data The object to serialize as the document.
+   * @param {T} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
@@ -286,19 +287,19 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  set(
-    documentRef: DocumentReference,
-    data: DocumentData,
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: T,
     options?: SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
     const mergeLeaves = options && options.merge === true;
     const mergePaths = options && options.mergeFields;
-
     validateDocumentReference('documentRef', documentRef);
+    let firestoreData = documentRef._converter.toFirestore(data);
     validateDocumentData(
       'data',
-      data,
+      firestoreData,
       /* allowDeletes= */ !!(mergePaths || mergeLeaves)
     );
 
@@ -308,19 +309,19 @@ export class WriteBatch {
 
     if (mergePaths) {
       documentMask = DocumentMask.fromFieldMask(options!.mergeFields!);
-      data = documentMask.applyTo(data);
+      firestoreData = documentMask.applyTo(firestoreData);
     }
 
-    const transform = DocumentTransform.fromObject(documentRef, data);
+    const transform = DocumentTransform.fromObject(documentRef, firestoreData);
     transform.validate();
 
     const op = () => {
-      const document = DocumentSnapshot.fromObject(documentRef, data);
+      const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
 
       if (mergePaths) {
         documentMask!.removeFields(transform.fields);
       } else {
-        documentMask = DocumentMask.fromObject(data);
+        documentMask = DocumentMask.fromObject(firestoreData);
       }
 
       const hasDocumentData = !document.isEmpty || !documentMask!.isEmpty;
@@ -381,8 +382,8 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  update(
-    documentRef: DocumentReference,
+  update<T = DocumentData>(
+    documentRef: DocumentReference<T>,
     dataOrField: UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
@@ -650,6 +651,15 @@ export class WriteBatch {
     }
 
     return true;
+  }
+
+  /**
+   * Resets the WriteBatch and dequeues all pending operations.
+   * @private
+   */
+  _reset() {
+    this._ops.splice(0);
+    this._committed = false;
   }
 }
 

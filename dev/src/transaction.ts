@@ -18,6 +18,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
+import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {
   DocumentReference,
@@ -70,17 +71,9 @@ export class Transaction {
    * @param firestore The Firestore Database client.
    * @param requestTag A unique client-assigned identifier for the scope of
    * this transaction.
-   * @param previousTransaction If available, the failed transaction that is
-   * being retried.
    */
-  constructor(
-    firestore: Firestore,
-    requestTag: string,
-    previousTransaction?: Transaction
-  ) {
+  constructor(firestore: Firestore, requestTag: string) {
     this._firestore = firestore;
-    this._transactionId =
-      previousTransaction && previousTransaction._transactionId;
     this._writeBatch = firestore.batch();
     this._requestTag = requestTag;
   }
@@ -92,7 +85,7 @@ export class Transaction {
    * @param {Query} query A query to execute.
    * @return {Promise<QuerySnapshot>} A QuerySnapshot for the retrieved data.
    */
-  get(query: Query): Promise<QuerySnapshot>;
+  get<T>(query: Query<T>): Promise<QuerySnapshot<T>>;
 
   /**
    * Reads the document referenced by the provided `DocumentReference.`
@@ -101,7 +94,7 @@ export class Transaction {
    * @param {DocumentReference} documentRef A reference to the document to be read.
    * @return {Promise<DocumentSnapshot>}  A DocumentSnapshot for the read data.
    */
-  get(documentRef: DocumentReference): Promise<DocumentSnapshot>;
+  get<T>(documentRef: DocumentReference<T>): Promise<DocumentSnapshot<T>>;
 
   /**
    * Retrieve a document or a query result from the database. Holds a
@@ -124,9 +117,9 @@ export class Transaction {
    *   });
    * });
    */
-  get(
-    refOrQuery: DocumentReference | Query
-  ): Promise<DocumentSnapshot | QuerySnapshot> {
+  get<T>(
+    refOrQuery: DocumentReference<T> | Query<T>
+  ): Promise<DocumentSnapshot<T> | QuerySnapshot<T>> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
@@ -179,9 +172,9 @@ export class Transaction {
    *   });
    * });
    */
-  getAll(
-    ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
-  ): Promise<DocumentSnapshot[]> {
+  getAll<T>(
+    ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+  ): Promise<Array<DocumentSnapshot<T>>> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
@@ -221,7 +214,7 @@ export class Transaction {
    *   });
    * });
    */
-  create(documentRef: DocumentReference, data: DocumentData): Transaction {
+  create<T>(documentRef: DocumentReference<T>, data: T): Transaction {
     this._writeBatch.create(documentRef, data);
     return this;
   }
@@ -235,7 +228,7 @@ export class Transaction {
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
-   * @param {DocumentData} data The object to serialize as the document.
+   * @param {T} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
@@ -253,9 +246,9 @@ export class Transaction {
    *   return Promise.resolve();
    * });
    */
-  set(
-    documentRef: DocumentReference,
-    data: DocumentData,
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: T,
     options?: SetOptions
   ): Transaction {
     this._writeBatch.set(documentRef, data, options);
@@ -300,18 +293,14 @@ export class Transaction {
    *   });
    * });
    */
-  update(
-    documentRef: DocumentReference,
+  update<T>(
+    documentRef: DocumentReference<T>,
     dataOrField: UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<Precondition | unknown | string | FieldPath>
   ): Transaction {
     validateMinNumberOfArguments('Transaction.update', arguments, 2);
 
-    this._writeBatch.update.apply(this._writeBatch, [
-      documentRef,
-      dataOrField,
-      ...preconditionOrValues,
-    ]);
+    this._writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
     return this;
   }
 
@@ -336,8 +325,8 @@ export class Transaction {
    *   return Promise.resolve();
    * });
    */
-  delete(
-    documentRef: DocumentReference,
+  delete<T>(
+    documentRef: DocumentReference<T>,
     precondition?: PublicPrecondition
   ): this {
     this._writeBatch.delete(documentRef, precondition);
@@ -402,12 +391,69 @@ export class Transaction {
   }
 
   /**
-   * Returns the tag to use with with all request for this Transaction.
+   * Executes `updateFunction()` and commits the transaction with retry.
+   *
    * @private
-   * @return A unique client-generated identifier for this transaction.
+   * @param updateFunction The user function to execute within the transaction
+   * context.
+   * @param requestTag A unique client-assigned identifier for the scope of
+   * this transaction.
+   * @param maxAttempts The maximum number of attempts for this transaction.
    */
-  get requestTag(): string {
-    return this._requestTag;
+  async runTransaction<T>(
+    updateFunction: (transaction: Transaction) => Promise<T>,
+    maxAttempts: number
+  ): Promise<T> {
+    let result: T;
+    let lastError: Error | undefined = undefined;
+
+    for (let attempt = 0; attempt < maxAttempts; ++attempt) {
+      if (lastError) {
+        logger(
+          'Firestore.runTransaction',
+          this._requestTag,
+          `Retrying transaction after error:`,
+          lastError
+        );
+      }
+
+      await this.begin();
+
+      try {
+        const promise = updateFunction(this);
+        if (!(promise instanceof Promise)) {
+          throw new Error(
+            'You must return a Promise in your transaction()-callback.'
+          );
+        }
+        result = await promise;
+      } catch (err) {
+        logger(
+          'Firestore.runTransaction',
+          this._requestTag,
+          'Rolling back transaction after callback error:',
+          err
+        );
+        await this.rollback();
+        return Promise.reject(err); // User callback failed
+      }
+
+      try {
+        await this.commit();
+        return result; // Success
+      } catch (err) {
+        lastError = err;
+        this._writeBatch._reset();
+      }
+    }
+
+    logger(
+      'Firestore.runTransaction',
+      this._requestTag,
+      'Exhausted transaction retries, returning error: %s',
+      lastError
+    );
+    return Promise.reject(lastError);
   }
 }
 
@@ -419,10 +465,10 @@ export class Transaction {
  * @param documentRefsOrReadOptions An array of document references followed by
  * an optional ReadOptions object.
  */
-export function parseGetAllArguments(
-  documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
-): {documents: DocumentReference[]; fieldMask: FieldPath[] | null} {
-  let documents: DocumentReference[];
+export function parseGetAllArguments<T>(
+  documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+): {documents: Array<DocumentReference<T>>; fieldMask: FieldPath[] | null} {
+  let documents: Array<DocumentReference<T>>;
   let readOptions: ReadOptions | undefined = undefined;
 
   if (Array.isArray(documentRefsOrReadOptions[0])) {
@@ -439,9 +485,9 @@ export function parseGetAllArguments(
     )
   ) {
     readOptions = documentRefsOrReadOptions.pop() as ReadOptions;
-    documents = documentRefsOrReadOptions as DocumentReference[];
+    documents = documentRefsOrReadOptions as Array<DocumentReference<T>>;
   } else {
-    documents = documentRefsOrReadOptions as DocumentReference[];
+    documents = documentRefsOrReadOptions as Array<DocumentReference<T>>;
   }
 
   for (let i = 0; i < documents.length; ++i) {

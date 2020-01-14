@@ -43,6 +43,7 @@ import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
+  DocumentData,
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
   GapicClient,
@@ -83,6 +84,7 @@ export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {setLogFunction} from './logger';
 export {
+  FirestoreDataConverter,
   UpdateData,
   DocumentData,
   Settings,
@@ -695,20 +697,22 @@ export class Firestore {
       );
     }
 
-    const document = new DocumentSnapshotBuilder();
-
+    let ref: DocumentReference;
+    let document: DocumentSnapshotBuilder;
     if (typeof documentOrName === 'string') {
-      document.ref = new DocumentReference(
+      ref = new DocumentReference(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(documentOrName)
       );
+      document = new DocumentSnapshotBuilder(ref);
     } else {
-      document.ref = new DocumentReference(
+      ref = new DocumentReference(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(
           documentOrName.name as string
         )
       );
+      document = new DocumentSnapshotBuilder(ref);
       document.fieldsProto = documentOrName.fields
         ? convertFields(documentOrName.fields as ApiMapValue)
         : {};
@@ -785,7 +789,7 @@ export class Firestore {
     const defaultAttempts = 5;
     const tag = requestTag();
 
-    let attemptsRemaining: number;
+    let maxAttempts: number;
 
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
@@ -794,82 +798,15 @@ export class Firestore {
         transactionOptions.maxAttempts,
         {optional: true, minValue: 1}
       );
-      attemptsRemaining = transactionOptions.maxAttempts || defaultAttempts;
+      maxAttempts = transactionOptions.maxAttempts || defaultAttempts;
     } else {
-      attemptsRemaining = defaultAttempts;
+      maxAttempts = defaultAttempts;
     }
 
+    const transaction = new Transaction(this, tag);
     return this.initializeIfNeeded(tag).then(() =>
-      this._runTransaction(updateFunction, {requestTag: tag, attemptsRemaining})
+      transaction.runTransaction(updateFunction, maxAttempts)
     );
-  }
-
-  _runTransaction<T>(
-    updateFunction: (transaction: Transaction) => Promise<T>,
-    transactionOptions: {
-      requestTag: string;
-      attemptsRemaining: number;
-      previousTransaction?: Transaction;
-    }
-  ): Promise<T> {
-    const requestTag = transactionOptions.requestTag;
-    const attemptsRemaining = transactionOptions.attemptsRemaining;
-    const previousTransaction = transactionOptions.previousTransaction;
-
-    const transaction = new Transaction(this, requestTag, previousTransaction);
-    let result: Promise<T>;
-
-    return transaction
-      .begin()
-      .then(() => {
-        const promise = updateFunction(transaction);
-        result =
-          promise instanceof Promise
-            ? promise
-            : Promise.reject(
-                new Error(
-                  'You must return a Promise in your transaction()-callback.'
-                )
-              );
-        return result.catch(err => {
-          logger(
-            'Firestore.runTransaction',
-            requestTag,
-            'Rolling back transaction after callback error:',
-            err
-          );
-          // Rollback the transaction and return the failed result.
-          return transaction.rollback().then(() => {
-            return result;
-          });
-        });
-      })
-      .then(() => {
-        return transaction
-          .commit()
-          .then(() => result)
-          .catch(err => {
-            if (attemptsRemaining > 1) {
-              logger(
-                'Firestore.runTransaction',
-                requestTag,
-                `Retrying transaction after error: ${JSON.stringify(err)}.`
-              );
-              return this._runTransaction(updateFunction, {
-                previousTransaction: transaction,
-                requestTag,
-                attemptsRemaining: attemptsRemaining - 1,
-              });
-            }
-            logger(
-              'Firestore.runTransaction',
-              requestTag,
-              'Exhausted transaction retries, returning error: %s',
-              err
-            );
-            return Promise.reject(err);
-          });
-      });
   }
 
   /**
@@ -886,7 +823,7 @@ export class Firestore {
    *   }
    * });
    */
-  listCollections() {
+  listCollections(): Promise<CollectionReference[]> {
     const rootDocument = new DocumentReference(this, ResourcePath.EMPTY);
     return rootDocument.listCollections();
   }
@@ -912,9 +849,9 @@ export class Firestore {
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
    */
-  getAll(
-    ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
-  ): Promise<DocumentSnapshot[]> {
+  getAll<T>(
+    ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+  ): Promise<Array<DocumentSnapshot<T>>> {
     validateMinNumberOfArguments('Firestore.getAll', arguments, 1);
 
     const {documents, fieldMask} = parseGetAllArguments(
@@ -937,12 +874,12 @@ export class Firestore {
    * @param transactionId The transaction ID to use for this read.
    * @returns A Promise that contains an array with the resulting documents.
    */
-  getAll_(
-    docRefs: DocumentReference[],
+  getAll_<T>(
+    docRefs: Array<DocumentReference<T>>,
     fieldMask: FieldPath[] | null,
     requestTag: string,
     transactionId?: Uint8Array
-  ): Promise<DocumentSnapshot[]> {
+  ): Promise<Array<DocumentSnapshot<T>>> {
     const requestedDocuments = new Set<string>();
     const retrievedDocuments = new Map<string, DocumentSnapshot>();
 
@@ -962,11 +899,10 @@ export class Firestore {
     }
 
     const self = this;
-
     return self
       .requestStream('batchGetDocuments', request, requestTag)
       .then(stream => {
-        return new Promise<DocumentSnapshot[]>((resolve, reject) => {
+        return new Promise<Array<DocumentSnapshot<T>>>((resolve, reject) => {
           stream
             .on('error', err => {
               logger(
@@ -1024,11 +960,19 @@ export class Firestore {
 
               // BatchGetDocuments doesn't preserve document order. We use
               // the request order to sort the resulting documents.
-              const orderedDocuments: DocumentSnapshot[] = [];
+              const orderedDocuments: Array<DocumentSnapshot<T>> = [];
+
               for (const docRef of docRefs) {
                 const document = retrievedDocuments.get(docRef.path);
                 if (document !== undefined) {
-                  orderedDocuments.push(document);
+                  // Recreate the DocumentSnapshot with the DocumentReference
+                  // containing the original converter.
+                  const finalDoc = new DocumentSnapshotBuilder(docRef);
+                  finalDoc.fieldsProto = document._fieldsProto;
+                  finalDoc.readTime = document.readTime;
+                  finalDoc.createTime = document.createTime;
+                  finalDoc.updateTime = document.updateTime;
+                  orderedDocuments.push(finalDoc.build());
                 } else {
                   reject(
                     new Error(`Did not receive document for "${docRef.path}".`)

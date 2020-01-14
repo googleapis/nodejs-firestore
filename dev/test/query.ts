@@ -26,8 +26,14 @@ import {
   createInstance,
   document,
   InvalidApiUsage,
+  Post,
+  postConverter,
+  requestEquals,
+  response,
+  set,
   stream,
   verifyInstance,
+  writeResult,
 } from './util/helpers';
 
 import api = google.firestore.v1;
@@ -43,11 +49,11 @@ function snapshot(
   data: DocumentData
 ): Promise<DocumentSnapshot> {
   return createInstance().then(firestore => {
-    const snapshot = new DocumentSnapshotBuilder();
     const path = QualifiedResourcePath.fromSlashSeparatedString(
       `${DATABASE_ROOT}/documents/${relativePath}`
     );
-    snapshot.ref = new DocumentReference(firestore, path);
+    const ref = new DocumentReference(firestore, path);
+    const snapshot = new DocumentSnapshotBuilder(ref);
     snapshot.fieldsProto = firestore['_serializer']!.encodeFields(data);
     snapshot.readTime = Timestamp.fromMillis(0);
     snapshot.createTime = Timestamp.fromMillis(0);
@@ -619,6 +625,37 @@ describe('query interface', () => {
           'QuerySnapshot.docChanges has been changed from a property into a method'
         );
       });
+    });
+  });
+
+  it('for Query.withConverter()', async () => {
+    const doc = document('documentId', 'author', 'author', 'title', 'post');
+    const overrides: ApiOverride = {
+      commit: request => {
+        const expectedRequest = set({
+          document: doc,
+        });
+        requestEquals(request, expectedRequest);
+        return response(writeResult(1));
+      },
+      runQuery: request => {
+        queryEquals(request, fieldFilters('title', 'EQUAL', 'post'));
+        return stream({document: doc, readTime: {seconds: 5, nanos: 6}});
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      await firestore
+        .collection('collectionId')
+        .doc('documentId')
+        .set({title: 'post', author: 'author'});
+      const posts = await firestore
+        .collection('collectionId')
+        .where('title', '==', 'post')
+        .withConverter(postConverter)
+        .get();
+      expect(posts.size).to.equal(1);
+      expect(posts.docs[0].data().toString()).to.equal('post, by author');
     });
   });
 });

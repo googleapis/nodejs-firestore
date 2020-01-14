@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {expect} from 'chai';
+import * as through2 from 'through2';
 
 import {DocumentReference, Firestore, setLogFunction} from '../src';
 import {
@@ -21,8 +22,13 @@ import {
   DATABASE_ROOT,
   document,
   InvalidApiUsage,
+  Post,
+  postConverter,
+  requestEquals,
   response,
+  set,
   verifyInstance,
+  writeResult,
 } from './util/helpers';
 
 // Change the argument to 'console.log' to enable debug output.
@@ -168,5 +174,51 @@ describe('Collection interface', () => {
     const coll2 = firestore.collection('coll2');
     expect(coll1.isEqual(coll1Equals)).to.be.ok;
     expect(coll1.isEqual(coll2)).to.not.be.ok;
+  });
+
+  it('for CollectionReference.withConverter().doc()', async () => {
+    const doc = document('documentId', 'author', 'author', 'title', 'post');
+    const overrides: ApiOverride = {
+      commit: request => {
+        const expectedRequest = set({
+          document: doc,
+        });
+        requestEquals(request, expectedRequest);
+
+        return response(writeResult(1));
+      },
+      batchGetDocuments: () => {
+        const stream = through2.obj();
+        setImmediate(() => {
+          stream.push({found: doc, readTime: {seconds: 5, nanos: 6}});
+          stream.push(null);
+        });
+
+        return stream;
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const docRef = firestore
+        .collection('collectionId')
+        .withConverter(postConverter)
+        .doc('documentId');
+      await docRef.set(new Post('post', 'author'));
+      const postData = await docRef.get();
+      const post = postData.data();
+      expect(post).to.not.be.undefined;
+      expect(post!.toString()).to.equal('post, by author');
+    });
+  });
+
+  it('drops the converter when calling CollectionReference<T>.parent()', () => {
+    return createInstance().then(async firestore => {
+      const postsCollection = firestore
+        .collection('users/user1/posts')
+        .withConverter(postConverter);
+
+      const usersCollection = postsCollection.parent;
+      expect(usersCollection!.isEqual(firestore.doc('users/user1'))).to.be.true;
+    });
   });
 });
