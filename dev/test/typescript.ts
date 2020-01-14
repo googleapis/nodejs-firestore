@@ -31,9 +31,9 @@ import DocumentData = FirebaseFirestore.DocumentData;
 import GeoPoint = FirebaseFirestore.GeoPoint;
 import Precondition = FirebaseFirestore.Precondition;
 import SetOptions = FirebaseFirestore.SetOptions;
+import FirestoreDataConverter = FirebaseFirestore.FirestoreDataConverter;
 import Timestamp = FirebaseFirestore.Timestamp;
 import Settings = FirebaseFirestore.Settings;
-import {FirestoreDataConverter} from '@google-cloud/firestore';
 
 // This test verifies the Typescript typings and is not meant for execution.
 xdescribe('firestore.d.ts', () => {

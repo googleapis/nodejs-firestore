@@ -149,8 +149,9 @@ export interface FirestoreDataConverter<T> {
 
 /**
  * A default converter to use when none is provided.
+ * @private
  */
-export const defaultConverter = {
+export const defaultConverter: FirestoreDataConverter<DocumentData> = {
   toFirestore(
     modelObject: FirebaseFirestore.DocumentData
   ): FirebaseFirestore.DocumentData {

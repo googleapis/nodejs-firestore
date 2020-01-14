@@ -84,6 +84,7 @@ export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {setLogFunction} from './logger';
 export {
+  FirestoreDataConverter,
   UpdateData,
   DocumentData,
   Settings,

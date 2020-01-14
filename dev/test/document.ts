@@ -14,8 +14,8 @@
 
 import {expect} from 'chai';
 import {GoogleError, Status} from 'google-gax';
-
 import * as through2 from 'through2';
+
 import {
   DocumentReference,
   DocumentSnapshot,
@@ -2020,7 +2020,7 @@ describe('withConverter() support', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('for DocumentReference.withConverter().get()', async () => {
+  it('for DocumentReference.get()', async () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
       commit: request => {

@@ -541,6 +541,40 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    * provided converter will convert between Firestore data and your custom
    * type U.
    *
+   * Using the converter allows you to specify generic type arguments when
+   * storing and retrieving objects from Firestore.
+   *
+   * @example
+   * class Post {
+   *   constructor(readonly title: string, readonly author: string) {}
+   *
+   *   toString(): string {
+   *     return this.title + ', by ' + this.author;
+   *   }
+   * }
+   *
+   * const postConverter = {
+   *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+   *     return {title: post.title, author: post.author};
+   *   },
+   *   fromFirestore(
+   *     data: FirebaseFirestore.DocumentData
+   *   ): Post {
+   *     return new Post(data.title, data.author);
+   *   }
+   * };
+   *
+   * const postSnap = await Firestore()
+   *   .collection('posts')
+   *   .withConverter(postConverter)
+   *   .doc().get();
+   * const post = postSnap.data();
+   * if (post !== undefined) {
+   *   post.title; // string
+   *   post.toString(); // Should be defined
+   *   post.someNonExistentProperty; // TS error
+   * }
+   *
    * @param converter Converts objects to and from Firestore.
    * @return A DocumentReference<U> that uses the provided converter.
    */
@@ -997,7 +1031,7 @@ export class QueryOptions<T> {
    * @private
    */
   with(
-    settings: Partial<QueryOptions<T>>,
+    settings: Partial<Omit<QueryOptions<T>, 'converter'>>,
     converter = defaultConverter as FirestoreDataConverter<T>
   ): QueryOptions<T> {
     return new QueryOptions(
@@ -2023,6 +2057,40 @@ export class Query<T = DocumentData> {
    * returned Query, the provided converter will convert between Firestore
    * data and your custom type U.
    *
+   * Using the converter allows you to specify generic type arguments when
+   * storing and retrieving objects from Firestore.
+   *
+   * @example
+   * class Post {
+   *   constructor(readonly title: string, readonly author: string) {}
+   *
+   *   toString(): string {
+   *     return this.title + ', by ' + this.author;
+   *   }
+   * }
+   *
+   * const postConverter = {
+   *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+   *     return {title: post.title, author: post.author};
+   *   },
+   *   fromFirestore(
+   *     data: FirebaseFirestore.DocumentData
+   *   ): Post {
+   *     return new Post(data.title, data.author);
+   *   }
+   * };
+   *
+   * const postSnap = await Firestore()
+   *   .collection('posts')
+   *   .withConverter(postConverter)
+   *   .doc().get();
+   * const post = postSnap.data();
+   * if (post !== undefined) {
+   *   post.title; // string
+   *   post.toString(); // Should be defined
+   *   post.someNonExistentProperty; // TS error
+   * }
+   *
    * @param converter Converts objects to and from Firestore.
    * @return A Query<U> that uses the provided converter.
    */
@@ -2260,6 +2328,40 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    * to use your own custom model objects with Firestore. When you call add()
    * on the returned CollectionReference instance, the provided converter will
    * convert between Firestore data and your custom type U.
+   *
+   * Using the converter allows you to specify generic type arguments when
+   * storing and retrieving objects from Firestore.
+   *
+   * @example
+   * class Post {
+   *   constructor(readonly title: string, readonly author: string) {}
+   *
+   *   toString(): string {
+   *     return this.title + ', by ' + this.author;
+   *   }
+   * }
+   *
+   * const postConverter = {
+   *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+   *     return {title: post.title, author: post.author};
+   *   },
+   *   fromFirestore(
+   *     data: FirebaseFirestore.DocumentData
+   *   ): Post {
+   *     return new Post(data.title, data.author);
+   *   }
+   * };
+   *
+   * const postSnap = await Firestore()
+   *   .collection('posts')
+   *   .withConverter(postConverter)
+   *   .doc().get();
+   * const post = postSnap.data();
+   * if (post !== undefined) {
+   *   post.title; // string
+   *   post.toString(); // Should be defined
+   *   post.someNonExistentProperty; // TS error
+   * }
    *
    * @param converter Converts objects to and from Firestore.
    * @return A CollectionReference<U> that uses the provided converter.
