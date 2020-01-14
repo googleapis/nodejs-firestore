@@ -393,7 +393,7 @@ export function validateUserInput(
 }
 
 /**
- * Returns true if value is a MomentJs Date object.
+ * Returns true if value is a MomentJs date object.
  * @private
  */
 function isMomentJsType(value: unknown): value is Moment {
