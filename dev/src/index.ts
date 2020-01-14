@@ -799,9 +799,9 @@ export class Firestore {
       maxAttempts = defaultAttempts;
     }
 
-    const transaction = new Transaction(this);
+    const transaction = new Transaction(this, tag);
     return this.initializeIfNeeded(tag).then(() =>
-      transaction.runTransaction(updateFunction, tag, maxAttempts)
+      transaction.runTransaction(updateFunction, maxAttempts)
     );
   }
 

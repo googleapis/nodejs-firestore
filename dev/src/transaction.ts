@@ -62,17 +62,20 @@ const READ_AFTER_WRITE_ERROR_MSG =
 export class Transaction {
   private _firestore: Firestore;
   private _writeBatch: WriteBatch;
-  private _requestTag?: string;
+  private _requestTag: string;
   private _transactionId?: Uint8Array;
 
   /**
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
+   * @param requestTag A unique client-assigned identifier for the scope of
+   * this transaction.
    */
-  constructor(firestore: Firestore) {
+  constructor(firestore: Firestore, requestTag: string) {
     this._firestore = firestore;
     this._writeBatch = firestore.batch();
+    this._requestTag = requestTag;
   }
 
   /**
@@ -126,7 +129,7 @@ export class Transaction {
         .getAll_(
           [refOrQuery],
           /* fieldMask= */ null,
-          this._requestTag!,
+          this._requestTag,
           this._transactionId
         )
         .then(res => {
@@ -185,7 +188,7 @@ export class Transaction {
     return this._firestore.getAll_(
       documents,
       fieldMask,
-      this._requestTag!,
+      this._requestTag,
       this._transactionId
     );
   }
@@ -356,7 +359,7 @@ export class Transaction {
       .request<api.IBeginTransactionRequest, api.IBeginTransactionResponse>(
         'beginTransaction',
         request,
-        this._requestTag!
+        this._requestTag
       )
       .then(resp => {
         this._transactionId = resp.transaction!;
@@ -388,7 +391,7 @@ export class Transaction {
       transaction: this._transactionId,
     };
 
-    return this._firestore.request('rollback', request, this._requestTag!);
+    return this._firestore.request('rollback', request, this._requestTag);
   }
 
   /**
@@ -403,7 +406,6 @@ export class Transaction {
    */
   async runTransaction<T>(
     updateFunction: (transaction: Transaction) => Promise<T>,
-    requestTag: string,
     maxAttempts: number
   ): Promise<T> {
     let result: T;
@@ -413,7 +415,7 @@ export class Transaction {
       if (lastError) {
         logger(
           'Firestore.runTransaction',
-          requestTag,
+          this._requestTag,
           `Retrying transaction after error:`,
           lastError
         );
@@ -432,7 +434,7 @@ export class Transaction {
       } catch (err) {
         logger(
           'Firestore.runTransaction',
-          requestTag,
+          this._requestTag,
           'Rolling back transaction after callback error:',
           err
         );
@@ -445,12 +447,13 @@ export class Transaction {
         return result; // Success
       } catch (err) {
         lastError = err;
+        this._writeBatch._reset();
       }
     }
 
     logger(
       'Firestore.runTransaction',
-      requestTag,
+      this._requestTag,
       'Exhausted transaction retries, returning error: %s',
       lastError
     );
