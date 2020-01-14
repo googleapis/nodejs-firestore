@@ -9,7 +9,7 @@
 
 ### Bug Fixes
 
-* don't format log message if logging is disable ([#874](https://www.github.com/googleapis/nodejs-firestore/issues/874)) ([b7b5fc9](https://www.github.com/googleapis/nodejs-firestore/commit/b7b5fc993d4cece92833c95487efe63320537058))
+* don't format log message if logging is disabled ([#874](https://www.github.com/googleapis/nodejs-firestore/issues/874)) ([b7b5fc9](https://www.github.com/googleapis/nodejs-firestore/commit/b7b5fc993d4cece92833c95487efe63320537058))
 
 ### [3.3.4](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.3...v3.3.4) (2020-01-12)
 
