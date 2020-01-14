@@ -43,6 +43,7 @@ import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
+  DocumentData,
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
   GapicClient,
@@ -83,6 +84,7 @@ export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {setLogFunction} from './logger';
 export {
+  FirestoreDataConverter,
   UpdateData,
   DocumentData,
   Settings,
@@ -695,20 +697,22 @@ export class Firestore {
       );
     }
 
-    const document = new DocumentSnapshotBuilder();
-
+    let ref: DocumentReference;
+    let document: DocumentSnapshotBuilder;
     if (typeof documentOrName === 'string') {
-      document.ref = new DocumentReference(
+      ref = new DocumentReference(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(documentOrName)
       );
+      document = new DocumentSnapshotBuilder(ref);
     } else {
-      document.ref = new DocumentReference(
+      ref = new DocumentReference(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(
           documentOrName.name as string
         )
       );
+      document = new DocumentSnapshotBuilder(ref);
       document.fieldsProto = documentOrName.fields
         ? convertFields(documentOrName.fields as ApiMapValue)
         : {};
@@ -819,7 +823,7 @@ export class Firestore {
    *   }
    * });
    */
-  listCollections() {
+  listCollections(): Promise<CollectionReference[]> {
     const rootDocument = new DocumentReference(this, ResourcePath.EMPTY);
     return rootDocument.listCollections();
   }
@@ -845,9 +849,9 @@ export class Firestore {
    *   console.log(`Second document: ${JSON.stringify(docs[1])}`);
    * });
    */
-  getAll(
-    ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
-  ): Promise<DocumentSnapshot[]> {
+  getAll<T>(
+    ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+  ): Promise<Array<DocumentSnapshot<T>>> {
     validateMinNumberOfArguments('Firestore.getAll', arguments, 1);
 
     const {documents, fieldMask} = parseGetAllArguments(
@@ -870,12 +874,12 @@ export class Firestore {
    * @param transactionId The transaction ID to use for this read.
    * @returns A Promise that contains an array with the resulting documents.
    */
-  getAll_(
-    docRefs: DocumentReference[],
+  getAll_<T>(
+    docRefs: Array<DocumentReference<T>>,
     fieldMask: FieldPath[] | null,
     requestTag: string,
     transactionId?: Uint8Array
-  ): Promise<DocumentSnapshot[]> {
+  ): Promise<Array<DocumentSnapshot<T>>> {
     const requestedDocuments = new Set<string>();
     const retrievedDocuments = new Map<string, DocumentSnapshot>();
 
@@ -895,11 +899,10 @@ export class Firestore {
     }
 
     const self = this;
-
     return self
       .requestStream('batchGetDocuments', request, requestTag)
       .then(stream => {
-        return new Promise<DocumentSnapshot[]>((resolve, reject) => {
+        return new Promise<Array<DocumentSnapshot<T>>>((resolve, reject) => {
           stream
             .on('error', err => {
               logger(
@@ -957,11 +960,19 @@ export class Firestore {
 
               // BatchGetDocuments doesn't preserve document order. We use
               // the request order to sort the resulting documents.
-              const orderedDocuments: DocumentSnapshot[] = [];
+              const orderedDocuments: Array<DocumentSnapshot<T>> = [];
+
               for (const docRef of docRefs) {
                 const document = retrievedDocuments.get(docRef.path);
                 if (document !== undefined) {
-                  orderedDocuments.push(document);
+                  // Recreate the DocumentSnapshot with the DocumentReference
+                  // containing the original converter.
+                  const finalDoc = new DocumentSnapshotBuilder(docRef);
+                  finalDoc.fieldsProto = document._fieldsProto;
+                  finalDoc.readTime = document.readTime;
+                  finalDoc.createTime = document.createTime;
+                  finalDoc.updateTime = document.updateTime;
+                  orderedDocuments.push(finalDoc.build());
                 } else {
                   reject(
                     new Error(`Did not receive document for "${docRef.path}".`)

@@ -31,6 +31,7 @@ import DocumentData = FirebaseFirestore.DocumentData;
 import GeoPoint = FirebaseFirestore.GeoPoint;
 import Precondition = FirebaseFirestore.Precondition;
 import SetOptions = FirebaseFirestore.SetOptions;
+import FirestoreDataConverter = FirebaseFirestore.FirestoreDataConverter;
 import Timestamp = FirebaseFirestore.Timestamp;
 import Settings = FirebaseFirestore.Settings;
 
@@ -51,6 +52,15 @@ xdescribe('firestore.d.ts', () => {
   const collRef: CollectionReference = firestore.collection('coll');
   const updateData: UpdateData = {};
   const documentData: DocumentData = {};
+
+  const defaultConverter: FirestoreDataConverter<DocumentData> = {
+    toFirestore(modelObject: DocumentData): DocumentData {
+      return modelObject;
+    },
+    fromFirestore(data: DocumentData): DocumentData {
+      return data;
+    },
+  };
 
   FirebaseFirestore.setLogFunction(console.log);
 
@@ -153,6 +163,7 @@ xdescribe('firestore.d.ts', () => {
     const subcollection: CollectionReference = docRef.collection('coll');
     docRef.listCollections().then((collections: CollectionReference[]) => {});
     docRef.get().then((snapshot: DocumentSnapshot) => {});
+    docRef.withConverter(defaultConverter);
     docRef
       .create(documentData)
       .then((writeResult: FirebaseFirestore.WriteResult) => {});
@@ -260,6 +271,7 @@ xdescribe('firestore.d.ts', () => {
       query = query.endBefore(snapshot);
       query = query.endBefore('foo');
       query = query.endBefore('foo', 'bar');
+      query = query.withConverter(defaultConverter);
       query.get().then((results: QuerySnapshot) => {});
       query.stream().on('data', () => {});
       let unsubscribe: () => void = query.onSnapshot(
@@ -305,6 +317,7 @@ xdescribe('firestore.d.ts', () => {
     const docRef1: DocumentReference = collRef.doc();
     const docRef2: DocumentReference = collRef.doc('doc');
     collRef.add(documentData).then((docRef: DocumentReference) => {});
+    collRef.withConverter(defaultConverter);
     const list: Promise<DocumentReference[]> = collRef.listDocuments();
     const equals: boolean = collRef.isEqual(collRef);
   });

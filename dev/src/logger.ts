@@ -22,7 +22,7 @@ import {validateFunction} from './validate';
 let libVersion: string;
 
 /*! The external function used to emit logs. */
-let logFunction: ((msg: string) => void) | undefined = undefined;
+let logFunction: ((msg: string) => void) | null = null;
 
 /**
  * Log function to use for debug output. By default, we don't perform any
@@ -49,15 +49,18 @@ export function logger(
 }
 
 /**
- * Sets the log function for all active Firestore instances.
+ * Sets or disables the log function for all active Firestore instances.
+ *
+ * @param logger A log function that takes a message (such as `console.log`) or
+ * `null` to turn off logging.
  */
-export function setLogFunction(logger: (msg: string) => void): void {
+export function setLogFunction(logger: ((msg: string) => void) | null): void {
   validateFunction('logger', logger);
   logFunction = logger;
 }
 
 /**
- * Sets the log function for all active Firestore instances.
+ * Sets the library version to be used in log messages.
  *
  * @private
  */

@@ -85,7 +85,7 @@ export class Transaction {
    * @param {Query} query A query to execute.
    * @return {Promise<QuerySnapshot>} A QuerySnapshot for the retrieved data.
    */
-  get(query: Query): Promise<QuerySnapshot>;
+  get<T>(query: Query<T>): Promise<QuerySnapshot<T>>;
 
   /**
    * Reads the document referenced by the provided `DocumentReference.`
@@ -94,7 +94,7 @@ export class Transaction {
    * @param {DocumentReference} documentRef A reference to the document to be read.
    * @return {Promise<DocumentSnapshot>}  A DocumentSnapshot for the read data.
    */
-  get(documentRef: DocumentReference): Promise<DocumentSnapshot>;
+  get<T>(documentRef: DocumentReference<T>): Promise<DocumentSnapshot<T>>;
 
   /**
    * Retrieve a document or a query result from the database. Holds a
@@ -117,9 +117,9 @@ export class Transaction {
    *   });
    * });
    */
-  get(
-    refOrQuery: DocumentReference | Query
-  ): Promise<DocumentSnapshot | QuerySnapshot> {
+  get<T>(
+    refOrQuery: DocumentReference<T> | Query<T>
+  ): Promise<DocumentSnapshot<T> | QuerySnapshot<T>> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
@@ -172,9 +172,9 @@ export class Transaction {
    *   });
    * });
    */
-  getAll(
-    ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
-  ): Promise<DocumentSnapshot[]> {
+  getAll<T>(
+    ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+  ): Promise<Array<DocumentSnapshot<T>>> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
@@ -214,7 +214,7 @@ export class Transaction {
    *   });
    * });
    */
-  create(documentRef: DocumentReference, data: DocumentData): Transaction {
+  create<T>(documentRef: DocumentReference<T>, data: T): Transaction {
     this._writeBatch.create(documentRef, data);
     return this;
   }
@@ -228,7 +228,7 @@ export class Transaction {
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
-   * @param {DocumentData} data The object to serialize as the document.
+   * @param {T} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
@@ -246,9 +246,9 @@ export class Transaction {
    *   return Promise.resolve();
    * });
    */
-  set(
-    documentRef: DocumentReference,
-    data: DocumentData,
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: T,
     options?: SetOptions
   ): Transaction {
     this._writeBatch.set(documentRef, data, options);
@@ -293,18 +293,14 @@ export class Transaction {
    *   });
    * });
    */
-  update(
-    documentRef: DocumentReference,
+  update<T>(
+    documentRef: DocumentReference<T>,
     dataOrField: UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<Precondition | unknown | string | FieldPath>
   ): Transaction {
     validateMinNumberOfArguments('Transaction.update', arguments, 2);
 
-    this._writeBatch.update.apply(this._writeBatch, [
-      documentRef,
-      dataOrField,
-      ...preconditionOrValues,
-    ]);
+    this._writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
     return this;
   }
 
@@ -329,8 +325,8 @@ export class Transaction {
    *   return Promise.resolve();
    * });
    */
-  delete(
-    documentRef: DocumentReference,
+  delete<T>(
+    documentRef: DocumentReference<T>,
     precondition?: PublicPrecondition
   ): this {
     this._writeBatch.delete(documentRef, precondition);
@@ -469,10 +465,10 @@ export class Transaction {
  * @param documentRefsOrReadOptions An array of document references followed by
  * an optional ReadOptions object.
  */
-export function parseGetAllArguments(
-  documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
-): {documents: DocumentReference[]; fieldMask: FieldPath[] | null} {
-  let documents: DocumentReference[];
+export function parseGetAllArguments<T>(
+  documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+): {documents: Array<DocumentReference<T>>; fieldMask: FieldPath[] | null} {
+  let documents: Array<DocumentReference<T>>;
   let readOptions: ReadOptions | undefined = undefined;
 
   if (Array.isArray(documentRefsOrReadOptions[0])) {
@@ -489,9 +485,9 @@ export function parseGetAllArguments(
     )
   ) {
     readOptions = documentRefsOrReadOptions.pop() as ReadOptions;
-    documents = documentRefsOrReadOptions as DocumentReference[];
+    documents = documentRefsOrReadOptions as Array<DocumentReference<T>>;
   } else {
-    documents = documentRefsOrReadOptions as DocumentReference[];
+    documents = documentRefsOrReadOptions as Array<DocumentReference<T>>;
   }
 
   for (let i = 0; i < documents.length; ++i) {

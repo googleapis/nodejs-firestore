@@ -93,6 +93,78 @@ export type UnaryMethod<Req, Resp> = (
 export type RBTree = any;
 
 /**
+ * Converter used by `withConverter()` to transform user objects of type T
+ * into Firestore data.
+ *
+ * Using the converter allows you to specify generic type arguments when
+ * storing and retrieving objects from Firestore.
+ *
+ * @example
+ * ```typescript
+ * class Post {
+ *   constructor(readonly title: string, readonly author: string) {}
+ *
+ *   toString(): string {
+ *     return this.title + ', by ' + this.author;
+ *   }
+ * }
+ *
+ * const postConverter = {
+ *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+ *     return {title: post.title, author: post.author};
+ *   },
+ *   fromFirestore(
+ *     data: FirebaseFirestore.DocumentData
+ *   ): Post {
+ *     return new Post(data.title, data.author);
+ *   }
+ * };
+ *
+ * const postSnap = await Firestore()
+ *   .collection('posts')
+ *   .withConverter(postConverter)
+ *   .doc().get();
+ * const post = postSnap.data();
+ * if (post !== undefined) {
+ *   post.title; // string
+ *   post.toString(); // Should be defined
+ *   post.someNonExistentProperty; // TS error
+ * }
+ * ```
+ */
+export interface FirestoreDataConverter<T> {
+  /**
+   * Called by the Firestore SDK to convert a custom model object of type T
+   * into a plain Javascript object (suitable for writing directly to the
+   * Firestore database).
+   */
+  toFirestore(modelObject: T): DocumentData;
+
+  /**
+   * Called by the Firestore SDK to convert Firestore data into an object of
+   * type T.
+   */
+  fromFirestore(data: DocumentData): T;
+}
+
+/**
+ * A default converter to use when none is provided.
+ * @private
+ */
+export const defaultConverter: FirestoreDataConverter<DocumentData> = {
+  toFirestore(
+    modelObject: FirebaseFirestore.DocumentData
+  ): FirebaseFirestore.DocumentData {
+    return modelObject;
+  },
+  fromFirestore(
+    data: FirebaseFirestore.DocumentData
+  ): FirebaseFirestore.DocumentData {
+    return data;
+  },
+};
+
+/**
  * Settings used to directly configure a `Firestore` instance.
  */
 export interface Settings {
@@ -141,7 +213,8 @@ export interface Settings {
  * mapped to values.
  */
 export interface DocumentData {
-  [field: string]: unknown;
+  // tslint:disable-next-line:no-any
+  [field: string]: any;
 }
 
 /**
