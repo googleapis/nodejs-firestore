@@ -565,7 +565,7 @@ function validateReadOptions(
 function isRetryableTransactionError(error: Error): boolean {
   if (error instanceof GoogleError || 'code' in error) {
     // In transactions, the backend returns code ABORTED for reads that fail
-    // due to contention. These errors should be retried for both GoogleError
+    // with contention. These errors should be retried for both GoogleError
     // and GoogleError-alike errors (in case the prototype hierarchy gets
     // stripped somewhere).
     return error.code === Status.ABORTED;
