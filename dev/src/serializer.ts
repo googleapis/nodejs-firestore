@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Moment} from 'moment';
+
 import * as proto from '../protos/firestore_v1_proto_api';
 
 import {detectValueType} from './convert';
@@ -119,7 +121,17 @@ export class Serializer {
     }
 
     if (val instanceof Date) {
-      const timestamp = Timestamp.fromDate(val as Date);
+      const timestamp = Timestamp.fromDate(val);
+      return {
+        timestampValue: {
+          seconds: timestamp.seconds,
+          nanos: timestamp.nanoseconds,
+        },
+      };
+    }
+
+    if (isMomentJsType(val)) {
+      const timestamp = Timestamp.fromDate(val.toDate());
       return {
         timestampValue: {
           seconds: timestamp.seconds,
@@ -369,6 +381,8 @@ export function validateUserInput(
     // Ok.
   } else if (value instanceof Timestamp || value instanceof Date) {
     // Ok.
+  } else if (isMomentJsType(value)) {
+    // Ok.
   } else if (value instanceof Buffer || value instanceof Uint8Array) {
     // Ok.
   } else if (value === null) {
@@ -376,4 +390,17 @@ export function validateUserInput(
   } else if (typeof value === 'object') {
     throw new Error(customObjectMessage(arg, value, path));
   }
+}
+
+/**
+ * Returns true if value is a MomentJs Date object.
+ * @private
+ */
+function isMomentJsType(value: unknown): value is Moment {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    value.constructor.name === 'Moment' &&
+    typeof (value as Moment).toDate === 'function'
+  );
 }
