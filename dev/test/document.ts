@@ -248,6 +248,37 @@ describe('serialize document', () => {
     });
   });
 
+  it('supports Moment.js', () => {
+    class Moment {
+      toDate(): Date {
+        return new Date('Jul 20 1969 20:18:00.123 UTC');
+      }
+    }
+
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'moonLanding', {
+              timestampValue: {
+                nanos: 123000000,
+                seconds: -14182920,
+              },
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        moonLanding: new Moment(),
+      });
+    });
+  });
+
   it('serializes unicode keys', () => {
     const overrides: ApiOverride = {
       commit: request => {
