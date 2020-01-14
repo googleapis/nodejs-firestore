@@ -356,7 +356,7 @@ describe('batch support', () => {
     return promise;
   });
 
-  it('cannot reset a committed batch', async () => {
+  it('can reset a committed batch', async () => {
     const documentName = firestore.doc('col/doc');
 
     const batch = firestore.batch();
