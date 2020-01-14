@@ -22,7 +22,7 @@ import {validateFunction} from './validate';
 let libVersion: string;
 
 /*! The external function used to emit logs. */
-let logFunction = (msg: string) => {};
+let logFunction: ((msg: string) => void) | undefined = undefined;
 
 /**
  * Log function to use for debug output. By default, we don't perform any
@@ -38,12 +38,14 @@ export function logger(
 ): void {
   requestTag = requestTag || '#####';
 
-  const formattedMessage = util.format(logMessage, ...additionalArgs);
-  const time = new Date().toISOString();
-  logFunction(
-    `Firestore (${libVersion}) ${time} ${requestTag} [${methodName}]: ` +
-      formattedMessage
-  );
+  if (logFunction) {
+    const formattedMessage = util.format(logMessage, ...additionalArgs);
+    const time = new Date().toISOString();
+    logFunction(
+      `Firestore (${libVersion}) ${time} ${requestTag} [${methodName}]: ` +
+        formattedMessage
+    );
+  }
 }
 
 /**
