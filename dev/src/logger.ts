@@ -60,7 +60,7 @@ export function setLogFunction(logger: ((msg: string) => void) | null): void {
 }
 
 /**
- * ets the library version to be used in log messages.
+ * Sets the library version to be used in log messages.
  *
  * @private
  */
