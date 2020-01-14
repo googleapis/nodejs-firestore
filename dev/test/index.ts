@@ -1065,7 +1065,7 @@ describe('getAll() method', () => {
       [Status.PERMISSION_DENIED]: 1,
       [Status.RESOURCE_EXHAUSTED]: 1,
       [Status.FAILED_PRECONDITION]: 1,
-      [Status.ABORTED]: 5,
+      [Status.ABORTED]: 1,
       [Status.OUT_OF_RANGE]: 1,
       [Status.UNIMPLEMENTED]: 1,
       [Status.INTERNAL]: 5,
