@@ -9,15 +9,15 @@
 
 ### Features
 
-* add support for Typescript Custom Mapping ([#828](https://www.github.com/googleapis/nodejs-firestore/issues/828)) ([94ddc89](https://www.github.com/googleapis/nodejs-firestore/commit/94ddc897400cafe5a1ee16f3ad0d285411bdd0b2))
+* support serialization of custom objects ([#828](https://www.github.com/googleapis/nodejs-firestore/issues/828)) ([94ddc89](https://www.github.com/googleapis/nodejs-firestore/commit/94ddc897400cafe5a1ee16f3ad0d285411bdd0b2))
+* support serialization of Moment.js types ([#879](https://www.github.com/googleapis/nodejs-firestore/issues/879)) ([9169fae](https://www.github.com/googleapis/nodejs-firestore/commit/9169fae692d219b5fb42004a4eb82e5a5919f087))
 * allow logging to be disabled ([#880](https://www.github.com/googleapis/nodejs-firestore/issues/880)) ([36d75f6](https://www.github.com/googleapis/nodejs-firestore/commit/36d75f6b75d7ede4656636f1d8bf770eb1cb3a80))
-* support serialization of Moment.js ([#879](https://www.github.com/googleapis/nodejs-firestore/issues/879)) ([9169fae](https://www.github.com/googleapis/nodejs-firestore/commit/9169fae692d219b5fb42004a4eb82e5a5919f087))
 
 
 ### Bug Fixes
 
-* don't format log message if logging is disable ([#874](https://www.github.com/googleapis/nodejs-firestore/issues/874)) ([b7b5fc9](https://www.github.com/googleapis/nodejs-firestore/commit/b7b5fc993d4cece92833c95487efe63320537058))
-* don't retry reads with Code ABORTED ([#881](https://www.github.com/googleapis/nodejs-firestore/issues/881)) ([82273ec](https://www.github.com/googleapis/nodejs-firestore/commit/82273ec0035b2ddae94d8f12791f8a5c55b6560d))
+* don't format log message if logging is disabled ([#874](https://www.github.com/googleapis/nodejs-firestore/issues/874)) ([b7b5fc9](https://www.github.com/googleapis/nodejs-firestore/commit/b7b5fc993d4cece92833c95487efe63320537058))
+* disable non-transactional retries for Code ABORTED ([#881](https://www.github.com/googleapis/nodejs-firestore/issues/881)) ([82273ec](https://www.github.com/googleapis/nodejs-firestore/commit/82273ec0035b2ddae94d8f12791f8a5c55b6560d))
 * manually retry ABORTED reads in transactions ([#883](https://www.github.com/googleapis/nodejs-firestore/issues/883)) ([7562033](https://www.github.com/googleapis/nodejs-firestore/commit/7562033876dc006e77d00b576b2541a7dfd30c66))
 * remove ticks from code comments ([#885](https://www.github.com/googleapis/nodejs-firestore/issues/885)) ([b2740ed](https://www.github.com/googleapis/nodejs-firestore/commit/b2740ed4fb0e7c34fd407e3de4f47f03067171cb))
 
