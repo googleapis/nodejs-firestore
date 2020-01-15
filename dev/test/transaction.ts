@@ -517,10 +517,14 @@ describe('transaction operations', () => {
 
   it('enforce that gets come before writes', () => {
     return expect(
-      runTransaction((transaction, docRef) => {
-        transaction.set(docRef, {foo: 'bar'});
-        return transaction.get(docRef);
-      }, begin())
+      runTransaction(
+        (transaction, docRef) => {
+          transaction.set(docRef, {foo: 'bar'});
+          return transaction.get(docRef);
+        },
+        begin(),
+        rollback()
+      )
     ).to.eventually.be.rejectedWith(
       'Firestore transactions require all reads to be executed before all writes.'
     );
@@ -575,10 +579,14 @@ describe('transaction operations', () => {
 
   it('enforce that getAll come before writes', () => {
     return expect(
-      runTransaction((transaction, docRef) => {
-        transaction.set(docRef, {foo: 'bar'});
-        return transaction.getAll(docRef);
-      }, begin())
+      runTransaction(
+        (transaction, docRef) => {
+          transaction.set(docRef, {foo: 'bar'});
+          return transaction.getAll(docRef);
+        },
+        begin(),
+        rollback()
+      )
     ).to.eventually.be.rejectedWith(
       'Firestore transactions require all reads to be executed before all writes.'
     );

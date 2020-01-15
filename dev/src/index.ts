@@ -789,7 +789,7 @@ export class Firestore {
     const defaultAttempts = 5;
     const tag = requestTag();
 
-    let attemptsRemaining: number;
+    let maxAttempts: number;
 
     if (transactionOptions) {
       validateObject('transactionOptions', transactionOptions);
@@ -798,82 +798,15 @@ export class Firestore {
         transactionOptions.maxAttempts,
         {optional: true, minValue: 1}
       );
-      attemptsRemaining = transactionOptions.maxAttempts || defaultAttempts;
+      maxAttempts = transactionOptions.maxAttempts || defaultAttempts;
     } else {
-      attemptsRemaining = defaultAttempts;
+      maxAttempts = defaultAttempts;
     }
 
+    const transaction = new Transaction(this, tag);
     return this.initializeIfNeeded(tag).then(() =>
-      this._runTransaction(updateFunction, {requestTag: tag, attemptsRemaining})
+      transaction.runTransaction(updateFunction, maxAttempts)
     );
-  }
-
-  _runTransaction<T>(
-    updateFunction: (transaction: Transaction) => Promise<T>,
-    transactionOptions: {
-      requestTag: string;
-      attemptsRemaining: number;
-      previousTransaction?: Transaction;
-    }
-  ): Promise<T> {
-    const requestTag = transactionOptions.requestTag;
-    const attemptsRemaining = transactionOptions.attemptsRemaining;
-    const previousTransaction = transactionOptions.previousTransaction;
-
-    const transaction = new Transaction(this, requestTag, previousTransaction);
-    let result: Promise<T>;
-
-    return transaction
-      .begin()
-      .then(() => {
-        const promise = updateFunction(transaction);
-        result =
-          promise instanceof Promise
-            ? promise
-            : Promise.reject(
-                new Error(
-                  'You must return a Promise in your transaction()-callback.'
-                )
-              );
-        return result.catch(err => {
-          logger(
-            'Firestore.runTransaction',
-            requestTag,
-            'Rolling back transaction after callback error:',
-            err
-          );
-          // Rollback the transaction and return the failed result.
-          return transaction.rollback().then(() => {
-            return result;
-          });
-        });
-      })
-      .then(() => {
-        return transaction
-          .commit()
-          .then(() => result)
-          .catch(err => {
-            if (attemptsRemaining > 1) {
-              logger(
-                'Firestore.runTransaction',
-                requestTag,
-                `Retrying transaction after error: ${JSON.stringify(err)}.`
-              );
-              return this._runTransaction(updateFunction, {
-                previousTransaction: transaction,
-                requestTag,
-                attemptsRemaining: attemptsRemaining - 1,
-              });
-            }
-            logger(
-              'Firestore.runTransaction',
-              requestTag,
-              'Exhausted transaction retries, returning error: %s',
-              err
-            );
-            return Promise.reject(err);
-          });
-      });
   }
 
   /**

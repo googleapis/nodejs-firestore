@@ -652,6 +652,15 @@ export class WriteBatch {
 
     return true;
   }
+
+  /**
+   * Resets the WriteBatch and dequeues all pending operations.
+   * @private
+   */
+  _reset() {
+    this._ops.splice(0);
+    this._committed = false;
+  }
 }
 
 /**

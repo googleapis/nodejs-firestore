@@ -356,6 +356,25 @@ describe('batch support', () => {
     return promise;
   });
 
+  it('can reset a committed batch', async () => {
+    const documentName = firestore.doc('col/doc');
+
+    const batch = firestore.batch();
+    batch.set(documentName, {foo: FieldValue.serverTimestamp()});
+    batch.update(documentName, {foo: 'bar'});
+    batch.create(documentName, {});
+    batch.delete(documentName);
+    await batch.commit();
+
+    batch._reset();
+
+    batch.set(documentName, {foo: FieldValue.serverTimestamp()});
+    batch.update(documentName, {foo: 'bar'});
+    batch.create(documentName, {});
+    batch.delete(documentName);
+    await batch.commit();
+  });
+
   it('can commit an unmodified batch multiple times', () => {
     const documentName = firestore.doc('col/doc');
 

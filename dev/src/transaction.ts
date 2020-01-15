@@ -18,6 +18,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
+import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
 import {
   DocumentReference,
@@ -70,17 +71,9 @@ export class Transaction {
    * @param firestore The Firestore Database client.
    * @param requestTag A unique client-assigned identifier for the scope of
    * this transaction.
-   * @param previousTransaction If available, the failed transaction that is
-   * being retried.
    */
-  constructor(
-    firestore: Firestore,
-    requestTag: string,
-    previousTransaction?: Transaction
-  ) {
+  constructor(firestore: Firestore, requestTag: string) {
     this._firestore = firestore;
-    this._transactionId =
-      previousTransaction && previousTransaction._transactionId;
     this._writeBatch = firestore.batch();
     this._requestTag = requestTag;
   }
@@ -398,12 +391,69 @@ export class Transaction {
   }
 
   /**
-   * Returns the tag to use with with all request for this Transaction.
+   * Executes `updateFunction()` and commits the transaction with retry.
+   *
    * @private
-   * @return A unique client-generated identifier for this transaction.
+   * @param updateFunction The user function to execute within the transaction
+   * context.
+   * @param requestTag A unique client-assigned identifier for the scope of
+   * this transaction.
+   * @param maxAttempts The maximum number of attempts for this transaction.
    */
-  get requestTag(): string {
-    return this._requestTag;
+  async runTransaction<T>(
+    updateFunction: (transaction: Transaction) => Promise<T>,
+    maxAttempts: number
+  ): Promise<T> {
+    let result: T;
+    let lastError: Error | undefined = undefined;
+
+    for (let attempt = 0; attempt < maxAttempts; ++attempt) {
+      if (lastError) {
+        logger(
+          'Firestore.runTransaction',
+          this._requestTag,
+          `Retrying transaction after error:`,
+          lastError
+        );
+      }
+
+      await this.begin();
+
+      try {
+        const promise = updateFunction(this);
+        if (!(promise instanceof Promise)) {
+          throw new Error(
+            'You must return a Promise in your transaction()-callback.'
+          );
+        }
+        result = await promise;
+      } catch (err) {
+        logger(
+          'Firestore.runTransaction',
+          this._requestTag,
+          'Rolling back transaction after callback error:',
+          err
+        );
+        await this.rollback();
+        return Promise.reject(err); // User callback failed
+      }
+
+      try {
+        await this.commit();
+        return result; // Success
+      } catch (err) {
+        lastError = err;
+        this._writeBatch._reset();
+      }
+    }
+
+    logger(
+      'Firestore.runTransaction',
+      this._requestTag,
+      'Exhausted transaction retries, returning error: %s',
+      lastError
+    );
+    return Promise.reject(lastError);
   }
 }
 
