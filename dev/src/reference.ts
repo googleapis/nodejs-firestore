@@ -1747,14 +1747,12 @@ export class Query<T = DocumentData> {
    * @param {bytes=} transactionId A transaction ID.
    */
   _get(transactionId?: Uint8Array): Promise<QuerySnapshot<T>> {
-    const self = this;
     const docs: Array<QueryDocumentSnapshot<T>> = [];
 
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
 
-      self
-        ._stream(transactionId)
+      this._stream(transactionId)
         .on('error', err => {
           reject(err);
         })
