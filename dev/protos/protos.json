@@ -11,7 +11,7 @@
                     "csharp_namespace": "Google.Cloud.Firestore.Admin.V1",
                     "go_package": "google.golang.org/genproto/googleapis/firestore/admin/v1;admin",
                     "java_multiple_files": true,
-                    "java_outer_classname": "LocationProto",
+                    "java_outer_classname": "OperationProto",
                     "java_package": "com.google.firestore.admin.v1",
                     "objc_class_prefix": "GCFS",
                     "php_namespace": "Google\\Cloud\\Firestore\\Admin\\V1",
@@ -417,6 +417,9 @@
                         }
                       }
                     },
+                    "LocationMetadata": {
+                      "fields": {}
+                    },
                     "IndexOperationMetadata": {
                       "fields": {
                         "startTime": {
@@ -598,9 +601,6 @@
                         "FAILED": 6,
                         "CANCELLED": 7
                       }
-                    },
-                    "LocationMetadata": {
-                      "fields": {}
                     }
                   }
                 }
