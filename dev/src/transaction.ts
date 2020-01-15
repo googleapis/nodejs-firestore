@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {GoogleError, Status} from 'google-gax';
+
 import * as proto from '../protos/firestore_v1_proto_api';
 
 import {DocumentSnapshot, Precondition} from './document';
@@ -434,8 +436,15 @@ export class Transaction {
           'Rolling back transaction after callback error:',
           err
         );
+
         await this.rollback();
-        return Promise.reject(err); // User callback failed
+
+        if (isRetryableTransactionError(err)) {
+          lastError = err;
+          continue; // Retry full transaction
+        } else {
+          return Promise.reject(err); // Callback failed w/ non-retryable error
+        }
       }
 
       try {
@@ -450,7 +459,7 @@ export class Transaction {
     logger(
       'Firestore.runTransaction',
       this._requestTag,
-      'Exhausted transaction retries, returning error: %s',
+      'Transaction not eligible for retry, returning error: %s',
       lastError
     );
     return Promise.reject(lastError);
@@ -551,4 +560,15 @@ function validateReadOptions(
       }
     }
   }
+}
+
+function isRetryableTransactionError(error: Error): boolean {
+  if (error instanceof GoogleError || 'code' in error) {
+    // In transactions, the backend returns code ABORTED for reads that fail
+    // with contention. These errors should be retried for both GoogleError
+    // and GoogleError-alike errors (in case the prototype hierarchy gets
+    // stripped somewhere).
+    return error.code === Status.ABORTED;
+  }
+  return false;
 }

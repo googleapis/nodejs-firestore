@@ -70,7 +70,7 @@ interface TransactionStep {
 function commit(
   transaction?: Uint8Array | string,
   writes?: api.IWrite[],
-  err?: Error
+  error?: Error
 ): TransactionStep {
   const proto: api.ICommitRequest = {
     database: DATABASE_ROOT,
@@ -99,14 +99,14 @@ function commit(
   return {
     type: 'commit',
     request: proto,
-    error: err,
+    error,
     response,
   };
 }
 
 function rollback(
   transaction?: Uint8Array | string,
-  err?: Error
+  error?: Error
 ): TransactionStep {
   const proto = {
     database: DATABASE_ROOT,
@@ -116,7 +116,7 @@ function rollback(
   return {
     type: 'rollback',
     request: proto,
-    error: err,
+    error,
     response: {},
   };
 }
@@ -124,7 +124,7 @@ function rollback(
 function begin(
   transaction?: Uint8Array | string,
   prevTransaction?: Uint8Array | string,
-  err?: Error
+  error?: Error
 ): TransactionStep {
   const proto: api.IBeginTransactionRequest = {database: DATABASE_ROOT};
 
@@ -143,12 +143,15 @@ function begin(
   return {
     type: 'begin',
     request: proto,
-    error: err,
+    error,
     response,
   };
 }
 
-function getDocument(transaction?: Uint8Array | string): TransactionStep {
+function getDocument(
+  transaction?: Uint8Array | string,
+  error?: Error
+): TransactionStep {
   const request = {
     database: DATABASE_ROOT,
     documents: [DOCUMENT_NAME],
@@ -172,6 +175,7 @@ function getDocument(transaction?: Uint8Array | string): TransactionStep {
   return {
     type: 'getDocument',
     request,
+    error,
     stream,
   };
 }
@@ -307,7 +311,11 @@ function runTransaction<T>(
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('getDocument');
       expect(actual).to.deep.eq(request.request);
-      return request.stream!;
+      if (request.error) {
+        throw request.error;
+      } else {
+        return request.stream!;
+      }
     },
     runQuery: actual => {
       const request = expectedRequests.shift()!;
@@ -396,7 +404,7 @@ describe('failed transactions', () => {
 
   it('requires a promise', () => {
     return expect(
-      runTransaction((() => {}) as InvalidApiUsage, begin(), rollback('foo'))
+      runTransaction((() => {}) as InvalidApiUsage, begin(), rollback())
     ).to.eventually.be.rejectedWith(
       'You must return a Promise in your transaction()-callback.'
     );
@@ -416,14 +424,51 @@ describe('failed transactions', () => {
     });
   });
 
-  it("doesn't retry on callback failure", () => {
+  it('retries GRPC exceptions with code ABORTED in callback', () => {
+    const retryableError = new GoogleError('Aborted');
+    retryableError.code = Status.ABORTED;
+
+    return runTransaction(
+      async (transaction, docRef) => {
+        await transaction.get(docRef);
+        return 'success';
+      },
+      begin('foo1'),
+      getDocument('foo1', retryableError),
+      rollback('foo1'),
+      begin('foo2', 'foo1'),
+      getDocument('foo2'),
+      commit('foo2')
+    ).then(res => {
+      expect(res).to.equal('success');
+    });
+  });
+
+  it("doesn't retry GRPC exceptions with code FAILED_PRECONDITION in callback", () => {
+    const nonRetryableError = new GoogleError('Failed Precondition');
+    nonRetryableError.code = Status.FAILED_PRECONDITION;
+
+    return expect(
+      runTransaction(
+        async (transaction, docRef) => {
+          await transaction.get(docRef);
+          return 'failure';
+        },
+        begin('foo'),
+        getDocument('foo', nonRetryableError),
+        rollback('foo')
+      )
+    ).to.eventually.be.rejectedWith('Failed Precondition');
+  });
+
+  it("doesn't retry custom user exceptions in callback", () => {
     return expect(
       runTransaction(
         () => {
           return Promise.reject('request exception');
         },
         begin(),
-        rollback('foo')
+        rollback()
       )
     ).to.eventually.be.rejectedWith('request exception');
   });
@@ -442,8 +487,8 @@ describe('failed transactions', () => {
       commit('foo2', [], serverError),
       begin('foo3', 'foo2'),
       commit('foo3')
-    ).then(red => {
-      expect(red).to.equal('success');
+    ).then(res => {
+      expect(res).to.equal('success');
     });
   });
 
