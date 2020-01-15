@@ -898,10 +898,8 @@ export class Firestore {
       request.mask = {fieldPaths};
     }
 
-    const self = this;
-    return self
-      .requestStream('batchGetDocuments', request, requestTag)
-      .then(stream => {
+    return this.requestStream('batchGetDocuments', request, requestTag).then(
+      stream => {
         return new Promise<Array<DocumentSnapshot<T>>>((resolve, reject) => {
           stream
             .on('error', err => {
@@ -924,7 +922,7 @@ export class Firestore {
                     'Received document: %s',
                     response.found.name!
                   );
-                  document = self.snapshot_(response.found, response.readTime!);
+                  document = this.snapshot_(response.found, response.readTime!);
                 } else {
                   logger(
                     'Firestore.getAll_',
@@ -932,7 +930,7 @@ export class Firestore {
                     'Document missing: %s',
                     response.missing!
                   );
-                  document = self.snapshot_(
+                  document = this.snapshot_(
                     response.missing!,
                     response.readTime!
                   );
@@ -983,7 +981,8 @@ export class Firestore {
             });
           stream.resume();
         });
-      });
+      }
+    );
   }
 
   /**
