@@ -70,7 +70,7 @@ interface TransactionStep {
 function commit(
   transaction?: Uint8Array | string,
   writes?: api.IWrite[],
-  err?: Error
+  error?: Error
 ): TransactionStep {
   const proto: api.ICommitRequest = {
     database: DATABASE_ROOT,
@@ -99,7 +99,7 @@ function commit(
   return {
     type: 'commit',
     request: proto,
-    error: err,
+    error,
     response,
   };
 }
@@ -404,7 +404,7 @@ describe('failed transactions', () => {
 
   it('requires a promise', () => {
     return expect(
-      runTransaction((() => {}) as InvalidApiUsage, begin(), rollback('foo'))
+      runTransaction((() => {}) as InvalidApiUsage, begin(), rollback())
     ).to.eventually.be.rejectedWith(
       'You must return a Promise in your transaction()-callback.'
     );
@@ -439,8 +439,8 @@ describe('failed transactions', () => {
       begin('foo2', 'foo1'),
       getDocument('foo2'),
       commit('foo2')
-    ).then(red => {
-      expect(red).to.equal('success');
+    ).then(res => {
+      expect(res).to.equal('success');
     });
   });
 
@@ -487,8 +487,8 @@ describe('failed transactions', () => {
       commit('foo2', [], serverError),
       begin('foo3', 'foo2'),
       commit('foo3')
-    ).then(red => {
-      expect(red).to.equal('success');
+    ).then(res => {
+      expect(res).to.equal('success');
     });
   });
 
