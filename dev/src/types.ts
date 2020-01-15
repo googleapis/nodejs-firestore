@@ -100,7 +100,6 @@ export type RBTree = any;
  * storing and retrieving objects from Firestore.
  *
  * @example
- * ```typescript
  * class Post {
  *   constructor(readonly title: string, readonly author: string) {}
  *
@@ -130,7 +129,6 @@ export type RBTree = any;
  *   post.toString(); // Should be defined
  *   post.someNonExistentProperty; // TS error
  * }
- * ```
  */
 export interface FirestoreDataConverter<T> {
   /**
