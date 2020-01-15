@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-const deepEqual = require('deep-equal');
+import {Transform} from 'stream';
 
-import * as through2 from 'through2';
+const deepEqual = require('deep-equal');
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
@@ -1806,12 +1806,11 @@ export class Query<T = DocumentData> {
   stream(): NodeJS.ReadableStream {
     const responseStream = this._stream();
 
-    const transform = through2.obj(function(this, chunk, encoding, callback) {
-      // Only send chunks with documents.
-      if (chunk.document) {
-        this.push(chunk.document);
-      }
-      callback();
+    const transform = new Transform({
+      objectMode: true,
+      transform(chunk, encoding, callback) {
+        callback(undefined, chunk.document);
+      },
     });
 
     responseStream.pipe(transform);
@@ -1911,29 +1910,30 @@ export class Query<T = DocumentData> {
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
-    const self = this;
 
-    const stream = through2.obj(function(this, proto, enc, callback) {
-      const readTime = Timestamp.fromProto(proto.readTime);
-      if (proto.document) {
-        const document = self.firestore.snapshot_(
-          proto.document,
-          proto.readTime
-        );
-        const finalDoc = new DocumentSnapshotBuilder(
-          document.ref.withConverter(self._queryOptions.converter)
-        );
-        // Recreate the QueryDocumentSnapshot with the DocumentReference
-        // containing the original converter.
-        finalDoc.fieldsProto = document._fieldsProto;
-        finalDoc.readTime = document.readTime;
-        finalDoc.createTime = document.createTime;
-        finalDoc.updateTime = document.updateTime;
-        this.push({document: finalDoc.build(), readTime});
-      } else {
-        this.push({readTime});
-      }
-      callback();
+    const stream = new Transform({
+      objectMode: true,
+      transform: (proto, enc, callback) => {
+        const readTime = Timestamp.fromProto(proto.readTime);
+        if (proto.document) {
+          const document = this.firestore.snapshot_(
+            proto.document,
+            proto.readTime
+          );
+          const finalDoc = new DocumentSnapshotBuilder(
+            document.ref.withConverter(this._queryOptions.converter)
+          );
+          // Recreate the QueryDocumentSnapshot with the DocumentReference
+          // containing the original converter.
+          finalDoc.fieldsProto = document._fieldsProto;
+          finalDoc.readTime = document.readTime;
+          finalDoc.createTime = document.createTime;
+          finalDoc.updateTime = document.updateTime;
+          callback(undefined, {document: finalDoc.build(), readTime});
+        } else {
+          callback(undefined, {readTime});
+        }
+      },
     });
 
     this.firestore.initializeIfNeeded(tag).then(() => {
