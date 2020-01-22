@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.4.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.4.0...v3.4.1) (2020-01-22)
+
+
+### Bug Fixes
+
+* do not assume all custom objects have constructors ([#893](https://www.github.com/googleapis/nodejs-firestore/issues/893)) ([f668e8e](https://www.github.com/googleapis/nodejs-firestore/commit/f668e8e4880256223c41c2c3183434e81c7f7945))
+
 ## [3.4.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.3.4...v3.4.0) (2020-01-15)
 
 
