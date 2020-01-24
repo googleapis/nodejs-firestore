@@ -400,6 +400,7 @@ function isMomentJsType(value: unknown): value is Moment {
   return (
     typeof value === 'object' &&
     value !== null &&
+    value.constructor &&
     value.constructor.name === 'Moment' &&
     typeof (value as Moment).toDate === 'function'
   );
