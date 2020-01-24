@@ -1148,8 +1148,6 @@ export class Firestore {
         }
       }
 
-      backendStream.on('data', () => streamReady());
-
       function streamEnded() {
         logger(
           'Firestore._initializeStream',
@@ -1161,11 +1159,7 @@ export class Firestore {
         lifetime.resolve();
       }
 
-      backendStream.on('end', () => streamEnded());
-      backendStream.on('close', () => streamEnded());
-      backendStream.on('finish', () => streamEnded());
-
-      backendStream.on('error', err => {
+      function streamFailed(err: Error) {
         if (!streamInitialized) {
           // If we receive an error before we were able to receive any data,
           // reject this stream.
@@ -1191,7 +1185,13 @@ export class Firestore {
             resultStream.emit('error', err);
           });
         }
-      });
+      }
+
+      backendStream.on('data', () => streamReady());
+      backendStream.on('error', err => streamFailed(err));
+      backendStream.on('end', () => streamEnded());
+      backendStream.on('close', () => streamEnded());
+      backendStream.on('finish', () => streamEnded());
 
       backendStream.pipe(resultStream);
 
@@ -1202,13 +1202,17 @@ export class Firestore {
           'Sending request: %j',
           request
         );
-        backendStream.write(request, 'utf-8', () => {
-          logger(
-            'Firestore._initializeStream',
-            requestTag,
-            'Marking stream as healthy'
-          );
-          streamReady();
+        backendStream.write(request, 'utf-8', err => {
+          if (err) {
+            streamFailed(err);
+          } else {
+            logger(
+              'Firestore._initializeStream',
+              requestTag,
+              'Marking stream as healthy'
+            );
+            streamReady();
+          }
         });
       }
     });
