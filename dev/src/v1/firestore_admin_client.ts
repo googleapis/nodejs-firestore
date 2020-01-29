@@ -1263,7 +1263,7 @@ export class FirestoreAdminClient {
   // --------------------
 
   /**
-   * Return a fully-qualified collectiongroup resource name string.
+   * Return a fully-qualified collectionGroup resource name string.
    *
    * @param {string} project
    * @param {string} database
@@ -1271,7 +1271,7 @@ export class FirestoreAdminClient {
    * @returns {string} Resource name string.
    */
   collectionGroupPath(project: string, database: string, collection: string) {
-    return this._pathTemplates.collectiongroupPathTemplate.render({
+    return this._pathTemplates.collectionGroupPathTemplate.render({
       project,
       database,
       collection,
@@ -1281,39 +1281,39 @@ export class FirestoreAdminClient {
   /**
    * Parse the project from CollectionGroup resource.
    *
-   * @param {string} collectiongroupName
+   * @param {string} collectionGroupName
    *   A fully-qualified path representing CollectionGroup resource.
    * @returns {string} A string representing the project.
    */
-  matchProjectFromCollectionGroupName(collectiongroupName: string) {
-    return this._pathTemplates.collectiongroupPathTemplate.match(
-      collectiongroupName
+  matchProjectFromCollectionGroupName(collectionGroupName: string) {
+    return this._pathTemplates.collectionGroupPathTemplate.match(
+      collectionGroupName
     ).project;
   }
 
   /**
    * Parse the database from CollectionGroup resource.
    *
-   * @param {string} collectiongroupName
+   * @param {string} collectionGroupName
    *   A fully-qualified path representing CollectionGroup resource.
    * @returns {string} A string representing the database.
    */
-  matchDatabaseFromCollectionGroupName(collectiongroupName: string) {
-    return this._pathTemplates.collectiongroupPathTemplate.match(
-      collectiongroupName
+  matchDatabaseFromCollectionGroupName(collectionGroupName: string) {
+    return this._pathTemplates.collectionGroupPathTemplate.match(
+      collectionGroupName
     ).database;
   }
 
   /**
    * Parse the collection from CollectionGroup resource.
    *
-   * @param {string} collectiongroupName
+   * @param {string} collectionGroupName
    *   A fully-qualified path representing CollectionGroup resource.
    * @returns {string} A string representing the collection.
    */
-  matchCollectionFromCollectionGroupName(collectiongroupName: string) {
-    return this._pathTemplates.collectiongroupPathTemplate.match(
-      collectiongroupName
+  matchCollectionFromCollectionGroupName(collectionGroupName: string) {
+    return this._pathTemplates.collectionGroupPathTemplate.match(
+      collectionGroupName
     ).collection;
   }
 
