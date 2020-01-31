@@ -187,8 +187,9 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  *   return documentRef.delete({ lastUpdateTime: updateTime });
  * });
  *
- * @property {string} lastUpdateTime The update time to enforce (specified as
- * an ISO 8601 string).
+ * @property {Timestamp} lastUpdateTime The update time to enforce. If set,
+ *  enforces that the document was last updated at lastUpdateTime. Fails the
+ *  operation if the document was last updated at a different time.
  * @typedef {Object} Precondition
  */
 
