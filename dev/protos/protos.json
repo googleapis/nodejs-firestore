@@ -19,6 +19,45 @@
                     "(google.api.resource_definition).pattern": "projects/{project}/databases/{database}/collectionGroups/{collection}"
                   },
                   "nested": {
+                    "Field": {
+                      "options": {
+                        "(google.api.resource).type": "firestore.googleapis.com/Field",
+                        "(google.api.resource).pattern": "projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}"
+                      },
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "indexConfig": {
+                          "type": "IndexConfig",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "IndexConfig": {
+                          "fields": {
+                            "indexes": {
+                              "rule": "repeated",
+                              "type": "Index",
+                              "id": 1
+                            },
+                            "usesAncestorConfig": {
+                              "type": "bool",
+                              "id": 2
+                            },
+                            "ancestorField": {
+                              "type": "string",
+                              "id": 3
+                            },
+                            "reverting": {
+                              "type": "bool",
+                              "id": 4
+                            }
+                          }
+                        }
+                      }
+                    },
                     "Index": {
                       "options": {
                         "(google.api.resource).type": "firestore.googleapis.com/Index",
@@ -96,45 +135,6 @@
                             "CREATING": 1,
                             "READY": 2,
                             "NEEDS_REPAIR": 3
-                          }
-                        }
-                      }
-                    },
-                    "Field": {
-                      "options": {
-                        "(google.api.resource).type": "firestore.googleapis.com/Field",
-                        "(google.api.resource).pattern": "projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}"
-                      },
-                      "fields": {
-                        "name": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "indexConfig": {
-                          "type": "IndexConfig",
-                          "id": 2
-                        }
-                      },
-                      "nested": {
-                        "IndexConfig": {
-                          "fields": {
-                            "indexes": {
-                              "rule": "repeated",
-                              "type": "Index",
-                              "id": 1
-                            },
-                            "usesAncestorConfig": {
-                              "type": "bool",
-                              "id": 2
-                            },
-                            "ancestorField": {
-                              "type": "string",
-                              "id": 3
-                            },
-                            "reverting": {
-                              "type": "bool",
-                              "id": 4
-                            }
                           }
                         }
                       }
@@ -611,7 +611,7 @@
                 "csharp_namespace": "Google.Cloud.Firestore.V1",
                 "go_package": "google.golang.org/genproto/googleapis/firestore/v1;firestore",
                 "java_multiple_files": true,
-                "java_outer_classname": "FirestoreProto",
+                "java_outer_classname": "WriteProto",
                 "java_package": "com.google.firestore.v1",
                 "objc_class_prefix": "GCFS",
                 "php_namespace": "Google\\Cloud\\Firestore\\V1"
@@ -792,389 +792,6 @@
                       "keyType": "string",
                       "type": "Value",
                       "id": 1
-                    }
-                  }
-                },
-                "Write": {
-                  "oneofs": {
-                    "operation": {
-                      "oneof": [
-                        "update",
-                        "delete",
-                        "transform"
-                      ]
-                    }
-                  },
-                  "fields": {
-                    "update": {
-                      "type": "Document",
-                      "id": 1
-                    },
-                    "delete": {
-                      "type": "string",
-                      "id": 2
-                    },
-                    "transform": {
-                      "type": "DocumentTransform",
-                      "id": 6
-                    },
-                    "updateMask": {
-                      "type": "DocumentMask",
-                      "id": 3
-                    },
-                    "currentDocument": {
-                      "type": "Precondition",
-                      "id": 4
-                    }
-                  }
-                },
-                "DocumentTransform": {
-                  "fields": {
-                    "document": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "fieldTransforms": {
-                      "rule": "repeated",
-                      "type": "FieldTransform",
-                      "id": 2
-                    }
-                  },
-                  "nested": {
-                    "FieldTransform": {
-                      "oneofs": {
-                        "transformType": {
-                          "oneof": [
-                            "setToServerValue",
-                            "increment",
-                            "maximum",
-                            "minimum",
-                            "appendMissingElements",
-                            "removeAllFromArray"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "fieldPath": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "setToServerValue": {
-                          "type": "ServerValue",
-                          "id": 2
-                        },
-                        "increment": {
-                          "type": "Value",
-                          "id": 3
-                        },
-                        "maximum": {
-                          "type": "Value",
-                          "id": 4
-                        },
-                        "minimum": {
-                          "type": "Value",
-                          "id": 5
-                        },
-                        "appendMissingElements": {
-                          "type": "ArrayValue",
-                          "id": 6
-                        },
-                        "removeAllFromArray": {
-                          "type": "ArrayValue",
-                          "id": 7
-                        }
-                      },
-                      "nested": {
-                        "ServerValue": {
-                          "values": {
-                            "SERVER_VALUE_UNSPECIFIED": 0,
-                            "REQUEST_TIME": 1
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "WriteResult": {
-                  "fields": {
-                    "updateTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 1
-                    },
-                    "transformResults": {
-                      "rule": "repeated",
-                      "type": "Value",
-                      "id": 2
-                    }
-                  }
-                },
-                "DocumentChange": {
-                  "fields": {
-                    "document": {
-                      "type": "Document",
-                      "id": 1
-                    },
-                    "targetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 5
-                    },
-                    "removedTargetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 6
-                    }
-                  }
-                },
-                "DocumentDelete": {
-                  "fields": {
-                    "document": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "removedTargetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 6
-                    },
-                    "readTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 4
-                    }
-                  }
-                },
-                "DocumentRemove": {
-                  "fields": {
-                    "document": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "removedTargetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 2
-                    },
-                    "readTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 4
-                    }
-                  }
-                },
-                "ExistenceFilter": {
-                  "fields": {
-                    "targetId": {
-                      "type": "int32",
-                      "id": 1
-                    },
-                    "count": {
-                      "type": "int32",
-                      "id": 2
-                    }
-                  }
-                },
-                "StructuredQuery": {
-                  "fields": {
-                    "select": {
-                      "type": "Projection",
-                      "id": 1
-                    },
-                    "from": {
-                      "rule": "repeated",
-                      "type": "CollectionSelector",
-                      "id": 2
-                    },
-                    "where": {
-                      "type": "Filter",
-                      "id": 3
-                    },
-                    "orderBy": {
-                      "rule": "repeated",
-                      "type": "Order",
-                      "id": 4
-                    },
-                    "startAt": {
-                      "type": "Cursor",
-                      "id": 7
-                    },
-                    "endAt": {
-                      "type": "Cursor",
-                      "id": 8
-                    },
-                    "offset": {
-                      "type": "int32",
-                      "id": 6
-                    },
-                    "limit": {
-                      "type": "google.protobuf.Int32Value",
-                      "id": 5
-                    }
-                  },
-                  "nested": {
-                    "CollectionSelector": {
-                      "fields": {
-                        "collectionId": {
-                          "type": "string",
-                          "id": 2
-                        },
-                        "allDescendants": {
-                          "type": "bool",
-                          "id": 3
-                        }
-                      }
-                    },
-                    "Filter": {
-                      "oneofs": {
-                        "filterType": {
-                          "oneof": [
-                            "compositeFilter",
-                            "fieldFilter",
-                            "unaryFilter"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "compositeFilter": {
-                          "type": "CompositeFilter",
-                          "id": 1
-                        },
-                        "fieldFilter": {
-                          "type": "FieldFilter",
-                          "id": 2
-                        },
-                        "unaryFilter": {
-                          "type": "UnaryFilter",
-                          "id": 3
-                        }
-                      }
-                    },
-                    "CompositeFilter": {
-                      "fields": {
-                        "op": {
-                          "type": "Operator",
-                          "id": 1
-                        },
-                        "filters": {
-                          "rule": "repeated",
-                          "type": "Filter",
-                          "id": 2
-                        }
-                      },
-                      "nested": {
-                        "Operator": {
-                          "values": {
-                            "OPERATOR_UNSPECIFIED": 0,
-                            "AND": 1
-                          }
-                        }
-                      }
-                    },
-                    "FieldFilter": {
-                      "fields": {
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 1
-                        },
-                        "op": {
-                          "type": "Operator",
-                          "id": 2
-                        },
-                        "value": {
-                          "type": "Value",
-                          "id": 3
-                        }
-                      },
-                      "nested": {
-                        "Operator": {
-                          "values": {
-                            "OPERATOR_UNSPECIFIED": 0,
-                            "LESS_THAN": 1,
-                            "LESS_THAN_OR_EQUAL": 2,
-                            "GREATER_THAN": 3,
-                            "GREATER_THAN_OR_EQUAL": 4,
-                            "EQUAL": 5,
-                            "ARRAY_CONTAINS": 7,
-                            "IN": 8,
-                            "ARRAY_CONTAINS_ANY": 9
-                          }
-                        }
-                      }
-                    },
-                    "UnaryFilter": {
-                      "oneofs": {
-                        "operandType": {
-                          "oneof": [
-                            "field"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "op": {
-                          "type": "Operator",
-                          "id": 1
-                        },
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 2
-                        }
-                      },
-                      "nested": {
-                        "Operator": {
-                          "values": {
-                            "OPERATOR_UNSPECIFIED": 0,
-                            "IS_NAN": 2,
-                            "IS_NULL": 3
-                          }
-                        }
-                      }
-                    },
-                    "Order": {
-                      "fields": {
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 1
-                        },
-                        "direction": {
-                          "type": "Direction",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "FieldReference": {
-                      "fields": {
-                        "fieldPath": {
-                          "type": "string",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "Projection": {
-                      "fields": {
-                        "fields": {
-                          "rule": "repeated",
-                          "type": "FieldReference",
-                          "id": 2
-                        }
-                      }
-                    },
-                    "Direction": {
-                      "values": {
-                        "DIRECTION_UNSPECIFIED": 0,
-                        "ASCENDING": 1,
-                        "DESCENDING": 2
-                      }
-                    }
-                  }
-                },
-                "Cursor": {
-                  "fields": {
-                    "values": {
-                      "rule": "repeated",
-                      "type": "Value",
-                      "id": 1
-                    },
-                    "before": {
-                      "type": "bool",
-                      "id": 2
                     }
                   }
                 },
@@ -1932,374 +1549,6 @@
                       "id": 2
                     }
                   }
-                }
-              }
-            },
-            "v1beta1": {
-              "options": {
-                "csharp_namespace": "Google.Cloud.Firestore.V1Beta1",
-                "go_package": "google.golang.org/genproto/googleapis/firestore/v1beta1;firestore",
-                "java_multiple_files": true,
-                "java_outer_classname": "FirestoreProto",
-                "java_package": "com.google.firestore.v1beta1",
-                "objc_class_prefix": "GCFS",
-                "php_namespace": "Google\\Cloud\\Firestore\\V1beta1"
-              },
-              "nested": {
-                "DocumentMask": {
-                  "fields": {
-                    "fieldPaths": {
-                      "rule": "repeated",
-                      "type": "string",
-                      "id": 1
-                    }
-                  }
-                },
-                "Precondition": {
-                  "oneofs": {
-                    "conditionType": {
-                      "oneof": [
-                        "exists",
-                        "updateTime"
-                      ]
-                    }
-                  },
-                  "fields": {
-                    "exists": {
-                      "type": "bool",
-                      "id": 1
-                    },
-                    "updateTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 2
-                    }
-                  }
-                },
-                "TransactionOptions": {
-                  "oneofs": {
-                    "mode": {
-                      "oneof": [
-                        "readOnly",
-                        "readWrite"
-                      ]
-                    }
-                  },
-                  "fields": {
-                    "readOnly": {
-                      "type": "ReadOnly",
-                      "id": 2
-                    },
-                    "readWrite": {
-                      "type": "ReadWrite",
-                      "id": 3
-                    }
-                  },
-                  "nested": {
-                    "ReadWrite": {
-                      "fields": {
-                        "retryTransaction": {
-                          "type": "bytes",
-                          "id": 1
-                        }
-                      }
-                    },
-                    "ReadOnly": {
-                      "oneofs": {
-                        "consistencySelector": {
-                          "oneof": [
-                            "readTime"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "readTime": {
-                          "type": "google.protobuf.Timestamp",
-                          "id": 2
-                        }
-                      }
-                    }
-                  }
-                },
-                "Document": {
-                  "fields": {
-                    "name": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "fields": {
-                      "keyType": "string",
-                      "type": "Value",
-                      "id": 2
-                    },
-                    "createTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 3
-                    },
-                    "updateTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 4
-                    }
-                  }
-                },
-                "Value": {
-                  "oneofs": {
-                    "valueType": {
-                      "oneof": [
-                        "nullValue",
-                        "booleanValue",
-                        "integerValue",
-                        "doubleValue",
-                        "timestampValue",
-                        "stringValue",
-                        "bytesValue",
-                        "referenceValue",
-                        "geoPointValue",
-                        "arrayValue",
-                        "mapValue"
-                      ]
-                    }
-                  },
-                  "fields": {
-                    "nullValue": {
-                      "type": "google.protobuf.NullValue",
-                      "id": 11
-                    },
-                    "booleanValue": {
-                      "type": "bool",
-                      "id": 1
-                    },
-                    "integerValue": {
-                      "type": "int64",
-                      "id": 2
-                    },
-                    "doubleValue": {
-                      "type": "double",
-                      "id": 3
-                    },
-                    "timestampValue": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 10
-                    },
-                    "stringValue": {
-                      "type": "string",
-                      "id": 17
-                    },
-                    "bytesValue": {
-                      "type": "bytes",
-                      "id": 18
-                    },
-                    "referenceValue": {
-                      "type": "string",
-                      "id": 5
-                    },
-                    "geoPointValue": {
-                      "type": "google.type.LatLng",
-                      "id": 8
-                    },
-                    "arrayValue": {
-                      "type": "ArrayValue",
-                      "id": 9
-                    },
-                    "mapValue": {
-                      "type": "MapValue",
-                      "id": 6
-                    }
-                  }
-                },
-                "ArrayValue": {
-                  "fields": {
-                    "values": {
-                      "rule": "repeated",
-                      "type": "Value",
-                      "id": 1
-                    }
-                  }
-                },
-                "MapValue": {
-                  "fields": {
-                    "fields": {
-                      "keyType": "string",
-                      "type": "Value",
-                      "id": 1
-                    }
-                  }
-                },
-                "Write": {
-                  "oneofs": {
-                    "operation": {
-                      "oneof": [
-                        "update",
-                        "delete",
-                        "transform"
-                      ]
-                    }
-                  },
-                  "fields": {
-                    "update": {
-                      "type": "Document",
-                      "id": 1
-                    },
-                    "delete": {
-                      "type": "string",
-                      "id": 2
-                    },
-                    "transform": {
-                      "type": "DocumentTransform",
-                      "id": 6
-                    },
-                    "updateMask": {
-                      "type": "DocumentMask",
-                      "id": 3
-                    },
-                    "currentDocument": {
-                      "type": "Precondition",
-                      "id": 4
-                    }
-                  }
-                },
-                "DocumentTransform": {
-                  "fields": {
-                    "document": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "fieldTransforms": {
-                      "rule": "repeated",
-                      "type": "FieldTransform",
-                      "id": 2
-                    }
-                  },
-                  "nested": {
-                    "FieldTransform": {
-                      "oneofs": {
-                        "transformType": {
-                          "oneof": [
-                            "setToServerValue",
-                            "increment",
-                            "maximum",
-                            "minimum",
-                            "appendMissingElements",
-                            "removeAllFromArray"
-                          ]
-                        }
-                      },
-                      "fields": {
-                        "fieldPath": {
-                          "type": "string",
-                          "id": 1
-                        },
-                        "setToServerValue": {
-                          "type": "ServerValue",
-                          "id": 2
-                        },
-                        "increment": {
-                          "type": "Value",
-                          "id": 3
-                        },
-                        "maximum": {
-                          "type": "Value",
-                          "id": 4
-                        },
-                        "minimum": {
-                          "type": "Value",
-                          "id": 5
-                        },
-                        "appendMissingElements": {
-                          "type": "ArrayValue",
-                          "id": 6
-                        },
-                        "removeAllFromArray": {
-                          "type": "ArrayValue",
-                          "id": 7
-                        }
-                      },
-                      "nested": {
-                        "ServerValue": {
-                          "values": {
-                            "SERVER_VALUE_UNSPECIFIED": 0,
-                            "REQUEST_TIME": 1
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "WriteResult": {
-                  "fields": {
-                    "updateTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 1
-                    },
-                    "transformResults": {
-                      "rule": "repeated",
-                      "type": "Value",
-                      "id": 2
-                    }
-                  }
-                },
-                "DocumentChange": {
-                  "fields": {
-                    "document": {
-                      "type": "Document",
-                      "id": 1
-                    },
-                    "targetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 5
-                    },
-                    "removedTargetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 6
-                    }
-                  }
-                },
-                "DocumentDelete": {
-                  "fields": {
-                    "document": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "removedTargetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 6
-                    },
-                    "readTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 4
-                    }
-                  }
-                },
-                "DocumentRemove": {
-                  "fields": {
-                    "document": {
-                      "type": "string",
-                      "id": 1
-                    },
-                    "removedTargetIds": {
-                      "rule": "repeated",
-                      "type": "int32",
-                      "id": 2
-                    },
-                    "readTime": {
-                      "type": "google.protobuf.Timestamp",
-                      "id": 4
-                    }
-                  }
-                },
-                "ExistenceFilter": {
-                  "fields": {
-                    "targetId": {
-                      "type": "int32",
-                      "id": 1
-                    },
-                    "count": {
-                      "type": "int32",
-                      "id": 2
-                    }
-                  }
                 },
                 "StructuredQuery": {
                   "fields": {
@@ -2504,6 +1753,374 @@
                     "before": {
                       "type": "bool",
                       "id": 2
+                    }
+                  }
+                },
+                "Write": {
+                  "oneofs": {
+                    "operation": {
+                      "oneof": [
+                        "update",
+                        "delete",
+                        "transform"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "update": {
+                      "type": "Document",
+                      "id": 1
+                    },
+                    "delete": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "transform": {
+                      "type": "DocumentTransform",
+                      "id": 6
+                    },
+                    "updateMask": {
+                      "type": "DocumentMask",
+                      "id": 3
+                    },
+                    "currentDocument": {
+                      "type": "Precondition",
+                      "id": 4
+                    }
+                  }
+                },
+                "DocumentTransform": {
+                  "fields": {
+                    "document": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "fieldTransforms": {
+                      "rule": "repeated",
+                      "type": "FieldTransform",
+                      "id": 2
+                    }
+                  },
+                  "nested": {
+                    "FieldTransform": {
+                      "oneofs": {
+                        "transformType": {
+                          "oneof": [
+                            "setToServerValue",
+                            "increment",
+                            "maximum",
+                            "minimum",
+                            "appendMissingElements",
+                            "removeAllFromArray"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "setToServerValue": {
+                          "type": "ServerValue",
+                          "id": 2
+                        },
+                        "increment": {
+                          "type": "Value",
+                          "id": 3
+                        },
+                        "maximum": {
+                          "type": "Value",
+                          "id": 4
+                        },
+                        "minimum": {
+                          "type": "Value",
+                          "id": 5
+                        },
+                        "appendMissingElements": {
+                          "type": "ArrayValue",
+                          "id": 6
+                        },
+                        "removeAllFromArray": {
+                          "type": "ArrayValue",
+                          "id": 7
+                        }
+                      },
+                      "nested": {
+                        "ServerValue": {
+                          "values": {
+                            "SERVER_VALUE_UNSPECIFIED": 0,
+                            "REQUEST_TIME": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "WriteResult": {
+                  "fields": {
+                    "updateTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 1
+                    },
+                    "transformResults": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 2
+                    }
+                  }
+                },
+                "DocumentChange": {
+                  "fields": {
+                    "document": {
+                      "type": "Document",
+                      "id": 1
+                    },
+                    "targetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 5
+                    },
+                    "removedTargetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 6
+                    }
+                  }
+                },
+                "DocumentDelete": {
+                  "fields": {
+                    "document": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "removedTargetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 6
+                    },
+                    "readTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 4
+                    }
+                  }
+                },
+                "DocumentRemove": {
+                  "fields": {
+                    "document": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "removedTargetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "readTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 4
+                    }
+                  }
+                },
+                "ExistenceFilter": {
+                  "fields": {
+                    "targetId": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "count": {
+                      "type": "int32",
+                      "id": 2
+                    }
+                  }
+                }
+              }
+            },
+            "v1beta1": {
+              "options": {
+                "csharp_namespace": "Google.Cloud.Firestore.V1Beta1",
+                "go_package": "google.golang.org/genproto/googleapis/firestore/v1beta1;firestore",
+                "java_multiple_files": true,
+                "java_outer_classname": "WriteProto",
+                "java_package": "com.google.firestore.v1beta1",
+                "objc_class_prefix": "GCFS",
+                "php_namespace": "Google\\Cloud\\Firestore\\V1beta1"
+              },
+              "nested": {
+                "DocumentMask": {
+                  "fields": {
+                    "fieldPaths": {
+                      "rule": "repeated",
+                      "type": "string",
+                      "id": 1
+                    }
+                  }
+                },
+                "Precondition": {
+                  "oneofs": {
+                    "conditionType": {
+                      "oneof": [
+                        "exists",
+                        "updateTime"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "exists": {
+                      "type": "bool",
+                      "id": 1
+                    },
+                    "updateTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 2
+                    }
+                  }
+                },
+                "TransactionOptions": {
+                  "oneofs": {
+                    "mode": {
+                      "oneof": [
+                        "readOnly",
+                        "readWrite"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "readOnly": {
+                      "type": "ReadOnly",
+                      "id": 2
+                    },
+                    "readWrite": {
+                      "type": "ReadWrite",
+                      "id": 3
+                    }
+                  },
+                  "nested": {
+                    "ReadWrite": {
+                      "fields": {
+                        "retryTransaction": {
+                          "type": "bytes",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "ReadOnly": {
+                      "oneofs": {
+                        "consistencySelector": {
+                          "oneof": [
+                            "readTime"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "readTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2
+                        }
+                      }
+                    }
+                  }
+                },
+                "Document": {
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "fields": {
+                      "keyType": "string",
+                      "type": "Value",
+                      "id": 2
+                    },
+                    "createTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 3
+                    },
+                    "updateTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 4
+                    }
+                  }
+                },
+                "Value": {
+                  "oneofs": {
+                    "valueType": {
+                      "oneof": [
+                        "nullValue",
+                        "booleanValue",
+                        "integerValue",
+                        "doubleValue",
+                        "timestampValue",
+                        "stringValue",
+                        "bytesValue",
+                        "referenceValue",
+                        "geoPointValue",
+                        "arrayValue",
+                        "mapValue"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "nullValue": {
+                      "type": "google.protobuf.NullValue",
+                      "id": 11
+                    },
+                    "booleanValue": {
+                      "type": "bool",
+                      "id": 1
+                    },
+                    "integerValue": {
+                      "type": "int64",
+                      "id": 2
+                    },
+                    "doubleValue": {
+                      "type": "double",
+                      "id": 3
+                    },
+                    "timestampValue": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 10
+                    },
+                    "stringValue": {
+                      "type": "string",
+                      "id": 17
+                    },
+                    "bytesValue": {
+                      "type": "bytes",
+                      "id": 18
+                    },
+                    "referenceValue": {
+                      "type": "string",
+                      "id": 5
+                    },
+                    "geoPointValue": {
+                      "type": "google.type.LatLng",
+                      "id": 8
+                    },
+                    "arrayValue": {
+                      "type": "ArrayValue",
+                      "id": 9
+                    },
+                    "mapValue": {
+                      "type": "MapValue",
+                      "id": 6
+                    }
+                  }
+                },
+                "ArrayValue": {
+                  "fields": {
+                    "values": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 1
+                    }
+                  }
+                },
+                "MapValue": {
+                  "fields": {
+                    "fields": {
+                      "keyType": "string",
+                      "type": "Value",
+                      "id": 1
                     }
                   }
                 },
@@ -3258,6 +2875,389 @@
                     },
                     "nextPageToken": {
                       "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
+                "StructuredQuery": {
+                  "fields": {
+                    "select": {
+                      "type": "Projection",
+                      "id": 1
+                    },
+                    "from": {
+                      "rule": "repeated",
+                      "type": "CollectionSelector",
+                      "id": 2
+                    },
+                    "where": {
+                      "type": "Filter",
+                      "id": 3
+                    },
+                    "orderBy": {
+                      "rule": "repeated",
+                      "type": "Order",
+                      "id": 4
+                    },
+                    "startAt": {
+                      "type": "Cursor",
+                      "id": 7
+                    },
+                    "endAt": {
+                      "type": "Cursor",
+                      "id": 8
+                    },
+                    "offset": {
+                      "type": "int32",
+                      "id": 6
+                    },
+                    "limit": {
+                      "type": "google.protobuf.Int32Value",
+                      "id": 5
+                    }
+                  },
+                  "nested": {
+                    "CollectionSelector": {
+                      "fields": {
+                        "collectionId": {
+                          "type": "string",
+                          "id": 2
+                        },
+                        "allDescendants": {
+                          "type": "bool",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "Filter": {
+                      "oneofs": {
+                        "filterType": {
+                          "oneof": [
+                            "compositeFilter",
+                            "fieldFilter",
+                            "unaryFilter"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "compositeFilter": {
+                          "type": "CompositeFilter",
+                          "id": 1
+                        },
+                        "fieldFilter": {
+                          "type": "FieldFilter",
+                          "id": 2
+                        },
+                        "unaryFilter": {
+                          "type": "UnaryFilter",
+                          "id": 3
+                        }
+                      }
+                    },
+                    "CompositeFilter": {
+                      "fields": {
+                        "op": {
+                          "type": "Operator",
+                          "id": 1
+                        },
+                        "filters": {
+                          "rule": "repeated",
+                          "type": "Filter",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "Operator": {
+                          "values": {
+                            "OPERATOR_UNSPECIFIED": 0,
+                            "AND": 1
+                          }
+                        }
+                      }
+                    },
+                    "FieldFilter": {
+                      "fields": {
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 1
+                        },
+                        "op": {
+                          "type": "Operator",
+                          "id": 2
+                        },
+                        "value": {
+                          "type": "Value",
+                          "id": 3
+                        }
+                      },
+                      "nested": {
+                        "Operator": {
+                          "values": {
+                            "OPERATOR_UNSPECIFIED": 0,
+                            "LESS_THAN": 1,
+                            "LESS_THAN_OR_EQUAL": 2,
+                            "GREATER_THAN": 3,
+                            "GREATER_THAN_OR_EQUAL": 4,
+                            "EQUAL": 5,
+                            "ARRAY_CONTAINS": 7,
+                            "IN": 8,
+                            "ARRAY_CONTAINS_ANY": 9
+                          }
+                        }
+                      }
+                    },
+                    "UnaryFilter": {
+                      "oneofs": {
+                        "operandType": {
+                          "oneof": [
+                            "field"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "op": {
+                          "type": "Operator",
+                          "id": 1
+                        },
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 2
+                        }
+                      },
+                      "nested": {
+                        "Operator": {
+                          "values": {
+                            "OPERATOR_UNSPECIFIED": 0,
+                            "IS_NAN": 2,
+                            "IS_NULL": 3
+                          }
+                        }
+                      }
+                    },
+                    "Order": {
+                      "fields": {
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 1
+                        },
+                        "direction": {
+                          "type": "Direction",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "FieldReference": {
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Projection": {
+                      "fields": {
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "FieldReference",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Direction": {
+                      "values": {
+                        "DIRECTION_UNSPECIFIED": 0,
+                        "ASCENDING": 1,
+                        "DESCENDING": 2
+                      }
+                    }
+                  }
+                },
+                "Cursor": {
+                  "fields": {
+                    "values": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 1
+                    },
+                    "before": {
+                      "type": "bool",
+                      "id": 2
+                    }
+                  }
+                },
+                "Write": {
+                  "oneofs": {
+                    "operation": {
+                      "oneof": [
+                        "update",
+                        "delete",
+                        "transform"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "update": {
+                      "type": "Document",
+                      "id": 1
+                    },
+                    "delete": {
+                      "type": "string",
+                      "id": 2
+                    },
+                    "transform": {
+                      "type": "DocumentTransform",
+                      "id": 6
+                    },
+                    "updateMask": {
+                      "type": "DocumentMask",
+                      "id": 3
+                    },
+                    "currentDocument": {
+                      "type": "Precondition",
+                      "id": 4
+                    }
+                  }
+                },
+                "DocumentTransform": {
+                  "fields": {
+                    "document": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "fieldTransforms": {
+                      "rule": "repeated",
+                      "type": "FieldTransform",
+                      "id": 2
+                    }
+                  },
+                  "nested": {
+                    "FieldTransform": {
+                      "oneofs": {
+                        "transformType": {
+                          "oneof": [
+                            "setToServerValue",
+                            "increment",
+                            "maximum",
+                            "minimum",
+                            "appendMissingElements",
+                            "removeAllFromArray"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
+                          "id": 1
+                        },
+                        "setToServerValue": {
+                          "type": "ServerValue",
+                          "id": 2
+                        },
+                        "increment": {
+                          "type": "Value",
+                          "id": 3
+                        },
+                        "maximum": {
+                          "type": "Value",
+                          "id": 4
+                        },
+                        "minimum": {
+                          "type": "Value",
+                          "id": 5
+                        },
+                        "appendMissingElements": {
+                          "type": "ArrayValue",
+                          "id": 6
+                        },
+                        "removeAllFromArray": {
+                          "type": "ArrayValue",
+                          "id": 7
+                        }
+                      },
+                      "nested": {
+                        "ServerValue": {
+                          "values": {
+                            "SERVER_VALUE_UNSPECIFIED": 0,
+                            "REQUEST_TIME": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "WriteResult": {
+                  "fields": {
+                    "updateTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 1
+                    },
+                    "transformResults": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 2
+                    }
+                  }
+                },
+                "DocumentChange": {
+                  "fields": {
+                    "document": {
+                      "type": "Document",
+                      "id": 1
+                    },
+                    "targetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 5
+                    },
+                    "removedTargetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 6
+                    }
+                  }
+                },
+                "DocumentDelete": {
+                  "fields": {
+                    "document": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "removedTargetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 6
+                    },
+                    "readTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 4
+                    }
+                  }
+                },
+                "DocumentRemove": {
+                  "fields": {
+                    "document": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "removedTargetIds": {
+                      "rule": "repeated",
+                      "type": "int32",
+                      "id": 2
+                    },
+                    "readTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 4
+                    }
+                  }
+                },
+                "ExistenceFilter": {
+                  "fields": {
+                    "targetId": {
+                      "type": "int32",
+                      "id": 1
+                    },
+                    "count": {
+                      "type": "int32",
                       "id": 2
                     }
                   }
