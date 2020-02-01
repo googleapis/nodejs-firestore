@@ -71,17 +71,13 @@
     "duplexify": "^4.0.0",
     "extend": "^3.0.2",
     "gts": "^1.1.2",
-    "hard-rejection": "^2.0.0",
-    "intelli-espower-loader": "^1.0.1",
     "jsdoc": "^3.6.2",
     "jsdoc-fresh": "^1.0.2",
     "jsdoc-region-tag": "^1.0.2",
     "linkinator": "^1.8.0",
     "mocha": "^7.0.0",
-    "power-assert": "^1.6.1",
     "protobufjs": "^6.8.6",
     "proxyquire": "^2.1.3",
-    "source-map-support": "^0.5.16",
     "ts-node": "^8.5.4",
     "typescript": "3.6.4"
   }
