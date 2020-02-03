@@ -12,7 +12,8 @@
     "quick": "cd ..; npm run compile; cd -; npm install; ts-node quickstart.ts"
   },
   "dependencies": {
-    "@google-cloud/firestore": ".."
+    "@google-cloud/firestore": "..",
+    "express": "^4.17.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",

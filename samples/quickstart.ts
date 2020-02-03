@@ -1,6 +1,8 @@
 import {FirebaseFirestore} from "@google-cloud/firestore";
+import { Http2ServerRequest, Http2ServerResponse } from "http2";
 
 const {Firestore} = require('@google-cloud/firestore');
+const express = require('express');
 // Create a new client
 const firestore = new Firestore();
 
@@ -33,8 +35,15 @@ async function quickstart() {
   bundle.addDoc(document);
   bundle.addQuery('restaurants', firestore.collection('restaurants'));
   const s = await bundle.stream();
-  for await(const d of s) {
+  const app = express();
+  app.get('/', async (req: Http2ServerRequest, res: Http2ServerResponse) => {
+    for await(const d of s) {
       console.log(d);
-  }
+      res.write(d);
+    }
+    res.end();
+  });
+
+  app.listen(43215, () => console.log('listening now...'));
 }
 quickstart();
