@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 /**
  * @fileoverview Firestore Server API.
  *
@@ -147,6 +148,18 @@ declare namespace FirebaseFirestore {
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
 
+  export class BundleBuilder {
+    addDoc(doc: DocumentReference): BundleBuilder;
+
+    addDocSnap(docSnap: DocumentSnapshot): BundleBuilder;
+
+    addQuery(queryName: string, querySnap: QuerySnapshot): BundleBuilder;
+
+    addQuerySnap(queryName: string, query: Query): BundleBuilder;
+
+    stream(): Promise<Readable>;
+  }
+
   /**
    * `Firestore` represents a Firestore Database and is the entry point for all
    * Firestore operations.
@@ -262,6 +275,7 @@ declare namespace FirebaseFirestore {
      * atomic operation.
      */
     batch(): WriteBatch;
+    bundle(): BundleBuilder;
   }
 
   /**

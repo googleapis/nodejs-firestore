@@ -64,6 +64,7 @@ import {
 import {WriteBatch} from './write-batch';
 
 import {interfaces} from './v1/firestore_client_config.json';
+import { BundleBuilder } from './bundle';
 const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
@@ -737,6 +738,10 @@ export class Firestore {
     }
 
     return document.build();
+  }
+
+  bundle(): BundleBuilder {
+    return new BundleBuilder();
   }
 
   /**

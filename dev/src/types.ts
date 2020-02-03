@@ -151,13 +151,13 @@ export interface FirestoreDataConverter<T> {
  */
 export const defaultConverter: FirestoreDataConverter<DocumentData> = {
   toFirestore(
-    modelObject: FirebaseFirestore.DocumentData
-  ): FirebaseFirestore.DocumentData {
+    modelObject: DocumentData
+  ): DocumentData {
     return modelObject;
   },
   fromFirestore(
-    data: FirebaseFirestore.DocumentData
-  ): FirebaseFirestore.DocumentData {
+    data: DocumentData
+  ): DocumentData {
     return data;
   },
 };

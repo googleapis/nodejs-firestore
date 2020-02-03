@@ -8,10 +8,11 @@
     "node": ">=8"
   },
   "scripts": {
-    "test": "mocha --timeout 600000"
+    "test": "mocha --timeout 600000",
+    "quick": "cd ..; npm run compile; cd -; npm install; ts-node quickstart.ts"
   },
   "dependencies": {
-    "@google-cloud/firestore": "^3.4.0"
+    "@google-cloud/firestore": ".."
   },
   "devDependencies": {
     "chai": "^4.2.0",
