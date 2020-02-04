@@ -145,14 +145,14 @@ export class FirestoreAdminClient {
     // identifiers to uniquely identify resources within the API.
     // Create useful helper objects for these.
     this._pathTemplates = {
-      collectionGroupPathTemplate: new gaxModule.PathTemplate(
-        'projects/{project}/databases/{database}/collectionGroups/{collection}'
-      ),
       indexPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}'
       ),
       fieldPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}'
+      ),
+      collectionGroupPathTemplate: new gaxModule.PathTemplate(
+        'projects/{project}/databases/{database}/collectionGroups/{collection}'
       ),
       databasePathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}'
@@ -764,7 +764,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers[
       'x-goog-request-params'
     ] = gax.routingHeader.fromParams({
-      field_name: request.field!.name || '',
+      'field.name': request.field!.name || '',
     });
     return this._innerApiCalls.updateField(request, options, callback);
   }
@@ -1263,61 +1263,6 @@ export class FirestoreAdminClient {
   // --------------------
 
   /**
-   * Return a fully-qualified collectionGroup resource name string.
-   *
-   * @param {string} project
-   * @param {string} database
-   * @param {string} collection
-   * @returns {string} Resource name string.
-   */
-  collectionGroupPath(project: string, database: string, collection: string) {
-    return this._pathTemplates.collectionGroupPathTemplate.render({
-      project,
-      database,
-      collection,
-    });
-  }
-
-  /**
-   * Parse the project from CollectionGroup resource.
-   *
-   * @param {string} collectionGroupName
-   *   A fully-qualified path representing CollectionGroup resource.
-   * @returns {string} A string representing the project.
-   */
-  matchProjectFromCollectionGroupName(collectionGroupName: string) {
-    return this._pathTemplates.collectionGroupPathTemplate.match(
-      collectionGroupName
-    ).project;
-  }
-
-  /**
-   * Parse the database from CollectionGroup resource.
-   *
-   * @param {string} collectionGroupName
-   *   A fully-qualified path representing CollectionGroup resource.
-   * @returns {string} A string representing the database.
-   */
-  matchDatabaseFromCollectionGroupName(collectionGroupName: string) {
-    return this._pathTemplates.collectionGroupPathTemplate.match(
-      collectionGroupName
-    ).database;
-  }
-
-  /**
-   * Parse the collection from CollectionGroup resource.
-   *
-   * @param {string} collectionGroupName
-   *   A fully-qualified path representing CollectionGroup resource.
-   * @returns {string} A string representing the collection.
-   */
-  matchCollectionFromCollectionGroupName(collectionGroupName: string) {
-    return this._pathTemplates.collectionGroupPathTemplate.match(
-      collectionGroupName
-    ).collection;
-  }
-
-  /**
    * Return a fully-qualified index resource name string.
    *
    * @param {string} project
@@ -1449,6 +1394,61 @@ export class FirestoreAdminClient {
    */
   matchFieldFromFieldName(fieldName: string) {
     return this._pathTemplates.fieldPathTemplate.match(fieldName).field;
+  }
+
+  /**
+   * Return a fully-qualified collectionGroup resource name string.
+   *
+   * @param {string} project
+   * @param {string} database
+   * @param {string} collection
+   * @returns {string} Resource name string.
+   */
+  collectionGroupPath(project: string, database: string, collection: string) {
+    return this._pathTemplates.collectionGroupPathTemplate.render({
+      project,
+      database,
+      collection,
+    });
+  }
+
+  /**
+   * Parse the project from CollectionGroup resource.
+   *
+   * @param {string} collectionGroupName
+   *   A fully-qualified path representing CollectionGroup resource.
+   * @returns {string} A string representing the project.
+   */
+  matchProjectFromCollectionGroupName(collectionGroupName: string) {
+    return this._pathTemplates.collectionGroupPathTemplate.match(
+      collectionGroupName
+    ).project;
+  }
+
+  /**
+   * Parse the database from CollectionGroup resource.
+   *
+   * @param {string} collectionGroupName
+   *   A fully-qualified path representing CollectionGroup resource.
+   * @returns {string} A string representing the database.
+   */
+  matchDatabaseFromCollectionGroupName(collectionGroupName: string) {
+    return this._pathTemplates.collectionGroupPathTemplate.match(
+      collectionGroupName
+    ).database;
+  }
+
+  /**
+   * Parse the collection from CollectionGroup resource.
+   *
+   * @param {string} collectionGroupName
+   *   A fully-qualified path representing CollectionGroup resource.
+   * @returns {string} A string representing the collection.
+   */
+  matchCollectionFromCollectionGroupName(collectionGroupName: string) {
+    return this._pathTemplates.collectionGroupPathTemplate.match(
+      collectionGroupName
+    ).collection;
   }
 
   /**
