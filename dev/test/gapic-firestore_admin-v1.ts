@@ -112,6 +112,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IGetIndexRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -134,6 +135,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IGetIndexRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -158,6 +160,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IDeleteIndexRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -180,6 +183,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IDeleteIndexRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -204,6 +208,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IGetFieldRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -226,6 +231,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IGetFieldRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -250,6 +256,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.ICreateIndexRequest = {};
+      request.parent = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -279,6 +286,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.ICreateIndexRequest = {};
+      request.parent = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -376,6 +384,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IExportDocumentsRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -405,6 +414,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IExportDocumentsRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -437,6 +447,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IImportDocumentsRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -466,6 +477,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IImportDocumentsRequest = {};
+      request.name = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -498,6 +510,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IListIndexesRequest = {};
+      request.parent = '';
       // Mock response
       const expectedResponse = {};
       // Mock Grpc layer
@@ -524,8 +537,9 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IListIndexesRequest = {};
+      request.parent = '';
       // Mock response
-      const expectedResponse = {};
+      const expectedResponse = {response: 'data'};
       // Mock Grpc layer
       client._innerApiCalls.listIndexes = (
         actualRequest: {},
@@ -544,7 +558,7 @@ describe('v1.FirestoreAdminClient', () => {
         .on('error', (err: FakeError) => {
           done(err);
         });
-      stream.write(request);
+      stream.write(expectedResponse);
     });
   });
   describe('listFields', () => {
@@ -555,6 +569,7 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IListFieldsRequest = {};
+      request.parent = '';
       // Mock response
       const expectedResponse = {};
       // Mock Grpc layer
@@ -581,8 +596,9 @@ describe('v1.FirestoreAdminClient', () => {
       });
       // Mock request
       const request: protosTypes.google.firestore.admin.v1.IListFieldsRequest = {};
+      request.parent = '';
       // Mock response
-      const expectedResponse = {};
+      const expectedResponse = {response: 'data'};
       // Mock Grpc layer
       client._innerApiCalls.listFields = (
         actualRequest: {},
@@ -601,7 +617,7 @@ describe('v1.FirestoreAdminClient', () => {
         .on('error', (err: FakeError) => {
           done(err);
         });
-      stream.write(request);
+      stream.write(expectedResponse);
     });
   });
 });
