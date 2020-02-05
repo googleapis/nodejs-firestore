@@ -1455,9 +1455,9 @@ declare namespace FirebaseFirestore {
 
   /**
    * Status error code enums used by google-gax that correspond to the error
-   * codes returned by Firestore calls.
+   * codes returned by Firestore gRPC calls.
    */
-  export const Status: import('../dev/src/types').Status;
+  export const GrpcStatus: import('google-gax').Status;
 }
 
 declare module '@google-cloud/firestore' {
