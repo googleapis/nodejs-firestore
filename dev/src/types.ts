@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CallOptions} from 'google-gax';
+import {CallOptions, Status} from 'google-gax';
 import {Duplex} from 'stream';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -323,3 +323,9 @@ export interface ValidationOptions {
 export interface ProtobufJsValue extends api.IValue {
   valueType?: string;
 }
+
+/**
+ * Status error code enums used by google-gax that correspond to the error codes
+ * returned by Firestore calls.
+ */
+export {Status};

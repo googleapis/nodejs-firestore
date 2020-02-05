@@ -1452,6 +1452,12 @@ declare namespace FirebaseFirestore {
    * API and the underlying Firestore v1 RPCs.
    */
   export const v1: {FirestoreClient: any, FirestoreAdminClient: any};
+
+  /**
+   * Status error code enums used by google-gax that correspond to the error
+   * codes returned by Firestore calls.
+   */
+  export const Status: import('../dev/src/types').Status;
 }
 
 declare module '@google-cloud/firestore' {
