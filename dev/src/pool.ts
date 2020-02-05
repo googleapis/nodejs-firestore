@@ -15,9 +15,9 @@
  */
 
 import * as assert from 'assert';
-import {describe, it} from 'mocha';
 
 import {logger} from './logger';
+import {Deferred} from './util';
 
 /**
  * An auto-resizing pool that distributes concurrent operations over multiple
@@ -41,6 +41,12 @@ export class ClientPool<T> {
    * ClientPool can longer schedule new operations.
    */
   private terminated = false;
+
+  /**
+   * A deferred promise that resolves when there are no more active operations
+   * on all clients.
+   */
+  private operationsDeferred = new Deferred<void>();
 
   /**
    * @param concurrentOperationLimit The number of operations that each client
@@ -112,8 +118,12 @@ export class ClientPool<T> {
    */
   private async release(requestTag: string, client: T): Promise<void> {
     const requestCount = this.activeClients.get(client) || 0;
-    assert(requestCount > 0, 'No active request');
+    assert(
+      requestCount > 0,
+      'Release failed. No active requests are on the client.'
+    );
     this.activeClients.set(client, requestCount - 1);
+    this.operationsDeferred.resolve();
 
     if (this.shouldGarbageCollectClient(client)) {
       this.activeClients.delete(client);
@@ -195,6 +205,14 @@ export class ClientPool<T> {
 
   async terminate(): Promise<void> {
     this.terminated = true;
+
+    // If there are any operations still running after terminate() is called,
+    // wait for them to complete before garbage collecting active clients.
+    if (this.opCount > 0) {
+      this.operationsDeferred = new Deferred<void>();
+      await this.operationsDeferred.promise;
+    }
+
     for (const [client, _requestCount] of this.activeClients) {
       this.activeClients.delete(client);
       await this.clientDestructor(client);
