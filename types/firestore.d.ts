@@ -1022,7 +1022,7 @@ declare namespace FirebaseFirestore {
      *
      * @return A Promise that will be resolved with the results of the Query.
      */
-    get(): Promise<QuerySnapshot>;
+    get(): Promise<QuerySnapshot<T>>;
 
     /*
      * Executes the query and returns the results as Node Stream.
@@ -1041,7 +1041,7 @@ declare namespace FirebaseFirestore {
      * @return An unsubscribe function that can be called to cancel
      * the snapshot listener.
      */
-    onSnapshot(onNext: (snapshot: QuerySnapshot) => void,
+    onSnapshot(onNext: (snapshot: QuerySnapshot<T>) => void,
                onError?: (error: Error) => void) : () => void;
 
     /**
@@ -1050,7 +1050,7 @@ declare namespace FirebaseFirestore {
      * @param other The `Query` to compare against.
      * @return true if this `Query` is equal to the provided one.
      */
-    isEqual(other: Query): boolean;
+    isEqual(other: Query<T>): boolean;
 
      /**
      * Applies a custom data converter to this Query, allowing you to use your
