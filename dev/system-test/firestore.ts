@@ -992,19 +992,6 @@ describe('DocumentReference class', () => {
       unsubscribeCallbacks.forEach(c => c());
     });
 
-    it('waits for existing operations to complete before releasing clients', async () => {
-      const ref = randomCol.doc('doc-1');
-
-      const unsubscribe = ref.onSnapshot(() => {
-        // No-op
-      });
-
-      await ref.set({});
-      unsubscribe();
-      // Terminate should allow unsubscribe to complete.
-      await firestore.terminate();
-    });
-
     it('handles query snapshots with converters', async () => {
       const setupDeferred = new Deferred<void>();
       const resultsDeferred = new Deferred<QuerySnapshot<Post>>();

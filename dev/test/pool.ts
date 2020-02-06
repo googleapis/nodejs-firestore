@@ -327,4 +327,20 @@ describe('Client pool', () => {
         expect(err).to.equal('The client has already been terminated');
       });
   });
+
+  it('waits for existing operations to complete before releasing clients', async () => {
+    const clientPool = new ClientPool<{}>(1, 0, () => {
+      return {};
+    });
+
+    const deferred = new Deferred<void>();
+
+    const op = clientPool.run(REQUEST_TAG, async () => {
+      await deferred.promise;
+      return Promise.resolve('success');
+    });
+    await clientPool.terminate();
+    deferred.resolve();
+    expect(op).to.become('success');
+  });
 });
