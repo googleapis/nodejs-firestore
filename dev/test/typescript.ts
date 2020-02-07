@@ -34,6 +34,7 @@ import SetOptions = FirebaseFirestore.SetOptions;
 import FirestoreDataConverter = FirebaseFirestore.FirestoreDataConverter;
 import Timestamp = FirebaseFirestore.Timestamp;
 import Settings = FirebaseFirestore.Settings;
+import GrpcStatus = FirebaseFirestore.GrpcStatus;
 
 // This test verifies the Typescript typings and is not meant for execution.
 xdescribe('firestore.d.ts', () => {
@@ -351,5 +352,9 @@ xdescribe('firestore.d.ts', () => {
     timestamp = Timestamp.fromMillis(0);
     const seconds: number = timestamp.seconds;
     const nanoseconds: number = timestamp.nanoseconds;
+  });
+
+  it('has typings for GrpcStatus', () => {
+    const status = GrpcStatus.ABORTED;
   });
 });

@@ -91,6 +91,7 @@ export {
   Precondition,
   SetOptions,
 } from './types';
+export {Status as GrpcStatus} from 'google-gax';
 
 const libVersion = require('../../package.json').version;
 setLibVersion(libVersion);
