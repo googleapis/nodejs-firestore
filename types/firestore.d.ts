@@ -1022,7 +1022,7 @@ declare namespace FirebaseFirestore {
      *
      * @return A Promise that will be resolved with the results of the Query.
      */
-    get(): Promise<QuerySnapshot>;
+    get(): Promise<QuerySnapshot<T>>;
 
     /*
      * Executes the query and returns the results as Node Stream.
@@ -1041,7 +1041,7 @@ declare namespace FirebaseFirestore {
      * @return An unsubscribe function that can be called to cancel
      * the snapshot listener.
      */
-    onSnapshot(onNext: (snapshot: QuerySnapshot) => void,
+    onSnapshot(onNext: (snapshot: QuerySnapshot<T>) => void,
                onError?: (error: Error) => void) : () => void;
 
     /**
@@ -1050,7 +1050,7 @@ declare namespace FirebaseFirestore {
      * @param other The `Query` to compare against.
      * @return true if this `Query` is equal to the provided one.
      */
-    isEqual(other: Query): boolean;
+    isEqual(other: Query<T>): boolean;
 
      /**
      * Applies a custom data converter to this Query, allowing you to use your
@@ -1452,6 +1452,29 @@ declare namespace FirebaseFirestore {
    * API and the underlying Firestore v1 RPCs.
    */
   export const v1: {FirestoreClient: any, FirestoreAdminClient: any};
+
+  /**
+   * Status codes returned by Firestore's gRPC calls.
+   */
+  export enum GrpcStatus {
+    OK = 0,
+    CANCELLED = 1,
+    UNKNOWN = 2,
+    INVALID_ARGUMENT = 3,
+    DEADLINE_EXCEEDED = 4,
+    NOT_FOUND = 5,
+    ALREADY_EXISTS = 6,
+    PERMISSION_DENIED = 7,
+    RESOURCE_EXHAUSTED = 8,
+    FAILED_PRECONDITION = 9,
+    ABORTED = 10,
+    OUT_OF_RANGE = 11,
+    UNIMPLEMENTED = 12,
+    INTERNAL = 13,
+    UNAVAILABLE = 14,
+    DATA_LOSS = 15,
+    UNAUTHENTICATED = 16
+  }
 }
 
 declare module '@google-cloud/firestore' {
