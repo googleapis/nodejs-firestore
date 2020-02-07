@@ -32,13 +32,13 @@ async function quickstart() {
   // console.log('Deleted the document');
 
   const bundle = firestore.bundle();
-  bundle.addDoc(document);
-  bundle.addQuery('restaurants', firestore.collection('restaurants'));
-  const s = await bundle.stream();
+  bundle.add(document);
+  bundle.add('restaurants', firestore.collection('restaurants'));
+  const s = bundle.stream();
   const app = express();
   app.get('/', async (req: Http2ServerRequest, res: Http2ServerResponse) => {
     for await(const d of s) {
-      console.log(d);
+      console.log(d.toString());
       res.write(d);
     }
     res.end();
