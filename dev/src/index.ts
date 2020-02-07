@@ -298,6 +298,13 @@ export class Firestore {
    */
   private _projectId: string | undefined = undefined;
 
+  /**
+   * Set of requestTags associated with the listeners that have been registered
+   * on the client.
+   * @private
+   */
+  private registeredListeners = new Set<string>();
+
   // GCF currently tears down idle connections after two minutes. Requests
   // that are issued after this period may fail. On GCF, we therefore issue
   // these requests as part of a transaction so that we can safely retry until
@@ -988,11 +995,38 @@ export class Firestore {
   }
 
   /**
+   * Registers the requestTag associated with the listener. This is used to
+   * ensure that all listeners are detached when terminate() is called.
+   *
+   * @private
+   * @param requestTag A unique client-assigned identifier
+   */
+  registerListener(requestTag: string): void {
+    this.registeredListeners.add(requestTag);
+  }
+
+  /**
+   * Unregisters the requestTag associated with the listener. This is used to
+   * ensure that all listeners are detached when terminate() is called.
+   *
+   * @private
+   * @param requestTag A unique client-assigned identifier
+   */
+  unregisterListener(requestTag: string): void {
+    this.registeredListeners.delete(requestTag);
+  }
+
+  /**
    * Terminates the Firestore client and closes all open streams.
    *
    * @return A Promise that resolves when the client is terminated.
    */
   terminate(): Promise<void> {
+    if (this.registeredListeners.size > 0) {
+      return Promise.reject(
+        'All listeners must be disconnected before terminating the client.'
+      );
+    }
     return this._clientPool.terminate();
   }
 

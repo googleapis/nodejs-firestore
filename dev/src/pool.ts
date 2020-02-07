@@ -17,6 +17,7 @@
 import * as assert from 'assert';
 
 import {logger} from './logger';
+import {Deferred} from './util';
 
 /**
  * An auto-resizing pool that distributes concurrent operations over multiple
@@ -40,6 +41,8 @@ export class ClientPool<T> {
    * ClientPool can longer schedule new operations.
    */
   private terminated = false;
+
+  private operationsDeferred = new Deferred<void>();
 
   /**
    * @param concurrentOperationLimit The number of operations that each client
@@ -113,6 +116,9 @@ export class ClientPool<T> {
     const requestCount = this.activeClients.get(client) || 0;
     assert(requestCount > 0, 'No active requests');
     this.activeClients.set(client, requestCount - 1);
+    if (this.opCount === 0) {
+      this.operationsDeferred.resolve();
+    }
 
     if (this.shouldGarbageCollectClient(client)) {
       this.activeClients.delete(client);
@@ -195,15 +201,14 @@ export class ClientPool<T> {
   async terminate(): Promise<void> {
     this.terminated = true;
 
-    // Set maxIdleClients to 0 so that clients without active operations will
-    // be garbage collected, but clients with active operations are allowed to
-    // finish.
-    this.maxIdleClients = 0;
+    // Wait for all pending operations to complete before terminating.
+    if (this.opCount > 0) {
+      this.operationsDeferred = new Deferred<void>();
+      await this.operationsDeferred.promise;
+    }
     for (const [client, _requestCount] of this.activeClients) {
-      if (this.shouldGarbageCollectClient(client)) {
-        this.activeClients.delete(client);
-        await this.clientDestructor(client);
-      }
+      this.activeClients.delete(client);
+      await this.clientDestructor(client);
     }
   }
 }

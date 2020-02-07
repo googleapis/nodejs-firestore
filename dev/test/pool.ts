@@ -332,15 +332,20 @@ describe('Client pool', () => {
     const clientPool = new ClientPool<{}>(1, 0, () => {
       return {};
     });
-
     const deferred = new Deferred<void>();
 
     const op = clientPool.run(REQUEST_TAG, async () => {
       await deferred.promise;
       return Promise.resolve('success');
     });
-    await clientPool.terminate();
+    const terminate = clientPool
+      .terminate()
+      .then(() => Promise.resolve('success'));
     deferred.resolve();
+
+    // Wait for the terminate promise to resolve after run() completes.
+    await terminate;
     expect(op).to.become('success');
+    expect(terminate).to.become('success');
   });
 });
