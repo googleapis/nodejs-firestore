@@ -899,6 +899,13 @@ export class FirestoreClient {
   ): gax.CancellableStream {
     request = request || {};
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      database: request.database || '',
+    });
     return this._innerApiCalls.batchGetDocuments(request, options);
   }
 
@@ -937,6 +944,13 @@ export class FirestoreClient {
   ): gax.CancellableStream {
     request = request || {};
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
     return this._innerApiCalls.runQuery(request, options);
   }
 
@@ -952,6 +966,13 @@ export class FirestoreClient {
    */
   write(options?: gax.CallOptions): gax.CancellableStream {
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      database: request.database || '',
+    });
     return this._innerApiCalls.write(options);
   }
 
@@ -967,6 +988,13 @@ export class FirestoreClient {
    */
   listen(options?: gax.CallOptions): gax.CancellableStream {
     options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      database: request.database || '',
+    });
     return this._innerApiCalls.listen({}, options);
   }
 
@@ -1142,9 +1170,17 @@ export class FirestoreClient {
    */
   listDocumentsStream(
     request?: protosTypes.google.firestore.v1.IListDocumentsRequest,
-    options?: gax.CallOptions | {}
+    options?: gax.CallOptions
   ): Transform {
     request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
     const callSettings = new gax.CallSettings(options);
     return this._descriptors.page.listDocuments.createStream(
       this._innerApiCalls.listDocuments as gax.GaxCall,
@@ -1276,9 +1312,17 @@ export class FirestoreClient {
    */
   listCollectionIdsStream(
     request?: protosTypes.google.firestore.v1.IListCollectionIdsRequest,
-    options?: gax.CallOptions | {}
+    options?: gax.CallOptions
   ): Transform {
     request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
     const callSettings = new gax.CallSettings(options);
     return this._descriptors.page.listCollectionIds.createStream(
       this._innerApiCalls.listCollectionIds as gax.GaxCall,
