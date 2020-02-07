@@ -42,6 +42,10 @@ export class ClientPool<T> {
    */
   private terminated = false;
 
+  /**
+   * Deferred promise that is resolved when there are no active operations on
+   * the client pool.
+   */
   private operationsDeferred = new Deferred<void>();
 
   /**
@@ -56,7 +60,7 @@ export class ClientPool<T> {
    */
   constructor(
     private readonly concurrentOperationLimit: number,
-    private maxIdleClients: number,
+    private readonly maxIdleClients: number,
     private readonly clientFactory: () => T,
     private readonly clientDestructor: (client: T) => Promise<void> = () =>
       Promise.resolve()
