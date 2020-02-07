@@ -1454,8 +1454,7 @@ declare namespace FirebaseFirestore {
   export const v1: {FirestoreClient: any, FirestoreAdminClient: any};
 
   /**
-   * Status error code enums used by google-gax that correspond to the error
-   * codes returned by Firestore gRPC calls.
+   * Status codes returned by Firestore's gRPC calls.
    */
   export enum GrpcStatus {
     OK = 0,
