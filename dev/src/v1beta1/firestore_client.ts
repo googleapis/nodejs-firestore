@@ -977,14 +977,6 @@ export class FirestoreClient {
    *   will emit objects representing [WriteResponse]{@link google.firestore.v1beta1.WriteResponse} on 'data' event asynchronously.
    */
   write(options?: gax.CallOptions): gax.CancellableStream {
-    options = options || {};
-    options.otherArgs = options.otherArgs || {};
-    options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      database: request.database || '',
-    });
     return this._innerApiCalls.write(options);
   }
 
@@ -999,14 +991,6 @@ export class FirestoreClient {
    *   will emit objects representing [ListenResponse]{@link google.firestore.v1beta1.ListenResponse} on 'data' event asynchronously.
    */
   listen(options?: gax.CallOptions): gax.CancellableStream {
-    options = options || {};
-    options.otherArgs = options.otherArgs || {};
-    options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      database: request.database || '',
-    });
     return this._innerApiCalls.listen({}, options);
   }
 
