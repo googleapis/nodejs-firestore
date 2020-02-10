@@ -1501,6 +1501,125 @@ export namespace google {
         /** Namespace v1. */
         namespace v1 {
 
+            /** Properties of a NamedQuery. */
+            interface INamedQuery {
+
+                /** NamedQuery name */
+                name?: (string|null);
+
+                /** NamedQuery queryTarget */
+                queryTarget?: (google.firestore.v1.ITarget|null);
+
+                /** NamedQuery resumeToken */
+                resumeToken?: (Uint8Array|null);
+            }
+
+            /** Represents a NamedQuery. */
+            class NamedQuery implements INamedQuery {
+
+                /**
+                 * Constructs a new NamedQuery.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.INamedQuery);
+
+                /** NamedQuery name. */
+                public name: string;
+
+                /** NamedQuery queryTarget. */
+                public queryTarget?: (google.firestore.v1.ITarget|null);
+
+                /** NamedQuery resumeToken. */
+                public resumeToken: Uint8Array;
+            }
+
+            /** Properties of a BundledDocument. */
+            interface IBundledDocument {
+
+                /** BundledDocument document */
+                document?: (google.firestore.v1.IDocument|null);
+
+                /** BundledDocument readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a BundledDocument. */
+            class BundledDocument implements IBundledDocument {
+
+                /**
+                 * Constructs a new BundledDocument.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IBundledDocument);
+
+                /** BundledDocument document. */
+                public document?: (google.firestore.v1.IDocument|null);
+
+                /** BundledDocument readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Properties of a BundleMetadata. */
+            interface IBundleMetadata {
+
+                /** BundleMetadata name */
+                name?: (string|null);
+
+                /** BundleMetadata createTime */
+                createTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a BundleMetadata. */
+            class BundleMetadata implements IBundleMetadata {
+
+                /**
+                 * Constructs a new BundleMetadata.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IBundleMetadata);
+
+                /** BundleMetadata name. */
+                public name: string;
+
+                /** BundleMetadata createTime. */
+                public createTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Properties of a BundleElement. */
+            interface IBundleElement {
+
+                /** BundleElement metadata */
+                metadata?: (google.firestore.v1.IBundleMetadata|null);
+
+                /** BundleElement namedQuery */
+                namedQuery?: (google.firestore.v1.INamedQuery|null);
+
+                /** BundleElement document */
+                document?: (google.firestore.v1.IBundledDocument|null);
+            }
+
+            /** Represents a BundleElement. */
+            class BundleElement implements IBundleElement {
+
+                /**
+                 * Constructs a new BundleElement.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IBundleElement);
+
+                /** BundleElement metadata. */
+                public metadata?: (google.firestore.v1.IBundleMetadata|null);
+
+                /** BundleElement namedQuery. */
+                public namedQuery?: (google.firestore.v1.INamedQuery|null);
+
+                /** BundleElement document. */
+                public document?: (google.firestore.v1.IBundledDocument|null);
+
+                /** BundleElement elementType. */
+                public elementType?: ("metadata"|"namedQuery"|"document");
+            }
+
             /** Properties of a DocumentMask. */
             interface IDocumentMask {
 

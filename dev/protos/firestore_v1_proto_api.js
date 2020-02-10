@@ -2622,6 +2622,214 @@ $root.google = (function() {
              */
             var v1 = {};
 
+            v1.NamedQuery = (function() {
+
+                /**
+                 * Properties of a NamedQuery.
+                 * @memberof google.firestore.v1
+                 * @interface INamedQuery
+                 * @property {string|null} [name] NamedQuery name
+                 * @property {google.firestore.v1.ITarget|null} [queryTarget] NamedQuery queryTarget
+                 * @property {Uint8Array|null} [resumeToken] NamedQuery resumeToken
+                 */
+
+                /**
+                 * Constructs a new NamedQuery.
+                 * @memberof google.firestore.v1
+                 * @classdesc Represents a NamedQuery.
+                 * @implements INamedQuery
+                 * @constructor
+                 * @param {google.firestore.v1.INamedQuery=} [properties] Properties to set
+                 */
+                function NamedQuery(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+
+                /**
+                 * NamedQuery name.
+                 * @member {string} name
+                 * @memberof google.firestore.v1.NamedQuery
+                 * @instance
+                 */
+                NamedQuery.prototype.name = "";
+
+                /**
+                 * NamedQuery queryTarget.
+                 * @member {google.firestore.v1.ITarget|null|undefined} queryTarget
+                 * @memberof google.firestore.v1.NamedQuery
+                 * @instance
+                 */
+                NamedQuery.prototype.queryTarget = null;
+
+                /**
+                 * NamedQuery resumeToken.
+                 * @member {Uint8Array} resumeToken
+                 * @memberof google.firestore.v1.NamedQuery
+                 * @instance
+                 */
+                NamedQuery.prototype.resumeToken = $util.newBuffer([]);
+
+                return NamedQuery;
+            })();
+
+            v1.BundledDocument = (function() {
+
+                /**
+                 * Properties of a BundledDocument.
+                 * @memberof google.firestore.v1
+                 * @interface IBundledDocument
+                 * @property {google.firestore.v1.IDocument|null} [document] BundledDocument document
+                 * @property {google.protobuf.ITimestamp|null} [readTime] BundledDocument readTime
+                 */
+
+                /**
+                 * Constructs a new BundledDocument.
+                 * @memberof google.firestore.v1
+                 * @classdesc Represents a BundledDocument.
+                 * @implements IBundledDocument
+                 * @constructor
+                 * @param {google.firestore.v1.IBundledDocument=} [properties] Properties to set
+                 */
+                function BundledDocument(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+
+                /**
+                 * BundledDocument document.
+                 * @member {google.firestore.v1.IDocument|null|undefined} document
+                 * @memberof google.firestore.v1.BundledDocument
+                 * @instance
+                 */
+                BundledDocument.prototype.document = null;
+
+                /**
+                 * BundledDocument readTime.
+                 * @member {google.protobuf.ITimestamp|null|undefined} readTime
+                 * @memberof google.firestore.v1.BundledDocument
+                 * @instance
+                 */
+                BundledDocument.prototype.readTime = null;
+
+                return BundledDocument;
+            })();
+
+            v1.BundleMetadata = (function() {
+
+                /**
+                 * Properties of a BundleMetadata.
+                 * @memberof google.firestore.v1
+                 * @interface IBundleMetadata
+                 * @property {string|null} [name] BundleMetadata name
+                 * @property {google.protobuf.ITimestamp|null} [createTime] BundleMetadata createTime
+                 */
+
+                /**
+                 * Constructs a new BundleMetadata.
+                 * @memberof google.firestore.v1
+                 * @classdesc Represents a BundleMetadata.
+                 * @implements IBundleMetadata
+                 * @constructor
+                 * @param {google.firestore.v1.IBundleMetadata=} [properties] Properties to set
+                 */
+                function BundleMetadata(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+
+                /**
+                 * BundleMetadata name.
+                 * @member {string} name
+                 * @memberof google.firestore.v1.BundleMetadata
+                 * @instance
+                 */
+                BundleMetadata.prototype.name = "";
+
+                /**
+                 * BundleMetadata createTime.
+                 * @member {google.protobuf.ITimestamp|null|undefined} createTime
+                 * @memberof google.firestore.v1.BundleMetadata
+                 * @instance
+                 */
+                BundleMetadata.prototype.createTime = null;
+
+                return BundleMetadata;
+            })();
+
+            v1.BundleElement = (function() {
+
+                /**
+                 * Properties of a BundleElement.
+                 * @memberof google.firestore.v1
+                 * @interface IBundleElement
+                 * @property {google.firestore.v1.IBundleMetadata|null} [metadata] BundleElement metadata
+                 * @property {google.firestore.v1.INamedQuery|null} [namedQuery] BundleElement namedQuery
+                 * @property {google.firestore.v1.IBundledDocument|null} [document] BundleElement document
+                 */
+
+                /**
+                 * Constructs a new BundleElement.
+                 * @memberof google.firestore.v1
+                 * @classdesc Represents a BundleElement.
+                 * @implements IBundleElement
+                 * @constructor
+                 * @param {google.firestore.v1.IBundleElement=} [properties] Properties to set
+                 */
+                function BundleElement(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+
+                /**
+                 * BundleElement metadata.
+                 * @member {google.firestore.v1.IBundleMetadata|null|undefined} metadata
+                 * @memberof google.firestore.v1.BundleElement
+                 * @instance
+                 */
+                BundleElement.prototype.metadata = null;
+
+                /**
+                 * BundleElement namedQuery.
+                 * @member {google.firestore.v1.INamedQuery|null|undefined} namedQuery
+                 * @memberof google.firestore.v1.BundleElement
+                 * @instance
+                 */
+                BundleElement.prototype.namedQuery = null;
+
+                /**
+                 * BundleElement document.
+                 * @member {google.firestore.v1.IBundledDocument|null|undefined} document
+                 * @memberof google.firestore.v1.BundleElement
+                 * @instance
+                 */
+                BundleElement.prototype.document = null;
+
+                // OneOf field names bound to virtual getters and setters
+                var $oneOfFields;
+
+                /**
+                 * BundleElement elementType.
+                 * @member {"metadata"|"namedQuery"|"document"|undefined} elementType
+                 * @memberof google.firestore.v1.BundleElement
+                 * @instance
+                 */
+                Object.defineProperty(BundleElement.prototype, "elementType", {
+                    get: $util.oneOfGetter($oneOfFields = ["metadata", "namedQuery", "document"]),
+                    set: $util.oneOfSetter($oneOfFields)
+                });
+
+                return BundleElement;
+            })();
+
             v1.DocumentMask = (function() {
 
                 /**

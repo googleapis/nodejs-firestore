@@ -1,7 +1,10 @@
+
+import {google} from '../protos/firestore_v1_proto_api';
 import { DocumentReference, Query, QuerySnapshot } from './reference';
 import { DocumentSnapshot } from './document';
-import { DocumentData } from './types';
 import { Readable } from 'stream';
+
+import api = google.firestore.v1;
 
 /**
  * Builds a Firestore data bundle with results from given queries and specified documents.
@@ -58,12 +61,12 @@ export class BundleBuilder {
     }
 
     stream(): NodeJS.ReadableStream {
-        var documents: Array<DocumentData> = [];
+        var documents: Array<api.IDocument> = [];
         let promises: Array<Promise<void>> = [];
         for (const doc of this.docRefs) {
             promises.push(doc.get().then(snap => {
                 if (!!snap.data()) {
-                    documents.push(snap.data()!);
+                    documents.push(snap.toDocumentProto());
                 }
             }));
         }
@@ -73,7 +76,7 @@ export class BundleBuilder {
             namedQueries.set(name, query);
             promises.push(query.get().then(snap => {
                 for (const d of snap.docs) {
-                    documents.push(d.data());
+                    documents.push(d.toDocumentProto());
                 }
 
             }));
