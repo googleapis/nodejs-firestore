@@ -35,10 +35,10 @@ message NamedQuery {
 
   // Information about the query. The format is defined in `BundleMetadata`'s 
   // `target_document_format`.
-  Target query_target = 2;
+  QueryTarget query_target = 2;
 
   // Resume tokens to resume this query from point of bundling.
-  bytes resume_token = 3;
+  google.protobuf.Timestamp read_time = 3;
 }
 
 message BundledDocument {
@@ -70,6 +70,6 @@ message BundleElement {
 
     NamedQuery named_query = 2;
 
-    BundledDocument document = 3;
+    BundledDocument bundled_document = 3;
   }
 }

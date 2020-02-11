@@ -2629,8 +2629,8 @@ $root.google = (function() {
                  * @memberof google.firestore.v1
                  * @interface INamedQuery
                  * @property {string|null} [name] NamedQuery name
-                 * @property {google.firestore.v1.ITarget|null} [queryTarget] NamedQuery queryTarget
-                 * @property {Uint8Array|null} [resumeToken] NamedQuery resumeToken
+                 * @property {google.firestore.v1.Target.IQueryTarget|null} [queryTarget] NamedQuery queryTarget
+                 * @property {google.protobuf.ITimestamp|null} [readTime] NamedQuery readTime
                  */
 
                 /**
@@ -2658,19 +2658,19 @@ $root.google = (function() {
 
                 /**
                  * NamedQuery queryTarget.
-                 * @member {google.firestore.v1.ITarget|null|undefined} queryTarget
+                 * @member {google.firestore.v1.Target.IQueryTarget|null|undefined} queryTarget
                  * @memberof google.firestore.v1.NamedQuery
                  * @instance
                  */
                 NamedQuery.prototype.queryTarget = null;
 
                 /**
-                 * NamedQuery resumeToken.
-                 * @member {Uint8Array} resumeToken
+                 * NamedQuery readTime.
+                 * @member {google.protobuf.ITimestamp|null|undefined} readTime
                  * @memberof google.firestore.v1.NamedQuery
                  * @instance
                  */
-                NamedQuery.prototype.resumeToken = $util.newBuffer([]);
+                NamedQuery.prototype.readTime = null;
 
                 return NamedQuery;
             })();
@@ -2771,7 +2771,7 @@ $root.google = (function() {
                  * @interface IBundleElement
                  * @property {google.firestore.v1.IBundleMetadata|null} [metadata] BundleElement metadata
                  * @property {google.firestore.v1.INamedQuery|null} [namedQuery] BundleElement namedQuery
-                 * @property {google.firestore.v1.IBundledDocument|null} [document] BundleElement document
+                 * @property {google.firestore.v1.IBundledDocument|null} [bundledDocument] BundleElement bundledDocument
                  */
 
                 /**
@@ -2806,24 +2806,24 @@ $root.google = (function() {
                 BundleElement.prototype.namedQuery = null;
 
                 /**
-                 * BundleElement document.
-                 * @member {google.firestore.v1.IBundledDocument|null|undefined} document
+                 * BundleElement bundledDocument.
+                 * @member {google.firestore.v1.IBundledDocument|null|undefined} bundledDocument
                  * @memberof google.firestore.v1.BundleElement
                  * @instance
                  */
-                BundleElement.prototype.document = null;
+                BundleElement.prototype.bundledDocument = null;
 
                 // OneOf field names bound to virtual getters and setters
                 var $oneOfFields;
 
                 /**
                  * BundleElement elementType.
-                 * @member {"metadata"|"namedQuery"|"document"|undefined} elementType
+                 * @member {"metadata"|"namedQuery"|"bundledDocument"|undefined} elementType
                  * @memberof google.firestore.v1.BundleElement
                  * @instance
                  */
                 Object.defineProperty(BundleElement.prototype, "elementType", {
-                    get: $util.oneOfGetter($oneOfFields = ["metadata", "namedQuery", "document"]),
+                    get: $util.oneOfGetter($oneOfFields = ["metadata", "namedQuery", "bundledDocument"]),
                     set: $util.oneOfSetter($oneOfFields)
                 });
 

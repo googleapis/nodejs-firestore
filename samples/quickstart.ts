@@ -31,7 +31,7 @@ async function quickstart() {
   // await document.delete();
   // console.log('Deleted the document');
 
-  const bundle = firestore.bundle();
+  const bundle = firestore.bundle('my-bundle');
   bundle.add(document);
   bundle.add('restaurants', firestore.collection('restaurants'));
   const s = bundle.stream();

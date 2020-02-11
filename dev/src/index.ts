@@ -740,8 +740,8 @@ export class Firestore {
     return document.build();
   }
 
-  bundle(): BundleBuilder {
-    return new BundleBuilder();
+  bundle(name: string): BundleBuilder {
+    return new BundleBuilder(name);
   }
 
   /**

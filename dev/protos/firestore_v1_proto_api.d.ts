@@ -1508,10 +1508,10 @@ export namespace google {
                 name?: (string|null);
 
                 /** NamedQuery queryTarget */
-                queryTarget?: (google.firestore.v1.ITarget|null);
+                queryTarget?: (google.firestore.v1.Target.IQueryTarget|null);
 
-                /** NamedQuery resumeToken */
-                resumeToken?: (Uint8Array|null);
+                /** NamedQuery readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
             }
 
             /** Represents a NamedQuery. */
@@ -1527,10 +1527,10 @@ export namespace google {
                 public name: string;
 
                 /** NamedQuery queryTarget. */
-                public queryTarget?: (google.firestore.v1.ITarget|null);
+                public queryTarget?: (google.firestore.v1.Target.IQueryTarget|null);
 
-                /** NamedQuery resumeToken. */
-                public resumeToken: Uint8Array;
+                /** NamedQuery readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
             }
 
             /** Properties of a BundledDocument. */
@@ -1594,8 +1594,8 @@ export namespace google {
                 /** BundleElement namedQuery */
                 namedQuery?: (google.firestore.v1.INamedQuery|null);
 
-                /** BundleElement document */
-                document?: (google.firestore.v1.IBundledDocument|null);
+                /** BundleElement bundledDocument */
+                bundledDocument?: (google.firestore.v1.IBundledDocument|null);
             }
 
             /** Represents a BundleElement. */
@@ -1613,11 +1613,11 @@ export namespace google {
                 /** BundleElement namedQuery. */
                 public namedQuery?: (google.firestore.v1.INamedQuery|null);
 
-                /** BundleElement document. */
-                public document?: (google.firestore.v1.IBundledDocument|null);
+                /** BundleElement bundledDocument. */
+                public bundledDocument?: (google.firestore.v1.IBundledDocument|null);
 
                 /** BundleElement elementType. */
-                public elementType?: ("metadata"|"namedQuery"|"document");
+                public elementType?: ("metadata"|"namedQuery"|"bundledDocument");
             }
 
             /** Properties of a DocumentMask. */

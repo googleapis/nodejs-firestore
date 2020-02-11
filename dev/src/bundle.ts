@@ -1,10 +1,11 @@
 
-import {google} from '../protos/firestore_v1_proto_api';
+import { google } from '../protos/firestore_v1_proto_api';
 import { DocumentReference, Query, QuerySnapshot } from './reference';
 import { DocumentSnapshot } from './document';
 import { Readable } from 'stream';
 
 import api = google.firestore.v1;
+import { Timestamp } from './timestamp';
 
 /**
  * Builds a Firestore data bundle with results from given queries and specified documents.
@@ -20,6 +21,12 @@ export class BundleBuilder {
     // resume token in the snapshot.
     private docSnaps: Array<DocumentSnapshot> = [];
     private querySnaps: Map<string, QuerySnapshot> = new Map<string, QuerySnapshot>();
+
+    private documents: Map<string, api.IBundledDocument> = new Map();
+    private namedQueries: Map<string, api.INamedQuery> = new Map();
+    private latestReadTime: Timestamp = Timestamp.fromProto({ seconds: 0, nanos: 0 });
+
+    constructor(private name: string) { }
 
     /**
      * Adds a Firestore document to the bundle. Both the document data and it's 
@@ -60,32 +67,89 @@ export class BundleBuilder {
         return this;
     }
 
+    private addBundledDocument(snap: DocumentSnapshot) {
+        if (snap.exists) {
+            const docProto = snap.toDocumentProto();
+            if (!this.documents.has(snap.id) ||
+                Timestamp.fromProto(this.documents.get(snap.id)!.readTime!).toMillis() < snap.readTime.toMillis()) {
+                this.documents.set(snap.id, { document: docProto, readTime: snap.readTime });
+            }
+            if (snap.readTime.toMillis() > this.latestReadTime.toMillis()) {
+                this.latestReadTime = snap.readTime;
+            }
+        }
+    }
+
+    private addNamedQuery(name: string, querySnap: QuerySnapshot) {
+        this.namedQueries.set(name, {
+            name,
+            queryTarget: {
+                parent: querySnap.query.toProto().parent,
+                structuredQuery: querySnap.query.toProto().structuredQuery
+            },
+            readTime: querySnap.readTime.toProto().timestampValue
+        });
+
+        for (const snap of querySnap.docs) {
+            this.addBundledDocument(snap);
+        }
+
+        if (querySnap.readTime.toMillis() > this.latestReadTime.toMillis()) {
+            this.latestReadTime = querySnap.readTime;
+        }
+    }
+
     stream(): NodeJS.ReadableStream {
-        var documents: Array<api.IDocument> = [];
+
+        for (const snap of this.docSnaps) {
+            this.addBundledDocument(snap);
+        }
+
+        for (const [name, snap] of Array.from(this.querySnaps)) {
+            const querySnap = snap as QuerySnapshot;
+
+            if (this.namedQueries.has(name)) {
+                throw new Error(`Query name conflict: ${name}`);
+            }
+
+            this.addNamedQuery(name, querySnap);
+        }
+
         let promises: Array<Promise<void>> = [];
         for (const doc of this.docRefs) {
             promises.push(doc.get().then(snap => {
-                if (!!snap.data()) {
-                    documents.push(snap.toDocumentProto());
-                }
+                this.addBundledDocument(snap);
             }));
         }
 
-        var namedQueries: Map<string, Query> = new Map<string, Query>();
         for (const [name, query] of Array.from(this.queries)) {
-            namedQueries.set(name, query);
-            promises.push(query.get().then(snap => {
-                for (const d of snap.docs) {
-                    documents.push(d.toDocumentProto());
-                }
+            if (this.namedQueries.has(name)) {
+                throw new Error(`Query name conflict: ${name}`);
+            }
 
+            promises.push(query.get().then(snap => {
+                const querySnap = snap as QuerySnapshot;
+                this.addNamedQuery(name, querySnap);
             }));
         }
 
         const readable = new Readable({ objectMode: false });
         Promise.all(promises).then(results => {
-            for (const doc of documents) {
-                readable.push(JSON.stringify(doc));
+            const metadata: api.IBundleMetadata = {
+                name: this.name,
+                createTime: this.latestReadTime.toProto().timestampValue
+            };
+            const metaElement: api.IBundleElement = { metadata }
+            readable.push(JSON.stringify(metaElement));
+
+            for (const namedQuery of this.namedQueries.values()) {
+                const element: api.IBundleElement = { namedQuery };
+                readable.push(JSON.stringify(element));
+            }
+
+            for (const bundledDocument of this.documents.values()) {
+                const element: api.IBundleElement = { bundledDocument }
+                readable.push(JSON.stringify(element));
             }
             readable.push(null);
         });
