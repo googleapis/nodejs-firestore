@@ -299,8 +299,9 @@ export class Firestore {
   private _projectId: string | undefined = undefined;
 
   /**
-   * Set of requestTags associated with the listeners that have been registered
-   * on the client.
+   * Count of listeners that have been registered on the client.
+   *
+   * The client can only be terminated when there are no registered listeners.
    * @private
    */
   private registeredListenersCount = 0;
@@ -996,7 +997,7 @@ export class Firestore {
 
   /**
    * Registers a listener on this client, incrementing the listener count. This
-   * is used to ensure that all listeners are unsubscribed when terminate() is
+   * is used to verify that all listeners are unsubscribed when terminate() is
    * called.
    *
    * @private
@@ -1007,7 +1008,7 @@ export class Firestore {
 
   /**
    * Unregisters a listener on this client, decrementing the listener count.
-   * This is used to ensure that all listeners are unsubscribed when terminate()
+   * This is used to verify that all listeners are unsubscribed when terminate()
    * is called.
    *
    * @private
