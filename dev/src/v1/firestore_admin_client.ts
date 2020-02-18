@@ -148,14 +148,14 @@ export class FirestoreAdminClient {
       collectionGroupPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}'
       ),
-      indexPathTemplate: new gaxModule.PathTemplate(
-        'projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}'
+      databasePathTemplate: new gaxModule.PathTemplate(
+        'projects/{project}/databases/{database}'
       ),
       fieldPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}'
       ),
-      databasePathTemplate: new gaxModule.PathTemplate(
-        'projects/{project}/databases/{database}'
+      indexPathTemplate: new gaxModule.PathTemplate(
+        'projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}'
       ),
     };
 
@@ -764,7 +764,7 @@ export class FirestoreAdminClient {
     options.otherArgs.headers[
       'x-goog-request-params'
     ] = gax.routingHeader.fromParams({
-      field_name: request.field!.name || '',
+      'field.name': request.field!.name || '',
     });
     return this._innerApiCalls.updateField(request, options, callback);
   }
@@ -1099,9 +1099,17 @@ export class FirestoreAdminClient {
    */
   listIndexesStream(
     request?: protosTypes.google.firestore.admin.v1.IListIndexesRequest,
-    options?: gax.CallOptions | {}
+    options?: gax.CallOptions
   ): Transform {
     request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
     const callSettings = new gax.CallSettings(options);
     return this._descriptors.page.listIndexes.createStream(
       this._innerApiCalls.listIndexes as gax.GaxCall,
@@ -1248,9 +1256,17 @@ export class FirestoreAdminClient {
    */
   listFieldsStream(
     request?: protosTypes.google.firestore.admin.v1.IListFieldsRequest,
-    options?: gax.CallOptions | {}
+    options?: gax.CallOptions
   ): Transform {
     request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
     const callSettings = new gax.CallSettings(options);
     return this._descriptors.page.listFields.createStream(
       this._innerApiCalls.listFields as gax.GaxCall,
@@ -1318,70 +1334,40 @@ export class FirestoreAdminClient {
   }
 
   /**
-   * Return a fully-qualified index resource name string.
+   * Return a fully-qualified database resource name string.
    *
    * @param {string} project
    * @param {string} database
-   * @param {string} collection
-   * @param {string} index
    * @returns {string} Resource name string.
    */
-  indexPath(
-    project: string,
-    database: string,
-    collection: string,
-    index: string
-  ) {
-    return this._pathTemplates.indexPathTemplate.render({
+  databasePath(project: string, database: string) {
+    return this._pathTemplates.databasePathTemplate.render({
       project,
       database,
-      collection,
-      index,
     });
   }
 
   /**
-   * Parse the project from Index resource.
+   * Parse the project from Database resource.
    *
-   * @param {string} indexName
-   *   A fully-qualified path representing Index resource.
+   * @param {string} databaseName
+   *   A fully-qualified path representing Database resource.
    * @returns {string} A string representing the project.
    */
-  matchProjectFromIndexName(indexName: string) {
-    return this._pathTemplates.indexPathTemplate.match(indexName).project;
+  matchProjectFromDatabaseName(databaseName: string) {
+    return this._pathTemplates.databasePathTemplate.match(databaseName).project;
   }
 
   /**
-   * Parse the database from Index resource.
+   * Parse the database from Database resource.
    *
-   * @param {string} indexName
-   *   A fully-qualified path representing Index resource.
+   * @param {string} databaseName
+   *   A fully-qualified path representing Database resource.
    * @returns {string} A string representing the database.
    */
-  matchDatabaseFromIndexName(indexName: string) {
-    return this._pathTemplates.indexPathTemplate.match(indexName).database;
-  }
-
-  /**
-   * Parse the collection from Index resource.
-   *
-   * @param {string} indexName
-   *   A fully-qualified path representing Index resource.
-   * @returns {string} A string representing the collection.
-   */
-  matchCollectionFromIndexName(indexName: string) {
-    return this._pathTemplates.indexPathTemplate.match(indexName).collection;
-  }
-
-  /**
-   * Parse the index from Index resource.
-   *
-   * @param {string} indexName
-   *   A fully-qualified path representing Index resource.
-   * @returns {string} A string representing the index.
-   */
-  matchIndexFromIndexName(indexName: string) {
-    return this._pathTemplates.indexPathTemplate.match(indexName).index;
+  matchDatabaseFromDatabaseName(databaseName: string) {
+    return this._pathTemplates.databasePathTemplate.match(databaseName)
+      .database;
   }
 
   /**
@@ -1452,40 +1438,70 @@ export class FirestoreAdminClient {
   }
 
   /**
-   * Return a fully-qualified database resource name string.
+   * Return a fully-qualified index resource name string.
    *
    * @param {string} project
    * @param {string} database
+   * @param {string} collection
+   * @param {string} index
    * @returns {string} Resource name string.
    */
-  databasePath(project: string, database: string) {
-    return this._pathTemplates.databasePathTemplate.render({
+  indexPath(
+    project: string,
+    database: string,
+    collection: string,
+    index: string
+  ) {
+    return this._pathTemplates.indexPathTemplate.render({
       project,
       database,
+      collection,
+      index,
     });
   }
 
   /**
-   * Parse the project from Database resource.
+   * Parse the project from Index resource.
    *
-   * @param {string} databaseName
-   *   A fully-qualified path representing Database resource.
+   * @param {string} indexName
+   *   A fully-qualified path representing Index resource.
    * @returns {string} A string representing the project.
    */
-  matchProjectFromDatabaseName(databaseName: string) {
-    return this._pathTemplates.databasePathTemplate.match(databaseName).project;
+  matchProjectFromIndexName(indexName: string) {
+    return this._pathTemplates.indexPathTemplate.match(indexName).project;
   }
 
   /**
-   * Parse the database from Database resource.
+   * Parse the database from Index resource.
    *
-   * @param {string} databaseName
-   *   A fully-qualified path representing Database resource.
+   * @param {string} indexName
+   *   A fully-qualified path representing Index resource.
    * @returns {string} A string representing the database.
    */
-  matchDatabaseFromDatabaseName(databaseName: string) {
-    return this._pathTemplates.databasePathTemplate.match(databaseName)
-      .database;
+  matchDatabaseFromIndexName(indexName: string) {
+    return this._pathTemplates.indexPathTemplate.match(indexName).database;
+  }
+
+  /**
+   * Parse the collection from Index resource.
+   *
+   * @param {string} indexName
+   *   A fully-qualified path representing Index resource.
+   * @returns {string} A string representing the collection.
+   */
+  matchCollectionFromIndexName(indexName: string) {
+    return this._pathTemplates.indexPathTemplate.match(indexName).collection;
+  }
+
+  /**
+   * Parse the index from Index resource.
+   *
+   * @param {string} indexName
+   *   A fully-qualified path representing Index resource.
+   * @returns {string} A string representing the index.
+   */
+  matchIndexFromIndexName(indexName: string) {
+    return this._pathTemplates.indexPathTemplate.match(indexName).index;
   }
 
   /**

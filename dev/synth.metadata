@@ -1,12 +1,12 @@
 {
-  "updateTime": "2020-01-29T12:21:39.064044Z",
+  "updateTime": "2020-02-07T18:50:00.377881Z",
   "sources": [
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "cf3b61102ed5f36b827bc82ec39be09525f018c8",
-        "internalRef": "292034635"
+        "sha": "e46f761cd6ec15a9e3d5ed4ff321a4bcba8e8585",
+        "internalRef": "293710856"
       }
     },
     {
@@ -48,49 +48,10 @@
   ],
   "newFiles": [
     {
-      "path": "conformance/.eslintrc.yml"
+      "path": ".gitignore"
     },
     {
-      "path": "conformance/runner.ts"
-    },
-    {
-      "path": "conformance/test-definition.proto"
-    },
-    {
-      "path": "conformance/test-suite.binproto"
-    },
-    {
-      "path": "protos/firestore_admin_v1_proto_api.d.ts"
-    },
-    {
-      "path": "protos/firestore_admin_v1_proto_api.js"
-    },
-    {
-      "path": "protos/firestore_v1_proto_api.d.ts"
-    },
-    {
-      "path": "protos/firestore_v1_proto_api.js"
-    },
-    {
-      "path": "protos/firestore_v1beta1_proto_api.d.ts"
-    },
-    {
-      "path": "protos/firestore_v1beta1_proto_api.js"
-    },
-    {
-      "path": "protos/google/api/annotations.proto"
-    },
-    {
-      "path": "protos/google/api/client.proto"
-    },
-    {
-      "path": "protos/google/api/field_behavior.proto"
-    },
-    {
-      "path": "protos/google/api/http.proto"
-    },
-    {
-      "path": "protos/google/api/resource.proto"
+      "path": ".mocharc.json"
     },
     {
       "path": "protos/google/firestore/admin/v1/field.proto"
@@ -138,91 +99,7 @@
       "path": "protos/google/firestore/v1beta1/write.proto"
     },
     {
-      "path": "protos/google/longrunning/operations.proto"
-    },
-    {
-      "path": "protos/google/protobuf/any.proto"
-    },
-    {
-      "path": "protos/google/protobuf/empty.proto"
-    },
-    {
-      "path": "protos/google/protobuf/field_mask.proto"
-    },
-    {
-      "path": "protos/google/protobuf/struct.proto"
-    },
-    {
-      "path": "protos/google/protobuf/timestamp.proto"
-    },
-    {
-      "path": "protos/google/protobuf/wrappers.proto"
-    },
-    {
-      "path": "protos/google/rpc/status.proto"
-    },
-    {
-      "path": "protos/google/type/latlng.proto"
-    },
-    {
       "path": "protos/protos.json"
-    },
-    {
-      "path": "protos/update.sh"
-    },
-    {
-      "path": "src/backoff.ts"
-    },
-    {
-      "path": "src/convert.ts"
-    },
-    {
-      "path": "src/document-change.ts"
-    },
-    {
-      "path": "src/document.ts"
-    },
-    {
-      "path": "src/external-modules.d.ts"
-    },
-    {
-      "path": "src/field-value.ts"
-    },
-    {
-      "path": "src/geo-point.ts"
-    },
-    {
-      "path": "src/index.ts"
-    },
-    {
-      "path": "src/logger.ts"
-    },
-    {
-      "path": "src/order.ts"
-    },
-    {
-      "path": "src/path.ts"
-    },
-    {
-      "path": "src/pool.ts"
-    },
-    {
-      "path": "src/reference.ts"
-    },
-    {
-      "path": "src/serializer.ts"
-    },
-    {
-      "path": "src/timestamp.ts"
-    },
-    {
-      "path": "src/transaction.ts"
-    },
-    {
-      "path": "src/types.ts"
-    },
-    {
-      "path": "src/util.ts"
     },
     {
       "path": "src/v1/firestore_admin_client.ts"
@@ -243,9 +120,6 @@
       "path": "src/v1/firestore_proto_list.json"
     },
     {
-      "path": "src/v1/index.ts"
-    },
-    {
       "path": "src/v1beta1/firestore_client.ts"
     },
     {
@@ -255,42 +129,6 @@
       "path": "src/v1beta1/firestore_proto_list.json"
     },
     {
-      "path": "src/v1beta1/index.ts"
-    },
-    {
-      "path": "src/validate.ts"
-    },
-    {
-      "path": "src/watch.ts"
-    },
-    {
-      "path": "src/write-batch.ts"
-    },
-    {
-      "path": "synth.metadata"
-    },
-    {
-      "path": "system-test/.eslintrc.yml"
-    },
-    {
-      "path": "system-test/.gitignore"
-    },
-    {
-      "path": "system-test/firestore.ts"
-    },
-    {
-      "path": "test/backoff.ts"
-    },
-    {
-      "path": "test/collection.ts"
-    },
-    {
-      "path": "test/document.ts"
-    },
-    {
-      "path": "test/field-value.ts"
-    },
-    {
       "path": "test/gapic-firestore-v1.ts"
     },
     {
@@ -298,45 +136,6 @@
     },
     {
       "path": "test/gapic-firestore_admin-v1.ts"
-    },
-    {
-      "path": "test/index.ts"
-    },
-    {
-      "path": "test/mocha.opts"
-    },
-    {
-      "path": "test/order.ts"
-    },
-    {
-      "path": "test/path.ts"
-    },
-    {
-      "path": "test/pool.ts"
-    },
-    {
-      "path": "test/query.ts"
-    },
-    {
-      "path": "test/timestamp.ts"
-    },
-    {
-      "path": "test/transaction.ts"
-    },
-    {
-      "path": "test/typescript.ts"
-    },
-    {
-      "path": "test/util.ts"
-    },
-    {
-      "path": "test/util/helpers.ts"
-    },
-    {
-      "path": "test/watch.ts"
-    },
-    {
-      "path": "test/write-batch.ts"
     }
   ]
 }
