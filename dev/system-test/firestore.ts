@@ -239,11 +239,10 @@ describe('CollectionReference class', () => {
   });
 
   it('supports withConverter()', async () => {
-    const ref = firestore
+    const ref = await firestore
       .collection('col')
       .withConverter(postConverter)
-      .doc('doc');
-    await ref.set(new Post('post', 'author'));
+      .add(new Post('post', 'author'));
     const postData = await ref.get();
     const post = postData.data();
     expect(post).to.not.be.undefined;
