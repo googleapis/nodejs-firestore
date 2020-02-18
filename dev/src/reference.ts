@@ -2298,7 +2298,8 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    * });
    */
   add(data: T): Promise<DocumentReference<T>> {
-    validateDocumentData('data', data, /*allowDeletes=*/ false);
+    const firestoreData = this._queryOptions.converter.toFirestore(data);
+    validateDocumentData('data', firestoreData, /*allowDeletes=*/ false);
 
     const documentRef = this.doc();
     return documentRef.create(data).then(() => documentRef);
