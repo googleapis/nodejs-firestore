@@ -211,6 +211,66 @@ describe('Collection interface', () => {
     });
   });
 
+  it('for CollectionReference.withConverter().add()', async () => {
+    let doc = document('dummy');
+    const overrides: ApiOverride = {
+      commit: request => {
+        // Extract the auto-generated document ID.
+        const docId = request.writes![0].update!.name!;
+        const docIdSplit = docId.split('/');
+        doc = document(
+          docIdSplit[docIdSplit.length - 1],
+          'author',
+          'author',
+          'title',
+          'post'
+        );
+        expect(request).to.deep.equal({
+          database: DATABASE_ROOT,
+          writes: [
+            {
+              update: {
+                fields: {
+                  author: {
+                    stringValue: 'author',
+                  },
+                  title: {
+                    stringValue: 'post',
+                  },
+                },
+                name: docId,
+              },
+              currentDocument: {
+                exists: false,
+              },
+            },
+          ],
+        });
+
+        return response(writeResult(1));
+      },
+      batchGetDocuments: () => {
+        const stream = through2.obj();
+        setImmediate(() => {
+          stream.push({found: doc, readTime: {seconds: 5, nanos: 6}});
+          stream.push(null);
+        });
+        return stream;
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const docRef = await firestore
+        .collection('collectionId')
+        .withConverter(postConverter)
+        .add(new Post('post', 'author'));
+      const postData = await docRef.get();
+      const post = postData.data();
+      expect(post).to.not.be.undefined;
+      expect(post!.toString()).to.equal('post, by author');
+    });
+  });
+
   it('drops the converter when calling CollectionReference<T>.parent()', () => {
     return createInstance().then(async firestore => {
       const postsCollection = firestore

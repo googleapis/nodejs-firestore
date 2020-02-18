@@ -182,11 +182,11 @@ export class WriteBatch {
    */
   create<T>(documentRef: DocumentReference<T>, data: T): WriteBatch {
     validateDocumentReference('documentRef', documentRef);
-    validateDocumentData('data', data, /* allowDeletes= */ false);
+    const firestoreData = documentRef._converter.toFirestore(data);
+    validateDocumentData('data', firestoreData, /* allowDeletes= */ false);
 
     this.verifyNotCommitted();
 
-    const firestoreData = documentRef._converter.toFirestore(data);
     const transform = DocumentTransform.fromObject(documentRef, firestoreData);
     transform.validate();
 
