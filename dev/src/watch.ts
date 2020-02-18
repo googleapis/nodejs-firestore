@@ -255,7 +255,7 @@ abstract class Watch<T = DocumentData> {
     const unsubscribe = () => {
       logger('Watch.onSnapshot', this.requestTag, 'Unsubscribe called');
       // Prevent further callbacks.
-      if (!this.isActive) {
+      if (this.isActive) {
         // Unregister the listener iff it has not already been unregistered.
         this.firestore.unregisterListener();
         this.isActive = false;
