@@ -216,25 +216,47 @@ describe('Collection interface', () => {
     const overrides: ApiOverride = {
       commit: request => {
         docId = request.writes![0].update!.name!;
+        // Remove the auto-generated id and then verify that the rest of the
+        // protobuf matches.
+        delete request.writes![0].update!.name;
+        expect(request).to.deep.equal({
+          database: DATABASE_ROOT,
+          writes: [
+            {
+              update: {
+                fields: {
+                  author: {
+                    stringValue: 'author',
+                  },
+                  title: {
+                    stringValue: 'post',
+                  },
+                },
+              },
+              currentDocument: {
+                exists: false,
+              },
+            },
+          ],
+        });
 
         return response(writeResult(1));
       },
       batchGetDocuments: () => {
+        // Extract the auto-generated document ID.
+        const docIdSplit = docId.split('/');
+        const doc = document(
+          docIdSplit[docIdSplit.length - 1],
+          'author',
+          'author',
+          'title',
+          'post'
+        );
         const stream = through2.obj();
         setImmediate(() => {
-          // Extract the auto-generated document ID.
-          const docIdSplit = docId.split('/');
-          const doc = document(
-            docIdSplit[docIdSplit.length - 1],
-            'author',
-            'author',
-            'title',
-            'post'
-          );
           stream.push({found: doc, readTime: {seconds: 5, nanos: 6}});
           stream.push(null);
         });
-
         return stream;
       },
     };
