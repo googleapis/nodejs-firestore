@@ -212,13 +212,19 @@ describe('Collection interface', () => {
   });
 
   it('for CollectionReference.withConverter().add()', async () => {
-    let docId = '';
+    let doc = document('dummy');
     const overrides: ApiOverride = {
       commit: request => {
-        docId = request.writes![0].update!.name!;
-        // Remove the auto-generated id and then verify that the rest of the
-        // protobuf matches.
-        delete request.writes![0].update!.name;
+        // Extract the auto-generated document ID.
+        const docId = request.writes![0].update!.name!;
+        const docIdSplit = docId.split('/');
+        doc = document(
+          docIdSplit[docIdSplit.length - 1],
+          'author',
+          'author',
+          'title',
+          'post'
+        );
         expect(request).to.deep.equal({
           database: DATABASE_ROOT,
           writes: [
@@ -232,6 +238,7 @@ describe('Collection interface', () => {
                     stringValue: 'post',
                   },
                 },
+                name: docId,
               },
               currentDocument: {
                 exists: false,
@@ -243,15 +250,6 @@ describe('Collection interface', () => {
         return response(writeResult(1));
       },
       batchGetDocuments: () => {
-        // Extract the auto-generated document ID.
-        const docIdSplit = docId.split('/');
-        const doc = document(
-          docIdSplit[docIdSplit.length - 1],
-          'author',
-          'author',
-          'title',
-          'post'
-        );
         const stream = through2.obj();
         setImmediate(() => {
           stream.push({found: doc, readTime: {seconds: 5, nanos: 6}});
