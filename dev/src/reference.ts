@@ -1034,9 +1034,7 @@ export class QueryOptions<T> {
     return new QueryOptions(
       coalesce(settings.parentPath, this.parentPath)!,
       coalesce(settings.collectionId, this.collectionId)!,
-      this.converter
-        ? this.converter
-        : (defaultConverter as FirestoreDataConverter<T>),
+      this.converter,
       coalesce(settings.allDescendants, this.allDescendants)!,
       coalesce(settings.fieldFilters, this.fieldFilters)!,
       coalesce(settings.fieldOrders, this.fieldOrders)!,

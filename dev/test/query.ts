@@ -659,16 +659,9 @@ describe('query interface', () => {
     });
   });
 
-  it('for withConverter() propagation through queryOptions', async () => {
+  it.only('propagates withConverter() through QueryOptions', async () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
-      commit: request => {
-        const expectedRequest = set({
-          document: doc,
-        });
-        requestEquals(request, expectedRequest);
-        return response(writeResult(1));
-      },
       runQuery: request => {
         queryEquals(request, fieldFilters('title', 'EQUAL', 'post'));
         return stream({document: doc, readTime: {seconds: 5, nanos: 6}});
@@ -676,10 +669,6 @@ describe('query interface', () => {
     };
 
     return createInstance(overrides).then(async firestore => {
-      await firestore
-        .collection('collectionId')
-        .doc('documentId')
-        .set({title: 'post', author: 'author'});
       const coll = await firestore
         .collection('collectionId')
         .withConverter(postConverter);
