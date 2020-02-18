@@ -659,7 +659,7 @@ describe('query interface', () => {
     });
   });
 
-  it.only('propagates withConverter() through QueryOptions', async () => {
+  it('propagates withConverter() through QueryOptions', async () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
       runQuery: request => {
