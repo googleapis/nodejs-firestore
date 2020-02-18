@@ -1030,14 +1030,13 @@ export class QueryOptions<T> {
    * Returns the union of the current and the provided options.
    * @private
    */
-  with(
-    settings: Partial<Omit<QueryOptions<T>, 'converter'>>,
-    converter = defaultConverter as FirestoreDataConverter<T>
-  ): QueryOptions<T> {
+  with(settings: Partial<Omit<QueryOptions<T>, 'converter'>>): QueryOptions<T> {
     return new QueryOptions(
       coalesce(settings.parentPath, this.parentPath)!,
       coalesce(settings.collectionId, this.collectionId)!,
-      converter,
+      this.converter
+        ? this.converter
+        : (defaultConverter as FirestoreDataConverter<T>),
       coalesce(settings.allDescendants, this.allDescendants)!,
       coalesce(settings.fieldFilters, this.fieldFilters)!,
       coalesce(settings.fieldOrders, this.fieldOrders)!,

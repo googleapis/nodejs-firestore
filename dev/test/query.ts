@@ -658,6 +658,38 @@ describe('query interface', () => {
       expect(posts.docs[0].data().toString()).to.equal('post, by author');
     });
   });
+
+  it('for withConverter() propagation through queryOptions', async () => {
+    const doc = document('documentId', 'author', 'author', 'title', 'post');
+    const overrides: ApiOverride = {
+      commit: request => {
+        const expectedRequest = set({
+          document: doc,
+        });
+        requestEquals(request, expectedRequest);
+        return response(writeResult(1));
+      },
+      runQuery: request => {
+        queryEquals(request, fieldFilters('title', 'EQUAL', 'post'));
+        return stream({document: doc, readTime: {seconds: 5, nanos: 6}});
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      await firestore
+        .collection('collectionId')
+        .doc('documentId')
+        .set({title: 'post', author: 'author'});
+      const coll = await firestore
+        .collection('collectionId')
+        .withConverter(postConverter);
+
+      // Verify that the converter is carried through.
+      const posts = await coll.where('title', '==', 'post').get();
+      expect(posts.size).to.equal(1);
+      expect(posts.docs[0].data().toString()).to.equal('post, by author');
+    });
+  });
 });
 
 describe('where() interface', () => {
