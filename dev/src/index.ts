@@ -995,22 +995,22 @@ export class Firestore {
   }
 
   /**
-   * Registers the requestTag associated with the listener. This is used to
-   * ensure that all listeners are detached when terminate() is called.
+   * Registers a listener on this client, incrementing the listener count. This
+   * is used to ensure that all listeners are unsubscribed when terminate() is
+   * called.
    *
    * @private
-   * @param requestTag A unique client-assigned identifier
    */
   registerListener(): void {
     this.registeredListenersCount += 1;
   }
 
   /**
-   * Unregisters the requestTag associated with the listener. This is used to
-   * ensure that all listeners are detached when terminate() is called.
+   * Unregisters a listener on this client, decrementing the listener count.
+   * This is used to ensure that all listeners are unsubscribed when terminate()
+   * is called.
    *
    * @private
-   * @param requestTag A unique client-assigned identifier
    */
   unregisterListener(): void {
     this.registeredListenersCount -= 1;
@@ -1024,7 +1024,7 @@ export class Firestore {
   terminate(): Promise<void> {
     if (this.registeredListenersCount > 0) {
       return Promise.reject(
-        'All listeners must be disconnected before terminating the client.'
+        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
       );
     }
     return this._clientPool.terminate();

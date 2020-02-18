@@ -159,7 +159,6 @@ describe('Firestore class', () => {
       // No-op
     });
 
-    await ref.set({});
     try {
       await firestore.terminate();
       throw new Error('terminate() should have failed');

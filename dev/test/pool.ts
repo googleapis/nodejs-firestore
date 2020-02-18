@@ -343,11 +343,10 @@ describe('Client pool', () => {
       terminated = true;
     });
 
-    setImmediate(async () => {
-      expect(terminated).to.be.false;
-      // Mark the mock operation as "complete".
-      deferred.resolve();
-      await terminateOp;
+    expect(terminated).to.be.false;
+    // Mark the mock operation as "complete".
+    deferred.resolve();
+    terminateOp.then(() => {
       expect(terminated).to.be.true;
       done();
     });
