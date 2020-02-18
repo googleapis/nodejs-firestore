@@ -1,5 +1,4 @@
-import {FirebaseFirestore} from "@google-cloud/firestore";
-import { Http2ServerRequest, Http2ServerResponse } from "http2";
+import {Http2ServerRequest, Http2ServerResponse} from 'http2';
 
 const {Firestore} = require('@google-cloud/firestore');
 const express = require('express');
@@ -35,11 +34,16 @@ async function quickstart() {
   bundle.add(document);
   bundle.add('restaurants', firestore.collection('restaurants'));
   const s = bundle.stream();
+
   const app = express();
   app.get('/', async (req: Http2ServerRequest, res: Http2ServerResponse) => {
-    for await(const d of s) {
-      console.log(d.toString());
-      res.write(d);
+    console.log('serving get');
+    for await (const d of s) {
+      console.log('handleing buffer');
+      const buffer = Buffer.from(d);
+      console.log(buffer.readUInt32LE(0));
+      console.log(buffer.toString('utf-8', 4, 4 + buffer.readUInt32LE(0)));
+      res.write(buffer);
     }
     res.end();
   });
