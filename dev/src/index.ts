@@ -303,7 +303,7 @@ export class Firestore {
    * on the client.
    * @private
    */
-  private registeredListeners = new Set<string>();
+  private registeredListenersCount = 0;
 
   // GCF currently tears down idle connections after two minutes. Requests
   // that are issued after this period may fail. On GCF, we therefore issue
@@ -1001,8 +1001,8 @@ export class Firestore {
    * @private
    * @param requestTag A unique client-assigned identifier
    */
-  registerListener(requestTag: string): void {
-    this.registeredListeners.add(requestTag);
+  registerListener(): void {
+    this.registeredListenersCount += 1;
   }
 
   /**
@@ -1012,8 +1012,8 @@ export class Firestore {
    * @private
    * @param requestTag A unique client-assigned identifier
    */
-  unregisterListener(requestTag: string): void {
-    this.registeredListeners.delete(requestTag);
+  unregisterListener(): void {
+    this.registeredListenersCount -= 1;
   }
 
   /**
@@ -1022,7 +1022,7 @@ export class Firestore {
    * @return A Promise that resolves when the client is terminated.
    */
   terminate(): Promise<void> {
-    if (this.registeredListeners.size > 0) {
+    if (this.registeredListenersCount > 0) {
       return Promise.reject(
         'All listeners must be disconnected before terminating the client.'
       );

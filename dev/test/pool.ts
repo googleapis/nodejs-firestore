@@ -328,24 +328,28 @@ describe('Client pool', () => {
       });
   });
 
-  it('waits for existing operations to complete before releasing clients', async () => {
+  it('waits for existing operations to complete before releasing clients', done => {
     const clientPool = new ClientPool<{}>(1, 0, () => {
       return {};
     });
     const deferred = new Deferred<void>();
+    let terminated = false;
 
-    const op = clientPool.run(REQUEST_TAG, async () => {
-      await deferred.promise;
-      return Promise.resolve('success');
+    // Run operation that completes after terminate() is called.
+    clientPool.run(REQUEST_TAG, () => {
+      return deferred.promise;
     });
-    const terminate = clientPool
-      .terminate()
-      .then(() => Promise.resolve('success'));
-    deferred.resolve();
+    const terminateOp = clientPool.terminate().then(() => {
+      terminated = true;
+    });
 
-    // Wait for the terminate promise to resolve after run() completes.
-    await terminate;
-    expect(op).to.become('success');
-    expect(terminate).to.become('success');
+    setImmediate(async () => {
+      expect(terminated).to.be.false;
+      // Mark the mock operation as "complete".
+      deferred.resolve();
+      await terminateOp;
+      expect(terminated).to.be.true;
+      done();
+    });
   });
 });

@@ -253,17 +253,20 @@ abstract class Watch<T = DocumentData> {
     this.initStream();
 
     const unsubscribe = () => {
-      this.firestore.unregisterListener(this.requestTag);
       logger('Watch.onSnapshot', this.requestTag, 'Unsubscribe called');
       // Prevent further callbacks.
-      this.isActive = false;
+      if (!this.isActive) {
+        // Unregister the listener iff it has not already been unregistered.
+        this.firestore.unregisterListener();
+        this.isActive = false;
+      }
       this.onNext = () => {};
       this.onError = () => {};
       if (this.currentStream) {
         this.currentStream.end();
       }
     };
-    this.firestore.registerListener(this.requestTag);
+    this.firestore.registerListener();
     return unsubscribe;
   }
 
@@ -332,6 +335,7 @@ abstract class Watch<T = DocumentData> {
     }
 
     if (this.isActive) {
+      this.firestore.unregisterListener();
       this.isActive = false;
       logger('Watch.closeStream', this.requestTag, 'Invoking onError: ', err);
       this.onError(err);

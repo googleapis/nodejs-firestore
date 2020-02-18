@@ -162,13 +162,12 @@ describe('Firestore class', () => {
     await ref.set({});
     try {
       await firestore.terminate();
-      return Promise.reject('terminate() should have failed');
+      throw new Error('terminate() should have failed');
     } catch (err) {
       expect(err).to.equal(
         'All listeners must be disconnected before terminating the client.'
       );
       unsubscribe();
-      return Promise.resolve();
     }
   });
 });

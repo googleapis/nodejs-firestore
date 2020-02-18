@@ -46,7 +46,7 @@ export class ClientPool<T> {
    * Deferred promise that is resolved when there are no active operations on
    * the client pool.
    */
-  private operationsDeferred = new Deferred<void>();
+  private operationsCompletedDeferred = new Deferred<void>();
 
   /**
    * @param concurrentOperationLimit The number of operations that each client
@@ -121,7 +121,7 @@ export class ClientPool<T> {
     assert(requestCount > 0, 'No active requests');
     this.activeClients.set(client, requestCount - 1);
     if (this.opCount === 0) {
-      this.operationsDeferred.resolve();
+      this.operationsCompletedDeferred.resolve();
     }
 
     if (this.shouldGarbageCollectClient(client)) {
@@ -207,8 +207,13 @@ export class ClientPool<T> {
 
     // Wait for all pending operations to complete before terminating.
     if (this.opCount > 0) {
-      this.operationsDeferred = new Deferred<void>();
-      await this.operationsDeferred.promise;
+      this.operationsCompletedDeferred = new Deferred<void>();
+      logger(
+        'ClientPool.terminate',
+        /* requestTag= */ null,
+        'Waiting for all pending operations to complete before terminating'
+      );
+      await this.operationsCompletedDeferred.promise;
     }
     for (const [client, _requestCount] of this.activeClients) {
       this.activeClients.delete(client);
