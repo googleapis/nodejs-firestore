@@ -4,6 +4,16 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.5.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.5.0...v3.5.1) (2020-02-19)
+
+
+### Bug Fixes
+
+* collectionReference.add() validation ([#925](https://www.github.com/googleapis/nodejs-firestore/issues/925)) ([19c2c75](https://www.github.com/googleapis/nodejs-firestore/commit/19c2c75d86c3aab967d21da16598016185ae360b))
+* pass x-goog-request-params header for streaming calls ([#920](https://www.github.com/googleapis/nodejs-firestore/issues/920)) ([cfbe19e](https://www.github.com/googleapis/nodejs-firestore/commit/cfbe19ed4c3cc6bb9ffc7b352de901150b8b9dea))
+* propagate converter in QueryOptions.with() ([#931](https://www.github.com/googleapis/nodejs-firestore/issues/931)) ([e35a098](https://www.github.com/googleapis/nodejs-firestore/commit/e35a098621b872b85a3ab70c6592eba75a929de8))
+* wait for operations to complete before deleting clients ([#915](https://www.github.com/googleapis/nodejs-firestore/issues/915)) ([1e5d63f](https://www.github.com/googleapis/nodejs-firestore/commit/1e5d63fbc39d9c3e6883e79a55e8a26634cd30c5))
+
 ## [3.5.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.4.1...v3.5.0) (2020-02-07)
 
 
