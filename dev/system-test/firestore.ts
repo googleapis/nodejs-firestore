@@ -152,6 +152,23 @@ describe('Firestore class', () => {
         expect(err).to.equal('The client has already been terminated');
       });
   });
+
+  it('throws an error if terminate() is called with active listeners', async () => {
+    const ref = randomCol.doc('doc-1');
+    const unsubscribe = ref.onSnapshot(() => {
+      // No-op
+    });
+
+    try {
+      await firestore.terminate();
+      throw new Error('terminate() should have failed');
+    } catch (err) {
+      expect(err).to.equal(
+        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
+      );
+      unsubscribe();
+    }
+  });
 });
 
 describe('CollectionReference class', () => {

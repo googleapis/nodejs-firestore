@@ -327,4 +327,28 @@ describe('Client pool', () => {
         expect(err).to.equal('The client has already been terminated');
       });
   });
+
+  it('waits for existing operations to complete before releasing clients', done => {
+    const clientPool = new ClientPool<{}>(1, 0, () => {
+      return {};
+    });
+    const deferred = new Deferred<void>();
+    let terminated = false;
+
+    // Run operation that completes after terminate() is called.
+    clientPool.run(REQUEST_TAG, () => {
+      return deferred.promise;
+    });
+    const terminateOp = clientPool.terminate().then(() => {
+      terminated = true;
+    });
+
+    expect(terminated).to.be.false;
+    // Mark the mock operation as "complete".
+    deferred.resolve();
+    terminateOp.then(() => {
+      expect(terminated).to.be.true;
+      done();
+    });
+  });
 });
