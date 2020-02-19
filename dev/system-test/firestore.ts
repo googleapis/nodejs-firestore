@@ -164,7 +164,7 @@ describe('Firestore class', () => {
       throw new Error('terminate() should have failed');
     } catch (err) {
       expect(err).to.equal(
-        'All listeners must be disconnected before terminating the client.'
+        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
       );
       unsubscribe();
     }
