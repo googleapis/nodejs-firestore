@@ -152,6 +152,23 @@ describe('Firestore class', () => {
         expect(err).to.equal('The client has already been terminated');
       });
   });
+
+  it('throws an error if terminate() is called with active listeners', async () => {
+    const ref = randomCol.doc('doc-1');
+    const unsubscribe = ref.onSnapshot(() => {
+      // No-op
+    });
+
+    try {
+      await firestore.terminate();
+      throw new Error('terminate() should have failed');
+    } catch (err) {
+      expect(err).to.equal(
+        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
+      );
+      unsubscribe();
+    }
+  });
 });
 
 describe('CollectionReference class', () => {
@@ -222,11 +239,10 @@ describe('CollectionReference class', () => {
   });
 
   it('supports withConverter()', async () => {
-    const ref = firestore
+    const ref = await firestore
       .collection('col')
       .withConverter(postConverter)
-      .doc('doc');
-    await ref.set(new Post('post', 'author'));
+      .add(new Post('post', 'author'));
     const postData = await ref.get();
     const post = postData.data();
     expect(post).to.not.be.undefined;

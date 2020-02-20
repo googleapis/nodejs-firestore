@@ -298,6 +298,14 @@ export class Firestore {
    */
   private _projectId: string | undefined = undefined;
 
+  /**
+   * Count of listeners that have been registered on the client.
+   *
+   * The client can only be terminated when there are no registered listeners.
+   * @private
+   */
+  private registeredListenersCount = 0;
+
   // GCF currently tears down idle connections after two minutes. Requests
   // that are issued after this period may fail. On GCF, we therefore issue
   // these requests as part of a transaction so that we can safely retry until
@@ -988,11 +996,38 @@ export class Firestore {
   }
 
   /**
+   * Registers a listener on this client, incrementing the listener count. This
+   * is used to verify that all listeners are unsubscribed when terminate() is
+   * called.
+   *
+   * @private
+   */
+  registerListener(): void {
+    this.registeredListenersCount += 1;
+  }
+
+  /**
+   * Unregisters a listener on this client, decrementing the listener count.
+   * This is used to verify that all listeners are unsubscribed when terminate()
+   * is called.
+   *
+   * @private
+   */
+  unregisterListener(): void {
+    this.registeredListenersCount -= 1;
+  }
+
+  /**
    * Terminates the Firestore client and closes all open streams.
    *
    * @return A Promise that resolves when the client is terminated.
    */
   terminate(): Promise<void> {
+    if (this.registeredListenersCount > 0) {
+      return Promise.reject(
+        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
+      );
+    }
     return this._clientPool.terminate();
   }
 

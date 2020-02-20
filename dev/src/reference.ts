@@ -1030,14 +1030,11 @@ export class QueryOptions<T> {
    * Returns the union of the current and the provided options.
    * @private
    */
-  with(
-    settings: Partial<Omit<QueryOptions<T>, 'converter'>>,
-    converter = defaultConverter as FirestoreDataConverter<T>
-  ): QueryOptions<T> {
+  with(settings: Partial<Omit<QueryOptions<T>, 'converter'>>): QueryOptions<T> {
     return new QueryOptions(
       coalesce(settings.parentPath, this.parentPath)!,
       coalesce(settings.collectionId, this.collectionId)!,
-      converter,
+      this.converter,
       coalesce(settings.allDescendants, this.allDescendants)!,
       coalesce(settings.fieldFilters, this.fieldFilters)!,
       coalesce(settings.fieldOrders, this.fieldOrders)!,
@@ -2301,7 +2298,8 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    * });
    */
   add(data: T): Promise<DocumentReference<T>> {
-    validateDocumentData('data', data, /*allowDeletes=*/ false);
+    const firestoreData = this._queryOptions.converter.toFirestore(data);
+    validateDocumentData('data', firestoreData, /*allowDeletes=*/ false);
 
     const documentRef = this.doc();
     return documentRef.create(data).then(() => documentRef);
