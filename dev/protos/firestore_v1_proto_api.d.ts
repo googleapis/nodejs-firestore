@@ -1533,29 +1533,29 @@ export namespace google {
                 public readTime?: (google.protobuf.ITimestamp|null);
             }
 
-            /** Properties of a BundledDocument. */
-            interface IBundledDocument {
+            /** Properties of a BundledDocumentMetadata. */
+            interface IBundledDocumentMetadata {
 
-                /** BundledDocument document */
-                document?: (google.firestore.v1.IDocument|null);
+                /** BundledDocumentMetadata documentKey */
+                documentKey?: (string|null);
 
-                /** BundledDocument readTime */
+                /** BundledDocumentMetadata readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
             }
 
-            /** Represents a BundledDocument. */
-            class BundledDocument implements IBundledDocument {
+            /** Represents a BundledDocumentMetadata. */
+            class BundledDocumentMetadata implements IBundledDocumentMetadata {
 
                 /**
-                 * Constructs a new BundledDocument.
+                 * Constructs a new BundledDocumentMetadata.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1.IBundledDocument);
+                constructor(properties?: google.firestore.v1.IBundledDocumentMetadata);
 
-                /** BundledDocument document. */
-                public document?: (google.firestore.v1.IDocument|null);
+                /** BundledDocumentMetadata documentKey. */
+                public documentKey: string;
 
-                /** BundledDocument readTime. */
+                /** BundledDocumentMetadata readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
             }
 
@@ -1594,8 +1594,11 @@ export namespace google {
                 /** BundleElement namedQuery */
                 namedQuery?: (google.firestore.v1.INamedQuery|null);
 
-                /** BundleElement bundledDocument */
-                bundledDocument?: (google.firestore.v1.IBundledDocument|null);
+                /** BundleElement documentMetadata */
+                documentMetadata?: (google.firestore.v1.IBundledDocumentMetadata|null);
+
+                /** BundleElement document */
+                document?: (google.firestore.v1.IDocument|null);
             }
 
             /** Represents a BundleElement. */
@@ -1613,11 +1616,14 @@ export namespace google {
                 /** BundleElement namedQuery. */
                 public namedQuery?: (google.firestore.v1.INamedQuery|null);
 
-                /** BundleElement bundledDocument. */
-                public bundledDocument?: (google.firestore.v1.IBundledDocument|null);
+                /** BundleElement documentMetadata. */
+                public documentMetadata?: (google.firestore.v1.IBundledDocumentMetadata|null);
+
+                /** BundleElement document. */
+                public document?: (google.firestore.v1.IDocument|null);
 
                 /** BundleElement elementType. */
-                public elementType?: ("metadata"|"namedQuery"|"bundledDocument");
+                public elementType?: ("metadata"|"namedQuery"|"documentMetadata"|"document");
             }
 
             /** Properties of a DocumentMask. */

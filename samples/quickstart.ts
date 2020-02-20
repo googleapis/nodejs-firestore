@@ -1,4 +1,5 @@
 import {Http2ServerRequest, Http2ServerResponse} from 'http2';
+import { Readable } from 'stream';
 
 const {Firestore} = require('@google-cloud/firestore');
 const express = require('express');
@@ -36,16 +37,19 @@ async function quickstart() {
   const s = bundle.stream();
 
   const app = express();
+
   app.get('/', async (req: Http2ServerRequest, res: Http2ServerResponse) => {
-    console.log('serving get');
-    for await (const d of s) {
-      console.log('handleing buffer');
-      const buffer = Buffer.from(d);
-      console.log(buffer.readUInt32LE(0));
-      console.log(buffer.toString('utf-8', 4, 4 + buffer.readUInt32LE(0)));
-      res.write(buffer);
-    }
-    res.end();
+    /*
+    const bundle = firestore.bundle('my-bundle');
+    const document = firestore.doc('posts/intro-to-firestore');
+    bundle.add(document);
+    bundle.add('restaurants', firestore.collection('restaurants'));
+    console.log(`start building stream`);
+    const s : Readable = bundle.stream();
+    console.log(`end building stream`);
+     */
+
+    s.pipe(res);
   });
 
   app.listen(43215, () => console.log('listening now...'));

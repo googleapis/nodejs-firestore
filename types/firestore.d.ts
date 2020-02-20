@@ -157,7 +157,7 @@ declare namespace FirebaseFirestore {
 
     addQuerySnap(queryName: string, query: Query): BundleBuilder;
 
-    stream(): Promise<Readable>;
+    stream(): Readable;
   }
 
   /**

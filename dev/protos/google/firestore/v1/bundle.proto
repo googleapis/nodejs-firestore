@@ -41,10 +41,9 @@ message NamedQuery {
   google.protobuf.Timestamp read_time = 3;
 }
 
-message BundledDocument {
-  // Bundled document data. The format is defined in `BundleMetadata`'s 
-  // `target_document_format`.
-  Document document = 1;
+message BundledDocumentMetadata {
+  // The document key of a bundled document.
+  string document_key = 1;
 
   // The snapshot version of the document data bundled.
   google.protobuf.Timestamp read_time = 2;
@@ -70,6 +69,8 @@ message BundleElement {
 
     NamedQuery named_query = 2;
 
-    BundledDocument bundled_document = 3;
+    BundledDocumentMetadata document_metadata = 3;
+
+    Document document = 4;
   }
 }

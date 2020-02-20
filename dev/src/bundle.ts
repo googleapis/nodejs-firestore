@@ -1,4 +1,3 @@
-
 import {Readable} from 'stream';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -26,16 +25,17 @@ export class BundleBuilder {
   private querySnaps: Map<string, QuerySnapshot> =
       new Map<string, QuerySnapshot>();
 
-  private documents: Map<string, api.IBundledDocument> = new Map();
+  private documents: Map<string, BundledDocument> = new Map();
   private namedQueries: Map<string, api.INamedQuery> = new Map();
   private latestReadTime: Timestamp =
       Timestamp.fromProto({seconds: 0, nanos: 0});
 
-  constructor(private name: string) {}
+  constructor(private name: string) {
+  }
 
   /**
    * Adds a Firestore document to the bundle. Both the document data and it's
-     read time will be included in the bundle.
+   read time will be included in the bundle.
    */
   add(doc: DocumentReference): BundleBuilder;
 
@@ -58,8 +58,8 @@ export class BundleBuilder {
    */
   add(queryName: string, query: Query): BundleBuilder;
 
-  add(docOrName: DocumentReference|DocumentSnapshot|string,
-      query?: QuerySnapshot|Query) {
+  add(docOrName: DocumentReference | DocumentSnapshot | string,
+      query?: QuerySnapshot | Query) {
     if (docOrName instanceof DocumentReference) {
       this.docRefs.push(docOrName);
     } else if (docOrName instanceof DocumentSnapshot) {
@@ -77,10 +77,13 @@ export class BundleBuilder {
     if (snap.exists) {
       const docProto = snap.toDocumentProto();
       if (!this.documents.has(snap.id) ||
-          Timestamp.fromProto(this.documents.get(snap.id)!.readTime!)
-                  .toMillis() < snap.readTime.toMillis()) {
+          Timestamp.fromProto(this.documents.get(snap.id)!.metadata.readTime!)
+              .toMillis() < snap.readTime.toMillis()) {
         this.documents.set(
-            snap.id, {document: docProto, readTime: snap.readTime});
+            snap.id, {
+              document: docProto,
+              metadata: {documentKey: snap.id, readTime: snap.readTime}
+            });
       }
       if (snap.readTime.toMillis() > this.latestReadTime.toMillis()) {
         this.latestReadTime = snap.readTime;
@@ -154,6 +157,7 @@ export class BundleBuilder {
 
     const readable = new Readable({objectMode: false});
     Promise.all(promises).then(results => {
+      console.log(`promises resolved.`);
       const metadata: api.IBundleMetadata = {
         name: this.name,
         createTime: this.latestReadTime.toProto().timestampValue
@@ -167,12 +171,25 @@ export class BundleBuilder {
       }
 
       for (const bundledDocument of this.documents.values()) {
-        const element: api.IBundleElement = {bundledDocument};
+        const documentMetadata: api.IBundledDocumentMetadata = bundledDocument.metadata;
+        const document: api.IDocument = bundledDocument.document;
+
+        let element: api.IBundleElement = {documentMetadata};
+        this.pushLengthPrefixedString(readable, JSON.stringify(element));
+
+        element = {document}
         this.pushLengthPrefixedString(readable, JSON.stringify(element));
       }
+      console.log(`pushing null`);
       readable.push(null);
     });
 
     return readable;
+  }
+}
+
+class BundledDocument {
+  constructor(public readonly metadata: api.IBundledDocumentMetadata,
+              public readonly document: api.IDocument) {
   }
 }
