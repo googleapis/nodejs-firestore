@@ -75,11 +75,24 @@ s.replace(
    "dev/src/v1beta1/firestore_client.ts",
    "/protos/protos'",
    "/protos/firestore_v1beta1_proto_api'"
- )
+)
 s.replace(
   "dev/test/gapic-firestore-v1beta1.ts",
   "/protos/protos'",
   "/protos/firestore_v1beta1_proto_api'"
+)
+
+# Mark v1beta1 as deprecated
+s.replace(
+  "dev/src/v1beta1/firestore_client.ts",
+  "@class",
+  "@class\n * @deprecated Use v1/firestore_client instead."
+)
+s.replace(
+  "dev/src/v1beta1/firestore_client.ts",
+  "const version",
+  "// tslint:disable deprecation\n\nconst version",
+  1
 )
 
 # Remove auto-generated packaging tests
