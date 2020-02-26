@@ -1,19 +1,26 @@
 {
-  "updateTime": "2020-02-07T18:50:00.377881Z",
+  "updateTime": "2020-02-26T23:06:26.717008Z",
   "sources": [
+    {
+      "git": {
+        "name": ".",
+        "remote": "git@github.com:googleapis/nodejs-firestore.git",
+        "sha": "6c7a497aa1e42ee1e6876b6c8732f6f7d9c0062b"
+      }
+    },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "e46f761cd6ec15a9e3d5ed4ff321a4bcba8e8585",
-        "internalRef": "293710856"
+        "sha": "f077632ba7fee588922d9e8717ee272039be126d",
+        "internalRef": "297405063"
       }
     },
     {
       "template": {
         "name": "node_library",
         "origin": "synthtool.gcp",
-        "version": "2019.10.17"
+        "version": "2020.2.4"
       }
     }
   ],
@@ -44,98 +51,6 @@
         "language": "typescript",
         "generator": "gapic-generator-typescript"
       }
-    }
-  ],
-  "newFiles": [
-    {
-      "path": ".gitignore"
-    },
-    {
-      "path": ".mocharc.json"
-    },
-    {
-      "path": "protos/google/firestore/admin/v1/field.proto"
-    },
-    {
-      "path": "protos/google/firestore/admin/v1/firestore_admin.proto"
-    },
-    {
-      "path": "protos/google/firestore/admin/v1/index.proto"
-    },
-    {
-      "path": "protos/google/firestore/admin/v1/location.proto"
-    },
-    {
-      "path": "protos/google/firestore/admin/v1/operation.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1/common.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1/document.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1/firestore.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1/query.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1/write.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1beta1/common.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1beta1/document.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1beta1/firestore.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1beta1/query.proto"
-    },
-    {
-      "path": "protos/google/firestore/v1beta1/write.proto"
-    },
-    {
-      "path": "protos/protos.json"
-    },
-    {
-      "path": "src/v1/firestore_admin_client.ts"
-    },
-    {
-      "path": "src/v1/firestore_admin_client_config.json"
-    },
-    {
-      "path": "src/v1/firestore_admin_proto_list.json"
-    },
-    {
-      "path": "src/v1/firestore_client.ts"
-    },
-    {
-      "path": "src/v1/firestore_client_config.json"
-    },
-    {
-      "path": "src/v1/firestore_proto_list.json"
-    },
-    {
-      "path": "src/v1beta1/firestore_client.ts"
-    },
-    {
-      "path": "src/v1beta1/firestore_client_config.json"
-    },
-    {
-      "path": "src/v1beta1/firestore_proto_list.json"
-    },
-    {
-      "path": "test/gapic-firestore-v1.ts"
-    },
-    {
-      "path": "test/gapic-firestore-v1beta1.ts"
-    },
-    {
-      "path": "test/gapic-firestore_admin-v1.ts"
     }
   ]
 }
