@@ -171,54 +171,6 @@ describe('v1.FirestoreClient', () => {
       });
     });
   });
-  describe('createDocument', () => {
-    it('invokes createDocument without error', done => {
-      const client = new firestoreModule.v1.FirestoreClient({
-        credentials: {client_email: 'bogus', private_key: 'bogus'},
-        projectId: 'bogus',
-      });
-      // Mock request
-      const request: protosTypes.google.firestore.v1.ICreateDocumentRequest = {};
-      request.parent = '';
-      // Mock response
-      const expectedResponse = {};
-      // Mock gRPC layer
-      client._innerApiCalls.createDocument = mockSimpleGrpcMethod(
-        request,
-        expectedResponse,
-        null
-      );
-      client.createDocument(request, (err: {}, response: {}) => {
-        assert.ifError(err);
-        assert.deepStrictEqual(response, expectedResponse);
-        done();
-      });
-    });
-
-    it('invokes createDocument with error', done => {
-      const client = new firestoreModule.v1.FirestoreClient({
-        credentials: {client_email: 'bogus', private_key: 'bogus'},
-        projectId: 'bogus',
-      });
-      // Mock request
-      const request: protosTypes.google.firestore.v1.ICreateDocumentRequest = {};
-      request.parent = '';
-      // Mock response
-      const expectedResponse = {};
-      // Mock gRPC layer
-      client._innerApiCalls.createDocument = mockSimpleGrpcMethod(
-        request,
-        null,
-        error
-      );
-      client.createDocument(request, (err: FakeError, response: {}) => {
-        assert(err instanceof FakeError);
-        assert.strictEqual(err.code, FAKE_STATUS_CODE);
-        assert(typeof response === 'undefined');
-        done();
-      });
-    });
-  });
   describe('updateDocument', () => {
     it('invokes updateDocument without error', done => {
       const client = new firestoreModule.v1.FirestoreClient({
@@ -450,6 +402,54 @@ describe('v1.FirestoreClient', () => {
         error
       );
       client.rollback(request, (err: FakeError, response: {}) => {
+        assert(err instanceof FakeError);
+        assert.strictEqual(err.code, FAKE_STATUS_CODE);
+        assert(typeof response === 'undefined');
+        done();
+      });
+    });
+  });
+  describe('createDocument', () => {
+    it('invokes createDocument without error', done => {
+      const client = new firestoreModule.v1.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      // Mock request
+      const request: protosTypes.google.firestore.v1.ICreateDocumentRequest = {};
+      request.parent = '';
+      // Mock response
+      const expectedResponse = {};
+      // Mock gRPC layer
+      client._innerApiCalls.createDocument = mockSimpleGrpcMethod(
+        request,
+        expectedResponse,
+        null
+      );
+      client.createDocument(request, (err: {}, response: {}) => {
+        assert.ifError(err);
+        assert.deepStrictEqual(response, expectedResponse);
+        done();
+      });
+    });
+
+    it('invokes createDocument with error', done => {
+      const client = new firestoreModule.v1.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      // Mock request
+      const request: protosTypes.google.firestore.v1.ICreateDocumentRequest = {};
+      request.parent = '';
+      // Mock response
+      const expectedResponse = {};
+      // Mock gRPC layer
+      client._innerApiCalls.createDocument = mockSimpleGrpcMethod(
+        request,
+        null,
+        error
+      );
+      client.createDocument(request, (err: FakeError, response: {}) => {
         assert(err instanceof FakeError);
         assert.strictEqual(err.code, FAKE_STATUS_CODE);
         assert(typeof response === 'undefined');

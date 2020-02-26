@@ -201,7 +201,6 @@ export class FirestoreClient {
     const firestoreStubMethods = [
       'getDocument',
       'listDocuments',
-      'createDocument',
       'updateDocument',
       'deleteDocument',
       'batchGetDocuments',
@@ -212,6 +211,7 @@ export class FirestoreClient {
       'write',
       'listen',
       'listCollectionIds',
+      'createDocument',
     ];
 
     for (const methodName of firestoreStubMethods) {
@@ -379,92 +379,6 @@ export class FirestoreClient {
       name: request.name || '',
     });
     return this._innerApiCalls.getDocument(request, options, callback);
-  }
-  createDocument(
-    request: protosTypes.google.firestore.v1.ICreateDocumentRequest,
-    options?: gax.CallOptions
-  ): Promise<
-    [
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
-      {} | undefined
-    ]
-  >;
-  createDocument(
-    request: protosTypes.google.firestore.v1.ICreateDocumentRequest,
-    options: gax.CallOptions,
-    callback: Callback<
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
-      {} | undefined
-    >
-  ): void;
-  /**
-   * Creates a new document.
-   *
-   * @param {Object} request
-   *   The request object that will be sent.
-   * @param {string} request.parent
-   *   Required. The parent resource. For example:
-   *   `projects/{project_id}/databases/{database_id}/documents` or
-   *   `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
-   * @param {string} request.collectionId
-   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`.
-   * @param {string} request.documentId
-   *   The client-assigned document ID to use for this document.
-   *
-   *   Optional. If not specified, an ID will be assigned by the service.
-   * @param {google.firestore.v1.Document} request.document
-   *   Required. The document to create. `name` must not be set.
-   * @param {google.firestore.v1.DocumentMask} request.mask
-   *   The fields to return. If not set, returns all fields.
-   *
-   *   If the document has a field that is not present in this mask, that field
-   *   will not be returned in the response.
-   * @param {object} [options]
-   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
-   * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [Document]{@link google.firestore.v1.Document}.
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
-   */
-  createDocument(
-    request: protosTypes.google.firestore.v1.ICreateDocumentRequest,
-    optionsOrCallback?:
-      | gax.CallOptions
-      | Callback<
-          protosTypes.google.firestore.v1.IDocument,
-          protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
-          {} | undefined
-        >,
-    callback?: Callback<
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
-      {} | undefined
-    >
-  ): Promise<
-    [
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
-      {} | undefined
-    ]
-  > | void {
-    request = request || {};
-    let options: gax.CallOptions;
-    if (typeof optionsOrCallback === 'function' && callback === undefined) {
-      callback = optionsOrCallback;
-      options = {};
-    } else {
-      options = optionsOrCallback as gax.CallOptions;
-    }
-    options = options || {};
-    options.otherArgs = options.otherArgs || {};
-    options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      parent: request.parent || '',
-    });
-    return this._innerApiCalls.createDocument(request, options, callback);
   }
   updateDocument(
     request: protosTypes.google.firestore.v1.IUpdateDocumentRequest,
@@ -855,6 +769,92 @@ export class FirestoreClient {
       database: request.database || '',
     });
     return this._innerApiCalls.rollback(request, options, callback);
+  }
+  createDocument(
+    request: protosTypes.google.firestore.v1.ICreateDocumentRequest,
+    options?: gax.CallOptions
+  ): Promise<
+    [
+      protosTypes.google.firestore.v1.IDocument,
+      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
+      {} | undefined
+    ]
+  >;
+  createDocument(
+    request: protosTypes.google.firestore.v1.ICreateDocumentRequest,
+    options: gax.CallOptions,
+    callback: Callback<
+      protosTypes.google.firestore.v1.IDocument,
+      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
+      {} | undefined
+    >
+  ): void;
+  /**
+   * Creates a new document.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource. For example:
+   *   `projects/{project_id}/databases/{database_id}/documents` or
+   *   `projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}`
+   * @param {string} request.collectionId
+   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`.
+   * @param {string} request.documentId
+   *   The client-assigned document ID to use for this document.
+   *
+   *   Optional. If not specified, an ID will be assigned by the service.
+   * @param {google.firestore.v1.Document} request.document
+   *   Required. The document to create. `name` must not be set.
+   * @param {google.firestore.v1.DocumentMask} request.mask
+   *   The fields to return. If not set, returns all fields.
+   *
+   *   If the document has a field that is not present in this mask, that field
+   *   will not be returned in the response.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [Document]{@link google.firestore.v1.Document}.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   */
+  createDocument(
+    request: protosTypes.google.firestore.v1.ICreateDocumentRequest,
+    optionsOrCallback?:
+      | gax.CallOptions
+      | Callback<
+          protosTypes.google.firestore.v1.IDocument,
+          protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
+          {} | undefined
+        >,
+    callback?: Callback<
+      protosTypes.google.firestore.v1.IDocument,
+      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
+      {} | undefined
+    >
+  ): Promise<
+    [
+      protosTypes.google.firestore.v1.IDocument,
+      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
+      {} | undefined
+    ]
+  > | void {
+    request = request || {};
+    let options: gax.CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as gax.CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    return this._innerApiCalls.createDocument(request, options, callback);
   }
 
   /**
