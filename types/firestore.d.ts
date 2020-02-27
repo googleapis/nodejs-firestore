@@ -1439,6 +1439,14 @@ declare namespace FirebaseFirestore {
      * @return 'true' if this `Timestamp` is equal to the provided one.
      */
     isEqual(other: Timestamp): boolean;
+
+    /**
+     * Converts this object to a primitive `string`, which allows `Timestamp` objects to be compared
+     * using the `>`, `<=`, `>=` and `>` operators.
+     *
+     * @return a string encoding of this object.
+     */
+    valueOf(): string;
   }
 
   /**

@@ -148,4 +148,60 @@ describe('timestamps', () => {
       'Value for argument "nanoseconds" must be within [0, 999999999] inclusive, but was: 1000000000'
     );
   });
+
+  it('valueOf', () => {
+    expect(new Firestore.Timestamp(-62135596677, 456).valueOf()).to.equal(
+      '000000000123.000000456'
+    );
+    expect(new Firestore.Timestamp(-62135596800, 0).valueOf()).to.equal(
+      '000000000000.000000000'
+    );
+    expect(new Firestore.Timestamp(253402300799, 1e9 - 1).valueOf()).to.equal(
+      '315537897599.999999999'
+    );
+  });
+
+  it('arithmetic comparison of a Timestamp object to itself', () => {
+    const timestamp = new Firestore.Timestamp(1, 1);
+    expect(timestamp < timestamp).to.be.false;
+    expect(timestamp <= timestamp).to.be.true;
+    expect(timestamp > timestamp).to.be.false;
+    expect(timestamp >= timestamp).to.be.true;
+  });
+
+  it('arithmetic comparison of equivalent, but distinct, Timestamp objects', () => {
+    const t1 = new Firestore.Timestamp(1, 1);
+    const t2 = new Firestore.Timestamp(1, 1);
+    expect(t1 < t2).to.be.false;
+    expect(t1 <= t2).to.be.true;
+    expect(t1 > t2).to.be.false;
+    expect(t1 >= t2).to.be.true;
+  });
+
+  it('arithmetic comparison of Timestamp objects whose nanoseconds differ', () => {
+    const t1 = new Firestore.Timestamp(1, 1);
+    const t2 = new Firestore.Timestamp(1, 2);
+    expect(t1 < t2).to.be.true;
+    expect(t1 <= t2).to.be.true;
+    expect(t1 > t2).to.be.false;
+    expect(t1 >= t2).to.be.false;
+  });
+
+  it('arithmetic comparison of Timestamp objects whose seconds differ', () => {
+    const t1 = new Firestore.Timestamp(100, 0);
+    const t2 = new Firestore.Timestamp(200, 0);
+    expect(t1 < t2).to.be.true;
+    expect(t1 <= t2).to.be.true;
+    expect(t1 > t2).to.be.false;
+    expect(t1 >= t2).to.be.false;
+  });
+
+  it('arithmetic comparison of the smallest and largest Timestamp objects', () => {
+    const t1 = new Firestore.Timestamp(-62135596800, 0);
+    const t2 = new Firestore.Timestamp(253402300799, 999999999);
+    expect(t1 < t2).to.be.true;
+    expect(t1 <= t2).to.be.true;
+    expect(t1 > t2).to.be.false;
+    expect(t1 >= t2).to.be.false;
+  });
 });
