@@ -258,12 +258,12 @@ export class Timestamp {
     return {timestampValue: timestamp};
   }
 
-   /**
-    * Converts this object to a primitive `string`, which allows `Timestamp` objects to be compared
-    * using the `>`, `<=`, `>=` and `>` operators.
-    *
-    * @return {string} a string encoding of this object.
-    */
+  /**
+   * Converts this object to a primitive `string`, which allows `Timestamp` objects to be compared
+   * using the `>`, `<=`, `>=` and `>` operators.
+   *
+   * @return {string} a string encoding of this object.
+   */
   valueOf(): string {
     // This method returns a string of the form <seconds>.<nanoseconds> where <seconds> is
     // translated to have a non-negative value and both <seconds> and <nanoseconds> are left-padded
