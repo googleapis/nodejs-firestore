@@ -1454,11 +1454,11 @@ describe('update document', () => {
             document: document('documentId', 'foo', {
               mapValue: {},
             }),
-            transforms: [serverTimestamp('a.b'), serverTimestamp('c.d')],
+            updateTransforms: [serverTimestamp('a.b'), serverTimestamp('c.d')],
             mask: updateMask('a', 'foo'),
           })
         );
-        return response(writeResult(2));
+        return response(writeResult(1));
       },
     };
 

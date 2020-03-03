@@ -479,13 +479,26 @@ export class WriteBatch {
       if (!document.isEmpty || !documentMask.isEmpty) {
         write = document.toProto();
         write!.updateMask = documentMask.toProto();
-      }
 
-      return {
-        write,
-        transform: transform.toProto(this._serializer),
-        precondition: precondition.toProto(),
-      };
+        const transformProto = transform.toProto(this._serializer);
+        if (transformProto) {
+          write!.updateTransforms =
+            transformProto && transformProto.transform
+              ? transformProto.transform.fieldTransforms
+              : null;
+        }
+
+        return {
+          write,
+          precondition: precondition.toProto(),
+        };
+      } else {
+        return {
+          write,
+          transform: transform.toProto(this._serializer),
+          precondition: precondition.toProto(),
+        };
+      }
     };
 
     this._ops.push(op);

@@ -92,6 +92,7 @@ function write(
   document: api.IDocument | null,
   mask: api.IDocumentMask | null,
   transforms: api.DocumentTransform.IFieldTransform[] | null,
+  updateTransforms: api.DocumentTransform.IFieldTransform[] | null,
   precondition: api.IPrecondition | null
 ): api.ICommitRequest {
   const writes: api.IWrite[] = [];
@@ -104,6 +105,10 @@ function write(
     if (mask) {
       writes[0].updateMask = mask;
     }
+  }
+
+  if (updateTransforms) {
+    writes[0].updateTransforms = updateTransforms;
   }
 
   if (transforms) {
@@ -132,13 +137,15 @@ export function set(opts: {
     opts.document || null,
     opts.mask || null,
     opts.transforms || null,
-    null
+    /** updateTransforms */ null,
+    /** precondition */ null
   );
 }
 
 export function update(opts: {
   document?: api.IDocument;
   transforms?: api.DocumentTransform.IFieldTransform[];
+  updateTransforms?: api.DocumentTransform.IFieldTransform[];
   mask?: api.IDocumentMask;
   precondition?: api.IPrecondition;
 }): api.ICommitRequest {
@@ -148,6 +155,7 @@ export function update(opts: {
     opts.document || null,
     mask,
     opts.transforms || null,
+    opts.updateTransforms || null,
     precondition
   );
 }
@@ -161,6 +169,7 @@ export function create(opts: {
     opts.document || null,
     /* updateMask */ null,
     opts.transforms || null,
+    /** updateTransforms */ null,
     {
       exists: false,
     }
