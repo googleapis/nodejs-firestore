@@ -131,11 +131,21 @@ describe('timestamps', () => {
     expect(actual.isEqual(expected)).to.be.true;
   });
 
-  it('validates nanoseconds', () => {
+  it('validates seconds', () => {
     expect(() => new Firestore.Timestamp(0.1, 0)).to.throw(
       'Value for argument "seconds" is not a valid integer.'
     );
 
+    expect(() => new Firestore.Timestamp(-62135596801, 0)).to.throw(
+      'Value for argument "seconds" must be within [-62135596800, 253402300799] inclusive, but was: -62135596801'
+    );
+
+    expect(() => new Firestore.Timestamp(253402300800, 0)).to.throw(
+      'Value for argument "seconds" must be within [-62135596800, 253402300799] inclusive, but was: 253402300800'
+    );
+  });
+
+  it('validates nanoseconds', () => {
     expect(() => new Firestore.Timestamp(0, 0.1)).to.throw(
       'Value for argument "nanoseconds" is not a valid integer.'
     );

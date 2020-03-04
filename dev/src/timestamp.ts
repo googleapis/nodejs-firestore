@@ -130,7 +130,10 @@ export class Timestamp {
    * from 0 to 999,999,999 inclusive.
    */
   constructor(seconds: number, nanoseconds: number) {
-    validateInteger('seconds', seconds);
+    validateInteger('seconds', seconds, {
+      minValue: -62135596800,
+      maxValue: 253402300799,
+    });
     validateInteger('nanoseconds', nanoseconds, {
       minValue: 0,
       maxValue: 999999999,
