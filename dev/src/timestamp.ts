@@ -35,6 +35,15 @@ const MS_TO_NANOS = 1000000;
  */
 const MIN_SECONDS = -62135596800;
 
+/*!
+ * The maximum legal value for the "seconds" property of a Timestamp object.
+ *
+ * This value corresponds to 9999-12-31T23:59:59.999999999Z.
+ *
+ * @type {number}
+ */
+const MAX_SECONDS = 253402300799;
+
 /**
  * A Timestamp represents a point in time independent of any time zone or
  * calendar, represented as seconds and fractions of seconds at nanosecond
@@ -131,8 +140,8 @@ export class Timestamp {
    */
   constructor(seconds: number, nanoseconds: number) {
     validateInteger('seconds', seconds, {
-      minValue: -62135596800,
-      maxValue: 253402300799,
+      minValue: MIN_SECONDS,
+      maxValue: MAX_SECONDS,
     });
     validateInteger('nanoseconds', nanoseconds, {
       minValue: 0,
