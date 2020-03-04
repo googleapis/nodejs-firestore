@@ -22,6 +22,7 @@ import * as through2 from 'through2';
 import * as proto from '../protos/firestore_v1_proto_api';
 import * as Firestore from '../src';
 import {DocumentReference, FieldPath, Transaction} from '../src';
+import {setTimeoutHandler} from '../src/backoff';
 import {
   ApiOverride,
   createInstance,
@@ -36,7 +37,8 @@ use(chaiAsPromised);
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
-const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
+const DOCUMENT_ID = 'documentId';
+const DOCUMENT_NAME = `${COLLECTION_ROOT}/${DOCUMENT_ID}`;
 
 // Change the argument to 'console.log' to enable debug output.
 Firestore.setLogFunction(() => {});
@@ -57,8 +59,9 @@ function transactionId(transaction?: Uint8Array | string): Uint8Array {
  * format defines an expected request and its expected response or error code.
  */
 interface TransactionStep {
-  type: 'begin' | 'getDocument' | 'query' | 'commit' | 'rollback';
-  request:
+  type: 'begin' | 'getDocument' | 'query' | 'commit' | 'rollback' | 'backoff';
+  delay?: 'exponential' | 'max';
+  request?:
     | api.ICommitRequest
     | api.IBeginTransactionRequest
     | api.IRunQueryRequest;
@@ -148,43 +151,16 @@ function begin(
   };
 }
 
-function getDocument(
+function getAll(
+  docs: string[],
+  fieldMask?: string[],
   transaction?: Uint8Array | string,
   error?: Error
 ): TransactionStep {
-  const request = {
-    database: DATABASE_ROOT,
-    documents: [DOCUMENT_NAME],
-    transaction: transactionId(transaction),
-  };
-
-  const stream = through2.obj();
-
-  setImmediate(() => {
-    stream.push({
-      found: {
-        name: DOCUMENT_NAME,
-        createTime: {seconds: 1, nanos: 2},
-        updateTime: {seconds: 3, nanos: 4},
-      },
-      readTime: {seconds: 5, nanos: 6},
-    });
-    stream.push(null);
-  });
-
-  return {
-    type: 'getDocument',
-    request,
-    error,
-    stream,
-  };
-}
-
-function getAll(docs: string[], fieldMask?: string[]): TransactionStep {
   const request: api.IBatchGetDocumentsRequest = {
     database: DATABASE_ROOT,
     documents: [],
-    transaction: Buffer.from('foo'),
+    transaction: transactionId(transaction),
   };
 
   if (fieldMask) {
@@ -210,17 +186,32 @@ function getAll(docs: string[], fieldMask?: string[]): TransactionStep {
   }
 
   setImmediate(() => {
-    stream.push(null);
+    if (error) {
+      stream.destroy(error);
+    } else {
+      stream.push(null);
+    }
   });
 
   return {
     type: 'getDocument',
     request,
+    error,
     stream,
   };
 }
 
-function query(transaction?: Uint8Array): TransactionStep {
+function getDocument(
+  transaction?: Uint8Array | string,
+  error?: Error
+): TransactionStep {
+  return getAll([DOCUMENT_ID], undefined, transaction, error);
+}
+
+function query(
+  transaction?: Uint8Array | string,
+  error?: Error
+): TransactionStep {
   const request = {
     parent: `${DATABASE_ROOT}/documents`,
     structuredQuery: {
@@ -241,12 +232,14 @@ function query(transaction?: Uint8Array): TransactionStep {
         },
       },
     },
-    transaction: transaction || Buffer.from('foo'),
+    transaction: transactionId(transaction),
   };
 
   const stream = through2.obj();
 
   setImmediate(() => {
+    // Push a single result even for errored queries, as this avoids implicit
+    // stream retries.
     stream.push({
       document: {
         name: DOCUMENT_NAME,
@@ -256,13 +249,24 @@ function query(transaction?: Uint8Array): TransactionStep {
       readTime: {seconds: 5, nanos: 6},
     });
 
-    stream.push(null);
+    if (error) {
+      stream.destroy(error);
+    } else {
+      stream.push(null);
+    }
   });
 
   return {
     type: 'query',
     request,
     stream,
+  };
+}
+
+function backoff(maxDelay?: boolean): TransactionStep {
+  return {
+    type: 'backoff',
+    delay: maxDelay ? 'max' : 'exponential',
   };
 }
 
@@ -274,8 +278,11 @@ function runTransaction<T>(
     transaction: Transaction,
     docRef: DocumentReference
   ) => Promise<T>,
-  ...expectedRequests: TransactionStep[]
+  ...expectedRequests: Array<TransactionStep | undefined>
 ) {
+  // Filter out empty steps
+  expectedRequests = expectedRequests.filter(v => v !== undefined);
+
   const overrides: ApiOverride = {
     beginTransaction: actual => {
       const request = expectedRequests.shift()!;
@@ -311,11 +318,7 @@ function runTransaction<T>(
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('getDocument');
       expect(actual).to.deep.eq(request.request);
-      if (request.error) {
-        throw request.error;
-      } else {
-        return request.stream!;
-      }
+      return request.stream!;
     },
     runQuery: actual => {
       const request = expectedRequests.shift()!;
@@ -326,20 +329,31 @@ function runTransaction<T>(
     },
   };
 
-  return createInstance(overrides).then(firestore => {
-    return firestore
-      .runTransaction(transaction => {
+  return createInstance(overrides).then(async firestore => {
+    const defaultTimeoutHandler = setTimeout;
+
+    try {
+      setTimeoutHandler((callback, timeout) => {
+        if (timeout > 0) {
+          const request = expectedRequests.shift()!;
+          expect(request.type).to.equal('backoff');
+          if (request.delay === 'max') {
+            // Make sure that the delay is at least 30 seconds, which is based
+            // on the maximum delay of 60 second and a jitter factor of 50%.
+            expect(timeout).to.not.be.lessThan(30 * 1000);
+          }
+        }
+        callback();
+      });
+
+      return await firestore.runTransaction(transaction => {
         const docRef = firestore.doc('collectionId/documentId');
         return transactionCallback(transaction, docRef);
-      })
-      .then(val => {
-        expect(expectedRequests.length).to.equal(0);
-        return val;
-      })
-      .catch(err => {
-        expect(expectedRequests.length).to.equal(0);
-        return Promise.reject(err);
       });
+    } finally {
+      expect(expectedRequests.length).to.equal(0);
+      setTimeoutHandler(defaultTimeoutHandler);
+    }
   });
 }
 
@@ -368,6 +382,132 @@ describe('successful transactions', () => {
 });
 
 describe('failed transactions', () => {
+  type TestCase = {retry: false} | {retry: true; backoff: boolean};
+
+  const errorBehavior: {[code: number]: TestCase} = {
+    [Status.CANCELLED]: {retry: true, backoff: true},
+    [Status.UNKNOWN]: {retry: true, backoff: true},
+    [Status.INVALID_ARGUMENT]: {retry: false},
+    [Status.DEADLINE_EXCEEDED]: {retry: true, backoff: true},
+    [Status.NOT_FOUND]: {retry: false},
+    [Status.ALREADY_EXISTS]: {retry: false},
+    [Status.RESOURCE_EXHAUSTED]: {retry: true, backoff: true},
+    [Status.FAILED_PRECONDITION]: {retry: false},
+    [Status.ABORTED]: {retry: true, backoff: false},
+    [Status.OUT_OF_RANGE]: {retry: false},
+    [Status.UNIMPLEMENTED]: {retry: false},
+    [Status.INTERNAL]: {retry: true, backoff: true},
+    [Status.UNAVAILABLE]: {retry: true, backoff: true},
+    [Status.DATA_LOSS]: {retry: false},
+    [Status.UNAUTHENTICATED]: {retry: true, backoff: true},
+  };
+
+  it('retries commit based on error code', async () => {
+    const transactionFunction = () => Promise.resolve();
+
+    for (const errorCode of Object.keys(errorBehavior)) {
+      const retryBehavior = errorBehavior[Number(errorCode)];
+      const serverError = new GoogleError('Test Error');
+      serverError.code = Number(errorCode) as Status;
+
+      if (retryBehavior.retry) {
+        await runTransaction(
+          transactionFunction,
+          begin('foo1'),
+          commit('foo1', undefined, serverError),
+          rollback('foo1'),
+          retryBehavior.backoff ? backoff() : undefined,
+          begin('foo2', 'foo1'),
+          commit('foo2')
+        );
+      } else {
+        await expect(
+          runTransaction(
+            transactionFunction,
+            begin('foo1'),
+            commit('foo1', undefined, serverError),
+            rollback('foo1')
+          )
+        ).to.eventually.be.rejected;
+      }
+    }
+  });
+
+  it('retries runQuery based on error code', async () => {
+    const transactionFunction = (
+      transaction: Transaction,
+      docRef: DocumentReference
+    ) => {
+      const query = docRef.parent.where('foo', '==', 'bar');
+      return transaction.get(query);
+    };
+
+    for (const errorCode of Object.keys(errorBehavior)) {
+      const retryBehavior = errorBehavior[Number(errorCode)];
+      const serverError = new GoogleError('Test Error');
+      serverError.code = Number(errorCode) as Status;
+
+      if (retryBehavior.retry) {
+        await runTransaction(
+          transactionFunction,
+          begin('foo1'),
+          query('foo1', serverError),
+          rollback('foo1'),
+          retryBehavior.backoff ? backoff() : undefined,
+          begin('foo2', 'foo1'),
+          query('foo2'),
+          commit('foo2')
+        );
+      } else {
+        await expect(
+          runTransaction(
+            transactionFunction,
+            begin('foo1'),
+            query('foo1', serverError),
+            rollback('foo1')
+          )
+        ).to.eventually.be.rejected;
+      }
+    }
+  });
+
+  it('retries batchGetDocuments based on error code', async () => {
+    const transactionFunction = (
+      transaction: Transaction,
+      docRef: DocumentReference
+    ) => {
+      return transaction.get(docRef);
+    };
+
+    for (const errorCode of Object.keys(errorBehavior)) {
+      const retryBehavior = errorBehavior[Number(errorCode)];
+      const serverError = new GoogleError('Test Error');
+      serverError.code = Number(errorCode) as Status;
+
+      if (retryBehavior.retry) {
+        await runTransaction(
+          transactionFunction,
+          begin('foo1'),
+          getDocument('foo1', serverError),
+          rollback('foo1'),
+          retryBehavior.backoff ? backoff() : undefined,
+          begin('foo2', 'foo1'),
+          getDocument('foo2'),
+          commit('foo2')
+        );
+      } else {
+        await expect(
+          runTransaction(
+            transactionFunction,
+            begin('foo1'),
+            getDocument('foo1', serverError),
+            rollback('foo1')
+          )
+        ).to.eventually.be.rejected;
+      }
+    }
+  });
+
   it('requires update function', () => {
     const overrides: ApiOverride = {
       beginTransaction: () => Promise.reject(),
@@ -424,43 +564,6 @@ describe('failed transactions', () => {
     });
   });
 
-  it('retries GRPC exceptions with code ABORTED in callback', () => {
-    const retryableError = new GoogleError('Aborted');
-    retryableError.code = Status.ABORTED;
-
-    return runTransaction(
-      async (transaction, docRef) => {
-        await transaction.get(docRef);
-        return 'success';
-      },
-      begin('foo1'),
-      getDocument('foo1', retryableError),
-      rollback('foo1'),
-      begin('foo2', 'foo1'),
-      getDocument('foo2'),
-      commit('foo2')
-    ).then(res => {
-      expect(res).to.equal('success');
-    });
-  });
-
-  it("doesn't retry GRPC exceptions with code FAILED_PRECONDITION in callback", () => {
-    const nonRetryableError = new GoogleError('Failed Precondition');
-    nonRetryableError.code = Status.FAILED_PRECONDITION;
-
-    return expect(
-      runTransaction(
-        async (transaction, docRef) => {
-          await transaction.get(docRef);
-          return 'failure';
-        },
-        begin('foo'),
-        getDocument('foo', nonRetryableError),
-        rollback('foo')
-      )
-    ).to.eventually.be.rejectedWith('Failed Precondition');
-  });
-
   it("doesn't retry custom user exceptions in callback", () => {
     return expect(
       runTransaction(
@@ -473,46 +576,49 @@ describe('failed transactions', () => {
     ).to.eventually.be.rejectedWith('request exception');
   });
 
-  it('retries on commit failure', () => {
-    const userResult = ['failure', 'failure', 'success'];
-    const serverError = new Error('Retryable error');
-
-    return runTransaction(
-      () => {
-        return Promise.resolve(userResult.shift());
-      },
-      begin('foo1'),
-      commit('foo1', [], serverError),
-      begin('foo2', 'foo1'),
-      commit('foo2', [], serverError),
-      begin('foo3', 'foo2'),
-      commit('foo3')
-    ).then(res => {
-      expect(res).to.equal('success');
-    });
-  });
-
   it('limits the retry attempts', () => {
     const err = new GoogleError('Server disconnect');
     err.code = Status.UNAVAILABLE;
 
     return expect(
       runTransaction(
-        () => {
-          return Promise.resolve('success');
-        },
+        () => Promise.resolve(),
         begin('foo1'),
         commit('foo1', [], err),
+        rollback('foo1'),
+        backoff(),
         begin('foo2', 'foo1'),
         commit('foo2', [], err),
+        rollback('foo2'),
+        backoff(),
         begin('foo3', 'foo2'),
         commit('foo3', [], err),
+        rollback('foo3'),
+        backoff(),
         begin('foo4', 'foo3'),
         commit('foo4', [], err),
+        rollback('foo4'),
+        backoff(),
         begin('foo5', 'foo4'),
-        commit('foo5', [], new Error('Final exception'))
+        commit('foo5', [], new Error('Final exception')),
+        rollback('foo5')
       )
     ).to.eventually.be.rejectedWith('Final exception');
+  });
+
+  it('uses maximum backoff for RESOURCE_EXHAUSTED', () => {
+    const err = new GoogleError('Server disconnect');
+    err.code = Status.RESOURCE_EXHAUSTED;
+
+    return runTransaction(
+      async () => {},
+      begin('foo1'),
+      commit('foo1', [], err),
+      rollback('foo1'),
+      backoff(/* maxDelay= */ true),
+      begin('foo2', 'foo1'),
+      commit('foo2')
+    );
   });
 
   it('fails on rollback', () => {
