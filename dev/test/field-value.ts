@@ -108,7 +108,7 @@ describe('FieldValue.arrayUnion()', () => {
 
         requestEquals(request, expectedRequest);
 
-        return response(writeResult(2));
+        return response(writeResult(1));
       },
     };
 
@@ -162,7 +162,7 @@ describe('FieldValue.increment()', () => {
           ],
         });
         requestEquals(request, expectedRequest);
-        return response(writeResult(2));
+        return response(writeResult(1));
       },
     };
 
@@ -205,7 +205,7 @@ describe('FieldValue.arrayRemove()', () => {
         });
         requestEquals(request, expectedRequest);
 
-        return response(writeResult(2));
+        return response(writeResult(1));
       },
     };
 
@@ -240,7 +240,7 @@ describe('FieldValue.serverTimestamp()', () => {
         });
         requestEquals(request, expectedRequest);
 
-        return response(writeResult(2));
+        return response(writeResult(1));
       },
     };
 

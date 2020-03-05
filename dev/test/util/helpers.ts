@@ -92,29 +92,22 @@ function write(
   document: api.IDocument | null,
   mask: api.IDocumentMask | null,
   transforms: api.DocumentTransform.IFieldTransform[] | null,
-  updateTransforms: api.DocumentTransform.IFieldTransform[] | null,
   precondition: api.IPrecondition | null
 ): api.ICommitRequest {
   const writes: api.IWrite[] = [];
+  const update = Object.assign({}, document);
+  delete update.updateTime;
+  delete update.createTime;
+  writes.push({update});
 
   if (document) {
-    const update = Object.assign({}, document);
-    delete update.updateTime;
-    delete update.createTime;
-    writes.push({update});
     if (mask) {
       writes[0].updateMask = mask;
     }
   }
 
-  if (updateTransforms) {
-    writes[0].updateTransforms = updateTransforms;
-  }
-
   if (transforms) {
-    writes.push({
-      transform: {document: DOCUMENT_NAME, fieldTransforms: transforms},
-    });
+    writes[0].updateTransforms = transforms;
   }
 
   if (precondition) {
@@ -137,7 +130,6 @@ export function set(opts: {
     opts.document || null,
     opts.mask || null,
     opts.transforms || null,
-    /** updateTransforms */ null,
     /** precondition */ null
   );
 }
@@ -145,7 +137,6 @@ export function set(opts: {
 export function update(opts: {
   document?: api.IDocument;
   transforms?: api.DocumentTransform.IFieldTransform[];
-  updateTransforms?: api.DocumentTransform.IFieldTransform[];
   mask?: api.IDocumentMask;
   precondition?: api.IPrecondition;
 }): api.ICommitRequest {
@@ -155,7 +146,7 @@ export function update(opts: {
     opts.document || null,
     mask,
     opts.transforms || null,
-    opts.updateTransforms || null,
+    // opts.updateTransforms || null,
     precondition
   );
 }
@@ -169,7 +160,6 @@ export function create(opts: {
     opts.document || null,
     /* updateMask */ null,
     opts.transforms || null,
-    /** updateTransforms */ null,
     {
       exists: false,
     }

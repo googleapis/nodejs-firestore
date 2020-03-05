@@ -995,6 +995,21 @@ export class DocumentTransform<T = DocumentData> {
       },
     };
   }
+
+  toTransformProto(
+    serializer: Serializer
+  ): api.DocumentTransform.IFieldTransform[] | null {
+    if (this.isEmpty) {
+      return null;
+    }
+
+    const fieldTransforms = [];
+    for (const [path, transform] of this.transforms) {
+      fieldTransforms.push(transform.toProto(serializer, path));
+    }
+
+    return fieldTransforms;
+  }
 }
 
 /**
