@@ -89,7 +89,7 @@ export function verifyInstance(firestore: Firestore): Promise<void> {
 }
 
 function write(
-  document: api.IDocument | null,
+  document: api.IDocument,
   mask: api.IDocumentMask | null,
   transforms: api.DocumentTransform.IFieldTransform[] | null,
   precondition: api.IPrecondition | null
@@ -122,12 +122,12 @@ export function updateMask(...fieldPaths: string[]): api.IDocumentMask {
 }
 
 export function set(opts: {
-  document?: api.IDocument;
+  document: api.IDocument;
   transforms?: api.DocumentTransform.IFieldTransform[];
   mask?: api.IDocumentMask;
 }): api.ICommitRequest {
   return write(
-    opts.document || null,
+    opts.document,
     opts.mask || null,
     opts.transforms || null,
     /** precondition */ null
@@ -135,7 +135,7 @@ export function set(opts: {
 }
 
 export function update(opts: {
-  document?: api.IDocument;
+  document: api.IDocument;
   transforms?: api.DocumentTransform.IFieldTransform[];
   mask?: api.IDocumentMask;
   precondition?: api.IPrecondition;
@@ -143,7 +143,7 @@ export function update(opts: {
   const precondition = opts.precondition || {exists: true};
   const mask = opts.mask || updateMask();
   return write(
-    opts.document || null,
+    opts.document,
     mask,
     opts.transforms || null,
     // opts.updateTransforms || null,
@@ -152,18 +152,13 @@ export function update(opts: {
 }
 
 export function create(opts: {
-  document?: api.IDocument;
+  document: api.IDocument;
   transforms?: api.DocumentTransform.IFieldTransform[];
   mask?: api.IDocumentMask;
 }): api.ICommitRequest {
-  return write(
-    opts.document || null,
-    /* updateMask */ null,
-    opts.transforms || null,
-    {
-      exists: false,
-    }
-  );
+  return write(opts.document, /* updateMask */ null, opts.transforms || null, {
+    exists: false,
+  });
 }
 
 function value(value: string | api.IValue): api.IValue {

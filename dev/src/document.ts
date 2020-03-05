@@ -971,32 +971,14 @@ export class DocumentTransform<T = DocumentData> {
   }
 
   /**
-   * Converts a document transform to the Firestore 'DocumentTransform' Proto.
+   * Converts a document transform to the Firestore 'FieldTransform' Proto.
    *
    * @private
    * @param serializer The Firestore serializer
-   * @returns A Firestore 'DocumentTransform' Proto or 'null' if this transform
-   * is empty.
+   * @returns A list of Firestore 'FieldTransform' Protos or 'null' if this
+   * transform is empty.
    */
-  toProto(serializer: Serializer): api.IWrite | null {
-    if (this.isEmpty) {
-      return null;
-    }
-
-    const fieldTransforms: api.DocumentTransform.IFieldTransform[] = [];
-    for (const [path, transform] of this.transforms) {
-      fieldTransforms.push(transform.toProto(serializer, path));
-    }
-
-    return {
-      transform: {
-        document: this.ref.formattedName,
-        fieldTransforms,
-      },
-    };
-  }
-
-  toTransformProto(
+  toProto(
     serializer: Serializer
   ): api.DocumentTransform.IFieldTransform[] | null {
     if (this.isEmpty) {

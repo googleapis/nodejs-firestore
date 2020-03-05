@@ -195,7 +195,7 @@ export class WriteBatch {
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
       const write = document.toProto();
       if (!transform.isEmpty) {
-        write.updateTransforms = transform.toTransformProto(this._serializer);
+        write.updateTransforms = transform.toProto(this._serializer);
       }
 
       return {
@@ -326,7 +326,7 @@ export class WriteBatch {
 
       const write = document.toProto();
       if (!transform.isEmpty) {
-        write.updateTransforms = transform.toTransformProto(this._serializer);
+        write.updateTransforms = transform.toProto(this._serializer);
       }
 
       const hasMerge = mergePaths || mergeLeaves;
@@ -475,7 +475,7 @@ export class WriteBatch {
       const write = document.toProto();
       write!.updateMask = documentMask.toProto();
       if (!transform.isEmpty) {
-        write!.updateTransforms = transform.toTransformProto(this._serializer);
+        write!.updateTransforms = transform.toProto(this._serializer);
       }
       return {
         write,
