@@ -339,7 +339,7 @@ function runTransaction<T>(
           expect(request.type).to.equal('backoff');
           if (request.delay === 'max') {
             // Make sure that the delay is at least 30 seconds, which is based
-            // on the maximum delay of 60 second and a jitter factor of 50%.
+            // on the maximum delay of 60 seconds and a jitter factor of 50%.
             expect(timeout).to.not.be.lessThan(30 * 1000);
           }
         }
