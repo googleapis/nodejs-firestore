@@ -2033,24 +2033,23 @@ describe('Transaction class', () => {
     const ref = randomCol.doc('doc');
 
     let firstTransaction, secondTransaction: Promise<void>;
-    let firstTransactionAttempts = 0,
-      secondTransactionAttempts = 0;
+    let attempts = 0;
 
     // Create two transactions that both read and update the same document.
     // `contentionPromise` is used to ensure that both transactions are active
-    // when we try to commit, which causes the second transaction to fail with
-    // Code ABORTED and be retried.
+    // on commit, which causes one of transactions to fail with Code ABORTED
+    // and be retried.
     const contentionPromise = new Deferred<void>();
 
     firstTransaction = firestore.runTransaction(async transaction => {
-      ++firstTransactionAttempts;
+      ++attempts;
       await transaction.get(ref);
       await contentionPromise.promise;
       transaction.set(ref, {first: true}, {merge: true});
     });
 
     secondTransaction = firestore.runTransaction(async transaction => {
-      ++secondTransactionAttempts;
+      ++attempts;
       await transaction.get(ref);
       contentionPromise.resolve();
       transaction.set(ref, {second: true}, {merge: true});
@@ -2059,8 +2058,7 @@ describe('Transaction class', () => {
     await firstTransaction;
     await secondTransaction;
 
-    expect(firstTransactionAttempts).to.equal(1);
-    expect(secondTransactionAttempts).to.equal(2);
+    expect(attempts).to.equal(3);
 
     const finalSnapshot = await ref.get();
     expect(finalSnapshot.data()).to.deep.equal({first: true, second: true});
