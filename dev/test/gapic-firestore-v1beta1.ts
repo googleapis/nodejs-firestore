@@ -464,7 +464,8 @@ describe('v1beta1.FirestoreClient', () => {
         projectId: 'bogus',
       });
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IBatchGetDocumentsRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -489,7 +490,8 @@ describe('v1beta1.FirestoreClient', () => {
         projectId: 'bogus',
       });
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IBatchGetDocumentsRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -517,7 +519,8 @@ describe('v1beta1.FirestoreClient', () => {
         projectId: 'bogus',
       });
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IRunQueryRequest = {};
+      request.parent = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -542,7 +545,8 @@ describe('v1beta1.FirestoreClient', () => {
         projectId: 'bogus',
       });
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IRunQueryRequest = {};
+      request.parent = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -570,7 +574,8 @@ describe('v1beta1.FirestoreClient', () => {
         projectId: 'bogus',
       });
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IWriteRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -596,7 +601,8 @@ describe('v1beta1.FirestoreClient', () => {
         projectId: 'bogus',
       });
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IWriteRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -625,7 +631,8 @@ describe('v1beta1.FirestoreClient', () => {
         projectId: 'bogus',
       });
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IListenRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -651,7 +658,8 @@ describe('v1beta1.FirestoreClient', () => {
         projectId: 'bogus',
       });
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IListenRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer

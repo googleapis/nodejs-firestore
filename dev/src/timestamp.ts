@@ -26,6 +26,24 @@ import api = google.firestore.v1;
  */
 const MS_TO_NANOS = 1000000;
 
+/*!
+ * The minimum legal value for the "seconds" property of a Timestamp object.
+ *
+ * This value corresponds to 0001-01-01T00:00:00Z.
+ *
+ * @type {number}
+ */
+const MIN_SECONDS = -62135596800;
+
+/*!
+ * The maximum legal value for the "seconds" property of a Timestamp object.
+ *
+ * This value corresponds to 9999-12-31T23:59:59.999999999Z.
+ *
+ * @type {number}
+ */
+const MAX_SECONDS = 253402300799;
+
 /**
  * A Timestamp represents a point in time independent of any time zone or
  * calendar, represented as seconds and fractions of seconds at nanosecond
@@ -121,7 +139,10 @@ export class Timestamp {
    * from 0 to 999,999,999 inclusive.
    */
   constructor(seconds: number, nanoseconds: number) {
-    validateInteger('seconds', seconds);
+    validateInteger('seconds', seconds, {
+      minValue: MIN_SECONDS,
+      maxValue: MAX_SECONDS,
+    });
     validateInteger('nanoseconds', nanoseconds, {
       minValue: 0,
       maxValue: 999999999,
@@ -247,5 +268,25 @@ export class Timestamp {
     }
 
     return {timestampValue: timestamp};
+  }
+
+  /**
+   * Converts this object to a primitive `string`, which allows `Timestamp` objects to be compared
+   * using the `>`, `<=`, `>=` and `>` operators.
+   *
+   * @return {string} a string encoding of this object.
+   */
+  valueOf(): string {
+    // This method returns a string of the form <seconds>.<nanoseconds> where <seconds> is
+    // translated to have a non-negative value and both <seconds> and <nanoseconds> are left-padded
+    // with zeroes to be a consistent length. Strings with this format then have a lexiographical
+    // ordering that matches the expected ordering. The <seconds> translation is done to avoid
+    // having a leading negative sign (i.e. a leading '-' character) in its string representation,
+    // which would affect its lexiographical ordering.
+    const adjustedSeconds = this.seconds - MIN_SECONDS;
+    // Note: Up to 12 decimal digits are required to represent all valid 'seconds' values.
+    const formattedSeconds = String(adjustedSeconds).padStart(12, '0');
+    const formattedNanoseconds = String(this.nanoseconds).padStart(9, '0');
+    return formattedSeconds + '.' + formattedNanoseconds;
   }
 }
