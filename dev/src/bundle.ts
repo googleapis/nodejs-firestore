@@ -82,7 +82,7 @@ export class BundleBuilder {
         this.documents.set(
             snap.id, {
               document: docProto,
-              metadata: {documentKey: snap.id, readTime: snap.readTime}
+              metadata: {documentKey: docProto.name, readTime: snap.readTime}
             });
       }
       if (snap.readTime.toMillis() > this.latestReadTime.toMillis()) {

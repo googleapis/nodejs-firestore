@@ -486,7 +486,7 @@ export class DocumentSnapshot<T = DocumentData> {
     return {
       createTime: this.createTime,
       updateTime: this.updateTime,
-      name: this.id,
+      name: this._ref.formattedName,
       fields: this._fieldsProto!
     };
   }
