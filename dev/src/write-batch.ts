@@ -558,9 +558,7 @@ export class WriteBatch {
         req.write!.currentDocument = req.precondition;
       }
 
-      if (req.write) {
-        request.writes.push(req.write);
-      }
+      request.writes.push(req.write!);
     }
 
     logger(
@@ -590,8 +588,7 @@ export class WriteBatch {
 
           const commitTime = Timestamp.fromProto(resp.commitTime!);
 
-          for (let i = 0; i < writes.length; ++i) {
-            const writeResult = resp.writeResults[i];
+          for (const writeResult of resp.writeResults) {
             writeResults.push(
               new WriteResult(
                 writeResult.updateTime

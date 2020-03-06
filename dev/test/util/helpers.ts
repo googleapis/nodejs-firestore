@@ -100,10 +100,8 @@ function write(
   delete update.createTime;
   writes.push({update});
 
-  if (document) {
-    if (mask) {
-      writes[0].updateMask = mask;
-    }
+  if (mask) {
+    writes[0].updateMask = mask;
   }
 
   if (transforms) {
@@ -130,7 +128,7 @@ export function set(opts: {
     opts.document,
     opts.mask || null,
     opts.transforms || null,
-    /** precondition */ null
+    /** precondition= */ null
   );
 }
 
@@ -142,13 +140,7 @@ export function update(opts: {
 }): api.ICommitRequest {
   const precondition = opts.precondition || {exists: true};
   const mask = opts.mask || updateMask();
-  return write(
-    opts.document,
-    mask,
-    opts.transforms || null,
-    // opts.updateTransforms || null,
-    precondition
-  );
+  return write(opts.document, mask, opts.transforms || null, precondition);
 }
 
 export function create(opts: {

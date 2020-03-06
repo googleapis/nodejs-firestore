@@ -1976,14 +1976,14 @@ describe('Transaction class', () => {
     const ref = randomCol.doc('doc');
     return ref
       .set({
-        foo: ['bar', 'baz'],
+        boo: ['ghost', 'sebastian'],
         moo: 'chicken',
       })
       .then(() => {
         return firestore.runTransaction(updateFunction => {
           return updateFunction.get(ref).then(() => {
             updateFunction.update(ref, {
-              foo: FieldValue.arrayRemove('bar'),
+              boo: FieldValue.arrayRemove('sebastian'),
               moo: 'cow',
             });
           });
@@ -1993,8 +1993,10 @@ describe('Transaction class', () => {
         return ref.get();
       })
       .then(doc => {
-        expect(doc.get('foo')).to.deep.equal(['baz']);
-        expect(doc.get('moo')).to.equal('cow');
+        expect(doc.data()).to.deep.equal({
+          boo: ['ghost'],
+          moo: 'cow',
+        });
       });
   });
 
