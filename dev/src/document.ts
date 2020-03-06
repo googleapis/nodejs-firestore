@@ -968,12 +968,9 @@ export class DocumentTransform<T = DocumentData> {
    * @returns A list of Firestore 'FieldTransform' Protos
    */
   toProto(serializer: Serializer): api.DocumentTransform.IFieldTransform[] {
-    const fieldTransforms = [];
-    for (const [path, transform] of this.transforms) {
-      fieldTransforms.push(transform.toProto(serializer, path));
-    }
-
-    return fieldTransforms;
+    return Array.from(this.transforms, ([path, transform]) =>
+      transform.toProto(serializer, path)
+    );
   }
 }
 

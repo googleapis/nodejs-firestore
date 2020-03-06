@@ -148,7 +148,7 @@ export function create(opts: {
   transforms?: api.DocumentTransform.IFieldTransform[];
   mask?: api.IDocumentMask;
 }): api.ICommitRequest {
-  return write(opts.document, /* updateMask */ null, opts.transforms || null, {
+  return write(opts.document, /* updateMask= */ null, opts.transforms || null, {
     exists: false,
   });
 }

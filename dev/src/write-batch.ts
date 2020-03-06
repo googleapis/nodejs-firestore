@@ -106,7 +106,7 @@ export class WriteResult {
 /** Helper type to manage the list of writes in a WriteBatch. */
 // TODO(mrschmidt): Replace with api.IWrite
 interface WriteOp {
-  write?: api.IWrite | null;
+  write: api.IWrite;
   precondition?: api.IPrecondition | null;
 }
 
@@ -330,7 +330,7 @@ export class WriteBatch {
       }
 
       const hasMerge = mergePaths || mergeLeaves;
-      if (hasMerge) {
+      if (hasMerge && !documentMask.isEmpty) {
         write.updateMask = documentMask!.toProto();
       }
 
@@ -552,8 +552,6 @@ export class WriteBatch {
     request.writes = [];
 
     for (const req of writes) {
-      assert(req.write, 'A write must be set');
-
       if (req.precondition) {
         req.write!.currentDocument = req.precondition;
       }
@@ -575,7 +573,7 @@ export class WriteBatch {
     return this._firestore
       .request<api.ICommitRequest, api.CommitResponse>('commit', request, tag)
       .then(resp => {
-        const writeResults: WriteResult[] = [];
+        let writeResults: WriteResult[] = [];
 
         if (request.writes!.length > 0) {
           assert(
@@ -588,15 +586,14 @@ export class WriteBatch {
 
           const commitTime = Timestamp.fromProto(resp.commitTime!);
 
-          for (const writeResult of resp.writeResults) {
-            writeResults.push(
+          writeResults = resp.writeResults.map(
+            writeResult =>
               new WriteResult(
                 writeResult.updateTime
                   ? Timestamp.fromProto(writeResult.updateTime)
                   : commitTime
               )
-            );
-          }
+          );
         }
 
         return writeResults;
