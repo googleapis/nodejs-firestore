@@ -471,15 +471,9 @@ export class Transaction {
    * @return A Promise that resolves after the delay expired.
    */
   private async maybeBackoff(error?: GoogleError) {
-    if (error) {
-      if (error.code === Status.RESOURCE_EXHAUSTED) {
-        this._backoff.resetToMax();
-      } else if (error.code === Status.ABORTED) {
-        // We don't backoff for ABORTED to avoid starvation
-        this._backoff.reset();
-      }
+    if (error && error.code === Status.RESOURCE_EXHAUSTED) {
+      this._backoff.resetToMax();
     }
-
     await this._backoff.backoffAndWait();
   }
 }

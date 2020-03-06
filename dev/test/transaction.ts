@@ -278,11 +278,8 @@ function runTransaction<T>(
     transaction: Transaction,
     docRef: DocumentReference
   ) => Promise<T>,
-  ...expectedRequests: Array<TransactionStep | undefined>
+  ...expectedRequests: TransactionStep[]
 ) {
-  // Filter out empty steps
-  expectedRequests = expectedRequests.filter(v => v !== undefined);
-
   const overrides: ApiOverride = {
     beginTransaction: actual => {
       const request = expectedRequests.shift()!;
@@ -382,41 +379,38 @@ describe('successful transactions', () => {
 });
 
 describe('failed transactions', () => {
-  type TestCase = {retry: false} | {retry: true; backoff: boolean};
-
-  const errorBehavior: {[code: number]: TestCase} = {
-    [Status.CANCELLED]: {retry: true, backoff: true},
-    [Status.UNKNOWN]: {retry: true, backoff: true},
-    [Status.INVALID_ARGUMENT]: {retry: false},
-    [Status.DEADLINE_EXCEEDED]: {retry: true, backoff: true},
-    [Status.NOT_FOUND]: {retry: false},
-    [Status.ALREADY_EXISTS]: {retry: false},
-    [Status.RESOURCE_EXHAUSTED]: {retry: true, backoff: true},
-    [Status.FAILED_PRECONDITION]: {retry: false},
-    [Status.ABORTED]: {retry: true, backoff: false},
-    [Status.OUT_OF_RANGE]: {retry: false},
-    [Status.UNIMPLEMENTED]: {retry: false},
-    [Status.INTERNAL]: {retry: true, backoff: true},
-    [Status.UNAVAILABLE]: {retry: true, backoff: true},
-    [Status.DATA_LOSS]: {retry: false},
-    [Status.UNAUTHENTICATED]: {retry: true, backoff: true},
+  const retryBehavior: {[code: number]: boolean} = {
+    [Status.CANCELLED]: true,
+    [Status.UNKNOWN]: true,
+    [Status.INVALID_ARGUMENT]: false,
+    [Status.DEADLINE_EXCEEDED]: true,
+    [Status.NOT_FOUND]: false,
+    [Status.ALREADY_EXISTS]: false,
+    [Status.RESOURCE_EXHAUSTED]: true,
+    [Status.FAILED_PRECONDITION]: false,
+    [Status.ABORTED]: true,
+    [Status.OUT_OF_RANGE]: false,
+    [Status.UNIMPLEMENTED]: false,
+    [Status.INTERNAL]: true,
+    [Status.UNAVAILABLE]: true,
+    [Status.DATA_LOSS]: false,
+    [Status.UNAUTHENTICATED]: true,
   };
 
   it('retries commit based on error code', async () => {
     const transactionFunction = () => Promise.resolve();
 
-    for (const errorCode of Object.keys(errorBehavior)) {
-      const retryBehavior = errorBehavior[Number(errorCode)];
+    for (const [errorCode, retry] of Object.entries(retryBehavior)) {
       const serverError = new GoogleError('Test Error');
       serverError.code = Number(errorCode) as Status;
 
-      if (retryBehavior.retry) {
+      if (retry) {
         await runTransaction(
           transactionFunction,
           begin('foo1'),
           commit('foo1', undefined, serverError),
           rollback('foo1'),
-          retryBehavior.backoff ? backoff() : undefined,
+          backoff(),
           begin('foo2', 'foo1'),
           commit('foo2')
         );
@@ -442,18 +436,17 @@ describe('failed transactions', () => {
       return transaction.get(query);
     };
 
-    for (const errorCode of Object.keys(errorBehavior)) {
-      const retryBehavior = errorBehavior[Number(errorCode)];
+    for (const [errorCode, retry] of Object.entries(retryBehavior)) {
       const serverError = new GoogleError('Test Error');
       serverError.code = Number(errorCode) as Status;
 
-      if (retryBehavior.retry) {
+      if (retry) {
         await runTransaction(
           transactionFunction,
           begin('foo1'),
           query('foo1', serverError),
           rollback('foo1'),
-          retryBehavior.backoff ? backoff() : undefined,
+          backoff(),
           begin('foo2', 'foo1'),
           query('foo2'),
           commit('foo2')
@@ -479,18 +472,17 @@ describe('failed transactions', () => {
       return transaction.get(docRef);
     };
 
-    for (const errorCode of Object.keys(errorBehavior)) {
-      const retryBehavior = errorBehavior[Number(errorCode)];
+    for (const [errorCode, retry] of Object.entries(retryBehavior)) {
       const serverError = new GoogleError('Test Error');
       serverError.code = Number(errorCode) as Status;
 
-      if (retryBehavior.retry) {
+      if (retry) {
         await runTransaction(
           transactionFunction,
           begin('foo1'),
           getDocument('foo1', serverError),
           rollback('foo1'),
-          retryBehavior.backoff ? backoff() : undefined,
+          backoff(),
           begin('foo2', 'foo1'),
           getDocument('foo2'),
           commit('foo2')
