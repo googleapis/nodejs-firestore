@@ -14,6 +14,7 @@
 
 import {expect} from 'chai';
 
+import {Status} from 'google-gax';
 import {
   FieldValue,
   Firestore,
@@ -22,6 +23,7 @@ import {
   WriteBatch,
   WriteResult,
 } from '../src';
+import {BatchWriteResult} from '../src/write-batch';
 import {
   ApiOverride,
   createInstance,
@@ -459,6 +461,88 @@ describe('batch support', () => {
           expect(commitCalled).to.equal(3);
           delete process.env.FUNCTION_TRIGGER_TYPE;
         });
+    });
+  });
+});
+
+describe('batch support', () => {
+  const documentName = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
+
+  let firestore: Firestore;
+  let writeBatch: WriteBatch;
+
+  beforeEach(() => {
+    const overrides: ApiOverride = {
+      batchWrite: request => {
+        expect(request).to.deep.eq({
+          database: `projects/${PROJECT_ID}/databases/(default)`,
+          writes: [
+            {
+              update: {
+                fields: {},
+                name: documentName,
+              },
+              updateTransforms: [
+                {
+                  fieldPath: 'foo',
+                  setToServerValue: REQUEST_TIME,
+                },
+              ],
+            },
+            {
+              currentDocument: {
+                exists: true,
+              },
+              update: {
+                fields: {
+                  foo: {
+                    stringValue: 'bar',
+                  },
+                },
+                name: documentName,
+              },
+              updateMask: {
+                fieldPaths: ['foo'],
+              },
+            },
+          ],
+        });
+        return response({
+          writeResults: [
+            {
+              updateTime: {
+                nanos: 0,
+                seconds: 0,
+              },
+            },
+          ],
+          status: [{code: 0}, {code: 14}],
+        });
+      },
+    };
+    return createInstance(overrides).then(firestoreClient => {
+      firestore = firestoreClient;
+      writeBatch = firestore.batch();
+    });
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  function verifyResponse(writeResults: BatchWriteResult[]) {
+    expect(writeResults[0].writeTime!.isEqual(new Timestamp(0, 0))).to.be.true;
+    expect(writeResults[1].writeTime).to.be.null;
+    expect(writeResults[0].status).to.equal(Status.OK);
+    expect(writeResults[1].status).to.equal(Status.UNAVAILABLE);
+  }
+
+  it('commits in batches', () => {
+    const documentName = firestore.doc('col/doc');
+
+    writeBatch.set(documentName, {foo: FieldValue.serverTimestamp()});
+    writeBatch.update(documentName, {foo: 'bar'});
+
+    return writeBatch.batchCommit().then(resp => {
+      verifyResponse(resp);
     });
   });
 });

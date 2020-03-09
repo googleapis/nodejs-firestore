@@ -46,6 +46,10 @@ export interface GapicClient {
     request: api.ICommitRequest,
     options?: CallOptions
   ): Promise<[api.ICommitResponse, unknown, unknown]>;
+  batchWrite(
+    request: api.IBatchWriteRequest,
+    options?: CallOptions
+  ): Promise<[api.IBatchWriteResponse, unknown, unknown]>;
   rollback(
     request: api.IRollbackRequest,
     options?: CallOptions
@@ -73,7 +77,8 @@ export type FirestoreUnaryMethod =
   | 'listCollectionIds'
   | 'rollback'
   | 'beginTransaction'
-  | 'commit';
+  | 'commit'
+  | 'batchWrite';
 
 /** Streaming methods used in the Firestore SDK. */
 export type FirestoreStreamingMethod =

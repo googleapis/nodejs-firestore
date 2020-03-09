@@ -48,6 +48,7 @@ import {
 } from './validate';
 
 import api = google.firestore.v1;
+import {Status} from 'google-gax';
 
 /*!
  * Google Cloud Functions terminates idle connections after two minutes. After
@@ -100,6 +101,33 @@ export class WriteResult {
       (other instanceof WriteResult &&
         this._writeTime.isEqual(other._writeTime))
     );
+  }
+}
+
+/**
+ * A BatchWriteResult wraps the write time and status returned by Firestore
+ * when making BatchWriteRequests.
+ *
+ * @private
+ */
+export class BatchWriteResult {
+  constructor(
+    private readonly _writeTime: Timestamp | null,
+    private readonly _status: Status
+  ) {}
+
+  /**
+   * The write time as set by the Firestore servers.
+   */
+  get writeTime(): Timestamp | null {
+    return this._writeTime;
+  }
+
+  /**
+   * The status as set by the Firestore servers.
+   */
+  get status(): Status {
+    return this._status;
   }
 }
 
@@ -506,7 +534,22 @@ export class WriteBatch {
    * });
    */
   commit(): Promise<WriteResult[]> {
-    return this.commit_();
+    return this.commit_() as Promise<WriteResult[]>;
+  }
+
+  /**
+   * Commits all pending operations to the database and verifies all
+   * preconditions. Fails the entire write if any precondition is not met.
+   *
+   * Though each write is atomic, the writes in the batch are not applied
+   * atomically and can be applied out of order.
+   *
+   * @private
+   */
+  batchCommit(): Promise<BatchWriteResult[]> {
+    return this.commit_({}, /* useBatch= */ true) as Promise<
+      BatchWriteResult[]
+    >;
   }
 
   /**
@@ -517,12 +560,16 @@ export class WriteBatch {
    * @param commitOptions.transactionId The transaction ID of this commit.
    * @param commitOptions.requestTag A unique client-assigned identifier for
    * this request.
+   * @param useBatch Whether to use BatchWrite API instead of CommitRequest.
    * @returns  A Promise that resolves when this batch completes.
    */
-  async commit_(commitOptions?: {
-    transactionId?: Uint8Array;
-    requestTag?: string;
-  }): Promise<WriteResult[]> {
+  async commit_(
+    commitOptions?: {
+      transactionId?: Uint8Array;
+      requestTag?: string;
+    },
+    useBatch = false
+  ): Promise<WriteResult[] | BatchWriteResult[]> {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
     this._committed = true;
 
@@ -567,25 +614,55 @@ export class WriteBatch {
     );
 
     if (explicitTransaction) {
+      assert(!useBatch, 'Cannot use batch mode with transactions');
       request.transaction = explicitTransaction;
     }
 
-    return this._firestore
-      .request<api.ICommitRequest, api.CommitResponse>('commit', request, tag)
-      .then(resp => {
-        if (request.writes!.length > 0) {
-          const commitTime = Timestamp.fromProto(resp.commitTime!);
-          return resp.writeResults.map(
-            writeResult =>
-              new WriteResult(
-                writeResult.updateTime
-                  ? Timestamp.fromProto(writeResult.updateTime)
-                  : commitTime
-              )
-          );
-        }
-        return [];
-      });
+    if (useBatch) {
+      return this._firestore
+        .request<api.IBatchWriteRequest, api.BatchWriteResponse>(
+          'batchWrite',
+          request as api.IBatchWriteRequest,
+          tag
+        )
+        .then(resp => {
+          const zipped: Array<[
+            api.IWriteResult,
+            google.rpc.IStatus
+          ]> = resp.writeResults.map((result, i) => {
+            return [result, resp.status[i]];
+          });
+          if (request.writes!.length > 0) {
+            return zipped.map(
+              ([writeResult, status]) =>
+                new BatchWriteResult(
+                  writeResult.updateTime
+                    ? Timestamp.fromProto(writeResult.updateTime)
+                    : null,
+                  status.code as Status
+                )
+            );
+          }
+          return [];
+        });
+    } else {
+      return this._firestore
+        .request<api.ICommitRequest, api.CommitResponse>('commit', request, tag)
+        .then(resp => {
+          if (request.writes!.length > 0) {
+            const commitTime = Timestamp.fromProto(resp.commitTime!);
+            return resp.writeResults.map(
+              writeResult =>
+                new WriteResult(
+                  writeResult.updateTime
+                    ? Timestamp.fromProto(writeResult.updateTime)
+                    : commitTime
+                )
+            );
+          }
+          return [];
+        });
+    }
   }
 
   /**
