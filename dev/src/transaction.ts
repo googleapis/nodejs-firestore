@@ -18,6 +18,7 @@ import {GoogleError, Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
+import {ExponentialBackoff} from './backoff';
 import {DocumentSnapshot, Precondition} from './document';
 import {Firestore, WriteBatch} from './index';
 import {logger} from './logger';
@@ -64,6 +65,7 @@ const READ_AFTER_WRITE_ERROR_MSG =
 export class Transaction {
   private _firestore: Firestore;
   private _writeBatch: WriteBatch;
+  private _backoff: ExponentialBackoff;
   private _requestTag: string;
   private _transactionId?: Uint8Array;
 
@@ -78,6 +80,7 @@ export class Transaction {
     this._firestore = firestore;
     this._writeBatch = firestore.batch();
     this._requestTag = requestTag;
+    this._backoff = new ExponentialBackoff();
   }
 
   /**
@@ -407,7 +410,7 @@ export class Transaction {
     maxAttempts: number
   ): Promise<T> {
     let result: T;
-    let lastError: Error | undefined = undefined;
+    let lastError: GoogleError | undefined = undefined;
 
     for (let attempt = 0; attempt < maxAttempts; ++attempt) {
       if (lastError) {
@@ -419,6 +422,9 @@ export class Transaction {
         );
       }
 
+      this._writeBatch._reset();
+      await this.maybeBackoff(lastError);
+
       await this.begin();
 
       try {
@@ -429,6 +435,8 @@ export class Transaction {
           );
         }
         result = await promise;
+        await this.commit();
+        return result;
       } catch (err) {
         logger(
           'Firestore.runTransaction',
@@ -441,18 +449,9 @@ export class Transaction {
 
         if (isRetryableTransactionError(err)) {
           lastError = err;
-          continue; // Retry full transaction
         } else {
           return Promise.reject(err); // Callback failed w/ non-retryable error
         }
-      }
-
-      try {
-        await this.commit();
-        return result; // Success
-      } catch (err) {
-        lastError = err;
-        this._writeBatch._reset();
       }
     }
 
@@ -463,6 +462,19 @@ export class Transaction {
       lastError
     );
     return Promise.reject(lastError);
+  }
+
+  /**
+   * Delays further operations based on the provided error.
+   *
+   * @private
+   * @return A Promise that resolves after the delay expired.
+   */
+  private async maybeBackoff(error?: GoogleError) {
+    if (error && error.code === Status.RESOURCE_EXHAUSTED) {
+      this._backoff.resetToMax();
+    }
+    await this._backoff.backoffAndWait();
   }
 }
 
@@ -562,13 +574,22 @@ function validateReadOptions(
   }
 }
 
-function isRetryableTransactionError(error: Error): boolean {
-  if (error instanceof GoogleError || 'code' in error) {
-    // In transactions, the backend returns code ABORTED for reads that fail
-    // with contention. These errors should be retried for both GoogleError
-    // and GoogleError-alike errors (in case the prototype hierarchy gets
-    // stripped somewhere).
-    return error.code === Status.ABORTED;
+function isRetryableTransactionError(error: GoogleError): boolean {
+  if (error.code !== undefined) {
+    // This list is based on https://github.com/firebase/firebase-js-sdk/blob/master/packages/firestore/src/core/transaction_runner.ts#L112
+    switch (error.code) {
+      case Status.ABORTED:
+      case Status.CANCELLED:
+      case Status.UNKNOWN:
+      case Status.DEADLINE_EXCEEDED:
+      case Status.INTERNAL:
+      case Status.UNAVAILABLE:
+      case Status.UNAUTHENTICATED:
+      case Status.RESOURCE_EXHAUSTED:
+        return true;
+      default:
+        return false;
+    }
   }
   return false;
 }

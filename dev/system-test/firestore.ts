@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {expect} from 'chai';
+import {expect, use} from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 
 import {
   CollectionReference,
   DocumentData,
-  DocumentReference,
   DocumentSnapshot,
   FieldPath,
   FieldValue,
@@ -32,6 +32,8 @@ import {
 } from '../src';
 import {autoId, Deferred} from '../src/util';
 import {Post, postConverter, verifyInstance} from '../test/util/helpers';
+
+use(chaiAsPromised);
 
 const version = require('../../package.json').version;
 
@@ -1991,21 +1993,6 @@ describe('Transaction class', () => {
       });
   });
 
-  it('enforces that updated document exists', () => {
-    const ref = firestore.collection('col').doc();
-    return firestore
-      .runTransaction(updateFunction => {
-        updateFunction.update(ref, {foo: 'b'});
-        return Promise.resolve();
-      })
-      .then(() => {
-        expect.fail();
-      })
-      .catch(err => {
-        expect(err.message).to.match(/No document to update/);
-      });
-  });
-
   it('has delete() method', () => {
     let success = false;
     const ref = randomCol.doc('doc');
@@ -2025,6 +2012,56 @@ describe('Transaction class', () => {
         expect(success).to.be.true;
         expect(result.exists).to.be.false;
       });
+  });
+
+  it('does not retry transaction that fail with FAILED_PRECONDITION', async () => {
+    const ref = firestore.collection('col').doc();
+
+    let attempts = 0;
+
+    await expect(
+      firestore.runTransaction(async transaction => {
+        ++attempts;
+        transaction.update(ref, {foo: 'b'});
+      })
+    ).to.eventually.be.rejectedWith('No document to update');
+
+    expect(attempts).to.equal(1);
+  });
+
+  it('retries transactions that fail with contention', async () => {
+    const ref = randomCol.doc('doc');
+
+    let firstTransaction, secondTransaction: Promise<void>;
+    let attempts = 0;
+
+    // Create two transactions that both read and update the same document.
+    // `contentionPromise` is used to ensure that both transactions are active
+    // on commit, which causes one of transactions to fail with Code ABORTED
+    // and be retried.
+    const contentionPromise = new Deferred<void>();
+
+    firstTransaction = firestore.runTransaction(async transaction => {
+      ++attempts;
+      await transaction.get(ref);
+      await contentionPromise.promise;
+      transaction.set(ref, {first: true}, {merge: true});
+    });
+
+    secondTransaction = firestore.runTransaction(async transaction => {
+      ++attempts;
+      await transaction.get(ref);
+      contentionPromise.resolve();
+      transaction.set(ref, {second: true}, {merge: true});
+    });
+
+    await firstTransaction;
+    await secondTransaction;
+
+    expect(attempts).to.equal(3);
+
+    const finalSnapshot = await ref.get();
+    expect(finalSnapshot.data()).to.deep.equal({first: true, second: true});
   });
 });
 
