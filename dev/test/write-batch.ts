@@ -197,17 +197,12 @@ describe('batch support', () => {
                 fields: {},
                 name: documentName,
               },
-            },
-            {
-              transform: {
-                document: documentName,
-                fieldTransforms: [
-                  {
-                    fieldPath: 'foo',
-                    setToServerValue: REQUEST_TIME,
-                  },
-                ],
-              },
+              updateTransforms: [
+                {
+                  fieldPath: 'foo',
+                  setToServerValue: REQUEST_TIME,
+                },
+              ],
             },
             {
               currentDocument: {
@@ -245,14 +240,6 @@ describe('batch support', () => {
             seconds: 0,
           },
           writeResults: [
-            // This write result conforms to the Write +
-            // DocumentTransform and won't be returned in the response.
-            {
-              updateTime: {
-                nanos: 1337,
-                seconds: 1337,
-              },
-            },
             {
               updateTime: {
                 nanos: 0,

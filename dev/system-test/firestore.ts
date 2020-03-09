@@ -1977,11 +1977,17 @@ describe('Transaction class', () => {
   it('has update() method', () => {
     const ref = randomCol.doc('doc');
     return ref
-      .set({foo: 'bar'})
+      .set({
+        boo: ['ghost', 'sebastian'],
+        moo: 'chicken',
+      })
       .then(() => {
         return firestore.runTransaction(updateFunction => {
           return updateFunction.get(ref).then(() => {
-            updateFunction.update(ref, {foo: 'foobar'});
+            updateFunction.update(ref, {
+              boo: FieldValue.arrayRemove('sebastian'),
+              moo: 'cow',
+            });
           });
         });
       })
@@ -1989,7 +1995,10 @@ describe('Transaction class', () => {
         return ref.get();
       })
       .then(doc => {
-        expect(doc.get('foo')).to.equal('foobar');
+        expect(doc.data()).to.deep.equal({
+          boo: ['ghost'],
+          moo: 'cow',
+        });
       });
   });
 

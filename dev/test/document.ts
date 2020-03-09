@@ -913,6 +913,7 @@ describe('set document', () => {
         requestEquals(
           request,
           set({
+            document: document('documentId'),
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
           })
         );
@@ -941,7 +942,7 @@ describe('set document', () => {
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
           })
         );
-        return response(writeResult(2));
+        return response(writeResult(1));
       },
     };
 
@@ -1042,7 +1043,6 @@ describe('set document', () => {
           request,
           set({
             document: document('documentId'),
-            mask: updateMask(),
           })
         );
         return response(writeResult(1));
@@ -1121,7 +1121,7 @@ describe('set document', () => {
             ],
           })
         );
-        return response(writeResult(2));
+        return response(writeResult(1));
       },
     };
 
@@ -1150,7 +1150,6 @@ describe('set document', () => {
           request,
           set({
             document: document('documentId'),
-            mask: updateMask(),
           })
         );
         return response(writeResult(1));
@@ -1354,6 +1353,7 @@ describe('create document', () => {
         requestEquals(
           request,
           create({
+            document: document('documentId'),
             transforms: [
               serverTimestamp('field'),
               serverTimestamp('map.field'),
@@ -1458,7 +1458,7 @@ describe('update document', () => {
             mask: updateMask('a', 'foo'),
           })
         );
-        return response(writeResult(2));
+        return response(writeResult(1));
       },
     };
 
@@ -1474,7 +1474,13 @@ describe('update document', () => {
   it('skips write for single field transform', () => {
     const overrides: ApiOverride = {
       commit: request => {
-        requestEquals(request, update({transforms: [serverTimestamp('a')]}));
+        requestEquals(
+          request,
+          update({
+            document: document('documentId'),
+            transforms: [serverTimestamp('a')],
+          })
+        );
         return response(writeResult(1));
       },
     };

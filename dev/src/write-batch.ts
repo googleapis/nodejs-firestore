@@ -106,8 +106,7 @@ export class WriteResult {
 /** Helper type to manage the list of writes in a WriteBatch. */
 // TODO(mrschmidt): Replace with api.IWrite
 interface WriteOp {
-  write?: api.IWrite | null;
-  transform?: api.IWrite | null;
+  write: api.IWrite;
   precondition?: api.IPrecondition | null;
 }
 
@@ -194,12 +193,13 @@ export class WriteBatch {
 
     const op = () => {
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
-      const write =
-        !document.isEmpty || transform.isEmpty ? document.toProto() : null;
+      const write = document.toProto();
+      if (!transform.isEmpty) {
+        write.updateTransforms = transform.toProto(this._serializer);
+      }
 
       return {
         write,
-        transform: transform.toProto(this._serializer),
         precondition: precondition.toProto(),
       };
     };
@@ -324,20 +324,18 @@ export class WriteBatch {
         documentMask = DocumentMask.fromObject(firestoreData);
       }
 
-      const hasDocumentData = !document.isEmpty || !documentMask!.isEmpty;
+      const write = document.toProto();
+      if (!transform.isEmpty) {
+        write.updateTransforms = transform.toProto(this._serializer);
+      }
 
-      let write;
-
-      if (!mergePaths && !mergeLeaves) {
-        write = document.toProto();
-      } else if (hasDocumentData || transform.isEmpty) {
-        write = document.toProto()!;
+      const hasMerge = mergePaths || mergeLeaves;
+      if (hasMerge && !documentMask.isEmpty) {
         write.updateMask = documentMask!.toProto();
       }
 
       return {
         write,
-        transform: transform.toProto(this._serializer),
       };
     };
 
@@ -474,16 +472,13 @@ export class WriteBatch {
 
     const op = () => {
       const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
-      let write: api.IWrite | null = null;
-
-      if (!document.isEmpty || !documentMask.isEmpty) {
-        write = document.toProto();
-        write!.updateMask = documentMask.toProto();
+      const write = document.toProto();
+      write!.updateMask = documentMask.toProto();
+      if (!transform.isEmpty) {
+        write!.updateTransforms = transform.toProto(this._serializer);
       }
-
       return {
         write,
-        transform: transform.toProto(this._serializer),
         precondition: precondition.toProto(),
       };
     };
@@ -557,22 +552,11 @@ export class WriteBatch {
     request.writes = [];
 
     for (const req of writes) {
-      assert(
-        req.write || req.transform,
-        'Either a write or transform must be set'
-      );
-
       if (req.precondition) {
-        (req.write || req.transform)!.currentDocument = req.precondition;
+        req.write!.currentDocument = req.precondition;
       }
 
-      if (req.write) {
-        request.writes.push(req.write);
-      }
-
-      if (req.transform) {
-        request.writes.push(req.transform);
-      }
+      request.writes.push(req.write);
     }
 
     logger(
@@ -589,47 +573,18 @@ export class WriteBatch {
     return this._firestore
       .request<api.ICommitRequest, api.CommitResponse>('commit', request, tag)
       .then(resp => {
-        const writeResults: WriteResult[] = [];
-
         if (request.writes!.length > 0) {
-          assert(
-            Array.isArray(resp.writeResults) &&
-              request.writes!.length === resp.writeResults.length,
-            `Expected one write result per operation, but got ${
-              resp.writeResults.length
-            } results for ${request.writes!.length} operations.`
-          );
-
           const commitTime = Timestamp.fromProto(resp.commitTime!);
-
-          let offset = 0;
-
-          for (let i = 0; i < writes.length; ++i) {
-            const writeRequest = writes[i];
-
-            // Don't return two write results for a write that contains a
-            // transform, as the fact that we have to split one write
-            // operation into two distinct write requests is an implementation
-            // detail.
-            if (writeRequest.write && writeRequest.transform) {
-              // The document transform is always sent last and produces the
-              // latest update time.
-              ++offset;
-            }
-
-            const writeResult = resp.writeResults[i + offset];
-
-            writeResults.push(
+          return resp.writeResults.map(
+            writeResult =>
               new WriteResult(
                 writeResult.updateTime
                   ? Timestamp.fromProto(writeResult.updateTime)
                   : commitTime
               )
-            );
-          }
+          );
         }
-
-        return writeResults;
+        return [];
       });
   }
 
