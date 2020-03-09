@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [3.6.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.5.1...v3.6.0) (2020-03-09)
+
+
+### Features
+
+* base transaction retries on error codes ([#953](https://www.github.com/googleapis/nodejs-firestore/issues/953)) ([4a30820](https://www.github.com/googleapis/nodejs-firestore/commit/4a30820876db2ec925efd0ac04482fe9c6882813))
+* deferred client initialization ([#956](https://www.github.com/googleapis/nodejs-firestore/issues/956)) ([301a7e2](https://www.github.com/googleapis/nodejs-firestore/commit/301a7e2870529fc8b14c91ac08c942dececcc3d6))
+* implement Timestamp.valueOf() ([#947](https://www.github.com/googleapis/nodejs-firestore/issues/947)) ([24a96c6](https://www.github.com/googleapis/nodejs-firestore/commit/24a96c65ecbc4df0fc69b9a7f64e9e508fea89b9)), closes [#944](https://www.github.com/googleapis/nodejs-firestore/issues/944)
+
 ### [3.5.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.5.0...v3.5.1) (2020-02-19)
 
 
