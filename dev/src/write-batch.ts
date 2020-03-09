@@ -556,7 +556,7 @@ export class WriteBatch {
         req.write!.currentDocument = req.precondition;
       }
 
-      request.writes.push(req.write!);
+      request.writes.push(req.write);
     }
 
     logger(
@@ -573,20 +573,9 @@ export class WriteBatch {
     return this._firestore
       .request<api.ICommitRequest, api.CommitResponse>('commit', request, tag)
       .then(resp => {
-        let writeResults: WriteResult[] = [];
-
         if (request.writes!.length > 0) {
-          assert(
-            Array.isArray(resp.writeResults) &&
-              request.writes!.length === resp.writeResults.length,
-            `Expected one write result per operation, but got ${
-              resp.writeResults.length
-            } results for ${request.writes!.length} operations.`
-          );
-
           const commitTime = Timestamp.fromProto(resp.commitTime!);
-
-          writeResults = resp.writeResults.map(
+          return resp.writeResults.map(
             writeResult =>
               new WriteResult(
                 writeResult.updateTime
@@ -595,8 +584,7 @@ export class WriteBatch {
               )
           );
         }
-
-        return writeResults;
+        return [];
       });
   }
 

@@ -128,7 +128,7 @@ export function set(opts: {
     opts.document,
     opts.mask || null,
     opts.transforms || null,
-    /** precondition= */ null
+    /* precondition= */ null
   );
 }
 
