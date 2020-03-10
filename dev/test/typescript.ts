@@ -255,6 +255,7 @@ xdescribe('firestore.d.ts', () => {
       query = query.orderBy(new FieldPath('foo'));
       query = query.orderBy(new FieldPath('foo'), 'desc');
       query = query.limit(42);
+      query = query.limitToLast(42);
       query = query.offset(42);
       query = query.select('foo');
       query = query.select('foo', 'bar');
