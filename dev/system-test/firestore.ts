@@ -1285,7 +1285,7 @@ describe('Query class', () => {
       .get();
     expectDocs(res, {foo: 'b'});
   });
-  
+
   it('supports Unicode in document names', async () => {
     const collRef = randomCol.doc('доброеутро').collection('coll');
     await collRef.add({});
@@ -1346,13 +1346,13 @@ describe('Query class', () => {
         expect(results.docs).to.have.length(10);
       });
   });
-  
+
   it('has startAt() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol
-        .orderBy('foo')
-        .startAt('b')
-        .get();
+      .orderBy('foo')
+      .startAt('b')
+      .get();
     expectDocs(res, {foo: 'b'});
   });
 
