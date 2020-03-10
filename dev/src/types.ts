@@ -22,6 +22,7 @@ import {FieldPath} from './path';
 import {Timestamp} from './timestamp';
 
 import api = google.firestore.v1;
+import {QueryDocumentSnapshot} from './document';
 
 /**
  * A map in the format of the Proto API
@@ -113,7 +114,7 @@ export type RBTree = any;
  *     return {title: post.title, author: post.author};
  *   },
  *   fromFirestore(
- *     data: FirebaseFirestore.DocumentData
+ *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
  *   ): Post {
  *     return new Post(data.title, data.author);
  *   }
@@ -142,7 +143,7 @@ export interface FirestoreDataConverter<T> {
    * Called by the Firestore SDK to convert Firestore data into an object of
    * type T.
    */
-  fromFirestore(data: DocumentData): T;
+  fromFirestore(snapshot: QueryDocumentSnapshot): T;
 }
 
 /**
@@ -150,15 +151,11 @@ export interface FirestoreDataConverter<T> {
  * @private
  */
 export const defaultConverter: FirestoreDataConverter<DocumentData> = {
-  toFirestore(
-    modelObject: FirebaseFirestore.DocumentData
-  ): FirebaseFirestore.DocumentData {
+  toFirestore(modelObject: DocumentData): DocumentData {
     return modelObject;
   },
-  fromFirestore(
-    data: FirebaseFirestore.DocumentData
-  ): FirebaseFirestore.DocumentData {
-    return data;
+  fromFirestore(snapshot: QueryDocumentSnapshot): DocumentData {
+    return snapshot.data()!;
   },
 };
 
