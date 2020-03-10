@@ -104,6 +104,12 @@ export class WriteResult {
   }
 }
 
+/** Helper type to hold a google.rpc.Status object. */
+interface RpcStatus {
+  code: Status;
+  message?: string | null;
+}
+
 /**
  * A BatchWriteResult wraps the write time and status returned by Firestore
  * when making BatchWriteRequests.
@@ -113,7 +119,7 @@ export class WriteResult {
 export class BatchWriteResult {
   constructor(
     private readonly _writeTime: Timestamp | null,
-    private readonly _status: Status
+    private readonly _status: RpcStatus
   ) {}
 
   /**
@@ -126,7 +132,7 @@ export class BatchWriteResult {
   /**
    * The status as set by the Firestore servers.
    */
-  get status(): Status {
+  get status(): RpcStatus {
     return this._status;
   }
 }
@@ -534,22 +540,52 @@ export class WriteBatch {
    * });
    */
   commit(): Promise<WriteResult[]> {
-    return this.commit_() as Promise<WriteResult[]>;
+    return this.commit_();
   }
 
   /**
    * Commits all pending operations to the database and verifies all
    * preconditions. Fails the entire write if any precondition is not met.
    *
-   * Though each write is atomic, the writes in the batch are not applied
-   * atomically and can be applied out of order.
+   * The writes in the batch are not applied atomically and can be applied out
+   * of order.
    *
    * @private
    */
-  batchCommit(): Promise<BatchWriteResult[]> {
-    return this.commit_({}, /* useBatch= */ true) as Promise<
-      BatchWriteResult[]
-    >;
+  async batchCommit(commitOptions?: {
+    requestTag?: string;
+  }): Promise<BatchWriteResult[]> {
+    this._committed = true;
+    const tag = (commitOptions && commitOptions.requestTag) || requestTag();
+    await this._firestore.initializeIfNeeded(tag);
+
+    const database = this._firestore.formattedName;
+    const request: api.IBatchWriteRequest = {database};
+    const writes = this._ops.map(op => op());
+    request.writes = [];
+
+    for (const req of writes) {
+      if (req.precondition) {
+        req.write!.currentDocument = req.precondition;
+      }
+      request.writes.push(req.write);
+    }
+
+    const response = await this._firestore.request<
+      api.IBatchWriteRequest,
+      api.BatchWriteResponse
+    >('batchWrite', request, tag);
+
+    if (request.writes!.length > 0) {
+      return response.writeResults.map((result, i) => {
+        const status = response.status[i];
+        return new BatchWriteResult(
+          result.updateTime ? Timestamp.fromProto(result.updateTime) : null,
+          {code: status.code as Status, message: status.message}
+        );
+      });
+    }
+    return [];
   }
 
   /**
@@ -560,16 +596,12 @@ export class WriteBatch {
    * @param commitOptions.transactionId The transaction ID of this commit.
    * @param commitOptions.requestTag A unique client-assigned identifier for
    * this request.
-   * @param useBatch Whether to use BatchWrite API instead of CommitRequest.
    * @returns  A Promise that resolves when this batch completes.
    */
-  async commit_(
-    commitOptions?: {
-      transactionId?: Uint8Array;
-      requestTag?: string;
-    },
-    useBatch = false
-  ): Promise<WriteResult[] | BatchWriteResult[]> {
+  async commit_(commitOptions?: {
+    transactionId?: Uint8Array;
+    requestTag?: string;
+  }): Promise<WriteResult[]> {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
     this._committed = true;
 
@@ -614,55 +646,22 @@ export class WriteBatch {
     );
 
     if (explicitTransaction) {
-      assert(!useBatch, 'Cannot use batch mode with transactions');
       request.transaction = explicitTransaction;
     }
+    const response = await this._firestore.request<
+      api.ICommitRequest,
+      api.CommitResponse
+    >('commit', request, tag);
 
-    if (useBatch) {
-      return this._firestore
-        .request<api.IBatchWriteRequest, api.BatchWriteResponse>(
-          'batchWrite',
-          request as api.IBatchWriteRequest,
-          tag
-        )
-        .then(resp => {
-          const zipped: Array<[
-            api.IWriteResult,
-            google.rpc.IStatus
-          ]> = resp.writeResults.map((result, i) => {
-            return [result, resp.status[i]];
-          });
-          if (request.writes!.length > 0) {
-            return zipped.map(
-              ([writeResult, status]) =>
-                new BatchWriteResult(
-                  writeResult.updateTime
-                    ? Timestamp.fromProto(writeResult.updateTime)
-                    : null,
-                  status.code as Status
-                )
-            );
-          }
-          return [];
-        });
-    } else {
-      return this._firestore
-        .request<api.ICommitRequest, api.CommitResponse>('commit', request, tag)
-        .then(resp => {
-          if (request.writes!.length > 0) {
-            const commitTime = Timestamp.fromProto(resp.commitTime!);
-            return resp.writeResults.map(
-              writeResult =>
-                new WriteResult(
-                  writeResult.updateTime
-                    ? Timestamp.fromProto(writeResult.updateTime)
-                    : commitTime
-                )
-            );
-          }
-          return [];
-        });
+    if (request.writes!.length > 0) {
+      return response.writeResults.map(
+        writeResult =>
+          new WriteResult(
+            Timestamp.fromProto(writeResult.updateTime || response.commitTime!)
+          )
+      );
     }
+    return [];
   }
 
   /**

@@ -66,10 +66,6 @@ describe('set() method', () => {
     );
   });
 
-  it('accepts preconditions', () => {
-    writeBatch.set(firestore.doc('sub/doc'), {exists: false});
-  });
-
   it('works with null objects', () => {
     const nullObject = Object.create(null);
     nullObject.bar = 'ack';
@@ -515,6 +511,9 @@ describe('batch support', () => {
                 seconds: 0,
               },
             },
+            {
+              updateTime: null,
+            },
           ],
           status: [{code: 0}, {code: 14}],
         });
@@ -531,8 +530,8 @@ describe('batch support', () => {
   function verifyResponse(writeResults: BatchWriteResult[]) {
     expect(writeResults[0].writeTime!.isEqual(new Timestamp(0, 0))).to.be.true;
     expect(writeResults[1].writeTime).to.be.null;
-    expect(writeResults[0].status).to.equal(Status.OK);
-    expect(writeResults[1].status).to.equal(Status.UNAVAILABLE);
+    expect(writeResults[0].status.code).to.equal(Status.OK);
+    expect(writeResults[1].status.code).to.equal(Status.UNAVAILABLE);
   }
 
   it('commits in batches', () => {
