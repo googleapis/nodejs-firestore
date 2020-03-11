@@ -384,15 +384,18 @@ export class DocumentSnapshot<T = DocumentData> {
     // We only want to use the converter and create a new QueryDocumentSnapshot
     // if a converter has been provided.
     if (this.ref._converter !== defaultConverter) {
-      const ref = new DocumentReference(this.ref.firestore, this.ref._path);
-      const snapshot = new DocumentSnapshotBuilder(ref);
-      snapshot.readTime = this.readTime;
-      snapshot.createTime = this.createTime;
-      snapshot.updateTime = this.updateTime;
-      snapshot.fieldsProto = this._fieldsProto;
-
+      const untypedReference = new DocumentReference(
+        this.ref.firestore,
+        this.ref._path
+      );
       return this.ref._converter.fromFirestore(
-        snapshot.build() as QueryDocumentSnapshot
+        new QueryDocumentSnapshot<DocumentData>(
+          untypedReference,
+          this._fieldsProto!,
+          this.readTime,
+          this.createTime!,
+          this.updateTime!
+        )
       );
     } else {
       const obj: DocumentData = {};
