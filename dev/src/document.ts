@@ -515,7 +515,6 @@ export class DocumentSnapshot<T = DocumentData> {
 export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<
   T
 > {
-
   /**
    * The time the document was created.
    *
