@@ -1079,6 +1079,18 @@ describe('Query class', () => {
       });
   };
 
+  function addDocs(...data: DocumentData[]): Promise<WriteResult[]> {
+    let id = 0; // Guarantees consistent ordering for the first documents
+    return Promise.all(data.map(d => randomCol.doc('' + id++).set(d)));
+  }
+
+  function expectDocs(result: QuerySnapshot, ...data: DocumentData[]) {
+    expect(result.size).to.equal(data.length);
+    result.forEach(doc => {
+      expect(doc.data()).to.deep.equal(data.shift());
+    });
+  }
+
   beforeEach(() => {
     firestore = new Firestore({});
     randomCol = getTestRoot(firestore);
@@ -1159,46 +1171,44 @@ describe('Query class', () => {
       });
   });
 
-  it('supports in', () => {
-    return Promise.all([
-      randomCol.doc('a').set({zip: 98101}),
-      randomCol.doc('b').set({zip: 91102}),
-      randomCol.doc('c').set({zip: 98103}),
-      randomCol.doc('d').set({zip: [98101]}),
-      randomCol.doc('e').set({zip: ['98101', {zip: 98101}]}),
-      randomCol.doc('f').set({zip: {zip: 98101}}),
-    ])
-      .then(() => randomCol.where('zip', 'in', [98101, 98103]).get())
-      .then(res => {
-        expect(res.size).to.equal(2);
-        expect(res.docs[0].data()).to.deep.equal({zip: 98101});
-        expect(res.docs[1].data()).to.deep.equal({zip: 98103});
-      });
+  it('supports in', async () => {
+    await addDocs(
+      {zip: 98101},
+      {zip: 91102},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+    const res = await randomCol.where('zip', 'in', [98101, 98103]).get();
+    expectDocs(res, {zip: 98101}, {zip: 98103});
   });
 
-  it('supports array-contains-any', () => {
-    return Promise.all([
-      randomCol.doc('a').set({array: [42]}),
-      randomCol.doc('b').set({array: ['a', 42, 'c']}),
-      randomCol.doc('c').set({array: [41.999, '42', {a: [42]}]}),
-      randomCol.doc('d').set({array: [42], array2: ['sigh']}),
-      randomCol.doc('e').set({array: [43]}),
-      randomCol.doc('f').set({array: [{a: 42}]}),
-      randomCol.doc('g').set({array: 42}),
-    ])
-      .then(() =>
-        randomCol.where('array', 'array-contains-any', [42, 43]).get()
-      )
-      .then(res => {
-        expect(res.size).to.equal(4);
-        expect(res.docs[0].data()).to.deep.equal({array: [42]});
-        expect(res.docs[1].data()).to.deep.equal({array: ['a', 42, 'c']});
-        expect(res.docs[2].data()).to.deep.equal({
-          array: [42],
-          array2: ['sigh'],
-        });
-        expect(res.docs[3].data()).to.deep.equal({array: [43]});
-      });
+  it('supports array-contains-any', async () => {
+    await addDocs(
+      {array: [42]},
+      {array: ['a', 42, 'c']},
+      {array: [41.999, '42', {a: [42]}]},
+      {array: [42], array2: ['sigh']},
+      {array: [43]},
+      {array: [{a: 42}]},
+      {array: 42}
+    );
+
+    const res = await randomCol
+      .where('array', 'array-contains-any', [42, 43])
+      .get();
+
+    expectDocs(
+      res,
+      {array: [42]},
+      {array: ['a', 42, 'c']},
+      {
+        array: [42],
+        array2: ['sigh'],
+      },
+      {array: [43]}
+    );
   });
 
   it('can query by FieldPath.documentId()', () => {
@@ -1214,23 +1224,14 @@ describe('Query class', () => {
       });
   });
 
-  it('has orderBy() method', () => {
-    const ref1 = randomCol.doc('doc1');
-    const ref2 = randomCol.doc('doc2');
+  it('has orderBy() method', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
 
-    return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol.orderBy('foo').get();
-      })
-      .then(res => {
-        expect(res.docs[0].data()).to.deep.equal({foo: 'a'});
-        expect(res.docs[1].data()).to.deep.equal({foo: 'b'});
-        return randomCol.orderBy('foo', 'desc').get();
-      })
-      .then(res => {
-        expect(res.docs[0].data()).to.deep.equal({foo: 'b'});
-        expect(res.docs[1].data()).to.deep.equal({foo: 'a'});
-      });
+    let res = await randomCol.orderBy('foo').get();
+    expectDocs(res, {foo: 'a'}, {foo: 'b'});
+
+    res = await randomCol.orderBy('foo', 'desc').get();
+    expectDocs(res, {foo: 'b'}, {foo: 'a'});
   });
 
   it('can order by FieldPath.documentId()', () => {
@@ -1247,54 +1248,42 @@ describe('Query class', () => {
       });
   });
 
-  it('has limit() method', () => {
-    const ref1 = randomCol.doc('doc1');
-    const ref2 = randomCol.doc('doc2');
-
-    return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .limit(1)
-          .get();
-      })
-      .then(res => {
-        expect(res.size).to.equal(1);
-        expect(res.docs[0].data()).to.deep.equal({foo: 'a'});
-      });
+  it('has limit() method', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol
+      .orderBy('foo')
+      .limit(1)
+      .get();
+    expectDocs(res, {foo: 'a'});
   });
 
-  it('has offset() method', () => {
-    const ref1 = randomCol.doc('doc1');
-    const ref2 = randomCol.doc('doc2');
-
-    return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .offset(1)
-          .get();
-      })
-      .then(res => {
-        expect(res.size).to.equal(1);
-        expect(res.docs[0].data()).to.deep.equal({foo: 'b'});
-      });
+  it('has limitToLast() method', async () => {
+    await addDocs({doc: 1}, {doc: 2}, {doc: 3});
+    const res = await randomCol
+      .orderBy('doc')
+      .limitToLast(2)
+      .get();
+    expectDocs(res, {doc: 2}, {doc: 3});
   });
 
-  it('has startAt() method', () => {
-    const ref1 = randomCol.doc('doc1');
-    const ref2 = randomCol.doc('doc2');
+  it('limitToLast() supports Query cursors', async () => {
+    await addDocs({doc: 1}, {doc: 2}, {doc: 3}, {doc: 4}, {doc: 5});
+    const res = await randomCol
+      .orderBy('doc')
+      .startAt(2)
+      .endAt(4)
+      .limitToLast(5)
+      .get();
+    expectDocs(res, {doc: 2}, {doc: 3}, {doc: 4});
+  });
 
-    return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .startAt('a')
-          .get();
-      })
-      .then(res => {
-        expect(res.docs[0].data()).to.deep.equal({foo: 'a'});
-      });
+  it('has offset() method', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol
+      .orderBy('foo')
+      .offset(1)
+      .get();
+    expectDocs(res, {foo: 'b'});
   });
 
   it('supports Unicode in document names', async () => {
@@ -1358,55 +1347,40 @@ describe('Query class', () => {
       });
   });
 
-  it('has startAfter() method', () => {
-    const ref1 = randomCol.doc('doc1');
-    const ref2 = randomCol.doc('doc2');
-
-    return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .startAfter('a')
-          .get();
-      })
-      .then(res => {
-        expect(res.docs[0].data()).to.deep.equal({foo: 'b'});
-      });
+  it('has startAt() method', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol
+      .orderBy('foo')
+      .startAt('b')
+      .get();
+    expectDocs(res, {foo: 'b'});
   });
 
-  it('has endAt() method', () => {
-    const ref1 = randomCol.doc('doc1');
-    const ref2 = randomCol.doc('doc2');
-
-    return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .endAt('b')
-          .get();
-      })
-      .then(res => {
-        expect(res.size).to.equal(2);
-        expect(res.docs[0].data()).to.deep.equal({foo: 'a'});
-        expect(res.docs[1].data()).to.deep.equal({foo: 'b'});
-      });
+  it('has startAfter() method', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol
+      .orderBy('foo')
+      .startAfter('a')
+      .get();
+    expectDocs(res, {foo: 'b'});
   });
 
-  it('has endBefore() method', () => {
-    const ref1 = randomCol.doc('doc1');
-    const ref2 = randomCol.doc('doc2');
+  it('has endAt() method', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol
+      .orderBy('foo')
+      .endAt('b')
+      .get();
+    expectDocs(res, {foo: 'a'}, {foo: 'b'});
+  });
 
-    return Promise.all([ref1.set({foo: 'a'}), ref2.set({foo: 'b'})])
-      .then(() => {
-        return randomCol
-          .orderBy('foo')
-          .endBefore('b')
-          .get();
-      })
-      .then(res => {
-        expect(res.size).to.equal(1);
-        expect(res.docs[0].data()).to.deep.equal({foo: 'a'});
-      });
+  it('has endBefore() method', async () => {
+    await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol
+      .orderBy('foo')
+      .endBefore('b')
+      .get();
+    expectDocs(res, {foo: 'a'});
   });
 
   it('has stream() method', done => {
@@ -1819,6 +1793,29 @@ describe('Query class', () => {
           });
           unsubscribe();
         });
+    });
+
+    it('orders limitToLast() correctly', async () => {
+      const ref1 = randomCol.doc('doc1');
+      const ref2 = randomCol.doc('doc2');
+      const ref3 = randomCol.doc('doc3');
+
+      await ref1.set({doc: 1});
+      await ref2.set({doc: 2});
+      await ref3.set({doc: 3});
+
+      const unsubscribe = randomCol
+        .orderBy('doc')
+        .limitToLast(2)
+        .onSnapshot(snapshot => currentDeferred.resolve(snapshot));
+
+      const results = await waitForSnapshot();
+      snapshotsEqual(results, {
+        docs: [snapshot('doc2', {doc: 2}), snapshot('doc3', {doc: 3})],
+        docChanges: [added('doc2', {doc: 2}), added('doc3', {doc: 3})],
+      });
+
+      unsubscribe();
     });
   });
 });

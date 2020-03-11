@@ -965,8 +965,17 @@ docChangesPropertiesToOverride.forEach(property => {
 
 /** Internal representation of a query cursor before serialization. */
 interface QueryCursor {
-  before?: boolean;
+  before: boolean;
   values: unknown[];
+}
+
+/*!
+ * Denotes whether a provided limit is applied to the beginning or the end of
+ * the result set.
+ */
+enum LimitType {
+  First,
+  Last,
 }
 
 /**
@@ -986,6 +995,7 @@ export class QueryOptions<T> {
     readonly startAt?: QueryCursor,
     readonly endAt?: QueryCursor,
     readonly limit?: number,
+    readonly limitType?: LimitType,
     readonly offset?: number,
     readonly projection?: api.StructuredQuery.IProjection
   ) {}
@@ -1041,6 +1051,7 @@ export class QueryOptions<T> {
       coalesce(settings.startAt, this.startAt),
       coalesce(settings.endAt, this.endAt),
       coalesce(settings.limit, this.limit),
+      coalesce(settings.limitType, this.limitType),
       coalesce(settings.offset, this.offset),
       coalesce(settings.projection, this.projection)
     );
@@ -1057,9 +1068,14 @@ export class QueryOptions<T> {
       this.startAt,
       this.endAt,
       this.limit,
+      this.limitType,
       this.offset,
       this.projection
     );
+  }
+
+  hasFieldOrders(): boolean {
+    return this.fieldOrders.length > 0;
   }
 
   isEqual(other: QueryOptions<T>) {
@@ -1328,8 +1344,8 @@ export class Query<T = DocumentData> {
   }
 
   /**
-   * Creates and returns a new [Query]{@link Query} that's additionally limited
-   * to only return up to the specified number of documents.
+   * Creates and returns a new [Query]{@link Query} that only returns the
+   * first matching documents.
    *
    * This function returns a new (immutable) instance of the Query (rather than
    * modify the existing instance) to impose the limit.
@@ -1349,7 +1365,38 @@ export class Query<T = DocumentData> {
   limit(limit: number): Query<T> {
     validateInteger('limit', limit);
 
-    const options = this._queryOptions.with({limit});
+    const options = this._queryOptions.with({
+      limit,
+      limitType: LimitType.First,
+    });
+    return new Query(this._firestore, options);
+  }
+
+  /**
+   * Creates and returns a new [Query]{@link Query} that only returns the
+   * last matching documents.
+   *
+   * You must specify at least one orderBy clause for limitToLast queries,
+   * otherwise an exception will be thrown during execution.
+   *
+   * Results for limitToLast queries cannot be streamed via the `stream()` API.
+   *
+   * @param limit The maximum number of items to return.
+   * @return The created Query.
+   *
+   * @example
+   * let query = firestore.collection('col').where('foo', '>', 42);
+   *
+   * query.limitToLast(1).get().then(querySnapshot => {
+   *   querySnapshot.forEach(documentSnapshot => {
+   *     console.log(`Last matching document is ${documentSnapshot.ref.path}`);
+   *   });
+   * });
+   */
+  limitToLast(limit: number): Query<T> {
+    validateInteger('limitToLast', limit);
+
+    const options = this._queryOptions.with({limit, limitType: LimitType.Last});
     return new Query(this._firestore, options);
   }
 
@@ -1478,11 +1525,7 @@ export class Query<T = DocumentData> {
       );
     }
 
-    const options: QueryCursor = {values: []};
-
-    if (before) {
-      options.before = true;
-    }
+    const options: QueryCursor = {values: [], before};
 
     for (let i = 0; i < fieldValues.length; ++i) {
       let fieldValue = fieldValues[i];
@@ -1744,12 +1787,14 @@ export class Query<T = DocumentData> {
    * @param {bytes=} transactionId A transaction ID.
    */
   _get(transactionId?: Uint8Array): Promise<QuerySnapshot<T>> {
+    const request = this.toProto(transactionId);
+
     const docs: Array<QueryDocumentSnapshot<T>> = [];
 
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
 
-      this._stream(transactionId)
+      this._stream(request)
         .on('error', err => {
           reject(err);
         })
@@ -1760,6 +1805,13 @@ export class Query<T = DocumentData> {
           }
         })
         .on('end', () => {
+          if (this._queryOptions.limitType === LimitType.Last) {
+            // The results for limitToLast queries need to be flipped since
+            // we reversed the ordering constraints before sending the query
+            // to the backend.
+            docs.reverse();
+          }
+
           resolve(
             new QuerySnapshot(
               this,
@@ -1799,7 +1851,15 @@ export class Query<T = DocumentData> {
    * });
    */
   stream(): NodeJS.ReadableStream {
-    const responseStream = this._stream();
+    if (this._queryOptions.limitType === LimitType.Last) {
+      throw new Error(
+        'Query results for queries that include limitToLast() ' +
+          'constraints cannot be streamed. Use Query.get() instead.'
+      );
+    }
+
+    const request = this.toProto();
+    const responseStream = this._stream(request);
 
     const transform = through2.obj(function(this, chunk, encoding, callback) {
       // Only send chunks with documents.
@@ -1816,14 +1876,16 @@ export class Query<T = DocumentData> {
 
   /**
    * Converts a QueryCursor to its proto representation.
+   *
+   * @param cursor The original cursor value
    * @private
    */
-  private _toCursor(cursor?: QueryCursor): api.ICursor | undefined {
+  private toCursor(cursor: QueryCursor | undefined): api.ICursor | undefined {
     if (cursor) {
       const values = cursor.values.map(
         val => this._serializer.encodeValue(val) as api.IValue
       );
-      return {before: cursor.before, values};
+      return cursor.before ? {before: true, values} : {values};
     }
 
     return undefined;
@@ -1875,12 +1937,41 @@ export class Query<T = DocumentData> {
       };
     }
 
-    if (this._queryOptions.fieldOrders.length) {
-      const orderBy: api.StructuredQuery.IOrder[] = [];
-      for (const fieldOrder of this._queryOptions.fieldOrders) {
-        orderBy.push(fieldOrder.toProto());
+    if (this._queryOptions.limitType === LimitType.Last) {
+      if (!this._queryOptions.hasFieldOrders()) {
+        throw new Error(
+          'limitToLast() queries require specifying at least one orderBy() clause.'
+        );
       }
-      structuredQuery.orderBy = orderBy;
+
+      structuredQuery.orderBy = this._queryOptions.fieldOrders!.map(order => {
+        // Flip the orderBy directions since we want the last results
+        const dir =
+          order.direction === 'DESCENDING' ? 'ASCENDING' : 'DESCENDING';
+        return new FieldOrder(order.field, dir).toProto();
+      });
+
+      // Swap the cursors to match the now-flipped query ordering.
+      structuredQuery.startAt = this._queryOptions.endAt
+        ? this.toCursor({
+            values: this._queryOptions.endAt.values,
+            before: !this._queryOptions.endAt.before,
+          })
+        : undefined;
+      structuredQuery.endAt = this._queryOptions.startAt
+        ? this.toCursor({
+            values: this._queryOptions.startAt.values,
+            before: !this._queryOptions.startAt.before,
+          })
+        : undefined;
+    } else {
+      if (this._queryOptions.hasFieldOrders()) {
+        structuredQuery.orderBy = this._queryOptions.fieldOrders.map(o =>
+          o.toProto()
+        );
+      }
+      structuredQuery.startAt = this.toCursor(this._queryOptions.startAt);
+      structuredQuery.endAt = this.toCursor(this._queryOptions.endAt);
     }
 
     if (this._queryOptions.limit) {
@@ -1888,8 +1979,6 @@ export class Query<T = DocumentData> {
     }
 
     structuredQuery.offset = this._queryOptions.offset;
-    structuredQuery.startAt = this._toCursor(this._queryOptions.startAt);
-    structuredQuery.endAt = this._toCursor(this._queryOptions.endAt);
     structuredQuery.select = this._queryOptions.projection;
 
     reqOpts.transaction = transactionId;
@@ -1898,13 +1987,13 @@ export class Query<T = DocumentData> {
   }
 
   /**
-   * Internal streaming method that accepts an optional transaction id.
+   * Internal streaming method that accepts the request proto.
    *
-   * @param transactionId A transaction ID.
+   * @param request The request proto.
    * @private
    * @returns A stream of document results.
    */
-  _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
+  _stream(request: api.IRunQueryRequest): NodeJS.ReadableStream {
     const tag = requestTag();
     const self = this;
 
@@ -1932,7 +2021,6 @@ export class Query<T = DocumentData> {
     });
 
     this.firestore.initializeIfNeeded(tag).then(() => {
-      const request = this.toProto(transactionId);
       this._firestore
         .requestStream('runQuery', request, tag)
         .then(backendStream => {
@@ -2009,12 +2097,11 @@ export class Query<T = DocumentData> {
   ) => number {
     return (doc1, doc2) => {
       // Add implicit sorting by name, using the last specified direction.
-      const lastDirection: api.StructuredQuery.Direction =
-        this._queryOptions.fieldOrders.length === 0
-          ? 'ASCENDING'
-          : this._queryOptions.fieldOrders[
-              this._queryOptions.fieldOrders.length - 1
-            ].direction;
+      const lastDirection = this._queryOptions.hasFieldOrders()
+        ? this._queryOptions.fieldOrders[
+            this._queryOptions.fieldOrders.length - 1
+          ].direction
+        : 'ASCENDING';
       const orderBys = this._queryOptions.fieldOrders.concat(
         new FieldOrder(FieldPath.documentId(), lastDirection)
       );
