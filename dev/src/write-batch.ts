@@ -48,7 +48,7 @@ import {
 } from './validate';
 
 import api = google.firestore.v1;
-import {Status} from 'google-gax';
+import {GoogleError, Status} from 'google-gax';
 
 /*!
  * Google Cloud Functions terminates idle connections after two minutes. After
@@ -104,12 +104,6 @@ export class WriteResult {
   }
 }
 
-/** Helper type to hold a google.rpc.Status object. */
-interface RpcStatus {
-  code: Status;
-  message?: string | null;
-}
-
 /**
  * A BatchWriteResult wraps the write time and status returned by Firestore
  * when making BatchWriteRequests.
@@ -118,23 +112,9 @@ interface RpcStatus {
  */
 export class BatchWriteResult {
   constructor(
-    private readonly _writeTime: Timestamp | null,
-    private readonly _status: RpcStatus
+    readonly writeTime: Timestamp | null,
+    readonly status: GoogleError
   ) {}
-
-  /**
-   * The write time as set by the Firestore servers.
-   */
-  get writeTime(): Timestamp | null {
-    return this._writeTime;
-  }
-
-  /**
-   * The status as set by the Firestore servers.
-   */
-  get status(): RpcStatus {
-    return this._status;
-  }
 }
 
 /** Helper type to manage the list of writes in a WriteBatch. */
@@ -545,30 +525,27 @@ export class WriteBatch {
 
   /**
    * Commits all pending operations to the database and verifies all
-   * preconditions. Fails the entire write if any precondition is not met.
+   * preconditions.
    *
    * The writes in the batch are not applied atomically and can be applied out
    * of order.
    *
    * @private
    */
-  async batchCommit(commitOptions?: {
-    requestTag?: string;
-  }): Promise<BatchWriteResult[]> {
+  async bulkCommit(): Promise<BatchWriteResult[]> {
     this._committed = true;
-    const tag = (commitOptions && commitOptions.requestTag) || requestTag();
+    const tag = requestTag();
     await this._firestore.initializeIfNeeded(tag);
 
     const database = this._firestore.formattedName;
-    const request: api.IBatchWriteRequest = {database};
+    const request: api.IBatchWriteRequest = {database, writes: []};
     const writes = this._ops.map(op => op());
-    request.writes = [];
 
     for (const req of writes) {
       if (req.precondition) {
         req.write!.currentDocument = req.precondition;
       }
-      request.writes.push(req.write);
+      request.writes!.push(req.write);
     }
 
     const response = await this._firestore.request<
@@ -576,16 +553,15 @@ export class WriteBatch {
       api.BatchWriteResponse
     >('batchWrite', request, tag);
 
-    if (request.writes!.length > 0) {
-      return response.writeResults.map((result, i) => {
-        const status = response.status[i];
-        return new BatchWriteResult(
-          result.updateTime ? Timestamp.fromProto(result.updateTime) : null,
-          {code: status.code as Status, message: status.message}
-        );
-      });
-    }
-    return [];
+    return response.writeResults.map((result, i) => {
+      const status = response.status[i];
+      const error = new GoogleError(status.message || undefined);
+      error.code = status.code as Status;
+      return new BatchWriteResult(
+        result.updateTime ? Timestamp.fromProto(result.updateTime) : null,
+        error
+      );
+    });
   }
 
   /**
@@ -626,23 +602,22 @@ export class WriteBatch {
         });
     }
 
-    const request: api.ICommitRequest = {database};
+    const request: api.ICommitRequest = {database, writes: []};
     const writes = this._ops.map(op => op());
-    request.writes = [];
 
     for (const req of writes) {
       if (req.precondition) {
         req.write!.currentDocument = req.precondition;
       }
 
-      request.writes.push(req.write);
+      request.writes!.push(req.write);
     }
 
     logger(
       'WriteBatch.commit',
       tag,
       'Sending %d writes',
-      request.writes.length
+      request.writes!.length
     );
 
     if (explicitTransaction) {
@@ -653,15 +628,12 @@ export class WriteBatch {
       api.CommitResponse
     >('commit', request, tag);
 
-    if (request.writes!.length > 0) {
-      return response.writeResults.map(
-        writeResult =>
-          new WriteResult(
-            Timestamp.fromProto(writeResult.updateTime || response.commitTime!)
-          )
-      );
-    }
-    return [];
+    return response.writeResults.map(
+      writeResult =>
+        new WriteResult(
+          Timestamp.fromProto(writeResult.updateTime || response.commitTime!)
+        )
+    );
   }
 
   /**

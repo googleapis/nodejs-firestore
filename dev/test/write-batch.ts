@@ -66,6 +66,10 @@ describe('set() method', () => {
     );
   });
 
+  it('accepts document data', () => {
+    writeBatch.set(firestore.doc('sub/doc'), {foo: 'bar'});
+  });
+
   it('works with null objects', () => {
     const nullObject = Object.create(null);
     nullObject.bar = 'ack';
@@ -461,7 +465,7 @@ describe('batch support', () => {
   });
 });
 
-describe('batch support', () => {
+describe('bulkCommit support', () => {
   const documentName = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
 
   let firestore: Firestore;
@@ -534,13 +538,13 @@ describe('batch support', () => {
     expect(writeResults[1].status.code).to.equal(Status.UNAVAILABLE);
   }
 
-  it('commits in batches', () => {
+  it('bulkCommit', () => {
     const documentName = firestore.doc('col/doc');
 
     writeBatch.set(documentName, {foo: FieldValue.serverTimestamp()});
     writeBatch.update(documentName, {foo: 'bar'});
 
-    return writeBatch.batchCommit().then(resp => {
+    return writeBatch.bulkCommit().then(resp => {
       verifyResponse(resp);
     });
   });
