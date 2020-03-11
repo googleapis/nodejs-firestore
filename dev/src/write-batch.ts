@@ -553,7 +553,7 @@ export class WriteBatch {
       api.BatchWriteResponse
     >('batchWrite', request, tag);
 
-    return response.writeResults.map((result, i) => {
+    return (response.writeResults || []).map((result, i) => {
       const status = response.status[i];
       const error = new GoogleError(status.message || undefined);
       error.code = status.code as Status;
@@ -628,7 +628,7 @@ export class WriteBatch {
       api.CommitResponse
     >('commit', request, tag);
 
-    return response.writeResults.map(
+    return (response.writeResults || []).map(
       writeResult =>
         new WriteResult(
           Timestamp.fromProto(writeResult.updateTime || response.commitTime!)
