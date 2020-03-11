@@ -965,7 +965,7 @@ docChangesPropertiesToOverride.forEach(property => {
 
 /** Internal representation of a query cursor before serialization. */
 interface QueryCursor {
-  before?: boolean;
+  before: boolean;
   values: unknown[];
 }
 
@@ -1344,8 +1344,8 @@ export class Query<T = DocumentData> {
   }
 
   /**
-   * Creates and returns a new [Query]{@link Query} that's additionally limited
-   * to only return up to the specified number of documents.
+   * Creates and returns a new [Query]{@link Query} that only returns the
+   * first matching documents.
    *
    * This function returns a new (immutable) instance of the Query (rather than
    * modify the existing instance) to impose the limit.
@@ -1373,8 +1373,8 @@ export class Query<T = DocumentData> {
   }
 
   /**
-   * Creates and returns a new Query that only returns the last matching
-   * documents.
+   * Creates and returns a new [Query]{@link Query} that only returns the
+   * last matching documents.
    *
    * You must specify at least one orderBy clause for limitToLast queries,
    * otherwise an exception will be thrown during execution.
@@ -1525,11 +1525,7 @@ export class Query<T = DocumentData> {
       );
     }
 
-    const options: QueryCursor = {values: []};
-
-    if (before) {
-      options.before = true;
-    }
+    const options: QueryCursor = {values: [], before};
 
     for (let i = 0; i < fieldValues.length; ++i) {
       let fieldValue = fieldValues[i];
@@ -1882,20 +1878,14 @@ export class Query<T = DocumentData> {
    * Converts a QueryCursor to its proto representation.
    *
    * @param cursor The original cursor value
-   * @param reverse Whether to flip the "before" value (e.g. for limitToLast
-   * queries)
    * @private
    */
-  private toCursor(
-    cursor: QueryCursor | undefined,
-    reverse = false
-  ): api.ICursor | undefined {
+  private toCursor(cursor: QueryCursor | undefined): api.ICursor | undefined {
     if (cursor) {
       const values = cursor.values.map(
         val => this._serializer.encodeValue(val) as api.IValue
       );
-      const before = (cursor.before === true) !== reverse ? true : undefined;
-      return {before, values};
+      return cursor.before ? {before: true, values} : {values};
     }
 
     return undefined;
@@ -1962,14 +1952,18 @@ export class Query<T = DocumentData> {
       });
 
       // Swap the cursors to match the now-flipped query ordering.
-      structuredQuery.startAt = this.toCursor(
-        this._queryOptions.endAt,
-        /* reverse= */ true
-      );
-      structuredQuery.endAt = this.toCursor(
-        this._queryOptions.startAt,
-        /* reverse= */ true
-      );
+      structuredQuery.startAt = this._queryOptions.endAt
+        ? this.toCursor({
+            values: this._queryOptions.endAt.values,
+            before: !this._queryOptions.endAt.before,
+          })
+        : undefined;
+      structuredQuery.endAt = this._queryOptions.startAt
+        ? this.toCursor({
+            values: this._queryOptions.startAt.values,
+            before: !this._queryOptions.startAt.before,
+          })
+        : undefined;
     } else {
       if (this._queryOptions.hasFieldOrders()) {
         structuredQuery.orderBy = this._queryOptions.fieldOrders.map(o =>
@@ -1993,7 +1987,7 @@ export class Query<T = DocumentData> {
   }
 
   /**
-   * Internal streaming method that accepts the requets proto.
+   * Internal streaming method that accepts the request proto.
    *
    * @param request The request proto.
    * @private

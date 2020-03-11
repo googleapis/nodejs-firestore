@@ -893,8 +893,8 @@ declare namespace FirebaseFirestore {
     ): Query<T>;
 
     /**
-     * Creates and returns a new Query that's additionally limited to only
-     * return up to the specified number of documents.
+     * Creates and returns a new Query that only returns the first matching 
+     * documents.
      *
      * This function returns a new (immutable) instance of the Query (rather
      * than modify the existing instance) to impose the limit.

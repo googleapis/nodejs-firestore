@@ -1270,8 +1270,8 @@ describe('limitToLast() interface', () => {
 
   it('expects number', () => {
     const query = firestore.collection('collectionId');
-    expect(() => query.limit(Infinity)).to.throw(
-      'Value for argument "limit" is not a valid integer.'
+    expect(() => query.limitToLast(Infinity)).to.throw(
+      'Value for argument "limitToLast" is not a valid integer.'
     );
   });
 
