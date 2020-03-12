@@ -48,6 +48,7 @@ import {
 } from './validate';
 
 import api = google.firestore.v1;
+import {GoogleError, Status} from 'google-gax';
 
 /*!
  * Google Cloud Functions terminates idle connections after two minutes. After
@@ -101,6 +102,19 @@ export class WriteResult {
         this._writeTime.isEqual(other._writeTime))
     );
   }
+}
+
+/**
+ * A BatchWriteResult wraps the write time and status returned by Firestore
+ * when making BatchWriteRequests.
+ *
+ * @private
+ */
+export class BatchWriteResult {
+  constructor(
+    readonly writeTime: Timestamp | null,
+    readonly status: GoogleError
+  ) {}
 }
 
 /** Helper type to manage the list of writes in a WriteBatch. */
@@ -510,6 +524,47 @@ export class WriteBatch {
   }
 
   /**
+   * Commits all pending operations to the database and verifies all
+   * preconditions.
+   *
+   * The writes in the batch are not applied atomically and can be applied out
+   * of order.
+   *
+   * @private
+   */
+  async bulkCommit(): Promise<BatchWriteResult[]> {
+    this._committed = true;
+    const tag = requestTag();
+    await this._firestore.initializeIfNeeded(tag);
+
+    const database = this._firestore.formattedName;
+    const request: api.IBatchWriteRequest = {database, writes: []};
+    const writes = this._ops.map(op => op());
+
+    for (const req of writes) {
+      if (req.precondition) {
+        req.write!.currentDocument = req.precondition;
+      }
+      request.writes!.push(req.write);
+    }
+
+    const response = await this._firestore.request<
+      api.IBatchWriteRequest,
+      api.BatchWriteResponse
+    >('batchWrite', request, tag);
+
+    return (response.writeResults || []).map((result, i) => {
+      const status = response.status[i];
+      const error = new GoogleError(status.message || undefined);
+      error.code = status.code as Status;
+      return new BatchWriteResult(
+        result.updateTime ? Timestamp.fromProto(result.updateTime) : null,
+        error
+      );
+    });
+  }
+
+  /**
    * Commit method that takes an optional transaction ID.
    *
    * @private
@@ -547,45 +602,38 @@ export class WriteBatch {
         });
     }
 
-    const request: api.ICommitRequest = {database};
+    const request: api.ICommitRequest = {database, writes: []};
     const writes = this._ops.map(op => op());
-    request.writes = [];
 
     for (const req of writes) {
       if (req.precondition) {
         req.write!.currentDocument = req.precondition;
       }
 
-      request.writes.push(req.write);
+      request.writes!.push(req.write);
     }
 
     logger(
       'WriteBatch.commit',
       tag,
       'Sending %d writes',
-      request.writes.length
+      request.writes!.length
     );
 
     if (explicitTransaction) {
       request.transaction = explicitTransaction;
     }
+    const response = await this._firestore.request<
+      api.ICommitRequest,
+      api.CommitResponse
+    >('commit', request, tag);
 
-    return this._firestore
-      .request<api.ICommitRequest, api.CommitResponse>('commit', request, tag)
-      .then(resp => {
-        if (request.writes!.length > 0) {
-          const commitTime = Timestamp.fromProto(resp.commitTime!);
-          return resp.writeResults.map(
-            writeResult =>
-              new WriteResult(
-                writeResult.updateTime
-                  ? Timestamp.fromProto(writeResult.updateTime)
-                  : commitTime
-              )
-          );
-        }
-        return [];
-      });
+    return (response.writeResults || []).map(
+      writeResult =>
+        new WriteResult(
+          Timestamp.fromProto(writeResult.updateTime || response.commitTime!)
+        )
+    );
   }
 
   /**
