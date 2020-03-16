@@ -1278,7 +1278,7 @@ describe('limitToLast() interface', () => {
     );
   });
 
-  it('requires at least one ordering constraints (for Query.get())', () => {
+  it('requires at least one ordering constraints', () => {
     const query = firestore.collection('collectionId');
     const result = query.limitToLast(1).get();
     return expect(result).to.eventually.be.rejectedWith(
