@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {expect} from 'chai';
+import {expect, use} from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -42,6 +43,8 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(() => {});
+
+use(chaiAsPromised);
 
 function snapshot(
   relativePath: string,
@@ -1277,7 +1280,8 @@ describe('limitToLast() interface', () => {
 
   it('requires at least one ordering constraints', () => {
     const query = firestore.collection('collectionId');
-    expect(() => query.limitToLast(1).get()).to.throw(
+    const result = query.limitToLast(1).get();
+    return expect(result).to.eventually.be.rejectedWith(
       'limitToLast() queries require specifying at least one orderBy() clause.'
     );
   });
