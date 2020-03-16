@@ -1787,14 +1787,12 @@ export class Query<T = DocumentData> {
    * @param {bytes=} transactionId A transaction ID.
    */
   _get(transactionId?: Uint8Array): Promise<QuerySnapshot<T>> {
-    const request = this.toProto(transactionId);
-
     const docs: Array<QueryDocumentSnapshot<T>> = [];
 
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
 
-      this._stream(request)
+      this._stream(transactionId)
         .on('error', err => {
           reject(err);
         })
@@ -1858,8 +1856,7 @@ export class Query<T = DocumentData> {
       );
     }
 
-    const request = this.toProto();
-    const responseStream = this._stream(request);
+    const responseStream = this._stream();
 
     const transform = through2.obj(function(this, chunk, encoding, callback) {
       // Only send chunks with documents.
@@ -1989,11 +1986,11 @@ export class Query<T = DocumentData> {
   /**
    * Internal streaming method that accepts the request proto.
    *
-   * @param request The request proto.
+   * @param transactionId A transaction ID.
    * @private
    * @returns A stream of document results.
    */
-  _stream(request: api.IRunQueryRequest): NodeJS.ReadableStream {
+  _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
     const self = this;
 
@@ -2020,26 +2017,30 @@ export class Query<T = DocumentData> {
       callback();
     });
 
-    this.firestore.initializeIfNeeded(tag).then(() => {
-      this._firestore
-        .requestStream('runQuery', request, tag)
-        .then(backendStream => {
-          backendStream.on('error', err => {
-            logger(
-              'Query._stream',
-              tag,
-              'Query failed with stream error:',
-              err
-            );
+    this.firestore
+      .initializeIfNeeded(tag)
+      .then(async () => {
+        const request = this.toProto(transactionId);
+        this._firestore
+          .requestStream('runQuery', request, tag)
+          .then(backendStream => {
+            backendStream.on('error', err => {
+              logger(
+                'Query._stream',
+                tag,
+                'Query failed with stream error:',
+                err
+              );
+              stream.destroy(err);
+            });
+            backendStream.resume();
+            backendStream.pipe(stream);
+          })
+          .catch(err => {
             stream.destroy(err);
           });
-          backendStream.resume();
-          backendStream.pipe(stream);
-        })
-        .catch(err => {
-          stream.destroy(err);
-        });
-    });
+      })
+      .catch(e => stream.destroy(e));
 
     return stream;
   }
