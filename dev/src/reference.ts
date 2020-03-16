@@ -1984,7 +1984,7 @@ export class Query<T = DocumentData> {
   }
 
   /**
-   * Internal streaming method that accepts the request proto.
+   * Internal streaming method that accepts an optional transaction ID.
    *
    * @param transactionId A transaction ID.
    * @private
@@ -2020,25 +2020,19 @@ export class Query<T = DocumentData> {
     this.firestore
       .initializeIfNeeded(tag)
       .then(async () => {
+        // `toProto()` might throw an exception. We rely on the behavior of an
+        // async function to convert this exception into the rejected Promise we
+        // catch below.
         const request = this.toProto(transactionId);
-        this._firestore
-          .requestStream('runQuery', request, tag)
-          .then(backendStream => {
-            backendStream.on('error', err => {
-              logger(
-                'Query._stream',
-                tag,
-                'Query failed with stream error:',
-                err
-              );
-              stream.destroy(err);
-            });
-            backendStream.resume();
-            backendStream.pipe(stream);
-          })
-          .catch(err => {
-            stream.destroy(err);
-          });
+        return this._firestore.requestStream('runQuery', request, tag);
+      })
+      .then(backendStream => {
+        backendStream.on('error', err => {
+          logger('Query._stream', tag, 'Query failed with stream error:', err);
+          stream.destroy(err);
+        });
+        backendStream.resume();
+        backendStream.pipe(stream);
       })
       .catch(e => stream.destroy(e));
 
