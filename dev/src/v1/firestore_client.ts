@@ -50,13 +50,8 @@ export class FirestoreClient {
   private _descriptors: Descriptors = {page: {}, stream: {}, longrunning: {}};
   private _innerApiCalls: {[name: string]: Function};
   private _terminated = false;
-  private _opts: ClientOptions;
-  private _gaxModule: typeof gax | typeof gax.fallback;
-  private _gaxGrpc: gax.GrpcClient | gax.fallback.GrpcClient;
-  private _protos: {};
-  private _defaults: {[method: string]: gax.CallSettings};
   auth: gax.GoogleAuth;
-  firestoreStub?: Promise<{[name: string]: Function}>;
+  firestoreStub: Promise<{[name: string]: Function}>;
 
   /**
    * Construct an instance of FirestoreClient.
@@ -80,6 +75,8 @@ export class FirestoreClient {
    *     app is running in an environment which supports
    *     {@link https://developers.google.com/identity/protocols/application-default-credentials Application Default Credentials},
    *     your project ID will be detected automatically.
+   * @param {function} [options.promise] - Custom promise module to use instead
+   *     of native Promises.
    * @param {string} [options.apiEndpoint] - The domain name of the
    *     API remote host.
    */
@@ -109,28 +106,25 @@ export class FirestoreClient {
     // If we are in browser, we are already using fallback because of the
     // "browser" field in package.json.
     // But if we were explicitly requested to use fallback, let's do it now.
-    this._gaxModule = !isBrowser && opts.fallback ? gax.fallback : gax;
+    const gaxModule = !isBrowser && opts.fallback ? gax.fallback : gax;
 
     // Create a `gaxGrpc` object, with any grpc-specific options
     // sent to the client.
     opts.scopes = (this.constructor as typeof FirestoreClient).scopes;
-    this._gaxGrpc = new this._gaxModule.GrpcClient(opts);
-
-    // Save options to use in initialize() method.
-    this._opts = opts;
+    const gaxGrpc = new gaxModule.GrpcClient(opts);
 
     // Save the auth object to the client, for use by other methods.
-    this.auth = this._gaxGrpc.auth as gax.GoogleAuth;
+    this.auth = gaxGrpc.auth as gax.GoogleAuth;
 
     // Determine the client header string.
-    const clientHeader = [`gax/${this._gaxModule.version}`, `gapic/${version}`];
+    const clientHeader = [`gax/${gaxModule.version}`, `gapic/${version}`];
     if (typeof process !== 'undefined' && 'versions' in process) {
       clientHeader.push(`gl-node/${process.versions.node}`);
     } else {
-      clientHeader.push(`gl-web/${this._gaxModule.version}`);
+      clientHeader.push(`gl-web/${gaxModule.version}`);
     }
     if (!opts.fallback) {
-      clientHeader.push(`grpc/${this._gaxGrpc.grpcVersion}`);
+      clientHeader.push(`grpc/${gaxGrpc.grpcVersion}`);
     }
     if (opts.libName && opts.libVersion) {
       clientHeader.push(`${opts.libName}/${opts.libVersion}`);
@@ -146,7 +140,7 @@ export class FirestoreClient {
       'protos',
       'protos.json'
     );
-    this._protos = this._gaxGrpc.loadProto(
+    const protos = gaxGrpc.loadProto(
       opts.fallback ? require('../../protos/protos.json') : nodejsProtoPath
     );
 
@@ -154,12 +148,12 @@ export class FirestoreClient {
     // (e.g. 50 results at a time, with tokens to get subsequent
     // pages). Denote the keys used for pagination and results.
     this._descriptors.page = {
-      listDocuments: new this._gaxModule.PageDescriptor(
+      listDocuments: new gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
         'documents'
       ),
-      listCollectionIds: new this._gaxModule.PageDescriptor(
+      listCollectionIds: new gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
         'collectionIds'
@@ -169,22 +163,16 @@ export class FirestoreClient {
     // Some of the methods on this service provide streaming responses.
     // Provide descriptors for these.
     this._descriptors.stream = {
-      batchGetDocuments: new this._gaxModule.StreamDescriptor(
+      batchGetDocuments: new gaxModule.StreamDescriptor(
         gax.StreamType.SERVER_STREAMING
       ),
-      runQuery: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.SERVER_STREAMING
-      ),
-      write: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING
-      ),
-      listen: new this._gaxModule.StreamDescriptor(
-        gax.StreamType.BIDI_STREAMING
-      ),
+      runQuery: new gaxModule.StreamDescriptor(gax.StreamType.SERVER_STREAMING),
+      write: new gaxModule.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
+      listen: new gaxModule.StreamDescriptor(gax.StreamType.BIDI_STREAMING),
     };
 
     // Put together the default options sent with requests.
-    this._defaults = this._gaxGrpc.constructSettings(
+    const defaults = gaxGrpc.constructSettings(
       'google.firestore.v1.Firestore',
       gapicConfig as gax.ClientConfig,
       opts.clientConfig || {},
@@ -195,35 +183,17 @@ export class FirestoreClient {
     // of calling the API is handled in `google-gax`, with this code
     // merely providing the destination and request information.
     this._innerApiCalls = {};
-  }
-
-  /**
-   * Initialize the client.
-   * Performs asynchronous operations (such as authentication) and prepares the client.
-   * This function will be called automatically when any class method is called for the
-   * first time, but if you need to initialize it before calling an actual method,
-   * feel free to call initialize() directly.
-   *
-   * You can await on this method if you want to make sure the client is initialized.
-   *
-   * @returns {Promise} A promise that resolves to an authenticated service stub.
-   */
-  initialize() {
-    // If the client stub promise is already initialized, return immediately.
-    if (this.firestoreStub) {
-      return this.firestoreStub;
-    }
 
     // Put together the "service stub" for
     // google.firestore.v1.Firestore.
-    this.firestoreStub = this._gaxGrpc.createStub(
-      this._opts.fallback
-        ? (this._protos as protobuf.Root).lookupService(
+    this.firestoreStub = gaxGrpc.createStub(
+      opts.fallback
+        ? (protos as protobuf.Root).lookupService(
             'google.firestore.v1.Firestore'
           )
         : // tslint:disable-next-line no-any
-          (this._protos as any).google.firestore.v1.Firestore,
-      this._opts
+          (protos as any).google.firestore.v1.Firestore,
+      opts
     ) as Promise<{[method: string]: Function}>;
 
     // Iterate over each of the methods that the service provides
@@ -257,9 +227,9 @@ export class FirestoreClient {
         }
       );
 
-      const apiCall = this._gaxModule.createApiCall(
+      const apiCall = gaxModule.createApiCall(
         innerCallPromise,
-        this._defaults[methodName],
+        defaults[methodName],
         this._descriptors.page[methodName] ||
           this._descriptors.stream[methodName] ||
           this._descriptors.longrunning[methodName]
@@ -273,8 +243,6 @@ export class FirestoreClient {
         return apiCall(argument, callOptions, callback);
       };
     }
-
-    return this.firestoreStub;
   }
 
   /**
@@ -410,7 +378,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       name: request.name || '',
     });
-    this.initialize();
     return this._innerApiCalls.getDocument(request, options, callback);
   }
   updateDocument(
@@ -499,7 +466,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       'document.name': request.document!.name || '',
     });
-    this.initialize();
     return this._innerApiCalls.updateDocument(request, options, callback);
   }
   deleteDocument(
@@ -575,7 +541,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       name: request.name || '',
     });
-    this.initialize();
     return this._innerApiCalls.deleteDocument(request, options, callback);
   }
   beginTransaction(
@@ -651,7 +616,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       database: request.database || '',
     });
-    this.initialize();
     return this._innerApiCalls.beginTransaction(request, options, callback);
   }
   commit(
@@ -730,7 +694,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       database: request.database || '',
     });
-    this.initialize();
     return this._innerApiCalls.commit(request, options, callback);
   }
   rollback(
@@ -805,7 +768,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       database: request.database || '',
     });
-    this.initialize();
     return this._innerApiCalls.rollback(request, options, callback);
   }
   createDocument(
@@ -892,7 +854,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       parent: request.parent || '',
     });
-    this.initialize();
     return this._innerApiCalls.createDocument(request, options, callback);
   }
 
@@ -945,7 +906,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       database: request.database || '',
     });
-    this.initialize();
     return this._innerApiCalls.batchGetDocuments(request, options);
   }
 
@@ -991,7 +951,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       parent: request.parent || '',
     });
-    this.initialize();
     return this._innerApiCalls.runQuery(request, options);
   }
 
@@ -1006,7 +965,6 @@ export class FirestoreClient {
    *   will emit objects representing [WriteResponse]{@link google.firestore.v1.WriteResponse} on 'data' event asynchronously.
    */
   write(options?: gax.CallOptions): gax.CancellableStream {
-    this.initialize();
     return this._innerApiCalls.write(options);
   }
 
@@ -1021,7 +979,6 @@ export class FirestoreClient {
    *   will emit objects representing [ListenResponse]{@link google.firestore.v1.ListenResponse} on 'data' event asynchronously.
    */
   listen(options?: gax.CallOptions): gax.CancellableStream {
-    this.initialize();
     return this._innerApiCalls.listen({}, options);
   }
 
@@ -1078,8 +1035,8 @@ export class FirestoreClient {
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
-   *   be returned with a key but will not have fields, {@link google.firestore.v1.Document.create_time|Document.create_time},
-   *   or {@link google.firestore.v1.Document.update_time|Document.update_time} set.
+   *   be returned with a key but will not have fields, [Document.create_time][google.firestore.v1.Document.create_time],
+   *   or [Document.update_time][google.firestore.v1.Document.update_time] set.
    *
    *   Requests with `show_missing` may not specify `where` or
    *   `order_by`.
@@ -1138,7 +1095,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       parent: request.parent || '',
     });
-    this.initialize();
     return this._innerApiCalls.listDocuments(request, options, callback);
   }
 
@@ -1186,8 +1142,8 @@ export class FirestoreClient {
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
-   *   be returned with a key but will not have fields, {@link google.firestore.v1.Document.create_time|Document.create_time},
-   *   or {@link google.firestore.v1.Document.update_time|Document.update_time} set.
+   *   be returned with a key but will not have fields, [Document.create_time][google.firestore.v1.Document.create_time],
+   *   or [Document.update_time][google.firestore.v1.Document.update_time] set.
    *
    *   Requests with `show_missing` may not specify `where` or
    *   `order_by`.
@@ -1210,7 +1166,6 @@ export class FirestoreClient {
       parent: request.parent || '',
     });
     const callSettings = new gax.CallSettings(options);
-    this.initialize();
     return this._descriptors.page.listDocuments.createStream(
       this._innerApiCalls.listDocuments as gax.GaxCall,
       request,
@@ -1250,7 +1205,7 @@ export class FirestoreClient {
    *   The maximum number of results to return.
    * @param {string} request.pageToken
    *   A page token. Must be a value from
-   *   {@link google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
+   *   [ListCollectionIdsResponse][google.firestore.v1.ListCollectionIdsResponse].
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1306,7 +1261,6 @@ export class FirestoreClient {
     ] = gax.routingHeader.fromParams({
       parent: request.parent || '',
     });
-    this.initialize();
     return this._innerApiCalls.listCollectionIds(request, options, callback);
   }
 
@@ -1334,7 +1288,7 @@ export class FirestoreClient {
    *   The maximum number of results to return.
    * @param {string} request.pageToken
    *   A page token. Must be a value from
-   *   {@link google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
+   *   [ListCollectionIdsResponse][google.firestore.v1.ListCollectionIdsResponse].
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1354,7 +1308,6 @@ export class FirestoreClient {
       parent: request.parent || '',
     });
     const callSettings = new gax.CallSettings(options);
-    this.initialize();
     return this._descriptors.page.listCollectionIds.createStream(
       this._innerApiCalls.listCollectionIds as gax.GaxCall,
       request,
@@ -1368,9 +1321,8 @@ export class FirestoreClient {
    * The client will no longer be usable and all future behavior is undefined.
    */
   close(): Promise<void> {
-    this.initialize();
     if (!this._terminated) {
-      return this.firestoreStub!.then(stub => {
+      return this.firestoreStub.then(stub => {
         this._terminated = true;
         stub.close();
       });

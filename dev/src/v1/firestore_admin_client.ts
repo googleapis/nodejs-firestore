@@ -46,14 +46,9 @@ export class FirestoreAdminClient {
   private _innerApiCalls: {[name: string]: Function};
   private _pathTemplates: {[name: string]: gax.PathTemplate};
   private _terminated = false;
-  private _opts: ClientOptions;
-  private _gaxModule: typeof gax | typeof gax.fallback;
-  private _gaxGrpc: gax.GrpcClient | gax.fallback.GrpcClient;
-  private _protos: {};
-  private _defaults: {[method: string]: gax.CallSettings};
   auth: gax.GoogleAuth;
   operationsClient: gax.OperationsClient;
-  firestoreAdminStub?: Promise<{[name: string]: Function}>;
+  firestoreAdminStub: Promise<{[name: string]: Function}>;
 
   /**
    * Construct an instance of FirestoreAdminClient.
@@ -77,6 +72,8 @@ export class FirestoreAdminClient {
    *     app is running in an environment which supports
    *     {@link https://developers.google.com/identity/protocols/application-default-credentials Application Default Credentials},
    *     your project ID will be detected automatically.
+   * @param {function} [options.promise] - Custom promise module to use instead
+   *     of native Promises.
    * @param {string} [options.apiEndpoint] - The domain name of the
    *     API remote host.
    */
@@ -106,28 +103,25 @@ export class FirestoreAdminClient {
     // If we are in browser, we are already using fallback because of the
     // "browser" field in package.json.
     // But if we were explicitly requested to use fallback, let's do it now.
-    this._gaxModule = !isBrowser && opts.fallback ? gax.fallback : gax;
+    const gaxModule = !isBrowser && opts.fallback ? gax.fallback : gax;
 
     // Create a `gaxGrpc` object, with any grpc-specific options
     // sent to the client.
     opts.scopes = (this.constructor as typeof FirestoreAdminClient).scopes;
-    this._gaxGrpc = new this._gaxModule.GrpcClient(opts);
-
-    // Save options to use in initialize() method.
-    this._opts = opts;
+    const gaxGrpc = new gaxModule.GrpcClient(opts);
 
     // Save the auth object to the client, for use by other methods.
-    this.auth = this._gaxGrpc.auth as gax.GoogleAuth;
+    this.auth = gaxGrpc.auth as gax.GoogleAuth;
 
     // Determine the client header string.
-    const clientHeader = [`gax/${this._gaxModule.version}`, `gapic/${version}`];
+    const clientHeader = [`gax/${gaxModule.version}`, `gapic/${version}`];
     if (typeof process !== 'undefined' && 'versions' in process) {
       clientHeader.push(`gl-node/${process.versions.node}`);
     } else {
-      clientHeader.push(`gl-web/${this._gaxModule.version}`);
+      clientHeader.push(`gl-web/${gaxModule.version}`);
     }
     if (!opts.fallback) {
-      clientHeader.push(`grpc/${this._gaxGrpc.grpcVersion}`);
+      clientHeader.push(`grpc/${gaxGrpc.grpcVersion}`);
     }
     if (opts.libName && opts.libVersion) {
       clientHeader.push(`${opts.libName}/${opts.libVersion}`);
@@ -143,7 +137,7 @@ export class FirestoreAdminClient {
       'protos',
       'protos.json'
     );
-    this._protos = this._gaxGrpc.loadProto(
+    const protos = gaxGrpc.loadProto(
       opts.fallback ? require('../../protos/protos.json') : nodejsProtoPath
     );
 
@@ -151,16 +145,16 @@ export class FirestoreAdminClient {
     // identifiers to uniquely identify resources within the API.
     // Create useful helper objects for these.
     this._pathTemplates = {
-      collectionGroupPathTemplate: new this._gaxModule.PathTemplate(
+      collectionGroupPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}'
       ),
-      databasePathTemplate: new this._gaxModule.PathTemplate(
+      databasePathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}'
       ),
-      fieldPathTemplate: new this._gaxModule.PathTemplate(
+      fieldPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}'
       ),
-      indexPathTemplate: new this._gaxModule.PathTemplate(
+      indexPathTemplate: new gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}'
       ),
     };
@@ -169,12 +163,12 @@ export class FirestoreAdminClient {
     // (e.g. 50 results at a time, with tokens to get subsequent
     // pages). Denote the keys used for pagination and results.
     this._descriptors.page = {
-      listIndexes: new this._gaxModule.PageDescriptor(
+      listIndexes: new gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
         'indexes'
       ),
-      listFields: new this._gaxModule.PageDescriptor(
+      listFields: new gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
         'fields'
@@ -185,15 +179,13 @@ export class FirestoreAdminClient {
     // an Operation object that allows for tracking of the operation,
     // rather than holding a request open.
     const protoFilesRoot = opts.fallback
-      ? this._gaxModule.protobuf.Root.fromJSON(
-          require('../../protos/protos.json')
-        )
-      : this._gaxModule.protobuf.loadSync(nodejsProtoPath);
+      ? gaxModule.protobuf.Root.fromJSON(require('../../protos/protos.json'))
+      : gaxModule.protobuf.loadSync(nodejsProtoPath);
 
-    this.operationsClient = this._gaxModule
+    this.operationsClient = gaxModule
       .lro({
         auth: this.auth,
-        grpc: 'grpc' in this._gaxGrpc ? this._gaxGrpc.grpc : undefined,
+        grpc: 'grpc' in gaxGrpc ? gaxGrpc.grpc : undefined,
       })
       .operationsClient(opts);
     const createIndexResponse = protoFilesRoot.lookup(
@@ -222,22 +214,22 @@ export class FirestoreAdminClient {
     ) as gax.protobuf.Type;
 
     this._descriptors.longrunning = {
-      createIndex: new this._gaxModule.LongrunningDescriptor(
+      createIndex: new gaxModule.LongrunningDescriptor(
         this.operationsClient,
         createIndexResponse.decode.bind(createIndexResponse),
         createIndexMetadata.decode.bind(createIndexMetadata)
       ),
-      updateField: new this._gaxModule.LongrunningDescriptor(
+      updateField: new gaxModule.LongrunningDescriptor(
         this.operationsClient,
         updateFieldResponse.decode.bind(updateFieldResponse),
         updateFieldMetadata.decode.bind(updateFieldMetadata)
       ),
-      exportDocuments: new this._gaxModule.LongrunningDescriptor(
+      exportDocuments: new gaxModule.LongrunningDescriptor(
         this.operationsClient,
         exportDocumentsResponse.decode.bind(exportDocumentsResponse),
         exportDocumentsMetadata.decode.bind(exportDocumentsMetadata)
       ),
-      importDocuments: new this._gaxModule.LongrunningDescriptor(
+      importDocuments: new gaxModule.LongrunningDescriptor(
         this.operationsClient,
         importDocumentsResponse.decode.bind(importDocumentsResponse),
         importDocumentsMetadata.decode.bind(importDocumentsMetadata)
@@ -245,7 +237,7 @@ export class FirestoreAdminClient {
     };
 
     // Put together the default options sent with requests.
-    this._defaults = this._gaxGrpc.constructSettings(
+    const defaults = gaxGrpc.constructSettings(
       'google.firestore.admin.v1.FirestoreAdmin',
       gapicConfig as gax.ClientConfig,
       opts.clientConfig || {},
@@ -256,35 +248,17 @@ export class FirestoreAdminClient {
     // of calling the API is handled in `google-gax`, with this code
     // merely providing the destination and request information.
     this._innerApiCalls = {};
-  }
-
-  /**
-   * Initialize the client.
-   * Performs asynchronous operations (such as authentication) and prepares the client.
-   * This function will be called automatically when any class method is called for the
-   * first time, but if you need to initialize it before calling an actual method,
-   * feel free to call initialize() directly.
-   *
-   * You can await on this method if you want to make sure the client is initialized.
-   *
-   * @returns {Promise} A promise that resolves to an authenticated service stub.
-   */
-  initialize() {
-    // If the client stub promise is already initialized, return immediately.
-    if (this.firestoreAdminStub) {
-      return this.firestoreAdminStub;
-    }
 
     // Put together the "service stub" for
     // google.firestore.admin.v1.FirestoreAdmin.
-    this.firestoreAdminStub = this._gaxGrpc.createStub(
-      this._opts.fallback
-        ? (this._protos as protobuf.Root).lookupService(
+    this.firestoreAdminStub = gaxGrpc.createStub(
+      opts.fallback
+        ? (protos as protobuf.Root).lookupService(
             'google.firestore.admin.v1.FirestoreAdmin'
           )
         : // tslint:disable-next-line no-any
-          (this._protos as any).google.firestore.admin.v1.FirestoreAdmin,
-      this._opts
+          (protos as any).google.firestore.admin.v1.FirestoreAdmin,
+      opts
     ) as Promise<{[method: string]: Function}>;
 
     // Iterate over each of the methods that the service provides
@@ -314,9 +288,9 @@ export class FirestoreAdminClient {
         }
       );
 
-      const apiCall = this._gaxModule.createApiCall(
+      const apiCall = gaxModule.createApiCall(
         innerCallPromise,
-        this._defaults[methodName],
+        defaults[methodName],
         this._descriptors.page[methodName] ||
           this._descriptors.stream[methodName] ||
           this._descriptors.longrunning[methodName]
@@ -330,8 +304,6 @@ export class FirestoreAdminClient {
         return apiCall(argument, callOptions, callback);
       };
     }
-
-    return this.firestoreAdminStub;
   }
 
   /**
@@ -457,7 +429,6 @@ export class FirestoreAdminClient {
     ] = gax.routingHeader.fromParams({
       name: request.name || '',
     });
-    this.initialize();
     return this._innerApiCalls.getIndex(request, options, callback);
   }
   deleteIndex(
@@ -530,7 +501,6 @@ export class FirestoreAdminClient {
     ] = gax.routingHeader.fromParams({
       name: request.name || '',
     });
-    this.initialize();
     return this._innerApiCalls.deleteIndex(request, options, callback);
   }
   getField(
@@ -603,7 +573,6 @@ export class FirestoreAdminClient {
     ] = gax.routingHeader.fromParams({
       name: request.name || '',
     });
-    this.initialize();
     return this._innerApiCalls.getField(request, options, callback);
   }
 
@@ -633,9 +602,9 @@ export class FirestoreAdminClient {
     >
   ): void;
   /**
-   * Creates a composite index. This returns a {@link google.longrunning.Operation|google.longrunning.Operation}
+   * Creates a composite index. This returns a [google.longrunning.Operation][google.longrunning.Operation]
    * which may be used to track the status of the creation. The metadata for
-   * the operation will be the type {@link google.firestore.admin.v1.IndexOperationMetadata|IndexOperationMetadata}.
+   * the operation will be the type [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
    *
    * @param {Object} request
    *   The request object that will be sent.
@@ -696,7 +665,6 @@ export class FirestoreAdminClient {
     ] = gax.routingHeader.fromParams({
       parent: request.parent || '',
     });
-    this.initialize();
     return this._innerApiCalls.createIndex(request, options, callback);
   }
   updateField(
@@ -727,13 +695,13 @@ export class FirestoreAdminClient {
   /**
    * Updates a field configuration. Currently, field updates apply only to
    * single field index configuration. However, calls to
-   * {@link google.firestore.admin.v1.FirestoreAdmin.UpdateField|FirestoreAdmin.UpdateField} should provide a field mask to avoid
+   * [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField] should provide a field mask to avoid
    * changing any configuration that the caller isn't aware of. The field mask
    * should be specified as: `{ paths: "index_config" }`.
    *
-   * This call returns a {@link google.longrunning.Operation|google.longrunning.Operation} which may be used to
+   * This call returns a [google.longrunning.Operation][google.longrunning.Operation] which may be used to
    * track the status of the field update. The metadata for
-   * the operation will be the type {@link google.firestore.admin.v1.FieldOperationMetadata|FieldOperationMetadata}.
+   * the operation will be the type [FieldOperationMetadata][google.firestore.admin.v1.FieldOperationMetadata].
    *
    * To configure the default field settings for the database, use
    * the special `Field` with resource name:
@@ -798,7 +766,6 @@ export class FirestoreAdminClient {
     ] = gax.routingHeader.fromParams({
       'field.name': request.field!.name || '',
     });
-    this.initialize();
     return this._innerApiCalls.updateField(request, options, callback);
   }
   exportDocuments(
@@ -904,7 +871,6 @@ export class FirestoreAdminClient {
     ] = gax.routingHeader.fromParams({
       name: request.name || '',
     });
-    this.initialize();
     return this._innerApiCalls.exportDocuments(request, options, callback);
   }
   importDocuments(
@@ -952,7 +918,7 @@ export class FirestoreAdminClient {
    *   This must match the output_uri_prefix of an ExportDocumentsResponse from
    *   an export that has completed successfully.
    *   See:
-   *   {@link google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix|google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix}.
+   *   [google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix][google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix].
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -1005,7 +971,6 @@ export class FirestoreAdminClient {
     ] = gax.routingHeader.fromParams({
       name: request.name || '',
     });
-    this.initialize();
     return this._innerApiCalls.importDocuments(request, options, callback);
   }
   listIndexes(
@@ -1041,7 +1006,7 @@ export class FirestoreAdminClient {
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes}, that may be used to get the next
+   *   [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes], that may be used to get the next
    *   page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
@@ -1098,7 +1063,6 @@ export class FirestoreAdminClient {
     ] = gax.routingHeader.fromParams({
       parent: request.parent || '',
     });
-    this.initialize();
     return this._innerApiCalls.listIndexes(request, options, callback);
   }
 
@@ -1126,7 +1090,7 @@ export class FirestoreAdminClient {
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes}, that may be used to get the next
+   *   [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes], that may be used to get the next
    *   page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
@@ -1147,7 +1111,6 @@ export class FirestoreAdminClient {
       parent: request.parent || '',
     });
     const callSettings = new gax.CallSettings(options);
-    this.initialize();
     return this._descriptors.page.listIndexes.createStream(
       this._innerApiCalls.listIndexes as gax.GaxCall,
       request,
@@ -1176,9 +1139,9 @@ export class FirestoreAdminClient {
   /**
    * Lists the field configuration and metadata for this database.
    *
-   * Currently, {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
+   * Currently, [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields] only supports listing fields
    * that have been explicitly overridden. To issue this query, call
-   * {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with the filter set to
+   * [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields] with the filter set to
    * `indexConfig.usesAncestorConfig:false`.
    *
    * @param {Object} request
@@ -1188,15 +1151,15 @@ export class FirestoreAdminClient {
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} request.filter
    *   The filter to apply to list results. Currently,
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
+   *   [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields] only supports listing fields
    *   that have been explicitly overridden. To issue this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with the filter set to
+   *   [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields] with the filter set to
    *   `indexConfig.usesAncestorConfig:false`.
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}, that may be used to get the next
+   *   [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields], that may be used to get the next
    *   page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
@@ -1253,7 +1216,6 @@ export class FirestoreAdminClient {
     ] = gax.routingHeader.fromParams({
       parent: request.parent || '',
     });
-    this.initialize();
     return this._innerApiCalls.listFields(request, options, callback);
   }
 
@@ -1277,15 +1239,15 @@ export class FirestoreAdminClient {
    *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
    * @param {string} request.filter
    *   The filter to apply to list results. Currently,
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
+   *   [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields] only supports listing fields
    *   that have been explicitly overridden. To issue this query, call
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with the filter set to
+   *   [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields] with the filter set to
    *   `indexConfig.usesAncestorConfig:false`.
    * @param {number} request.pageSize
    *   The number of results to return.
    * @param {string} request.pageToken
    *   A page token, returned from a previous call to
-   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}, that may be used to get the next
+   *   [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields], that may be used to get the next
    *   page of results.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
@@ -1306,7 +1268,6 @@ export class FirestoreAdminClient {
       parent: request.parent || '',
     });
     const callSettings = new gax.CallSettings(options);
-    this.initialize();
     return this._descriptors.page.listFields.createStream(
       this._innerApiCalls.listFields as gax.GaxCall,
       request,
@@ -1549,9 +1510,8 @@ export class FirestoreAdminClient {
    * The client will no longer be usable and all future behavior is undefined.
    */
   close(): Promise<void> {
-    this.initialize();
     if (!this._terminated) {
-      return this.firestoreAdminStub!.then(stub => {
+      return this.firestoreAdminStub.then(stub => {
         this._terminated = true;
         stub.close();
       });
