@@ -163,6 +163,13 @@ export class WriteBatch {
   }
 
   /**
+   * @private
+   */
+  get opCount(): number {
+    return this._ops.length;
+  }
+
+  /**
    * Throws an error if this batch has already been committed.
    *
    * @private
