@@ -530,7 +530,7 @@ function normalizeTimestamp(obj: {[key: string]: {}}) {
   const fieldNames = ['updateTime', 'createTime', 'readTime'];
   for (const key of Object.keys(obj)) {
     if (fieldNames.includes(key) && typeof obj[key] === 'string') {
-      obj[key] = timestamp(obj[key] as string);
+      obj[key] = convertTimestamp(obj[key] as string);
     } else if (typeof obj[key] === 'object') {
       normalizeTimestamp(obj[key]);
     }
@@ -541,7 +541,7 @@ function normalizeTimestamp(obj: {[key: string]: {}}) {
  * Convert a string TimeStamp, e.g. "1970-01-01T00:00:42Z", to its protobuf
  * type.
  */
-function timestamp(text: string): {[key: string]: number} {
+function convertTimestamp(text: string): {[key: string]: number} {
   const split = text.split(':');
   const secondsStr = split[split.length - 1];
 
