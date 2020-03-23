@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {expect} from 'chai';
+import {expect, use} from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -26,7 +27,6 @@ import {
   createInstance,
   document,
   InvalidApiUsage,
-  Post,
   postConverter,
   requestEquals,
   response,
@@ -43,6 +43,8 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(() => {});
+
+use(chaiAsPromised);
 
 function snapshot(
   relativePath: string,
@@ -1196,6 +1198,116 @@ describe('limit() interface', () => {
         .limit(1)
         .limit(2)
         .limit(3);
+      return query.get();
+    });
+  });
+});
+
+describe('limitToLast() interface', () => {
+  let firestore: Firestore;
+
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('reverses order constraints', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request, orderBy('foo', 'DESCENDING'), limit(10));
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query.orderBy('foo').limitToLast(10);
+      return query.get();
+    });
+  });
+
+  it('reverses cursors', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          orderBy('foo', 'DESCENDING'),
+          startAt(true, 'end'),
+          endAt(false, 'start'),
+          limit(10)
+        );
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query
+        .orderBy('foo')
+        .startAt('start')
+        .endAt('end')
+        .limitToLast(10);
+      return query.get();
+    });
+  });
+
+  it('reverses results', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request, orderBy('foo', 'DESCENDING'), limit(2));
+        return stream(result('second'), result('first'));
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query.orderBy('foo').limitToLast(2);
+      const result = await query.get();
+      expect(result.docs[0].id).to.equal('first');
+      expect(result.docs[1].id).to.equal('second');
+    });
+  });
+
+  it('expects number', () => {
+    const query = firestore.collection('collectionId');
+    expect(() => query.limitToLast(Infinity)).to.throw(
+      'Value for argument "limitToLast" is not a valid integer.'
+    );
+  });
+
+  it('requires at least one ordering constraints', () => {
+    const query = firestore.collection('collectionId');
+    const result = query.limitToLast(1).get();
+    return expect(result).to.eventually.be.rejectedWith(
+      'limitToLast() queries require specifying at least one orderBy() clause.'
+    );
+  });
+
+  it('rejects Query.stream()', () => {
+    const query = firestore.collection('collectionId');
+    expect(() => query.limitToLast(1).stream()).to.throw(
+      'Query results for queries that include limitToLast() constraints cannot be streamed. Use Query.get() instead.'
+    );
+  });
+
+  it('uses latest limitToLast', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request, orderBy('foo', 'DESCENDING'), limit(3));
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query
+        .orderBy('foo')
+        .limitToLast(1)
+        .limitToLast(2)
+        .limitToLast(3);
       return query.get();
     });
   });
