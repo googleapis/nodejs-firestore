@@ -2036,19 +2036,21 @@ describe('Transaction class', () => {
     // `contentionPromise` is used to ensure that both transactions are active
     // on commit, which causes one of transactions to fail with Code ABORTED
     // and be retried.
-    const contentionPromise = new Deferred<void>();
+    const contentionPromise = [new Deferred<void>(), new Deferred<void>()];
 
     firstTransaction = firestore.runTransaction(async transaction => {
       ++attempts;
       await transaction.get(ref);
-      await contentionPromise.promise;
+      contentionPromise[0].resolve();
+      await contentionPromise[1].promise;
       transaction.set(ref, {first: true}, {merge: true});
     });
 
     secondTransaction = firestore.runTransaction(async transaction => {
       ++attempts;
       await transaction.get(ref);
-      contentionPromise.resolve();
+      contentionPromise[1].resolve();
+      await contentionPromise[0].promise;
       transaction.set(ref, {second: true}, {merge: true});
     });
 

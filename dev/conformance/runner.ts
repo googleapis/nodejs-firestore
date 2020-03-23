@@ -13,6 +13,7 @@
 // limitations under the License.
 
 const duplexify = require('duplexify');
+const mkdirp = require('mkdirp');
 
 import {expect} from 'chai';
 import * as path from 'path';
@@ -151,10 +152,9 @@ const convertInput = {
   precondition: (precondition: string) => {
     const deepCopy = JSON.parse(JSON.stringify(precondition));
     if (deepCopy.updateTime) {
-      deepCopy.lastUpdateTime = deepCopy.updateTime;
       deepCopy.lastUpdateTime = Timestamp.fromProto({
-        seconds: deepCopy.lastUpdateTime.seconds,
-        nanos: deepCopy.lastUpdateTime.nanos,
+        seconds: deepCopy.updateTime.seconds,
+        nanos: deepCopy.updateTime.nanos,
       });
       delete deepCopy.updateTime;
     }
@@ -526,13 +526,13 @@ function runTest(spec: ConformanceProto) {
  * as strings to a proper protobuf type since protobufJS does not support it at
  * the moment.
  */
-function updateTimeStamp(obj: {[key: string]: {}}) {
+function normalizeTimestamp(obj: {[key: string]: {}}) {
   const fieldNames = ['updateTime', 'createTime', 'readTime'];
   for (const key of Object.keys(obj)) {
     if (fieldNames.includes(key) && typeof obj[key] === 'string') {
-      obj[key] = timestamp((obj[key] as unknown) as string);
+      obj[key] = timestamp(obj[key] as string);
     } else if (typeof obj[key] === 'object') {
-      updateTimeStamp(obj[key]);
+      normalizeTimestamp(obj[key]);
     }
   }
 }
@@ -565,7 +565,7 @@ function timestamp(text: string): {[key: string]: number} {
  * Value type, but the 'limit' field in 'query' has Int32Value type, resulting
  * in the need for an extra layer of specificity.
  */
-function updateInt32Value(obj: {[key: string]: {}}, parent = '') {
+function normalizeInt32Value(obj: {[key: string]: {}}, parent = '') {
   const fieldNames = ['limit'];
   const parentNames = ['query'];
   for (const key of Object.keys(obj)) {
@@ -578,7 +578,7 @@ function updateInt32Value(obj: {[key: string]: {}}, parent = '') {
         value: obj[key],
       };
     } else if (typeof obj[key] === 'object') {
-      updateInt32Value(obj[key], key);
+      normalizeInt32Value(obj[key], key);
     }
   }
 }
@@ -596,10 +596,10 @@ describe('Conformance Tests', () => {
       const singleTest = JSON.parse(fs.readFileSync(testFilePath));
 
       // Convert Timestamp string representation to protobuf object.
-      updateTimeStamp(singleTest);
+      normalizeTimestamp(singleTest);
 
       // Convert Int32Value to protobuf object.
-      updateInt32Value(singleTest);
+      normalizeInt32Value(singleTest);
 
       const testFile = TEST_SUITE_TYPE.fromObject(singleTest);
       testDataJson = testDataJson.concat(testFile);

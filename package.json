@@ -41,7 +41,7 @@
     "lint": "gts check",
     "clean": "gts clean",
     "compile": "tsc -p .",
-    "postcompile": "cd build/conformance && mkdir -p conformance-tests && cd ../../ && cp -r dev/protos build && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/conformance-tests/*.json build/conformance/conformance-tests",
+    "postcompile": "ts-node dev/conformance/pre-runner.ts && cp -r dev/protos build && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/conformance-tests/*.json build/conformance/conformance-tests",
     "fix": "gts fix",
     "prepare": "npm run compile",
     "docs-test": "linkinator docs",
