@@ -22,16 +22,19 @@ export class BundleBuilder {
   // Both DocumentSnapshot and QuerySnapshot need to be modified to add
   // resume token in the snapshot.
   private docSnaps: Array<DocumentSnapshot> = [];
-  private querySnaps: Map<string, QuerySnapshot> =
-      new Map<string, QuerySnapshot>();
+  private querySnaps: Map<string, QuerySnapshot> = new Map<
+    string,
+    QuerySnapshot
+  >();
 
   private documents: Map<string, BundledDocument> = new Map();
   private namedQueries: Map<string, api.INamedQuery> = new Map();
-  private latestReadTime: Timestamp =
-      Timestamp.fromProto({seconds: 0, nanos: 0});
+  private latestReadTime: Timestamp = Timestamp.fromProto({
+    seconds: 0,
+    nanos: 0,
+  });
 
-  constructor(private name: string) {
-  }
+  constructor(private name: string) {}
 
   /**
    * Adds a Firestore document to the bundle. Both the document data and it's
@@ -58,8 +61,10 @@ export class BundleBuilder {
    */
   add(queryName: string, query: Query): BundleBuilder;
 
-  add(docOrName: DocumentReference | DocumentSnapshot | string,
-      query?: QuerySnapshot | Query) {
+  add(
+    docOrName: DocumentReference | DocumentSnapshot | string,
+    query?: QuerySnapshot | Query
+  ) {
     if (docOrName instanceof DocumentReference) {
       this.docRefs.push(docOrName);
     } else if (docOrName instanceof DocumentSnapshot) {
@@ -76,14 +81,16 @@ export class BundleBuilder {
   private addBundledDocument(snap: DocumentSnapshot) {
     if (snap.exists) {
       const docProto = snap.toDocumentProto();
-      if (!this.documents.has(snap.id) ||
-          Timestamp.fromProto(this.documents.get(snap.id)!.metadata.readTime!)
-              .toMillis() < snap.readTime.toMillis()) {
-        this.documents.set(
-            snap.id, {
-              document: docProto,
-              metadata: {documentKey: docProto.name, readTime: snap.readTime}
-            });
+      if (
+        !this.documents.has(snap.id) ||
+        Timestamp.fromProto(
+          this.documents.get(snap.id)!.metadata.readTime!
+        ).toMillis() < snap.readTime.toMillis()
+      ) {
+        this.documents.set(snap.id, {
+          document: docProto,
+          metadata: {documentKey: docProto.name, readTime: snap.readTime},
+        });
       }
       if (snap.readTime.toMillis() > this.latestReadTime.toMillis()) {
         this.latestReadTime = snap.readTime;
@@ -96,9 +103,9 @@ export class BundleBuilder {
       name,
       queryTarget: {
         parent: querySnap.query.toProto().parent,
-        structuredQuery: querySnap.query.toProto().structuredQuery
+        structuredQuery: querySnap.query.toProto().structuredQuery,
       },
-      readTime: querySnap.readTime.toProto().timestampValue
+      readTime: querySnap.readTime.toProto().timestampValue,
     });
 
     for (const snap of querySnap.docs) {
@@ -139,9 +146,11 @@ export class BundleBuilder {
 
     let promises: Array<Promise<void>> = [];
     for (const doc of this.docRefs) {
-      promises.push(doc.get().then(snap => {
-        this.addBundledDocument(snap);
-      }));
+      promises.push(
+        doc.get().then(snap => {
+          this.addBundledDocument(snap);
+        })
+      );
     }
 
     for (const [name, query] of Array.from(this.queries)) {
@@ -149,39 +158,45 @@ export class BundleBuilder {
         throw new Error(`Query name conflict: ${name}`);
       }
 
-      promises.push(query.get().then(snap => {
-        const querySnap = snap as QuerySnapshot;
-        this.addNamedQuery(name, querySnap);
-      }));
+      promises.push(
+        query.get().then(snap => {
+          const querySnap = snap as QuerySnapshot;
+          this.addNamedQuery(name, querySnap);
+        })
+      );
     }
 
-    const readable = new Readable({objectMode: false});
-    Promise.all(promises).then(results => {
-      console.log(`promises resolved.`);
-      const metadata: api.IBundleMetadata = {
-        name: this.name,
-        createTime: this.latestReadTime.toProto().timestampValue
-      };
-      const metaElement: api.IBundleElement = {metadata};
-      this.pushLengthPrefixedString(readable, JSON.stringify(metaElement));
+    const readable = new Readable({
+      objectMode: false,
+      read: async size => {
+        await Promise.all(promises);
+        console.log(`promises resolved.`);
+        const metadata: api.IBundleMetadata = {
+          name: this.name,
+          createTime: this.latestReadTime.toProto().timestampValue,
+        };
+        const metaElement: api.IBundleElement = {metadata};
+        this.pushLengthPrefixedString(readable, JSON.stringify(metaElement));
 
-      for (const namedQuery of this.namedQueries.values()) {
-        const element: api.IBundleElement = {namedQuery};
-        this.pushLengthPrefixedString(readable, JSON.stringify(element));
-      }
+        for (const namedQuery of this.namedQueries.values()) {
+          const element: api.IBundleElement = {namedQuery};
+          this.pushLengthPrefixedString(readable, JSON.stringify(element));
+        }
 
-      for (const bundledDocument of this.documents.values()) {
-        const documentMetadata: api.IBundledDocumentMetadata = bundledDocument.metadata;
-        const document: api.IDocument = bundledDocument.document;
+        for (const bundledDocument of this.documents.values()) {
+          const documentMetadata: api.IBundledDocumentMetadata =
+            bundledDocument.metadata;
+          const document: api.IDocument = bundledDocument.document;
 
-        let element: api.IBundleElement = {documentMetadata};
-        this.pushLengthPrefixedString(readable, JSON.stringify(element));
+          let element: api.IBundleElement = {documentMetadata};
+          this.pushLengthPrefixedString(readable, JSON.stringify(element));
 
-        element = {document}
-        this.pushLengthPrefixedString(readable, JSON.stringify(element));
-      }
-      console.log(`pushing null`);
-      readable.push(null);
+          element = {document};
+          this.pushLengthPrefixedString(readable, JSON.stringify(element));
+        }
+        console.log(`pushing null`);
+        readable.push(null);
+      },
     });
 
     return readable;
@@ -189,7 +204,8 @@ export class BundleBuilder {
 }
 
 class BundledDocument {
-  constructor(public readonly metadata: api.IBundledDocumentMetadata,
-              public readonly document: api.IDocument) {
-  }
+  constructor(
+    public readonly metadata: api.IBundledDocumentMetadata,
+    public readonly document: api.IDocument
+  ) {}
 }
