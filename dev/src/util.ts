@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { randomBytes } from 'crypto';
 import {GoogleError, ServiceConfig, Status} from 'google-gax';
 
 import {DocumentData} from './types';
@@ -52,8 +53,17 @@ export function autoId(): string {
   const chars =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let autoId = '';
-  for (let i = 0; i < 20; i++) {
-    autoId += chars.charAt(Math.floor(Math.random() * chars.length));
+  while (autoId.length < 20) {
+    const bytes = randomBytes(40);
+    bytes.forEach(b => {
+      // Length of `chars` is 62. We only take bytes between 0 and 62*4-1
+      // (both inclusive). The value is then evenly mapped to indices of `char`
+      // via a modulo operation.
+      const maxValue = 62 * 4 - 1;
+      if (autoId.length < 20 && b <= maxValue) {
+        autoId += chars.charAt(b % 62);
+      }
+    });
   }
   return autoId;
 }
