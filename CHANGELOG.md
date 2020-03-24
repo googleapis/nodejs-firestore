@@ -4,6 +4,21 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.7.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.0...v3.7.1) (2020-03-16)
+
+
+### Bug Fixes
+
+* support Query.stream() as first client operation ([#971](https://www.github.com/googleapis/nodejs-firestore/issues/971)) ([a48017c](https://www.github.com/googleapis/nodejs-firestore/commit/a48017c16dbf7819ea45ea2577365b52721c2475))
+
+## [3.7.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.6.0...v3.7.0) (2020-03-11)
+
+
+### Features
+
+* **deps:** update to TypeScript 3.8 ([#962](https://www.github.com/googleapis/nodejs-firestore/issues/962)) ([12982cd](https://www.github.com/googleapis/nodejs-firestore/commit/12982cd9ef6b418b6bc9fa303bb804255b9c906a))
+* add support for Query.limitToLast() ([#954](https://www.github.com/googleapis/nodejs-firestore/issues/954)) ([c89546f](https://www.github.com/googleapis/nodejs-firestore/commit/c89546f5ae83da3845076aeeffcda75f9b208f5c))
+
 ## [3.6.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.5.1...v3.6.0) (2020-03-09)
 
 
