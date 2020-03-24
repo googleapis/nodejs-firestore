@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { randomBytes } from 'crypto';
+import {randomBytes} from 'crypto';
 import {GoogleError, ServiceConfig, Status} from 'google-gax';
 
 import {DocumentData} from './types';
