@@ -10,11 +10,7 @@
 ### Bug Fixes
 
 * fix flaky contention test ([#979](https://www.github.com/googleapis/nodejs-firestore/issues/979)) ([f294998](https://www.github.com/googleapis/nodejs-firestore/commit/f294998daab77a0a51c81265945e28eec34db186))
-
-
-### Reverts
-
-* Revert "Use Random Number from `crypto` to generate AutoId. (#984)" (#985) ([05b3363](https://www.github.com/googleapis/nodejs-firestore/commit/05b3363d07537a56d7b66d19027d09686e3c34d8)), closes [#984](https://www.github.com/googleapis/nodejs-firestore/issues/984) [#985](https://www.github.com/googleapis/nodejs-firestore/issues/985)
+* fix: use Random Number from `crypto` to generate AutoId ([05b3363](https://www.github.com/googleapis/nodejs-firestore/commit/ce6ea390f2fffcbe796ba1c5b040ee02452e287a))
 
 ### [3.7.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.0...v3.7.1) (2020-03-16)
 
