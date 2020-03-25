@@ -15,13 +15,14 @@ import "google/firestore/v1/query.proto";
 import "google/protobuf/timestamp.proto";
 
 // A collection of tests.
-message TestSuite {
+message TestFile {
   repeated Test tests = 1;
 }
 
 // A Test describes a single client method call and its expected result.
 message Test {
   string description = 1; // short description of the test
+  string comment = 10; // a comment describing the behavior being tested
 
   oneof test {
     GetTest         get = 2;

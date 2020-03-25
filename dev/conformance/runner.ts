@@ -13,6 +13,7 @@
 // limitations under the License.
 
 const duplexify = require('duplexify');
+const mkdirp = require('mkdirp');
 
 import {expect} from 'chai';
 import * as path from 'path';
@@ -49,7 +50,10 @@ import api = proto.google.firestore.v1;
 type ConformanceProto = any; // tslint:disable-line:no-any
 
 /** List of test cases that are ignored. */
-const ignoredRe: RegExp[] = [];
+const ignoredRe: RegExp[] = [
+  // TODO(chenbrian): Enable this test once update_transforms support is added.
+  new RegExp('update-paths: ServerTimestamp beside an empty map'),
+];
 
 /** If non-empty, list the test cases to run exclusively. */
 const exclusiveRe: RegExp[] = [];
@@ -69,7 +73,7 @@ const protoDefinition = protobufRoot.loadSync(
   path.join(__dirname, 'test-definition.proto')
 );
 
-const TEST_SUITE_TYPE = protoDefinition.lookupType('tests.TestSuite');
+const TEST_SUITE_TYPE = protoDefinition.lookupType('tests.TestFile');
 const STRUCTURED_QUERY_TYPE = protoDefinition.lookupType(
   'google.firestore.v1.StructuredQuery'
 );
@@ -148,7 +152,10 @@ const convertInput = {
   precondition: (precondition: string) => {
     const deepCopy = JSON.parse(JSON.stringify(precondition));
     if (deepCopy.updateTime) {
-      deepCopy.lastUpdateTime = Timestamp.fromProto(deepCopy.updateTime);
+      deepCopy.lastUpdateTime = Timestamp.fromProto({
+        seconds: deepCopy.updateTime.seconds,
+        nanos: deepCopy.updateTime.nanos,
+      });
       delete deepCopy.updateTime;
     }
     return deepCopy;
@@ -514,17 +521,91 @@ function runTest(spec: ConformanceProto) {
   );
 }
 
+/**
+ * Parses through the TestFile and changes all instances of Timestamps encoded
+ * as strings to a proper protobuf type since protobufJS does not support it at
+ * the moment.
+ */
+function normalizeTimestamp(obj: {[key: string]: {}}) {
+  const fieldNames = ['updateTime', 'createTime', 'readTime'];
+  for (const key of Object.keys(obj)) {
+    if (fieldNames.includes(key) && typeof obj[key] === 'string') {
+      obj[key] = convertTimestamp(obj[key] as string);
+    } else if (typeof obj[key] === 'object') {
+      normalizeTimestamp(obj[key]);
+    }
+  }
+}
+
+/**
+ * Convert a string TimeStamp, e.g. "1970-01-01T00:00:42Z", to its protobuf
+ * type.
+ */
+function convertTimestamp(text: string): {[key: string]: number} {
+  const split = text.split(':');
+  const secondsStr = split[split.length - 1];
+
+  // Remove trailing 'Z' from Timestamp
+  const seconds = Number(secondsStr.slice(0, secondsStr.length - 2));
+  const frac = seconds - Math.floor(seconds);
+
+  return {
+    seconds: Math.floor(seconds),
+    nanos: frac * 1e9,
+  };
+}
+
+/**
+ * Parses through the TestFile and changes all instances of Int32Values encoded
+ * as numbers to a proper protobuf type since protobufJS does not support it at
+ * the moment.
+ *
+ * We must include a parent field to properly catch which fields are standard
+ * values vs. Int32Values. In this case, the 'limit' field in 'clauses' has
+ * Value type, but the 'limit' field in 'query' has Int32Value type, resulting
+ * in the need for an extra layer of specificity.
+ */
+function normalizeInt32Value(obj: {[key: string]: {}}, parent = '') {
+  const fieldNames = ['limit'];
+  const parentNames = ['query'];
+  for (const key of Object.keys(obj)) {
+    if (
+      fieldNames.includes(key) &&
+      typeof obj[key] === 'number' &&
+      parentNames.includes(parent)
+    ) {
+      obj[key] = {
+        value: obj[key],
+      };
+    } else if (typeof obj[key] === 'object') {
+      normalizeInt32Value(obj[key], key);
+    }
+  }
+}
+
 describe('Conformance Tests', () => {
   const loadTestCases = () => {
-    const binaryProtoData = require('fs').readFileSync(
-      path.join(__dirname, 'test-suite.binproto')
-    );
-
-    // We don't have type information for the conformance proto.
     // tslint:disable-next-line:no-any
-    const testSuite: any = TEST_SUITE_TYPE.decode(binaryProtoData);
+    let testDataJson: any[] = [];
+    const fs = require('fs');
 
-    return testSuite.tests;
+    const testPath = path.join(__dirname, 'conformance-tests');
+    const fileNames = fs.readdirSync(testPath);
+    for (const fileName of fileNames) {
+      const testFilePath = path.join(__dirname, 'conformance-tests', fileName);
+      const singleTest = JSON.parse(fs.readFileSync(testFilePath));
+
+      // Convert Timestamp string representation to protobuf object.
+      normalizeTimestamp(singleTest);
+
+      // Convert Int32Value to protobuf object.
+      normalizeInt32Value(singleTest);
+
+      const testFile = TEST_SUITE_TYPE.fromObject(singleTest);
+      testDataJson = testDataJson.concat(testFile);
+    }
+
+    return testDataJson.map(testFile => testFile.tests[0]);
   };
 
   for (const testCase of loadTestCases()) {
