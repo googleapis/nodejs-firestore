@@ -506,26 +506,6 @@ export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<
   T
 > {
   /**
-   * @hideconstructor
-   *
-   * @param ref The reference to the document.
-   * @param fieldsProto The fields of the Firestore `Document` Protobuf backing
-   * this document.
-   * @param readTime The time when this snapshot was read.
-   * @param createTime The time when the document was created.
-   * @param updateTime The time when the document was last updated.
-   */
-  constructor(
-    ref: DocumentReference<T>,
-    fieldsProto: ApiMapValue,
-    readTime: Timestamp,
-    createTime: Timestamp,
-    updateTime: Timestamp
-  ) {
-    super(ref, fieldsProto, readTime, createTime, updateTime);
-  }
-
-  /**
    * The time the document was created.
    *
    * @type {Timestamp}

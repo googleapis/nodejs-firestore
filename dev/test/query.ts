@@ -847,6 +847,77 @@ describe('where() interface', () => {
     });
   });
 
+  it('supports reference array for IN queries', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          fieldFilters('__name__', 'IN', {
+            arrayValue: {
+              values: [
+                {
+                  referenceValue: `projects/${PROJECT_ID}/databases/(default)/documents/collectionId/foo`,
+                },
+                {
+                  referenceValue: `projects/${PROJECT_ID}/databases/(default)/documents/collectionId/bar`,
+                },
+              ],
+            },
+          })
+        );
+
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      const collection = firestore.collection('collectionId');
+      const query = collection.where(FieldPath.documentId(), 'in', [
+        'foo',
+        collection.doc('bar'),
+      ]);
+      return query.get();
+    });
+  });
+
+  it('validates references for IN queries', () => {
+    const query = firestore.collection('collectionId');
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'in', ['foo', 42]);
+    }).to.throw(
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
+    );
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'in', 42);
+    }).to.throw(
+      "Invalid Query. A non-empty array is required for 'in' filters."
+    );
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'in', []);
+    }).to.throw(
+      "Invalid Query. A non-empty array is required for 'in' filters."
+    );
+  });
+
+  it('validates query operator for FieldPath.document()', () => {
+    const query = firestore.collection('collectionId');
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'array-contains', query.doc());
+    }).to.throw(
+      "Invalid Query. You can't perform 'array-contains' queries on FieldPath.documentId()."
+    );
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'array-contains-any', query.doc());
+    }).to.throw(
+      "Invalid Query. You can't perform 'array-contains-any' queries on FieldPath.documentId()."
+    );
+  });
+
   it('rejects custom objects for field paths', () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
@@ -1511,7 +1582,7 @@ describe('startAt() interface', () => {
     expect(() => {
       query.orderBy(FieldPath.documentId()).startAt(42);
     }).to.throw(
-      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference.'
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
     );
 
     expect(() => {
