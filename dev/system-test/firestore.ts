@@ -1194,7 +1194,6 @@ describe('Query class', () => {
   });
 
   it('supports "in" with document ID array', async () => {
-    setLogFunction(console.log);
     const refs = await addDocs({count: 1}, {count: 2}, {count: 3});
     const res = await randomCol
       .where(FieldPath.documentId(), 'in', [refs[0].id, refs[1]])
