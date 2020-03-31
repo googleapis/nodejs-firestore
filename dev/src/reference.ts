@@ -1240,7 +1240,23 @@ export class Query<T = DocumentData> {
     const path = FieldPath.fromArgument(fieldPath);
 
     if (FieldPath.documentId().isEqual(path)) {
-      value = this.validateReference(value);
+      if (opStr === 'array-contains' || opStr === 'array-contains-any') {
+        throw new Error(
+          `Invalid Query. You can't perform '${opStr}' ` +
+            'queries on FieldPath.documentId().'
+        );
+      }
+
+      if (opStr === 'in') {
+        if (!Array.isArray(value) || value.length === 0) {
+          throw new Error(
+            `Invalid Query. A non-empty array is required for '${opStr}' filters.`
+          );
+        }
+        value = value.map(el => this.validateReference(el));
+      } else {
+        value = this.validateReference(value);
+      }
     }
 
     const fieldFilter = new FieldFilter(
@@ -1595,7 +1611,7 @@ export class Query<T = DocumentData> {
     } else {
       throw new Error(
         'The corresponding value for FieldPath.documentId() must be a ' +
-          'string or a DocumentReference.'
+          `string or a DocumentReference, but was "${val}".`
       );
     }
 
