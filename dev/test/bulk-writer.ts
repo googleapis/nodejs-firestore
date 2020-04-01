@@ -50,7 +50,7 @@ describe('BulkWriter', () => {
 
   beforeEach(() => {
     counter = -1;
-  })
+  });
 
   function instantiateInstance(
     requests: BulkWriterRequest[],

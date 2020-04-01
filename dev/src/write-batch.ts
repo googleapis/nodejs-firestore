@@ -124,6 +124,8 @@ interface WriteOp {
   precondition?: api.IPrecondition | null;
 }
 
+export class UpdateBuilder {}
+
 /**
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.

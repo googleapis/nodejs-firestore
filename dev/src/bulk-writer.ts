@@ -1,51 +1,184 @@
-// Copyright 2020 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not
-// use this file except in compliance with the License. You may obtain a copy of
-// the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-// License for the specific language governing permissions and limitations under
-// the License.
+/*!
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import assert = require('assert');
 import {FieldPath, Firestore, Timestamp} from '.';
-import {logger} from './logger';
 import {DocumentReference} from './reference';
 import {DocumentData, Precondition, SetOptions, UpdateData} from './types';
-import {Deferred, requestTag} from './util';
+import {Deferred} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
 /**
- * The maximum number of writes that be in a single batch.
+ * The default maximum number of writes that can be in a single batch.
  */
-const BULK_WRITER_MAX_BATCH_SIZE = 500;
+const DEFAULT_BULK_WRITER_MAX_BATCH_SIZE = 500;
 
 /**
  * Used to represent a batch on the BatchQueue.
  *
  * @private
  */
-interface BulkCommitBatch {
-  // The underlying WriteBatch used for making writes.
-  writeBatch: WriteBatch;
+class BulkCommitBatch {
+  // The maximum number of writes that can be in a single batch.
+  private maxBatchSize = DEFAULT_BULK_WRITER_MAX_BATCH_SIZE;
 
   // The set of references present in the WriteBatch.
-  refsInBatch: Set<DocumentReference>;
-
-  // A unique identifier for the batch.
-  tag: string;
+  readonly refsInBatch = new Set<DocumentReference>();
 
   // Whether the batch has been marked to be sent. Writes cannot be added to
   // pending batches.
-  pending: boolean;
+  private pending = false;
 
-  // A deferred promise that will return the result of writing the batch.
-  result: Deferred<BatchWriteResult[]>;
+  // A deferred promise that is resolved after the batch has been sent, and a
+  // response is received.
+  private completedDeferred = new Deferred<void>();
+
+  // A map from each WriteBatch operation to its corresponding result.
+  private resultsMap = new Map<number, Deferred<BatchWriteResult>>();
+
+  constructor(readonly id: number, private readonly writeBatch: WriteBatch) {}
+
+  /**
+   * Adds a `create` operation to the WriteBatch. Returns a promise that
+   * resolves with the result of the write.
+   */
+  create(
+    documentRef: DocumentReference,
+    data: DocumentData
+  ): Promise<WriteResult> {
+    this.refsInBatch.add(documentRef);
+    this.writeBatch.create(documentRef, data);
+    this.resultsMap.set(
+      this.writeBatch.opCount,
+      new Deferred<BatchWriteResult>()
+    );
+    return this.getResult(this.writeBatch.opCount);
+  }
+
+  /**
+   * Adds a `delete` operation to the WriteBatch. Returns a promise that
+   * resolves with the result of the delete.
+   */
+  delete(
+    documentRef: DocumentReference,
+    precondition: Precondition
+  ): Promise<WriteResult> {
+    this.refsInBatch.add(documentRef);
+    this.writeBatch.delete(documentRef, precondition);
+    this.resultsMap.set(
+      this.writeBatch.opCount,
+      new Deferred<BatchWriteResult>()
+    );
+    return this.getResult(this.writeBatch.opCount);
+  }
+
+  /**
+   * Adds a `set` operation to the WriteBatch. Returns a promise that
+   * resolves with the result of the write.
+   */
+  set(
+    documentRef: DocumentReference,
+    data: DocumentData,
+    options?: SetOptions
+  ): Promise<WriteResult> {
+    this.refsInBatch.add(documentRef);
+    this.writeBatch.set(documentRef, data, options);
+    this.resultsMap.set(
+      this.writeBatch.opCount,
+      new Deferred<BatchWriteResult>()
+    );
+    return this.getResult(this.writeBatch.opCount);
+  }
+
+  /**
+   * Adds an `update` operation to the WriteBatch. Returns a promise that
+   * resolves with the result of the write.
+   */
+  update(
+    documentRef: DocumentReference,
+    dataOrField: UpdateData | string | FieldPath,
+    ...preconditionOrValues: Array<
+      {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
+    >
+  ): Promise<WriteResult> {
+    this.refsInBatch.add(documentRef);
+    this.writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
+    this.resultsMap.set(
+      this.writeBatch.opCount,
+      new Deferred<BatchWriteResult>()
+    );
+    return this.getResult(this.writeBatch.opCount);
+  }
+
+  /**
+   * Returns whether a write containing the provided document reference can be
+   * added to this batch.
+   */
+  canAddDoc(documentRef: DocumentReference): boolean {
+    return (
+      this.pending === false &&
+      this.writeBatch.opCount < this.maxBatchSize &&
+      !this.refsInBatch.has(documentRef)
+    );
+  }
+
+  /**
+   * Commits the batch and returns a promise that resolves with the result of
+   * all writes in this batch.
+   */
+  bulkCommit(): Promise<BatchWriteResult[]> {
+    this.pending = true;
+    return this.writeBatch.bulkCommit();
+  }
+
+  /**
+   * Returns the a promise that resolves with the result for the write in the
+   * WriteBatch at the provided index.
+   */
+  getResult(opCount: number): Promise<WriteResult> {
+    return this.resultsMap.get(opCount)!.promise.then(result => {
+      if (result.writeTime) {
+        return new WriteResult(result.writeTime);
+      } else {
+        throw result.status;
+      }
+    });
+  }
+
+  /**
+   * Resolves the individual operations in the batch with the results.
+   */
+  resolveResults(results: BatchWriteResult[]): void {
+    results.map((result, index) => {
+      this.resultsMap.get(index + 1)!.resolve(result);
+    });
+    this.completedDeferred.resolve();
+  }
+
+  /**
+   * Returns a promise that resolves when the batch has been sent, and a
+   * response is received.
+   */
+  awaitBatch(): Promise<void> {
+    return this.completedDeferred.promise;
+  }
+
+  // Visible for testing.
+  setMaxBatchSize(size: number): void {
+    this.maxBatchSize = size;
+  }
 }
 
 /**
@@ -61,22 +194,22 @@ export class BulkWriter {
   private batchQueue: BulkCommitBatch[] = [];
 
   /**
-   * A mapping of each batch's unique tag to a promise that will resolve with
-   * the result of writing the batch.
-   */
-  private resultsMap = new Map<string, Deferred<BatchWriteResult[]>>();
-
-  /**
    * A set of all document references that are currently in flight.
    */
   private refsInFlight = new Set<DocumentReference>();
+
+  /**
+   * Counter used to generate ids for batches.
+   */
+  private currentId = 0;
+
   constructor(
     private readonly firestore: Firestore,
-    private readonly maxBatchSize = BULK_WRITER_MAX_BATCH_SIZE
+    private readonly maxBatchSize = DEFAULT_BULK_WRITER_MAX_BATCH_SIZE
   ) {}
 
   /**
-   * Create a document with the provided object values. This will fail the batch
+   * Create a document with the provided data. This single operation will fail
    * if a document exists at its location.
    *
    * @param {DocumentReference} documentRef A reference to the document to be
@@ -104,13 +237,7 @@ export class BulkWriter {
     data: DocumentData
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
-    bulkCommitBatch.refsInBatch.add(documentRef);
-    bulkCommitBatch.writeBatch.create(documentRef, data);
-
-    return this.getResult(
-      bulkCommitBatch.tag,
-      bulkCommitBatch.writeBatch.opCount
-    );
+    return bulkCommitBatch.create(documentRef, data);
   }
 
   /**
@@ -133,10 +260,10 @@ export class BulkWriter {
    * bulkWriter
    *  .delete(documentRef)
    *  .then(result => {
-   *    console.log('Successfully executed write at: ', result);
+   *    console.log('Successfully delete document at: ', result);
    *  })
    *  .catch(err => {
-   *    console.log('Write failed with: ', err);
+   *    console.log('Delete failed with: ', err);
    *  });
    * });
    */
@@ -145,13 +272,7 @@ export class BulkWriter {
     precondition: Precondition
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
-    bulkCommitBatch.refsInBatch.add(documentRef);
-    bulkCommitBatch.writeBatch.delete(documentRef, precondition);
-
-    return this.getResult(
-      bulkCommitBatch.tag,
-      bulkCommitBatch.writeBatch.opCount
-    );
+    return bulkCommitBatch.delete(documentRef, precondition);
   }
 
   /**
@@ -194,13 +315,7 @@ export class BulkWriter {
     options?: SetOptions
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
-    bulkCommitBatch.refsInBatch.add(documentRef);
-    bulkCommitBatch.writeBatch.set(documentRef, data, options);
-
-    return this.getResult(
-      bulkCommitBatch.tag,
-      bulkCommitBatch.writeBatch.opCount
-    );
+    return bulkCommitBatch.set(documentRef, data, options);
   }
 
   /**
@@ -251,27 +366,21 @@ export class BulkWriter {
     >
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
-    bulkCommitBatch.refsInBatch.add(documentRef);
-    bulkCommitBatch.writeBatch.update(
+    return bulkCommitBatch.update(
       documentRef,
       dataOrField,
       preconditionOrValues
-    );
-
-    return this.getResult(
-      bulkCommitBatch.tag,
-      bulkCommitBatch.writeBatch.opCount
     );
   }
 
   /**
    * Returns a Promise that resolves when there are no more pending writes. It
-   * never fails.
+   * never fails. Calling this method will send all requests.
    *
-   * The promise resolves immediately if there no pending writes. Otherwise, the
-   * Promise waits for all previously issued writes, but it does not wait for
-   * writes that were added after the method is called. If you want to wait for
-   * additional writes, call `waitForPendingWrites()` again.
+   * The promise resolves immediately if there are no pending writes. Otherwise,
+   * the Promise waits for all previously issued writes, but it does not wait
+   * for writes that were added after the method is called. If you want to wait
+   * for additional writes, call `waitForPendingWrites()` again.
    *
    * @return {Promise<void>} A promise that resolves when there are no more
    * pending writes.
@@ -288,11 +397,8 @@ export class BulkWriter {
    */
   async waitForPendingWrites(): Promise<void> {
     const trackedBatches = this.batchQueue;
+    const writePromises = trackedBatches.map(batch => batch.awaitBatch());
     this.sendBatches();
-    const writePromises = trackedBatches.map(batch => {
-      batch.pending = true;
-      return this.resultsMap.get(batch.tag)!.promise;
-    });
     await Promise.all(writePromises);
   }
 
@@ -302,26 +408,20 @@ export class BulkWriter {
    */
   private getEligibleBatch(ref: DocumentReference): BulkCommitBatch {
     let batch = null;
-    let logWarning = true;
+    let logWarning = this.batchQueue.length > 0;
     for (const bulkBatch of this.batchQueue) {
-      if (bulkBatch.refsInBatch.has(ref)) {
+      if (!bulkBatch.refsInBatch.has(ref)) {
         logWarning = false;
       }
-
-      if (
-        bulkBatch.pending === false &&
-        bulkBatch.writeBatch.opCount < BULK_WRITER_MAX_BATCH_SIZE &&
-        !bulkBatch.refsInBatch.has(ref)
-      ) {
+      if (bulkBatch.canAddDoc(ref)) {
         batch = bulkBatch;
       }
     }
 
     if (batch === null) {
       if (logWarning) {
-        logger(
-          'BulkWriter',
-          null,
+        console.warn(
+          '[BulkWriter]',
           'Writing to the same document multiple times will slow down BulkWriter. ' +
             'Write to unique documents in order to maximize throughput.'
         );
@@ -332,43 +432,21 @@ export class BulkWriter {
     }
   }
 
-  /**
-   * Create a new batch on the BatchQueue and a mapping from the batch to its
-   * result.
-   */
   private createNewBatch(): BulkCommitBatch {
-    const tag = requestTag();
-    const deferred = new Deferred<BatchWriteResult[]>();
-    const newBatch = {
-      writeBatch: this.firestore.batch(),
-      refsInBatch: new Set(),
-      tag,
-      pending: false,
-      result: deferred,
-    } as BulkCommitBatch;
+    const newBatch = new BulkCommitBatch(this.getId(), this.firestore.batch());
 
     this.batchQueue.push(newBatch);
-    this.resultsMap.set(tag, deferred);
     return newBatch;
   }
 
-  /**
-   * Return the result of the write at the given batch tag and operation count.
-   */
-  private getResult(tag: string, opCount: number): Promise<WriteResult> {
-    assert(this.resultsMap.has(tag), 'requestTag not found');
-    return this.resultsMap.get(tag)!.promise.then(results => {
-      assert(
-        results.length >= opCount,
-        'opCount invalid' + results.length + opCount
-      );
-      const result = results[opCount - 1];
-      if (result.writeTime) {
-        return new WriteResult(result.writeTime);
-      } else {
-        throw result.status;
-      }
-    });
+  private getId(): number {
+    const id = this.currentId;
+    if (this.currentId === Number.MAX_SAFE_INTEGER) {
+      this.currentId = 0;
+    } else {
+      this.currentId++;
+    }
+    return id;
   }
 
   /**
@@ -386,10 +464,9 @@ export class BulkWriter {
       }
 
       this.refsInFlight = new Set([...this.refsInFlight, ...batch.refsInBatch]);
-      batch.pending = true;
 
-      batch.writeBatch.bulkCommit().then(async results => {
-        this.broadcastResults(results, batch.tag);
+      batch.bulkCommit().then(async results => {
+        batch.resolveResults(results);
 
         // Remove references that are no longer in flight.
         this.refsInFlight = new Set(
@@ -416,13 +493,5 @@ export class BulkWriter {
       }
     }
     return true;
-  }
-
-  /**
-   * Broadcasts the result of a BatchWrite to the appropriate promise.
-   */
-  private broadcastResults(results: BatchWriteResult[], tag: string): void {
-    this.resultsMap.get(tag)!.resolve(results);
-    this.resultsMap.delete(tag);
   }
 }
