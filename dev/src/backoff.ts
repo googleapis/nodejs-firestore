@@ -57,7 +57,7 @@ export const MAX_RETRY_ATTEMPTS = 10;
 /*!
  * The timeout handler used by `ExponentialBackoff`.
  */
-let delayExecution: (f: () => void, ms: number) => void = setTimeout;
+export let delayExecution: (f: () => void, ms: number) => void = setTimeout;
 
 /**
  * Allows overriding of the timeout handler used by the exponential backoff

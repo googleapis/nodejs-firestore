@@ -657,7 +657,7 @@ export class Firestore {
    *   });
    * bulkWriter.update(firestore.doc('col/doc2), {foo: 'bar'});
    * bulkWriter.delete(firestore.doc('col/doc3'));
-   * await waitForPendingWrites().then(() => {
+   * await flush().then(() => {
    *   console.log('Successfully executed all writes');
    * });
    */

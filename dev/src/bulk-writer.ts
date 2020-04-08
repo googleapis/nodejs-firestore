@@ -13,10 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as assert from 'assert';
 
-import {FieldPath, Firestore, Timestamp} from '.';
+import {FieldPath, Firestore} from '.';
+import {delayExecution} from './backoff';
 import {DocumentReference} from './reference';
-import {DocumentData, Precondition, SetOptions, UpdateData} from './types';
+import {Timestamp} from './timestamp';
+import {
+  BulkWriterOptions,
+  DocumentData,
+  Precondition,
+  SetOptions,
+  UpdateData,
+} from './types';
 import {Deferred} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
@@ -26,20 +35,27 @@ import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 const DEFAULT_BULK_WRITER_MAX_BATCH_SIZE = 500;
 
 /**
+ * The starting maximum number of operations per second as allowed by the
+ * 5/5/5 rule.
+ */
+const STARTING_MAXIMUM_OPS_PER_SECOND = 500;
+
+/**
  * Used to represent a batch on the BatchQueue.
  *
  * @private
  */
 class BulkCommitBatch {
-  // The maximum number of writes that can be in a single batch.
-  private maxBatchSize = DEFAULT_BULK_WRITER_MAX_BATCH_SIZE;
-
   // The set of references present in the WriteBatch.
   readonly refsInBatch = new Set<DocumentReference>();
 
-  // Whether the batch has been marked to be sent. Writes cannot be added to
-  // pending batches.
-  private pending = false;
+  // Whether the batch is ready to be sent. Writes cannot be added once a batch
+  // is marked as pending.
+  private _pending = false;
+
+  // When the batch was sent. Writes cannot be added to batches that have
+  // already been sent.
+  private _sendTime: Timestamp | null = null;
 
   // A deferred promise that is resolved after the batch has been sent, and a
   // response is received.
@@ -48,7 +64,23 @@ class BulkCommitBatch {
   // A map from each WriteBatch operation to its corresponding result.
   private resultsMap = new Map<number, Deferred<BatchWriteResult>>();
 
-  constructor(readonly id: number, private readonly writeBatch: WriteBatch) {}
+  constructor(
+    readonly id: number,
+    private readonly writeBatch: WriteBatch,
+    private readonly maxBatchSize: number
+  ) {}
+
+  get sendTime(): Timestamp | null {
+    return this._sendTime;
+  }
+
+  get opCount(): number {
+    return this.writeBatch.opCount;
+  }
+
+  get pending(): boolean {
+    return this._pending;
+  }
 
   /**
    * Adds a `create` operation to the WriteBatch. Returns a promise that
@@ -73,7 +105,7 @@ class BulkCommitBatch {
    */
   delete(
     documentRef: DocumentReference,
-    precondition: Precondition
+    precondition?: Precondition
   ): Promise<WriteResult> {
     this.refsInBatch.add(documentRef);
     this.writeBatch.delete(documentRef, precondition);
@@ -128,7 +160,7 @@ class BulkCommitBatch {
    */
   canAddDoc(documentRef: DocumentReference): boolean {
     return (
-      this.pending === false &&
+      !this.pending &&
       this.writeBatch.opCount < this.maxBatchSize &&
       !this.refsInBatch.has(documentRef)
     );
@@ -139,7 +171,8 @@ class BulkCommitBatch {
    * all writes in this batch.
    */
   bulkCommit(): Promise<BatchWriteResult[]> {
-    this.pending = true;
+    assert(this._sendTime === null, 'The batch should not have been sent yet.');
+    this._sendTime = Timestamp.now();
     return this.writeBatch.bulkCommit();
   }
 
@@ -172,12 +205,8 @@ class BulkCommitBatch {
    * response is received.
    */
   awaitBatch(): Promise<void> {
+    this._pending = true;
     return this.completedDeferred.promise;
-  }
-
-  // Visible for testing.
-  setMaxBatchSize(size: number): void {
-    this.maxBatchSize = size;
   }
 }
 
@@ -188,6 +217,9 @@ class BulkCommitBatch {
  * @class
  */
 export class BulkWriter {
+  // The maximum number of writes that can be in a single batch.
+  private maxBatchSize = DEFAULT_BULK_WRITER_MAX_BATCH_SIZE;
+
   /**
    * A queue of batches to be written.
    */
@@ -203,10 +235,26 @@ export class BulkWriter {
    */
   private currentId = 0;
 
+  /**
+   * Whether this BulkWriter instance is closed. Once closed, it cannot be
+   * opened again.
+   */
+  private closed = false;
+
+  /**
+   * The maximum number of operations per second as determined by the 500/50/5
+   * rule. This value gradually increases with time.
+   */
+  private maxOpsPerSecond = STARTING_MAXIMUM_OPS_PER_SECOND;
+
   constructor(
     private readonly firestore: Firestore,
-    private readonly maxBatchSize = DEFAULT_BULK_WRITER_MAX_BATCH_SIZE
-  ) {}
+    private readonly options?: BulkWriterOptions
+  ) {
+    if (options && !options.disableThrottling) {
+      this.rampMaxOps();
+    }
+  }
 
   /**
    * Create a document with the provided data. This single operation will fail
@@ -232,10 +280,11 @@ export class BulkWriter {
    *  });
    * });
    */
-  async create(
+  create(
     documentRef: DocumentReference,
     data: DocumentData
   ): Promise<WriteResult> {
+    this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     return bulkCommitBatch.create(documentRef, data);
   }
@@ -269,8 +318,9 @@ export class BulkWriter {
    */
   delete(
     documentRef: DocumentReference,
-    precondition: Precondition
+    precondition?: Precondition
   ): Promise<WriteResult> {
+    this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     return bulkCommitBatch.delete(documentRef, precondition);
   }
@@ -314,6 +364,7 @@ export class BulkWriter {
     data: DocumentData,
     options?: SetOptions
   ): Promise<WriteResult> {
+    this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     return bulkCommitBatch.set(documentRef, data, options);
   }
@@ -328,6 +379,7 @@ export class BulkWriter {
    * that alternate between field paths and field values. Nested fields can be
    * updated by providing dot-separated field path strings or by providing
    * FieldPath objects.
+   *
    *
    * A Precondition restricting this update can be specified as the last
    * argument.
@@ -365,6 +417,7 @@ export class BulkWriter {
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
   ): Promise<WriteResult> {
+    this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     return bulkCommitBatch.update(
       documentRef,
@@ -374,13 +427,15 @@ export class BulkWriter {
   }
 
   /**
+   * Commits all writes that have been enqueued up to this point in parallel.
+   *
    * Returns a Promise that resolves when there are no more pending writes. It
-   * never fails. Calling this method will send all requests.
+   * never fails.
    *
    * The promise resolves immediately if there are no pending writes. Otherwise,
    * the Promise waits for all previously issued writes, but it does not wait
    * for writes that were added after the method is called. If you want to wait
-   * for additional writes, call `waitForPendingWrites()` again.
+   * for additional writes, call `flush()` again.
    *
    * @return {Promise<void>} A promise that resolves when there are no more
    * pending writes.
@@ -391,15 +446,65 @@ export class BulkWriter {
    * bulkWriter.create(documentRef, {foo: 'bar'});
    * bulkWriter.update(documentRef2, {foo: 'bar'});
    * bulkWriter.delete(documentRef3);
-   * await waitForPendingWrites().then(() => {
+   * await flush().then(() => {
    *   console.log('Successfully executed all writes');
    * });
    */
-  async waitForPendingWrites(): Promise<void> {
+  flush(): Promise<void> {
+    this.verifyNotClosed();
+    return this._flush();
+  }
+
+  /**
+   * Commits all enqueued writes and marks the BulkWriter instance as closed.
+   *
+   * After calling `close()`, calling any method wil throw an error.
+   *
+   * Returns a Promise that resolves when there are no more pending writes. It
+   * never fails. Calling this method will send all requests. The promise
+   * resolves immediately if there are no pending writes.
+   *
+   * @return {Promise<void>} A promise that resolves when there are no more
+   * pending writes.
+   *
+   * @example
+   * let bulkWriter = firestore.bulkWriter();
+   *
+   * bulkWriter.create(documentRef, {foo: 'bar'});
+   * bulkWriter.update(documentRef2, {foo: 'bar'});
+   * bulkWriter.delete(documentRef3);
+   * await close().then(() => {
+   *   console.log('Successfully executed all writes');
+   * });
+   */
+  close(): Promise<void> {
+    this.verifyNotClosed();
+    this.closed = true;
+    return this._flush();
+  }
+
+  private async _flush(): Promise<void> {
     const trackedBatches = this.batchQueue;
     const writePromises = trackedBatches.map(batch => batch.awaitBatch());
     this.sendBatches();
     await Promise.all(writePromises);
+  }
+
+  private verifyNotClosed(): void {
+    if (this.closed) {
+      throw new Error('BulkWriter has already been closed.');
+    }
+  }
+
+  /**
+   * Gradually ramps up the maximum number of operations per second by 50%
+   * every 5 minutes in line with the 500/50/5 rule.
+   */
+  private rampMaxOps(): void {
+    delayExecution(() => {
+      this.maxOpsPerSecond = this.maxOpsPerSecond * 1.5;
+      this.rampMaxOps();
+    }, 5 * 60 * 1000);
   }
 
   /**
@@ -433,7 +538,11 @@ export class BulkWriter {
   }
 
   private createNewBatch(): BulkCommitBatch {
-    const newBatch = new BulkCommitBatch(this.getId(), this.firestore.batch());
+    const newBatch = new BulkCommitBatch(
+      this.getId(),
+      this.firestore.batch(),
+      this.maxBatchSize
+    );
 
     this.batchQueue.push(newBatch);
     return newBatch;
@@ -456,42 +565,99 @@ export class BulkWriter {
    * After a batch is complete, try sending batches again.
    */
   private sendBatches(): void {
-    let counter = 0;
-    for (const batch of this.batchQueue) {
-      // Only send up until the first batch that cannot be sent.
-      if (!this.isBatchSendable(batch)) {
-        break;
-      }
+    if (this.batchQueue.length === 0) {
+      return;
+    }
 
-      this.refsInFlight = new Set([...this.refsInFlight, ...batch.refsInBatch]);
+    let index = 0;
+    const unsentBatches = this.batchQueue.filter(
+      batch => batch.sendTime === null
+    );
 
-      batch.bulkCommit().then(async results => {
+    while (
+      unsentBatches.length > index &&
+      this.isBatchSendable(unsentBatches[index])
+    ) {
+      const batch = unsentBatches[index];
+      batch.refsInBatch.forEach(batch => {
+        this.refsInFlight.add(batch);
+      });
+
+      batch.bulkCommit().then(results => {
         batch.resolveResults(results);
 
+        const batchIndex = this.batchQueue.indexOf(batch);
+        assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
+        this.batchQueue.splice(batchIndex, 1);
+
         // Remove references that are no longer in flight.
-        this.refsInFlight = new Set(
-          [...this.refsInFlight].filter(ref => !batch.refsInBatch.has(ref))
-        );
+        batch.refsInBatch.forEach(batch => {
+          this.refsInFlight.delete(batch);
+        });
 
         this.sendBatches();
       });
-      counter++;
-    }
 
-    // Remove batches that were successfully sent.
-    this.batchQueue = this.batchQueue.slice(counter);
+      index++;
+    }
   }
 
   /**
-   * Checks that the provided batch does not write to references that are
-   * currently in flight.
+   * Checks that the provided batch is sendable. To be sendable, a batch must:
+   * (1) be marked as pending
+   * (2) not write to references that are currently in flight
+   * (3) stays under the operations rate limit if sent
    */
   private isBatchSendable(batch: BulkCommitBatch): boolean {
+    if (!batch.pending) {
+      return false;
+    }
+
     for (const ref of batch.refsInBatch) {
       if (this.refsInFlight.has(ref)) {
         return false;
       }
     }
+
+    if (this.options && this.options.disableThrottling) {
+      return true;
+    }
+
+    // Get the number of operations sent in the past second.
+    const cutoffMillis = Timestamp.now().toMillis() - 1 * 1000;
+    const opCount = this.batchQueue
+      .filter(batch => {
+        batch.sendTime !== null && batch.sendTime.toMillis() > cutoffMillis;
+      })
+      .map(batch => batch.opCount)
+      .reduce((acc, val) => {
+        return acc + val;
+      }, 0);
+
+    if (opCount + batch.opCount > this.maxOpsPerSecond) {
+      return false;
+    }
+
     return true;
+  }
+
+  /**
+   * Sets the maximum number of allowed operations per second.
+   *
+   * @private
+   */
+  // Visible for testing.
+  setMaxOpsPerSecond(maxOps: number): void {
+    this.maxOpsPerSecond = maxOps;
+  }
+
+  /**
+   * Sets the maximum number of allowed operations in a batch.
+   *
+   * @private
+   */
+  // Visible for testing.
+  setMaxBatchSize(size: number): void {
+    this.maxBatchSize = size;
   }
 }
