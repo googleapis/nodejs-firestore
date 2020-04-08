@@ -121,6 +121,15 @@ describe('FieldValue.arrayUnion()', () => {
     });
   });
 
+  it('must not contain directly nested arrays', () => {
+    return createInstance().then(firestore => {
+      const docRef = firestore.doc('collectionId/documentId');
+      expect(() => docRef.set({foo: FieldValue.arrayUnion([])})).to.throw(
+        `Nested arrays are not supported`
+      );
+    });
+  });
+
   genericFieldValueTests('FieldValue.arrayUnion', FieldValue.arrayUnion('foo'));
 });
 
@@ -215,6 +224,15 @@ describe('FieldValue.arrayRemove()', () => {
         field: FieldValue.arrayRemove('foo', 'bar'),
         map: {field: FieldValue.arrayRemove('foo', 'bar')},
       });
+    });
+  });
+
+  it('must not contain directly nested arrays', () => {
+    return createInstance().then(firestore => {
+      const docRef = firestore.doc('collectionId/documentId');
+      expect(() => docRef.set({foo: FieldValue.arrayRemove([])})).to.throw(
+        `Nested arrays are not supported`
+      );
     });
   });
 
