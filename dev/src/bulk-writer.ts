@@ -49,6 +49,9 @@ class BulkCommitBatch {
   // The set of references present in the WriteBatch.
   readonly refsInBatch = new Set<DocumentReference>();
 
+  // The number of writes in this batch.
+  private _opCount = 0;
+
   // Whether the batch is ready to be sent. Writes cannot be added once a batch
   // is marked as pending.
   private _pending = false;
@@ -75,7 +78,7 @@ class BulkCommitBatch {
   }
 
   get opCount(): number {
-    return this.writeBatch.opCount;
+    return this._opCount;
   }
 
   get pending(): boolean {
@@ -90,13 +93,8 @@ class BulkCommitBatch {
     documentRef: DocumentReference,
     data: DocumentData
   ): Promise<WriteResult> {
-    this.refsInBatch.add(documentRef);
     this.writeBatch.create(documentRef, data);
-    this.resultsMap.set(
-      this.writeBatch.opCount,
-      new Deferred<BatchWriteResult>()
-    );
-    return this.getResult(this.writeBatch.opCount);
+    return this.processOperation(documentRef);
   }
 
   /**
@@ -107,13 +105,8 @@ class BulkCommitBatch {
     documentRef: DocumentReference,
     precondition?: Precondition
   ): Promise<WriteResult> {
-    this.refsInBatch.add(documentRef);
     this.writeBatch.delete(documentRef, precondition);
-    this.resultsMap.set(
-      this.writeBatch.opCount,
-      new Deferred<BatchWriteResult>()
-    );
-    return this.getResult(this.writeBatch.opCount);
+    return this.processOperation(documentRef);
   }
 
   /**
@@ -125,13 +118,8 @@ class BulkCommitBatch {
     data: DocumentData,
     options?: SetOptions
   ): Promise<WriteResult> {
-    this.refsInBatch.add(documentRef);
     this.writeBatch.set(documentRef, data, options);
-    this.resultsMap.set(
-      this.writeBatch.opCount,
-      new Deferred<BatchWriteResult>()
-    );
-    return this.getResult(this.writeBatch.opCount);
+    return this.processOperation(documentRef);
   }
 
   /**
@@ -145,13 +133,21 @@ class BulkCommitBatch {
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
   ): Promise<WriteResult> {
-    this.refsInBatch.add(documentRef);
     this.writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
-    this.resultsMap.set(
-      this.writeBatch.opCount,
-      new Deferred<BatchWriteResult>()
-    );
-    return this.getResult(this.writeBatch.opCount);
+    return this.processOperation(documentRef);
+  }
+
+  /**
+   * Helper to update data structures associated with the operation and
+   * return the result.
+   */
+  private processOperation(
+    documentRef: DocumentReference
+  ): Promise<WriteResult> {
+    this.refsInBatch.add(documentRef);
+    this._opCount++;
+    this.resultsMap.set(this.opCount, new Deferred<BatchWriteResult>());
+    return this.getResult(this.opCount);
   }
 
   /**
@@ -161,7 +157,7 @@ class BulkCommitBatch {
   canAddDoc(documentRef: DocumentReference): boolean {
     return (
       !this.pending &&
-      this.writeBatch.opCount < this.maxBatchSize &&
+      this.opCount < this.maxBatchSize &&
       !this.refsInBatch.has(documentRef)
     );
   }
@@ -251,7 +247,7 @@ export class BulkWriter {
     private readonly firestore: Firestore,
     private readonly options?: BulkWriterOptions
   ) {
-    if (options && !options.disableThrottling) {
+    if (options === undefined || options.throttlingEnabled) {
       this.rampMaxOps();
     }
   }
@@ -304,7 +300,7 @@ export class BulkWriter {
    *
    * @example
    * let bulkWriter = firestore.bulkWriter();
-   * let documentRef = firestore.collection('col').doc();
+   * let documentRef = firestore.doc('col/doc');
    *
    * bulkWriter
    *  .delete(documentRef)
@@ -398,7 +394,7 @@ export class BulkWriter {
    *
    * @example
    * let bulkWriter = firestore.bulkWriter();
-   * let documentRef = firestore.collection('col').doc();
+   * let documentRef = firestore.doc('col/doc');
    *
    * bulkWriter
    *  .update(documentRef, {foo: 'bar'})
@@ -565,15 +561,11 @@ export class BulkWriter {
    * After a batch is complete, try sending batches again.
    */
   private sendBatches(): void {
-    if (this.batchQueue.length === 0) {
-      return;
-    }
-
-    let index = 0;
     const unsentBatches = this.batchQueue.filter(
       batch => batch.sendTime === null
     );
 
+    let index = 0;
     while (
       unsentBatches.length > index &&
       this.isBatchSendable(unsentBatches[index])
@@ -619,7 +611,7 @@ export class BulkWriter {
       }
     }
 
-    if (this.options && this.options.disableThrottling) {
+    if (this.options && !this.options.throttlingEnabled) {
       return true;
     }
 

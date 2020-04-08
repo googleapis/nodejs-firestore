@@ -16,16 +16,10 @@ import {fail} from 'assert';
 import {expect} from 'chai';
 import {Status} from 'google-gax';
 
-import {
-  FieldValue,
-  Firestore,
-  setLogFunction,
-  Timestamp,
-  WriteResult,
-} from '../src';
-import { setTimeoutHandler } from '../src/backoff';
+import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
+import {setTimeoutHandler} from '../src/backoff';
 import {BulkWriter} from '../src/bulk-writer';
-import { Deferred } from '../src/util';
+import {Deferred} from '../src/util';
 import {
   ApiOverride,
   createInstance,
@@ -52,7 +46,7 @@ interface RequestResponse {
   response: BulkWriterResponse;
 }
 
-describe.only('BulkWriter', () => {
+describe('BulkWriter', () => {
   const documentNameRoot = `projects/${PROJECT_ID}/databases/(default)/documents/`;
 
   let firestore: Firestore;
@@ -163,7 +157,10 @@ describe.only('BulkWriter', () => {
     };
   }
 
-  function instantiateInstance(mock: RequestResponse[], manualFlush = false): Promise<void> {
+  function instantiateInstance(
+    mock: RequestResponse[],
+    manualFlush = false
+  ): Promise<void> {
     const overrides: ApiOverride = {
       batchWrite: async request => {
         requestCounter++;
@@ -272,7 +269,7 @@ describe.only('BulkWriter', () => {
   });
 
   // TODO: Do I need to include other tests similar to the ones in WriteBatch
-  // that check for adding preconditions, passing in null values, etc? OR can I 
+  // that check for adding preconditions, passing in null values, etc? OR can I
   // assume that WriteBatch will handle them?
 
   it('surfaces errors', async () => {
@@ -397,16 +394,22 @@ describe.only('BulkWriter', () => {
   });
 
   it('throttles writes', async () => {
-    await instantiateInstance([
-      {
-        request: createRequest([setOp('col/doc1', 'bar'), setOp('col/doc2', 'bar')]),
-        response: createResponse([successResponse(1), successResponse(2)]),
-      }, 
-      {
-        request: createRequest([setOp('col/doc3', 'bar')]),
-        response: createResponse([successResponse(3)]),
-      }
-    ], /** manualFlush= */ true);
+    await instantiateInstance(
+      [
+        {
+          request: createRequest([
+            setOp('col/doc1', 'bar'),
+            setOp('col/doc2', 'bar'),
+          ]),
+          response: createResponse([successResponse(1), successResponse(2)]),
+        },
+        {
+          request: createRequest([setOp('col/doc3', 'bar')]),
+          response: createResponse([successResponse(3)]),
+        },
+      ],
+      /** manualFlush= */ true
+    );
 
     // TODO: figure out how to properly create barrier to check for throttling
     // in order to test for requests that are in flight.
@@ -426,8 +429,6 @@ describe.only('BulkWriter', () => {
 
   it('does not add writes to batches that are already in flight', () => {});
 
-
-
   describe('555 support', () => {
     let observedMax: number[] = [];
 
@@ -437,9 +438,9 @@ describe.only('BulkWriter', () => {
         callback();
       });
     });
-  
+
     beforeEach(() => {
-      observedMax= [];
+      observedMax = [];
     });
 
     afterEach(() => setTimeoutHandler(setTimeout));
@@ -447,12 +448,10 @@ describe.only('BulkWriter', () => {
     it('gradually ramps up the maximum operations per second', () => {
       const nop = () => {};
       bulkWriter.set(firestore.doc('col/doc'), {});
-      
+
       // TODO: Should I finish the test and add hooks to monitor that the maxOps
       // increases by 50% each time? It seems like a quite a bit of boilerplate to test
-      // something pretty simple. On the otherhand, it feels bad to not test it at all.
-  
-      
+      // something pretty simple. On the other hand, it feels bad to not test it at all.
     });
   });
 });
