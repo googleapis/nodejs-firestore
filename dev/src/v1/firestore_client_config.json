@@ -35,11 +35,6 @@
           "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
-        "CreateDocument": {
-          "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
-          "retry_params_name": "default"
-        },
         "UpdateDocument": {
           "timeout_millis": 60000,
           "retry_codes_name": "non_idempotent",
@@ -88,6 +83,11 @@
         "ListCollectionIds": {
           "timeout_millis": 60000,
           "retry_codes_name": "deadline_exceeded_internal_unavailable",
+          "retry_params_name": "default"
+        },
+        "CreateDocument": {
+          "timeout_millis": 60000,
+          "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         }
       }

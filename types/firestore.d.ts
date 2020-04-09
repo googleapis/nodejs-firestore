@@ -893,8 +893,8 @@ declare namespace FirebaseFirestore {
     ): Query<T>;
 
     /**
-     * Creates and returns a new Query that's additionally limited to only
-     * return up to the specified number of documents.
+     * Creates and returns a new Query that only returns the first matching 
+     * documents.
      *
      * This function returns a new (immutable) instance of the Query (rather
      * than modify the existing instance) to impose the limit.
@@ -903,6 +903,21 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     limit(limit: number): Query<T>;
+    
+    /**
+     * Creates and returns a new Query that only returns the last matching
+     * documents.
+     *
+     * You must specify at least one orderBy clause for limitToLast queries, 
+     * otherwise an exception will be thrown during execution.
+     * 
+     * Results for limitToLast queries cannot be streamed via the `stream()`
+     * API.
+     *
+     * @param limit The maximum number of items to return.
+     * @return The created Query.
+     */
+    limitToLast(limit: number): Query<T>;
 
     /**
      * Specifies the offset of the returned results.
@@ -1439,6 +1454,14 @@ declare namespace FirebaseFirestore {
      * @return 'true' if this `Timestamp` is equal to the provided one.
      */
     isEqual(other: Timestamp): boolean;
+
+    /**
+     * Converts this object to a primitive `string`, which allows `Timestamp` objects to be compared
+     * using the `>`, `<=`, `>=` and `>` operators.
+     *
+     * @return a string encoding of this object.
+     */
+    valueOf(): string;
   }
 
   /**

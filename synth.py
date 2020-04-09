@@ -6,6 +6,9 @@ import os
 
 logging.basicConfig(level=logging.DEBUG)
 
+AUTOSYNTH_MULTIPLE_COMMITS = True
+
+
 gapic_micro = gcp.GAPICMicrogenerator()
 
 v1_admin_library = gapic_micro.typescript_library(

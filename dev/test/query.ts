@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {expect} from 'chai';
+import {expect, use} from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -26,7 +27,6 @@ import {
   createInstance,
   document,
   InvalidApiUsage,
-  Post,
   postConverter,
   requestEquals,
   response,
@@ -43,6 +43,8 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(() => {});
+
+use(chaiAsPromised);
 
 function snapshot(
   relativePath: string,
@@ -845,6 +847,77 @@ describe('where() interface', () => {
     });
   });
 
+  it('supports reference array for IN queries', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          fieldFilters('__name__', 'IN', {
+            arrayValue: {
+              values: [
+                {
+                  referenceValue: `projects/${PROJECT_ID}/databases/(default)/documents/collectionId/foo`,
+                },
+                {
+                  referenceValue: `projects/${PROJECT_ID}/databases/(default)/documents/collectionId/bar`,
+                },
+              ],
+            },
+          })
+        );
+
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      const collection = firestore.collection('collectionId');
+      const query = collection.where(FieldPath.documentId(), 'in', [
+        'foo',
+        collection.doc('bar'),
+      ]);
+      return query.get();
+    });
+  });
+
+  it('validates references for IN queries', () => {
+    const query = firestore.collection('collectionId');
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'in', ['foo', 42]);
+    }).to.throw(
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
+    );
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'in', 42);
+    }).to.throw(
+      "Invalid Query. A non-empty array is required for 'in' filters."
+    );
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'in', []);
+    }).to.throw(
+      "Invalid Query. A non-empty array is required for 'in' filters."
+    );
+  });
+
+  it('validates query operator for FieldPath.document()', () => {
+    const query = firestore.collection('collectionId');
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'array-contains', query.doc());
+    }).to.throw(
+      "Invalid Query. You can't perform 'array-contains' queries on FieldPath.documentId()."
+    );
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'array-contains-any', query.doc());
+    }).to.throw(
+      "Invalid Query. You can't perform 'array-contains-any' queries on FieldPath.documentId()."
+    );
+  });
+
   it('rejects custom objects for field paths', () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
@@ -1201,6 +1274,116 @@ describe('limit() interface', () => {
   });
 });
 
+describe('limitToLast() interface', () => {
+  let firestore: Firestore;
+
+  beforeEach(() => {
+    return createInstance().then(firestoreInstance => {
+      firestore = firestoreInstance;
+    });
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('reverses order constraints', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request, orderBy('foo', 'DESCENDING'), limit(10));
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query.orderBy('foo').limitToLast(10);
+      return query.get();
+    });
+  });
+
+  it('reverses cursors', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          orderBy('foo', 'DESCENDING'),
+          startAt(true, 'end'),
+          endAt(false, 'start'),
+          limit(10)
+        );
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query
+        .orderBy('foo')
+        .startAt('start')
+        .endAt('end')
+        .limitToLast(10);
+      return query.get();
+    });
+  });
+
+  it('reverses results', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request, orderBy('foo', 'DESCENDING'), limit(2));
+        return stream(result('second'), result('first'));
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query.orderBy('foo').limitToLast(2);
+      const result = await query.get();
+      expect(result.docs[0].id).to.equal('first');
+      expect(result.docs[1].id).to.equal('second');
+    });
+  });
+
+  it('expects number', () => {
+    const query = firestore.collection('collectionId');
+    expect(() => query.limitToLast(Infinity)).to.throw(
+      'Value for argument "limitToLast" is not a valid integer.'
+    );
+  });
+
+  it('requires at least one ordering constraints', () => {
+    const query = firestore.collection('collectionId');
+    const result = query.limitToLast(1).get();
+    return expect(result).to.eventually.be.rejectedWith(
+      'limitToLast() queries require specifying at least one orderBy() clause.'
+    );
+  });
+
+  it('rejects Query.stream()', () => {
+    const query = firestore.collection('collectionId');
+    expect(() => query.limitToLast(1).stream()).to.throw(
+      'Query results for queries that include limitToLast() constraints cannot be streamed. Use Query.get() instead.'
+    );
+  });
+
+  it('uses latest limitToLast', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request, orderBy('foo', 'DESCENDING'), limit(3));
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query
+        .orderBy('foo')
+        .limitToLast(1)
+        .limitToLast(2)
+        .limitToLast(3);
+      return query.get();
+    });
+  });
+});
+
 describe('offset() interface', () => {
   let firestore: Firestore;
 
@@ -1399,7 +1582,7 @@ describe('startAt() interface', () => {
     expect(() => {
       query.orderBy(FieldPath.documentId()).startAt(42);
     }).to.throw(
-      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference.'
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
     );
 
     expect(() => {

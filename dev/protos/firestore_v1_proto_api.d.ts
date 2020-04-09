@@ -1826,20 +1826,6 @@ export namespace google {
                 public listDocuments(request: google.firestore.v1.IListDocumentsRequest): Promise<google.firestore.v1.ListDocumentsResponse>;
 
                 /**
-                 * Calls CreateDocument.
-                 * @param request CreateDocumentRequest message or plain object
-                 * @param callback Node-style callback called with the error, if any, and Document
-                 */
-                public createDocument(request: google.firestore.v1.ICreateDocumentRequest, callback: google.firestore.v1.Firestore.CreateDocumentCallback): void;
-
-                /**
-                 * Calls CreateDocument.
-                 * @param request CreateDocumentRequest message or plain object
-                 * @returns Promise
-                 */
-                public createDocument(request: google.firestore.v1.ICreateDocumentRequest): Promise<google.firestore.v1.Document>;
-
-                /**
                  * Calls UpdateDocument.
                  * @param request UpdateDocumentRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and Document
@@ -1978,6 +1964,20 @@ export namespace google {
                  * @returns Promise
                  */
                 public listCollectionIds(request: google.firestore.v1.IListCollectionIdsRequest): Promise<google.firestore.v1.ListCollectionIdsResponse>;
+
+                /**
+                 * Calls CreateDocument.
+                 * @param request CreateDocumentRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and Document
+                 */
+                public createDocument(request: google.firestore.v1.ICreateDocumentRequest, callback: google.firestore.v1.Firestore.CreateDocumentCallback): void;
+
+                /**
+                 * Calls CreateDocument.
+                 * @param request CreateDocumentRequest message or plain object
+                 * @returns Promise
+                 */
+                public createDocument(request: google.firestore.v1.ICreateDocumentRequest): Promise<google.firestore.v1.Document>;
             }
 
             namespace Firestore {
@@ -1995,13 +1995,6 @@ export namespace google {
                  * @param [response] ListDocumentsResponse
                  */
                 type ListDocumentsCallback = (error: (Error|null), response?: google.firestore.v1.ListDocumentsResponse) => void;
-
-                /**
-                 * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
-                 * @param error Error, if any
-                 * @param [response] Document
-                 */
-                type CreateDocumentCallback = (error: (Error|null), response?: google.firestore.v1.Document) => void;
 
                 /**
                  * Callback as used by {@link google.firestore.v1.Firestore#updateDocument}.
@@ -2072,6 +2065,13 @@ export namespace google {
                  * @param [response] ListCollectionIdsResponse
                  */
                 type ListCollectionIdsCallback = (error: (Error|null), response?: google.firestore.v1.ListCollectionIdsResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
+                 * @param error Error, if any
+                 * @param [response] Document
+                 */
+                type CreateDocumentCallback = (error: (Error|null), response?: google.firestore.v1.Document) => void;
             }
 
             /** Properties of a GetDocumentRequest. */
@@ -3216,6 +3216,26 @@ export namespace google {
                         "OPERATOR_UNSPECIFIED"| "LESS_THAN"| "LESS_THAN_OR_EQUAL"| "GREATER_THAN"| "GREATER_THAN_OR_EQUAL"| "EQUAL"| "ARRAY_CONTAINS"| "IN"| "ARRAY_CONTAINS_ANY";
                 }
 
+                /** Properties of a Projection. */
+                interface IProjection {
+
+                    /** Projection fields */
+                    fields?: (google.firestore.v1.StructuredQuery.IFieldReference[]|null);
+                }
+
+                /** Represents a Projection. */
+                class Projection implements IProjection {
+
+                    /**
+                     * Constructs a new Projection.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IProjection);
+
+                    /** Projection fields. */
+                    public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
+                }
+
                 /** Properties of an UnaryFilter. */
                 interface IUnaryFilter {
 
@@ -3252,6 +3272,26 @@ export namespace google {
                         "OPERATOR_UNSPECIFIED"| "IS_NAN"| "IS_NULL";
                 }
 
+                /** Properties of a FieldReference. */
+                interface IFieldReference {
+
+                    /** FieldReference fieldPath */
+                    fieldPath?: (string|null);
+                }
+
+                /** Represents a FieldReference. */
+                class FieldReference implements IFieldReference {
+
+                    /**
+                     * Constructs a new FieldReference.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IFieldReference);
+
+                    /** FieldReference fieldPath. */
+                    public fieldPath: string;
+                }
+
                 /** Properties of an Order. */
                 interface IOrder {
 
@@ -3276,46 +3316,6 @@ export namespace google {
 
                     /** Order direction. */
                     public direction: google.firestore.v1.StructuredQuery.Direction;
-                }
-
-                /** Properties of a FieldReference. */
-                interface IFieldReference {
-
-                    /** FieldReference fieldPath */
-                    fieldPath?: (string|null);
-                }
-
-                /** Represents a FieldReference. */
-                class FieldReference implements IFieldReference {
-
-                    /**
-                     * Constructs a new FieldReference.
-                     * @param [properties] Properties to set
-                     */
-                    constructor(properties?: google.firestore.v1.StructuredQuery.IFieldReference);
-
-                    /** FieldReference fieldPath. */
-                    public fieldPath: string;
-                }
-
-                /** Properties of a Projection. */
-                interface IProjection {
-
-                    /** Projection fields */
-                    fields?: (google.firestore.v1.StructuredQuery.IFieldReference[]|null);
-                }
-
-                /** Represents a Projection. */
-                class Projection implements IProjection {
-
-                    /**
-                     * Constructs a new Projection.
-                     * @param [properties] Properties to set
-                     */
-                    constructor(properties?: google.firestore.v1.StructuredQuery.IProjection);
-
-                    /** Projection fields. */
-                    public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
                 }
 
                 /** Direction enum. */
@@ -3364,6 +3364,9 @@ export namespace google {
                 /** Write updateMask */
                 updateMask?: (google.firestore.v1.IDocumentMask|null);
 
+                /** Write updateTransforms */
+                updateTransforms?: (google.firestore.v1.DocumentTransform.IFieldTransform[]|null);
+
                 /** Write currentDocument */
                 currentDocument?: (google.firestore.v1.IPrecondition|null);
             }
@@ -3388,6 +3391,9 @@ export namespace google {
 
                 /** Write updateMask. */
                 public updateMask?: (google.firestore.v1.IDocumentMask|null);
+
+                /** Write updateTransforms. */
+                public updateTransforms: google.firestore.v1.DocumentTransform.IFieldTransform[];
 
                 /** Write currentDocument. */
                 public currentDocument?: (google.firestore.v1.IPrecondition|null);

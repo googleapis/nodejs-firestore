@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -123,12 +123,30 @@ describe('v1beta1.FirestoreClient', () => {
     });
     assert(client);
   });
+  it('has initialize method and supports deferred initialization', async () => {
+    const client = new firestoreModule.v1beta1.FirestoreClient({
+      credentials: {client_email: 'bogus', private_key: 'bogus'},
+      projectId: 'bogus',
+    });
+    assert.strictEqual(client.firestoreStub, undefined);
+    await client.initialize();
+    assert(client.firestoreStub);
+  });
+  it('has close method', () => {
+    const client = new firestoreModule.v1beta1.FirestoreClient({
+      credentials: {client_email: 'bogus', private_key: 'bogus'},
+      projectId: 'bogus',
+    });
+    client.close();
+  });
   describe('getDocument', () => {
     it('invokes getDocument without error', done => {
       const client = new firestoreModule.v1beta1.FirestoreClient({
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IGetDocumentRequest = {};
       request.name = '';
@@ -152,6 +170,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IGetDocumentRequest = {};
       request.name = '';
@@ -177,6 +197,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.ICreateDocumentRequest = {};
       request.parent = '';
@@ -200,6 +222,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.ICreateDocumentRequest = {};
       request.parent = '';
@@ -225,6 +249,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IUpdateDocumentRequest = {};
       request.document = {};
@@ -249,6 +275,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IUpdateDocumentRequest = {};
       request.document = {};
@@ -275,6 +303,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IDeleteDocumentRequest = {};
       request.name = '';
@@ -298,6 +328,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IDeleteDocumentRequest = {};
       request.name = '';
@@ -323,6 +355,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IBeginTransactionRequest = {};
       request.database = '';
@@ -346,6 +380,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IBeginTransactionRequest = {};
       request.database = '';
@@ -371,6 +407,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.ICommitRequest = {};
       request.database = '';
@@ -394,6 +432,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.ICommitRequest = {};
       request.database = '';
@@ -415,6 +455,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IRollbackRequest = {};
       request.database = '';
@@ -438,6 +480,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IRollbackRequest = {};
       request.database = '';
@@ -463,8 +507,11 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IBatchGetDocumentsRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -488,8 +535,11 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IBatchGetDocumentsRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -516,8 +566,11 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IRunQueryRequest = {};
+      request.parent = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -541,8 +594,11 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IRunQueryRequest = {};
+      request.parent = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -569,8 +625,11 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IWriteRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -595,8 +654,11 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IWriteRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -624,8 +686,11 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IListenRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -650,8 +715,11 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
-      const request = {};
+      const request: protosTypes.google.firestore.v1beta1.IListenRequest = {};
+      request.database = '';
       // Mock response
       const expectedResponse = {};
       // Mock gRPC layer
@@ -679,6 +747,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IListDocumentsRequest = {};
       request.parent = '';
@@ -706,6 +776,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IListDocumentsRequest = {};
       request.parent = '';
@@ -738,6 +810,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IListCollectionIdsRequest = {};
       request.parent = '';
@@ -765,6 +839,8 @@ describe('v1beta1.FirestoreClient', () => {
         credentials: {client_email: 'bogus', private_key: 'bogus'},
         projectId: 'bogus',
       });
+      // Initialize client before mocking
+      client.initialize();
       // Mock request
       const request: protosTypes.google.firestore.v1beta1.IListCollectionIdsRequest = {};
       request.parent = '';

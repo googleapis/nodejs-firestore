@@ -633,7 +633,7 @@ export class Firestore {
    * writeBatch.set(firestore.doc('col/doc2'), data);
    *
    * writeBatch.commit().then(res => {
-   *   console.log(`Added document at ${res.writeResults[0].updateTime}`);
+   *   console.log('Successfully executed batch.');
    * });
    */
   batch(): WriteBatch {

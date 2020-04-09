@@ -815,14 +815,6 @@
                         "(google.api.http).get": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}"
                       }
                     },
-                    "CreateDocument": {
-                      "requestType": "CreateDocumentRequest",
-                      "responseType": "Document",
-                      "options": {
-                        "(google.api.http).post": "/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}",
-                        "(google.api.http).body": "document"
-                      }
-                    },
                     "UpdateDocument": {
                       "requestType": "UpdateDocumentRequest",
                       "responseType": "Document",
@@ -916,6 +908,14 @@
                         "(google.api.http).additional_bindings.post": "/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds",
                         "(google.api.http).additional_bindings.body": "*",
                         "(google.api.method_signature)": "parent"
+                      }
+                    },
+                    "CreateDocument": {
+                      "requestType": "CreateDocumentRequest",
+                      "responseType": "Document",
+                      "options": {
+                        "(google.api.http).post": "/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}",
+                        "(google.api.http).body": "document"
                       }
                     }
                   }
@@ -1677,6 +1677,15 @@
                         }
                       }
                     },
+                    "Projection": {
+                      "fields": {
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "FieldReference",
+                          "id": 2
+                        }
+                      }
+                    },
                     "UnaryFilter": {
                       "oneofs": {
                         "operandType": {
@@ -1705,18 +1714,6 @@
                         }
                       }
                     },
-                    "Order": {
-                      "fields": {
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 1
-                        },
-                        "direction": {
-                          "type": "Direction",
-                          "id": 2
-                        }
-                      }
-                    },
                     "FieldReference": {
                       "fields": {
                         "fieldPath": {
@@ -1725,11 +1722,14 @@
                         }
                       }
                     },
-                    "Projection": {
+                    "Order": {
                       "fields": {
-                        "fields": {
-                          "rule": "repeated",
+                        "field": {
                           "type": "FieldReference",
+                          "id": 1
+                        },
+                        "direction": {
+                          "type": "Direction",
                           "id": 2
                         }
                       }
@@ -1782,6 +1782,11 @@
                     "updateMask": {
                       "type": "DocumentMask",
                       "id": 3
+                    },
+                    "updateTransforms": {
+                      "rule": "repeated",
+                      "type": "DocumentTransform.FieldTransform",
+                      "id": 7
                     },
                     "currentDocument": {
                       "type": "Precondition",

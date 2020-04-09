@@ -3217,39 +3217,6 @@ $root.google = (function() {
                  */
 
                 /**
-                 * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
-                 * @memberof google.firestore.v1.Firestore
-                 * @typedef CreateDocumentCallback
-                 * @type {function}
-                 * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1.Document} [response] Document
-                 */
-
-                /**
-                 * Calls CreateDocument.
-                 * @function createDocument
-                 * @memberof google.firestore.v1.Firestore
-                 * @instance
-                 * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
-                 * @param {google.firestore.v1.Firestore.CreateDocumentCallback} callback Node-style callback called with the error, if any, and Document
-                 * @returns {undefined}
-                 * @variation 1
-                 */
-                Object.defineProperty(Firestore.prototype.createDocument = function createDocument(request, callback) {
-                    return this.rpcCall(createDocument, $root.google.firestore.v1.CreateDocumentRequest, $root.google.firestore.v1.Document, request, callback);
-                }, "name", { value: "CreateDocument" });
-
-                /**
-                 * Calls CreateDocument.
-                 * @function createDocument
-                 * @memberof google.firestore.v1.Firestore
-                 * @instance
-                 * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
-                 * @returns {Promise<google.firestore.v1.Document>} Promise
-                 * @variation 2
-                 */
-
-                /**
                  * Callback as used by {@link google.firestore.v1.Firestore#updateDocument}.
                  * @memberof google.firestore.v1.Firestore
                  * @typedef UpdateDocumentCallback
@@ -3576,6 +3543,39 @@ $root.google = (function() {
                  * @instance
                  * @param {google.firestore.v1.IListCollectionIdsRequest} request ListCollectionIdsRequest message or plain object
                  * @returns {Promise<google.firestore.v1.ListCollectionIdsResponse>} Promise
+                 * @variation 2
+                 */
+
+                /**
+                 * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
+                 * @memberof google.firestore.v1.Firestore
+                 * @typedef CreateDocumentCallback
+                 * @type {function}
+                 * @param {Error|null} error Error, if any
+                 * @param {google.firestore.v1.Document} [response] Document
+                 */
+
+                /**
+                 * Calls CreateDocument.
+                 * @function createDocument
+                 * @memberof google.firestore.v1.Firestore
+                 * @instance
+                 * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
+                 * @param {google.firestore.v1.Firestore.CreateDocumentCallback} callback Node-style callback called with the error, if any, and Document
+                 * @returns {undefined}
+                 * @variation 1
+                 */
+                Object.defineProperty(Firestore.prototype.createDocument = function createDocument(request, callback) {
+                    return this.rpcCall(createDocument, $root.google.firestore.v1.CreateDocumentRequest, $root.google.firestore.v1.Document, request, callback);
+                }, "name", { value: "CreateDocument" });
+
+                /**
+                 * Calls CreateDocument.
+                 * @function createDocument
+                 * @memberof google.firestore.v1.Firestore
+                 * @instance
+                 * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
+                 * @returns {Promise<google.firestore.v1.Document>} Promise
                  * @variation 2
                  */
 
@@ -5587,6 +5587,42 @@ $root.google = (function() {
                     return FieldFilter;
                 })();
 
+                StructuredQuery.Projection = (function() {
+
+                    /**
+                     * Properties of a Projection.
+                     * @memberof google.firestore.v1.StructuredQuery
+                     * @interface IProjection
+                     * @property {Array.<google.firestore.v1.StructuredQuery.IFieldReference>|null} [fields] Projection fields
+                     */
+
+                    /**
+                     * Constructs a new Projection.
+                     * @memberof google.firestore.v1.StructuredQuery
+                     * @classdesc Represents a Projection.
+                     * @implements IProjection
+                     * @constructor
+                     * @param {google.firestore.v1.StructuredQuery.IProjection=} [properties] Properties to set
+                     */
+                    function Projection(properties) {
+                        this.fields = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+
+                    /**
+                     * Projection fields.
+                     * @member {Array.<google.firestore.v1.StructuredQuery.IFieldReference>} fields
+                     * @memberof google.firestore.v1.StructuredQuery.Projection
+                     * @instance
+                     */
+                    Projection.prototype.fields = $util.emptyArray;
+
+                    return Projection;
+                })();
+
                 StructuredQuery.UnaryFilter = (function() {
 
                     /**
@@ -5661,6 +5697,41 @@ $root.google = (function() {
                     return UnaryFilter;
                 })();
 
+                StructuredQuery.FieldReference = (function() {
+
+                    /**
+                     * Properties of a FieldReference.
+                     * @memberof google.firestore.v1.StructuredQuery
+                     * @interface IFieldReference
+                     * @property {string|null} [fieldPath] FieldReference fieldPath
+                     */
+
+                    /**
+                     * Constructs a new FieldReference.
+                     * @memberof google.firestore.v1.StructuredQuery
+                     * @classdesc Represents a FieldReference.
+                     * @implements IFieldReference
+                     * @constructor
+                     * @param {google.firestore.v1.StructuredQuery.IFieldReference=} [properties] Properties to set
+                     */
+                    function FieldReference(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+
+                    /**
+                     * FieldReference fieldPath.
+                     * @member {string} fieldPath
+                     * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                     * @instance
+                     */
+                    FieldReference.prototype.fieldPath = "";
+
+                    return FieldReference;
+                })();
+
                 StructuredQuery.Order = (function() {
 
                     /**
@@ -5703,77 +5774,6 @@ $root.google = (function() {
                     Order.prototype.direction = 0;
 
                     return Order;
-                })();
-
-                StructuredQuery.FieldReference = (function() {
-
-                    /**
-                     * Properties of a FieldReference.
-                     * @memberof google.firestore.v1.StructuredQuery
-                     * @interface IFieldReference
-                     * @property {string|null} [fieldPath] FieldReference fieldPath
-                     */
-
-                    /**
-                     * Constructs a new FieldReference.
-                     * @memberof google.firestore.v1.StructuredQuery
-                     * @classdesc Represents a FieldReference.
-                     * @implements IFieldReference
-                     * @constructor
-                     * @param {google.firestore.v1.StructuredQuery.IFieldReference=} [properties] Properties to set
-                     */
-                    function FieldReference(properties) {
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-
-                    /**
-                     * FieldReference fieldPath.
-                     * @member {string} fieldPath
-                     * @memberof google.firestore.v1.StructuredQuery.FieldReference
-                     * @instance
-                     */
-                    FieldReference.prototype.fieldPath = "";
-
-                    return FieldReference;
-                })();
-
-                StructuredQuery.Projection = (function() {
-
-                    /**
-                     * Properties of a Projection.
-                     * @memberof google.firestore.v1.StructuredQuery
-                     * @interface IProjection
-                     * @property {Array.<google.firestore.v1.StructuredQuery.IFieldReference>|null} [fields] Projection fields
-                     */
-
-                    /**
-                     * Constructs a new Projection.
-                     * @memberof google.firestore.v1.StructuredQuery
-                     * @classdesc Represents a Projection.
-                     * @implements IProjection
-                     * @constructor
-                     * @param {google.firestore.v1.StructuredQuery.IProjection=} [properties] Properties to set
-                     */
-                    function Projection(properties) {
-                        this.fields = [];
-                        if (properties)
-                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                if (properties[keys[i]] != null)
-                                    this[keys[i]] = properties[keys[i]];
-                    }
-
-                    /**
-                     * Projection fields.
-                     * @member {Array.<google.firestore.v1.StructuredQuery.IFieldReference>} fields
-                     * @memberof google.firestore.v1.StructuredQuery.Projection
-                     * @instance
-                     */
-                    Projection.prototype.fields = $util.emptyArray;
-
-                    return Projection;
                 })();
 
                 /**
@@ -5850,6 +5850,7 @@ $root.google = (function() {
                  * @property {string|null} ["delete"] Write delete
                  * @property {google.firestore.v1.IDocumentTransform|null} [transform] Write transform
                  * @property {google.firestore.v1.IDocumentMask|null} [updateMask] Write updateMask
+                 * @property {Array.<google.firestore.v1.DocumentTransform.IFieldTransform>|null} [updateTransforms] Write updateTransforms
                  * @property {google.firestore.v1.IPrecondition|null} [currentDocument] Write currentDocument
                  */
 
@@ -5862,6 +5863,7 @@ $root.google = (function() {
                  * @param {google.firestore.v1.IWrite=} [properties] Properties to set
                  */
                 function Write(properties) {
+                    this.updateTransforms = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -5899,6 +5901,14 @@ $root.google = (function() {
                  * @instance
                  */
                 Write.prototype.updateMask = null;
+
+                /**
+                 * Write updateTransforms.
+                 * @member {Array.<google.firestore.v1.DocumentTransform.IFieldTransform>} updateTransforms
+                 * @memberof google.firestore.v1.Write
+                 * @instance
+                 */
+                Write.prototype.updateTransforms = $util.emptyArray;
 
                 /**
                  * Write currentDocument.
