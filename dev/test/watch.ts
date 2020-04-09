@@ -14,6 +14,7 @@
 
 const duplexify = require('duplexify');
 
+import {describe, it} from 'mocha';
 import {expect} from 'chai';
 import * as extend from 'extend';
 import {GoogleError, Status} from 'google-gax';
