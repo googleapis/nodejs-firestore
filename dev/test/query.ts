@@ -387,14 +387,8 @@ describe('query interface', () => {
 
     queryEquals(
       [
-        query
-          .orderBy('foo')
-          .orderBy('__name__')
-          .startAt('b', 'c'),
-        query
-          .orderBy('foo')
-          .orderBy('__name__')
-          .startAt('b', 'c'),
+        query.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
+        query.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
       ],
       []
     );
@@ -1155,10 +1149,7 @@ describe('orderBy() interface', () => {
 
     return snapshot('collectionId/doc', {foo: 'bar'}).then(snapshot => {
       expect(() => {
-        query = query
-          .orderBy('foo')
-          .startAt('foo')
-          .orderBy('foo');
+        query = query.orderBy('foo').startAt('foo').orderBy('foo');
       }).to.throw(
         'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().'
       );
@@ -1173,10 +1164,7 @@ describe('orderBy() interface', () => {
       );
 
       expect(() => {
-        query = query
-          .orderBy('foo')
-          .endAt('foo')
-          .orderBy('foo');
+        query = query.orderBy('foo').endAt('foo').orderBy('foo');
       }).to.throw(
         'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().'
       );
@@ -1265,10 +1253,7 @@ describe('limit() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .limit(1)
-        .limit(2)
-        .limit(3);
+      query = query.limit(1).limit(2).limit(3);
       return query.get();
     });
   });
@@ -1374,11 +1359,7 @@ describe('limitToLast() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .limitToLast(1)
-        .limitToLast(2)
-        .limitToLast(3);
+      query = query.orderBy('foo').limitToLast(1).limitToLast(2).limitToLast(3);
       return query.get();
     });
   });
@@ -1427,10 +1408,7 @@ describe('offset() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .offset(1)
-        .offset(2)
-        .offset(3);
+      query = query.offset(1).offset(2).offset(3);
       return query.get();
     });
   });
@@ -1533,10 +1511,7 @@ describe('startAt() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .orderBy('bar')
-        .startAt('foo', 'bar');
+      query = query.orderBy('foo').orderBy('bar').startAt('foo', 'bar');
       return query.get();
     });
   });
@@ -1563,14 +1538,8 @@ describe('startAt() interface', () => {
         const query = firestore.collection('collectionId');
 
         return Promise.all([
-          query
-            .orderBy(FieldPath.documentId())
-            .startAt(doc.id)
-            .get(),
-          query
-            .orderBy(FieldPath.documentId())
-            .startAt(doc.ref)
-            .get(),
+          query.orderBy(FieldPath.documentId()).startAt(doc.id).get(),
+          query.orderBy(FieldPath.documentId()).startAt(doc.ref).get(),
         ]);
       });
     });
@@ -1858,10 +1827,7 @@ describe('startAt() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .orderBy('bar')
-        .startAt('foo');
+      query = query.orderBy('foo').orderBy('bar').startAt('foo');
       return query.get();
     });
   });
@@ -1884,10 +1850,7 @@ describe('startAt() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .startAt('foo')
-        .startAt('bar');
+      query = query.orderBy('foo').startAt('foo').startAt('bar');
       return query.get();
     });
   });
@@ -1919,10 +1882,7 @@ describe('startAfter() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .orderBy('bar')
-        .startAfter('foo', 'bar');
+      query = query.orderBy('foo').orderBy('bar').startAfter('foo', 'bar');
       return query.get();
     });
   });
@@ -1949,10 +1909,7 @@ describe('startAfter() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .startAfter('foo')
-        .startAfter('bar');
+      query = query.orderBy('foo').startAfter('foo').startAfter('bar');
       return query.get();
     });
   });
@@ -1984,10 +1941,7 @@ describe('endAt() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .orderBy('bar')
-        .endAt('foo', 'bar');
+      query = query.orderBy('foo').orderBy('bar').endAt('foo', 'bar');
       return query.get();
     });
   });
@@ -2010,10 +1964,7 @@ describe('endAt() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .endAt('foo')
-        .endAt('bar');
+      query = query.orderBy('foo').endAt('foo').endAt('bar');
       return query.get();
     });
   });
@@ -2045,10 +1996,7 @@ describe('endBefore() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .orderBy('bar')
-        .endBefore('foo', 'bar');
+      query = query.orderBy('foo').orderBy('bar').endBefore('foo', 'bar');
       return query.get();
     });
   });
@@ -2071,10 +2019,7 @@ describe('endBefore() interface', () => {
 
     return createInstance(overrides).then(firestore => {
       let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .endBefore('foo')
-        .endBefore('bar');
+      query = query.orderBy('foo').endBefore('foo').endBefore('bar');
       return query.get();
     });
   });

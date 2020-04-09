@@ -702,7 +702,7 @@ export class Firestore {
       convertFields = fieldsFromJson;
     } else {
       throw new Error(
-        `Unsupported encoding format. Expected "json" or "protobufJS", ` +
+        'Unsupported encoding format. Expected "json" or "protobufJS", ' +
           `but was "${encoding}".`
       );
     }
@@ -1332,7 +1332,7 @@ export class Firestore {
           const stream = bidirectional
             ? gapicClient[methodName](callOptions)
             : gapicClient[methodName](request, callOptions);
-          const logStream = through2.obj(function(this, chunk, enc, callback) {
+          const logStream = through2.obj((this, chunk, enc, callback) => {
             logger(
               'Firestore.requestStream',
               requestTag,

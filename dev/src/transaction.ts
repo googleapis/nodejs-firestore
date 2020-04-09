@@ -417,7 +417,7 @@ export class Transaction {
         logger(
           'Firestore.runTransaction',
           this._requestTag,
-          `Retrying transaction after error:`,
+          'Retrying transaction after error:',
           lastError
         );
       }

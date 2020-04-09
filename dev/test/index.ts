@@ -508,7 +508,7 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore({projectId: 'foo'});
 
     return expect(firestore.formattedName).to.equal(
-      `projects/foo/databases/(default)`
+      'projects/foo/databases/(default)'
     );
   });
 
@@ -522,7 +522,7 @@ describe('instantiation', () => {
       await firestore.initializeIfNeeded('tag');
       expect(firestore.projectId).to.equal('foo');
       expect(firestore.formattedName).to.equal(
-        `projects/foo/databases/(default)`
+        'projects/foo/databases/(default)'
       );
     });
   });

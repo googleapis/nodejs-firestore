@@ -354,7 +354,7 @@ export class DocumentSnapshot<T = DocumentData> {
    */
   get readTime(): Timestamp {
     if (this._readTime === undefined) {
-      throw new Error(`Called 'readTime' on a local document`);
+      throw new Error("Called 'readTime' on a local document");
     }
     return this._readTime;
   }

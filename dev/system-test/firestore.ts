@@ -600,7 +600,7 @@ describe('DocumentReference class', () => {
   });
 
   // tslint:disable-next-line:only-arrow-function
-  it('can add and delete fields sequentially', function() {
+  it('can add and delete fields sequentially', function () {
     this.timeout(30 * 1000);
 
     const ref = randomCol.doc('doc');
@@ -674,7 +674,7 @@ describe('DocumentReference class', () => {
   });
 
   // tslint:disable-next-line:only-arrow-function
-  it('can add and delete fields with server timestamps', function() {
+  it('can add and delete fields with server timestamps', function () {
     this.timeout(10 * 1000);
 
     const ref = randomCol.doc('doc');
@@ -1154,10 +1154,7 @@ describe('Query class', () => {
     return ref
       .set({foo: NaN, bar: null})
       .then(() => {
-        return randomCol
-          .where('foo', '==', NaN)
-          .where('bar', '==', null)
-          .get();
+        return randomCol.where('foo', '==', NaN).where('bar', '==', null).get();
       })
       .then(res => {
         expect(
@@ -1267,19 +1264,13 @@ describe('Query class', () => {
 
   it('has limit() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .limit(1)
-      .get();
+    const res = await randomCol.orderBy('foo').limit(1).get();
     expectDocs(res, {foo: 'a'});
   });
 
   it('has limitToLast() method', async () => {
     await addDocs({doc: 1}, {doc: 2}, {doc: 3});
-    const res = await randomCol
-      .orderBy('doc')
-      .limitToLast(2)
-      .get();
+    const res = await randomCol.orderBy('doc').limitToLast(2).get();
     expectDocs(res, {doc: 2}, {doc: 3});
   });
 
@@ -1296,10 +1287,7 @@ describe('Query class', () => {
 
   it('has offset() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .offset(1)
-      .get();
+    const res = await randomCol.orderBy('foo').offset(1).get();
     expectDocs(res, {foo: 'b'});
   });
 
@@ -1366,37 +1354,25 @@ describe('Query class', () => {
 
   it('has startAt() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .startAt('b')
-      .get();
+    const res = await randomCol.orderBy('foo').startAt('b').get();
     expectDocs(res, {foo: 'b'});
   });
 
   it('has startAfter() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .startAfter('a')
-      .get();
+    const res = await randomCol.orderBy('foo').startAfter('a').get();
     expectDocs(res, {foo: 'b'});
   });
 
   it('has endAt() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .endAt('b')
-      .get();
+    const res = await randomCol.orderBy('foo').endAt('b').get();
     expectDocs(res, {foo: 'a'}, {foo: 'b'});
   });
 
   it('has endBefore() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .endBefore('b')
-      .get();
+    const res = await randomCol.orderBy('foo').endBefore('b').get();
     expectDocs(res, {foo: 'a'});
   });
 
@@ -1480,7 +1456,7 @@ describe('Query class', () => {
       `a/b/c/d/${collectionGroup}/cg-doc4`,
       `a/c/${collectionGroup}/cg-doc5`,
       `${collectionGroup}/cg-doc6`,
-      `a/b/nope/nope`,
+      'a/b/nope/nope',
     ];
     const batch = firestore.batch();
     for (const docPath of docPaths) {
@@ -1491,7 +1467,7 @@ describe('Query class', () => {
     let querySnapshot = await firestore
       .collectionGroup(collectionGroup)
       .orderBy(FieldPath.documentId())
-      .startAt(`a/b`)
+      .startAt('a/b')
       .endAt('a/b0')
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
@@ -1521,7 +1497,7 @@ describe('Query class', () => {
       `a/b/c/d/${collectionGroup}/cg-doc4`,
       `a/c/${collectionGroup}/cg-doc5`,
       `${collectionGroup}/cg-doc6`,
-      `a/b/nope/nope`,
+      'a/b/nope/nope',
     ];
     const batch = firestore.batch();
     for (const docPath of docPaths) {
@@ -1531,7 +1507,7 @@ describe('Query class', () => {
 
     let querySnapshot = await firestore
       .collectionGroup(collectionGroup)
-      .where(FieldPath.documentId(), '>=', `a/b`)
+      .where(FieldPath.documentId(), '>=', 'a/b')
       .where(FieldPath.documentId(), '<=', 'a/b0')
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
@@ -1542,7 +1518,7 @@ describe('Query class', () => {
 
     querySnapshot = await firestore
       .collectionGroup(collectionGroup)
-      .where(FieldPath.documentId(), '>', `a/b`)
+      .where(FieldPath.documentId(), '>', 'a/b')
       .where(FieldPath.documentId(), '<', `a/b/${collectionGroup}/cg-doc3`)
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
