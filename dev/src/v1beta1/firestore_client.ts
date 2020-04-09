@@ -32,6 +32,8 @@ import {Transform} from 'stream';
 import * as protosTypes from '../../protos/firestore_v1beta1_proto_api';
 import * as gapicConfig from './firestore_client_config.json';
 
+// tslint:disable deprecation
+
 const version = require('../../../package.json').version;
 
 /**
@@ -52,6 +54,7 @@ const version = require('../../../package.json').version;
  *       committed. Any read with an equal or greater `read_time` is guaranteed
  *       to see the effects of the transaction.
  * @class
+ * @deprecated Use v1/firestore_client instead.
  * @memberof v1beta1
  */
 export class FirestoreClient {

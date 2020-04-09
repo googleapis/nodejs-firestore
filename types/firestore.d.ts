@@ -1467,6 +1467,7 @@ declare namespace FirebaseFirestore {
   /**
    * The v1beta1 Veneer client. This client provides access to to the underlying
    * Firestore v1beta1 RPCs.
+   * @deprecated Use v1 instead.
    */
   export const v1beta1 : any;
 
