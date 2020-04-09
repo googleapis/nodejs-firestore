@@ -231,7 +231,8 @@ describe('FieldValue.arrayRemove()', () => {
     return createInstance().then(firestore => {
       const docRef = firestore.doc('collectionId/documentId');
       expect(() => docRef.set({foo: FieldValue.arrayRemove([])})).to.throw(
-        `Nested arrays are not supported`
+        'Element at index 0 is not a valid array element. Nested arrays are ' +
+          'not supported.'
       );
     });
   });
