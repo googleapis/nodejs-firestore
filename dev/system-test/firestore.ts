@@ -895,9 +895,6 @@ describe('DocumentReference class', () => {
       const doc1 = randomCol.doc();
       const doc2 = randomCol.doc();
 
-      let unsubscribe1: () => void;
-      let unsubscribe2: () => void;
-
       // Documents transition from non-existent to existent to non-existent.
       const exists1 = [false, true, false];
       const exists2 = [false, true, false];
@@ -926,12 +923,12 @@ describe('DocumentReference class', () => {
           run.shift()!();
         }
       };
-      unsubscribe1 = doc1.onSnapshot(snapshot => {
+      const unsubscribe1 = doc1.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists1.shift());
         maybeRun();
       });
 
-      unsubscribe2 = doc2.onSnapshot(snapshot => {
+      const unsubscribe2 = doc2.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists2.shift());
         maybeRun();
       });
@@ -939,9 +936,6 @@ describe('DocumentReference class', () => {
 
     it('handles multiple streams on same doc', done => {
       const doc = randomCol.doc();
-
-      let unsubscribe1: () => void;
-      let unsubscribe2: () => void;
 
       // Document transitions from non-existent to existent to non-existent.
       const exists1 = [false, true, false];
@@ -970,12 +964,12 @@ describe('DocumentReference class', () => {
         }
       };
 
-      unsubscribe1 = doc.onSnapshot(snapshot => {
+      const unsubscribe1 = doc.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists1.shift());
         maybeRun();
       });
 
-      unsubscribe2 = doc.onSnapshot(snapshot => {
+      const unsubscribe2 = doc.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists2.shift());
         maybeRun();
       });
@@ -1402,7 +1396,7 @@ describe('Query class', () => {
     await randomCol.doc().set({foo: 'bar'});
 
     const stream = randomCol.stream();
-    for await (const chunk of stream) {
+    for await (const _ of stream) {
       ++received;
     }
 
@@ -2023,7 +2017,6 @@ describe('Transaction class', () => {
   it('retries transactions that fail with contention', async () => {
     const ref = randomCol.doc('doc');
 
-    let firstTransaction, secondTransaction: Promise<void>;
     let attempts = 0;
 
     // Create two transactions that both read and update the same document.
@@ -2032,7 +2025,7 @@ describe('Transaction class', () => {
     // and be retried.
     const contentionPromise = [new Deferred<void>(), new Deferred<void>()];
 
-    firstTransaction = firestore.runTransaction(async transaction => {
+    const firstTransaction = firestore.runTransaction(async transaction => {
       ++attempts;
       await transaction.get(ref);
       contentionPromise[0].resolve();
@@ -2040,7 +2033,7 @@ describe('Transaction class', () => {
       transaction.set(ref, {first: true}, {merge: true});
     });
 
-    secondTransaction = firestore.runTransaction(async transaction => {
+    const secondTransaction = firestore.runTransaction(async transaction => {
       ++attempts;
       await transaction.get(ref);
       contentionPromise[1].resolve();
