@@ -58,8 +58,8 @@ xdescribe('firestore.d.ts', () => {
     toFirestore(modelObject: DocumentData): DocumentData {
       return modelObject;
     },
-    fromFirestore(data: DocumentData): DocumentData {
-      return data;
+    fromFirestore(snapshot: QueryDocumentSnapshot): DocumentData {
+      return snapshot.data();
     },
   };
 

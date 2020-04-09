@@ -19,7 +19,11 @@ import {Duplex} from 'stream';
 import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
-import {Firestore} from '../../src';
+import {
+  Firestore,
+  FirestoreDataConverter,
+  QueryDocumentSnapshot,
+} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {DocumentData, GapicClient} from '../../src/types';
 
@@ -348,7 +352,8 @@ export const postConverter = {
   toFirestore(post: Post): DocumentData {
     return {title: post.title, author: post.author};
   },
-  fromFirestore(data: DocumentData): Post {
+  fromFirestore(snapshot: QueryDocumentSnapshot): Post {
+    const data = snapshot.data();
     return new Post(data.title, data.author);
   },
 };

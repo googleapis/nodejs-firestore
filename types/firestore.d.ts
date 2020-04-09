@@ -63,8 +63,9 @@ declare namespace FirebaseFirestore {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
-   *     data: FirebaseFirestore.DocumentData
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
+   *     const data = snapshot.data();
    *     return new Post(data.title, data.author);
    *   }
    * };
@@ -92,7 +93,7 @@ declare namespace FirebaseFirestore {
      * Called by the Firestore SDK to convert Firestore data into an object of
      * type T.
      */
-    fromFirestore(data: DocumentData): T;
+    fromFirestore(snapshot: QueryDocumentSnapshot): T;
   }
 
   /**
