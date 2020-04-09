@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const {describe, it, beforeEach, afterEach} = require('mocha');
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
