@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CallOptions, GoogleError} from 'google-gax';
+import {CallOptions} from 'google-gax';
 import {Duplex, PassThrough} from 'stream';
 import * as through2 from 'through2';
 import {URL} from 'url';
@@ -43,7 +43,6 @@ import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
-  DocumentData,
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
   GapicClient,

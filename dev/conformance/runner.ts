@@ -13,7 +13,6 @@
 // limitations under the License.
 
 const duplexify = require('duplexify');
-const mkdirp = require('mkdirp');
 
 import {expect} from 'chai';
 import * as path from 'path';

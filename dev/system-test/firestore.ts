@@ -1396,7 +1396,8 @@ describe('Query class', () => {
     await randomCol.doc().set({foo: 'bar'});
 
     const stream = randomCol.stream();
-    for await (const _ of stream) {
+    for await (const doc of stream) {
+      expect(doc).to.be.a('DocumentSnapshot')
       ++received;
     }
 

@@ -19,7 +19,6 @@ import * as through2 from 'through2';
 
 import {
   DocumentReference,
-  DocumentSnapshot,
   FieldPath,
   FieldValue,
   Firestore,

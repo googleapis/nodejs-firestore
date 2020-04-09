@@ -908,10 +908,10 @@ describe('getAll() method', () => {
     result: DocumentSnapshot[],
     ...docs: api.IBatchGetDocumentsResponse[]
   ) {
-    expect(result.length).to.equal(arguments.length - 1);
+    expect(result.length).to.equal(docs.length);
 
     for (let i = 0; i < result.length; ++i) {
-      const doc = arguments[i + 1];
+      const doc = docs[i];
 
       if (doc.found) {
         expect(result[i].exists).to.be.true;

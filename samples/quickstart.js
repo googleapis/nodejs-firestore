@@ -14,6 +14,8 @@
 
 'use strict';
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 // [START firestore_quickstart]
 const {Firestore} = require('@google-cloud/firestore');
 

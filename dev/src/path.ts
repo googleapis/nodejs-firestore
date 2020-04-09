@@ -411,14 +411,11 @@ export class QualifiedResourcePath extends ResourcePath {
 
   /**
    * Convenience method to match the ResourcePath API. This method always
-   * returns the current instance. The arguments is ignored.
+   * returns the current instance.
    *
-   * @param projectIdIfMissing The project ID of the current Firestore project.
-   * The project ID is only used if it's not provided as part of this
-   * ResourcePath.
    * @private
    */
-  toQualifiedResourcePath(projectIdIfMissing: string): QualifiedResourcePath {
+  toQualifiedResourcePath(): QualifiedResourcePath {
     return this;
   }
 

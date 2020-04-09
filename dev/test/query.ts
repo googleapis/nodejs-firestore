@@ -75,10 +75,12 @@ function fieldFilters(
 ): api.IStructuredQuery {
   const filters: api.StructuredQuery.IFilter[] = [];
 
-  for (let i = 0; i < arguments.length; i += 3) {
-    fieldPath = arguments[i];
-    op = arguments[i + 1];
-    value = arguments[i + 2];
+  fieldPathOpAndValues = [fieldPath, op, value, ...fieldPathOpAndValues];
+  
+  for (let i = 0; i < fieldPathOpAndValues.length; i += 3) {
+    fieldPath = fieldPathOpAndValues[i] as string;
+    op = fieldPathOpAndValues[i + 1] as api.StructuredQuery.FieldFilter.Operator;
+    value = fieldPathOpAndValues[i + 2] as string | api.IValue;
 
     const filter: api.StructuredQuery.IFieldFilter = {
       field: {
