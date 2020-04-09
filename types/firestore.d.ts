@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-// tslint:disable
+// We're using 'any' in our Public API to describe customer-provided types
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
