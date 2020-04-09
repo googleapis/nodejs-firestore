@@ -20,7 +20,11 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {FieldPath} from './path';
 import {Serializer, validateUserInput} from './serializer';
-import {validateMinNumberOfArguments, validateNumber} from './validate';
+import {
+  invalidArgumentMessage,
+  validateMinNumberOfArguments,
+  validateNumber,
+} from './validate';
 
 import api = proto.google.firestore.v1;
 
@@ -502,13 +506,22 @@ class ArrayRemoveTransform extends FieldTransform {
 
 /**
  * Validates that `value` can be used as an element inside of an array. Certain
- * field values (such as ServerTimestamps) are rejected.
+ * field values (such as ServerTimestamps) are rejected. Nested arrays are also
+ * rejected.
  *
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The value to validate.
  */
 function validateArrayElement(arg: string | number, value: unknown): void {
+  if (Array.isArray(value)) {
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        'array element'
+      )} Nested arrays are not supported.`
+    );
+  }
   validateUserInput(
     arg,
     value,

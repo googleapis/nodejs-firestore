@@ -4,6 +4,28 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.7.4](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.3...v3.7.4) (2020-04-09)
+
+
+### Bug Fixes
+
+* validate nested arrays in FieldValue ([#1003](https://www.github.com/googleapis/nodejs-firestore/issues/1003)) ([3497691](https://www.github.com/googleapis/nodejs-firestore/commit/3497691754d8b3b0b17385c34362f74ab8a84feb))
+
+### [3.7.3](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.2...v3.7.3) (2020-03-31)
+
+
+### Bug Fixes
+
+* support array of references for IN queries ([#993](https://www.github.com/googleapis/nodejs-firestore/issues/993)) ([a6d8fe0](https://www.github.com/googleapis/nodejs-firestore/commit/a6d8fe061fcfe0fde7a4fa023b2ec454e2adb432))
+
+### [3.7.2](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.1...v3.7.2) (2020-03-25)
+
+
+### Bug Fixes
+
+* fix flaky contention test ([#979](https://www.github.com/googleapis/nodejs-firestore/issues/979)) ([f294998](https://www.github.com/googleapis/nodejs-firestore/commit/f294998daab77a0a51c81265945e28eec34db186))
+* fix: use Random Number from `crypto` to generate AutoId ([05b3363](https://www.github.com/googleapis/nodejs-firestore/commit/ce6ea390f2fffcbe796ba1c5b040ee02452e287a))
+
 ### [3.7.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.0...v3.7.1) (2020-03-16)
 
 

@@ -18,6 +18,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import {
   CollectionReference,
   DocumentData,
+  DocumentReference,
   DocumentSnapshot,
   FieldPath,
   FieldValue,
@@ -1079,9 +1080,17 @@ describe('Query class', () => {
       });
   };
 
-  function addDocs(...data: DocumentData[]): Promise<WriteResult[]> {
+  async function addDocs(
+    ...docs: DocumentData[]
+  ): Promise<DocumentReference[]> {
     let id = 0; // Guarantees consistent ordering for the first documents
-    return Promise.all(data.map(d => randomCol.doc('' + id++).set(d)));
+    const refs: DocumentReference[] = [];
+    for (const doc of docs) {
+      const ref = randomCol.doc('doc' + id++);
+      await ref.set(doc);
+      refs.push(ref);
+    }
+    return refs;
   }
 
   function expectDocs(result: QuerySnapshot, ...data: DocumentData[]) {
@@ -1171,7 +1180,7 @@ describe('Query class', () => {
       });
   });
 
-  it('supports in', async () => {
+  it('supports "in"', async () => {
     await addDocs(
       {zip: 98101},
       {zip: 91102},
@@ -1182,6 +1191,14 @@ describe('Query class', () => {
     );
     const res = await randomCol.where('zip', 'in', [98101, 98103]).get();
     expectDocs(res, {zip: 98101}, {zip: 98103});
+  });
+
+  it('supports "in" with document ID array', async () => {
+    const refs = await addDocs({count: 1}, {count: 2}, {count: 3});
+    const res = await randomCol
+      .where(FieldPath.documentId(), 'in', [refs[0].id, refs[1]])
+      .get();
+    expectDocs(res, {count: 1}, {count: 2});
   });
 
   it('supports array-contains-any', async () => {
