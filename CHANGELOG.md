@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.7.4](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.3...v3.7.4) (2020-04-09)
+
+
+### Bug Fixes
+
+* validate nested arrays in FieldValue ([#1003](https://www.github.com/googleapis/nodejs-firestore/issues/1003)) ([3497691](https://www.github.com/googleapis/nodejs-firestore/commit/3497691754d8b3b0b17385c34362f74ab8a84feb))
+
 ### [3.7.3](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.2...v3.7.3) (2020-03-31)
 
 
