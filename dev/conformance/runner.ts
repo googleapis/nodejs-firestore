@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const duplexify = require('duplexify');
+import * as duplexify from 'duplexify';
 
+import {it, xit} from 'mocha';
 import {expect} from 'chai';
 import * as path from 'path';
+import * as fs from 'fs';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
 import * as proto from '../protos/firestore_v1_proto_api';
@@ -330,10 +332,7 @@ function runTest(spec: ConformanceProto) {
       }
 
       const document = docRef(spec.docRefPath);
-      // TODO(mrschmidt): Remove 'any' and invoke by calling update() directly
-      // for each individual case.
-      // tslint:disable-next-line:no-any
-      return document.update.apply(document, varargs as any);
+      return document.update(varargs[0] as string, ...varargs.slice(1));
     });
   };
 
@@ -341,10 +340,7 @@ function runTest(spec: ConformanceProto) {
     const overrides = {runQuery: queryHandler(spec)};
     const applyClause = (query: Query, clause: ConformanceProto) => {
       if (clause.select) {
-        query = query.select.apply(
-          query,
-          convertInput.paths(clause.select.fields)
-        );
+        query = query.select(...convertInput.paths(clause.select.fields));
       } else if (clause.where) {
         const fieldPath = convertInput.path(clause.where.path);
         const value = convertInput.argument(clause.where.jsonValue);
@@ -586,7 +582,6 @@ describe('Conformance Tests', () => {
   const loadTestCases = () => {
     // tslint:disable-next-line:no-any
     let testDataJson: any[] = [];
-    const fs = require('fs');
 
     const testPath = path.join(__dirname, 'conformance-tests');
     const fileNames = fs.readdirSync(testPath);

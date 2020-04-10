@@ -280,7 +280,7 @@ export class DeleteTransform extends FieldTransform {
 
   validate(): void {}
 
-  toProto(serializer: Serializer, fieldPath: FieldPath): never {
+  toProto(): never {
     throw new Error(
       'FieldValue.delete() should not be included in a FieldTransform'
     );

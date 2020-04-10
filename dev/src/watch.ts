@@ -17,7 +17,6 @@
 import * as assert from 'assert';
 import * as rbtree from 'functional-red-black-tree';
 import {GoogleError, Status} from 'google-gax';
-import {describe, it} from 'mocha';
 import {Duplex} from 'stream';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -49,7 +48,7 @@ const WATCH_TARGET_ID = 0x1;
  * Sentinel value for a document remove.
  */
 // tslint:disable-next-line:no-any
-const REMOVED = {} as DocumentSnapshotBuilder<any>;
+const REMOVED = {} as DocumentSnapshotBuilder<unknown>;
 
 /*!
  * The change type for document change events.
