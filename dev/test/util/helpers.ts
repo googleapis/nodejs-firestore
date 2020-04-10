@@ -27,10 +27,8 @@ import api = proto.google.firestore.v1;
 
 const v1 = require('../../src/v1');
 
-/* tslint:disable:no-any */
 const grpc = new GrpcClient({} as any).grpc;
 const SSL_CREDENTIALS = (grpc.credentials as any).createInsecure();
-/* tslint:enable:no-any */
 
 export const PROJECT_ID = 'test-project';
 export const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;

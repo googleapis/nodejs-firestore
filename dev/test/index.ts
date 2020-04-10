@@ -252,7 +252,7 @@ const allSupportedTypesInput = {
     {
       formattedName: DATABASE_ROOT,
       _getProjectId: () => ({projectId: PROJECT_ID, databaseId: '(default)'}),
-    } as any, // tslint:disable-line no-any
+    } as any,
     new QualifiedResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
@@ -282,7 +282,7 @@ const allSupportedTypesOutput = {
     {
       formattedName: DATABASE_ROOT,
       _getProjectId: () => ({projectId: PROJECT_ID, databaseId: '(default)'}),
-    } as any, // tslint:disable-line no-any
+    } as any,
     new QualifiedResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
@@ -302,10 +302,8 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    /* tslint:disable:no-any */
     expect((firestore as any)._settings.projectId).to.equal(PROJECT_ID);
     expect((firestore as any)._settings.foo).to.equal('bar');
-    /* tslint:enable:no-any */
   });
 
   it('can only call settings() once', () => {

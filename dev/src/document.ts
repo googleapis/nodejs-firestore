@@ -409,7 +409,7 @@ export class DocumentSnapshot<T = DocumentData> {
   // on end users.
   // tslint:disable-next-line no-any
   get(field: string | FieldPath): any {
-    // tslint:disable-line no-any
+   
     validateFieldPath('field', field);
 
     const protoField = this.protoField(field);
