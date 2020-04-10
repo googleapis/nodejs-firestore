@@ -76,10 +76,12 @@ function fieldFilters(
   const filters: api.StructuredQuery.IFilter[] = [];
 
   fieldPathOpAndValues = [fieldPath, op, value, ...fieldPathOpAndValues];
-  
+
   for (let i = 0; i < fieldPathOpAndValues.length; i += 3) {
     fieldPath = fieldPathOpAndValues[i] as string;
-    op = fieldPathOpAndValues[i + 1] as api.StructuredQuery.FieldFilter.Operator;
+    op = fieldPathOpAndValues[
+      i + 1
+    ] as api.StructuredQuery.FieldFilter.Operator;
     value = fieldPathOpAndValues[i + 2] as string | api.IValue;
 
     const filter: api.StructuredQuery.IFieldFilter = {

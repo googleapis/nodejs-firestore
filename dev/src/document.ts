@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as deepEqual from 'fast-deep-equal'
+import * as deepEqual from 'fast-deep-equal';
 
 import * as assert from 'assert';
 
@@ -409,7 +409,6 @@ export class DocumentSnapshot<T = DocumentData> {
   // on end users.
   // tslint:disable-next-line no-any
   get(field: string | FieldPath): any {
-   
     validateFieldPath('field', field);
 
     const protoField = this.protoField(field);

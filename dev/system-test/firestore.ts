@@ -1397,7 +1397,7 @@ describe('Query class', () => {
 
     const stream = randomCol.stream();
     for await (const doc of stream) {
-      expect(doc).to.be.a('DocumentSnapshot')
+      expect(doc).to.be.a('DocumentSnapshot');
       ++received;
     }
 

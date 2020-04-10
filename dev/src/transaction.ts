@@ -30,7 +30,6 @@ import {
   validateDocumentReference,
 } from './reference';
 import {
-  DocumentData,
   Precondition as PublicPrecondition,
   ReadOptions,
   SetOptions,
