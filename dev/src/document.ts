@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const deepEqual = require('deep-equal');
+import * as deepEqual from 'fast-deep-equal'
 
 import * as assert from 'assert';
 
