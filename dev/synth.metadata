@@ -1,19 +1,11 @@
 {
-  "updateTime": "2020-03-22T11:28:16.621427Z",
+  "updateTime": "2020-04-11T00:21:24.079317Z",
   "sources": [
-    {
-      "git": {
-        "name": "googleapis",
-        "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "0be7105dc52590fa9a24e784052298ae37ce53aa",
-        "internalRef": "302154871"
-      }
-    },
     {
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "7e98e1609c91082f4eeb63b530c6468aefd18cfd"
+        "sha": "6f32150677c9784f3c3a7e1949472bd29c9d72c5"
       }
     }
   ],

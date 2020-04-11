@@ -38,7 +38,7 @@
     "test-only": "c8 mocha build/test",
     "pretest-only": "npm run compile",
     "test": "npm run test-only && npm run conformance",
-    "lint": "gts check",
+    "lint": "gts fix",
     "clean": "gts clean",
     "compile": "tsc -p .",
     "postcompile": "node scripts/init-directories.js && cp -r dev/protos build && cp dev/src/v1beta1/*.json build/src/v1beta1/ && cp dev/src/v1/*.json build/src/v1/ && cp dev/conformance/test-definition.proto build/conformance && cp dev/conformance/conformance-tests/*.json build/conformance/conformance-tests",
@@ -46,12 +46,12 @@
     "prepare": "npm run compile",
     "docs-test": "linkinator docs",
     "predocs-test": "npm run docs",
-    "prelint": "cd samples; npm link ../; npm i"
+    "prelint": "cd samples; npm link ../; npm install"
   },
   "dependencies": {
     "deep-equal": "^2.0.0",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^1.13.0",
+    "google-gax": "^2.1.0",
     "readable-stream": "^3.4.0",
     "through2": "^3.0.0"
   },
@@ -71,7 +71,7 @@
     "codecov": "^3.6.1",
     "duplexify": "^4.0.0",
     "extend": "^3.0.2",
-    "gts": "^1.1.2",
+    "gts": "^2.0.0",
     "jsdoc": "^3.6.2",
     "jsdoc-fresh": "^1.0.2",
     "jsdoc-region-tag": "^1.0.2",
