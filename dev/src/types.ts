@@ -326,8 +326,8 @@ export interface ValidationOptions {
  * throttling implemented by BulkWriter.
  */
 export interface BulkWriterOptions {
-  /** Whether to enable throttling as specified by the 500/50/5 rule. */
-  readonly throttlingEnabled: boolean;
+  /** Whether to disable throttling as specified by the 500/50/5 rule. */
+  readonly disableThrottling?: boolean;
 }
 
 /**

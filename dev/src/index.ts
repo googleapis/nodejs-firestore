@@ -655,11 +655,18 @@ export class Firestore {
    *   .then(res => {
    *     console.log(`Added document at ${res.writeTime}`);
    *   });
-   * bulkWriter.update(firestore.doc('col/doc2), {foo: 'bar'});
-   * bulkWriter.delete(firestore.doc('col/doc3'));
-   * await flush().then(() => {
-   *   console.log('Successfully executed all writes');
+   * bulkWriter.update(firestore.doc('col/doc2), {foo: 'bar'})
+   *   .then(res => {
+   *     console.log(`Updated document at ${res.writeTime}`);
+   *   });
+   * bulkWriter.delete(firestore.doc('col/doc3'))
+   *   .then(res => {
+   *     console.log(`Deleted document at ${res.writeTime}`);
+   *   });
+   * await bulkWriter.flush().then(() => {
+   *   console.log('Executed all writes');
    * });
+   * bulkWriter.close();
    */
   bulkWriter(): BulkWriter {
     return new BulkWriter(this);
