@@ -938,31 +938,6 @@ export class QuerySnapshot<T = DocumentData> {
   }
 }
 
-// TODO: As of v0.17.0, we're changing docChanges from an array into a method.
-// Because this is a runtime breaking change and somewhat subtle (both Array and
-// Function have a .length, etc.), we'll replace commonly-used properties
-// (including Symbol.iterator) to throw a custom error message. By our v1.0
-// release, we should remove this code.
-function throwDocChangesMethodError() {
-  throw new Error(
-    'QuerySnapshot.docChanges has been changed from a property into a ' +
-      'method, so usages like "querySnapshot.docChanges" should become ' +
-      '"querySnapshot.docChanges()"'
-  );
-}
-
-const docChangesPropertiesToOverride = [
-  'length',
-  'forEach',
-  'map',
-  ...(typeof Symbol !== 'undefined' ? [Symbol.iterator] : []),
-];
-docChangesPropertiesToOverride.forEach(property => {
-  Object.defineProperty(QuerySnapshot.prototype.docChanges, property, {
-    get: () => throwDocChangesMethodError(),
-  });
-});
-
 /** Internal representation of a query cursor before serialization. */
 interface QueryCursor {
   before: boolean;
@@ -1091,11 +1066,11 @@ export class QueryOptions<T> {
       this.allDescendants === other.allDescendants &&
       this.limit === other.limit &&
       this.offset === other.offset &&
-      deepEqual(this.fieldFilters, other.fieldFilters, {strict: true}) &&
-      deepEqual(this.fieldOrders, other.fieldOrders, {strict: true}) &&
-      deepEqual(this.startAt, other.startAt, {strict: true}) &&
-      deepEqual(this.endAt, other.endAt, {strict: true}) &&
-      deepEqual(this.projection, other.projection, {strict: true})
+      deepEqual(this.fieldFilters, other.fieldFilters) &&
+      deepEqual(this.fieldOrders, other.fieldOrders) &&
+      deepEqual(this.startAt, other.startAt) &&
+      deepEqual(this.endAt, other.endAt) &&
+      deepEqual(this.projection, other.projection)
     );
   }
 }

@@ -602,33 +602,6 @@ describe('query interface', () => {
     });
   });
 
-  it('throws if QuerySnapshot.docChanges() is used as a property', () => {
-    const overrides: ApiOverride = {
-      runQuery: request => {
-        queryEquals(request);
-        return stream(result('first'), result('second'));
-      },
-    };
-
-    return createInstance(overrides).then(firestore => {
-      const query = firestore.collection('collectionId');
-      return query.get().then(snapshot => {
-        expect(() => {
-          (snapshot.docChanges as InvalidApiUsage).forEach(() => {});
-        }).to.throw(
-          'QuerySnapshot.docChanges has been changed from a property into a method'
-        );
-
-        expect(() => {
-          for (const doc of snapshot.docChanges as InvalidApiUsage) {
-          }
-        }).to.throw(
-          'QuerySnapshot.docChanges has been changed from a property into a method'
-        );
-      });
-    });
-  });
-
   it('for Query.withConverter()', async () => {
     const doc = document('documentId', 'author', 'author', 'title', 'post');
     const overrides: ApiOverride = {
