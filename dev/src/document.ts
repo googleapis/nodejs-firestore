@@ -407,7 +407,7 @@ export class DocumentSnapshot<T = DocumentData> {
    */
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
-  // tslint:disable-next-line no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(field: string | FieldPath): any {
     validateFieldPath('field', field);
 

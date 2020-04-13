@@ -48,7 +48,8 @@ import {
 import api = proto.google.firestore.v1;
 
 // TODO(mrschmidt): Create Protobuf .d.ts file for the conformance proto
-type ConformanceProto = any; // tslint:disable-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ConformanceProto = any;
 
 /** List of test cases that are ignored. */
 const ignoredRe: RegExp[] = [
@@ -580,14 +581,14 @@ function normalizeInt32Value(obj: {[key: string]: {}}, parent = '') {
 
 describe('Conformance Tests', () => {
   const loadTestCases = () => {
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let testDataJson: any[] = [];
 
     const testPath = path.join(__dirname, 'conformance-tests');
     const fileNames = fs.readdirSync(testPath);
     for (const fileName of fileNames) {
       const testFilePath = path.join(__dirname, 'conformance-tests', fileName);
-      const singleTest = JSON.parse(fs.readFileSync(testFilePath));
+      const singleTest = JSON.parse(fs.readFileSync(testFilePath, 'utf-8'));
 
       // Convert Timestamp string representation to protobuf object.
       normalizeTimestamp(singleTest);

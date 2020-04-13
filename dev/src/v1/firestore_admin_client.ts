@@ -33,7 +33,8 @@ import {Transform} from 'stream';
 import * as protosTypes from '../../protos/firestore_admin_v1_proto_api';
 import * as gapicConfig from './firestore_admin_client_config.json';
 
-const version = require('../../../package.json').version;
+import * as pkg from '../../../package.json';
+const version = pkg.version;
 
 /**
  *  Operations are created by service `FirestoreAdmin`, but are accessed via
@@ -287,7 +288,7 @@ export class FirestoreAdminClient {
         ? (this._protos as protobuf.Root).lookupService(
             'google.firestore.admin.v1.FirestoreAdmin'
           )
-        : // tslint:disable-next-line no-any
+        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._protos as any).google.firestore.admin.v1.FirestoreAdmin,
       this._opts
     ) as Promise<{[method: string]: Function}>;

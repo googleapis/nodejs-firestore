@@ -419,7 +419,7 @@ describe('serialize document', () => {
       // instances, even if they have cyclic references (we shouldn't try to
       // validate them beyond the instanceof check).
       const ref = firestore.doc('collectionId/documentId');
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (ref.firestore as any).firestore = firestore;
       return ref.set({ref});
     });

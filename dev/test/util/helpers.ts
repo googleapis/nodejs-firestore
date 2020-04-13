@@ -36,7 +36,7 @@ export const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
 export const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
 // Allow invalid API usage to test error handling.
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InvalidApiUsage = any;
 
 /** Defines the request handlers used by Firestore. */

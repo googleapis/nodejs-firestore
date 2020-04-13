@@ -47,7 +47,6 @@ const WATCH_TARGET_ID = 0x1;
 /*!
  * Sentinel value for a document remove.
  */
-// tslint:disable-next-line:no-any
 const REMOVED = {} as DocumentSnapshotBuilder<unknown>;
 
 /*!

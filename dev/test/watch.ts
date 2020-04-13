@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as  duplexify from 'duplexify';
+import * as duplexify from 'duplexify';
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 import * as extend from 'extend';
@@ -304,7 +304,7 @@ class StreamHelper {
   write(data: string | object): void {
     // The stream returned by the Gapic library accepts Protobuf
     // messages, but the type information does not expose this.
-    // tslint:disable-next-line no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.writeStream!.write(data as any);
   }
 

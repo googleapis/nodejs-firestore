@@ -89,7 +89,7 @@ export type UnaryMethod<Req, Resp> = (
 
 // We don't have type information for the npm package
 // `functional-red-black-tree`.
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RBTree = any;
 
 /**
@@ -202,7 +202,7 @@ export interface Settings {
    */
   maxIdleChannels?: number;
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any; // Accept other properties, such as GRPC settings.
 }
 
@@ -211,7 +211,7 @@ export interface Settings {
  * mapped to values.
  */
 export interface DocumentData {
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [field: string]: any;
 }
 

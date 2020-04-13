@@ -234,7 +234,7 @@ export class FirestoreClient {
         ? (this._protos as protobuf.Root).lookupService(
             'google.firestore.v1beta1.Firestore'
           )
-        : // tslint:disable-next-line no-any
+        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._protos as any).google.firestore.v1beta1.Firestore,
       this._opts
     ) as Promise<{[method: string]: Function}>;

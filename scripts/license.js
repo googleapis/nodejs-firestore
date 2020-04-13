@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as fs from 'fs';
+const fs = require('fs');
 
 const LICENSE_HEADER = `/*!
  * Copyright 2020 Google LLC
