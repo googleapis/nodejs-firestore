@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CallOptions} from 'google-gax';
+import {CallOptions, grpc} from 'google-gax';
 import {Duplex, PassThrough} from 'stream';
 import * as through2 from 'through2';
 import {URL} from 'url';
@@ -418,8 +418,8 @@ export class Firestore {
         let client: GapicClient;
 
         if (this._settings.ssl === false) {
-          const grpc = this._settings.grpc ?? require('@grpc/grpc-js');
-          const sslCreds = grpc.credentials.createInsecure();
+          const grpcModule = this._settings.grpc ?? grpc;
+          const sslCreds = grpcModule.credentials.createInsecure();
           client = new module.exports.v1({sslCreds, ...this._settings});
         } else {
           client = new module.exports.v1(this._settings);

@@ -14,7 +14,7 @@
 
 import {expect} from 'chai';
 import * as extend from 'extend';
-import {GrpcClient} from 'google-gax';
+import {grpc} from 'google-gax';
 import {Duplex} from 'stream';
 import * as through2 from 'through2';
 
@@ -27,8 +27,7 @@ import api = proto.google.firestore.v1;
 
 const v1 = require('../../src/v1');
 
-const grpc = new GrpcClient({} as any).grpc;
-const SSL_CREDENTIALS = (grpc.credentials as any).createInsecure();
+const SSL_CREDENTIALS = grpc.credentials.createInsecure();
 
 export const PROJECT_ID = 'test-project';
 export const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
