@@ -20,10 +20,7 @@ import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
-import {
-  Firestore,
-  QueryDocumentSnapshot,
-} from '../../src';
+import {Firestore, QueryDocumentSnapshot} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {DocumentData, GapicClient} from '../../src/types';
 
