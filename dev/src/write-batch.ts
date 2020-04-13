@@ -434,7 +434,7 @@ export class WriteBatch {
     } else {
       try {
         validateUpdateMap('dataOrField', dataOrField);
-        // tslint-disable-next-line prefer-rest-params
+        // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
         const data = dataOrField as UpdateData;

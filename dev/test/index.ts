@@ -252,7 +252,7 @@ const allSupportedTypesInput = {
     {
       formattedName: DATABASE_ROOT,
       _getProjectId: () => ({projectId: PROJECT_ID, databaseId: '(default)'}),
-    } as any,
+    } as any, // eslint-disable @typescript-eslint/no-explicit-any
     new QualifiedResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
@@ -282,7 +282,7 @@ const allSupportedTypesOutput = {
     {
       formattedName: DATABASE_ROOT,
       _getProjectId: () => ({projectId: PROJECT_ID, databaseId: '(default)'}),
-    } as any,
+    } as any,  // eslint-disable @typescript-eslint/no-explicit-any
     new QualifiedResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
@@ -301,9 +301,11 @@ describe('instantiation', () => {
   it('merges settings', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
-
+    
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     expect((firestore as any)._settings.projectId).to.equal(PROJECT_ID);
     expect((firestore as any)._settings.foo).to.equal('bar');
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   });
 
   it('can only call settings() once', () => {
