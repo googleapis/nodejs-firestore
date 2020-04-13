@@ -389,7 +389,7 @@ describe('batch support', () => {
 
   it('can return same write result', () => {
     const overrides: ApiOverride = {
-      commit: request => {
+      commit: () => {
         return response({
           commitTime: {
             nanos: 0,

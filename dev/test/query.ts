@@ -447,7 +447,7 @@ describe('query interface', () => {
   it('retries on stream failure', () => {
     let attempts = 0;
     const overrides: ApiOverride = {
-      runQuery: request => {
+      runQuery: () => {
         ++attempts;
         throw new Error('Expected error');
       },

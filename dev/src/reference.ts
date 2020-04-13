@@ -1999,6 +1999,8 @@ export class Query<T = DocumentData> {
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
+    // TODO(mrschmidt): Remove through2
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     const stream = through2.obj(function (this, proto, enc, callback) {
