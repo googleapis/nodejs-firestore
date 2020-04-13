@@ -3,6 +3,13 @@
   "sources": [
     {
       "git": {
+        "name": ".",
+        "remote": "git@github.com:googleapis/nodejs-firestore.git",
+        "sha": "a2c941c3c14fe509d1ca245e07e4c1487c6861c0"
+      }
+    },
+    {
+      "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
         "sha": "0be7105dc52590fa9a24e784052298ae37ce53aa",

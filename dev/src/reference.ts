@@ -558,8 +558,9 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
-   *     data: FirebaseFirestore.DocumentData
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
+   *     const data = snapshot.data();
    *     return new Post(data.title, data.author);
    *   }
    * };
@@ -2160,8 +2161,9 @@ export class Query<T = DocumentData> {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
-   *     data: FirebaseFirestore.DocumentData
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
+   *     const data = snapshot.data();
    *     return new Post(data.title, data.author);
    *   }
    * };
@@ -2433,8 +2435,9 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
-   *     data: FirebaseFirestore.DocumentData
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
+   *     const data = snapshot.data();
    *     return new Post(data.title, data.author);
    *   }
    * };

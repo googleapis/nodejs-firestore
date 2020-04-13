@@ -64,8 +64,9 @@ declare namespace FirebaseFirestore {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
-   *     data: FirebaseFirestore.DocumentData
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
+   *     const data = snapshot.data();
    *     return new Post(data.title, data.author);
    *   }
    * };
@@ -93,7 +94,7 @@ declare namespace FirebaseFirestore {
      * Called by the Firestore SDK to convert Firestore data into an object of
      * type T.
      */
-    fromFirestore(data: DocumentData): T;
+    fromFirestore(snapshot: QueryDocumentSnapshot): T;
   }
 
   /**
@@ -1517,6 +1518,7 @@ declare namespace FirebaseFirestore {
   /**
    * The v1beta1 Veneer client. This client provides access to to the underlying
    * Firestore v1beta1 RPCs.
+   * @deprecated Use v1 instead.
    */
   export const v1beta1: any;
 

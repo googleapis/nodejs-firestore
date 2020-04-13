@@ -24,7 +24,7 @@ import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {ApiMapValue, DocumentData, UpdateMap} from './types';
+import {ApiMapValue, defaultConverter, DocumentData, UpdateMap} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 
 import api = google.firestore.v1;
@@ -380,11 +380,29 @@ export class DocumentSnapshot<T = DocumentData> {
       return undefined;
     }
 
-    const obj: DocumentData = {};
-    for (const prop of Object.keys(fields)) {
-      obj[prop] = this._serializer.decodeValue(fields[prop]);
+    // We only want to use the converter and create a new QueryDocumentSnapshot
+    // if a converter has been provided.
+    if (this.ref._converter !== defaultConverter) {
+      const untypedReference = new DocumentReference(
+        this.ref.firestore,
+        this.ref._path
+      );
+      return this.ref._converter.fromFirestore(
+        new QueryDocumentSnapshot<DocumentData>(
+          untypedReference,
+          this._fieldsProto!,
+          this.readTime,
+          this.createTime!,
+          this.updateTime!
+        )
+      );
+    } else {
+      const obj: DocumentData = {};
+      for (const prop of Object.keys(fields)) {
+        obj[prop] = this._serializer.decodeValue(fields[prop]);
+      }
+      return obj as T;
     }
-    return this.ref._converter.fromFirestore(obj);
   }
 
   /**

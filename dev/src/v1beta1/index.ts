@@ -16,6 +16,8 @@
 // ** https://github.com/googleapis/gapic-generator-typescript **
 // ** All changes to this file may be overwritten. **
 
+// tslint:disable deprecation
+
 import {FirestoreClient} from './firestore_client';
 export {FirestoreClient};
 
