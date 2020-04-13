@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-// We're using 'any' in our Public API to describe customer-provided types
+// We deliberately use `any` in the external API to not impose type-checking
+// on end users.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Declare a global (ambient) namespace
