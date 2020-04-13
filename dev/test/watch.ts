@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const duplexify = require('duplexify');
-
+import * as  duplexify from 'duplexify';
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 import * as extend from 'extend';

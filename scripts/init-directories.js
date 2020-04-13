@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const mkdirp = require('mkdirp');
+import * as mkdirp from 'mkdirp'
 
 // We have to manually add the directory here because the docker image that
 // runs CI does not have this directory. We also can't use `mkdir -p` in the
