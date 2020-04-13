@@ -316,7 +316,7 @@ abstract class Watch<T = DocumentData> {
     this.docTree.forEach((snapshot: QueryDocumentSnapshot) => {
       // Mark each document as deleted. If documents are not deleted, they
       // will be send again by the server.
-      this.changeMap.set(snapshot.ref.path, REMOVED);
+      this.changeMap.set(snapshot.ref.path, REMOVED as DocumentSnapshotBuilder<T>);
     });
 
     this.current = false;
@@ -529,14 +529,14 @@ abstract class Watch<T = DocumentData> {
         this.changeMap.set(relativeName, snapshot);
       } else if (removed) {
         logger('Watch.onData', this.requestTag, 'Received document remove');
-        this.changeMap.set(relativeName, REMOVED);
+        this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
       }
     } else if (proto.documentDelete || proto.documentRemove) {
       logger('Watch.onData', this.requestTag, 'Processing remove event');
       const name = (proto.documentDelete || proto.documentRemove)!.document!;
       const relativeName = QualifiedResourcePath.fromSlashSeparatedString(name)
         .relativeName;
-      this.changeMap.set(relativeName, REMOVED);
+      this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
     } else if (proto.filter) {
       logger('Watch.onData', this.requestTag, 'Processing filter update');
       if (proto.filter.count !== this.currentSize()) {

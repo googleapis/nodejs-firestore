@@ -444,7 +444,7 @@ class ArrayUnionTransform extends FieldTransform {
     return (
       this === other ||
       (other instanceof ArrayUnionTransform &&
-        deepEqual(this.elements, other.elements, {strict: true}))
+        deepEqual(this.elements, other.elements))
     );
   }
 }
@@ -500,7 +500,7 @@ class ArrayRemoveTransform extends FieldTransform {
     return (
       this === other ||
       (other instanceof ArrayRemoveTransform &&
-        deepEqual(this.elements, other.elements, {strict: true}))
+        deepEqual(this.elements, other.elements))
     );
   }
 }

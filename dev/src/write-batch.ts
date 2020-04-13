@@ -406,22 +406,25 @@ export class WriteBatch {
       typeof dataOrField === 'string' || dataOrField instanceof FieldPath;
 
     if (usesVarargs) {
+      const argumentOffset = 1; // Respect 'documentRef' in the error message
       const fieldOrValues = [dataOrField, ...preconditionOrValues];
       try {
         for (let i = 0; i < fieldOrValues.length; i += 2) {
           if (i === fieldOrValues.length - 1) {
-            validateUpdatePrecondition(i, fieldOrValues[i]);
-            precondition = new Precondition(fieldOrValues[i]);
+            const maybePrecondition = fieldOrValues[i];
+            validateUpdatePrecondition(i + argumentOffset, maybePrecondition);
+            precondition = new Precondition(maybePrecondition);
           } else {
-            validateFieldPath(i, fieldOrValues[i]);
+            const maybeFieldPath = fieldOrValues[i];
+            validateFieldPath(i + argumentOffset, maybeFieldPath);
             // Unlike the `validateMinNumberOfArguments` invocation above, this
             // validation can be triggered both from `WriteBatch.update()` and
             // `DocumentReference.update()`. Hence, we don't use the fully
             // qualified API name in the error message.
             validateMinNumberOfArguments('update', fieldOrValues, i + 1);
 
-            const fieldPath = FieldPath.fromArgument(fieldOrValues[i]);
-            validateFieldValue(i, fieldOrValues[i + 1], fieldPath);
+            const fieldPath = FieldPath.fromArgument(maybeFieldPath);
+            validateFieldValue(i + argumentOffset, fieldOrValues[i + 1], fieldPath);
             updateMap.set(fieldPath, fieldOrValues[i + 1]);
           }
         }

@@ -1335,7 +1335,7 @@ export class Firestore {
           const stream = bidirectional
             ? gapicClient[methodName](callOptions)
             : gapicClient[methodName](request, callOptions);
-          const logStream = through2.obj((this, chunk, enc, callback) => {
+          const logStream = through2.obj((chunk, enc, callback) => {
             logger(
               'Firestore.requestStream',
               requestTag,
