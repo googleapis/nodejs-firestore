@@ -424,7 +424,11 @@ export class WriteBatch {
             validateMinNumberOfArguments('update', fieldOrValues, i + 1);
 
             const fieldPath = FieldPath.fromArgument(maybeFieldPath);
-            validateFieldValue(i + argumentOffset, fieldOrValues[i + 1], fieldPath);
+            validateFieldValue(
+              i + argumentOffset,
+              fieldOrValues[i + 1],
+              fieldPath
+            );
             updateMap.set(fieldPath, fieldOrValues[i + 1]);
           }
         }

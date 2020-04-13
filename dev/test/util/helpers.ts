@@ -19,13 +19,12 @@ import {Duplex} from 'stream';
 import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
+import * as v1 from '../../src/v1';
 import {Firestore} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {DocumentData, GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
-
-const v1 = require('../../src/v1');
 
 const SSL_CREDENTIALS = grpc.credentials.createInsecure();
 
@@ -64,7 +63,11 @@ export function createInstance(
   firestore['_clientPool'] = new ClientPool<GapicClient>(
     /* concurrentRequestLimit= */ 1,
     /* maxIdleClients= */ 0,
-    () => ({...new v1(initializationOptions), ...apiOverrides})
+    () =>
+      ({
+        ...new v1.FirestoreClient(initializationOptions),
+        ...apiOverrides,
+      } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
   );
 
   return Promise.resolve(firestore);

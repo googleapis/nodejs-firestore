@@ -316,7 +316,10 @@ abstract class Watch<T = DocumentData> {
     this.docTree.forEach((snapshot: QueryDocumentSnapshot) => {
       // Mark each document as deleted. If documents are not deleted, they
       // will be send again by the server.
-      this.changeMap.set(snapshot.ref.path, REMOVED as DocumentSnapshotBuilder<T>);
+      this.changeMap.set(
+        snapshot.ref.path,
+        REMOVED as DocumentSnapshotBuilder<T>
+      );
     });
 
     this.current = false;
