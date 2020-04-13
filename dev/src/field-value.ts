@@ -111,6 +111,7 @@ export class FieldValue {
    * });
    */
   static increment(n: number): FieldValue {
+    // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('FieldValue.increment', arguments, 1);
     return new NumericIncrementTransform(n);
   }
@@ -139,7 +140,7 @@ export class FieldValue {
    * });
    */
   static arrayUnion(...elements: unknown[]): FieldValue {
-    validateMinNumberOfArguments('FieldValue.arrayUnion', arguments, 1);
+    validateMinNumberOfArguments('FieldValue.arrayUnion', elements, 1);
     return new ArrayUnionTransform(elements);
   }
 
@@ -166,7 +167,7 @@ export class FieldValue {
    * });
    */
   static arrayRemove(...elements: unknown[]): FieldValue {
-    validateMinNumberOfArguments('FieldValue.arrayRemove', arguments, 1);
+    validateMinNumberOfArguments('FieldValue.arrayRemove', elements, 1);
     return new ArrayRemoveTransform(elements);
   }
 

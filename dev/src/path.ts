@@ -639,7 +639,7 @@ export class FieldPath extends Path<FieldPath> {
 export function validateFieldPath(
   arg: string | number,
   fieldPath: unknown
-): void {
+): asserts fieldPath is string | FieldPath {
   if (fieldPath instanceof FieldPath) {
     return;
   }

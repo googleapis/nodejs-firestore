@@ -388,6 +388,7 @@ export class WriteBatch {
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
   ): WriteBatch {
+    // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('WriteBatch.update', arguments, 2);
     validateDocumentReference('documentRef', documentRef);
 
@@ -405,22 +406,23 @@ export class WriteBatch {
       typeof dataOrField === 'string' || dataOrField instanceof FieldPath;
 
     if (usesVarargs) {
+      const fieldOrValues = [dataOrField, ...preconditionOrValues];
       try {
-        for (let i = 1; i < arguments.length; i += 2) {
-          if (i === arguments.length - 1) {
-            validateUpdatePrecondition(i, arguments[i]);
-            precondition = new Precondition(arguments[i]);
+        for (let i = 0; i < fieldOrValues.length; i += 2) {
+          if (i === fieldOrValues.length - 1) {
+            validateUpdatePrecondition(i, fieldOrValues[i]);
+            precondition = new Precondition(fieldOrValues[i]);
           } else {
-            validateFieldPath(i, arguments[i]);
+            validateFieldPath(i, fieldOrValues[i]);
             // Unlike the `validateMinNumberOfArguments` invocation above, this
             // validation can be triggered both from `WriteBatch.update()` and
             // `DocumentReference.update()`. Hence, we don't use the fully
             // qualified API name in the error message.
-            validateMinNumberOfArguments('update', arguments, i + 1);
+            validateMinNumberOfArguments('update', fieldOrValues, i + 1);
 
-            const fieldPath = FieldPath.fromArgument(arguments[i]);
-            validateFieldValue(i, arguments[i + 1], fieldPath);
-            updateMap.set(fieldPath, arguments[i + 1]);
+            const fieldPath = FieldPath.fromArgument(fieldOrValues[i]);
+            validateFieldValue(i, fieldOrValues[i + 1], fieldPath);
+            updateMap.set(fieldPath, fieldOrValues[i + 1]);
           }
         }
       } catch (err) {
@@ -432,6 +434,7 @@ export class WriteBatch {
     } else {
       try {
         validateUpdateMap('dataOrField', dataOrField);
+        // tslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
         const data = dataOrField as UpdateData;
@@ -739,7 +742,7 @@ function validateUpdatePrecondition(
   arg: string | number,
   value: unknown,
   options?: RequiredArgumentOptions
-): void {
+): asserts value is {lastUpdateTime?: Timestamp} {
   if (!validateOptional(value, options)) {
     validatePrecondition(arg, value, /* allowExists= */ false);
   }

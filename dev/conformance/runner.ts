@@ -14,7 +14,7 @@
 
 import * as duplexify from 'duplexify';
 
-import {it, xit} from 'mocha';
+import {it, xit, describe} from 'mocha';
 import {expect} from 'chai';
 import * as path from 'path';
 import * as fs from 'fs';

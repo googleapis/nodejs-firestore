@@ -439,6 +439,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
     dataOrField: UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<unknown | string | FieldPath | Precondition>
   ): Promise<WriteResult> {
+    // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
     const writeBatch = new WriteBatch(this._firestore);
@@ -1648,7 +1649,11 @@ export class Query<T = DocumentData> {
   startAt(
     ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): Query<T> {
-    validateMinNumberOfArguments('Query.startAt', arguments, 1);
+    validateMinNumberOfArguments(
+      'Query.startAt',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
 
     const fieldOrders = this.createImplicitOrderBy(
       fieldValuesOrDocumentSnapshot
@@ -1686,7 +1691,11 @@ export class Query<T = DocumentData> {
   startAfter(
     ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): Query<T> {
-    validateMinNumberOfArguments('Query.startAfter', arguments, 1);
+    validateMinNumberOfArguments(
+      'Query.startAfter',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
 
     const fieldOrders = this.createImplicitOrderBy(
       fieldValuesOrDocumentSnapshot
@@ -1723,7 +1732,11 @@ export class Query<T = DocumentData> {
   endBefore(
     ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): Query<T> {
-    validateMinNumberOfArguments('Query.endBefore', arguments, 1);
+    validateMinNumberOfArguments(
+      'Query.endBefore',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
 
     const fieldOrders = this.createImplicitOrderBy(
       fieldValuesOrDocumentSnapshot
@@ -1760,7 +1773,11 @@ export class Query<T = DocumentData> {
   endAt(
     ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): Query<T> {
-    validateMinNumberOfArguments('Query.endAt', arguments, 1);
+    validateMinNumberOfArguments(
+      'Query.endAt',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
 
     const fieldOrders = this.createImplicitOrderBy(
       fieldValuesOrDocumentSnapshot
