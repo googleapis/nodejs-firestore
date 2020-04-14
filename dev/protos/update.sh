@@ -77,7 +77,7 @@ cp protobuf/src/google/protobuf/{any,empty,field_mask,struct,timestamp,wrappers}
 # Generate the Protobuf typings
 PBJS_ARGS=( --proto_path=. \
   --js_out=import_style=commonjs,binary:library \
-  --target=static \
+  --target=static-module \
   --no-create \
   --no-encode \
   --no-decode \

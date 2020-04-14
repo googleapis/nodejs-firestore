@@ -1067,7 +1067,7 @@ export class FirestoreClient {
    */
   write(options?: gax.CallOptions): gax.CancellableStream {
     this.initialize();
-    return this.innerApiCalls.write(options);
+    return this.innerApiCalls.write({}, options);
   }
 
   /**
@@ -1082,7 +1082,7 @@ export class FirestoreClient {
    */
   listen(options?: gax.CallOptions): gax.CancellableStream {
     this.initialize();
-    return this.innerApiCalls.listen(options);
+    return this.innerApiCalls.listen({}, options);
   }
 
   listDocuments(

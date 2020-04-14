@@ -36,13 +36,23 @@ s.copy(v1_library, "dev", excludes=["package.json", "README.md", "src/index.ts",
 # See: https://github.com/googleapis/nodejs-firestore/pull/375
 s.replace(
     "dev/src/v1beta1/firestore_client.ts",
-    "return this\._innerApiCalls\.listen\(options\);",
-    "return this._innerApiCalls.listen({}, options);",
+    "return this\.innerApiCalls\.listen\(options\);",
+    "return this.innerApiCalls.listen({}, options);",
 )
 s.replace(
     "dev/src/v1/firestore_client.ts",
-    "return this\._innerApiCalls\.listen\(options\);",
-    "return this._innerApiCalls.listen({}, options);",
+    "return this\.innerApiCalls\.listen\(options\);",
+    "return this.innerApiCalls.listen({}, options);",
+)
+s.replace(
+    "dev/src/v1beta1/firestore_client.ts",
+    "return this\.innerApiCalls\.write\(options\);",
+    "return this.innerApiCalls.write({}, options);",
+)
+s.replace(
+    "dev/src/v1/firestore_client.ts",
+    "return this\.innerApiCalls\.write\(options\);",
+    "return this.innerApiCalls.write({}, options);",
 )
 
 # Copy template files
