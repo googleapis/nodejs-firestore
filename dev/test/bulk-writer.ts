@@ -52,6 +52,7 @@ describe('BulkWriter', () => {
   let requestCounter: number;
   let opCount: number;
   let flushDeferred = new Deferred<void>();
+  let flushCounter = 0;
 
   beforeEach(() => {
     requestCounter = -1;
@@ -167,14 +168,14 @@ describe('BulkWriter', () => {
           writes: mock[requestCounter].request.writes,
         });
         if (manualFlush) {
-          return Promise.resolve().then(async () => {
-            await flushDeferred.promise;
+          flushCounter++;
+          return flushDeferred.promise.then(() => {
             flushDeferred = new Deferred<void>();
             return response({
-              writeResults: mock[requestCounter].response.writeResults,
-              status: mock[requestCounter].response.status,
-            });
-          });
+            writeResults: mock[requestCounter].response.writeResults,
+            status: mock[requestCounter].response.status,
+          })
+        });
         }
         return response({
           writeResults: mock[requestCounter].response.writeResults,
@@ -292,6 +293,26 @@ describe('BulkWriter', () => {
     return bulkWriter.flush().then(() => verifyOpCount(0));
   });
 
+  it('adds writes to a new batch after calling flush()', async() => {
+    await instantiateInstance([
+      {
+        request: createRequest([createOp('col/doc', 'bar')]),
+        response: createResponse([successResponse(2)]),
+      },
+      {
+        request: createRequest([setOp('col/doc', 'bar1')]),
+        response: createResponse([successResponse(2)]),
+      },
+    ]);
+    const doc = firestore.doc('col/doc');
+    bulkWriter.create(doc, {foo: 'bar'}).then(incrementOpCount);
+    bulkWriter.flush();
+    bulkWriter.set(doc, {foo: 'bar1'}).then(incrementOpCount);
+    await bulkWriter.flush().then(async () => {
+      verifyOpCount(2);
+    });
+  })
+
   it('close() sends all writes', async () => {
     await instantiateInstance([
       {
@@ -300,14 +321,9 @@ describe('BulkWriter', () => {
       },
     ]);
     const doc = firestore.doc('col/doc');
-    let writeResult: WriteResult;
-    bulkWriter.create(doc, {foo: 'bar'}).then(result => {
-      incrementOpCount();
-      writeResult = result;
-    });
+    bulkWriter.create(doc, {foo: 'bar'}).then(incrementOpCount);
     return bulkWriter.close().then(async () => {
       verifyOpCount(1);
-      expect(writeResult.writeTime.isEqual(new Timestamp(2, 0))).to.be.true;
     });
   });
 
@@ -489,4 +505,33 @@ describe('BulkWriter', () => {
       verifyOpCount(4);
     });
   });
+
+  it.only('does not send batches if a document containing the same write is in flight', async () => {
+    await instantiateInstance(
+      [
+        {
+          request: createRequest([
+            setOp('col/doc1', 'bar'),
+            setOp('col/doc2', 'bar'),
+          ]),
+          response: createResponse([successResponse(1), successResponse(2)]),
+        },
+        {
+          request: createRequest([setOp('col/doc3', 'bar')]),
+          response: createResponse([successResponse(3)]),
+        },
+      ],
+      /** manualFlush= */ true
+    );
+    bulkWriter.set(firestore.doc('col/doc1'), {foo: 'bar'});
+    bulkWriter.set(firestore.doc('col/doc2'), {foo: 'bar'});
+    const flush1 = bulkWriter.flush();
+    // The third write will be placed in a new batch
+    bulkWriter.set(firestore.doc('col/doc3'), {foo: 'bar'});
+    const flush2 = bulkWriter.flush();
+    flushDeferred.resolve();
+    await flush1;
+    expect(flushCounter).to.equal(1);
+    await flush2;
+  })
 });
