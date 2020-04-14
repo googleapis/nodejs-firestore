@@ -1,26 +1,25 @@
 {
-  "updateTime": "2020-03-22T11:28:16.621427Z",
   "sources": [
     {
       "git": {
         "name": ".",
         "remote": "git@github.com:googleapis/nodejs-firestore.git",
-        "sha": "a2c941c3c14fe509d1ca245e07e4c1487c6861c0"
+        "sha": "5fbc6e606d23dc2f63a3c5a2545adbfb4f47847d"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "0be7105dc52590fa9a24e784052298ae37ce53aa",
-        "internalRef": "302154871"
+        "sha": "3028060618e8024af9a32b3ab3456c160091ecb7",
+        "internalRef": "306450502"
       }
     },
     {
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "7e98e1609c91082f4eeb63b530c6468aefd18cfd"
+        "sha": "52638600f387deb98efb5f9c85fec39e82aa9052"
       }
     }
   ],

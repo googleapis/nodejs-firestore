@@ -85,7 +85,7 @@ async function quickstart() {
   console.log('Updated an existing document');
 
   // Read the document.
-  let doc = await document.get();
+  const doc = await document.get();
   console.log('Read the document');
 
   // Delete the document.
