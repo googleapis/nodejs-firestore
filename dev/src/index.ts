@@ -67,6 +67,7 @@ import {interfaces} from './v1/firestore_client_config.json';
 const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
+import {BulkWriter} from './bulk-writer';
 
 export {
   CollectionReference,
@@ -638,6 +639,37 @@ export class Firestore {
    */
   batch(): WriteBatch {
     return new WriteBatch(this);
+  }
+
+  /**
+   * Creates a [BulkWriter]{@link BulkWriter}, used for performing
+   * multiple writes in parallel.
+   *
+   * @returns {WriteBatch} A BulkWriter that operates on this Firestore
+   * client.
+   *
+   * @example
+   * let bulkWriter = firestore.bulkWriter();
+   *
+   * bulkWriter.create(firestore.doc('col/doc1'), {foo: 'bar'})
+   *   .then(res => {
+   *     console.log(`Added document at ${res.writeTime}`);
+   *   });
+   * bulkWriter.update(firestore.doc('col/doc2), {foo: 'bar'})
+   *   .then(res => {
+   *     console.log(`Updated document at ${res.writeTime}`);
+   *   });
+   * bulkWriter.delete(firestore.doc('col/doc3'))
+   *   .then(res => {
+   *     console.log(`Deleted document at ${res.writeTime}`);
+   *   });
+   * await bulkWriter.flush().then(() => {
+   *   console.log('Executed all writes');
+   * });
+   * bulkWriter.close();
+   */
+  bulkWriter(): BulkWriter {
+    return new BulkWriter(this);
   }
 
   /**
