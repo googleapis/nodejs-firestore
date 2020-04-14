@@ -284,7 +284,7 @@ export class BulkWriter {
    * bulkWriter
    *  .delete(documentRef)
    *  .then(result => {
-   *    console.log('Successfully delete document at: ', result);
+   *    console.log('Successfully deleted document at: ', result);
    *  })
    *  .catch(err => {
    *    console.log('Delete failed with: ', err);
