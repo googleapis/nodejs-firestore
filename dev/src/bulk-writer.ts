@@ -479,11 +479,14 @@ export class BulkWriter {
    */
   private getEligibleBatch(ref: DocumentReference): BulkCommitBatch {
     let eligibleBatch = null;
-    let hasBatches = this.batchQueue.length > 0;
-    if (hasBatches) {
+    let logWarning = false;
+    if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
-      if (!lastBatch.docPaths.has(ref.path)) {
-        hasBatches = false;
+      if (
+        lastBatch.docPaths.has(ref.path) &&
+        lastBatch.state === BatchState.OPEN
+      ) {
+        logWarning = true;
       }
       if (lastBatch.canAddDoc(ref)) {
         eligibleBatch = lastBatch;
@@ -491,7 +494,7 @@ export class BulkWriter {
     }
 
     if (eligibleBatch === null) {
-      if (hasBatches) {
+      if (logWarning) {
         console.warn(
           '[BulkWriter]',
           `Duplicate write to document "${ref.path}" detected.`,
