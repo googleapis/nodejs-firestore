@@ -13,14 +13,14 @@
 // limitations under the License.
 
 'use strict';
-const { Firestore, FieldValue } = require('@google-cloud/firestore');
+const {Firestore, FieldValue} = require('@google-cloud/firestore');
 
 async function main() {
   // [START increment_counter]
   function incrementCounter(docRef, numShards) {
     const shardId = Math.floor(Math.random() * numShards);
     const shardRef = docRef.collection('shards').doc(shardId.toString());
-    return shardRef.set({ count: FieldValue.increment(1) }, { merge: true });
+    return shardRef.set({count: FieldValue.increment(1)}, {merge: true});
   }
   // [END increment_counter]
 
@@ -41,8 +41,8 @@ async function main() {
   async function deleteDocs(docRef) {
     const shardsCollectionRef = docRef.collection('shards');
     const shardDocs = await shardsCollectionRef.select('id').get();
-    let promises = [];
-    shardDocs.forEach(async (doc) => {
+    const promises = [];
+    shardDocs.forEach(async doc => {
       promises.push(shardsCollectionRef.doc(doc.id).delete());
     });
     return Promise.all(promises);
@@ -51,13 +51,15 @@ async function main() {
 
   // Create a new client
   const firestore = new Firestore();
-  const docRef = firestore.doc('distributed_counter_samples/distributed_counter');
+  const docRef = firestore.doc(
+    'distributed_counter_samples/distributed_counter'
+  );
   const numberOfShards = 10;
   // Increase the document count
   return incrementCounter(docRef, numberOfShards).then(async () => {
     console.log('counter increased');
     // Get document count
-    let count = await getCount(docRef);
+    const count = await getCount(docRef);
     console.log(`new count is : ${count}`);
     // Delete the document
     await deleteDocs(docRef);

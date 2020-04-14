@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-const deepEqual = require('deep-equal');
+import * as deepEqual from 'fast-deep-equal';
 
 import * as assert from 'assert';
-import {describe, it} from 'mocha';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldTransform} from './field-value';
@@ -354,7 +353,7 @@ export class DocumentSnapshot<T = DocumentData> {
    */
   get readTime(): Timestamp {
     if (this._readTime === undefined) {
-      throw new Error(`Called 'readTime' on a local document`);
+      throw new Error("Called 'readTime' on a local document");
     }
     return this._readTime;
   }
@@ -426,9 +425,8 @@ export class DocumentSnapshot<T = DocumentData> {
    */
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
-  // tslint:disable-next-line no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(field: string | FieldPath): any {
-    // tslint:disable-line no-any
     validateFieldPath('field', field);
 
     const protoField = this.protoField(field);
@@ -510,7 +508,7 @@ export class DocumentSnapshot<T = DocumentData> {
       this === other ||
       (other instanceof DocumentSnapshot &&
         this._ref.isEqual(other._ref) &&
-        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
+        deepEqual(this._fieldsProto, other._fieldsProto))
     );
   }
 }

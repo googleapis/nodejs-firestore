@@ -142,7 +142,7 @@ export class ClientPool<T> {
     }
 
     let idleCapacityCount = 0;
-    for (const [_, count] of this.activeClients) {
+    for (const [, count] of this.activeClients) {
       idleCapacityCount += this.concurrentOperationLimit - count;
     }
     return (
@@ -215,7 +215,7 @@ export class ClientPool<T> {
       );
       await this.terminateDeferred.promise;
     }
-    for (const [client, _requestCount] of this.activeClients) {
+    for (const [client] of this.activeClients) {
       this.activeClients.delete(client);
       await this.clientDestructor(client);
     }

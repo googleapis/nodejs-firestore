@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 import {GoogleError, Status} from 'google-gax';
 import * as through2 from 'through2';
 
 import {
   DocumentReference,
-  DocumentSnapshot,
   FieldPath,
   FieldValue,
   Firestore,
@@ -419,7 +419,7 @@ describe('serialize document', () => {
       // instances, even if they have cyclic references (we shouldn't try to
       // validate them beyond the instanceof check).
       const ref = firestore.doc('collectionId/documentId');
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (ref.firestore as any).firestore = firestore;
       return ref.set({ref});
     });

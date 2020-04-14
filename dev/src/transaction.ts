@@ -30,7 +30,6 @@ import {
   validateDocumentReference,
 } from './reference';
 import {
-  DocumentData,
   Precondition as PublicPrecondition,
   ReadOptions,
   SetOptions,
@@ -184,7 +183,11 @@ export class Transaction {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
-    validateMinNumberOfArguments('Transaction.getAll', arguments, 1);
+    validateMinNumberOfArguments(
+      'Transaction.getAll',
+      documentRefsOrReadOptions,
+      1
+    );
 
     const {documents, fieldMask} = parseGetAllArguments(
       documentRefsOrReadOptions
@@ -303,6 +306,7 @@ export class Transaction {
     dataOrField: UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<Precondition | unknown | string | FieldPath>
   ): Transaction {
+    // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('Transaction.update', arguments, 2);
 
     this._writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
@@ -417,7 +421,7 @@ export class Transaction {
         logger(
           'Firestore.runTransaction',
           this._requestTag,
-          `Retrying transaction after error:`,
+          'Retrying transaction after error:',
           lastError
         );
       }

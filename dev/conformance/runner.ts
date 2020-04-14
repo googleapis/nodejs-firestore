@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const duplexify = require('duplexify');
-const mkdirp = require('mkdirp');
+import * as duplexify from 'duplexify';
 
+import {it, xit, describe} from 'mocha';
 import {expect} from 'chai';
 import * as path from 'path';
+import * as fs from 'fs';
 import * as protobufjs from 'protobufjs';
 import * as through2 from 'through2';
 import * as proto from '../protos/firestore_v1_proto_api';
@@ -47,7 +48,8 @@ import {
 import api = proto.google.firestore.v1;
 
 // TODO(mrschmidt): Create Protobuf .d.ts file for the conformance proto
-type ConformanceProto = any; // tslint:disable-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ConformanceProto = any;
 
 /** List of test cases that are ignored. */
 const ignoredRe: RegExp[] = [
@@ -331,10 +333,7 @@ function runTest(spec: ConformanceProto) {
       }
 
       const document = docRef(spec.docRefPath);
-      // TODO(mrschmidt): Remove 'any' and invoke by calling update() directly
-      // for each individual case.
-      // tslint:disable-next-line:no-any
-      return document.update.apply(document, varargs as any);
+      return document.update(varargs[0] as string, ...varargs.slice(1));
     });
   };
 
@@ -342,10 +341,7 @@ function runTest(spec: ConformanceProto) {
     const overrides = {runQuery: queryHandler(spec)};
     const applyClause = (query: Query, clause: ConformanceProto) => {
       if (clause.select) {
-        query = query.select.apply(
-          query,
-          convertInput.paths(clause.select.fields)
-        );
+        query = query.select(...convertInput.paths(clause.select.fields));
       } else if (clause.where) {
         const fieldPath = convertInput.path(clause.where.path);
         const value = convertInput.argument(clause.where.jsonValue);
@@ -585,15 +581,14 @@ function normalizeInt32Value(obj: {[key: string]: {}}, parent = '') {
 
 describe('Conformance Tests', () => {
   const loadTestCases = () => {
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let testDataJson: any[] = [];
-    const fs = require('fs');
 
     const testPath = path.join(__dirname, 'conformance-tests');
     const fileNames = fs.readdirSync(testPath);
     for (const fileName of fileNames) {
       const testFilePath = path.join(__dirname, 'conformance-tests', fileName);
-      const singleTest = JSON.parse(fs.readFileSync(testFilePath));
+      const singleTest = JSON.parse(fs.readFileSync(testFilePath, 'utf-8'));
 
       // Convert Timestamp string representation to protobuf object.
       normalizeTimestamp(singleTest);
