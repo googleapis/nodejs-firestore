@@ -30,7 +30,7 @@
     var $util = $protobuf.util;
     
     // Exported root namespace
-    var $root = $protobuf.roots.firestore_v1beta1_v1 || ($protobuf.roots.firestore_v1beta1_v1 = {});
+    var $root = $protobuf.roots.firestore_v1beta1 || ($protobuf.roots.firestore_v1beta1 = {});
     
     $root.google = (function() {
     

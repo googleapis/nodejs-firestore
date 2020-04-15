@@ -13,15 +13,18 @@ gapic_micro = gcp.GAPICMicrogenerator()
 
 v1_admin_library = gapic_micro.typescript_library(
     "firestore-admin", "v1", proto_path="/google/firestore/admin/v1",
-    generator_args={'grpc-service-config': 'google/firestore/admin/v1/firestore_admin_grpc_service_config.json'}
+    generator_args={'package-name': '@google-cloud/firestore', 
+    'grpc-service-config': 'google/firestore/admin/v1/firestore_admin_grpc_service_config.json'}
 )
 v1beta1_library = gapic_micro.typescript_library(
     "firestore", "v1beta1", proto_path="/google/firestore/v1beta1",
-    generator_args={'grpc-service-config': 'google/firestore/v1beta1/firestore_grpc_service_config.json'}
+    generator_args={'package-name': '@google-cloud/firestore', 
+    'grpc-service-config': 'google/firestore/v1beta1/firestore_grpc_service_config.json'}
 )
 v1_library = gapic_micro.typescript_library(
     "firestore", "v1", proto_path="/google/firestore/v1",
-    generator_args={'grpc-service-config': 'google/firestore/v1/firestore_grpc_service_config.json'}
+    generator_args={'package-name': '@google-cloud/firestore', 
+    'grpc-service-config': 'google/firestore/v1/firestore_grpc_service_config.json'}
 )
 
 # skip index, protos, package.json, and README.md
