@@ -30,7 +30,7 @@
     var $util = $protobuf.util;
     
     // Exported root namespace
-    var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+    var $root = $protobuf.roots.firestore_v1 || ($protobuf.roots.firestore_v1 = {});
     
     $root.google = (function() {
     
@@ -91,6 +91,74 @@
                  */
                 Timestamp.prototype.nanos = 0;
     
+                /**
+                 * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Timestamp
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Timestamp} Timestamp
+                 */
+                Timestamp.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Timestamp)
+                        return object;
+                    var message = new $root.google.protobuf.Timestamp();
+                    if (object.seconds != null)
+                        if ($util.Long)
+                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
+                        else if (typeof object.seconds === "string")
+                            message.seconds = parseInt(object.seconds, 10);
+                        else if (typeof object.seconds === "number")
+                            message.seconds = object.seconds;
+                        else if (typeof object.seconds === "object")
+                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
+                    if (object.nanos != null)
+                        message.nanos = object.nanos | 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Timestamp
+                 * @static
+                 * @param {google.protobuf.Timestamp} message Timestamp
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Timestamp.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.seconds = options.longs === String ? "0" : 0;
+                        object.nanos = 0;
+                    }
+                    if (message.seconds != null && message.hasOwnProperty("seconds"))
+                        if (typeof message.seconds === "number")
+                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
+                        else
+                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
+                    if (message.nanos != null && message.hasOwnProperty("nanos"))
+                        object.nanos = message.nanos;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Timestamp to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Timestamp
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Timestamp.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return Timestamp;
             })();
     
@@ -126,6 +194,65 @@
                  * @instance
                  */
                 FileDescriptorSet.prototype.file = $util.emptyArray;
+    
+                /**
+                 * Creates a FileDescriptorSet message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FileDescriptorSet
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FileDescriptorSet} FileDescriptorSet
+                 */
+                FileDescriptorSet.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FileDescriptorSet)
+                        return object;
+                    var message = new $root.google.protobuf.FileDescriptorSet();
+                    if (object.file) {
+                        if (!Array.isArray(object.file))
+                            throw TypeError(".google.protobuf.FileDescriptorSet.file: array expected");
+                        message.file = [];
+                        for (var i = 0; i < object.file.length; ++i) {
+                            if (typeof object.file[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorSet.file: object expected");
+                            message.file[i] = $root.google.protobuf.FileDescriptorProto.fromObject(object.file[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FileDescriptorSet message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FileDescriptorSet
+                 * @static
+                 * @param {google.protobuf.FileDescriptorSet} message FileDescriptorSet
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FileDescriptorSet.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.file = [];
+                    if (message.file && message.file.length) {
+                        object.file = [];
+                        for (var j = 0; j < message.file.length; ++j)
+                            object.file[j] = $root.google.protobuf.FileDescriptorProto.toObject(message.file[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this FileDescriptorSet to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FileDescriptorSet
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FileDescriptorSet.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return FileDescriptorSet;
             })();
@@ -268,6 +395,186 @@
                  */
                 FileDescriptorProto.prototype.syntax = "";
     
+                /**
+                 * Creates a FileDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FileDescriptorProto} FileDescriptorProto
+                 */
+                FileDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FileDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.FileDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object["package"] != null)
+                        message["package"] = String(object["package"]);
+                    if (object.dependency) {
+                        if (!Array.isArray(object.dependency))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.dependency: array expected");
+                        message.dependency = [];
+                        for (var i = 0; i < object.dependency.length; ++i)
+                            message.dependency[i] = String(object.dependency[i]);
+                    }
+                    if (object.publicDependency) {
+                        if (!Array.isArray(object.publicDependency))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.publicDependency: array expected");
+                        message.publicDependency = [];
+                        for (var i = 0; i < object.publicDependency.length; ++i)
+                            message.publicDependency[i] = object.publicDependency[i] | 0;
+                    }
+                    if (object.weakDependency) {
+                        if (!Array.isArray(object.weakDependency))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.weakDependency: array expected");
+                        message.weakDependency = [];
+                        for (var i = 0; i < object.weakDependency.length; ++i)
+                            message.weakDependency[i] = object.weakDependency[i] | 0;
+                    }
+                    if (object.messageType) {
+                        if (!Array.isArray(object.messageType))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.messageType: array expected");
+                        message.messageType = [];
+                        for (var i = 0; i < object.messageType.length; ++i) {
+                            if (typeof object.messageType[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorProto.messageType: object expected");
+                            message.messageType[i] = $root.google.protobuf.DescriptorProto.fromObject(object.messageType[i]);
+                        }
+                    }
+                    if (object.enumType) {
+                        if (!Array.isArray(object.enumType))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.enumType: array expected");
+                        message.enumType = [];
+                        for (var i = 0; i < object.enumType.length; ++i) {
+                            if (typeof object.enumType[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorProto.enumType: object expected");
+                            message.enumType[i] = $root.google.protobuf.EnumDescriptorProto.fromObject(object.enumType[i]);
+                        }
+                    }
+                    if (object.service) {
+                        if (!Array.isArray(object.service))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.service: array expected");
+                        message.service = [];
+                        for (var i = 0; i < object.service.length; ++i) {
+                            if (typeof object.service[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorProto.service: object expected");
+                            message.service[i] = $root.google.protobuf.ServiceDescriptorProto.fromObject(object.service[i]);
+                        }
+                    }
+                    if (object.extension) {
+                        if (!Array.isArray(object.extension))
+                            throw TypeError(".google.protobuf.FileDescriptorProto.extension: array expected");
+                        message.extension = [];
+                        for (var i = 0; i < object.extension.length; ++i) {
+                            if (typeof object.extension[i] !== "object")
+                                throw TypeError(".google.protobuf.FileDescriptorProto.extension: object expected");
+                            message.extension[i] = $root.google.protobuf.FieldDescriptorProto.fromObject(object.extension[i]);
+                        }
+                    }
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.FileDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.FileOptions.fromObject(object.options);
+                    }
+                    if (object.sourceCodeInfo != null) {
+                        if (typeof object.sourceCodeInfo !== "object")
+                            throw TypeError(".google.protobuf.FileDescriptorProto.sourceCodeInfo: object expected");
+                        message.sourceCodeInfo = $root.google.protobuf.SourceCodeInfo.fromObject(object.sourceCodeInfo);
+                    }
+                    if (object.syntax != null)
+                        message.syntax = String(object.syntax);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FileDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @static
+                 * @param {google.protobuf.FileDescriptorProto} message FileDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FileDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.dependency = [];
+                        object.messageType = [];
+                        object.enumType = [];
+                        object.service = [];
+                        object.extension = [];
+                        object.publicDependency = [];
+                        object.weakDependency = [];
+                    }
+                    if (options.defaults) {
+                        object.name = "";
+                        object["package"] = "";
+                        object.options = null;
+                        object.sourceCodeInfo = null;
+                        object.syntax = "";
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message["package"] != null && message.hasOwnProperty("package"))
+                        object["package"] = message["package"];
+                    if (message.dependency && message.dependency.length) {
+                        object.dependency = [];
+                        for (var j = 0; j < message.dependency.length; ++j)
+                            object.dependency[j] = message.dependency[j];
+                    }
+                    if (message.messageType && message.messageType.length) {
+                        object.messageType = [];
+                        for (var j = 0; j < message.messageType.length; ++j)
+                            object.messageType[j] = $root.google.protobuf.DescriptorProto.toObject(message.messageType[j], options);
+                    }
+                    if (message.enumType && message.enumType.length) {
+                        object.enumType = [];
+                        for (var j = 0; j < message.enumType.length; ++j)
+                            object.enumType[j] = $root.google.protobuf.EnumDescriptorProto.toObject(message.enumType[j], options);
+                    }
+                    if (message.service && message.service.length) {
+                        object.service = [];
+                        for (var j = 0; j < message.service.length; ++j)
+                            object.service[j] = $root.google.protobuf.ServiceDescriptorProto.toObject(message.service[j], options);
+                    }
+                    if (message.extension && message.extension.length) {
+                        object.extension = [];
+                        for (var j = 0; j < message.extension.length; ++j)
+                            object.extension[j] = $root.google.protobuf.FieldDescriptorProto.toObject(message.extension[j], options);
+                    }
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.FileOptions.toObject(message.options, options);
+                    if (message.sourceCodeInfo != null && message.hasOwnProperty("sourceCodeInfo"))
+                        object.sourceCodeInfo = $root.google.protobuf.SourceCodeInfo.toObject(message.sourceCodeInfo, options);
+                    if (message.publicDependency && message.publicDependency.length) {
+                        object.publicDependency = [];
+                        for (var j = 0; j < message.publicDependency.length; ++j)
+                            object.publicDependency[j] = message.publicDependency[j];
+                    }
+                    if (message.weakDependency && message.weakDependency.length) {
+                        object.weakDependency = [];
+                        for (var j = 0; j < message.weakDependency.length; ++j)
+                            object.weakDependency[j] = message.weakDependency[j];
+                    }
+                    if (message.syntax != null && message.hasOwnProperty("syntax"))
+                        object.syntax = message.syntax;
+                    return object;
+                };
+    
+                /**
+                 * Converts this FileDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FileDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return FileDescriptorProto;
             })();
     
@@ -392,6 +699,190 @@
                  */
                 DescriptorProto.prototype.reservedName = $util.emptyArray;
     
+                /**
+                 * Creates a DescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.DescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.DescriptorProto} DescriptorProto
+                 */
+                DescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.DescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.DescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.field) {
+                        if (!Array.isArray(object.field))
+                            throw TypeError(".google.protobuf.DescriptorProto.field: array expected");
+                        message.field = [];
+                        for (var i = 0; i < object.field.length; ++i) {
+                            if (typeof object.field[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.field: object expected");
+                            message.field[i] = $root.google.protobuf.FieldDescriptorProto.fromObject(object.field[i]);
+                        }
+                    }
+                    if (object.extension) {
+                        if (!Array.isArray(object.extension))
+                            throw TypeError(".google.protobuf.DescriptorProto.extension: array expected");
+                        message.extension = [];
+                        for (var i = 0; i < object.extension.length; ++i) {
+                            if (typeof object.extension[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.extension: object expected");
+                            message.extension[i] = $root.google.protobuf.FieldDescriptorProto.fromObject(object.extension[i]);
+                        }
+                    }
+                    if (object.nestedType) {
+                        if (!Array.isArray(object.nestedType))
+                            throw TypeError(".google.protobuf.DescriptorProto.nestedType: array expected");
+                        message.nestedType = [];
+                        for (var i = 0; i < object.nestedType.length; ++i) {
+                            if (typeof object.nestedType[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.nestedType: object expected");
+                            message.nestedType[i] = $root.google.protobuf.DescriptorProto.fromObject(object.nestedType[i]);
+                        }
+                    }
+                    if (object.enumType) {
+                        if (!Array.isArray(object.enumType))
+                            throw TypeError(".google.protobuf.DescriptorProto.enumType: array expected");
+                        message.enumType = [];
+                        for (var i = 0; i < object.enumType.length; ++i) {
+                            if (typeof object.enumType[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.enumType: object expected");
+                            message.enumType[i] = $root.google.protobuf.EnumDescriptorProto.fromObject(object.enumType[i]);
+                        }
+                    }
+                    if (object.extensionRange) {
+                        if (!Array.isArray(object.extensionRange))
+                            throw TypeError(".google.protobuf.DescriptorProto.extensionRange: array expected");
+                        message.extensionRange = [];
+                        for (var i = 0; i < object.extensionRange.length; ++i) {
+                            if (typeof object.extensionRange[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.extensionRange: object expected");
+                            message.extensionRange[i] = $root.google.protobuf.DescriptorProto.ExtensionRange.fromObject(object.extensionRange[i]);
+                        }
+                    }
+                    if (object.oneofDecl) {
+                        if (!Array.isArray(object.oneofDecl))
+                            throw TypeError(".google.protobuf.DescriptorProto.oneofDecl: array expected");
+                        message.oneofDecl = [];
+                        for (var i = 0; i < object.oneofDecl.length; ++i) {
+                            if (typeof object.oneofDecl[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.oneofDecl: object expected");
+                            message.oneofDecl[i] = $root.google.protobuf.OneofDescriptorProto.fromObject(object.oneofDecl[i]);
+                        }
+                    }
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.DescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.MessageOptions.fromObject(object.options);
+                    }
+                    if (object.reservedRange) {
+                        if (!Array.isArray(object.reservedRange))
+                            throw TypeError(".google.protobuf.DescriptorProto.reservedRange: array expected");
+                        message.reservedRange = [];
+                        for (var i = 0; i < object.reservedRange.length; ++i) {
+                            if (typeof object.reservedRange[i] !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.reservedRange: object expected");
+                            message.reservedRange[i] = $root.google.protobuf.DescriptorProto.ReservedRange.fromObject(object.reservedRange[i]);
+                        }
+                    }
+                    if (object.reservedName) {
+                        if (!Array.isArray(object.reservedName))
+                            throw TypeError(".google.protobuf.DescriptorProto.reservedName: array expected");
+                        message.reservedName = [];
+                        for (var i = 0; i < object.reservedName.length; ++i)
+                            message.reservedName[i] = String(object.reservedName[i]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a DescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.DescriptorProto
+                 * @static
+                 * @param {google.protobuf.DescriptorProto} message DescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                DescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.field = [];
+                        object.nestedType = [];
+                        object.enumType = [];
+                        object.extensionRange = [];
+                        object.extension = [];
+                        object.oneofDecl = [];
+                        object.reservedRange = [];
+                        object.reservedName = [];
+                    }
+                    if (options.defaults) {
+                        object.name = "";
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.field && message.field.length) {
+                        object.field = [];
+                        for (var j = 0; j < message.field.length; ++j)
+                            object.field[j] = $root.google.protobuf.FieldDescriptorProto.toObject(message.field[j], options);
+                    }
+                    if (message.nestedType && message.nestedType.length) {
+                        object.nestedType = [];
+                        for (var j = 0; j < message.nestedType.length; ++j)
+                            object.nestedType[j] = $root.google.protobuf.DescriptorProto.toObject(message.nestedType[j], options);
+                    }
+                    if (message.enumType && message.enumType.length) {
+                        object.enumType = [];
+                        for (var j = 0; j < message.enumType.length; ++j)
+                            object.enumType[j] = $root.google.protobuf.EnumDescriptorProto.toObject(message.enumType[j], options);
+                    }
+                    if (message.extensionRange && message.extensionRange.length) {
+                        object.extensionRange = [];
+                        for (var j = 0; j < message.extensionRange.length; ++j)
+                            object.extensionRange[j] = $root.google.protobuf.DescriptorProto.ExtensionRange.toObject(message.extensionRange[j], options);
+                    }
+                    if (message.extension && message.extension.length) {
+                        object.extension = [];
+                        for (var j = 0; j < message.extension.length; ++j)
+                            object.extension[j] = $root.google.protobuf.FieldDescriptorProto.toObject(message.extension[j], options);
+                    }
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.MessageOptions.toObject(message.options, options);
+                    if (message.oneofDecl && message.oneofDecl.length) {
+                        object.oneofDecl = [];
+                        for (var j = 0; j < message.oneofDecl.length; ++j)
+                            object.oneofDecl[j] = $root.google.protobuf.OneofDescriptorProto.toObject(message.oneofDecl[j], options);
+                    }
+                    if (message.reservedRange && message.reservedRange.length) {
+                        object.reservedRange = [];
+                        for (var j = 0; j < message.reservedRange.length; ++j)
+                            object.reservedRange[j] = $root.google.protobuf.DescriptorProto.ReservedRange.toObject(message.reservedRange[j], options);
+                    }
+                    if (message.reservedName && message.reservedName.length) {
+                        object.reservedName = [];
+                        for (var j = 0; j < message.reservedName.length; ++j)
+                            object.reservedName[j] = message.reservedName[j];
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this DescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.DescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                DescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 DescriptorProto.ExtensionRange = (function() {
     
                     /**
@@ -432,6 +923,60 @@
                      * @instance
                      */
                     ExtensionRange.prototype.end = 0;
+    
+                    /**
+                     * Creates an ExtensionRange message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.DescriptorProto.ExtensionRange} ExtensionRange
+                     */
+                    ExtensionRange.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.DescriptorProto.ExtensionRange)
+                            return object;
+                        var message = new $root.google.protobuf.DescriptorProto.ExtensionRange();
+                        if (object.start != null)
+                            message.start = object.start | 0;
+                        if (object.end != null)
+                            message.end = object.end | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ExtensionRange message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @static
+                     * @param {google.protobuf.DescriptorProto.ExtensionRange} message ExtensionRange
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ExtensionRange.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.start = 0;
+                            object.end = 0;
+                        }
+                        if (message.start != null && message.hasOwnProperty("start"))
+                            object.start = message.start;
+                        if (message.end != null && message.hasOwnProperty("end"))
+                            object.end = message.end;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ExtensionRange to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ExtensionRange.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return ExtensionRange;
                 })();
@@ -476,6 +1021,60 @@
                      * @instance
                      */
                     ReservedRange.prototype.end = 0;
+    
+                    /**
+                     * Creates a ReservedRange message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.DescriptorProto.ReservedRange
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.DescriptorProto.ReservedRange} ReservedRange
+                     */
+                    ReservedRange.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.DescriptorProto.ReservedRange)
+                            return object;
+                        var message = new $root.google.protobuf.DescriptorProto.ReservedRange();
+                        if (object.start != null)
+                            message.start = object.start | 0;
+                        if (object.end != null)
+                            message.end = object.end | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a ReservedRange message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.DescriptorProto.ReservedRange
+                     * @static
+                     * @param {google.protobuf.DescriptorProto.ReservedRange} message ReservedRange
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ReservedRange.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.start = 0;
+                            object.end = 0;
+                        }
+                        if (message.start != null && message.hasOwnProperty("start"))
+                            object.start = message.start;
+                        if (message.end != null && message.hasOwnProperty("end"))
+                            object.end = message.end;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ReservedRange to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.DescriptorProto.ReservedRange
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ReservedRange.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return ReservedRange;
                 })();
@@ -597,6 +1196,187 @@
                 FieldDescriptorProto.prototype.options = null;
     
                 /**
+                 * Creates a FieldDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FieldDescriptorProto} FieldDescriptorProto
+                 */
+                FieldDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FieldDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.FieldDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.number != null)
+                        message.number = object.number | 0;
+                    switch (object.label) {
+                    case "LABEL_OPTIONAL":
+                    case 1:
+                        message.label = 1;
+                        break;
+                    case "LABEL_REQUIRED":
+                    case 2:
+                        message.label = 2;
+                        break;
+                    case "LABEL_REPEATED":
+                    case 3:
+                        message.label = 3;
+                        break;
+                    }
+                    switch (object.type) {
+                    case "TYPE_DOUBLE":
+                    case 1:
+                        message.type = 1;
+                        break;
+                    case "TYPE_FLOAT":
+                    case 2:
+                        message.type = 2;
+                        break;
+                    case "TYPE_INT64":
+                    case 3:
+                        message.type = 3;
+                        break;
+                    case "TYPE_UINT64":
+                    case 4:
+                        message.type = 4;
+                        break;
+                    case "TYPE_INT32":
+                    case 5:
+                        message.type = 5;
+                        break;
+                    case "TYPE_FIXED64":
+                    case 6:
+                        message.type = 6;
+                        break;
+                    case "TYPE_FIXED32":
+                    case 7:
+                        message.type = 7;
+                        break;
+                    case "TYPE_BOOL":
+                    case 8:
+                        message.type = 8;
+                        break;
+                    case "TYPE_STRING":
+                    case 9:
+                        message.type = 9;
+                        break;
+                    case "TYPE_GROUP":
+                    case 10:
+                        message.type = 10;
+                        break;
+                    case "TYPE_MESSAGE":
+                    case 11:
+                        message.type = 11;
+                        break;
+                    case "TYPE_BYTES":
+                    case 12:
+                        message.type = 12;
+                        break;
+                    case "TYPE_UINT32":
+                    case 13:
+                        message.type = 13;
+                        break;
+                    case "TYPE_ENUM":
+                    case 14:
+                        message.type = 14;
+                        break;
+                    case "TYPE_SFIXED32":
+                    case 15:
+                        message.type = 15;
+                        break;
+                    case "TYPE_SFIXED64":
+                    case 16:
+                        message.type = 16;
+                        break;
+                    case "TYPE_SINT32":
+                    case 17:
+                        message.type = 17;
+                        break;
+                    case "TYPE_SINT64":
+                    case 18:
+                        message.type = 18;
+                        break;
+                    }
+                    if (object.typeName != null)
+                        message.typeName = String(object.typeName);
+                    if (object.extendee != null)
+                        message.extendee = String(object.extendee);
+                    if (object.defaultValue != null)
+                        message.defaultValue = String(object.defaultValue);
+                    if (object.oneofIndex != null)
+                        message.oneofIndex = object.oneofIndex | 0;
+                    if (object.jsonName != null)
+                        message.jsonName = String(object.jsonName);
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.FieldDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.FieldOptions.fromObject(object.options);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FieldDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @static
+                 * @param {google.protobuf.FieldDescriptorProto} message FieldDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FieldDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.extendee = "";
+                        object.number = 0;
+                        object.label = options.enums === String ? "LABEL_OPTIONAL" : 1;
+                        object.type = options.enums === String ? "TYPE_DOUBLE" : 1;
+                        object.typeName = "";
+                        object.defaultValue = "";
+                        object.options = null;
+                        object.oneofIndex = 0;
+                        object.jsonName = "";
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.extendee != null && message.hasOwnProperty("extendee"))
+                        object.extendee = message.extendee;
+                    if (message.number != null && message.hasOwnProperty("number"))
+                        object.number = message.number;
+                    if (message.label != null && message.hasOwnProperty("label"))
+                        object.label = options.enums === String ? $root.google.protobuf.FieldDescriptorProto.Label[message.label] : message.label;
+                    if (message.type != null && message.hasOwnProperty("type"))
+                        object.type = options.enums === String ? $root.google.protobuf.FieldDescriptorProto.Type[message.type] : message.type;
+                    if (message.typeName != null && message.hasOwnProperty("typeName"))
+                        object.typeName = message.typeName;
+                    if (message.defaultValue != null && message.hasOwnProperty("defaultValue"))
+                        object.defaultValue = message.defaultValue;
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.FieldOptions.toObject(message.options, options);
+                    if (message.oneofIndex != null && message.hasOwnProperty("oneofIndex"))
+                        object.oneofIndex = message.oneofIndex;
+                    if (message.jsonName != null && message.hasOwnProperty("jsonName"))
+                        object.jsonName = message.jsonName;
+                    return object;
+                };
+    
+                /**
+                 * Converts this FieldDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FieldDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
                  * Type enum.
                  * @name google.protobuf.FieldDescriptorProto.Type
                  * @enum {number}
@@ -702,6 +1482,63 @@
                  */
                 OneofDescriptorProto.prototype.options = null;
     
+                /**
+                 * Creates an OneofDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.OneofDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.OneofDescriptorProto} OneofDescriptorProto
+                 */
+                OneofDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.OneofDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.OneofDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.OneofDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.OneofOptions.fromObject(object.options);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an OneofDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.OneofDescriptorProto
+                 * @static
+                 * @param {google.protobuf.OneofDescriptorProto} message OneofDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                OneofDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.OneofOptions.toObject(message.options, options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this OneofDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.OneofDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                OneofDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return OneofDescriptorProto;
             })();
     
@@ -756,6 +1593,80 @@
                  */
                 EnumDescriptorProto.prototype.options = null;
     
+                /**
+                 * Creates an EnumDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.EnumDescriptorProto} EnumDescriptorProto
+                 */
+                EnumDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.EnumDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.EnumDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.value) {
+                        if (!Array.isArray(object.value))
+                            throw TypeError(".google.protobuf.EnumDescriptorProto.value: array expected");
+                        message.value = [];
+                        for (var i = 0; i < object.value.length; ++i) {
+                            if (typeof object.value[i] !== "object")
+                                throw TypeError(".google.protobuf.EnumDescriptorProto.value: object expected");
+                            message.value[i] = $root.google.protobuf.EnumValueDescriptorProto.fromObject(object.value[i]);
+                        }
+                    }
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.EnumDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.EnumOptions.fromObject(object.options);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an EnumDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @static
+                 * @param {google.protobuf.EnumDescriptorProto} message EnumDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                EnumDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.value = [];
+                    if (options.defaults) {
+                        object.name = "";
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.value && message.value.length) {
+                        object.value = [];
+                        for (var j = 0; j < message.value.length; ++j)
+                            object.value[j] = $root.google.protobuf.EnumValueDescriptorProto.toObject(message.value[j], options);
+                    }
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.EnumOptions.toObject(message.options, options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this EnumDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                EnumDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return EnumDescriptorProto;
             })();
     
@@ -808,6 +1719,68 @@
                  * @instance
                  */
                 EnumValueDescriptorProto.prototype.options = null;
+    
+                /**
+                 * Creates an EnumValueDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.EnumValueDescriptorProto} EnumValueDescriptorProto
+                 */
+                EnumValueDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.EnumValueDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.EnumValueDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.number != null)
+                        message.number = object.number | 0;
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.EnumValueDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.EnumValueOptions.fromObject(object.options);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an EnumValueDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @static
+                 * @param {google.protobuf.EnumValueDescriptorProto} message EnumValueDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                EnumValueDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.number = 0;
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.number != null && message.hasOwnProperty("number"))
+                        object.number = message.number;
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.EnumValueOptions.toObject(message.options, options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this EnumValueDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.EnumValueDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                EnumValueDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return EnumValueDescriptorProto;
             })();
@@ -862,6 +1835,80 @@
                  * @instance
                  */
                 ServiceDescriptorProto.prototype.options = null;
+    
+                /**
+                 * Creates a ServiceDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.ServiceDescriptorProto} ServiceDescriptorProto
+                 */
+                ServiceDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.ServiceDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.ServiceDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.method) {
+                        if (!Array.isArray(object.method))
+                            throw TypeError(".google.protobuf.ServiceDescriptorProto.method: array expected");
+                        message.method = [];
+                        for (var i = 0; i < object.method.length; ++i) {
+                            if (typeof object.method[i] !== "object")
+                                throw TypeError(".google.protobuf.ServiceDescriptorProto.method: object expected");
+                            message.method[i] = $root.google.protobuf.MethodDescriptorProto.fromObject(object.method[i]);
+                        }
+                    }
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.ServiceDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.ServiceOptions.fromObject(object.options);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ServiceDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @static
+                 * @param {google.protobuf.ServiceDescriptorProto} message ServiceDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ServiceDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.method = [];
+                    if (options.defaults) {
+                        object.name = "";
+                        object.options = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.method && message.method.length) {
+                        object.method = [];
+                        for (var j = 0; j < message.method.length; ++j)
+                            object.method[j] = $root.google.protobuf.MethodDescriptorProto.toObject(message.method[j], options);
+                    }
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.ServiceOptions.toObject(message.options, options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this ServiceDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.ServiceDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ServiceDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return ServiceDescriptorProto;
             })();
@@ -942,6 +1989,83 @@
                  * @instance
                  */
                 MethodDescriptorProto.prototype.serverStreaming = false;
+    
+                /**
+                 * Creates a MethodDescriptorProto message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.MethodDescriptorProto} MethodDescriptorProto
+                 */
+                MethodDescriptorProto.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.MethodDescriptorProto)
+                        return object;
+                    var message = new $root.google.protobuf.MethodDescriptorProto();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.inputType != null)
+                        message.inputType = String(object.inputType);
+                    if (object.outputType != null)
+                        message.outputType = String(object.outputType);
+                    if (object.options != null) {
+                        if (typeof object.options !== "object")
+                            throw TypeError(".google.protobuf.MethodDescriptorProto.options: object expected");
+                        message.options = $root.google.protobuf.MethodOptions.fromObject(object.options);
+                    }
+                    if (object.clientStreaming != null)
+                        message.clientStreaming = Boolean(object.clientStreaming);
+                    if (object.serverStreaming != null)
+                        message.serverStreaming = Boolean(object.serverStreaming);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a MethodDescriptorProto message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @static
+                 * @param {google.protobuf.MethodDescriptorProto} message MethodDescriptorProto
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                MethodDescriptorProto.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.inputType = "";
+                        object.outputType = "";
+                        object.options = null;
+                        object.clientStreaming = false;
+                        object.serverStreaming = false;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.inputType != null && message.hasOwnProperty("inputType"))
+                        object.inputType = message.inputType;
+                    if (message.outputType != null && message.hasOwnProperty("outputType"))
+                        object.outputType = message.outputType;
+                    if (message.options != null && message.hasOwnProperty("options"))
+                        object.options = $root.google.protobuf.MethodOptions.toObject(message.options, options);
+                    if (message.clientStreaming != null && message.hasOwnProperty("clientStreaming"))
+                        object.clientStreaming = message.clientStreaming;
+                    if (message.serverStreaming != null && message.hasOwnProperty("serverStreaming"))
+                        object.serverStreaming = message.serverStreaming;
+                    return object;
+                };
+    
+                /**
+                 * Converts this MethodDescriptorProto to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.MethodDescriptorProto
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                MethodDescriptorProto.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return MethodDescriptorProto;
             })();
@@ -1116,6 +2240,166 @@
                 FileOptions.prototype[".google.api.resourceDefinition"] = $util.emptyArray;
     
                 /**
+                 * Creates a FileOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FileOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FileOptions} FileOptions
+                 */
+                FileOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FileOptions)
+                        return object;
+                    var message = new $root.google.protobuf.FileOptions();
+                    if (object.javaPackage != null)
+                        message.javaPackage = String(object.javaPackage);
+                    if (object.javaOuterClassname != null)
+                        message.javaOuterClassname = String(object.javaOuterClassname);
+                    if (object.javaMultipleFiles != null)
+                        message.javaMultipleFiles = Boolean(object.javaMultipleFiles);
+                    if (object.javaGenerateEqualsAndHash != null)
+                        message.javaGenerateEqualsAndHash = Boolean(object.javaGenerateEqualsAndHash);
+                    if (object.javaStringCheckUtf8 != null)
+                        message.javaStringCheckUtf8 = Boolean(object.javaStringCheckUtf8);
+                    switch (object.optimizeFor) {
+                    case "SPEED":
+                    case 1:
+                        message.optimizeFor = 1;
+                        break;
+                    case "CODE_SIZE":
+                    case 2:
+                        message.optimizeFor = 2;
+                        break;
+                    case "LITE_RUNTIME":
+                    case 3:
+                        message.optimizeFor = 3;
+                        break;
+                    }
+                    if (object.goPackage != null)
+                        message.goPackage = String(object.goPackage);
+                    if (object.ccGenericServices != null)
+                        message.ccGenericServices = Boolean(object.ccGenericServices);
+                    if (object.javaGenericServices != null)
+                        message.javaGenericServices = Boolean(object.javaGenericServices);
+                    if (object.pyGenericServices != null)
+                        message.pyGenericServices = Boolean(object.pyGenericServices);
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.ccEnableArenas != null)
+                        message.ccEnableArenas = Boolean(object.ccEnableArenas);
+                    if (object.objcClassPrefix != null)
+                        message.objcClassPrefix = String(object.objcClassPrefix);
+                    if (object.csharpNamespace != null)
+                        message.csharpNamespace = String(object.csharpNamespace);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.FileOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.FileOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.resourceDefinition"]) {
+                        if (!Array.isArray(object[".google.api.resourceDefinition"]))
+                            throw TypeError(".google.protobuf.FileOptions..google.api.resourceDefinition: array expected");
+                        message[".google.api.resourceDefinition"] = [];
+                        for (var i = 0; i < object[".google.api.resourceDefinition"].length; ++i) {
+                            if (typeof object[".google.api.resourceDefinition"][i] !== "object")
+                                throw TypeError(".google.protobuf.FileOptions..google.api.resourceDefinition: object expected");
+                            message[".google.api.resourceDefinition"][i] = $root.google.api.ResourceDescriptor.fromObject(object[".google.api.resourceDefinition"][i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FileOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FileOptions
+                 * @static
+                 * @param {google.protobuf.FileOptions} message FileOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FileOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.uninterpretedOption = [];
+                        object[".google.api.resourceDefinition"] = [];
+                    }
+                    if (options.defaults) {
+                        object.javaPackage = "";
+                        object.javaOuterClassname = "";
+                        object.optimizeFor = options.enums === String ? "SPEED" : 1;
+                        object.javaMultipleFiles = false;
+                        object.goPackage = "";
+                        object.ccGenericServices = false;
+                        object.javaGenericServices = false;
+                        object.pyGenericServices = false;
+                        object.javaGenerateEqualsAndHash = false;
+                        object.deprecated = false;
+                        object.javaStringCheckUtf8 = false;
+                        object.ccEnableArenas = false;
+                        object.objcClassPrefix = "";
+                        object.csharpNamespace = "";
+                    }
+                    if (message.javaPackage != null && message.hasOwnProperty("javaPackage"))
+                        object.javaPackage = message.javaPackage;
+                    if (message.javaOuterClassname != null && message.hasOwnProperty("javaOuterClassname"))
+                        object.javaOuterClassname = message.javaOuterClassname;
+                    if (message.optimizeFor != null && message.hasOwnProperty("optimizeFor"))
+                        object.optimizeFor = options.enums === String ? $root.google.protobuf.FileOptions.OptimizeMode[message.optimizeFor] : message.optimizeFor;
+                    if (message.javaMultipleFiles != null && message.hasOwnProperty("javaMultipleFiles"))
+                        object.javaMultipleFiles = message.javaMultipleFiles;
+                    if (message.goPackage != null && message.hasOwnProperty("goPackage"))
+                        object.goPackage = message.goPackage;
+                    if (message.ccGenericServices != null && message.hasOwnProperty("ccGenericServices"))
+                        object.ccGenericServices = message.ccGenericServices;
+                    if (message.javaGenericServices != null && message.hasOwnProperty("javaGenericServices"))
+                        object.javaGenericServices = message.javaGenericServices;
+                    if (message.pyGenericServices != null && message.hasOwnProperty("pyGenericServices"))
+                        object.pyGenericServices = message.pyGenericServices;
+                    if (message.javaGenerateEqualsAndHash != null && message.hasOwnProperty("javaGenerateEqualsAndHash"))
+                        object.javaGenerateEqualsAndHash = message.javaGenerateEqualsAndHash;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.javaStringCheckUtf8 != null && message.hasOwnProperty("javaStringCheckUtf8"))
+                        object.javaStringCheckUtf8 = message.javaStringCheckUtf8;
+                    if (message.ccEnableArenas != null && message.hasOwnProperty("ccEnableArenas"))
+                        object.ccEnableArenas = message.ccEnableArenas;
+                    if (message.objcClassPrefix != null && message.hasOwnProperty("objcClassPrefix"))
+                        object.objcClassPrefix = message.objcClassPrefix;
+                    if (message.csharpNamespace != null && message.hasOwnProperty("csharpNamespace"))
+                        object.csharpNamespace = message.csharpNamespace;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.api.resourceDefinition"] && message[".google.api.resourceDefinition"].length) {
+                        object[".google.api.resourceDefinition"] = [];
+                        for (var j = 0; j < message[".google.api.resourceDefinition"].length; ++j)
+                            object[".google.api.resourceDefinition"][j] = $root.google.api.ResourceDescriptor.toObject(message[".google.api.resourceDefinition"][j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this FileOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FileOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
                  * OptimizeMode enum.
                  * @name google.protobuf.FileOptions.OptimizeMode
                  * @enum {number}
@@ -1211,6 +2495,95 @@
                  * @instance
                  */
                 MessageOptions.prototype[".google.api.resource"] = null;
+    
+                /**
+                 * Creates a MessageOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.MessageOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.MessageOptions} MessageOptions
+                 */
+                MessageOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.MessageOptions)
+                        return object;
+                    var message = new $root.google.protobuf.MessageOptions();
+                    if (object.messageSetWireFormat != null)
+                        message.messageSetWireFormat = Boolean(object.messageSetWireFormat);
+                    if (object.noStandardDescriptorAccessor != null)
+                        message.noStandardDescriptorAccessor = Boolean(object.noStandardDescriptorAccessor);
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.mapEntry != null)
+                        message.mapEntry = Boolean(object.mapEntry);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.MessageOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.MessageOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.resource"] != null) {
+                        if (typeof object[".google.api.resource"] !== "object")
+                            throw TypeError(".google.protobuf.MessageOptions..google.api.resource: object expected");
+                        message[".google.api.resource"] = $root.google.api.ResourceDescriptor.fromObject(object[".google.api.resource"]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a MessageOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.MessageOptions
+                 * @static
+                 * @param {google.protobuf.MessageOptions} message MessageOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                MessageOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (options.defaults) {
+                        object.messageSetWireFormat = false;
+                        object.noStandardDescriptorAccessor = false;
+                        object.deprecated = false;
+                        object.mapEntry = false;
+                        object[".google.api.resource"] = null;
+                    }
+                    if (message.messageSetWireFormat != null && message.hasOwnProperty("messageSetWireFormat"))
+                        object.messageSetWireFormat = message.messageSetWireFormat;
+                    if (message.noStandardDescriptorAccessor != null && message.hasOwnProperty("noStandardDescriptorAccessor"))
+                        object.noStandardDescriptorAccessor = message.noStandardDescriptorAccessor;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.mapEntry != null && message.hasOwnProperty("mapEntry"))
+                        object.mapEntry = message.mapEntry;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.api.resource"] != null && message.hasOwnProperty(".google.api.resource"))
+                        object[".google.api.resource"] = $root.google.api.ResourceDescriptor.toObject(message[".google.api.resource"], options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this MessageOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                MessageOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return MessageOptions;
             })();
@@ -1322,6 +2695,169 @@
                 FieldOptions.prototype[".google.api.resourceReference"] = null;
     
                 /**
+                 * Creates a FieldOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FieldOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FieldOptions} FieldOptions
+                 */
+                FieldOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FieldOptions)
+                        return object;
+                    var message = new $root.google.protobuf.FieldOptions();
+                    switch (object.ctype) {
+                    case "STRING":
+                    case 0:
+                        message.ctype = 0;
+                        break;
+                    case "CORD":
+                    case 1:
+                        message.ctype = 1;
+                        break;
+                    case "STRING_PIECE":
+                    case 2:
+                        message.ctype = 2;
+                        break;
+                    }
+                    if (object.packed != null)
+                        message.packed = Boolean(object.packed);
+                    switch (object.jstype) {
+                    case "JS_NORMAL":
+                    case 0:
+                        message.jstype = 0;
+                        break;
+                    case "JS_STRING":
+                    case 1:
+                        message.jstype = 1;
+                        break;
+                    case "JS_NUMBER":
+                    case 2:
+                        message.jstype = 2;
+                        break;
+                    }
+                    if (object.lazy != null)
+                        message.lazy = Boolean(object.lazy);
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.weak != null)
+                        message.weak = Boolean(object.weak);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.FieldOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.FieldOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.fieldBehavior"]) {
+                        if (!Array.isArray(object[".google.api.fieldBehavior"]))
+                            throw TypeError(".google.protobuf.FieldOptions..google.api.fieldBehavior: array expected");
+                        message[".google.api.fieldBehavior"] = [];
+                        for (var i = 0; i < object[".google.api.fieldBehavior"].length; ++i)
+                            switch (object[".google.api.fieldBehavior"][i]) {
+                            default:
+                            case "FIELD_BEHAVIOR_UNSPECIFIED":
+                            case 0:
+                                message[".google.api.fieldBehavior"][i] = 0;
+                                break;
+                            case "OPTIONAL":
+                            case 1:
+                                message[".google.api.fieldBehavior"][i] = 1;
+                                break;
+                            case "REQUIRED":
+                            case 2:
+                                message[".google.api.fieldBehavior"][i] = 2;
+                                break;
+                            case "OUTPUT_ONLY":
+                            case 3:
+                                message[".google.api.fieldBehavior"][i] = 3;
+                                break;
+                            case "INPUT_ONLY":
+                            case 4:
+                                message[".google.api.fieldBehavior"][i] = 4;
+                                break;
+                            case "IMMUTABLE":
+                            case 5:
+                                message[".google.api.fieldBehavior"][i] = 5;
+                                break;
+                            }
+                    }
+                    if (object[".google.api.resourceReference"] != null) {
+                        if (typeof object[".google.api.resourceReference"] !== "object")
+                            throw TypeError(".google.protobuf.FieldOptions..google.api.resourceReference: object expected");
+                        message[".google.api.resourceReference"] = $root.google.api.ResourceReference.fromObject(object[".google.api.resourceReference"]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FieldOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FieldOptions
+                 * @static
+                 * @param {google.protobuf.FieldOptions} message FieldOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FieldOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.uninterpretedOption = [];
+                        object[".google.api.fieldBehavior"] = [];
+                    }
+                    if (options.defaults) {
+                        object.ctype = options.enums === String ? "STRING" : 0;
+                        object.packed = false;
+                        object.deprecated = false;
+                        object.lazy = false;
+                        object.jstype = options.enums === String ? "JS_NORMAL" : 0;
+                        object.weak = false;
+                        object[".google.api.resourceReference"] = null;
+                    }
+                    if (message.ctype != null && message.hasOwnProperty("ctype"))
+                        object.ctype = options.enums === String ? $root.google.protobuf.FieldOptions.CType[message.ctype] : message.ctype;
+                    if (message.packed != null && message.hasOwnProperty("packed"))
+                        object.packed = message.packed;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.lazy != null && message.hasOwnProperty("lazy"))
+                        object.lazy = message.lazy;
+                    if (message.jstype != null && message.hasOwnProperty("jstype"))
+                        object.jstype = options.enums === String ? $root.google.protobuf.FieldOptions.JSType[message.jstype] : message.jstype;
+                    if (message.weak != null && message.hasOwnProperty("weak"))
+                        object.weak = message.weak;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.api.fieldBehavior"] && message[".google.api.fieldBehavior"].length) {
+                        object[".google.api.fieldBehavior"] = [];
+                        for (var j = 0; j < message[".google.api.fieldBehavior"].length; ++j)
+                            object[".google.api.fieldBehavior"][j] = options.enums === String ? $root.google.api.FieldBehavior[message[".google.api.fieldBehavior"][j]] : message[".google.api.fieldBehavior"][j];
+                    }
+                    if (message[".google.api.resourceReference"] != null && message.hasOwnProperty(".google.api.resourceReference"))
+                        object[".google.api.resourceReference"] = $root.google.api.ResourceReference.toObject(message[".google.api.resourceReference"], options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this FieldOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FieldOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
                  * CType enum.
                  * @name google.protobuf.FieldOptions.CType
                  * @enum {number}
@@ -1389,6 +2925,65 @@
                  */
                 OneofOptions.prototype.uninterpretedOption = $util.emptyArray;
     
+                /**
+                 * Creates an OneofOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.OneofOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.OneofOptions} OneofOptions
+                 */
+                OneofOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.OneofOptions)
+                        return object;
+                    var message = new $root.google.protobuf.OneofOptions();
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.OneofOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.OneofOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an OneofOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.OneofOptions
+                 * @static
+                 * @param {google.protobuf.OneofOptions} message OneofOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                OneofOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this OneofOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.OneofOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                OneofOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return OneofOptions;
             })();
     
@@ -1443,6 +3038,77 @@
                  */
                 EnumOptions.prototype.uninterpretedOption = $util.emptyArray;
     
+                /**
+                 * Creates an EnumOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.EnumOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.EnumOptions} EnumOptions
+                 */
+                EnumOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.EnumOptions)
+                        return object;
+                    var message = new $root.google.protobuf.EnumOptions();
+                    if (object.allowAlias != null)
+                        message.allowAlias = Boolean(object.allowAlias);
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.EnumOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.EnumOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an EnumOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.EnumOptions
+                 * @static
+                 * @param {google.protobuf.EnumOptions} message EnumOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                EnumOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (options.defaults) {
+                        object.allowAlias = false;
+                        object.deprecated = false;
+                    }
+                    if (message.allowAlias != null && message.hasOwnProperty("allowAlias"))
+                        object.allowAlias = message.allowAlias;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this EnumOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.EnumOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                EnumOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return EnumOptions;
             })();
     
@@ -1487,6 +3153,71 @@
                  * @instance
                  */
                 EnumValueOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * Creates an EnumValueOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.EnumValueOptions} EnumValueOptions
+                 */
+                EnumValueOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.EnumValueOptions)
+                        return object;
+                    var message = new $root.google.protobuf.EnumValueOptions();
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.EnumValueOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.EnumValueOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an EnumValueOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @static
+                 * @param {google.protobuf.EnumValueOptions} message EnumValueOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                EnumValueOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (options.defaults)
+                        object.deprecated = false;
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this EnumValueOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                EnumValueOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return EnumValueOptions;
             })();
@@ -1550,6 +3281,82 @@
                  * @instance
                  */
                 ServiceOptions.prototype[".google.api.oauthScopes"] = "";
+    
+                /**
+                 * Creates a ServiceOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.ServiceOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.ServiceOptions} ServiceOptions
+                 */
+                ServiceOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.ServiceOptions)
+                        return object;
+                    var message = new $root.google.protobuf.ServiceOptions();
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.ServiceOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.ServiceOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.defaultHost"] != null)
+                        message[".google.api.defaultHost"] = String(object[".google.api.defaultHost"]);
+                    if (object[".google.api.oauthScopes"] != null)
+                        message[".google.api.oauthScopes"] = String(object[".google.api.oauthScopes"]);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ServiceOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.ServiceOptions
+                 * @static
+                 * @param {google.protobuf.ServiceOptions} message ServiceOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ServiceOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.uninterpretedOption = [];
+                    if (options.defaults) {
+                        object.deprecated = false;
+                        object[".google.api.defaultHost"] = "";
+                        object[".google.api.oauthScopes"] = "";
+                    }
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.api.defaultHost"] != null && message.hasOwnProperty(".google.api.defaultHost"))
+                        object[".google.api.defaultHost"] = message[".google.api.defaultHost"];
+                    if (message[".google.api.oauthScopes"] != null && message.hasOwnProperty(".google.api.oauthScopes"))
+                        object[".google.api.oauthScopes"] = message[".google.api.oauthScopes"];
+                    return object;
+                };
+    
+                /**
+                 * Converts this ServiceOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.ServiceOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ServiceOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return ServiceOptions;
             })();
@@ -1623,6 +3430,102 @@
                  * @instance
                  */
                 MethodOptions.prototype[".google.longrunning.operationInfo"] = null;
+    
+                /**
+                 * Creates a MethodOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.MethodOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.MethodOptions} MethodOptions
+                 */
+                MethodOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.MethodOptions)
+                        return object;
+                    var message = new $root.google.protobuf.MethodOptions();
+                    if (object.deprecated != null)
+                        message.deprecated = Boolean(object.deprecated);
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.MethodOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.MethodOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object[".google.api.http"] != null) {
+                        if (typeof object[".google.api.http"] !== "object")
+                            throw TypeError(".google.protobuf.MethodOptions..google.api.http: object expected");
+                        message[".google.api.http"] = $root.google.api.HttpRule.fromObject(object[".google.api.http"]);
+                    }
+                    if (object[".google.api.methodSignature"]) {
+                        if (!Array.isArray(object[".google.api.methodSignature"]))
+                            throw TypeError(".google.protobuf.MethodOptions..google.api.methodSignature: array expected");
+                        message[".google.api.methodSignature"] = [];
+                        for (var i = 0; i < object[".google.api.methodSignature"].length; ++i)
+                            message[".google.api.methodSignature"][i] = String(object[".google.api.methodSignature"][i]);
+                    }
+                    if (object[".google.longrunning.operationInfo"] != null) {
+                        if (typeof object[".google.longrunning.operationInfo"] !== "object")
+                            throw TypeError(".google.protobuf.MethodOptions..google.longrunning.operationInfo: object expected");
+                        message[".google.longrunning.operationInfo"] = $root.google.longrunning.OperationInfo.fromObject(object[".google.longrunning.operationInfo"]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a MethodOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.MethodOptions
+                 * @static
+                 * @param {google.protobuf.MethodOptions} message MethodOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                MethodOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.uninterpretedOption = [];
+                        object[".google.api.methodSignature"] = [];
+                    }
+                    if (options.defaults) {
+                        object.deprecated = false;
+                        object[".google.longrunning.operationInfo"] = null;
+                        object[".google.api.http"] = null;
+                    }
+                    if (message.deprecated != null && message.hasOwnProperty("deprecated"))
+                        object.deprecated = message.deprecated;
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    if (message[".google.longrunning.operationInfo"] != null && message.hasOwnProperty(".google.longrunning.operationInfo"))
+                        object[".google.longrunning.operationInfo"] = $root.google.longrunning.OperationInfo.toObject(message[".google.longrunning.operationInfo"], options);
+                    if (message[".google.api.methodSignature"] && message[".google.api.methodSignature"].length) {
+                        object[".google.api.methodSignature"] = [];
+                        for (var j = 0; j < message[".google.api.methodSignature"].length; ++j)
+                            object[".google.api.methodSignature"][j] = message[".google.api.methodSignature"][j];
+                    }
+                    if (message[".google.api.http"] != null && message.hasOwnProperty(".google.api.http"))
+                        object[".google.api.http"] = $root.google.api.HttpRule.toObject(message[".google.api.http"], options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this MethodOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                MethodOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return MethodOptions;
             })();
@@ -1714,6 +3617,134 @@
                  */
                 UninterpretedOption.prototype.aggregateValue = "";
     
+                /**
+                 * Creates an UninterpretedOption message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.UninterpretedOption} UninterpretedOption
+                 */
+                UninterpretedOption.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.UninterpretedOption)
+                        return object;
+                    var message = new $root.google.protobuf.UninterpretedOption();
+                    if (object.name) {
+                        if (!Array.isArray(object.name))
+                            throw TypeError(".google.protobuf.UninterpretedOption.name: array expected");
+                        message.name = [];
+                        for (var i = 0; i < object.name.length; ++i) {
+                            if (typeof object.name[i] !== "object")
+                                throw TypeError(".google.protobuf.UninterpretedOption.name: object expected");
+                            message.name[i] = $root.google.protobuf.UninterpretedOption.NamePart.fromObject(object.name[i]);
+                        }
+                    }
+                    if (object.identifierValue != null)
+                        message.identifierValue = String(object.identifierValue);
+                    if (object.positiveIntValue != null)
+                        if ($util.Long)
+                            (message.positiveIntValue = $util.Long.fromValue(object.positiveIntValue)).unsigned = true;
+                        else if (typeof object.positiveIntValue === "string")
+                            message.positiveIntValue = parseInt(object.positiveIntValue, 10);
+                        else if (typeof object.positiveIntValue === "number")
+                            message.positiveIntValue = object.positiveIntValue;
+                        else if (typeof object.positiveIntValue === "object")
+                            message.positiveIntValue = new $util.LongBits(object.positiveIntValue.low >>> 0, object.positiveIntValue.high >>> 0).toNumber(true);
+                    if (object.negativeIntValue != null)
+                        if ($util.Long)
+                            (message.negativeIntValue = $util.Long.fromValue(object.negativeIntValue)).unsigned = false;
+                        else if (typeof object.negativeIntValue === "string")
+                            message.negativeIntValue = parseInt(object.negativeIntValue, 10);
+                        else if (typeof object.negativeIntValue === "number")
+                            message.negativeIntValue = object.negativeIntValue;
+                        else if (typeof object.negativeIntValue === "object")
+                            message.negativeIntValue = new $util.LongBits(object.negativeIntValue.low >>> 0, object.negativeIntValue.high >>> 0).toNumber();
+                    if (object.doubleValue != null)
+                        message.doubleValue = Number(object.doubleValue);
+                    if (object.stringValue != null)
+                        if (typeof object.stringValue === "string")
+                            $util.base64.decode(object.stringValue, message.stringValue = $util.newBuffer($util.base64.length(object.stringValue)), 0);
+                        else if (object.stringValue.length)
+                            message.stringValue = object.stringValue;
+                    if (object.aggregateValue != null)
+                        message.aggregateValue = String(object.aggregateValue);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an UninterpretedOption message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @static
+                 * @param {google.protobuf.UninterpretedOption} message UninterpretedOption
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                UninterpretedOption.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.name = [];
+                    if (options.defaults) {
+                        object.identifierValue = "";
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, true);
+                            object.positiveIntValue = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.positiveIntValue = options.longs === String ? "0" : 0;
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.negativeIntValue = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.negativeIntValue = options.longs === String ? "0" : 0;
+                        object.doubleValue = 0;
+                        if (options.bytes === String)
+                            object.stringValue = "";
+                        else {
+                            object.stringValue = [];
+                            if (options.bytes !== Array)
+                                object.stringValue = $util.newBuffer(object.stringValue);
+                        }
+                        object.aggregateValue = "";
+                    }
+                    if (message.name && message.name.length) {
+                        object.name = [];
+                        for (var j = 0; j < message.name.length; ++j)
+                            object.name[j] = $root.google.protobuf.UninterpretedOption.NamePart.toObject(message.name[j], options);
+                    }
+                    if (message.identifierValue != null && message.hasOwnProperty("identifierValue"))
+                        object.identifierValue = message.identifierValue;
+                    if (message.positiveIntValue != null && message.hasOwnProperty("positiveIntValue"))
+                        if (typeof message.positiveIntValue === "number")
+                            object.positiveIntValue = options.longs === String ? String(message.positiveIntValue) : message.positiveIntValue;
+                        else
+                            object.positiveIntValue = options.longs === String ? $util.Long.prototype.toString.call(message.positiveIntValue) : options.longs === Number ? new $util.LongBits(message.positiveIntValue.low >>> 0, message.positiveIntValue.high >>> 0).toNumber(true) : message.positiveIntValue;
+                    if (message.negativeIntValue != null && message.hasOwnProperty("negativeIntValue"))
+                        if (typeof message.negativeIntValue === "number")
+                            object.negativeIntValue = options.longs === String ? String(message.negativeIntValue) : message.negativeIntValue;
+                        else
+                            object.negativeIntValue = options.longs === String ? $util.Long.prototype.toString.call(message.negativeIntValue) : options.longs === Number ? new $util.LongBits(message.negativeIntValue.low >>> 0, message.negativeIntValue.high >>> 0).toNumber() : message.negativeIntValue;
+                    if (message.doubleValue != null && message.hasOwnProperty("doubleValue"))
+                        object.doubleValue = options.json && !isFinite(message.doubleValue) ? String(message.doubleValue) : message.doubleValue;
+                    if (message.stringValue != null && message.hasOwnProperty("stringValue"))
+                        object.stringValue = options.bytes === String ? $util.base64.encode(message.stringValue, 0, message.stringValue.length) : options.bytes === Array ? Array.prototype.slice.call(message.stringValue) : message.stringValue;
+                    if (message.aggregateValue != null && message.hasOwnProperty("aggregateValue"))
+                        object.aggregateValue = message.aggregateValue;
+                    return object;
+                };
+    
+                /**
+                 * Converts this UninterpretedOption to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.UninterpretedOption
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                UninterpretedOption.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 UninterpretedOption.NamePart = (function() {
     
                     /**
@@ -1755,6 +3786,60 @@
                      */
                     NamePart.prototype.isExtension = false;
     
+                    /**
+                     * Creates a NamePart message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.UninterpretedOption.NamePart
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.UninterpretedOption.NamePart} NamePart
+                     */
+                    NamePart.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.UninterpretedOption.NamePart)
+                            return object;
+                        var message = new $root.google.protobuf.UninterpretedOption.NamePart();
+                        if (object.namePart != null)
+                            message.namePart = String(object.namePart);
+                        if (object.isExtension != null)
+                            message.isExtension = Boolean(object.isExtension);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a NamePart message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.UninterpretedOption.NamePart
+                     * @static
+                     * @param {google.protobuf.UninterpretedOption.NamePart} message NamePart
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    NamePart.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.namePart = "";
+                            object.isExtension = false;
+                        }
+                        if (message.namePart != null && message.hasOwnProperty("namePart"))
+                            object.namePart = message.namePart;
+                        if (message.isExtension != null && message.hasOwnProperty("isExtension"))
+                            object.isExtension = message.isExtension;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this NamePart to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.UninterpretedOption.NamePart
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    NamePart.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return NamePart;
                 })();
     
@@ -1793,6 +3878,65 @@
                  * @instance
                  */
                 SourceCodeInfo.prototype.location = $util.emptyArray;
+    
+                /**
+                 * Creates a SourceCodeInfo message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.SourceCodeInfo
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.SourceCodeInfo} SourceCodeInfo
+                 */
+                SourceCodeInfo.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.SourceCodeInfo)
+                        return object;
+                    var message = new $root.google.protobuf.SourceCodeInfo();
+                    if (object.location) {
+                        if (!Array.isArray(object.location))
+                            throw TypeError(".google.protobuf.SourceCodeInfo.location: array expected");
+                        message.location = [];
+                        for (var i = 0; i < object.location.length; ++i) {
+                            if (typeof object.location[i] !== "object")
+                                throw TypeError(".google.protobuf.SourceCodeInfo.location: object expected");
+                            message.location[i] = $root.google.protobuf.SourceCodeInfo.Location.fromObject(object.location[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a SourceCodeInfo message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.SourceCodeInfo
+                 * @static
+                 * @param {google.protobuf.SourceCodeInfo} message SourceCodeInfo
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                SourceCodeInfo.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.location = [];
+                    if (message.location && message.location.length) {
+                        object.location = [];
+                        for (var j = 0; j < message.location.length; ++j)
+                            object.location[j] = $root.google.protobuf.SourceCodeInfo.Location.toObject(message.location[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this SourceCodeInfo to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.SourceCodeInfo
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                SourceCodeInfo.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 SourceCodeInfo.Location = (function() {
     
@@ -1865,6 +4009,101 @@
                      */
                     Location.prototype.leadingDetachedComments = $util.emptyArray;
     
+                    /**
+                     * Creates a Location message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.SourceCodeInfo.Location} Location
+                     */
+                    Location.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.SourceCodeInfo.Location)
+                            return object;
+                        var message = new $root.google.protobuf.SourceCodeInfo.Location();
+                        if (object.path) {
+                            if (!Array.isArray(object.path))
+                                throw TypeError(".google.protobuf.SourceCodeInfo.Location.path: array expected");
+                            message.path = [];
+                            for (var i = 0; i < object.path.length; ++i)
+                                message.path[i] = object.path[i] | 0;
+                        }
+                        if (object.span) {
+                            if (!Array.isArray(object.span))
+                                throw TypeError(".google.protobuf.SourceCodeInfo.Location.span: array expected");
+                            message.span = [];
+                            for (var i = 0; i < object.span.length; ++i)
+                                message.span[i] = object.span[i] | 0;
+                        }
+                        if (object.leadingComments != null)
+                            message.leadingComments = String(object.leadingComments);
+                        if (object.trailingComments != null)
+                            message.trailingComments = String(object.trailingComments);
+                        if (object.leadingDetachedComments) {
+                            if (!Array.isArray(object.leadingDetachedComments))
+                                throw TypeError(".google.protobuf.SourceCodeInfo.Location.leadingDetachedComments: array expected");
+                            message.leadingDetachedComments = [];
+                            for (var i = 0; i < object.leadingDetachedComments.length; ++i)
+                                message.leadingDetachedComments[i] = String(object.leadingDetachedComments[i]);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Location message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @static
+                     * @param {google.protobuf.SourceCodeInfo.Location} message Location
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Location.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults) {
+                            object.path = [];
+                            object.span = [];
+                            object.leadingDetachedComments = [];
+                        }
+                        if (options.defaults) {
+                            object.leadingComments = "";
+                            object.trailingComments = "";
+                        }
+                        if (message.path && message.path.length) {
+                            object.path = [];
+                            for (var j = 0; j < message.path.length; ++j)
+                                object.path[j] = message.path[j];
+                        }
+                        if (message.span && message.span.length) {
+                            object.span = [];
+                            for (var j = 0; j < message.span.length; ++j)
+                                object.span[j] = message.span[j];
+                        }
+                        if (message.leadingComments != null && message.hasOwnProperty("leadingComments"))
+                            object.leadingComments = message.leadingComments;
+                        if (message.trailingComments != null && message.hasOwnProperty("trailingComments"))
+                            object.trailingComments = message.trailingComments;
+                        if (message.leadingDetachedComments && message.leadingDetachedComments.length) {
+                            object.leadingDetachedComments = [];
+                            for (var j = 0; j < message.leadingDetachedComments.length; ++j)
+                                object.leadingDetachedComments[j] = message.leadingDetachedComments[j];
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Location to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.SourceCodeInfo.Location
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Location.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return Location;
                 })();
     
@@ -1903,6 +4142,65 @@
                  * @instance
                  */
                 GeneratedCodeInfo.prototype.annotation = $util.emptyArray;
+    
+                /**
+                 * Creates a GeneratedCodeInfo message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.GeneratedCodeInfo
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.GeneratedCodeInfo} GeneratedCodeInfo
+                 */
+                GeneratedCodeInfo.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.GeneratedCodeInfo)
+                        return object;
+                    var message = new $root.google.protobuf.GeneratedCodeInfo();
+                    if (object.annotation) {
+                        if (!Array.isArray(object.annotation))
+                            throw TypeError(".google.protobuf.GeneratedCodeInfo.annotation: array expected");
+                        message.annotation = [];
+                        for (var i = 0; i < object.annotation.length; ++i) {
+                            if (typeof object.annotation[i] !== "object")
+                                throw TypeError(".google.protobuf.GeneratedCodeInfo.annotation: object expected");
+                            message.annotation[i] = $root.google.protobuf.GeneratedCodeInfo.Annotation.fromObject(object.annotation[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a GeneratedCodeInfo message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.GeneratedCodeInfo
+                 * @static
+                 * @param {google.protobuf.GeneratedCodeInfo} message GeneratedCodeInfo
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                GeneratedCodeInfo.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.annotation = [];
+                    if (message.annotation && message.annotation.length) {
+                        object.annotation = [];
+                        for (var j = 0; j < message.annotation.length; ++j)
+                            object.annotation[j] = $root.google.protobuf.GeneratedCodeInfo.Annotation.toObject(message.annotation[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this GeneratedCodeInfo to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.GeneratedCodeInfo
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                GeneratedCodeInfo.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 GeneratedCodeInfo.Annotation = (function() {
     
@@ -1964,6 +4262,79 @@
                      */
                     Annotation.prototype.end = 0;
     
+                    /**
+                     * Creates an Annotation message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.GeneratedCodeInfo.Annotation} Annotation
+                     */
+                    Annotation.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.GeneratedCodeInfo.Annotation)
+                            return object;
+                        var message = new $root.google.protobuf.GeneratedCodeInfo.Annotation();
+                        if (object.path) {
+                            if (!Array.isArray(object.path))
+                                throw TypeError(".google.protobuf.GeneratedCodeInfo.Annotation.path: array expected");
+                            message.path = [];
+                            for (var i = 0; i < object.path.length; ++i)
+                                message.path[i] = object.path[i] | 0;
+                        }
+                        if (object.sourceFile != null)
+                            message.sourceFile = String(object.sourceFile);
+                        if (object.begin != null)
+                            message.begin = object.begin | 0;
+                        if (object.end != null)
+                            message.end = object.end | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an Annotation message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @static
+                     * @param {google.protobuf.GeneratedCodeInfo.Annotation} message Annotation
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Annotation.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.path = [];
+                        if (options.defaults) {
+                            object.sourceFile = "";
+                            object.begin = 0;
+                            object.end = 0;
+                        }
+                        if (message.path && message.path.length) {
+                            object.path = [];
+                            for (var j = 0; j < message.path.length; ++j)
+                                object.path[j] = message.path[j];
+                        }
+                        if (message.sourceFile != null && message.hasOwnProperty("sourceFile"))
+                            object.sourceFile = message.sourceFile;
+                        if (message.begin != null && message.hasOwnProperty("begin"))
+                            object.begin = message.begin;
+                        if (message.end != null && message.hasOwnProperty("end"))
+                            object.end = message.end;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Annotation to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Annotation.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return Annotation;
                 })();
     
@@ -2002,6 +4373,66 @@
                  * @instance
                  */
                 Struct.prototype.fields = $util.emptyObject;
+    
+                /**
+                 * Creates a Struct message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Struct
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Struct} Struct
+                 */
+                Struct.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Struct)
+                        return object;
+                    var message = new $root.google.protobuf.Struct();
+                    if (object.fields) {
+                        if (typeof object.fields !== "object")
+                            throw TypeError(".google.protobuf.Struct.fields: object expected");
+                        message.fields = {};
+                        for (var keys = Object.keys(object.fields), i = 0; i < keys.length; ++i) {
+                            if (typeof object.fields[keys[i]] !== "object")
+                                throw TypeError(".google.protobuf.Struct.fields: object expected");
+                            message.fields[keys[i]] = $root.google.protobuf.Value.fromObject(object.fields[keys[i]]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Struct message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Struct
+                 * @static
+                 * @param {google.protobuf.Struct} message Struct
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Struct.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.objects || options.defaults)
+                        object.fields = {};
+                    var keys2;
+                    if (message.fields && (keys2 = Object.keys(message.fields)).length) {
+                        object.fields = {};
+                        for (var j = 0; j < keys2.length; ++j)
+                            object.fields[keys2[j]] = $root.google.protobuf.Value.toObject(message.fields[keys2[j]], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this Struct to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Struct
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Struct.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return Struct;
             })();
@@ -2097,6 +4528,100 @@
                     set: $util.oneOfSetter($oneOfFields)
                 });
     
+                /**
+                 * Creates a Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Value} Value
+                 */
+                Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Value)
+                        return object;
+                    var message = new $root.google.protobuf.Value();
+                    switch (object.nullValue) {
+                    case "NULL_VALUE":
+                    case 0:
+                        message.nullValue = 0;
+                        break;
+                    }
+                    if (object.numberValue != null)
+                        message.numberValue = Number(object.numberValue);
+                    if (object.stringValue != null)
+                        message.stringValue = String(object.stringValue);
+                    if (object.boolValue != null)
+                        message.boolValue = Boolean(object.boolValue);
+                    if (object.structValue != null) {
+                        if (typeof object.structValue !== "object")
+                            throw TypeError(".google.protobuf.Value.structValue: object expected");
+                        message.structValue = $root.google.protobuf.Struct.fromObject(object.structValue);
+                    }
+                    if (object.listValue != null) {
+                        if (typeof object.listValue !== "object")
+                            throw TypeError(".google.protobuf.Value.listValue: object expected");
+                        message.listValue = $root.google.protobuf.ListValue.fromObject(object.listValue);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Value
+                 * @static
+                 * @param {google.protobuf.Value} message Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (message.nullValue != null && message.hasOwnProperty("nullValue")) {
+                        object.nullValue = options.enums === String ? $root.google.protobuf.NullValue[message.nullValue] : message.nullValue;
+                        if (options.oneofs)
+                            object.kind = "nullValue";
+                    }
+                    if (message.numberValue != null && message.hasOwnProperty("numberValue")) {
+                        object.numberValue = options.json && !isFinite(message.numberValue) ? String(message.numberValue) : message.numberValue;
+                        if (options.oneofs)
+                            object.kind = "numberValue";
+                    }
+                    if (message.stringValue != null && message.hasOwnProperty("stringValue")) {
+                        object.stringValue = message.stringValue;
+                        if (options.oneofs)
+                            object.kind = "stringValue";
+                    }
+                    if (message.boolValue != null && message.hasOwnProperty("boolValue")) {
+                        object.boolValue = message.boolValue;
+                        if (options.oneofs)
+                            object.kind = "boolValue";
+                    }
+                    if (message.structValue != null && message.hasOwnProperty("structValue")) {
+                        object.structValue = $root.google.protobuf.Struct.toObject(message.structValue, options);
+                        if (options.oneofs)
+                            object.kind = "structValue";
+                    }
+                    if (message.listValue != null && message.hasOwnProperty("listValue")) {
+                        object.listValue = $root.google.protobuf.ListValue.toObject(message.listValue, options);
+                        if (options.oneofs)
+                            object.kind = "listValue";
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return Value;
             })();
     
@@ -2145,6 +4670,65 @@
                  */
                 ListValue.prototype.values = $util.emptyArray;
     
+                /**
+                 * Creates a ListValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.ListValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.ListValue} ListValue
+                 */
+                ListValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.ListValue)
+                        return object;
+                    var message = new $root.google.protobuf.ListValue();
+                    if (object.values) {
+                        if (!Array.isArray(object.values))
+                            throw TypeError(".google.protobuf.ListValue.values: array expected");
+                        message.values = [];
+                        for (var i = 0; i < object.values.length; ++i) {
+                            if (typeof object.values[i] !== "object")
+                                throw TypeError(".google.protobuf.ListValue.values: object expected");
+                            message.values[i] = $root.google.protobuf.Value.fromObject(object.values[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ListValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.ListValue
+                 * @static
+                 * @param {google.protobuf.ListValue} message ListValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ListValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.values = [];
+                    if (message.values && message.values.length) {
+                        object.values = [];
+                        for (var j = 0; j < message.values.length; ++j)
+                            object.values[j] = $root.google.protobuf.Value.toObject(message.values[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this ListValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.ListValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ListValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return ListValue;
             })();
     
@@ -2170,6 +4754,44 @@
                             if (properties[keys[i]] != null)
                                 this[keys[i]] = properties[keys[i]];
                 }
+    
+                /**
+                 * Creates an Empty message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Empty
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Empty} Empty
+                 */
+                Empty.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Empty)
+                        return object;
+                    return new $root.google.protobuf.Empty();
+                };
+    
+                /**
+                 * Creates a plain object from an Empty message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Empty
+                 * @static
+                 * @param {google.protobuf.Empty} message Empty
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Empty.toObject = function toObject() {
+                    return {};
+                };
+    
+                /**
+                 * Converts this Empty to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Empty
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Empty.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return Empty;
             })();
@@ -2206,6 +4828,54 @@
                  */
                 DoubleValue.prototype.value = 0;
     
+                /**
+                 * Creates a DoubleValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.DoubleValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.DoubleValue} DoubleValue
+                 */
+                DoubleValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.DoubleValue)
+                        return object;
+                    var message = new $root.google.protobuf.DoubleValue();
+                    if (object.value != null)
+                        message.value = Number(object.value);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a DoubleValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.DoubleValue
+                 * @static
+                 * @param {google.protobuf.DoubleValue} message DoubleValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                DoubleValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = options.json && !isFinite(message.value) ? String(message.value) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this DoubleValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.DoubleValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                DoubleValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return DoubleValue;
             })();
     
@@ -2240,6 +4910,54 @@
                  * @instance
                  */
                 FloatValue.prototype.value = 0;
+    
+                /**
+                 * Creates a FloatValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FloatValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FloatValue} FloatValue
+                 */
+                FloatValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FloatValue)
+                        return object;
+                    var message = new $root.google.protobuf.FloatValue();
+                    if (object.value != null)
+                        message.value = Number(object.value);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FloatValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FloatValue
+                 * @static
+                 * @param {google.protobuf.FloatValue} message FloatValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FloatValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = options.json && !isFinite(message.value) ? String(message.value) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this FloatValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FloatValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FloatValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return FloatValue;
             })();
@@ -2276,6 +4994,68 @@
                  */
                 Int64Value.prototype.value = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
     
+                /**
+                 * Creates an Int64Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Int64Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Int64Value} Int64Value
+                 */
+                Int64Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Int64Value)
+                        return object;
+                    var message = new $root.google.protobuf.Int64Value();
+                    if (object.value != null)
+                        if ($util.Long)
+                            (message.value = $util.Long.fromValue(object.value)).unsigned = false;
+                        else if (typeof object.value === "string")
+                            message.value = parseInt(object.value, 10);
+                        else if (typeof object.value === "number")
+                            message.value = object.value;
+                        else if (typeof object.value === "object")
+                            message.value = new $util.LongBits(object.value.low >>> 0, object.value.high >>> 0).toNumber();
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an Int64Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Int64Value
+                 * @static
+                 * @param {google.protobuf.Int64Value} message Int64Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Int64Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.value = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.value = options.longs === String ? "0" : 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        if (typeof message.value === "number")
+                            object.value = options.longs === String ? String(message.value) : message.value;
+                        else
+                            object.value = options.longs === String ? $util.Long.prototype.toString.call(message.value) : options.longs === Number ? new $util.LongBits(message.value.low >>> 0, message.value.high >>> 0).toNumber() : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Int64Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Int64Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Int64Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return Int64Value;
             })();
     
@@ -2310,6 +5090,68 @@
                  * @instance
                  */
                 UInt64Value.prototype.value = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+    
+                /**
+                 * Creates a UInt64Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.UInt64Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.UInt64Value} UInt64Value
+                 */
+                UInt64Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.UInt64Value)
+                        return object;
+                    var message = new $root.google.protobuf.UInt64Value();
+                    if (object.value != null)
+                        if ($util.Long)
+                            (message.value = $util.Long.fromValue(object.value)).unsigned = true;
+                        else if (typeof object.value === "string")
+                            message.value = parseInt(object.value, 10);
+                        else if (typeof object.value === "number")
+                            message.value = object.value;
+                        else if (typeof object.value === "object")
+                            message.value = new $util.LongBits(object.value.low >>> 0, object.value.high >>> 0).toNumber(true);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a UInt64Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.UInt64Value
+                 * @static
+                 * @param {google.protobuf.UInt64Value} message UInt64Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                UInt64Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, true);
+                            object.value = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.value = options.longs === String ? "0" : 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        if (typeof message.value === "number")
+                            object.value = options.longs === String ? String(message.value) : message.value;
+                        else
+                            object.value = options.longs === String ? $util.Long.prototype.toString.call(message.value) : options.longs === Number ? new $util.LongBits(message.value.low >>> 0, message.value.high >>> 0).toNumber(true) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this UInt64Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.UInt64Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                UInt64Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return UInt64Value;
             })();
@@ -2346,6 +5188,54 @@
                  */
                 Int32Value.prototype.value = 0;
     
+                /**
+                 * Creates an Int32Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Int32Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Int32Value} Int32Value
+                 */
+                Int32Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Int32Value)
+                        return object;
+                    var message = new $root.google.protobuf.Int32Value();
+                    if (object.value != null)
+                        message.value = object.value | 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an Int32Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Int32Value
+                 * @static
+                 * @param {google.protobuf.Int32Value} message Int32Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Int32Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Int32Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Int32Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Int32Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return Int32Value;
             })();
     
@@ -2380,6 +5270,54 @@
                  * @instance
                  */
                 UInt32Value.prototype.value = 0;
+    
+                /**
+                 * Creates a UInt32Value message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.UInt32Value
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.UInt32Value} UInt32Value
+                 */
+                UInt32Value.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.UInt32Value)
+                        return object;
+                    var message = new $root.google.protobuf.UInt32Value();
+                    if (object.value != null)
+                        message.value = object.value >>> 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a UInt32Value message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.UInt32Value
+                 * @static
+                 * @param {google.protobuf.UInt32Value} message UInt32Value
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                UInt32Value.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = 0;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this UInt32Value to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.UInt32Value
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                UInt32Value.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return UInt32Value;
             })();
@@ -2416,6 +5354,54 @@
                  */
                 BoolValue.prototype.value = false;
     
+                /**
+                 * Creates a BoolValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.BoolValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.BoolValue} BoolValue
+                 */
+                BoolValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.BoolValue)
+                        return object;
+                    var message = new $root.google.protobuf.BoolValue();
+                    if (object.value != null)
+                        message.value = Boolean(object.value);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a BoolValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.BoolValue
+                 * @static
+                 * @param {google.protobuf.BoolValue} message BoolValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                BoolValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = false;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this BoolValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.BoolValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                BoolValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return BoolValue;
             })();
     
@@ -2451,6 +5437,54 @@
                  */
                 StringValue.prototype.value = "";
     
+                /**
+                 * Creates a StringValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.StringValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.StringValue} StringValue
+                 */
+                StringValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.StringValue)
+                        return object;
+                    var message = new $root.google.protobuf.StringValue();
+                    if (object.value != null)
+                        message.value = String(object.value);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a StringValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.StringValue
+                 * @static
+                 * @param {google.protobuf.StringValue} message StringValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                StringValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.value = "";
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this StringValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.StringValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                StringValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return StringValue;
             })();
     
@@ -2485,6 +5519,63 @@
                  * @instance
                  */
                 BytesValue.prototype.value = $util.newBuffer([]);
+    
+                /**
+                 * Creates a BytesValue message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.BytesValue
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.BytesValue} BytesValue
+                 */
+                BytesValue.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.BytesValue)
+                        return object;
+                    var message = new $root.google.protobuf.BytesValue();
+                    if (object.value != null)
+                        if (typeof object.value === "string")
+                            $util.base64.decode(object.value, message.value = $util.newBuffer($util.base64.length(object.value)), 0);
+                        else if (object.value.length)
+                            message.value = object.value;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a BytesValue message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.BytesValue
+                 * @static
+                 * @param {google.protobuf.BytesValue} message BytesValue
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                BytesValue.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        if (options.bytes === String)
+                            object.value = "";
+                        else {
+                            object.value = [];
+                            if (options.bytes !== Array)
+                                object.value = $util.newBuffer(object.value);
+                        }
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = options.bytes === String ? $util.base64.encode(message.value, 0, message.value.length) : options.bytes === Array ? Array.prototype.slice.call(message.value) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this BytesValue to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.BytesValue
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                BytesValue.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return BytesValue;
             })();
@@ -2530,6 +5621,69 @@
                  */
                 Any.prototype.value = $util.newBuffer([]);
     
+                /**
+                 * Creates an Any message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Any
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Any} Any
+                 */
+                Any.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Any)
+                        return object;
+                    var message = new $root.google.protobuf.Any();
+                    if (object.type_url != null)
+                        message.type_url = String(object.type_url);
+                    if (object.value != null)
+                        if (typeof object.value === "string")
+                            $util.base64.decode(object.value, message.value = $util.newBuffer($util.base64.length(object.value)), 0);
+                        else if (object.value.length)
+                            message.value = object.value;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an Any message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Any
+                 * @static
+                 * @param {google.protobuf.Any} message Any
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Any.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.type_url = "";
+                        if (options.bytes === String)
+                            object.value = "";
+                        else {
+                            object.value = [];
+                            if (options.bytes !== Array)
+                                object.value = $util.newBuffer(object.value);
+                        }
+                    }
+                    if (message.type_url != null && message.hasOwnProperty("type_url"))
+                        object.type_url = message.type_url;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = options.bytes === String ? $util.base64.encode(message.value, 0, message.value.length) : options.bytes === Array ? Array.prototype.slice.call(message.value) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Any to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Any
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Any.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return Any;
             })();
     
@@ -2565,6 +5719,62 @@
                  * @instance
                  */
                 FieldMask.prototype.paths = $util.emptyArray;
+    
+                /**
+                 * Creates a FieldMask message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FieldMask
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FieldMask} FieldMask
+                 */
+                FieldMask.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FieldMask)
+                        return object;
+                    var message = new $root.google.protobuf.FieldMask();
+                    if (object.paths) {
+                        if (!Array.isArray(object.paths))
+                            throw TypeError(".google.protobuf.FieldMask.paths: array expected");
+                        message.paths = [];
+                        for (var i = 0; i < object.paths.length; ++i)
+                            message.paths[i] = String(object.paths[i]);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FieldMask message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FieldMask
+                 * @static
+                 * @param {google.protobuf.FieldMask} message FieldMask
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FieldMask.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.paths = [];
+                    if (message.paths && message.paths.length) {
+                        object.paths = [];
+                        for (var j = 0; j < message.paths.length; ++j)
+                            object.paths[j] = message.paths[j];
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this FieldMask to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FieldMask
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FieldMask.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return FieldMask;
             })();
@@ -2609,6 +5819,74 @@
                  * @instance
                  */
                 Duration.prototype.nanos = 0;
+    
+                /**
+                 * Creates a Duration message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Duration
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Duration} Duration
+                 */
+                Duration.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Duration)
+                        return object;
+                    var message = new $root.google.protobuf.Duration();
+                    if (object.seconds != null)
+                        if ($util.Long)
+                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
+                        else if (typeof object.seconds === "string")
+                            message.seconds = parseInt(object.seconds, 10);
+                        else if (typeof object.seconds === "number")
+                            message.seconds = object.seconds;
+                        else if (typeof object.seconds === "object")
+                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
+                    if (object.nanos != null)
+                        message.nanos = object.nanos | 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Duration message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Duration
+                 * @static
+                 * @param {google.protobuf.Duration} message Duration
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Duration.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.seconds = options.longs === String ? "0" : 0;
+                        object.nanos = 0;
+                    }
+                    if (message.seconds != null && message.hasOwnProperty("seconds"))
+                        if (typeof message.seconds === "number")
+                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
+                        else
+                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
+                    if (message.nanos != null && message.hasOwnProperty("nanos"))
+                        object.nanos = message.nanos;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Duration to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Duration
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Duration.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return Duration;
             })();
@@ -2666,6 +5944,62 @@
                      * @instance
                      */
                     DocumentMask.prototype.fieldPaths = $util.emptyArray;
+    
+                    /**
+                     * Creates a DocumentMask message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.DocumentMask
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.DocumentMask} DocumentMask
+                     */
+                    DocumentMask.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.DocumentMask)
+                            return object;
+                        var message = new $root.google.firestore.v1.DocumentMask();
+                        if (object.fieldPaths) {
+                            if (!Array.isArray(object.fieldPaths))
+                                throw TypeError(".google.firestore.v1.DocumentMask.fieldPaths: array expected");
+                            message.fieldPaths = [];
+                            for (var i = 0; i < object.fieldPaths.length; ++i)
+                                message.fieldPaths[i] = String(object.fieldPaths[i]);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a DocumentMask message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.DocumentMask
+                     * @static
+                     * @param {google.firestore.v1.DocumentMask} message DocumentMask
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    DocumentMask.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.fieldPaths = [];
+                        if (message.fieldPaths && message.fieldPaths.length) {
+                            object.fieldPaths = [];
+                            for (var j = 0; j < message.fieldPaths.length; ++j)
+                                object.fieldPaths[j] = message.fieldPaths[j];
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this DocumentMask to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.DocumentMask
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    DocumentMask.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return DocumentMask;
                 })();
@@ -2725,6 +6059,65 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a Precondition message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.Precondition
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.Precondition} Precondition
+                     */
+                    Precondition.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.Precondition)
+                            return object;
+                        var message = new $root.google.firestore.v1.Precondition();
+                        if (object.exists != null)
+                            message.exists = Boolean(object.exists);
+                        if (object.updateTime != null) {
+                            if (typeof object.updateTime !== "object")
+                                throw TypeError(".google.firestore.v1.Precondition.updateTime: object expected");
+                            message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Precondition message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.Precondition
+                     * @static
+                     * @param {google.firestore.v1.Precondition} message Precondition
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Precondition.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (message.exists != null && message.hasOwnProperty("exists")) {
+                            object.exists = message.exists;
+                            if (options.oneofs)
+                                object.conditionType = "exists";
+                        }
+                        if (message.updateTime != null && message.hasOwnProperty("updateTime")) {
+                            object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
+                            if (options.oneofs)
+                                object.conditionType = "updateTime";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Precondition to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.Precondition
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Precondition.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return Precondition;
                 })();
     
@@ -2783,6 +6176,68 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a TransactionOptions message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.TransactionOptions
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.TransactionOptions} TransactionOptions
+                     */
+                    TransactionOptions.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.TransactionOptions)
+                            return object;
+                        var message = new $root.google.firestore.v1.TransactionOptions();
+                        if (object.readOnly != null) {
+                            if (typeof object.readOnly !== "object")
+                                throw TypeError(".google.firestore.v1.TransactionOptions.readOnly: object expected");
+                            message.readOnly = $root.google.firestore.v1.TransactionOptions.ReadOnly.fromObject(object.readOnly);
+                        }
+                        if (object.readWrite != null) {
+                            if (typeof object.readWrite !== "object")
+                                throw TypeError(".google.firestore.v1.TransactionOptions.readWrite: object expected");
+                            message.readWrite = $root.google.firestore.v1.TransactionOptions.ReadWrite.fromObject(object.readWrite);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a TransactionOptions message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.TransactionOptions
+                     * @static
+                     * @param {google.firestore.v1.TransactionOptions} message TransactionOptions
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    TransactionOptions.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (message.readOnly != null && message.hasOwnProperty("readOnly")) {
+                            object.readOnly = $root.google.firestore.v1.TransactionOptions.ReadOnly.toObject(message.readOnly, options);
+                            if (options.oneofs)
+                                object.mode = "readOnly";
+                        }
+                        if (message.readWrite != null && message.hasOwnProperty("readWrite")) {
+                            object.readWrite = $root.google.firestore.v1.TransactionOptions.ReadWrite.toObject(message.readWrite, options);
+                            if (options.oneofs)
+                                object.mode = "readWrite";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this TransactionOptions to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.TransactionOptions
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    TransactionOptions.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     TransactionOptions.ReadWrite = (function() {
     
                         /**
@@ -2814,6 +6269,63 @@
                          * @instance
                          */
                         ReadWrite.prototype.retryTransaction = $util.newBuffer([]);
+    
+                        /**
+                         * Creates a ReadWrite message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.TransactionOptions.ReadWrite
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.TransactionOptions.ReadWrite} ReadWrite
+                         */
+                        ReadWrite.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.TransactionOptions.ReadWrite)
+                                return object;
+                            var message = new $root.google.firestore.v1.TransactionOptions.ReadWrite();
+                            if (object.retryTransaction != null)
+                                if (typeof object.retryTransaction === "string")
+                                    $util.base64.decode(object.retryTransaction, message.retryTransaction = $util.newBuffer($util.base64.length(object.retryTransaction)), 0);
+                                else if (object.retryTransaction.length)
+                                    message.retryTransaction = object.retryTransaction;
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ReadWrite message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.TransactionOptions.ReadWrite
+                         * @static
+                         * @param {google.firestore.v1.TransactionOptions.ReadWrite} message ReadWrite
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ReadWrite.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                if (options.bytes === String)
+                                    object.retryTransaction = "";
+                                else {
+                                    object.retryTransaction = [];
+                                    if (options.bytes !== Array)
+                                        object.retryTransaction = $util.newBuffer(object.retryTransaction);
+                                }
+                            if (message.retryTransaction != null && message.hasOwnProperty("retryTransaction"))
+                                object.retryTransaction = options.bytes === String ? $util.base64.encode(message.retryTransaction, 0, message.retryTransaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.retryTransaction) : message.retryTransaction;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ReadWrite to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.TransactionOptions.ReadWrite
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ReadWrite.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
     
                         return ReadWrite;
                     })();
@@ -2863,6 +6375,58 @@
                             get: $util.oneOfGetter($oneOfFields = ["readTime"]),
                             set: $util.oneOfSetter($oneOfFields)
                         });
+    
+                        /**
+                         * Creates a ReadOnly message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.TransactionOptions.ReadOnly
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.TransactionOptions.ReadOnly} ReadOnly
+                         */
+                        ReadOnly.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.TransactionOptions.ReadOnly)
+                                return object;
+                            var message = new $root.google.firestore.v1.TransactionOptions.ReadOnly();
+                            if (object.readTime != null) {
+                                if (typeof object.readTime !== "object")
+                                    throw TypeError(".google.firestore.v1.TransactionOptions.ReadOnly.readTime: object expected");
+                                message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ReadOnly message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.TransactionOptions.ReadOnly
+                         * @static
+                         * @param {google.firestore.v1.TransactionOptions.ReadOnly} message ReadOnly
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ReadOnly.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                                object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                                if (options.oneofs)
+                                    object.consistencySelector = "readTime";
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ReadOnly to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.TransactionOptions.ReadOnly
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ReadOnly.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
     
                         return ReadOnly;
                     })();
@@ -2929,6 +6493,89 @@
                      * @instance
                      */
                     Document.prototype.updateTime = null;
+    
+                    /**
+                     * Creates a Document message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.Document
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.Document} Document
+                     */
+                    Document.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.Document)
+                            return object;
+                        var message = new $root.google.firestore.v1.Document();
+                        if (object.name != null)
+                            message.name = String(object.name);
+                        if (object.fields) {
+                            if (typeof object.fields !== "object")
+                                throw TypeError(".google.firestore.v1.Document.fields: object expected");
+                            message.fields = {};
+                            for (var keys = Object.keys(object.fields), i = 0; i < keys.length; ++i) {
+                                if (typeof object.fields[keys[i]] !== "object")
+                                    throw TypeError(".google.firestore.v1.Document.fields: object expected");
+                                message.fields[keys[i]] = $root.google.firestore.v1.Value.fromObject(object.fields[keys[i]]);
+                            }
+                        }
+                        if (object.createTime != null) {
+                            if (typeof object.createTime !== "object")
+                                throw TypeError(".google.firestore.v1.Document.createTime: object expected");
+                            message.createTime = $root.google.protobuf.Timestamp.fromObject(object.createTime);
+                        }
+                        if (object.updateTime != null) {
+                            if (typeof object.updateTime !== "object")
+                                throw TypeError(".google.firestore.v1.Document.updateTime: object expected");
+                            message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Document message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.Document
+                     * @static
+                     * @param {google.firestore.v1.Document} message Document
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Document.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.objects || options.defaults)
+                            object.fields = {};
+                        if (options.defaults) {
+                            object.name = "";
+                            object.createTime = null;
+                            object.updateTime = null;
+                        }
+                        if (message.name != null && message.hasOwnProperty("name"))
+                            object.name = message.name;
+                        var keys2;
+                        if (message.fields && (keys2 = Object.keys(message.fields)).length) {
+                            object.fields = {};
+                            for (var j = 0; j < keys2.length; ++j)
+                                object.fields[keys2[j]] = $root.google.firestore.v1.Value.toObject(message.fields[keys2[j]], options);
+                        }
+                        if (message.createTime != null && message.hasOwnProperty("createTime"))
+                            object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
+                        if (message.updateTime != null && message.hasOwnProperty("updateTime"))
+                            object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Document to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.Document
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Document.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return Document;
                 })();
@@ -3069,6 +6716,154 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a Value message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.Value
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.Value} Value
+                     */
+                    Value.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.Value)
+                            return object;
+                        var message = new $root.google.firestore.v1.Value();
+                        switch (object.nullValue) {
+                        case "NULL_VALUE":
+                        case 0:
+                            message.nullValue = 0;
+                            break;
+                        }
+                        if (object.booleanValue != null)
+                            message.booleanValue = Boolean(object.booleanValue);
+                        if (object.integerValue != null)
+                            if ($util.Long)
+                                (message.integerValue = $util.Long.fromValue(object.integerValue)).unsigned = false;
+                            else if (typeof object.integerValue === "string")
+                                message.integerValue = parseInt(object.integerValue, 10);
+                            else if (typeof object.integerValue === "number")
+                                message.integerValue = object.integerValue;
+                            else if (typeof object.integerValue === "object")
+                                message.integerValue = new $util.LongBits(object.integerValue.low >>> 0, object.integerValue.high >>> 0).toNumber();
+                        if (object.doubleValue != null)
+                            message.doubleValue = Number(object.doubleValue);
+                        if (object.timestampValue != null) {
+                            if (typeof object.timestampValue !== "object")
+                                throw TypeError(".google.firestore.v1.Value.timestampValue: object expected");
+                            message.timestampValue = $root.google.protobuf.Timestamp.fromObject(object.timestampValue);
+                        }
+                        if (object.stringValue != null)
+                            message.stringValue = String(object.stringValue);
+                        if (object.bytesValue != null)
+                            if (typeof object.bytesValue === "string")
+                                $util.base64.decode(object.bytesValue, message.bytesValue = $util.newBuffer($util.base64.length(object.bytesValue)), 0);
+                            else if (object.bytesValue.length)
+                                message.bytesValue = object.bytesValue;
+                        if (object.referenceValue != null)
+                            message.referenceValue = String(object.referenceValue);
+                        if (object.geoPointValue != null) {
+                            if (typeof object.geoPointValue !== "object")
+                                throw TypeError(".google.firestore.v1.Value.geoPointValue: object expected");
+                            message.geoPointValue = $root.google.type.LatLng.fromObject(object.geoPointValue);
+                        }
+                        if (object.arrayValue != null) {
+                            if (typeof object.arrayValue !== "object")
+                                throw TypeError(".google.firestore.v1.Value.arrayValue: object expected");
+                            message.arrayValue = $root.google.firestore.v1.ArrayValue.fromObject(object.arrayValue);
+                        }
+                        if (object.mapValue != null) {
+                            if (typeof object.mapValue !== "object")
+                                throw TypeError(".google.firestore.v1.Value.mapValue: object expected");
+                            message.mapValue = $root.google.firestore.v1.MapValue.fromObject(object.mapValue);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Value message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.Value
+                     * @static
+                     * @param {google.firestore.v1.Value} message Value
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Value.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (message.booleanValue != null && message.hasOwnProperty("booleanValue")) {
+                            object.booleanValue = message.booleanValue;
+                            if (options.oneofs)
+                                object.valueType = "booleanValue";
+                        }
+                        if (message.integerValue != null && message.hasOwnProperty("integerValue")) {
+                            if (typeof message.integerValue === "number")
+                                object.integerValue = options.longs === String ? String(message.integerValue) : message.integerValue;
+                            else
+                                object.integerValue = options.longs === String ? $util.Long.prototype.toString.call(message.integerValue) : options.longs === Number ? new $util.LongBits(message.integerValue.low >>> 0, message.integerValue.high >>> 0).toNumber() : message.integerValue;
+                            if (options.oneofs)
+                                object.valueType = "integerValue";
+                        }
+                        if (message.doubleValue != null && message.hasOwnProperty("doubleValue")) {
+                            object.doubleValue = options.json && !isFinite(message.doubleValue) ? String(message.doubleValue) : message.doubleValue;
+                            if (options.oneofs)
+                                object.valueType = "doubleValue";
+                        }
+                        if (message.referenceValue != null && message.hasOwnProperty("referenceValue")) {
+                            object.referenceValue = message.referenceValue;
+                            if (options.oneofs)
+                                object.valueType = "referenceValue";
+                        }
+                        if (message.mapValue != null && message.hasOwnProperty("mapValue")) {
+                            object.mapValue = $root.google.firestore.v1.MapValue.toObject(message.mapValue, options);
+                            if (options.oneofs)
+                                object.valueType = "mapValue";
+                        }
+                        if (message.geoPointValue != null && message.hasOwnProperty("geoPointValue")) {
+                            object.geoPointValue = $root.google.type.LatLng.toObject(message.geoPointValue, options);
+                            if (options.oneofs)
+                                object.valueType = "geoPointValue";
+                        }
+                        if (message.arrayValue != null && message.hasOwnProperty("arrayValue")) {
+                            object.arrayValue = $root.google.firestore.v1.ArrayValue.toObject(message.arrayValue, options);
+                            if (options.oneofs)
+                                object.valueType = "arrayValue";
+                        }
+                        if (message.timestampValue != null && message.hasOwnProperty("timestampValue")) {
+                            object.timestampValue = $root.google.protobuf.Timestamp.toObject(message.timestampValue, options);
+                            if (options.oneofs)
+                                object.valueType = "timestampValue";
+                        }
+                        if (message.nullValue != null && message.hasOwnProperty("nullValue")) {
+                            object.nullValue = options.enums === String ? $root.google.protobuf.NullValue[message.nullValue] : message.nullValue;
+                            if (options.oneofs)
+                                object.valueType = "nullValue";
+                        }
+                        if (message.stringValue != null && message.hasOwnProperty("stringValue")) {
+                            object.stringValue = message.stringValue;
+                            if (options.oneofs)
+                                object.valueType = "stringValue";
+                        }
+                        if (message.bytesValue != null && message.hasOwnProperty("bytesValue")) {
+                            object.bytesValue = options.bytes === String ? $util.base64.encode(message.bytesValue, 0, message.bytesValue.length) : options.bytes === Array ? Array.prototype.slice.call(message.bytesValue) : message.bytesValue;
+                            if (options.oneofs)
+                                object.valueType = "bytesValue";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Value to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.Value
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Value.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return Value;
                 })();
     
@@ -3105,6 +6900,65 @@
                      */
                     ArrayValue.prototype.values = $util.emptyArray;
     
+                    /**
+                     * Creates an ArrayValue message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ArrayValue
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ArrayValue} ArrayValue
+                     */
+                    ArrayValue.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ArrayValue)
+                            return object;
+                        var message = new $root.google.firestore.v1.ArrayValue();
+                        if (object.values) {
+                            if (!Array.isArray(object.values))
+                                throw TypeError(".google.firestore.v1.ArrayValue.values: array expected");
+                            message.values = [];
+                            for (var i = 0; i < object.values.length; ++i) {
+                                if (typeof object.values[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.ArrayValue.values: object expected");
+                                message.values[i] = $root.google.firestore.v1.Value.fromObject(object.values[i]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ArrayValue message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ArrayValue
+                     * @static
+                     * @param {google.firestore.v1.ArrayValue} message ArrayValue
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ArrayValue.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.values = [];
+                        if (message.values && message.values.length) {
+                            object.values = [];
+                            for (var j = 0; j < message.values.length; ++j)
+                                object.values[j] = $root.google.firestore.v1.Value.toObject(message.values[j], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ArrayValue to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ArrayValue
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ArrayValue.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return ArrayValue;
                 })();
     
@@ -3140,6 +6994,66 @@
                      * @instance
                      */
                     MapValue.prototype.fields = $util.emptyObject;
+    
+                    /**
+                     * Creates a MapValue message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.MapValue
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.MapValue} MapValue
+                     */
+                    MapValue.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.MapValue)
+                            return object;
+                        var message = new $root.google.firestore.v1.MapValue();
+                        if (object.fields) {
+                            if (typeof object.fields !== "object")
+                                throw TypeError(".google.firestore.v1.MapValue.fields: object expected");
+                            message.fields = {};
+                            for (var keys = Object.keys(object.fields), i = 0; i < keys.length; ++i) {
+                                if (typeof object.fields[keys[i]] !== "object")
+                                    throw TypeError(".google.firestore.v1.MapValue.fields: object expected");
+                                message.fields[keys[i]] = $root.google.firestore.v1.Value.fromObject(object.fields[keys[i]]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a MapValue message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.MapValue
+                     * @static
+                     * @param {google.firestore.v1.MapValue} message MapValue
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    MapValue.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.objects || options.defaults)
+                            object.fields = {};
+                        var keys2;
+                        if (message.fields && (keys2 = Object.keys(message.fields)).length) {
+                            object.fields = {};
+                            for (var j = 0; j < keys2.length; ++j)
+                                object.fields[keys2[j]] = $root.google.firestore.v1.Value.toObject(message.fields[keys2[j]], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this MapValue to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.MapValue
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    MapValue.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return MapValue;
                 })();
@@ -3667,6 +7581,83 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a GetDocumentRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.GetDocumentRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.GetDocumentRequest} GetDocumentRequest
+                     */
+                    GetDocumentRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.GetDocumentRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.GetDocumentRequest();
+                        if (object.name != null)
+                            message.name = String(object.name);
+                        if (object.mask != null) {
+                            if (typeof object.mask !== "object")
+                                throw TypeError(".google.firestore.v1.GetDocumentRequest.mask: object expected");
+                            message.mask = $root.google.firestore.v1.DocumentMask.fromObject(object.mask);
+                        }
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length)
+                                message.transaction = object.transaction;
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.GetDocumentRequest.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a GetDocumentRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.GetDocumentRequest
+                     * @static
+                     * @param {google.firestore.v1.GetDocumentRequest} message GetDocumentRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    GetDocumentRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.name = "";
+                            object.mask = null;
+                        }
+                        if (message.name != null && message.hasOwnProperty("name"))
+                            object.name = message.name;
+                        if (message.mask != null && message.hasOwnProperty("mask"))
+                            object.mask = $root.google.firestore.v1.DocumentMask.toObject(message.mask, options);
+                        if (message.transaction != null && message.hasOwnProperty("transaction")) {
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                            if (options.oneofs)
+                                object.consistencySelector = "transaction";
+                        }
+                        if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "readTime";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this GetDocumentRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.GetDocumentRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    GetDocumentRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return GetDocumentRequest;
                 })();
     
@@ -3788,6 +7779,108 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a ListDocumentsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ListDocumentsRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ListDocumentsRequest} ListDocumentsRequest
+                     */
+                    ListDocumentsRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ListDocumentsRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.ListDocumentsRequest();
+                        if (object.parent != null)
+                            message.parent = String(object.parent);
+                        if (object.collectionId != null)
+                            message.collectionId = String(object.collectionId);
+                        if (object.pageSize != null)
+                            message.pageSize = object.pageSize | 0;
+                        if (object.pageToken != null)
+                            message.pageToken = String(object.pageToken);
+                        if (object.orderBy != null)
+                            message.orderBy = String(object.orderBy);
+                        if (object.mask != null) {
+                            if (typeof object.mask !== "object")
+                                throw TypeError(".google.firestore.v1.ListDocumentsRequest.mask: object expected");
+                            message.mask = $root.google.firestore.v1.DocumentMask.fromObject(object.mask);
+                        }
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length)
+                                message.transaction = object.transaction;
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.ListDocumentsRequest.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        if (object.showMissing != null)
+                            message.showMissing = Boolean(object.showMissing);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a ListDocumentsRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ListDocumentsRequest
+                     * @static
+                     * @param {google.firestore.v1.ListDocumentsRequest} message ListDocumentsRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ListDocumentsRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.parent = "";
+                            object.collectionId = "";
+                            object.pageSize = 0;
+                            object.pageToken = "";
+                            object.orderBy = "";
+                            object.mask = null;
+                            object.showMissing = false;
+                        }
+                        if (message.parent != null && message.hasOwnProperty("parent"))
+                            object.parent = message.parent;
+                        if (message.collectionId != null && message.hasOwnProperty("collectionId"))
+                            object.collectionId = message.collectionId;
+                        if (message.pageSize != null && message.hasOwnProperty("pageSize"))
+                            object.pageSize = message.pageSize;
+                        if (message.pageToken != null && message.hasOwnProperty("pageToken"))
+                            object.pageToken = message.pageToken;
+                        if (message.orderBy != null && message.hasOwnProperty("orderBy"))
+                            object.orderBy = message.orderBy;
+                        if (message.mask != null && message.hasOwnProperty("mask"))
+                            object.mask = $root.google.firestore.v1.DocumentMask.toObject(message.mask, options);
+                        if (message.transaction != null && message.hasOwnProperty("transaction")) {
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                            if (options.oneofs)
+                                object.consistencySelector = "transaction";
+                        }
+                        if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "readTime";
+                        }
+                        if (message.showMissing != null && message.hasOwnProperty("showMissing"))
+                            object.showMissing = message.showMissing;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ListDocumentsRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ListDocumentsRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ListDocumentsRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return ListDocumentsRequest;
                 })();
     
@@ -3832,6 +7925,71 @@
                      * @instance
                      */
                     ListDocumentsResponse.prototype.nextPageToken = "";
+    
+                    /**
+                     * Creates a ListDocumentsResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ListDocumentsResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ListDocumentsResponse} ListDocumentsResponse
+                     */
+                    ListDocumentsResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ListDocumentsResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.ListDocumentsResponse();
+                        if (object.documents) {
+                            if (!Array.isArray(object.documents))
+                                throw TypeError(".google.firestore.v1.ListDocumentsResponse.documents: array expected");
+                            message.documents = [];
+                            for (var i = 0; i < object.documents.length; ++i) {
+                                if (typeof object.documents[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.ListDocumentsResponse.documents: object expected");
+                                message.documents[i] = $root.google.firestore.v1.Document.fromObject(object.documents[i]);
+                            }
+                        }
+                        if (object.nextPageToken != null)
+                            message.nextPageToken = String(object.nextPageToken);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a ListDocumentsResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ListDocumentsResponse
+                     * @static
+                     * @param {google.firestore.v1.ListDocumentsResponse} message ListDocumentsResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ListDocumentsResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.documents = [];
+                        if (options.defaults)
+                            object.nextPageToken = "";
+                        if (message.documents && message.documents.length) {
+                            object.documents = [];
+                            for (var j = 0; j < message.documents.length; ++j)
+                                object.documents[j] = $root.google.firestore.v1.Document.toObject(message.documents[j], options);
+                        }
+                        if (message.nextPageToken != null && message.hasOwnProperty("nextPageToken"))
+                            object.nextPageToken = message.nextPageToken;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ListDocumentsResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ListDocumentsResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ListDocumentsResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return ListDocumentsResponse;
                 })();
@@ -3904,6 +8062,81 @@
                      */
                     CreateDocumentRequest.prototype.mask = null;
     
+                    /**
+                     * Creates a CreateDocumentRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.CreateDocumentRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.CreateDocumentRequest} CreateDocumentRequest
+                     */
+                    CreateDocumentRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.CreateDocumentRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.CreateDocumentRequest();
+                        if (object.parent != null)
+                            message.parent = String(object.parent);
+                        if (object.collectionId != null)
+                            message.collectionId = String(object.collectionId);
+                        if (object.documentId != null)
+                            message.documentId = String(object.documentId);
+                        if (object.document != null) {
+                            if (typeof object.document !== "object")
+                                throw TypeError(".google.firestore.v1.CreateDocumentRequest.document: object expected");
+                            message.document = $root.google.firestore.v1.Document.fromObject(object.document);
+                        }
+                        if (object.mask != null) {
+                            if (typeof object.mask !== "object")
+                                throw TypeError(".google.firestore.v1.CreateDocumentRequest.mask: object expected");
+                            message.mask = $root.google.firestore.v1.DocumentMask.fromObject(object.mask);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a CreateDocumentRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.CreateDocumentRequest
+                     * @static
+                     * @param {google.firestore.v1.CreateDocumentRequest} message CreateDocumentRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    CreateDocumentRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.parent = "";
+                            object.collectionId = "";
+                            object.documentId = "";
+                            object.document = null;
+                            object.mask = null;
+                        }
+                        if (message.parent != null && message.hasOwnProperty("parent"))
+                            object.parent = message.parent;
+                        if (message.collectionId != null && message.hasOwnProperty("collectionId"))
+                            object.collectionId = message.collectionId;
+                        if (message.documentId != null && message.hasOwnProperty("documentId"))
+                            object.documentId = message.documentId;
+                        if (message.document != null && message.hasOwnProperty("document"))
+                            object.document = $root.google.firestore.v1.Document.toObject(message.document, options);
+                        if (message.mask != null && message.hasOwnProperty("mask"))
+                            object.mask = $root.google.firestore.v1.DocumentMask.toObject(message.mask, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this CreateDocumentRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.CreateDocumentRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    CreateDocumentRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return CreateDocumentRequest;
                 })();
     
@@ -3966,6 +8199,82 @@
                      */
                     UpdateDocumentRequest.prototype.currentDocument = null;
     
+                    /**
+                     * Creates an UpdateDocumentRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.UpdateDocumentRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.UpdateDocumentRequest} UpdateDocumentRequest
+                     */
+                    UpdateDocumentRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.UpdateDocumentRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.UpdateDocumentRequest();
+                        if (object.document != null) {
+                            if (typeof object.document !== "object")
+                                throw TypeError(".google.firestore.v1.UpdateDocumentRequest.document: object expected");
+                            message.document = $root.google.firestore.v1.Document.fromObject(object.document);
+                        }
+                        if (object.updateMask != null) {
+                            if (typeof object.updateMask !== "object")
+                                throw TypeError(".google.firestore.v1.UpdateDocumentRequest.updateMask: object expected");
+                            message.updateMask = $root.google.firestore.v1.DocumentMask.fromObject(object.updateMask);
+                        }
+                        if (object.mask != null) {
+                            if (typeof object.mask !== "object")
+                                throw TypeError(".google.firestore.v1.UpdateDocumentRequest.mask: object expected");
+                            message.mask = $root.google.firestore.v1.DocumentMask.fromObject(object.mask);
+                        }
+                        if (object.currentDocument != null) {
+                            if (typeof object.currentDocument !== "object")
+                                throw TypeError(".google.firestore.v1.UpdateDocumentRequest.currentDocument: object expected");
+                            message.currentDocument = $root.google.firestore.v1.Precondition.fromObject(object.currentDocument);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an UpdateDocumentRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.UpdateDocumentRequest
+                     * @static
+                     * @param {google.firestore.v1.UpdateDocumentRequest} message UpdateDocumentRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    UpdateDocumentRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.document = null;
+                            object.updateMask = null;
+                            object.mask = null;
+                            object.currentDocument = null;
+                        }
+                        if (message.document != null && message.hasOwnProperty("document"))
+                            object.document = $root.google.firestore.v1.Document.toObject(message.document, options);
+                        if (message.updateMask != null && message.hasOwnProperty("updateMask"))
+                            object.updateMask = $root.google.firestore.v1.DocumentMask.toObject(message.updateMask, options);
+                        if (message.mask != null && message.hasOwnProperty("mask"))
+                            object.mask = $root.google.firestore.v1.DocumentMask.toObject(message.mask, options);
+                        if (message.currentDocument != null && message.hasOwnProperty("currentDocument"))
+                            object.currentDocument = $root.google.firestore.v1.Precondition.toObject(message.currentDocument, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this UpdateDocumentRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.UpdateDocumentRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    UpdateDocumentRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return UpdateDocumentRequest;
                 })();
     
@@ -4009,6 +8318,63 @@
                      * @instance
                      */
                     DeleteDocumentRequest.prototype.currentDocument = null;
+    
+                    /**
+                     * Creates a DeleteDocumentRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.DeleteDocumentRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.DeleteDocumentRequest} DeleteDocumentRequest
+                     */
+                    DeleteDocumentRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.DeleteDocumentRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.DeleteDocumentRequest();
+                        if (object.name != null)
+                            message.name = String(object.name);
+                        if (object.currentDocument != null) {
+                            if (typeof object.currentDocument !== "object")
+                                throw TypeError(".google.firestore.v1.DeleteDocumentRequest.currentDocument: object expected");
+                            message.currentDocument = $root.google.firestore.v1.Precondition.fromObject(object.currentDocument);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a DeleteDocumentRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.DeleteDocumentRequest
+                     * @static
+                     * @param {google.firestore.v1.DeleteDocumentRequest} message DeleteDocumentRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    DeleteDocumentRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.name = "";
+                            object.currentDocument = null;
+                        }
+                        if (message.name != null && message.hasOwnProperty("name"))
+                            object.name = message.name;
+                        if (message.currentDocument != null && message.hasOwnProperty("currentDocument"))
+                            object.currentDocument = $root.google.firestore.v1.Precondition.toObject(message.currentDocument, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this DeleteDocumentRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.DeleteDocumentRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    DeleteDocumentRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return DeleteDocumentRequest;
                 })();
@@ -4105,6 +8471,107 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a BatchGetDocumentsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.BatchGetDocumentsRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.BatchGetDocumentsRequest} BatchGetDocumentsRequest
+                     */
+                    BatchGetDocumentsRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.BatchGetDocumentsRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.BatchGetDocumentsRequest();
+                        if (object.database != null)
+                            message.database = String(object.database);
+                        if (object.documents) {
+                            if (!Array.isArray(object.documents))
+                                throw TypeError(".google.firestore.v1.BatchGetDocumentsRequest.documents: array expected");
+                            message.documents = [];
+                            for (var i = 0; i < object.documents.length; ++i)
+                                message.documents[i] = String(object.documents[i]);
+                        }
+                        if (object.mask != null) {
+                            if (typeof object.mask !== "object")
+                                throw TypeError(".google.firestore.v1.BatchGetDocumentsRequest.mask: object expected");
+                            message.mask = $root.google.firestore.v1.DocumentMask.fromObject(object.mask);
+                        }
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length)
+                                message.transaction = object.transaction;
+                        if (object.newTransaction != null) {
+                            if (typeof object.newTransaction !== "object")
+                                throw TypeError(".google.firestore.v1.BatchGetDocumentsRequest.newTransaction: object expected");
+                            message.newTransaction = $root.google.firestore.v1.TransactionOptions.fromObject(object.newTransaction);
+                        }
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.BatchGetDocumentsRequest.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a BatchGetDocumentsRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.BatchGetDocumentsRequest
+                     * @static
+                     * @param {google.firestore.v1.BatchGetDocumentsRequest} message BatchGetDocumentsRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    BatchGetDocumentsRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.documents = [];
+                        if (options.defaults) {
+                            object.database = "";
+                            object.mask = null;
+                        }
+                        if (message.database != null && message.hasOwnProperty("database"))
+                            object.database = message.database;
+                        if (message.documents && message.documents.length) {
+                            object.documents = [];
+                            for (var j = 0; j < message.documents.length; ++j)
+                                object.documents[j] = message.documents[j];
+                        }
+                        if (message.mask != null && message.hasOwnProperty("mask"))
+                            object.mask = $root.google.firestore.v1.DocumentMask.toObject(message.mask, options);
+                        if (message.transaction != null && message.hasOwnProperty("transaction")) {
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                            if (options.oneofs)
+                                object.consistencySelector = "transaction";
+                        }
+                        if (message.newTransaction != null && message.hasOwnProperty("newTransaction")) {
+                            object.newTransaction = $root.google.firestore.v1.TransactionOptions.toObject(message.newTransaction, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "newTransaction";
+                        }
+                        if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "readTime";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this BatchGetDocumentsRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.BatchGetDocumentsRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    BatchGetDocumentsRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return BatchGetDocumentsRequest;
                 })();
     
@@ -4181,6 +8648,89 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a BatchGetDocumentsResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.BatchGetDocumentsResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.BatchGetDocumentsResponse} BatchGetDocumentsResponse
+                     */
+                    BatchGetDocumentsResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.BatchGetDocumentsResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.BatchGetDocumentsResponse();
+                        if (object.found != null) {
+                            if (typeof object.found !== "object")
+                                throw TypeError(".google.firestore.v1.BatchGetDocumentsResponse.found: object expected");
+                            message.found = $root.google.firestore.v1.Document.fromObject(object.found);
+                        }
+                        if (object.missing != null)
+                            message.missing = String(object.missing);
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length)
+                                message.transaction = object.transaction;
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.BatchGetDocumentsResponse.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a BatchGetDocumentsResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.BatchGetDocumentsResponse
+                     * @static
+                     * @param {google.firestore.v1.BatchGetDocumentsResponse} message BatchGetDocumentsResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    BatchGetDocumentsResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            if (options.bytes === String)
+                                object.transaction = "";
+                            else {
+                                object.transaction = [];
+                                if (options.bytes !== Array)
+                                    object.transaction = $util.newBuffer(object.transaction);
+                            }
+                            object.readTime = null;
+                        }
+                        if (message.found != null && message.hasOwnProperty("found")) {
+                            object.found = $root.google.firestore.v1.Document.toObject(message.found, options);
+                            if (options.oneofs)
+                                object.result = "found";
+                        }
+                        if (message.missing != null && message.hasOwnProperty("missing")) {
+                            object.missing = message.missing;
+                            if (options.oneofs)
+                                object.result = "missing";
+                        }
+                        if (message.transaction != null && message.hasOwnProperty("transaction"))
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                        if (message.readTime != null && message.hasOwnProperty("readTime"))
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this BatchGetDocumentsResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.BatchGetDocumentsResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    BatchGetDocumentsResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return BatchGetDocumentsResponse;
                 })();
     
@@ -4225,6 +8775,63 @@
                      */
                     BeginTransactionRequest.prototype.options = null;
     
+                    /**
+                     * Creates a BeginTransactionRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.BeginTransactionRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.BeginTransactionRequest} BeginTransactionRequest
+                     */
+                    BeginTransactionRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.BeginTransactionRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.BeginTransactionRequest();
+                        if (object.database != null)
+                            message.database = String(object.database);
+                        if (object.options != null) {
+                            if (typeof object.options !== "object")
+                                throw TypeError(".google.firestore.v1.BeginTransactionRequest.options: object expected");
+                            message.options = $root.google.firestore.v1.TransactionOptions.fromObject(object.options);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a BeginTransactionRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.BeginTransactionRequest
+                     * @static
+                     * @param {google.firestore.v1.BeginTransactionRequest} message BeginTransactionRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    BeginTransactionRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.database = "";
+                            object.options = null;
+                        }
+                        if (message.database != null && message.hasOwnProperty("database"))
+                            object.database = message.database;
+                        if (message.options != null && message.hasOwnProperty("options"))
+                            object.options = $root.google.firestore.v1.TransactionOptions.toObject(message.options, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this BeginTransactionRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.BeginTransactionRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    BeginTransactionRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return BeginTransactionRequest;
                 })();
     
@@ -4259,6 +8866,63 @@
                      * @instance
                      */
                     BeginTransactionResponse.prototype.transaction = $util.newBuffer([]);
+    
+                    /**
+                     * Creates a BeginTransactionResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.BeginTransactionResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.BeginTransactionResponse} BeginTransactionResponse
+                     */
+                    BeginTransactionResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.BeginTransactionResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.BeginTransactionResponse();
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length)
+                                message.transaction = object.transaction;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a BeginTransactionResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.BeginTransactionResponse
+                     * @static
+                     * @param {google.firestore.v1.BeginTransactionResponse} message BeginTransactionResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    BeginTransactionResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults)
+                            if (options.bytes === String)
+                                object.transaction = "";
+                            else {
+                                object.transaction = [];
+                                if (options.bytes !== Array)
+                                    object.transaction = $util.newBuffer(object.transaction);
+                            }
+                        if (message.transaction != null && message.hasOwnProperty("transaction"))
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this BeginTransactionResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.BeginTransactionResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    BeginTransactionResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return BeginTransactionResponse;
                 })();
@@ -4314,6 +8978,86 @@
                      */
                     CommitRequest.prototype.transaction = $util.newBuffer([]);
     
+                    /**
+                     * Creates a CommitRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.CommitRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.CommitRequest} CommitRequest
+                     */
+                    CommitRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.CommitRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.CommitRequest();
+                        if (object.database != null)
+                            message.database = String(object.database);
+                        if (object.writes) {
+                            if (!Array.isArray(object.writes))
+                                throw TypeError(".google.firestore.v1.CommitRequest.writes: array expected");
+                            message.writes = [];
+                            for (var i = 0; i < object.writes.length; ++i) {
+                                if (typeof object.writes[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.CommitRequest.writes: object expected");
+                                message.writes[i] = $root.google.firestore.v1.Write.fromObject(object.writes[i]);
+                            }
+                        }
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length)
+                                message.transaction = object.transaction;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a CommitRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.CommitRequest
+                     * @static
+                     * @param {google.firestore.v1.CommitRequest} message CommitRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    CommitRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.writes = [];
+                        if (options.defaults) {
+                            object.database = "";
+                            if (options.bytes === String)
+                                object.transaction = "";
+                            else {
+                                object.transaction = [];
+                                if (options.bytes !== Array)
+                                    object.transaction = $util.newBuffer(object.transaction);
+                            }
+                        }
+                        if (message.database != null && message.hasOwnProperty("database"))
+                            object.database = message.database;
+                        if (message.writes && message.writes.length) {
+                            object.writes = [];
+                            for (var j = 0; j < message.writes.length; ++j)
+                                object.writes[j] = $root.google.firestore.v1.Write.toObject(message.writes[j], options);
+                        }
+                        if (message.transaction != null && message.hasOwnProperty("transaction"))
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this CommitRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.CommitRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    CommitRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return CommitRequest;
                 })();
     
@@ -4359,6 +9103,74 @@
                      */
                     CommitResponse.prototype.commitTime = null;
     
+                    /**
+                     * Creates a CommitResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.CommitResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.CommitResponse} CommitResponse
+                     */
+                    CommitResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.CommitResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.CommitResponse();
+                        if (object.writeResults) {
+                            if (!Array.isArray(object.writeResults))
+                                throw TypeError(".google.firestore.v1.CommitResponse.writeResults: array expected");
+                            message.writeResults = [];
+                            for (var i = 0; i < object.writeResults.length; ++i) {
+                                if (typeof object.writeResults[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.CommitResponse.writeResults: object expected");
+                                message.writeResults[i] = $root.google.firestore.v1.WriteResult.fromObject(object.writeResults[i]);
+                            }
+                        }
+                        if (object.commitTime != null) {
+                            if (typeof object.commitTime !== "object")
+                                throw TypeError(".google.firestore.v1.CommitResponse.commitTime: object expected");
+                            message.commitTime = $root.google.protobuf.Timestamp.fromObject(object.commitTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a CommitResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.CommitResponse
+                     * @static
+                     * @param {google.firestore.v1.CommitResponse} message CommitResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    CommitResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.writeResults = [];
+                        if (options.defaults)
+                            object.commitTime = null;
+                        if (message.writeResults && message.writeResults.length) {
+                            object.writeResults = [];
+                            for (var j = 0; j < message.writeResults.length; ++j)
+                                object.writeResults[j] = $root.google.firestore.v1.WriteResult.toObject(message.writeResults[j], options);
+                        }
+                        if (message.commitTime != null && message.hasOwnProperty("commitTime"))
+                            object.commitTime = $root.google.protobuf.Timestamp.toObject(message.commitTime, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this CommitResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.CommitResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    CommitResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return CommitResponse;
                 })();
     
@@ -4402,6 +9214,69 @@
                      * @instance
                      */
                     RollbackRequest.prototype.transaction = $util.newBuffer([]);
+    
+                    /**
+                     * Creates a RollbackRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.RollbackRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.RollbackRequest} RollbackRequest
+                     */
+                    RollbackRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.RollbackRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.RollbackRequest();
+                        if (object.database != null)
+                            message.database = String(object.database);
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length)
+                                message.transaction = object.transaction;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a RollbackRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.RollbackRequest
+                     * @static
+                     * @param {google.firestore.v1.RollbackRequest} message RollbackRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    RollbackRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.database = "";
+                            if (options.bytes === String)
+                                object.transaction = "";
+                            else {
+                                object.transaction = [];
+                                if (options.bytes !== Array)
+                                    object.transaction = $util.newBuffer(object.transaction);
+                            }
+                        }
+                        if (message.database != null && message.hasOwnProperty("database"))
+                            object.database = message.database;
+                        if (message.transaction != null && message.hasOwnProperty("transaction"))
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this RollbackRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.RollbackRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    RollbackRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return RollbackRequest;
                 })();
@@ -4499,6 +9374,94 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a RunQueryRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.RunQueryRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.RunQueryRequest} RunQueryRequest
+                     */
+                    RunQueryRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.RunQueryRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.RunQueryRequest();
+                        if (object.parent != null)
+                            message.parent = String(object.parent);
+                        if (object.structuredQuery != null) {
+                            if (typeof object.structuredQuery !== "object")
+                                throw TypeError(".google.firestore.v1.RunQueryRequest.structuredQuery: object expected");
+                            message.structuredQuery = $root.google.firestore.v1.StructuredQuery.fromObject(object.structuredQuery);
+                        }
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length)
+                                message.transaction = object.transaction;
+                        if (object.newTransaction != null) {
+                            if (typeof object.newTransaction !== "object")
+                                throw TypeError(".google.firestore.v1.RunQueryRequest.newTransaction: object expected");
+                            message.newTransaction = $root.google.firestore.v1.TransactionOptions.fromObject(object.newTransaction);
+                        }
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.RunQueryRequest.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a RunQueryRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.RunQueryRequest
+                     * @static
+                     * @param {google.firestore.v1.RunQueryRequest} message RunQueryRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    RunQueryRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults)
+                            object.parent = "";
+                        if (message.parent != null && message.hasOwnProperty("parent"))
+                            object.parent = message.parent;
+                        if (message.structuredQuery != null && message.hasOwnProperty("structuredQuery")) {
+                            object.structuredQuery = $root.google.firestore.v1.StructuredQuery.toObject(message.structuredQuery, options);
+                            if (options.oneofs)
+                                object.queryType = "structuredQuery";
+                        }
+                        if (message.transaction != null && message.hasOwnProperty("transaction")) {
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                            if (options.oneofs)
+                                object.consistencySelector = "transaction";
+                        }
+                        if (message.newTransaction != null && message.hasOwnProperty("newTransaction")) {
+                            object.newTransaction = $root.google.firestore.v1.TransactionOptions.toObject(message.newTransaction, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "newTransaction";
+                        }
+                        if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                            if (options.oneofs)
+                                object.consistencySelector = "readTime";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this RunQueryRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.RunQueryRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    RunQueryRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return RunQueryRequest;
                 })();
     
@@ -4560,6 +9523,85 @@
                      * @instance
                      */
                     RunQueryResponse.prototype.skippedResults = 0;
+    
+                    /**
+                     * Creates a RunQueryResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.RunQueryResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.RunQueryResponse} RunQueryResponse
+                     */
+                    RunQueryResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.RunQueryResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.RunQueryResponse();
+                        if (object.transaction != null)
+                            if (typeof object.transaction === "string")
+                                $util.base64.decode(object.transaction, message.transaction = $util.newBuffer($util.base64.length(object.transaction)), 0);
+                            else if (object.transaction.length)
+                                message.transaction = object.transaction;
+                        if (object.document != null) {
+                            if (typeof object.document !== "object")
+                                throw TypeError(".google.firestore.v1.RunQueryResponse.document: object expected");
+                            message.document = $root.google.firestore.v1.Document.fromObject(object.document);
+                        }
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.RunQueryResponse.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        if (object.skippedResults != null)
+                            message.skippedResults = object.skippedResults | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a RunQueryResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.RunQueryResponse
+                     * @static
+                     * @param {google.firestore.v1.RunQueryResponse} message RunQueryResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    RunQueryResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.document = null;
+                            if (options.bytes === String)
+                                object.transaction = "";
+                            else {
+                                object.transaction = [];
+                                if (options.bytes !== Array)
+                                    object.transaction = $util.newBuffer(object.transaction);
+                            }
+                            object.readTime = null;
+                            object.skippedResults = 0;
+                        }
+                        if (message.document != null && message.hasOwnProperty("document"))
+                            object.document = $root.google.firestore.v1.Document.toObject(message.document, options);
+                        if (message.transaction != null && message.hasOwnProperty("transaction"))
+                            object.transaction = options.bytes === String ? $util.base64.encode(message.transaction, 0, message.transaction.length) : options.bytes === Array ? Array.prototype.slice.call(message.transaction) : message.transaction;
+                        if (message.readTime != null && message.hasOwnProperty("readTime"))
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                        if (message.skippedResults != null && message.hasOwnProperty("skippedResults"))
+                            object.skippedResults = message.skippedResults;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this RunQueryResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.RunQueryResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    RunQueryResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return RunQueryResponse;
                 })();
@@ -4634,6 +9676,106 @@
                      */
                     WriteRequest.prototype.labels = $util.emptyObject;
     
+                    /**
+                     * Creates a WriteRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.WriteRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.WriteRequest} WriteRequest
+                     */
+                    WriteRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.WriteRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.WriteRequest();
+                        if (object.database != null)
+                            message.database = String(object.database);
+                        if (object.streamId != null)
+                            message.streamId = String(object.streamId);
+                        if (object.writes) {
+                            if (!Array.isArray(object.writes))
+                                throw TypeError(".google.firestore.v1.WriteRequest.writes: array expected");
+                            message.writes = [];
+                            for (var i = 0; i < object.writes.length; ++i) {
+                                if (typeof object.writes[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.WriteRequest.writes: object expected");
+                                message.writes[i] = $root.google.firestore.v1.Write.fromObject(object.writes[i]);
+                            }
+                        }
+                        if (object.streamToken != null)
+                            if (typeof object.streamToken === "string")
+                                $util.base64.decode(object.streamToken, message.streamToken = $util.newBuffer($util.base64.length(object.streamToken)), 0);
+                            else if (object.streamToken.length)
+                                message.streamToken = object.streamToken;
+                        if (object.labels) {
+                            if (typeof object.labels !== "object")
+                                throw TypeError(".google.firestore.v1.WriteRequest.labels: object expected");
+                            message.labels = {};
+                            for (var keys = Object.keys(object.labels), i = 0; i < keys.length; ++i)
+                                message.labels[keys[i]] = String(object.labels[keys[i]]);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a WriteRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.WriteRequest
+                     * @static
+                     * @param {google.firestore.v1.WriteRequest} message WriteRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    WriteRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.writes = [];
+                        if (options.objects || options.defaults)
+                            object.labels = {};
+                        if (options.defaults) {
+                            object.database = "";
+                            object.streamId = "";
+                            if (options.bytes === String)
+                                object.streamToken = "";
+                            else {
+                                object.streamToken = [];
+                                if (options.bytes !== Array)
+                                    object.streamToken = $util.newBuffer(object.streamToken);
+                            }
+                        }
+                        if (message.database != null && message.hasOwnProperty("database"))
+                            object.database = message.database;
+                        if (message.streamId != null && message.hasOwnProperty("streamId"))
+                            object.streamId = message.streamId;
+                        if (message.writes && message.writes.length) {
+                            object.writes = [];
+                            for (var j = 0; j < message.writes.length; ++j)
+                                object.writes[j] = $root.google.firestore.v1.Write.toObject(message.writes[j], options);
+                        }
+                        if (message.streamToken != null && message.hasOwnProperty("streamToken"))
+                            object.streamToken = options.bytes === String ? $util.base64.encode(message.streamToken, 0, message.streamToken.length) : options.bytes === Array ? Array.prototype.slice.call(message.streamToken) : message.streamToken;
+                        var keys2;
+                        if (message.labels && (keys2 = Object.keys(message.labels)).length) {
+                            object.labels = {};
+                            for (var j = 0; j < keys2.length; ++j)
+                                object.labels[keys2[j]] = message.labels[keys2[j]];
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this WriteRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.WriteRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    WriteRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return WriteRequest;
                 })();
     
@@ -4696,6 +9838,94 @@
                      * @instance
                      */
                     WriteResponse.prototype.commitTime = null;
+    
+                    /**
+                     * Creates a WriteResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.WriteResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.WriteResponse} WriteResponse
+                     */
+                    WriteResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.WriteResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.WriteResponse();
+                        if (object.streamId != null)
+                            message.streamId = String(object.streamId);
+                        if (object.streamToken != null)
+                            if (typeof object.streamToken === "string")
+                                $util.base64.decode(object.streamToken, message.streamToken = $util.newBuffer($util.base64.length(object.streamToken)), 0);
+                            else if (object.streamToken.length)
+                                message.streamToken = object.streamToken;
+                        if (object.writeResults) {
+                            if (!Array.isArray(object.writeResults))
+                                throw TypeError(".google.firestore.v1.WriteResponse.writeResults: array expected");
+                            message.writeResults = [];
+                            for (var i = 0; i < object.writeResults.length; ++i) {
+                                if (typeof object.writeResults[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.WriteResponse.writeResults: object expected");
+                                message.writeResults[i] = $root.google.firestore.v1.WriteResult.fromObject(object.writeResults[i]);
+                            }
+                        }
+                        if (object.commitTime != null) {
+                            if (typeof object.commitTime !== "object")
+                                throw TypeError(".google.firestore.v1.WriteResponse.commitTime: object expected");
+                            message.commitTime = $root.google.protobuf.Timestamp.fromObject(object.commitTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a WriteResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.WriteResponse
+                     * @static
+                     * @param {google.firestore.v1.WriteResponse} message WriteResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    WriteResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.writeResults = [];
+                        if (options.defaults) {
+                            object.streamId = "";
+                            if (options.bytes === String)
+                                object.streamToken = "";
+                            else {
+                                object.streamToken = [];
+                                if (options.bytes !== Array)
+                                    object.streamToken = $util.newBuffer(object.streamToken);
+                            }
+                            object.commitTime = null;
+                        }
+                        if (message.streamId != null && message.hasOwnProperty("streamId"))
+                            object.streamId = message.streamId;
+                        if (message.streamToken != null && message.hasOwnProperty("streamToken"))
+                            object.streamToken = options.bytes === String ? $util.base64.encode(message.streamToken, 0, message.streamToken.length) : options.bytes === Array ? Array.prototype.slice.call(message.streamToken) : message.streamToken;
+                        if (message.writeResults && message.writeResults.length) {
+                            object.writeResults = [];
+                            for (var j = 0; j < message.writeResults.length; ++j)
+                                object.writeResults[j] = $root.google.firestore.v1.WriteResult.toObject(message.writeResults[j], options);
+                        }
+                        if (message.commitTime != null && message.hasOwnProperty("commitTime"))
+                            object.commitTime = $root.google.protobuf.Timestamp.toObject(message.commitTime, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this WriteResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.WriteResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    WriteResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return WriteResponse;
                 })();
@@ -4773,6 +10003,86 @@
                         get: $util.oneOfGetter($oneOfFields = ["addTarget", "removeTarget"]),
                         set: $util.oneOfSetter($oneOfFields)
                     });
+    
+                    /**
+                     * Creates a ListenRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ListenRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ListenRequest} ListenRequest
+                     */
+                    ListenRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ListenRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.ListenRequest();
+                        if (object.database != null)
+                            message.database = String(object.database);
+                        if (object.addTarget != null) {
+                            if (typeof object.addTarget !== "object")
+                                throw TypeError(".google.firestore.v1.ListenRequest.addTarget: object expected");
+                            message.addTarget = $root.google.firestore.v1.Target.fromObject(object.addTarget);
+                        }
+                        if (object.removeTarget != null)
+                            message.removeTarget = object.removeTarget | 0;
+                        if (object.labels) {
+                            if (typeof object.labels !== "object")
+                                throw TypeError(".google.firestore.v1.ListenRequest.labels: object expected");
+                            message.labels = {};
+                            for (var keys = Object.keys(object.labels), i = 0; i < keys.length; ++i)
+                                message.labels[keys[i]] = String(object.labels[keys[i]]);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a ListenRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ListenRequest
+                     * @static
+                     * @param {google.firestore.v1.ListenRequest} message ListenRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ListenRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.objects || options.defaults)
+                            object.labels = {};
+                        if (options.defaults)
+                            object.database = "";
+                        if (message.database != null && message.hasOwnProperty("database"))
+                            object.database = message.database;
+                        if (message.addTarget != null && message.hasOwnProperty("addTarget")) {
+                            object.addTarget = $root.google.firestore.v1.Target.toObject(message.addTarget, options);
+                            if (options.oneofs)
+                                object.targetChange = "addTarget";
+                        }
+                        if (message.removeTarget != null && message.hasOwnProperty("removeTarget")) {
+                            object.removeTarget = message.removeTarget;
+                            if (options.oneofs)
+                                object.targetChange = "removeTarget";
+                        }
+                        var keys2;
+                        if (message.labels && (keys2 = Object.keys(message.labels)).length) {
+                            object.labels = {};
+                            for (var j = 0; j < keys2.length; ++j)
+                                object.labels[keys2[j]] = message.labels[keys2[j]];
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ListenRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ListenRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ListenRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return ListenRequest;
                 })();
@@ -4858,6 +10168,98 @@
                         get: $util.oneOfGetter($oneOfFields = ["targetChange", "documentChange", "documentDelete", "documentRemove", "filter"]),
                         set: $util.oneOfSetter($oneOfFields)
                     });
+    
+                    /**
+                     * Creates a ListenResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ListenResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ListenResponse} ListenResponse
+                     */
+                    ListenResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ListenResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.ListenResponse();
+                        if (object.targetChange != null) {
+                            if (typeof object.targetChange !== "object")
+                                throw TypeError(".google.firestore.v1.ListenResponse.targetChange: object expected");
+                            message.targetChange = $root.google.firestore.v1.TargetChange.fromObject(object.targetChange);
+                        }
+                        if (object.documentChange != null) {
+                            if (typeof object.documentChange !== "object")
+                                throw TypeError(".google.firestore.v1.ListenResponse.documentChange: object expected");
+                            message.documentChange = $root.google.firestore.v1.DocumentChange.fromObject(object.documentChange);
+                        }
+                        if (object.documentDelete != null) {
+                            if (typeof object.documentDelete !== "object")
+                                throw TypeError(".google.firestore.v1.ListenResponse.documentDelete: object expected");
+                            message.documentDelete = $root.google.firestore.v1.DocumentDelete.fromObject(object.documentDelete);
+                        }
+                        if (object.documentRemove != null) {
+                            if (typeof object.documentRemove !== "object")
+                                throw TypeError(".google.firestore.v1.ListenResponse.documentRemove: object expected");
+                            message.documentRemove = $root.google.firestore.v1.DocumentRemove.fromObject(object.documentRemove);
+                        }
+                        if (object.filter != null) {
+                            if (typeof object.filter !== "object")
+                                throw TypeError(".google.firestore.v1.ListenResponse.filter: object expected");
+                            message.filter = $root.google.firestore.v1.ExistenceFilter.fromObject(object.filter);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a ListenResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ListenResponse
+                     * @static
+                     * @param {google.firestore.v1.ListenResponse} message ListenResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ListenResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (message.targetChange != null && message.hasOwnProperty("targetChange")) {
+                            object.targetChange = $root.google.firestore.v1.TargetChange.toObject(message.targetChange, options);
+                            if (options.oneofs)
+                                object.responseType = "targetChange";
+                        }
+                        if (message.documentChange != null && message.hasOwnProperty("documentChange")) {
+                            object.documentChange = $root.google.firestore.v1.DocumentChange.toObject(message.documentChange, options);
+                            if (options.oneofs)
+                                object.responseType = "documentChange";
+                        }
+                        if (message.documentDelete != null && message.hasOwnProperty("documentDelete")) {
+                            object.documentDelete = $root.google.firestore.v1.DocumentDelete.toObject(message.documentDelete, options);
+                            if (options.oneofs)
+                                object.responseType = "documentDelete";
+                        }
+                        if (message.filter != null && message.hasOwnProperty("filter")) {
+                            object.filter = $root.google.firestore.v1.ExistenceFilter.toObject(message.filter, options);
+                            if (options.oneofs)
+                                object.responseType = "filter";
+                        }
+                        if (message.documentRemove != null && message.hasOwnProperty("documentRemove")) {
+                            object.documentRemove = $root.google.firestore.v1.DocumentRemove.toObject(message.documentRemove, options);
+                            if (options.oneofs)
+                                object.responseType = "documentRemove";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ListenResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ListenResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ListenResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return ListenResponse;
                 })();
@@ -4964,6 +10366,100 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a Target message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.Target
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.Target} Target
+                     */
+                    Target.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.Target)
+                            return object;
+                        var message = new $root.google.firestore.v1.Target();
+                        if (object.query != null) {
+                            if (typeof object.query !== "object")
+                                throw TypeError(".google.firestore.v1.Target.query: object expected");
+                            message.query = $root.google.firestore.v1.Target.QueryTarget.fromObject(object.query);
+                        }
+                        if (object.documents != null) {
+                            if (typeof object.documents !== "object")
+                                throw TypeError(".google.firestore.v1.Target.documents: object expected");
+                            message.documents = $root.google.firestore.v1.Target.DocumentsTarget.fromObject(object.documents);
+                        }
+                        if (object.resumeToken != null)
+                            if (typeof object.resumeToken === "string")
+                                $util.base64.decode(object.resumeToken, message.resumeToken = $util.newBuffer($util.base64.length(object.resumeToken)), 0);
+                            else if (object.resumeToken.length)
+                                message.resumeToken = object.resumeToken;
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.Target.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        if (object.targetId != null)
+                            message.targetId = object.targetId | 0;
+                        if (object.once != null)
+                            message.once = Boolean(object.once);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Target message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.Target
+                     * @static
+                     * @param {google.firestore.v1.Target} message Target
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Target.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.targetId = 0;
+                            object.once = false;
+                        }
+                        if (message.query != null && message.hasOwnProperty("query")) {
+                            object.query = $root.google.firestore.v1.Target.QueryTarget.toObject(message.query, options);
+                            if (options.oneofs)
+                                object.targetType = "query";
+                        }
+                        if (message.documents != null && message.hasOwnProperty("documents")) {
+                            object.documents = $root.google.firestore.v1.Target.DocumentsTarget.toObject(message.documents, options);
+                            if (options.oneofs)
+                                object.targetType = "documents";
+                        }
+                        if (message.resumeToken != null && message.hasOwnProperty("resumeToken")) {
+                            object.resumeToken = options.bytes === String ? $util.base64.encode(message.resumeToken, 0, message.resumeToken.length) : options.bytes === Array ? Array.prototype.slice.call(message.resumeToken) : message.resumeToken;
+                            if (options.oneofs)
+                                object.resumeType = "resumeToken";
+                        }
+                        if (message.targetId != null && message.hasOwnProperty("targetId"))
+                            object.targetId = message.targetId;
+                        if (message.once != null && message.hasOwnProperty("once"))
+                            object.once = message.once;
+                        if (message.readTime != null && message.hasOwnProperty("readTime")) {
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                            if (options.oneofs)
+                                object.resumeType = "readTime";
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Target to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.Target
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Target.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     Target.DocumentsTarget = (function() {
     
                         /**
@@ -4996,6 +10492,62 @@
                          * @instance
                          */
                         DocumentsTarget.prototype.documents = $util.emptyArray;
+    
+                        /**
+                         * Creates a DocumentsTarget message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.Target.DocumentsTarget
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.Target.DocumentsTarget} DocumentsTarget
+                         */
+                        DocumentsTarget.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.Target.DocumentsTarget)
+                                return object;
+                            var message = new $root.google.firestore.v1.Target.DocumentsTarget();
+                            if (object.documents) {
+                                if (!Array.isArray(object.documents))
+                                    throw TypeError(".google.firestore.v1.Target.DocumentsTarget.documents: array expected");
+                                message.documents = [];
+                                for (var i = 0; i < object.documents.length; ++i)
+                                    message.documents[i] = String(object.documents[i]);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a DocumentsTarget message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.Target.DocumentsTarget
+                         * @static
+                         * @param {google.firestore.v1.Target.DocumentsTarget} message DocumentsTarget
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DocumentsTarget.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.documents = [];
+                            if (message.documents && message.documents.length) {
+                                object.documents = [];
+                                for (var j = 0; j < message.documents.length; ++j)
+                                    object.documents[j] = message.documents[j];
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this DocumentsTarget to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.Target.DocumentsTarget
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DocumentsTarget.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
     
                         return DocumentsTarget;
                     })();
@@ -5054,6 +10606,64 @@
                             get: $util.oneOfGetter($oneOfFields = ["structuredQuery"]),
                             set: $util.oneOfSetter($oneOfFields)
                         });
+    
+                        /**
+                         * Creates a QueryTarget message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.Target.QueryTarget
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.Target.QueryTarget} QueryTarget
+                         */
+                        QueryTarget.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.Target.QueryTarget)
+                                return object;
+                            var message = new $root.google.firestore.v1.Target.QueryTarget();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            if (object.structuredQuery != null) {
+                                if (typeof object.structuredQuery !== "object")
+                                    throw TypeError(".google.firestore.v1.Target.QueryTarget.structuredQuery: object expected");
+                                message.structuredQuery = $root.google.firestore.v1.StructuredQuery.fromObject(object.structuredQuery);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a QueryTarget message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.Target.QueryTarget
+                         * @static
+                         * @param {google.firestore.v1.Target.QueryTarget} message QueryTarget
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        QueryTarget.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.parent = "";
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            if (message.structuredQuery != null && message.hasOwnProperty("structuredQuery")) {
+                                object.structuredQuery = $root.google.firestore.v1.StructuredQuery.toObject(message.structuredQuery, options);
+                                if (options.oneofs)
+                                    object.queryType = "structuredQuery";
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this QueryTarget to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.Target.QueryTarget
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        QueryTarget.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
     
                         return QueryTarget;
                     })();
@@ -5131,6 +10741,119 @@
                     TargetChange.prototype.readTime = null;
     
                     /**
+                     * Creates a TargetChange message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.TargetChange
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.TargetChange} TargetChange
+                     */
+                    TargetChange.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.TargetChange)
+                            return object;
+                        var message = new $root.google.firestore.v1.TargetChange();
+                        switch (object.targetChangeType) {
+                        case "NO_CHANGE":
+                        case 0:
+                            message.targetChangeType = 0;
+                            break;
+                        case "ADD":
+                        case 1:
+                            message.targetChangeType = 1;
+                            break;
+                        case "REMOVE":
+                        case 2:
+                            message.targetChangeType = 2;
+                            break;
+                        case "CURRENT":
+                        case 3:
+                            message.targetChangeType = 3;
+                            break;
+                        case "RESET":
+                        case 4:
+                            message.targetChangeType = 4;
+                            break;
+                        }
+                        if (object.targetIds) {
+                            if (!Array.isArray(object.targetIds))
+                                throw TypeError(".google.firestore.v1.TargetChange.targetIds: array expected");
+                            message.targetIds = [];
+                            for (var i = 0; i < object.targetIds.length; ++i)
+                                message.targetIds[i] = object.targetIds[i] | 0;
+                        }
+                        if (object.cause != null) {
+                            if (typeof object.cause !== "object")
+                                throw TypeError(".google.firestore.v1.TargetChange.cause: object expected");
+                            message.cause = $root.google.rpc.Status.fromObject(object.cause);
+                        }
+                        if (object.resumeToken != null)
+                            if (typeof object.resumeToken === "string")
+                                $util.base64.decode(object.resumeToken, message.resumeToken = $util.newBuffer($util.base64.length(object.resumeToken)), 0);
+                            else if (object.resumeToken.length)
+                                message.resumeToken = object.resumeToken;
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.TargetChange.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a TargetChange message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.TargetChange
+                     * @static
+                     * @param {google.firestore.v1.TargetChange} message TargetChange
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    TargetChange.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.targetIds = [];
+                        if (options.defaults) {
+                            object.targetChangeType = options.enums === String ? "NO_CHANGE" : 0;
+                            object.cause = null;
+                            if (options.bytes === String)
+                                object.resumeToken = "";
+                            else {
+                                object.resumeToken = [];
+                                if (options.bytes !== Array)
+                                    object.resumeToken = $util.newBuffer(object.resumeToken);
+                            }
+                            object.readTime = null;
+                        }
+                        if (message.targetChangeType != null && message.hasOwnProperty("targetChangeType"))
+                            object.targetChangeType = options.enums === String ? $root.google.firestore.v1.TargetChange.TargetChangeType[message.targetChangeType] : message.targetChangeType;
+                        if (message.targetIds && message.targetIds.length) {
+                            object.targetIds = [];
+                            for (var j = 0; j < message.targetIds.length; ++j)
+                                object.targetIds[j] = message.targetIds[j];
+                        }
+                        if (message.cause != null && message.hasOwnProperty("cause"))
+                            object.cause = $root.google.rpc.Status.toObject(message.cause, options);
+                        if (message.resumeToken != null && message.hasOwnProperty("resumeToken"))
+                            object.resumeToken = options.bytes === String ? $util.base64.encode(message.resumeToken, 0, message.resumeToken.length) : options.bytes === Array ? Array.prototype.slice.call(message.resumeToken) : message.resumeToken;
+                        if (message.readTime != null && message.hasOwnProperty("readTime"))
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this TargetChange to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.TargetChange
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    TargetChange.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
                      * TargetChangeType enum.
                      * @name google.firestore.v1.TargetChange.TargetChangeType
                      * @enum {number}
@@ -5203,6 +10926,65 @@
                      */
                     ListCollectionIdsRequest.prototype.pageToken = "";
     
+                    /**
+                     * Creates a ListCollectionIdsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ListCollectionIdsRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ListCollectionIdsRequest} ListCollectionIdsRequest
+                     */
+                    ListCollectionIdsRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ListCollectionIdsRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.ListCollectionIdsRequest();
+                        if (object.parent != null)
+                            message.parent = String(object.parent);
+                        if (object.pageSize != null)
+                            message.pageSize = object.pageSize | 0;
+                        if (object.pageToken != null)
+                            message.pageToken = String(object.pageToken);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a ListCollectionIdsRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ListCollectionIdsRequest
+                     * @static
+                     * @param {google.firestore.v1.ListCollectionIdsRequest} message ListCollectionIdsRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ListCollectionIdsRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.parent = "";
+                            object.pageSize = 0;
+                            object.pageToken = "";
+                        }
+                        if (message.parent != null && message.hasOwnProperty("parent"))
+                            object.parent = message.parent;
+                        if (message.pageSize != null && message.hasOwnProperty("pageSize"))
+                            object.pageSize = message.pageSize;
+                        if (message.pageToken != null && message.hasOwnProperty("pageToken"))
+                            object.pageToken = message.pageToken;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ListCollectionIdsRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ListCollectionIdsRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ListCollectionIdsRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return ListCollectionIdsRequest;
                 })();
     
@@ -5247,6 +11029,68 @@
                      * @instance
                      */
                     ListCollectionIdsResponse.prototype.nextPageToken = "";
+    
+                    /**
+                     * Creates a ListCollectionIdsResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ListCollectionIdsResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ListCollectionIdsResponse} ListCollectionIdsResponse
+                     */
+                    ListCollectionIdsResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ListCollectionIdsResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.ListCollectionIdsResponse();
+                        if (object.collectionIds) {
+                            if (!Array.isArray(object.collectionIds))
+                                throw TypeError(".google.firestore.v1.ListCollectionIdsResponse.collectionIds: array expected");
+                            message.collectionIds = [];
+                            for (var i = 0; i < object.collectionIds.length; ++i)
+                                message.collectionIds[i] = String(object.collectionIds[i]);
+                        }
+                        if (object.nextPageToken != null)
+                            message.nextPageToken = String(object.nextPageToken);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a ListCollectionIdsResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ListCollectionIdsResponse
+                     * @static
+                     * @param {google.firestore.v1.ListCollectionIdsResponse} message ListCollectionIdsResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ListCollectionIdsResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.collectionIds = [];
+                        if (options.defaults)
+                            object.nextPageToken = "";
+                        if (message.collectionIds && message.collectionIds.length) {
+                            object.collectionIds = [];
+                            for (var j = 0; j < message.collectionIds.length; ++j)
+                                object.collectionIds[j] = message.collectionIds[j];
+                        }
+                        if (message.nextPageToken != null && message.hasOwnProperty("nextPageToken"))
+                            object.nextPageToken = message.nextPageToken;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ListCollectionIdsResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ListCollectionIdsResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ListCollectionIdsResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return ListCollectionIdsResponse;
                 })();
@@ -5348,6 +11192,129 @@
                      */
                     StructuredQuery.prototype.limit = null;
     
+                    /**
+                     * Creates a StructuredQuery message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.StructuredQuery
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.StructuredQuery} StructuredQuery
+                     */
+                    StructuredQuery.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.StructuredQuery)
+                            return object;
+                        var message = new $root.google.firestore.v1.StructuredQuery();
+                        if (object.select != null) {
+                            if (typeof object.select !== "object")
+                                throw TypeError(".google.firestore.v1.StructuredQuery.select: object expected");
+                            message.select = $root.google.firestore.v1.StructuredQuery.Projection.fromObject(object.select);
+                        }
+                        if (object.from) {
+                            if (!Array.isArray(object.from))
+                                throw TypeError(".google.firestore.v1.StructuredQuery.from: array expected");
+                            message.from = [];
+                            for (var i = 0; i < object.from.length; ++i) {
+                                if (typeof object.from[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.from: object expected");
+                                message.from[i] = $root.google.firestore.v1.StructuredQuery.CollectionSelector.fromObject(object.from[i]);
+                            }
+                        }
+                        if (object.where != null) {
+                            if (typeof object.where !== "object")
+                                throw TypeError(".google.firestore.v1.StructuredQuery.where: object expected");
+                            message.where = $root.google.firestore.v1.StructuredQuery.Filter.fromObject(object.where);
+                        }
+                        if (object.orderBy) {
+                            if (!Array.isArray(object.orderBy))
+                                throw TypeError(".google.firestore.v1.StructuredQuery.orderBy: array expected");
+                            message.orderBy = [];
+                            for (var i = 0; i < object.orderBy.length; ++i) {
+                                if (typeof object.orderBy[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.orderBy: object expected");
+                                message.orderBy[i] = $root.google.firestore.v1.StructuredQuery.Order.fromObject(object.orderBy[i]);
+                            }
+                        }
+                        if (object.startAt != null) {
+                            if (typeof object.startAt !== "object")
+                                throw TypeError(".google.firestore.v1.StructuredQuery.startAt: object expected");
+                            message.startAt = $root.google.firestore.v1.Cursor.fromObject(object.startAt);
+                        }
+                        if (object.endAt != null) {
+                            if (typeof object.endAt !== "object")
+                                throw TypeError(".google.firestore.v1.StructuredQuery.endAt: object expected");
+                            message.endAt = $root.google.firestore.v1.Cursor.fromObject(object.endAt);
+                        }
+                        if (object.offset != null)
+                            message.offset = object.offset | 0;
+                        if (object.limit != null) {
+                            if (typeof object.limit !== "object")
+                                throw TypeError(".google.firestore.v1.StructuredQuery.limit: object expected");
+                            message.limit = $root.google.protobuf.Int32Value.fromObject(object.limit);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a StructuredQuery message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.StructuredQuery
+                     * @static
+                     * @param {google.firestore.v1.StructuredQuery} message StructuredQuery
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    StructuredQuery.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults) {
+                            object.from = [];
+                            object.orderBy = [];
+                        }
+                        if (options.defaults) {
+                            object.select = null;
+                            object.where = null;
+                            object.limit = null;
+                            object.offset = 0;
+                            object.startAt = null;
+                            object.endAt = null;
+                        }
+                        if (message.select != null && message.hasOwnProperty("select"))
+                            object.select = $root.google.firestore.v1.StructuredQuery.Projection.toObject(message.select, options);
+                        if (message.from && message.from.length) {
+                            object.from = [];
+                            for (var j = 0; j < message.from.length; ++j)
+                                object.from[j] = $root.google.firestore.v1.StructuredQuery.CollectionSelector.toObject(message.from[j], options);
+                        }
+                        if (message.where != null && message.hasOwnProperty("where"))
+                            object.where = $root.google.firestore.v1.StructuredQuery.Filter.toObject(message.where, options);
+                        if (message.orderBy && message.orderBy.length) {
+                            object.orderBy = [];
+                            for (var j = 0; j < message.orderBy.length; ++j)
+                                object.orderBy[j] = $root.google.firestore.v1.StructuredQuery.Order.toObject(message.orderBy[j], options);
+                        }
+                        if (message.limit != null && message.hasOwnProperty("limit"))
+                            object.limit = $root.google.protobuf.Int32Value.toObject(message.limit, options);
+                        if (message.offset != null && message.hasOwnProperty("offset"))
+                            object.offset = message.offset;
+                        if (message.startAt != null && message.hasOwnProperty("startAt"))
+                            object.startAt = $root.google.firestore.v1.Cursor.toObject(message.startAt, options);
+                        if (message.endAt != null && message.hasOwnProperty("endAt"))
+                            object.endAt = $root.google.firestore.v1.Cursor.toObject(message.endAt, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this StructuredQuery to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.StructuredQuery
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    StructuredQuery.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     StructuredQuery.CollectionSelector = (function() {
     
                         /**
@@ -5388,6 +11355,60 @@
                          * @instance
                          */
                         CollectionSelector.prototype.allDescendants = false;
+    
+                        /**
+                         * Creates a CollectionSelector message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.CollectionSelector
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.CollectionSelector} CollectionSelector
+                         */
+                        CollectionSelector.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.CollectionSelector)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.CollectionSelector();
+                            if (object.collectionId != null)
+                                message.collectionId = String(object.collectionId);
+                            if (object.allDescendants != null)
+                                message.allDescendants = Boolean(object.allDescendants);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a CollectionSelector message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.CollectionSelector
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.CollectionSelector} message CollectionSelector
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CollectionSelector.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.collectionId = "";
+                                object.allDescendants = false;
+                            }
+                            if (message.collectionId != null && message.hasOwnProperty("collectionId"))
+                                object.collectionId = message.collectionId;
+                            if (message.allDescendants != null && message.hasOwnProperty("allDescendants"))
+                                object.allDescendants = message.allDescendants;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this CollectionSelector to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.CollectionSelector
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CollectionSelector.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
     
                         return CollectionSelector;
                     })();
@@ -5456,6 +11477,78 @@
                             set: $util.oneOfSetter($oneOfFields)
                         });
     
+                        /**
+                         * Creates a Filter message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.Filter
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.Filter} Filter
+                         */
+                        Filter.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.Filter)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.Filter();
+                            if (object.compositeFilter != null) {
+                                if (typeof object.compositeFilter !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.Filter.compositeFilter: object expected");
+                                message.compositeFilter = $root.google.firestore.v1.StructuredQuery.CompositeFilter.fromObject(object.compositeFilter);
+                            }
+                            if (object.fieldFilter != null) {
+                                if (typeof object.fieldFilter !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.Filter.fieldFilter: object expected");
+                                message.fieldFilter = $root.google.firestore.v1.StructuredQuery.FieldFilter.fromObject(object.fieldFilter);
+                            }
+                            if (object.unaryFilter != null) {
+                                if (typeof object.unaryFilter !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.Filter.unaryFilter: object expected");
+                                message.unaryFilter = $root.google.firestore.v1.StructuredQuery.UnaryFilter.fromObject(object.unaryFilter);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a Filter message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.Filter
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.Filter} message Filter
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Filter.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (message.compositeFilter != null && message.hasOwnProperty("compositeFilter")) {
+                                object.compositeFilter = $root.google.firestore.v1.StructuredQuery.CompositeFilter.toObject(message.compositeFilter, options);
+                                if (options.oneofs)
+                                    object.filterType = "compositeFilter";
+                            }
+                            if (message.fieldFilter != null && message.hasOwnProperty("fieldFilter")) {
+                                object.fieldFilter = $root.google.firestore.v1.StructuredQuery.FieldFilter.toObject(message.fieldFilter, options);
+                                if (options.oneofs)
+                                    object.filterType = "fieldFilter";
+                            }
+                            if (message.unaryFilter != null && message.hasOwnProperty("unaryFilter")) {
+                                object.unaryFilter = $root.google.firestore.v1.StructuredQuery.UnaryFilter.toObject(message.unaryFilter, options);
+                                if (options.oneofs)
+                                    object.filterType = "unaryFilter";
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Filter to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.Filter
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Filter.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
                         return Filter;
                     })();
     
@@ -5500,6 +11593,79 @@
                          * @instance
                          */
                         CompositeFilter.prototype.filters = $util.emptyArray;
+    
+                        /**
+                         * Creates a CompositeFilter message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.CompositeFilter
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.CompositeFilter} CompositeFilter
+                         */
+                        CompositeFilter.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.CompositeFilter)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.CompositeFilter();
+                            switch (object.op) {
+                            case "OPERATOR_UNSPECIFIED":
+                            case 0:
+                                message.op = 0;
+                                break;
+                            case "AND":
+                            case 1:
+                                message.op = 1;
+                                break;
+                            }
+                            if (object.filters) {
+                                if (!Array.isArray(object.filters))
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.CompositeFilter.filters: array expected");
+                                message.filters = [];
+                                for (var i = 0; i < object.filters.length; ++i) {
+                                    if (typeof object.filters[i] !== "object")
+                                        throw TypeError(".google.firestore.v1.StructuredQuery.CompositeFilter.filters: object expected");
+                                    message.filters[i] = $root.google.firestore.v1.StructuredQuery.Filter.fromObject(object.filters[i]);
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a CompositeFilter message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.CompositeFilter
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.CompositeFilter} message CompositeFilter
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CompositeFilter.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.filters = [];
+                            if (options.defaults)
+                                object.op = options.enums === String ? "OPERATOR_UNSPECIFIED" : 0;
+                            if (message.op != null && message.hasOwnProperty("op"))
+                                object.op = options.enums === String ? $root.google.firestore.v1.StructuredQuery.CompositeFilter.Operator[message.op] : message.op;
+                            if (message.filters && message.filters.length) {
+                                object.filters = [];
+                                for (var j = 0; j < message.filters.length; ++j)
+                                    object.filters[j] = $root.google.firestore.v1.StructuredQuery.Filter.toObject(message.filters[j], options);
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this CompositeFilter to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.CompositeFilter
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CompositeFilter.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
     
                         /**
                          * Operator enum.
@@ -5569,6 +11735,107 @@
                         FieldFilter.prototype.value = null;
     
                         /**
+                         * Creates a FieldFilter message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.FieldFilter
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.FieldFilter} FieldFilter
+                         */
+                        FieldFilter.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.FieldFilter)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.FieldFilter();
+                            if (object.field != null) {
+                                if (typeof object.field !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.FieldFilter.field: object expected");
+                                message.field = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.field);
+                            }
+                            switch (object.op) {
+                            case "OPERATOR_UNSPECIFIED":
+                            case 0:
+                                message.op = 0;
+                                break;
+                            case "LESS_THAN":
+                            case 1:
+                                message.op = 1;
+                                break;
+                            case "LESS_THAN_OR_EQUAL":
+                            case 2:
+                                message.op = 2;
+                                break;
+                            case "GREATER_THAN":
+                            case 3:
+                                message.op = 3;
+                                break;
+                            case "GREATER_THAN_OR_EQUAL":
+                            case 4:
+                                message.op = 4;
+                                break;
+                            case "EQUAL":
+                            case 5:
+                                message.op = 5;
+                                break;
+                            case "ARRAY_CONTAINS":
+                            case 7:
+                                message.op = 7;
+                                break;
+                            case "IN":
+                            case 8:
+                                message.op = 8;
+                                break;
+                            case "ARRAY_CONTAINS_ANY":
+                            case 9:
+                                message.op = 9;
+                                break;
+                            }
+                            if (object.value != null) {
+                                if (typeof object.value !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.FieldFilter.value: object expected");
+                                message.value = $root.google.firestore.v1.Value.fromObject(object.value);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a FieldFilter message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.FieldFilter
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.FieldFilter} message FieldFilter
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        FieldFilter.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.field = null;
+                                object.op = options.enums === String ? "OPERATOR_UNSPECIFIED" : 0;
+                                object.value = null;
+                            }
+                            if (message.field != null && message.hasOwnProperty("field"))
+                                object.field = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.field, options);
+                            if (message.op != null && message.hasOwnProperty("op"))
+                                object.op = options.enums === String ? $root.google.firestore.v1.StructuredQuery.FieldFilter.Operator[message.op] : message.op;
+                            if (message.value != null && message.hasOwnProperty("value"))
+                                object.value = $root.google.firestore.v1.Value.toObject(message.value, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this FieldFilter to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.FieldFilter
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        FieldFilter.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
                          * Operator enum.
                          * @name google.firestore.v1.StructuredQuery.FieldFilter.Operator
                          * @enum {number}
@@ -5632,6 +11899,65 @@
                          */
                         Projection.prototype.fields = $util.emptyArray;
     
+                        /**
+                         * Creates a Projection message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.Projection
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.Projection} Projection
+                         */
+                        Projection.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.Projection)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.Projection();
+                            if (object.fields) {
+                                if (!Array.isArray(object.fields))
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.Projection.fields: array expected");
+                                message.fields = [];
+                                for (var i = 0; i < object.fields.length; ++i) {
+                                    if (typeof object.fields[i] !== "object")
+                                        throw TypeError(".google.firestore.v1.StructuredQuery.Projection.fields: object expected");
+                                    message.fields[i] = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.fields[i]);
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a Projection message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.Projection
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.Projection} message Projection
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Projection.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.fields = [];
+                            if (message.fields && message.fields.length) {
+                                object.fields = [];
+                                for (var j = 0; j < message.fields.length; ++j)
+                                    object.fields[j] = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.fields[j], options);
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Projection to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.Projection
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Projection.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
                         return Projection;
                     })();
     
@@ -5691,6 +12017,76 @@
                         });
     
                         /**
+                         * Creates an UnaryFilter message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.UnaryFilter
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.UnaryFilter} UnaryFilter
+                         */
+                        UnaryFilter.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.UnaryFilter)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.UnaryFilter();
+                            switch (object.op) {
+                            case "OPERATOR_UNSPECIFIED":
+                            case 0:
+                                message.op = 0;
+                                break;
+                            case "IS_NAN":
+                            case 2:
+                                message.op = 2;
+                                break;
+                            case "IS_NULL":
+                            case 3:
+                                message.op = 3;
+                                break;
+                            }
+                            if (object.field != null) {
+                                if (typeof object.field !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.UnaryFilter.field: object expected");
+                                message.field = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.field);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an UnaryFilter message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.UnaryFilter
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.UnaryFilter} message UnaryFilter
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        UnaryFilter.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.op = options.enums === String ? "OPERATOR_UNSPECIFIED" : 0;
+                            if (message.op != null && message.hasOwnProperty("op"))
+                                object.op = options.enums === String ? $root.google.firestore.v1.StructuredQuery.UnaryFilter.Operator[message.op] : message.op;
+                            if (message.field != null && message.hasOwnProperty("field")) {
+                                object.field = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.field, options);
+                                if (options.oneofs)
+                                    object.operandType = "field";
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this UnaryFilter to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.UnaryFilter
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        UnaryFilter.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
                          * Operator enum.
                          * @name google.firestore.v1.StructuredQuery.UnaryFilter.Operator
                          * @enum {number}
@@ -5741,6 +12137,54 @@
                          */
                         FieldReference.prototype.fieldPath = "";
     
+                        /**
+                         * Creates a FieldReference message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.FieldReference} FieldReference
+                         */
+                        FieldReference.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.FieldReference)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.FieldReference();
+                            if (object.fieldPath != null)
+                                message.fieldPath = String(object.fieldPath);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a FieldReference message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.FieldReference} message FieldReference
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        FieldReference.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.fieldPath = "";
+                            if (message.fieldPath != null && message.hasOwnProperty("fieldPath"))
+                                object.fieldPath = message.fieldPath;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this FieldReference to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        FieldReference.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
                         return FieldReference;
                     })();
     
@@ -5784,6 +12228,75 @@
                          * @instance
                          */
                         Order.prototype.direction = 0;
+    
+                        /**
+                         * Creates an Order message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.Order
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.Order} Order
+                         */
+                        Order.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.Order)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.Order();
+                            if (object.field != null) {
+                                if (typeof object.field !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.Order.field: object expected");
+                                message.field = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.field);
+                            }
+                            switch (object.direction) {
+                            case "DIRECTION_UNSPECIFIED":
+                            case 0:
+                                message.direction = 0;
+                                break;
+                            case "ASCENDING":
+                            case 1:
+                                message.direction = 1;
+                                break;
+                            case "DESCENDING":
+                            case 2:
+                                message.direction = 2;
+                                break;
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an Order message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.Order
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.Order} message Order
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Order.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.field = null;
+                                object.direction = options.enums === String ? "DIRECTION_UNSPECIFIED" : 0;
+                            }
+                            if (message.field != null && message.hasOwnProperty("field"))
+                                object.field = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.field, options);
+                            if (message.direction != null && message.hasOwnProperty("direction"))
+                                object.direction = options.enums === String ? $root.google.firestore.v1.StructuredQuery.Direction[message.direction] : message.direction;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Order to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.Order
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Order.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
     
                         return Order;
                     })();
@@ -5848,6 +12361,71 @@
                      * @instance
                      */
                     Cursor.prototype.before = false;
+    
+                    /**
+                     * Creates a Cursor message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.Cursor
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.Cursor} Cursor
+                     */
+                    Cursor.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.Cursor)
+                            return object;
+                        var message = new $root.google.firestore.v1.Cursor();
+                        if (object.values) {
+                            if (!Array.isArray(object.values))
+                                throw TypeError(".google.firestore.v1.Cursor.values: array expected");
+                            message.values = [];
+                            for (var i = 0; i < object.values.length; ++i) {
+                                if (typeof object.values[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.Cursor.values: object expected");
+                                message.values[i] = $root.google.firestore.v1.Value.fromObject(object.values[i]);
+                            }
+                        }
+                        if (object.before != null)
+                            message.before = Boolean(object.before);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Cursor message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.Cursor
+                     * @static
+                     * @param {google.firestore.v1.Cursor} message Cursor
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Cursor.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.values = [];
+                        if (options.defaults)
+                            object.before = false;
+                        if (message.values && message.values.length) {
+                            object.values = [];
+                            for (var j = 0; j < message.values.length; ++j)
+                                object.values[j] = $root.google.firestore.v1.Value.toObject(message.values[j], options);
+                        }
+                        if (message.before != null && message.hasOwnProperty("before"))
+                            object.before = message.before;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Cursor to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.Cursor
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Cursor.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return Cursor;
                 })();
@@ -5944,6 +12522,110 @@
                         set: $util.oneOfSetter($oneOfFields)
                     });
     
+                    /**
+                     * Creates a Write message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.Write
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.Write} Write
+                     */
+                    Write.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.Write)
+                            return object;
+                        var message = new $root.google.firestore.v1.Write();
+                        if (object.update != null) {
+                            if (typeof object.update !== "object")
+                                throw TypeError(".google.firestore.v1.Write.update: object expected");
+                            message.update = $root.google.firestore.v1.Document.fromObject(object.update);
+                        }
+                        if (object["delete"] != null)
+                            message["delete"] = String(object["delete"]);
+                        if (object.transform != null) {
+                            if (typeof object.transform !== "object")
+                                throw TypeError(".google.firestore.v1.Write.transform: object expected");
+                            message.transform = $root.google.firestore.v1.DocumentTransform.fromObject(object.transform);
+                        }
+                        if (object.updateMask != null) {
+                            if (typeof object.updateMask !== "object")
+                                throw TypeError(".google.firestore.v1.Write.updateMask: object expected");
+                            message.updateMask = $root.google.firestore.v1.DocumentMask.fromObject(object.updateMask);
+                        }
+                        if (object.updateTransforms) {
+                            if (!Array.isArray(object.updateTransforms))
+                                throw TypeError(".google.firestore.v1.Write.updateTransforms: array expected");
+                            message.updateTransforms = [];
+                            for (var i = 0; i < object.updateTransforms.length; ++i) {
+                                if (typeof object.updateTransforms[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.Write.updateTransforms: object expected");
+                                message.updateTransforms[i] = $root.google.firestore.v1.DocumentTransform.FieldTransform.fromObject(object.updateTransforms[i]);
+                            }
+                        }
+                        if (object.currentDocument != null) {
+                            if (typeof object.currentDocument !== "object")
+                                throw TypeError(".google.firestore.v1.Write.currentDocument: object expected");
+                            message.currentDocument = $root.google.firestore.v1.Precondition.fromObject(object.currentDocument);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Write message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.Write
+                     * @static
+                     * @param {google.firestore.v1.Write} message Write
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Write.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.updateTransforms = [];
+                        if (options.defaults) {
+                            object.updateMask = null;
+                            object.currentDocument = null;
+                        }
+                        if (message.update != null && message.hasOwnProperty("update")) {
+                            object.update = $root.google.firestore.v1.Document.toObject(message.update, options);
+                            if (options.oneofs)
+                                object.operation = "update";
+                        }
+                        if (message["delete"] != null && message.hasOwnProperty("delete")) {
+                            object["delete"] = message["delete"];
+                            if (options.oneofs)
+                                object.operation = "delete";
+                        }
+                        if (message.updateMask != null && message.hasOwnProperty("updateMask"))
+                            object.updateMask = $root.google.firestore.v1.DocumentMask.toObject(message.updateMask, options);
+                        if (message.currentDocument != null && message.hasOwnProperty("currentDocument"))
+                            object.currentDocument = $root.google.firestore.v1.Precondition.toObject(message.currentDocument, options);
+                        if (message.transform != null && message.hasOwnProperty("transform")) {
+                            object.transform = $root.google.firestore.v1.DocumentTransform.toObject(message.transform, options);
+                            if (options.oneofs)
+                                object.operation = "transform";
+                        }
+                        if (message.updateTransforms && message.updateTransforms.length) {
+                            object.updateTransforms = [];
+                            for (var j = 0; j < message.updateTransforms.length; ++j)
+                                object.updateTransforms[j] = $root.google.firestore.v1.DocumentTransform.FieldTransform.toObject(message.updateTransforms[j], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Write to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.Write
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Write.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return Write;
                 })();
     
@@ -5988,6 +12670,71 @@
                      * @instance
                      */
                     DocumentTransform.prototype.fieldTransforms = $util.emptyArray;
+    
+                    /**
+                     * Creates a DocumentTransform message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.DocumentTransform
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.DocumentTransform} DocumentTransform
+                     */
+                    DocumentTransform.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.DocumentTransform)
+                            return object;
+                        var message = new $root.google.firestore.v1.DocumentTransform();
+                        if (object.document != null)
+                            message.document = String(object.document);
+                        if (object.fieldTransforms) {
+                            if (!Array.isArray(object.fieldTransforms))
+                                throw TypeError(".google.firestore.v1.DocumentTransform.fieldTransforms: array expected");
+                            message.fieldTransforms = [];
+                            for (var i = 0; i < object.fieldTransforms.length; ++i) {
+                                if (typeof object.fieldTransforms[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.DocumentTransform.fieldTransforms: object expected");
+                                message.fieldTransforms[i] = $root.google.firestore.v1.DocumentTransform.FieldTransform.fromObject(object.fieldTransforms[i]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a DocumentTransform message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.DocumentTransform
+                     * @static
+                     * @param {google.firestore.v1.DocumentTransform} message DocumentTransform
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    DocumentTransform.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.fieldTransforms = [];
+                        if (options.defaults)
+                            object.document = "";
+                        if (message.document != null && message.hasOwnProperty("document"))
+                            object.document = message.document;
+                        if (message.fieldTransforms && message.fieldTransforms.length) {
+                            object.fieldTransforms = [];
+                            for (var j = 0; j < message.fieldTransforms.length; ++j)
+                                object.fieldTransforms[j] = $root.google.firestore.v1.DocumentTransform.FieldTransform.toObject(message.fieldTransforms[j], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this DocumentTransform to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.DocumentTransform
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    DocumentTransform.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     DocumentTransform.FieldTransform = (function() {
     
@@ -6090,6 +12837,119 @@
                         });
     
                         /**
+                         * Creates a FieldTransform message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.DocumentTransform.FieldTransform
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.DocumentTransform.FieldTransform} FieldTransform
+                         */
+                        FieldTransform.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.DocumentTransform.FieldTransform)
+                                return object;
+                            var message = new $root.google.firestore.v1.DocumentTransform.FieldTransform();
+                            if (object.fieldPath != null)
+                                message.fieldPath = String(object.fieldPath);
+                            switch (object.setToServerValue) {
+                            case "SERVER_VALUE_UNSPECIFIED":
+                            case 0:
+                                message.setToServerValue = 0;
+                                break;
+                            case "REQUEST_TIME":
+                            case 1:
+                                message.setToServerValue = 1;
+                                break;
+                            }
+                            if (object.increment != null) {
+                                if (typeof object.increment !== "object")
+                                    throw TypeError(".google.firestore.v1.DocumentTransform.FieldTransform.increment: object expected");
+                                message.increment = $root.google.firestore.v1.Value.fromObject(object.increment);
+                            }
+                            if (object.maximum != null) {
+                                if (typeof object.maximum !== "object")
+                                    throw TypeError(".google.firestore.v1.DocumentTransform.FieldTransform.maximum: object expected");
+                                message.maximum = $root.google.firestore.v1.Value.fromObject(object.maximum);
+                            }
+                            if (object.minimum != null) {
+                                if (typeof object.minimum !== "object")
+                                    throw TypeError(".google.firestore.v1.DocumentTransform.FieldTransform.minimum: object expected");
+                                message.minimum = $root.google.firestore.v1.Value.fromObject(object.minimum);
+                            }
+                            if (object.appendMissingElements != null) {
+                                if (typeof object.appendMissingElements !== "object")
+                                    throw TypeError(".google.firestore.v1.DocumentTransform.FieldTransform.appendMissingElements: object expected");
+                                message.appendMissingElements = $root.google.firestore.v1.ArrayValue.fromObject(object.appendMissingElements);
+                            }
+                            if (object.removeAllFromArray != null) {
+                                if (typeof object.removeAllFromArray !== "object")
+                                    throw TypeError(".google.firestore.v1.DocumentTransform.FieldTransform.removeAllFromArray: object expected");
+                                message.removeAllFromArray = $root.google.firestore.v1.ArrayValue.fromObject(object.removeAllFromArray);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a FieldTransform message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.DocumentTransform.FieldTransform
+                         * @static
+                         * @param {google.firestore.v1.DocumentTransform.FieldTransform} message FieldTransform
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        FieldTransform.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.fieldPath = "";
+                            if (message.fieldPath != null && message.hasOwnProperty("fieldPath"))
+                                object.fieldPath = message.fieldPath;
+                            if (message.setToServerValue != null && message.hasOwnProperty("setToServerValue")) {
+                                object.setToServerValue = options.enums === String ? $root.google.firestore.v1.DocumentTransform.FieldTransform.ServerValue[message.setToServerValue] : message.setToServerValue;
+                                if (options.oneofs)
+                                    object.transformType = "setToServerValue";
+                            }
+                            if (message.increment != null && message.hasOwnProperty("increment")) {
+                                object.increment = $root.google.firestore.v1.Value.toObject(message.increment, options);
+                                if (options.oneofs)
+                                    object.transformType = "increment";
+                            }
+                            if (message.maximum != null && message.hasOwnProperty("maximum")) {
+                                object.maximum = $root.google.firestore.v1.Value.toObject(message.maximum, options);
+                                if (options.oneofs)
+                                    object.transformType = "maximum";
+                            }
+                            if (message.minimum != null && message.hasOwnProperty("minimum")) {
+                                object.minimum = $root.google.firestore.v1.Value.toObject(message.minimum, options);
+                                if (options.oneofs)
+                                    object.transformType = "minimum";
+                            }
+                            if (message.appendMissingElements != null && message.hasOwnProperty("appendMissingElements")) {
+                                object.appendMissingElements = $root.google.firestore.v1.ArrayValue.toObject(message.appendMissingElements, options);
+                                if (options.oneofs)
+                                    object.transformType = "appendMissingElements";
+                            }
+                            if (message.removeAllFromArray != null && message.hasOwnProperty("removeAllFromArray")) {
+                                object.removeAllFromArray = $root.google.firestore.v1.ArrayValue.toObject(message.removeAllFromArray, options);
+                                if (options.oneofs)
+                                    object.transformType = "removeAllFromArray";
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this FieldTransform to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.DocumentTransform.FieldTransform
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        FieldTransform.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
                          * ServerValue enum.
                          * @name google.firestore.v1.DocumentTransform.FieldTransform.ServerValue
                          * @enum {number}
@@ -6151,6 +13011,74 @@
                      */
                     WriteResult.prototype.transformResults = $util.emptyArray;
     
+                    /**
+                     * Creates a WriteResult message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.WriteResult
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.WriteResult} WriteResult
+                     */
+                    WriteResult.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.WriteResult)
+                            return object;
+                        var message = new $root.google.firestore.v1.WriteResult();
+                        if (object.updateTime != null) {
+                            if (typeof object.updateTime !== "object")
+                                throw TypeError(".google.firestore.v1.WriteResult.updateTime: object expected");
+                            message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
+                        }
+                        if (object.transformResults) {
+                            if (!Array.isArray(object.transformResults))
+                                throw TypeError(".google.firestore.v1.WriteResult.transformResults: array expected");
+                            message.transformResults = [];
+                            for (var i = 0; i < object.transformResults.length; ++i) {
+                                if (typeof object.transformResults[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.WriteResult.transformResults: object expected");
+                                message.transformResults[i] = $root.google.firestore.v1.Value.fromObject(object.transformResults[i]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a WriteResult message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.WriteResult
+                     * @static
+                     * @param {google.firestore.v1.WriteResult} message WriteResult
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    WriteResult.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.transformResults = [];
+                        if (options.defaults)
+                            object.updateTime = null;
+                        if (message.updateTime != null && message.hasOwnProperty("updateTime"))
+                            object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
+                        if (message.transformResults && message.transformResults.length) {
+                            object.transformResults = [];
+                            for (var j = 0; j < message.transformResults.length; ++j)
+                                object.transformResults[j] = $root.google.firestore.v1.Value.toObject(message.transformResults[j], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this WriteResult to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.WriteResult
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    WriteResult.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return WriteResult;
                 })();
     
@@ -6206,6 +13134,85 @@
                      */
                     DocumentChange.prototype.removedTargetIds = $util.emptyArray;
     
+                    /**
+                     * Creates a DocumentChange message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.DocumentChange
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.DocumentChange} DocumentChange
+                     */
+                    DocumentChange.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.DocumentChange)
+                            return object;
+                        var message = new $root.google.firestore.v1.DocumentChange();
+                        if (object.document != null) {
+                            if (typeof object.document !== "object")
+                                throw TypeError(".google.firestore.v1.DocumentChange.document: object expected");
+                            message.document = $root.google.firestore.v1.Document.fromObject(object.document);
+                        }
+                        if (object.targetIds) {
+                            if (!Array.isArray(object.targetIds))
+                                throw TypeError(".google.firestore.v1.DocumentChange.targetIds: array expected");
+                            message.targetIds = [];
+                            for (var i = 0; i < object.targetIds.length; ++i)
+                                message.targetIds[i] = object.targetIds[i] | 0;
+                        }
+                        if (object.removedTargetIds) {
+                            if (!Array.isArray(object.removedTargetIds))
+                                throw TypeError(".google.firestore.v1.DocumentChange.removedTargetIds: array expected");
+                            message.removedTargetIds = [];
+                            for (var i = 0; i < object.removedTargetIds.length; ++i)
+                                message.removedTargetIds[i] = object.removedTargetIds[i] | 0;
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a DocumentChange message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.DocumentChange
+                     * @static
+                     * @param {google.firestore.v1.DocumentChange} message DocumentChange
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    DocumentChange.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults) {
+                            object.targetIds = [];
+                            object.removedTargetIds = [];
+                        }
+                        if (options.defaults)
+                            object.document = null;
+                        if (message.document != null && message.hasOwnProperty("document"))
+                            object.document = $root.google.firestore.v1.Document.toObject(message.document, options);
+                        if (message.targetIds && message.targetIds.length) {
+                            object.targetIds = [];
+                            for (var j = 0; j < message.targetIds.length; ++j)
+                                object.targetIds[j] = message.targetIds[j];
+                        }
+                        if (message.removedTargetIds && message.removedTargetIds.length) {
+                            object.removedTargetIds = [];
+                            for (var j = 0; j < message.removedTargetIds.length; ++j)
+                                object.removedTargetIds[j] = message.removedTargetIds[j];
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this DocumentChange to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.DocumentChange
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    DocumentChange.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return DocumentChange;
                 })();
     
@@ -6259,6 +13266,77 @@
                      * @instance
                      */
                     DocumentDelete.prototype.readTime = null;
+    
+                    /**
+                     * Creates a DocumentDelete message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.DocumentDelete
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.DocumentDelete} DocumentDelete
+                     */
+                    DocumentDelete.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.DocumentDelete)
+                            return object;
+                        var message = new $root.google.firestore.v1.DocumentDelete();
+                        if (object.document != null)
+                            message.document = String(object.document);
+                        if (object.removedTargetIds) {
+                            if (!Array.isArray(object.removedTargetIds))
+                                throw TypeError(".google.firestore.v1.DocumentDelete.removedTargetIds: array expected");
+                            message.removedTargetIds = [];
+                            for (var i = 0; i < object.removedTargetIds.length; ++i)
+                                message.removedTargetIds[i] = object.removedTargetIds[i] | 0;
+                        }
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.DocumentDelete.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a DocumentDelete message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.DocumentDelete
+                     * @static
+                     * @param {google.firestore.v1.DocumentDelete} message DocumentDelete
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    DocumentDelete.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.removedTargetIds = [];
+                        if (options.defaults) {
+                            object.document = "";
+                            object.readTime = null;
+                        }
+                        if (message.document != null && message.hasOwnProperty("document"))
+                            object.document = message.document;
+                        if (message.readTime != null && message.hasOwnProperty("readTime"))
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                        if (message.removedTargetIds && message.removedTargetIds.length) {
+                            object.removedTargetIds = [];
+                            for (var j = 0; j < message.removedTargetIds.length; ++j)
+                                object.removedTargetIds[j] = message.removedTargetIds[j];
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this DocumentDelete to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.DocumentDelete
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    DocumentDelete.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return DocumentDelete;
                 })();
@@ -6314,6 +13392,77 @@
                      */
                     DocumentRemove.prototype.readTime = null;
     
+                    /**
+                     * Creates a DocumentRemove message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.DocumentRemove
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.DocumentRemove} DocumentRemove
+                     */
+                    DocumentRemove.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.DocumentRemove)
+                            return object;
+                        var message = new $root.google.firestore.v1.DocumentRemove();
+                        if (object.document != null)
+                            message.document = String(object.document);
+                        if (object.removedTargetIds) {
+                            if (!Array.isArray(object.removedTargetIds))
+                                throw TypeError(".google.firestore.v1.DocumentRemove.removedTargetIds: array expected");
+                            message.removedTargetIds = [];
+                            for (var i = 0; i < object.removedTargetIds.length; ++i)
+                                message.removedTargetIds[i] = object.removedTargetIds[i] | 0;
+                        }
+                        if (object.readTime != null) {
+                            if (typeof object.readTime !== "object")
+                                throw TypeError(".google.firestore.v1.DocumentRemove.readTime: object expected");
+                            message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a DocumentRemove message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.DocumentRemove
+                     * @static
+                     * @param {google.firestore.v1.DocumentRemove} message DocumentRemove
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    DocumentRemove.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.removedTargetIds = [];
+                        if (options.defaults) {
+                            object.document = "";
+                            object.readTime = null;
+                        }
+                        if (message.document != null && message.hasOwnProperty("document"))
+                            object.document = message.document;
+                        if (message.removedTargetIds && message.removedTargetIds.length) {
+                            object.removedTargetIds = [];
+                            for (var j = 0; j < message.removedTargetIds.length; ++j)
+                                object.removedTargetIds[j] = message.removedTargetIds[j];
+                        }
+                        if (message.readTime != null && message.hasOwnProperty("readTime"))
+                            object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this DocumentRemove to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.DocumentRemove
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    DocumentRemove.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
                     return DocumentRemove;
                 })();
     
@@ -6357,6 +13506,60 @@
                      * @instance
                      */
                     ExistenceFilter.prototype.count = 0;
+    
+                    /**
+                     * Creates an ExistenceFilter message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.ExistenceFilter
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.ExistenceFilter} ExistenceFilter
+                     */
+                    ExistenceFilter.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.ExistenceFilter)
+                            return object;
+                        var message = new $root.google.firestore.v1.ExistenceFilter();
+                        if (object.targetId != null)
+                            message.targetId = object.targetId | 0;
+                        if (object.count != null)
+                            message.count = object.count | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ExistenceFilter message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.ExistenceFilter
+                     * @static
+                     * @param {google.firestore.v1.ExistenceFilter} message ExistenceFilter
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ExistenceFilter.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.targetId = 0;
+                            object.count = 0;
+                        }
+                        if (message.targetId != null && message.hasOwnProperty("targetId"))
+                            object.targetId = message.targetId;
+                        if (message.count != null && message.hasOwnProperty("count"))
+                            object.count = message.count;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ExistenceFilter to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.ExistenceFilter
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ExistenceFilter.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return ExistenceFilter;
                 })();
@@ -6408,6 +13611,65 @@
                  * @instance
                  */
                 Http.prototype.rules = $util.emptyArray;
+    
+                /**
+                 * Creates a Http message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.Http
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.Http} Http
+                 */
+                Http.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.Http)
+                        return object;
+                    var message = new $root.google.api.Http();
+                    if (object.rules) {
+                        if (!Array.isArray(object.rules))
+                            throw TypeError(".google.api.Http.rules: array expected");
+                        message.rules = [];
+                        for (var i = 0; i < object.rules.length; ++i) {
+                            if (typeof object.rules[i] !== "object")
+                                throw TypeError(".google.api.Http.rules: object expected");
+                            message.rules[i] = $root.google.api.HttpRule.fromObject(object.rules[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Http message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.Http
+                 * @static
+                 * @param {google.api.Http} message Http
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Http.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.rules = [];
+                    if (message.rules && message.rules.length) {
+                        object.rules = [];
+                        for (var j = 0; j < message.rules.length; ++j)
+                            object.rules[j] = $root.google.api.HttpRule.toObject(message.rules[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this Http to JSON.
+                 * @function toJSON
+                 * @memberof google.api.Http
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Http.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return Http;
             })();
@@ -6531,6 +13793,122 @@
                     set: $util.oneOfSetter($oneOfFields)
                 });
     
+                /**
+                 * Creates a HttpRule message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.HttpRule
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.HttpRule} HttpRule
+                 */
+                HttpRule.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.HttpRule)
+                        return object;
+                    var message = new $root.google.api.HttpRule();
+                    if (object.get != null)
+                        message.get = String(object.get);
+                    if (object.put != null)
+                        message.put = String(object.put);
+                    if (object.post != null)
+                        message.post = String(object.post);
+                    if (object["delete"] != null)
+                        message["delete"] = String(object["delete"]);
+                    if (object.patch != null)
+                        message.patch = String(object.patch);
+                    if (object.custom != null) {
+                        if (typeof object.custom !== "object")
+                            throw TypeError(".google.api.HttpRule.custom: object expected");
+                        message.custom = $root.google.api.CustomHttpPattern.fromObject(object.custom);
+                    }
+                    if (object.selector != null)
+                        message.selector = String(object.selector);
+                    if (object.body != null)
+                        message.body = String(object.body);
+                    if (object.additionalBindings) {
+                        if (!Array.isArray(object.additionalBindings))
+                            throw TypeError(".google.api.HttpRule.additionalBindings: array expected");
+                        message.additionalBindings = [];
+                        for (var i = 0; i < object.additionalBindings.length; ++i) {
+                            if (typeof object.additionalBindings[i] !== "object")
+                                throw TypeError(".google.api.HttpRule.additionalBindings: object expected");
+                            message.additionalBindings[i] = $root.google.api.HttpRule.fromObject(object.additionalBindings[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a HttpRule message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.HttpRule
+                 * @static
+                 * @param {google.api.HttpRule} message HttpRule
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                HttpRule.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.additionalBindings = [];
+                    if (options.defaults) {
+                        object.selector = "";
+                        object.body = "";
+                    }
+                    if (message.selector != null && message.hasOwnProperty("selector"))
+                        object.selector = message.selector;
+                    if (message.get != null && message.hasOwnProperty("get")) {
+                        object.get = message.get;
+                        if (options.oneofs)
+                            object.pattern = "get";
+                    }
+                    if (message.put != null && message.hasOwnProperty("put")) {
+                        object.put = message.put;
+                        if (options.oneofs)
+                            object.pattern = "put";
+                    }
+                    if (message.post != null && message.hasOwnProperty("post")) {
+                        object.post = message.post;
+                        if (options.oneofs)
+                            object.pattern = "post";
+                    }
+                    if (message["delete"] != null && message.hasOwnProperty("delete")) {
+                        object["delete"] = message["delete"];
+                        if (options.oneofs)
+                            object.pattern = "delete";
+                    }
+                    if (message.patch != null && message.hasOwnProperty("patch")) {
+                        object.patch = message.patch;
+                        if (options.oneofs)
+                            object.pattern = "patch";
+                    }
+                    if (message.body != null && message.hasOwnProperty("body"))
+                        object.body = message.body;
+                    if (message.custom != null && message.hasOwnProperty("custom")) {
+                        object.custom = $root.google.api.CustomHttpPattern.toObject(message.custom, options);
+                        if (options.oneofs)
+                            object.pattern = "custom";
+                    }
+                    if (message.additionalBindings && message.additionalBindings.length) {
+                        object.additionalBindings = [];
+                        for (var j = 0; j < message.additionalBindings.length; ++j)
+                            object.additionalBindings[j] = $root.google.api.HttpRule.toObject(message.additionalBindings[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this HttpRule to JSON.
+                 * @function toJSON
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                HttpRule.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return HttpRule;
             })();
     
@@ -6574,6 +13952,60 @@
                  * @instance
                  */
                 CustomHttpPattern.prototype.path = "";
+    
+                /**
+                 * Creates a CustomHttpPattern message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.CustomHttpPattern
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.CustomHttpPattern} CustomHttpPattern
+                 */
+                CustomHttpPattern.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.CustomHttpPattern)
+                        return object;
+                    var message = new $root.google.api.CustomHttpPattern();
+                    if (object.kind != null)
+                        message.kind = String(object.kind);
+                    if (object.path != null)
+                        message.path = String(object.path);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a CustomHttpPattern message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.CustomHttpPattern
+                 * @static
+                 * @param {google.api.CustomHttpPattern} message CustomHttpPattern
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                CustomHttpPattern.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.kind = "";
+                        object.path = "";
+                    }
+                    if (message.kind != null && message.hasOwnProperty("kind"))
+                        object.kind = message.kind;
+                    if (message.path != null && message.hasOwnProperty("path"))
+                        object.path = message.path;
+                    return object;
+                };
+    
+                /**
+                 * Converts this CustomHttpPattern to JSON.
+                 * @function toJSON
+                 * @memberof google.api.CustomHttpPattern
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                CustomHttpPattern.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return CustomHttpPattern;
             })();
@@ -6679,6 +14111,101 @@
                 ResourceDescriptor.prototype.singular = "";
     
                 /**
+                 * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.ResourceDescriptor
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.ResourceDescriptor} ResourceDescriptor
+                 */
+                ResourceDescriptor.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.ResourceDescriptor)
+                        return object;
+                    var message = new $root.google.api.ResourceDescriptor();
+                    if (object.type != null)
+                        message.type = String(object.type);
+                    if (object.pattern) {
+                        if (!Array.isArray(object.pattern))
+                            throw TypeError(".google.api.ResourceDescriptor.pattern: array expected");
+                        message.pattern = [];
+                        for (var i = 0; i < object.pattern.length; ++i)
+                            message.pattern[i] = String(object.pattern[i]);
+                    }
+                    if (object.nameField != null)
+                        message.nameField = String(object.nameField);
+                    switch (object.history) {
+                    case "HISTORY_UNSPECIFIED":
+                    case 0:
+                        message.history = 0;
+                        break;
+                    case "ORIGINALLY_SINGLE_PATTERN":
+                    case 1:
+                        message.history = 1;
+                        break;
+                    case "FUTURE_MULTI_PATTERN":
+                    case 2:
+                        message.history = 2;
+                        break;
+                    }
+                    if (object.plural != null)
+                        message.plural = String(object.plural);
+                    if (object.singular != null)
+                        message.singular = String(object.singular);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ResourceDescriptor message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.ResourceDescriptor
+                 * @static
+                 * @param {google.api.ResourceDescriptor} message ResourceDescriptor
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ResourceDescriptor.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.pattern = [];
+                    if (options.defaults) {
+                        object.type = "";
+                        object.nameField = "";
+                        object.history = options.enums === String ? "HISTORY_UNSPECIFIED" : 0;
+                        object.plural = "";
+                        object.singular = "";
+                    }
+                    if (message.type != null && message.hasOwnProperty("type"))
+                        object.type = message.type;
+                    if (message.pattern && message.pattern.length) {
+                        object.pattern = [];
+                        for (var j = 0; j < message.pattern.length; ++j)
+                            object.pattern[j] = message.pattern[j];
+                    }
+                    if (message.nameField != null && message.hasOwnProperty("nameField"))
+                        object.nameField = message.nameField;
+                    if (message.history != null && message.hasOwnProperty("history"))
+                        object.history = options.enums === String ? $root.google.api.ResourceDescriptor.History[message.history] : message.history;
+                    if (message.plural != null && message.hasOwnProperty("plural"))
+                        object.plural = message.plural;
+                    if (message.singular != null && message.hasOwnProperty("singular"))
+                        object.singular = message.singular;
+                    return object;
+                };
+    
+                /**
+                 * Converts this ResourceDescriptor to JSON.
+                 * @function toJSON
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ResourceDescriptor.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
                  * History enum.
                  * @name google.api.ResourceDescriptor.History
                  * @enum {number}
@@ -6738,6 +14265,60 @@
                  */
                 ResourceReference.prototype.childType = "";
     
+                /**
+                 * Creates a ResourceReference message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.ResourceReference
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.ResourceReference} ResourceReference
+                 */
+                ResourceReference.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.ResourceReference)
+                        return object;
+                    var message = new $root.google.api.ResourceReference();
+                    if (object.type != null)
+                        message.type = String(object.type);
+                    if (object.childType != null)
+                        message.childType = String(object.childType);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ResourceReference message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.ResourceReference
+                 * @static
+                 * @param {google.api.ResourceReference} message ResourceReference
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ResourceReference.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.type = "";
+                        object.childType = "";
+                    }
+                    if (message.type != null && message.hasOwnProperty("type"))
+                        object.type = message.type;
+                    if (message.childType != null && message.hasOwnProperty("childType"))
+                        object.childType = message.childType;
+                    return object;
+                };
+    
+                /**
+                 * Converts this ResourceReference to JSON.
+                 * @function toJSON
+                 * @memberof google.api.ResourceReference
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ResourceReference.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return ResourceReference;
             })();
     
@@ -6793,6 +14374,60 @@
                  * @instance
                  */
                 LatLng.prototype.longitude = 0;
+    
+                /**
+                 * Creates a LatLng message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.type.LatLng
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.type.LatLng} LatLng
+                 */
+                LatLng.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.type.LatLng)
+                        return object;
+                    var message = new $root.google.type.LatLng();
+                    if (object.latitude != null)
+                        message.latitude = Number(object.latitude);
+                    if (object.longitude != null)
+                        message.longitude = Number(object.longitude);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a LatLng message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.type.LatLng
+                 * @static
+                 * @param {google.type.LatLng} message LatLng
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                LatLng.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.latitude = 0;
+                        object.longitude = 0;
+                    }
+                    if (message.latitude != null && message.hasOwnProperty("latitude"))
+                        object.latitude = options.json && !isFinite(message.latitude) ? String(message.latitude) : message.latitude;
+                    if (message.longitude != null && message.hasOwnProperty("longitude"))
+                        object.longitude = options.json && !isFinite(message.longitude) ? String(message.longitude) : message.longitude;
+                    return object;
+                };
+    
+                /**
+                 * Converts this LatLng to JSON.
+                 * @function toJSON
+                 * @memberof google.type.LatLng
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                LatLng.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return LatLng;
             })();
@@ -6859,6 +14494,77 @@
                  * @instance
                  */
                 Status.prototype.details = $util.emptyArray;
+    
+                /**
+                 * Creates a Status message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.rpc.Status
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.rpc.Status} Status
+                 */
+                Status.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.rpc.Status)
+                        return object;
+                    var message = new $root.google.rpc.Status();
+                    if (object.code != null)
+                        message.code = object.code | 0;
+                    if (object.message != null)
+                        message.message = String(object.message);
+                    if (object.details) {
+                        if (!Array.isArray(object.details))
+                            throw TypeError(".google.rpc.Status.details: array expected");
+                        message.details = [];
+                        for (var i = 0; i < object.details.length; ++i) {
+                            if (typeof object.details[i] !== "object")
+                                throw TypeError(".google.rpc.Status.details: object expected");
+                            message.details[i] = $root.google.protobuf.Any.fromObject(object.details[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Status message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.rpc.Status
+                 * @static
+                 * @param {google.rpc.Status} message Status
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Status.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.details = [];
+                    if (options.defaults) {
+                        object.code = 0;
+                        object.message = "";
+                    }
+                    if (message.code != null && message.hasOwnProperty("code"))
+                        object.code = message.code;
+                    if (message.message != null && message.hasOwnProperty("message"))
+                        object.message = message.message;
+                    if (message.details && message.details.length) {
+                        object.details = [];
+                        for (var j = 0; j < message.details.length; ++j)
+                            object.details[j] = $root.google.protobuf.Any.toObject(message.details[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this Status to JSON.
+                 * @function toJSON
+                 * @memberof google.rpc.Status
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Status.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return Status;
             })();
@@ -7143,6 +14849,88 @@
                     set: $util.oneOfSetter($oneOfFields)
                 });
     
+                /**
+                 * Creates an Operation message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.longrunning.Operation
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.longrunning.Operation} Operation
+                 */
+                Operation.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.longrunning.Operation)
+                        return object;
+                    var message = new $root.google.longrunning.Operation();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.metadata != null) {
+                        if (typeof object.metadata !== "object")
+                            throw TypeError(".google.longrunning.Operation.metadata: object expected");
+                        message.metadata = $root.google.protobuf.Any.fromObject(object.metadata);
+                    }
+                    if (object.done != null)
+                        message.done = Boolean(object.done);
+                    if (object.error != null) {
+                        if (typeof object.error !== "object")
+                            throw TypeError(".google.longrunning.Operation.error: object expected");
+                        message.error = $root.google.rpc.Status.fromObject(object.error);
+                    }
+                    if (object.response != null) {
+                        if (typeof object.response !== "object")
+                            throw TypeError(".google.longrunning.Operation.response: object expected");
+                        message.response = $root.google.protobuf.Any.fromObject(object.response);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an Operation message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.longrunning.Operation
+                 * @static
+                 * @param {google.longrunning.Operation} message Operation
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Operation.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.metadata = null;
+                        object.done = false;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.metadata != null && message.hasOwnProperty("metadata"))
+                        object.metadata = $root.google.protobuf.Any.toObject(message.metadata, options);
+                    if (message.done != null && message.hasOwnProperty("done"))
+                        object.done = message.done;
+                    if (message.error != null && message.hasOwnProperty("error")) {
+                        object.error = $root.google.rpc.Status.toObject(message.error, options);
+                        if (options.oneofs)
+                            object.result = "error";
+                    }
+                    if (message.response != null && message.hasOwnProperty("response")) {
+                        object.response = $root.google.protobuf.Any.toObject(message.response, options);
+                        if (options.oneofs)
+                            object.result = "response";
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this Operation to JSON.
+                 * @function toJSON
+                 * @memberof google.longrunning.Operation
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Operation.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return Operation;
             })();
     
@@ -7177,6 +14965,54 @@
                  * @instance
                  */
                 GetOperationRequest.prototype.name = "";
+    
+                /**
+                 * Creates a GetOperationRequest message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.longrunning.GetOperationRequest
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.longrunning.GetOperationRequest} GetOperationRequest
+                 */
+                GetOperationRequest.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.longrunning.GetOperationRequest)
+                        return object;
+                    var message = new $root.google.longrunning.GetOperationRequest();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a GetOperationRequest message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.longrunning.GetOperationRequest
+                 * @static
+                 * @param {google.longrunning.GetOperationRequest} message GetOperationRequest
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                GetOperationRequest.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.name = "";
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    return object;
+                };
+    
+                /**
+                 * Converts this GetOperationRequest to JSON.
+                 * @function toJSON
+                 * @memberof google.longrunning.GetOperationRequest
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                GetOperationRequest.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return GetOperationRequest;
             })();
@@ -7240,6 +15076,70 @@
                  */
                 ListOperationsRequest.prototype.pageToken = "";
     
+                /**
+                 * Creates a ListOperationsRequest message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.longrunning.ListOperationsRequest
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.longrunning.ListOperationsRequest} ListOperationsRequest
+                 */
+                ListOperationsRequest.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.longrunning.ListOperationsRequest)
+                        return object;
+                    var message = new $root.google.longrunning.ListOperationsRequest();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.filter != null)
+                        message.filter = String(object.filter);
+                    if (object.pageSize != null)
+                        message.pageSize = object.pageSize | 0;
+                    if (object.pageToken != null)
+                        message.pageToken = String(object.pageToken);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ListOperationsRequest message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.longrunning.ListOperationsRequest
+                 * @static
+                 * @param {google.longrunning.ListOperationsRequest} message ListOperationsRequest
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ListOperationsRequest.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.filter = "";
+                        object.pageSize = 0;
+                        object.pageToken = "";
+                        object.name = "";
+                    }
+                    if (message.filter != null && message.hasOwnProperty("filter"))
+                        object.filter = message.filter;
+                    if (message.pageSize != null && message.hasOwnProperty("pageSize"))
+                        object.pageSize = message.pageSize;
+                    if (message.pageToken != null && message.hasOwnProperty("pageToken"))
+                        object.pageToken = message.pageToken;
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    return object;
+                };
+    
+                /**
+                 * Converts this ListOperationsRequest to JSON.
+                 * @function toJSON
+                 * @memberof google.longrunning.ListOperationsRequest
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ListOperationsRequest.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return ListOperationsRequest;
             })();
     
@@ -7285,6 +15185,71 @@
                  */
                 ListOperationsResponse.prototype.nextPageToken = "";
     
+                /**
+                 * Creates a ListOperationsResponse message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.longrunning.ListOperationsResponse
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.longrunning.ListOperationsResponse} ListOperationsResponse
+                 */
+                ListOperationsResponse.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.longrunning.ListOperationsResponse)
+                        return object;
+                    var message = new $root.google.longrunning.ListOperationsResponse();
+                    if (object.operations) {
+                        if (!Array.isArray(object.operations))
+                            throw TypeError(".google.longrunning.ListOperationsResponse.operations: array expected");
+                        message.operations = [];
+                        for (var i = 0; i < object.operations.length; ++i) {
+                            if (typeof object.operations[i] !== "object")
+                                throw TypeError(".google.longrunning.ListOperationsResponse.operations: object expected");
+                            message.operations[i] = $root.google.longrunning.Operation.fromObject(object.operations[i]);
+                        }
+                    }
+                    if (object.nextPageToken != null)
+                        message.nextPageToken = String(object.nextPageToken);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ListOperationsResponse message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.longrunning.ListOperationsResponse
+                 * @static
+                 * @param {google.longrunning.ListOperationsResponse} message ListOperationsResponse
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ListOperationsResponse.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.operations = [];
+                    if (options.defaults)
+                        object.nextPageToken = "";
+                    if (message.operations && message.operations.length) {
+                        object.operations = [];
+                        for (var j = 0; j < message.operations.length; ++j)
+                            object.operations[j] = $root.google.longrunning.Operation.toObject(message.operations[j], options);
+                    }
+                    if (message.nextPageToken != null && message.hasOwnProperty("nextPageToken"))
+                        object.nextPageToken = message.nextPageToken;
+                    return object;
+                };
+    
+                /**
+                 * Converts this ListOperationsResponse to JSON.
+                 * @function toJSON
+                 * @memberof google.longrunning.ListOperationsResponse
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ListOperationsResponse.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return ListOperationsResponse;
             })();
     
@@ -7320,6 +15285,54 @@
                  */
                 CancelOperationRequest.prototype.name = "";
     
+                /**
+                 * Creates a CancelOperationRequest message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.longrunning.CancelOperationRequest
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.longrunning.CancelOperationRequest} CancelOperationRequest
+                 */
+                CancelOperationRequest.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.longrunning.CancelOperationRequest)
+                        return object;
+                    var message = new $root.google.longrunning.CancelOperationRequest();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a CancelOperationRequest message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.longrunning.CancelOperationRequest
+                 * @static
+                 * @param {google.longrunning.CancelOperationRequest} message CancelOperationRequest
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                CancelOperationRequest.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.name = "";
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    return object;
+                };
+    
+                /**
+                 * Converts this CancelOperationRequest to JSON.
+                 * @function toJSON
+                 * @memberof google.longrunning.CancelOperationRequest
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                CancelOperationRequest.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return CancelOperationRequest;
             })();
     
@@ -7354,6 +15367,54 @@
                  * @instance
                  */
                 DeleteOperationRequest.prototype.name = "";
+    
+                /**
+                 * Creates a DeleteOperationRequest message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.longrunning.DeleteOperationRequest
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.longrunning.DeleteOperationRequest} DeleteOperationRequest
+                 */
+                DeleteOperationRequest.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.longrunning.DeleteOperationRequest)
+                        return object;
+                    var message = new $root.google.longrunning.DeleteOperationRequest();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a DeleteOperationRequest message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.longrunning.DeleteOperationRequest
+                 * @static
+                 * @param {google.longrunning.DeleteOperationRequest} message DeleteOperationRequest
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                DeleteOperationRequest.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults)
+                        object.name = "";
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    return object;
+                };
+    
+                /**
+                 * Converts this DeleteOperationRequest to JSON.
+                 * @function toJSON
+                 * @memberof google.longrunning.DeleteOperationRequest
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                DeleteOperationRequest.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return DeleteOperationRequest;
             })();
@@ -7399,6 +15460,63 @@
                  */
                 WaitOperationRequest.prototype.timeout = null;
     
+                /**
+                 * Creates a WaitOperationRequest message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.longrunning.WaitOperationRequest
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.longrunning.WaitOperationRequest} WaitOperationRequest
+                 */
+                WaitOperationRequest.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.longrunning.WaitOperationRequest)
+                        return object;
+                    var message = new $root.google.longrunning.WaitOperationRequest();
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.timeout != null) {
+                        if (typeof object.timeout !== "object")
+                            throw TypeError(".google.longrunning.WaitOperationRequest.timeout: object expected");
+                        message.timeout = $root.google.protobuf.Duration.fromObject(object.timeout);
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a WaitOperationRequest message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.longrunning.WaitOperationRequest
+                 * @static
+                 * @param {google.longrunning.WaitOperationRequest} message WaitOperationRequest
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                WaitOperationRequest.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.name = "";
+                        object.timeout = null;
+                    }
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.timeout != null && message.hasOwnProperty("timeout"))
+                        object.timeout = $root.google.protobuf.Duration.toObject(message.timeout, options);
+                    return object;
+                };
+    
+                /**
+                 * Converts this WaitOperationRequest to JSON.
+                 * @function toJSON
+                 * @memberof google.longrunning.WaitOperationRequest
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                WaitOperationRequest.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
                 return WaitOperationRequest;
             })();
     
@@ -7442,6 +15560,60 @@
                  * @instance
                  */
                 OperationInfo.prototype.metadataType = "";
+    
+                /**
+                 * Creates an OperationInfo message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.longrunning.OperationInfo
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.longrunning.OperationInfo} OperationInfo
+                 */
+                OperationInfo.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.longrunning.OperationInfo)
+                        return object;
+                    var message = new $root.google.longrunning.OperationInfo();
+                    if (object.responseType != null)
+                        message.responseType = String(object.responseType);
+                    if (object.metadataType != null)
+                        message.metadataType = String(object.metadataType);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an OperationInfo message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.longrunning.OperationInfo
+                 * @static
+                 * @param {google.longrunning.OperationInfo} message OperationInfo
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                OperationInfo.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.responseType = "";
+                        object.metadataType = "";
+                    }
+                    if (message.responseType != null && message.hasOwnProperty("responseType"))
+                        object.responseType = message.responseType;
+                    if (message.metadataType != null && message.hasOwnProperty("metadataType"))
+                        object.metadataType = message.metadataType;
+                    return object;
+                };
+    
+                /**
+                 * Converts this OperationInfo to JSON.
+                 * @function toJSON
+                 * @memberof google.longrunning.OperationInfo
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                OperationInfo.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
     
                 return OperationInfo;
             })();

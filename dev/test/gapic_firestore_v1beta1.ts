@@ -1243,7 +1243,7 @@ describe('v1beta1.FirestoreClient', () => {
       assert(
         (client.innerApiCalls.write as SinonStub)
           .getCall(0)
-          .calledWithExactly(undefined)
+          .calledWithExactly({}, undefined)
       );
       assert.deepStrictEqual(
         (((stream as unknown) as PassThrough)._transform as SinonStub).getCall(
@@ -1289,7 +1289,7 @@ describe('v1beta1.FirestoreClient', () => {
       assert(
         (client.innerApiCalls.write as SinonStub)
           .getCall(0)
-          .calledWithExactly(undefined)
+          .calledWithExactly({}, undefined)
       );
       assert.deepStrictEqual(
         (((stream as unknown) as PassThrough)._transform as SinonStub).getCall(
@@ -1333,7 +1333,7 @@ describe('v1beta1.FirestoreClient', () => {
       assert(
         (client.innerApiCalls.listen as SinonStub)
           .getCall(0)
-          .calledWithExactly(undefined)
+          .calledWithExactly({}, undefined)
       );
       assert.deepStrictEqual(
         (((stream as unknown) as PassThrough)._transform as SinonStub).getCall(
@@ -1379,7 +1379,7 @@ describe('v1beta1.FirestoreClient', () => {
       assert(
         (client.innerApiCalls.listen as SinonStub)
           .getCall(0)
-          .calledWithExactly(undefined)
+          .calledWithExactly({}, undefined)
       );
       assert.deepStrictEqual(
         (((stream as unknown) as PassThrough)._transform as SinonStub).getCall(

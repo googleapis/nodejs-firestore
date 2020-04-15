@@ -45,6 +45,11 @@ s.replace(
     "return this.innerApiCalls.listen({}, options);",
 )
 s.replace(
+    "dev/test/gapic_firestore_v1beta1.ts",
+    "calledWithExactly\(undefined\)",
+    "calledWithExactly({}, undefined)",
+)
+s.replace(
     "dev/src/v1beta1/firestore_client.ts",
     "return this\.innerApiCalls\.write\(options\);",
     "return this.innerApiCalls.write({}, options);",
@@ -53,6 +58,11 @@ s.replace(
     "dev/src/v1/firestore_client.ts",
     "return this\.innerApiCalls\.write\(options\);",
     "return this.innerApiCalls.write({}, options);",
+)
+s.replace(
+    "dev/test/gapic_firestore_v1.ts",
+    "calledWithExactly\(undefined\)",
+    "calledWithExactly({}, undefined)",
 )
 
 # Copy template files
@@ -153,5 +163,8 @@ subprocess.run(["npm", "install"])
 subprocess.run(["npm", "run", "fix"])
 os.chdir("dev")
 subprocess.run(["npx", "compileProtos", "src"])
-os.unlink('protos/protos.js')
-os.unlink('protos/protos.d.ts')
+os.chdir("protos")
+os.unlink('protos.js')
+os.unlink('protos.d.ts')
+subprocess.run('./update.sh', shell=True)
+os.chdir("../../")

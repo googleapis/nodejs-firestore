@@ -82,12 +82,12 @@ PBJS_ARGS=( --proto_path=. \
   --no-encode \
   --no-decode \
   --no-verify \
-  --no-convert \
   --no-delimited \
   --force-enum-string \
   --force-number)
       
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1_proto_api.js \
+  -r firestore_v1 \
   "${PROTOS_DIR}/google/firestore/v1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
@@ -95,6 +95,7 @@ PBJS_ARGS=( --proto_path=. \
 "${PBTS}" -o firestore_v1_proto_api.d.ts firestore_v1_proto_api.js
 
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_admin_v1_proto_api.js \
+  -r firestore_admin_v1 \
   "${PROTOS_DIR}/google/firestore/admin/v1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
@@ -102,6 +103,7 @@ PBJS_ARGS=( --proto_path=. \
 "${PBTS}" -o firestore_admin_v1_proto_api.d.ts firestore_admin_v1_proto_api.js
 
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1beta1_proto_api.js \
+  -r firestore_v1beta1_v1 \
   "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
