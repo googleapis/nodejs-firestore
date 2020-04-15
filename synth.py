@@ -155,6 +155,8 @@ os.rename("dev/.mocharc.js", ".mocharc.js")
 os.rename("dev/.jsdoc.js", ".jsdoc.js")
 os.rename("dev/.prettierrc.js", ".prettierrc.js")
 
+s.replace(".jsdoc.js", "protos", "build/protos", 1)
+
 # Remove auto-generated packaging tests
 os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
 
