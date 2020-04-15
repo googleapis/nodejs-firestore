@@ -62,10 +62,17 @@ export class RateLimiter {
    * @param currentTime Used for testing the limiter.
    * @private
    */
-  tryMakeRequest(
-    numOperations: number,
-    currentTime = Timestamp.now()
-  ): boolean {
+  tryMakeRequest(numOperations: number) {
+    return this._tryMakeRequest(numOperations, Timestamp.now());
+  }
+
+  /**
+   * Used in testing for different timestamps.
+   *
+   * @private
+   */
+  // Visible for testing.
+  _tryMakeRequest(numOperations: number, currentTime: Timestamp): boolean {
     this.refillTokens(currentTime);
     if (numOperations <= this.availableTokens) {
       this.availableTokens -= numOperations;
@@ -80,12 +87,21 @@ export class RateLimiter {
    * capacity. Returns -1 if the request is not possible with the current
    * capacity.
    *
-   * @param currentTime Used for testing the limiter.
    * @private
    */
-  getNextRequestDelayMs(
+  getNextRequestDelayMs(numOperations: number) {
+    return this._getNextRequestDelayMs(numOperations, Timestamp.now());
+  }
+
+  /**
+   * Used in testing for different timestamps.
+   *
+   * @private
+   */
+  // Visible for testing.
+  _getNextRequestDelayMs(
     numOperations: number,
-    currentTime = Timestamp.now()
+    currentTime: Timestamp
   ): number {
     if (numOperations < this.availableTokens) {
       return 0;

@@ -25,52 +25,53 @@ describe('RateLimiter', () => {
   });
 
   it('accepts and rejects requests based on capacity', () => {
-    expect(limiter.tryMakeRequest(250, new Timestamp(0, 0))).to.be.true;
-    expect(limiter.tryMakeRequest(250, new Timestamp(0, 0))).to.be.true;
+    expect(limiter._tryMakeRequest(250, new Timestamp(0, 0))).to.be.true;
+    expect(limiter._tryMakeRequest(250, new Timestamp(0, 0))).to.be.true;
 
     // Once tokens have been used, further requests should fail.
-    expect(limiter.tryMakeRequest(1, new Timestamp(0, 0))).to.be.false;
+    expect(limiter._tryMakeRequest(1, new Timestamp(0, 0))).to.be.false;
 
     // Tokens will only refill up to max capacity.
-    expect(limiter.tryMakeRequest(501, new Timestamp(1, 0))).to.be.false;
-    expect(limiter.tryMakeRequest(500, new Timestamp(1, 0))).to.be.true;
+    expect(limiter._tryMakeRequest(501, new Timestamp(1, 0))).to.be.false;
+    expect(limiter._tryMakeRequest(500, new Timestamp(1, 0))).to.be.true;
 
     // Tokens will refill incrementally based on the number of ms elapsed.
-    expect(limiter.tryMakeRequest(251, new Timestamp(1, 500 * 1e6))).to.be
+    expect(limiter._tryMakeRequest(251, new Timestamp(1, 500 * 1e6))).to.be
       .false;
-    expect(limiter.tryMakeRequest(250, new Timestamp(1, 500 * 1e6))).to.be.true;
+    expect(limiter._tryMakeRequest(250, new Timestamp(1, 500 * 1e6))).to.be
+      .true;
 
     // Scales with multiplier.
-    expect(limiter.tryMakeRequest(751, new Timestamp(5 * 60 - 1, 0))).to.be
+    expect(limiter._tryMakeRequest(751, new Timestamp(5 * 60 - 1, 0))).to.be
       .false;
-    expect(limiter.tryMakeRequest(751, new Timestamp(5 * 60, 0))).to.be.false;
-    expect(limiter.tryMakeRequest(750, new Timestamp(5 * 60, 0))).to.be.true;
+    expect(limiter._tryMakeRequest(751, new Timestamp(5 * 60, 0))).to.be.false;
+    expect(limiter._tryMakeRequest(750, new Timestamp(5 * 60, 0))).to.be.true;
   });
 
   it('calculates the number of ms needed to place the next request', () => {
     // Should return 0 if there are enough tokens for the request to be made.
     let timestamp = new Timestamp(0, 0);
-    expect(limiter.getNextRequestDelayMs(500, timestamp)).to.equal(0);
+    expect(limiter._getNextRequestDelayMs(500, timestamp)).to.equal(0);
 
     // Should factor in remaining tokens when calculating the time.
-    expect(limiter.tryMakeRequest(250, timestamp));
-    expect(limiter.getNextRequestDelayMs(500, timestamp)).to.equal(500);
+    expect(limiter._tryMakeRequest(250, timestamp));
+    expect(limiter._getNextRequestDelayMs(500, timestamp)).to.equal(500);
 
     // Once tokens have been used, should calculate time before next request.
     timestamp = new Timestamp(1, 0);
-    expect(limiter.tryMakeRequest(500, timestamp)).to.be.true;
-    expect(limiter.getNextRequestDelayMs(100, timestamp)).to.equal(200);
-    expect(limiter.getNextRequestDelayMs(250, timestamp)).to.equal(500);
-    expect(limiter.getNextRequestDelayMs(500, timestamp)).to.equal(1000);
-    expect(limiter.getNextRequestDelayMs(501, timestamp)).to.equal(-1);
+    expect(limiter._tryMakeRequest(500, timestamp)).to.be.true;
+    expect(limiter._getNextRequestDelayMs(100, timestamp)).to.equal(200);
+    expect(limiter._getNextRequestDelayMs(250, timestamp)).to.equal(500);
+    expect(limiter._getNextRequestDelayMs(500, timestamp)).to.equal(1000);
+    expect(limiter._getNextRequestDelayMs(501, timestamp)).to.equal(-1);
 
     // Scales with multiplier.
     timestamp = new Timestamp(5 * 60, 0);
-    expect(limiter.tryMakeRequest(750, timestamp)).to.be.true;
-    expect(limiter.getNextRequestDelayMs(250, timestamp)).to.equal(334);
-    expect(limiter.getNextRequestDelayMs(500, timestamp)).to.equal(667);
-    expect(limiter.getNextRequestDelayMs(750, timestamp)).to.equal(1000);
-    expect(limiter.getNextRequestDelayMs(751, timestamp)).to.equal(-1);
+    expect(limiter._tryMakeRequest(750, timestamp)).to.be.true;
+    expect(limiter._getNextRequestDelayMs(250, timestamp)).to.equal(334);
+    expect(limiter._getNextRequestDelayMs(500, timestamp)).to.equal(667);
+    expect(limiter._getNextRequestDelayMs(750, timestamp)).to.equal(1000);
+    expect(limiter._getNextRequestDelayMs(751, timestamp)).to.equal(-1);
   });
 
   it('calculates the maximum number of operations correctly', async () => {
