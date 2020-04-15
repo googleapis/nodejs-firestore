@@ -18,23 +18,22 @@
 
 import * as gax from 'google-gax';
 import {
-  APICallback,
   Callback,
   CallOptions,
-  ClientOptions,
   Descriptors,
+  ClientOptions,
   LROperation,
   PaginationCallback,
-  PaginationResponse,
+  GaxCall,
 } from 'google-gax';
 import * as path from 'path';
 
 import {Transform} from 'stream';
-import * as protosTypes from '../../protos/firestore_admin_v1_proto_api';
+import {RequestType} from 'google-gax/build/src/apitypes';
+import * as protos from '../../protos/firestore_admin_v1_proto_api';
 import * as gapicConfig from './firestore_admin_client_config.json';
 
-import * as pkg from '../../../package.json';
-const version = pkg.version;
+const version = require('../../../package.json').version;
 
 /**
  *  Operations are created by service `FirestoreAdmin`, but are accessed via
@@ -43,14 +42,6 @@ const version = pkg.version;
  * @memberof v1
  */
 export class FirestoreAdminClient {
-  private _descriptors: Descriptors = {
-    page: {},
-    stream: {},
-    longrunning: {},
-    batching: {},
-  };
-  private _innerApiCalls: {[name: string]: Function};
-  private _pathTemplates: {[name: string]: gax.PathTemplate};
   private _terminated = false;
   private _opts: ClientOptions;
   private _gaxModule: typeof gax | typeof gax.fallback;
@@ -58,6 +49,14 @@ export class FirestoreAdminClient {
   private _protos: {};
   private _defaults: {[method: string]: gax.CallSettings};
   auth: gax.GoogleAuth;
+  descriptors: Descriptors = {
+    page: {},
+    stream: {},
+    longrunning: {},
+    batching: {},
+  };
+  innerApiCalls: {[name: string]: Function};
+  pathTemplates: {[name: string]: gax.PathTemplate};
   operationsClient: gax.OperationsClient;
   firestoreAdminStub?: Promise<{[name: string]: Function}>;
 
@@ -150,13 +149,16 @@ export class FirestoreAdminClient {
       'protos.json'
     );
     this._protos = this._gaxGrpc.loadProto(
-      opts.fallback ? require('../../protos/protos.json') : nodejsProtoPath
+      opts.fallback
+        ? // eslint-disable-next-line @typescript-eslint/no-var-requires
+          require('../../protos/protos.json')
+        : nodejsProtoPath
     );
 
     // This API contains "path templates"; forward-slash-separated
     // identifiers to uniquely identify resources within the API.
     // Create useful helper objects for these.
-    this._pathTemplates = {
+    this.pathTemplates = {
       collectionGroupPathTemplate: new this._gaxModule.PathTemplate(
         'projects/{project}/databases/{database}/collectionGroups/{collection}'
       ),
@@ -174,7 +176,7 @@ export class FirestoreAdminClient {
     // Some of the methods on this service return "paged" results,
     // (e.g. 50 results at a time, with tokens to get subsequent
     // pages). Denote the keys used for pagination and results.
-    this._descriptors.page = {
+    this.descriptors.page = {
       listIndexes: new this._gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
@@ -228,7 +230,7 @@ export class FirestoreAdminClient {
       '.google.firestore.admin.v1.ImportDocumentsMetadata'
     ) as gax.protobuf.Type;
 
-    this._descriptors.longrunning = {
+    this.descriptors.longrunning = {
       createIndex: new this._gaxModule.LongrunningDescriptor(
         this.operationsClient,
         createIndexResponse.decode.bind(createIndexResponse),
@@ -262,7 +264,7 @@ export class FirestoreAdminClient {
     // Set up a dictionary of "inner API calls"; the core implementation
     // of calling the API is handled in `google-gax`, with this code
     // merely providing the destination and request information.
-    this._innerApiCalls = {};
+    this.innerApiCalls = {};
   }
 
   /**
@@ -307,9 +309,8 @@ export class FirestoreAdminClient {
       'exportDocuments',
       'importDocuments',
     ];
-
     for (const methodName of firestoreAdminStubMethods) {
-      const innerCallPromise = this.firestoreAdminStub.then(
+      const callPromise = this.firestoreAdminStub.then(
         stub => (...args: Array<{}>) => {
           if (this._terminated) {
             return Promise.reject('The client has already been closed.');
@@ -323,20 +324,14 @@ export class FirestoreAdminClient {
       );
 
       const apiCall = this._gaxModule.createApiCall(
-        innerCallPromise,
+        callPromise,
         this._defaults[methodName],
-        this._descriptors.page[methodName] ||
-          this._descriptors.stream[methodName] ||
-          this._descriptors.longrunning[methodName]
+        this.descriptors.page[methodName] ||
+          this.descriptors.stream[methodName] ||
+          this.descriptors.longrunning[methodName]
       );
 
-      this._innerApiCalls[methodName] = (
-        argument: {},
-        callOptions?: CallOptions,
-        callback?: APICallback
-      ) => {
-        return apiCall(argument, callOptions, callback);
-      };
+      this.innerApiCalls[methodName] = apiCall;
     }
 
     return this.firestoreAdminStub;
@@ -396,22 +391,30 @@ export class FirestoreAdminClient {
   // -- Service calls --
   // -------------------
   getIndex(
-    request: protosTypes.google.firestore.admin.v1.IGetIndexRequest,
+    request: protos.google.firestore.admin.v1.IGetIndexRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.admin.v1.IIndex,
-      protosTypes.google.firestore.admin.v1.IGetIndexRequest | undefined,
+      protos.google.firestore.admin.v1.IIndex,
+      protos.google.firestore.admin.v1.IGetIndexRequest | undefined,
       {} | undefined
     ]
   >;
   getIndex(
-    request: protosTypes.google.firestore.admin.v1.IGetIndexRequest,
+    request: protos.google.firestore.admin.v1.IGetIndexRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.firestore.admin.v1.IIndex,
-      protosTypes.google.firestore.admin.v1.IGetIndexRequest | undefined,
-      {} | undefined
+      protos.google.firestore.admin.v1.IIndex,
+      protos.google.firestore.admin.v1.IGetIndexRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  getIndex(
+    request: protos.google.firestore.admin.v1.IGetIndexRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IIndex,
+      protos.google.firestore.admin.v1.IGetIndexRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -429,23 +432,23 @@ export class FirestoreAdminClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   getIndex(
-    request: protosTypes.google.firestore.admin.v1.IGetIndexRequest,
+    request: protos.google.firestore.admin.v1.IGetIndexRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.firestore.admin.v1.IIndex,
-          protosTypes.google.firestore.admin.v1.IGetIndexRequest | undefined,
-          {} | undefined
+          protos.google.firestore.admin.v1.IIndex,
+          protos.google.firestore.admin.v1.IGetIndexRequest | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.firestore.admin.v1.IIndex,
-      protosTypes.google.firestore.admin.v1.IGetIndexRequest | undefined,
-      {} | undefined
+      protos.google.firestore.admin.v1.IIndex,
+      protos.google.firestore.admin.v1.IGetIndexRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.firestore.admin.v1.IIndex,
-      protosTypes.google.firestore.admin.v1.IGetIndexRequest | undefined,
+      protos.google.firestore.admin.v1.IIndex,
+      protos.google.firestore.admin.v1.IGetIndexRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -466,25 +469,33 @@ export class FirestoreAdminClient {
       name: request.name || '',
     });
     this.initialize();
-    return this._innerApiCalls.getIndex(request, options, callback);
+    return this.innerApiCalls.getIndex(request, options, callback);
   }
   deleteIndex(
-    request: protosTypes.google.firestore.admin.v1.IDeleteIndexRequest,
+    request: protos.google.firestore.admin.v1.IDeleteIndexRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.admin.v1.IDeleteIndexRequest | undefined,
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteIndexRequest | undefined,
       {} | undefined
     ]
   >;
   deleteIndex(
-    request: protosTypes.google.firestore.admin.v1.IDeleteIndexRequest,
+    request: protos.google.firestore.admin.v1.IDeleteIndexRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.admin.v1.IDeleteIndexRequest | undefined,
-      {} | undefined
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteIndexRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  deleteIndex(
+    request: protos.google.firestore.admin.v1.IDeleteIndexRequest,
+    callback: Callback<
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteIndexRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -502,23 +513,25 @@ export class FirestoreAdminClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   deleteIndex(
-    request: protosTypes.google.firestore.admin.v1.IDeleteIndexRequest,
+    request: protos.google.firestore.admin.v1.IDeleteIndexRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.protobuf.IEmpty,
-          protosTypes.google.firestore.admin.v1.IDeleteIndexRequest | undefined,
-          {} | undefined
+          protos.google.protobuf.IEmpty,
+          | protos.google.firestore.admin.v1.IDeleteIndexRequest
+          | null
+          | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.admin.v1.IDeleteIndexRequest | undefined,
-      {} | undefined
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteIndexRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.admin.v1.IDeleteIndexRequest | undefined,
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.admin.v1.IDeleteIndexRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -539,25 +552,33 @@ export class FirestoreAdminClient {
       name: request.name || '',
     });
     this.initialize();
-    return this._innerApiCalls.deleteIndex(request, options, callback);
+    return this.innerApiCalls.deleteIndex(request, options, callback);
   }
   getField(
-    request: protosTypes.google.firestore.admin.v1.IGetFieldRequest,
+    request: protos.google.firestore.admin.v1.IGetFieldRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.admin.v1.IField,
-      protosTypes.google.firestore.admin.v1.IGetFieldRequest | undefined,
+      protos.google.firestore.admin.v1.IField,
+      protos.google.firestore.admin.v1.IGetFieldRequest | undefined,
       {} | undefined
     ]
   >;
   getField(
-    request: protosTypes.google.firestore.admin.v1.IGetFieldRequest,
+    request: protos.google.firestore.admin.v1.IGetFieldRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.firestore.admin.v1.IField,
-      protosTypes.google.firestore.admin.v1.IGetFieldRequest | undefined,
-      {} | undefined
+      protos.google.firestore.admin.v1.IField,
+      protos.google.firestore.admin.v1.IGetFieldRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  getField(
+    request: protos.google.firestore.admin.v1.IGetFieldRequest,
+    callback: Callback<
+      protos.google.firestore.admin.v1.IField,
+      protos.google.firestore.admin.v1.IGetFieldRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -575,23 +596,23 @@ export class FirestoreAdminClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   getField(
-    request: protosTypes.google.firestore.admin.v1.IGetFieldRequest,
+    request: protos.google.firestore.admin.v1.IGetFieldRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.firestore.admin.v1.IField,
-          protosTypes.google.firestore.admin.v1.IGetFieldRequest | undefined,
-          {} | undefined
+          protos.google.firestore.admin.v1.IField,
+          protos.google.firestore.admin.v1.IGetFieldRequest | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.firestore.admin.v1.IField,
-      protosTypes.google.firestore.admin.v1.IGetFieldRequest | undefined,
-      {} | undefined
+      protos.google.firestore.admin.v1.IField,
+      protos.google.firestore.admin.v1.IGetFieldRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.firestore.admin.v1.IField,
-      protosTypes.google.firestore.admin.v1.IGetFieldRequest | undefined,
+      protos.google.firestore.admin.v1.IField,
+      protos.google.firestore.admin.v1.IGetFieldRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -612,32 +633,43 @@ export class FirestoreAdminClient {
       name: request.name || '',
     });
     this.initialize();
-    return this._innerApiCalls.getField(request, options, callback);
+    return this.innerApiCalls.getField(request, options, callback);
   }
 
   createIndex(
-    request: protosTypes.google.firestore.admin.v1.ICreateIndexRequest,
+    request: protos.google.firestore.admin.v1.ICreateIndexRequest,
     options?: gax.CallOptions
   ): Promise<
     [
       LROperation<
-        protosTypes.google.firestore.admin.v1.IIndex,
-        protosTypes.google.firestore.admin.v1.IIndexOperationMetadata
+        protos.google.firestore.admin.v1.IIndex,
+        protos.google.firestore.admin.v1.IIndexOperationMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
+      protos.google.longrunning.IOperation | undefined,
       {} | undefined
     ]
   >;
   createIndex(
-    request: protosTypes.google.firestore.admin.v1.ICreateIndexRequest,
+    request: protos.google.firestore.admin.v1.ICreateIndexRequest,
     options: gax.CallOptions,
     callback: Callback<
       LROperation<
-        protosTypes.google.firestore.admin.v1.IIndex,
-        protosTypes.google.firestore.admin.v1.IIndexOperationMetadata
+        protos.google.firestore.admin.v1.IIndex,
+        protos.google.firestore.admin.v1.IIndexOperationMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
-      {} | undefined
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  createIndex(
+    request: protos.google.firestore.admin.v1.ICreateIndexRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IIndex,
+        protos.google.firestore.admin.v1.IIndexOperationMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -659,32 +691,32 @@ export class FirestoreAdminClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   createIndex(
-    request: protosTypes.google.firestore.admin.v1.ICreateIndexRequest,
+    request: protos.google.firestore.admin.v1.ICreateIndexRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
           LROperation<
-            protosTypes.google.firestore.admin.v1.IIndex,
-            protosTypes.google.firestore.admin.v1.IIndexOperationMetadata
+            protos.google.firestore.admin.v1.IIndex,
+            protos.google.firestore.admin.v1.IIndexOperationMetadata
           >,
-          protosTypes.google.longrunning.IOperation | undefined,
-          {} | undefined
+          protos.google.longrunning.IOperation | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
       LROperation<
-        protosTypes.google.firestore.admin.v1.IIndex,
-        protosTypes.google.firestore.admin.v1.IIndexOperationMetadata
+        protos.google.firestore.admin.v1.IIndex,
+        protos.google.firestore.admin.v1.IIndexOperationMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
-      {} | undefined
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
       LROperation<
-        protosTypes.google.firestore.admin.v1.IIndex,
-        protosTypes.google.firestore.admin.v1.IIndexOperationMetadata
+        protos.google.firestore.admin.v1.IIndex,
+        protos.google.firestore.admin.v1.IIndexOperationMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
+      protos.google.longrunning.IOperation | undefined,
       {} | undefined
     ]
   > | void {
@@ -705,31 +737,42 @@ export class FirestoreAdminClient {
       parent: request.parent || '',
     });
     this.initialize();
-    return this._innerApiCalls.createIndex(request, options, callback);
+    return this.innerApiCalls.createIndex(request, options, callback);
   }
   updateField(
-    request: protosTypes.google.firestore.admin.v1.IUpdateFieldRequest,
+    request: protos.google.firestore.admin.v1.IUpdateFieldRequest,
     options?: gax.CallOptions
   ): Promise<
     [
       LROperation<
-        protosTypes.google.firestore.admin.v1.IField,
-        protosTypes.google.firestore.admin.v1.IFieldOperationMetadata
+        protos.google.firestore.admin.v1.IField,
+        protos.google.firestore.admin.v1.IFieldOperationMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
+      protos.google.longrunning.IOperation | undefined,
       {} | undefined
     ]
   >;
   updateField(
-    request: protosTypes.google.firestore.admin.v1.IUpdateFieldRequest,
+    request: protos.google.firestore.admin.v1.IUpdateFieldRequest,
     options: gax.CallOptions,
     callback: Callback<
       LROperation<
-        protosTypes.google.firestore.admin.v1.IField,
-        protosTypes.google.firestore.admin.v1.IFieldOperationMetadata
+        protos.google.firestore.admin.v1.IField,
+        protos.google.firestore.admin.v1.IFieldOperationMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
-      {} | undefined
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  updateField(
+    request: protos.google.firestore.admin.v1.IUpdateFieldRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IField,
+        protos.google.firestore.admin.v1.IFieldOperationMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -761,32 +804,32 @@ export class FirestoreAdminClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   updateField(
-    request: protosTypes.google.firestore.admin.v1.IUpdateFieldRequest,
+    request: protos.google.firestore.admin.v1.IUpdateFieldRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
           LROperation<
-            protosTypes.google.firestore.admin.v1.IField,
-            protosTypes.google.firestore.admin.v1.IFieldOperationMetadata
+            protos.google.firestore.admin.v1.IField,
+            protos.google.firestore.admin.v1.IFieldOperationMetadata
           >,
-          protosTypes.google.longrunning.IOperation | undefined,
-          {} | undefined
+          protos.google.longrunning.IOperation | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
       LROperation<
-        protosTypes.google.firestore.admin.v1.IField,
-        protosTypes.google.firestore.admin.v1.IFieldOperationMetadata
+        protos.google.firestore.admin.v1.IField,
+        protos.google.firestore.admin.v1.IFieldOperationMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
-      {} | undefined
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
       LROperation<
-        protosTypes.google.firestore.admin.v1.IField,
-        protosTypes.google.firestore.admin.v1.IFieldOperationMetadata
+        protos.google.firestore.admin.v1.IField,
+        protos.google.firestore.admin.v1.IFieldOperationMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
+      protos.google.longrunning.IOperation | undefined,
       {} | undefined
     ]
   > | void {
@@ -807,31 +850,42 @@ export class FirestoreAdminClient {
       'field.name': request.field!.name || '',
     });
     this.initialize();
-    return this._innerApiCalls.updateField(request, options, callback);
+    return this.innerApiCalls.updateField(request, options, callback);
   }
   exportDocuments(
-    request: protosTypes.google.firestore.admin.v1.IExportDocumentsRequest,
+    request: protos.google.firestore.admin.v1.IExportDocumentsRequest,
     options?: gax.CallOptions
   ): Promise<
     [
       LROperation<
-        protosTypes.google.firestore.admin.v1.IExportDocumentsResponse,
-        protosTypes.google.firestore.admin.v1.IExportDocumentsMetadata
+        protos.google.firestore.admin.v1.IExportDocumentsResponse,
+        protos.google.firestore.admin.v1.IExportDocumentsMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
+      protos.google.longrunning.IOperation | undefined,
       {} | undefined
     ]
   >;
   exportDocuments(
-    request: protosTypes.google.firestore.admin.v1.IExportDocumentsRequest,
+    request: protos.google.firestore.admin.v1.IExportDocumentsRequest,
     options: gax.CallOptions,
     callback: Callback<
       LROperation<
-        protosTypes.google.firestore.admin.v1.IExportDocumentsResponse,
-        protosTypes.google.firestore.admin.v1.IExportDocumentsMetadata
+        protos.google.firestore.admin.v1.IExportDocumentsResponse,
+        protos.google.firestore.admin.v1.IExportDocumentsMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
-      {} | undefined
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  exportDocuments(
+    request: protos.google.firestore.admin.v1.IExportDocumentsRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IExportDocumentsResponse,
+        protos.google.firestore.admin.v1.IExportDocumentsMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -867,32 +921,32 @@ export class FirestoreAdminClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   exportDocuments(
-    request: protosTypes.google.firestore.admin.v1.IExportDocumentsRequest,
+    request: protos.google.firestore.admin.v1.IExportDocumentsRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
           LROperation<
-            protosTypes.google.firestore.admin.v1.IExportDocumentsResponse,
-            protosTypes.google.firestore.admin.v1.IExportDocumentsMetadata
+            protos.google.firestore.admin.v1.IExportDocumentsResponse,
+            protos.google.firestore.admin.v1.IExportDocumentsMetadata
           >,
-          protosTypes.google.longrunning.IOperation | undefined,
-          {} | undefined
+          protos.google.longrunning.IOperation | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
       LROperation<
-        protosTypes.google.firestore.admin.v1.IExportDocumentsResponse,
-        protosTypes.google.firestore.admin.v1.IExportDocumentsMetadata
+        protos.google.firestore.admin.v1.IExportDocumentsResponse,
+        protos.google.firestore.admin.v1.IExportDocumentsMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
-      {} | undefined
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
       LROperation<
-        protosTypes.google.firestore.admin.v1.IExportDocumentsResponse,
-        protosTypes.google.firestore.admin.v1.IExportDocumentsMetadata
+        protos.google.firestore.admin.v1.IExportDocumentsResponse,
+        protos.google.firestore.admin.v1.IExportDocumentsMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
+      protos.google.longrunning.IOperation | undefined,
       {} | undefined
     ]
   > | void {
@@ -913,31 +967,42 @@ export class FirestoreAdminClient {
       name: request.name || '',
     });
     this.initialize();
-    return this._innerApiCalls.exportDocuments(request, options, callback);
+    return this.innerApiCalls.exportDocuments(request, options, callback);
   }
   importDocuments(
-    request: protosTypes.google.firestore.admin.v1.IImportDocumentsRequest,
+    request: protos.google.firestore.admin.v1.IImportDocumentsRequest,
     options?: gax.CallOptions
   ): Promise<
     [
       LROperation<
-        protosTypes.google.protobuf.IEmpty,
-        protosTypes.google.firestore.admin.v1.IImportDocumentsMetadata
+        protos.google.protobuf.IEmpty,
+        protos.google.firestore.admin.v1.IImportDocumentsMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
+      protos.google.longrunning.IOperation | undefined,
       {} | undefined
     ]
   >;
   importDocuments(
-    request: protosTypes.google.firestore.admin.v1.IImportDocumentsRequest,
+    request: protos.google.firestore.admin.v1.IImportDocumentsRequest,
     options: gax.CallOptions,
     callback: Callback<
       LROperation<
-        protosTypes.google.protobuf.IEmpty,
-        protosTypes.google.firestore.admin.v1.IImportDocumentsMetadata
+        protos.google.protobuf.IEmpty,
+        protos.google.firestore.admin.v1.IImportDocumentsMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
-      {} | undefined
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  importDocuments(
+    request: protos.google.firestore.admin.v1.IImportDocumentsRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.protobuf.IEmpty,
+        protos.google.firestore.admin.v1.IImportDocumentsMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -968,32 +1033,32 @@ export class FirestoreAdminClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   importDocuments(
-    request: protosTypes.google.firestore.admin.v1.IImportDocumentsRequest,
+    request: protos.google.firestore.admin.v1.IImportDocumentsRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
           LROperation<
-            protosTypes.google.protobuf.IEmpty,
-            protosTypes.google.firestore.admin.v1.IImportDocumentsMetadata
+            protos.google.protobuf.IEmpty,
+            protos.google.firestore.admin.v1.IImportDocumentsMetadata
           >,
-          protosTypes.google.longrunning.IOperation | undefined,
-          {} | undefined
+          protos.google.longrunning.IOperation | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
       LROperation<
-        protosTypes.google.protobuf.IEmpty,
-        protosTypes.google.firestore.admin.v1.IImportDocumentsMetadata
+        protos.google.protobuf.IEmpty,
+        protos.google.firestore.admin.v1.IImportDocumentsMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
-      {} | undefined
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
       LROperation<
-        protosTypes.google.protobuf.IEmpty,
-        protosTypes.google.firestore.admin.v1.IImportDocumentsMetadata
+        protos.google.protobuf.IEmpty,
+        protos.google.firestore.admin.v1.IImportDocumentsMetadata
       >,
-      protosTypes.google.longrunning.IOperation | undefined,
+      protos.google.longrunning.IOperation | undefined,
       {} | undefined
     ]
   > | void {
@@ -1014,25 +1079,33 @@ export class FirestoreAdminClient {
       name: request.name || '',
     });
     this.initialize();
-    return this._innerApiCalls.importDocuments(request, options, callback);
+    return this.innerApiCalls.importDocuments(request, options, callback);
   }
   listIndexes(
-    request: protosTypes.google.firestore.admin.v1.IListIndexesRequest,
+    request: protos.google.firestore.admin.v1.IListIndexesRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.admin.v1.IIndex[],
-      protosTypes.google.firestore.admin.v1.IListIndexesRequest | null,
-      protosTypes.google.firestore.admin.v1.IListIndexesResponse
+      protos.google.firestore.admin.v1.IIndex[],
+      protos.google.firestore.admin.v1.IListIndexesRequest | null,
+      protos.google.firestore.admin.v1.IListIndexesResponse
     ]
   >;
   listIndexes(
-    request: protosTypes.google.firestore.admin.v1.IListIndexesRequest,
+    request: protos.google.firestore.admin.v1.IListIndexesRequest,
     options: gax.CallOptions,
-    callback: Callback<
-      protosTypes.google.firestore.admin.v1.IIndex[],
-      protosTypes.google.firestore.admin.v1.IListIndexesRequest | null,
-      protosTypes.google.firestore.admin.v1.IListIndexesResponse
+    callback: PaginationCallback<
+      protos.google.firestore.admin.v1.IListIndexesRequest,
+      protos.google.firestore.admin.v1.IListIndexesResponse | null | undefined,
+      protos.google.firestore.admin.v1.IIndex
+    >
+  ): void;
+  listIndexes(
+    request: protos.google.firestore.admin.v1.IListIndexesRequest,
+    callback: PaginationCallback<
+      protos.google.firestore.admin.v1.IListIndexesRequest,
+      protos.google.firestore.admin.v1.IListIndexesResponse | null | undefined,
+      protos.google.firestore.admin.v1.IIndex
     >
   ): void;
   /**
@@ -1070,24 +1143,26 @@ export class FirestoreAdminClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   listIndexes(
-    request: protosTypes.google.firestore.admin.v1.IListIndexesRequest,
+    request: protos.google.firestore.admin.v1.IListIndexesRequest,
     optionsOrCallback?:
       | gax.CallOptions
-      | Callback<
-          protosTypes.google.firestore.admin.v1.IIndex[],
-          protosTypes.google.firestore.admin.v1.IListIndexesRequest | null,
-          protosTypes.google.firestore.admin.v1.IListIndexesResponse
+      | PaginationCallback<
+          protos.google.firestore.admin.v1.IListIndexesRequest,
+          | protos.google.firestore.admin.v1.IListIndexesResponse
+          | null
+          | undefined,
+          protos.google.firestore.admin.v1.IIndex
         >,
-    callback?: Callback<
-      protosTypes.google.firestore.admin.v1.IIndex[],
-      protosTypes.google.firestore.admin.v1.IListIndexesRequest | null,
-      protosTypes.google.firestore.admin.v1.IListIndexesResponse
+    callback?: PaginationCallback<
+      protos.google.firestore.admin.v1.IListIndexesRequest,
+      protos.google.firestore.admin.v1.IListIndexesResponse | null | undefined,
+      protos.google.firestore.admin.v1.IIndex
     >
   ): Promise<
     [
-      protosTypes.google.firestore.admin.v1.IIndex[],
-      protosTypes.google.firestore.admin.v1.IListIndexesRequest | null,
-      protosTypes.google.firestore.admin.v1.IListIndexesResponse
+      protos.google.firestore.admin.v1.IIndex[],
+      protos.google.firestore.admin.v1.IListIndexesRequest | null,
+      protos.google.firestore.admin.v1.IListIndexesResponse
     ]
   > | void {
     request = request || {};
@@ -1107,7 +1182,7 @@ export class FirestoreAdminClient {
       parent: request.parent || '',
     });
     this.initialize();
-    return this._innerApiCalls.listIndexes(request, options, callback);
+    return this.innerApiCalls.listIndexes(request, options, callback);
   }
 
   /**
@@ -1142,7 +1217,7 @@ export class FirestoreAdminClient {
    *   An object stream which emits an object representing [Index]{@link google.firestore.admin.v1.Index} on 'data' event.
    */
   listIndexesStream(
-    request?: protosTypes.google.firestore.admin.v1.IListIndexesRequest,
+    request?: protos.google.firestore.admin.v1.IListIndexesRequest,
     options?: gax.CallOptions
   ): Transform {
     request = request || {};
@@ -1156,29 +1231,83 @@ export class FirestoreAdminClient {
     });
     const callSettings = new gax.CallSettings(options);
     this.initialize();
-    return this._descriptors.page.listIndexes.createStream(
-      this._innerApiCalls.listIndexes as gax.GaxCall,
+    return this.descriptors.page.listIndexes.createStream(
+      this.innerApiCalls.listIndexes as gax.GaxCall,
       request,
       callSettings
     );
   }
+
+  /**
+   * Equivalent to {@link listIndexes}, but returns an iterable object.
+   *
+   * for-await-of syntax is used with the iterable to recursively get response element on-demand.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. A parent name of the form
+   *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
+   * @param {string} request.filter
+   *   The filter to apply to list results.
+   * @param {number} request.pageSize
+   *   The number of results to return.
+   * @param {string} request.pageToken
+   *   A page token, returned from a previous call to
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListIndexes|FirestoreAdmin.ListIndexes}, that may be used to get the next
+   *   page of results.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Object}
+   *   An iterable Object that conforms to @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols.
+   */
+  listIndexesAsync(
+    request?: protos.google.firestore.admin.v1.IListIndexesRequest,
+    options?: gax.CallOptions
+  ): AsyncIterable<protos.google.firestore.admin.v1.IIndex> {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    options = options || {};
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.listIndexes.asyncIterate(
+      this.innerApiCalls['listIndexes'] as GaxCall,
+      (request as unknown) as RequestType,
+      callSettings
+    ) as AsyncIterable<protos.google.firestore.admin.v1.IIndex>;
+  }
   listFields(
-    request: protosTypes.google.firestore.admin.v1.IListFieldsRequest,
+    request: protos.google.firestore.admin.v1.IListFieldsRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.admin.v1.IField[],
-      protosTypes.google.firestore.admin.v1.IListFieldsRequest | null,
-      protosTypes.google.firestore.admin.v1.IListFieldsResponse
+      protos.google.firestore.admin.v1.IField[],
+      protos.google.firestore.admin.v1.IListFieldsRequest | null,
+      protos.google.firestore.admin.v1.IListFieldsResponse
     ]
   >;
   listFields(
-    request: protosTypes.google.firestore.admin.v1.IListFieldsRequest,
+    request: protos.google.firestore.admin.v1.IListFieldsRequest,
     options: gax.CallOptions,
-    callback: Callback<
-      protosTypes.google.firestore.admin.v1.IField[],
-      protosTypes.google.firestore.admin.v1.IListFieldsRequest | null,
-      protosTypes.google.firestore.admin.v1.IListFieldsResponse
+    callback: PaginationCallback<
+      protos.google.firestore.admin.v1.IListFieldsRequest,
+      protos.google.firestore.admin.v1.IListFieldsResponse | null | undefined,
+      protos.google.firestore.admin.v1.IField
+    >
+  ): void;
+  listFields(
+    request: protos.google.firestore.admin.v1.IListFieldsRequest,
+    callback: PaginationCallback<
+      protos.google.firestore.admin.v1.IListFieldsRequest,
+      protos.google.firestore.admin.v1.IListFieldsResponse | null | undefined,
+      protos.google.firestore.admin.v1.IField
     >
   ): void;
   /**
@@ -1225,24 +1354,26 @@ export class FirestoreAdminClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   listFields(
-    request: protosTypes.google.firestore.admin.v1.IListFieldsRequest,
+    request: protos.google.firestore.admin.v1.IListFieldsRequest,
     optionsOrCallback?:
       | gax.CallOptions
-      | Callback<
-          protosTypes.google.firestore.admin.v1.IField[],
-          protosTypes.google.firestore.admin.v1.IListFieldsRequest | null,
-          protosTypes.google.firestore.admin.v1.IListFieldsResponse
+      | PaginationCallback<
+          protos.google.firestore.admin.v1.IListFieldsRequest,
+          | protos.google.firestore.admin.v1.IListFieldsResponse
+          | null
+          | undefined,
+          protos.google.firestore.admin.v1.IField
         >,
-    callback?: Callback<
-      protosTypes.google.firestore.admin.v1.IField[],
-      protosTypes.google.firestore.admin.v1.IListFieldsRequest | null,
-      protosTypes.google.firestore.admin.v1.IListFieldsResponse
+    callback?: PaginationCallback<
+      protos.google.firestore.admin.v1.IListFieldsRequest,
+      protos.google.firestore.admin.v1.IListFieldsResponse | null | undefined,
+      protos.google.firestore.admin.v1.IField
     >
   ): Promise<
     [
-      protosTypes.google.firestore.admin.v1.IField[],
-      protosTypes.google.firestore.admin.v1.IListFieldsRequest | null,
-      protosTypes.google.firestore.admin.v1.IListFieldsResponse
+      protos.google.firestore.admin.v1.IField[],
+      protos.google.firestore.admin.v1.IListFieldsRequest | null,
+      protos.google.firestore.admin.v1.IListFieldsResponse
     ]
   > | void {
     request = request || {};
@@ -1262,7 +1393,7 @@ export class FirestoreAdminClient {
       parent: request.parent || '',
     });
     this.initialize();
-    return this._innerApiCalls.listFields(request, options, callback);
+    return this.innerApiCalls.listFields(request, options, callback);
   }
 
   /**
@@ -1301,7 +1432,7 @@ export class FirestoreAdminClient {
    *   An object stream which emits an object representing [Field]{@link google.firestore.admin.v1.Field} on 'data' event.
    */
   listFieldsStream(
-    request?: protosTypes.google.firestore.admin.v1.IListFieldsRequest,
+    request?: protos.google.firestore.admin.v1.IListFieldsRequest,
     options?: gax.CallOptions
   ): Transform {
     request = request || {};
@@ -1315,11 +1446,61 @@ export class FirestoreAdminClient {
     });
     const callSettings = new gax.CallSettings(options);
     this.initialize();
-    return this._descriptors.page.listFields.createStream(
-      this._innerApiCalls.listFields as gax.GaxCall,
+    return this.descriptors.page.listFields.createStream(
+      this.innerApiCalls.listFields as gax.GaxCall,
       request,
       callSettings
     );
+  }
+
+  /**
+   * Equivalent to {@link listFields}, but returns an iterable object.
+   *
+   * for-await-of syntax is used with the iterable to recursively get response element on-demand.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. A parent name of the form
+   *   `projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}`
+   * @param {string} request.filter
+   *   The filter to apply to list results. Currently,
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} only supports listing fields
+   *   that have been explicitly overridden. To issue this query, call
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields} with the filter set to
+   *   `indexConfig.usesAncestorConfig:false`.
+   * @param {number} request.pageSize
+   *   The number of results to return.
+   * @param {string} request.pageToken
+   *   A page token, returned from a previous call to
+   *   {@link google.firestore.admin.v1.FirestoreAdmin.ListFields|FirestoreAdmin.ListFields}, that may be used to get the next
+   *   page of results.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Object}
+   *   An iterable Object that conforms to @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols.
+   */
+  listFieldsAsync(
+    request?: protos.google.firestore.admin.v1.IListFieldsRequest,
+    options?: gax.CallOptions
+  ): AsyncIterable<protos.google.firestore.admin.v1.IField> {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    options = options || {};
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.listFields.asyncIterate(
+      this.innerApiCalls['listFields'] as GaxCall,
+      (request as unknown) as RequestType,
+      callSettings
+    ) as AsyncIterable<protos.google.firestore.admin.v1.IField>;
   }
   // --------------------
   // -- Path templates --
@@ -1334,10 +1515,10 @@ export class FirestoreAdminClient {
    * @returns {string} Resource name string.
    */
   collectionGroupPath(project: string, database: string, collection: string) {
-    return this._pathTemplates.collectionGroupPathTemplate.render({
-      project,
-      database,
-      collection,
+    return this.pathTemplates.collectionGroupPathTemplate.render({
+      project: project,
+      database: database,
+      collection: collection,
     });
   }
 
@@ -1349,7 +1530,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the project.
    */
   matchProjectFromCollectionGroupName(collectionGroupName: string) {
-    return this._pathTemplates.collectionGroupPathTemplate.match(
+    return this.pathTemplates.collectionGroupPathTemplate.match(
       collectionGroupName
     ).project;
   }
@@ -1362,7 +1543,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the database.
    */
   matchDatabaseFromCollectionGroupName(collectionGroupName: string) {
-    return this._pathTemplates.collectionGroupPathTemplate.match(
+    return this.pathTemplates.collectionGroupPathTemplate.match(
       collectionGroupName
     ).database;
   }
@@ -1375,7 +1556,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the collection.
    */
   matchCollectionFromCollectionGroupName(collectionGroupName: string) {
-    return this._pathTemplates.collectionGroupPathTemplate.match(
+    return this.pathTemplates.collectionGroupPathTemplate.match(
       collectionGroupName
     ).collection;
   }
@@ -1388,9 +1569,9 @@ export class FirestoreAdminClient {
    * @returns {string} Resource name string.
    */
   databasePath(project: string, database: string) {
-    return this._pathTemplates.databasePathTemplate.render({
-      project,
-      database,
+    return this.pathTemplates.databasePathTemplate.render({
+      project: project,
+      database: database,
     });
   }
 
@@ -1402,7 +1583,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the project.
    */
   matchProjectFromDatabaseName(databaseName: string) {
-    return this._pathTemplates.databasePathTemplate.match(databaseName).project;
+    return this.pathTemplates.databasePathTemplate.match(databaseName).project;
   }
 
   /**
@@ -1413,8 +1594,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the database.
    */
   matchDatabaseFromDatabaseName(databaseName: string) {
-    return this._pathTemplates.databasePathTemplate.match(databaseName)
-      .database;
+    return this.pathTemplates.databasePathTemplate.match(databaseName).database;
   }
 
   /**
@@ -1432,11 +1612,11 @@ export class FirestoreAdminClient {
     collection: string,
     field: string
   ) {
-    return this._pathTemplates.fieldPathTemplate.render({
-      project,
-      database,
-      collection,
-      field,
+    return this.pathTemplates.fieldPathTemplate.render({
+      project: project,
+      database: database,
+      collection: collection,
+      field: field,
     });
   }
 
@@ -1448,7 +1628,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the project.
    */
   matchProjectFromFieldName(fieldName: string) {
-    return this._pathTemplates.fieldPathTemplate.match(fieldName).project;
+    return this.pathTemplates.fieldPathTemplate.match(fieldName).project;
   }
 
   /**
@@ -1459,7 +1639,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the database.
    */
   matchDatabaseFromFieldName(fieldName: string) {
-    return this._pathTemplates.fieldPathTemplate.match(fieldName).database;
+    return this.pathTemplates.fieldPathTemplate.match(fieldName).database;
   }
 
   /**
@@ -1470,7 +1650,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the collection.
    */
   matchCollectionFromFieldName(fieldName: string) {
-    return this._pathTemplates.fieldPathTemplate.match(fieldName).collection;
+    return this.pathTemplates.fieldPathTemplate.match(fieldName).collection;
   }
 
   /**
@@ -1481,7 +1661,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the field.
    */
   matchFieldFromFieldName(fieldName: string) {
-    return this._pathTemplates.fieldPathTemplate.match(fieldName).field;
+    return this.pathTemplates.fieldPathTemplate.match(fieldName).field;
   }
 
   /**
@@ -1499,11 +1679,11 @@ export class FirestoreAdminClient {
     collection: string,
     index: string
   ) {
-    return this._pathTemplates.indexPathTemplate.render({
-      project,
-      database,
-      collection,
-      index,
+    return this.pathTemplates.indexPathTemplate.render({
+      project: project,
+      database: database,
+      collection: collection,
+      index: index,
     });
   }
 
@@ -1515,7 +1695,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the project.
    */
   matchProjectFromIndexName(indexName: string) {
-    return this._pathTemplates.indexPathTemplate.match(indexName).project;
+    return this.pathTemplates.indexPathTemplate.match(indexName).project;
   }
 
   /**
@@ -1526,7 +1706,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the database.
    */
   matchDatabaseFromIndexName(indexName: string) {
-    return this._pathTemplates.indexPathTemplate.match(indexName).database;
+    return this.pathTemplates.indexPathTemplate.match(indexName).database;
   }
 
   /**
@@ -1537,7 +1717,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the collection.
    */
   matchCollectionFromIndexName(indexName: string) {
-    return this._pathTemplates.indexPathTemplate.match(indexName).collection;
+    return this.pathTemplates.indexPathTemplate.match(indexName).collection;
   }
 
   /**
@@ -1548,7 +1728,7 @@ export class FirestoreAdminClient {
    * @returns {string} A string representing the index.
    */
   matchIndexFromIndexName(indexName: string) {
-    return this._pathTemplates.indexPathTemplate.match(indexName).index;
+    return this.pathTemplates.indexPathTemplate.match(indexName).index;
   }
 
   /**

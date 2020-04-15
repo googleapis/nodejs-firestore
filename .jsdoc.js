@@ -1,4 +1,4 @@
-// Copyright 2019 Google LLC
+// Copyright 2020 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,18 +34,19 @@ module.exports = {
   source: {
     excludePattern: '(^|\\/|\\\\)[._]',
     include: [
-      'build/src'
+      'build/src',
+      'build/protos'
     ],
     includePattern: '\\.js$'
   },
   templates: {
-    copyright: 'Copyright 2019 Google, LLC.',
+    copyright: 'Copyright 2020 Google LLC',
     includeDate: false,
     sourceFiles: false,
     systemName: '@google-cloud/firestore',
     theme: 'lumen',
     default: {
-      "outputSourceFiles": false
+      outputSourceFiles: false
     }
   },
   markdown: {
