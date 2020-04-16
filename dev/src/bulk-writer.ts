@@ -23,7 +23,7 @@ import {Deferred} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
 /**
- * The default maximum number of writes that can be in a single batch.
+ * The maximum number of writes that can be in a single batch.
  */
 const MAX_BATCH_SIZE = 500;
 
@@ -48,9 +48,9 @@ class BulkCommitBatch {
   /**
    * The state of the batch.
    */
-  private _state = BatchState.OPEN;
+  state = BatchState.OPEN;
 
-  // The set of document reference ids present in the WriteBatch.
+  // The set of document reference paths present in the WriteBatch.
   readonly docPaths = new Set<string>();
 
   // A deferred promise that is resolved after the batch has been sent, and a
@@ -72,10 +72,6 @@ class BulkCommitBatch {
    */
   get opCount(): number {
     return this.resultsMap.size;
-  }
-
-  get state(): BatchState {
-    return this._state;
   }
 
   /**
@@ -142,9 +138,14 @@ class BulkCommitBatch {
       'Batch should not contain writes to the same document'
     );
     this.docPaths.add(documentRef.path);
-    this.resultsMap.set(this.opCount, new Deferred<BatchWriteResult>());
+    const deferred = new Deferred<BatchWriteResult>();
+    this.resultsMap.set(this.opCount, deferred);
 
-    return this.resultsMap.get(this.opCount - 1)!.promise.then(result => {
+    if (this.opCount === this.maxBatchSize) {
+      this.state = BatchState.READY_TO_SEND;
+    }
+
+    return deferred.promise.then(result => {
       if (result.writeTime) {
         return new WriteResult(result.writeTime);
       } else {
@@ -154,27 +155,15 @@ class BulkCommitBatch {
   }
 
   /**
-   * Returns whether a write containing the provided document reference can be
-   * added to this batch.
-   */
-  canAddDoc(documentRef: DocumentReference): boolean {
-    return (
-      this._state === BatchState.OPEN &&
-      this.opCount < this.maxBatchSize &&
-      !this.docPaths.has(documentRef.path)
-    );
-  }
-
-  /**
    * Commits the batch and returns a promise that resolves with the result of
    * all writes in this batch.
    */
   bulkCommit(): Promise<BatchWriteResult[]> {
     assert(
-      this._state === BatchState.READY_TO_SEND,
+      this.state === BatchState.READY_TO_SEND,
       'The batch should be marked as READY_TO_SEND before committing'
     );
-    this._state = BatchState.SENT;
+    this.state = BatchState.SENT;
     return this.writeBatch.bulkCommit();
   }
 
@@ -198,8 +187,8 @@ class BulkCommitBatch {
   }
 
   markReadyToSend(): void {
-    if (this._state === BatchState.OPEN) {
-      this._state = BatchState.READY_TO_SEND;
+    if (this.state === BatchState.OPEN) {
+      this.state = BatchState.READY_TO_SEND;
     }
   }
 }
@@ -260,7 +249,7 @@ export class BulkWriter {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     const resultPromise = bulkCommitBatch.create(documentRef, data);
-    this.sendBatchIfFull(bulkCommitBatch);
+    this.sendReadyBatches();
     return resultPromise;
   }
 
@@ -298,7 +287,7 @@ export class BulkWriter {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     const resultPromise = bulkCommitBatch.delete(documentRef, precondition);
-    this.sendBatchIfFull(bulkCommitBatch);
+    this.sendReadyBatches();
     return resultPromise;
   }
 
@@ -344,7 +333,7 @@ export class BulkWriter {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     const resultPromise = bulkCommitBatch.set(documentRef, data, options);
-    this.sendBatchIfFull(bulkCommitBatch);
+    this.sendReadyBatches();
     return resultPromise;
   }
 
@@ -403,7 +392,7 @@ export class BulkWriter {
       dataOrField,
       preconditionOrValues
     );
-    this.sendBatchIfFull(bulkCommitBatch);
+    this.sendReadyBatches();
     return resultPromise;
   }
 
@@ -435,7 +424,7 @@ export class BulkWriter {
     this.verifyNotClosed();
     const trackedBatches = this.batchQueue;
     const writePromises = trackedBatches.map(batch => batch.awaitBatch());
-    this.sendBatches();
+    this.sendReadyBatches();
     await Promise.all(writePromises);
   }
 
@@ -482,14 +471,12 @@ export class BulkWriter {
     let logWarning = false;
     if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
-      if (
-        lastBatch.docPaths.has(ref.path) &&
-        lastBatch.state === BatchState.OPEN
-      ) {
-        logWarning = true;
-      }
-      if (lastBatch.canAddDoc(ref)) {
-        eligibleBatch = lastBatch;
+      if (lastBatch.state === BatchState.OPEN) {
+        if (!lastBatch.docPaths.has(ref.path)) {
+          eligibleBatch = lastBatch;
+        } else {
+          logWarning = true;
+        }
       }
     }
 
@@ -516,7 +503,7 @@ export class BulkWriter {
 
     if (this.batchQueue.length > 0) {
       this.batchQueue[this.batchQueue.length - 1].markReadyToSend();
-      this.sendBatches();
+      this.sendReadyBatches();
     }
     this.batchQueue.push(newBatch);
     return newBatch;
@@ -528,14 +515,14 @@ export class BulkWriter {
    *
    * After a batch is complete, try sending batches again.
    */
-  private sendBatches(): void {
+  private sendReadyBatches(): void {
     const unsentBatches = this.batchQueue.filter(
       batch => batch.state === BatchState.READY_TO_SEND
     );
 
     let index = 0;
     while (
-      unsentBatches.length > index &&
+      index < unsentBatches.length &&
       this.isBatchSendable(unsentBatches[index])
     ) {
       const batch = unsentBatches[index];
@@ -548,7 +535,7 @@ export class BulkWriter {
         assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
         this.batchQueue.splice(batchIndex, 1);
 
-        this.sendBatches();
+        this.sendReadyBatches();
       });
 
       index++;
@@ -566,7 +553,11 @@ export class BulkWriter {
     }
 
     for (const path of batch.docPaths) {
-      if (this.isRefInFlight(path)) {
+      const isRefInFlight =
+        this.batchQueue
+          .filter(batch => batch.state === BatchState.SENT)
+          .find(batch => batch.docPaths.has(path)) !== undefined;
+      if (isRefInFlight) {
         return false;
       }
     }
@@ -575,33 +566,12 @@ export class BulkWriter {
   }
 
   /**
-   * Whether the provided document reference path is currently in flight.
-   */
-  private isRefInFlight(docPath: string): boolean {
-    const refsInFlight = new Set<string>();
-    this.batchQueue
-      .filter(batch => batch.state === BatchState.SENT)
-      .map(batch => batch.docPaths.forEach(path => refsInFlight.add(path)));
-    return refsInFlight.has(docPath);
-  }
-
-  /**
-   * Sends the batch if it is at the maximum allowed size.
-   */
-  private sendBatchIfFull(batch: BulkCommitBatch): void {
-    if (batch.opCount === this.maxBatchSize) {
-      batch.markReadyToSend();
-      this.sendBatches();
-    }
-  }
-
-  /**
    * Sets the maximum number of allowed operations in a batch.
    *
    * @private
    */
   // Visible for testing.
-  setMaxBatchSize(size: number): void {
+  _setMaxBatchSize(size: number): void {
     this.maxBatchSize = size;
   }
 }
