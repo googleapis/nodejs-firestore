@@ -43,8 +43,8 @@ export class RateLimiter {
    * @param multiplier Rate by which to increase the capacity.
    * @param multiplierMillis How often the capacity should increase in
    * milliseconds.
-   * @param startTimeMillis The starting time in epoch milliseconds that the rate limit is based on. Used
-   * for testing the limiter.
+   * @param startTimeMillis The starting time in epoch milliseconds that the
+   * rate limit is based on. Used for testing the limiter.
    */
   constructor(
     private readonly initialCapacity: number,
@@ -60,15 +60,15 @@ export class RateLimiter {
    * Tries to make the number of operations. Returns true if the request
    * succeeded and false otherwise.
    *
-   * @param currentTimeMillis The date used to calculate the number of available
+   * @param requestTimeMillis The date used to calculate the number of available
    * tokens. Used for testing the limiter.
    * @private
    */
   tryMakeRequest(
     numOperations: number,
-    currentTimeMillis = Date.now()
+    requestTimeMillis = Date.now()
   ): boolean {
-    this.refillTokens(currentTimeMillis);
+    this.refillTokens(requestTimeMillis);
     if (numOperations <= this.availableTokens) {
       this.availableTokens -= numOperations;
       return true;
@@ -82,20 +82,19 @@ export class RateLimiter {
    * capacity. Returns -1 if the request is not possible with the current
    * capacity.
    *
-   * @param currentTimeMillis The date used to calculate the number of available
+   * @param requestTimeMillis The date used to calculate the number of available
    * tokens. Used for testing the limiter.
    * @private
    */
-
   getNextRequestDelayMs(
     numOperations: number,
-    currentTimeMillis = Date.now()
+    requestTimeMillis = Date.now()
   ): number {
     if (numOperations < this.availableTokens) {
       return 0;
     }
 
-    const capacity = this.calculateCapacity(currentTimeMillis);
+    const capacity = this.calculateCapacity(requestTimeMillis);
     if (capacity < numOperations) {
       return -1;
     }
@@ -108,22 +107,26 @@ export class RateLimiter {
    * Refills the number of available tokens based on how much time has elapsed
    * since the last time the tokens were refilled.
    *
-   * @param currentTimeMillis The date used to calculate the number of available
+   * @param requestTimeMillis The date used to calculate the number of available
    * tokens. Used for testing the limiter.
    * @private
    */
-  private refillTokens(currentTimeMillis = Date.now()): void {
-    if (currentTimeMillis > this.lastRefillTimeMillis) {
-      const elapsedTime = currentTimeMillis - this.lastRefillTimeMillis;
-      const capacity = this.calculateCapacity(currentTimeMillis);
+  private refillTokens(requestTimeMillis = Date.now()): void {
+    if (requestTimeMillis >= this.lastRefillTimeMillis) {
+      const elapsedTime = requestTimeMillis - this.lastRefillTimeMillis;
+      const capacity = this.calculateCapacity(requestTimeMillis);
       const tokensToAdd = Math.floor((elapsedTime * capacity) / 1000);
       if (tokensToAdd > 0) {
         this.availableTokens = Math.min(
           capacity,
           this.availableTokens + tokensToAdd
         );
-        this.lastRefillTimeMillis = currentTimeMillis;
+        this.lastRefillTimeMillis = requestTimeMillis;
       }
+    } else {
+      throw new Error(
+        'Request time should not be before the last token refill time.'
+      );
     }
   }
 
@@ -133,12 +136,12 @@ export class RateLimiter {
    * @private
    */
   // Visible for testing.
-  calculateCapacity(currentTimeMillis: number): number {
+  calculateCapacity(requestTimeMillis: number): number {
     assert(
-      currentTimeMillis >= this.startTimeMillis,
+      requestTimeMillis >= this.startTimeMillis,
       'startTime cannot be after currentTime'
     );
-    const millisElapsed = currentTimeMillis - this.startTimeMillis;
+    const millisElapsed = requestTimeMillis - this.startTimeMillis;
     const operationsPerSecond = Math.floor(
       Math.pow(
         this.multiplier,

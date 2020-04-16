@@ -58,6 +58,11 @@ describe('RateLimiter', () => {
     // Tokens will never exceed capacity.
     expect(limiter.tryMakeRequest(751, new Date((5 * 60 + 3) * 1000).getTime()))
       .to.be.false;
+
+    // Rejects requests made before lastRefillTime
+    expect(() =>
+      limiter.tryMakeRequest(751, new Date((5 * 60 + 2) * 1000).getTime())
+    ).to.throw('Request time should not be before the last token refill time.');
   });
 
   it('calculates the number of ms needed to place the next request', () => {
