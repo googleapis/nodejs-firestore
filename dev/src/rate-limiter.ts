@@ -36,44 +36,39 @@ export class RateLimiter {
   availableTokens: number;
 
   // When the token bucket was last refilled.
-  lastRefillTime = Timestamp.now();
+  lastRefillTimeMillis: number;
 
   /**
    * @param initialCapacity Initial maximum number of operations per second.
    * @param multiplier Rate by which to increase the capacity.
    * @param multiplierMillis How often the capacity should increase in
    * milliseconds.
-   * @param startTime Used for testing the limiter.
+   * @param startTimeMillis The starting time in epoch milliseconds that the rate limit is based on. Used
+   * for testing the limiter.
    */
   constructor(
     private readonly initialCapacity: number,
     private readonly multiplier: number,
     private readonly multiplierMillis: number,
-    private readonly startTime = Timestamp.now()
+    private readonly startTimeMillis = Date.now()
   ) {
     this.availableTokens = initialCapacity;
-    this.lastRefillTime = startTime;
+    this.lastRefillTimeMillis = startTimeMillis;
   }
 
   /**
-   * Tries to make the number of operations. Returns true if the request succeeded
-   * and false otherwise.
+   * Tries to make the number of operations. Returns true if the request
+   * succeeded and false otherwise.
    *
-   * @param currentTime Used for testing the limiter.
+   * @param currentTimeMillis The date used to calculate the number of available
+   * tokens. Used for testing the limiter.
    * @private
    */
-  tryMakeRequest(numOperations: number) {
-    return this._tryMakeRequest(numOperations, Timestamp.now());
-  }
-
-  /**
-   * Used in testing for different timestamps.
-   *
-   * @private
-   */
-  // Visible for testing.
-  _tryMakeRequest(numOperations: number, currentTime: Timestamp): boolean {
-    this.refillTokens(currentTime);
+  tryMakeRequest(
+    numOperations: number,
+    currentTimeMillis = Date.now()
+  ): boolean {
+    this.refillTokens(currentTimeMillis);
     if (numOperations <= this.availableTokens) {
       this.availableTokens -= numOperations;
       return true;
@@ -87,27 +82,20 @@ export class RateLimiter {
    * capacity. Returns -1 if the request is not possible with the current
    * capacity.
    *
+   * @param currentTimeMillis The date used to calculate the number of available
+   * tokens. Used for testing the limiter.
    * @private
    */
-  getNextRequestDelayMs(numOperations: number) {
-    return this._getNextRequestDelayMs(numOperations, Timestamp.now());
-  }
 
-  /**
-   * Used in testing for different timestamps.
-   *
-   * @private
-   */
-  // Visible for testing.
-  _getNextRequestDelayMs(
+  getNextRequestDelayMs(
     numOperations: number,
-    currentTime: Timestamp
+    currentTimeMillis = Date.now()
   ): number {
     if (numOperations < this.availableTokens) {
       return 0;
     }
 
-    const capacity = this.calculateCapacity(currentTime, this.startTime);
+    const capacity = this.calculateCapacity(currentTimeMillis);
     if (capacity < numOperations) {
       return -1;
     }
@@ -120,36 +108,37 @@ export class RateLimiter {
    * Refills the number of available tokens based on how much time has elapsed
    * since the last time the tokens were refilled.
    *
+   * @param currentTimeMillis The date used to calculate the number of available
+   * tokens. Used for testing the limiter.
    * @private
    */
-  private refillTokens(currentTime = Timestamp.now()): void {
-    if (currentTime.toMillis() > this.lastRefillTime.toMillis()) {
-      const elapsedTime =
-        currentTime.toMillis() - this.lastRefillTime.toMillis();
-      const capacity = this.calculateCapacity(currentTime, this.startTime);
+  private refillTokens(currentTimeMillis = Date.now()): void {
+    if (currentTimeMillis > this.lastRefillTimeMillis) {
+      const elapsedTime = currentTimeMillis - this.lastRefillTimeMillis;
+      const capacity = this.calculateCapacity(currentTimeMillis);
       const tokensToAdd = Math.floor((elapsedTime * capacity) / 1000);
       if (tokensToAdd > 0) {
         this.availableTokens = Math.min(
           capacity,
           this.availableTokens + tokensToAdd
         );
-        this.lastRefillTime = currentTime;
+        this.lastRefillTimeMillis = currentTimeMillis;
       }
     }
   }
 
   /**
-   * Calculates the maximum capacity based on the two provided timestamps.
+   * Calculates the maximum capacity based on the provided date.
    *
    * @private
    */
   // Visible for testing.
-  calculateCapacity(currentTime: Timestamp, startTime: Timestamp): number {
+  calculateCapacity(currentTimeMillis: number): number {
     assert(
-      currentTime.valueOf() >= startTime.valueOf(),
+      currentTimeMillis >= this.startTimeMillis,
       'startTime cannot be after currentTime'
     );
-    const millisElapsed = currentTime.toMillis() - startTime.toMillis();
+    const millisElapsed = currentTimeMillis - this.startTimeMillis;
     const operationsPerSecond = Math.floor(
       Math.pow(
         this.multiplier,
