@@ -15,8 +15,7 @@
  */
 
 import {CallOptions, grpc} from 'google-gax';
-import {Duplex, PassThrough} from 'stream';
-import * as through2 from 'through2';
+import {Duplex, PassThrough, Transform} from 'stream';
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -1335,14 +1334,17 @@ export class Firestore {
           const stream = bidirectional
             ? gapicClient[methodName](callOptions)
             : gapicClient[methodName](request, callOptions);
-          const logStream = through2.obj((chunk, enc, callback) => {
-            logger(
-              'Firestore.requestStream',
-              requestTag,
-              'Received response: %j',
-              chunk
-            );
-            callback();
+          const logStream = new Transform({
+            objectMode: true,
+            transform: (chunk, encoding, callback) => {
+              logger(
+                'Firestore.requestStream',
+                requestTag,
+                'Received response: %j',
+                chunk
+              );
+              callback();
+            },
           });
           stream.pipe(logStream);
 
