@@ -426,8 +426,8 @@ declare namespace FirebaseFirestore {
      * @param {DocumentReference} documentRef A reference to the document to be
      * created.
      * @param {T} data The object to serialize as the document.
-     * @returns {Promise<WriteResult>} A promise that resolves with the result of
-     * the write. Throws an error if the write fails.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result
+     * of the write. Throws an error if the write fails.
      */
     create(
       documentRef: DocumentReference,
@@ -444,8 +444,8 @@ declare namespace FirebaseFirestore {
      * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
      * document was last updated at lastUpdateTime. Fails the batch if the
      * document doesn't exist or was last updated at a different time.
-     * @returns {Promise<WriteResult>} A promise that resolves with the result of
-     * the write. Throws an error if the write fails.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result
+     * of the write. Throws an error if the write fails.
      */
     delete(
       documentRef: DocumentReference,
@@ -455,21 +455,22 @@ declare namespace FirebaseFirestore {
     /**
      * Write to the document referred to by the provided
      * [DocumentReference]{@link DocumentReference}. If the document does not
-     * exist yet, it will be created. If you pass [SetOptions]{@link SetOptions}.,
-     * the provided data can be merged into the existing document.
+     * exist yet, it will be created. If you pass
+     * [SetOptions]{@link SetOptions}., the provided data can be merged into the
+     * existing document.
      *
      * @param {DocumentReference} documentRef A reference to the document to be
      * set.
      * @param {T} data The object to serialize as the document.
      * @param {SetOptions=} options An object to configure the set behavior.
      * @param {boolean=} options.merge - If true, set() merges the values
-     * specified in its data argument. Fields omitted from this set() call remain
-     * untouched.
-     * @param {Array.<string|FieldPath>=} options.mergeFields - If provided, set()
-     * only replaces the specified field paths. Any field path that is not
+     * specified in its data argument. Fields omitted from this set() call
+     * remain untouched.
+     * @param {Array.<string|FieldPath>=} options.mergeFields - If provided,
+     * set() only replaces the specified field paths. Any field path that is not
      * specified is ignored and remains untouched.
-     * @returns {Promise<WriteResult>} A promise that resolves with the result of
-     * the write. Throws an error if the write fails.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result
+     * of the write. Throws an error if the write fails.
      */
     set(
       documentRef: DocumentReference,
@@ -483,10 +484,10 @@ declare namespace FirebaseFirestore {
      * exist, the update fails and the entire batch will be rejected.
      *
      * The update() method accepts either an object with field paths encoded as
-     * keys and field values encoded as values, or a variable number of arguments
-     * that alternate between field paths and field values. Nested fields can be
-     * updated by providing dot-separated field path strings or by providing
-     * FieldPath objects.
+     * keys and field values encoded as values, or a variable number of
+     * arguments that alternate between field paths and field values. Nested
+     * fields can be updated by providing dot-separated field path strings or by
+     * providing FieldPath objects.
      *
      *
      * A Precondition restricting this update can be specified as the last
@@ -500,8 +501,8 @@ declare namespace FirebaseFirestore {
      * @param {...(Precondition|*|string|FieldPath)} preconditionOrValues - An
      * alternating list of field paths and values to update or a Precondition to
      * restrict this update
-     * @returns {Promise<WriteResult>} A promise that resolves with the result of
-     * the write. Throws an error if the write fails.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result
+     * of the write. Throws an error if the write fails.
      */
     update(
       documentRef: DocumentReference,
@@ -514,16 +515,17 @@ declare namespace FirebaseFirestore {
     /**
      * Commits all writes that have been enqueued up to this point in parallel.
      *
-     * Returns a Promise that resolves when all writes have been committed.
-     * The Promise will never be rejected.
+     * Returns a Promise that resolves when all currently queued operations have
+     * been committed. The Promise will never be rejected since the results for
+     * each individual operation are conveyed via their individual Promises.
      *
-     * The Promise resolves immediately if there are no pending writes. Otherwise,
-     * the Promise waits for all previously issued writes, but it does not wait
-     * for writes that were added after the method is called. If you want to wait
-     * for additional writes, call `flush()` again.
+     * The Promise resolves immediately if there are no pending writes.
+     * Otherwise, the Promise waits for all previously issued writes, but it
+     * does not wait for writes that were added after the method is called. If
+     * you want to wait for additional writes, call `flush()` again.
      *
-     * @return {Promise<void>} A promise that resolves when all writes have
-     * been committed.
+     * @return {Promise<void>} A promise that resolves when all enqueued writes
+     * up to this point have been committed.
      */
     flush(): Promise<void>;
 
@@ -532,13 +534,13 @@ declare namespace FirebaseFirestore {
      *
      * After calling `close()`, calling any method wil throw an error.
      *
-     * Returns a Promise that resolves when all writes have been committed.
-     * The Promise will never be rejected. Calling this method will send all
+     * Returns a Promise that resolves when all writes have been committed. The
+     * Promise will never be rejected. Calling this method will send all
      * requests. The promise resolves immediately if there are no pending
      * writes.
      *
-     * @return {Promise<void>} A promise that resolves when all writes have
-     * been committed.
+     * @return {Promise<void>} A promise that resolves when all enqueued writes
+     * up to this point have been committed.
      */
     close(): Promise<void>;
   }

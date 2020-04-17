@@ -176,9 +176,9 @@ class BulkCommitBatch {
    */
   processResults(results: BatchWriteResult[], error?: Error): void {
     if (error === undefined) {
-      results.map((result, index) => {
-        this.resultsMap.get(index)!.resolve(result);
-      });
+      for (let i = 0; i < this.opCount; i++) {
+        this.resultsMap.get(i)!.resolve(results[i]);
+      }
     } else {
       for (let i = 0; i < this.opCount; i++) {
         this.resultsMap.get(i)!.reject(error);
@@ -409,16 +409,17 @@ export class BulkWriter {
   /**
    * Commits all writes that have been enqueued up to this point in parallel.
    *
-   * Returns a Promise that resolves when there are no more pending writes.
-   * The Promise will never be rejected.
+   * Returns a Promise that resolves when all currently queued operations have
+   * been committed. The Promise will never be rejected since the results for
+   * each individual operation are conveyed via their individual Promises.
    *
    * The Promise resolves immediately if there are no pending writes. Otherwise,
    * the Promise waits for all previously issued writes, but it does not wait
    * for writes that were added after the method is called. If you want to wait
    * for additional writes, call `flush()` again.
    *
-   * @return {Promise<void>} A promise that resolves when there are no more
-   * pending writes.
+   * @return {Promise<void>} A promise that resolves when all enqueued writes
+   * up to this point have been committed.
    *
    * @example
    * let bulkWriter = firestore.bulkWriter();
@@ -447,8 +448,8 @@ export class BulkWriter {
    * Promise will never be rejected. Calling this method will send all requests.
    * The promise resolves immediately if there are no pending writes.
    *
-   * @return {Promise<void>} A promise that resolves when there are no more
-   * pending writes.
+   * @return {Promise<void>} A promise that resolves when all enqueued writes
+   * up to this point have been committed.
    *
    * @example
    * let bulkWriter = firestore.bulkWriter();

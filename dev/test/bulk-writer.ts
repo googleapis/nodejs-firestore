@@ -128,20 +128,15 @@ describe('BulkWriter', () => {
   }
 
   /**
-   *  /**
    * Creates an instance with the mocked objects.
    *
-   * @param options.enforceSingleConcurrentRequest Whether to check that there
-   * is only one active request at a time. If true, the `activeRequestDeferred`
-   * must be manually resolved for the response to return.
-   * @param options.failResponse Whether to fail the request with an error.
+   * @param enforceSingleConcurrentRequest Whether to check that there is only
+   * one active request at a time. If true, the `activeRequestDeferred` must be
+   * manually resolved for the response to return.
    */
   function instantiateInstance(
     mock: RequestResponse[],
-    options?: {
-      enforceSingleConcurrentRequest?: boolean;
-      failResponse?: boolean;
-    }
+    enforceSingleConcurrentRequest = false
   ): Promise<BulkWriter> {
     const overrides: ApiOverride = {
       batchWrite: async request => {
@@ -149,11 +144,7 @@ describe('BulkWriter', () => {
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: mock[requestCounter].request.writes,
         });
-        if (options && options.failResponse) {
-          throw new Error('batchWrite failed');
-        }
-
-        if (options && options.enforceSingleConcurrentRequest) {
+        if (enforceSingleConcurrentRequest) {
           activeRequestCounter++;
 
           // This expect statement is used to test that only one request is
@@ -500,7 +491,7 @@ describe('BulkWriter', () => {
           response: successResponse(3),
         },
       ],
-      {enforceSingleConcurrentRequest: true}
+      /* enforceSingleConcurrentRequest= */ true
     );
     bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
     bulkWriter.set(firestore.doc('collectionId/doc2'), {foo: 'bar'});
@@ -515,19 +506,19 @@ describe('BulkWriter', () => {
   });
 
   describe('if bulkCommit() fails', async () => {
+    function instantiateInstance(): Promise<BulkWriter> {
+      const overrides: ApiOverride = {
+        batchWrite: () => {
+          throw new Error('Mock batchWrite failed in test');
+        },
+      };
+      return createInstance(overrides).then(firestoreClient => {
+        firestore = firestoreClient;
+        return firestore.bulkWriter();
+      });
+    }
     it('flush() should not fail', async () => {
-      const bulkWriter = await instantiateInstance(
-        [
-          {
-            request: createRequest([
-              createOp('doc', 'bar'),
-              setOp('doc2', 'bar'),
-            ]),
-            response: mergeResponses([]),
-          },
-        ],
-        {failResponse: true}
-      );
+      const bulkWriter = await instantiateInstance();
       bulkWriter
         .create(firestore.doc('collectionId/doc'), {foo: 'bar'})
         .catch(incrementOpCount);
@@ -541,18 +532,7 @@ describe('BulkWriter', () => {
     });
 
     it('close() should not fail', async () => {
-      const bulkWriter = await instantiateInstance(
-        [
-          {
-            request: createRequest([
-              createOp('doc', 'bar'),
-              setOp('doc2', 'bar'),
-            ]),
-            response: mergeResponses([]),
-          },
-        ],
-        {failResponse: true}
-      );
+      const bulkWriter = await instantiateInstance();
       bulkWriter
         .create(firestore.doc('collectionId/doc'), {foo: 'bar'})
         .catch(incrementOpCount);
@@ -564,29 +544,18 @@ describe('BulkWriter', () => {
     });
 
     it('all individual writes are rejected', async () => {
-      const bulkWriter = await instantiateInstance(
-        [
-          {
-            request: createRequest([
-              createOp('doc', 'bar'),
-              setOp('doc2', 'bar'),
-            ]),
-            response: mergeResponses([]),
-          },
-        ],
-        {failResponse: true}
-      );
+      const bulkWriter = await instantiateInstance();
       bulkWriter
         .create(firestore.doc('collectionId/doc'), {foo: 'bar'})
         .catch(err => {
-          expect(err.message).to.equal('batchWrite failed');
+          expect(err.message).to.equal('Mock batchWrite failed in test');
           incrementOpCount();
         });
 
       bulkWriter
         .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
         .catch(err => {
-          expect(err.message).to.equal('batchWrite failed');
+          expect(err.message).to.equal('Mock batchWrite failed in test');
           incrementOpCount();
         });
 
