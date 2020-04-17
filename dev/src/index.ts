@@ -21,6 +21,7 @@ import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
+import {BulkWriter} from './bulk-writer';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
   DocumentSnapshot,
@@ -74,6 +75,7 @@ export {
   QuerySnapshot,
   Query,
 } from './reference';
+export {BulkWriter} from './bulk-writer';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
 export {WriteBatch, WriteResult} from './write-batch';
@@ -638,6 +640,37 @@ export class Firestore {
    */
   batch(): WriteBatch {
     return new WriteBatch(this);
+  }
+
+  /**
+   * Creates a [BulkWriter]{@link BulkWriter}, used for performing
+   * multiple writes in parallel.
+   *
+   * @returns {WriteBatch} A BulkWriter that operates on this Firestore
+   * client.
+   *
+   * @example
+   * let bulkWriter = firestore.bulkWriter();
+   *
+   * bulkWriter.create(firestore.doc('col/doc1'), {foo: 'bar'})
+   *   .then(res => {
+   *     console.log(`Added document at ${res.writeTime}`);
+   *   });
+   * bulkWriter.update(firestore.doc('col/doc2), {foo: 'bar'})
+   *   .then(res => {
+   *     console.log(`Updated document at ${res.writeTime}`);
+   *   });
+   * bulkWriter.delete(firestore.doc('col/doc3'))
+   *   .then(res => {
+   *     console.log(`Deleted document at ${res.writeTime}`);
+   *   });
+   * await bulkWriter.flush().then(() => {
+   *   console.log('Executed all writes');
+   * });
+   * bulkWriter.close();
+   */
+  bulkWriter(): BulkWriter {
+    return new BulkWriter(this);
   }
 
   /**
