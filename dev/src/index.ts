@@ -267,7 +267,7 @@ export class Firestore {
    * The configuration options for the GAPIC client.
    * @private
    */
-  private _settings: Settings = {};
+  _settings: Settings = {};
 
   /**
    * Settings for the exponential backoff used by the streaming endpoints.

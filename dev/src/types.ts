@@ -199,6 +199,14 @@ export interface Settings {
    */
   maxIdleChannels?: number;
 
+  /**
+   * Whether to use `BigInt` for integer types when deserializing Firestore
+   * Documents. Regardless of magnitude, all integer values will be returned as
+   * `BigInt` and match the precision of the Firestore backend. Floating point
+   * numbers continue to use JavaScript's `number` type.
+   */
+  useBigInt?: boolean;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any; // Accept other properties, such as GRPC settings.
 }

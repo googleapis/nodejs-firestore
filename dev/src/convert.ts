@@ -177,16 +177,12 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
       return {
         bytesValue: bytesFromJson(fieldValue.bytesValue!),
       };
-    case 'integerValue':
-      return {
-        integerValue: Number(fieldValue.integerValue),
-      };
     case 'doubleValue':
       return {
         doubleValue: Number(fieldValue.doubleValue),
       };
     case 'arrayValue': {
-      const arrayValue: Array<{}> = [];
+      const arrayValue: Array<api.IValue> = [];
       if (Array.isArray(fieldValue.arrayValue!.values)) {
         for (const value of fieldValue.arrayValue!.values!) {
           arrayValue.push(valueFromJson(value));

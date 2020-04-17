@@ -3325,8 +3325,8 @@
                          * Properties of a Progress.
                          * @memberof google.firestore.admin.v1
                          * @interface IProgress
-                         * @property {number|null} [estimatedWork] Progress estimatedWork
-                         * @property {number|null} [completedWork] Progress completedWork
+                         * @property {number|string|null} [estimatedWork] Progress estimatedWork
+                         * @property {number|string|null} [completedWork] Progress completedWork
                          */
     
                         /**
@@ -3346,7 +3346,7 @@
     
                         /**
                          * Progress estimatedWork.
-                         * @member {number} estimatedWork
+                         * @member {number|string} estimatedWork
                          * @memberof google.firestore.admin.v1.Progress
                          * @instance
                          */
@@ -3354,7 +3354,7 @@
     
                         /**
                          * Progress completedWork.
-                         * @member {number} completedWork
+                         * @member {number|string} completedWork
                          * @memberof google.firestore.admin.v1.Progress
                          * @instance
                          */
@@ -7620,8 +7620,8 @@
                  * @interface IUninterpretedOption
                  * @property {Array.<google.protobuf.UninterpretedOption.INamePart>|null} [name] UninterpretedOption name
                  * @property {string|null} [identifierValue] UninterpretedOption identifierValue
-                 * @property {number|null} [positiveIntValue] UninterpretedOption positiveIntValue
-                 * @property {number|null} [negativeIntValue] UninterpretedOption negativeIntValue
+                 * @property {number|string|null} [positiveIntValue] UninterpretedOption positiveIntValue
+                 * @property {number|string|null} [negativeIntValue] UninterpretedOption negativeIntValue
                  * @property {number|null} [doubleValue] UninterpretedOption doubleValue
                  * @property {Uint8Array|null} [stringValue] UninterpretedOption stringValue
                  * @property {string|null} [aggregateValue] UninterpretedOption aggregateValue
@@ -7661,7 +7661,7 @@
     
                 /**
                  * UninterpretedOption positiveIntValue.
-                 * @member {number} positiveIntValue
+                 * @member {number|string} positiveIntValue
                  * @memberof google.protobuf.UninterpretedOption
                  * @instance
                  */
@@ -7669,7 +7669,7 @@
     
                 /**
                  * UninterpretedOption negativeIntValue.
-                 * @member {number} negativeIntValue
+                 * @member {number|string} negativeIntValue
                  * @memberof google.protobuf.UninterpretedOption
                  * @instance
                  */
@@ -8585,7 +8585,7 @@
                  * Properties of a Timestamp.
                  * @memberof google.protobuf
                  * @interface ITimestamp
-                 * @property {number|null} [seconds] Timestamp seconds
+                 * @property {number|string|null} [seconds] Timestamp seconds
                  * @property {number|null} [nanos] Timestamp nanos
                  */
     
@@ -8606,7 +8606,7 @@
     
                 /**
                  * Timestamp seconds.
-                 * @member {number} seconds
+                 * @member {number|string} seconds
                  * @memberof google.protobuf.Timestamp
                  * @instance
                  */
@@ -9361,7 +9361,7 @@
                  * Properties of an Int64Value.
                  * @memberof google.protobuf
                  * @interface IInt64Value
-                 * @property {number|null} [value] Int64Value value
+                 * @property {number|string|null} [value] Int64Value value
                  */
     
                 /**
@@ -9381,7 +9381,7 @@
     
                 /**
                  * Int64Value value.
-                 * @member {number} value
+                 * @member {number|string} value
                  * @memberof google.protobuf.Int64Value
                  * @instance
                  */
@@ -9458,7 +9458,7 @@
                  * Properties of a UInt64Value.
                  * @memberof google.protobuf
                  * @interface IUInt64Value
-                 * @property {number|null} [value] UInt64Value value
+                 * @property {number|string|null} [value] UInt64Value value
                  */
     
                 /**
@@ -9478,7 +9478,7 @@
     
                 /**
                  * UInt64Value value.
-                 * @member {number} value
+                 * @member {number|string} value
                  * @memberof google.protobuf.UInt64Value
                  * @instance
                  */
@@ -9979,7 +9979,7 @@
                  * Properties of a Duration.
                  * @memberof google.protobuf
                  * @interface IDuration
-                 * @property {number|null} [seconds] Duration seconds
+                 * @property {number|string|null} [seconds] Duration seconds
                  * @property {number|null} [nanos] Duration nanos
                  */
     
@@ -10000,7 +10000,7 @@
     
                 /**
                  * Duration seconds.
-                 * @member {number} seconds
+                 * @member {number|string} seconds
                  * @memberof google.protobuf.Duration
                  * @instance
                  */

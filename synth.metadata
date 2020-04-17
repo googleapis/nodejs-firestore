@@ -4,15 +4,16 @@
       "git": {
         "name": ".",
         "remote": "git@github.com:googleapis/nodejs-firestore.git",
-        "sha": "eb77d86abb2cba21a42c20999b8b74c760069ffa"
+        "sha": "3cec3361084cff65c284482b3a526e67ddb41620"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "629e6bea8418ad4a5d081ab9eb48bb327ad368e1",
-        "internalRef": "306660765"
+        "sha": "c3f3cdeda70f60d808eaaae8fea44d306b6d5cc2",
+        "internalRef": "306746093",
+        "log": "c3f3cdeda70f60d808eaaae8fea44d306b6d5cc2\nfix: update {Create|Delete}Backup and RestoreDatabase timeouts to 1 hour\n\nPiperOrigin-RevId: 306746093\n\n"
       }
     },
     {

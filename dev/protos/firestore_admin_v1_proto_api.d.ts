@@ -1451,10 +1451,10 @@ export namespace google {
                 interface IProgress {
 
                     /** Progress estimatedWork */
-                    estimatedWork?: (number|null);
+                    estimatedWork?: (number|string|null);
 
                     /** Progress completedWork */
-                    completedWork?: (number|null);
+                    completedWork?: (number|string|null);
                 }
 
                 /** Represents a Progress. */
@@ -1467,10 +1467,10 @@ export namespace google {
                     constructor(properties?: google.firestore.admin.v1.IProgress);
 
                     /** Progress estimatedWork. */
-                    public estimatedWork: number;
+                    public estimatedWork: (number|string);
 
                     /** Progress completedWork. */
-                    public completedWork: number;
+                    public completedWork: (number|string);
 
                     /**
                      * Creates a Progress message from a plain object. Also converts values to their respective internal types.
@@ -3097,10 +3097,10 @@ export namespace google {
             identifierValue?: (string|null);
 
             /** UninterpretedOption positiveIntValue */
-            positiveIntValue?: (number|null);
+            positiveIntValue?: (number|string|null);
 
             /** UninterpretedOption negativeIntValue */
-            negativeIntValue?: (number|null);
+            negativeIntValue?: (number|string|null);
 
             /** UninterpretedOption doubleValue */
             doubleValue?: (number|null);
@@ -3128,10 +3128,10 @@ export namespace google {
             public identifierValue: string;
 
             /** UninterpretedOption positiveIntValue. */
-            public positiveIntValue: number;
+            public positiveIntValue: (number|string);
 
             /** UninterpretedOption negativeIntValue. */
-            public negativeIntValue: number;
+            public negativeIntValue: (number|string);
 
             /** UninterpretedOption doubleValue. */
             public doubleValue: number;
@@ -3506,7 +3506,7 @@ export namespace google {
         interface ITimestamp {
 
             /** Timestamp seconds */
-            seconds?: (number|null);
+            seconds?: (number|string|null);
 
             /** Timestamp nanos */
             nanos?: (number|null);
@@ -3522,7 +3522,7 @@ export namespace google {
             constructor(properties?: google.protobuf.ITimestamp);
 
             /** Timestamp seconds. */
-            public seconds: number;
+            public seconds: (number|string);
 
             /** Timestamp nanos. */
             public nanos: number;
@@ -3842,7 +3842,7 @@ export namespace google {
         interface IInt64Value {
 
             /** Int64Value value */
-            value?: (number|null);
+            value?: (number|string|null);
         }
 
         /** Represents an Int64Value. */
@@ -3855,7 +3855,7 @@ export namespace google {
             constructor(properties?: google.protobuf.IInt64Value);
 
             /** Int64Value value. */
-            public value: number;
+            public value: (number|string);
 
             /**
              * Creates an Int64Value message from a plain object. Also converts values to their respective internal types.
@@ -3883,7 +3883,7 @@ export namespace google {
         interface IUInt64Value {
 
             /** UInt64Value value */
-            value?: (number|null);
+            value?: (number|string|null);
         }
 
         /** Represents a UInt64Value. */
@@ -3896,7 +3896,7 @@ export namespace google {
             constructor(properties?: google.protobuf.IUInt64Value);
 
             /** UInt64Value value. */
-            public value: number;
+            public value: (number|string);
 
             /**
              * Creates a UInt64Value message from a plain object. Also converts values to their respective internal types.
@@ -4129,7 +4129,7 @@ export namespace google {
         interface IDuration {
 
             /** Duration seconds */
-            seconds?: (number|null);
+            seconds?: (number|string|null);
 
             /** Duration nanos */
             nanos?: (number|null);
@@ -4145,7 +4145,7 @@ export namespace google {
             constructor(properties?: google.protobuf.IDuration);
 
             /** Duration seconds. */
-            public seconds: number;
+            public seconds: (number|string);
 
             /** Duration nanos. */
             public nanos: number;
