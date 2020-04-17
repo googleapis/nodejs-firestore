@@ -45,6 +45,7 @@ import {
 } from './validate';
 
 import api = proto.google.firestore.v1;
+import {UpdateBuilder} from "./update-builder";
 
 /*!
  * Error message for transactional reads that were executed after performing
@@ -62,9 +63,7 @@ const READ_AFTER_WRITE_ERROR_MSG =
  *
  * @class
  */
-export class Transaction {
-  private _firestore: Firestore;
-  private _writeBatch: WriteBatch;
+export class Transaction extends UpdateBuilder<Transaction> {
   private _backoff: ExponentialBackoff;
   private _requestTag: string;
   private _transactionId?: Uint8Array;
@@ -77,12 +76,15 @@ export class Transaction {
    * this transaction.
    */
   constructor(firestore: Firestore, requestTag: string) {
-    this._firestore = firestore;
-    this._writeBatch = firestore.batch();
+    super(firestore, 500);
     this._requestTag = requestTag;
     this._backoff = new ExponentialBackoff();
   }
 
+  wrapResult(): Transaction {
+    return this
+  }
+  
   /**
    * Retrieves a query result. Holds a pessimistic lock on all returned
    * documents.
@@ -125,7 +127,7 @@ export class Transaction {
   get<T>(
     refOrQuery: DocumentReference<T> | Query<T>
   ): Promise<DocumentSnapshot<T> | QuerySnapshot<T>> {
-    if (!this._writeBatch.isEmpty) {
+    if (!this.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
@@ -180,7 +182,7 @@ export class Transaction {
   getAll<T>(
     ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
   ): Promise<Array<DocumentSnapshot<T>>> {
-    if (!this._writeBatch.isEmpty) {
+    if (!this.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
@@ -196,146 +198,6 @@ export class Transaction {
       this._requestTag,
       this._transactionId
     );
-  }
-
-  /**
-   * Create the document referred to by the provided
-   * [DocumentReference]{@link DocumentReference}. The operation will
-   * fail the transaction if a document exists at the specified location.
-   *
-   * @param {DocumentReference} documentRef A reference to the document to be
-   * created.
-   * @param {DocumentData} data The object data to serialize as the document.
-   * @returns {Transaction} This Transaction instance. Used for
-   * chaining method calls.
-   *
-   * @example
-   * firestore.runTransaction(transaction => {
-   *   let documentRef = firestore.doc('col/doc');
-   *   return transaction.get(documentRef).then(doc => {
-   *     if (!doc.exists) {
-   *       transaction.create(documentRef, { foo: 'bar' });
-   *     }
-   *   });
-   * });
-   */
-  create<T>(documentRef: DocumentReference<T>, data: T): Transaction {
-    this._writeBatch.create(documentRef, data);
-    return this;
-  }
-
-  /**
-   * Writes to the document referred to by the provided
-   * [DocumentReference]{@link DocumentReference}. If the document
-   * does not exist yet, it will be created. If you pass
-   * [SetOptions]{@link SetOptions}, the provided data can be merged into the
-   * existing document.
-   *
-   * @param {DocumentReference} documentRef A reference to the document to be
-   * set.
-   * @param {T} data The object to serialize as the document.
-   * @param {SetOptions=} options An object to configure the set behavior.
-   * @param {boolean=} options.merge - If true, set() merges the values
-   * specified in its data argument. Fields omitted from this set() call
-   * remain untouched.
-   * @param {Array.<string|FieldPath>=} options.mergeFields - If provided,
-   * set() only replaces the specified field paths. Any field path that is not
-   * specified is ignored and remains untouched.
-   * @returns {Transaction} This Transaction instance. Used for
-   * chaining method calls.
-   *
-   * @example
-   * firestore.runTransaction(transaction => {
-   *   let documentRef = firestore.doc('col/doc');
-   *   transaction.set(documentRef, { foo: 'bar' });
-   *   return Promise.resolve();
-   * });
-   */
-  set<T>(
-    documentRef: DocumentReference<T>,
-    data: T,
-    options?: SetOptions
-  ): Transaction {
-    this._writeBatch.set(documentRef, data, options);
-    return this;
-  }
-
-  /**
-   * Updates fields in the document referred to by the provided
-   * [DocumentReference]{@link DocumentReference}. The update will
-   * fail if applied to a document that does not exist.
-   *
-   * The update() method accepts either an object with field paths encoded as
-   * keys and field values encoded as values, or a variable number of arguments
-   * that alternate between field paths and field values. Nested fields can be
-   * updated by providing dot-separated field path strings or by providing
-   * FieldPath objects.
-   *
-   * A Precondition restricting this update can be specified as the last
-   * argument.
-   *
-   * @param {DocumentReference} documentRef A reference to the document to be
-   * updated.
-   * @param {UpdateData|string|FieldPath} dataOrField An object
-   * containing the fields and values with which to update the document
-   * or the path of the first field to update.
-   * @param {
-   * ...(Precondition|*|string|FieldPath)} preconditionOrValues -
-   * An alternating list of field paths and values to update or a Precondition
-   * to to enforce on this update.
-   * @returns {Transaction} This Transaction instance. Used for
-   * chaining method calls.
-   *
-   * @example
-   * firestore.runTransaction(transaction => {
-   *   let documentRef = firestore.doc('col/doc');
-   *   return transaction.get(documentRef).then(doc => {
-   *     if (doc.exists) {
-   *       transaction.update(documentRef, { count: doc.get('count') + 1 });
-   *     } else {
-   *       transaction.create(documentRef, { count: 1 });
-   *     }
-   *   });
-   * });
-   */
-  update<T>(
-    documentRef: DocumentReference<T>,
-    dataOrField: UpdateData | string | FieldPath,
-    ...preconditionOrValues: Array<Precondition | unknown | string | FieldPath>
-  ): Transaction {
-    validateMinNumberOfArguments('Transaction.update', arguments, 2);
-
-    this._writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
-    return this;
-  }
-
-  /**
-   * Deletes the document referred to by the provided [DocumentReference]
-   * {@link DocumentReference}.
-   *
-   * @param {DocumentReference} documentRef A reference to the document to be
-   * deleted.
-   * @param {Precondition=} precondition A precondition to enforce for this
-   * delete.
-   * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime. Fails the transaction if the
-   * document doesn't exist or was last updated at a different time.
-   * @returns {Transaction} This Transaction instance. Used for
-   * chaining method calls.
-   *
-   * @example
-   * firestore.runTransaction(transaction => {
-   *   let documentRef = firestore.doc('col/doc');
-   *   transaction.delete(documentRef);
-   *   return Promise.resolve();
-   * });
-   */
-  delete<T>(
-    documentRef: DocumentReference<T>,
-    precondition?: PublicPrecondition
-  ): this {
-    this._writeBatch.delete(documentRef, precondition);
-    return this;
   }
 
   /**
@@ -373,8 +235,7 @@ export class Transaction {
    * @private
    */
   commit(): Promise<void> {
-    return this._writeBatch
-      .commit_({
+    return this.commit_({
         transactionId: this._transactionId,
         requestTag: this._requestTag,
       })
@@ -401,8 +262,6 @@ export class Transaction {
    * @private
    * @param updateFunction The user function to execute within the transaction
    * context.
-   * @param requestTag A unique client-assigned identifier for the scope of
-   * this transaction.
    * @param maxAttempts The maximum number of attempts for this transaction.
    */
   async runTransaction<T>(
@@ -422,7 +281,7 @@ export class Transaction {
         );
       }
 
-      this._writeBatch._reset();
+      this._reset();
       await this.maybeBackoff(lastError);
 
       await this.begin();

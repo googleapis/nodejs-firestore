@@ -77,7 +77,8 @@ export {
 } from './reference';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
-export {WriteBatch, WriteResult} from './write-batch';
+export {WriteBatch} from './write-batch';
+export {WriteResult} from './update-builder'
 export {Transaction} from './transaction';
 export {Timestamp} from './timestamp';
 export {DocumentChange} from './document-change';

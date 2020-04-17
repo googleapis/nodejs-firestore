@@ -57,7 +57,8 @@ import {
   validateMinNumberOfArguments,
 } from './validate';
 import {DocumentWatch, QueryWatch} from './watch';
-import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
+import {validateDocumentData, WriteResult} from './update-builder';
+import {WriteBatch} from './write-batch';
 
 import api = proto.google.firestore.v1;
 
