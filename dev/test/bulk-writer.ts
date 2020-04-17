@@ -15,6 +15,7 @@
 import {expect} from 'chai';
 import {Status} from 'google-gax';
 
+import * as proto from '../protos/firestore_v1_proto_api';
 import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
 import {BulkWriter} from '../src/bulk-writer';
 import {Deferred} from '../src/util';
@@ -31,18 +32,20 @@ import {
   verifyInstance,
 } from './util/helpers';
 
+import api = proto.google.firestore.v1;
+
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(() => {});
 
 const PROJECT_ID = 'test-project';
 
 interface BulkWriterRequest {
-  writes: Array<{[key: string]: {} | undefined}>;
+  writes: api.IWrite[] | null;
 }
 
 interface BulkWriterResponse {
-  writeResults: Array<{[key: string]: {} | null}>;
-  status: Array<{[key: string]: {}}>;
+  writeResults: api.IWriteResult[] | null;
+  status: proto.google.rpc.IStatus[] | null;
 }
 
 interface RequestResponse {
@@ -52,11 +55,10 @@ interface RequestResponse {
 
 describe('BulkWriter', () => {
   let firestore: Firestore;
-  let bulkWriter: BulkWriter;
   let requestCounter: number;
   let opCount: number;
-  const flushDeferred = new Deferred<void>();
-  let flushCounter = 0;
+  const activeRequestDeferred = new Deferred<void>();
+  let activeRequestCounter = 0;
 
   beforeEach(() => {
     requestCounter = 0;
@@ -71,34 +73,32 @@ describe('BulkWriter', () => {
     expect(opCount).to.equal(expected);
   }
 
-  function setOp(doc: string, value: string): BulkWriterRequest {
+  function setOp(doc: string, value: string): api.IWrite {
     return set({
       document: document(doc, 'foo', value),
-    }) as BulkWriterRequest;
+    }).writes![0];
   }
 
-  function createOp(doc: string, value: string): BulkWriterRequest {
-    return create({
-      document: document(doc, 'foo', value),
-    }) as BulkWriterRequest;
-  }
-
-  function updateOp(doc: string, value: string): BulkWriterRequest {
-    const updateRequest = update({
+  function updateOp(doc: string, value: string): api.IWrite {
+    return update({
       document: document(doc, 'foo', value),
       mask: updateMask('foo'),
-    }) as BulkWriterRequest;
-    delete updateRequest.writes[0].currentDocument;
-    return updateRequest;
+    }).writes![0];
   }
 
-  function deleteOp(doc: string): BulkWriterRequest {
-    return remove(doc) as BulkWriterRequest;
+  function createOp(doc: string, value: string): api.IWrite {
+    return create({
+      document: document(doc, 'foo', value),
+    }).writes![0];
   }
 
-  function joinRequests(requests: BulkWriterRequest[]): BulkWriterRequest {
+  function deleteOp(doc: string): api.IWrite {
+    return remove(doc).writes![0];
+  }
+
+  function createRequest(requests: api.IWrite[]): BulkWriterRequest {
     return {
-      writes: requests.map(req => req.writes[0]),
+      writes: requests,
     };
   }
 
@@ -125,31 +125,40 @@ describe('BulkWriter', () => {
     const writeResults = responses.map(response => ({
       updateTime: response.updateTime,
     }));
-    const status = responses.map(response => ({code: response.code!}));
+    const status = responses.map(
+      response => ({code: response.code!} as proto.google.rpc.IStatus)
+    );
     return {
       writeResults,
       status,
     };
   }
 
+  /**
+   * Creates an instance with the mocked objects.
+   *
+   * @param checkActiveRequests Whether to check for active requests. If true,
+   * the `activeRequestDeferred` must be manually resolved for the response to
+   * return.
+   */
   function instantiateInstance(
     mock: RequestResponse[],
-    manualFlush = false
-  ): Promise<void> {
+    checkActiveRequests = false
+  ): Promise<BulkWriter> {
     const overrides: ApiOverride = {
       batchWrite: async request => {
         expect(request).to.deep.eq({
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: mock[requestCounter].request.writes,
         });
-        if (manualFlush) {
-          flushCounter++;
+        if (checkActiveRequests) {
+          activeRequestCounter++;
 
           // This expect statement is used to test that only one request is
           // made at a time.
-          expect(flushCounter).to.equal(1);
-          await flushDeferred.promise;
-          flushCounter--;
+          expect(activeRequestCounter).to.equal(1);
+          await activeRequestDeferred.promise;
+          activeRequestCounter--;
         }
         const responsePromise = response({
           writeResults: mock[requestCounter].response.writeResults,
@@ -161,16 +170,16 @@ describe('BulkWriter', () => {
     };
     return createInstance(overrides).then(firestoreClient => {
       firestore = firestoreClient;
-      bulkWriter = firestore.bulkWriter();
+      return firestore.bulkWriter();
     });
   }
 
   afterEach(() => verifyInstance(firestore));
 
   it('has a set() method', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: setOp('doc', 'bar'),
+        request: createRequest([setOp('doc', 'bar')]),
         response: createResponse([successResponse(2)]),
       },
     ]);
@@ -187,9 +196,9 @@ describe('BulkWriter', () => {
   });
 
   it('has an update() method', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: updateOp('doc', 'bar'),
+        request: createRequest([updateOp('doc', 'bar')]),
         response: createResponse([successResponse(2)]),
       },
     ]);
@@ -206,9 +215,9 @@ describe('BulkWriter', () => {
   });
 
   it('has a delete() method', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: deleteOp('doc'),
+        request: createRequest([deleteOp('doc')]),
         response: createResponse([successResponse(2)]),
       },
     ]);
@@ -225,9 +234,9 @@ describe('BulkWriter', () => {
   });
 
   it('has a create() method', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: createOp('doc', 'bar'),
+        request: createRequest([createOp('doc', 'bar')]),
         response: createResponse([successResponse(2)]),
       },
     ]);
@@ -244,9 +253,9 @@ describe('BulkWriter', () => {
   });
 
   it('surfaces errors', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: setOp('doc', 'bar'),
+        request: createRequest([setOp('doc', 'bar')]),
         response: createResponse([failResponse()]),
       },
     ]);
@@ -261,18 +270,18 @@ describe('BulkWriter', () => {
   });
 
   it('flush() resolves immediately if there are no writes', async () => {
-    await instantiateInstance([]);
+    const bulkWriter = await instantiateInstance([]);
     return bulkWriter.flush().then(() => verifyOpCount(0));
   });
 
   it('adds writes to a new batch after calling flush()', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: createOp('doc', 'bar'),
+        request: createRequest([createOp('doc', 'bar')]),
         response: createResponse([successResponse(2)]),
       },
       {
-        request: setOp('doc2', 'bar1'),
+        request: createRequest([setOp('doc2', 'bar1')]),
         response: createResponse([successResponse(2)]),
       },
     ]);
@@ -289,9 +298,9 @@ describe('BulkWriter', () => {
   });
 
   it('close() sends all writes', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: createOp('doc', 'bar'),
+        request: createRequest([createOp('doc', 'bar')]),
         response: createResponse([successResponse(2)]),
       },
     ]);
@@ -303,12 +312,12 @@ describe('BulkWriter', () => {
   });
 
   it('close() resolves immediately if there are no writes', async () => {
-    await instantiateInstance([]);
+    const bulkWriter = await instantiateInstance([]);
     return bulkWriter.close().then(() => verifyOpCount(0));
   });
 
   it('cannot call methods after close() is called', async () => {
-    await instantiateInstance([]);
+    const bulkWriter = await instantiateInstance([]);
 
     const expected = 'BulkWriter has already been closed.';
     const doc = firestore.doc('collectionId/doc');
@@ -322,20 +331,22 @@ describe('BulkWriter', () => {
   });
 
   it('sends writes to the same document in separate batches', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: setOp('doc', 'bar'),
+        request: createRequest([setOp('doc', 'bar')]),
         response: createResponse([successResponse(0)]),
       },
       {
-        request: updateOp('doc', 'bar1'),
+        request: createRequest([updateOp('doc', 'bar1')]),
         response: createResponse([successResponse(1)]),
       },
     ]);
 
+    // Create two document references pointing to the same document.
     const doc = firestore.doc('collectionId/doc');
+    const doc2 = firestore.doc('collectionId/doc');
     bulkWriter.set(doc, {foo: 'bar'}).then(incrementOpCount);
-    bulkWriter.update(doc, {foo: 'bar1'}).then(incrementOpCount);
+    bulkWriter.update(doc2, {foo: 'bar1'}).then(incrementOpCount);
 
     return bulkWriter.close().then(async () => {
       verifyOpCount(2);
@@ -343,9 +354,9 @@ describe('BulkWriter', () => {
   });
 
   it('sends writes to different documents in the same batch', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: joinRequests([setOp('doc1', 'bar'), updateOp('doc2', 'bar')]),
+        request: createRequest([setOp('doc1', 'bar'), updateOp('doc2', 'bar')]),
         response: createResponse([successResponse(0), successResponse(1)]),
       },
     ]);
@@ -364,17 +375,17 @@ describe('BulkWriter', () => {
     const arrayRange = Array.from(new Array(6), (_, i) => i);
     const requests = arrayRange.map(i => setOp('doc' + i, 'bar'));
     const responses = arrayRange.map(i => successResponse(i));
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: joinRequests([requests[0], requests[1]]),
+        request: createRequest([requests[0], requests[1]]),
         response: createResponse([responses[0], responses[1]]),
       },
       {
-        request: joinRequests([requests[2], requests[3]]),
+        request: createRequest([requests[2], requests[3]]),
         response: createResponse([responses[2], responses[3]]),
       },
       {
-        request: joinRequests([requests[4], requests[5]]),
+        request: createRequest([requests[4], requests[5]]),
         response: createResponse([responses[4], responses[5]]),
       },
     ]);
@@ -392,13 +403,13 @@ describe('BulkWriter', () => {
   });
 
   it('sends existing batches when a new batch is created', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: setOp('doc', 'bar'),
+        request: createRequest([setOp('doc', 'bar')]),
         response: createResponse([successResponse(0)]),
       },
       {
-        request: joinRequests([
+        request: createRequest([
           updateOp('doc', 'bar1'),
           createOp('doc2', 'bar1'),
         ]),
@@ -430,9 +441,9 @@ describe('BulkWriter', () => {
   });
 
   it('sends batches automatically when the batch size limit is reached', async () => {
-    await instantiateInstance([
+    const bulkWriter = await instantiateInstance([
       {
-        request: joinRequests([
+        request: createRequest([
           setOp('doc1', 'bar'),
           updateOp('doc2', 'bar'),
           createOp('doc3', 'bar'),
@@ -444,7 +455,7 @@ describe('BulkWriter', () => {
         ]),
       },
       {
-        request: deleteOp('doc4'),
+        request: createRequest([deleteOp('doc4')]),
         response: createResponse([successResponse(3)]),
       },
     ]);
@@ -475,14 +486,14 @@ describe('BulkWriter', () => {
   });
 
   it('does not send batches if a document containing the same write is in flight', async () => {
-    await instantiateInstance(
+    const bulkWriter = await instantiateInstance(
       [
         {
-          request: joinRequests([setOp('doc1', 'bar'), setOp('doc2', 'bar')]),
+          request: createRequest([setOp('doc1', 'bar'), setOp('doc2', 'bar')]),
           response: createResponse([successResponse(1), successResponse(2)]),
         },
         {
-          request: setOp('doc1', 'bar'),
+          request: createRequest([setOp('doc1', 'bar')]),
           response: createResponse([successResponse(3)]),
         },
       ],
@@ -494,7 +505,7 @@ describe('BulkWriter', () => {
     // The third write will be placed in a new batch
     bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
     const flush2 = bulkWriter.flush();
-    flushDeferred.resolve();
+    activeRequestDeferred.resolve();
     await flush1;
     await flush2;
     return bulkWriter.close();

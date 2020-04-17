@@ -137,6 +137,10 @@ class BulkCommitBatch {
       !this.docPaths.has(documentRef.path),
       'Batch should not contain writes to the same document'
     );
+    assert(
+      this.state === BatchState.OPEN,
+      'Batch should be OPEN when adding writes'
+    );
     this.docPaths.add(documentRef.path);
     const deferred = new Deferred<BatchWriteResult>();
     this.resultsMap.set(this.opCount, deferred);
@@ -181,7 +185,7 @@ class BulkCommitBatch {
    * Returns a promise that resolves when the batch has been sent, and a
    * response is received.
    */
-  awaitBatch(): Promise<void> {
+  awaitBulkCommit(): Promise<void> {
     this.markReadyToSend();
     return this.completedDeferred.promise;
   }
@@ -390,7 +394,7 @@ export class BulkWriter {
     const resultPromise = bulkCommitBatch.update(
       documentRef,
       dataOrField,
-      preconditionOrValues
+      ...preconditionOrValues
     );
     this.sendReadyBatches();
     return resultPromise;
@@ -423,7 +427,7 @@ export class BulkWriter {
   async flush(): Promise<void> {
     this.verifyNotClosed();
     const trackedBatches = this.batchQueue;
-    const writePromises = trackedBatches.map(batch => batch.awaitBatch());
+    const writePromises = trackedBatches.map(batch => batch.awaitBulkCommit());
     this.sendReadyBatches();
     await Promise.all(writePromises);
   }
@@ -467,32 +471,16 @@ export class BulkWriter {
    * reference, or creates one if no eligible batches are found.
    */
   private getEligibleBatch(ref: DocumentReference): BulkCommitBatch {
-    let eligibleBatch = null;
-    let logWarning = false;
     if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
-      if (lastBatch.state === BatchState.OPEN) {
-        if (!lastBatch.docPaths.has(ref.path)) {
-          eligibleBatch = lastBatch;
-        } else {
-          logWarning = true;
-        }
+      if (
+        lastBatch.state === BatchState.OPEN &&
+        !lastBatch.docPaths.has(ref.path)
+      ) {
+        return lastBatch;
       }
     }
-
-    if (eligibleBatch === null) {
-      if (logWarning) {
-        console.warn(
-          '[BulkWriter]',
-          `Duplicate write to document "${ref.path}" detected.`,
-          'Writing to the same document multiple times will slow down BulkWriter. ' +
-            'Write to unique documents in order to maximize throughput.'
-        );
-      }
-      return this.createNewBatch();
-    } else {
-      return eligibleBatch;
-    }
+    return this.createNewBatch();
   }
 
   private createNewBatch(): BulkCommitBatch {
@@ -558,6 +546,12 @@ export class BulkWriter {
           .filter(batch => batch.state === BatchState.SENT)
           .find(batch => batch.docPaths.has(path)) !== undefined;
       if (isRefInFlight) {
+        console.warn(
+          '[BulkWriter]',
+          `Duplicate write to document "${path}" detected.`,
+          'Writing to the same document multiple times will slow down BulkWriter. ' +
+            'Write to unique documents in order to maximize throughput.'
+        );
         return false;
       }
     }
