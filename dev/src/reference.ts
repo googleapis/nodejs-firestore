@@ -2005,11 +2005,11 @@ export class Query<T = DocumentData> {
         const readTime = Timestamp.fromProto(proto.readTime);
         if (proto.document) {
           const document = this.firestore.snapshot_(
-              proto.document,
-              proto.readTime
+            proto.document,
+            proto.readTime
           );
           const finalDoc = new DocumentSnapshotBuilder(
-              document.ref.withConverter(this._queryOptions.converter)
+            document.ref.withConverter(this._queryOptions.converter)
           );
           // Recreate the QueryDocumentSnapshot with the DocumentReference
           // containing the original converter.
@@ -2021,7 +2021,7 @@ export class Query<T = DocumentData> {
         } else {
           callback(undefined, {readTime});
         }
-      }
+      },
     });
 
     this.firestore
