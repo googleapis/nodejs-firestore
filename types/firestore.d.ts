@@ -411,214 +411,137 @@ declare namespace FirebaseFirestore {
   }
 
   /**
- * A Firestore BulkWriter than can be used to perform large amounts of writes in
- * parallel. Writes to the same document will be executed sequentially.
- *
- * @class
- */
-export class BulkWriter {
-  private constructor();
-
-  /**
-   * Create a document with the provided data. This single operation will fail
-   * if a document exists at its location.
+   * A Firestore BulkWriter than can be used to perform a large number of writes
+   * in parallel. Writes to the same document will be executed sequentially.
    *
-   * @param {DocumentReference} documentRef A reference to the document to be
-   * created.
-   * @param {T} data The object to serialize as the document.
-   * @returns {Promise<WriteResult>} A promise that resolves with the result of
-   * the write. Throws an error if the write fails.
-   *
-   * @example
-   * let bulkWriter = firestore.bulkWriter();
-   * let documentRef = firestore.collection('col').doc();
-   *
-   * bulkWriter
-   *  .create(documentRef, {foo: 'bar'})
-   *  .then(result => {
-   *    console.log('Successfully executed write at: ', result);
-   *  })
-   *  .catch(err => {
-   *    console.log('Write failed with: ', err);
-   *  });
-   * });
+   * @class
    */
-  create(
-    documentRef: DocumentReference,
-    data: DocumentData
-  ): Promise<WriteResult>;
+  export class BulkWriter {
+    private constructor();
 
-  /**
-   * Delete a document from the database.
-   *
-   * @param {DocumentReference} documentRef A reference to the document to be
-   * deleted.
-   * @param {Precondition=} precondition A precondition to enforce for this
-   * delete.
-   * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
-   * document was last updated at lastUpdateTime. Fails the batch if the
-   * document doesn't exist or was last updated at a different time.
-   * @returns {Promise<WriteResult>} A promise that resolves with the result of
-   * the write. Throws an error if the write fails.
-   *
-   * @example
-   * let bulkWriter = firestore.bulkWriter();
-   * let documentRef = firestore.doc('col/doc');
-   *
-   * bulkWriter
-   *  .delete(documentRef)
-   *  .then(result => {
-   *    console.log('Successfully deleted document at: ', result);
-   *  })
-   *  .catch(err => {
-   *    console.log('Delete failed with: ', err);
-   *  });
-   * });
-   */
-  delete(
-    documentRef: DocumentReference,
-    precondition?: Precondition
-  ): Promise<WriteResult>;
+    /**
+     * Create a document with the provided data. This single operation will fail
+     * if a document exists at its location.
+     *
+     * @param {DocumentReference} documentRef A reference to the document to be
+     * created.
+     * @param {T} data The object to serialize as the document.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result of
+     * the write. Throws an error if the write fails.
+     */
+    create(
+      documentRef: DocumentReference,
+      data: DocumentData
+    ): Promise<WriteResult>;
 
-  /**
-   * Write to the document referred to by the provided
-   * [DocumentReference]{@link DocumentReference}. If the document does not
-   * exist yet, it will be created. If you pass [SetOptions]{@link SetOptions}.,
-   * the provided data can be merged into the existing document.
-   *
-   * @param {DocumentReference} documentRef A reference to the document to be
-   * set.
-   * @param {T} data The object to serialize as the document.
-   * @param {SetOptions=} options An object to configure the set behavior.
-   * @param {boolean=} options.merge - If true, set() merges the values
-   * specified in its data argument. Fields omitted from this set() call remain
-   * untouched.
-   * @param {Array.<string|FieldPath>=} options.mergeFields - If provided, set()
-   * only replaces the specified field paths. Any field path that is not
-   * specified is ignored and remains untouched.
-   * @returns {Promise<WriteResult>} A promise that resolves with the result of
-   * the write. Throws an error if the write fails.
-   *
-   *
-   * @example
-   * let bulkWriter = firestore.bulkWriter();
-   * let documentRef = firestore.collection('col').doc();
-   *
-   * bulkWriter
-   *  .set(documentRef, {foo: 'bar'})
-   *  .then(result => {
-   *    console.log('Successfully executed write at: ', result);
-   *  })
-   *  .catch(err => {
-   *    console.log('Write failed with: ', err);
-   *  });
-   * });
-   */
-  set(
-    documentRef: DocumentReference,
-    data: DocumentData,
-    options?: SetOptions
-  ): Promise<WriteResult>;
+    /**
+     * Delete a document from the database.
+     *
+     * @param {DocumentReference} documentRef A reference to the document to be
+     * deleted.
+     * @param {Precondition=} precondition A precondition to enforce for this
+     * delete.
+     * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
+     * document was last updated at lastUpdateTime. Fails the batch if the
+     * document doesn't exist or was last updated at a different time.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result of
+     * the write. Throws an error if the write fails.
+     */
+    delete(
+      documentRef: DocumentReference,
+      precondition?: Precondition
+    ): Promise<WriteResult>;
 
-  /**
-   * Update fields of the document referred to by the provided
-   * [DocumentReference]{@link DocumentReference}. If the document doesn't yet
-   * exist, the update fails and the entire batch will be rejected.
-   *
-   * The update() method accepts either an object with field paths encoded as
-   * keys and field values encoded as values, or a variable number of arguments
-   * that alternate between field paths and field values. Nested fields can be
-   * updated by providing dot-separated field path strings or by providing
-   * FieldPath objects.
-   *
-   *
-   * A Precondition restricting this update can be specified as the last
-   * argument.
-   *
-   * @param {DocumentReference} documentRef A reference to the document to be
-   * updated.
-   * @param {UpdateData|string|FieldPath} dataOrField An object containing the
-   * fields and values with which to update the document or the path of the
-   * first field to update.
-   * @param {...(Precondition|*|string|FieldPath)} preconditionOrValues - An
-   * alternating list of field paths and values to update or a Precondition to
-   * restrict this update
-   * @returns {Promise<WriteResult>} A promise that resolves with the result of
-   * the write. Throws an error if the write fails.
-   *
-   *
-   * @example
-   * let bulkWriter = firestore.bulkWriter();
-   * let documentRef = firestore.doc('col/doc');
-   *
-   * bulkWriter
-   *  .update(documentRef, {foo: 'bar'})
-   *  .then(result => {
-   *    console.log('Successfully executed write at: ', result);
-   *  })
-   *  .catch(err => {
-   *    console.log('Write failed with: ', err);
-   *  });
-   * });
-   */
-  update(
-    documentRef: DocumentReference,
-    dataOrField: UpdateData | string | FieldPath,
-    ...preconditionOrValues: Array<
-      {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
-    >
-  ): Promise<WriteResult>;
+    /**
+     * Write to the document referred to by the provided
+     * [DocumentReference]{@link DocumentReference}. If the document does not
+     * exist yet, it will be created. If you pass [SetOptions]{@link SetOptions}.,
+     * the provided data can be merged into the existing document.
+     *
+     * @param {DocumentReference} documentRef A reference to the document to be
+     * set.
+     * @param {T} data The object to serialize as the document.
+     * @param {SetOptions=} options An object to configure the set behavior.
+     * @param {boolean=} options.merge - If true, set() merges the values
+     * specified in its data argument. Fields omitted from this set() call remain
+     * untouched.
+     * @param {Array.<string|FieldPath>=} options.mergeFields - If provided, set()
+     * only replaces the specified field paths. Any field path that is not
+     * specified is ignored and remains untouched.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result of
+     * the write. Throws an error if the write fails.
+     */
+    set(
+      documentRef: DocumentReference,
+      data: DocumentData,
+      options?: SetOptions
+    ): Promise<WriteResult>;
 
-  /**
-   * Commits all writes that have been enqueued up to this point in parallel.
-   *
-   * Returns a Promise that resolves when there are no more pending writes. It
-   * never fails.
-   *
-   * The promise resolves immediately if there are no pending writes. Otherwise,
-   * the Promise waits for all previously issued writes, but it does not wait
-   * for writes that were added after the method is called. If you want to wait
-   * for additional writes, call `flush()` again.
-   *
-   * @return {Promise<void>} A promise that resolves when there are no more
-   * pending writes.
-   *
-   * @example
-   * let bulkWriter = firestore.bulkWriter();
-   *
-   * bulkWriter.create(documentRef, {foo: 'bar'});
-   * bulkWriter.update(documentRef2, {foo: 'bar'});
-   * bulkWriter.delete(documentRef3);
-   * await flush().then(() => {
-   *   console.log('Executed all writes');
-   * });
-   */
-  flush(): Promise<void>;
+    /**
+     * Update fields of the document referred to by the provided
+     * [DocumentReference]{@link DocumentReference}. If the document doesn't yet
+     * exist, the update fails and the entire batch will be rejected.
+     *
+     * The update() method accepts either an object with field paths encoded as
+     * keys and field values encoded as values, or a variable number of arguments
+     * that alternate between field paths and field values. Nested fields can be
+     * updated by providing dot-separated field path strings or by providing
+     * FieldPath objects.
+     *
+     *
+     * A Precondition restricting this update can be specified as the last
+     * argument.
+     *
+     * @param {DocumentReference} documentRef A reference to the document to be
+     * updated.
+     * @param {UpdateData|string|FieldPath} dataOrField An object containing the
+     * fields and values with which to update the document or the path of the
+     * first field to update.
+     * @param {...(Precondition|*|string|FieldPath)} preconditionOrValues - An
+     * alternating list of field paths and values to update or a Precondition to
+     * restrict this update
+     * @returns {Promise<WriteResult>} A promise that resolves with the result of
+     * the write. Throws an error if the write fails.
+     */
+    update(
+      documentRef: DocumentReference,
+      dataOrField: UpdateData | string | FieldPath,
+      ...preconditionOrValues: Array<
+        {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
+      >
+    ): Promise<WriteResult>;
 
-  /**
-   * Commits all enqueued writes and marks the BulkWriter instance as closed.
-   *
-   * After calling `close()`, calling any method wil throw an error.
-   *
-   * Returns a Promise that resolves when there are no more pending writes. It
-   * never fails. Calling this method will send all requests. The promise
-   * resolves immediately if there are no pending writes.
-   *
-   * @return {Promise<void>} A promise that resolves when there are no more
-   * pending writes.
-   *
-   * @example
-   * let bulkWriter = firestore.bulkWriter();
-   *
-   * bulkWriter.create(documentRef, {foo: 'bar'});
-   * bulkWriter.update(documentRef2, {foo: 'bar'});
-   * bulkWriter.delete(documentRef3);
-   * await close().then(() => {
-   *   console.log('Executed all writes');
-   * });
-   */
-  close(): Promise<void>;
-}
+    /**
+     * Commits all writes that have been enqueued up to this point in parallel.
+     *
+     * Returns a Promise that resolves when all writes have been committed.
+     * The Promise will never be rejected.
+     *
+     * The Promise resolves immediately if there are no pending writes. Otherwise,
+     * the Promise waits for all previously issued writes, but it does not wait
+     * for writes that were added after the method is called. If you want to wait
+     * for additional writes, call `flush()` again.
+     *
+     * @return {Promise<void>} A promise that resolves when all writes have
+     * been committed.
+     */
+    flush(): Promise<void>;
+
+    /**
+     * Commits all enqueued writes and marks the BulkWriter instance as closed.
+     *
+     * After calling `close()`, calling any method wil throw an error.
+     *
+     * Returns a Promise that resolves when all writes have been committed.
+     * The Promise will never be rejected. Calling this method will send all
+     * requests. The promise resolves immediately if there are no pending
+     * writes.
+     *
+     * @return {Promise<void>} A promise that resolves when all writes have
+     * been committed.
+     */
+    close(): Promise<void>;
+  }
 
   /**
    * A write batch, used to perform multiple writes as a single atomic unit.

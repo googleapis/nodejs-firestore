@@ -21,6 +21,7 @@ import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
+import {BulkWriter} from './bulk-writer';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
   DocumentSnapshot,
@@ -67,7 +68,6 @@ import {interfaces} from './v1/firestore_client_config.json';
 const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
-import {BulkWriter} from './bulk-writer';
 
 export {
   CollectionReference,
@@ -75,6 +75,7 @@ export {
   QuerySnapshot,
   Query,
 } from './reference';
+export {BulkWriter} from './bulk-writer';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
 export {WriteBatch, WriteResult} from './write-batch';

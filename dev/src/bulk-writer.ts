@@ -174,10 +174,16 @@ class BulkCommitBatch {
   /**
    * Resolves the individual operations in the batch with the results.
    */
-  processResults(results: BatchWriteResult[]): void {
-    results.map((result, index) => {
-      this.resultsMap.get(index)!.resolve(result);
-    });
+  processResults(results: BatchWriteResult[], error?: Error): void {
+    if (error === undefined) {
+      results.map((result, index) => {
+        this.resultsMap.get(index)!.resolve(result);
+      });
+    } else {
+      for (let i = 0; i < this.opCount; i++) {
+        this.resultsMap.get(i)!.reject(error);
+      }
+    }
     this.completedDeferred.resolve();
   }
 
@@ -198,8 +204,8 @@ class BulkCommitBatch {
 }
 
 /**
- * A Firestore BulkWriter than can be used to perform large amounts of writes in
- * parallel. Writes to the same document will be executed sequentially.
+ * A Firestore BulkWriter than can be used to perform a large number of writes
+ * in parallel. Writes to the same document will be executed sequentially.
  *
  * @class
  */
@@ -403,10 +409,10 @@ export class BulkWriter {
   /**
    * Commits all writes that have been enqueued up to this point in parallel.
    *
-   * Returns a Promise that resolves when there are no more pending writes. It
-   * never fails.
+   * Returns a Promise that resolves when there are no more pending writes.
+   * The Promise will never be rejected.
    *
-   * The promise resolves immediately if there are no pending writes. Otherwise,
+   * The Promise resolves immediately if there are no pending writes. Otherwise,
    * the Promise waits for all previously issued writes, but it does not wait
    * for writes that were added after the method is called. If you want to wait
    * for additional writes, call `flush()` again.
@@ -437,9 +443,9 @@ export class BulkWriter {
    *
    * After calling `close()`, calling any method wil throw an error.
    *
-   * Returns a Promise that resolves when there are no more pending writes. It
-   * never fails. Calling this method will send all requests. The promise
-   * resolves immediately if there are no pending writes.
+   * Returns a Promise that resolves when there are no more pending writes. The
+   * Promise will never be rejected. Calling this method will send all requests.
+   * The promise resolves immediately if there are no pending writes.
    *
    * @return {Promise<void>} A promise that resolves when there are no more
    * pending writes.
@@ -515,16 +521,22 @@ export class BulkWriter {
     ) {
       const batch = unsentBatches[index];
 
-      batch.bulkCommit().then(results => {
-        batch.processResults(results);
+      batch
+        .bulkCommit()
+        .then(results => {
+          batch.processResults(results);
+        })
+        .catch((error: Error) => {
+          batch.processResults([], error);
+        })
+        .then(() => {
+          // Remove the batch from the BatchQueue after it has been processed.
+          const batchIndex = this.batchQueue.indexOf(batch);
+          assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
+          this.batchQueue.splice(batchIndex, 1);
 
-        // Remove the batch from the BatchQueue after it has been processed.
-        const batchIndex = this.batchQueue.indexOf(batch);
-        assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
-        this.batchQueue.splice(batchIndex, 1);
-
-        this.sendReadyBatches();
-      });
+          this.sendReadyBatches();
+        });
 
       index++;
     }
