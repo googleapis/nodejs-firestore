@@ -259,7 +259,7 @@ describe('DocumentReference class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    firestore = new Firestore({useBigInt: true});
     randomCol = getTestRoot(firestore);
   });
 
@@ -355,6 +355,21 @@ describe('DocumentReference class', () => {
         const actualValue = doc.data()!.nanValue;
         expect(actualValue).to.be.a('number');
         expect(actualValue).to.be.NaN;
+      });
+  });
+
+  it('round-trips BigInts', () => {
+    const bigIntValue = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
+    const ref = randomCol.doc('doc');
+    return ref
+      .set({bigIntValue})
+      .then(() => ref.get())
+      .then(doc => ref.set(doc.data()!))
+      .then(() => ref.get())
+      .then(doc => {
+        const actualValue = doc.data()!.bigIntValue;
+        expect(actualValue).to.be.a('bigint');
+        expect(actualValue).to.equal(bigIntValue);
       });
   });
 

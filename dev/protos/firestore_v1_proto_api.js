@@ -56,7 +56,7 @@
                  * Properties of a Timestamp.
                  * @memberof google.protobuf
                  * @interface ITimestamp
-                 * @property {number|null} [seconds] Timestamp seconds
+                 * @property {number|string|null} [seconds] Timestamp seconds
                  * @property {number|null} [nanos] Timestamp nanos
                  */
     
@@ -77,7 +77,7 @@
     
                 /**
                  * Timestamp seconds.
-                 * @member {number} seconds
+                 * @member {number|string} seconds
                  * @memberof google.protobuf.Timestamp
                  * @instance
                  */
@@ -3538,8 +3538,8 @@
                  * @interface IUninterpretedOption
                  * @property {Array.<google.protobuf.UninterpretedOption.INamePart>|null} [name] UninterpretedOption name
                  * @property {string|null} [identifierValue] UninterpretedOption identifierValue
-                 * @property {number|null} [positiveIntValue] UninterpretedOption positiveIntValue
-                 * @property {number|null} [negativeIntValue] UninterpretedOption negativeIntValue
+                 * @property {number|string|null} [positiveIntValue] UninterpretedOption positiveIntValue
+                 * @property {number|string|null} [negativeIntValue] UninterpretedOption negativeIntValue
                  * @property {number|null} [doubleValue] UninterpretedOption doubleValue
                  * @property {Uint8Array|null} [stringValue] UninterpretedOption stringValue
                  * @property {string|null} [aggregateValue] UninterpretedOption aggregateValue
@@ -3579,7 +3579,7 @@
     
                 /**
                  * UninterpretedOption positiveIntValue.
-                 * @member {number} positiveIntValue
+                 * @member {number|string} positiveIntValue
                  * @memberof google.protobuf.UninterpretedOption
                  * @instance
                  */
@@ -3587,7 +3587,7 @@
     
                 /**
                  * UninterpretedOption negativeIntValue.
-                 * @member {number} negativeIntValue
+                 * @member {number|string} negativeIntValue
                  * @memberof google.protobuf.UninterpretedOption
                  * @instance
                  */
@@ -4968,7 +4968,7 @@
                  * Properties of an Int64Value.
                  * @memberof google.protobuf
                  * @interface IInt64Value
-                 * @property {number|null} [value] Int64Value value
+                 * @property {number|string|null} [value] Int64Value value
                  */
     
                 /**
@@ -4988,7 +4988,7 @@
     
                 /**
                  * Int64Value value.
-                 * @member {number} value
+                 * @member {number|string} value
                  * @memberof google.protobuf.Int64Value
                  * @instance
                  */
@@ -5065,7 +5065,7 @@
                  * Properties of a UInt64Value.
                  * @memberof google.protobuf
                  * @interface IUInt64Value
-                 * @property {number|null} [value] UInt64Value value
+                 * @property {number|string|null} [value] UInt64Value value
                  */
     
                 /**
@@ -5085,7 +5085,7 @@
     
                 /**
                  * UInt64Value value.
-                 * @member {number} value
+                 * @member {number|string} value
                  * @memberof google.protobuf.UInt64Value
                  * @instance
                  */
@@ -5785,7 +5785,7 @@
                  * Properties of a Duration.
                  * @memberof google.protobuf
                  * @interface IDuration
-                 * @property {number|null} [seconds] Duration seconds
+                 * @property {number|string|null} [seconds] Duration seconds
                  * @property {number|null} [nanos] Duration nanos
                  */
     
@@ -5806,7 +5806,7 @@
     
                 /**
                  * Duration seconds.
-                 * @member {number} seconds
+                 * @member {number|string} seconds
                  * @memberof google.protobuf.Duration
                  * @instance
                  */
@@ -6588,7 +6588,7 @@
                      * @interface IValue
                      * @property {google.protobuf.NullValue|null} [nullValue] Value nullValue
                      * @property {boolean|null} [booleanValue] Value booleanValue
-                     * @property {number|null} [integerValue] Value integerValue
+                     * @property {number|string|null} [integerValue] Value integerValue
                      * @property {number|null} [doubleValue] Value doubleValue
                      * @property {google.protobuf.ITimestamp|null} [timestampValue] Value timestampValue
                      * @property {string|null} [stringValue] Value stringValue
@@ -6632,7 +6632,7 @@
     
                     /**
                      * Value integerValue.
-                     * @member {number} integerValue
+                     * @member {number|string} integerValue
                      * @memberof google.firestore.v1.Value
                      * @instance
                      */
