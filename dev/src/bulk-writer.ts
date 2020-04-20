@@ -16,9 +16,17 @@
 import * as assert from 'assert';
 
 import {FieldPath, Firestore} from '.';
+import {delayExecution} from './backoff';
+import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {DocumentData, Precondition, SetOptions, UpdateData} from './types';
+import {
+  BulkWriterOptions,
+  DocumentData,
+  Precondition,
+  SetOptions,
+  UpdateData,
+} from './types';
 import {Deferred} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
@@ -26,6 +34,29 @@ import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
  * The maximum number of writes that can be in a single batch.
  */
 const MAX_BATCH_SIZE = 500;
+
+/**
+ * The starting maximum number of operations per second as allowed by the
+ * 500/50/5 rule.
+ *
+ * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
+ */
+const STARTING_MAXIMUM_OPS_PER_SECOND = 500;
+
+/**
+ * The rate by which to increase the capacity as specified by the 500/50/5 rule.
+ *
+ * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
+ */
+const RATE_LIMITER_MULTIPLIER = 1.5;
+
+/**
+ * How often the operations per second capacity should increase in milliseconds
+ * as specified by the 500/50/5 rule.
+ *
+ * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
+ */
+const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
 /**
  * Used to represent the state of batch.
@@ -226,7 +257,23 @@ export class BulkWriter {
    */
   private closed = false;
 
-  constructor(private readonly firestore: Firestore) {}
+  /**
+   * Rate limiter used to throttle requests as per the 500/50/5 rule.
+   */
+  private rateLimiter = new RateLimiter(
+    STARTING_MAXIMUM_OPS_PER_SECOND,
+    RATE_LIMITER_MULTIPLIER,
+    RATE_LIMITER_MULTIPLIER_MILLIS
+  );
+
+  private readonly options: BulkWriterOptions = {};
+
+  constructor(
+    private readonly firestore: Firestore,
+    options?: BulkWriterOptions
+  ) {
+    this.options = {...options};
+  }
 
   /**
    * Create a document with the provided data. This single operation will fail
@@ -522,25 +569,48 @@ export class BulkWriter {
     ) {
       const batch = unsentBatches[index];
 
-      batch
-        .bulkCommit()
-        .then(results => {
-          batch.processResults(results);
-        })
-        .catch((error: Error) => {
-          batch.processResults([], error);
-        })
-        .then(() => {
-          // Remove the batch from the BatchQueue after it has been processed.
-          const batchIndex = this.batchQueue.indexOf(batch);
-          assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
-          this.batchQueue.splice(batchIndex, 1);
-
-          this.sendReadyBatches();
-        });
+      if (this.options && this.options.disableThrottling) {
+        this.sendBatch(batch);
+      } else {
+        // Send the batch if it is under the rate limit, or schedule another
+        // attempt after the appropriate timeout.
+        const delayMs = this.rateLimiter.getNextRequestDelayMs(batch.opCount);
+        assert(delayMs !== -1, 'Batch size should be under capacity');
+        if (delayMs === 0) {
+          this.sendBatch(batch);
+        } else {
+          delayExecution(() => this.sendReadyBatches(), delayMs);
+          break;
+        }
+      }
 
       index++;
     }
+  }
+
+  /**
+   * Sends the provided batch and processes the results. After the batch is
+   * committed, sends the next group of ready batches.
+   */
+  private sendBatch(batch: BulkCommitBatch): void {
+    const success = this.rateLimiter.tryMakeRequest(batch.opCount);
+    assert(success, 'Batch should be under rate limit to be sent.');
+    batch
+      .bulkCommit()
+      .then(results => {
+        batch.processResults(results);
+      })
+      .catch((error: Error) => {
+        batch.processResults([], error);
+      })
+      .then(() => {
+        // Remove the batch from the BatchQueue after it has been processed.
+        const batchIndex = this.batchQueue.indexOf(batch);
+        assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
+        this.batchQueue.splice(batchIndex, 1);
+
+        this.sendReadyBatches();
+      });
   }
 
   /**

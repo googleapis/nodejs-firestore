@@ -90,6 +90,7 @@ export class RateLimiter {
     numOperations: number,
     requestTimeMillis = Date.now()
   ): number {
+    this.refillTokens(requestTimeMillis);
     if (numOperations < this.availableTokens) {
       return 0;
     }
