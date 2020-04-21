@@ -546,6 +546,15 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * An options object that can be used to disable request throttling in
+   * BulkWriter.
+   */
+  export interface BulkWriterOptions {
+    /** Whether to disable throttling. */
+    readonly disableThrottling?: boolean;
+  }
+
+  /**
    * A write batch, used to perform multiple writes as a single atomic unit.
    *
    * A `WriteBatch` object can be acquired by calling `Firestore.batch()`. It

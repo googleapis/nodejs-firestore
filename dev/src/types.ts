@@ -322,6 +322,15 @@ export interface ValidationOptions {
 }
 
 /**
+ * An options object that can be used to disable request throttling in
+ * BulkWriter.
+ */
+export interface BulkWriterOptions {
+  /** Whether to disable throttling. */
+  readonly disableThrottling?: boolean;
+}
+
+/**
  * A Firestore Proto value in ProtoJs format.
  * @private
  */

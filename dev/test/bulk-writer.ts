@@ -33,6 +33,7 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
+import {setTimeoutHandler} from '../src/backoff';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(() => {});
@@ -503,6 +504,59 @@ describe('BulkWriter', () => {
     await flush1;
     await flush2;
     return bulkWriter.close();
+  });
+
+  describe('500/50/5 support', () => {
+    afterEach(() => setTimeoutHandler(setTimeout));
+
+    it('does not send batches if doing so exceeds the rate limit', done => {
+      // The test is considered a success if BulkWriter tries to send the second
+      // batch again after a timeout.
+
+      const arrayRange = Array.from(new Array(500), (_, i) => i);
+      const requests1 = arrayRange.map(i => setOp('doc' + i, 'bar'));
+      const responses1 = arrayRange.map(i => successResponse(i));
+      const arrayRange2 = [500, 501, 502, 503, 504];
+      const requests2 = arrayRange2.map(i => setOp('doc' + i, 'bar'));
+      const responses2 = arrayRange2.map(i => successResponse(i));
+
+      instantiateInstance([
+        {
+          request: createRequest(requests1),
+          response: mergeResponses(responses1),
+        },
+        {
+          request: createRequest(requests2),
+          response: mergeResponses(responses2),
+        },
+      ]).then(bulkWriter => {
+        setTimeoutHandler(() =>
+          done(new Error('This batch should not have a timeout'))
+        );
+        for (let i = 0; i < 500; i++) {
+          bulkWriter
+            .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
+            .then(incrementOpCount);
+        }
+        bulkWriter.flush();
+
+        // Sending this next batch would go over the 500/50/5 capacity, so
+        // check that BulkWriter doesn't send this batch until the first batch
+        // is resolved.
+        setTimeoutHandler((_, timeout) => {
+          // Check that BulkWriter has not yet sent the 2nd batch.
+          expect(requestCounter).to.equal(0);
+          expect(timeout).to.be.greaterThan(0);
+          done();
+        });
+        for (let i = 500; i < 505; i++) {
+          bulkWriter
+            .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
+            .then(incrementOpCount);
+        }
+        return bulkWriter.flush();
+      });
+    });
   });
 
   describe('if bulkCommit() fails', async () => {
