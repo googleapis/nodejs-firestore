@@ -19,17 +19,19 @@
 
 syntax = "proto3";
 
-package google.firestore.v1;
+package firestore.proto;
 
+import "google/firestore/v1/document.proto";
+import "google/firestore/v1/query.proto";
 import "google/protobuf/timestamp.proto";
 
-option csharp_namespace = "Google.Cloud.Firestore.V1";
-option go_package = "google.golang.org/genproto/googleapis/firestore/v1;firestore";
+option csharp_namespace = "Firestore.Proto";
+option go_package = "google.golang.org/genproto/firestore/proto;firestore";
 option java_multiple_files = true;
 option java_outer_classname = "BundleProto";
-option java_package = "com.google.firestore.v1";
-option objc_class_prefix = "GCFS";
-option php_namespace = "Google\\Cloud\\Firestore\\V1";
+option java_package = "com.google.firestore.proto";
+option objc_class_prefix = "FSTPB";
+option php_namespace = "Firestore\\Proto";
 
 // Encodes a query saved in the bundle.
 message BundledQuery {
@@ -39,7 +41,7 @@ message BundledQuery {
   // The query to run.
   oneof query_type {
     // A structured query.
-    StructuredQuery structured_query = 2;
+    google.firestore.v1.StructuredQuery structured_query = 2;
   }
 
   // If the query is a limit query, should the limit be applied to the beginning or
@@ -98,6 +100,6 @@ message BundleElement {
 
     BundledDocumentMetadata document_metadata = 3;
 
-    Document document = 4;
+    google.firestore.v1.Document document = 4;
   }
 }
