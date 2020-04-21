@@ -649,7 +649,7 @@ export class Firestore {
    * multiple writes in parallel. Automatically throttles writes as specified
    * by the 500/50/5 rule.
    *
-   * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
+   * @see [500/50/5 Documentation]{@link https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic}
    *
    * @param {object=} options BulkWriter options.
    * @param {boolean=} options.disableThrottling Whether to disable throttling
