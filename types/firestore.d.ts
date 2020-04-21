@@ -546,11 +546,11 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * An options object that can be used to toggle the default rate limit
-   * throttling implemented by BulkWriter.
+   * An options object that can be used to disable request throttling in
+   * BulkWriter.
    */
   export interface BulkWriterOptions {
-    /** Whether to disable throttling as specified by the 500/50/5 rule. */
+    /** Whether to disable throttling. */
     readonly disableThrottling?: boolean;
   }
 

@@ -646,7 +646,7 @@ export class Firestore {
 
   /**
    * Creates a [BulkWriter]{@link BulkWriter}, used for performing
-   * multiple writes in parallel. Automatically throttles writes as specified
+   * multiple writes in parallel. Gradually ramps up writes as specified
    * by the 500/50/5 rule.
    *
    * @see [500/50/5 Documentation]{@link https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic}
