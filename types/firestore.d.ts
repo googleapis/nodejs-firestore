@@ -546,6 +546,15 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * An options object that can be used to toggle the default rate limit
+   * throttling implemented by BulkWriter.
+   */
+  export interface BulkWriterOptions {
+    /** Whether to disable throttling as specified by the 500/50/5 rule. */
+    readonly disableThrottling?: boolean;
+  }
+
+  /**
    * A write batch, used to perform multiple writes as a single atomic unit.
    *
    * A `WriteBatch` object can be acquired by calling `Firestore.batch()`. It

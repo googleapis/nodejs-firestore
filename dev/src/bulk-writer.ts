@@ -260,19 +260,25 @@ export class BulkWriter {
   /**
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
    */
-  private rateLimiter = new RateLimiter(
-    STARTING_MAXIMUM_OPS_PER_SECOND,
-    RATE_LIMITER_MULTIPLIER,
-    RATE_LIMITER_MULTIPLIER_MILLIS
-  );
-
-  private readonly options: BulkWriterOptions = {};
+  private rateLimiter: RateLimiter;
 
   constructor(
     private readonly firestore: Firestore,
-    options?: BulkWriterOptions
+    enableThrottling: boolean
   ) {
-    this.options = {...options};
+    if (enableThrottling) {
+      this.rateLimiter = new RateLimiter(
+        STARTING_MAXIMUM_OPS_PER_SECOND,
+        RATE_LIMITER_MULTIPLIER,
+        RATE_LIMITER_MULTIPLIER_MILLIS
+      );
+    } else {
+      this.rateLimiter = new RateLimiter(
+        Number.POSITIVE_INFINITY,
+        Number.POSITIVE_INFINITY,
+        Number.POSITIVE_INFINITY
+      );
+    }
   }
 
   /**
@@ -569,19 +575,15 @@ export class BulkWriter {
     ) {
       const batch = unsentBatches[index];
 
-      if (this.options && this.options.disableThrottling) {
+      // Send the batch if it is under the rate limit, or schedule another
+      // attempt after the appropriate timeout.
+      const delayMs = this.rateLimiter.getNextRequestDelayMs(batch.opCount);
+      assert(delayMs !== -1, 'Batch size should be under capacity');
+      if (delayMs === 0) {
         this.sendBatch(batch);
       } else {
-        // Send the batch if it is under the rate limit, or schedule another
-        // attempt after the appropriate timeout.
-        const delayMs = this.rateLimiter.getNextRequestDelayMs(batch.opCount);
-        assert(delayMs !== -1, 'Batch size should be under capacity');
-        if (delayMs === 0) {
-          this.sendBatch(batch);
-        } else {
-          delayExecution(() => this.sendReadyBatches(), delayMs);
-          break;
-        }
+        delayExecution(() => this.sendReadyBatches(), delayMs);
+        break;
       }
 
       index++;
