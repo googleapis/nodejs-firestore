@@ -651,6 +651,7 @@ export class Firestore {
    *
    * @see [500/50/5 Documentation]{@link https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic}
    *
+   * @private
    * @param {object=} options BulkWriter options.
    * @param {boolean=} options.disableThrottling Whether to disable throttling
    * as specified by the 500/50/5 rule.
@@ -664,7 +665,7 @@ export class Firestore {
    *   .then(res => {
    *     console.log(`Added document at ${res.writeTime}`);
    *   });
-   * bulkWriter.update(firestore.doc('col/doc2), {foo: 'bar'})
+   * bulkWriter.update(firestore.doc('col/doc2'), {foo: 'bar'})
    *   .then(res => {
    *     console.log(`Updated document at ${res.writeTime}`);
    *   });
@@ -677,7 +678,7 @@ export class Firestore {
    * });
    * bulkWriter.close();
    */
-  bulkWriter(options?: BulkWriterOptions): BulkWriter {
+  _bulkWriter(options?: BulkWriterOptions): BulkWriter {
     return new BulkWriter(this, !options?.disableThrottling);
   }
 

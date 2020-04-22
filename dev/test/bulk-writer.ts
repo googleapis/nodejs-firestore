@@ -165,7 +165,7 @@ describe('BulkWriter', () => {
     };
     return createInstance(overrides).then(firestoreClient => {
       firestore = firestoreClient;
-      return firestore.bulkWriter();
+      return firestore._bulkWriter();
     });
   }
 
@@ -568,7 +568,7 @@ describe('BulkWriter', () => {
       };
       return createInstance(overrides).then(firestoreClient => {
         firestore = firestoreClient;
-        return firestore.bulkWriter();
+        return firestore._bulkWriter();
       });
     }
     it('flush() should not fail', async () => {

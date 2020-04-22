@@ -416,7 +416,7 @@ declare namespace FirebaseFirestore {
    *
    * @class
    */
-  export class BulkWriter {
+  class BulkWriter {
     private constructor();
 
     /**
@@ -549,7 +549,7 @@ declare namespace FirebaseFirestore {
    * An options object that can be used to disable request throttling in
    * BulkWriter.
    */
-  export interface BulkWriterOptions {
+  interface BulkWriterOptions {
     /** Whether to disable throttling. */
     readonly disableThrottling?: boolean;
   }
