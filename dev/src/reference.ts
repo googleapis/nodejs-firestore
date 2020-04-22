@@ -18,7 +18,7 @@ const deepEqual = require('deep-equal');
 
 import * as through2 from 'through2';
 
-import * as proto from '../protos/firestore_v1_proto_api';
+import {firestore, google} from '../protos/firestore_v1_proto_api';
 
 import {
   DocumentSnapshot,
@@ -59,7 +59,7 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
-import api = proto.google.firestore.v1;
+import api = google.firestore.v1;
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1918,38 +1918,10 @@ export class Query<T = DocumentData> {
       projectId
     );
 
-    const reqOpts: api.IRunQueryRequest = {
-      parent: parentPath.formattedName,
-      structuredQuery: {
-        from: [
-          {
-            collectionId: this._queryOptions.collectionId,
-          },
-        ],
-      },
-    };
+    const structuredQuery = this.toStructuredQuery();
 
-    if (this._queryOptions.allDescendants) {
-      reqOpts.structuredQuery!.from![0].allDescendants = true;
-    }
-
-    const structuredQuery = reqOpts.structuredQuery!;
-
-    if (this._queryOptions.fieldFilters.length === 1) {
-      structuredQuery.where = this._queryOptions.fieldFilters[0].toProto();
-    } else if (this._queryOptions.fieldFilters.length > 1) {
-      const filters: api.StructuredQuery.IFilter[] = [];
-      for (const fieldFilter of this._queryOptions.fieldFilters) {
-        filters.push(fieldFilter.toProto());
-      }
-      structuredQuery.where = {
-        compositeFilter: {
-          op: 'AND',
-          filters,
-        },
-      };
-    }
-
+    // For limitToLast queries, the structured query has to be translated to a version with
+    // reversed ordered, and flipped startAt/endAt to work properly.
     if (this._queryOptions.limitType === LimitType.Last) {
       if (!this._queryOptions.hasFieldOrders()) {
         throw new Error(
@@ -1977,15 +1949,74 @@ export class Query<T = DocumentData> {
             before: !this._queryOptions.startAt.before,
           })
         : undefined;
-    } else {
-      if (this._queryOptions.hasFieldOrders()) {
-        structuredQuery.orderBy = this._queryOptions.fieldOrders.map(o =>
-          o.toProto()
-        );
-      }
-      structuredQuery.startAt = this.toCursor(this._queryOptions.startAt);
-      structuredQuery.endAt = this.toCursor(this._queryOptions.endAt);
     }
+
+    return {
+      parent: parentPath.formattedName,
+      transaction: transactionId,
+      structuredQuery,
+    };
+  }
+
+  /**
+   * Converts current Query to an IBundledQuery.
+   */
+  toBundledQuery(): firestore.IBundledQuery {
+    const projectId = this.firestore.projectId;
+    const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
+      projectId
+    );
+    const structuredQuery = this.toStructuredQuery();
+
+    const bundledQuery: firestore.IBundledQuery = {
+      parent: parentPath.formattedName,
+      structuredQuery,
+    };
+    if (this._queryOptions.limitType === LimitType.First) {
+      bundledQuery.limitType = 'FIRST';
+    } else if (this._queryOptions.limitType === LimitType.Last) {
+      bundledQuery.limitType = 'LAST';
+    }
+
+    return bundledQuery;
+  }
+
+  private toStructuredQuery(): api.IStructuredQuery {
+    const structuredQuery: api.IStructuredQuery = {
+      from: [
+        {
+          collectionId: this._queryOptions.collectionId,
+        },
+      ],
+    };
+
+    if (this._queryOptions.allDescendants) {
+      structuredQuery.from![0].allDescendants = true;
+    }
+
+    if (this._queryOptions.fieldFilters.length === 1) {
+      structuredQuery.where = this._queryOptions.fieldFilters[0].toProto();
+    } else if (this._queryOptions.fieldFilters.length > 1) {
+      const filters: api.StructuredQuery.IFilter[] = [];
+      for (const fieldFilter of this._queryOptions.fieldFilters) {
+        filters.push(fieldFilter.toProto());
+      }
+      structuredQuery.where = {
+        compositeFilter: {
+          op: 'AND',
+          filters,
+        },
+      };
+    }
+
+    if (this._queryOptions.hasFieldOrders()) {
+      structuredQuery.orderBy = this._queryOptions.fieldOrders.map(o =>
+        o.toProto()
+      );
+    }
+
+    structuredQuery.startAt = this.toCursor(this._queryOptions.startAt);
+    structuredQuery.endAt = this.toCursor(this._queryOptions.endAt);
 
     if (this._queryOptions.limit) {
       structuredQuery.limit = {value: this._queryOptions.limit};
@@ -1994,9 +2025,7 @@ export class Query<T = DocumentData> {
     structuredQuery.offset = this._queryOptions.offset;
     structuredQuery.select = this._queryOptions.projection;
 
-    reqOpts.transaction = transactionId;
-
-    return reqOpts;
+    return structuredQuery;
   }
 
   /**
