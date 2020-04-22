@@ -17,7 +17,7 @@ import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 
-import {google} from '../protos/firestore_v1_proto_api';
+import {firestore, google} from '../protos/firestore_v1_proto_api';
 import {
   FieldPath,
   FieldValue,
@@ -287,6 +287,36 @@ function queryEquals(
         },
       ],
     },
+  };
+
+  for (const protoComponent of protoComponents) {
+    extend(true, query.structuredQuery, protoComponent);
+  }
+
+  // 'extend' removes undefined fields in the request object. The backend
+  // ignores these fields, but we need to manually strip them before we compare
+  // the expected and the actual request.
+  actual = extend(true, {}, actual);
+  expect(actual).to.deep.eq(query);
+}
+
+function bundledQueryEquals(
+  actual: firestore.IBundledQuery | undefined,
+  limitType: firestore.BundledQuery.LimitType | undefined,
+  ...protoComponents: api.IStructuredQuery[]
+) {
+  expect(actual).to.not.be.undefined;
+
+  const query: firestore.IBundledQuery = {
+    parent: DATABASE_ROOT + '/documents',
+    structuredQuery: {
+      from: [
+        {
+          collectionId: 'collectionId',
+        },
+      ],
+    },
+    limitType,
   };
 
   for (const protoComponent of protoComponents) {
@@ -1368,6 +1398,40 @@ describe('limitToLast() interface', () => {
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').limitToLast(1).limitToLast(2).limitToLast(3);
       return query.get();
+    });
+  });
+
+  it('converts to bundled query without order reversing', () => {
+    return createInstance().then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query.orderBy('foo').limitToLast(10);
+      const bundledQuery = query.toBundledQuery();
+      bundledQueryEquals(
+        bundledQuery,
+        'LAST',
+        orderBy('foo', 'ASCENDING'),
+        limit(10)
+      );
+    });
+  });
+
+  it('converts to bundled query without cursor flipping', () => {
+    return createInstance().then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query
+        .orderBy('foo')
+        .startAt('start')
+        .endAt('end')
+        .limitToLast(10);
+      const bundledQuery = query.toBundledQuery();
+      bundledQueryEquals(
+        bundledQuery,
+        'LAST',
+        orderBy('foo', 'ASCENDING'),
+        limit(10),
+        startAt(true, 'start'),
+        endAt(false, 'end')
+      );
     });
   });
 });
