@@ -37,7 +37,6 @@ import {
 } from './util/helpers';
 
 import api = google.firestore.v1;
-import proto = firestore.proto;
 
 const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -291,13 +290,13 @@ function queryEquals(
 }
 
 function bundledQueryEquals(
-  actual: proto.IBundledQuery | undefined,
-  limitType: proto.BundledQuery.LimitType | undefined,
+  actual: firestore.IBundledQuery | undefined,
+  limitType: firestore.BundledQuery.LimitType | undefined,
   ...protoComponents: api.IStructuredQuery[]
 ) {
   expect(actual).to.not.be.undefined;
 
-  const query: proto.IBundledQuery = {
+  const query: firestore.IBundledQuery = {
     parent: DATABASE_ROOT + '/documents',
     structuredQuery: {
       from: [

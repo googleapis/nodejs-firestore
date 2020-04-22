@@ -60,7 +60,6 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = google.firestore.v1;
-import proto = firestore.proto;
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1952,32 +1951,24 @@ export class Query<T = DocumentData> {
         : undefined;
     }
 
-    const reqOpts: api.IRunQueryRequest = {
+    return {
       parent: parentPath.formattedName,
+      transaction: transactionId,
       structuredQuery,
     };
-
-    reqOpts.transaction = transactionId;
-
-    return reqOpts;
   }
 
   /**
-   * Internal method for serializing a query to its RunQuery proto
-   * representation with an optional transaction id.
-   *
-   * @param transactionId A transaction ID.
-   * @private
-   * @returns Serialized JSON for the query.
+   * Converts current Query to an IBundledQuery.
    */
-  toBundledQuery(): proto.IBundledQuery {
+  toBundledQuery(): firestore.IBundledQuery {
     const projectId = this.firestore.projectId;
     const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
       projectId
     );
     const structuredQuery = this.toStructuredQuery();
 
-    const bundledQuery: proto.IBundledQuery = {
+    const bundledQuery: firestore.IBundledQuery = {
       parent: parentPath.formattedName,
       structuredQuery,
     };
@@ -1998,6 +1989,7 @@ export class Query<T = DocumentData> {
         },
       ],
     };
+
     if (this._queryOptions.allDescendants) {
       structuredQuery.from![0].allDescendants = true;
     }
@@ -2022,6 +2014,7 @@ export class Query<T = DocumentData> {
         o.toProto()
       );
     }
+
     structuredQuery.startAt = this.toCursor(this._queryOptions.startAt);
     structuredQuery.endAt = this.toCursor(this._queryOptions.endAt);
 
