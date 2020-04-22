@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package firestore.proto;
+package firestore;
 
 import "google/firestore/v1/document.proto";
 import "google/firestore/v1/query.proto";

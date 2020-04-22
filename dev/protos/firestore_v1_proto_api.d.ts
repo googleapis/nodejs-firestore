@@ -18,175 +18,171 @@ import * as $protobuf from "protobufjs";
 /** Namespace firestore. */
 export namespace firestore {
 
-    /** Namespace proto. */
-    namespace proto {
+    /** Properties of a BundledQuery. */
+    interface IBundledQuery {
 
-        /** Properties of a BundledQuery. */
-        interface IBundledQuery {
+        /** BundledQuery parent */
+        parent?: (string|null);
 
-            /** BundledQuery parent */
-            parent?: (string|null);
+        /** BundledQuery structuredQuery */
+        structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
 
-            /** BundledQuery structuredQuery */
-            structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+        /** BundledQuery limitType */
+        limitType?: (firestore.BundledQuery.LimitType|null);
+    }
 
-            /** BundledQuery limitType */
-            limitType?: (firestore.proto.BundledQuery.LimitType|null);
-        }
+    /** Represents a BundledQuery. */
+    class BundledQuery implements IBundledQuery {
 
-        /** Represents a BundledQuery. */
-        class BundledQuery implements IBundledQuery {
+        /**
+         * Constructs a new BundledQuery.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.IBundledQuery);
 
-            /**
-             * Constructs a new BundledQuery.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: firestore.proto.IBundledQuery);
+        /** BundledQuery parent. */
+        public parent: string;
 
-            /** BundledQuery parent. */
-            public parent: string;
+        /** BundledQuery structuredQuery. */
+        public structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
 
-            /** BundledQuery structuredQuery. */
-            public structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+        /** BundledQuery limitType. */
+        public limitType: firestore.BundledQuery.LimitType;
 
-            /** BundledQuery limitType. */
-            public limitType: firestore.proto.BundledQuery.LimitType;
+        /** BundledQuery queryType. */
+        public queryType?: "structuredQuery";
+    }
 
-            /** BundledQuery queryType. */
-            public queryType?: "structuredQuery";
-        }
+    namespace BundledQuery {
 
-        namespace BundledQuery {
+        /** LimitType enum. */
+        type LimitType =
+            "FIRST"| "LAST";
+    }
 
-            /** LimitType enum. */
-            type LimitType =
-                "FIRST"| "LAST";
-        }
+    /** Properties of a NamedQuery. */
+    interface INamedQuery {
 
-        /** Properties of a NamedQuery. */
-        interface INamedQuery {
+        /** NamedQuery name */
+        name?: (string|null);
 
-            /** NamedQuery name */
-            name?: (string|null);
+        /** NamedQuery bundledQuery */
+        bundledQuery?: (firestore.IBundledQuery|null);
 
-            /** NamedQuery bundledQuery */
-            bundledQuery?: (firestore.proto.IBundledQuery|null);
+        /** NamedQuery readTime */
+        readTime?: (google.protobuf.ITimestamp|null);
+    }
 
-            /** NamedQuery readTime */
-            readTime?: (google.protobuf.ITimestamp|null);
-        }
+    /** Represents a NamedQuery. */
+    class NamedQuery implements INamedQuery {
 
-        /** Represents a NamedQuery. */
-        class NamedQuery implements INamedQuery {
+        /**
+         * Constructs a new NamedQuery.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.INamedQuery);
 
-            /**
-             * Constructs a new NamedQuery.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: firestore.proto.INamedQuery);
+        /** NamedQuery name. */
+        public name: string;
 
-            /** NamedQuery name. */
-            public name: string;
+        /** NamedQuery bundledQuery. */
+        public bundledQuery?: (firestore.IBundledQuery|null);
 
-            /** NamedQuery bundledQuery. */
-            public bundledQuery?: (firestore.proto.IBundledQuery|null);
+        /** NamedQuery readTime. */
+        public readTime?: (google.protobuf.ITimestamp|null);
+    }
 
-            /** NamedQuery readTime. */
-            public readTime?: (google.protobuf.ITimestamp|null);
-        }
+    /** Properties of a BundledDocumentMetadata. */
+    interface IBundledDocumentMetadata {
 
-        /** Properties of a BundledDocumentMetadata. */
-        interface IBundledDocumentMetadata {
+        /** BundledDocumentMetadata documentKey */
+        documentKey?: (string|null);
 
-            /** BundledDocumentMetadata documentKey */
-            documentKey?: (string|null);
+        /** BundledDocumentMetadata readTime */
+        readTime?: (google.protobuf.ITimestamp|null);
+    }
 
-            /** BundledDocumentMetadata readTime */
-            readTime?: (google.protobuf.ITimestamp|null);
-        }
+    /** Represents a BundledDocumentMetadata. */
+    class BundledDocumentMetadata implements IBundledDocumentMetadata {
 
-        /** Represents a BundledDocumentMetadata. */
-        class BundledDocumentMetadata implements IBundledDocumentMetadata {
+        /**
+         * Constructs a new BundledDocumentMetadata.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.IBundledDocumentMetadata);
 
-            /**
-             * Constructs a new BundledDocumentMetadata.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: firestore.proto.IBundledDocumentMetadata);
+        /** BundledDocumentMetadata documentKey. */
+        public documentKey: string;
 
-            /** BundledDocumentMetadata documentKey. */
-            public documentKey: string;
+        /** BundledDocumentMetadata readTime. */
+        public readTime?: (google.protobuf.ITimestamp|null);
+    }
 
-            /** BundledDocumentMetadata readTime. */
-            public readTime?: (google.protobuf.ITimestamp|null);
-        }
+    /** Properties of a BundleMetadata. */
+    interface IBundleMetadata {
 
-        /** Properties of a BundleMetadata. */
-        interface IBundleMetadata {
+        /** BundleMetadata id */
+        id?: (string|null);
 
-            /** BundleMetadata id */
-            id?: (string|null);
+        /** BundleMetadata createTime */
+        createTime?: (google.protobuf.ITimestamp|null);
+    }
 
-            /** BundleMetadata createTime */
-            createTime?: (google.protobuf.ITimestamp|null);
-        }
+    /** Represents a BundleMetadata. */
+    class BundleMetadata implements IBundleMetadata {
 
-        /** Represents a BundleMetadata. */
-        class BundleMetadata implements IBundleMetadata {
+        /**
+         * Constructs a new BundleMetadata.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.IBundleMetadata);
 
-            /**
-             * Constructs a new BundleMetadata.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: firestore.proto.IBundleMetadata);
+        /** BundleMetadata id. */
+        public id: string;
 
-            /** BundleMetadata id. */
-            public id: string;
+        /** BundleMetadata createTime. */
+        public createTime?: (google.protobuf.ITimestamp|null);
+    }
 
-            /** BundleMetadata createTime. */
-            public createTime?: (google.protobuf.ITimestamp|null);
-        }
+    /** Properties of a BundleElement. */
+    interface IBundleElement {
 
-        /** Properties of a BundleElement. */
-        interface IBundleElement {
+        /** BundleElement metadata */
+        metadata?: (firestore.IBundleMetadata|null);
 
-            /** BundleElement metadata */
-            metadata?: (firestore.proto.IBundleMetadata|null);
+        /** BundleElement namedQuery */
+        namedQuery?: (firestore.INamedQuery|null);
 
-            /** BundleElement namedQuery */
-            namedQuery?: (firestore.proto.INamedQuery|null);
+        /** BundleElement documentMetadata */
+        documentMetadata?: (firestore.IBundledDocumentMetadata|null);
 
-            /** BundleElement documentMetadata */
-            documentMetadata?: (firestore.proto.IBundledDocumentMetadata|null);
+        /** BundleElement document */
+        document?: (google.firestore.v1.IDocument|null);
+    }
 
-            /** BundleElement document */
-            document?: (google.firestore.v1.IDocument|null);
-        }
+    /** Represents a BundleElement. */
+    class BundleElement implements IBundleElement {
 
-        /** Represents a BundleElement. */
-        class BundleElement implements IBundleElement {
+        /**
+         * Constructs a new BundleElement.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.IBundleElement);
 
-            /**
-             * Constructs a new BundleElement.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: firestore.proto.IBundleElement);
+        /** BundleElement metadata. */
+        public metadata?: (firestore.IBundleMetadata|null);
 
-            /** BundleElement metadata. */
-            public metadata?: (firestore.proto.IBundleMetadata|null);
+        /** BundleElement namedQuery. */
+        public namedQuery?: (firestore.INamedQuery|null);
 
-            /** BundleElement namedQuery. */
-            public namedQuery?: (firestore.proto.INamedQuery|null);
+        /** BundleElement documentMetadata. */
+        public documentMetadata?: (firestore.IBundledDocumentMetadata|null);
 
-            /** BundleElement documentMetadata. */
-            public documentMetadata?: (firestore.proto.IBundledDocumentMetadata|null);
+        /** BundleElement document. */
+        public document?: (google.firestore.v1.IDocument|null);
 
-            /** BundleElement document. */
-            public document?: (google.firestore.v1.IDocument|null);
-
-            /** BundleElement elementType. */
-            public elementType?: ("metadata"|"namedQuery"|"documentMetadata"|"document");
-        }
+        /** BundleElement elementType. */
+        public elementType?: ("metadata"|"namedQuery"|"documentMetadata"|"document");
     }
 }
 
