@@ -38,8 +38,8 @@ PBTS="$(npm bin)/pbts"
 pushd "$WORK_DIR"
 
 # Clone necessary git repos.
-git clone https://github.com/googleapis/googleapis.git
-git clone https://github.com/google/protobuf.git
+git clone --depth 1 https://github.com/googleapis/googleapis.git
+git clone --depth 1 https://github.com/google/protobuf.git
 
 # Copy necessary protos.
 mkdir -p "${PROTOS_DIR}/google/api"
@@ -89,6 +89,7 @@ PBJS_ARGS=( --proto_path=. \
       
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1_proto_api.js \
   "${PROTOS_DIR}/google/firestore/v1/*.proto" \
+  "${PROTOS_DIR}/firestore/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
   "${PROTOS_DIR}/google/longrunning/*.proto"
