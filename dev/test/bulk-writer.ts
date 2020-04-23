@@ -16,7 +16,13 @@ import {expect} from 'chai';
 import {Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
-import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
+import {
+  DocumentData,
+  Firestore,
+  setLogFunction,
+  Timestamp,
+  WriteResult,
+} from '../src';
 import {BulkWriter} from '../src/bulk-writer';
 import {Deferred} from '../src/util';
 import {
@@ -504,6 +510,45 @@ describe('BulkWriter', () => {
     await flush1;
     await flush2;
     return bulkWriter.close();
+  });
+
+  it('supports different type converters', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc1', 'bar1'), setOp('doc2', 'bar2')]),
+        response: mergeResponses([successResponse(1), successResponse(2)]),
+      },
+    ]);
+
+    class Boo {
+      constructor(readonly foo: string) {}
+    }
+    const booConverter = {
+      toFirestore(boo: Boo): DocumentData {
+        return {foo: boo.foo};
+      },
+      fromFirestore(data: DocumentData): Boo {
+        return new Boo(data.foo);
+      },
+    };
+
+    class Moo {
+      constructor(readonly foo: string) {}
+    }
+    const mooConverter = {
+      toFirestore(moo: Moo): DocumentData {
+        return {foo: moo.foo};
+      },
+      fromFirestore(data: DocumentData): Moo {
+        return new Moo(data.foo);
+      },
+    };
+
+    const doc1 = firestore.doc('collectionId/doc1').withConverter(booConverter);
+    const doc2 = firestore.doc('collectionId/doc2').withConverter(mooConverter);
+    bulkWriter.set(doc1, new Boo('bar1')).then(incrementOpCount);
+    bulkWriter.set(doc2, new Moo('bar2')).then(incrementOpCount);
+    return bulkWriter.close().then(() => verifyOpCount(2));
   });
 
   describe('500/50/5 support', () => {

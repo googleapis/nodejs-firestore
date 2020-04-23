@@ -20,11 +20,7 @@ import {delayExecution} from './backoff';
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {
-  Precondition,
-  SetOptions,
-  UpdateData,
-} from './types';
+import {Precondition, SetOptions, UpdateData} from './types';
 import {Deferred} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
