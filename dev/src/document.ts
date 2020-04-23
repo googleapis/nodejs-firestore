@@ -478,6 +478,20 @@ export class DocumentSnapshot<T = DocumentData> {
   }
 
   /**
+   * Hack to get the raw Document proto.
+   *
+   * @private
+   */
+  toDocumentProto(): api.IDocument {
+    return {
+      createTime: this.createTime,
+      updateTime: this.updateTime,
+      name: this._ref.formattedName,
+      fields: this._fieldsProto!,
+    };
+  }
+
+  /**
    * Returns true if the document's data and path in this `DocumentSnapshot` is
    * equal to the provided value.
    *

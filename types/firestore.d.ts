@@ -1,3 +1,5 @@
+import {DocumentReference, DocumentSnapshot, Query, QuerySnapshot} from "../dev/src";
+
 /**
  * @fileoverview Firestore Server API.
  *
@@ -148,6 +150,62 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * Builds a Firestore data bundle with results from given queries and specified
+   * documents.
+   *
+   * For documents in scope for multiple queries, the latest read version will
+   * be included in the bundle.
+   */
+  export class BundleBuilder {
+
+    /**
+     * Adds a Firestore document to the bundle. Both the document data and it's
+     * read time will be included in the bundle.
+     */
+    add(doc: DocumentReference): BundleBuilder;
+
+    /**
+     * Adds a Firestore document snapshot to the bundle. Both the document data
+     * and it's query read time will be included in the bundle.
+     */
+    add(docSnap: DocumentSnapshot): BundleBuilder;
+
+    /**
+     * Adds a Firestore query snapshot to the bundle. Both the document data and
+     * it's query read time will be included in the bundle.
+     */
+    add(queryName: string, querySnap: QuerySnapshot): BundleBuilder;
+
+    /**
+     * Adds a Firestore query to the bundle. Both the query result (at the time
+     * when the bundle is materialized) and the query itself, including it's read time
+     * will be included in the bundle.
+     */
+    add(queryName: string, query: Query): BundleBuilder;
+
+    /**
+     * Adds a Firestore query to the bundle. Both the query result (at the time when `build()`
+     * is called) and the query itself, including its resume token will be included in the
+     * bundle.
+     */
+    add(queryName: string, query: Query): BundleBuilder;
+
+    /**
+     * Builds the bundle with the documents and query results added to this bundle.
+     *
+     * @returns A readable stream containing the content of the built bundle.
+     */
+    stream(): ReadableStream;
+
+    /**
+     * Builds the bundle with the documents and query results added to this bundle.
+     *
+     * @returns A promise resolves to a Buffer containing the content of the built bundle.
+     */
+    build(): Promise<Buffer>;
+  }
+
+  /**
    * `Firestore` represents a Firestore Database and is the entry point for all
    * Firestore operations.
    */
@@ -262,6 +320,15 @@ declare namespace FirebaseFirestore {
      * atomic operation.
      */
     batch(): WriteBatch;
+
+    /**
+     * Creates a new `BundleBuilder` instance to package selected Firestore data into
+     * a bundle.
+     *
+     * @param bundleId. The id of the bundle. When loaded on clients, client SDKs use this id
+     * and the timestamp associated with the built bundle to tell if it has been loaded already.
+     */
+    bundle(bundleId?: string): BundleBuilder;
   }
 
   /**
