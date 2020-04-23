@@ -76,7 +76,6 @@ export {
   QuerySnapshot,
   Query,
 } from './reference';
-export {BulkWriter} from './bulk-writer';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
 export {WriteBatch, WriteResult} from './write-batch';

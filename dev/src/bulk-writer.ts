@@ -528,7 +528,7 @@ export class BulkWriter {
   /**
    * Return the first eligible batch that can hold a write to the provided
    * reference, or creates one if no eligible batches are found.
-   * 
+   *
    * @private
    */
   private getEligibleBatch(ref: DocumentReference): BulkCommitBatch {
@@ -547,7 +547,7 @@ export class BulkWriter {
   /**
    * Creates a new batch and adds it to the BatchQueue. If there is already a
    * batch enqueued, sends the batch after a new one is created.
-   * 
+   *
    * @private
    */
   private createNewBatch(): BulkCommitBatch {
@@ -569,7 +569,7 @@ export class BulkWriter {
    * batch cannot be sent.
    *
    * After a batch is complete, try sending batches again.
-   * 
+   *
    * @private
    */
   private sendReadyBatches(): void {
@@ -602,7 +602,7 @@ export class BulkWriter {
   /**
    * Sends the provided batch and processes the results. After the batch is
    * committed, sends the next group of ready batches.
-   * 
+   *
    * @private
    */
   private sendBatch(batch: BulkCommitBatch): void {
@@ -630,7 +630,7 @@ export class BulkWriter {
    * Checks that the provided batch is sendable. To be sendable, a batch must:
    * (1) be marked as READY_TO_SEND
    * (2) not write to references that are currently in flight
-   * 
+   *
    * @private
    */
   private isBatchSendable(batch: BulkCommitBatch): boolean {
