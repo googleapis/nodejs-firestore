@@ -2337,7 +2337,7 @@ describe('Client initialization', () => {
 });
 
 describe('Bundle building', () => {
-  // Converts "13{..}43{..}51{..}" to [[13,43,51],[obj,obj,obj]]
+  // Helper function for testing: converts "13{..}43{..}51{..}" to [[13,43,51],[obj,obj,obj]]
   function bundleToLengthsAndObject(bundle: string): [number[], object[]] {
     const isNum = (c: string) => !isNaN(Number(c));
     let jsons = '';
@@ -2409,7 +2409,7 @@ describe('Bundle building', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('verifies we can read length prefixed json', () => {
+  it('succeeds to read length prefixed json with testing function', () => {
     const bundleString =
       '47{"a": "string value"}53{"b": 123}454{"c": {"d": "nested value"}}';
     const [lengths, objects] = bundleToLengthsAndObject(bundleString);
@@ -2421,7 +2421,7 @@ describe('Bundle building', () => {
     ]);
   });
 
-  it('works with document references and snapshots', async () => {
+  it('succeeds with document references and snapshots', async () => {
     const bundle = firestore.bundle('test-bundle');
     const doc1 = testCol.doc('doc1');
     const snap1 = await doc1.get();
@@ -2445,6 +2445,7 @@ describe('Bundle building', () => {
       snap2.readTime.toMillis()
     );
 
+    // Verify doc1Meta and doc1Snap
     const result1 = [
       (elements[1] as IBundleElement).documentMetadata,
       (elements[2] as IBundleElement).document,
@@ -2457,17 +2458,18 @@ describe('Bundle building', () => {
       snap1.toDocumentProto(),
     ]);
 
-    const docMeta2 = (elements[3] as IBundleElement).documentMetadata;
-    expect(docMeta2!.documentKey).to.equal(snap2.toDocumentProto().name);
+    // Verify doc2Meta and doc2Snap
+    const doc2Meta = (elements[3] as IBundleElement).documentMetadata;
+    expect(doc2Meta!.documentKey).to.equal(snap2.toDocumentProto().name);
     expect(
-      Timestamp.fromProto(docMeta2!.readTime!).toMillis()
+      Timestamp.fromProto(doc2Meta!.readTime!).toMillis()
     ).to.be.greaterThan(snap2.readTime.toMillis());
 
     const bundledDoc2 = (elements[4] as IBundleElement).document;
     expect(bundledDoc2).to.deep.equal(snap2.toDocumentProto());
   });
 
-  it('works with named queries and snapshots', async () => {
+  it('succeeds with named queries and snapshots', async () => {
     const bundle = firestore.bundle('test-bundle');
     const query1 = testCol.where('sort', '==', 3);
     const snap1 = await query1.get();
@@ -2503,6 +2505,7 @@ describe('Bundle building', () => {
       namedQuery1 = temp;
     }
 
+    // Verify query1 and query2
     expect(namedQuery1!.name).to.equal('query1');
     expect(
       Timestamp.fromProto(namedQuery1!.readTime!).toMillis()
@@ -2534,6 +2537,7 @@ describe('Bundle building', () => {
       )
     );
 
+    // Verify doc3Meta and doc3Snap
     const docMeta = (elements[3] as IBundleElement).documentMetadata;
     expect(docMeta!.documentKey).to.equal(snap2.docs[0].toDocumentProto().name);
     expect(
@@ -2544,7 +2548,7 @@ describe('Bundle building', () => {
     expect(bundledDoc).to.deep.equal(snap2.docs[0].toDocumentProto());
   });
 
-  it('works when there are no results', async () => {
+  it('succeeds when there are no results', async () => {
     const bundle = firestore.bundle('test-bundle');
     const query = testCol.where('sort', '==', 5);
     const snap = await query.get();
@@ -2582,21 +2586,16 @@ describe('Bundle building', () => {
     );
   });
 
-  it('throws when nothing is added', () => {
+  it('succeeds to save limit and limitToLast queries', async () => {
     const bundle = firestore.bundle('test-bundle');
-    expect(() => bundle.stream()).to.throw('Nothing is added to the bundle.');
-  });
+    const limitQuery = testCol.orderBy('sort', 'desc').limit(1);
+    const limitSnap = await limitQuery.get();
+    const limitToLastQuery = testCol.orderBy('sort', 'asc').limitToLast(1);
+    const limitToLastSnap = await limitToLastQuery.get();
 
-  it('saves limit and limitToLast queries as expected', async () => {
-    const bundle = firestore.bundle('test-bundle');
-    const query1 = testCol.orderBy('sort', 'desc').limit(1);
-    const snap1 = await query1.get();
-    const query2 = testCol.orderBy('sort', 'asc').limitToLast(1);
-    const snap2 = await query2.get();
-
-    bundle.add('query1', query1);
-    bundle.add('query2', snap2);
-    // `elements` is expected to be [bundleMeta, query1, query2, doc4Meta, doc4Snap].
+    bundle.add('limitQuery', limitQuery);
+    bundle.add('limitToLastQuery', limitToLastSnap);
+    // `elements` is expected to be [bundleMeta, limitQuery, limitToLastQuery, doc4Meta, doc4Snap].
     const [lengths, elements] = bundleToLengthsAndObject(
       (await bundle.build()).toString()
     );
@@ -2608,39 +2607,41 @@ describe('Bundle building', () => {
     const meta = (elements[0] as IBundleElement).metadata;
     expect(meta!.id).to.equal('test-bundle');
     expect(Timestamp.fromProto(meta!.createTime!).toMillis()).to.be.greaterThan(
-      snap2.readTime.toMillis()
+      limitToLastSnap.readTime.toMillis()
     );
 
     let namedQuery1 = (elements[1] as IBundleElement).namedQuery;
     let namedQuery2 = (elements[2] as IBundleElement).namedQuery;
     // We might need to swap this.
-    if (namedQuery1!.name === 'query2') {
+    if (namedQuery1!.name === 'limitToLastQuery') {
       const temp = namedQuery2;
       namedQuery2 = namedQuery1;
       namedQuery1 = temp;
     }
 
-    expect(namedQuery1!.name).to.equal('query1');
+    // Verify saved limit query.
+    expect(namedQuery1!.name).to.equal('limitQuery');
     expect(
       Timestamp.fromProto(namedQuery1!.readTime!).toMillis()
-    ).to.be.greaterThan(snap1.readTime.toMillis());
+    ).to.be.greaterThan(limitSnap.readTime.toMillis());
     expect(namedQuery1!.bundledQuery).to.deep.equal(
       extend(
         true,
         {},
         {
-          parent: query1.toProto().parent,
-          structuredQuery: query1.toProto().structuredQuery,
+          parent: limitQuery.toProto().parent,
+          structuredQuery: limitQuery.toProto().structuredQuery,
           limitType: 'FIRST',
         }
       )
     );
 
-    expect(namedQuery2!.name).to.equal('query2');
+    // Verify saved limitToLast query.
+    expect(namedQuery2!.name).to.equal('limitToLastQuery');
     expect(namedQuery2!.readTime).to.deep.equal(
-      snap2.readTime.toProto().timestampValue
+      limitToLastSnap.readTime.toProto().timestampValue
     );
-    // `query2`'s structured query should be the same as this one. This together with
+    // `limitToLastQuery`'s structured query should be the same as this one. This together with
     // `limitType` can re-construct a limitToLast client query by client SDKs.
     const q = testCol.orderBy('sort', 'asc').limit(1);
     expect(namedQuery2!.bundledQuery).to.deep.equal(
@@ -2648,20 +2649,28 @@ describe('Bundle building', () => {
         true,
         {},
         {
-          parent: query2.toProto().parent,
+          parent: limitToLastQuery.toProto().parent,
           structuredQuery: q.toProto().structuredQuery,
           limitType: 'LAST',
         }
       )
     );
 
+    // Verify saved doc4
     const docMeta = (elements[3] as IBundleElement).documentMetadata;
-    expect(docMeta!.documentKey).to.equal(snap2.docs[0].toDocumentProto().name);
+    expect(docMeta!.documentKey).to.equal(
+      limitToLastSnap.docs[0].toDocumentProto().name
+    );
     expect(
       Timestamp.fromProto(docMeta!.readTime!).toMillis()
-    ).to.be.greaterThan(snap2.readTime.toMillis());
+    ).to.be.greaterThan(limitToLastSnap.readTime.toMillis());
 
     const bundledDoc = (elements[4] as IBundleElement).document;
-    expect(bundledDoc).to.deep.equal(snap2.docs[0].toDocumentProto());
+    expect(bundledDoc).to.deep.equal(limitToLastSnap.docs[0].toDocumentProto());
+  });
+
+  it('succeeds to throw when nothing is added', () => {
+    const bundle = firestore.bundle('test-bundle');
+    expect(() => bundle.stream()).to.throw('Nothing is added to the bundle.');
   });
 });

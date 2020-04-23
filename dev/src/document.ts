@@ -463,12 +463,11 @@ export class DocumentSnapshot<T = DocumentData> {
   }
 
   /**
-   * Convert a document snapshot to the Firestore 'Document' Protobuf.
+   * Convert a document snapshot to the Firestore 'Write' proto.
    *
    * @private
-   * @returns The document in the format the API expects.
    */
-  toProto(): api.IWrite {
+  toWriteProto(): api.IWrite {
     return {
       update: {
         name: this._ref.formattedName,
@@ -478,7 +477,7 @@ export class DocumentSnapshot<T = DocumentData> {
   }
 
   /**
-   * Hack to get the raw Document proto.
+   * Convert a document snapshot to the Firestore 'Document' proto.
    *
    * @private
    */
