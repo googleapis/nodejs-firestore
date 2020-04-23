@@ -20,13 +20,7 @@ import {delayExecution} from './backoff';
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {
-  BulkWriterOptions,
-  DocumentData,
-  Precondition,
-  SetOptions,
-  UpdateData,
-} from './types';
+import {Precondition, SetOptions, UpdateData} from './types';
 import {Deferred} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
@@ -107,10 +101,7 @@ class BulkCommitBatch {
    * Adds a `create` operation to the WriteBatch. Returns a promise that
    * resolves with the result of the write.
    */
-  create(
-    documentRef: DocumentReference,
-    data: DocumentData
-  ): Promise<WriteResult> {
+  create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult> {
     this.writeBatch.create(documentRef, data);
     return this.processOperation(documentRef);
   }
@@ -119,8 +110,8 @@ class BulkCommitBatch {
    * Adds a `delete` operation to the WriteBatch. Returns a promise that
    * resolves with the result of the delete.
    */
-  delete(
-    documentRef: DocumentReference,
+  delete<T>(
+    documentRef: DocumentReference<T>,
     precondition?: Precondition
   ): Promise<WriteResult> {
     this.writeBatch.delete(documentRef, precondition);
@@ -131,9 +122,9 @@ class BulkCommitBatch {
    * Adds a `set` operation to the WriteBatch. Returns a promise that
    * resolves with the result of the write.
    */
-  set(
-    documentRef: DocumentReference,
-    data: DocumentData,
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: T,
     options?: SetOptions
   ): Promise<WriteResult> {
     this.writeBatch.set(documentRef, data, options);
@@ -144,8 +135,8 @@ class BulkCommitBatch {
    * Adds an `update` operation to the WriteBatch. Returns a promise that
    * resolves with the result of the write.
    */
-  update(
-    documentRef: DocumentReference,
+  update<T>(
+    documentRef: DocumentReference<T>,
     dataOrField: UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
@@ -159,8 +150,8 @@ class BulkCommitBatch {
    * Helper to update data structures associated with the operation and
    * return the result.
    */
-  private processOperation(
-    documentRef: DocumentReference
+  private processOperation<T>(
+    documentRef: DocumentReference<T>
   ): Promise<WriteResult> {
     assert(
       !this.docPaths.has(documentRef.path),
@@ -304,10 +295,7 @@ export class BulkWriter {
    *  });
    * });
    */
-  create(
-    documentRef: DocumentReference,
-    data: DocumentData
-  ): Promise<WriteResult> {
+  create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult> {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     const resultPromise = bulkCommitBatch.create(documentRef, data);
@@ -342,8 +330,8 @@ export class BulkWriter {
    *  });
    * });
    */
-  delete(
-    documentRef: DocumentReference,
+  delete<T>(
+    documentRef: DocumentReference<T>,
     precondition?: Precondition
   ): Promise<WriteResult> {
     this.verifyNotClosed();
@@ -387,9 +375,9 @@ export class BulkWriter {
    *  });
    * });
    */
-  set(
-    documentRef: DocumentReference,
-    data: DocumentData,
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: T,
     options?: SetOptions
   ): Promise<WriteResult> {
     this.verifyNotClosed();
@@ -440,7 +428,7 @@ export class BulkWriter {
    *  });
    * });
    */
-  update(
+  update<T>(
     documentRef: DocumentReference,
     dataOrField: UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<
@@ -531,7 +519,7 @@ export class BulkWriter {
    *
    * @private
    */
-  private getEligibleBatch(ref: DocumentReference): BulkCommitBatch {
+  private getEligibleBatch<T>(ref: DocumentReference<T>): BulkCommitBatch {
     if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
       if (
