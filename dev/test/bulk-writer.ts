@@ -515,39 +515,35 @@ describe('BulkWriter', () => {
   it('supports different type converters', async () => {
     const bulkWriter = await instantiateInstance([
       {
-        request: createRequest([setOp('doc1', 'bar1'), setOp('doc2', 'bar2')]),
+        request: createRequest([setOp('doc1', 'boo'), setOp('doc2', 'moo')]),
         response: mergeResponses([successResponse(1), successResponse(2)]),
       },
     ]);
 
-    class Boo {
-      constructor(readonly foo: string) {}
-    }
+    class Boo {}
     const booConverter = {
-      toFirestore(boo: Boo): DocumentData {
-        return {foo: boo.foo};
+      toFirestore(): DocumentData {
+        return {foo: 'boo'};
       },
-      fromFirestore(data: DocumentData): Boo {
-        return new Boo(data.foo);
+      fromFirestore(): Boo {
+        return new Boo();
       },
     };
 
-    class Moo {
-      constructor(readonly foo: string) {}
-    }
+    class Moo {}
     const mooConverter = {
-      toFirestore(moo: Moo): DocumentData {
-        return {foo: moo.foo};
+      toFirestore(): DocumentData {
+        return {foo: 'moo'};
       },
-      fromFirestore(data: DocumentData): Moo {
-        return new Moo(data.foo);
+      fromFirestore(): Moo {
+        return new Moo();
       },
     };
 
     const doc1 = firestore.doc('collectionId/doc1').withConverter(booConverter);
     const doc2 = firestore.doc('collectionId/doc2').withConverter(mooConverter);
-    bulkWriter.set(doc1, new Boo('bar1')).then(incrementOpCount);
-    bulkWriter.set(doc2, new Moo('bar2')).then(incrementOpCount);
+    bulkWriter.set(doc1, new Boo()).then(incrementOpCount);
+    bulkWriter.set(doc2, new Moo()).then(incrementOpCount);
     return bulkWriter.close().then(() => verifyOpCount(2));
   });
 
