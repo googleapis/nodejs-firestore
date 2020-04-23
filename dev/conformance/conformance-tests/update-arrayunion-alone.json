@@ -25,25 +25,13 @@
                   "appendMissingElements": {
                     "values": [
                       {
-                        "integerValue": {
-                          "high": 0,
-                          "low": 1,
-                          "unsigned": false
-                        }
+                        "integerValue": "1"
                       },
                       {
-                        "integerValue": {
-                          "high": 0,
-                          "low": 2,
-                          "unsigned": false
-                        }
+                        "integerValue": "2"
                       },
                       {
-                        "integerValue": {
-                          "high": 0,
-                          "low": 3,
-                          "unsigned": false
-                        }
+                        "integerValue": "3"
                       }
                     ]
                   },

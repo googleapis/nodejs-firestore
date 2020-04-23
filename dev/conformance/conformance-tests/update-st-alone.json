@@ -23,7 +23,7 @@
               "updateTransforms": [
                 {
                   "fieldPath": "a",
-                  "setToServerValue": 1
+                  "setToServerValue": "REQUEST_TIME"
                 }
               ]
             }

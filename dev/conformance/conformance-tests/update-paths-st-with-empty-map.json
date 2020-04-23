@@ -43,7 +43,7 @@
               "updateTransforms": [
                 {
                   "fieldPath": "a.c",
-                  "setToServerValue": 1
+                  "setToServerValue": "REQUEST_TIME"
                 }
               ],
               "currentDocument": {
