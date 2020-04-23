@@ -30,12 +30,12 @@ import {
 import {Deferred} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
-/**
+/*!
  * The maximum number of writes that can be in a single batch.
  */
 const MAX_BATCH_SIZE = 500;
 
-/**
+/*!
  * The starting maximum number of operations per second as allowed by the
  * 500/50/5 rule.
  *
@@ -43,14 +43,14 @@ const MAX_BATCH_SIZE = 500;
  */
 const STARTING_MAXIMUM_OPS_PER_SECOND = 500;
 
-/**
+/*!
  * The rate by which to increase the capacity as specified by the 500/50/5 rule.
  *
  * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
  */
 const RATE_LIMITER_MULTIPLIER = 1.5;
 
-/**
+/*!
  * How often the operations per second capacity should increase in milliseconds
  * as specified by the 500/50/5 rule.
  *
@@ -58,7 +58,7 @@ const RATE_LIMITER_MULTIPLIER = 1.5;
  */
 const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
-/**
+/*!
  * Used to represent the state of batch.
  *
  * Writes can only be added while the batch is OPEN. For a batch to be sent,
@@ -98,8 +98,6 @@ class BulkCommitBatch {
 
   /**
    * The number of writes in this batch.
-   *
-   * @property
    */
   get opCount(): number {
     return this.resultsMap.size;
@@ -239,6 +237,7 @@ class BulkCommitBatch {
  * in parallel. Writes to the same document will be executed sequentially.
  *
  * @class
+ * @private
  */
 export class BulkWriter {
   /**
@@ -529,6 +528,8 @@ export class BulkWriter {
   /**
    * Return the first eligible batch that can hold a write to the provided
    * reference, or creates one if no eligible batches are found.
+   *
+   * @private
    */
   private getEligibleBatch(ref: DocumentReference): BulkCommitBatch {
     if (this.batchQueue.length > 0) {
@@ -543,6 +544,12 @@ export class BulkWriter {
     return this.createNewBatch();
   }
 
+  /**
+   * Creates a new batch and adds it to the BatchQueue. If there is already a
+   * batch enqueued, sends the batch after a new one is created.
+   *
+   * @private
+   */
   private createNewBatch(): BulkCommitBatch {
     const newBatch = new BulkCommitBatch(
       this.firestore.batch(),
@@ -562,6 +569,8 @@ export class BulkWriter {
    * batch cannot be sent.
    *
    * After a batch is complete, try sending batches again.
+   *
+   * @private
    */
   private sendReadyBatches(): void {
     const unsentBatches = this.batchQueue.filter(
@@ -593,6 +602,8 @@ export class BulkWriter {
   /**
    * Sends the provided batch and processes the results. After the batch is
    * committed, sends the next group of ready batches.
+   *
+   * @private
    */
   private sendBatch(batch: BulkCommitBatch): void {
     const success = this.rateLimiter.tryMakeRequest(batch.opCount);
@@ -619,6 +630,8 @@ export class BulkWriter {
    * Checks that the provided batch is sendable. To be sendable, a batch must:
    * (1) be marked as READY_TO_SEND
    * (2) not write to references that are currently in flight
+   *
+   * @private
    */
   private isBatchSendable(batch: BulkCommitBatch): boolean {
     if (batch.state !== BatchState.READY_TO_SEND) {
