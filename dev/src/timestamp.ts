@@ -116,10 +116,7 @@ export class Timestamp {
    * @param {Object} timestamp The `Timestamp` Protobuf object.
    */
   static fromProto(timestamp: google.protobuf.ITimestamp) {
-    return new Timestamp(
-      Number(timestamp.seconds || 0),
-      Number(timestamp.nanos || 0)
-    );
+    return new Timestamp(Number(timestamp.seconds || 0), timestamp.nanos || 0);
   }
 
   /**
@@ -165,7 +162,7 @@ export class Timestamp {
    *
    * @type {number}
    */
-  get seconds() {
+  get seconds(): number {
     return this._seconds;
   }
 
@@ -182,7 +179,7 @@ export class Timestamp {
    *
    * @type {number}
    */
-  get nanoseconds() {
+  get nanoseconds(): number {
     return this._nanoseconds;
   }
 
@@ -200,7 +197,7 @@ export class Timestamp {
    * @return {Date} JavaScript `Date` object representing the same point in time
    * as this `Timestamp`, with millisecond precision.
    */
-  toDate() {
+  toDate(): Date {
     return new Date(
       this._seconds * 1000 + Math.round(this._nanoseconds / MS_TO_NANOS)
     );
@@ -222,7 +219,7 @@ export class Timestamp {
    * represented as the number of milliseconds since Unix epoch
    * 1970-01-01T00:00:00Z.
    */
-  toMillis() {
+  toMillis(): number {
     return this._seconds * 1000 + Math.floor(this._nanoseconds / MS_TO_NANOS);
   }
 

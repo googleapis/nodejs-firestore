@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {CallOptions, GoogleError} from 'google-gax';
-import {Duplex, PassThrough} from 'stream';
-import * as through2 from 'through2';
+import {CallOptions, grpc} from 'google-gax';
+import {Duplex, PassThrough, Transform} from 'stream';
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -44,7 +43,6 @@ import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
-  DocumentData,
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
   GapicClient,
@@ -269,7 +267,7 @@ export class Firestore {
    * The configuration options for the GAPIC client.
    * @private
    */
-  private _settings: Settings = {};
+  _settings: Settings = {};
 
   /**
    * Settings for the exponential backoff used by the streaming endpoints.
@@ -420,8 +418,8 @@ export class Firestore {
         let client: GapicClient;
 
         if (this._settings.ssl === false) {
-          const grpc = require('@grpc/grpc-js');
-          const sslCreds = grpc.credentials.createInsecure();
+          const grpcModule = this._settings.grpc ?? grpc;
+          const sslCreds = grpcModule.credentials.createInsecure();
           client = new module.exports.v1({sslCreds, ...this._settings});
         } else {
           client = new module.exports.v1(this._settings);
@@ -703,7 +701,7 @@ export class Firestore {
       convertFields = fieldsFromJson;
     } else {
       throw new Error(
-        `Unsupported encoding format. Expected "json" or "protobufJS", ` +
+        'Unsupported encoding format. Expected "json" or "protobufJS", ' +
           `but was "${encoding}".`
       );
     }
@@ -875,7 +873,11 @@ export class Firestore {
   getAll<T>(
     ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
   ): Promise<Array<DocumentSnapshot<T>>> {
-    validateMinNumberOfArguments('Firestore.getAll', arguments, 1);
+    validateMinNumberOfArguments(
+      'Firestore.getAll',
+      documentRefsOrReadOptions,
+      1
+    );
 
     const {documents, fieldMask} = parseGetAllArguments(
       documentRefsOrReadOptions
@@ -1345,14 +1347,17 @@ export class Firestore {
           const stream = bidirectional
             ? gapicClient[methodName](callOptions)
             : gapicClient[methodName](request, callOptions);
-          const logStream = through2.obj(function(this, chunk, enc, callback) {
-            logger(
-              'Firestore.requestStream',
-              requestTag,
-              'Received response: %j',
-              chunk
-            );
-            callback();
+          const logStream = new Transform({
+            objectMode: true,
+            transform: (chunk, encoding, callback) => {
+              logger(
+                'Firestore.requestStream',
+                requestTag,
+                'Received response: %j',
+                chunk
+              );
+              callback();
+            },
           });
           stream.pipe(logStream);
 

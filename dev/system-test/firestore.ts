@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
@@ -70,7 +71,7 @@ describe('Firestore class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -261,7 +262,7 @@ describe('DocumentReference class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -357,6 +358,24 @@ describe('DocumentReference class', () => {
         const actualValue = doc.data()!.nanValue;
         expect(actualValue).to.be.a('number');
         expect(actualValue).to.be.NaN;
+      });
+  });
+
+  it('round-trips BigInts', () => {
+    const bigIntValue = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
+
+    const firestore = new Firestore({useBigInt: true});
+    const randomCol = getTestRoot(firestore);
+    const ref = randomCol.doc('doc');
+    return ref
+      .set({bigIntValue})
+      .then(() => ref.get())
+      .then(doc => ref.set(doc.data()!))
+      .then(() => ref.get())
+      .then(doc => {
+        const actualValue = doc.data()!.bigIntValue;
+        expect(actualValue).to.be.a('bigint');
+        expect(actualValue).to.equal(bigIntValue);
       });
   });
 
@@ -603,7 +622,7 @@ describe('DocumentReference class', () => {
   });
 
   // tslint:disable-next-line:only-arrow-function
-  it('can add and delete fields sequentially', function() {
+  it('can add and delete fields sequentially', function () {
     this.timeout(30 * 1000);
 
     const ref = randomCol.doc('doc');
@@ -677,7 +696,7 @@ describe('DocumentReference class', () => {
   });
 
   // tslint:disable-next-line:only-arrow-function
-  it('can add and delete fields with server timestamps', function() {
+  it('can add and delete fields with server timestamps', function () {
     this.timeout(10 * 1000);
 
     const ref = randomCol.doc('doc');
@@ -897,9 +916,6 @@ describe('DocumentReference class', () => {
       const doc1 = randomCol.doc();
       const doc2 = randomCol.doc();
 
-      let unsubscribe1: () => void;
-      let unsubscribe2: () => void;
-
       // Documents transition from non-existent to existent to non-existent.
       const exists1 = [false, true, false];
       const exists2 = [false, true, false];
@@ -928,12 +944,12 @@ describe('DocumentReference class', () => {
           run.shift()!();
         }
       };
-      unsubscribe1 = doc1.onSnapshot(snapshot => {
+      const unsubscribe1 = doc1.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists1.shift());
         maybeRun();
       });
 
-      unsubscribe2 = doc2.onSnapshot(snapshot => {
+      const unsubscribe2 = doc2.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists2.shift());
         maybeRun();
       });
@@ -941,9 +957,6 @@ describe('DocumentReference class', () => {
 
     it('handles multiple streams on same doc', done => {
       const doc = randomCol.doc();
-
-      let unsubscribe1: () => void;
-      let unsubscribe2: () => void;
 
       // Document transitions from non-existent to existent to non-existent.
       const exists1 = [false, true, false];
@@ -972,12 +985,12 @@ describe('DocumentReference class', () => {
         }
       };
 
-      unsubscribe1 = doc.onSnapshot(snapshot => {
+      const unsubscribe1 = doc.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists1.shift());
         maybeRun();
       });
 
-      unsubscribe2 = doc.onSnapshot(snapshot => {
+      const unsubscribe2 = doc.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists2.shift());
         maybeRun();
       });
@@ -1157,10 +1170,7 @@ describe('Query class', () => {
     return ref
       .set({foo: NaN, bar: null})
       .then(() => {
-        return randomCol
-          .where('foo', '==', NaN)
-          .where('bar', '==', null)
-          .get();
+        return randomCol.where('foo', '==', NaN).where('bar', '==', null).get();
       })
       .then(res => {
         expect(
@@ -1270,19 +1280,13 @@ describe('Query class', () => {
 
   it('has limit() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .limit(1)
-      .get();
+    const res = await randomCol.orderBy('foo').limit(1).get();
     expectDocs(res, {foo: 'a'});
   });
 
   it('has limitToLast() method', async () => {
     await addDocs({doc: 1}, {doc: 2}, {doc: 3});
-    const res = await randomCol
-      .orderBy('doc')
-      .limitToLast(2)
-      .get();
+    const res = await randomCol.orderBy('doc').limitToLast(2).get();
     expectDocs(res, {doc: 2}, {doc: 3});
   });
 
@@ -1299,10 +1303,7 @@ describe('Query class', () => {
 
   it('has offset() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .offset(1)
-      .get();
+    const res = await randomCol.orderBy('foo').offset(1).get();
     expectDocs(res, {foo: 'b'});
   });
 
@@ -1369,37 +1370,25 @@ describe('Query class', () => {
 
   it('has startAt() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .startAt('b')
-      .get();
+    const res = await randomCol.orderBy('foo').startAt('b').get();
     expectDocs(res, {foo: 'b'});
   });
 
   it('has startAfter() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .startAfter('a')
-      .get();
+    const res = await randomCol.orderBy('foo').startAfter('a').get();
     expectDocs(res, {foo: 'b'});
   });
 
   it('has endAt() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .endAt('b')
-      .get();
+    const res = await randomCol.orderBy('foo').endAt('b').get();
     expectDocs(res, {foo: 'a'}, {foo: 'b'});
   });
 
   it('has endBefore() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .endBefore('b')
-      .get();
+    const res = await randomCol.orderBy('foo').endBefore('b').get();
     expectDocs(res, {foo: 'a'});
   });
 
@@ -1428,7 +1417,8 @@ describe('Query class', () => {
     await randomCol.doc().set({foo: 'bar'});
 
     const stream = randomCol.stream();
-    for await (const chunk of stream) {
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
       ++received;
     }
 
@@ -1483,7 +1473,7 @@ describe('Query class', () => {
       `a/b/c/d/${collectionGroup}/cg-doc4`,
       `a/c/${collectionGroup}/cg-doc5`,
       `${collectionGroup}/cg-doc6`,
-      `a/b/nope/nope`,
+      'a/b/nope/nope',
     ];
     const batch = firestore.batch();
     for (const docPath of docPaths) {
@@ -1494,7 +1484,7 @@ describe('Query class', () => {
     let querySnapshot = await firestore
       .collectionGroup(collectionGroup)
       .orderBy(FieldPath.documentId())
-      .startAt(`a/b`)
+      .startAt('a/b')
       .endAt('a/b0')
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
@@ -1524,7 +1514,7 @@ describe('Query class', () => {
       `a/b/c/d/${collectionGroup}/cg-doc4`,
       `a/c/${collectionGroup}/cg-doc5`,
       `${collectionGroup}/cg-doc6`,
-      `a/b/nope/nope`,
+      'a/b/nope/nope',
     ];
     const batch = firestore.batch();
     for (const docPath of docPaths) {
@@ -1534,7 +1524,7 @@ describe('Query class', () => {
 
     let querySnapshot = await firestore
       .collectionGroup(collectionGroup)
-      .where(FieldPath.documentId(), '>=', `a/b`)
+      .where(FieldPath.documentId(), '>=', 'a/b')
       .where(FieldPath.documentId(), '<=', 'a/b0')
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
@@ -1545,7 +1535,7 @@ describe('Query class', () => {
 
     querySnapshot = await firestore
       .collectionGroup(collectionGroup)
-      .where(FieldPath.documentId(), '>', `a/b`)
+      .where(FieldPath.documentId(), '>', 'a/b')
       .where(FieldPath.documentId(), '<', `a/b/${collectionGroup}/cg-doc3`)
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
@@ -2049,7 +2039,6 @@ describe('Transaction class', () => {
   it('retries transactions that fail with contention', async () => {
     const ref = randomCol.doc('doc');
 
-    let firstTransaction, secondTransaction: Promise<void>;
     let attempts = 0;
 
     // Create two transactions that both read and update the same document.
@@ -2058,7 +2047,7 @@ describe('Transaction class', () => {
     // and be retried.
     const contentionPromise = [new Deferred<void>(), new Deferred<void>()];
 
-    firstTransaction = firestore.runTransaction(async transaction => {
+    const firstTransaction = firestore.runTransaction(async transaction => {
       ++attempts;
       await transaction.get(ref);
       contentionPromise[0].resolve();
@@ -2066,7 +2055,7 @@ describe('Transaction class', () => {
       transaction.set(ref, {first: true}, {merge: true});
     });
 
-    secondTransaction = firestore.runTransaction(async transaction => {
+    const secondTransaction = firestore.runTransaction(async transaction => {
       ++attempts;
       await transaction.get(ref);
       contentionPromise[1].resolve();

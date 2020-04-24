@@ -18,7 +18,9 @@ import {DocumentReference, DocumentSnapshot, Query, QuerySnapshot} from "../dev/
  * limitations under the License.
  */
 
-// tslint:disable
+// We deliberately use `any` in the external API to not impose type-checking
+// on end users.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
@@ -38,12 +40,12 @@ declare namespace FirebaseFirestore {
 
   /**
    * Sets or disables the log function for all active Firestore instances.
-   * 
+   *
    * @param logger A log function that takes a message (such as `console.log`) or
    * `null` to turn off logging.
    */
-  function setLogFunction(logger: ((msg:string) => void) | null) : void; 
-  
+  function setLogFunction(logger: ((msg: string) => void) | null): void;
+
   /**
    * Converter used by `withConverter()` to transform user objects of type T
    * into Firestore data.
@@ -65,8 +67,9 @@ declare namespace FirebaseFirestore {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
-   *     data: FirebaseFirestore.DocumentData
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
+   *     const data = snapshot.data();
    *     return new Post(data.title, data.author);
    *   }
    * };
@@ -94,7 +97,7 @@ declare namespace FirebaseFirestore {
      * Called by the Firestore SDK to convert Firestore data into an object of
      * type T.
      */
-    fromFirestore(data: DocumentData): T;
+    fromFirestore(snapshot: QueryDocumentSnapshot): T;
   }
 
   /**
@@ -133,7 +136,7 @@ declare namespace FirebaseFirestore {
      * Default Credentials}. If your credentials are stored in a JSON file, you
      * can specify a `keyFilename` instead.
      */
-    credentials?: {client_email?:string, private_key?:string};
+    credentials?: {client_email?: string; private_key?: string};
 
     /** Whether to use SSL when connecting. */
     ssl?: boolean;
@@ -145,7 +148,15 @@ declare namespace FirebaseFirestore {
      * when the client becomes idle. Defaults to 1.
      */
     maxIdleChannels?: number;
-    
+
+    /**
+     * Whether to use `BigInt` for integer types when deserializing Firestore
+     * Documents. Regardless of magnitude, all integer values are returned as
+     * `BigInt` to match the precision of the Firestore backend. Floating point
+     * numbers continue to use JavaScript's `number` type.
+     */
+    useBigInt?: boolean;
+
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
 
@@ -273,8 +284,11 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll(...documentRefsOrReadOptions: Array<DocumentReference<DocumentData> | ReadOptions>):
-        Promise<Array<DocumentSnapshot<DocumentData>>>;
+    getAll(
+      ...documentRefsOrReadOptions: Array<
+        DocumentReference<DocumentData> | ReadOptions
+      >
+    ): Promise<Array<DocumentSnapshot<DocumentData>>>;
 
     /**
      * Terminates the Firestore client and closes all open streams.
@@ -289,7 +303,7 @@ declare namespace FirebaseFirestore {
      *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
-    listCollections() : Promise<Array<CollectionReference<DocumentData>>>;
+    listCollections(): Promise<Array<CollectionReference<DocumentData>>>;
 
     /**
      * Executes the given updateFunction and commits the changes applied within
@@ -311,8 +325,8 @@ declare namespace FirebaseFirestore {
      * error will be returned.
      */
     runTransaction<T>(
-        updateFunction: (transaction: Transaction) => Promise<T>,
-        transactionOptions?:{maxAttempts?: number}
+      updateFunction: (transaction: Transaction) => Promise<T>,
+      transactionOptions?: {maxAttempts?: number}
     ): Promise<T>;
 
     /**
@@ -368,7 +382,6 @@ declare namespace FirebaseFirestore {
   export class Transaction {
     private constructor();
 
-
     /**
      * Retrieves a query result. Holds a pessimistic lock on all returned
      * documents.
@@ -401,8 +414,9 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll<T>(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
-        Promise<Array<DocumentSnapshot<T>>>;
+    getAll<T>(
+      ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
+    ): Promise<Array<DocumentSnapshot<T>>>;
 
     /**
      * Create the document referred to by the provided `DocumentReference`.
@@ -425,8 +439,11 @@ declare namespace FirebaseFirestore {
      * @param options An object to configure the set behavior.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    set<T>(documentRef: DocumentReference<T>, data: T,
-        options?: SetOptions): Transaction;
+    set<T>(
+      documentRef: DocumentReference<T>,
+      data: T,
+      options?: SetOptions
+    ): Transaction;
 
     /**
      * Updates fields in the document referred to by the provided
@@ -442,8 +459,11 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce on this update.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    update(documentRef: DocumentReference<any>, data: UpdateData,
-           precondition?: Precondition): Transaction;
+    update(
+      documentRef: DocumentReference<any>,
+      data: UpdateData,
+      precondition?: Precondition
+    ): Transaction;
 
     /**
      * Updates fields in the document referred to by the provided
@@ -464,8 +484,12 @@ declare namespace FirebaseFirestore {
      * update.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    update(documentRef: DocumentReference<any>, field: string|FieldPath, value:any,
-           ...fieldsOrPrecondition: any[]): Transaction;
+    update(
+      documentRef: DocumentReference<any>,
+      field: string | FieldPath,
+      value: any,
+      ...fieldsOrPrecondition: any[]
+    ): Transaction;
 
     /**
      * Deletes the document referred to by the provided `DocumentReference`.
@@ -474,8 +498,10 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce for this delete.
      * @return This `Transaction` instance. Used for chaining method calls.
      */
-    delete(documentRef: DocumentReference<any>,
-           precondition?: Precondition): Transaction;
+    delete(
+      documentRef: DocumentReference<any>,
+      precondition?: Precondition
+    ): Transaction;
   }
 
   /**
@@ -513,8 +539,11 @@ declare namespace FirebaseFirestore {
      * @param options An object to configure the set behavior.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    set<T>(documentRef: DocumentReference<T>, data: T,
-        options?: SetOptions): WriteBatch;
+    set<T>(
+      documentRef: DocumentReference<T>,
+      data: T,
+      options?: SetOptions
+    ): WriteBatch;
 
     /**
      * Update fields of the document referred to by the provided
@@ -530,8 +559,11 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce on this update.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    update(documentRef: DocumentReference<any>, data: UpdateData,
-           precondition?: Precondition): WriteBatch;
+    update(
+      documentRef: DocumentReference<any>,
+      data: UpdateData,
+      precondition?: Precondition
+    ): WriteBatch;
 
     /**
      * Updates fields in the document referred to by the provided
@@ -551,8 +583,12 @@ declare namespace FirebaseFirestore {
      * to update, optionally followed a `Precondition` to enforce on this update.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    update(documentRef: DocumentReference<any>, field: string|FieldPath, value:any,
-           ...fieldsOrPrecondition: any[]): WriteBatch;
+    update(
+      documentRef: DocumentReference<any>,
+      field: string | FieldPath,
+      value: any,
+      ...fieldsOrPrecondition: any[]
+    ): WriteBatch;
 
     /**
      * Deletes the document referred to by the provided `DocumentReference`.
@@ -561,8 +597,10 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce for this delete.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
-    delete(documentRef: DocumentReference<any>,
-           precondition?: Precondition): WriteBatch;
+    delete(
+      documentRef: DocumentReference<any>,
+      precondition?: Precondition
+    ): WriteBatch;
 
     /**
      * Commits all of the writes in this write batch as a single atomic unit.
@@ -608,7 +646,7 @@ declare namespace FirebaseFirestore {
      * It is an error to pass a SetOptions object to a set() call that is
      * missing a value for any of the fields specified here.
      */
-    readonly mergeFields?: (string|FieldPath)[];
+    readonly mergeFields?: (string | FieldPath)[];
   }
 
   /**
@@ -625,7 +663,7 @@ declare namespace FirebaseFirestore {
      * contain values for all the fields in the mask to be part of the result
      * set.
      */
-    readonly fieldMask?: (string|FieldPath)[];
+    readonly fieldMask?: (string | FieldPath)[];
   }
 
   /**
@@ -692,7 +730,7 @@ declare namespace FirebaseFirestore {
      *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
-    listCollections() : Promise<Array<CollectionReference<DocumentData>>>;
+    listCollections(): Promise<Array<CollectionReference<DocumentData>>>;
 
     /**
      * Creates a document referred to by this `DocumentReference` with the
@@ -745,8 +783,11 @@ declare namespace FirebaseFirestore {
      * this update.
      * @return A Promise resolved with the write time of this update.
      */
-    update(field: string|FieldPath, value:any,
-           ...moreFieldsOrPrecondition: any[]): Promise<WriteResult>;
+    update(
+      field: string | FieldPath,
+      value: any,
+      ...moreFieldsOrPrecondition: any[]
+    ): Promise<WriteResult>;
 
     /**
      * Deletes the document referred to by this `DocumentReference`.
@@ -754,7 +795,7 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce for this delete.
      * @return A Promise resolved with the write time of this delete.
      */
-    delete(precondition?:Precondition): Promise<WriteResult>;
+    delete(precondition?: Precondition): Promise<WriteResult>;
 
     /**
      * Reads the document referred to by this `DocumentReference`.
@@ -774,8 +815,10 @@ declare namespace FirebaseFirestore {
      * @return An unsubscribe function that can be called to cancel
      * the snapshot listener.
      */
-    onSnapshot(onNext: (snapshot: DocumentSnapshot<T>) => void,
-               onError?: (error: Error) => void): () => void;
+    onSnapshot(
+      onNext: (snapshot: DocumentSnapshot<T>) => void,
+      onError?: (error: Error) => void
+    ): () => void;
 
     /**
      * Returns true if this `DocumentReference` is equal to the provided one.
@@ -855,7 +898,7 @@ declare namespace FirebaseFirestore {
      * @return The data at the specified field location or undefined if no such
      * field exists in the document.
      */
-    get(fieldPath: string|FieldPath): any;
+    get(fieldPath: string | FieldPath): any;
 
     /**
      * Returns true if the document's data and path in this `DocumentSnapshot`
@@ -878,7 +921,9 @@ declare namespace FirebaseFirestore {
    * `exists` property will always be true and `data()` will never return
    * 'undefined'.
    */
-  export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<T> {
+  export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<
+    T
+  > {
     private constructor();
 
     /**
@@ -909,11 +954,18 @@ declare namespace FirebaseFirestore {
 
   /**
    * Filter conditions in a `Query.where()` clause are specified using the
-   * strings '<', '<=', '==', '>=', '>', 'array-contains', 'in', and 
+   * strings '<', '<=', '==', '>=', '>', 'array-contains', 'in', and
    * 'array-contains-any'.
    */
-  export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains' | 
-  'in' | 'array-contains-any';
+  export type WhereFilterOp =
+    | '<'
+    | '<='
+    | '=='
+    | '>='
+    | '>'
+    | 'array-contains'
+    | 'in'
+    | 'array-contains-any';
 
   /**
    * A `Query` refers to a Query which you can read or listen to. You can also
@@ -941,7 +993,11 @@ declare namespace FirebaseFirestore {
      * @param value The value for comparison
      * @return The created Query.
      */
-    where(fieldPath: string|FieldPath, opStr: WhereFilterOp, value: any): Query<T>;
+    where(
+      fieldPath: string | FieldPath,
+      opStr: WhereFilterOp,
+      value: any
+    ): Query<T>;
 
     /**
      * Creates and returns a new Query that's additionally sorted by the
@@ -956,11 +1012,12 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     orderBy(
-        fieldPath: string|FieldPath, directionStr?: OrderByDirection
+      fieldPath: string | FieldPath,
+      directionStr?: OrderByDirection
     ): Query<T>;
 
     /**
-     * Creates and returns a new Query that only returns the first matching 
+     * Creates and returns a new Query that only returns the first matching
      * documents.
      *
      * This function returns a new (immutable) instance of the Query (rather
@@ -970,14 +1027,14 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     limit(limit: number): Query<T>;
-    
+
     /**
      * Creates and returns a new Query that only returns the last matching
      * documents.
      *
-     * You must specify at least one orderBy clause for limitToLast queries, 
+     * You must specify at least one orderBy clause for limitToLast queries,
      * otherwise an exception will be thrown during execution.
-     * 
+     *
      * Results for limitToLast queries cannot be streamed via the `stream()`
      * API.
      *
@@ -1123,8 +1180,10 @@ declare namespace FirebaseFirestore {
      * @return An unsubscribe function that can be called to cancel
      * the snapshot listener.
      */
-    onSnapshot(onNext: (snapshot: QuerySnapshot<T>) => void,
-               onError?: (error: Error) => void) : () => void;
+    onSnapshot(
+      onNext: (snapshot: QuerySnapshot<T>) => void,
+      onError?: (error: Error) => void
+    ): () => void;
 
     /**
      * Returns true if this `Query` is equal to the provided one.
@@ -1134,7 +1193,7 @@ declare namespace FirebaseFirestore {
      */
     isEqual(other: Query<T>): boolean;
 
-     /**
+    /**
      * Applies a custom data converter to this Query, allowing you to use your
      * own custom model objects with Firestore. When you call get() on the
      * returned Query, the provided converter will convert between Firestore
@@ -1189,7 +1248,8 @@ declare namespace FirebaseFirestore {
      * @param thisArg The `this` binding for the callback.
      */
     forEach(
-        callback: (result: QueryDocumentSnapshot<T>) => void, thisArg?: any
+      callback: (result: QueryDocumentSnapshot<T>) => void,
+      thisArg?: any
     ): void;
 
     /**
@@ -1534,14 +1594,15 @@ declare namespace FirebaseFirestore {
   /**
    * The v1beta1 Veneer client. This client provides access to to the underlying
    * Firestore v1beta1 RPCs.
+   * @deprecated Use v1 instead.
    */
-  export const v1beta1 : any;
+  export const v1beta1: any;
 
   /**
    * The v1 Veneer clients. These clients provide access to the Firestore Admin
    * API and the underlying Firestore v1 RPCs.
    */
-  export const v1: {FirestoreClient: any, FirestoreAdminClient: any};
+  export const v1: {FirestoreClient: any; FirestoreAdminClient: any};
 
   /**
    * Status codes returned by Firestore's gRPC calls.
@@ -1563,7 +1624,7 @@ declare namespace FirebaseFirestore {
     INTERNAL = 13,
     UNAVAILABLE = 14,
     DATA_LOSS = 15,
-    UNAUTHENTICATED = 16
+    UNAUTHENTICATED = 16,
   }
 }
 

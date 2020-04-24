@@ -51,6 +51,27 @@ export namespace firestore {
 
         /** BundledQuery queryType. */
         public queryType?: "structuredQuery";
+
+        /**
+         * Creates a BundledQuery message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BundledQuery
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.BundledQuery;
+
+        /**
+         * Creates a plain object from a BundledQuery message. Also converts values to other types if specified.
+         * @param message BundledQuery
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.BundledQuery, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BundledQuery to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
     }
 
     namespace BundledQuery {
@@ -90,6 +111,27 @@ export namespace firestore {
 
         /** NamedQuery readTime. */
         public readTime?: (google.protobuf.ITimestamp|null);
+
+        /**
+         * Creates a NamedQuery message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns NamedQuery
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.NamedQuery;
+
+        /**
+         * Creates a plain object from a NamedQuery message. Also converts values to other types if specified.
+         * @param message NamedQuery
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.NamedQuery, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this NamedQuery to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a BundledDocumentMetadata. */
@@ -116,6 +158,27 @@ export namespace firestore {
 
         /** BundledDocumentMetadata readTime. */
         public readTime?: (google.protobuf.ITimestamp|null);
+
+        /**
+         * Creates a BundledDocumentMetadata message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BundledDocumentMetadata
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.BundledDocumentMetadata;
+
+        /**
+         * Creates a plain object from a BundledDocumentMetadata message. Also converts values to other types if specified.
+         * @param message BundledDocumentMetadata
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.BundledDocumentMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BundledDocumentMetadata to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a BundleMetadata. */
@@ -142,6 +205,27 @@ export namespace firestore {
 
         /** BundleMetadata createTime. */
         public createTime?: (google.protobuf.ITimestamp|null);
+
+        /**
+         * Creates a BundleMetadata message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BundleMetadata
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.BundleMetadata;
+
+        /**
+         * Creates a plain object from a BundleMetadata message. Also converts values to other types if specified.
+         * @param message BundleMetadata
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.BundleMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BundleMetadata to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
     }
 
     /** Properties of a BundleElement. */
@@ -183,6 +267,27 @@ export namespace firestore {
 
         /** BundleElement elementType. */
         public elementType?: ("metadata"|"namedQuery"|"documentMetadata"|"document");
+
+        /**
+         * Creates a BundleElement message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BundleElement
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.BundleElement;
+
+        /**
+         * Creates a plain object from a BundleElement message. Also converts values to other types if specified.
+         * @param message BundleElement
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.BundleElement, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BundleElement to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
     }
 }
 
@@ -196,7 +301,7 @@ export namespace google {
         interface ITimestamp {
 
             /** Timestamp seconds */
-            seconds?: (number|null);
+            seconds?: (number|string|null);
 
             /** Timestamp nanos */
             nanos?: (number|null);
@@ -212,10 +317,31 @@ export namespace google {
             constructor(properties?: google.protobuf.ITimestamp);
 
             /** Timestamp seconds. */
-            public seconds: number;
+            public seconds: (number|string);
 
             /** Timestamp nanos. */
             public nanos: number;
+
+            /**
+             * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Timestamp
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Timestamp;
+
+            /**
+             * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
+             * @param message Timestamp
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Timestamp, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Timestamp to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a FileDescriptorSet. */
@@ -236,6 +362,27 @@ export namespace google {
 
             /** FileDescriptorSet file. */
             public file: google.protobuf.IFileDescriptorProto[];
+
+            /**
+             * Creates a FileDescriptorSet message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FileDescriptorSet
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FileDescriptorSet;
+
+            /**
+             * Creates a plain object from a FileDescriptorSet message. Also converts values to other types if specified.
+             * @param message FileDescriptorSet
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FileDescriptorSet, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FileDescriptorSet to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a FileDescriptorProto. */
@@ -322,6 +469,27 @@ export namespace google {
 
             /** FileDescriptorProto syntax. */
             public syntax: string;
+
+            /**
+             * Creates a FileDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FileDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FileDescriptorProto;
+
+            /**
+             * Creates a plain object from a FileDescriptorProto message. Also converts values to other types if specified.
+             * @param message FileDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FileDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FileDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a DescriptorProto. */
@@ -396,6 +564,27 @@ export namespace google {
 
             /** DescriptorProto reservedName. */
             public reservedName: string[];
+
+            /**
+             * Creates a DescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns DescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.DescriptorProto;
+
+            /**
+             * Creates a plain object from a DescriptorProto message. Also converts values to other types if specified.
+             * @param message DescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.DescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this DescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         namespace DescriptorProto {
@@ -424,6 +613,27 @@ export namespace google {
 
                 /** ExtensionRange end. */
                 public end: number;
+
+                /**
+                 * Creates an ExtensionRange message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExtensionRange
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.DescriptorProto.ExtensionRange;
+
+                /**
+                 * Creates a plain object from an ExtensionRange message. Also converts values to other types if specified.
+                 * @param message ExtensionRange
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.DescriptorProto.ExtensionRange, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExtensionRange to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a ReservedRange. */
@@ -450,6 +660,27 @@ export namespace google {
 
                 /** ReservedRange end. */
                 public end: number;
+
+                /**
+                 * Creates a ReservedRange message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ReservedRange
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.DescriptorProto.ReservedRange;
+
+                /**
+                 * Creates a plain object from a ReservedRange message. Also converts values to other types if specified.
+                 * @param message ReservedRange
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.DescriptorProto.ReservedRange, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ReservedRange to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
         }
 
@@ -525,6 +756,27 @@ export namespace google {
 
             /** FieldDescriptorProto options. */
             public options?: (google.protobuf.IFieldOptions|null);
+
+            /**
+             * Creates a FieldDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FieldDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FieldDescriptorProto;
+
+            /**
+             * Creates a plain object from a FieldDescriptorProto message. Also converts values to other types if specified.
+             * @param message FieldDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FieldDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FieldDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         namespace FieldDescriptorProto {
@@ -562,6 +814,27 @@ export namespace google {
 
             /** OneofDescriptorProto options. */
             public options?: (google.protobuf.IOneofOptions|null);
+
+            /**
+             * Creates an OneofDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns OneofDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.OneofDescriptorProto;
+
+            /**
+             * Creates a plain object from an OneofDescriptorProto message. Also converts values to other types if specified.
+             * @param message OneofDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.OneofDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this OneofDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an EnumDescriptorProto. */
@@ -594,6 +867,27 @@ export namespace google {
 
             /** EnumDescriptorProto options. */
             public options?: (google.protobuf.IEnumOptions|null);
+
+            /**
+             * Creates an EnumDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns EnumDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumDescriptorProto;
+
+            /**
+             * Creates a plain object from an EnumDescriptorProto message. Also converts values to other types if specified.
+             * @param message EnumDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.EnumDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this EnumDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an EnumValueDescriptorProto. */
@@ -626,6 +920,27 @@ export namespace google {
 
             /** EnumValueDescriptorProto options. */
             public options?: (google.protobuf.IEnumValueOptions|null);
+
+            /**
+             * Creates an EnumValueDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns EnumValueDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumValueDescriptorProto;
+
+            /**
+             * Creates a plain object from an EnumValueDescriptorProto message. Also converts values to other types if specified.
+             * @param message EnumValueDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.EnumValueDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this EnumValueDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a ServiceDescriptorProto. */
@@ -658,6 +973,27 @@ export namespace google {
 
             /** ServiceDescriptorProto options. */
             public options?: (google.protobuf.IServiceOptions|null);
+
+            /**
+             * Creates a ServiceDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ServiceDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.ServiceDescriptorProto;
+
+            /**
+             * Creates a plain object from a ServiceDescriptorProto message. Also converts values to other types if specified.
+             * @param message ServiceDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.ServiceDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ServiceDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MethodDescriptorProto. */
@@ -708,6 +1044,27 @@ export namespace google {
 
             /** MethodDescriptorProto serverStreaming. */
             public serverStreaming: boolean;
+
+            /**
+             * Creates a MethodDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns MethodDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.MethodDescriptorProto;
+
+            /**
+             * Creates a plain object from a MethodDescriptorProto message. Also converts values to other types if specified.
+             * @param message MethodDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.MethodDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this MethodDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a FileOptions. */
@@ -815,6 +1172,27 @@ export namespace google {
 
             /** FileOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a FileOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FileOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FileOptions;
+
+            /**
+             * Creates a plain object from a FileOptions message. Also converts values to other types if specified.
+             * @param message FileOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FileOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FileOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         namespace FileOptions {
@@ -869,6 +1247,27 @@ export namespace google {
 
             /** MessageOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a MessageOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns MessageOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.MessageOptions;
+
+            /**
+             * Creates a plain object from a MessageOptions message. Also converts values to other types if specified.
+             * @param message MessageOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.MessageOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this MessageOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a FieldOptions. */
@@ -931,6 +1330,27 @@ export namespace google {
 
             /** FieldOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a FieldOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FieldOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FieldOptions;
+
+            /**
+             * Creates a plain object from a FieldOptions message. Also converts values to other types if specified.
+             * @param message FieldOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FieldOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FieldOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         namespace FieldOptions {
@@ -962,6 +1382,27 @@ export namespace google {
 
             /** OneofOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates an OneofOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns OneofOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.OneofOptions;
+
+            /**
+             * Creates a plain object from an OneofOptions message. Also converts values to other types if specified.
+             * @param message OneofOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.OneofOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this OneofOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an EnumOptions. */
@@ -994,6 +1435,27 @@ export namespace google {
 
             /** EnumOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates an EnumOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns EnumOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumOptions;
+
+            /**
+             * Creates a plain object from an EnumOptions message. Also converts values to other types if specified.
+             * @param message EnumOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.EnumOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this EnumOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an EnumValueOptions. */
@@ -1020,6 +1482,27 @@ export namespace google {
 
             /** EnumValueOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates an EnumValueOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns EnumValueOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumValueOptions;
+
+            /**
+             * Creates a plain object from an EnumValueOptions message. Also converts values to other types if specified.
+             * @param message EnumValueOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.EnumValueOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this EnumValueOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a ServiceOptions. */
@@ -1052,6 +1535,27 @@ export namespace google {
 
             /** ServiceOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a ServiceOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ServiceOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.ServiceOptions;
+
+            /**
+             * Creates a plain object from a ServiceOptions message. Also converts values to other types if specified.
+             * @param message ServiceOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.ServiceOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ServiceOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a MethodOptions. */
@@ -1087,6 +1591,27 @@ export namespace google {
 
             /** MethodOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a MethodOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns MethodOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.MethodOptions;
+
+            /**
+             * Creates a plain object from a MethodOptions message. Also converts values to other types if specified.
+             * @param message MethodOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.MethodOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this MethodOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an UninterpretedOption. */
@@ -1099,10 +1624,10 @@ export namespace google {
             identifierValue?: (string|null);
 
             /** UninterpretedOption positiveIntValue */
-            positiveIntValue?: (number|null);
+            positiveIntValue?: (number|string|null);
 
             /** UninterpretedOption negativeIntValue */
-            negativeIntValue?: (number|null);
+            negativeIntValue?: (number|string|null);
 
             /** UninterpretedOption doubleValue */
             doubleValue?: (number|null);
@@ -1130,10 +1655,10 @@ export namespace google {
             public identifierValue: string;
 
             /** UninterpretedOption positiveIntValue. */
-            public positiveIntValue: number;
+            public positiveIntValue: (number|string);
 
             /** UninterpretedOption negativeIntValue. */
-            public negativeIntValue: number;
+            public negativeIntValue: (number|string);
 
             /** UninterpretedOption doubleValue. */
             public doubleValue: number;
@@ -1143,6 +1668,27 @@ export namespace google {
 
             /** UninterpretedOption aggregateValue. */
             public aggregateValue: string;
+
+            /**
+             * Creates an UninterpretedOption message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns UninterpretedOption
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.UninterpretedOption;
+
+            /**
+             * Creates a plain object from an UninterpretedOption message. Also converts values to other types if specified.
+             * @param message UninterpretedOption
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.UninterpretedOption, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this UninterpretedOption to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         namespace UninterpretedOption {
@@ -1171,6 +1717,27 @@ export namespace google {
 
                 /** NamePart isExtension. */
                 public isExtension: boolean;
+
+                /**
+                 * Creates a NamePart message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns NamePart
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.UninterpretedOption.NamePart;
+
+                /**
+                 * Creates a plain object from a NamePart message. Also converts values to other types if specified.
+                 * @param message NamePart
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.UninterpretedOption.NamePart, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this NamePart to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
         }
 
@@ -1192,6 +1759,27 @@ export namespace google {
 
             /** SourceCodeInfo location. */
             public location: google.protobuf.SourceCodeInfo.ILocation[];
+
+            /**
+             * Creates a SourceCodeInfo message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns SourceCodeInfo
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.SourceCodeInfo;
+
+            /**
+             * Creates a plain object from a SourceCodeInfo message. Also converts values to other types if specified.
+             * @param message SourceCodeInfo
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.SourceCodeInfo, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this SourceCodeInfo to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         namespace SourceCodeInfo {
@@ -1238,6 +1826,27 @@ export namespace google {
 
                 /** Location leadingDetachedComments. */
                 public leadingDetachedComments: string[];
+
+                /**
+                 * Creates a Location message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Location
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.SourceCodeInfo.Location;
+
+                /**
+                 * Creates a plain object from a Location message. Also converts values to other types if specified.
+                 * @param message Location
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.SourceCodeInfo.Location, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Location to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
         }
 
@@ -1259,6 +1868,27 @@ export namespace google {
 
             /** GeneratedCodeInfo annotation. */
             public annotation: google.protobuf.GeneratedCodeInfo.IAnnotation[];
+
+            /**
+             * Creates a GeneratedCodeInfo message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns GeneratedCodeInfo
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.GeneratedCodeInfo;
+
+            /**
+             * Creates a plain object from a GeneratedCodeInfo message. Also converts values to other types if specified.
+             * @param message GeneratedCodeInfo
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.GeneratedCodeInfo, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this GeneratedCodeInfo to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         namespace GeneratedCodeInfo {
@@ -1299,6 +1929,27 @@ export namespace google {
 
                 /** Annotation end. */
                 public end: number;
+
+                /**
+                 * Creates an Annotation message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Annotation
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.GeneratedCodeInfo.Annotation;
+
+                /**
+                 * Creates a plain object from an Annotation message. Also converts values to other types if specified.
+                 * @param message Annotation
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.GeneratedCodeInfo.Annotation, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Annotation to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
         }
 
@@ -1320,6 +1971,27 @@ export namespace google {
 
             /** Struct fields. */
             public fields: { [k: string]: google.protobuf.IValue };
+
+            /**
+             * Creates a Struct message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Struct
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Struct;
+
+            /**
+             * Creates a plain object from a Struct message. Also converts values to other types if specified.
+             * @param message Struct
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Struct, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Struct to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a Value. */
@@ -1373,6 +2045,27 @@ export namespace google {
 
             /** Value kind. */
             public kind?: ("nullValue"|"numberValue"|"stringValue"|"boolValue"|"structValue"|"listValue");
+
+            /**
+             * Creates a Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Value;
+
+            /**
+             * Creates a plain object from a Value message. Also converts values to other types if specified.
+             * @param message Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** NullValue enum. */
@@ -1397,6 +2090,27 @@ export namespace google {
 
             /** ListValue values. */
             public values: google.protobuf.IValue[];
+
+            /**
+             * Creates a ListValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ListValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.ListValue;
+
+            /**
+             * Creates a plain object from a ListValue message. Also converts values to other types if specified.
+             * @param message ListValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.ListValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ListValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an Empty. */
@@ -1411,6 +2125,27 @@ export namespace google {
              * @param [properties] Properties to set
              */
             constructor(properties?: google.protobuf.IEmpty);
+
+            /**
+             * Creates an Empty message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Empty
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Empty;
+
+            /**
+             * Creates a plain object from an Empty message. Also converts values to other types if specified.
+             * @param message Empty
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Empty, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Empty to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a DoubleValue. */
@@ -1431,6 +2166,27 @@ export namespace google {
 
             /** DoubleValue value. */
             public value: number;
+
+            /**
+             * Creates a DoubleValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns DoubleValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.DoubleValue;
+
+            /**
+             * Creates a plain object from a DoubleValue message. Also converts values to other types if specified.
+             * @param message DoubleValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.DoubleValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this DoubleValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a FloatValue. */
@@ -1451,13 +2207,34 @@ export namespace google {
 
             /** FloatValue value. */
             public value: number;
+
+            /**
+             * Creates a FloatValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FloatValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FloatValue;
+
+            /**
+             * Creates a plain object from a FloatValue message. Also converts values to other types if specified.
+             * @param message FloatValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FloatValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FloatValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an Int64Value. */
         interface IInt64Value {
 
             /** Int64Value value */
-            value?: (number|null);
+            value?: (number|string|null);
         }
 
         /** Represents an Int64Value. */
@@ -1470,14 +2247,35 @@ export namespace google {
             constructor(properties?: google.protobuf.IInt64Value);
 
             /** Int64Value value. */
-            public value: number;
+            public value: (number|string);
+
+            /**
+             * Creates an Int64Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Int64Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Int64Value;
+
+            /**
+             * Creates a plain object from an Int64Value message. Also converts values to other types if specified.
+             * @param message Int64Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Int64Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Int64Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a UInt64Value. */
         interface IUInt64Value {
 
             /** UInt64Value value */
-            value?: (number|null);
+            value?: (number|string|null);
         }
 
         /** Represents a UInt64Value. */
@@ -1490,7 +2288,28 @@ export namespace google {
             constructor(properties?: google.protobuf.IUInt64Value);
 
             /** UInt64Value value. */
-            public value: number;
+            public value: (number|string);
+
+            /**
+             * Creates a UInt64Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns UInt64Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.UInt64Value;
+
+            /**
+             * Creates a plain object from a UInt64Value message. Also converts values to other types if specified.
+             * @param message UInt64Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.UInt64Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this UInt64Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an Int32Value. */
@@ -1511,6 +2330,27 @@ export namespace google {
 
             /** Int32Value value. */
             public value: number;
+
+            /**
+             * Creates an Int32Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Int32Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Int32Value;
+
+            /**
+             * Creates a plain object from an Int32Value message. Also converts values to other types if specified.
+             * @param message Int32Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Int32Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Int32Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a UInt32Value. */
@@ -1531,6 +2371,27 @@ export namespace google {
 
             /** UInt32Value value. */
             public value: number;
+
+            /**
+             * Creates a UInt32Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns UInt32Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.UInt32Value;
+
+            /**
+             * Creates a plain object from a UInt32Value message. Also converts values to other types if specified.
+             * @param message UInt32Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.UInt32Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this UInt32Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a BoolValue. */
@@ -1551,6 +2412,27 @@ export namespace google {
 
             /** BoolValue value. */
             public value: boolean;
+
+            /**
+             * Creates a BoolValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns BoolValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.BoolValue;
+
+            /**
+             * Creates a plain object from a BoolValue message. Also converts values to other types if specified.
+             * @param message BoolValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.BoolValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this BoolValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a StringValue. */
@@ -1571,6 +2453,27 @@ export namespace google {
 
             /** StringValue value. */
             public value: string;
+
+            /**
+             * Creates a StringValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns StringValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.StringValue;
+
+            /**
+             * Creates a plain object from a StringValue message. Also converts values to other types if specified.
+             * @param message StringValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.StringValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this StringValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a BytesValue. */
@@ -1591,6 +2494,27 @@ export namespace google {
 
             /** BytesValue value. */
             public value: Uint8Array;
+
+            /**
+             * Creates a BytesValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns BytesValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.BytesValue;
+
+            /**
+             * Creates a plain object from a BytesValue message. Also converts values to other types if specified.
+             * @param message BytesValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.BytesValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this BytesValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an Any. */
@@ -1617,6 +2541,27 @@ export namespace google {
 
             /** Any value. */
             public value: Uint8Array;
+
+            /**
+             * Creates an Any message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Any
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Any;
+
+            /**
+             * Creates a plain object from an Any message. Also converts values to other types if specified.
+             * @param message Any
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Any, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Any to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a FieldMask. */
@@ -1637,13 +2582,34 @@ export namespace google {
 
             /** FieldMask paths. */
             public paths: string[];
+
+            /**
+             * Creates a FieldMask message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FieldMask
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FieldMask;
+
+            /**
+             * Creates a plain object from a FieldMask message. Also converts values to other types if specified.
+             * @param message FieldMask
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FieldMask, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FieldMask to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a Duration. */
         interface IDuration {
 
             /** Duration seconds */
-            seconds?: (number|null);
+            seconds?: (number|string|null);
 
             /** Duration nanos */
             nanos?: (number|null);
@@ -1659,10 +2625,31 @@ export namespace google {
             constructor(properties?: google.protobuf.IDuration);
 
             /** Duration seconds. */
-            public seconds: number;
+            public seconds: (number|string);
 
             /** Duration nanos. */
             public nanos: number;
+
+            /**
+             * Creates a Duration message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Duration
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Duration;
+
+            /**
+             * Creates a plain object from a Duration message. Also converts values to other types if specified.
+             * @param message Duration
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Duration, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Duration to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
     }
 
@@ -1690,6 +2677,27 @@ export namespace google {
 
                 /** DocumentMask fieldPaths. */
                 public fieldPaths: string[];
+
+                /**
+                 * Creates a DocumentMask message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns DocumentMask
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.DocumentMask;
+
+                /**
+                 * Creates a plain object from a DocumentMask message. Also converts values to other types if specified.
+                 * @param message DocumentMask
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.DocumentMask, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this DocumentMask to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a Precondition. */
@@ -1719,6 +2727,27 @@ export namespace google {
 
                 /** Precondition conditionType. */
                 public conditionType?: ("exists"|"updateTime");
+
+                /**
+                 * Creates a Precondition message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Precondition
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Precondition;
+
+                /**
+                 * Creates a plain object from a Precondition message. Also converts values to other types if specified.
+                 * @param message Precondition
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Precondition, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Precondition to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a TransactionOptions. */
@@ -1748,6 +2777,27 @@ export namespace google {
 
                 /** TransactionOptions mode. */
                 public mode?: ("readOnly"|"readWrite");
+
+                /**
+                 * Creates a TransactionOptions message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns TransactionOptions
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.TransactionOptions;
+
+                /**
+                 * Creates a plain object from a TransactionOptions message. Also converts values to other types if specified.
+                 * @param message TransactionOptions
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.TransactionOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this TransactionOptions to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             namespace TransactionOptions {
@@ -1770,6 +2820,27 @@ export namespace google {
 
                     /** ReadWrite retryTransaction. */
                     public retryTransaction: Uint8Array;
+
+                    /**
+                     * Creates a ReadWrite message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ReadWrite
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.TransactionOptions.ReadWrite;
+
+                    /**
+                     * Creates a plain object from a ReadWrite message. Also converts values to other types if specified.
+                     * @param message ReadWrite
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.TransactionOptions.ReadWrite, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ReadWrite to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 /** Properties of a ReadOnly. */
@@ -1793,6 +2864,27 @@ export namespace google {
 
                     /** ReadOnly consistencySelector. */
                     public consistencySelector?: "readTime";
+
+                    /**
+                     * Creates a ReadOnly message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ReadOnly
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.TransactionOptions.ReadOnly;
+
+                    /**
+                     * Creates a plain object from a ReadOnly message. Also converts values to other types if specified.
+                     * @param message ReadOnly
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.TransactionOptions.ReadOnly, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ReadOnly to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
             }
 
@@ -1832,6 +2924,27 @@ export namespace google {
 
                 /** Document updateTime. */
                 public updateTime?: (google.protobuf.ITimestamp|null);
+
+                /**
+                 * Creates a Document message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Document
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Document;
+
+                /**
+                 * Creates a plain object from a Document message. Also converts values to other types if specified.
+                 * @param message Document
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Document, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Document to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a Value. */
@@ -1844,7 +2957,7 @@ export namespace google {
                 booleanValue?: (boolean|null);
 
                 /** Value integerValue */
-                integerValue?: (number|null);
+                integerValue?: (number|string|null);
 
                 /** Value doubleValue */
                 doubleValue?: (number|null);
@@ -1887,7 +3000,7 @@ export namespace google {
                 public booleanValue: boolean;
 
                 /** Value integerValue. */
-                public integerValue: number;
+                public integerValue: (number|string);
 
                 /** Value doubleValue. */
                 public doubleValue: number;
@@ -1915,6 +3028,27 @@ export namespace google {
 
                 /** Value valueType. */
                 public valueType?: ("nullValue"|"booleanValue"|"integerValue"|"doubleValue"|"timestampValue"|"stringValue"|"bytesValue"|"referenceValue"|"geoPointValue"|"arrayValue"|"mapValue");
+
+                /**
+                 * Creates a Value message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Value
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Value;
+
+                /**
+                 * Creates a plain object from a Value message. Also converts values to other types if specified.
+                 * @param message Value
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Value to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of an ArrayValue. */
@@ -1935,6 +3069,27 @@ export namespace google {
 
                 /** ArrayValue values. */
                 public values: google.firestore.v1.IValue[];
+
+                /**
+                 * Creates an ArrayValue message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ArrayValue
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ArrayValue;
+
+                /**
+                 * Creates a plain object from an ArrayValue message. Also converts values to other types if specified.
+                 * @param message ArrayValue
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ArrayValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ArrayValue to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a MapValue. */
@@ -1955,6 +3110,27 @@ export namespace google {
 
                 /** MapValue fields. */
                 public fields: { [k: string]: google.firestore.v1.IValue };
+
+                /**
+                 * Creates a MapValue message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns MapValue
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.MapValue;
+
+                /**
+                 * Creates a plain object from a MapValue message. Also converts values to other types if specified.
+                 * @param message MapValue
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.MapValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this MapValue to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Represents a Firestore */
@@ -2284,6 +3460,27 @@ export namespace google {
 
                 /** GetDocumentRequest consistencySelector. */
                 public consistencySelector?: ("transaction"|"readTime");
+
+                /**
+                 * Creates a GetDocumentRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns GetDocumentRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.GetDocumentRequest;
+
+                /**
+                 * Creates a plain object from a GetDocumentRequest message. Also converts values to other types if specified.
+                 * @param message GetDocumentRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.GetDocumentRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this GetDocumentRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a ListDocumentsRequest. */
@@ -2355,6 +3552,27 @@ export namespace google {
 
                 /** ListDocumentsRequest consistencySelector. */
                 public consistencySelector?: ("transaction"|"readTime");
+
+                /**
+                 * Creates a ListDocumentsRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ListDocumentsRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ListDocumentsRequest;
+
+                /**
+                 * Creates a plain object from a ListDocumentsRequest message. Also converts values to other types if specified.
+                 * @param message ListDocumentsRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ListDocumentsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ListDocumentsRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a ListDocumentsResponse. */
@@ -2381,6 +3599,27 @@ export namespace google {
 
                 /** ListDocumentsResponse nextPageToken. */
                 public nextPageToken: string;
+
+                /**
+                 * Creates a ListDocumentsResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ListDocumentsResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ListDocumentsResponse;
+
+                /**
+                 * Creates a plain object from a ListDocumentsResponse message. Also converts values to other types if specified.
+                 * @param message ListDocumentsResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ListDocumentsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ListDocumentsResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a CreateDocumentRequest. */
@@ -2425,6 +3664,27 @@ export namespace google {
 
                 /** CreateDocumentRequest mask. */
                 public mask?: (google.firestore.v1.IDocumentMask|null);
+
+                /**
+                 * Creates a CreateDocumentRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns CreateDocumentRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.CreateDocumentRequest;
+
+                /**
+                 * Creates a plain object from a CreateDocumentRequest message. Also converts values to other types if specified.
+                 * @param message CreateDocumentRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.CreateDocumentRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this CreateDocumentRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of an UpdateDocumentRequest. */
@@ -2463,6 +3723,27 @@ export namespace google {
 
                 /** UpdateDocumentRequest currentDocument. */
                 public currentDocument?: (google.firestore.v1.IPrecondition|null);
+
+                /**
+                 * Creates an UpdateDocumentRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns UpdateDocumentRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.UpdateDocumentRequest;
+
+                /**
+                 * Creates a plain object from an UpdateDocumentRequest message. Also converts values to other types if specified.
+                 * @param message UpdateDocumentRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.UpdateDocumentRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this UpdateDocumentRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a DeleteDocumentRequest. */
@@ -2489,6 +3770,27 @@ export namespace google {
 
                 /** DeleteDocumentRequest currentDocument. */
                 public currentDocument?: (google.firestore.v1.IPrecondition|null);
+
+                /**
+                 * Creates a DeleteDocumentRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns DeleteDocumentRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.DeleteDocumentRequest;
+
+                /**
+                 * Creates a plain object from a DeleteDocumentRequest message. Also converts values to other types if specified.
+                 * @param message DeleteDocumentRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.DeleteDocumentRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this DeleteDocumentRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a BatchGetDocumentsRequest. */
@@ -2542,6 +3844,27 @@ export namespace google {
 
                 /** BatchGetDocumentsRequest consistencySelector. */
                 public consistencySelector?: ("transaction"|"newTransaction"|"readTime");
+
+                /**
+                 * Creates a BatchGetDocumentsRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BatchGetDocumentsRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BatchGetDocumentsRequest;
+
+                /**
+                 * Creates a plain object from a BatchGetDocumentsRequest message. Also converts values to other types if specified.
+                 * @param message BatchGetDocumentsRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BatchGetDocumentsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BatchGetDocumentsRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a BatchGetDocumentsResponse. */
@@ -2583,6 +3906,27 @@ export namespace google {
 
                 /** BatchGetDocumentsResponse result. */
                 public result?: ("found"|"missing");
+
+                /**
+                 * Creates a BatchGetDocumentsResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BatchGetDocumentsResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BatchGetDocumentsResponse;
+
+                /**
+                 * Creates a plain object from a BatchGetDocumentsResponse message. Also converts values to other types if specified.
+                 * @param message BatchGetDocumentsResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BatchGetDocumentsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BatchGetDocumentsResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a BeginTransactionRequest. */
@@ -2609,6 +3953,27 @@ export namespace google {
 
                 /** BeginTransactionRequest options. */
                 public options?: (google.firestore.v1.ITransactionOptions|null);
+
+                /**
+                 * Creates a BeginTransactionRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BeginTransactionRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BeginTransactionRequest;
+
+                /**
+                 * Creates a plain object from a BeginTransactionRequest message. Also converts values to other types if specified.
+                 * @param message BeginTransactionRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BeginTransactionRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BeginTransactionRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a BeginTransactionResponse. */
@@ -2629,6 +3994,27 @@ export namespace google {
 
                 /** BeginTransactionResponse transaction. */
                 public transaction: Uint8Array;
+
+                /**
+                 * Creates a BeginTransactionResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BeginTransactionResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BeginTransactionResponse;
+
+                /**
+                 * Creates a plain object from a BeginTransactionResponse message. Also converts values to other types if specified.
+                 * @param message BeginTransactionResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BeginTransactionResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BeginTransactionResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a CommitRequest. */
@@ -2661,6 +4047,27 @@ export namespace google {
 
                 /** CommitRequest transaction. */
                 public transaction: Uint8Array;
+
+                /**
+                 * Creates a CommitRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns CommitRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.CommitRequest;
+
+                /**
+                 * Creates a plain object from a CommitRequest message. Also converts values to other types if specified.
+                 * @param message CommitRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.CommitRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this CommitRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a CommitResponse. */
@@ -2687,6 +4094,27 @@ export namespace google {
 
                 /** CommitResponse commitTime. */
                 public commitTime?: (google.protobuf.ITimestamp|null);
+
+                /**
+                 * Creates a CommitResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns CommitResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.CommitResponse;
+
+                /**
+                 * Creates a plain object from a CommitResponse message. Also converts values to other types if specified.
+                 * @param message CommitResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.CommitResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this CommitResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a RollbackRequest. */
@@ -2713,6 +4141,27 @@ export namespace google {
 
                 /** RollbackRequest transaction. */
                 public transaction: Uint8Array;
+
+                /**
+                 * Creates a RollbackRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns RollbackRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.RollbackRequest;
+
+                /**
+                 * Creates a plain object from a RollbackRequest message. Also converts values to other types if specified.
+                 * @param message RollbackRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.RollbackRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this RollbackRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a RunQueryRequest. */
@@ -2763,6 +4212,27 @@ export namespace google {
 
                 /** RunQueryRequest consistencySelector. */
                 public consistencySelector?: ("transaction"|"newTransaction"|"readTime");
+
+                /**
+                 * Creates a RunQueryRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns RunQueryRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.RunQueryRequest;
+
+                /**
+                 * Creates a plain object from a RunQueryRequest message. Also converts values to other types if specified.
+                 * @param message RunQueryRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.RunQueryRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this RunQueryRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a RunQueryResponse. */
@@ -2801,6 +4271,27 @@ export namespace google {
 
                 /** RunQueryResponse skippedResults. */
                 public skippedResults: number;
+
+                /**
+                 * Creates a RunQueryResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns RunQueryResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.RunQueryResponse;
+
+                /**
+                 * Creates a plain object from a RunQueryResponse message. Also converts values to other types if specified.
+                 * @param message RunQueryResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.RunQueryResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this RunQueryResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a WriteRequest. */
@@ -2845,6 +4336,27 @@ export namespace google {
 
                 /** WriteRequest labels. */
                 public labels: { [k: string]: string };
+
+                /**
+                 * Creates a WriteRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns WriteRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.WriteRequest;
+
+                /**
+                 * Creates a plain object from a WriteRequest message. Also converts values to other types if specified.
+                 * @param message WriteRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.WriteRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this WriteRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a WriteResponse. */
@@ -2883,6 +4395,27 @@ export namespace google {
 
                 /** WriteResponse commitTime. */
                 public commitTime?: (google.protobuf.ITimestamp|null);
+
+                /**
+                 * Creates a WriteResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns WriteResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.WriteResponse;
+
+                /**
+                 * Creates a plain object from a WriteResponse message. Also converts values to other types if specified.
+                 * @param message WriteResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.WriteResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this WriteResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a ListenRequest. */
@@ -2924,6 +4457,27 @@ export namespace google {
 
                 /** ListenRequest targetChange. */
                 public targetChange?: ("addTarget"|"removeTarget");
+
+                /**
+                 * Creates a ListenRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ListenRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ListenRequest;
+
+                /**
+                 * Creates a plain object from a ListenRequest message. Also converts values to other types if specified.
+                 * @param message ListenRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ListenRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ListenRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a ListenResponse. */
@@ -2971,6 +4525,27 @@ export namespace google {
 
                 /** ListenResponse responseType. */
                 public responseType?: ("targetChange"|"documentChange"|"documentDelete"|"documentRemove"|"filter");
+
+                /**
+                 * Creates a ListenResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ListenResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ListenResponse;
+
+                /**
+                 * Creates a plain object from a ListenResponse message. Also converts values to other types if specified.
+                 * @param message ListenResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ListenResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ListenResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a Target. */
@@ -3027,6 +4602,27 @@ export namespace google {
 
                 /** Target resumeType. */
                 public resumeType?: ("resumeToken"|"readTime");
+
+                /**
+                 * Creates a Target message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Target
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Target;
+
+                /**
+                 * Creates a plain object from a Target message. Also converts values to other types if specified.
+                 * @param message Target
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Target, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Target to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             namespace Target {
@@ -3049,6 +4645,27 @@ export namespace google {
 
                     /** DocumentsTarget documents. */
                     public documents: string[];
+
+                    /**
+                     * Creates a DocumentsTarget message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DocumentsTarget
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.Target.DocumentsTarget;
+
+                    /**
+                     * Creates a plain object from a DocumentsTarget message. Also converts values to other types if specified.
+                     * @param message DocumentsTarget
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.Target.DocumentsTarget, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DocumentsTarget to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 /** Properties of a QueryTarget. */
@@ -3078,6 +4695,27 @@ export namespace google {
 
                     /** QueryTarget queryType. */
                     public queryType?: "structuredQuery";
+
+                    /**
+                     * Creates a QueryTarget message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns QueryTarget
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.Target.QueryTarget;
+
+                    /**
+                     * Creates a plain object from a QueryTarget message. Also converts values to other types if specified.
+                     * @param message QueryTarget
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.Target.QueryTarget, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this QueryTarget to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
             }
 
@@ -3123,6 +4761,27 @@ export namespace google {
 
                 /** TargetChange readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
+
+                /**
+                 * Creates a TargetChange message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns TargetChange
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.TargetChange;
+
+                /**
+                 * Creates a plain object from a TargetChange message. Also converts values to other types if specified.
+                 * @param message TargetChange
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.TargetChange, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this TargetChange to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             namespace TargetChange {
@@ -3162,6 +4821,27 @@ export namespace google {
 
                 /** ListCollectionIdsRequest pageToken. */
                 public pageToken: string;
+
+                /**
+                 * Creates a ListCollectionIdsRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ListCollectionIdsRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ListCollectionIdsRequest;
+
+                /**
+                 * Creates a plain object from a ListCollectionIdsRequest message. Also converts values to other types if specified.
+                 * @param message ListCollectionIdsRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ListCollectionIdsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ListCollectionIdsRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a ListCollectionIdsResponse. */
@@ -3188,6 +4868,27 @@ export namespace google {
 
                 /** ListCollectionIdsResponse nextPageToken. */
                 public nextPageToken: string;
+
+                /**
+                 * Creates a ListCollectionIdsResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ListCollectionIdsResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ListCollectionIdsResponse;
+
+                /**
+                 * Creates a plain object from a ListCollectionIdsResponse message. Also converts values to other types if specified.
+                 * @param message ListCollectionIdsResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ListCollectionIdsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ListCollectionIdsResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a StructuredQuery. */
@@ -3250,6 +4951,27 @@ export namespace google {
 
                 /** StructuredQuery limit. */
                 public limit?: (google.protobuf.IInt32Value|null);
+
+                /**
+                 * Creates a StructuredQuery message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns StructuredQuery
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery;
+
+                /**
+                 * Creates a plain object from a StructuredQuery message. Also converts values to other types if specified.
+                 * @param message StructuredQuery
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.StructuredQuery, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this StructuredQuery to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             namespace StructuredQuery {
@@ -3278,6 +5000,27 @@ export namespace google {
 
                     /** CollectionSelector allDescendants. */
                     public allDescendants: boolean;
+
+                    /**
+                     * Creates a CollectionSelector message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CollectionSelector
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.CollectionSelector;
+
+                    /**
+                     * Creates a plain object from a CollectionSelector message. Also converts values to other types if specified.
+                     * @param message CollectionSelector
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.CollectionSelector, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CollectionSelector to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 /** Properties of a Filter. */
@@ -3313,6 +5056,27 @@ export namespace google {
 
                     /** Filter filterType. */
                     public filterType?: ("compositeFilter"|"fieldFilter"|"unaryFilter");
+
+                    /**
+                     * Creates a Filter message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Filter
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.Filter;
+
+                    /**
+                     * Creates a plain object from a Filter message. Also converts values to other types if specified.
+                     * @param message Filter
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.Filter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Filter to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 /** Properties of a CompositeFilter. */
@@ -3339,6 +5103,27 @@ export namespace google {
 
                     /** CompositeFilter filters. */
                     public filters: google.firestore.v1.StructuredQuery.IFilter[];
+
+                    /**
+                     * Creates a CompositeFilter message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CompositeFilter
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.CompositeFilter;
+
+                    /**
+                     * Creates a plain object from a CompositeFilter message. Also converts values to other types if specified.
+                     * @param message CompositeFilter
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.CompositeFilter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CompositeFilter to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 namespace CompositeFilter {
@@ -3378,6 +5163,27 @@ export namespace google {
 
                     /** FieldFilter value. */
                     public value?: (google.firestore.v1.IValue|null);
+
+                    /**
+                     * Creates a FieldFilter message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns FieldFilter
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.FieldFilter;
+
+                    /**
+                     * Creates a plain object from a FieldFilter message. Also converts values to other types if specified.
+                     * @param message FieldFilter
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.FieldFilter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this FieldFilter to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 namespace FieldFilter {
@@ -3405,6 +5211,27 @@ export namespace google {
 
                     /** Projection fields. */
                     public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
+
+                    /**
+                     * Creates a Projection message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Projection
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.Projection;
+
+                    /**
+                     * Creates a plain object from a Projection message. Also converts values to other types if specified.
+                     * @param message Projection
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.Projection, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Projection to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 /** Properties of an UnaryFilter. */
@@ -3434,6 +5261,27 @@ export namespace google {
 
                     /** UnaryFilter operandType. */
                     public operandType?: "field";
+
+                    /**
+                     * Creates an UnaryFilter message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns UnaryFilter
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.UnaryFilter;
+
+                    /**
+                     * Creates a plain object from an UnaryFilter message. Also converts values to other types if specified.
+                     * @param message UnaryFilter
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.UnaryFilter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this UnaryFilter to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 namespace UnaryFilter {
@@ -3461,6 +5309,27 @@ export namespace google {
 
                     /** FieldReference fieldPath. */
                     public fieldPath: string;
+
+                    /**
+                     * Creates a FieldReference message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns FieldReference
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.FieldReference;
+
+                    /**
+                     * Creates a plain object from a FieldReference message. Also converts values to other types if specified.
+                     * @param message FieldReference
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.FieldReference, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this FieldReference to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 /** Properties of an Order. */
@@ -3487,6 +5356,27 @@ export namespace google {
 
                     /** Order direction. */
                     public direction: google.firestore.v1.StructuredQuery.Direction;
+
+                    /**
+                     * Creates an Order message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Order
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.Order;
+
+                    /**
+                     * Creates a plain object from an Order message. Also converts values to other types if specified.
+                     * @param message Order
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.Order, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Order to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 /** Direction enum. */
@@ -3518,6 +5408,27 @@ export namespace google {
 
                 /** Cursor before. */
                 public before: boolean;
+
+                /**
+                 * Creates a Cursor message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Cursor
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Cursor;
+
+                /**
+                 * Creates a plain object from a Cursor message. Also converts values to other types if specified.
+                 * @param message Cursor
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Cursor, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Cursor to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a Write. */
@@ -3571,6 +5482,27 @@ export namespace google {
 
                 /** Write operation. */
                 public operation?: ("update"|"delete"|"transform");
+
+                /**
+                 * Creates a Write message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Write
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Write;
+
+                /**
+                 * Creates a plain object from a Write message. Also converts values to other types if specified.
+                 * @param message Write
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Write, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Write to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a DocumentTransform. */
@@ -3597,6 +5529,27 @@ export namespace google {
 
                 /** DocumentTransform fieldTransforms. */
                 public fieldTransforms: google.firestore.v1.DocumentTransform.IFieldTransform[];
+
+                /**
+                 * Creates a DocumentTransform message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns DocumentTransform
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.DocumentTransform;
+
+                /**
+                 * Creates a plain object from a DocumentTransform message. Also converts values to other types if specified.
+                 * @param message DocumentTransform
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.DocumentTransform, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this DocumentTransform to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             namespace DocumentTransform {
@@ -3658,6 +5611,27 @@ export namespace google {
 
                     /** FieldTransform transformType. */
                     public transformType?: ("setToServerValue"|"increment"|"maximum"|"minimum"|"appendMissingElements"|"removeAllFromArray");
+
+                    /**
+                     * Creates a FieldTransform message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns FieldTransform
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.DocumentTransform.FieldTransform;
+
+                    /**
+                     * Creates a plain object from a FieldTransform message. Also converts values to other types if specified.
+                     * @param message FieldTransform
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.DocumentTransform.FieldTransform, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this FieldTransform to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 namespace FieldTransform {
@@ -3692,6 +5666,27 @@ export namespace google {
 
                 /** WriteResult transformResults. */
                 public transformResults: google.firestore.v1.IValue[];
+
+                /**
+                 * Creates a WriteResult message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns WriteResult
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.WriteResult;
+
+                /**
+                 * Creates a plain object from a WriteResult message. Also converts values to other types if specified.
+                 * @param message WriteResult
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.WriteResult, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this WriteResult to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a DocumentChange. */
@@ -3724,6 +5719,27 @@ export namespace google {
 
                 /** DocumentChange removedTargetIds. */
                 public removedTargetIds: number[];
+
+                /**
+                 * Creates a DocumentChange message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns DocumentChange
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.DocumentChange;
+
+                /**
+                 * Creates a plain object from a DocumentChange message. Also converts values to other types if specified.
+                 * @param message DocumentChange
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.DocumentChange, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this DocumentChange to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a DocumentDelete. */
@@ -3756,6 +5772,27 @@ export namespace google {
 
                 /** DocumentDelete readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
+
+                /**
+                 * Creates a DocumentDelete message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns DocumentDelete
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.DocumentDelete;
+
+                /**
+                 * Creates a plain object from a DocumentDelete message. Also converts values to other types if specified.
+                 * @param message DocumentDelete
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.DocumentDelete, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this DocumentDelete to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a DocumentRemove. */
@@ -3788,6 +5825,27 @@ export namespace google {
 
                 /** DocumentRemove readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
+
+                /**
+                 * Creates a DocumentRemove message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns DocumentRemove
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.DocumentRemove;
+
+                /**
+                 * Creates a plain object from a DocumentRemove message. Also converts values to other types if specified.
+                 * @param message DocumentRemove
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.DocumentRemove, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this DocumentRemove to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of an ExistenceFilter. */
@@ -3814,6 +5872,27 @@ export namespace google {
 
                 /** ExistenceFilter count. */
                 public count: number;
+
+                /**
+                 * Creates an ExistenceFilter message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExistenceFilter
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ExistenceFilter;
+
+                /**
+                 * Creates a plain object from an ExistenceFilter message. Also converts values to other types if specified.
+                 * @param message ExistenceFilter
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ExistenceFilter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExistenceFilter to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
         }
     }
@@ -3839,6 +5918,27 @@ export namespace google {
 
             /** Http rules. */
             public rules: google.api.IHttpRule[];
+
+            /**
+             * Creates a Http message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Http
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.Http;
+
+            /**
+             * Creates a plain object from a Http message. Also converts values to other types if specified.
+             * @param message Http
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.Http, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Http to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a HttpRule. */
@@ -3910,6 +6010,27 @@ export namespace google {
 
             /** HttpRule pattern. */
             public pattern?: ("get"|"put"|"post"|"delete"|"patch"|"custom");
+
+            /**
+             * Creates a HttpRule message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns HttpRule
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.HttpRule;
+
+            /**
+             * Creates a plain object from a HttpRule message. Also converts values to other types if specified.
+             * @param message HttpRule
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.HttpRule, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this HttpRule to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a CustomHttpPattern. */
@@ -3936,6 +6057,27 @@ export namespace google {
 
             /** CustomHttpPattern path. */
             public path: string;
+
+            /**
+             * Creates a CustomHttpPattern message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns CustomHttpPattern
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.CustomHttpPattern;
+
+            /**
+             * Creates a plain object from a CustomHttpPattern message. Also converts values to other types if specified.
+             * @param message CustomHttpPattern
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.CustomHttpPattern, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this CustomHttpPattern to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** FieldBehavior enum. */
@@ -3990,6 +6132,27 @@ export namespace google {
 
             /** ResourceDescriptor singular. */
             public singular: string;
+
+            /**
+             * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ResourceDescriptor
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.ResourceDescriptor;
+
+            /**
+             * Creates a plain object from a ResourceDescriptor message. Also converts values to other types if specified.
+             * @param message ResourceDescriptor
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.ResourceDescriptor, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ResourceDescriptor to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         namespace ResourceDescriptor {
@@ -4023,6 +6186,27 @@ export namespace google {
 
             /** ResourceReference childType. */
             public childType: string;
+
+            /**
+             * Creates a ResourceReference message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ResourceReference
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.ResourceReference;
+
+            /**
+             * Creates a plain object from a ResourceReference message. Also converts values to other types if specified.
+             * @param message ResourceReference
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.ResourceReference, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ResourceReference to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
     }
 
@@ -4053,6 +6237,27 @@ export namespace google {
 
             /** LatLng longitude. */
             public longitude: number;
+
+            /**
+             * Creates a LatLng message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns LatLng
+             */
+            public static fromObject(object: { [k: string]: any }): google.type.LatLng;
+
+            /**
+             * Creates a plain object from a LatLng message. Also converts values to other types if specified.
+             * @param message LatLng
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.type.LatLng, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this LatLng to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
     }
 
@@ -4089,6 +6294,27 @@ export namespace google {
 
             /** Status details. */
             public details: google.protobuf.IAny[];
+
+            /**
+             * Creates a Status message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Status
+             */
+            public static fromObject(object: { [k: string]: any }): google.rpc.Status;
+
+            /**
+             * Creates a plain object from a Status message. Also converts values to other types if specified.
+             * @param message Status
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.rpc.Status, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Status to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
     }
 
@@ -4260,6 +6486,27 @@ export namespace google {
 
             /** Operation result. */
             public result?: ("error"|"response");
+
+            /**
+             * Creates an Operation message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Operation
+             */
+            public static fromObject(object: { [k: string]: any }): google.longrunning.Operation;
+
+            /**
+             * Creates a plain object from an Operation message. Also converts values to other types if specified.
+             * @param message Operation
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.longrunning.Operation, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Operation to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a GetOperationRequest. */
@@ -4280,6 +6527,27 @@ export namespace google {
 
             /** GetOperationRequest name. */
             public name: string;
+
+            /**
+             * Creates a GetOperationRequest message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns GetOperationRequest
+             */
+            public static fromObject(object: { [k: string]: any }): google.longrunning.GetOperationRequest;
+
+            /**
+             * Creates a plain object from a GetOperationRequest message. Also converts values to other types if specified.
+             * @param message GetOperationRequest
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.longrunning.GetOperationRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this GetOperationRequest to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a ListOperationsRequest. */
@@ -4318,6 +6586,27 @@ export namespace google {
 
             /** ListOperationsRequest pageToken. */
             public pageToken: string;
+
+            /**
+             * Creates a ListOperationsRequest message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ListOperationsRequest
+             */
+            public static fromObject(object: { [k: string]: any }): google.longrunning.ListOperationsRequest;
+
+            /**
+             * Creates a plain object from a ListOperationsRequest message. Also converts values to other types if specified.
+             * @param message ListOperationsRequest
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.longrunning.ListOperationsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ListOperationsRequest to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a ListOperationsResponse. */
@@ -4344,6 +6633,27 @@ export namespace google {
 
             /** ListOperationsResponse nextPageToken. */
             public nextPageToken: string;
+
+            /**
+             * Creates a ListOperationsResponse message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ListOperationsResponse
+             */
+            public static fromObject(object: { [k: string]: any }): google.longrunning.ListOperationsResponse;
+
+            /**
+             * Creates a plain object from a ListOperationsResponse message. Also converts values to other types if specified.
+             * @param message ListOperationsResponse
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.longrunning.ListOperationsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ListOperationsResponse to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a CancelOperationRequest. */
@@ -4364,6 +6674,27 @@ export namespace google {
 
             /** CancelOperationRequest name. */
             public name: string;
+
+            /**
+             * Creates a CancelOperationRequest message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns CancelOperationRequest
+             */
+            public static fromObject(object: { [k: string]: any }): google.longrunning.CancelOperationRequest;
+
+            /**
+             * Creates a plain object from a CancelOperationRequest message. Also converts values to other types if specified.
+             * @param message CancelOperationRequest
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.longrunning.CancelOperationRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this CancelOperationRequest to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a DeleteOperationRequest. */
@@ -4384,6 +6715,27 @@ export namespace google {
 
             /** DeleteOperationRequest name. */
             public name: string;
+
+            /**
+             * Creates a DeleteOperationRequest message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns DeleteOperationRequest
+             */
+            public static fromObject(object: { [k: string]: any }): google.longrunning.DeleteOperationRequest;
+
+            /**
+             * Creates a plain object from a DeleteOperationRequest message. Also converts values to other types if specified.
+             * @param message DeleteOperationRequest
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.longrunning.DeleteOperationRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this DeleteOperationRequest to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of a WaitOperationRequest. */
@@ -4410,6 +6762,27 @@ export namespace google {
 
             /** WaitOperationRequest timeout. */
             public timeout?: (google.protobuf.IDuration|null);
+
+            /**
+             * Creates a WaitOperationRequest message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns WaitOperationRequest
+             */
+            public static fromObject(object: { [k: string]: any }): google.longrunning.WaitOperationRequest;
+
+            /**
+             * Creates a plain object from a WaitOperationRequest message. Also converts values to other types if specified.
+             * @param message WaitOperationRequest
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.longrunning.WaitOperationRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this WaitOperationRequest to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
 
         /** Properties of an OperationInfo. */
@@ -4436,6 +6809,27 @@ export namespace google {
 
             /** OperationInfo metadataType. */
             public metadataType: string;
+
+            /**
+             * Creates an OperationInfo message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns OperationInfo
+             */
+            public static fromObject(object: { [k: string]: any }): google.longrunning.OperationInfo;
+
+            /**
+             * Creates a plain object from an OperationInfo message. Also converts values to other types if specified.
+             * @param message OperationInfo
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.longrunning.OperationInfo, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this OperationInfo to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
     }
 }

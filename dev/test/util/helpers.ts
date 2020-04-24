@@ -14,23 +14,19 @@
 
 import {expect} from 'chai';
 import * as extend from 'extend';
-import {GrpcClient} from 'google-gax';
+import {grpc} from 'google-gax';
 import {Duplex} from 'stream';
 import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
-import {Firestore} from '../../src';
+import * as v1 from '../../src/v1';
+import {Firestore, QueryDocumentSnapshot, Settings} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {DocumentData, GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
-const v1 = require('../../src/v1');
-
-/* tslint:disable:no-any */
-const grpc = new GrpcClient({} as any).grpc;
-const SSL_CREDENTIALS = (grpc.credentials as any).createInsecure();
-/* tslint:enable:no-any */
+const SSL_CREDENTIALS = grpc.credentials.createInsecure();
 
 export const PROJECT_ID = 'test-project';
 export const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
@@ -38,7 +34,7 @@ export const COLLECTION_ROOT = `${DATABASE_ROOT}/documents/collectionId`;
 export const DOCUMENT_NAME = `${COLLECTION_ROOT}/documentId`;
 
 // Allow invalid API usage to test error handling.
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InvalidApiUsage = any;
 
 /** Defines the request handlers used by Firestore. */
@@ -54,7 +50,7 @@ export type ApiOverride = Partial<GapicClient>;
  */
 export function createInstance(
   apiOverrides?: ApiOverride,
-  firestoreSettings?: {}
+  firestoreSettings?: Settings
 ): Promise<Firestore> {
   const initializationOptions = {
     ...{projectId: PROJECT_ID, sslCreds: SSL_CREDENTIALS},
@@ -67,7 +63,11 @@ export function createInstance(
   firestore['_clientPool'] = new ClientPool<GapicClient>(
     /* concurrentRequestLimit= */ 1,
     /* maxIdleClients= */ 0,
-    () => ({...new v1(initializationOptions), ...apiOverrides})
+    () =>
+      ({
+        ...new v1.FirestoreClient(initializationOptions),
+        ...apiOverrides,
+      } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
   );
 
   return Promise.resolve(firestore);
@@ -348,7 +348,8 @@ export const postConverter = {
   toFirestore(post: Post): DocumentData {
     return {title: post.title, author: post.author};
   },
-  fromFirestore(data: DocumentData): Post {
+  fromFirestore(snapshot: QueryDocumentSnapshot): Post {
+    const data = snapshot.data();
     return new Post(data.title, data.author);
   },
 };

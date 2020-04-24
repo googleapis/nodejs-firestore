@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import {Moment} from 'moment';
-
 import * as proto from '../protos/firestore_v1_proto_api';
 
 import {detectValueType} from './convert';
-import {FieldTransform} from './field-value';
-import {DeleteTransform} from './field-value';
+import {DeleteTransform, FieldTransform} from './field-value';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
 import {FieldPath, QualifiedResourcePath} from './path';
@@ -55,12 +52,15 @@ export interface Serializable {
  */
 export class Serializer {
   private createReference: (path: string) => DocumentReference;
+  private createInteger: (n: number | string) => number | BigInt;
 
   constructor(firestore: Firestore) {
     // Instead of storing the `firestore` object, we store just a reference to
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
     this.createReference = path => firestore.doc(path);
+    this.createInteger = n =>
+      firestore._settings.useBigInt ? BigInt(n) : Number(n);
   }
 
   /**
@@ -118,6 +118,12 @@ export class Serializer {
           doubleValue: val as number,
         };
       }
+    }
+
+    if (typeof val === 'bigint') {
+      return {
+        integerValue: val.toString(),
+      };
     }
 
     if (val instanceof Date) {
@@ -215,14 +221,13 @@ export class Serializer {
         return proto.booleanValue;
       }
       case 'integerValue': {
-        return Number(proto.integerValue);
+        return this.createInteger(proto.integerValue!);
       }
       case 'doubleValue': {
-        return Number(proto.doubleValue);
+        return proto.doubleValue;
       }
       case 'timestampValue': {
-        const timestamp = Timestamp.fromProto(proto.timestampValue!);
-        return timestamp;
+        return Timestamp.fromProto(proto.timestampValue!);
       }
       case 'referenceValue': {
         const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(
@@ -300,7 +305,6 @@ export function validateUserInput(
     );
   }
 
-  options = options || {};
   level = level || 0;
   inArray = inArray || false;
 
@@ -396,12 +400,12 @@ export function validateUserInput(
  * Returns true if value is a MomentJs date object.
  * @private
  */
-function isMomentJsType(value: unknown): value is Moment {
+function isMomentJsType(value: unknown): value is {toDate(): Date} {
   return (
     typeof value === 'object' &&
     value !== null &&
     value.constructor &&
     value.constructor.name === 'Moment' &&
-    typeof (value as Moment).toDate === 'function'
+    typeof (value as {toDate: unknown}).toDate === 'function'
   );
 }

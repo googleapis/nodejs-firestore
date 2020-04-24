@@ -15,7 +15,6 @@
  */
 
 import * as assert from 'assert';
-import {describe, it} from 'mocha';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {
@@ -389,6 +388,7 @@ export class WriteBatch {
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
   ): WriteBatch {
+    // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('WriteBatch.update', arguments, 2);
     validateDocumentReference('documentRef', documentRef);
 
@@ -406,22 +406,30 @@ export class WriteBatch {
       typeof dataOrField === 'string' || dataOrField instanceof FieldPath;
 
     if (usesVarargs) {
+      const argumentOffset = 1; // Respect 'documentRef' in the error message
+      const fieldOrValues = [dataOrField, ...preconditionOrValues];
       try {
-        for (let i = 1; i < arguments.length; i += 2) {
-          if (i === arguments.length - 1) {
-            validateUpdatePrecondition(i, arguments[i]);
-            precondition = new Precondition(arguments[i]);
+        for (let i = 0; i < fieldOrValues.length; i += 2) {
+          if (i === fieldOrValues.length - 1) {
+            const maybePrecondition = fieldOrValues[i];
+            validateUpdatePrecondition(i + argumentOffset, maybePrecondition);
+            precondition = new Precondition(maybePrecondition);
           } else {
-            validateFieldPath(i, arguments[i]);
+            const maybeFieldPath = fieldOrValues[i];
+            validateFieldPath(i + argumentOffset, maybeFieldPath);
             // Unlike the `validateMinNumberOfArguments` invocation above, this
             // validation can be triggered both from `WriteBatch.update()` and
             // `DocumentReference.update()`. Hence, we don't use the fully
             // qualified API name in the error message.
-            validateMinNumberOfArguments('update', arguments, i + 1);
+            validateMinNumberOfArguments('update', fieldOrValues, i + 1);
 
-            const fieldPath = FieldPath.fromArgument(arguments[i]);
-            validateFieldValue(i, arguments[i + 1], fieldPath);
-            updateMap.set(fieldPath, arguments[i + 1]);
+            const fieldPath = FieldPath.fromArgument(maybeFieldPath);
+            validateFieldValue(
+              i + argumentOffset,
+              fieldOrValues[i + 1],
+              fieldPath
+            );
+            updateMap.set(fieldPath, fieldOrValues[i + 1]);
           }
         }
       } catch (err) {
@@ -433,6 +441,7 @@ export class WriteBatch {
     } else {
       try {
         validateUpdateMap('dataOrField', dataOrField);
+        // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
         const data = dataOrField as UpdateData;
@@ -740,7 +749,7 @@ function validateUpdatePrecondition(
   arg: string | number,
   value: unknown,
   options?: RequiredArgumentOptions
-): void {
+): asserts value is {lastUpdateTime?: Timestamp} {
   if (!validateOptional(value, options)) {
     validatePrecondition(arg, value, /* allowExists= */ false);
   }

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-const deepEqual = require('deep-equal');
+import * as deepEqual from 'fast-deep-equal';
 
 import * as assert from 'assert';
-import {describe, it} from 'mocha';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldTransform} from './field-value';
@@ -25,7 +24,7 @@ import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {ApiMapValue, DocumentData, UpdateMap} from './types';
+import {ApiMapValue, defaultConverter, DocumentData, UpdateMap} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 
 import api = google.firestore.v1;
@@ -354,7 +353,7 @@ export class DocumentSnapshot<T = DocumentData> {
    */
   get readTime(): Timestamp {
     if (this._readTime === undefined) {
-      throw new Error(`Called 'readTime' on a local document`);
+      throw new Error("Called 'readTime' on a local document");
     }
     return this._readTime;
   }
@@ -381,11 +380,29 @@ export class DocumentSnapshot<T = DocumentData> {
       return undefined;
     }
 
-    const obj: DocumentData = {};
-    for (const prop of Object.keys(fields)) {
-      obj[prop] = this._serializer.decodeValue(fields[prop]);
+    // We only want to use the converter and create a new QueryDocumentSnapshot
+    // if a converter has been provided.
+    if (this.ref._converter !== defaultConverter) {
+      const untypedReference = new DocumentReference(
+        this.ref.firestore,
+        this.ref._path
+      );
+      return this.ref._converter.fromFirestore(
+        new QueryDocumentSnapshot<DocumentData>(
+          untypedReference,
+          this._fieldsProto!,
+          this.readTime,
+          this.createTime!,
+          this.updateTime!
+        )
+      );
+    } else {
+      const obj: DocumentData = {};
+      for (const prop of Object.keys(fields)) {
+        obj[prop] = this._serializer.decodeValue(fields[prop]);
+      }
+      return obj as T;
     }
-    return this.ref._converter.fromFirestore(obj);
   }
 
   /**
@@ -408,9 +425,8 @@ export class DocumentSnapshot<T = DocumentData> {
    */
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
-  // tslint:disable-next-line no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(field: string | FieldPath): any {
-    // tslint:disable-line no-any
     validateFieldPath('field', field);
 
     const protoField = this.protoField(field);
@@ -505,7 +521,7 @@ export class DocumentSnapshot<T = DocumentData> {
       this === other ||
       (other instanceof DocumentSnapshot &&
         this._ref.isEqual(other._ref) &&
-        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
+        deepEqual(this._fieldsProto, other._fieldsProto))
     );
   }
 }

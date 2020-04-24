@@ -22,6 +22,7 @@ import {FieldPath} from './path';
 import {Timestamp} from './timestamp';
 
 import api = google.firestore.v1;
+import {QueryDocumentSnapshot} from './document';
 
 /**
  * A map in the format of the Proto API
@@ -89,7 +90,7 @@ export type UnaryMethod<Req, Resp> = (
 
 // We don't have type information for the npm package
 // `functional-red-black-tree`.
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RBTree = any;
 
 /**
@@ -113,7 +114,7 @@ export type RBTree = any;
  *     return {title: post.title, author: post.author};
  *   },
  *   fromFirestore(
- *     data: FirebaseFirestore.DocumentData
+ *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
  *   ): Post {
  *     return new Post(data.title, data.author);
  *   }
@@ -142,7 +143,7 @@ export interface FirestoreDataConverter<T> {
    * Called by the Firestore SDK to convert Firestore data into an object of
    * type T.
    */
-  fromFirestore(data: DocumentData): T;
+  fromFirestore(snapshot: QueryDocumentSnapshot): T;
 }
 
 /**
@@ -153,8 +154,8 @@ export const defaultConverter: FirestoreDataConverter<DocumentData> = {
   toFirestore(modelObject: DocumentData): DocumentData {
     return modelObject;
   },
-  fromFirestore(data: DocumentData): DocumentData {
-    return data;
+  fromFirestore(snapshot: QueryDocumentSnapshot): DocumentData {
+    return snapshot.data()!;
   },
 };
 
@@ -198,7 +199,15 @@ export interface Settings {
    */
   maxIdleChannels?: number;
 
-  // tslint:disable-next-line:no-any
+  /**
+   * Whether to use `BigInt` for integer types when deserializing Firestore
+   * Documents. Regardless of magnitude, all integer values are returned as
+   * `BigInt` to match the precision of the Firestore backend. Floating point
+   * numbers continue to use JavaScript's `number` type.
+   */
+  useBigInt?: boolean;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any; // Accept other properties, such as GRPC settings.
 }
 
@@ -207,7 +216,7 @@ export interface Settings {
  * mapped to values.
  */
 export interface DocumentData {
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [field: string]: any;
 }
 

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-const deepEqual = require('deep-equal');
-
-import * as through2 from 'through2';
+import {Transform} from 'stream';
+import * as deepEqual from 'fast-deep-equal';
 
 import {firestore, google} from '../protos/firestore_v1_proto_api';
 
@@ -440,6 +439,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
     dataOrField: UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<unknown | string | FieldPath | Precondition>
   ): Promise<WriteResult> {
+    // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
     const writeBatch = new WriteBatch(this._firestore);
@@ -558,8 +558,9 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
-   *     data: FirebaseFirestore.DocumentData
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
+   *     const data = snapshot.data();
    *     return new Post(data.title, data.author);
    *   }
    * };
@@ -938,31 +939,6 @@ export class QuerySnapshot<T = DocumentData> {
   }
 }
 
-// TODO: As of v0.17.0, we're changing docChanges from an array into a method.
-// Because this is a runtime breaking change and somewhat subtle (both Array and
-// Function have a .length, etc.), we'll replace commonly-used properties
-// (including Symbol.iterator) to throw a custom error message. By our v1.0
-// release, we should remove this code.
-function throwDocChangesMethodError() {
-  throw new Error(
-    'QuerySnapshot.docChanges has been changed from a property into a ' +
-      'method, so usages like "querySnapshot.docChanges" should become ' +
-      '"querySnapshot.docChanges()"'
-  );
-}
-
-const docChangesPropertiesToOverride = [
-  'length',
-  'forEach',
-  'map',
-  ...(typeof Symbol !== 'undefined' ? [Symbol.iterator] : []),
-];
-docChangesPropertiesToOverride.forEach(property => {
-  Object.defineProperty(QuerySnapshot.prototype.docChanges, property, {
-    get: () => throwDocChangesMethodError(),
-  });
-});
-
 /** Internal representation of a query cursor before serialization. */
 interface QueryCursor {
   before: boolean;
@@ -1091,11 +1067,11 @@ export class QueryOptions<T> {
       this.allDescendants === other.allDescendants &&
       this.limit === other.limit &&
       this.offset === other.offset &&
-      deepEqual(this.fieldFilters, other.fieldFilters, {strict: true}) &&
-      deepEqual(this.fieldOrders, other.fieldOrders, {strict: true}) &&
-      deepEqual(this.startAt, other.startAt, {strict: true}) &&
-      deepEqual(this.endAt, other.endAt, {strict: true}) &&
-      deepEqual(this.projection, other.projection, {strict: true})
+      deepEqual(this.fieldFilters, other.fieldFilters) &&
+      deepEqual(this.fieldOrders, other.fieldOrders) &&
+      deepEqual(this.startAt, other.startAt) &&
+      deepEqual(this.endAt, other.endAt) &&
+      deepEqual(this.projection, other.projection)
     );
   }
 }
@@ -1649,7 +1625,11 @@ export class Query<T = DocumentData> {
   startAt(
     ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): Query<T> {
-    validateMinNumberOfArguments('Query.startAt', arguments, 1);
+    validateMinNumberOfArguments(
+      'Query.startAt',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
 
     const fieldOrders = this.createImplicitOrderBy(
       fieldValuesOrDocumentSnapshot
@@ -1687,7 +1667,11 @@ export class Query<T = DocumentData> {
   startAfter(
     ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): Query<T> {
-    validateMinNumberOfArguments('Query.startAfter', arguments, 1);
+    validateMinNumberOfArguments(
+      'Query.startAfter',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
 
     const fieldOrders = this.createImplicitOrderBy(
       fieldValuesOrDocumentSnapshot
@@ -1724,7 +1708,11 @@ export class Query<T = DocumentData> {
   endBefore(
     ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): Query<T> {
-    validateMinNumberOfArguments('Query.endBefore', arguments, 1);
+    validateMinNumberOfArguments(
+      'Query.endBefore',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
 
     const fieldOrders = this.createImplicitOrderBy(
       fieldValuesOrDocumentSnapshot
@@ -1761,7 +1749,11 @@ export class Query<T = DocumentData> {
   endAt(
     ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): Query<T> {
-    validateMinNumberOfArguments('Query.endAt', arguments, 1);
+    validateMinNumberOfArguments(
+      'Query.endAt',
+      fieldValuesOrDocumentSnapshot,
+      1
+    );
 
     const fieldOrders = this.createImplicitOrderBy(
       fieldValuesOrDocumentSnapshot
@@ -1873,13 +1865,11 @@ export class Query<T = DocumentData> {
     }
 
     const responseStream = this._stream();
-
-    const transform = through2.obj(function(this, chunk, encoding, callback) {
-      // Only send chunks with documents.
-      if (chunk.document) {
-        this.push(chunk.document);
-      }
-      callback();
+    const transform = new Transform({
+      objectMode: true,
+      transform(chunk, encoding, callback) {
+        callback(undefined, chunk.document);
+      },
     });
 
     responseStream.pipe(transform);
@@ -2037,29 +2027,30 @@ export class Query<T = DocumentData> {
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
-    const self = this;
 
-    const stream = through2.obj(function(this, proto, enc, callback) {
-      const readTime = Timestamp.fromProto(proto.readTime);
-      if (proto.document) {
-        const document = self.firestore.snapshot_(
-          proto.document,
-          proto.readTime
-        );
-        const finalDoc = new DocumentSnapshotBuilder(
-          document.ref.withConverter(self._queryOptions.converter)
-        );
-        // Recreate the QueryDocumentSnapshot with the DocumentReference
-        // containing the original converter.
-        finalDoc.fieldsProto = document._fieldsProto;
-        finalDoc.readTime = document.readTime;
-        finalDoc.createTime = document.createTime;
-        finalDoc.updateTime = document.updateTime;
-        this.push({document: finalDoc.build(), readTime});
-      } else {
-        this.push({readTime});
-      }
-      callback();
+    const stream = new Transform({
+      objectMode: true,
+      transform: (proto, enc, callback) => {
+        const readTime = Timestamp.fromProto(proto.readTime);
+        if (proto.document) {
+          const document = this.firestore.snapshot_(
+            proto.document,
+            proto.readTime
+          );
+          const finalDoc = new DocumentSnapshotBuilder(
+            document.ref.withConverter(this._queryOptions.converter)
+          );
+          // Recreate the QueryDocumentSnapshot with the DocumentReference
+          // containing the original converter.
+          finalDoc.fieldsProto = document._fieldsProto;
+          finalDoc.readTime = document.readTime;
+          finalDoc.createTime = document.createTime;
+          finalDoc.updateTime = document.updateTime;
+          callback(undefined, {document: finalDoc.build(), readTime});
+        } else {
+          callback(undefined, {readTime});
+        }
+      },
     });
 
     this.firestore
@@ -2196,8 +2187,9 @@ export class Query<T = DocumentData> {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
-   *     data: FirebaseFirestore.DocumentData
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
+   *     const data = snapshot.data();
    *     return new Post(data.title, data.author);
    *   }
    * };
@@ -2469,8 +2461,9 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    *     return {title: post.title, author: post.author};
    *   },
    *   fromFirestore(
-   *     data: FirebaseFirestore.DocumentData
+   *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
    *   ): Post {
+   *     const data = snapshot.data();
    *     return new Post(data.title, data.author);
    *   }
    * };
