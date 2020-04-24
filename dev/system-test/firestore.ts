@@ -68,7 +68,7 @@ describe('Firestore class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -259,7 +259,7 @@ describe('DocumentReference class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({useBigInt: true});
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -360,6 +360,9 @@ describe('DocumentReference class', () => {
 
   it('round-trips BigInts', () => {
     const bigIntValue = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
+
+    const firestore = new Firestore({useBigInt: true});
+    const randomCol = getTestRoot(firestore);
     const ref = randomCol.doc('doc');
     return ref
       .set({bigIntValue})
