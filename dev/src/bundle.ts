@@ -24,19 +24,21 @@ import {Timestamp} from './timestamp';
 import api = google.firestore.v1;
 
 /**
- * Builds a Firestore data bundle with results from given queries and specified
+ * Builds a Firestore data bundle with results from the given queries and specified
  * documents.
  *
- * For documents in scope for multiple queries, the latest read version will
+ * For documents in scope for multiple queries, only the latest version will
  * be included in the bundle.
  */
 export class BundleBuilder {
-  // DocumentReference and Query added to the bundle.
+  // DocumentReferences added to the bundle.
   private docRefs: DocumentReference[] = [];
+  // Queries added to the bundle, keyed by the query names.
   private queries: Map<string, Query> = new Map<string, Query>();
 
-  // DocumentSnapshot and QuerySnapshot added to the bundle.
+  // DocumentSnapshots added to the bundle.
   private docSnaps: DocumentSnapshot[] = [];
+  // QuerySnapshots added to the bundle, keyed by the query names.
   private querySnaps: Map<string, QuerySnapshot> = new Map<
     string,
     QuerySnapshot
@@ -48,21 +50,18 @@ export class BundleBuilder {
   private namedQueries: Map<string, firestore.INamedQuery> = new Map();
 
   // The latest read time among all bundled documents and queries.
-  private latestReadTime: Timestamp = Timestamp.fromProto({
-    seconds: 0,
-    nanos: 0,
-  });
+  private latestReadTime = new Timestamp(0, 0);
 
-  constructor(private id: string) {}
+  constructor(private bundleId: string) {}
 
-  add(doc: DocumentReference): BundleBuilder;
-  add(docSnap: DocumentSnapshot): BundleBuilder;
+  add(documentRef: DocumentReference): BundleBuilder;
+  add(documentSnapshot: DocumentSnapshot): BundleBuilder;
   add(queryName: string, querySnap: QuerySnapshot): BundleBuilder;
   add(queryName: string, query: Query): BundleBuilder;
   add(
     docOrName: DocumentReference | DocumentSnapshot | string,
     query?: QuerySnapshot | Query
-  ) {
+  ): BundleBuilder {
     if (docOrName instanceof DocumentReference) {
       this.docRefs.push(docOrName);
     } else if (docOrName instanceof DocumentSnapshot) {
@@ -114,11 +113,10 @@ export class BundleBuilder {
     }
   }
 
-  private pushLengthPrefixedString(readable: Readable, payload: string) {
+  private lengthPrefixedBuffer(payload: string): Buffer {
     const buffer = Buffer.from(payload, 'utf-8');
     const lengthBuffer = Buffer.from(buffer.length.toString());
-
-    readable.push(Buffer.concat([lengthBuffer, buffer]));
+    return Buffer.concat([lengthBuffer, buffer]);
   }
 
   stream(): NodeJS.ReadableStream {
@@ -169,18 +167,20 @@ export class BundleBuilder {
       read: async size => {
         await Promise.all(promises);
         const metadata: firestore.IBundleMetadata = {
-          id: this.id,
+          id: this.bundleId,
           createTime: this.latestReadTime.toProto().timestampValue,
         };
-        this.pushLengthPrefixedString(
-          readable,
-          JSON.stringify({metadata} as firestore.IBundleElement)
+        readable.push(
+          this.lengthPrefixedBuffer(
+            JSON.stringify({metadata} as firestore.IBundleElement)
+          )
         );
 
         for (const namedQuery of this.namedQueries.values()) {
-          this.pushLengthPrefixedString(
-            readable,
-            JSON.stringify({namedQuery} as firestore.IBundleElement)
+          readable.push(
+            this.lengthPrefixedBuffer(
+              JSON.stringify({namedQuery} as firestore.IBundleElement)
+            )
           );
         }
 
@@ -189,13 +189,15 @@ export class BundleBuilder {
             bundledDocument.metadata;
           const document: api.IDocument = bundledDocument.document;
 
-          this.pushLengthPrefixedString(
-            readable,
-            JSON.stringify({documentMetadata} as firestore.IBundleElement)
+          readable.push(
+            this.lengthPrefixedBuffer(
+              JSON.stringify({documentMetadata} as firestore.IBundleElement)
+            )
           );
-          this.pushLengthPrefixedString(
-            readable,
-            JSON.stringify({document} as firestore.IBundleElement)
+          readable.push(
+            this.lengthPrefixedBuffer(
+              JSON.stringify({document} as firestore.IBundleElement)
+            )
           );
         }
         readable.push(null);
