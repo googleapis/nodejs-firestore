@@ -1,7 +1,7 @@
 import synthtool as s
 import synthtool.gcp as gcp
+import synthtool.languages.node as node
 import logging
-import subprocess
 import os
 
 logging.basicConfig(level=logging.DEBUG)
@@ -163,11 +163,10 @@ s.replace(".jsdoc.js", "protos", "build/protos", 1)
 # Remove auto-generated packaging tests
 os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
 
-# Node.js specific cleanup
-subprocess.run(["npm", "install"])
-subprocess.run(["npm", "run", "fix"])
+node.install()
+node.fix()
 os.chdir("dev")
-subprocess.run(["npx", "compileProtos", "src"])
+node.compile_protos()
 os.chdir("protos")
 os.unlink('protos.js')
 os.unlink('protos.d.ts')
