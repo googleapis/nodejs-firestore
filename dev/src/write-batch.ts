@@ -344,7 +344,7 @@ export class WriteBatch {
       }
 
       const hasMerge = mergePaths || mergeLeaves;
-      if (hasMerge && !documentMask.isEmpty) {
+      if (hasMerge && (!documentMask.isEmpty || transform.isEmpty)) {
         write.updateMask = documentMask!.toProto();
       }
 

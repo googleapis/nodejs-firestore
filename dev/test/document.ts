@@ -1150,6 +1150,7 @@ describe('set document', () => {
           request,
           set({
             document: document('documentId'),
+            mask: updateMask(),
           })
         );
         return response(writeResult(1));
