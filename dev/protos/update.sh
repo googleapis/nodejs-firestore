@@ -91,7 +91,7 @@ PBJS_ARGS=( --proto_path=. \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
   "${PROTOS_DIR}/google/longrunning/*.proto"
-sed -i .bak 's:number|Long:number|string:g' firestore_v1_proto_api.js
+perl -pi -e 's/number\|Long/number\|string/g' firestore_v1_proto_api.js
 "${PBTS}" -o firestore_v1_proto_api.d.ts firestore_v1_proto_api.js
 
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_admin_v1_proto_api.js \
@@ -100,7 +100,7 @@ sed -i .bak 's:number|Long:number|string:g' firestore_v1_proto_api.js
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
   "${PROTOS_DIR}/google/longrunning/*.proto"
-sed -i .bak 's:number|Long:number|string:g' firestore_admin_v1_proto_api.js
+perl -pi -e 's/number\|Long/number\|string/g' firestore_admin_v1_proto_api.js
 "${PBTS}" -o firestore_admin_v1_proto_api.d.ts firestore_admin_v1_proto_api.js
 
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1beta1_proto_api.js \
@@ -109,7 +109,7 @@ sed -i .bak 's:number|Long:number|string:g' firestore_admin_v1_proto_api.js
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
   "${PROTOS_DIR}/google/longrunning/*.proto"
-sed -i .bak 's:number|Long:number|string:g' firestore_v1beta1_proto_api.js
+perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
 "${PBTS}" -o firestore_v1beta1_proto_api.d.ts firestore_v1beta1_proto_api.js
 
 node  "${PROTOS_DIR}"/../../scripts/license.js *.d.ts *.js
