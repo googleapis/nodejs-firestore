@@ -1873,7 +1873,7 @@ export class Query<T = DocumentData> {
     });
 
     responseStream.pipe(transform);
-    responseStream.on('error', transform.destroy);
+    responseStream.on('error', e => transform.destroy(e));
     return transform;
   }
 
