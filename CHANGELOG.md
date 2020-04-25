@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.7.5](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.4...v3.7.5) (2020-04-25)
+
+
+### Bug Fixes
+
+* return errors from Query.stream() ([#1046](https://www.github.com/googleapis/nodejs-firestore/issues/1046)) ([4b65fca](https://www.github.com/googleapis/nodejs-firestore/commit/4b65fca3d7aa9618ff944c02f059d08f39b4cac3))
+
 ### [3.7.4](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.3...v3.7.4) (2020-04-09)
 
 
