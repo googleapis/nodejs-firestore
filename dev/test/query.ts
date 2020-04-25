@@ -17,7 +17,13 @@ import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 
 import {google} from '../protos/firestore_v1_proto_api';
-import {FieldPath, FieldValue, Firestore, setLogFunction} from '../src';
+import {
+  FieldPath,
+  FieldValue,
+  Firestore,
+  QueryDocumentSnapshot,
+  setLogFunction,
+} from '../src';
 import {DocumentData, DocumentReference, Query, Timestamp} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
@@ -558,7 +564,7 @@ describe('query interface', () => {
     });
   });
 
-  it('handles stream exception after initialization', () => {
+  it('handles stream exception after initialization (with get())', () => {
     const overrides: ApiOverride = {
       runQuery: () => {
         return stream(result('first'), new Error('Expected error'));
@@ -575,6 +581,29 @@ describe('query interface', () => {
         .catch(err => {
           expect(err.message).to.equal('Expected error');
         });
+    });
+  });
+
+  it('handles stream exception after initialization (with stream())', done => {
+    const overrides: ApiOverride = {
+      runQuery: () => {
+        return stream(result('first'), new Error('Expected error'));
+      },
+    };
+
+    createInstance(overrides).then(firestore => {
+      const result = firestore.collection('collectionId').stream();
+
+      let resultCount = 0;
+      result.on('data', doc => {
+        expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
+        ++resultCount;
+      });
+      result.on('error', err => {
+        expect(resultCount).to.equal(1);
+        expect(err.message).to.equal('Expected error');
+        done();
+      });
     });
   });
 
