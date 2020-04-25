@@ -1,5 +1,3 @@
-import {DocumentReference, DocumentSnapshot, Query, QuerySnapshot} from "../dev/src";
-
 /**
  * @fileoverview Firestore Server API.
  *
@@ -168,13 +166,6 @@ declare namespace FirebaseFirestore {
    * be included in the bundle.
    */
   export class BundleBuilder {
-
-    /**
-     * Adds a Firestore document to the bundle. Both the document data and it's
-     * read time will be included in the bundle.
-     */
-    add(doc: DocumentReference): BundleBuilder;
-
     /**
      * Adds a Firestore document snapshot to the bundle. Both the document data
      * and it's query read time will be included in the bundle.
@@ -186,20 +177,6 @@ declare namespace FirebaseFirestore {
      * it's query read time will be included in the bundle.
      */
     add(queryName: string, querySnap: QuerySnapshot): BundleBuilder;
-
-    /**
-     * Adds a Firestore query to the bundle. Both the query result (at the time
-     * when the bundle is materialized) and the query itself, including it's read time
-     * will be included in the bundle.
-     */
-    add(queryName: string, query: Query): BundleBuilder;
-
-    /**
-     * Adds a Firestore query to the bundle. Both the query result (at the time when `build()`
-     * is called) and the query itself, including its resume token will be included in the
-     * bundle.
-     */
-    add(queryName: string, query: Query): BundleBuilder;
 
     /**
      * Builds the bundle with the documents and query results added to this bundle.

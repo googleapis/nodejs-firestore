@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as assert from 'assert';
 import {Readable} from 'stream';
 
 import {firestore, google} from '../protos/firestore_v1_proto_api';
 
 import {DocumentSnapshot} from './document';
-import {DocumentReference, Query, QuerySnapshot} from './reference';
+import {QuerySnapshot} from './reference';
 import {Timestamp} from './timestamp';
 
 import api = google.firestore.v1;
@@ -31,22 +30,9 @@ import api = google.firestore.v1;
  * be included in the bundle.
  */
 export class BundleBuilder {
-  // DocumentReferences added to the bundle.
-  private docRefs: DocumentReference[] = [];
-  // Queries added to the bundle, keyed by the query names.
-  private queries: Map<string, Query> = new Map<string, Query>();
-
-  // DocumentSnapshots added to the bundle.
-  private docSnaps: DocumentSnapshot[] = [];
-  // QuerySnapshots added to the bundle, keyed by the query names.
-  private querySnaps: Map<string, QuerySnapshot> = new Map<
-    string,
-    QuerySnapshot
-  >();
-
-  // Resulting documents for the bundle.
+  // Resulting documents for the bundle, keyed by full document path.
   private documents: Map<string, BundledDocument> = new Map();
-  // Named queries saved in the bundle.
+  // Named queries saved in the bundle, keyed by query name.
   private namedQueries: Map<string, firestore.INamedQuery> = new Map();
 
   // The latest read time among all bundled documents and queries.
@@ -54,22 +40,32 @@ export class BundleBuilder {
 
   constructor(private bundleId: string) {}
 
-  add(documentRef: DocumentReference): BundleBuilder;
   add(documentSnapshot: DocumentSnapshot): BundleBuilder;
   add(queryName: string, querySnap: QuerySnapshot): BundleBuilder;
-  add(queryName: string, query: Query): BundleBuilder;
+  /**
+   * Adds a Firestore document snapshot or query snapshot to the bundle.
+   * Both the documents data and the query read time will be included in the bundle.
+   *
+   * @param {DocumentSnapshot | string=} documentOrName A document snapshot to add or a name of a query.
+   * @param {Query?=} querySnapshot A query snapshot to add to the bundle, if provided.
+   * @returns {BundleBuilder} This instance.
+   *
+   * @example
+   * let bundle = firestore.bundle('data-bundle');
+   * const bundleStream =
+   *    await bundle.add(await firestore.doc('abc/123').get()) // Add a document
+   *                .add('coll-query', await firestore.collection('coll').get()) // Add a named query.
+   *                .stream();
+   * // Stream `bundleStream` to clients.
+   */
   add(
-    docOrName: DocumentReference | DocumentSnapshot | string,
-    query?: QuerySnapshot | Query
+    documentOrName: DocumentSnapshot | string,
+    querySnapshot?: QuerySnapshot
   ): BundleBuilder {
-    if (docOrName instanceof DocumentReference) {
-      this.docRefs.push(docOrName);
-    } else if (docOrName instanceof DocumentSnapshot) {
-      this.docSnaps.push(docOrName);
-    } else if (query instanceof Query) {
-      this.queries.set(docOrName, query);
-    } else if (query instanceof QuerySnapshot) {
-      this.querySnaps.set(docOrName, query);
+    if (documentOrName instanceof DocumentSnapshot) {
+      this.addBundledDocument(documentOrName);
+    } else if (querySnapshot instanceof QuerySnapshot) {
+      this.addNamedQuery(documentOrName, querySnapshot);
     }
 
     return this;
@@ -98,6 +94,10 @@ export class BundleBuilder {
   }
 
   private addNamedQuery(name: string, querySnap: QuerySnapshot) {
+    if (this.namedQueries.has(name)) {
+      throw new Error(`Query name conflict: ${name} is already added.`);
+    }
+
     this.namedQueries.set(name, {
       name,
       bundledQuery: querySnap.query.toBundledQuery(),
@@ -120,52 +120,9 @@ export class BundleBuilder {
   }
 
   stream(): NodeJS.ReadableStream {
-    assert(
-      this.docRefs.length +
-        this.docSnaps.length +
-        this.queries.size +
-        this.querySnaps.size >
-        0,
-      'Nothing is added to the bundle.'
-    );
-    for (const snap of this.docSnaps) {
-      this.addBundledDocument(snap);
-    }
-
-    for (const [name, snap] of Array.from(this.querySnaps)) {
-      if (this.namedQueries.has(name)) {
-        throw new Error(`Query name conflict: ${name}`);
-      }
-
-      this.addNamedQuery(name, snap);
-    }
-
-    const promises: Array<Promise<void>> = [];
-    for (const doc of this.docRefs) {
-      promises.push(
-        doc.get().then(snap => {
-          this.addBundledDocument(snap);
-        })
-      );
-    }
-
-    for (const [name, query] of Array.from(this.queries)) {
-      if (this.namedQueries.has(name)) {
-        throw new Error(`Query name conflict: ${name}`);
-      }
-
-      promises.push(
-        query.get().then(snap => {
-          const querySnap = snap as QuerySnapshot;
-          this.addNamedQuery(name, querySnap);
-        })
-      );
-    }
-
     const readable = new Readable({
       objectMode: false,
-      read: async size => {
-        await Promise.all(promises);
+      read: () => {
         const metadata: firestore.IBundleMetadata = {
           id: this.bundleId,
           createTime: this.latestReadTime.toProto().timestampValue,
