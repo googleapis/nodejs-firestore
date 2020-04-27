@@ -631,8 +631,13 @@ export class DocumentMask {
    * @private
    * @param data An object with fields to modify. Only the keys are used to
    * extract the document mask.
+   * @param includeFieldTransforms Whether to include all field transforms in
+   * the mask.
    */
-  static fromObject(data: DocumentData): DocumentMask {
+  static fromObject(
+    data: DocumentData,
+    includeFieldTransforms = false
+  ): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
     function extractFieldPaths(
@@ -652,7 +657,7 @@ export class DocumentMask {
           : childSegment;
         const value = currentData[key];
         if (value instanceof FieldTransform) {
-          if (value.includeInDocumentMask) {
+          if (value.includeInDocumentMask || includeFieldTransforms) {
             fieldPaths.push(childPath);
           }
         } else if (isPlainObject(value)) {

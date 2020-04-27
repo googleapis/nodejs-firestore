@@ -334,8 +334,13 @@ export class WriteBatch {
 
       if (mergePaths) {
         documentMask!.removeFields(transform.fields);
-      } else {
-        documentMask = DocumentMask.fromObject(firestoreData);
+      } else if (mergeLeaves) {
+        // Include all FieldTransforms in the mask to ensure existing fields
+        // do not get overwritten.
+        documentMask = DocumentMask.fromObject(
+          firestoreData,
+          /** includeFieldTransforms= */ true
+        );
       }
 
       const write = document.toProto();
@@ -343,8 +348,7 @@ export class WriteBatch {
         write.updateTransforms = transform.toProto(this._serializer);
       }
 
-      const hasMerge = mergePaths || mergeLeaves;
-      if (hasMerge && (!documentMask.isEmpty || transform.isEmpty)) {
+      if (mergePaths || mergeLeaves) {
         write.updateMask = documentMask!.toProto();
       }
 
