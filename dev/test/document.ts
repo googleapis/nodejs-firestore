@@ -915,6 +915,7 @@ describe('set document', () => {
           set({
             document: document('documentId'),
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
+            mask: updateMask(),
           })
         );
         return response(writeResult(1));
@@ -1043,6 +1044,7 @@ describe('set document', () => {
           request,
           set({
             document: document('documentId'),
+            mask: updateMask(),
           })
         );
         return response(writeResult(1));
@@ -1150,6 +1152,7 @@ describe('set document', () => {
           request,
           set({
             document: document('documentId'),
+            mask: updateMask(),
           })
         );
         return response(writeResult(1));
