@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "3.7.3",
+  "version": "3.7.5",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -46,7 +46,8 @@
     "prepare": "npm run compile",
     "docs-test": "linkinator docs",
     "predocs-test": "npm run docs",
-    "prelint": "cd samples; npm link ../; npm i"
+    "prelint": "cd samples; npm link ../; npm install",
+    "precompile": "gts clean"
   },
   "dependencies": {
     "deep-equal": "^2.0.0",

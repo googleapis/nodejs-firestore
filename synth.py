@@ -1,10 +1,13 @@
 import synthtool as s
 import synthtool.gcp as gcp
+import synthtool.languages.node as node
 import logging
-import subprocess
 import os
 
 logging.basicConfig(level=logging.DEBUG)
+
+AUTOSYNTH_MULTIPLE_COMMITS = True
+
 
 gapic_micro = gcp.GAPICMicrogenerator()
 
@@ -85,11 +88,10 @@ s.replace(
 # Remove auto-generated packaging tests
 os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
 
-# Node.js specific cleanup
-subprocess.run(["npm", "install"])
-subprocess.run(["npm", "run", "fix"])
+node.install()
+node.fix()
 os.chdir("dev")
-subprocess.run(["npx", "compileProtos", "src"])
+node.compile_protos()
 os.unlink('protos/protos.js')
 os.unlink('protos/protos.d.ts')
 os.unlink('.jsdoc.js')
