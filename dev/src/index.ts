@@ -21,6 +21,7 @@ import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
+import {BulkWriter} from './bulk-writer';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
   DocumentSnapshot,
@@ -43,6 +44,7 @@ import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
+  BulkWriterOptions,
   DocumentData,
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
@@ -84,6 +86,7 @@ export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {setLogFunction} from './logger';
 export {
+  BulkWriterOptions,
   FirestoreDataConverter,
   UpdateData,
   DocumentData,
@@ -638,6 +641,44 @@ export class Firestore {
    */
   batch(): WriteBatch {
     return new WriteBatch(this);
+  }
+
+  /**
+   * Creates a [BulkWriter]{@link BulkWriter}, used for performing
+   * multiple writes in parallel. Gradually ramps up writes as specified
+   * by the 500/50/5 rule.
+   *
+   * @see [500/50/5 Documentation]{@link https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic}
+   *
+   * @private
+   * @param {object=} options BulkWriter options.
+   * @param {boolean=} options.disableThrottling Whether to disable throttling
+   * as specified by the 500/50/5 rule.
+   * @returns {WriteBatch} A BulkWriter that operates on this Firestore
+   * client.
+   *
+   * @example
+   * let bulkWriter = firestore.bulkWriter();
+   *
+   * bulkWriter.create(firestore.doc('col/doc1'), {foo: 'bar'})
+   *   .then(res => {
+   *     console.log(`Added document at ${res.writeTime}`);
+   *   });
+   * bulkWriter.update(firestore.doc('col/doc2'), {foo: 'bar'})
+   *   .then(res => {
+   *     console.log(`Updated document at ${res.writeTime}`);
+   *   });
+   * bulkWriter.delete(firestore.doc('col/doc3'))
+   *   .then(res => {
+   *     console.log(`Deleted document at ${res.writeTime}`);
+   *   });
+   * await bulkWriter.flush().then(() => {
+   *   console.log('Executed all writes');
+   * });
+   * bulkWriter.close();
+   */
+  _bulkWriter(options?: BulkWriterOptions): BulkWriter {
+    return new BulkWriter(this, !options?.disableThrottling);
   }
 
   /**

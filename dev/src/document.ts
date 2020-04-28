@@ -453,16 +453,6 @@ export class DocumentSnapshot<T = DocumentData> {
   }
 
   /**
-   * Checks whether this DocumentSnapshot contains any fields.
-   *
-   * @private
-   * @return {boolean}
-   */
-  get isEmpty(): boolean {
-    return this._fieldsProto === undefined || isEmpty(this._fieldsProto);
-  }
-
-  /**
    * Convert a document snapshot to the Firestore 'Document' Protobuf.
    *
    * @private
@@ -951,29 +941,16 @@ export class DocumentTransform<T = DocumentData> {
   }
 
   /**
-   * Converts a document transform to the Firestore 'DocumentTransform' Proto.
+   * Converts a document transform to the Firestore 'FieldTransform' Proto.
    *
    * @private
    * @param serializer The Firestore serializer
-   * @returns A Firestore 'DocumentTransform' Proto or 'null' if this transform
-   * is empty.
+   * @returns A list of Firestore 'FieldTransform' Protos
    */
-  toProto(serializer: Serializer): api.IWrite | null {
-    if (this.isEmpty) {
-      return null;
-    }
-
-    const fieldTransforms: api.DocumentTransform.IFieldTransform[] = [];
-    for (const [path, transform] of this.transforms) {
-      fieldTransforms.push(transform.toProto(serializer, path));
-    }
-
-    return {
-      transform: {
-        document: this.ref.formattedName,
-        fieldTransforms,
-      },
-    };
+  toProto(serializer: Serializer): api.DocumentTransform.IFieldTransform[] {
+    return Array.from(this.transforms, ([path, transform]) =>
+      transform.toProto(serializer, path)
+    );
   }
 }
 
