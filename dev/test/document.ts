@@ -915,7 +915,6 @@ describe('set document', () => {
           set({
             document: document('documentId'),
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
-            mask: updateMask('a', 'b.c'),
           })
         );
         return response(writeResult(1));

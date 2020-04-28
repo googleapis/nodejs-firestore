@@ -335,12 +335,7 @@ export class WriteBatch {
       if (mergePaths) {
         documentMask!.removeFields(transform.fields);
       } else if (mergeLeaves) {
-        // Include all FieldTransforms in the mask to ensure existing fields
-        // do not get overwritten.
-        documentMask = DocumentMask.fromObject(
-          firestoreData,
-          /** includeFieldTransforms= */ true
-        );
+        documentMask = DocumentMask.fromObject(firestoreData);
       }
 
       const write = document.toProto();

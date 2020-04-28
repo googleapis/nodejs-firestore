@@ -18,9 +18,7 @@
                 "name": "projects/projectID/databases/(default)/documents/C/d"
               },
               "updateMask": {
-                "fieldPaths": [
-                  "a"
-                ]
+                "fieldPaths": []
               },
               "updateTransforms": [
                 {
