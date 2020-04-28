@@ -672,10 +672,9 @@ export class Firestore {
    *   .then(res => {
    *     console.log(`Deleted document at ${res.writeTime}`);
    *   });
-   * await bulkWriter.flush().then(() => {
+   * await bulkWriter.close().then(() => {
    *   console.log('Executed all writes');
    * });
-   * bulkWriter.close();
    */
   _bulkWriter(options?: BulkWriterOptions): BulkWriter {
     return new BulkWriter(this, !options?.disableThrottling);
