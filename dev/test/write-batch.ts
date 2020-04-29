@@ -15,6 +15,7 @@
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 
+import {Status} from 'google-gax';
 import {
   FieldValue,
   Firestore,
@@ -23,6 +24,7 @@ import {
   WriteBatch,
   WriteResult,
 } from '../src';
+import {BatchWriteResult} from '../src/write-batch';
 import {
   ApiOverride,
   createInstance,
@@ -65,8 +67,8 @@ describe('set() method', () => {
     );
   });
 
-  it('accepts preconditions', () => {
-    writeBatch.set(firestore.doc('sub/doc'), {exists: false});
+  it('accepts document data', () => {
+    writeBatch.set(firestore.doc('sub/doc'), {foo: 'bar'});
   });
 
   it('works with null objects', () => {
@@ -198,17 +200,12 @@ describe('batch support', () => {
                 fields: {},
                 name: documentName,
               },
-            },
-            {
-              transform: {
-                document: documentName,
-                fieldTransforms: [
-                  {
-                    fieldPath: 'foo',
-                    setToServerValue: REQUEST_TIME,
-                  },
-                ],
-              },
+              updateTransforms: [
+                {
+                  fieldPath: 'foo',
+                  setToServerValue: REQUEST_TIME,
+                },
+              ],
             },
             {
               currentDocument: {
@@ -246,14 +243,6 @@ describe('batch support', () => {
             seconds: 0,
           },
           writeResults: [
-            // This write result conforms to the Write +
-            // DocumentTransform and won't be returned in the response.
-            {
-              updateTime: {
-                nanos: 1337,
-                seconds: 1337,
-              },
-            },
             {
               updateTime: {
                 nanos: 0,
@@ -473,6 +462,91 @@ describe('batch support', () => {
           expect(commitCalled).to.equal(3);
           delete process.env.FUNCTION_TRIGGER_TYPE;
         });
+    });
+  });
+});
+
+describe('bulkCommit support', () => {
+  const documentName = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
+
+  let firestore: Firestore;
+  let writeBatch: WriteBatch;
+
+  beforeEach(() => {
+    const overrides: ApiOverride = {
+      batchWrite: request => {
+        expect(request).to.deep.eq({
+          database: `projects/${PROJECT_ID}/databases/(default)`,
+          writes: [
+            {
+              update: {
+                fields: {},
+                name: documentName,
+              },
+              updateTransforms: [
+                {
+                  fieldPath: 'foo',
+                  setToServerValue: REQUEST_TIME,
+                },
+              ],
+            },
+            {
+              currentDocument: {
+                exists: true,
+              },
+              update: {
+                fields: {
+                  foo: {
+                    stringValue: 'bar',
+                  },
+                },
+                name: documentName,
+              },
+              updateMask: {
+                fieldPaths: ['foo'],
+              },
+            },
+          ],
+        });
+        return response({
+          writeResults: [
+            {
+              updateTime: {
+                nanos: 0,
+                seconds: 0,
+              },
+            },
+            {
+              updateTime: null,
+            },
+          ],
+          status: [{code: 0}, {code: 14}],
+        });
+      },
+    };
+    return createInstance(overrides).then(firestoreClient => {
+      firestore = firestoreClient;
+      writeBatch = firestore.batch();
+    });
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  function verifyResponse(writeResults: BatchWriteResult[]) {
+    expect(writeResults[0].writeTime!.isEqual(new Timestamp(0, 0))).to.be.true;
+    expect(writeResults[1].writeTime).to.be.null;
+    expect(writeResults[0].status.code).to.equal(Status.OK);
+    expect(writeResults[1].status.code).to.equal(Status.UNAVAILABLE);
+  }
+
+  it('bulkCommit', () => {
+    const documentName = firestore.doc('col/doc');
+
+    writeBatch.set(documentName, {foo: FieldValue.serverTimestamp()});
+    writeBatch.update(documentName, {foo: 'bar'});
+
+    return writeBatch.bulkCommit().then(resp => {
+      verifyResponse(resp);
     });
   });
 });

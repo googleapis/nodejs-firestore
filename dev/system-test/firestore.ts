@@ -438,6 +438,21 @@ describe('DocumentReference class', () => {
       });
   });
 
+  it('supports increment() with set() with merge', () => {
+    const baseData = {sum: 1};
+    const updateData = {sum: FieldValue.increment(1)};
+    const expectedData = {sum: 2};
+
+    const ref = randomCol.doc('doc');
+    return ref
+      .set(baseData)
+      .then(() => ref.set(updateData, {merge: true}))
+      .then(() => ref.get())
+      .then(doc => {
+        expect(doc.data()).to.deep.equal(expectedData);
+      });
+  });
+
   it('supports arrayUnion()', () => {
     const baseObject = {
       a: [],
@@ -1981,11 +1996,17 @@ describe('Transaction class', () => {
   it('has update() method', () => {
     const ref = randomCol.doc('doc');
     return ref
-      .set({foo: 'bar'})
+      .set({
+        boo: ['ghost', 'sebastian'],
+        moo: 'chicken',
+      })
       .then(() => {
         return firestore.runTransaction(updateFunction => {
           return updateFunction.get(ref).then(() => {
-            updateFunction.update(ref, {foo: 'foobar'});
+            updateFunction.update(ref, {
+              boo: FieldValue.arrayRemove('sebastian'),
+              moo: 'cow',
+            });
           });
         });
       })
@@ -1993,7 +2014,10 @@ describe('Transaction class', () => {
         return ref.get();
       })
       .then(doc => {
-        expect(doc.get('foo')).to.equal('foobar');
+        expect(doc.data()).to.deep.equal({
+          boo: ['ghost'],
+          moo: 'cow',
+        });
       });
   });
 
