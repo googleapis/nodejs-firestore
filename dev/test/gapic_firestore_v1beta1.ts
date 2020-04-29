@@ -1263,7 +1263,6 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.WriteRequest()
       );
       request.database = '';
-      const expectedHeaderRequestParams = 'database=';
       const expectedError = new Error('expected');
       client.innerApiCalls.write = stubBidiStreamingCall(
         undefined,
@@ -1353,7 +1352,6 @@ describe('v1beta1.FirestoreClient', () => {
         new protos.google.firestore.v1beta1.ListenRequest()
       );
       request.database = '';
-      const expectedHeaderRequestParams = 'database=';
       const expectedError = new Error('expected');
       client.innerApiCalls.listen = stubBidiStreamingCall(
         undefined,

@@ -15,8 +15,6 @@
  */
 import * as assert from 'assert';
 
-import {Timestamp} from './timestamp';
-
 /**
  * A helper that uses the Token Bucket algorithm to rate limit the number of
  * operations that can be made in a second.

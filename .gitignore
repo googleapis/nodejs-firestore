@@ -9,11 +9,6 @@ build/
 system-test/secrets.js
 system-test/*key.json
 *.lock
-<<<<<<< HEAD
-=======
-build/
-package-lock.json
->>>>>>> master
 .DS_Store
 package-lock.json
 __pycache__

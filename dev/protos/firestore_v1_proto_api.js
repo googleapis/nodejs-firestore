@@ -3602,52 +3602,10 @@
                 UninterpretedOption.prototype.doubleValue = 0;
     
                 /**
-<<<<<<< HEAD
                  * UninterpretedOption stringValue.
                  * @member {Uint8Array} stringValue
                  * @memberof google.protobuf.UninterpretedOption
                  * @instance
-=======
-                 * Callback as used by {@link google.firestore.v1.Firestore#batchWrite}.
-                 * @memberof google.firestore.v1.Firestore
-                 * @typedef BatchWriteCallback
-                 * @type {function}
-                 * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1.BatchWriteResponse} [response] BatchWriteResponse
-                 */
-
-                /**
-                 * Calls BatchWrite.
-                 * @function batchWrite
-                 * @memberof google.firestore.v1.Firestore
-                 * @instance
-                 * @param {google.firestore.v1.IBatchWriteRequest} request BatchWriteRequest message or plain object
-                 * @param {google.firestore.v1.Firestore.BatchWriteCallback} callback Node-style callback called with the error, if any, and BatchWriteResponse
-                 * @returns {undefined}
-                 * @variation 1
-                 */
-                Object.defineProperty(Firestore.prototype.batchWrite = function batchWrite(request, callback) {
-                    return this.rpcCall(batchWrite, $root.google.firestore.v1.BatchWriteRequest, $root.google.firestore.v1.BatchWriteResponse, request, callback);
-                }, "name", { value: "BatchWrite" });
-
-                /**
-                 * Calls BatchWrite.
-                 * @function batchWrite
-                 * @memberof google.firestore.v1.Firestore
-                 * @instance
-                 * @param {google.firestore.v1.IBatchWriteRequest} request BatchWriteRequest message or plain object
-                 * @returns {Promise<google.firestore.v1.BatchWriteResponse>} Promise
-                 * @variation 2
-                 */
-                
-                /*
-                 * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
-                 * @memberof google.firestore.v1.Firestore
-                 * @typedef CreateDocumentCallback
-                 * @type {function}
-                 * @param {Error|null} error Error, if any
-                 * @param {google.firestore.v1.Document} [response] Document
->>>>>>> master
                  */
                 UninterpretedOption.prototype.stringValue = $util.newBuffer([]);
     
@@ -6162,304 +6120,9 @@
     
                     return Precondition;
                 })();
-<<<<<<< HEAD
     
                 v1.TransactionOptions = (function() {
     
-=======
-
-                return TargetChange;
-            })();
-
-            v1.ListCollectionIdsRequest = (function() {
-
-                /**
-                 * Properties of a ListCollectionIdsRequest.
-                 * @memberof google.firestore.v1
-                 * @interface IListCollectionIdsRequest
-                 * @property {string|null} [parent] ListCollectionIdsRequest parent
-                 * @property {number|null} [pageSize] ListCollectionIdsRequest pageSize
-                 * @property {string|null} [pageToken] ListCollectionIdsRequest pageToken
-                 */
-
-                /**
-                 * Constructs a new ListCollectionIdsRequest.
-                 * @memberof google.firestore.v1
-                 * @classdesc Represents a ListCollectionIdsRequest.
-                 * @implements IListCollectionIdsRequest
-                 * @constructor
-                 * @param {google.firestore.v1.IListCollectionIdsRequest=} [properties] Properties to set
-                 */
-                function ListCollectionIdsRequest(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * ListCollectionIdsRequest parent.
-                 * @member {string} parent
-                 * @memberof google.firestore.v1.ListCollectionIdsRequest
-                 * @instance
-                 */
-                ListCollectionIdsRequest.prototype.parent = "";
-
-                /**
-                 * ListCollectionIdsRequest pageSize.
-                 * @member {number} pageSize
-                 * @memberof google.firestore.v1.ListCollectionIdsRequest
-                 * @instance
-                 */
-                ListCollectionIdsRequest.prototype.pageSize = 0;
-
-                /**
-                 * ListCollectionIdsRequest pageToken.
-                 * @member {string} pageToken
-                 * @memberof google.firestore.v1.ListCollectionIdsRequest
-                 * @instance
-                 */
-                ListCollectionIdsRequest.prototype.pageToken = "";
-
-                return ListCollectionIdsRequest;
-            })();
-
-            v1.ListCollectionIdsResponse = (function() {
-
-                /**
-                 * Properties of a ListCollectionIdsResponse.
-                 * @memberof google.firestore.v1
-                 * @interface IListCollectionIdsResponse
-                 * @property {Array.<string>|null} [collectionIds] ListCollectionIdsResponse collectionIds
-                 * @property {string|null} [nextPageToken] ListCollectionIdsResponse nextPageToken
-                 */
-
-                /**
-                 * Constructs a new ListCollectionIdsResponse.
-                 * @memberof google.firestore.v1
-                 * @classdesc Represents a ListCollectionIdsResponse.
-                 * @implements IListCollectionIdsResponse
-                 * @constructor
-                 * @param {google.firestore.v1.IListCollectionIdsResponse=} [properties] Properties to set
-                 */
-                function ListCollectionIdsResponse(properties) {
-                    this.collectionIds = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * ListCollectionIdsResponse collectionIds.
-                 * @member {Array.<string>} collectionIds
-                 * @memberof google.firestore.v1.ListCollectionIdsResponse
-                 * @instance
-                 */
-                ListCollectionIdsResponse.prototype.collectionIds = $util.emptyArray;
-
-                /**
-                 * ListCollectionIdsResponse nextPageToken.
-                 * @member {string} nextPageToken
-                 * @memberof google.firestore.v1.ListCollectionIdsResponse
-                 * @instance
-                 */
-                ListCollectionIdsResponse.prototype.nextPageToken = "";
-
-                return ListCollectionIdsResponse;
-            })();
-
-            v1.BatchWriteRequest = (function() {
-
-                /**
-                 * Properties of a BatchWriteRequest.
-                 * @memberof google.firestore.v1
-                 * @interface IBatchWriteRequest
-                 * @property {string|null} [database] BatchWriteRequest database
-                 * @property {Array.<google.firestore.v1.IWrite>|null} [writes] BatchWriteRequest writes
-                 */
-
-                /**
-                 * Constructs a new BatchWriteRequest.
-                 * @memberof google.firestore.v1
-                 * @classdesc Represents a BatchWriteRequest.
-                 * @implements IBatchWriteRequest
-                 * @constructor
-                 * @param {google.firestore.v1.IBatchWriteRequest=} [properties] Properties to set
-                 */
-                function BatchWriteRequest(properties) {
-                    this.writes = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * BatchWriteRequest database.
-                 * @member {string} database
-                 * @memberof google.firestore.v1.BatchWriteRequest
-                 * @instance
-                 */
-                BatchWriteRequest.prototype.database = "";
-
-                /**
-                 * BatchWriteRequest writes.
-                 * @member {Array.<google.firestore.v1.IWrite>} writes
-                 * @memberof google.firestore.v1.BatchWriteRequest
-                 * @instance
-                 */
-                BatchWriteRequest.prototype.writes = $util.emptyArray;
-
-                return BatchWriteRequest;
-            })();
-
-            v1.BatchWriteResponse = (function() {
-
-                /**
-                 * Properties of a BatchWriteResponse.
-                 * @memberof google.firestore.v1
-                 * @interface IBatchWriteResponse
-                 * @property {Array.<google.firestore.v1.IWriteResult>|null} [writeResults] BatchWriteResponse writeResults
-                 * @property {Array.<google.rpc.IStatus>|null} [status] BatchWriteResponse status
-                 */
-
-                /**
-                 * Constructs a new BatchWriteResponse.
-                 * @memberof google.firestore.v1
-                 * @classdesc Represents a BatchWriteResponse.
-                 * @implements IBatchWriteResponse
-                 * @constructor
-                 * @param {google.firestore.v1.IBatchWriteResponse=} [properties] Properties to set
-                 */
-                function BatchWriteResponse(properties) {
-                    this.writeResults = [];
-                    this.status = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * BatchWriteResponse writeResults.
-                 * @member {Array.<google.firestore.v1.IWriteResult>} writeResults
-                 * @memberof google.firestore.v1.BatchWriteResponse
-                 * @instance
-                 */
-                BatchWriteResponse.prototype.writeResults = $util.emptyArray;
-
-                /**
-                 * BatchWriteResponse status.
-                 * @member {Array.<google.rpc.IStatus>} status
-                 * @memberof google.firestore.v1.BatchWriteResponse
-                 * @instance
-                 */
-                BatchWriteResponse.prototype.status = $util.emptyArray;
-
-                return BatchWriteResponse;
-            })();
-
-            v1.StructuredQuery = (function() {
-
-                /**
-                 * Properties of a StructuredQuery.
-                 * @memberof google.firestore.v1
-                 * @interface IStructuredQuery
-                 * @property {google.firestore.v1.StructuredQuery.IProjection|null} [select] StructuredQuery select
-                 * @property {Array.<google.firestore.v1.StructuredQuery.ICollectionSelector>|null} [from] StructuredQuery from
-                 * @property {google.firestore.v1.StructuredQuery.IFilter|null} [where] StructuredQuery where
-                 * @property {Array.<google.firestore.v1.StructuredQuery.IOrder>|null} [orderBy] StructuredQuery orderBy
-                 * @property {google.firestore.v1.ICursor|null} [startAt] StructuredQuery startAt
-                 * @property {google.firestore.v1.ICursor|null} [endAt] StructuredQuery endAt
-                 * @property {number|null} [offset] StructuredQuery offset
-                 * @property {google.protobuf.IInt32Value|null} [limit] StructuredQuery limit
-                 */
-
-                /**
-                 * Constructs a new StructuredQuery.
-                 * @memberof google.firestore.v1
-                 * @classdesc Represents a StructuredQuery.
-                 * @implements IStructuredQuery
-                 * @constructor
-                 * @param {google.firestore.v1.IStructuredQuery=} [properties] Properties to set
-                 */
-                function StructuredQuery(properties) {
-                    this.from = [];
-                    this.orderBy = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * StructuredQuery select.
-                 * @member {google.firestore.v1.StructuredQuery.IProjection|null|undefined} select
-                 * @memberof google.firestore.v1.StructuredQuery
-                 * @instance
-                 */
-                StructuredQuery.prototype.select = null;
-
-                /**
-                 * StructuredQuery from.
-                 * @member {Array.<google.firestore.v1.StructuredQuery.ICollectionSelector>} from
-                 * @memberof google.firestore.v1.StructuredQuery
-                 * @instance
-                 */
-                StructuredQuery.prototype.from = $util.emptyArray;
-
-                /**
-                 * StructuredQuery where.
-                 * @member {google.firestore.v1.StructuredQuery.IFilter|null|undefined} where
-                 * @memberof google.firestore.v1.StructuredQuery
-                 * @instance
-                 */
-                StructuredQuery.prototype.where = null;
-
-                /**
-                 * StructuredQuery orderBy.
-                 * @member {Array.<google.firestore.v1.StructuredQuery.IOrder>} orderBy
-                 * @memberof google.firestore.v1.StructuredQuery
-                 * @instance
-                 */
-                StructuredQuery.prototype.orderBy = $util.emptyArray;
-
-                /**
-                 * StructuredQuery startAt.
-                 * @member {google.firestore.v1.ICursor|null|undefined} startAt
-                 * @memberof google.firestore.v1.StructuredQuery
-                 * @instance
-                 */
-                StructuredQuery.prototype.startAt = null;
-
-                /**
-                 * StructuredQuery endAt.
-                 * @member {google.firestore.v1.ICursor|null|undefined} endAt
-                 * @memberof google.firestore.v1.StructuredQuery
-                 * @instance
-                 */
-                StructuredQuery.prototype.endAt = null;
-
-                /**
-                 * StructuredQuery offset.
-                 * @member {number} offset
-                 * @memberof google.firestore.v1.StructuredQuery
-                 * @instance
-                 */
-                StructuredQuery.prototype.offset = 0;
-
-                /**
-                 * StructuredQuery limit.
-                 * @member {google.protobuf.IInt32Value|null|undefined} limit
-                 * @memberof google.firestore.v1.StructuredQuery
-                 * @instance
-                 */
-                StructuredQuery.prototype.limit = null;
-
-                StructuredQuery.CollectionSelector = (function() {
-
->>>>>>> master
                     /**
                      * Properties of a TransactionOptions.
                      * @memberof google.firestore.v1
@@ -7808,7 +7471,40 @@
                      * @returns {Promise<google.firestore.v1.ListCollectionIdsResponse>} Promise
                      * @variation 2
                      */
-    
+
+                    /**
+                     * Callback as used by {@link google.firestore.v1.Firestore#batchWrite}.
+                     * @memberof google.firestore.v1.Firestore
+                     * @typedef BatchWriteCallback
+                     * @type {function}
+                     * @param {Error|null} error Error, if any
+                     * @param {google.firestore.v1.BatchWriteResponse} [response] BatchWriteResponse
+                     */
+
+                    /**
+                     * Calls BatchWrite.
+                     * @function batchWrite
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IBatchWriteRequest} request BatchWriteRequest message or plain object
+                     * @param {google.firestore.v1.Firestore.BatchWriteCallback} callback Node-style callback called with the error, if any, and BatchWriteResponse
+                     * @returns {undefined}
+                     * @variation 1
+                     */
+                    Object.defineProperty(Firestore.prototype.batchWrite = function batchWrite(request, callback) {
+                        return this.rpcCall(batchWrite, $root.google.firestore.v1.BatchWriteRequest, $root.google.firestore.v1.BatchWriteResponse, request, callback);
+                    }, "name", { value: "BatchWrite" });
+
+                   /**
+                     * Calls BatchWrite.
+                     * @function batchWrite
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IBatchWriteRequest} request BatchWriteRequest message or plain object
+                     * @returns {Promise<google.firestore.v1.BatchWriteResponse>} Promise
+                     * @variation 2
+                     */
+
                     /**
                      * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
                      * @memberof google.firestore.v1.Firestore
@@ -11430,6 +11126,97 @@
                     };
     
                     return ListCollectionIdsResponse;
+                })();
+
+                v1.BatchWriteRequest = (function() {
+
+                    /**
+                     * Properties of a BatchWriteRequest.
+                     * @memberof google.firestore.v1
+                     * @interface IBatchWriteRequest
+                     * @property {string|null} [database] BatchWriteRequest database
+                     * @property {Array.<google.firestore.v1.IWrite>|null} [writes] BatchWriteRequest writes
+                     */
+    
+                    /**
+                     * Constructs a new BatchWriteRequest.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a BatchWriteRequest.
+                     * @implements IBatchWriteRequest
+                     * @constructor
+                     * @param {google.firestore.v1.IBatchWriteRequest=} [properties] Properties to set
+                     */
+                    function BatchWriteRequest(properties) {
+                        this.writes = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * BatchWriteRequest database.
+                     * @member {string} database
+                     * @memberof google.firestore.v1.BatchWriteRequest
+                     * @instance
+                     */
+                    BatchWriteRequest.prototype.database = "";
+    
+                    /**
+                     * BatchWriteRequest writes.
+                     * @member {Array.<google.firestore.v1.IWrite>} writes
+                     * @memberof google.firestore.v1.BatchWriteRequest
+                     * @instance
+                     */
+                    BatchWriteRequest.prototype.writes = $util.emptyArray;
+    
+                    return BatchWriteRequest;
+                })();
+    
+                v1.BatchWriteResponse = (function() {
+    
+                    /**
+                     * Properties of a BatchWriteResponse.
+                     * @memberof google.firestore.v1
+                     * @interface IBatchWriteResponse
+                     * @property {Array.<google.firestore.v1.IWriteResult>|null} [writeResults] BatchWriteResponse writeResults
+                     * @property {Array.<google.rpc.IStatus>|null} [status] BatchWriteResponse status
+                     */
+    
+                    /**
+                     * Constructs a new BatchWriteResponse.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a BatchWriteResponse.
+                     * @implements IBatchWriteResponse
+                     * @constructor
+                     * @param {google.firestore.v1.IBatchWriteResponse=} [properties] Properties to set
+                     */
+                    function BatchWriteResponse(properties) {
+                        this.writeResults = [];
+                        this.status = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * BatchWriteResponse writeResults.
+                     * @member {Array.<google.firestore.v1.IWriteResult>} writeResults
+                     * @memberof google.firestore.v1.BatchWriteResponse
+                     * @instance
+                     */
+                    BatchWriteResponse.prototype.writeResults = $util.emptyArray;
+    
+                    /**
+                     * BatchWriteResponse status.
+                     * @member {Array.<google.rpc.IStatus>} status
+                     * @memberof google.firestore.v1.BatchWriteResponse
+                     * @instance
+                     */
+                    BatchWriteResponse.prototype.status = $util.emptyArray;
+    
+                    return BatchWriteResponse;
                 })();
     
                 v1.StructuredQuery = (function() {

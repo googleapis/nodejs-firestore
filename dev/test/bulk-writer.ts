@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 import {Status} from 'google-gax';
 

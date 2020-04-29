@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import * as assert from 'assert';
-
 import {google} from '../protos/firestore_v1_proto_api';
 import {
   DocumentMask,

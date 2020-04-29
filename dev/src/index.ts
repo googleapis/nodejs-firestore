@@ -43,11 +43,7 @@ import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
-<<<<<<< HEAD
-=======
   BulkWriterOptions,
-  DocumentData,
->>>>>>> master
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
   GapicClient,
