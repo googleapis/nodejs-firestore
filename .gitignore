@@ -9,6 +9,5 @@ system-test/*key.json
 *.lock
 build/
 package-lock.json
-.vscode
 .DS_Store
 __pycache__
