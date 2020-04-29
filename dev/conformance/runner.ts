@@ -52,10 +52,7 @@ import api = proto.google.firestore.v1;
 type ConformanceProto = any;
 
 /** List of test cases that are ignored. */
-const ignoredRe: RegExp[] = [
-  // TODO(chenbrian): Enable this test once update_transforms support is added.
-  new RegExp('update-paths: ServerTimestamp beside an empty map'),
-];
+const ignoredRe: RegExp[] = [];
 
 /** If non-empty, list the test cases to run exclusively. */
 const exclusiveRe: RegExp[] = [];

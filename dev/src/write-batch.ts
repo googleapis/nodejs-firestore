@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import * as assert from 'assert';
-
 import {google} from '../protos/firestore_v1_proto_api';
 import {
   DocumentMask,
@@ -47,6 +45,7 @@ import {
 } from './validate';
 
 import api = google.firestore.v1;
+import {GoogleError, Status} from 'google-gax';
 
 /*!
  * Google Cloud Functions terminates idle connections after two minutes. After
@@ -102,11 +101,23 @@ export class WriteResult {
   }
 }
 
+/**
+ * A BatchWriteResult wraps the write time and status returned by Firestore
+ * when making BatchWriteRequests.
+ *
+ * @private
+ */
+export class BatchWriteResult {
+  constructor(
+    readonly writeTime: Timestamp | null,
+    readonly status: GoogleError
+  ) {}
+}
+
 /** Helper type to manage the list of writes in a WriteBatch. */
 // TODO(mrschmidt): Replace with api.IWrite
 interface WriteOp {
-  write?: api.IWrite | null;
-  transform?: api.IWrite | null;
+  write: api.IWrite;
   precondition?: api.IPrecondition | null;
 }
 
@@ -193,12 +204,13 @@ export class WriteBatch {
 
     const op = () => {
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
-      const write =
-        !document.isEmpty || transform.isEmpty ? document.toProto() : null;
+      const write = document.toProto();
+      if (!transform.isEmpty) {
+        write.updateTransforms = transform.toProto(this._serializer);
+      }
 
       return {
         write,
-        transform: transform.toProto(this._serializer),
         precondition: precondition.toProto(),
       };
     };
@@ -319,24 +331,21 @@ export class WriteBatch {
 
       if (mergePaths) {
         documentMask!.removeFields(transform.fields);
-      } else {
+      } else if (mergeLeaves) {
         documentMask = DocumentMask.fromObject(firestoreData);
       }
 
-      const hasDocumentData = !document.isEmpty || !documentMask!.isEmpty;
+      const write = document.toProto();
+      if (!transform.isEmpty) {
+        write.updateTransforms = transform.toProto(this._serializer);
+      }
 
-      let write;
-
-      if (!mergePaths && !mergeLeaves) {
-        write = document.toProto();
-      } else if (hasDocumentData || transform.isEmpty) {
-        write = document.toProto()!;
+      if (mergePaths || mergeLeaves) {
         write.updateMask = documentMask!.toProto();
       }
 
       return {
         write,
-        transform: transform.toProto(this._serializer),
       };
     };
 
@@ -483,16 +492,13 @@ export class WriteBatch {
 
     const op = () => {
       const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
-      let write: api.IWrite | null = null;
-
-      if (!document.isEmpty || !documentMask.isEmpty) {
-        write = document.toProto();
-        write!.updateMask = documentMask.toProto();
+      const write = document.toProto();
+      write!.updateMask = documentMask.toProto();
+      if (!transform.isEmpty) {
+        write!.updateTransforms = transform.toProto(this._serializer);
       }
-
       return {
         write,
-        transform: transform.toProto(this._serializer),
         precondition: precondition.toProto(),
       };
     };
@@ -521,6 +527,47 @@ export class WriteBatch {
    */
   commit(): Promise<WriteResult[]> {
     return this.commit_();
+  }
+
+  /**
+   * Commits all pending operations to the database and verifies all
+   * preconditions.
+   *
+   * The writes in the batch are not applied atomically and can be applied out
+   * of order.
+   *
+   * @private
+   */
+  async bulkCommit(): Promise<BatchWriteResult[]> {
+    this._committed = true;
+    const tag = requestTag();
+    await this._firestore.initializeIfNeeded(tag);
+
+    const database = this._firestore.formattedName;
+    const request: api.IBatchWriteRequest = {database, writes: []};
+    const writes = this._ops.map(op => op());
+
+    for (const req of writes) {
+      if (req.precondition) {
+        req.write!.currentDocument = req.precondition;
+      }
+      request.writes!.push(req.write);
+    }
+
+    const response = await this._firestore.request<
+      api.IBatchWriteRequest,
+      api.BatchWriteResponse
+    >('batchWrite', request, tag);
+
+    return (response.writeResults || []).map((result, i) => {
+      const status = response.status[i];
+      const error = new GoogleError(status.message || undefined);
+      error.code = status.code as Status;
+      return new BatchWriteResult(
+        result.updateTime ? Timestamp.fromProto(result.updateTime) : null,
+        error
+      );
+    });
   }
 
   /**
@@ -561,85 +608,38 @@ export class WriteBatch {
         });
     }
 
-    const request: api.ICommitRequest = {database};
+    const request: api.ICommitRequest = {database, writes: []};
     const writes = this._ops.map(op => op());
-    request.writes = [];
 
     for (const req of writes) {
-      assert(
-        req.write || req.transform,
-        'Either a write or transform must be set'
-      );
-
       if (req.precondition) {
-        (req.write || req.transform)!.currentDocument = req.precondition;
+        req.write!.currentDocument = req.precondition;
       }
 
-      if (req.write) {
-        request.writes.push(req.write);
-      }
-
-      if (req.transform) {
-        request.writes.push(req.transform);
-      }
+      request.writes!.push(req.write);
     }
 
     logger(
       'WriteBatch.commit',
       tag,
       'Sending %d writes',
-      request.writes.length
+      request.writes!.length
     );
 
     if (explicitTransaction) {
       request.transaction = explicitTransaction;
     }
+    const response = await this._firestore.request<
+      api.ICommitRequest,
+      api.CommitResponse
+    >('commit', request, tag);
 
-    return this._firestore
-      .request<api.ICommitRequest, api.CommitResponse>('commit', request, tag)
-      .then(resp => {
-        const writeResults: WriteResult[] = [];
-
-        if (request.writes!.length > 0) {
-          assert(
-            Array.isArray(resp.writeResults) &&
-              request.writes!.length === resp.writeResults.length,
-            `Expected one write result per operation, but got ${
-              resp.writeResults.length
-            } results for ${request.writes!.length} operations.`
-          );
-
-          const commitTime = Timestamp.fromProto(resp.commitTime!);
-
-          let offset = 0;
-
-          for (let i = 0; i < writes.length; ++i) {
-            const writeRequest = writes[i];
-
-            // Don't return two write results for a write that contains a
-            // transform, as the fact that we have to split one write
-            // operation into two distinct write requests is an implementation
-            // detail.
-            if (writeRequest.write && writeRequest.transform) {
-              // The document transform is always sent last and produces the
-              // latest update time.
-              ++offset;
-            }
-
-            const writeResult = resp.writeResults[i + offset];
-
-            writeResults.push(
-              new WriteResult(
-                writeResult.updateTime
-                  ? Timestamp.fromProto(writeResult.updateTime)
-                  : commitTime
-              )
-            );
-          }
-        }
-
-        return writeResults;
-      });
+    return (response.writeResults || []).map(
+      writeResult =>
+        new WriteResult(
+          Timestamp.fromProto(writeResult.updateTime || response.commitTime!)
+        )
+    );
   }
 
   /**

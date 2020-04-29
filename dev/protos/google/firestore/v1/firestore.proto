@@ -161,6 +161,14 @@ service Firestore {
     option (google.api.method_signature) = "parent";
   }
 
+  // Commit a batch of non-transactional writes.
+  rpc BatchWrite(BatchWriteRequest) returns (BatchWriteResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/{database=projects/*/databases/*}/documents:batchWrite"
+      body: "*"
+    };
+  }
+
   // Creates a new document.
   rpc CreateDocument(CreateDocumentRequest) returns (Document) {
     option (google.api.http) = {
@@ -755,4 +763,34 @@ message ListCollectionIdsResponse {
 
   // A page token that may be used to continue the list.
   string next_page_token = 2;
+}
+
+// The request for [Firestore.BatchWrite][].
+message BatchWriteRequest {
+  // The database name. In the format:
+  // `projects/{project_id}/databases/{database_id}`.
+  string database = 1;
+  // The writes to apply.
+  // The writes are not applied atomically, and can be applied out of order.
+  // More than 1 write per document is not allowed.
+  // The success status of each write is independent of the other ones (some may
+  // fail and some may succeed) and is specified in the BatchWriteResponse.
+  // Note that the writes here are not applied atomically but the writes in the
+  // Write(stream WriteRequest) are applied atomically and they cannot be
+  // batched.
+  repeated Write writes = 2;
+}
+
+// The response from [Firestore.BatchWrite][].
+message BatchWriteResponse {
+  // The result of applying the writes.
+  //
+  // This i-th write result corresponds to the i-th write in the
+  // request.
+  repeated WriteResult write_results = 1;
+  // The status of applying the writes.
+  //
+  // This i-th write status corresponds to the i-th write in the
+  // request.
+  repeated google.rpc.Status status = 2;
 }
