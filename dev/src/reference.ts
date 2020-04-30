@@ -575,7 +575,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param {FirestoreDataConverter=} converter Converts objects to and from
+   * @param {FirestoreDataConverter} converter Converts objects to and from
    * Firestore.
    * @return A DocumentReference<U> that uses the provided converter.
    */
@@ -2176,7 +2176,7 @@ export class Query<T = DocumentData> {
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param {FirestoreDataConverter=} converter Converts objects to and from
+   * @param {FirestoreDataConverter} converter Converts objects to and from
    * Firestore.
    * @return A Query<U> that uses the provided converter.
    */
@@ -2451,7 +2451,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param {FirestoreDataConverter=} converter Converts objects to and from
+   * @param {FirestoreDataConverter} converter Converts objects to and from
    * Firestore.
    * @return A CollectionReference<U> that uses the provided converter.
    */
