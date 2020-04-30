@@ -535,11 +535,10 @@ export class DocumentReference<T = DocumentData> implements Serializable {
   }
 
   /**
-   * Applies a custom data converter to this DocumentReference, allowing you
-   * to use your own custom model objects with Firestore. When you call
-   * set(), get(), etc. on the returned DocumentReference instance, the
-   * provided converter will convert between Firestore data and your custom
-   * type U.
+   * Applies a custom data converter to this DocumentReference, allowing you to
+   * use your own custom model objects with Firestore. When you call set(),
+   * get(), etc. on the returned DocumentReference instance, the provided
+   * converter will convert between Firestore data and your custom type U.
    *
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
@@ -576,7 +575,8 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param converter Converts objects to and from Firestore.
+   * @param {FirestoreDataConverter=} converter Converts objects to and from
+   * Firestore.
    * @return A DocumentReference<U> that uses the provided converter.
    */
   withConverter<U>(converter: FirestoreDataConverter<U>): DocumentReference<U> {
@@ -2176,7 +2176,8 @@ export class Query<T = DocumentData> {
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param converter Converts objects to and from Firestore.
+   * @param {FirestoreDataConverter=} converter Converts objects to and from
+   * Firestore.
    * @return A Query<U> that uses the provided converter.
    */
   withConverter<U>(converter: FirestoreDataConverter<U>): Query<U> {
@@ -2411,8 +2412,8 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
 
   /**
    * Applies a custom data converter to this CollectionReference, allowing you
-   * to use your own custom model objects with Firestore. When you call add()
-   * on the returned CollectionReference instance, the provided converter will
+   * to use your own custom model objects with Firestore. When you call add() on
+   * the returned CollectionReference instance, the provided converter will
    * convert between Firestore data and your custom type U.
    *
    * Using the converter allows you to specify generic type arguments when
@@ -2450,7 +2451,8 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param converter Converts objects to and from Firestore.
+   * @param {FirestoreDataConverter=} converter Converts objects to and from
+   * Firestore.
    * @return A CollectionReference<U> that uses the provided converter.
    */
   withConverter<U>(
