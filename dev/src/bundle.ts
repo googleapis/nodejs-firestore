@@ -19,6 +19,7 @@ import {firestore, google} from '../protos/firestore_v1_proto_api';
 import {DocumentSnapshot} from './document';
 import {QuerySnapshot} from './reference';
 import {Timestamp} from './timestamp';
+import {validateOptional, validateString} from './validate';
 
 import api = google.firestore.v1;
 
@@ -26,7 +27,7 @@ import api = google.firestore.v1;
  * Builds a Firestore data bundle with results from the given queries and specified
  * documents.
  *
- * For documents in scope for multiple queries, only the latest version will
+ * For documents that are included multiple times, only the latest version will
  * be included in the bundle.
  */
 export class BundleBuilder {
@@ -41,31 +42,36 @@ export class BundleBuilder {
   constructor(private bundleId: string) {}
 
   add(documentSnapshot: DocumentSnapshot): BundleBuilder;
-  add(queryName: string, querySnap: QuerySnapshot): BundleBuilder;
+  add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
   /**
    * Adds a Firestore document snapshot or query snapshot to the bundle.
    * Both the documents data and the query read time will be included in the bundle.
    *
    * @param {DocumentSnapshot | string=} documentOrName A document snapshot to add or a name of a query.
-   * @param {Query?=} querySnapshot A query snapshot to add to the bundle, if provided.
+   * @param {Query=} querySnapshot A query snapshot to add to the bundle, if provided.
    * @returns {BundleBuilder} This instance.
    *
    * @example
    * let bundle = firestore.bundle('data-bundle');
-   * const bundleStream =
-   *    await bundle.add(await firestore.doc('abc/123').get()) // Add a document
-   *                .add('coll-query', await firestore.collection('coll').get()) // Add a named query.
-   *                .stream();
+   * const docSnapshot = await firestore.doc('abc/123').get();
+   * const querySnapshot = await firestore.collection('coll').get();
+   * const bundleStream = bundle.add(docSnapshot) // Add a document
+   *                            .add('coll-query', querySnapshot) // Add a named query.
+   *                            .stream();
    * // Stream `bundleStream` to clients.
    */
   add(
     documentOrName: DocumentSnapshot | string,
     querySnapshot?: QuerySnapshot
   ): BundleBuilder {
-    if (documentOrName instanceof DocumentSnapshot) {
+    if (
+      documentOrName instanceof DocumentSnapshot &&
+      validateOptional(querySnapshot, {optional: true})
+    ) {
       this.addBundledDocument(documentOrName);
     } else if (querySnapshot instanceof QuerySnapshot) {
-      this.addNamedQuery(documentOrName, querySnapshot);
+      validateString('documentOrName', documentOrName);
+      this.addNamedQuery(documentOrName as string, querySnapshot);
     }
 
     return this;
@@ -74,11 +80,10 @@ export class BundleBuilder {
   private addBundledDocument(snap: DocumentSnapshot) {
     if (snap.exists) {
       const docProto = snap.toDocumentProto();
-      if (
-        !this.documents.has(snap.id) ||
-        Timestamp.fromProto(this.documents.get(snap.id)!.metadata.readTime!) <
-          snap.readTime
-      ) {
+      const savedReadTime = Timestamp.fromProto(
+        this.documents.get(snap.id)?.metadata.readTime ?? {}
+      );
+      if (!this.documents.has(snap.id) || savedReadTime < snap.readTime) {
         this.documents.set(snap.id, {
           document: docProto,
           metadata: {
@@ -113,8 +118,12 @@ export class BundleBuilder {
     }
   }
 
-  private lengthPrefixedBuffer(payload: string): Buffer {
-    const buffer = Buffer.from(payload, 'utf-8');
+  // Converts a IBundleElement to a Buffer whose content is the length prefixed JSON representation
+  // of the element.
+  private elementToLengthPrefixedBuffer(
+    bundleElement: firestore.IBundleElement
+  ): Buffer {
+    const buffer = Buffer.from(JSON.stringify(bundleElement), 'utf-8');
     const lengthBuffer = Buffer.from(buffer.length.toString());
     return Buffer.concat([lengthBuffer, buffer]);
   }
@@ -127,18 +136,10 @@ export class BundleBuilder {
           id: this.bundleId,
           createTime: this.latestReadTime.toProto().timestampValue,
         };
-        readable.push(
-          this.lengthPrefixedBuffer(
-            JSON.stringify({metadata} as firestore.IBundleElement)
-          )
-        );
+        readable.push(this.elementToLengthPrefixedBuffer({metadata}));
 
         for (const namedQuery of this.namedQueries.values()) {
-          readable.push(
-            this.lengthPrefixedBuffer(
-              JSON.stringify({namedQuery} as firestore.IBundleElement)
-            )
-          );
+          readable.push(this.elementToLengthPrefixedBuffer({namedQuery}));
         }
 
         for (const bundledDocument of this.documents.values()) {
@@ -146,16 +147,8 @@ export class BundleBuilder {
             bundledDocument.metadata;
           const document: api.IDocument = bundledDocument.document;
 
-          readable.push(
-            this.lengthPrefixedBuffer(
-              JSON.stringify({documentMetadata} as firestore.IBundleElement)
-            )
-          );
-          readable.push(
-            this.lengthPrefixedBuffer(
-              JSON.stringify({document} as firestore.IBundleElement)
-            )
-          );
+          readable.push(this.elementToLengthPrefixedBuffer({documentMetadata}));
+          readable.push(this.elementToLengthPrefixedBuffer({document}));
         }
         readable.push(null);
       },
@@ -176,6 +169,9 @@ export class BundleBuilder {
   }
 }
 
+/**
+ * Convenient class to hold both the metadata and the actual content of a document to be bundled.
+ */
 class BundledDocument {
   constructor(
     readonly metadata: firestore.IBundledDocumentMetadata,
