@@ -308,7 +308,6 @@ declare namespace FirebaseFirestore {
   export class Transaction {
     private constructor();
 
-
     /**
      * Retrieves a query result. Holds a pessimistic lock on all returned
      * documents.

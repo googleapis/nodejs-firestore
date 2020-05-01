@@ -46,6 +46,10 @@ export interface GapicClient {
     request: api.ICommitRequest,
     options?: CallOptions
   ): Promise<[api.ICommitResponse, unknown, unknown]>;
+  batchWrite(
+    request: api.IBatchWriteRequest,
+    options?: CallOptions
+  ): Promise<[api.IBatchWriteResponse, unknown, unknown]>;
   rollback(
     request: api.IRollbackRequest,
     options?: CallOptions
@@ -73,7 +77,8 @@ export type FirestoreUnaryMethod =
   | 'listCollectionIds'
   | 'rollback'
   | 'beginTransaction'
-  | 'commit';
+  | 'commit'
+  | 'batchWrite';
 
 /** Streaming methods used in the Firestore SDK. */
 export type FirestoreStreamingMethod =
@@ -327,6 +332,15 @@ export interface ValidationOptions {
    * the root.
    */
   allowUndefined: boolean;
+}
+
+/**
+ * An options object that can be used to disable request throttling in
+ * BulkWriter.
+ */
+export interface BulkWriterOptions {
+  /** Whether to disable throttling. */
+  readonly disableThrottling?: boolean;
 }
 
 /**
