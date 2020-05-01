@@ -348,7 +348,7 @@ declare namespace FirebaseFirestore {
      * snapshots.
      */
     getAll<T>(
-      ...documentRefsOrReadOptions: Array<DocumentReference | ReadOptions>
+      ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
     ): Promise<Array<DocumentSnapshot<T>>>;
 
     /**
