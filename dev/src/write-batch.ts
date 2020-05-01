@@ -114,6 +114,8 @@ export class BatchWriteResult {
   ) {}
 }
 
+export type PendingWriteOp = () => api.IWrite;
+
 /**
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.
@@ -129,7 +131,7 @@ export class WriteBatch {
    * resulting `api.IWrite` will be sent to the backend.
    * @private
    */
-  private readonly _ops: Array<() => api.IWrite> = [];
+  private readonly _ops: Array<PendingWriteOp> = [];
 
   private _committed = false;
 
@@ -195,7 +197,7 @@ export class WriteBatch {
 
     const precondition = new Precondition({exists: false});
 
-    const op = () => {
+    const op: PendingWriteOp = () => {
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
       const write = document.toProto();
       if (!transform.isEmpty) {
@@ -244,7 +246,7 @@ export class WriteBatch {
 
     const conditions = new Precondition(precondition);
 
-    const op = () => {
+    const op: PendingWriteOp = () => {
       const write: api.IWrite = {delete: documentRef.formattedName};
       if (!conditions.isEmpty) {
         write.currentDocument = conditions.toProto();
@@ -315,7 +317,7 @@ export class WriteBatch {
     const transform = DocumentTransform.fromObject(documentRef, firestoreData);
     transform.validate();
 
-    const op = () => {
+    const op: PendingWriteOp = () => {
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
 
       if (mergePaths) {
@@ -475,7 +477,7 @@ export class WriteBatch {
 
     const documentMask = DocumentMask.fromUpdateMap(updateMap);
 
-    const op = () => {
+    const op: PendingWriteOp = () => {
       const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
       const write = document.toProto();
       write.updateMask = documentMask.toProto();
@@ -638,7 +640,7 @@ export class WriteBatch {
    * Resets the WriteBatch and dequeues all pending operations.
    * @private
    */
-  _reset() {
+  _reset(): void {
     this._ops.splice(0);
     this._committed = false;
   }

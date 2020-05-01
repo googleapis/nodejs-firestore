@@ -73,7 +73,7 @@ export class DocumentChange<T = DocumentData> {
    * // Remove this listener.
    * unsubscribe();
    */
-  get type() {
+  get type(): DocumentChangeType {
     return this._type;
   }
 
@@ -96,7 +96,7 @@ export class DocumentChange<T = DocumentData> {
    * // Remove this listener.
    * unsubscribe();
    */
-  get doc() {
+  get doc(): QueryDocumentSnapshot<T> {
     return this._document;
   }
 
@@ -127,7 +127,7 @@ export class DocumentChange<T = DocumentData> {
    * // Remove this listener.
    * unsubscribe();
    */
-  get oldIndex() {
+  get oldIndex(): number {
     return this._oldIndex;
   }
 
@@ -159,7 +159,7 @@ export class DocumentChange<T = DocumentData> {
    * // Remove this listener.
    * unsubscribe();
    */
-  get newIndex() {
+  get newIndex(): number {
     return this._newIndex;
   }
 

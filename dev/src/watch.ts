@@ -63,15 +63,15 @@ const ChangeType: {[k: string]: DocumentChangeType} = {
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
-const DOCUMENT_WATCH_COMPARATOR = <T>(
+const DOCUMENT_WATCH_COMPARATOR: <T>(
   doc1: QueryDocumentSnapshot<T>,
   doc2: QueryDocumentSnapshot<T>
-) => {
+) => number = (doc1, doc2) => {
   assert(doc1 === doc2, 'Document watches only support one document.');
   return 0;
 };
 
-const EMPTY_FUNCTION = () => {};
+const EMPTY_FUNCTION: () => void = () => {};
 
 /**
  * @private
@@ -250,7 +250,7 @@ abstract class Watch<T = DocumentData> {
 
     this.initStream();
 
-    const unsubscribe = () => {
+    const unsubscribe: () => void = () => {
       logger('Watch.onSnapshot', this.requestTag, 'Unsubscribe called');
       // Prevent further callbacks.
       if (this.isActive) {
