@@ -326,14 +326,14 @@ export class WriteBatch {
         documentMask = DocumentMask.fromObject(firestoreData);
       }
 
-      const update = document.toProto();
+      const write = document.toProto();
       if (!transform.isEmpty) {
-        update.updateTransforms = transform.toProto(this._serializer);
+        write.updateTransforms = transform.toProto(this._serializer);
       }
       if (mergePaths || mergeLeaves) {
-        update.updateMask = documentMask!.toProto();
+        write.updateMask = documentMask!.toProto();
       }
-      return update;
+      return write;
     };
 
     this._ops.push(op);
