@@ -216,7 +216,7 @@ declare namespace FirebaseFirestore {
      * snapshots.
      */
     getAll(...documentRefsOrReadOptions: Array<DocumentReference<DocumentData> | ReadOptions>):
-        Promise<Array<DocumentSnapshot<DocumentData>>>;
+        Promise<Array<(DocumentSnapshot<DocumentData> | QueryDocumentSnapshot<DocumentData>)>>;
 
     /**
      * Terminates the Firestore client and closes all open streams.
@@ -317,7 +317,7 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be read.
      * @return A DocumentSnapshot for the read data.
      */
-    get<T>(documentRef: DocumentReference<T>): Promise<DocumentSnapshot<T>>;
+    get<T>(documentRef: DocumentReference<T>): Promise<(DocumentSnapshot<T> | QueryDocumentSnapshot<T>>;
 
     /**
      * Retrieves multiple documents from Firestore. Holds a pessimistic lock on
@@ -334,7 +334,7 @@ declare namespace FirebaseFirestore {
      * snapshots.
      */
     getAll<T>(...documentRefsOrReadOptions: Array<DocumentReference|ReadOptions>):
-        Promise<Array<DocumentSnapshot<T>>>;
+        Promise<Array<DocumentSnapshot<T>|QueryDocumentSnapshot<T>>>;
 
     /**
      * Create the document referred to by the provided `DocumentReference`.
@@ -694,7 +694,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise resolved with a DocumentSnapshot containing the
      * current document contents.
      */
-    get(): Promise<DocumentSnapshot<T>>;
+    get(): Promise<DocumentSnapshot<T> | QueryDocumentSnapshot<T>>;
 
     /**
      * Attaches a listener for DocumentSnapshot events.
@@ -706,7 +706,7 @@ declare namespace FirebaseFirestore {
      * @return An unsubscribe function that can be called to cancel
      * the snapshot listener.
      */
-    onSnapshot(onNext: (snapshot: DocumentSnapshot<T>) => void,
+    onSnapshot(onNext: (snapshot: DocumentSnapshot<T> | QueryDocumentSnapshot<T>) => void,
                onError?: (error: Error) => void): () => void;
 
     /**
@@ -745,7 +745,7 @@ declare namespace FirebaseFirestore {
     protected constructor();
 
     /** True if the document exists. */
-    readonly exists: boolean;
+    readonly exists: false;
 
     /** A `DocumentReference` to the document location. */
     readonly ref: DocumentReference<T>;
@@ -759,13 +759,13 @@ declare namespace FirebaseFirestore {
      * The time the document was created. Not set for documents that don't
      * exist.
      */
-    readonly createTime?: Timestamp;
+    readonly createTime: undefined;
 
     /**
      * The time the document was last updated (at the time the snapshot was
      * generated). Not set for documents that don't exist.
      */
-    readonly updateTime?: Timestamp;
+    readonly updateTime: undefined;
 
     /**
      * The time this snapshot was read.
@@ -810,8 +810,10 @@ declare namespace FirebaseFirestore {
    * `exists` property will always be true and `data()` will never return
    * 'undefined'.
    */
-  export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<T> {
+  export class QueryDocumentSnapshot<T = DocumentData> {
     private constructor();
+    
+    readonly exists: true;
 
     /**
      * The time the document was created.
@@ -952,7 +954,7 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to start after.
      * @return The created Query.
      */
-    startAt(snapshot: DocumentSnapshot<any>): Query<T>;
+    startAt(snapshot: (DocumentSnapshot<any> | QueryDocumentSnapshot<any>)): Query<T>;
 
     /**
      * Creates and returns a new Query that starts at the provided fields
@@ -974,7 +976,7 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to start after.
      * @return The created Query.
      */
-    startAfter(snapshot: DocumentSnapshot<any>): Query<T>;
+    startAfter(snapshot: (DocumentSnapshot<any> | QueryDocumentSnapshot<any>)): Query<T>;
 
     /**
      * Creates and returns a new Query that starts after the provided fields
@@ -996,7 +998,7 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to end before.
      * @return The created Query.
      */
-    endBefore(snapshot: DocumentSnapshot<any>): Query<T>;
+    endBefore(snapshot: (DocumentSnapshot<any> | QueryDocumentSnapshot<any>)): Query<T>;
 
     /**
      * Creates and returns a new Query that ends before the provided fields
@@ -1018,7 +1020,7 @@ declare namespace FirebaseFirestore {
      * @param snapshot The snapshot of the document to end at.
      * @return The created Query.
      */
-    endAt(snapshot: DocumentSnapshot<any>): Query<T>;
+    endAt(snapshot: (DocumentSnapshot<any> | QueryDocumentSnapshot<any>)): Query<T>;
 
     /**
      * Creates and returns a new Query that ends at the provided fields
