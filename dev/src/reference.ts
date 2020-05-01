@@ -400,7 +400,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *   console.log(`Document written at ${res.updateTime}`);
    * });
    */
-  set(data: T | Partial<T>, options?: SetOptions) {
+  set(data: T | Partial<T>, options?: SetOptions): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .set(this, data, options)
