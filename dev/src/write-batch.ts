@@ -114,13 +114,6 @@ export class BatchWriteResult {
   ) {}
 }
 
-/** Helper type to manage the list of writes in a WriteBatch. */
-// TODO(mrschmidt): Replace with api.IWrite
-interface WriteOp {
-  write: api.IWrite;
-  precondition?: api.IPrecondition | null;
-}
-
 /**
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.
@@ -136,7 +129,7 @@ export class WriteBatch {
    * resulting `api.IWrite` will be sent to the backend.
    * @private
    */
-  private readonly _ops: Array<() => WriteOp> = [];
+  private readonly _ops: Array<() => api.IWrite> = [];
 
   private _committed = false;
 
@@ -208,11 +201,8 @@ export class WriteBatch {
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);
       }
-
-      return {
-        write,
-        precondition: precondition.toProto(),
-      };
+      write.currentDocument = precondition.toProto();
+      return write;
     };
 
     this._ops.push(op);
@@ -255,12 +245,11 @@ export class WriteBatch {
     const conditions = new Precondition(precondition);
 
     const op = () => {
-      return {
-        write: {
-          delete: documentRef.formattedName,
-        },
-        precondition: conditions.toProto(),
-      };
+      const write: api.IWrite = {delete: documentRef.formattedName};
+      if (!conditions.isEmpty) {
+        write.currentDocument = conditions.toProto();
+      }
+      return write;
     };
 
     this._ops.push(op);
@@ -335,18 +324,14 @@ export class WriteBatch {
         documentMask = DocumentMask.fromObject(firestoreData);
       }
 
-      const write = document.toProto();
+      const update = document.toProto();
       if (!transform.isEmpty) {
-        write.updateTransforms = transform.toProto(this._serializer);
+        update.updateTransforms = transform.toProto(this._serializer);
       }
-
       if (mergePaths || mergeLeaves) {
-        write.updateMask = documentMask!.toProto();
+        update.updateMask = documentMask!.toProto();
       }
-
-      return {
-        write,
-      };
+      return update;
     };
 
     this._ops.push(op);
@@ -493,14 +478,12 @@ export class WriteBatch {
     const op = () => {
       const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
       const write = document.toProto();
-      write!.updateMask = documentMask.toProto();
+      write.updateMask = documentMask.toProto();
       if (!transform.isEmpty) {
-        write!.updateTransforms = transform.toProto(this._serializer);
+        write.updateTransforms = transform.toProto(this._serializer);
       }
-      return {
-        write,
-        precondition: precondition.toProto(),
-      };
+      write.currentDocument = precondition.toProto();
+      return write;
     };
 
     this._ops.push(op);
@@ -544,15 +527,10 @@ export class WriteBatch {
     await this._firestore.initializeIfNeeded(tag);
 
     const database = this._firestore.formattedName;
-    const request: api.IBatchWriteRequest = {database, writes: []};
-    const writes = this._ops.map(op => op());
-
-    for (const req of writes) {
-      if (req.precondition) {
-        req.write!.currentDocument = req.precondition;
-      }
-      request.writes!.push(req.write);
-    }
+    const request: api.IBatchWriteRequest = {
+      database,
+      writes: this._ops.map(op => op()),
+    };
 
     const response = await this._firestore.request<
       api.IBatchWriteRequest,
@@ -608,16 +586,10 @@ export class WriteBatch {
         });
     }
 
-    const request: api.ICommitRequest = {database, writes: []};
-    const writes = this._ops.map(op => op());
-
-    for (const req of writes) {
-      if (req.precondition) {
-        req.write!.currentDocument = req.precondition;
-      }
-
-      request.writes!.push(req.write);
-    }
+    const request: api.ICommitRequest = {
+      database,
+      writes: this._ops.map(op => op()),
+    };
 
     logger(
       'WriteBatch.commit',
