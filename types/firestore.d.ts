@@ -96,10 +96,10 @@ declare namespace FirebaseFirestore {
      * Partial<T> into a plain Javascript object (suitable for writing directly
      * to the Firestore database).
      *
-     * This method must be defined in order to use set() with objects of type
-     * Partial<T>.
+     * This method must be defined in order to use set() with `merge` or
+     * `mergeFields`.
      */
-    toFirestoreFromPartial?(modelObject: Partial<T>): DocumentData;
+    toFirestoreFromMerge?(modelObject: Partial<T>): DocumentData;
 
     /**
      * Called by the Firestore SDK to convert Firestore data into an object of

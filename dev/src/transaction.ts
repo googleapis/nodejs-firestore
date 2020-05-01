@@ -34,7 +34,6 @@ import {
   ReadOptions,
   SetOptions,
   UpdateData,
-  isDefaultConverter,
 } from './types';
 import {isObject, isPlainObject} from './util';
 import {
@@ -233,18 +232,13 @@ export class Transaction {
     data: Partial<T>,
     options: SetOptions
   ): Transaction;
-  set<T>(
-    documentRef: DocumentReference<T>,
-    data: T,
-    options?: SetOptions
-  ): Transaction;
+  set<T>(documentRef: DocumentReference<T>, data: T): Transaction;
   /**
    * Writes to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document
    * does not exist yet, it will be created. If you pass
    * [SetOptions]{@link SetOptions}, the provided data can be merged into the
-   * existing document. Using Partial objects requires
-   * [SetOptions]{@link SetOptions} to be passed in as well.
+   * existing document.
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
@@ -271,15 +265,7 @@ export class Transaction {
     data: T | Partial<T>,
     options?: SetOptions
   ): Transaction {
-    if (
-      options &&
-      (options.merge || options.mergeFields) &&
-      !isDefaultConverter(documentRef._converter)
-    ) {
-      this._writeBatch.set(documentRef, data as Partial<T>, options);
-    } else {
-      this._writeBatch.set(documentRef, data as T, options);
-    }
+    this._writeBatch.set(documentRef, data, options);
     return this;
   }
 

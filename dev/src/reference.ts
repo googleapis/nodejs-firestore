@@ -46,7 +46,6 @@ import {
   SetOptions,
   UpdateData,
   WhereFilterOp,
-  isDefaultConverter,
 } from './types';
 import {autoId, requestTag} from './util';
 import {
@@ -377,13 +376,12 @@ export class DocumentReference<T = DocumentData> implements Serializable {
   }
 
   set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
-  set(data: T, options?: SetOptions): Promise<WriteResult>;
+  set(data: T): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
    * document does not yet exist, it will be created. If you pass
    * [SetOptions]{@link SetOptions}, the provided data can be merged into an
-   * existing document. Using Partial objects requires
-   * [SetOptions]{@link SetOptions} to be passed in as well.
+   * existing document.
    *
    * @param {T|Partial<T>} data A map of the fields and values for the document.
    * @param {SetOptions=} options An object to configure the set behavior.
@@ -403,17 +401,11 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    * });
    */
   set(data: T | Partial<T>, options?: SetOptions) {
-    let writeBatch = new WriteBatch(this._firestore);
-    if (
-      options &&
-      (options.merge || options.mergeFields) &&
-      !isDefaultConverter(this._converter)
-    ) {
-      writeBatch = writeBatch.set(this, data as Partial<T>, options);
-    } else {
-      writeBatch = writeBatch.set(this, data as T, options);
-    }
-    return writeBatch.commit().then(([writeResult]) => writeResult);
+    const writeBatch = new WriteBatch(this._firestore);
+    return writeBatch
+      .set(this, data, options)
+      .commit()
+      .then(([writeResult]) => writeResult);
   }
 
   /**

@@ -203,10 +203,10 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * @property {Function} toFirestore Called by the Firestore SDK to convert a
  * custom model object of type T into a plain Javascript object (suitable for
  * writing directly to the Firestore database).
- * @property {Function=} toFirestoreFromPartial Called by the Firestore SDK to
+ * @property {Function=} toFirestoreFromMerge Called by the Firestore SDK to
  * convert a custom model object of type Partial<T> into a plain Javascript
  * object (suitable for writing directly to the Firestore database). This method
- * must be defined in order to use set() with objects of type Partial<T>.
+ * must be defined in order to use set() with `merge` or `mergeFields`.
  * @property {Function} fromFirestore Called by the Firestore SDK to convert
  * Firestore data into an object of type T.
  * @typedef {Object} FirestoreDataConverter

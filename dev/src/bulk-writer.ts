@@ -118,13 +118,24 @@ class BulkCommitBatch {
     return this.processOperation(documentRef);
   }
 
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: Partial<T>,
+    options: SetOptions
+  ): Promise<WriteResult>;
+  set<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: T | Partial<T>,
+    options?: SetOptions
+  ): Promise<WriteResult>;
   /**
    * Adds a `set` operation to the WriteBatch. Returns a promise that
    * resolves with the result of the write.
    */
   set<T>(
     documentRef: DocumentReference<T>,
-    data: T,
+    data: T | Partial<T>,
     options?: SetOptions
   ): Promise<WriteResult> {
     this.writeBatch.set(documentRef, data, options);
@@ -341,6 +352,12 @@ export class BulkWriter {
     return resultPromise;
   }
 
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: Partial<T>,
+    options: SetOptions
+  ): Promise<WriteResult>;
+  set<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
   /**
    * Write to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document does not
@@ -377,7 +394,7 @@ export class BulkWriter {
    */
   set<T>(
     documentRef: DocumentReference<T>,
-    data: T,
+    data: T | Partial<T>,
     options?: SetOptions
   ): Promise<WriteResult> {
     this.verifyNotClosed();

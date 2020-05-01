@@ -334,7 +334,7 @@ export const postConverter = {
   toFirestore(post: Post): DocumentData {
     return {title: post.title, author: post.author};
   },
-  toFirestoreFromPartial(post: Partial<Post>): DocumentData {
+  toFirestoreFromMerge(post: Partial<Post>): DocumentData {
     return Object.assign({}, post);
   },
   fromFirestore(snapshot: QueryDocumentSnapshot): Post {

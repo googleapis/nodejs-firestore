@@ -79,14 +79,14 @@ describe('set() method', () => {
     writeBatch.set(firestore.doc('sub/doc'), nullObject);
   });
 
-  it('requires toFirestoreFromPartial() for Partial usage', () => {
+  it('requires toFirestoreFromMerge() for Partial usage', () => {
     const converter = postConverter;
-    delete converter.toFirestoreFromPartial;
+    delete converter.toFirestoreFromMerge;
     const ref = firestore.doc('sub/doc').withConverter(converter);
     expect(() =>
       writeBatch.set(ref, {title: 'foo'} as Partial<Post>, {merge: true})
     ).to.throw(
-      'toFirestoreFromPartial() must be defined to use merge with Partials.'
+      'toFirestoreFromMerge() must be defined to use set() with `merge` or `mergeFields`.'
     );
   });
 

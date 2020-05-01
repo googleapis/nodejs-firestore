@@ -2141,7 +2141,7 @@ describe('WriteBatch class', () => {
     const ref = randomCol.doc('doc').withConverter(postConverter);
     await ref.set(new Post('walnut', 'author'));
     const batch = firestore.batch();
-    batch.set(ref, {title: 'olive'} as Partial<Post>, {merge: true});
+    batch.set(ref, {title: 'olive'}, {merge: true});
     return batch
       .commit()
       .then(() => {

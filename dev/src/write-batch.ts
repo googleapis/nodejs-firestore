@@ -32,7 +32,7 @@ import {
   SetOptions,
   UpdateData,
   UpdateMap,
-  isDefaultConverter,
+  defaultConverter,
 } from './types';
 import {DocumentData} from './types';
 import {isObject, isPlainObject, requestTag} from './util';
@@ -274,18 +274,17 @@ export class WriteBatch {
     data: Partial<T>,
     options: SetOptions
   ): WriteBatch;
+  set<T>(documentRef: DocumentReference<T>, data: T): WriteBatch;
   set<T>(
     documentRef: DocumentReference<T>,
-    data: T,
+    data: T | Partial<T>,
     options?: SetOptions
   ): WriteBatch;
-
   /**
    * Write to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document does not
    * exist yet, it will be created. If you pass [SetOptions]{@link SetOptions},
-   * the provided data can be merged into the existing document. Using Partial
-   * objects requires [SetOptions]{@link SetOptions} to be passed in as well.
+   * the provided data can be merged into the existing document.
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
@@ -322,14 +321,15 @@ export class WriteBatch {
     let firestoreData: DocumentData;
     if (
       (mergeLeaves || mergePaths) &&
-      !isDefaultConverter(documentRef._converter)
+      documentRef._converter !== defaultConverter
     ) {
-      if (documentRef._converter.toFirestoreFromPartial === undefined) {
+      if (documentRef._converter.toFirestoreFromMerge === undefined) {
         throw new Error(
-          'toFirestoreFromPartial() must be defined to use merge with Partials.'
+          'toFirestoreFromMerge() must be defined to use set() with ' +
+            '`merge` or `mergeFields`.'
         );
       }
-      firestoreData = documentRef._converter.toFirestoreFromPartial(
+      firestoreData = documentRef._converter.toFirestoreFromMerge(
         data as Partial<T>
       );
     } else {
