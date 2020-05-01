@@ -46,6 +46,7 @@ import {
   SetOptions,
   UpdateData,
   WhereFilterOp,
+  isDefaultConverter,
 } from './types';
 import {autoId, requestTag} from './util';
 import {
@@ -375,13 +376,16 @@ export class DocumentReference<T = DocumentData> implements Serializable {
       .then(([writeResult]) => writeResult);
   }
 
+  set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
+  set(data: T, options?: SetOptions): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
    * document does not yet exist, it will be created. If you pass
    * [SetOptions]{@link SetOptions}, the provided data can be merged into an
-   * existing document.
+   * existing document. Using Partial objects requires
+   * [SetOptions]{@link SetOptions} to be passed in as well.
    *
-   * @param {T} data A map of the fields and values for the document.
+   * @param {T|Partial<T>} data A map of the fields and values for the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge If true, set() merges the values specified
    * in its data argument. Fields omitted from this set() call remain untouched.
@@ -398,12 +402,18 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *   console.log(`Document written at ${res.updateTime}`);
    * });
    */
-  set(data: T, options?: SetOptions): Promise<WriteResult> {
-    const writeBatch = new WriteBatch(this._firestore);
-    return writeBatch
-      .set(this, data, options)
-      .commit()
-      .then(([writeResult]) => writeResult);
+  set(data: T | Partial<T>, options?: SetOptions) {
+    let writeBatch = new WriteBatch(this._firestore);
+    if (
+      options &&
+      (options.merge || options.mergeFields) &&
+      !isDefaultConverter(this._converter)
+    ) {
+      writeBatch = writeBatch.set(this, data as Partial<T>, options);
+    } else {
+      writeBatch = writeBatch.set(this, data as T, options);
+    }
+    return writeBatch.commit().then(([writeResult]) => writeResult);
   }
 
   /**

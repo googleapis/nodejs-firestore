@@ -32,6 +32,7 @@ import {
   SetOptions,
   UpdateData,
   UpdateMap,
+  isDefaultConverter,
 } from './types';
 import {DocumentData} from './types';
 import {isObject, isPlainObject, requestTag} from './util';
@@ -268,16 +269,27 @@ export class WriteBatch {
     return this;
   }
 
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: Partial<T>,
+    options: SetOptions
+  ): WriteBatch;
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: T,
+    options?: SetOptions
+  ): WriteBatch;
+
   /**
    * Write to the document referred to by the provided
-   * [DocumentReference]{@link DocumentReference}.
-   * If the document does not exist yet, it will be created. If you pass
-   * [SetOptions]{@link SetOptions}., the provided data can be merged
-   * into the existing document.
+   * [DocumentReference]{@link DocumentReference}. If the document does not
+   * exist yet, it will be created. If you pass [SetOptions]{@link SetOptions},
+   * the provided data can be merged into the existing document. Using Partial
+   * objects requires [SetOptions]{@link SetOptions} to be passed in as well.
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
-   * @param {T} data The object to serialize as the document.
+   * @param {T|Partial<T>} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
@@ -300,14 +312,29 @@ export class WriteBatch {
    */
   set<T>(
     documentRef: DocumentReference<T>,
-    data: T,
+    data: T | Partial<T>,
     options?: SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
     const mergeLeaves = options && options.merge === true;
     const mergePaths = options && options.mergeFields;
     validateDocumentReference('documentRef', documentRef);
-    let firestoreData = documentRef._converter.toFirestore(data);
+    let firestoreData: DocumentData;
+    if (
+      (mergeLeaves || mergePaths) &&
+      !isDefaultConverter(documentRef._converter)
+    ) {
+      if (documentRef._converter.toFirestoreFromPartial === undefined) {
+        throw new Error(
+          'toFirestoreFromPartial() must be defined to use merge with Partials.'
+        );
+      }
+      firestoreData = documentRef._converter.toFirestoreFromPartial(
+        data as Partial<T>
+      );
+    } else {
+      firestoreData = documentRef._converter.toFirestore(data as T);
+    }
     validateDocumentData(
       'data',
       firestoreData,

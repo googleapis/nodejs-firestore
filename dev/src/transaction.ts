@@ -34,6 +34,7 @@ import {
   ReadOptions,
   SetOptions,
   UpdateData,
+  isDefaultConverter,
 } from './types';
 import {isObject, isPlainObject} from './util';
 import {
@@ -227,16 +228,27 @@ export class Transaction {
     return this;
   }
 
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: Partial<T>,
+    options: SetOptions
+  ): Transaction;
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: T,
+    options?: SetOptions
+  ): Transaction;
   /**
    * Writes to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document
    * does not exist yet, it will be created. If you pass
    * [SetOptions]{@link SetOptions}, the provided data can be merged into the
-   * existing document.
+   * existing document. Using Partial objects requires
+   * [SetOptions]{@link SetOptions} to be passed in as well.
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
-   * @param {T} data The object to serialize as the document.
+   * @param {T|Partial<T>} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
@@ -256,10 +268,18 @@ export class Transaction {
    */
   set<T>(
     documentRef: DocumentReference<T>,
-    data: T,
+    data: T | Partial<T>,
     options?: SetOptions
   ): Transaction {
-    this._writeBatch.set(documentRef, data, options);
+    if (
+      options &&
+      (options.merge || options.mergeFields) &&
+      !isDefaultConverter(documentRef._converter)
+    ) {
+      this._writeBatch.set(documentRef, data as Partial<T>, options);
+    } else {
+      this._writeBatch.set(documentRef, data as T, options);
+    }
     return this;
   }
 

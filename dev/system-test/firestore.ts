@@ -2137,6 +2137,22 @@ describe('WriteBatch class', () => {
       });
   });
 
+  it('set supports partials', async () => {
+    const ref = randomCol.doc('doc').withConverter(postConverter);
+    await ref.set(new Post('walnut', 'author'));
+    const batch = firestore.batch();
+    batch.set(ref, {title: 'olive'} as Partial<Post>, {merge: true});
+    return batch
+      .commit()
+      .then(() => {
+        return ref.get();
+      })
+      .then(doc => {
+        expect(doc.get('title')).to.equal('olive');
+        expect(doc.get('author')).to.equal('author');
+      });
+  });
+
   it('has update() method', () => {
     const ref = randomCol.doc('doc');
     const batch = firestore.batch();

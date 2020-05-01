@@ -92,6 +92,16 @@ declare namespace FirebaseFirestore {
     toFirestore(modelObject: T): DocumentData;
 
     /**
+     * Called by the Firestore SDK to convert a custom model object of
+     * Partial<T> into a plain Javascript object (suitable for writing directly
+     * to the Firestore database).
+     *
+     * This method must be defined in order to use set() with objects of type
+     * Partial<T>.
+     */
+    toFirestoreFromPartial?(modelObject: Partial<T>): DocumentData;
+
+    /**
      * Called by the Firestore SDK to convert Firestore data into an object of
      * type T.
      */
@@ -374,6 +384,11 @@ declare namespace FirebaseFirestore {
      */
     set<T>(
       documentRef: DocumentReference<T>,
+      data: Partial<T>,
+      options: SetOptions
+    ): Transaction;
+    set<T>(
+      documentRef: DocumentReference<T>,
       data: T,
       options?: SetOptions
     ): Transaction;
@@ -472,6 +487,11 @@ declare namespace FirebaseFirestore {
      * @param options An object to configure the set behavior.
      * @return This `WriteBatch` instance. Used for chaining method calls.
      */
+    set<T>(
+      documentRef: DocumentReference<T>,
+      data: Partial<T>,
+      options: SetOptions
+    ): WriteBatch;
     set<T>(
       documentRef: DocumentReference<T>,
       data: T,
@@ -683,6 +703,7 @@ declare namespace FirebaseFirestore {
      * @param options An object to configure the set behavior.
      * @return A Promise resolved with the write time of this set.
      */
+    set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
     set(data: T, options?: SetOptions): Promise<WriteResult>;
 
     /**

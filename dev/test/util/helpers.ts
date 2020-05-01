@@ -20,7 +20,7 @@ import * as through2 from 'through2';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
-import {Firestore, QueryDocumentSnapshot, Settings} from '../../src';
+import {Firestore, Settings, QueryDocumentSnapshot} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {DocumentData, GapicClient} from '../../src/types';
 
@@ -333,6 +333,9 @@ export class Post {
 export const postConverter = {
   toFirestore(post: Post): DocumentData {
     return {title: post.title, author: post.author};
+  },
+  toFirestoreFromPartial(post: Partial<Post>): DocumentData {
+    return Object.assign({}, post);
   },
   fromFirestore(snapshot: QueryDocumentSnapshot): Post {
     const data = snapshot.data();

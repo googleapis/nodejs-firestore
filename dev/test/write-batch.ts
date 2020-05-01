@@ -31,6 +31,8 @@ import {
   InvalidApiUsage,
   response,
   verifyInstance,
+  postConverter,
+  Post,
 } from './util/helpers';
 
 const REQUEST_TIME = 'REQUEST_TIME';
@@ -75,6 +77,24 @@ describe('set() method', () => {
     const nullObject = Object.create(null);
     nullObject.bar = 'ack';
     writeBatch.set(firestore.doc('sub/doc'), nullObject);
+  });
+
+  it('requires toFirestoreFromPartial() for Partial usage', () => {
+    const converter = postConverter;
+    delete converter.toFirestoreFromPartial;
+    const ref = firestore.doc('sub/doc').withConverter(converter);
+    expect(() =>
+      writeBatch.set(ref, {title: 'foo'} as Partial<Post>, {merge: true})
+    ).to.throw(
+      'toFirestoreFromPartial() must be defined to use merge with Partials.'
+    );
+  });
+
+  it('requires SetOptions to use partials', () => {
+    const ref = firestore.doc('sub/doc').withConverter(postConverter);
+    expect(() =>
+      (writeBatch as InvalidApiUsage).set(ref, {title: 'foo'} as Partial<Post>)
+    ).to.throw('Value for argument "data" is not a valid Firestore document.');
   });
 });
 

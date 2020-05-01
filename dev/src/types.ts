@@ -145,6 +145,16 @@ export interface FirestoreDataConverter<T> {
   toFirestore(modelObject: T): DocumentData;
 
   /**
+   * Called by the Firestore SDK to convert a custom model object of Partial<T>
+   * into a plain Javascript object (suitable for writing directly to the
+   * Firestore database).
+   *
+   * This method must be defined in order to use set() with objects of type
+   * Partial<T>.
+   */
+  toFirestoreFromPartial?(modelObject: Partial<T>): DocumentData;
+
+  /**
    * Called by the Firestore SDK to convert Firestore data into an object of
    * type T.
    */
@@ -163,6 +173,23 @@ export const defaultConverter: FirestoreDataConverter<DocumentData> = {
     return snapshot.data()!;
   },
 };
+
+/**
+ * Checks if the provided converter is the same as the default converter.
+ * @private
+ */
+export function isDefaultConverter<U>(
+  converter: FirestoreDataConverter<U>
+): boolean {
+  return (
+    converter.toFirestore.toString() ===
+      defaultConverter.toFirestore.toString() &&
+    converter.fromFirestore.toString() ===
+      defaultConverter.fromFirestore.toString() &&
+    converter.toFirestoreFromPartial?.toString() ===
+      defaultConverter.toFirestoreFromPartial?.toString()
+  );
+}
 
 /**
  * Settings used to directly configure a `Firestore` instance.
