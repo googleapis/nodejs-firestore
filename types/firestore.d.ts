@@ -143,6 +143,13 @@ declare namespace FirebaseFirestore {
      * when the client becomes idle. Defaults to 1.
      */
     maxIdleChannels?: number;
+
+    /**
+     * Whether to skip nested properties that are set to `undefined` during object
+     * serialization. If set to `false` or omitted, the SDK will throw an
+     * exception when it encounters values of type `undefined`.
+     */
+    ignoreUndefinedProperties?: boolean;
     
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
