@@ -114,7 +114,12 @@ export class BatchWriteResult {
   ) {}
 }
 
-export type PendingWriteOp = () => api.IWrite;
+/**
+ * A lazily-evaluated write that allows us to detect the Project ID before
+ * serializing the request.
+ * @private
+ */
+type PendingWriteOp = () => api.IWrite;
 
 /**
  * A Firestore WriteBatch that can be used to atomically commit multiple write
