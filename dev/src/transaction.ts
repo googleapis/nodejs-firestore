@@ -474,7 +474,7 @@ export class Transaction {
    * @private
    * @return A Promise that resolves after the delay expired.
    */
-  private async maybeBackoff(error?: GoogleError) {
+  private async maybeBackoff(error?: GoogleError): Promise<void> {
     if (error && error.code === Status.RESOURCE_EXHAUSTED) {
       this._backoff.resetToMax();
     }
