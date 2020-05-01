@@ -1270,7 +1270,7 @@ export class Firestore {
     let streamInitialized = false;
 
     return new Promise<Duplex>((resolve, reject) => {
-      function streamReady() {
+      function streamReady(): void {
         if (!streamInitialized) {
           streamInitialized = true;
           logger('Firestore._initializeStream', requestTag, 'Releasing stream');
@@ -1278,7 +1278,7 @@ export class Firestore {
         }
       }
 
-      function streamEnded() {
+      function streamEnded(): void {
         logger(
           'Firestore._initializeStream',
           requestTag,
@@ -1289,7 +1289,7 @@ export class Firestore {
         lifetime.resolve();
       }
 
-      function streamFailed(err: Error) {
+      function streamFailed(err: Error): void {
         if (!streamInitialized) {
           // If we receive an error before we were able to receive any data,
           // reject this stream.
