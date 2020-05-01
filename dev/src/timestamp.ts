@@ -69,7 +69,7 @@ export class Timestamp {
    *
    * @return {Timestamp} A new `Timestamp` representing the current date.
    */
-  static now() {
+  static now(): Timestamp {
     return Timestamp.fromMillis(Date.now());
   }
 
@@ -86,7 +86,7 @@ export class Timestamp {
    * @return {Timestamp} A new `Timestamp` representing the same point in time
    * as the given date.
    */
-  static fromDate(date: Date) {
+  static fromDate(date: Date): Timestamp {
     return Timestamp.fromMillis(date.getTime());
   }
 
@@ -103,7 +103,7 @@ export class Timestamp {
    * @return {Timestamp}  A new `Timestamp` representing the same point in time
    * as the given number of milliseconds.
    */
-  static fromMillis(milliseconds: number) {
+  static fromMillis(milliseconds: number): Timestamp {
     const seconds = Math.floor(milliseconds / 1000);
     const nanos = (milliseconds - seconds * 1000) * MS_TO_NANOS;
     return new Timestamp(seconds, nanos);
@@ -115,7 +115,7 @@ export class Timestamp {
    * @private
    * @param {Object} timestamp The `Timestamp` Protobuf object.
    */
-  static fromProto(timestamp: google.protobuf.ITimestamp) {
+  static fromProto(timestamp: google.protobuf.ITimestamp): Timestamp {
     return new Timestamp(Number(timestamp.seconds || 0), timestamp.nanos || 0);
   }
 

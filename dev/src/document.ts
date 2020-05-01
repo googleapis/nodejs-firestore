@@ -695,7 +695,7 @@ export class DocumentMask {
    * @private
    * @return {boolean} Whether this document mask is empty.
    */
-  get isEmpty() {
+  get isEmpty(): boolean {
     return this._sortedPaths.length === 0;
   }
 
@@ -771,13 +771,13 @@ export class DocumentMask {
      * Applies this DocumentMask to 'data' and computes the list of field paths
      * that were specified in the mask but are not present in 'data'.
      */
-    const applyDocumentMask = (data: DocumentData) => {
+    const applyDocumentMask: (data: DocumentData) => DocumentData = data => {
       const remainingPaths = this._sortedPaths.slice(0);
 
-      const processObject = (
+      const processObject: (
         currentData: DocumentData,
         currentPath?: FieldPath
-      ) => {
+      ) => DocumentData | null = (currentData, currentPath) => {
         let result: DocumentData | null = null;
 
         Object.keys(currentData).forEach(key => {
@@ -902,7 +902,11 @@ export class DocumentTransform<T = DocumentData> {
   ): DocumentTransform<T> {
     const transforms = new Map<FieldPath, FieldTransform>();
 
-    function encode_(val: unknown, path: FieldPath, allowTransforms: boolean) {
+    function encode_(
+      val: unknown,
+      path: FieldPath,
+      allowTransforms: boolean
+    ): void {
       if (val instanceof FieldTransform && val.includeInDocumentTransform) {
         if (allowTransforms) {
           transforms.set(path, val);

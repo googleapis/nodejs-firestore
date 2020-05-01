@@ -288,7 +288,7 @@ export function validateInteger(
 export function invalidArgumentMessage(
   arg: string | number,
   expectedType: string
-) {
+): string {
   return `${formatArgumentName(arg)} is not a valid ${expectedType}.`;
 }
 

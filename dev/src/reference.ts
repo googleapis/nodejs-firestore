@@ -1054,7 +1054,7 @@ export class QueryOptions<T> {
     return this.fieldOrders.length > 0;
   }
 
-  isEqual(other: QueryOptions<T>) {
+  isEqual(other: QueryOptions<T>): boolean {
     if (this === other) {
       return true;
     }
@@ -1129,7 +1129,7 @@ export class Query<T = DocumentData> {
   static _extractFieldValues(
     documentSnapshot: DocumentSnapshot,
     fieldOrders: FieldOrder[]
-  ) {
+  ): unknown[] {
     const fieldValues: unknown[] = [];
 
     for (const fieldOrder of fieldOrders) {
@@ -2215,7 +2215,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    * Returns a resource path for this collection.
    * @private
    */
-  private get resourcePath() {
+  private get resourcePath(): ResourcePath {
     return this._queryOptions.parentPath.append(
       this._queryOptions.collectionId
     );

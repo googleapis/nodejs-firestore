@@ -245,7 +245,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * database.
    * @private
    */
-  get relativeName() {
+  get relativeName(): string {
     return this.segments.join('/');
   }
 
@@ -543,7 +543,7 @@ export class FieldPath extends Path<FieldPath> {
    *
    * @returns {FieldPath}
    */
-  static documentId() {
+  static documentId(): FieldPath {
     return FieldPath._DOCUMENT_ID;
   }
 
@@ -556,7 +556,7 @@ export class FieldPath extends Path<FieldPath> {
    * @param {string|FieldPath} fieldPath The FieldPath to create.
    * @returns {FieldPath} A field path representation.
    */
-  static fromArgument(fieldPath: string | FieldPath) {
+  static fromArgument(fieldPath: string | FieldPath): FieldPath {
     // validateFieldPath() is used in all public API entry points to validate
     // that fromArgument() is only called with a Field Path or a string.
     return fieldPath instanceof FieldPath
@@ -613,7 +613,7 @@ export class FieldPath extends Path<FieldPath> {
    * @param segments Sequence of field names.
    * @returns The newly created FieldPath.
    */
-  construct(segments: string[]) {
+  construct(segments: string[]): FieldPath {
     return new FieldPath(...segments);
   }
 
