@@ -18,7 +18,7 @@
     },
     {
       "files": [
-        "dev/tests/*.ts",
+        "dev/test/*.ts",
         "dev/system-test/*.ts"
       ],
       "parser": "@typescript-eslint/parser",

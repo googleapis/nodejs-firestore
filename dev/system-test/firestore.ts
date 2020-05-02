@@ -63,7 +63,7 @@ function getTestRoot(firestore: Firestore) {
   return firestore.collection(`node_${version}_${autoId()}`);
 }
 
-describe.only('Firestore class', () => {
+describe('Firestore class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
@@ -74,7 +74,7 @@ describe.only('Firestore class', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it.only('has collection() method', () => {
+  it('has collection() method', () => {
     const ref = firestore.collection('col');
     expect(ref.id).to.equal('col');
   });
