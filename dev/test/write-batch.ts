@@ -89,13 +89,6 @@ describe('set() method', () => {
       'toFirestoreFromMerge() must be defined to use set() with `merge` or `mergeFields`.'
     );
   });
-
-  it('requires SetOptions to use partials', () => {
-    const ref = firestore.doc('sub/doc').withConverter(postConverter);
-    expect(() =>
-      (writeBatch as InvalidApiUsage).set(ref, {title: 'foo'})
-    ).to.throw('Value for argument "data" is not a valid Firestore document.');
-  });
 });
 
 describe('delete() method', () => {
