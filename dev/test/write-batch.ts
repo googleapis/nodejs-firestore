@@ -79,8 +79,8 @@ describe('set() method', () => {
     writeBatch.set(firestore.doc('sub/doc'), nullObject);
   });
 
-  it('requires toFirestoreFromMerge() for Partial usage', () => {
-    const converter = postConverter;
+  it.only('requires toFirestoreFromMerge() for Partial usage', () => {
+    const converter = {...postConverter};
     delete converter.toFirestoreFromMerge;
     const ref = firestore.doc('sub/doc').withConverter(converter);
     expect(() =>
@@ -93,7 +93,7 @@ describe('set() method', () => {
   it('requires SetOptions to use partials', () => {
     const ref = firestore.doc('sub/doc').withConverter(postConverter);
     expect(() =>
-      (writeBatch as InvalidApiUsage).set(ref, {title: 'foo'} as Partial<Post>)
+      (writeBatch as InvalidApiUsage).set(ref, {title: 'foo'})
     ).to.throw('Value for argument "data" is not a valid Firestore document.');
   });
 });

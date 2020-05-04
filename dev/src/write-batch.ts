@@ -325,7 +325,7 @@ export class WriteBatch {
       (mergeLeaves || mergePaths) &&
       documentRef._converter !== defaultConverter
     ) {
-      if (documentRef._converter.toFirestoreFromMerge === undefined) {
+      if (typeof documentRef._converter.toFirestoreFromMerge !== 'function') {
         throw new Error(
           'toFirestoreFromMerge() must be defined to use set() with ' +
             '`merge` or `mergeFields`.'
