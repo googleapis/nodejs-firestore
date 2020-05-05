@@ -23,7 +23,6 @@ import {Timestamp} from './timestamp';
 import {Precondition, SetOptions, UpdateData} from './types';
 import {Deferred} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
-import {CLIENT_TERMINATED_ERROR_MSG} from './pool';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -87,6 +86,7 @@ class BulkCommitBatch {
   private resultsMap = new Map<number, Deferred<BatchWriteResult>>();
 
   constructor(
+    private readonly firestore: Firestore,
     private readonly writeBatch: WriteBatch,
     private readonly maxBatchSize: number
   ) {}
@@ -170,6 +170,8 @@ class BulkCommitBatch {
       this.state = BatchState.READY_TO_SEND;
     }
 
+    this.firestore.incrementOperationsCount();
+
     return deferred.promise.then(result => {
       if (result.writeTime) {
         return new WriteResult(result.writeTime);
@@ -198,10 +200,12 @@ class BulkCommitBatch {
   processResults(results: BatchWriteResult[], error?: Error): void {
     if (error === undefined) {
       for (let i = 0; i < this.opCount; i++) {
+        this.firestore.decrementOperationsCount();
         this.resultsMap.get(i)!.resolve(results[i]);
       }
     } else {
       for (let i = 0; i < this.opCount; i++) {
+        this.firestore.decrementOperationsCount();
         this.resultsMap.get(i)!.reject(error);
       }
     }
@@ -221,11 +225,6 @@ class BulkCommitBatch {
     if (this.state === BatchState.OPEN) {
       this.state = BatchState.READY_TO_SEND;
     }
-  }
-
-  /** Rejects all pending operations with the provided error. */
-  rejectPendingOps(err: Error): void {
-    this.resultsMap.forEach(deferred => deferred.reject(err));
   }
 }
 
@@ -520,24 +519,9 @@ export class BulkWriter {
   }
 
   private verifyNotClosed(): void {
-    if (this.terminated) {
-      throw new Error(CLIENT_TERMINATED_ERROR_MSG);
-    }
+    this.firestore.verifyNotTerminated();
     if (this.closed) {
       throw new Error('BulkWriter has already been closed.');
-    }
-  }
-
-  /**
-   * Rejects all pending writes with an error after the client has been
-   * terminated.
-   *
-   * @private
-   */
-  onTerminate(): void {
-    this.terminated = true;
-    for (const batch of this.batchQueue) {
-      batch.rejectPendingOps(new Error(CLIENT_TERMINATED_ERROR_MSG));
     }
   }
 
@@ -568,6 +552,7 @@ export class BulkWriter {
    */
   private createNewBatch(): BulkCommitBatch {
     const newBatch = new BulkCommitBatch(
+      this.firestore,
       this.firestore.batch(),
       this.maxBatchSize
     );

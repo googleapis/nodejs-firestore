@@ -174,6 +174,20 @@ describe('Firestore class', () => {
       unsubscribe();
     }
   });
+
+  it('throws an error if terminate() is called with pending BulkWriter operations', async () => {
+    const writer = firestore._bulkWriter();
+    const ref = randomCol.doc('doc-1');
+    writer.set(ref, {foo: 'bar'});
+    try {
+      await firestore.terminate();
+      throw new Error('terminate() should have failed');
+    } catch (err) {
+      expect(err).to.equal(
+        'All BulkWriter operations must be completed before terminating the client.'
+      );
+    }
+  });
 });
 
 describe('CollectionReference class', () => {
@@ -2277,18 +2291,13 @@ describe('BulkWriter class', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('pending batches fail when terminate() is called', () => {
+  it.skip('increments and decrements the pendingOperationsCount', async () => {
     const ref = randomCol.doc('doc1');
     const writer = firestore._bulkWriter();
-    const set = writer.set(ref, {foo: 'bar'});
-    return firestore.terminate().then(() => {
-      return set;
-    }).then(async () => {
-      return Promise.reject('should have thrown termination error');
-    })
-    .catch(err => {
-      expect(err.message).to.equal(CLIENT_TERMINATED_ERROR_MSG);
-    });
+    writer.set(ref, {foo: 'bar'});
+    writer.set(ref, {foo: 'bar2'});
+    await writer.close();
+    return firestore.terminate();
   });
 
   it('subsequent operations fail after terminate() is called', () => {

@@ -349,10 +349,20 @@ export class Firestore {
   /**
    * Count of listeners that have been registered on the client.
    *
-   * The client can only be terminated when there are no registered listeners.
+   * The client can only be terminated when there are no pending writes or
+   * registered listeners.
    * @private
    */
   private registeredListenersCount = 0;
+
+  /**
+   * Number of pending operations on the client.
+   *
+   * The client can only be terminated when there are no pending writes or
+   * registered listeners.
+   * @private
+   */
+  private pendingOperationsCount = 0;
 
   // GCF currently tears down idle connections after two minutes. Requests
   // that are issued after this period may fail. On GCF, we therefore issue
@@ -365,14 +375,6 @@ export class Firestore {
   _preferTransactions: boolean;
   /** @private */
   _lastSuccessfulRequest = 0;
-
-  /**
-   * Array of callbacks that are called after the Firestore instance is
-   * terminated.
-   *
-   * @private
-   */
-  private onTerminateOps: Array<() => void> = [];
 
   /**
    * @param {Object=} settings [Configuration object](#/docs).
@@ -730,9 +732,7 @@ export class Firestore {
    * });
    */
   _bulkWriter(options?: BulkWriterOptions): BulkWriter {
-    const writer = new BulkWriter(this, !options?.disableThrottling);
-    this.onTerminateOps.push(writer.onTerminate.bind(writer));
-    return writer;
+    return new BulkWriter(this, !options?.disableThrottling);
   }
 
   /**
@@ -1117,6 +1117,26 @@ export class Firestore {
   }
 
   /**
+   * Increments the number of pending operations. This is used to verify that
+   * all pending operations are complete when terminate() is called.
+   *
+   * @private
+   */
+  incrementOperationsCount(): void {
+    this.pendingOperationsCount += 1;
+  }
+
+  /**
+   * Decrements the number of pending operations. This is used to verify that
+   * all pending operations are complete when terminate() is called.
+   *
+   * @private
+   */
+  decrementOperationsCount(): void {
+    this.pendingOperationsCount -= 1;
+  }
+
+  /**
    * Terminates the Firestore client and closes all open streams.
    *
    * @return A Promise that resolves when the client is terminated.
@@ -1127,9 +1147,21 @@ export class Firestore {
         'All onSnapshot() listeners must be unsubscribed before terminating the client.'
       );
     }
-    return this._clientPool.terminate().then(() => {
-      this.onTerminateOps.forEach(op => op());
-    });
+    if (this.pendingOperationsCount > 0) {
+      return Promise.reject(
+        'All BulkWriter operations must be completed before terminating the client.'
+      );
+    }
+    return this._clientPool.terminate();
+  }
+
+  /**
+   * Throws an error if this Firestore instance has been terminated.
+   *
+   * @private
+   */
+  verifyNotTerminated(): void {
+    return this._clientPool.verifyNotTerminated();
   }
 
   /**

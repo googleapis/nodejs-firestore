@@ -223,4 +223,10 @@ export class ClientPool<T> {
       await this.clientDestructor(client);
     }
   }
+
+  verifyNotTerminated(): void {
+    if (this.terminated) {
+      throw new Error(CLIENT_TERMINATED_ERROR_MSG);
+    }
+  }
 }
