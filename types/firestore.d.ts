@@ -181,16 +181,14 @@ declare namespace FirebaseFirestore {
     /**
      * Builds the bundle with the documents and query results added to this bundle.
      *
-     * @returns A readable stream containing the content of the built bundle.
-     */
-    stream(): ReadableStream;
-
-    /**
-     * Builds the bundle with the documents and query results added to this bundle.
+     * Every time this is called, a new Buffer is created with the content
+     * added to the bundle at the moment of calling. If you add more contents after
+     * calling `build`, you would need to call it one more time to get the new
+     * contents (together with original contents).
      *
-     * @returns A promise resolves to a Buffer containing the content of the built bundle.
+     * @returns A Buffer containing the content of the built bundle.
      */
-    build(): Promise<Buffer>;
+    build(): Buffer;
   }
 
   /**

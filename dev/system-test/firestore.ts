@@ -16,6 +16,7 @@ import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
+import {PassThrough} from "stream";
 import {firestore} from '../protos/firestore_v1_proto_api';
 
 import {
@@ -35,7 +36,7 @@ import {
   WriteResult,
 } from '../src';
 import {autoId, Deferred} from '../src/util';
-import {Post, postConverter, verifyInstance} from '../test/util/helpers';
+import {bundleToElementArray, Post, postConverter, verifyInstance} from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
 
 use(chaiAsPromised);
@@ -2326,62 +2327,6 @@ describe('Client initialization', () => {
 });
 
 describe('Bundle building', () => {
-  // Helper function for testing: converts "13{..}43{..}51{..}" to [{length: 13 content: obj},...,...]]
-  function bundleToLengthsAndObject(bundle: string): Array<{length: number, content: firestore.IBundleElement}> {
-    const isNum = (c: string) => !isNaN(Number(c));
-    let jsons = '';
-    let bracketDepth = 0;
-    let insertComma = false;
-
-    // Turn "13{..}43{..}51{..}" into "{..},{..},{..}"
-    for (const c of bundle) {
-      if (isNum(c) && bracketDepth === 0) {
-        if (insertComma) {
-          jsons += ',';
-          insertComma = false;
-        }
-      } else {
-        jsons += c;
-        if (c === '{') {
-          bracketDepth += 1;
-        } else if (c === '}') {
-          bracketDepth -= 1;
-          if (bracketDepth === 0) {
-            insertComma = true;
-          }
-        }
-      }
-    }
-
-    let lengthStr = '';
-    bracketDepth = 0;
-    // Turn "13{..}43{..}51{..}" into "13,43,51,"
-    for (const c of bundle) {
-      if (isNum(c) && bracketDepth === 0) {
-        lengthStr += c;
-      } else {
-        if (c === '{') {
-          bracketDepth += 1;
-        } else if (c === '}') {
-          bracketDepth -= 1;
-          if (bracketDepth === 0) {
-            lengthStr += ',';
-          }
-        }
-      }
-    }
-
-    const lengths : [number] = JSON.parse(`[${lengthStr.slice(0, lengthStr.length - 1)}]`);
-    const contents : [firestore.IBundleElement] = JSON.parse(`[${jsons}]`);
-    expect(lengths.length).to.equal(contents.length, 'Number of lengths and contents mismatch in the bundle');
-
-    return lengths.map((v, i) => {
-      const bufLength = Buffer.byteLength(JSON.stringify(contents[i]));
-      expect(v).to.equal(bufLength, `Length specified in bundle and actual content length mismatch`);
-      return {length: v, content: contents[i]};
-    });
-  }
-
   let firestore: Firestore;
   let testCol: CollectionReference;
 
@@ -2403,77 +2348,6 @@ describe('Bundle building', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('succeeds to read length prefixed json with testing function', () => {
-    const bundleString =
-      '20{"a": "string value"}9{"b": 123}26{"c": {"d": "nested value"}}';
-    const elements = bundleToLengthsAndObject(bundleString);
-    expect(elements).to.deep.equal(
-        [{length: 20, content: {a: 'string value'}},
-          {length: 9, content: {b: 123}},
-          {length: 26, content: {c: {d: 'nested value'}}}]
-    );
-  });
-
-  it('succeeds with document snapshots', async () => {
-    const bundle = firestore.bundle('test-bundle');
-    const snap1 = await testCol.doc('doc1').get();
-    const snap2 = await testCol.doc('doc2').get();
-
-    bundle.add(snap1);
-    bundle.add(snap2);
-    // Bundle is expected to be [bundleMeta, doc1Meta, doc1Snap, doc2Meta, doc2Snap].
-    const elements = bundleToLengthsAndObject(
-      (await bundle.build()).toString()
-    );
-
-    const meta = (elements[0].content as IBundleElement).metadata;
-    expect(meta).to.deep.equal({
-      id: 'test-bundle',
-      createTime: snap2.readTime.toProto().timestampValue
-    });
-
-    // Verify doc1Meta and doc1Snap
-    const result1 = [
-      (elements[1].content as IBundleElement).documentMetadata,
-      (elements[2].content as IBundleElement).document,
-    ];
-    expect(result1).to.deep.equal([
-      {
-        documentKey: snap1.toDocumentProto().name,
-        readTime: snap1.readTime.toProto().timestampValue,
-      },
-      snap1.toDocumentProto(),
-    ]);
-
-    // Verify doc1Meta and doc1Snap
-    const result2 = [
-      (elements[3].content as IBundleElement).documentMetadata,
-      (elements[4].content as IBundleElement).document,
-    ];
-    expect(result2).to.deep.equal([
-      {
-        documentKey: snap2.toDocumentProto().name,
-        readTime: snap2.readTime.toProto().timestampValue,
-      },
-      snap2.toDocumentProto(),
-    ]);
-  });
-
-  it('succeeds when nothing is added', async () => {
-    const bundle = firestore.bundle('test-bundle');
-
-    // `elements` is expected to be [bundleMeta].
-    const elements = bundleToLengthsAndObject(
-        (await bundle.build()).toString()
-    );
-
-    const meta = (elements[0].content as IBundleElement).metadata;
-    expect(meta).to.deep.equal({
-      id: 'test-bundle',
-      createTime: new Timestamp(0,0).toProto().timestampValue
-    });
-  });
-
   it('succeeds when there are no results', async () => {
     const bundle = firestore.bundle('test-bundle');
     const query = testCol.where('sort', '==', 5);
@@ -2481,17 +2355,17 @@ describe('Bundle building', () => {
 
     bundle.add('query', snap);
     // `elements` is expected to be [bundleMeta, query].
-    const elements = bundleToLengthsAndObject(
-      (await bundle.build()).toString()
+    const elements = await bundleToElementArray(
+      bundle.build()
     );
 
-    const meta = (elements[0].content as IBundleElement).metadata;
+    const meta = (elements[0] as IBundleElement).metadata;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
       createTime: snap.readTime.toProto().timestampValue
     });
 
-    const namedQuery = (elements[1].content as IBundleElement).namedQuery;
+    const namedQuery = (elements[1] as IBundleElement).namedQuery;
     // Verify saved query.
     expect(namedQuery).to.deep.equal({
       name: 'query',
@@ -2517,18 +2391,18 @@ describe('Bundle building', () => {
     bundle.add('limitQuery', limitSnap);
     bundle.add('limitToLastQuery', limitToLastSnap);
     // `elements` is expected to be [bundleMeta, limitQuery, limitToLastQuery, doc4Meta, doc4Snap].
-    const elements = bundleToLengthsAndObject(
-      (await bundle.build()).toString()
+    const elements = await bundleToElementArray(
+      await bundle.build()
     );
 
-    const meta = (elements[0].content as IBundleElement).metadata;
+    const meta = (elements[0] as IBundleElement).metadata;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
       createTime: limitToLastSnap.readTime.toProto().timestampValue
     });
 
-    let namedQuery1 = (elements[1].content as IBundleElement).namedQuery;
-    let namedQuery2 = (elements[2].content as IBundleElement).namedQuery;
+    let namedQuery1 = (elements[1] as IBundleElement).namedQuery;
+    let namedQuery2 = (elements[2] as IBundleElement).namedQuery;
     // We might need to swap them.
     if (namedQuery1!.name === 'limitToLastQuery') {
       const temp = namedQuery2;
@@ -2570,13 +2444,13 @@ describe('Bundle building', () => {
     });
 
     // Verify bundled document
-    const docMeta = (elements[3].content as IBundleElement).documentMetadata;
+    const docMeta = (elements[3] as IBundleElement).documentMetadata;
     expect(docMeta).to.deep.equal({
       documentKey: limitToLastSnap.docs[0].toDocumentProto().name,
       readTime: limitToLastSnap.readTime.toProto().timestampValue
     });
 
-    const bundledDoc = (elements[4].content as IBundleElement).document;
+    const bundledDoc = (elements[4] as IBundleElement).document;
     expect(bundledDoc).to.deep.equal(limitToLastSnap.docs[0].toDocumentProto());
   });
 });
