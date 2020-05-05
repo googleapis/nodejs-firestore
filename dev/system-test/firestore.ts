@@ -34,6 +34,7 @@ import {
 } from '../src';
 import {autoId, Deferred} from '../src/util';
 import {Post, postConverter, verifyInstance} from '../test/util/helpers';
+import { CLIENT_TERMINATED_ERROR_MSG } from '../src/pool';
 
 use(chaiAsPromised);
 
@@ -153,7 +154,7 @@ describe('Firestore class', () => {
       })
       .then(() => Promise.reject('set() should have failed'))
       .catch(err => {
-        expect(err).to.equal('The client has already been terminated');
+        expect(err).to.equal(CLIENT_TERMINATED_ERROR_MSG);
       });
   });
 
@@ -2264,6 +2265,45 @@ describe('QuerySnapshot class', () => {
     });
   });
 });
+
+describe('BulkWriter class', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  beforeEach(() => {
+    firestore = new Firestore({});
+    randomCol = getTestRoot(firestore);
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('pending batches fail when terminate() is called', () => {
+    const ref = randomCol.doc('doc1');
+    const writer = firestore._bulkWriter();
+    const set = writer.set(ref, {foo: 'bar'});
+    return firestore.terminate().then(() => {
+      return set;
+    }).then(async () => {
+      return Promise.reject('should have thrown termination error');
+    })
+    .catch(err => {
+      expect(err.message).to.equal(CLIENT_TERMINATED_ERROR_MSG);
+    });
+  });
+
+  it('subsequent operations fail after terminate() is called', () => {
+    const ref = randomCol.doc('doc1');
+    const writer = firestore._bulkWriter();
+    return firestore.terminate().then(() => {
+      return writer.set(ref, {foo: 'bar'});;
+    }).then(async () => {
+      return Promise.reject('should have thrown termination error');
+    })
+    .catch(err => {
+      expect(err.message).to.equal(CLIENT_TERMINATED_ERROR_MSG);
+    });
+  });
+})
 
 describe('Client initialization', () => {
   const ops: Array<[

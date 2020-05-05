@@ -23,6 +23,7 @@ import {Timestamp} from './timestamp';
 import {Precondition, SetOptions, UpdateData} from './types';
 import {Deferred} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
+import {CLIENT_TERMINATED_ERROR_MSG} from './pool';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -221,6 +222,11 @@ class BulkCommitBatch {
       this.state = BatchState.READY_TO_SEND;
     }
   }
+
+  /** Rejects all pending operations with the provided error. */
+  rejectPendingOps(err: Error): void {
+    this.resultsMap.forEach(deferred => deferred.reject(err));
+  }
 }
 
 /**
@@ -246,6 +252,12 @@ export class BulkWriter {
    * opened again.
    */
   private closed = false;
+
+  /**
+   * Whether the Firestore instance has been terminated. Once terminated, all
+   * subsequent operations will immediately be rejected.
+   */
+  private terminated = false;
 
   /**
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
@@ -508,8 +520,24 @@ export class BulkWriter {
   }
 
   private verifyNotClosed(): void {
+    if (this.terminated) {
+      throw new Error(CLIENT_TERMINATED_ERROR_MSG);
+    }
     if (this.closed) {
       throw new Error('BulkWriter has already been closed.');
+    }
+  }
+
+  /**
+   * Rejects all pending writes with an error after the client has been
+   * terminated.
+   *
+   * @private
+   */
+  onTerminate(): void {
+    this.terminated = true;
+    for (const batch of this.batchQueue) {
+      batch.rejectPendingOps(new Error(CLIENT_TERMINATED_ERROR_MSG));
     }
   }
 

@@ -367,6 +367,14 @@ export class Firestore {
   _lastSuccessfulRequest = 0;
 
   /**
+   * Array of callbacks that are called after the Firestore instance is
+   * terminated.
+   *
+   * @private
+   */
+  private onTerminateOps: Array<() => void> = [];
+
+  /**
    * @param {Object=} settings [Configuration object](#/docs).
    * @param {string=} settings.projectId The project ID from the Google
    * Developer's Console, e.g. 'grape-spaceship-123'. We will also check the
@@ -722,7 +730,9 @@ export class Firestore {
    * });
    */
   _bulkWriter(options?: BulkWriterOptions): BulkWriter {
-    return new BulkWriter(this, !options?.disableThrottling);
+    const writer = new BulkWriter(this, !options?.disableThrottling);
+    this.onTerminateOps.push(writer.onTerminate.bind(writer));
+    return writer;
   }
 
   /**
@@ -1117,7 +1127,9 @@ export class Firestore {
         'All onSnapshot() listeners must be unsubscribed before terminating the client.'
       );
     }
-    return this._clientPool.terminate();
+    return this._clientPool.terminate().then(() => {
+      this.onTerminateOps.forEach(op => op());
+    });
   }
 
   /**
