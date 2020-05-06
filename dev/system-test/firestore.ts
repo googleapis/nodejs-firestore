@@ -16,7 +16,6 @@ import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
-import {PassThrough} from "stream";
 import {firestore} from '../protos/firestore_v1_proto_api';
 
 import {
@@ -2370,6 +2369,7 @@ describe('Bundle building', () => {
     expect(namedQuery).to.deep.equal({
       name: 'query',
       readTime: snap.readTime.toProto().timestampValue,
+      // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
       bundledQuery: extend(
           true,
           {},
@@ -2379,6 +2379,31 @@ describe('Bundle building', () => {
           }
       )
     });
+  });
+
+  it('succeeds when added document does not exist', async () => {
+    const bundle = firestore.bundle('test-bundle');
+    const snap = await testCol.doc('doc5-not-exist').get();
+
+    bundle.add(snap);
+    // `elements` is expected to be [bundleMeta, docMeta, docSnap].
+    const elements = await bundleToElementArray(
+        bundle.build()
+    );
+
+    const meta = (elements[0] as IBundleElement).metadata;
+    expect(meta).to.deep.equal({
+      id: 'test-bundle',
+      createTime: snap.readTime.toProto().timestampValue
+    });
+
+    const docMeta = (elements[1] as IBundleElement).documentMetadata;
+    const docSnap = (elements[2] as IBundleElement).document;
+    expect(docMeta).to.deep.equal({
+      documentKey: snap.toDocumentProto().name,
+      readTime: snap.readTime.toProto().timestampValue
+    });
+    expect(docSnap).to.deep.equal(snap.toDocumentProto());
   });
 
   it('succeeds to save limit and limitToLast queries', async () => {

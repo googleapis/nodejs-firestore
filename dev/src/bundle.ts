@@ -33,10 +33,7 @@ import api = google.firestore.v1;
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  */
-export function validateDocumentSnapshot(
-  arg: string | number,
-  value: unknown
-): void {
+function validateDocumentSnapshot(arg: string | number, value: unknown): void {
   if (!(value instanceof DocumentSnapshot)) {
     throw new Error(invalidArgumentMessage(arg, 'DocumentSnapshot'));
   }
@@ -49,10 +46,7 @@ export function validateDocumentSnapshot(
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The input to validate.
  */
-export function validateQuerySnapshot(
-  arg: string | number,
-  value: unknown
-): void {
+function validateQuerySnapshot(arg: string | number, value: unknown): void {
   if (!(value instanceof QuerySnapshot)) {
     throw new Error(invalidArgumentMessage(arg, 'QuerySnapshot'));
   }
@@ -78,17 +72,18 @@ export class BundleBuilder {
    * Adds a Firestore document snapshot or query snapshot to the bundle.
    * Both the documents data and the query read time will be included in the bundle.
    *
-   * @param {DocumentSnapshot | string=} documentOrName A document snapshot to add or a name of a query.
+   * @param {DocumentSnapshot | string} documentOrName A document snapshot to add or a name of a query.
    * @param {Query=} querySnapshot A query snapshot to add to the bundle, if provided.
    * @returns {BundleBuilder} This instance.
    *
    * @example
-   * let bundle = firestore.bundle('data-bundle');
+   * const bundle = firestore.bundle('data-bundle');
    * const docSnapshot = await firestore.doc('abc/123').get();
    * const querySnapshot = await firestore.collection('coll').get();
-   * bundle.add(docSnapshot); // Add a document.
-   * bundle.add('coll-query', querySnapshot) // Add a named query.
-   * const bundleBuffer = await bundle.build();
+   *
+   * const bundleBuffer = bundle.add(docSnapshot); // Add a document
+   *                            .add('coll-query', querySnapshot) // Add a named query.
+   *                            .build()
    * // Save `bundleBuffer` to CDN or stream it to clients.
    */
   add(
@@ -102,7 +97,7 @@ export class BundleBuilder {
     if (arguments.length === 1) {
       validateDocumentSnapshot('documentOrName', documentOrName);
       this.addBundledDocument(documentOrName as DocumentSnapshot);
-    } else if (arguments.length === 2) {
+    } else {
       validateString('documentOrName', documentOrName);
       validateQuerySnapshot('querySnapshot', querySnapshot);
       this.addNamedQuery(documentOrName as string, querySnapshot!);
@@ -112,23 +107,16 @@ export class BundleBuilder {
   }
 
   private addBundledDocument(snap: DocumentSnapshot) {
-    if (snap.exists) {
-      const docProto = snap.toDocumentProto();
-      const savedReadTime = Timestamp.fromProto(
-        this.documents.get(snap.id)?.metadata.readTime ?? {}
-      );
-      if (!this.documents.has(snap.id) || savedReadTime < snap.readTime) {
-        this.documents.set(snap.id, {
-          document: docProto,
-          metadata: {
-            documentKey: docProto.name,
-            readTime: snap.readTime.toProto().timestampValue,
-          },
-        });
-      }
-      if (snap.readTime > this.latestReadTime) {
-        this.latestReadTime = snap.readTime;
-      }
+    const docProto = snap.toDocumentProto();
+    this.documents.set(snap.id, {
+      document: docProto,
+      metadata: {
+        documentKey: docProto.name,
+        readTime: snap.readTime.toProto().timestampValue,
+      },
+    });
+    if (snap.readTime > this.latestReadTime) {
+      this.latestReadTime = snap.readTime;
     }
   }
 
