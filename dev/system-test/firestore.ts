@@ -163,15 +163,23 @@ describe('Firestore class', () => {
       // No-op
     });
 
-    try {
-      await firestore.terminate();
-      throw new Error('terminate() should have failed');
-    } catch (err) {
-      expect(err).to.equal(
-        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
-      );
-      unsubscribe();
-    }
+    await expect(firestore.terminate()).to.eventually.be.rejectedWith(
+      'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
+        'instances must be closed before terminating the client. There are 1 ' +
+        'active listeners and 0 open BulkWriter instances.'
+    );
+    unsubscribe();
+  });
+
+  it('throws an error if terminate() is called with pending BulkWriter operations', async () => {
+    const writer = firestore._bulkWriter();
+    const ref = randomCol.doc('doc-1');
+    writer.set(ref, {foo: 'bar'});
+    await expect(firestore.terminate()).to.eventually.be.rejectedWith(
+      'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
+        'instances must be closed before terminating the client. There are 0 ' +
+        'active listeners and 1 open BulkWriter instances.'
+    );
   });
 });
 
@@ -2262,6 +2270,28 @@ describe('QuerySnapshot class', () => {
       });
       expect(count).to.equal(2);
     });
+  });
+});
+
+describe('BulkWriter class', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+
+  beforeEach(() => {
+    firestore = new Firestore({});
+    randomCol = getTestRoot(firestore);
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  // TODO(BulkWriter): Enable this test once protos are public.
+  it.skip('can terminate once BulkWriter is closed', async () => {
+    const ref = randomCol.doc('doc1');
+    const writer = firestore._bulkWriter();
+    writer.set(ref, {foo: 'bar'});
+    writer.set(ref, {foo: 'bar2'});
+    await writer.close();
+    return firestore.terminate();
   });
 });
 

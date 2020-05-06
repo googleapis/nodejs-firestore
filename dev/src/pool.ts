@@ -19,6 +19,9 @@ import * as assert from 'assert';
 import {logger} from './logger';
 import {Deferred} from './util';
 
+export const CLIENT_TERMINATED_ERROR_MSG =
+  'The client has already been terminated';
+
 /**
  * An auto-resizing pool that distributes concurrent operations over multiple
  * clients of type `T`.
@@ -187,7 +190,7 @@ export class ClientPool<T> {
    */
   run<V>(requestTag: string, op: (client: T) => Promise<V>): Promise<V> {
     if (this.terminated) {
-      return Promise.reject('The client has already been terminated');
+      return Promise.reject(CLIENT_TERMINATED_ERROR_MSG);
     }
     const client = this.acquire(requestTag);
 

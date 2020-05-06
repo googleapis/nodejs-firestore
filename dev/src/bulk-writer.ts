@@ -86,6 +86,7 @@ class BulkCommitBatch {
   private resultsMap = new Map<number, Deferred<BatchWriteResult>>();
 
   constructor(
+    private readonly firestore: Firestore,
     private readonly writeBatch: WriteBatch,
     private readonly maxBatchSize: number
   ) {}
@@ -256,6 +257,7 @@ export class BulkWriter {
     private readonly firestore: Firestore,
     enableThrottling: boolean
   ) {
+    this.firestore.incrementBulkWritersCount();
     if (enableThrottling) {
       this.rateLimiter = new RateLimiter(
         STARTING_MAXIMUM_OPS_PER_SECOND,
@@ -502,6 +504,8 @@ export class BulkWriter {
    * });
    */
   close(): Promise<void> {
+    this.verifyNotClosed();
+    this.firestore.decrementBulkWritersCount();
     const flushPromise = this.flush();
     this.closed = true;
     return flushPromise;
@@ -540,6 +544,7 @@ export class BulkWriter {
    */
   private createNewBatch(): BulkCommitBatch {
     const newBatch = new BulkCommitBatch(
+      this.firestore,
       this.firestore.batch(),
       this.maxBatchSize
     );
