@@ -154,7 +154,7 @@ describe('Firestore class', () => {
       })
       .then(() => Promise.reject('set() should have failed'))
       .catch(err => {
-        expect(err).to.equal(CLIENT_TERMINATED_ERROR_MSG);
+        expect(err).to.equal('The client has already been terminated.');
       });
   });
 
@@ -2280,7 +2280,7 @@ describe('QuerySnapshot class', () => {
   });
 });
 
-describe('BulkWriter class', () => {
+describe.only('BulkWriter class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
@@ -2291,7 +2291,7 @@ describe('BulkWriter class', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it.skip('increments and decrements the pendingOperationsCount', async () => {
+  it.skip('can terminate once BulkWriter is closed', async () => {
     const ref = randomCol.doc('doc1');
     const writer = firestore._bulkWriter();
     writer.set(ref, {foo: 'bar'});
@@ -2300,17 +2300,13 @@ describe('BulkWriter class', () => {
     return firestore.terminate();
   });
 
-  it('subsequent operations fail after terminate() is called', () => {
+  it('subsequent operations fail after terminate() is called', async () => {
     const ref = randomCol.doc('doc1');
     const writer = firestore._bulkWriter();
-    return firestore.terminate().then(() => {
-      return writer.set(ref, {foo: 'bar'});;
-    }).then(async () => {
-      return Promise.reject('should have thrown termination error');
-    })
-    .catch(err => {
-      expect(err.message).to.equal(CLIENT_TERMINATED_ERROR_MSG);
-    });
+    await firestore.terminate();
+    expect(
+     () => writer.set(ref, {foo: 'bar'})
+    ).to.throw('The client has already been terminated');
   });
 })
 

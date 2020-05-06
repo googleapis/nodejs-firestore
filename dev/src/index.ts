@@ -362,7 +362,7 @@ export class Firestore {
    * registered listeners.
    * @private
    */
-  private pendingOperationsCount = 0;
+  private bulkWritersCount = 0;
 
   // GCF currently tears down idle connections after two minutes. Requests
   // that are issued after this period may fail. On GCF, we therefore issue
@@ -1117,23 +1117,23 @@ export class Firestore {
   }
 
   /**
-   * Increments the number of pending operations. This is used to verify that
-   * all pending operations are complete when terminate() is called.
+   * Increments the number of open BulkWriter instances. This is used to verify
+   * that all pending operations are complete when terminate() is called.
    *
    * @private
    */
-  incrementOperationsCount(): void {
-    this.pendingOperationsCount += 1;
+  incrementBulkWritersCount(): void {
+    this.bulkWritersCount += 1;
   }
 
   /**
-   * Decrements the number of pending operations. This is used to verify that
-   * all pending operations are complete when terminate() is called.
+   * Decrements the number of open BulkWriter instances. This is used to verify
+   * that all pending operations are complete when terminate() is called.
    *
    * @private
    */
-  decrementOperationsCount(): void {
-    this.pendingOperationsCount -= 1;
+  decrementBulkWritersCount(): void {
+    this.bulkWritersCount -= 1;
   }
 
   /**
@@ -1147,9 +1147,10 @@ export class Firestore {
         'All onSnapshot() listeners must be unsubscribed before terminating the client.'
       );
     }
-    if (this.pendingOperationsCount > 0) {
+    if (this.bulkWritersCount > 0) {
       return Promise.reject(
-        'All BulkWriter operations must be completed before terminating the client.'
+        'All BulkWriter instances must be closed by calling and awaiting ' +
+          '`BulkWriter.close()` before terminating the client. '
       );
     }
     return this._clientPool.terminate();

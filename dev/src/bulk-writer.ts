@@ -170,8 +170,6 @@ class BulkCommitBatch {
       this.state = BatchState.READY_TO_SEND;
     }
 
-    this.firestore.incrementOperationsCount();
-
     return deferred.promise.then(result => {
       if (result.writeTime) {
         return new WriteResult(result.writeTime);
@@ -200,12 +198,10 @@ class BulkCommitBatch {
   processResults(results: BatchWriteResult[], error?: Error): void {
     if (error === undefined) {
       for (let i = 0; i < this.opCount; i++) {
-        this.firestore.decrementOperationsCount();
         this.resultsMap.get(i)!.resolve(results[i]);
       }
     } else {
       for (let i = 0; i < this.opCount; i++) {
-        this.firestore.decrementOperationsCount();
         this.resultsMap.get(i)!.reject(error);
       }
     }
@@ -253,12 +249,6 @@ export class BulkWriter {
   private closed = false;
 
   /**
-   * Whether the Firestore instance has been terminated. Once terminated, all
-   * subsequent operations will immediately be rejected.
-   */
-  private terminated = false;
-
-  /**
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
    */
   private rateLimiter: RateLimiter;
@@ -267,6 +257,7 @@ export class BulkWriter {
     private readonly firestore: Firestore,
     enableThrottling: boolean
   ) {
+    this.firestore.incrementBulkWritersCount();
     if (enableThrottling) {
       this.rateLimiter = new RateLimiter(
         STARTING_MAXIMUM_OPS_PER_SECOND,
@@ -513,6 +504,9 @@ export class BulkWriter {
    * });
    */
   close(): Promise<void> {
+    if (!this.closed) {
+      this.firestore.decrementBulkWritersCount();
+    }
     const flushPromise = this.flush();
     this.closed = true;
     return flushPromise;
