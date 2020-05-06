@@ -3037,20 +3037,6 @@ export namespace google {
                 public listCollectionIds(request: google.firestore.v1.IListCollectionIdsRequest): Promise<google.firestore.v1.ListCollectionIdsResponse>;
 
                 /**
-                 * Calls BatchWrite.
-                 * @param request BatchWriteRequest message or plain object
-                 * @param callback Node-style callback called with the error, if any, and BatchWriteResponse
-                 */
-                public batchWrite(request: google.firestore.v1.IBatchWriteRequest, callback: google.firestore.v1.Firestore.BatchWriteCallback): void;
-
-                /**
-                 * Calls BatchWrite.
-                 * @param request BatchWriteRequest message or plain object
-                 * @returns Promise
-                 */
-                public batchWrite(request: google.firestore.v1.IBatchWriteRequest): Promise<google.firestore.v1.BatchWriteResponse>;
-                 
-                /*
                  * Calls CreateDocument.
                  * @param request CreateDocumentRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and Document
@@ -3063,6 +3049,20 @@ export namespace google {
                  * @returns Promise
                  */
                 public createDocument(request: google.firestore.v1.ICreateDocumentRequest): Promise<google.firestore.v1.Document>;
+
+                /**
+                 * Calls BatchWrite.
+                 * @param request BatchWriteRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and BatchWriteResponse
+                 */
+                public batchWrite(request: google.firestore.v1.IBatchWriteRequest, callback: google.firestore.v1.Firestore.BatchWriteCallback): void;
+
+                /**
+                 * Calls BatchWrite.
+                 * @param request BatchWriteRequest message or plain object
+                 * @returns Promise
+                 */
+                public batchWrite(request: google.firestore.v1.IBatchWriteRequest): Promise<google.firestore.v1.BatchWriteResponse>;
             }
 
             namespace Firestore {
@@ -3152,18 +3152,18 @@ export namespace google {
                 type ListCollectionIdsCallback = (error: (Error|null), response?: google.firestore.v1.ListCollectionIdsResponse) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1.Firestore#batchWrite}.
-                 * @param error Error, if any
-                 * @param [response] BatchWriteResponse
-                 */
-                type BatchWriteCallback = (error: (Error|null), response?: google.firestore.v1.BatchWriteResponse) => void;
-                
-                /*
                  * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
                  * @param error Error, if any
                  * @param [response] Document
                  */
                 type CreateDocumentCallback = (error: (Error|null), response?: google.firestore.v1.Document) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1.Firestore#batchWrite}.
+                 * @param error Error, if any
+                 * @param [response] BatchWriteResponse
+                 */
+                type BatchWriteCallback = (error: (Error|null), response?: google.firestore.v1.BatchWriteResponse) => void;
             }
 
             /** Properties of a GetDocumentRequest. */
@@ -4660,6 +4660,27 @@ export namespace google {
 
                 /** BatchWriteRequest writes. */
                 public writes: google.firestore.v1.IWrite[];
+
+                /**
+                 * Creates a BatchWriteRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BatchWriteRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BatchWriteRequest;
+
+                /**
+                 * Creates a plain object from a BatchWriteRequest message. Also converts values to other types if specified.
+                 * @param message BatchWriteRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BatchWriteRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BatchWriteRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a BatchWriteResponse. */
@@ -4686,6 +4707,27 @@ export namespace google {
 
                 /** BatchWriteResponse status. */
                 public status: google.rpc.IStatus[];
+
+                /**
+                 * Creates a BatchWriteResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BatchWriteResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BatchWriteResponse;
+
+                /**
+                 * Creates a plain object from a BatchWriteResponse message. Also converts values to other types if specified.
+                 * @param message BatchWriteResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BatchWriteResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BatchWriteResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
             }
 
             /** Properties of a StructuredQuery. */
