@@ -504,9 +504,8 @@ export class BulkWriter {
    * });
    */
   close(): Promise<void> {
-    if (!this.closed) {
-      this.firestore.decrementBulkWritersCount();
-    }
+    this.verifyNotClosed();
+    this.firestore.decrementBulkWritersCount();
     const flushPromise = this.flush();
     this.closed = true;
     return flushPromise;

@@ -34,7 +34,6 @@ import {
 } from '../src';
 import {autoId, Deferred} from '../src/util';
 import {Post, postConverter, verifyInstance} from '../test/util/helpers';
-import { CLIENT_TERMINATED_ERROR_MSG } from '../src/pool';
 
 use(chaiAsPromised);
 
@@ -2280,7 +2279,7 @@ describe('QuerySnapshot class', () => {
   });
 });
 
-describe.only('BulkWriter class', () => {
+describe('BulkWriter class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
 
@@ -2304,11 +2303,11 @@ describe.only('BulkWriter class', () => {
     const ref = randomCol.doc('doc1');
     const writer = firestore._bulkWriter();
     await firestore.terminate();
-    expect(
-     () => writer.set(ref, {foo: 'bar'})
-    ).to.throw('The client has already been terminated');
+    expect(() => writer.set(ref, {foo: 'bar'})).to.throw(
+      'The client has already been terminated'
+    );
   });
-})
+});
 
 describe('Client initialization', () => {
   const ops: Array<[
