@@ -69,14 +69,6 @@ s.replace(
     "calledWithExactly({}, undefined)",
 )
 
-# Copy template files
-common_templates = gcp.CommonTemplates()
-templates = common_templates.node_library(
-    source_location="build/src", test_project="node-gcloud-ci"
-)
-
-s.copy(templates)
-
 # use the existing proto .js / .d.ts files
 s.replace(
    "dev/src/v1/firestore_client.ts",
@@ -160,6 +152,14 @@ os.rename("dev/.jsdoc.js", ".jsdoc.js")
 os.rename("dev/.prettierrc.js", ".prettierrc.js")
 
 s.replace(".jsdoc.js", "protos", "build/protos", 1)
+
+# Copy template files
+common_templates = gcp.CommonTemplates()
+templates = common_templates.node_library(
+    source_location="build/src", test_project="node-gcloud-ci"
+)
+
+s.copy(templates)
 
 # Remove auto-generated packaging tests
 os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
