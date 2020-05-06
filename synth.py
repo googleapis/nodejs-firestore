@@ -3,6 +3,7 @@ import synthtool.gcp as gcp
 import synthtool.languages.node as node
 import logging
 import os
+import subprocess
 
 logging.basicConfig(level=logging.DEBUG)
 

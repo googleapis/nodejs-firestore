@@ -25,7 +25,7 @@ import * as firestoreadminModule from '../src/v1';
 
 import {PassThrough} from 'stream';
 
-import {protobuf, LROperation} from 'google-gax';
+import {protobuf, LROperation, operationsProtos} from 'google-gax';
 
 function generateSampleMessage<T extends object>(instance: T) {
   const filledObject = (instance.constructor as typeof protobuf.Message).toObject(
@@ -326,9 +326,7 @@ describe('v1.FirestoreAdminClient', () => {
       };
       const expectedError = new Error('expected');
       client.innerApiCalls.getIndex = stubSimpleCall(undefined, expectedError);
-      await assert.rejects(async () => {
-        await client.getIndex(request);
-      }, expectedError);
+      await assert.rejects(client.getIndex(request), expectedError);
       assert(
         (client.innerApiCalls.getIndex as SinonStub)
           .getCall(0)
@@ -440,9 +438,7 @@ describe('v1.FirestoreAdminClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.deleteIndex(request);
-      }, expectedError);
+      await assert.rejects(client.deleteIndex(request), expectedError);
       assert(
         (client.innerApiCalls.deleteIndex as SinonStub)
           .getCall(0)
@@ -551,9 +547,7 @@ describe('v1.FirestoreAdminClient', () => {
       };
       const expectedError = new Error('expected');
       client.innerApiCalls.getField = stubSimpleCall(undefined, expectedError);
-      await assert.rejects(async () => {
-        await client.getField(request);
-      }, expectedError);
+      await assert.rejects(client.getField(request), expectedError);
       assert(
         (client.innerApiCalls.getField as SinonStub)
           .getCall(0)
@@ -673,9 +667,7 @@ describe('v1.FirestoreAdminClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.createIndex(request);
-      }, expectedError);
+      await assert.rejects(client.createIndex(request), expectedError);
       assert(
         (client.innerApiCalls.createIndex as SinonStub)
           .getCall(0)
@@ -708,14 +700,50 @@ describe('v1.FirestoreAdminClient', () => {
         expectedError
       );
       const [operation] = await client.createIndex(request);
-      await assert.rejects(async () => {
-        await operation.promise();
-      }, expectedError);
+      await assert.rejects(operation.promise(), expectedError);
       assert(
         (client.innerApiCalls.createIndex as SinonStub)
           .getCall(0)
           .calledWith(request, expectedOptions, undefined)
       );
+    });
+
+    it('invokes checkCreateIndexProgress without error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const expectedResponse = generateSampleMessage(
+        new operationsProtos.google.longrunning.Operation()
+      );
+      expectedResponse.name = 'test';
+      expectedResponse.response = {type_url: 'url', value: Buffer.from('')};
+      expectedResponse.metadata = {type_url: 'url', value: Buffer.from('')};
+
+      client.operationsClient.getOperation = stubSimpleCall(expectedResponse);
+      const decodedOperation = await client.checkCreateIndexProgress(
+        expectedResponse.name
+      );
+      assert.deepStrictEqual(decodedOperation.name, expectedResponse.name);
+      assert(decodedOperation.metadata);
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
+    });
+
+    it('invokes checkCreateIndexProgress with error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const expectedError = new Error('expected');
+
+      client.operationsClient.getOperation = stubSimpleCall(
+        undefined,
+        expectedError
+      );
+      await assert.rejects(client.checkCreateIndexProgress(''), expectedError);
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
     });
   });
 
@@ -833,9 +861,7 @@ describe('v1.FirestoreAdminClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.updateField(request);
-      }, expectedError);
+      await assert.rejects(client.updateField(request), expectedError);
       assert(
         (client.innerApiCalls.updateField as SinonStub)
           .getCall(0)
@@ -869,14 +895,50 @@ describe('v1.FirestoreAdminClient', () => {
         expectedError
       );
       const [operation] = await client.updateField(request);
-      await assert.rejects(async () => {
-        await operation.promise();
-      }, expectedError);
+      await assert.rejects(operation.promise(), expectedError);
       assert(
         (client.innerApiCalls.updateField as SinonStub)
           .getCall(0)
           .calledWith(request, expectedOptions, undefined)
       );
+    });
+
+    it('invokes checkUpdateFieldProgress without error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const expectedResponse = generateSampleMessage(
+        new operationsProtos.google.longrunning.Operation()
+      );
+      expectedResponse.name = 'test';
+      expectedResponse.response = {type_url: 'url', value: Buffer.from('')};
+      expectedResponse.metadata = {type_url: 'url', value: Buffer.from('')};
+
+      client.operationsClient.getOperation = stubSimpleCall(expectedResponse);
+      const decodedOperation = await client.checkUpdateFieldProgress(
+        expectedResponse.name
+      );
+      assert.deepStrictEqual(decodedOperation.name, expectedResponse.name);
+      assert(decodedOperation.metadata);
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
+    });
+
+    it('invokes checkUpdateFieldProgress with error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const expectedError = new Error('expected');
+
+      client.operationsClient.getOperation = stubSimpleCall(
+        undefined,
+        expectedError
+      );
+      await assert.rejects(client.checkUpdateFieldProgress(''), expectedError);
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
     });
   });
 
@@ -993,9 +1055,7 @@ describe('v1.FirestoreAdminClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.exportDocuments(request);
-      }, expectedError);
+      await assert.rejects(client.exportDocuments(request), expectedError);
       assert(
         (client.innerApiCalls.exportDocuments as SinonStub)
           .getCall(0)
@@ -1028,14 +1088,53 @@ describe('v1.FirestoreAdminClient', () => {
         expectedError
       );
       const [operation] = await client.exportDocuments(request);
-      await assert.rejects(async () => {
-        await operation.promise();
-      }, expectedError);
+      await assert.rejects(operation.promise(), expectedError);
       assert(
         (client.innerApiCalls.exportDocuments as SinonStub)
           .getCall(0)
           .calledWith(request, expectedOptions, undefined)
       );
+    });
+
+    it('invokes checkExportDocumentsProgress without error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const expectedResponse = generateSampleMessage(
+        new operationsProtos.google.longrunning.Operation()
+      );
+      expectedResponse.name = 'test';
+      expectedResponse.response = {type_url: 'url', value: Buffer.from('')};
+      expectedResponse.metadata = {type_url: 'url', value: Buffer.from('')};
+
+      client.operationsClient.getOperation = stubSimpleCall(expectedResponse);
+      const decodedOperation = await client.checkExportDocumentsProgress(
+        expectedResponse.name
+      );
+      assert.deepStrictEqual(decodedOperation.name, expectedResponse.name);
+      assert(decodedOperation.metadata);
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
+    });
+
+    it('invokes checkExportDocumentsProgress with error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const expectedError = new Error('expected');
+
+      client.operationsClient.getOperation = stubSimpleCall(
+        undefined,
+        expectedError
+      );
+      await assert.rejects(
+        client.checkExportDocumentsProgress(''),
+        expectedError
+      );
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
     });
   });
 
@@ -1152,9 +1251,7 @@ describe('v1.FirestoreAdminClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.importDocuments(request);
-      }, expectedError);
+      await assert.rejects(client.importDocuments(request), expectedError);
       assert(
         (client.innerApiCalls.importDocuments as SinonStub)
           .getCall(0)
@@ -1187,14 +1284,53 @@ describe('v1.FirestoreAdminClient', () => {
         expectedError
       );
       const [operation] = await client.importDocuments(request);
-      await assert.rejects(async () => {
-        await operation.promise();
-      }, expectedError);
+      await assert.rejects(operation.promise(), expectedError);
       assert(
         (client.innerApiCalls.importDocuments as SinonStub)
           .getCall(0)
           .calledWith(request, expectedOptions, undefined)
       );
+    });
+
+    it('invokes checkImportDocumentsProgress without error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const expectedResponse = generateSampleMessage(
+        new operationsProtos.google.longrunning.Operation()
+      );
+      expectedResponse.name = 'test';
+      expectedResponse.response = {type_url: 'url', value: Buffer.from('')};
+      expectedResponse.metadata = {type_url: 'url', value: Buffer.from('')};
+
+      client.operationsClient.getOperation = stubSimpleCall(expectedResponse);
+      const decodedOperation = await client.checkImportDocumentsProgress(
+        expectedResponse.name
+      );
+      assert.deepStrictEqual(decodedOperation.name, expectedResponse.name);
+      assert(decodedOperation.metadata);
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
+    });
+
+    it('invokes checkImportDocumentsProgress with error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const expectedError = new Error('expected');
+
+      client.operationsClient.getOperation = stubSimpleCall(
+        undefined,
+        expectedError
+      );
+      await assert.rejects(
+        client.checkImportDocumentsProgress(''),
+        expectedError
+      );
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
     });
   });
 
@@ -1305,9 +1441,7 @@ describe('v1.FirestoreAdminClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.listIndexes(request);
-      }, expectedError);
+      await assert.rejects(client.listIndexes(request), expectedError);
       assert(
         (client.innerApiCalls.listIndexes as SinonStub)
           .getCall(0)
@@ -1397,9 +1531,7 @@ describe('v1.FirestoreAdminClient', () => {
           reject(err);
         });
       });
-      await assert.rejects(async () => {
-        await promise;
-      }, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.descriptors.page.listIndexes.createStream as SinonStub)
           .getCall(0)
@@ -1597,9 +1729,7 @@ describe('v1.FirestoreAdminClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.listFields(request);
-      }, expectedError);
+      await assert.rejects(client.listFields(request), expectedError);
       assert(
         (client.innerApiCalls.listFields as SinonStub)
           .getCall(0)
@@ -1689,9 +1819,7 @@ describe('v1.FirestoreAdminClient', () => {
           reject(err);
         });
       });
-      await assert.rejects(async () => {
-        await promise;
-      }, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.descriptors.page.listFields.createStream as SinonStub)
           .getCall(0)

@@ -7471,40 +7471,7 @@
                      * @returns {Promise<google.firestore.v1.ListCollectionIdsResponse>} Promise
                      * @variation 2
                      */
-
-                    /**
-                     * Callback as used by {@link google.firestore.v1.Firestore#batchWrite}.
-                     * @memberof google.firestore.v1.Firestore
-                     * @typedef BatchWriteCallback
-                     * @type {function}
-                     * @param {Error|null} error Error, if any
-                     * @param {google.firestore.v1.BatchWriteResponse} [response] BatchWriteResponse
-                     */
-
-                    /**
-                     * Calls BatchWrite.
-                     * @function batchWrite
-                     * @memberof google.firestore.v1.Firestore
-                     * @instance
-                     * @param {google.firestore.v1.IBatchWriteRequest} request BatchWriteRequest message or plain object
-                     * @param {google.firestore.v1.Firestore.BatchWriteCallback} callback Node-style callback called with the error, if any, and BatchWriteResponse
-                     * @returns {undefined}
-                     * @variation 1
-                     */
-                    Object.defineProperty(Firestore.prototype.batchWrite = function batchWrite(request, callback) {
-                        return this.rpcCall(batchWrite, $root.google.firestore.v1.BatchWriteRequest, $root.google.firestore.v1.BatchWriteResponse, request, callback);
-                    }, "name", { value: "BatchWrite" });
-
-                   /**
-                     * Calls BatchWrite.
-                     * @function batchWrite
-                     * @memberof google.firestore.v1.Firestore
-                     * @instance
-                     * @param {google.firestore.v1.IBatchWriteRequest} request BatchWriteRequest message or plain object
-                     * @returns {Promise<google.firestore.v1.BatchWriteResponse>} Promise
-                     * @variation 2
-                     */
-
+    
                     /**
                      * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
                      * @memberof google.firestore.v1.Firestore
@@ -7535,6 +7502,39 @@
                      * @instance
                      * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
                      * @returns {Promise<google.firestore.v1.Document>} Promise
+                     * @variation 2
+                     */
+    
+                    /**
+                     * Callback as used by {@link google.firestore.v1.Firestore#batchWrite}.
+                     * @memberof google.firestore.v1.Firestore
+                     * @typedef BatchWriteCallback
+                     * @type {function}
+                     * @param {Error|null} error Error, if any
+                     * @param {google.firestore.v1.BatchWriteResponse} [response] BatchWriteResponse
+                     */
+    
+                    /**
+                     * Calls BatchWrite.
+                     * @function batchWrite
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IBatchWriteRequest} request BatchWriteRequest message or plain object
+                     * @param {google.firestore.v1.Firestore.BatchWriteCallback} callback Node-style callback called with the error, if any, and BatchWriteResponse
+                     * @returns {undefined}
+                     * @variation 1
+                     */
+                    Object.defineProperty(Firestore.prototype.batchWrite = function batchWrite(request, callback) {
+                        return this.rpcCall(batchWrite, $root.google.firestore.v1.BatchWriteRequest, $root.google.firestore.v1.BatchWriteResponse, request, callback);
+                    }, "name", { value: "BatchWrite" });
+    
+                    /**
+                     * Calls BatchWrite.
+                     * @function batchWrite
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IBatchWriteRequest} request BatchWriteRequest message or plain object
+                     * @returns {Promise<google.firestore.v1.BatchWriteResponse>} Promise
                      * @variation 2
                      */
     
@@ -11127,9 +11127,9 @@
     
                     return ListCollectionIdsResponse;
                 })();
-
+    
                 v1.BatchWriteRequest = (function() {
-
+    
                     /**
                      * Properties of a BatchWriteRequest.
                      * @memberof google.firestore.v1
@@ -11169,6 +11169,71 @@
                      * @instance
                      */
                     BatchWriteRequest.prototype.writes = $util.emptyArray;
+    
+                    /**
+                     * Creates a BatchWriteRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.BatchWriteRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.BatchWriteRequest} BatchWriteRequest
+                     */
+                    BatchWriteRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.BatchWriteRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.BatchWriteRequest();
+                        if (object.database != null)
+                            message.database = String(object.database);
+                        if (object.writes) {
+                            if (!Array.isArray(object.writes))
+                                throw TypeError(".google.firestore.v1.BatchWriteRequest.writes: array expected");
+                            message.writes = [];
+                            for (var i = 0; i < object.writes.length; ++i) {
+                                if (typeof object.writes[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.BatchWriteRequest.writes: object expected");
+                                message.writes[i] = $root.google.firestore.v1.Write.fromObject(object.writes[i]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a BatchWriteRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.BatchWriteRequest
+                     * @static
+                     * @param {google.firestore.v1.BatchWriteRequest} message BatchWriteRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    BatchWriteRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.writes = [];
+                        if (options.defaults)
+                            object.database = "";
+                        if (message.database != null && message.hasOwnProperty("database"))
+                            object.database = message.database;
+                        if (message.writes && message.writes.length) {
+                            object.writes = [];
+                            for (var j = 0; j < message.writes.length; ++j)
+                                object.writes[j] = $root.google.firestore.v1.Write.toObject(message.writes[j], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this BatchWriteRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.BatchWriteRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    BatchWriteRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return BatchWriteRequest;
                 })();
@@ -11215,6 +11280,82 @@
                      * @instance
                      */
                     BatchWriteResponse.prototype.status = $util.emptyArray;
+    
+                    /**
+                     * Creates a BatchWriteResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.BatchWriteResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.BatchWriteResponse} BatchWriteResponse
+                     */
+                    BatchWriteResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.BatchWriteResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.BatchWriteResponse();
+                        if (object.writeResults) {
+                            if (!Array.isArray(object.writeResults))
+                                throw TypeError(".google.firestore.v1.BatchWriteResponse.writeResults: array expected");
+                            message.writeResults = [];
+                            for (var i = 0; i < object.writeResults.length; ++i) {
+                                if (typeof object.writeResults[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.BatchWriteResponse.writeResults: object expected");
+                                message.writeResults[i] = $root.google.firestore.v1.WriteResult.fromObject(object.writeResults[i]);
+                            }
+                        }
+                        if (object.status) {
+                            if (!Array.isArray(object.status))
+                                throw TypeError(".google.firestore.v1.BatchWriteResponse.status: array expected");
+                            message.status = [];
+                            for (var i = 0; i < object.status.length; ++i) {
+                                if (typeof object.status[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.BatchWriteResponse.status: object expected");
+                                message.status[i] = $root.google.rpc.Status.fromObject(object.status[i]);
+                            }
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a BatchWriteResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.BatchWriteResponse
+                     * @static
+                     * @param {google.firestore.v1.BatchWriteResponse} message BatchWriteResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    BatchWriteResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults) {
+                            object.writeResults = [];
+                            object.status = [];
+                        }
+                        if (message.writeResults && message.writeResults.length) {
+                            object.writeResults = [];
+                            for (var j = 0; j < message.writeResults.length; ++j)
+                                object.writeResults[j] = $root.google.firestore.v1.WriteResult.toObject(message.writeResults[j], options);
+                        }
+                        if (message.status && message.status.length) {
+                            object.status = [];
+                            for (var j = 0; j < message.status.length; ++j)
+                                object.status[j] = $root.google.rpc.Status.toObject(message.status[j], options);
+                        }
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this BatchWriteResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.BatchWriteResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    BatchWriteResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
     
                     return BatchWriteResponse;
                 })();
