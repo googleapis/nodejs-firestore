@@ -153,7 +153,7 @@ describe('Firestore class', () => {
       })
       .then(() => Promise.reject('set() should have failed'))
       .catch(err => {
-        expect(err).to.equal('The client has already been terminated.');
+        expect(err).to.equal('The client has already been terminated');
       });
   });
 
@@ -163,24 +163,22 @@ describe('Firestore class', () => {
       // No-op
     });
 
-    try {
-      await firestore.terminate();
-      throw new Error('terminate() should have failed');
-    } catch (err) {
-      expect(err).to.equal(
-        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
-      );
-      unsubscribe();
-    }
+    await expect(firestore.terminate()).to.eventually.be.rejectedWith(
+      'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
+        'instances must be closed before terminating the client. There are 1 ' +
+        'active listeners and 0 open BulkWriter instances.'
+    );
+    unsubscribe();
   });
 
   it('throws an error if terminate() is called with pending BulkWriter operations', async () => {
     const writer = firestore._bulkWriter();
     const ref = randomCol.doc('doc-1');
     writer.set(ref, {foo: 'bar'});
-    expect(firestore.terminate()).to.eventually.be.rejectedWith(
-      'All BulkWriter instances must be closed by calling and awaiting ' +
-        '`BulkWriter.close()` before terminating the client.'
+    await expect(firestore.terminate()).to.eventually.be.rejectedWith(
+      'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
+        'instances must be closed before terminating the client. There are 0 ' +
+        'active listeners and 1 open BulkWriter instances.'
     );
   });
 });
@@ -2286,6 +2284,7 @@ describe('BulkWriter class', () => {
 
   afterEach(() => verifyInstance(firestore));
 
+  // TODO(BulkWriter): Enable this test once protos are public.
   it.skip('can terminate once BulkWriter is closed', async () => {
     const ref = randomCol.doc('doc1');
     const writer = firestore._bulkWriter();

@@ -1142,15 +1142,12 @@ export class Firestore {
    * @return A Promise that resolves when the client is terminated.
    */
   terminate(): Promise<void> {
-    if (this.registeredListenersCount > 0) {
+    if (this.registeredListenersCount > 0 || this.bulkWritersCount > 0) {
       return Promise.reject(
-        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
-      );
-    }
-    if (this.bulkWritersCount > 0) {
-      return Promise.reject(
-        'All BulkWriter instances must be closed by calling and awaiting ' +
-          '`BulkWriter.close()` before terminating the client.'
+        'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
+          'instances must be closed before terminating the client. ' +
+          `There are ${this.registeredListenersCount} active listeners and ` +
+          `${this.bulkWritersCount} open BulkWriter instances.`
       );
     }
     return this._clientPool.terminate();
