@@ -512,7 +512,6 @@ export class BulkWriter {
   }
 
   private verifyNotClosed(): void {
-    this.firestore.verifyNotTerminated();
     if (this.closed) {
       throw new Error('BulkWriter has already been closed.');
     }

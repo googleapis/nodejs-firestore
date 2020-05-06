@@ -1150,19 +1150,10 @@ export class Firestore {
     if (this.bulkWritersCount > 0) {
       return Promise.reject(
         'All BulkWriter instances must be closed by calling and awaiting ' +
-          '`BulkWriter.close()` before terminating the client. '
+          '`BulkWriter.close()` before terminating the client.'
       );
     }
     return this._clientPool.terminate();
-  }
-
-  /**
-   * Throws an error if this Firestore instance has been terminated.
-   *
-   * @private
-   */
-  verifyNotTerminated(): void {
-    return this._clientPool.verifyNotTerminated();
   }
 
   /**

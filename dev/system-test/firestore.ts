@@ -178,14 +178,10 @@ describe('Firestore class', () => {
     const writer = firestore._bulkWriter();
     const ref = randomCol.doc('doc-1');
     writer.set(ref, {foo: 'bar'});
-    try {
-      await firestore.terminate();
-      throw new Error('terminate() should have failed');
-    } catch (err) {
-      expect(err).to.equal(
-        'All BulkWriter operations must be completed before terminating the client.'
-      );
-    }
+    expect(firestore.terminate()).to.eventually.be.rejectedWith(
+      'All BulkWriter instances must be closed by calling and awaiting ' +
+        '`BulkWriter.close()` before terminating the client.'
+    );
   });
 });
 
@@ -2297,15 +2293,6 @@ describe('BulkWriter class', () => {
     writer.set(ref, {foo: 'bar2'});
     await writer.close();
     return firestore.terminate();
-  });
-
-  it('subsequent operations fail after terminate() is called', async () => {
-    const ref = randomCol.doc('doc1');
-    const writer = firestore._bulkWriter();
-    await firestore.terminate();
-    expect(() => writer.set(ref, {foo: 'bar'})).to.throw(
-      'The client has already been terminated'
-    );
   });
 });
 
