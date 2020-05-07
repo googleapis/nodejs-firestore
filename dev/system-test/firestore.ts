@@ -34,6 +34,7 @@ import {
 } from '../src';
 import {autoId, Deferred} from '../src/util';
 import {Post, postConverter, verifyInstance} from '../test/util/helpers';
+import {BulkWriter} from '../src/bulk-writer';
 
 use(chaiAsPromised);
 
@@ -2273,23 +2274,70 @@ describe('QuerySnapshot class', () => {
   });
 });
 
-describe('BulkWriter class', () => {
+describe.only('BulkWriter class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
+  let writer: BulkWriter;
 
   beforeEach(() => {
     firestore = new Firestore({});
+    writer = firestore._bulkWriter();
     randomCol = getTestRoot(firestore);
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  // TODO(BulkWriter): Enable this test once protos are public.
-  it.skip('can terminate once BulkWriter is closed', async () => {
+  it.only('has create() method', async () => {
+    process.on('unhandledRejection', (reason, p) => {
+      console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+    });
+    const ref = randomCol.doc('doc1');
+    const promise = writer.create(ref, {foo: 'bar'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar'});
+    const writeTime = (await promise).writeTime;
+    expect(writeTime).to.not.be.null;
+  });
+
+  it('has set() method', async () => {
+    const ref = randomCol.doc('doc1');
+    const promise = writer.set(ref, {foo: 'bar'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar'});
+    const writeTime = (await promise).writeTime;
+    expect(writeTime).to.not.be.null;
+  });
+
+  it('has update() method', async () => {
+    const ref = randomCol.doc('doc1');
+    await ref.set({foo: 'bar'});
+    const promise = writer.update(ref, {foo: 'bar2'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar2'});
+    const writeTime = (await promise).writeTime;
+    expect(writeTime).to.not.be.null;
+  });
+
+  it.only('has delete() method', async () => {
+    const ref = randomCol.doc('doc1');
+    await ref.set({foo: 'bar'});
+    const promise = writer.delete(ref).catch(err => {
+      console.log('erraught ', err);
+    });
+    await writer.close();
+    const result = await ref.get();
+    expect(result.exists).to.be.false;
+    await promise;
+    // expect(writeTime).to.be.null;
+  });
+
+  it('can terminate once BulkWriter is closed', async () => {
     const ref = randomCol.doc('doc1');
     const writer = firestore._bulkWriter();
     writer.set(ref, {foo: 'bar'});
-    writer.set(ref, {foo: 'bar2'});
     await writer.close();
     return firestore.terminate();
   });

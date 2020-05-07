@@ -545,9 +545,15 @@ export class WriteBatch {
     >('batchWrite', request, tag);
 
     return (response.writeResults || []).map((result, i) => {
-      const status = response.status[i];
-      const error = new GoogleError(status.message || undefined);
-      error.code = status.code as Status;
+      let error;
+      try {
+        const status = response.status[i];
+        error = new GoogleError(status.message || undefined);
+        error.code = status.code as Status;
+      } catch (e) {
+        console.log('caught', e);
+        error = new Error('lol');
+      }
       return new BatchWriteResult(
         result.updateTime ? Timestamp.fromProto(result.updateTime) : null,
         error
