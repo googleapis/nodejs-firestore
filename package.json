@@ -63,7 +63,6 @@
     "@types/duplexify": "^3.5.0",
     "@types/extend": "^3.0.0",
     "@types/mocha": "^7.0.0",
-    "@types/moment": "^2.13.0",
     "@types/node": "^12.12.17",
     "@types/through2": "^2.0.34",
     "c8": "^7.0.0",

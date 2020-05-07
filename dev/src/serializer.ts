@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {Moment} from 'moment';
-
 import * as proto from '../protos/firestore_v1_proto_api';
 
 import {detectValueType} from './convert';
@@ -412,12 +410,13 @@ export function validateUserInput(
  * Returns true if value is a MomentJs date object.
  * @private
  */
-function isMomentJsType(value: unknown): value is Moment {
+function isMomentJsType(value: unknown): value is {toDate: () => Date} {
   return (
     typeof value === 'object' &&
     value !== null &&
     value.constructor &&
     value.constructor.name === 'Moment' &&
-    typeof (value as Moment).toDate === 'function'
+    // tslint:disable-next-line:no-any
+    typeof (value as any).toDate === 'function'
   );
 }
