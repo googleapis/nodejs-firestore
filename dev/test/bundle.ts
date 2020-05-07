@@ -24,7 +24,7 @@ import {
 } from './util/helpers';
 import IBundleElement = firestore.IBundleElement;
 
-describe.only('Bundle Buidler', () => {
+describe('Bundle Buidler', () => {
   let firestore: Firestore;
 
   beforeEach(() => {
@@ -83,14 +83,16 @@ describe.only('Bundle Buidler', () => {
       id: 'test-bundle',
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       createTime: snap1.readTime.toProto().timestampValue,
+      version: 1,
     });
 
     // Verify doc1Meta and doc1Snap
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
     const docSnap = (elements[2] as IBundleElement).document;
     expect(docMeta).to.deep.equal({
-      documentKey: snap2.toDocumentProto().name,
+      name: snap2.toDocumentProto().name,
       readTime: snap2.readTime.toProto().timestampValue,
+      exists: true,
     });
     expect(docSnap).to.deep.equal(snap2.toDocumentProto());
   });
@@ -119,14 +121,16 @@ describe.only('Bundle Buidler', () => {
       id: 'test-bundle',
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       createTime: snap1.readTime.toProto().timestampValue,
+      version: 1,
     });
 
     // Verify doc1Meta and doc1Snap
     const doc1Meta = (elements[1] as IBundleElement).documentMetadata;
     const doc1Snap = (elements[2] as IBundleElement).document;
     expect(doc1Meta).to.deep.equal({
-      documentKey: snap1.toDocumentProto().name,
+      name: snap1.toDocumentProto().name,
       readTime: snap1.readTime.toProto().timestampValue,
+      exists: true,
     });
     expect(doc1Snap).to.deep.equal(snap1.toDocumentProto());
 
@@ -153,8 +157,9 @@ describe.only('Bundle Buidler', () => {
     const doc2Meta = (newElements[3] as IBundleElement).documentMetadata;
     const doc2Snap = (newElements[4] as IBundleElement).document;
     expect(doc2Meta).to.deep.equal({
-      documentKey: snap2.toDocumentProto().name,
+      name: snap2.toDocumentProto().name,
       readTime: snap2.readTime.toProto().timestampValue,
+      exists: true,
     });
     expect(doc2Snap).to.deep.equal(snap2.toDocumentProto());
   });
@@ -170,6 +175,7 @@ describe.only('Bundle Buidler', () => {
     expect(meta).to.deep.equal({
       id: 'test-bundle',
       createTime: new Timestamp(0, 0).toProto().timestampValue,
+      version: 1,
     });
   });
 });

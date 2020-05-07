@@ -72,10 +72,13 @@ message NamedQuery {
 // Metadata describing a Firestore document saved in the bundle.
 message BundledDocumentMetadata {
   // The document key of a bundled document.
-  string document_key = 1;
+  string name = 1;
 
   // The snapshot version of the document data bundled.
   google.protobuf.Timestamp read_time = 2;
+
+  // Whether the document exists.
+  bool exists = 3;
 }
 
 // Metadata describing the bundle file/stream.
@@ -85,6 +88,9 @@ message BundleMetadata {
 
   // Time at which the documents snapshot is taken for this bundle.
   google.protobuf.Timestamp create_time = 2;
+
+  // The version of bundle.
+  uint32 version = 3;
 }
 
 // A Firestore bundle is a length-prefixed stream of JSON representations of 

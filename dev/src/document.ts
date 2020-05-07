@@ -498,17 +498,12 @@ export class DocumentSnapshot<T = DocumentData> {
    * @private
    */
   toDocumentProto(): api.IDocument {
-    const result: api.IDocument = {name: this._ref.formattedName};
-    if (this.createTime) {
-      result.createTime = this.createTime;
-    }
-    if (this.updateTime) {
-      result.updateTime = this.updateTime;
-    }
-    if (this._fieldsProto) {
-      result.fields = this._fieldsProto;
-    }
-    return result;
+    return {
+      name: this._ref.formattedName,
+      createTime: this.createTime,
+      updateTime: this.updateTime,
+      fields: this._fieldsProto,
+    };
   }
 
   /**

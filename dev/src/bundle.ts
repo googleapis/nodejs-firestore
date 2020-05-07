@@ -26,31 +26,7 @@ import {
 
 import api = google.firestore.v1;
 
-/**
- * Validates that 'value' is DocumentSnapshot.
- *
- * @private
- * @param arg The argument name or argument index (for varargs methods).
- * @param value The input to validate.
- */
-function validateDocumentSnapshot(arg: string | number, value: unknown): void {
-  if (!(value instanceof DocumentSnapshot)) {
-    throw new Error(invalidArgumentMessage(arg, 'DocumentSnapshot'));
-  }
-}
-
-/**
- * Validates that 'value' is QuerySnapshot.
- *
- * @private
- * @param arg The argument name or argument index (for varargs methods).
- * @param value The input to validate.
- */
-function validateQuerySnapshot(arg: string | number, value: unknown): void {
-  if (!(value instanceof QuerySnapshot)) {
-    throw new Error(invalidArgumentMessage(arg, 'QuerySnapshot'));
-  }
-}
+const BUNDLE_VERSION = 1;
 
 /**
  * Builds a Firestore data bundle with results from the given document and query snapshots.
@@ -109,10 +85,11 @@ export class BundleBuilder {
   private addBundledDocument(snap: DocumentSnapshot) {
     const docProto = snap.toDocumentProto();
     this.documents.set(snap.id, {
-      document: docProto,
+      document: snap.exists ? docProto : undefined,
       metadata: {
-        documentKey: docProto.name,
+        name: docProto.name,
         readTime: snap.readTime.toProto().timestampValue,
+        exists: snap.exists,
       },
     });
     if (snap.readTime > this.latestReadTime) {
@@ -158,6 +135,7 @@ export class BundleBuilder {
     const metadata: firestore.IBundleMetadata = {
       id: this.bundleId,
       createTime: this.latestReadTime.toProto().timestampValue,
+      version: BUNDLE_VERSION,
     };
     bundleBuffer = Buffer.concat([
       bundleBuffer,
@@ -174,16 +152,19 @@ export class BundleBuilder {
     for (const bundledDocument of this.documents.values()) {
       const documentMetadata: firestore.IBundledDocumentMetadata =
         bundledDocument.metadata;
-      const document: api.IDocument = bundledDocument.document;
+      const document = bundledDocument.document;
 
       bundleBuffer = Buffer.concat([
         bundleBuffer,
         this.elementToLengthPrefixedBuffer({documentMetadata}),
       ]);
-      bundleBuffer = Buffer.concat([
-        bundleBuffer,
-        this.elementToLengthPrefixedBuffer({document}),
-      ]);
+      // Write to the bundle if document exists.
+      if (document) {
+        bundleBuffer = Buffer.concat([
+          bundleBuffer,
+          this.elementToLengthPrefixedBuffer({document}),
+        ]);
+      }
     }
     return bundleBuffer;
   }
@@ -196,6 +177,32 @@ export class BundleBuilder {
 class BundledDocument {
   constructor(
     readonly metadata: firestore.IBundledDocumentMetadata,
-    readonly document: api.IDocument
+    readonly document?: api.IDocument
   ) {}
+}
+
+/**
+ * Validates that 'value' is DocumentSnapshot.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ */
+function validateDocumentSnapshot(arg: string | number, value: unknown): void {
+  if (!(value instanceof DocumentSnapshot)) {
+    throw new Error(invalidArgumentMessage(arg, 'DocumentSnapshot'));
+  }
+}
+
+/**
+ * Validates that 'value' is QuerySnapshot.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The input to validate.
+ */
+function validateQuerySnapshot(arg: string | number, value: unknown): void {
+  if (!(value instanceof QuerySnapshot)) {
+    throw new Error(invalidArgumentMessage(arg, 'QuerySnapshot'));
+  }
 }

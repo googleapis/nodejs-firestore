@@ -318,8 +318,9 @@
              * Properties of a BundledDocumentMetadata.
              * @memberof firestore
              * @interface IBundledDocumentMetadata
-             * @property {string|null} [documentKey] BundledDocumentMetadata documentKey
+             * @property {string|null} [name] BundledDocumentMetadata name
              * @property {google.protobuf.ITimestamp|null} [readTime] BundledDocumentMetadata readTime
+             * @property {boolean|null} [exists] BundledDocumentMetadata exists
              */
     
             /**
@@ -338,12 +339,12 @@
             }
     
             /**
-             * BundledDocumentMetadata documentKey.
-             * @member {string} documentKey
+             * BundledDocumentMetadata name.
+             * @member {string} name
              * @memberof firestore.BundledDocumentMetadata
              * @instance
              */
-            BundledDocumentMetadata.prototype.documentKey = "";
+            BundledDocumentMetadata.prototype.name = "";
     
             /**
              * BundledDocumentMetadata readTime.
@@ -352,6 +353,14 @@
              * @instance
              */
             BundledDocumentMetadata.prototype.readTime = null;
+    
+            /**
+             * BundledDocumentMetadata exists.
+             * @member {boolean} exists
+             * @memberof firestore.BundledDocumentMetadata
+             * @instance
+             */
+            BundledDocumentMetadata.prototype.exists = false;
     
             /**
              * Creates a BundledDocumentMetadata message from a plain object. Also converts values to their respective internal types.
@@ -365,13 +374,15 @@
                 if (object instanceof $root.firestore.BundledDocumentMetadata)
                     return object;
                 var message = new $root.firestore.BundledDocumentMetadata();
-                if (object.documentKey != null)
-                    message.documentKey = String(object.documentKey);
+                if (object.name != null)
+                    message.name = String(object.name);
                 if (object.readTime != null) {
                     if (typeof object.readTime !== "object")
                         throw TypeError(".firestore.BundledDocumentMetadata.readTime: object expected");
                     message.readTime = $root.google.protobuf.Timestamp.fromObject(object.readTime);
                 }
+                if (object.exists != null)
+                    message.exists = Boolean(object.exists);
                 return message;
             };
     
@@ -389,13 +400,16 @@
                     options = {};
                 var object = {};
                 if (options.defaults) {
-                    object.documentKey = "";
+                    object.name = "";
                     object.readTime = null;
+                    object.exists = false;
                 }
-                if (message.documentKey != null && message.hasOwnProperty("documentKey"))
-                    object.documentKey = message.documentKey;
+                if (message.name != null && message.hasOwnProperty("name"))
+                    object.name = message.name;
                 if (message.readTime != null && message.hasOwnProperty("readTime"))
                     object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
+                if (message.exists != null && message.hasOwnProperty("exists"))
+                    object.exists = message.exists;
                 return object;
             };
     
@@ -421,6 +435,7 @@
              * @interface IBundleMetadata
              * @property {string|null} [id] BundleMetadata id
              * @property {google.protobuf.ITimestamp|null} [createTime] BundleMetadata createTime
+             * @property {number|null} [version] BundleMetadata version
              */
     
             /**
@@ -455,6 +470,14 @@
             BundleMetadata.prototype.createTime = null;
     
             /**
+             * BundleMetadata version.
+             * @member {number} version
+             * @memberof firestore.BundleMetadata
+             * @instance
+             */
+            BundleMetadata.prototype.version = 0;
+    
+            /**
              * Creates a BundleMetadata message from a plain object. Also converts values to their respective internal types.
              * @function fromObject
              * @memberof firestore.BundleMetadata
@@ -473,6 +496,8 @@
                         throw TypeError(".firestore.BundleMetadata.createTime: object expected");
                     message.createTime = $root.google.protobuf.Timestamp.fromObject(object.createTime);
                 }
+                if (object.version != null)
+                    message.version = object.version >>> 0;
                 return message;
             };
     
@@ -492,11 +517,14 @@
                 if (options.defaults) {
                     object.id = "";
                     object.createTime = null;
+                    object.version = 0;
                 }
                 if (message.id != null && message.hasOwnProperty("id"))
                     object.id = message.id;
                 if (message.createTime != null && message.hasOwnProperty("createTime"))
                     object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
+                if (message.version != null && message.hasOwnProperty("version"))
+                    object.version = message.version;
                 return object;
             };
     

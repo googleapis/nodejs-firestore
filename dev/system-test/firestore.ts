@@ -2361,7 +2361,8 @@ describe('Bundle building', () => {
     const meta = (elements[0] as IBundleElement).metadata;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
-      createTime: snap.readTime.toProto().timestampValue
+      createTime: snap.readTime.toProto().timestampValue,
+      version: 1
     });
 
     const namedQuery = (elements[1] as IBundleElement).namedQuery;
@@ -2386,24 +2387,25 @@ describe('Bundle building', () => {
     const snap = await testCol.doc('doc5-not-exist').get();
 
     bundle.add(snap);
-    // `elements` is expected to be [bundleMeta, docMeta, docSnap].
+    // `elements` is expected to be [bundleMeta, docMeta].
     const elements = await bundleToElementArray(
         bundle.build()
     );
+    expect(elements.length).to.equal(2);
 
     const meta = (elements[0] as IBundleElement).metadata;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
-      createTime: snap.readTime.toProto().timestampValue
+      createTime: snap.readTime.toProto().timestampValue,
+      version: 1
     });
 
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
-    const docSnap = (elements[2] as IBundleElement).document;
     expect(docMeta).to.deep.equal({
-      documentKey: snap.toDocumentProto().name,
-      readTime: snap.readTime.toProto().timestampValue
+      name: snap.toDocumentProto().name,
+      readTime: snap.readTime.toProto().timestampValue,
+      exists: false
     });
-    expect(docSnap).to.deep.equal(snap.toDocumentProto());
   });
 
   it('succeeds to save limit and limitToLast queries', async () => {
@@ -2423,7 +2425,8 @@ describe('Bundle building', () => {
     const meta = (elements[0] as IBundleElement).metadata;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
-      createTime: limitToLastSnap.readTime.toProto().timestampValue
+      createTime: limitToLastSnap.readTime.toProto().timestampValue,
+      version: 1
     });
 
     let namedQuery1 = (elements[1] as IBundleElement).namedQuery;
@@ -2471,8 +2474,9 @@ describe('Bundle building', () => {
     // Verify bundled document
     const docMeta = (elements[3] as IBundleElement).documentMetadata;
     expect(docMeta).to.deep.equal({
-      documentKey: limitToLastSnap.docs[0].toDocumentProto().name,
-      readTime: limitToLastSnap.readTime.toProto().timestampValue
+      name: limitToLastSnap.docs[0].toDocumentProto().name,
+      readTime: limitToLastSnap.readTime.toProto().timestampValue,
+      exists: true
     });
 
     const bundledDoc = (elements[4] as IBundleElement).document;

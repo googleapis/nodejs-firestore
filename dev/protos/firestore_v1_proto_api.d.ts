@@ -137,11 +137,14 @@ export namespace firestore {
     /** Properties of a BundledDocumentMetadata. */
     interface IBundledDocumentMetadata {
 
-        /** BundledDocumentMetadata documentKey */
-        documentKey?: (string|null);
+        /** BundledDocumentMetadata name */
+        name?: (string|null);
 
         /** BundledDocumentMetadata readTime */
         readTime?: (google.protobuf.ITimestamp|null);
+
+        /** BundledDocumentMetadata exists */
+        exists?: (boolean|null);
     }
 
     /** Represents a BundledDocumentMetadata. */
@@ -153,11 +156,14 @@ export namespace firestore {
          */
         constructor(properties?: firestore.IBundledDocumentMetadata);
 
-        /** BundledDocumentMetadata documentKey. */
-        public documentKey: string;
+        /** BundledDocumentMetadata name. */
+        public name: string;
 
         /** BundledDocumentMetadata readTime. */
         public readTime?: (google.protobuf.ITimestamp|null);
+
+        /** BundledDocumentMetadata exists. */
+        public exists: boolean;
 
         /**
          * Creates a BundledDocumentMetadata message from a plain object. Also converts values to their respective internal types.
@@ -189,6 +195,9 @@ export namespace firestore {
 
         /** BundleMetadata createTime */
         createTime?: (google.protobuf.ITimestamp|null);
+
+        /** BundleMetadata version */
+        version?: (number|null);
     }
 
     /** Represents a BundleMetadata. */
@@ -205,6 +214,9 @@ export namespace firestore {
 
         /** BundleMetadata createTime. */
         public createTime?: (google.protobuf.ITimestamp|null);
+
+        /** BundleMetadata version. */
+        public version: number;
 
         /**
          * Creates a BundleMetadata message from a plain object. Also converts values to their respective internal types.
