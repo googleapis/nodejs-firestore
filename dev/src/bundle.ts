@@ -152,13 +152,13 @@ export class BundleBuilder {
     for (const bundledDocument of this.documents.values()) {
       const documentMetadata: firestore.IBundledDocumentMetadata =
         bundledDocument.metadata;
-      const document = bundledDocument.document;
 
       bundleBuffer = Buffer.concat([
         bundleBuffer,
         this.elementToLengthPrefixedBuffer({documentMetadata}),
       ]);
       // Write to the bundle if document exists.
+      const document = bundledDocument.document;
       if (document) {
         bundleBuffer = Buffer.concat([
           bundleBuffer,

@@ -89,7 +89,7 @@ message BundleMetadata {
   // Time at which the documents snapshot is taken for this bundle.
   google.protobuf.Timestamp create_time = 2;
 
-  // The version of bundle.
+  // The schema version of the bundle.
   uint32 version = 3;
 }
 
