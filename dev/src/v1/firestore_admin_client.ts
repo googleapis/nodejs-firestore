@@ -32,7 +32,7 @@ import {Transform} from 'stream';
 import {RequestType} from 'google-gax/build/src/apitypes';
 import * as protos from '../../protos/firestore_admin_v1_proto_api';
 import * as gapicConfig from './firestore_admin_client_config.json';
-
+import {operationsProtos} from 'google-gax';
 const version = require('../../../package.json').version;
 
 /**
@@ -739,6 +739,42 @@ export class FirestoreAdminClient {
     this.initialize();
     return this.innerApiCalls.createIndex(request, options, callback);
   }
+  /**
+   * Check the status of the long running operation returned by the createIndex() method.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *
+   * @example:
+   *   const decodedOperation = await checkCreateIndexProgress(name);
+   *   console.log(decodedOperation.result);
+   *   console.log(decodedOperation.done);
+   *   console.log(decodedOperation.metadata);
+   *
+   */
+  async checkCreateIndexProgress(
+    name: string
+  ): Promise<
+    LROperation<
+      protos.google.firestore.admin.v1.Index,
+      protos.google.firestore.admin.v1.IndexOperationMetadata
+    >
+  > {
+    const request = new operationsProtos.google.longrunning.GetOperationRequest(
+      {name}
+    );
+    const [operation] = await this.operationsClient.getOperation(request);
+    const decodeOperation = new gax.Operation(
+      operation,
+      this.descriptors.longrunning.createIndex,
+      gax.createDefaultBackoffSettings()
+    );
+    return decodeOperation as LROperation<
+      protos.google.firestore.admin.v1.Index,
+      protos.google.firestore.admin.v1.IndexOperationMetadata
+    >;
+  }
   updateField(
     request: protos.google.firestore.admin.v1.IUpdateFieldRequest,
     options?: gax.CallOptions
@@ -851,6 +887,42 @@ export class FirestoreAdminClient {
     });
     this.initialize();
     return this.innerApiCalls.updateField(request, options, callback);
+  }
+  /**
+   * Check the status of the long running operation returned by the updateField() method.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *
+   * @example:
+   *   const decodedOperation = await checkUpdateFieldProgress(name);
+   *   console.log(decodedOperation.result);
+   *   console.log(decodedOperation.done);
+   *   console.log(decodedOperation.metadata);
+   *
+   */
+  async checkUpdateFieldProgress(
+    name: string
+  ): Promise<
+    LROperation<
+      protos.google.firestore.admin.v1.Field,
+      protos.google.firestore.admin.v1.FieldOperationMetadata
+    >
+  > {
+    const request = new operationsProtos.google.longrunning.GetOperationRequest(
+      {name}
+    );
+    const [operation] = await this.operationsClient.getOperation(request);
+    const decodeOperation = new gax.Operation(
+      operation,
+      this.descriptors.longrunning.updateField,
+      gax.createDefaultBackoffSettings()
+    );
+    return decodeOperation as LROperation<
+      protos.google.firestore.admin.v1.Field,
+      protos.google.firestore.admin.v1.FieldOperationMetadata
+    >;
   }
   exportDocuments(
     request: protos.google.firestore.admin.v1.IExportDocumentsRequest,
@@ -969,6 +1041,42 @@ export class FirestoreAdminClient {
     this.initialize();
     return this.innerApiCalls.exportDocuments(request, options, callback);
   }
+  /**
+   * Check the status of the long running operation returned by the exportDocuments() method.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *
+   * @example:
+   *   const decodedOperation = await checkExportDocumentsProgress(name);
+   *   console.log(decodedOperation.result);
+   *   console.log(decodedOperation.done);
+   *   console.log(decodedOperation.metadata);
+   *
+   */
+  async checkExportDocumentsProgress(
+    name: string
+  ): Promise<
+    LROperation<
+      protos.google.firestore.admin.v1.ExportDocumentsResponse,
+      protos.google.firestore.admin.v1.ExportDocumentsMetadata
+    >
+  > {
+    const request = new operationsProtos.google.longrunning.GetOperationRequest(
+      {name}
+    );
+    const [operation] = await this.operationsClient.getOperation(request);
+    const decodeOperation = new gax.Operation(
+      operation,
+      this.descriptors.longrunning.exportDocuments,
+      gax.createDefaultBackoffSettings()
+    );
+    return decodeOperation as LROperation<
+      protos.google.firestore.admin.v1.ExportDocumentsResponse,
+      protos.google.firestore.admin.v1.ExportDocumentsMetadata
+    >;
+  }
   importDocuments(
     request: protos.google.firestore.admin.v1.IImportDocumentsRequest,
     options?: gax.CallOptions
@@ -1080,6 +1188,42 @@ export class FirestoreAdminClient {
     });
     this.initialize();
     return this.innerApiCalls.importDocuments(request, options, callback);
+  }
+  /**
+   * Check the status of the long running operation returned by the importDocuments() method.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *
+   * @example:
+   *   const decodedOperation = await checkImportDocumentsProgress(name);
+   *   console.log(decodedOperation.result);
+   *   console.log(decodedOperation.done);
+   *   console.log(decodedOperation.metadata);
+   *
+   */
+  async checkImportDocumentsProgress(
+    name: string
+  ): Promise<
+    LROperation<
+      protos.google.protobuf.Empty,
+      protos.google.firestore.admin.v1.ImportDocumentsMetadata
+    >
+  > {
+    const request = new operationsProtos.google.longrunning.GetOperationRequest(
+      {name}
+    );
+    const [operation] = await this.operationsClient.getOperation(request);
+    const decodeOperation = new gax.Operation(
+      operation,
+      this.descriptors.longrunning.importDocuments,
+      gax.createDefaultBackoffSettings()
+    );
+    return decodeOperation as LROperation<
+      protos.google.protobuf.Empty,
+      protos.google.firestore.admin.v1.ImportDocumentsMetadata
+    >;
   }
   listIndexes(
     request: protos.google.firestore.admin.v1.IListIndexesRequest,
