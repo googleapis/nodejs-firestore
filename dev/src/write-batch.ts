@@ -194,7 +194,7 @@ export class WriteBatch {
     const op = () => {
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
       const write =
-        !document.isEmpty || transform.isEmpty ? document.toProto() : null;
+        !document.isEmpty || transform.isEmpty ? document.toWriteProto() : null;
 
       return {
         write,
@@ -328,9 +328,9 @@ export class WriteBatch {
       let write;
 
       if (!mergePaths && !mergeLeaves) {
-        write = document.toProto();
+        write = document.toWriteProto();
       } else if (hasDocumentData || transform.isEmpty) {
-        write = document.toProto()!;
+        write = document.toWriteProto()!;
         write.updateMask = documentMask!.toProto();
       }
 
@@ -486,7 +486,7 @@ export class WriteBatch {
       let write: api.IWrite | null = null;
 
       if (!document.isEmpty || !documentMask.isEmpty) {
-        write = document.toProto();
+        write = document.toWriteProto();
         write!.updateMask = documentMask.toProto();
       }
 
