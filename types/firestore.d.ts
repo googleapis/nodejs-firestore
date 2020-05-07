@@ -159,6 +159,39 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * Builds a Firestore data bundle with results from given queries and specified
+   * documents.
+   *
+   * For documents in scope for multiple queries, the latest read version will
+   * be included in the bundle.
+   */
+  export class BundleBuilder {
+    /**
+     * Adds a Firestore document snapshot to the bundle. Both the document data
+     * and it's query read time will be included in the bundle.
+     */
+    add(docSnap: DocumentSnapshot): BundleBuilder;
+
+    /**
+     * Adds a Firestore query snapshot to the bundle. Both the document data and
+     * it's query read time will be included in the bundle.
+     */
+    add(queryName: string, querySnap: QuerySnapshot): BundleBuilder;
+
+    /**
+     * Builds the bundle with the documents and query results added to this bundle.
+     *
+     * Every time this is called, a new Buffer is created with the content
+     * added to the bundle at the moment of calling. If you add more contents after
+     * calling `build`, you would need to call it one more time to get the new
+     * contents (together with original contents).
+     *
+     * @returns A Buffer containing the content of the built bundle.
+     */
+    build(): Buffer;
+  }
+
+  /**
    * `Firestore` represents a Firestore Database and is the entry point for all
    * Firestore operations.
    */
@@ -276,6 +309,15 @@ declare namespace FirebaseFirestore {
      * atomic operation.
      */
     batch(): WriteBatch;
+
+    /**
+     * Creates a new `BundleBuilder` instance to package selected Firestore data into
+     * a bundle.
+     *
+     * @param bundleId. The id of the bundle. When loaded on clients, client SDKs use this id
+     * and the timestamp associated with the built bundle to tell if it has been loaded already.
+     */
+    bundle(bundleId?: string): BundleBuilder;
   }
 
   /**

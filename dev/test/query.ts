@@ -1434,6 +1434,40 @@ describe('limitToLast() interface', () => {
       );
     });
   });
+
+  it('converts to bundled query without order reversing', () => {
+    return createInstance().then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query.orderBy('foo').limitToLast(10);
+      const bundledQuery = query.toBundledQuery();
+      bundledQueryEquals(
+        bundledQuery,
+        'LAST',
+        orderBy('foo', 'ASCENDING'),
+        limit(10)
+      );
+    });
+  });
+
+  it('converts to bundled query without cursor flipping', () => {
+    return createInstance().then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query
+        .orderBy('foo')
+        .startAt('start')
+        .endAt('end')
+        .limitToLast(10);
+      const bundledQuery = query.toBundledQuery();
+      bundledQueryEquals(
+        bundledQuery,
+        'LAST',
+        orderBy('foo', 'ASCENDING'),
+        limit(10),
+        startAt(true, 'start'),
+        endAt(false, 'end')
+      );
+    });
+  });
 });
 
 describe('offset() interface', () => {

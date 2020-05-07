@@ -15,6 +15,8 @@
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import * as extend from 'extend';
+import {firestore} from '../protos/firestore_v1_proto_api';
 
 import {
   CollectionReference,
@@ -33,7 +35,8 @@ import {
   WriteResult,
 } from '../src';
 import {autoId, Deferred} from '../src/util';
-import {Post, postConverter, verifyInstance} from '../test/util/helpers';
+import {bundleToElementArray, Post, postConverter, verifyInstance} from '../test/util/helpers';
+import IBundleElement = firestore.IBundleElement;
 
 use(chaiAsPromised);
 
@@ -2374,4 +2377,163 @@ describe('Client initialization', () => {
       return op(randomCol);
     });
   }
+});
+
+describe('Bundle building', () => {
+  let firestore: Firestore;
+  let testCol: CollectionReference;
+
+  beforeEach(async () => {
+    firestore = new Firestore({});
+    testCol = getTestRoot(firestore);
+    const ref1 = testCol.doc('doc1');
+    const ref2 = testCol.doc('doc2');
+    const ref3 = testCol.doc('doc3');
+    const ref4 = testCol.doc('doc4');
+
+    await Promise.all([
+      ref1.set({name: '1', sort: 1, value: 'string value'}),
+      ref2.set({name: '2', sort: 2, value: 42}),
+      ref3.set({name: '3', sort: 3, value: {nested: 'nested value'}}),
+      ref4.set({name: '4', sort: 4, value: FieldValue.serverTimestamp()}),
+    ]);
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('succeeds when there are no results', async () => {
+    const bundle = firestore.bundle('test-bundle');
+    const query = testCol.where('sort', '==', 5);
+    const snap = await query.get();
+
+    bundle.add('query', snap);
+    // `elements` is expected to be [bundleMeta, query].
+    const elements = await bundleToElementArray(
+      bundle.build()
+    );
+
+    const meta = (elements[0] as IBundleElement).metadata;
+    expect(meta).to.deep.equal({
+      id: 'test-bundle',
+      createTime: snap.readTime.toProto().timestampValue,
+      version: 1
+    });
+
+    const namedQuery = (elements[1] as IBundleElement).namedQuery;
+    // Verify saved query.
+    expect(namedQuery).to.deep.equal({
+      name: 'query',
+      readTime: snap.readTime.toProto().timestampValue,
+      // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
+      bundledQuery: extend(
+          true,
+          {},
+          {
+            parent: query.toProto().parent,
+            structuredQuery: query.toProto().structuredQuery,
+          }
+      )
+    });
+  });
+
+  it('succeeds when added document does not exist', async () => {
+    const bundle = firestore.bundle('test-bundle');
+    const snap = await testCol.doc('doc5-not-exist').get();
+
+    bundle.add(snap);
+    // `elements` is expected to be [bundleMeta, docMeta].
+    const elements = await bundleToElementArray(
+        bundle.build()
+    );
+    expect(elements.length).to.equal(2);
+
+    const meta = (elements[0] as IBundleElement).metadata;
+    expect(meta).to.deep.equal({
+      id: 'test-bundle',
+      createTime: snap.readTime.toProto().timestampValue,
+      version: 1
+    });
+
+    const docMeta = (elements[1] as IBundleElement).documentMetadata;
+    expect(docMeta).to.deep.equal({
+      name: snap.toDocumentProto().name,
+      readTime: snap.readTime.toProto().timestampValue,
+      exists: false
+    });
+  });
+
+  it('succeeds to save limit and limitToLast queries', async () => {
+    const bundle = firestore.bundle('test-bundle');
+    const limitQuery = testCol.orderBy('sort', 'desc').limit(1);
+    const limitSnap = await limitQuery.get();
+    const limitToLastQuery = testCol.orderBy('sort', 'asc').limitToLast(1);
+    const limitToLastSnap = await limitToLastQuery.get();
+
+    bundle.add('limitQuery', limitSnap);
+    bundle.add('limitToLastQuery', limitToLastSnap);
+    // `elements` is expected to be [bundleMeta, limitQuery, limitToLastQuery, doc4Meta, doc4Snap].
+    const elements = await bundleToElementArray(
+      await bundle.build()
+    );
+
+    const meta = (elements[0] as IBundleElement).metadata;
+    expect(meta).to.deep.equal({
+      id: 'test-bundle',
+      createTime: limitToLastSnap.readTime.toProto().timestampValue,
+      version: 1
+    });
+
+    let namedQuery1 = (elements[1] as IBundleElement).namedQuery;
+    let namedQuery2 = (elements[2] as IBundleElement).namedQuery;
+    // We might need to swap them.
+    if (namedQuery1!.name === 'limitToLastQuery') {
+      const temp = namedQuery2;
+      namedQuery2 = namedQuery1;
+      namedQuery1 = temp;
+    }
+
+    // Verify saved limit query.
+    expect(namedQuery1).to.deep.equal({
+      name: 'limitQuery',
+      readTime: limitSnap.readTime.toProto().timestampValue,
+      bundledQuery: extend(
+          true,
+          {},
+          {
+            parent: limitQuery.toProto().parent,
+            structuredQuery: limitQuery.toProto().structuredQuery,
+            limitType: 'FIRST',
+          }
+      )
+    });
+
+    // `limitToLastQuery`'s structured query should be the same as this one. This together with
+    // `limitType` can re-construct a limitToLast client query by client SDKs.
+    const q = testCol.orderBy('sort', 'asc').limit(1);
+    // Verify saved limitToLast query.
+    expect(namedQuery2).to.deep.equal({
+      name: 'limitToLastQuery',
+      readTime: limitToLastSnap.readTime.toProto().timestampValue,
+      bundledQuery: extend(
+          true,
+          {},
+          {
+            parent: q.toProto().parent,
+            structuredQuery: q.toProto().structuredQuery,
+            limitType: 'LAST',
+          }
+      )
+    });
+
+    // Verify bundled document
+    const docMeta = (elements[3] as IBundleElement).documentMetadata;
+    expect(docMeta).to.deep.equal({
+      name: limitToLastSnap.docs[0].toDocumentProto().name,
+      readTime: limitToLastSnap.readTime.toProto().timestampValue,
+      exists: true
+    });
+
+    const bundledDoc = (elements[4] as IBundleElement).document;
+    expect(bundledDoc).to.deep.equal(limitToLastSnap.docs[0].toDocumentProto());
+  });
 });

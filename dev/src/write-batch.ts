@@ -204,7 +204,7 @@ export class WriteBatch {
 
     const op: PendingWriteOp = () => {
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
-      const write = document.toProto();
+      const write = document.toWriteProto();
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);
       }
@@ -331,7 +331,7 @@ export class WriteBatch {
         documentMask = DocumentMask.fromObject(firestoreData);
       }
 
-      const write = document.toProto();
+      const write = document.toWriteProto();
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);
       }
@@ -484,7 +484,7 @@ export class WriteBatch {
 
     const op: PendingWriteOp = () => {
       const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
-      const write = document.toProto();
+      const write = document.toWriteProto();
       write.updateMask = documentMask.toProto();
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);
@@ -728,7 +728,7 @@ function validateUpdatePrecondition(
   arg: string | number,
   value: unknown,
   options?: RequiredArgumentOptions
-): asserts value is {lastUpdateTime?: Timestamp} {
+): void {
   if (!validateOptional(value, options)) {
     validatePrecondition(arg, value, /* allowExists= */ false);
   }
