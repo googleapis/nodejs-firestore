@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import {expect} from 'chai';
+import * as extend from 'extend';
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {firestore} from '../protos/firestore_v1_proto_api';
-import {Firestore, Timestamp} from '../src';
+import {Firestore, QuerySnapshot, Timestamp} from '../src';
 import {
   bundleToElementArray,
   createInstance,
@@ -95,6 +96,69 @@ describe('Bundle Buidler', () => {
       exists: true,
     });
     expect(docSnap).to.deep.equal(snap2.toDocumentProto());
+  });
+
+  it('succeeds with query snapshots', async () => {
+    const bundle = firestore.bundle('test-bundle');
+    const snap = firestore.snapshot_(
+      {
+        name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
+        value: 'string',
+        createTime: '1970-01-01T00:00:01.002Z',
+        updateTime: '1970-01-01T00:00:03.000004Z',
+      },
+      // This should be the bundle read time.
+      '2020-01-01T00:00:05.000000006Z',
+      'json'
+    );
+    const query = firestore
+      .collection('collectionId')
+      .where('value', '==', 'string');
+    const querySnapshot = new QuerySnapshot(
+      query,
+      snap.readTime,
+      1,
+      () => [snap],
+      () => []
+    );
+
+    bundle.add('test-query', querySnapshot);
+    // Bundle is expected to be [bundleMeta, namedQuery, snapMeta, snap]
+    const elements = await bundleToElementArray(bundle.build());
+    expect(elements.length).to.equal(4);
+
+    const meta = (elements[0] as IBundleElement).metadata;
+    expect(meta).to.deep.equal({
+      id: 'test-bundle',
+      // `snap.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
+      createTime: snap.readTime.toProto().timestampValue,
+      version: 1,
+    });
+
+    // Verify named query
+    const namedQuery = (elements[1] as IBundleElement).namedQuery;
+    expect(namedQuery).to.deep.equal({
+      name: 'test-query',
+      readTime: snap.readTime.toProto().timestampValue,
+      bundledQuery: extend(
+        true,
+        {},
+        {
+          parent: query.toProto().parent,
+          structuredQuery: query.toProto().structuredQuery,
+        }
+      ),
+    });
+
+    // Verify docMeta and docSnap
+    const docMeta = (elements[2] as IBundleElement).documentMetadata;
+    const docSnap = (elements[3] as IBundleElement).document;
+    expect(docMeta).to.deep.equal({
+      name: snap.toDocumentProto().name,
+      readTime: snap.readTime.toProto().timestampValue,
+      exists: true,
+    });
+    expect(docSnap).to.deep.equal(snap.toDocumentProto());
   });
 
   it('succeeds with multiple calls to build()', async () => {
