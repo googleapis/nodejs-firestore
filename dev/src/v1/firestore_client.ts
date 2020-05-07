@@ -250,7 +250,6 @@ export class FirestoreClient {
       'listen',
       'listCollectionIds',
       'createDocument',
-      'batchWrite',
     ];
     for (const methodName of firestoreStubMethods) {
       const callPromise = this.firestoreStub.then(
@@ -955,96 +954,6 @@ export class FirestoreClient {
     });
     this.initialize();
     return this.innerApiCalls.createDocument(request, options, callback);
-  }
-  batchWrite(
-    request: protos.google.firestore.v1.IBatchWriteRequest,
-    options?: gax.CallOptions
-  ): Promise<
-    [
-      protos.google.firestore.v1.IBatchWriteResponse,
-      protos.google.firestore.v1.IBatchWriteRequest | undefined,
-      {} | undefined
-    ]
-  >;
-  batchWrite(
-    request: protos.google.firestore.v1.IBatchWriteRequest,
-    options: gax.CallOptions,
-    callback: Callback<
-      protos.google.firestore.v1.IBatchWriteResponse,
-      protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
-      {} | null | undefined
-    >
-  ): void;
-  batchWrite(
-    request: protos.google.firestore.v1.IBatchWriteRequest,
-    callback: Callback<
-      protos.google.firestore.v1.IBatchWriteResponse,
-      protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
-      {} | null | undefined
-    >
-  ): void;
-  /**
-   * Commit a batch of non-transactional writes.
-   *
-   * @param {Object} request
-   *   The request object that will be sent.
-   * @param {string} request.database
-   *   The database name. In the format:
-   *   `projects/{project_id}/databases/{database_id}`.
-   * @param {number[]} request.writes
-   *   The writes to apply.
-   *   The writes are not applied atomically, and can be applied out of order.
-   *   More than 1 write per document is not allowed.
-   *   The success status of each write is independent of the other ones (some may
-   *   fail and some may succeed) and is specified in the BatchWriteResponse.
-   *   Note that the writes here are not applied atomically but the writes in the
-   *   Write(stream WriteRequest) are applied atomically and they cannot be
-   *   batched.
-   * @param {object} [options]
-   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
-   * @returns {Promise} - The promise which resolves to an array.
-   *   The first element of the array is an object representing [BatchWriteResponse]{@link google.firestore.v1.BatchWriteResponse}.
-   *   The promise has a method named "cancel" which cancels the ongoing API call.
-   */
-  batchWrite(
-    request: protos.google.firestore.v1.IBatchWriteRequest,
-    optionsOrCallback?:
-      | gax.CallOptions
-      | Callback<
-          protos.google.firestore.v1.IBatchWriteResponse,
-          protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
-          {} | null | undefined
-        >,
-    callback?: Callback<
-      protos.google.firestore.v1.IBatchWriteResponse,
-      protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
-      {} | null | undefined
-    >
-  ): Promise<
-    [
-      protos.google.firestore.v1.IBatchWriteResponse,
-      protos.google.firestore.v1.IBatchWriteRequest | undefined,
-      {} | undefined
-    ]
-  > | void {
-    request = request || {};
-    let options: gax.CallOptions;
-    if (typeof optionsOrCallback === 'function' && callback === undefined) {
-      callback = optionsOrCallback;
-      options = {};
-    } else {
-      options = optionsOrCallback as gax.CallOptions;
-    }
-    options = options || {};
-    options.otherArgs = options.otherArgs || {};
-    options.otherArgs.headers = options.otherArgs.headers || {};
-    options.otherArgs.headers[
-      'x-goog-request-params'
-    ] = gax.routingHeader.fromParams({
-      database: request.database || '',
-    });
-    this.initialize();
-    return this.innerApiCalls.batchWrite(request, options, callback);
   }
 
   /**
