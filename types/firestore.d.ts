@@ -145,9 +145,11 @@ declare namespace FirebaseFirestore {
     maxIdleChannels?: number;
 
     /**
-     * Whether to skip nested properties that are set to `undefined` during object
-     * serialization. If set to `false` or omitted, the SDK will throw an
-     * exception when it encounters values of type `undefined`.
+     * Whether to skip nested properties that are set to `undefined` during
+     * object serialization. If set to `true`, these properties will be skipped
+     * and are not be written to Firestore. If the setting is set `false` or
+     * omitted, the SDK will throw an exception when it encounters properties
+     * of type `undefined`.
      */
     ignoreUndefinedProperties?: boolean;
     
