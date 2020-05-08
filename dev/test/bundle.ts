@@ -49,7 +49,7 @@ describe('Bundle Buidler', () => {
   });
 
   it('succeeds with document snapshots', async () => {
-    const bundle = firestore.bundle('test-bundle');
+    const bundle = firestore.bundle_('test-bundle');
     const snap1 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
@@ -99,7 +99,7 @@ describe('Bundle Buidler', () => {
   });
 
   it('succeeds with query snapshots', async () => {
-    const bundle = firestore.bundle('test-bundle');
+    const bundle = firestore.bundle_('test-bundle');
     const snap = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
@@ -162,7 +162,7 @@ describe('Bundle Buidler', () => {
   });
 
   it('succeeds with multiple calls to build()', async () => {
-    const bundle = firestore.bundle('test-bundle');
+    const bundle = firestore.bundle_('test-bundle');
     const snap1 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
@@ -229,7 +229,7 @@ describe('Bundle Buidler', () => {
   });
 
   it('succeeds when nothing is added', async () => {
-    const bundle = firestore.bundle('test-bundle');
+    const bundle = firestore.bundle_('test-bundle');
 
     // `elements` is expected to be [bundleMeta].
     const elements = await bundleToElementArray(bundle.build());

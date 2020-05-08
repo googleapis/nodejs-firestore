@@ -755,8 +755,10 @@ export class Firestore {
    * @param bundleId. The id of the bundle. When loaded on clients, client SDKs use this id
    * and the timestamp associated with the built bundle to tell if it has been loaded already.
    * If not specified, a random identifier will be used.
+   *
+   * @private
    */
-  bundle(name?: string): BundleBuilder {
+  bundle_(name?: string): BundleBuilder {
     return new BundleBuilder(name || autoId());
   }
 
