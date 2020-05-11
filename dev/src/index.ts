@@ -758,7 +758,7 @@ export class Firestore {
    *
    * @private
    */
-  bundle_(name?: string): BundleBuilder {
+  bundle(name?: string): BundleBuilder {
     return new BundleBuilder(name || autoId());
   }
 
