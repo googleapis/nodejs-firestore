@@ -203,6 +203,15 @@ export interface Settings {
    */
   maxIdleChannels?: number;
 
+  /**
+   * Whether to skip nested properties that are set to `undefined` during object
+   * serialization. If set to `true`, these properties will be skipped and are
+   * not be written to Firestore. If the setting is set `false` or omitted,
+   * the SDK will throw an exception when it encounters properties of type
+   * `undefined`.
+   */
+  ignoreUndefinedProperties?: boolean;
+
   // tslint:disable-next-line:no-any
   [key: string]: any; // Accept other properties, such as GRPC settings.
 }
@@ -315,6 +324,12 @@ export interface ValidationOptions {
 
   /** Whether server transforms are supported. */
   allowTransforms: boolean;
+
+  /**
+   * Whether undefined values are allowed. Undefined values cannot appear at
+   * the root.
+   */
+  allowUndefined: boolean;
 }
 
 /**

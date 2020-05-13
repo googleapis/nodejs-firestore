@@ -1108,6 +1108,7 @@ export class QueryOptions<T> {
  */
 export class Query<T = DocumentData> {
   private readonly _serializer: Serializer;
+  protected readonly _allowUndefined: boolean;
 
   /**
    * @hideconstructor
@@ -1120,6 +1121,8 @@ export class Query<T = DocumentData> {
     protected readonly _queryOptions: QueryOptions<T>
   ) {
     this._serializer = new Serializer(_firestore);
+    this._allowUndefined = !!this._firestore._settings
+      .ignoreUndefinedProperties;
   }
 
   /**
@@ -1228,7 +1231,7 @@ export class Query<T = DocumentData> {
   ): Query<T> {
     validateFieldPath('fieldPath', fieldPath);
     opStr = validateQueryOperator('opStr', opStr, value);
-    validateQueryValue('value', value);
+    validateQueryValue('value', value, this._allowUndefined);
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
@@ -1550,7 +1553,7 @@ export class Query<T = DocumentData> {
         fieldValue = this.validateReference(fieldValue);
       }
 
-      validateQueryValue(i, fieldValue);
+      validateQueryValue(i, fieldValue, this._allowUndefined);
       options.values!.push(fieldValue);
     }
 
@@ -2397,7 +2400,12 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    */
   add(data: T): Promise<DocumentReference<T>> {
     const firestoreData = this._queryOptions.converter.toFirestore(data);
-    validateDocumentData('data', firestoreData, /*allowDeletes=*/ false);
+    validateDocumentData(
+      'data',
+      firestoreData,
+      /*allowDeletes=*/ false,
+      this._allowUndefined
+    );
 
     const documentRef = this.doc();
     return documentRef.create(data).then(() => documentRef);
@@ -2549,11 +2557,17 @@ export function validateDocumentReference(
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The argument to validate.
+ * @param allowUndefined Whether to allow nested properties that are `undefined`.
  */
-function validateQueryValue(arg: string | number, value: unknown): void {
+function validateQueryValue(
+  arg: string | number,
+  value: unknown,
+  allowUndefined: boolean
+): void {
   validateUserInput(arg, value, 'query constraint', {
     allowDeletes: 'none',
     allowTransforms: false,
+    allowUndefined,
   });
 }
 

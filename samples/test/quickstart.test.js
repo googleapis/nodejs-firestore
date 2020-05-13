@@ -17,14 +17,14 @@
 const {execSync} = require('child_process');
 const {assert} = require('chai');
 const {describe, it} = require('mocha');
-const exec = cmd => execSync(cmd, { encoding: 'utf8' });
+const exec = (cmd) => execSync(cmd, {encoding: 'utf8'});
 
 describe('should make some API calls', () => {
   it('should run quickstart', () => {
-      const output = exec('node quickstart.js');
-      assert.include(output, 'Entered new data into the document');
-      assert.include(output, 'Updated an existing document');
-      assert.include(output, 'Read the document');
-      assert.include(output, 'Deleted the document');
-    });
+    const output = exec('node quickstart.js');
+    assert.include(output, 'Entered new data into the document');
+    assert.include(output, 'Updated an existing document');
+    assert.include(output, 'Read the document');
+    assert.include(output, 'Deleted the document');
+  });
 });
