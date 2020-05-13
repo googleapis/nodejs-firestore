@@ -30,6 +30,8 @@ const BUNDLE_VERSION = 1;
 
 /**
  * Builds a Firestore data bundle with results from the given document and query snapshots.
+ *
+ * @private
  */
 export class BundleBuilder {
   // Resulting documents for the bundle, keyed by full document path.
