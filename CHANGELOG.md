@@ -14,9 +14,8 @@
 
 ### Bug Fixes
 
-* Add BulkWriter ([#1051](https://www.github.com/googleapis/nodejs-firestore/issues/1051)) ([8c52d47](https://www.github.com/googleapis/nodejs-firestore/commit/8c52d475ae486e2998220947a0b0441d4a95ab49))
+* prepare sources for BulkWriter ([#1051](https://www.github.com/googleapis/nodejs-firestore/issues/1051)) ([8c52d47](https://www.github.com/googleapis/nodejs-firestore/commit/8c52d475ae486e2998220947a0b0441d4a95ab49))
 * allow running source with ts-node ([#1074](https://www.github.com/googleapis/nodejs-firestore/issues/1074)) ([f66a089](https://www.github.com/googleapis/nodejs-firestore/commit/f66a08978f11915d8662f964867a966ff75f6e96))
-* i thought i pushed but i didn't ([#1053](https://www.github.com/googleapis/nodejs-firestore/issues/1053)) ([608392b](https://www.github.com/googleapis/nodejs-firestore/commit/608392bc21408996eed0e6c20dff54be844c0ff3))
 * remove type dependency on Moment ([#1063](https://www.github.com/googleapis/nodejs-firestore/issues/1063)) ([30008b0](https://www.github.com/googleapis/nodejs-firestore/commit/30008b093a9872e34a83209e94de3dca09e89fe7))
 
 ### [3.7.5](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.4...v3.7.5) (2020-04-25)
