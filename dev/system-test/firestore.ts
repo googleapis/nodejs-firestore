@@ -35,7 +35,12 @@ import {
   WriteResult,
 } from '../src';
 import {autoId, Deferred} from '../src/util';
-import {bundleToElementArray, Post, postConverter, verifyInstance} from '../test/util/helpers';
+import {
+  bundleToElementArray,
+  Post,
+  postConverter,
+  verifyInstance,
+} from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
 
 use(chaiAsPromised);
@@ -2408,15 +2413,13 @@ describe('Bundle building', () => {
 
     bundle.add('query', snap);
     // `elements` is expected to be [bundleMeta, query].
-    const elements = await bundleToElementArray(
-      bundle.build()
-    );
+    const elements = await bundleToElementArray(bundle.build());
 
     const meta = (elements[0] as IBundleElement).metadata;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
       createTime: snap.readTime.toProto().timestampValue,
-      version: 1
+      version: 1,
     });
 
     const namedQuery = (elements[1] as IBundleElement).namedQuery;
@@ -2426,13 +2429,13 @@ describe('Bundle building', () => {
       readTime: snap.readTime.toProto().timestampValue,
       // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
       bundledQuery: extend(
-          true,
-          {},
-          {
-            parent: query.toProto().parent,
-            structuredQuery: query.toProto().structuredQuery,
-          }
-      )
+        true,
+        {},
+        {
+          parent: query.toProto().parent,
+          structuredQuery: query.toProto().structuredQuery,
+        }
+      ),
     });
   });
 
@@ -2442,23 +2445,21 @@ describe('Bundle building', () => {
 
     bundle.add(snap);
     // `elements` is expected to be [bundleMeta, docMeta].
-    const elements = await bundleToElementArray(
-        bundle.build()
-    );
+    const elements = await bundleToElementArray(bundle.build());
     expect(elements.length).to.equal(2);
 
     const meta = (elements[0] as IBundleElement).metadata;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
       createTime: snap.readTime.toProto().timestampValue,
-      version: 1
+      version: 1,
     });
 
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
     expect(docMeta).to.deep.equal({
       name: snap.toDocumentProto().name,
       readTime: snap.readTime.toProto().timestampValue,
-      exists: false
+      exists: false,
     });
   });
 
@@ -2472,15 +2473,13 @@ describe('Bundle building', () => {
     bundle.add('limitQuery', limitSnap);
     bundle.add('limitToLastQuery', limitToLastSnap);
     // `elements` is expected to be [bundleMeta, limitQuery, limitToLastQuery, doc4Meta, doc4Snap].
-    const elements = await bundleToElementArray(
-      await bundle.build()
-    );
+    const elements = await bundleToElementArray(await bundle.build());
 
     const meta = (elements[0] as IBundleElement).metadata;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
       createTime: limitToLastSnap.readTime.toProto().timestampValue,
-      version: 1
+      version: 1,
     });
 
     let namedQuery1 = (elements[1] as IBundleElement).namedQuery;
@@ -2497,14 +2496,14 @@ describe('Bundle building', () => {
       name: 'limitQuery',
       readTime: limitSnap.readTime.toProto().timestampValue,
       bundledQuery: extend(
-          true,
-          {},
-          {
-            parent: limitQuery.toProto().parent,
-            structuredQuery: limitQuery.toProto().structuredQuery,
-            limitType: 'FIRST',
-          }
-      )
+        true,
+        {},
+        {
+          parent: limitQuery.toProto().parent,
+          structuredQuery: limitQuery.toProto().structuredQuery,
+          limitType: 'FIRST',
+        }
+      ),
     });
 
     // `limitToLastQuery`'s structured query should be the same as this one. This together with
@@ -2515,14 +2514,14 @@ describe('Bundle building', () => {
       name: 'limitToLastQuery',
       readTime: limitToLastSnap.readTime.toProto().timestampValue,
       bundledQuery: extend(
-          true,
-          {},
-          {
-            parent: q.toProto().parent,
-            structuredQuery: q.toProto().structuredQuery,
-            limitType: 'LAST',
-          }
-      )
+        true,
+        {},
+        {
+          parent: q.toProto().parent,
+          structuredQuery: q.toProto().structuredQuery,
+          limitType: 'LAST',
+        }
+      ),
     });
 
     // Verify bundled document
@@ -2530,7 +2529,7 @@ describe('Bundle building', () => {
     expect(docMeta).to.deep.equal({
       name: limitToLastSnap.docs[0].toDocumentProto().name,
       readTime: limitToLastSnap.readTime.toProto().timestampValue,
-      exists: true
+      exists: true,
     });
 
     const bundledDoc = (elements[4] as IBundleElement).document;

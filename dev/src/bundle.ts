@@ -82,7 +82,7 @@ export class BundleBuilder {
     return this;
   }
 
-  private addBundledDocument(snap: DocumentSnapshot) {
+  private addBundledDocument(snap: DocumentSnapshot): void {
     const docProto = snap.toDocumentProto();
     this.documents.set(snap.id, {
       document: snap.exists ? docProto : undefined,
@@ -97,7 +97,7 @@ export class BundleBuilder {
     }
   }
 
-  private addNamedQuery(name: string, querySnap: QuerySnapshot) {
+  private addNamedQuery(name: string, querySnap: QuerySnapshot): void {
     if (this.namedQueries.has(name)) {
       throw new Error(`Query name conflict: ${name} is already added.`);
     }
