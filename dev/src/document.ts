@@ -469,17 +469,30 @@ export class DocumentSnapshot<T = DocumentData> {
   }
 
   /**
-   * Convert a document snapshot to the Firestore 'Document' Protobuf.
+   * Convert a document snapshot to the Firestore 'Write' proto.
    *
    * @private
-   * @returns The document in the format the API expects.
    */
-  toProto(): api.IWrite {
+  toWriteProto(): api.IWrite {
     return {
       update: {
         name: this._ref.formattedName,
         fields: this._fieldsProto,
       },
+    };
+  }
+
+  /**
+   * Convert a document snapshot to the Firestore 'Document' proto.
+   *
+   * @private
+   */
+  toDocumentProto(): api.IDocument {
+    return {
+      name: this._ref.formattedName,
+      createTime: this.createTime,
+      updateTime: this.updateTime,
+      fields: this._fieldsProto,
     };
   }
 

@@ -15,8 +15,10 @@
 import {expect} from 'chai';
 import * as extend from 'extend';
 import {grpc} from 'google-gax';
-import {Duplex} from 'stream';
+import {JSONStreamIterator} from 'length-prefixed-json-stream';
+import {Duplex, PassThrough} from 'stream';
 import * as through2 from 'through2';
+import {firestore} from '../../protos/firestore_v1_proto_api';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
@@ -339,3 +341,16 @@ export const postConverter = {
     return new Post(data.title, data.author);
   },
 };
+
+export async function bundleToElementArray(
+  bundle: Buffer
+): Promise<Array<firestore.IBundleElement>> {
+  const result: Array<firestore.IBundleElement> = [];
+  const readable = new PassThrough();
+  readable.end(bundle);
+  const streamIterator = new JSONStreamIterator(readable);
+  for await (const value of streamIterator) {
+    result.push(value as firestore.IBundleElement);
+  }
+  return result;
+}
