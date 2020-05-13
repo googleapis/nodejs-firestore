@@ -728,7 +728,7 @@ function validateUpdatePrecondition(
   arg: string | number,
   value: unknown,
   options?: RequiredArgumentOptions
-): void {
+): asserts value is {lastUpdateTime?: Timestamp} {
   if (!validateOptional(value, options)) {
     validatePrecondition(arg, value, /* allowExists= */ false);
   }
