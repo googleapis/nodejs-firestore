@@ -909,6 +909,41 @@ describe('where() interface', () => {
     });
   });
 
+  it('Fields of IN queries are not used in implicit order by', async () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          fieldFilters('foo', 'IN', {
+            arrayValue: {
+              values: [
+                {
+                  stringValue: `bar`,
+                },
+              ],
+            },
+          }),
+          orderBy('__name__', 'ASCENDING'),
+          startAt(true, {
+            referenceValue:
+              `projects/${PROJECT_ID}/databases/(default)/` +
+              'documents/collectionId/doc1',
+          })
+        );
+
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const collection = firestore.collection('collectionId');
+      const query = collection
+        .where('foo', 'in', ['bar'])
+        .startAt(await snapshot('collectionId/doc1', {}));
+      return query.get();
+    });
+  });
+
   it('validates references for IN queries', () => {
     const query = firestore.collection('collectionId');
 
