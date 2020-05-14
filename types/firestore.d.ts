@@ -387,11 +387,7 @@ declare namespace FirebaseFirestore {
       data: Partial<T>,
       options: SetOptions
     ): Transaction;
-    set<T>(
-      documentRef: DocumentReference<T>,
-      data: T,
-      options?: SetOptions
-    ): Transaction;
+    set<T>(documentRef: DocumentReference<T>, data: T): Transaction;
 
     /**
      * Updates fields in the document referred to by the provided
@@ -492,11 +488,7 @@ declare namespace FirebaseFirestore {
       data: Partial<T>,
       options: SetOptions
     ): WriteBatch;
-    set<T>(
-      documentRef: DocumentReference<T>,
-      data: T,
-      options?: SetOptions
-    ): WriteBatch;
+    set<T>(documentRef: DocumentReference<T>, data: T): WriteBatch;
 
     /**
      * Update fields of the document referred to by the provided
@@ -704,7 +696,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise resolved with the write time of this set.
      */
     set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
-    set(data: T, options?: SetOptions): Promise<WriteResult>;
+    set(data: T): Promise<WriteResult>;
 
     /**
      * Updates fields in the document referred to by this `DocumentReference`.

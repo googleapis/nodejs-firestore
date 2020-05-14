@@ -79,7 +79,7 @@ describe('set() method', () => {
     writeBatch.set(firestore.doc('sub/doc'), nullObject);
   });
 
-  it.only('requires toFirestoreFromMerge() for Partial usage', () => {
+  it('requires toFirestoreFromMerge() for Partial usage', () => {
     const converter = {...postConverter};
     delete converter.toFirestoreFromMerge;
     const ref = firestore.doc('sub/doc').withConverter(converter);
