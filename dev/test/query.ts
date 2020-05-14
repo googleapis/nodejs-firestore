@@ -70,7 +70,7 @@ function snapshot(
   });
 }
 
-function fieldFilters(
+export function fieldFilters(
   fieldPath: string,
   op: api.StructuredQuery.FieldFilter.Operator,
   value: string | api.IValue,
@@ -162,7 +162,7 @@ function unaryFilters(
   }
 }
 
-function orderBy(
+export function orderBy(
   fieldPath: string,
   direction: api.StructuredQuery.Direction,
   ...fieldPathAndOrderBys: Array<string | api.StructuredQuery.Direction>
@@ -217,7 +217,7 @@ function select(...fields: string[]): api.IStructuredQuery {
   return {select};
 }
 
-function startAt(
+export function startAt(
   before: boolean,
   ...values: Array<string | api.IValue>
 ): api.IStructuredQuery {
@@ -267,7 +267,7 @@ function endAt(
   return {endAt: cursor};
 }
 
-function queryEquals(
+export function queryEquals(
   actual: api.IRunQueryRequest | undefined,
   ...protoComponents: api.IStructuredQuery[]
 ) {

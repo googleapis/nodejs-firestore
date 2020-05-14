@@ -14,15 +14,15 @@
 
 'use strict';
 
-const { execSync } = require('child_process');
-const { assert } = require('chai');
-const exec = cmd => execSync(cmd, { encoding: 'utf8' });
+const {execSync} = require('child_process');
+const {assert} = require('chai');
+const exec = (cmd) => execSync(cmd, {encoding: 'utf8'});
 
 describe('distributed counter', () => {
-    it('should increase, get counter and delete the docs', () => {
-        const output = exec('node solution-counters.js');
-        assert.include(output, 'counter increased');
-        assert.include(output, 'new count is : 1');
-        assert.include(output, 'Deleted the document');
-    });
+  it('should increase, get counter and delete the docs', () => {
+    const output = exec('node solution-counters.js');
+    assert.include(output, 'counter increased');
+    assert.include(output, 'new count is : 1');
+    assert.include(output, 'Deleted the document');
+  });
 });
