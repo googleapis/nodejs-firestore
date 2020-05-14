@@ -332,9 +332,7 @@ describe('v1.FirestoreClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.getDocument(request);
-      }, expectedError);
+      await assert.rejects(client.getDocument(request), expectedError);
       assert(
         (client.innerApiCalls.getDocument as SinonStub)
           .getCall(0)
@@ -449,9 +447,7 @@ describe('v1.FirestoreClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.updateDocument(request);
-      }, expectedError);
+      await assert.rejects(client.updateDocument(request), expectedError);
       assert(
         (client.innerApiCalls.updateDocument as SinonStub)
           .getCall(0)
@@ -563,9 +559,7 @@ describe('v1.FirestoreClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.deleteDocument(request);
-      }, expectedError);
+      await assert.rejects(client.deleteDocument(request), expectedError);
       assert(
         (client.innerApiCalls.deleteDocument as SinonStub)
           .getCall(0)
@@ -677,9 +671,7 @@ describe('v1.FirestoreClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.beginTransaction(request);
-      }, expectedError);
+      await assert.rejects(client.beginTransaction(request), expectedError);
       assert(
         (client.innerApiCalls.beginTransaction as SinonStub)
           .getCall(0)
@@ -788,9 +780,7 @@ describe('v1.FirestoreClient', () => {
       };
       const expectedError = new Error('expected');
       client.innerApiCalls.commit = stubSimpleCall(undefined, expectedError);
-      await assert.rejects(async () => {
-        await client.commit(request);
-      }, expectedError);
+      await assert.rejects(client.commit(request), expectedError);
       assert(
         (client.innerApiCalls.commit as SinonStub)
           .getCall(0)
@@ -899,9 +889,7 @@ describe('v1.FirestoreClient', () => {
       };
       const expectedError = new Error('expected');
       client.innerApiCalls.rollback = stubSimpleCall(undefined, expectedError);
-      await assert.rejects(async () => {
-        await client.rollback(request);
-      }, expectedError);
+      await assert.rejects(client.rollback(request), expectedError);
       assert(
         (client.innerApiCalls.rollback as SinonStub)
           .getCall(0)
@@ -1013,9 +1001,7 @@ describe('v1.FirestoreClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.createDocument(request);
-      }, expectedError);
+      await assert.rejects(client.createDocument(request), expectedError);
       assert(
         (client.innerApiCalls.createDocument as SinonStub)
           .getCall(0)
@@ -1105,9 +1091,7 @@ describe('v1.FirestoreClient', () => {
           reject(err);
         });
       });
-      await assert.rejects(async () => {
-        await promise;
-      }, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.innerApiCalls.batchGetDocuments as SinonStub)
           .getCall(0)
@@ -1195,9 +1179,7 @@ describe('v1.FirestoreClient', () => {
           reject(err);
         });
       });
-      await assert.rejects(async () => {
-        await promise;
-      }, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.innerApiCalls.runQuery as SinonStub)
           .getCall(0)
@@ -1279,9 +1261,7 @@ describe('v1.FirestoreClient', () => {
         stream.write(request);
         stream.end();
       });
-      await assert.rejects(async () => {
-        await promise;
-      }, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.innerApiCalls.write as SinonStub)
           .getCall(0)
@@ -1369,9 +1349,7 @@ describe('v1.FirestoreClient', () => {
         stream.write(request);
         stream.end();
       });
-      await assert.rejects(async () => {
-        await promise;
-      }, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.innerApiCalls.listen as SinonStub)
           .getCall(0)
@@ -1493,9 +1471,7 @@ describe('v1.FirestoreClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.listDocuments(request);
-      }, expectedError);
+      await assert.rejects(client.listDocuments(request), expectedError);
       assert(
         (client.innerApiCalls.listDocuments as SinonStub)
           .getCall(0)
@@ -1580,9 +1556,7 @@ describe('v1.FirestoreClient', () => {
           reject(err);
         });
       });
-      await assert.rejects(async () => {
-        await promise;
-      }, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.descriptors.page.listDocuments.createStream as SinonStub)
           .getCall(0)
@@ -1770,9 +1744,7 @@ describe('v1.FirestoreClient', () => {
         undefined,
         expectedError
       );
-      await assert.rejects(async () => {
-        await client.listCollectionIds(request);
-      }, expectedError);
+      await assert.rejects(client.listCollectionIds(request), expectedError);
       assert(
         (client.innerApiCalls.listCollectionIds as SinonStub)
           .getCall(0)
@@ -1853,9 +1825,7 @@ describe('v1.FirestoreClient', () => {
           reject(err);
         });
       });
-      await assert.rejects(async () => {
-        await promise;
-      }, expectedError);
+      await assert.rejects(promise, expectedError);
       assert(
         (client.descriptors.page.listCollectionIds.createStream as SinonStub)
           .getCall(0)

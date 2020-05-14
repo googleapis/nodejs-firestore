@@ -329,7 +329,7 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.update(doc, {})).to.throw(expected);
     expect(() => bulkWriter.delete(doc)).to.throw(expected);
     expect(bulkWriter.flush()).to.eventually.be.rejectedWith(expected);
-    expect(bulkWriter.close()).to.eventually.be.rejectedWith(expected);
+    expect(() => bulkWriter.close()).to.throw(expected);
   });
 
   it('sends writes to the same document in separate batches', async () => {

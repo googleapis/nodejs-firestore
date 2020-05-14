@@ -353,10 +353,20 @@ export class Firestore {
   /**
    * Count of listeners that have been registered on the client.
    *
-   * The client can only be terminated when there are no registered listeners.
+   * The client can only be terminated when there are no pending writes or
+   * registered listeners.
    * @private
    */
   private registeredListenersCount = 0;
+
+  /**
+   * Number of pending operations on the client.
+   *
+   * The client can only be terminated when there are no pending writes or
+   * registered listeners.
+   * @private
+   */
+  private bulkWritersCount = 0;
 
   // GCF currently tears down idle connections after two minutes. Requests
   // that are issued after this period may fail. On GCF, we therefore issue
@@ -1111,14 +1121,37 @@ export class Firestore {
   }
 
   /**
+   * Increments the number of open BulkWriter instances. This is used to verify
+   * that all pending operations are complete when terminate() is called.
+   *
+   * @private
+   */
+  incrementBulkWritersCount(): void {
+    this.bulkWritersCount += 1;
+  }
+
+  /**
+   * Decrements the number of open BulkWriter instances. This is used to verify
+   * that all pending operations are complete when terminate() is called.
+   *
+   * @private
+   */
+  decrementBulkWritersCount(): void {
+    this.bulkWritersCount -= 1;
+  }
+
+  /**
    * Terminates the Firestore client and closes all open streams.
    *
    * @return A Promise that resolves when the client is terminated.
    */
   terminate(): Promise<void> {
-    if (this.registeredListenersCount > 0) {
+    if (this.registeredListenersCount > 0 || this.bulkWritersCount > 0) {
       return Promise.reject(
-        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
+        'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
+          'instances must be closed before terminating the client. ' +
+          `There are ${this.registeredListenersCount} active listeners and ` +
+          `${this.bulkWritersCount} open BulkWriter instances.`
       );
     }
     return this._clientPool.terminate();

@@ -917,6 +917,14 @@
                         "(google.api.http).post": "/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}",
                         "(google.api.http).body": "document"
                       }
+                    },
+                    "BatchWrite": {
+                      "requestType": "BatchWriteRequest",
+                      "responseType": "BatchWriteResponse",
+                      "options": {
+                        "(google.api.http).post": "/v1beta1/{database=projects/*/databases/*}/documents:batchWrite",
+                        "(google.api.http).body": "*"
+                      }
                     }
                   }
                 },
@@ -1546,6 +1554,33 @@
                     },
                     "nextPageToken": {
                       "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
+                "BatchWriteRequest": {
+                  "fields": {
+                    "database": {
+                      "type": "string",
+                      "id": 1
+                    },
+                    "writes": {
+                      "rule": "repeated",
+                      "type": "Write",
+                      "id": 2
+                    }
+                  }
+                },
+                "BatchWriteResponse": {
+                  "fields": {
+                    "writeResults": {
+                      "rule": "repeated",
+                      "type": "WriteResult",
+                      "id": 1
+                    },
+                    "status": {
+                      "rule": "repeated",
+                      "type": "google.rpc.Status",
                       "id": 2
                     }
                   }
