@@ -80,11 +80,14 @@ describe('Bundle Buidler', () => {
     expect(elements.length).to.equal(3);
 
     const meta = (elements[0] as IBundleElement).metadata;
+    expect(meta!.totalBytes).greaterThan(0);
+    delete meta!.totalBytes;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       createTime: snap1.readTime.toProto().timestampValue,
       version: 1,
+      totalDocuments: 1,
     });
 
     // Verify doc1Meta and doc1Snap
@@ -128,11 +131,14 @@ describe('Bundle Buidler', () => {
     expect(elements.length).to.equal(4);
 
     const meta = (elements[0] as IBundleElement).metadata;
+    expect(meta!.totalBytes).greaterThan(0);
+    delete meta!.totalBytes;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
       // `snap.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       createTime: snap.readTime.toProto().timestampValue,
       version: 1,
+      totalDocuments: 1,
     });
 
     // Verify named query
@@ -181,11 +187,14 @@ describe('Bundle Buidler', () => {
     expect(elements.length).to.equal(3);
 
     const meta = (elements[0] as IBundleElement).metadata;
+    expect(meta!.totalBytes).greaterThan(0);
+    delete meta!.totalBytes;
     expect(meta).to.deep.equal({
       id: 'test-bundle',
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       createTime: snap1.readTime.toProto().timestampValue,
       version: 1,
+      totalDocuments: 1,
     });
 
     // Verify doc1Meta and doc1Snap
@@ -215,7 +224,17 @@ describe('Bundle Buidler', () => {
     const newElements = await bundleToElementArray(bundle.build());
 
     expect(newElements.length).to.equal(5);
-    expect(newElements.slice(0, 3)).to.deep.equal(elements);
+    const newMeta = (newElements[0] as IBundleElement).metadata;
+    expect(newMeta!.totalBytes).greaterThan(0);
+    delete newMeta!.totalBytes;
+    expect(newMeta).to.deep.equal({
+      id: 'test-bundle',
+      // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
+      createTime: snap1.readTime.toProto().timestampValue,
+      version: 1,
+      totalDocuments: 2,
+    });
+    expect(newElements.slice(1, 3)).to.deep.equal(elements.slice(1));
 
     // Verify doc2Meta and doc2Snap
     const doc2Meta = (newElements[3] as IBundleElement).documentMetadata;
@@ -240,6 +259,8 @@ describe('Bundle Buidler', () => {
       id: 'test-bundle',
       createTime: new Timestamp(0, 0).toProto().timestampValue,
       version: 1,
+      totalDocuments: 0,
+      totalBytes: 0,
     });
   });
 });
