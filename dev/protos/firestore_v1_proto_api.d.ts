@@ -15,6 +15,294 @@
  */
 
 import * as $protobuf from "protobufjs";
+/** Namespace firestore. */
+export namespace firestore {
+
+    /** Properties of a BundledQuery. */
+    interface IBundledQuery {
+
+        /** BundledQuery parent */
+        parent?: (string|null);
+
+        /** BundledQuery structuredQuery */
+        structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+
+        /** BundledQuery limitType */
+        limitType?: (firestore.BundledQuery.LimitType|null);
+    }
+
+    /** Represents a BundledQuery. */
+    class BundledQuery implements IBundledQuery {
+
+        /**
+         * Constructs a new BundledQuery.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.IBundledQuery);
+
+        /** BundledQuery parent. */
+        public parent: string;
+
+        /** BundledQuery structuredQuery. */
+        public structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+
+        /** BundledQuery limitType. */
+        public limitType: firestore.BundledQuery.LimitType;
+
+        /** BundledQuery queryType. */
+        public queryType?: "structuredQuery";
+
+        /**
+         * Creates a BundledQuery message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BundledQuery
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.BundledQuery;
+
+        /**
+         * Creates a plain object from a BundledQuery message. Also converts values to other types if specified.
+         * @param message BundledQuery
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.BundledQuery, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BundledQuery to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    namespace BundledQuery {
+
+        /** LimitType enum. */
+        type LimitType =
+            "FIRST"| "LAST";
+    }
+
+    /** Properties of a NamedQuery. */
+    interface INamedQuery {
+
+        /** NamedQuery name */
+        name?: (string|null);
+
+        /** NamedQuery bundledQuery */
+        bundledQuery?: (firestore.IBundledQuery|null);
+
+        /** NamedQuery readTime */
+        readTime?: (google.protobuf.ITimestamp|null);
+    }
+
+    /** Represents a NamedQuery. */
+    class NamedQuery implements INamedQuery {
+
+        /**
+         * Constructs a new NamedQuery.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.INamedQuery);
+
+        /** NamedQuery name. */
+        public name: string;
+
+        /** NamedQuery bundledQuery. */
+        public bundledQuery?: (firestore.IBundledQuery|null);
+
+        /** NamedQuery readTime. */
+        public readTime?: (google.protobuf.ITimestamp|null);
+
+        /**
+         * Creates a NamedQuery message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns NamedQuery
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.NamedQuery;
+
+        /**
+         * Creates a plain object from a NamedQuery message. Also converts values to other types if specified.
+         * @param message NamedQuery
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.NamedQuery, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this NamedQuery to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a BundledDocumentMetadata. */
+    interface IBundledDocumentMetadata {
+
+        /** BundledDocumentMetadata name */
+        name?: (string|null);
+
+        /** BundledDocumentMetadata readTime */
+        readTime?: (google.protobuf.ITimestamp|null);
+
+        /** BundledDocumentMetadata exists */
+        exists?: (boolean|null);
+    }
+
+    /** Represents a BundledDocumentMetadata. */
+    class BundledDocumentMetadata implements IBundledDocumentMetadata {
+
+        /**
+         * Constructs a new BundledDocumentMetadata.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.IBundledDocumentMetadata);
+
+        /** BundledDocumentMetadata name. */
+        public name: string;
+
+        /** BundledDocumentMetadata readTime. */
+        public readTime?: (google.protobuf.ITimestamp|null);
+
+        /** BundledDocumentMetadata exists. */
+        public exists: boolean;
+
+        /**
+         * Creates a BundledDocumentMetadata message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BundledDocumentMetadata
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.BundledDocumentMetadata;
+
+        /**
+         * Creates a plain object from a BundledDocumentMetadata message. Also converts values to other types if specified.
+         * @param message BundledDocumentMetadata
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.BundledDocumentMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BundledDocumentMetadata to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a BundleMetadata. */
+    interface IBundleMetadata {
+
+        /** BundleMetadata id */
+        id?: (string|null);
+
+        /** BundleMetadata createTime */
+        createTime?: (google.protobuf.ITimestamp|null);
+
+        /** BundleMetadata version */
+        version?: (number|null);
+    }
+
+    /** Represents a BundleMetadata. */
+    class BundleMetadata implements IBundleMetadata {
+
+        /**
+         * Constructs a new BundleMetadata.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.IBundleMetadata);
+
+        /** BundleMetadata id. */
+        public id: string;
+
+        /** BundleMetadata createTime. */
+        public createTime?: (google.protobuf.ITimestamp|null);
+
+        /** BundleMetadata version. */
+        public version: number;
+
+        /**
+         * Creates a BundleMetadata message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BundleMetadata
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.BundleMetadata;
+
+        /**
+         * Creates a plain object from a BundleMetadata message. Also converts values to other types if specified.
+         * @param message BundleMetadata
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.BundleMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BundleMetadata to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a BundleElement. */
+    interface IBundleElement {
+
+        /** BundleElement metadata */
+        metadata?: (firestore.IBundleMetadata|null);
+
+        /** BundleElement namedQuery */
+        namedQuery?: (firestore.INamedQuery|null);
+
+        /** BundleElement documentMetadata */
+        documentMetadata?: (firestore.IBundledDocumentMetadata|null);
+
+        /** BundleElement document */
+        document?: (google.firestore.v1.IDocument|null);
+    }
+
+    /** Represents a BundleElement. */
+    class BundleElement implements IBundleElement {
+
+        /**
+         * Constructs a new BundleElement.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: firestore.IBundleElement);
+
+        /** BundleElement metadata. */
+        public metadata?: (firestore.IBundleMetadata|null);
+
+        /** BundleElement namedQuery. */
+        public namedQuery?: (firestore.INamedQuery|null);
+
+        /** BundleElement documentMetadata. */
+        public documentMetadata?: (firestore.IBundledDocumentMetadata|null);
+
+        /** BundleElement document. */
+        public document?: (google.firestore.v1.IDocument|null);
+
+        /** BundleElement elementType. */
+        public elementType?: ("metadata"|"namedQuery"|"documentMetadata"|"document");
+
+        /**
+         * Creates a BundleElement message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns BundleElement
+         */
+        public static fromObject(object: { [k: string]: any }): firestore.BundleElement;
+
+        /**
+         * Creates a plain object from a BundleElement message. Also converts values to other types if specified.
+         * @param message BundleElement
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: firestore.BundleElement, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this BundleElement to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+}
+
 /** Namespace google. */
 export namespace google {
 

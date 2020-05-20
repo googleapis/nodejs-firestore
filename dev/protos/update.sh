@@ -90,6 +90,7 @@ PBJS_ARGS=( --proto_path=. \
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1_proto_api.js \
   -r firestore_v1 \
   "${PROTOS_DIR}/google/firestore/v1/*.proto" \
+  "${PROTOS_DIR}/firestore/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
   "${PROTOS_DIR}/google/longrunning/*.proto"

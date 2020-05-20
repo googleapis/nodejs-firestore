@@ -205,7 +205,7 @@ export class WriteBatch {
 
     const op: PendingWriteOp = () => {
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
-      const write = document.toProto();
+      const write = document.toWriteProto();
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);
       }
@@ -358,7 +358,7 @@ export class WriteBatch {
         documentMask = DocumentMask.fromObject(firestoreData);
       }
 
-      const write = document.toProto();
+      const write = document.toWriteProto();
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);
       }
@@ -511,7 +511,7 @@ export class WriteBatch {
 
     const op: PendingWriteOp = () => {
       const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
-      const write = document.toProto();
+      const write = document.toWriteProto();
       write.updateMask = documentMask.toProto();
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);

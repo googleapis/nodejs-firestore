@@ -21,6 +21,7 @@ import {URL} from 'url';
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
 import {BulkWriter} from './bulk-writer';
+import {BundleBuilder} from './bundle';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
   DocumentSnapshot,
@@ -51,7 +52,7 @@ import {
   Settings,
   UnaryMethod,
 } from './types';
-import {Deferred, isPermanentRpcError, requestTag} from './util';
+import {autoId, Deferred, isPermanentRpcError, requestTag} from './util';
 import {
   validateBoolean,
   validateFunction,
@@ -846,6 +847,20 @@ export class Firestore {
     }
 
     return document.build();
+  }
+
+  /**
+   * Creates a new `BundleBuilder` instance to package selected Firestore data into
+   * a bundle.
+   *
+   * @param bundleId. The id of the bundle. When loaded on clients, client SDKs use this id
+   * and the timestamp associated with the built bundle to tell if it has been loaded already.
+   * If not specified, a random identifier will be used.
+   *
+   * @private
+   */
+  _bundle(name?: string): BundleBuilder {
+    return new BundleBuilder(name || autoId());
   }
 
   /**
