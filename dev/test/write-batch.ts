@@ -33,7 +33,6 @@ import {
   InvalidApiUsage,
   response,
   verifyInstance,
-  postConverter,
   Post,
 } from './util/helpers';
 

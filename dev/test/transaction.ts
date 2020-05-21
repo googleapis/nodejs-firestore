@@ -31,6 +31,7 @@ import {
   response,
   postConverter,
   Post,
+  postConverterMerge,
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
@@ -859,7 +860,7 @@ describe('transaction operations', () => {
 
     return runTransaction(
       (transaction, docRef) => {
-        const postRef = docRef.withConverter(postConverter);
+        const postRef = docRef.withConverter(postConverterMerge);
         transaction.set(postRef, {title: 'story'} as Partial<Post>, {
           merge: true,
         });

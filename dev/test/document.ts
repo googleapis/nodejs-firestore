@@ -36,6 +36,7 @@ import {
   missing,
   Post,
   postConverter,
+  postConverterMerge,
   remove,
   requestEquals,
   response,
@@ -1255,7 +1256,7 @@ describe('set document', () => {
     return createInstance(overrides).then(firestore => {
       return firestore
         .doc('collectionId/documentId')
-        .withConverter(postConverter)
+        .withConverter(postConverterMerge)
         .set({title: 'story'} as Partial<Post>, {
           merge: true,
         });
@@ -1281,7 +1282,7 @@ describe('set document', () => {
     return createInstance(overrides).then(firestore => {
       return firestore
         .doc('collectionId/documentId')
-        .withConverter(postConverter)
+        .withConverter(postConverterMerge)
         .set({title: 'story', author: 'writer'} as Partial<Post>, {
           mergeFields: ['title'],
         });

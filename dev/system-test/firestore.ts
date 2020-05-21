@@ -39,6 +39,7 @@ import {
   bundleToElementArray,
   Post,
   postConverter,
+  postConverterMerge,
   verifyInstance,
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
@@ -2154,7 +2155,7 @@ describe('WriteBatch class', () => {
   });
 
   it('set supports partials', async () => {
-    const ref = randomCol.doc('doc').withConverter(postConverter);
+    const ref = randomCol.doc('doc').withConverter(postConverterMerge);
     await ref.set(new Post('walnut', 'author'));
     const batch = firestore.batch();
     batch.set(ref, {title: 'olive'}, {merge: true});

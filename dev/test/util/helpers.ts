@@ -22,12 +22,7 @@ import {firestore} from '../../protos/firestore_v1_proto_api';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
-import {
-  Firestore,
-  Settings,
-  QueryDocumentSnapshot,
-  SetOptions,
-} from '../../src';
+import {Firestore, Settings, QueryDocumentSnapshot} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {DocumentData, GapicClient} from '../../src/types';
 
@@ -301,6 +296,9 @@ export function requestEquals(
   // 'extend' removes undefined fields in the request object. The backend
   // ignores these fields, but we need to manually strip them before we compare
   // the expected and the actual request.
+  // toFirestore(modelObject: T): DocumentData;
+  // toFirestore(modelObject: Partial<T>, options: SetOptions): DocumentData;
+
   actual = extend(true, {}, actual);
   const proto = Object.assign({database: DATABASE_ROOT}, expected);
   expect(actual).to.deep.eq(proto);
@@ -338,6 +336,16 @@ export class Post {
 
 /** Converts Post objects to and from Firestore in tests. */
 export const postConverter = {
+  toFirestore(post: Post): DocumentData {
+    return {title: post.title, author: post.author};
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot): Post {
+    const data = snapshot.data();
+    return new Post(data.title, data.author);
+  },
+};
+
+export const postConverterMerge = {
   toFirestore(post: Partial<Post>): DocumentData {
     const result: DocumentData = {};
     if (post.title) result.title = post.title;
