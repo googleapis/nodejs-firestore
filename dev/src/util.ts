@@ -146,3 +146,16 @@ export function isPermanentRpcError(
     return false;
   }
 }
+
+/**
+ * Wraps the provided error in a new error that includes the provided stack.
+ *
+ * Used to preserve stack traces across async calls.
+ * @private
+ */
+export function wrapError(err: Error, stack: string): Error {
+  let wrappedError = new Error(err.message);
+  wrappedError.stack += '\nCaused by: ' + stack;
+  wrappedError.stack += '\nCaused by: ' + err.stack;
+  return wrappedError;
+}

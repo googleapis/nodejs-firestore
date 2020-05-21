@@ -53,7 +53,7 @@ import {
   Settings,
   UnaryMethod,
 } from './types';
-import {Deferred, isPermanentRpcError, requestTag} from './util';
+import {Deferred, isPermanentRpcError, requestTag, wrapError} from './util';
 import {
   validateBoolean,
   validateFunction,
@@ -908,9 +908,15 @@ export class Firestore {
       documentRefsOrReadOptions
     );
     const tag = requestTag();
+
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack;
+
     return this.initializeIfNeeded(tag).then(() =>
       this.getAll_(documents, fieldMask, tag)
-    );
+    ).catch(err => {
+      throw wrapError(err, stack!);
+    });
   }
 
   /**
