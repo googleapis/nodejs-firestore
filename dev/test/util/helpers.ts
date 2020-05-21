@@ -22,7 +22,12 @@ import {firestore} from '../../protos/firestore_v1_proto_api';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
-import {Firestore, Settings, QueryDocumentSnapshot, SetOptions} from '../../src';
+import {
+  Firestore,
+  Settings,
+  QueryDocumentSnapshot,
+  SetOptions,
+} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {DocumentData, GapicClient} from '../../src/types';
 

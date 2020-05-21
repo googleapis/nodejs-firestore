@@ -28,7 +28,6 @@ import {
   ApiMapValue,
   defaultConverter,
   DocumentData,
-  FirestoreDataConverter,
   UpdateMap,
 } from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
