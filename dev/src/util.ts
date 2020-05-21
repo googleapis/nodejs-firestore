@@ -17,7 +17,7 @@
 import {randomBytes} from 'crypto';
 import {GoogleError, ServiceConfig, Status} from 'google-gax';
 
-import {defaultConverter, DocumentData, FirestoreDataConverter} from './types';
+import {DocumentData} from './types';
 
 /**
  * A Promise implementation that supports deferred resolution.
@@ -145,11 +145,4 @@ export function isPermanentRpcError(
   } else {
     return false;
   }
-}
-
-export function isDefaultConverter<U>(a: FirestoreDataConverter<U>): boolean {
-  return (
-    a.toFirestore.toString() === defaultConverter.toFirestore.toString() &&
-    a.fromFirestore.toString() === defaultConverter.fromFirestore.toString()
-  );
 }

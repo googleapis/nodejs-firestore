@@ -156,9 +156,13 @@ export interface FirestoreDataConverter<T> {
 
 /**
  * A default converter to use when none is provided.
+ *
+ * By declaring the converter as a variable instead of creating the object
+ * inside defaultConverter(), object equality when comparing default converters
+ * is preserved.
  * @private
  */
-export const defaultConverter: FirestoreDataConverter<DocumentData> = {
+const defaultConverterObj = {
   toFirestore(modelObject: DocumentData): DocumentData {
     return modelObject;
   },
@@ -166,6 +170,14 @@ export const defaultConverter: FirestoreDataConverter<DocumentData> = {
     return snapshot.data()!;
   },
 };
+
+/**
+ * A default converter to use when none is provided.
+ * @private
+ */
+export function defaultConverter<T>(): FirestoreDataConverter<T> {
+  return defaultConverterObj as FirestoreDataConverter<T>;
+}
 
 /**
  * Settings used to directly configure a `Firestore` instance.

@@ -296,9 +296,6 @@ export function requestEquals(
   // 'extend' removes undefined fields in the request object. The backend
   // ignores these fields, but we need to manually strip them before we compare
   // the expected and the actual request.
-  // toFirestore(modelObject: T): DocumentData;
-  // toFirestore(modelObject: Partial<T>, options: SetOptions): DocumentData;
-
   actual = extend(true, {}, actual);
   const proto = Object.assign({database: DATABASE_ROOT}, expected);
   expect(actual).to.deep.eq(proto);

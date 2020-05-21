@@ -132,9 +132,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
   constructor(
     private readonly _firestore: Firestore,
     readonly _path: ResourcePath,
-    readonly _converter = (defaultConverter as unknown) as FirestoreDataConverter<
-      T
-    >
+    readonly _converter = defaultConverter<T>()
   ) {}
 
   /**
@@ -986,7 +984,7 @@ export class QueryOptions<T> {
    */
   static forCollectionGroupQuery<T>(
     collectionId: string,
-    converter = (defaultConverter as unknown) as FirestoreDataConverter<T>
+    converter = defaultConverter<T>()
   ): QueryOptions<T> {
     return new QueryOptions<T>(
       /*parentPath=*/ ResourcePath.EMPTY,
@@ -1004,7 +1002,7 @@ export class QueryOptions<T> {
    */
   static forCollectionQuery<T>(
     collectionRef: ResourcePath,
-    converter = (defaultConverter as unknown) as FirestoreDataConverter<T>
+    converter = defaultConverter<T>()
   ): QueryOptions<T> {
     return new QueryOptions<T>(
       collectionRef.parent()!,
