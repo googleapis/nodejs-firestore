@@ -35,6 +35,7 @@ import {
   WriteResult,
 } from '../src';
 import {autoId, Deferred} from '../src/util';
+import {verifyMetadata} from '../test/bundle';
 import {
   bundleToElementArray,
   Post,
@@ -2416,9 +2417,7 @@ describe('Bundle building', () => {
     const elements = await bundleToElementArray(bundle.build());
 
     const meta = (elements[0] as IBundleElement).metadata;
-    expect(meta!.totalBytes).greaterThan(0);
-    delete meta!.totalBytes;
-    expect(meta).to.deep.equal({
+    verifyMetadata(meta!, {
       id: 'test-bundle',
       createTime: snap.readTime.toProto().timestampValue,
       version: 1,
@@ -2452,9 +2451,7 @@ describe('Bundle building', () => {
     expect(elements.length).to.equal(2);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    expect(meta!.totalBytes).greaterThan(0);
-    delete meta!.totalBytes;
-    expect(meta).to.deep.equal({
+    verifyMetadata(meta!, {
       id: 'test-bundle',
       createTime: snap.readTime.toProto().timestampValue,
       version: 1,
@@ -2482,9 +2479,7 @@ describe('Bundle building', () => {
     const elements = await bundleToElementArray(await bundle.build());
 
     const meta = (elements[0] as IBundleElement).metadata;
-    expect(meta!.totalBytes).greaterThan(0);
-    delete meta!.totalBytes;
-    expect(meta).to.deep.equal({
+    verifyMetadata(meta!, {
       id: 'test-bundle',
       createTime: limitToLastSnap.readTime.toProto().timestampValue,
       version: 1,

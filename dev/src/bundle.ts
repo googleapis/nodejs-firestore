@@ -167,7 +167,7 @@ export class BundleBuilder {
       totalDocuments: this.documents.size,
       totalBytes: bundleBuffer.length,
     };
-    // Prepends the metadata element to the bundleBuffer, note `bundleBuffer` is the second argument to `Buffer.concat`.
+    // Prepends the metadata element to the bundleBuffer: `bundleBuffer` is the second argument to `Buffer.concat`.
     bundleBuffer = Buffer.concat([
       this.elementToLengthPrefixedBuffer({metadata}),
       bundleBuffer,

@@ -24,6 +24,16 @@ import {
   verifyInstance,
 } from './util/helpers';
 import IBundleElement = firestore.IBundleElement;
+import IBundleMetadata = firestore.IBundleMetadata;
+
+export function verifyMetadata(
+  meta: IBundleMetadata,
+  expected: IBundleMetadata
+): void {
+  expect(meta!.totalBytes).greaterThan(0);
+  delete meta!.totalBytes;
+  expect(meta).to.deep.equal(expected);
+}
 
 describe('Bundle Buidler', () => {
   let firestore: Firestore;
@@ -80,9 +90,7 @@ describe('Bundle Buidler', () => {
     expect(elements.length).to.equal(3);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    expect(meta!.totalBytes).greaterThan(0);
-    delete meta!.totalBytes;
-    expect(meta).to.deep.equal({
+    verifyMetadata(meta!, {
       id: 'test-bundle',
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       createTime: snap1.readTime.toProto().timestampValue,
@@ -131,9 +139,7 @@ describe('Bundle Buidler', () => {
     expect(elements.length).to.equal(4);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    expect(meta!.totalBytes).greaterThan(0);
-    delete meta!.totalBytes;
-    expect(meta).to.deep.equal({
+    verifyMetadata(meta!, {
       id: 'test-bundle',
       // `snap.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       createTime: snap.readTime.toProto().timestampValue,
@@ -187,9 +193,7 @@ describe('Bundle Buidler', () => {
     expect(elements.length).to.equal(3);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    expect(meta!.totalBytes).greaterThan(0);
-    delete meta!.totalBytes;
-    expect(meta).to.deep.equal({
+    verifyMetadata(meta!, {
       id: 'test-bundle',
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       createTime: snap1.readTime.toProto().timestampValue,
@@ -225,9 +229,7 @@ describe('Bundle Buidler', () => {
 
     expect(newElements.length).to.equal(5);
     const newMeta = (newElements[0] as IBundleElement).metadata;
-    expect(newMeta!.totalBytes).greaterThan(0);
-    delete newMeta!.totalBytes;
-    expect(newMeta).to.deep.equal({
+    verifyMetadata(newMeta!, {
       id: 'test-bundle',
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
       createTime: snap1.readTime.toProto().timestampValue,
