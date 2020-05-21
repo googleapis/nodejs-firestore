@@ -315,6 +315,8 @@ export class WriteBatch {
     validateDocumentReference('documentRef', documentRef);
     let firestoreData: DocumentData;
     if (mergeLeaves || mergePaths) {
+      // Cast to any in order to satisfy the union type constraint on
+      // toFirestore().
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       firestoreData = (documentRef._converter as any).toFirestore(
         data,

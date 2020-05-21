@@ -393,9 +393,7 @@ export class DocumentSnapshot<T = DocumentData> {
         this.ref.firestore,
         this.ref._path
       );
-      return ((this.ref._converter as unknown) as FirestoreDataConverter<
-        T
-      >).fromFirestore(
+      return this.ref._converter.fromFirestore(
         new QueryDocumentSnapshot<DocumentData>(
           untypedReference,
           this._fieldsProto!,
