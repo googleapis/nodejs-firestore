@@ -154,7 +154,7 @@ export function isPermanentRpcError(
  * @private
  */
 export function wrapError(err: Error, stack: string): Error {
-  let wrappedError = new Error(err.message);
+  const wrappedError = new Error(err.message);
   wrappedError.stack += '\nCaused by: ' + stack;
   wrappedError.stack += '\nCaused by: ' + err.stack;
   return wrappedError;

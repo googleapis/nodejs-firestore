@@ -17,7 +17,7 @@
 import * as assert from 'assert';
 
 import {logger} from './logger';
-import {Deferred, wrapError} from './util';
+import {Deferred} from './util';
 
 /**
  * An auto-resizing pool that distributes concurrent operations over multiple

@@ -2148,6 +2148,17 @@ describe('WriteBatch class', () => {
       });
   });
 
+  it('has a full stack trace if set() errors', () => {
+    // Use an invalid document name that the backend will reject.
+    const ref = randomCol.doc('__doc__');
+    const batch = firestore.batch();
+    batch.set(ref, {foo: 'a'});
+    return batch.commit().then(() => Promise.reject('commit() should have failed')
+    ).catch((err: Error) => {
+      expect(err.stack).to.contain('WriteBatch.commit');
+    });
+  });
+
   it('has update() method', () => {
     const ref = randomCol.doc('doc');
     const batch = firestore.batch();

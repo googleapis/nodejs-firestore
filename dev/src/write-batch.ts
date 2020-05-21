@@ -532,12 +532,11 @@ export class WriteBatch {
    * });
    */
   commit(): Promise<WriteResult[]> {
-
     // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack;
+    const stack = Error().stack!;
 
     return this.commit_().catch(err => {
-      throw wrapError(err, stack!);
+      throw wrapError(err, stack);
     });
   }
 

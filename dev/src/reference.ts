@@ -1809,14 +1809,14 @@ export class Query<T = DocumentData> {
     const docs: Array<QueryDocumentSnapshot<T>> = [];
 
     // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack;
+    const stack = Error().stack!;
 
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
 
       this._stream(transactionId)
         .on('error', err => {
-          reject(wrapError(err, stack!));
+          reject(wrapError(err, stack));
         })
         .on('data', result => {
           readTime = result.readTime;

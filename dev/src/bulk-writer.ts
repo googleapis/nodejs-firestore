@@ -190,10 +190,10 @@ class BulkCommitBatch {
     this.state = BatchState.SENT;
 
     // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack;
+    const stack = Error().stack!;
 
     return this.writeBatch.bulkCommit().catch(err => {
-      throw wrapError(err, stack!);
+      throw wrapError(err, stack);
     });
   }
 
