@@ -2170,6 +2170,20 @@ describe('WriteBatch class', () => {
       });
   });
 
+  it('set()', () => {
+    const ref = randomCol.doc('doc');
+    const batch = firestore.batch();
+    batch.set(ref, {foo: 'a'});
+    return batch
+      .commit()
+      .then(() => {
+        return ref.get();
+      })
+      .then(doc => {
+        expect(doc.get('foo')).to.equal('a');
+      });
+  });
+
   it('has update() method', () => {
     const ref = randomCol.doc('doc');
     const batch = firestore.batch();

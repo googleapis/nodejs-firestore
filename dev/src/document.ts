@@ -24,12 +24,7 @@ import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {
-  ApiMapValue,
-  defaultConverter,
-  DocumentData,
-  UpdateMap,
-} from './types';
+import {ApiMapValue, defaultConverter, DocumentData, UpdateMap} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 
 import api = google.firestore.v1;
