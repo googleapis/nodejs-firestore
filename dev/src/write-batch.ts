@@ -32,7 +32,6 @@ import {
   SetOptions,
   UpdateData,
   UpdateMap,
-  defaultConverter,
 } from './types';
 import {DocumentData} from './types';
 import {isObject, isPlainObject, requestTag} from './util';
@@ -315,18 +314,11 @@ export class WriteBatch {
     const mergePaths = options && options.mergeFields;
     validateDocumentReference('documentRef', documentRef);
     let firestoreData: DocumentData;
-    if (
-      (mergeLeaves || mergePaths) &&
-      documentRef._converter !== defaultConverter
-    ) {
-      if (typeof documentRef._converter.toFirestoreFromMerge !== 'function') {
-        throw new Error(
-          'toFirestoreFromMerge() must be defined to use set() with ' +
-            '`merge` or `mergeFields`.'
-        );
-      }
-      firestoreData = documentRef._converter.toFirestoreFromMerge(
-        data as Partial<T>
+    if (mergeLeaves || mergePaths) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      firestoreData = (documentRef._converter as any).toFirestore(
+        data,
+        options
       );
     } else {
       firestoreData = documentRef._converter.toFirestore(data as T);

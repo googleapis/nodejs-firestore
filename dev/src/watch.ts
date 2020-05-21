@@ -193,7 +193,9 @@ abstract class Watch<T = DocumentData> {
    */
   constructor(
     firestore: Firestore,
-    readonly _converter = defaultConverter as FirestoreDataConverter<T>
+    readonly _converter = (defaultConverter as unknown) as FirestoreDataConverter<
+      T
+    >
   ) {
     this.firestore = firestore;
     this.backoff = new ExponentialBackoff();

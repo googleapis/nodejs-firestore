@@ -24,8 +24,8 @@ import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {ApiMapValue, defaultConverter, DocumentData, UpdateMap} from './types';
-import {isEmpty, isObject, isPlainObject} from './util';
+import {ApiMapValue, DocumentData, UpdateMap} from './types';
+import {isDefaultConverter, isEmpty, isObject, isPlainObject} from './util';
 
 import api = google.firestore.v1;
 
@@ -382,7 +382,7 @@ export class DocumentSnapshot<T = DocumentData> {
 
     // We only want to use the converter and create a new QueryDocumentSnapshot
     // if a converter has been provided.
-    if (this.ref._converter !== defaultConverter) {
+    if (!isDefaultConverter(this.ref._converter)) {
       const untypedReference = new DocumentReference(
         this.ref.firestore,
         this.ref._path

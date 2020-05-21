@@ -23,6 +23,8 @@ import {
   Timestamp,
   WriteBatch,
   WriteResult,
+  DocumentData,
+  QueryDocumentSnapshot,
 } from '../src';
 import {BatchWriteResult} from '../src/write-batch';
 import {
@@ -79,14 +81,21 @@ describe('set() method', () => {
     writeBatch.set(firestore.doc('sub/doc'), nullObject);
   });
 
-  it('requires toFirestoreFromMerge() for Partial usage', () => {
-    const converter = {...postConverter};
-    delete converter.toFirestoreFromMerge;
+  it('requires the correct converter for Partial usage', async () => {
+    const converter = {
+      toFirestore(post: Post): DocumentData {
+        return {title: post.title, author: post.author};
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): Post {
+        const data = snapshot.data();
+        return new Post(data.title, data.author);
+      },
+    };
     const ref = firestore.doc('sub/doc').withConverter(converter);
     expect(() =>
       writeBatch.set(ref, {title: 'foo'} as Partial<Post>, {merge: true})
     ).to.throw(
-      'toFirestoreFromMerge() must be defined to use set() with `merge` or `mergeFields`.'
+      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "author").'
     );
   });
 });
