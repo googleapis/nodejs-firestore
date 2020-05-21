@@ -23,6 +23,8 @@ import {
   Timestamp,
   WriteBatch,
   WriteResult,
+  DocumentData,
+  QueryDocumentSnapshot,
 } from '../src';
 import {BatchWriteResult} from '../src/write-batch';
 import {
@@ -31,6 +33,7 @@ import {
   InvalidApiUsage,
   response,
   verifyInstance,
+  Post,
 } from './util/helpers';
 
 const REQUEST_TIME = 'REQUEST_TIME';
@@ -75,6 +78,24 @@ describe('set() method', () => {
     const nullObject = Object.create(null);
     nullObject.bar = 'ack';
     writeBatch.set(firestore.doc('sub/doc'), nullObject);
+  });
+
+  it('requires the correct converter for Partial usage', async () => {
+    const converter = {
+      toFirestore(post: Post): DocumentData {
+        return {title: post.title, author: post.author};
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): Post {
+        const data = snapshot.data();
+        return new Post(data.title, data.author);
+      },
+    };
+    const ref = firestore.doc('sub/doc').withConverter(converter);
+    expect(() =>
+      writeBatch.set(ref, {title: 'foo'} as Partial<Post>, {merge: true})
+    ).to.throw(
+      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "author").'
+    );
   });
 });
 

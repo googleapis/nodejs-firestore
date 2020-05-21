@@ -87,9 +87,11 @@ declare namespace FirebaseFirestore {
     /**
      * Called by the Firestore SDK to convert a custom model object of type T
      * into a plain Javascript object (suitable for writing directly to the
-     * Firestore database).
+     * Firestore database). To use set() with `merge` and `mergeFields`,
+     * toFirestore() must be defined with `Partial<T>`.
      */
     toFirestore(modelObject: T): DocumentData;
+    toFirestore(modelObject: Partial<T>, options: SetOptions): DocumentData;
 
     /**
      * Called by the Firestore SDK to convert Firestore data into an object of
@@ -374,9 +376,10 @@ declare namespace FirebaseFirestore {
      */
     set<T>(
       documentRef: DocumentReference<T>,
-      data: T,
-      options?: SetOptions
+      data: Partial<T>,
+      options: SetOptions
     ): Transaction;
+    set<T>(documentRef: DocumentReference<T>, data: T): Transaction;
 
     /**
      * Updates fields in the document referred to by the provided
@@ -474,9 +477,10 @@ declare namespace FirebaseFirestore {
      */
     set<T>(
       documentRef: DocumentReference<T>,
-      data: T,
-      options?: SetOptions
+      data: Partial<T>,
+      options: SetOptions
     ): WriteBatch;
+    set<T>(documentRef: DocumentReference<T>, data: T): WriteBatch;
 
     /**
      * Update fields of the document referred to by the provided
@@ -683,7 +687,8 @@ declare namespace FirebaseFirestore {
      * @param options An object to configure the set behavior.
      * @return A Promise resolved with the write time of this set.
      */
-    set(data: T, options?: SetOptions): Promise<WriteResult>;
+    set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
+    set(data: T): Promise<WriteResult>;
 
     /**
      * Updates fields in the document referred to by this `DocumentReference`.

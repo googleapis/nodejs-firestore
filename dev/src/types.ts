@@ -140,22 +140,29 @@ export interface FirestoreDataConverter<T> {
   /**
    * Called by the Firestore SDK to convert a custom model object of type T
    * into a plain Javascript object (suitable for writing directly to the
-   * Firestore database).
+   * Firestore database). To use set() with `merge` and `mergeFields`,
+   * toFirestore() must be defined with `Partial<T>`.
    */
-  toFirestore(modelObject: T): DocumentData;
+  toFirestore:
+    | ((modelObject: T) => DocumentData)
+    | ((modelObject: Partial<T>, options?: SetOptions) => DocumentData);
 
   /**
    * Called by the Firestore SDK to convert Firestore data into an object of
    * type T.
    */
-  fromFirestore(snapshot: QueryDocumentSnapshot): T;
+  fromFirestore: (snapshot: QueryDocumentSnapshot) => T;
 }
 
 /**
  * A default converter to use when none is provided.
+ *
+ * By declaring the converter as a variable instead of creating the object
+ * inside defaultConverter(), object equality when comparing default converters
+ * is preserved.
  * @private
  */
-export const defaultConverter: FirestoreDataConverter<DocumentData> = {
+const defaultConverterObj = {
   toFirestore(modelObject: DocumentData): DocumentData {
     return modelObject;
   },
@@ -163,6 +170,14 @@ export const defaultConverter: FirestoreDataConverter<DocumentData> = {
     return snapshot.data()!;
   },
 };
+
+/**
+ * A default converter to use when none is provided.
+ * @private
+ */
+export function defaultConverter<T>(): FirestoreDataConverter<T> {
+  return defaultConverterObj as FirestoreDataConverter<T>;
+}
 
 /**
  * Settings used to directly configure a `Firestore` instance.

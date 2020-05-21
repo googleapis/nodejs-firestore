@@ -22,7 +22,12 @@ import {firestore} from '../../protos/firestore_v1_proto_api';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
-import {Firestore, QueryDocumentSnapshot, Settings} from '../../src';
+import {
+  Firestore,
+  Settings,
+  QueryDocumentSnapshot,
+  SetOptions,
+} from '../../src';
 import {ClientPool} from '../../src/pool';
 import {DocumentData, GapicClient} from '../../src/types';
 
@@ -335,6 +340,24 @@ export class Post {
 export const postConverter = {
   toFirestore(post: Post): DocumentData {
     return {title: post.title, author: post.author};
+  },
+  fromFirestore(snapshot: QueryDocumentSnapshot): Post {
+    const data = snapshot.data();
+    return new Post(data.title, data.author);
+  },
+};
+
+export const postConverterMerge = {
+  toFirestore(post: Partial<Post>, options?: SetOptions): DocumentData {
+    if (options && (options.merge || options.mergeFields)) {
+      expect(post).to.not.be.an.instanceOf(Post);
+    } else {
+      expect(post).to.be.an.instanceof(Post);
+    }
+    const result: DocumentData = {};
+    if (post.title) result.title = post.title;
+    if (post.author) result.author = post.author;
+    return result;
   },
   fromFirestore(snapshot: QueryDocumentSnapshot): Post {
     const data = snapshot.data();

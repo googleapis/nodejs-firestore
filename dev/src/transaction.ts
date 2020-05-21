@@ -227,6 +227,12 @@ export class Transaction {
     return this;
   }
 
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: Partial<T>,
+    options: SetOptions
+  ): Transaction;
+  set<T>(documentRef: DocumentReference<T>, data: T): Transaction;
   /**
    * Writes to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document
@@ -236,7 +242,7 @@ export class Transaction {
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
-   * @param {T} data The object to serialize as the document.
+   * @param {T|Partial<T>} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
@@ -256,7 +262,7 @@ export class Transaction {
    */
   set<T>(
     documentRef: DocumentReference<T>,
-    data: T,
+    data: T | Partial<T>,
     options?: SetOptions
   ): Transaction {
     this._writeBatch.set(documentRef, data, options);

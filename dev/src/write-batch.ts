@@ -264,16 +264,26 @@ export class WriteBatch {
     return this;
   }
 
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: Partial<T>,
+    options: SetOptions
+  ): WriteBatch;
+  set<T>(documentRef: DocumentReference<T>, data: T): WriteBatch;
+  set<T>(
+    documentRef: DocumentReference<T>,
+    data: T | Partial<T>,
+    options?: SetOptions
+  ): WriteBatch;
   /**
    * Write to the document referred to by the provided
-   * [DocumentReference]{@link DocumentReference}.
-   * If the document does not exist yet, it will be created. If you pass
-   * [SetOptions]{@link SetOptions}., the provided data can be merged
-   * into the existing document.
+   * [DocumentReference]{@link DocumentReference}. If the document does not
+   * exist yet, it will be created. If you pass [SetOptions]{@link SetOptions},
+   * the provided data can be merged into the existing document.
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
-   * @param {T} data The object to serialize as the document.
+   * @param {T|Partial<T>} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
@@ -296,14 +306,25 @@ export class WriteBatch {
    */
   set<T>(
     documentRef: DocumentReference<T>,
-    data: T,
+    data: T | Partial<T>,
     options?: SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
     const mergeLeaves = options && options.merge === true;
     const mergePaths = options && options.mergeFields;
     validateDocumentReference('documentRef', documentRef);
-    let firestoreData = documentRef._converter.toFirestore(data);
+    let firestoreData: DocumentData;
+    if (mergeLeaves || mergePaths) {
+      // Cast to any in order to satisfy the union type constraint on
+      // toFirestore().
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      firestoreData = (documentRef._converter as any).toFirestore(
+        data,
+        options
+      );
+    } else {
+      firestoreData = documentRef._converter.toFirestore(data as T);
+    }
     validateDocumentData(
       'data',
       firestoreData,

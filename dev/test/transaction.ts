@@ -29,6 +29,9 @@ import {
   createInstance,
   InvalidApiUsage,
   response,
+  postConverter,
+  Post,
+  postConverterMerge,
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
@@ -833,6 +836,66 @@ describe('transaction operations', () => {
     return runTransaction(
       (transaction, docRef) => {
         transaction.set(docRef, {'a.b': 'c'}, {merge: true});
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [set])
+    );
+  });
+
+  it('support set with partials and merge', () => {
+    const set = {
+      update: {
+        fields: {
+          title: {
+            stringValue: 'story',
+          },
+        },
+        name: DOCUMENT_NAME,
+      },
+      updateMask: {
+        fieldPaths: ['title'],
+      },
+    };
+
+    return runTransaction(
+      (transaction, docRef) => {
+        const postRef = docRef.withConverter(postConverterMerge);
+        transaction.set(postRef, {title: 'story'} as Partial<Post>, {
+          merge: true,
+        });
+        return Promise.resolve();
+      },
+      begin(),
+      commit(undefined, [set])
+    );
+  });
+
+  it('support set with partials and mergeFields', () => {
+    const set = {
+      update: {
+        fields: {
+          title: {
+            stringValue: 'story',
+          },
+        },
+        name: DOCUMENT_NAME,
+      },
+      updateMask: {
+        fieldPaths: ['title'],
+      },
+    };
+
+    return runTransaction(
+      (transaction, docRef) => {
+        const postRef = docRef.withConverter(postConverter);
+        transaction.set(
+          postRef,
+          {title: 'story', author: 'person'} as Partial<Post>,
+          {
+            mergeFields: ['title'],
+          }
+        );
         return Promise.resolve();
       },
       begin(),

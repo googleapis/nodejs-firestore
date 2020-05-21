@@ -382,7 +382,7 @@ export class DocumentSnapshot<T = DocumentData> {
 
     // We only want to use the converter and create a new QueryDocumentSnapshot
     // if a converter has been provided.
-    if (this.ref._converter !== defaultConverter) {
+    if (this.ref._converter !== defaultConverter()) {
       const untypedReference = new DocumentReference(
         this.ref.firestore,
         this.ref._path

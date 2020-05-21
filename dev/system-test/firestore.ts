@@ -39,6 +39,7 @@ import {
   bundleToElementArray,
   Post,
   postConverter,
+  postConverterMerge,
   verifyInstance,
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
@@ -2140,6 +2141,36 @@ describe('WriteBatch class', () => {
   });
 
   it('has set() method', () => {
+    const ref = randomCol.doc('doc');
+    const batch = firestore.batch();
+    batch.set(ref, {foo: 'a'});
+    return batch
+      .commit()
+      .then(() => {
+        return ref.get();
+      })
+      .then(doc => {
+        expect(doc.get('foo')).to.equal('a');
+      });
+  });
+
+  it('set supports partials', async () => {
+    const ref = randomCol.doc('doc').withConverter(postConverterMerge);
+    await ref.set(new Post('walnut', 'author'));
+    const batch = firestore.batch();
+    batch.set(ref, {title: 'olive'}, {merge: true});
+    return batch
+      .commit()
+      .then(() => {
+        return ref.get();
+      })
+      .then(doc => {
+        expect(doc.get('title')).to.equal('olive');
+        expect(doc.get('author')).to.equal('author');
+      });
+  });
+
+  it('set()', () => {
     const ref = randomCol.doc('doc');
     const batch = firestore.batch();
     batch.set(ref, {foo: 'a'});

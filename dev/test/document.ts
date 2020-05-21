@@ -36,6 +36,7 @@ import {
   missing,
   Post,
   postConverter,
+  postConverterMerge,
   remove,
   requestEquals,
   response,
@@ -1233,6 +1234,58 @@ describe('set document', () => {
           merge: true,
         }
       );
+    });
+  });
+
+  it('supports partials with merge', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'title', {
+              stringValue: 'story',
+            }),
+            mask: updateMask('title'),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore
+        .doc('collectionId/documentId')
+        .withConverter(postConverterMerge)
+        .set({title: 'story'} as Partial<Post>, {
+          merge: true,
+        });
+    });
+  });
+
+  it('supports partials with mergeFields', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'title', {
+              stringValue: 'story',
+            }),
+            mask: updateMask('title'),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore
+        .doc('collectionId/documentId')
+        .withConverter(postConverterMerge)
+        .set({title: 'story', author: 'writer'} as Partial<Post>, {
+          mergeFields: ['title'],
+        });
     });
   });
 

@@ -132,7 +132,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
   constructor(
     private readonly _firestore: Firestore,
     readonly _path: ResourcePath,
-    readonly _converter = defaultConverter as FirestoreDataConverter<T>
+    readonly _converter = defaultConverter<T>()
   ) {}
 
   /**
@@ -375,13 +375,15 @@ export class DocumentReference<T = DocumentData> implements Serializable {
       .then(([writeResult]) => writeResult);
   }
 
+  set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
+  set(data: T): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
    * document does not yet exist, it will be created. If you pass
    * [SetOptions]{@link SetOptions}, the provided data can be merged into an
    * existing document.
    *
-   * @param {T} data A map of the fields and values for the document.
+   * @param {T|Partial<T>} data A map of the fields and values for the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge If true, set() merges the values specified
    * in its data argument. Fields omitted from this set() call remain untouched.
@@ -398,7 +400,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *   console.log(`Document written at ${res.updateTime}`);
    * });
    */
-  set(data: T, options?: SetOptions): Promise<WriteResult> {
+  set(data: T | Partial<T>, options?: SetOptions): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .set(this, data, options)
@@ -982,7 +984,7 @@ export class QueryOptions<T> {
    */
   static forCollectionGroupQuery<T>(
     collectionId: string,
-    converter = defaultConverter as FirestoreDataConverter<T>
+    converter = defaultConverter<T>()
   ): QueryOptions<T> {
     return new QueryOptions<T>(
       /*parentPath=*/ ResourcePath.EMPTY,
@@ -1000,7 +1002,7 @@ export class QueryOptions<T> {
    */
   static forCollectionQuery<T>(
     collectionRef: ResourcePath,
-    converter = defaultConverter as FirestoreDataConverter<T>
+    converter = defaultConverter<T>()
   ): QueryOptions<T> {
     return new QueryOptions<T>(
       collectionRef.parent()!,
