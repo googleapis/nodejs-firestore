@@ -153,8 +153,9 @@ export function isPermanentRpcError(
  * Used to preserve stack traces across async calls.
  * @private
  */
-export function wrapError(err: Error, stack: string): Error {
-  const wrappedError = new Error(err.message);
+export function wrapError(err: GoogleError, stack: string): Error {
+  const wrappedError = new GoogleError(err.message);
+  wrappedError.code = err.code;
   wrappedError.stack += '\nCaused by: ' + stack;
   wrappedError.stack += '\nCaused by: ' + err.stack;
   return wrappedError;
