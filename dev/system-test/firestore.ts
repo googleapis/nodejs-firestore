@@ -2153,10 +2153,12 @@ describe('WriteBatch class', () => {
     const ref = randomCol.doc('__doc__');
     const batch = firestore.batch();
     batch.set(ref, {foo: 'a'});
-    return batch.commit().then(() => Promise.reject('commit() should have failed')
-    ).catch((err: Error) => {
-      expect(err.stack).to.contain('WriteBatch.commit');
-    });
+    return batch
+      .commit()
+      .then(() => Promise.reject('commit() should have failed'))
+      .catch((err: Error) => {
+        expect(err.stack).to.contain('WriteBatch.commit');
+      });
   });
 
   it('has update() method', () => {
