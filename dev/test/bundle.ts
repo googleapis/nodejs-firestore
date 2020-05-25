@@ -15,7 +15,7 @@
 import {expect} from 'chai';
 import * as extend from 'extend';
 import {afterEach, beforeEach, describe, it} from 'mocha';
-import {firestore} from '../protos/firestore_v1_proto_api';
+import {firestore, google} from '../protos/firestore_v1_proto_api';
 import {Firestore, QuerySnapshot, Timestamp} from '../src';
 import {
   bundleToElementArray,
@@ -25,14 +25,26 @@ import {
 } from './util/helpers';
 import IBundleElement = firestore.IBundleElement;
 import IBundleMetadata = firestore.IBundleMetadata;
+import ITimestamp = google.protobuf.ITimestamp;
+
+export const TEST_BUNDLE_ID = 'test-bundle';
+const TEST_BUNDLE_VERSION = 1;
 
 export function verifyMetadata(
   meta: IBundleMetadata,
-  expected: IBundleMetadata
+  createTime: ITimestamp,
+  totalDocuments: number,
+  expectEmptyContent = false
 ): void {
-  expect(meta!.totalBytes).greaterThan(0);
-  delete meta!.totalBytes;
-  expect(meta).to.deep.equal(expected);
+  if (!expectEmptyContent) {
+    expect(meta.totalBytes).greaterThan(0);
+  } else {
+    expect(meta.totalBytes).to.equal(0);
+  }
+  expect(meta.id).to.equal(TEST_BUNDLE_ID);
+  expect(meta.version).to.equal(TEST_BUNDLE_VERSION);
+  expect(meta.totalDocuments).to.equal(totalDocuments);
+  expect(meta.createTime).to.deep.equal(createTime);
 }
 
 describe('Bundle Buidler', () => {
@@ -59,7 +71,7 @@ describe('Bundle Buidler', () => {
   });
 
   it('succeeds with document snapshots', async () => {
-    const bundle = firestore._bundle('test-bundle');
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
     const snap1 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
@@ -90,13 +102,12 @@ describe('Bundle Buidler', () => {
     expect(elements.length).to.equal(3);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    verifyMetadata(meta!, {
-      id: 'test-bundle',
+    verifyMetadata(
+      meta!,
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
-      createTime: snap1.readTime.toProto().timestampValue,
-      version: 1,
-      totalDocuments: 1,
-    });
+      snap1.readTime.toProto().timestampValue!,
+      1
+    );
 
     // Verify doc1Meta and doc1Snap
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
@@ -110,7 +121,7 @@ describe('Bundle Buidler', () => {
   });
 
   it('succeeds with query snapshots', async () => {
-    const bundle = firestore._bundle('test-bundle');
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
     const snap = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
@@ -139,13 +150,12 @@ describe('Bundle Buidler', () => {
     expect(elements.length).to.equal(4);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    verifyMetadata(meta!, {
-      id: 'test-bundle',
+    verifyMetadata(
+      meta!,
       // `snap.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
-      createTime: snap.readTime.toProto().timestampValue,
-      version: 1,
-      totalDocuments: 1,
-    });
+      snap.readTime.toProto().timestampValue!,
+      1
+    );
 
     // Verify named query
     const namedQuery = (elements[1] as IBundleElement).namedQuery;
@@ -174,7 +184,7 @@ describe('Bundle Buidler', () => {
   });
 
   it('succeeds with multiple calls to build()', async () => {
-    const bundle = firestore._bundle('test-bundle');
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
     const snap1 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
@@ -193,13 +203,12 @@ describe('Bundle Buidler', () => {
     expect(elements.length).to.equal(3);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    verifyMetadata(meta!, {
-      id: 'test-bundle',
+    verifyMetadata(
+      meta!,
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
-      createTime: snap1.readTime.toProto().timestampValue,
-      version: 1,
-      totalDocuments: 1,
-    });
+      snap1.readTime.toProto().timestampValue!,
+      1
+    );
 
     // Verify doc1Meta and doc1Snap
     const doc1Meta = (elements[1] as IBundleElement).documentMetadata;
@@ -229,13 +238,12 @@ describe('Bundle Buidler', () => {
 
     expect(newElements.length).to.equal(5);
     const newMeta = (newElements[0] as IBundleElement).metadata;
-    verifyMetadata(newMeta!, {
-      id: 'test-bundle',
+    verifyMetadata(
+      newMeta!,
       // `snap1.readTime` is the bundle createTime, because it is larger than `snap2.readTime`.
-      createTime: snap1.readTime.toProto().timestampValue,
-      version: 1,
-      totalDocuments: 2,
-    });
+      snap1.readTime.toProto().timestampValue!,
+      2
+    );
     expect(newElements.slice(1, 3)).to.deep.equal(elements.slice(1));
 
     // Verify doc2Meta and doc2Snap
@@ -250,19 +258,18 @@ describe('Bundle Buidler', () => {
   });
 
   it('succeeds when nothing is added', async () => {
-    const bundle = firestore._bundle('test-bundle');
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
 
     // `elements` is expected to be [bundleMeta].
     const elements = await bundleToElementArray(bundle.build());
     expect(elements.length).to.equal(1);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    expect(meta).to.deep.equal({
-      id: 'test-bundle',
-      createTime: new Timestamp(0, 0).toProto().timestampValue,
-      version: 1,
-      totalDocuments: 0,
-      totalBytes: 0,
-    });
+    verifyMetadata(
+      meta!,
+      new Timestamp(0, 0).toProto().timestampValue!,
+      0,
+      true
+    );
   });
 });

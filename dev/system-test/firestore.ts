@@ -35,7 +35,7 @@ import {
   WriteResult,
 } from '../src';
 import {autoId, Deferred} from '../src/util';
-import {verifyMetadata} from '../test/bundle';
+import {TEST_BUNDLE_ID, verifyMetadata} from '../test/bundle';
 import {
   bundleToElementArray,
   Post,
@@ -2408,7 +2408,7 @@ describe('Bundle building', () => {
   afterEach(() => verifyInstance(firestore));
 
   it('succeeds when there are no results', async () => {
-    const bundle = firestore._bundle('test-bundle');
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
     const query = testCol.where('sort', '==', 5);
     const snap = await query.get();
 
@@ -2417,12 +2417,7 @@ describe('Bundle building', () => {
     const elements = await bundleToElementArray(bundle.build());
 
     const meta = (elements[0] as IBundleElement).metadata;
-    verifyMetadata(meta!, {
-      id: 'test-bundle',
-      createTime: snap.readTime.toProto().timestampValue,
-      version: 1,
-      totalDocuments: 0,
-    });
+    verifyMetadata(meta!, snap.readTime.toProto().timestampValue!, 0);
 
     const namedQuery = (elements[1] as IBundleElement).namedQuery;
     // Verify saved query.
@@ -2442,7 +2437,7 @@ describe('Bundle building', () => {
   });
 
   it('succeeds when added document does not exist', async () => {
-    const bundle = firestore._bundle('test-bundle');
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
     const snap = await testCol.doc('doc5-not-exist').get();
 
     bundle.add(snap);
@@ -2451,12 +2446,7 @@ describe('Bundle building', () => {
     expect(elements.length).to.equal(2);
 
     const meta = (elements[0] as IBundleElement).metadata;
-    verifyMetadata(meta!, {
-      id: 'test-bundle',
-      createTime: snap.readTime.toProto().timestampValue,
-      version: 1,
-      totalDocuments: 1,
-    });
+    verifyMetadata(meta!, snap.readTime.toProto().timestampValue!, 1);
 
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
     expect(docMeta).to.deep.equal({
@@ -2467,7 +2457,7 @@ describe('Bundle building', () => {
   });
 
   it('succeeds to save limit and limitToLast queries', async () => {
-    const bundle = firestore._bundle('test-bundle');
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
     const limitQuery = testCol.orderBy('sort', 'desc').limit(1);
     const limitSnap = await limitQuery.get();
     const limitToLastQuery = testCol.orderBy('sort', 'asc').limitToLast(1);
@@ -2479,12 +2469,11 @@ describe('Bundle building', () => {
     const elements = await bundleToElementArray(await bundle.build());
 
     const meta = (elements[0] as IBundleElement).metadata;
-    verifyMetadata(meta!, {
-      id: 'test-bundle',
-      createTime: limitToLastSnap.readTime.toProto().timestampValue,
-      version: 1,
-      totalDocuments: 1,
-    });
+    verifyMetadata(
+      meta!,
+      limitToLastSnap.readTime.toProto().timestampValue!,
+      1
+    );
 
     let namedQuery1 = (elements[1] as IBundleElement).namedQuery;
     let namedQuery2 = (elements[2] as IBundleElement).namedQuery;
