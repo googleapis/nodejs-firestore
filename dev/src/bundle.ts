@@ -134,15 +134,6 @@ export class BundleBuilder {
 
   build(): Buffer {
     let bundleBuffer = Buffer.alloc(0);
-    const metadata: firestore.IBundleMetadata = {
-      id: this.bundleId,
-      createTime: this.latestReadTime.toProto().timestampValue,
-      version: BUNDLE_VERSION,
-    };
-    bundleBuffer = Buffer.concat([
-      bundleBuffer,
-      this.elementToLengthPrefixedBuffer({metadata}),
-    ]);
 
     for (const namedQuery of this.namedQueries.values()) {
       bundleBuffer = Buffer.concat([
@@ -168,6 +159,19 @@ export class BundleBuilder {
         ]);
       }
     }
+
+    const metadata: firestore.IBundleMetadata = {
+      id: this.bundleId,
+      createTime: this.latestReadTime.toProto().timestampValue,
+      version: BUNDLE_VERSION,
+      totalDocuments: this.documents.size,
+      totalBytes: bundleBuffer.length,
+    };
+    // Prepends the metadata element to the bundleBuffer: `bundleBuffer` is the second argument to `Buffer.concat`.
+    bundleBuffer = Buffer.concat([
+      this.elementToLengthPrefixedBuffer({metadata}),
+      bundleBuffer,
+    ]);
     return bundleBuffer;
   }
 }

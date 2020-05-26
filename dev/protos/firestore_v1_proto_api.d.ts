@@ -198,6 +198,12 @@ export namespace firestore {
 
         /** BundleMetadata version */
         version?: (number|null);
+
+        /** BundleMetadata totalDocuments */
+        totalDocuments?: (number|null);
+
+        /** BundleMetadata totalBytes */
+        totalBytes?: (number|string|null);
     }
 
     /** Represents a BundleMetadata. */
@@ -217,6 +223,12 @@ export namespace firestore {
 
         /** BundleMetadata version. */
         public version: number;
+
+        /** BundleMetadata totalDocuments. */
+        public totalDocuments: number;
+
+        /** BundleMetadata totalBytes. */
+        public totalBytes: (number|string);
 
         /**
          * Creates a BundleMetadata message from a plain object. Also converts values to their respective internal types.
