@@ -944,6 +944,9 @@ declare namespace FirebaseFirestore {
      * specify a list of field paths to return, or use an empty list to only
      * return the references of matching documents.
      *
+     * Queries that contain field masks cannot be listened to via `onSnapshot()`
+     * listeners.
+     *
      * This function returns a new (immutable) instance of the Query (rather
      * than modify the existing instance) to impose the field mask.
      *
