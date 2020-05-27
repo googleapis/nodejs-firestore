@@ -48,7 +48,7 @@ import {
   UpdateData,
   WhereFilterOp,
 } from './types';
-import {autoId, requestTag} from './util';
+import {autoId, requestTag, wrapError} from './util';
 import {
   invalidArgumentMessage,
   validateEnumValue,
@@ -1811,12 +1811,15 @@ export class Query<T = DocumentData> {
   _get(transactionId?: Uint8Array): Promise<QuerySnapshot<T>> {
     const docs: Array<QueryDocumentSnapshot<T>> = [];
 
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
 
       this._stream(transactionId)
         .on('error', err => {
-          reject(err);
+          reject(wrapError(err, stack));
         })
         .on('data', result => {
           readTime = result.readTime;
