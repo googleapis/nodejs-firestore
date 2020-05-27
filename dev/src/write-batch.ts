@@ -37,7 +37,7 @@ import {
   UpdateMap,
 } from './types';
 import {DocumentData} from './types';
-import {isObject, isPlainObject, requestTag} from './util';
+import {isObject, isPlainObject, requestTag, wrapError} from './util';
 import {
   customObjectMessage,
   invalidArgumentMessage,
@@ -532,7 +532,12 @@ export class WriteBatch {
    * });
    */
   commit(): Promise<WriteResult[]> {
-    return this.commit_();
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    return this.commit_().catch(err => {
+      throw wrapError(err, stack);
+    });
   }
 
   /**
