@@ -58,7 +58,7 @@ export class RateLimiter {
    * Tries to make the number of operations. Returns true if the request
    * succeeded and false otherwise.
    *
-   * @param requestTimeMillis The date used to calculate the number of available
+   * @param requestTimeMillis The time used to calculate the number of available
    * tokens. Used for testing the limiter.
    * @private
    */
@@ -80,7 +80,7 @@ export class RateLimiter {
    * capacity. Returns -1 if the request is not possible with the current
    * capacity.
    *
-   * @param requestTimeMillis The date used to calculate the number of available
+   * @param requestTimeMillis The time used to calculate the number of available
    * tokens. Used for testing the limiter.
    * @private
    */
@@ -106,7 +106,7 @@ export class RateLimiter {
    * Refills the number of available tokens based on how much time has elapsed
    * since the last time the tokens were refilled.
    *
-   * @param requestTimeMillis The date used to calculate the number of available
+   * @param requestTimeMillis The time used to calculate the number of available
    * tokens. Used for testing the limiter.
    * @private
    */
