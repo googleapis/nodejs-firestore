@@ -72,7 +72,7 @@ describe('RateLimiter', () => {
     expect(limiter.getNextRequestDelayMs(500, timestamp)).to.equal(0);
 
     // Should factor in remaining tokens when calculating the time.
-    expect(limiter.tryMakeRequest(250, timestamp));
+    expect(limiter.tryMakeRequest(250, timestamp)).to.be.true;
     expect(limiter.getNextRequestDelayMs(500, timestamp)).to.equal(500);
 
     // Once tokens have been used, should calculate time before next request.
