@@ -110,7 +110,7 @@ export class RateLimiter {
    * tokens. Used for testing the limiter.
    * @private
    */
-  private refillTokens(requestTimeMillis = Date.now()): void {
+  private refillTokens(requestTimeMillis: number): void {
     if (requestTimeMillis >= this.lastRefillTimeMillis) {
       const elapsedTime = requestTimeMillis - this.lastRefillTimeMillis;
       const capacity = this.calculateCapacity(requestTimeMillis);
