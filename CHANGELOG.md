@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.8.2](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.1...v3.8.2) (2020-05-30)
+
+
+### Bug Fixes
+
+* **settings:** authenticate using fake bearer token when ssl is false ([#1095](https://www.github.com/googleapis/nodejs-firestore/issues/1095)) ([a178556](https://www.github.com/googleapis/nodejs-firestore/commit/a17855634542bce798f1ffe50d72775647990616)), closes [/github.com/firebase/firebase-js-sdk/issues/3105#issuecomment-635541894](https://www.github.com/googleapis//github.com/firebase/firebase-js-sdk/issues/3105/issues/issuecomment-635541894)
+
 ### [3.8.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.0...v3.8.1) (2020-05-27)
 
 
