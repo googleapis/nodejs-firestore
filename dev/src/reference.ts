@@ -2265,8 +2265,15 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    * let documentRef = collectionRef.parent;
    * console.log(`Parent name: ${documentRef.path}`);
    */
-  get parent(): DocumentReference<DocumentData> {
-    return new DocumentReference(this.firestore, this._queryOptions.parentPath);
+  get parent(): DocumentReference<DocumentData> | null {
+    if (this._queryOptions.parentPath.isDocument) {
+      return new DocumentReference(
+        this.firestore,
+        this._queryOptions.parentPath
+      );
+    }
+
+    return null;
   }
 
   /**
