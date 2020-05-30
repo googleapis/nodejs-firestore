@@ -378,13 +378,6 @@ export class Firestore {
       delete emulatorSettings.servicePath;
       delete emulatorSettings.apiEndpoint;
 
-      // Manually merge the Authorization header to preserve user-provided headers
-      emulatorSettings.customHeaders = Object.assign(
-        {},
-        emulatorSettings.customHeaders,
-        {Authorization: 'Bearer owner'}
-      );
-
       this.validateAndApplySettings(emulatorSettings);
     } else {
       this.validateAndApplySettings({...settings, ...libraryHeader});
@@ -424,7 +417,21 @@ export class Firestore {
         if (this._settings.ssl === false) {
           const grpc = require('@grpc/grpc-js');
           const sslCreds = grpc.credentials.createInsecure();
-          client = new module.exports.v1({sslCreds, ...this._settings});
+
+          // Use user-provided headers, but provide an Authorization header by default
+          // so that connection is recognized as admin in Firestore Emulator. (If for
+          // some reason we're not connecting to the emulator, then this will result in
+          // denials with invalid token, rather than behave like clients not logged in.)
+          const customHeaders = {
+            Authorization: 'Bearer owner',
+            ...this._settings.customHeaders,
+          };
+
+          client = new module.exports.v1({
+            sslCreds,
+            ...this._settings,
+            customHeaders,
+          });
         } else {
           client = new module.exports.v1(this._settings);
         }
