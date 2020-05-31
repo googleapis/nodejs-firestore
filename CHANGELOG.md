@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.8.3](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.2...v3.8.3) (2020-05-31)
+
+
+### Bug Fixes
+
+* return null for 'parent' call on root collection ([#1099](https://www.github.com/googleapis/nodejs-firestore/issues/1099)) ([c5c0b15](https://www.github.com/googleapis/nodejs-firestore/commit/c5c0b157bf32466875ace690216a99371d31b461))
+
 ### [3.8.2](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.1...v3.8.2) (2020-05-30)
 
 
