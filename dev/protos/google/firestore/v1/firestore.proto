@@ -176,14 +176,6 @@ service Firestore {
       body: "document"
     };
   }
-
-  // Commit a batch of non-transactional writes.
-  rpc BatchWrite(BatchWriteRequest) returns (BatchWriteResponse) {
-    option (google.api.http) = {
-      post: "/v1beta1/{database=projects/*/databases/*}/documents:batchWrite"
-      body: "*"
-    };
-  }
 }
 
 // The request for [Firestore.GetDocument][google.firestore.v1.Firestore.GetDocument].
