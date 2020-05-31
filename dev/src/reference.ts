@@ -2256,7 +2256,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    * A reference to the containing Document if this is a subcollection, else
    * null.
    *
-   * @type {DocumentReference}
+   * @type {DocumentReference|null}
    * @name CollectionReference#parent
    * @readonly
    *
