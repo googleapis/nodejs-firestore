@@ -51,6 +51,7 @@ export interface Serializable {
  * @private
  */
 export class Serializer {
+  private allowUndefined: boolean;
   private createReference: (path: string) => DocumentReference;
   private createInteger: (n: number | string) => number | BigInt;
 
@@ -61,6 +62,7 @@ export class Serializer {
     this.createReference = path => firestore.doc(path);
     this.createInteger = n =>
       firestore._settings.useBigInt ? BigInt(n) : Number(n);
+    this.allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
   }
 
   /**
@@ -200,6 +202,10 @@ export class Serializer {
       return map;
     }
 
+    if (val === undefined && this.allowUndefined) {
+      return null;
+    }
+
     throw new Error(`Cannot encode value: ${val}`);
   }
 
@@ -283,7 +289,7 @@ export class Serializer {
  * @param path The field path to validate.
  * @param options Validation options
  * @param level The current depth of the traversal. This is used to decide
- * whether deletes are allowed in conjunction with `allowDeletes: root`.
+ * whether undefined values or deletes are allowed.
  * @param inArray Whether we are inside an array.
  * @throws when the object is invalid.
  */
@@ -335,12 +341,22 @@ export function validateUserInput(
       );
     }
   } else if (value === undefined) {
-    throw new Error(
-      `${invalidArgumentMessage(
-        arg,
-        desc
-      )} Cannot use "undefined" as a Firestore value${fieldPathMessage}.`
-    );
+    if (options.allowUndefined && level === 0) {
+      throw new Error(
+        `${invalidArgumentMessage(
+          arg,
+          desc
+        )} "undefined" values are only ignored in object properties.`
+      );
+    } else if (!options.allowUndefined) {
+      throw new Error(
+        `${invalidArgumentMessage(
+          arg,
+          desc
+        )} Cannot use "undefined" as a Firestore value${fieldPathMessage}. ` +
+          'If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
+      );
+    }
   } else if (value instanceof DeleteTransform) {
     if (inArray) {
       throw new Error(

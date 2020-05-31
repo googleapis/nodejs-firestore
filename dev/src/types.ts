@@ -227,6 +227,14 @@ export interface Settings {
    */
   useBigInt?: boolean;
 
+  /**
+   * Whether to skip nested properties that are set to `undefined` during
+   * object serialization. If set to `true`, these properties are skipped
+   * and not written to Firestore. If set `false` or omitted, the SDK throws
+   * an exception when it encounters properties of type `undefined`.
+   */
+  ignoreUndefinedProperties?: boolean;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any; // Accept other properties, such as GRPC settings.
 }
@@ -339,6 +347,21 @@ export interface ValidationOptions {
 
   /** Whether server transforms are supported. */
   allowTransforms: boolean;
+
+  /**
+   * Whether undefined values are allowed. Undefined values cannot appear at
+   * the root.
+   */
+  allowUndefined: boolean;
+}
+
+/**
+ * An options object that can be used to disable request throttling in
+ * BulkWriter.
+ */
+export interface BulkWriterOptions {
+  /** Whether to disable throttling. */
+  readonly disableThrottling?: boolean;
 }
 
 /**

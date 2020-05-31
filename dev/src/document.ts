@@ -970,7 +970,9 @@ export class DocumentTransform<T = DocumentData> {
    * @private
    */
   validate(): void {
-    this.transforms.forEach(transform => transform.validate());
+    const allowUndefined = !!this.ref.firestore._settings
+      .ignoreUndefinedProperties;
+    this.transforms.forEach(transform => transform.validate(allowUndefined));
   }
 
   /**

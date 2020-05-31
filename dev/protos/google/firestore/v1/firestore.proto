@@ -161,6 +161,14 @@ service Firestore {
     option (google.api.method_signature) = "parent";
   }
 
+  // Commit a batch of non-transactional writes.
+  rpc BatchWrite(BatchWriteRequest) returns (BatchWriteResponse) {
+    option (google.api.http) = {
+      post: "/v1beta1/{database=projects/*/databases/*}/documents:batchWrite"
+      body: "*"
+    };
+  }
+
   // Creates a new document.
   rpc CreateDocument(CreateDocumentRequest) returns (Document) {
     option (google.api.http) = {

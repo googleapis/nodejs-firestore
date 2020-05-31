@@ -34,7 +34,7 @@ import {
   UpdateMap,
 } from './types';
 import {DocumentData} from './types';
-import {isObject, isPlainObject, requestTag} from './util';
+import {isObject, isPlainObject, requestTag, wrapError} from './util';
 import {
   customObjectMessage,
   invalidArgumentMessage,
@@ -130,6 +130,7 @@ type PendingWriteOp = () => api.IWrite;
 export class WriteBatch {
   private readonly _firestore: Firestore;
   private readonly _serializer: Serializer;
+  private readonly _allowUndefined: boolean;
 
   /**
    * An array of write operations that are executed as part of the commit. The
@@ -148,6 +149,7 @@ export class WriteBatch {
   constructor(firestore: Firestore) {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
+    this._allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
   }
 
   /**
@@ -193,7 +195,12 @@ export class WriteBatch {
   create<T>(documentRef: DocumentReference<T>, data: T): WriteBatch {
     validateDocumentReference('documentRef', documentRef);
     const firestoreData = documentRef._converter.toFirestore(data);
-    validateDocumentData('data', firestoreData, /* allowDeletes= */ false);
+    validateDocumentData(
+      'data',
+      firestoreData,
+      /* allowDeletes= */ false,
+      this._allowUndefined
+    );
 
     this.verifyNotCommitted();
 
@@ -328,7 +335,8 @@ export class WriteBatch {
     validateDocumentData(
       'data',
       firestoreData,
-      /* allowDeletes= */ !!(mergePaths || mergeLeaves)
+      /* allowDeletes= */ !!(mergePaths || mergeLeaves),
+      this._allowUndefined
     );
 
     this.verifyNotCommitted();
@@ -449,6 +457,7 @@ export class WriteBatch {
             validateFieldValue(
               i + argumentOffset,
               fieldOrValues[i + 1],
+              this._allowUndefined,
               fieldPath
             );
             updateMap.set(fieldPath, fieldOrValues[i + 1]);
@@ -462,7 +471,7 @@ export class WriteBatch {
       }
     } else {
       try {
-        validateUpdateMap('dataOrField', dataOrField);
+        validateUpdateMap('dataOrField', dataOrField, this._allowUndefined);
         // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
@@ -537,7 +546,12 @@ export class WriteBatch {
    * });
    */
   commit(): Promise<WriteResult[]> {
-    return this.commit_();
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    return this.commit_().catch(err => {
+      throw wrapError(err, stack);
+    });
   }
 
   /**
@@ -853,29 +867,24 @@ export function validateSetOptions(
  * @param arg The argument name or argument index (for varargs methods).
  * @param obj JavaScript object to validate.
  * @param allowDeletes Whether to allow FieldValue.delete() sentinels.
+ * @param allowUndefined Whether to allow nested properties that are `undefined`.
  * @throws when the object is invalid.
  */
 export function validateDocumentData(
   arg: string | number,
   obj: unknown,
-  allowDeletes: boolean
+  allowDeletes: boolean,
+  allowUndefined: boolean
 ): void {
   if (!isPlainObject(obj)) {
     throw new Error(customObjectMessage(arg, obj));
   }
 
-  for (const prop of Object.keys(obj)) {
-    validateUserInput(
-      arg,
-      obj[prop],
-      'Firestore document',
-      {
-        allowDeletes: allowDeletes ? 'all' : 'none',
-        allowTransforms: true,
-      },
-      new FieldPath(prop)
-    );
-  }
+  validateUserInput(arg, obj, 'Firestore document', {
+    allowDeletes: allowDeletes ? 'all' : 'none',
+    allowTransforms: true,
+    allowUndefined,
+  });
 }
 
 /**
@@ -884,18 +893,20 @@ export function validateDocumentData(
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param val The value to verify.
+ * @param allowUndefined Whether to allow nested properties that are `undefined`.
  * @param path The path to show in the error message.
  */
 export function validateFieldValue(
   arg: string | number,
   val: unknown,
+  allowUndefined: boolean,
   path?: FieldPath
 ): void {
   validateUserInput(
     arg,
     val,
     'Firestore value',
-    {allowDeletes: 'root', allowTransforms: true},
+    {allowDeletes: 'root', allowTransforms: true, allowUndefined},
     path
   );
 }
@@ -936,9 +947,14 @@ function validateNoConflictingFields(
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param obj JavaScript object to validate.
+ * @param allowUndefined Whether to allow nested properties that are `undefined`.
  * @throws when the object is invalid.
  */
-function validateUpdateMap(arg: string | number, obj: unknown): void {
+function validateUpdateMap(
+  arg: string | number,
+  obj: unknown,
+  allowUndefined: boolean
+): void {
   if (!isPlainObject(obj)) {
     throw new Error(customObjectMessage(arg, obj));
   }
@@ -947,7 +963,7 @@ function validateUpdateMap(arg: string | number, obj: unknown): void {
   if (obj) {
     for (const prop of Object.keys(obj)) {
       isEmpty = false;
-      validateFieldValue(arg, obj[prop], new FieldPath(prop));
+      validateFieldValue(arg, obj[prop], allowUndefined, new FieldPath(prop));
     }
   }
 

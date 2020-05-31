@@ -21,7 +21,7 @@ import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {Precondition, SetOptions, UpdateData} from './types';
-import {Deferred} from './util';
+import {Deferred, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
 /*!
@@ -200,7 +200,13 @@ class BulkCommitBatch {
       'The batch should be marked as READY_TO_SEND before committing'
     );
     this.state = BatchState.SENT;
-    return this.writeBatch.bulkCommit();
+
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    return this.writeBatch.bulkCommit().catch(err => {
+      throw wrapError(err, stack);
+    });
   }
 
   /**
@@ -269,6 +275,7 @@ export class BulkWriter {
     enableThrottling: boolean
   ) {
     this.firestore.incrementBulkWritersCount();
+
     if (enableThrottling) {
       this.rateLimiter = new RateLimiter(
         STARTING_MAXIMUM_OPS_PER_SECOND,

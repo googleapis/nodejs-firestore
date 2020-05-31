@@ -157,6 +157,14 @@ declare namespace FirebaseFirestore {
      */
     useBigInt?: boolean;
 
+    /**
+     * Whether to skip nested properties that are set to `undefined` during
+     * object serialization. If set to `true`, these properties are skipped
+     * and not written to Firestore. If set `false` or omitted, the SDK throws
+     * an exception when it encounters properties of type `undefined`.
+     */
+    ignoreUndefinedProperties?: boolean;
+
     [key: string]: any; // Accept other properties, such as GRPC settings.
   }
 
@@ -997,6 +1005,9 @@ declare namespace FirebaseFirestore {
      * the result and returns only the specified subset of fields. You can
      * specify a list of field paths to return, or use an empty list to only
      * return the references of matching documents.
+     *
+     * Queries that contain field masks cannot be listened to via `onSnapshot()`
+     * listeners.
      *
      * This function returns a new (immutable) instance of the Query (rather
      * than modify the existing instance) to impose the field mask.

@@ -4,6 +4,35 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.8.2](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.1...v3.8.2) (2020-05-30)
+
+
+### Bug Fixes
+
+* authenticate as admin user when ssl:false is set ([#1095](https://www.github.com/googleapis/nodejs-firestore/issues/1095)) ([a178556](https://www.github.com/googleapis/nodejs-firestore/commit/a17855634542bce798f1ffe50d72775647990616)), closes [/github.com/firebase/firebase-js-sdk/issues/3105#issuecomment-635541894](https://www.github.com/googleapis//github.com/firebase/firebase-js-sdk/issues/3105/issues/issuecomment-635541894)
+
+### [3.8.1](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.0...v3.8.1) (2020-05-27)
+
+
+### Bug Fixes
+
+* Add tests to check fields used in whereIn should be equality filters ([#1081](https://www.github.com/googleapis/nodejs-firestore/issues/1081)) ([3153dd2](https://www.github.com/googleapis/nodejs-firestore/commit/3153dd296891a983b3a0e78354df3fe106ad44a2))
+* capture error stacks across async calls ([#1088](https://www.github.com/googleapis/nodejs-firestore/issues/1088)) ([7acdd7e](https://www.github.com/googleapis/nodejs-firestore/commit/7acdd7e9e0877fd6dbb50539a0a3c1537d30904a))
+
+## [3.8.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.5...v3.8.0) (2020-05-13)
+
+
+### Features
+
+* add ignoreUndefinedProperties option ([#1062](https://www.github.com/googleapis/nodejs-firestore/issues/1062)) ([de733c8](https://www.github.com/googleapis/nodejs-firestore/commit/de733c821152a32893e7fccf30cdf96a2f8050eb))
+
+
+### Bug Fixes
+
+* prepare sources for BulkWriter ([#1051](https://www.github.com/googleapis/nodejs-firestore/issues/1051)) ([8c52d47](https://www.github.com/googleapis/nodejs-firestore/commit/8c52d475ae486e2998220947a0b0441d4a95ab49))
+* allow running source with ts-node ([#1074](https://www.github.com/googleapis/nodejs-firestore/issues/1074)) ([f66a089](https://www.github.com/googleapis/nodejs-firestore/commit/f66a08978f11915d8662f964867a966ff75f6e96))
+* remove type dependency on Moment ([#1063](https://www.github.com/googleapis/nodejs-firestore/issues/1063)) ([30008b0](https://www.github.com/googleapis/nodejs-firestore/commit/30008b093a9872e34a83209e94de3dca09e89fe7))
+
 ### [3.7.5](https://www.github.com/googleapis/nodejs-firestore/compare/v3.7.4...v3.7.5) (2020-04-25)
 
 

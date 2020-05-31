@@ -52,7 +52,13 @@ import {
   Settings,
   UnaryMethod,
 } from './types';
-import {autoId, Deferred, isPermanentRpcError, requestTag} from './util';
+import {
+  autoId,
+  Deferred,
+  isPermanentRpcError,
+  requestTag,
+  wrapError,
+} from './util';
 import {
   validateBoolean,
   validateFunction,
@@ -434,13 +440,6 @@ export class Firestore {
       delete emulatorSettings.servicePath;
       delete emulatorSettings.apiEndpoint;
 
-      // Manually merge the Authorization header to preserve user-provided headers
-      emulatorSettings.customHeaders = Object.assign(
-        {},
-        emulatorSettings.customHeaders,
-        {Authorization: 'Bearer owner'}
-      );
-
       this.validateAndApplySettings(emulatorSettings);
     } else {
       this.validateAndApplySettings({...settings, ...libraryHeader});
@@ -480,7 +479,21 @@ export class Firestore {
         if (this._settings.ssl === false) {
           const grpcModule = this._settings.grpc ?? grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
-          client = new module.exports.v1({sslCreds, ...this._settings});
+
+          // Use user-provided headers, but provide an Authorization header by default
+          // so that connection is recognized as admin in Firestore Emulator. (If for
+          // some reason we're not connecting to the emulator, then this will result in
+          // denials with invalid token, rather than behave like clients not logged in.)
+          const customHeaders = {
+            Authorization: 'Bearer owner',
+            ...this._settings.customHeaders,
+          };
+
+          client = new module.exports.v1({
+            sslCreds,
+            ...this._settings,
+            customHeaders,
+          });
         } else {
           client = new module.exports.v1(this._settings);
         }
@@ -982,9 +995,15 @@ export class Firestore {
       documentRefsOrReadOptions
     );
     const tag = requestTag();
-    return this.initializeIfNeeded(tag).then(() =>
-      this.getAll_(documents, fieldMask, tag)
-    );
+
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
+    return this.initializeIfNeeded(tag)
+      .then(() => this.getAll_(documents, fieldMask, tag))
+      .catch(err => {
+        throw wrapError(err, stack);
+      });
   }
 
   /**

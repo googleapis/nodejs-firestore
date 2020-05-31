@@ -436,6 +436,8 @@
              * @property {string|null} [id] BundleMetadata id
              * @property {google.protobuf.ITimestamp|null} [createTime] BundleMetadata createTime
              * @property {number|null} [version] BundleMetadata version
+             * @property {number|null} [totalDocuments] BundleMetadata totalDocuments
+             * @property {number|string|null} [totalBytes] BundleMetadata totalBytes
              */
     
             /**
@@ -478,6 +480,22 @@
             BundleMetadata.prototype.version = 0;
     
             /**
+             * BundleMetadata totalDocuments.
+             * @member {number} totalDocuments
+             * @memberof firestore.BundleMetadata
+             * @instance
+             */
+            BundleMetadata.prototype.totalDocuments = 0;
+    
+            /**
+             * BundleMetadata totalBytes.
+             * @member {number|string} totalBytes
+             * @memberof firestore.BundleMetadata
+             * @instance
+             */
+            BundleMetadata.prototype.totalBytes = $util.Long ? $util.Long.fromBits(0,0,true) : 0;
+    
+            /**
              * Creates a BundleMetadata message from a plain object. Also converts values to their respective internal types.
              * @function fromObject
              * @memberof firestore.BundleMetadata
@@ -498,6 +516,17 @@
                 }
                 if (object.version != null)
                     message.version = object.version >>> 0;
+                if (object.totalDocuments != null)
+                    message.totalDocuments = object.totalDocuments >>> 0;
+                if (object.totalBytes != null)
+                    if ($util.Long)
+                        (message.totalBytes = $util.Long.fromValue(object.totalBytes)).unsigned = true;
+                    else if (typeof object.totalBytes === "string")
+                        message.totalBytes = parseInt(object.totalBytes, 10);
+                    else if (typeof object.totalBytes === "number")
+                        message.totalBytes = object.totalBytes;
+                    else if (typeof object.totalBytes === "object")
+                        message.totalBytes = new $util.LongBits(object.totalBytes.low >>> 0, object.totalBytes.high >>> 0).toNumber(true);
                 return message;
             };
     
@@ -518,6 +547,12 @@
                     object.id = "";
                     object.createTime = null;
                     object.version = 0;
+                    object.totalDocuments = 0;
+                    if ($util.Long) {
+                        var long = new $util.Long(0, 0, true);
+                        object.totalBytes = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                    } else
+                        object.totalBytes = options.longs === String ? "0" : 0;
                 }
                 if (message.id != null && message.hasOwnProperty("id"))
                     object.id = message.id;
@@ -525,6 +560,13 @@
                     object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
                 if (message.version != null && message.hasOwnProperty("version"))
                     object.version = message.version;
+                if (message.totalDocuments != null && message.hasOwnProperty("totalDocuments"))
+                    object.totalDocuments = message.totalDocuments;
+                if (message.totalBytes != null && message.hasOwnProperty("totalBytes"))
+                    if (typeof message.totalBytes === "number")
+                        object.totalBytes = options.longs === String ? String(message.totalBytes) : message.totalBytes;
+                    else
+                        object.totalBytes = options.longs === String ? $util.Long.prototype.toString.call(message.totalBytes) : options.longs === Number ? new $util.LongBits(message.totalBytes.low >>> 0, message.totalBytes.high >>> 0).toNumber(true) : message.totalBytes;
                 return object;
             };
     

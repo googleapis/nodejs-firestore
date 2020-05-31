@@ -227,8 +227,12 @@ export abstract class FieldTransform extends FieldValue {
   /** The method name used to obtain the field transform. */
   abstract get methodName(): string;
 
-  /** Performs input validation on the values of this field transform. */
-  abstract validate(): void;
+  /**
+   * Performs input validation on the values of this field transform.
+   *
+   * @param allowUndefined Whether to allow nested properties that are `undefined`.
+   */
+  abstract validate(allowUndefined: boolean): void;
 
   /***
    * The proto representation for this field transform.
@@ -423,9 +427,9 @@ class ArrayUnionTransform extends FieldTransform {
     return 'FieldValue.arrayUnion';
   }
 
-  validate(): void {
+  validate(allowUndefined: boolean): void {
     for (let i = 0; i < this.elements.length; ++i) {
-      validateArrayElement(i, this.elements[i]);
+      validateArrayElement(i, this.elements[i], allowUndefined);
     }
   }
 
@@ -479,9 +483,9 @@ class ArrayRemoveTransform extends FieldTransform {
     return 'FieldValue.arrayRemove';
   }
 
-  validate(): void {
+  validate(allowUndefined: boolean): void {
     for (let i = 0; i < this.elements.length; ++i) {
-      validateArrayElement(i, this.elements[i]);
+      validateArrayElement(i, this.elements[i], allowUndefined);
     }
   }
 
@@ -513,8 +517,13 @@ class ArrayRemoveTransform extends FieldTransform {
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The value to validate.
+ * @param allowUndefined Whether to allow nested properties that are `undefined`.
  */
-function validateArrayElement(arg: string | number, value: unknown): void {
+function validateArrayElement(
+  arg: string | number,
+  value: unknown,
+  allowUndefined: boolean
+): void {
   if (Array.isArray(value)) {
     throw new Error(
       `${invalidArgumentMessage(
@@ -527,7 +536,7 @@ function validateArrayElement(arg: string | number, value: unknown): void {
     arg,
     value,
     'array element',
-    /*path=*/ {allowDeletes: 'none', allowTransforms: false},
+    /*path=*/ {allowDeletes: 'none', allowTransforms: false, allowUndefined},
     /*path=*/ undefined,
     /*level=*/ 0,
     /*inArray=*/ true

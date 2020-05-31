@@ -71,7 +71,7 @@ function snapshot(
   });
 }
 
-function fieldFilters(
+export function fieldFilters(
   fieldPath: string,
   op: api.StructuredQuery.FieldFilter.Operator,
   value: string | api.IValue,
@@ -167,7 +167,7 @@ function unaryFilters(
   }
 }
 
-function orderBy(
+export function orderBy(
   fieldPath: string,
   direction: api.StructuredQuery.Direction,
   ...fieldPathAndOrderBys: Array<string | api.StructuredQuery.Direction>
@@ -222,7 +222,7 @@ function select(...fields: string[]): api.IStructuredQuery {
   return {select};
 }
 
-function startAt(
+export function startAt(
   before: boolean,
   ...values: Array<string | api.IValue>
 ): api.IStructuredQuery {
@@ -272,7 +272,7 @@ function endAt(
   return {endAt: cursor};
 }
 
-function queryEquals(
+export function queryEquals(
   actual: api.IRunQueryRequest | undefined,
   ...protoComponents: api.IStructuredQuery[]
 ) {
@@ -907,6 +907,41 @@ describe('where() interface', () => {
         'foo',
         collection.doc('bar'),
       ]);
+      return query.get();
+    });
+  });
+
+  it('Fields of IN queries are not used in implicit order by', async () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          fieldFilters('foo', 'IN', {
+            arrayValue: {
+              values: [
+                {
+                  stringValue: 'bar',
+                },
+              ],
+            },
+          }),
+          orderBy('__name__', 'ASCENDING'),
+          startAt(true, {
+            referenceValue:
+              `projects/${PROJECT_ID}/databases/(default)/` +
+              'documents/collectionId/doc1',
+          })
+        );
+
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const collection = firestore.collection('collectionId');
+      const query = collection
+        .where('foo', 'in', ['bar'])
+        .startAt(await snapshot('collectionId/doc1', {}));
       return query.get();
     });
   });

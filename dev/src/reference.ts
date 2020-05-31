@@ -47,7 +47,7 @@ import {
   UpdateData,
   WhereFilterOp,
 } from './types';
-import {autoId, requestTag} from './util';
+import {autoId, requestTag, wrapError} from './util';
 import {
   invalidArgumentMessage,
   validateEnumValue,
@@ -1086,6 +1086,7 @@ export class QueryOptions<T> {
  */
 export class Query<T = DocumentData> {
   private readonly _serializer: Serializer;
+  protected readonly _allowUndefined: boolean;
 
   /**
    * @hideconstructor
@@ -1098,6 +1099,8 @@ export class Query<T = DocumentData> {
     protected readonly _queryOptions: QueryOptions<T>
   ) {
     this._serializer = new Serializer(_firestore);
+    this._allowUndefined = !!this._firestore._settings
+      .ignoreUndefinedProperties;
   }
 
   /**
@@ -1206,7 +1209,7 @@ export class Query<T = DocumentData> {
   ): Query<T> {
     validateFieldPath('fieldPath', fieldPath);
     opStr = validateQueryOperator('opStr', opStr, value);
-    validateQueryValue('value', value);
+    validateQueryValue('value', value, this._allowUndefined);
 
     if (this._queryOptions.startAt || this._queryOptions.endAt) {
       throw new Error(
@@ -1255,6 +1258,9 @@ export class Query<T = DocumentData> {
    * field mask to the result and returns only the specified subset of fields.
    * You can specify a list of field paths to return, or use an empty list to
    * only return the references of matching documents.
+   *
+   * Queries that contain field masks cannot be listened to via `onSnapshot()`
+   * listeners.
    *
    * This function returns a new (immutable) instance of the Query (rather than
    * modify the existing instance) to impose the field mask.
@@ -1528,7 +1534,7 @@ export class Query<T = DocumentData> {
         fieldValue = this.validateReference(fieldValue);
       }
 
-      validateQueryValue(i, fieldValue);
+      validateQueryValue(i, fieldValue, this._allowUndefined);
       options.values!.push(fieldValue);
     }
 
@@ -1799,12 +1805,15 @@ export class Query<T = DocumentData> {
   _get(transactionId?: Uint8Array): Promise<QuerySnapshot<T>> {
     const docs: Array<QueryDocumentSnapshot<T>> = [];
 
+    // Capture the error stack to preserve stack tracing across async calls.
+    const stack = Error().stack!;
+
     return new Promise((resolve, reject) => {
       let readTime: Timestamp;
 
       this._stream(transactionId)
         .on('error', err => {
-          reject(err);
+          reject(wrapError(err, stack));
         })
         .on('data', result => {
           readTime = result.readTime;
@@ -2421,7 +2430,12 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    */
   add(data: T): Promise<DocumentReference<T>> {
     const firestoreData = this._queryOptions.converter.toFirestore(data);
-    validateDocumentData('data', firestoreData, /*allowDeletes=*/ false);
+    validateDocumentData(
+      'data',
+      firestoreData,
+      /*allowDeletes=*/ false,
+      this._allowUndefined
+    );
 
     const documentRef = this.doc();
     return documentRef.create(data).then(() => documentRef);
@@ -2575,11 +2589,17 @@ export function validateDocumentReference(
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The argument to validate.
+ * @param allowUndefined Whether to allow nested properties that are `undefined`.
  */
-function validateQueryValue(arg: string | number, value: unknown): void {
+function validateQueryValue(
+  arg: string | number,
+  value: unknown,
+  allowUndefined: boolean
+): void {
   validateUserInput(arg, value, 'query constraint', {
     allowDeletes: 'none',
     allowTransforms: false,
+    allowUndefined,
   });
 }
 
