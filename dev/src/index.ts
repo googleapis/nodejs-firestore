@@ -418,19 +418,9 @@ export class Firestore {
           const grpc = require('@grpc/grpc-js');
           const sslCreds = grpc.credentials.createInsecure();
 
-          // Use user-provided headers, but provide an Authorization header by default
-          // so that connection is recognized as admin in Firestore Emulator. (If for
-          // some reason we're not connecting to the emulator, then this will result in
-          // denials with invalid token, rather than behave like clients not logged in.)
-          const customHeaders = {
-            Authorization: 'Bearer owner',
-            ...this._settings.customHeaders,
-          };
-
           client = new module.exports.v1({
             sslCreds,
             ...this._settings,
-            customHeaders,
           });
         } else {
           client = new module.exports.v1(this._settings);
@@ -1095,6 +1085,20 @@ export class Firestore {
    */
   async initializeIfNeeded(requestTag: string): Promise<void> {
     this._settingsFrozen = true;
+
+    if (this._settings.ssl === false) {
+      // If SSL is false, we assume that we are talking to the emulator. We
+      // provide an Authorization header by default so that the connection is
+      // recognized as admin in Firestore Emulator. (If for some reason we're
+      // not connecting to the emulator, then this will result in denials with
+      // invalid token, rather than behave like clients not logged in. The user
+      // can then provide their own Authorization header, which will take
+      // precedence).
+      this._settings.customHeaders = {
+        Authorization: 'Bearer owner',
+        ...this._settings.customHeaders,
+      };
+    }
 
     if (this._projectId === undefined) {
       try {
