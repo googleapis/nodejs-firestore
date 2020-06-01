@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.8.4](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.3...v3.8.4) (2020-06-01)
+
+
+### Bug Fixes
+
+* send Authentication header with every emulator request ([#1105](https://www.github.com/googleapis/nodejs-firestore/issues/1105)) ([83f617c](https://www.github.com/googleapis/nodejs-firestore/commit/83f617c753dbcad58eb91be585fd9fcb10480099))
+
 ### [3.8.3](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.2...v3.8.3) (2020-05-31)
 
 
