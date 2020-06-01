@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import * as deepEqual from 'fast-deep-equal';
 
 import * as proto from '../protos/firestore_v1_proto_api';
@@ -34,7 +36,7 @@ import api = proto.google.firestore.v1;
  *
  * @class
  */
-export class FieldValue {
+export class FieldValue implements firestore.FieldValue {
   /**
    * @hideconstructor
    */

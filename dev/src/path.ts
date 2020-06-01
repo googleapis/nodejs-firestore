@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {google} from '../protos/firestore_v1_proto_api';
 
 import {isObject} from './util';
@@ -494,7 +496,7 @@ export function validateResourcePath(
  *
  * @class
  */
-export class FieldPath extends Path<FieldPath> {
+export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
   /**
    * A special sentinel value to refer to the ID of a document.
    *
@@ -556,12 +558,12 @@ export class FieldPath extends Path<FieldPath> {
    * @param {string|FieldPath} fieldPath The FieldPath to create.
    * @returns {FieldPath} A field path representation.
    */
-  static fromArgument(fieldPath: string | FieldPath): FieldPath {
+  static fromArgument(fieldPath: string | firestore.FieldPath): FieldPath {
     // validateFieldPath() is used in all public API entry points to validate
     // that fromArgument() is only called with a Field Path or a string.
     return fieldPath instanceof FieldPath
       ? fieldPath
-      : new FieldPath(...fieldPath.split('.'));
+      : new FieldPath(...(fieldPath as string).split('.'));
   }
 
   /**

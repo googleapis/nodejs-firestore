@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {google} from '../protos/firestore_v1_proto_api';
 import {
   DocumentMask,
@@ -24,16 +26,10 @@ import {
 import {Firestore} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
-import {DocumentReference, validateDocumentReference} from './reference';
+import {validateDocumentReference} from './reference';
 import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
-import {
-  Precondition as PublicPrecondition,
-  SetOptions,
-  UpdateData,
-  UpdateMap,
-} from './types';
-import {DocumentData} from './types';
+import {UpdateMap} from './types';
 import {isObject, isPlainObject, requestTag, wrapError} from './util';
 import {
   customObjectMessage,
@@ -60,7 +56,7 @@ const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
  *
  * @class
  */
-export class WriteResult {
+export class WriteResult implements firestore.WriteResult {
   /**
    * @hideconstructor
    *
@@ -92,7 +88,7 @@ export class WriteResult {
    * @param {*} other The value to compare against.
    * @return true if this `WriteResult` is equal to the provided value.
    */
-  isEqual(other: WriteResult): boolean {
+  isEqual(other: firestore.WriteResult): boolean {
     return (
       this === other ||
       (other instanceof WriteResult &&
@@ -127,7 +123,7 @@ type PendingWriteOp = () => api.IWrite;
  *
  * @class
  */
-export class WriteBatch {
+export class WriteBatch implements firestore.WriteBatch {
   private readonly _firestore: Firestore;
   private readonly _serializer: Serializer;
   private readonly _allowUndefined: boolean;
@@ -192,9 +188,9 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  create<T>(documentRef: DocumentReference<T>, data: T): WriteBatch {
-    validateDocumentReference('documentRef', documentRef);
-    const firestoreData = documentRef._converter.toFirestore(data);
+  create<T>(documentRef: firestore.DocumentReference<T>, data: T): WriteBatch {
+    const ref = validateDocumentReference('documentRef', documentRef);
+    const firestoreData = ref._converter.toFirestore(data);
     validateDocumentData(
       'data',
       firestoreData,
@@ -204,13 +200,13 @@ export class WriteBatch {
 
     this.verifyNotCommitted();
 
-    const transform = DocumentTransform.fromObject(documentRef, firestoreData);
+    const transform = DocumentTransform.fromObject(ref, firestoreData);
     transform.validate();
 
     const precondition = new Precondition({exists: false});
 
     const op: PendingWriteOp = () => {
-      const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
+      const document = DocumentSnapshot.fromObject(ref, firestoreData);
       const write = document.toWriteProto();
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);
@@ -248,10 +244,10 @@ export class WriteBatch {
    * });
    */
   delete<T>(
-    documentRef: DocumentReference<T>,
-    precondition?: PublicPrecondition
+    documentRef: firestore.DocumentReference<T>,
+    precondition?: firestore.Precondition
   ): WriteBatch {
-    validateDocumentReference('documentRef', documentRef);
+    const ref = validateDocumentReference('documentRef', documentRef);
     validateDeletePrecondition('precondition', precondition, {optional: true});
 
     this.verifyNotCommitted();
@@ -259,7 +255,7 @@ export class WriteBatch {
     const conditions = new Precondition(precondition);
 
     const op: PendingWriteOp = () => {
-      const write: api.IWrite = {delete: documentRef.formattedName};
+      const write: api.IWrite = {delete: ref.formattedName};
       if (!conditions.isEmpty) {
         write.currentDocument = conditions.toProto();
       }
@@ -272,15 +268,15 @@ export class WriteBatch {
   }
 
   set<T>(
-    documentRef: DocumentReference<T>,
+    documentRef: firestore.DocumentReference<T>,
     data: Partial<T>,
-    options: SetOptions
+    options: firestore.SetOptions
   ): WriteBatch;
-  set<T>(documentRef: DocumentReference<T>, data: T): WriteBatch;
+  set<T>(documentRef: firestore.DocumentReference<T>, data: T): WriteBatch;
   set<T>(
-    documentRef: DocumentReference<T>,
+    documentRef: firestore.DocumentReference<T>,
     data: T | Partial<T>,
-    options?: SetOptions
+    options?: firestore.SetOptions
   ): WriteBatch;
   /**
    * Write to the document referred to by the provided
@@ -312,25 +308,22 @@ export class WriteBatch {
    * });
    */
   set<T>(
-    documentRef: DocumentReference<T>,
+    documentRef: firestore.DocumentReference<T>,
     data: T | Partial<T>,
-    options?: SetOptions
+    options?: firestore.SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
     const mergeLeaves = options && options.merge === true;
     const mergePaths = options && options.mergeFields;
-    validateDocumentReference('documentRef', documentRef);
-    let firestoreData: DocumentData;
+    const ref = validateDocumentReference('documentRef', documentRef);
+    let firestoreData: firestore.DocumentData;
     if (mergeLeaves || mergePaths) {
       // Cast to any in order to satisfy the union type constraint on
       // toFirestore().
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      firestoreData = (documentRef._converter as any).toFirestore(
-        data,
-        options
-      );
+      firestoreData = (ref._converter as any).toFirestore(data, options);
     } else {
-      firestoreData = documentRef._converter.toFirestore(data as T);
+      firestoreData = ref._converter.toFirestore(data as T);
     }
     validateDocumentData(
       'data',
@@ -411,11 +404,14 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  update<T = DocumentData>(
-    documentRef: DocumentReference<T>,
-    dataOrField: UpdateData | string | FieldPath,
+  update<T = firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<T>,
+    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
-      {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
+      | {lastUpdateTime?: firestore.Timestamp}
+      | unknown
+      | string
+      | firestore.FieldPath
     >
   ): WriteBatch {
     // eslint-disable-next-line prefer-rest-params
@@ -475,7 +471,7 @@ export class WriteBatch {
         // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
-        const data = dataOrField as UpdateData;
+        const data = dataOrField as firestore.UpdateData;
         Object.keys(data).forEach(key => {
           validateFieldPath(key, key);
           updateMap.set(FieldPath.fromArgument(key), data[key]);

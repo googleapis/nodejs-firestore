@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {DocumentData} from '@google-cloud/firestore';
+
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
@@ -25,7 +27,7 @@ import {
   QueryDocumentSnapshot,
   setLogFunction,
 } from '../src';
-import {DocumentData, DocumentReference, Query, Timestamp} from '../src';
+import {DocumentReference, Query, Timestamp} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {QualifiedResourcePath} from '../src/path';

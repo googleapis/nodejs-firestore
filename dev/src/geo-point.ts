@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {google} from '../protos/firestore_v1_proto_api';
 import {Serializable} from './serializer';
 import {validateNumber} from './validate';
@@ -26,7 +28,7 @@ import api = google.firestore.v1;
  *
  * @class
  */
-export class GeoPoint implements Serializable {
+export class GeoPoint implements Serializable, firestore.GeoPoint {
   private readonly _latitude: number;
   private readonly _longitude: number;
 
@@ -82,7 +84,7 @@ export class GeoPoint implements Serializable {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `GeoPoint` is equal to the provided value.
    */
-  isEqual(other: GeoPoint): boolean {
+  isEqual(other: firestore.GeoPoint): boolean {
     return (
       this === other ||
       (other instanceof GeoPoint &&

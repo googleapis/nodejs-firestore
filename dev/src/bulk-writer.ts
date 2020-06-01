@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as firestore from '@google-cloud/firestore';
+
 import * as assert from 'assert';
 
 import {FieldPath, Firestore} from '.';
@@ -20,7 +22,6 @@ import {delayExecution} from './backoff';
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {Precondition, SetOptions, UpdateData} from './types';
 import {Deferred, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
@@ -102,7 +103,10 @@ class BulkCommitBatch {
    * Adds a `create` operation to the WriteBatch. Returns a promise that
    * resolves with the result of the write.
    */
-  create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult> {
+  create<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T
+  ): Promise<WriteResult> {
     this.writeBatch.create(documentRef, data);
     return this.processOperation(documentRef);
   }
@@ -112,8 +116,8 @@ class BulkCommitBatch {
    * resolves with the result of the delete.
    */
   delete<T>(
-    documentRef: DocumentReference<T>,
-    precondition?: Precondition
+    documentRef: firestore.DocumentReference<T>,
+    precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.writeBatch.delete(documentRef, precondition);
     return this.processOperation(documentRef);
@@ -122,13 +126,13 @@ class BulkCommitBatch {
   set<T>(
     documentRef: DocumentReference<T>,
     data: Partial<T>,
-    options: SetOptions
+    options: firestore.SetOptions
   ): Promise<WriteResult>;
   set<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
   set<T>(
     documentRef: DocumentReference<T>,
     data: T | Partial<T>,
-    options?: SetOptions
+    options?: firestore.SetOptions
   ): Promise<WriteResult>;
   /**
    * Adds a `set` operation to the WriteBatch. Returns a promise that
@@ -137,7 +141,7 @@ class BulkCommitBatch {
   set<T>(
     documentRef: DocumentReference<T>,
     data: T | Partial<T>,
-    options?: SetOptions
+    options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this.writeBatch.set(documentRef, data, options);
     return this.processOperation(documentRef);
@@ -148,8 +152,8 @@ class BulkCommitBatch {
    * resolves with the result of the write.
    */
   update<T>(
-    documentRef: DocumentReference<T>,
-    dataOrField: UpdateData | string | FieldPath,
+    documentRef: firestore.DocumentReference<T>,
+    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
@@ -163,7 +167,7 @@ class BulkCommitBatch {
    * return the result.
    */
   private processOperation<T>(
-    documentRef: DocumentReference<T>
+    documentRef: firestore.DocumentReference<T>
   ): Promise<WriteResult> {
     assert(
       !this.docPaths.has(documentRef.path),
@@ -352,7 +356,7 @@ export class BulkWriter {
    */
   delete<T>(
     documentRef: DocumentReference<T>,
-    precondition?: Precondition
+    precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
@@ -364,7 +368,7 @@ export class BulkWriter {
   set<T>(
     documentRef: DocumentReference<T>,
     data: Partial<T>,
-    options: SetOptions
+    options: firestore.SetOptions
   ): Promise<WriteResult>;
   set<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
   /**
@@ -404,7 +408,7 @@ export class BulkWriter {
   set<T>(
     documentRef: DocumentReference<T>,
     data: T | Partial<T>,
-    options?: SetOptions
+    options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
@@ -456,7 +460,7 @@ export class BulkWriter {
    */
   update<T>(
     documentRef: DocumentReference,
-    dataOrField: UpdateData | string | FieldPath,
+    dataOrField: firestore.UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
