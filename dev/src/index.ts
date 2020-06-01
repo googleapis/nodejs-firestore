@@ -138,6 +138,12 @@ let v1beta1: unknown; // Lazy-loaded upon access.
 const CLOUD_RESOURCE_HEADER = 'google-cloud-resource-prefix';
 
 /*!
+ * HTTP "Authorization" header. Used for manually setting admin authorization
+ * for Firestore Emulator (where ssl is disabled and grpc.credentials unused).
+ */
+const AUTHORIZATION_HEADER = 'Authorization';
+
+/*!
  * The maximum number of times to retry idempotent requests.
  */
 const MAX_REQUEST_RETRIES = 5;
@@ -417,21 +423,7 @@ export class Firestore {
         if (this._settings.ssl === false) {
           const grpc = require('@grpc/grpc-js');
           const sslCreds = grpc.credentials.createInsecure();
-
-          // Use user-provided headers, but provide an Authorization header by default
-          // so that connection is recognized as admin in Firestore Emulator. (If for
-          // some reason we're not connecting to the emulator, then this will result in
-          // denials with invalid token, rather than behave like clients not logged in.)
-          const customHeaders = {
-            Authorization: 'Bearer owner',
-            ...this._settings.customHeaders,
-          };
-
-          client = new module.exports.v1({
-            sslCreds,
-            ...this._settings,
-            customHeaders,
-          });
+          client = new module.exports.v1({sslCreds, ...this._settings});
         } else {
           client = new module.exports.v1(this._settings);
         }
@@ -1124,14 +1116,17 @@ export class Firestore {
    * @private
    */
   private createCallOptions(): CallOptions {
-    return {
-      otherArgs: {
-        headers: {
-          [CLOUD_RESOURCE_HEADER]: this.formattedName,
-          ...this._settings.customHeaders,
-        },
-      },
-    };
+    const headers: Record<string, string> = {[CLOUD_RESOURCE_HEADER]: this.formattedName}
+    if (this._settings.ssl === false) {
+      // Provide an Authorization header by default so that connection is
+      // recognized as admin in Firestore Emulator. (If for some reason we're
+      // not connecting to the emulator, then this will result in denials with
+      // invalid token, rather than behave like clients not logged in.)
+      // Users may overwrite this via settings.customHeaders handled below.
+      headers[AUTHORIZATION_HEADER] = 'Bearer owner';
+    }
+    Object.assign(headers, this._settings.customHeaders);
+    return {otherArgs: {headers}};
   }
 
   /**
