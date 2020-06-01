@@ -1088,7 +1088,7 @@ export class Firestore {
 
     if (this._settings.ssl === false) {
       // If SSL is false, we assume that we are talking to the emulator. We
-      // provide an Authorization header by default so that connection is
+      // provide an Authorization header by default so that the connection is
       // recognized as admin in Firestore Emulator. (If for some reason we're
       // not connecting to the emulator, then this will result in denials with
       // invalid token, rather than behave like clients not logged in. The user
