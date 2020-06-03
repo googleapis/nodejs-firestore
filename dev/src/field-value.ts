@@ -201,7 +201,7 @@ export class FieldValue implements firestore.FieldValue {
    * }
    * console.log(`Found ${equal} equalities.`);
    */
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return this === other;
   }
 }
@@ -390,7 +390,7 @@ class NumericIncrementTransform extends FieldTransform {
     return {fieldPath: fieldPath.formattedName, increment: encodedOperand};
   }
 
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return (
       this === other ||
       (other instanceof NumericIncrementTransform &&
@@ -446,7 +446,7 @@ class ArrayUnionTransform extends FieldTransform {
     };
   }
 
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return (
       this === other ||
       (other instanceof ArrayUnionTransform &&
@@ -502,7 +502,7 @@ class ArrayRemoveTransform extends FieldTransform {
     };
   }
 
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return (
       this === other ||
       (other instanceof ArrayRemoveTransform &&
