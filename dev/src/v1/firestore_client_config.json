@@ -11,28 +11,12 @@
           "DEADLINE_EXCEEDED",
           "INTERNAL",
           "UNAVAILABLE"
-        ],
-        "internal_unavailable": [
-          "INTERNAL",
-          "UNAVAILABLE"
-        ],
-        "resource_exhausted": [
-          "RESOURCE_EXHAUSTED"
         ]
       },
       "retry_params": {
         "default": {
           "initial_retry_delay_millis": 100,
           "retry_delay_multiplier": 1.3,
-          "max_retry_delay_millis": 60000,
-          "initial_rpc_timeout_millis": 60000,
-          "rpc_timeout_multiplier": 1,
-          "max_rpc_timeout_millis": 60000,
-          "total_timeout_millis": 600000
-        },
-        "386d2a79c0994f76e803af29bfdfaf00bdea06a3": {
-          "initial_retry_delay_millis": 60000,
-          "retry_delay_multiplier": 1,
           "max_retry_delay_millis": 60000,
           "initial_rpc_timeout_millis": 60000,
           "rpc_timeout_multiplier": 1,
@@ -53,7 +37,7 @@
         },
         "UpdateDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "internal_unavailable",
+          "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
         "DeleteDocument": {
@@ -73,7 +57,7 @@
         },
         "Commit": {
           "timeout_millis": 60000,
-          "retry_codes_name": "internal_unavailable",
+          "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
         "Rollback": {
@@ -87,8 +71,8 @@
           "retry_params_name": "default"
         },
         "PartitionQuery": {
-          "retry_codes_name": "resource_exhausted",
-          "retry_params_name": "386d2a79c0994f76e803af29bfdfaf00bdea06a3"
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
         },
         "Write": {
           "timeout_millis": 86400000,
@@ -106,12 +90,12 @@
           "retry_params_name": "default"
         },
         "BatchWrite": {
-          "retry_codes_name": "resource_exhausted",
-          "retry_params_name": "386d2a79c0994f76e803af29bfdfaf00bdea06a3"
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
         },
         "CreateDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "internal_unavailable",
+          "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         }
       }
