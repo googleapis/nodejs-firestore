@@ -128,7 +128,10 @@ class BulkCommitBatch {
     data: Partial<T>,
     options: firestore.SetOptions
   ): Promise<WriteResult>;
-  set<T>(documentRef: firestore.DocumentReference<T>, data: T): Promise<WriteResult>;
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T
+  ): Promise<WriteResult>;
   set<T>(
     documentRef: firestore.DocumentReference<T>,
     data: T | Partial<T>,
@@ -319,7 +322,10 @@ export class BulkWriter {
    *  });
    * });
    */
-  create<T>(documentRef: firestore.DocumentReference<T>, data: T): Promise<WriteResult> {
+  create<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T
+  ): Promise<WriteResult> {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     const resultPromise = bulkCommitBatch.create(documentRef, data);
@@ -370,7 +376,10 @@ export class BulkWriter {
     data: Partial<T>,
     options: firestore.SetOptions
   ): Promise<WriteResult>;
-  set<T>(documentRef: firestore.DocumentReference<T>, data: T): Promise<WriteResult>;
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T
+  ): Promise<WriteResult>;
   /**
    * Write to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document does not
@@ -551,7 +560,9 @@ export class BulkWriter {
    *
    * @private
    */
-  private getEligibleBatch<T>(ref: firestore.DocumentReference<T>): BulkCommitBatch {
+  private getEligibleBatch<T>(
+    ref: firestore.DocumentReference<T>
+  ): BulkCommitBatch {
     if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
       if (
