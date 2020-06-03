@@ -58,7 +58,7 @@ export class FieldValue implements firestore.FieldValue {
    *   // Document now only contains { c: 'd' }
    * });
    */
-  static delete(): FieldValue {
+  static delete(): firestore.FieldValue {
     return DeleteTransform.DELETE_SENTINEL;
   }
 
@@ -80,7 +80,7 @@ export class FieldValue implements firestore.FieldValue {
    *   console.log(`Server time set to ${doc.get('time')}`);
    * });
    */
-  static serverTimestamp(): FieldValue {
+  static serverTimestamp(): firestore.FieldValue {
     return ServerTimestampTransform.SERVER_TIMESTAMP_SENTINEL;
   }
 
@@ -112,7 +112,7 @@ export class FieldValue implements firestore.FieldValue {
    *   // doc.get('counter') was incremented
    * });
    */
-  static increment(n: number): FieldValue {
+  static increment(n: number): firestore.FieldValue {
     // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('FieldValue.increment', arguments, 1);
     return new NumericIncrementTransform(n);
@@ -141,7 +141,7 @@ export class FieldValue implements firestore.FieldValue {
    *   // doc.get('array') contains field 'foo'
    * });
    */
-  static arrayUnion(...elements: unknown[]): FieldValue {
+  static arrayUnion(...elements: unknown[]): firestore.FieldValue {
     validateMinNumberOfArguments('FieldValue.arrayUnion', elements, 1);
     return new ArrayUnionTransform(elements);
   }
@@ -168,7 +168,7 @@ export class FieldValue implements firestore.FieldValue {
    *   // doc.get('array') no longer contains field 'foo'
    * });
    */
-  static arrayRemove(...elements: unknown[]): FieldValue {
+  static arrayRemove(...elements: unknown[]): firestore.FieldValue {
     validateMinNumberOfArguments('FieldValue.arrayRemove', elements, 1);
     return new ArrayRemoveTransform(elements);
   }
@@ -201,7 +201,7 @@ export class FieldValue implements firestore.FieldValue {
    * }
    * console.log(`Found ${equal} equalities.`);
    */
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return this === other;
   }
 }
@@ -390,7 +390,7 @@ class NumericIncrementTransform extends FieldTransform {
     return {fieldPath: fieldPath.formattedName, increment: encodedOperand};
   }
 
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return (
       this === other ||
       (other instanceof NumericIncrementTransform &&
@@ -446,7 +446,7 @@ class ArrayUnionTransform extends FieldTransform {
     };
   }
 
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return (
       this === other ||
       (other instanceof ArrayUnionTransform &&
@@ -502,7 +502,7 @@ class ArrayRemoveTransform extends FieldTransform {
     };
   }
 
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return (
       this === other ||
       (other instanceof ArrayRemoveTransform &&
