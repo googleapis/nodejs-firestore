@@ -8087,6 +8087,39 @@
                      */
     
                     /**
+                     * Callback as used by {@link google.firestore.v1.Firestore#partitionQuery}.
+                     * @memberof google.firestore.v1.Firestore
+                     * @typedef PartitionQueryCallback
+                     * @type {function}
+                     * @param {Error|null} error Error, if any
+                     * @param {google.firestore.v1.PartitionQueryResponse} [response] PartitionQueryResponse
+                     */
+    
+                    /**
+                     * Calls PartitionQuery.
+                     * @function partitionQuery
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IPartitionQueryRequest} request PartitionQueryRequest message or plain object
+                     * @param {google.firestore.v1.Firestore.PartitionQueryCallback} callback Node-style callback called with the error, if any, and PartitionQueryResponse
+                     * @returns {undefined}
+                     * @variation 1
+                     */
+                    Object.defineProperty(Firestore.prototype.partitionQuery = function partitionQuery(request, callback) {
+                        return this.rpcCall(partitionQuery, $root.google.firestore.v1.PartitionQueryRequest, $root.google.firestore.v1.PartitionQueryResponse, request, callback);
+                    }, "name", { value: "PartitionQuery" });
+    
+                    /**
+                     * Calls PartitionQuery.
+                     * @function partitionQuery
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.IPartitionQueryRequest} request PartitionQueryRequest message or plain object
+                     * @returns {Promise<google.firestore.v1.PartitionQueryResponse>} Promise
+                     * @variation 2
+                     */
+    
+                    /**
                      * Callback as used by {@link google.firestore.v1.Firestore#write}.
                      * @memberof google.firestore.v1.Firestore
                      * @typedef WriteCallback
@@ -8186,39 +8219,6 @@
                      */
     
                     /**
-                     * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
-                     * @memberof google.firestore.v1.Firestore
-                     * @typedef CreateDocumentCallback
-                     * @type {function}
-                     * @param {Error|null} error Error, if any
-                     * @param {google.firestore.v1.Document} [response] Document
-                     */
-    
-                    /**
-                     * Calls CreateDocument.
-                     * @function createDocument
-                     * @memberof google.firestore.v1.Firestore
-                     * @instance
-                     * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
-                     * @param {google.firestore.v1.Firestore.CreateDocumentCallback} callback Node-style callback called with the error, if any, and Document
-                     * @returns {undefined}
-                     * @variation 1
-                     */
-                    Object.defineProperty(Firestore.prototype.createDocument = function createDocument(request, callback) {
-                        return this.rpcCall(createDocument, $root.google.firestore.v1.CreateDocumentRequest, $root.google.firestore.v1.Document, request, callback);
-                    }, "name", { value: "CreateDocument" });
-    
-                    /**
-                     * Calls CreateDocument.
-                     * @function createDocument
-                     * @memberof google.firestore.v1.Firestore
-                     * @instance
-                     * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
-                     * @returns {Promise<google.firestore.v1.Document>} Promise
-                     * @variation 2
-                     */
-    
-                    /**
                      * Callback as used by {@link google.firestore.v1.Firestore#batchWrite}.
                      * @memberof google.firestore.v1.Firestore
                      * @typedef BatchWriteCallback
@@ -8248,6 +8248,39 @@
                      * @instance
                      * @param {google.firestore.v1.IBatchWriteRequest} request BatchWriteRequest message or plain object
                      * @returns {Promise<google.firestore.v1.BatchWriteResponse>} Promise
+                     * @variation 2
+                     */
+    
+                    /**
+                     * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
+                     * @memberof google.firestore.v1.Firestore
+                     * @typedef CreateDocumentCallback
+                     * @type {function}
+                     * @param {Error|null} error Error, if any
+                     * @param {google.firestore.v1.Document} [response] Document
+                     */
+    
+                    /**
+                     * Calls CreateDocument.
+                     * @function createDocument
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
+                     * @param {google.firestore.v1.Firestore.CreateDocumentCallback} callback Node-style callback called with the error, if any, and Document
+                     * @returns {undefined}
+                     * @variation 1
+                     */
+                    Object.defineProperty(Firestore.prototype.createDocument = function createDocument(request, callback) {
+                        return this.rpcCall(createDocument, $root.google.firestore.v1.CreateDocumentRequest, $root.google.firestore.v1.Document, request, callback);
+                    }, "name", { value: "CreateDocument" });
+    
+                    /**
+                     * Calls CreateDocument.
+                     * @function createDocument
+                     * @memberof google.firestore.v1.Firestore
+                     * @instance
+                     * @param {google.firestore.v1.ICreateDocumentRequest} request CreateDocumentRequest message or plain object
+                     * @returns {Promise<google.firestore.v1.Document>} Promise
                      * @variation 2
                      */
     
@@ -10352,6 +10385,289 @@
                     return RunQueryResponse;
                 })();
     
+                v1.PartitionQueryRequest = (function() {
+    
+                    /**
+                     * Properties of a PartitionQueryRequest.
+                     * @memberof google.firestore.v1
+                     * @interface IPartitionQueryRequest
+                     * @property {string|null} [parent] PartitionQueryRequest parent
+                     * @property {google.firestore.v1.IStructuredQuery|null} [structuredQuery] PartitionQueryRequest structuredQuery
+                     * @property {number|string|null} [partitionCount] PartitionQueryRequest partitionCount
+                     * @property {string|null} [pageToken] PartitionQueryRequest pageToken
+                     * @property {number|null} [pageSize] PartitionQueryRequest pageSize
+                     */
+    
+                    /**
+                     * Constructs a new PartitionQueryRequest.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a PartitionQueryRequest.
+                     * @implements IPartitionQueryRequest
+                     * @constructor
+                     * @param {google.firestore.v1.IPartitionQueryRequest=} [properties] Properties to set
+                     */
+                    function PartitionQueryRequest(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * PartitionQueryRequest parent.
+                     * @member {string} parent
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @instance
+                     */
+                    PartitionQueryRequest.prototype.parent = "";
+    
+                    /**
+                     * PartitionQueryRequest structuredQuery.
+                     * @member {google.firestore.v1.IStructuredQuery|null|undefined} structuredQuery
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @instance
+                     */
+                    PartitionQueryRequest.prototype.structuredQuery = null;
+    
+                    /**
+                     * PartitionQueryRequest partitionCount.
+                     * @member {number|string} partitionCount
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @instance
+                     */
+                    PartitionQueryRequest.prototype.partitionCount = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                    /**
+                     * PartitionQueryRequest pageToken.
+                     * @member {string} pageToken
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @instance
+                     */
+                    PartitionQueryRequest.prototype.pageToken = "";
+    
+                    /**
+                     * PartitionQueryRequest pageSize.
+                     * @member {number} pageSize
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @instance
+                     */
+                    PartitionQueryRequest.prototype.pageSize = 0;
+    
+                    // OneOf field names bound to virtual getters and setters
+                    var $oneOfFields;
+    
+                    /**
+                     * PartitionQueryRequest queryType.
+                     * @member {"structuredQuery"|undefined} queryType
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @instance
+                     */
+                    Object.defineProperty(PartitionQueryRequest.prototype, "queryType", {
+                        get: $util.oneOfGetter($oneOfFields = ["structuredQuery"]),
+                        set: $util.oneOfSetter($oneOfFields)
+                    });
+    
+                    /**
+                     * Creates a PartitionQueryRequest message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.PartitionQueryRequest} PartitionQueryRequest
+                     */
+                    PartitionQueryRequest.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.PartitionQueryRequest)
+                            return object;
+                        var message = new $root.google.firestore.v1.PartitionQueryRequest();
+                        if (object.parent != null)
+                            message.parent = String(object.parent);
+                        if (object.structuredQuery != null) {
+                            if (typeof object.structuredQuery !== "object")
+                                throw TypeError(".google.firestore.v1.PartitionQueryRequest.structuredQuery: object expected");
+                            message.structuredQuery = $root.google.firestore.v1.StructuredQuery.fromObject(object.structuredQuery);
+                        }
+                        if (object.partitionCount != null)
+                            if ($util.Long)
+                                (message.partitionCount = $util.Long.fromValue(object.partitionCount)).unsigned = false;
+                            else if (typeof object.partitionCount === "string")
+                                message.partitionCount = parseInt(object.partitionCount, 10);
+                            else if (typeof object.partitionCount === "number")
+                                message.partitionCount = object.partitionCount;
+                            else if (typeof object.partitionCount === "object")
+                                message.partitionCount = new $util.LongBits(object.partitionCount.low >>> 0, object.partitionCount.high >>> 0).toNumber();
+                        if (object.pageToken != null)
+                            message.pageToken = String(object.pageToken);
+                        if (object.pageSize != null)
+                            message.pageSize = object.pageSize | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a PartitionQueryRequest message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @static
+                     * @param {google.firestore.v1.PartitionQueryRequest} message PartitionQueryRequest
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    PartitionQueryRequest.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.parent = "";
+                            if ($util.Long) {
+                                var long = new $util.Long(0, 0, false);
+                                object.partitionCount = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                            } else
+                                object.partitionCount = options.longs === String ? "0" : 0;
+                            object.pageToken = "";
+                            object.pageSize = 0;
+                        }
+                        if (message.parent != null && message.hasOwnProperty("parent"))
+                            object.parent = message.parent;
+                        if (message.structuredQuery != null && message.hasOwnProperty("structuredQuery")) {
+                            object.structuredQuery = $root.google.firestore.v1.StructuredQuery.toObject(message.structuredQuery, options);
+                            if (options.oneofs)
+                                object.queryType = "structuredQuery";
+                        }
+                        if (message.partitionCount != null && message.hasOwnProperty("partitionCount"))
+                            if (typeof message.partitionCount === "number")
+                                object.partitionCount = options.longs === String ? String(message.partitionCount) : message.partitionCount;
+                            else
+                                object.partitionCount = options.longs === String ? $util.Long.prototype.toString.call(message.partitionCount) : options.longs === Number ? new $util.LongBits(message.partitionCount.low >>> 0, message.partitionCount.high >>> 0).toNumber() : message.partitionCount;
+                        if (message.pageToken != null && message.hasOwnProperty("pageToken"))
+                            object.pageToken = message.pageToken;
+                        if (message.pageSize != null && message.hasOwnProperty("pageSize"))
+                            object.pageSize = message.pageSize;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this PartitionQueryRequest to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.PartitionQueryRequest
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    PartitionQueryRequest.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    return PartitionQueryRequest;
+                })();
+    
+                v1.PartitionQueryResponse = (function() {
+    
+                    /**
+                     * Properties of a PartitionQueryResponse.
+                     * @memberof google.firestore.v1
+                     * @interface IPartitionQueryResponse
+                     * @property {Array.<google.firestore.v1.ICursor>|null} [partitions] PartitionQueryResponse partitions
+                     * @property {string|null} [nextPageToken] PartitionQueryResponse nextPageToken
+                     */
+    
+                    /**
+                     * Constructs a new PartitionQueryResponse.
+                     * @memberof google.firestore.v1
+                     * @classdesc Represents a PartitionQueryResponse.
+                     * @implements IPartitionQueryResponse
+                     * @constructor
+                     * @param {google.firestore.v1.IPartitionQueryResponse=} [properties] Properties to set
+                     */
+                    function PartitionQueryResponse(properties) {
+                        this.partitions = [];
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * PartitionQueryResponse partitions.
+                     * @member {Array.<google.firestore.v1.ICursor>} partitions
+                     * @memberof google.firestore.v1.PartitionQueryResponse
+                     * @instance
+                     */
+                    PartitionQueryResponse.prototype.partitions = $util.emptyArray;
+    
+                    /**
+                     * PartitionQueryResponse nextPageToken.
+                     * @member {string} nextPageToken
+                     * @memberof google.firestore.v1.PartitionQueryResponse
+                     * @instance
+                     */
+                    PartitionQueryResponse.prototype.nextPageToken = "";
+    
+                    /**
+                     * Creates a PartitionQueryResponse message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.firestore.v1.PartitionQueryResponse
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.firestore.v1.PartitionQueryResponse} PartitionQueryResponse
+                     */
+                    PartitionQueryResponse.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.firestore.v1.PartitionQueryResponse)
+                            return object;
+                        var message = new $root.google.firestore.v1.PartitionQueryResponse();
+                        if (object.partitions) {
+                            if (!Array.isArray(object.partitions))
+                                throw TypeError(".google.firestore.v1.PartitionQueryResponse.partitions: array expected");
+                            message.partitions = [];
+                            for (var i = 0; i < object.partitions.length; ++i) {
+                                if (typeof object.partitions[i] !== "object")
+                                    throw TypeError(".google.firestore.v1.PartitionQueryResponse.partitions: object expected");
+                                message.partitions[i] = $root.google.firestore.v1.Cursor.fromObject(object.partitions[i]);
+                            }
+                        }
+                        if (object.nextPageToken != null)
+                            message.nextPageToken = String(object.nextPageToken);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a PartitionQueryResponse message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.firestore.v1.PartitionQueryResponse
+                     * @static
+                     * @param {google.firestore.v1.PartitionQueryResponse} message PartitionQueryResponse
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    PartitionQueryResponse.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.arrays || options.defaults)
+                            object.partitions = [];
+                        if (options.defaults)
+                            object.nextPageToken = "";
+                        if (message.partitions && message.partitions.length) {
+                            object.partitions = [];
+                            for (var j = 0; j < message.partitions.length; ++j)
+                                object.partitions[j] = $root.google.firestore.v1.Cursor.toObject(message.partitions[j], options);
+                        }
+                        if (message.nextPageToken != null && message.hasOwnProperty("nextPageToken"))
+                            object.nextPageToken = message.nextPageToken;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this PartitionQueryResponse to JSON.
+                     * @function toJSON
+                     * @memberof google.firestore.v1.PartitionQueryResponse
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    PartitionQueryResponse.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    return PartitionQueryResponse;
+                })();
+    
                 v1.WriteRequest = (function() {
     
                     /**
@@ -11849,6 +12165,7 @@
                      * @interface IBatchWriteRequest
                      * @property {string|null} [database] BatchWriteRequest database
                      * @property {Array.<google.firestore.v1.IWrite>|null} [writes] BatchWriteRequest writes
+                     * @property {Object.<string,string>|null} [labels] BatchWriteRequest labels
                      */
     
                     /**
@@ -11861,6 +12178,7 @@
                      */
                     function BatchWriteRequest(properties) {
                         this.writes = [];
+                        this.labels = {};
                         if (properties)
                             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                 if (properties[keys[i]] != null)
@@ -11882,6 +12200,14 @@
                      * @instance
                      */
                     BatchWriteRequest.prototype.writes = $util.emptyArray;
+    
+                    /**
+                     * BatchWriteRequest labels.
+                     * @member {Object.<string,string>} labels
+                     * @memberof google.firestore.v1.BatchWriteRequest
+                     * @instance
+                     */
+                    BatchWriteRequest.prototype.labels = $util.emptyObject;
     
                     /**
                      * Creates a BatchWriteRequest message from a plain object. Also converts values to their respective internal types.
@@ -11907,6 +12233,13 @@
                                 message.writes[i] = $root.google.firestore.v1.Write.fromObject(object.writes[i]);
                             }
                         }
+                        if (object.labels) {
+                            if (typeof object.labels !== "object")
+                                throw TypeError(".google.firestore.v1.BatchWriteRequest.labels: object expected");
+                            message.labels = {};
+                            for (var keys = Object.keys(object.labels), i = 0; i < keys.length; ++i)
+                                message.labels[keys[i]] = String(object.labels[keys[i]]);
+                        }
                         return message;
                     };
     
@@ -11925,6 +12258,8 @@
                         var object = {};
                         if (options.arrays || options.defaults)
                             object.writes = [];
+                        if (options.objects || options.defaults)
+                            object.labels = {};
                         if (options.defaults)
                             object.database = "";
                         if (message.database != null && message.hasOwnProperty("database"))
@@ -11933,6 +12268,12 @@
                             object.writes = [];
                             for (var j = 0; j < message.writes.length; ++j)
                                 object.writes[j] = $root.google.firestore.v1.Write.toObject(message.writes[j], options);
+                        }
+                        var keys2;
+                        if (message.labels && (keys2 = Object.keys(message.labels)).length) {
+                            object.labels = {};
+                            for (var j = 0; j < keys2.length; ++j)
+                                object.labels[keys2[j]] = message.labels[keys2[j]];
                         }
                         return object;
                     };
@@ -12844,101 +13185,6 @@
                         return FieldFilter;
                     })();
     
-                    StructuredQuery.Projection = (function() {
-    
-                        /**
-                         * Properties of a Projection.
-                         * @memberof google.firestore.v1.StructuredQuery
-                         * @interface IProjection
-                         * @property {Array.<google.firestore.v1.StructuredQuery.IFieldReference>|null} [fields] Projection fields
-                         */
-    
-                        /**
-                         * Constructs a new Projection.
-                         * @memberof google.firestore.v1.StructuredQuery
-                         * @classdesc Represents a Projection.
-                         * @implements IProjection
-                         * @constructor
-                         * @param {google.firestore.v1.StructuredQuery.IProjection=} [properties] Properties to set
-                         */
-                        function Projection(properties) {
-                            this.fields = [];
-                            if (properties)
-                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                    if (properties[keys[i]] != null)
-                                        this[keys[i]] = properties[keys[i]];
-                        }
-    
-                        /**
-                         * Projection fields.
-                         * @member {Array.<google.firestore.v1.StructuredQuery.IFieldReference>} fields
-                         * @memberof google.firestore.v1.StructuredQuery.Projection
-                         * @instance
-                         */
-                        Projection.prototype.fields = $util.emptyArray;
-    
-                        /**
-                         * Creates a Projection message from a plain object. Also converts values to their respective internal types.
-                         * @function fromObject
-                         * @memberof google.firestore.v1.StructuredQuery.Projection
-                         * @static
-                         * @param {Object.<string,*>} object Plain object
-                         * @returns {google.firestore.v1.StructuredQuery.Projection} Projection
-                         */
-                        Projection.fromObject = function fromObject(object) {
-                            if (object instanceof $root.google.firestore.v1.StructuredQuery.Projection)
-                                return object;
-                            var message = new $root.google.firestore.v1.StructuredQuery.Projection();
-                            if (object.fields) {
-                                if (!Array.isArray(object.fields))
-                                    throw TypeError(".google.firestore.v1.StructuredQuery.Projection.fields: array expected");
-                                message.fields = [];
-                                for (var i = 0; i < object.fields.length; ++i) {
-                                    if (typeof object.fields[i] !== "object")
-                                        throw TypeError(".google.firestore.v1.StructuredQuery.Projection.fields: object expected");
-                                    message.fields[i] = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.fields[i]);
-                                }
-                            }
-                            return message;
-                        };
-    
-                        /**
-                         * Creates a plain object from a Projection message. Also converts values to other types if specified.
-                         * @function toObject
-                         * @memberof google.firestore.v1.StructuredQuery.Projection
-                         * @static
-                         * @param {google.firestore.v1.StructuredQuery.Projection} message Projection
-                         * @param {$protobuf.IConversionOptions} [options] Conversion options
-                         * @returns {Object.<string,*>} Plain object
-                         */
-                        Projection.toObject = function toObject(message, options) {
-                            if (!options)
-                                options = {};
-                            var object = {};
-                            if (options.arrays || options.defaults)
-                                object.fields = [];
-                            if (message.fields && message.fields.length) {
-                                object.fields = [];
-                                for (var j = 0; j < message.fields.length; ++j)
-                                    object.fields[j] = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.fields[j], options);
-                            }
-                            return object;
-                        };
-    
-                        /**
-                         * Converts this Projection to JSON.
-                         * @function toJSON
-                         * @memberof google.firestore.v1.StructuredQuery.Projection
-                         * @instance
-                         * @returns {Object.<string,*>} JSON object
-                         */
-                        Projection.prototype.toJSON = function toJSON() {
-                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                        };
-    
-                        return Projection;
-                    })();
-    
                     StructuredQuery.UnaryFilter = (function() {
     
                         /**
@@ -13277,6 +13523,101 @@
                         };
     
                         return Order;
+                    })();
+    
+                    StructuredQuery.Projection = (function() {
+    
+                        /**
+                         * Properties of a Projection.
+                         * @memberof google.firestore.v1.StructuredQuery
+                         * @interface IProjection
+                         * @property {Array.<google.firestore.v1.StructuredQuery.IFieldReference>|null} [fields] Projection fields
+                         */
+    
+                        /**
+                         * Constructs a new Projection.
+                         * @memberof google.firestore.v1.StructuredQuery
+                         * @classdesc Represents a Projection.
+                         * @implements IProjection
+                         * @constructor
+                         * @param {google.firestore.v1.StructuredQuery.IProjection=} [properties] Properties to set
+                         */
+                        function Projection(properties) {
+                            this.fields = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Projection fields.
+                         * @member {Array.<google.firestore.v1.StructuredQuery.IFieldReference>} fields
+                         * @memberof google.firestore.v1.StructuredQuery.Projection
+                         * @instance
+                         */
+                        Projection.prototype.fields = $util.emptyArray;
+    
+                        /**
+                         * Creates a Projection message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.Projection
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.Projection} Projection
+                         */
+                        Projection.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.Projection)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.Projection();
+                            if (object.fields) {
+                                if (!Array.isArray(object.fields))
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.Projection.fields: array expected");
+                                message.fields = [];
+                                for (var i = 0; i < object.fields.length; ++i) {
+                                    if (typeof object.fields[i] !== "object")
+                                        throw TypeError(".google.firestore.v1.StructuredQuery.Projection.fields: object expected");
+                                    message.fields[i] = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.fields[i]);
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a Projection message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.Projection
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.Projection} message Projection
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Projection.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.fields = [];
+                            if (message.fields && message.fields.length) {
+                                object.fields = [];
+                                for (var j = 0; j < message.fields.length; ++j)
+                                    object.fields[j] = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.fields[j], options);
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Projection to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.Projection
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Projection.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        return Projection;
                     })();
     
                     /**

@@ -3295,6 +3295,20 @@ export namespace google {
                 public runQuery(request: google.firestore.v1.IRunQueryRequest): Promise<google.firestore.v1.RunQueryResponse>;
 
                 /**
+                 * Calls PartitionQuery.
+                 * @param request PartitionQueryRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and PartitionQueryResponse
+                 */
+                public partitionQuery(request: google.firestore.v1.IPartitionQueryRequest, callback: google.firestore.v1.Firestore.PartitionQueryCallback): void;
+
+                /**
+                 * Calls PartitionQuery.
+                 * @param request PartitionQueryRequest message or plain object
+                 * @returns Promise
+                 */
+                public partitionQuery(request: google.firestore.v1.IPartitionQueryRequest): Promise<google.firestore.v1.PartitionQueryResponse>;
+
+                /**
                  * Calls Write.
                  * @param request WriteRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and WriteResponse
@@ -3337,20 +3351,6 @@ export namespace google {
                 public listCollectionIds(request: google.firestore.v1.IListCollectionIdsRequest): Promise<google.firestore.v1.ListCollectionIdsResponse>;
 
                 /**
-                 * Calls CreateDocument.
-                 * @param request CreateDocumentRequest message or plain object
-                 * @param callback Node-style callback called with the error, if any, and Document
-                 */
-                public createDocument(request: google.firestore.v1.ICreateDocumentRequest, callback: google.firestore.v1.Firestore.CreateDocumentCallback): void;
-
-                /**
-                 * Calls CreateDocument.
-                 * @param request CreateDocumentRequest message or plain object
-                 * @returns Promise
-                 */
-                public createDocument(request: google.firestore.v1.ICreateDocumentRequest): Promise<google.firestore.v1.Document>;
-
-                /**
                  * Calls BatchWrite.
                  * @param request BatchWriteRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and BatchWriteResponse
@@ -3363,6 +3363,20 @@ export namespace google {
                  * @returns Promise
                  */
                 public batchWrite(request: google.firestore.v1.IBatchWriteRequest): Promise<google.firestore.v1.BatchWriteResponse>;
+
+                /**
+                 * Calls CreateDocument.
+                 * @param request CreateDocumentRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and Document
+                 */
+                public createDocument(request: google.firestore.v1.ICreateDocumentRequest, callback: google.firestore.v1.Firestore.CreateDocumentCallback): void;
+
+                /**
+                 * Calls CreateDocument.
+                 * @param request CreateDocumentRequest message or plain object
+                 * @returns Promise
+                 */
+                public createDocument(request: google.firestore.v1.ICreateDocumentRequest): Promise<google.firestore.v1.Document>;
             }
 
             namespace Firestore {
@@ -3431,6 +3445,13 @@ export namespace google {
                 type RunQueryCallback = (error: (Error|null), response?: google.firestore.v1.RunQueryResponse) => void;
 
                 /**
+                 * Callback as used by {@link google.firestore.v1.Firestore#partitionQuery}.
+                 * @param error Error, if any
+                 * @param [response] PartitionQueryResponse
+                 */
+                type PartitionQueryCallback = (error: (Error|null), response?: google.firestore.v1.PartitionQueryResponse) => void;
+
+                /**
                  * Callback as used by {@link google.firestore.v1.Firestore#write}.
                  * @param error Error, if any
                  * @param [response] WriteResponse
@@ -3452,18 +3473,18 @@ export namespace google {
                 type ListCollectionIdsCallback = (error: (Error|null), response?: google.firestore.v1.ListCollectionIdsResponse) => void;
 
                 /**
-                 * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
-                 * @param error Error, if any
-                 * @param [response] Document
-                 */
-                type CreateDocumentCallback = (error: (Error|null), response?: google.firestore.v1.Document) => void;
-
-                /**
                  * Callback as used by {@link google.firestore.v1.Firestore#batchWrite}.
                  * @param error Error, if any
                  * @param [response] BatchWriteResponse
                  */
                 type BatchWriteCallback = (error: (Error|null), response?: google.firestore.v1.BatchWriteResponse) => void;
+
+                /**
+                 * Callback as used by {@link google.firestore.v1.Firestore#createDocument}.
+                 * @param error Error, if any
+                 * @param [response] Document
+                 */
+                type CreateDocumentCallback = (error: (Error|null), response?: google.firestore.v1.Document) => void;
             }
 
             /** Properties of a GetDocumentRequest. */
@@ -4339,6 +4360,121 @@ export namespace google {
                 public toJSON(): { [k: string]: any };
             }
 
+            /** Properties of a PartitionQueryRequest. */
+            interface IPartitionQueryRequest {
+
+                /** PartitionQueryRequest parent */
+                parent?: (string|null);
+
+                /** PartitionQueryRequest structuredQuery */
+                structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+
+                /** PartitionQueryRequest partitionCount */
+                partitionCount?: (number|string|null);
+
+                /** PartitionQueryRequest pageToken */
+                pageToken?: (string|null);
+
+                /** PartitionQueryRequest pageSize */
+                pageSize?: (number|null);
+            }
+
+            /** Represents a PartitionQueryRequest. */
+            class PartitionQueryRequest implements IPartitionQueryRequest {
+
+                /**
+                 * Constructs a new PartitionQueryRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IPartitionQueryRequest);
+
+                /** PartitionQueryRequest parent. */
+                public parent: string;
+
+                /** PartitionQueryRequest structuredQuery. */
+                public structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+
+                /** PartitionQueryRequest partitionCount. */
+                public partitionCount: (number|string);
+
+                /** PartitionQueryRequest pageToken. */
+                public pageToken: string;
+
+                /** PartitionQueryRequest pageSize. */
+                public pageSize: number;
+
+                /** PartitionQueryRequest queryType. */
+                public queryType?: "structuredQuery";
+
+                /**
+                 * Creates a PartitionQueryRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns PartitionQueryRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.PartitionQueryRequest;
+
+                /**
+                 * Creates a plain object from a PartitionQueryRequest message. Also converts values to other types if specified.
+                 * @param message PartitionQueryRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.PartitionQueryRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this PartitionQueryRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+            }
+
+            /** Properties of a PartitionQueryResponse. */
+            interface IPartitionQueryResponse {
+
+                /** PartitionQueryResponse partitions */
+                partitions?: (google.firestore.v1.ICursor[]|null);
+
+                /** PartitionQueryResponse nextPageToken */
+                nextPageToken?: (string|null);
+            }
+
+            /** Represents a PartitionQueryResponse. */
+            class PartitionQueryResponse implements IPartitionQueryResponse {
+
+                /**
+                 * Constructs a new PartitionQueryResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IPartitionQueryResponse);
+
+                /** PartitionQueryResponse partitions. */
+                public partitions: google.firestore.v1.ICursor[];
+
+                /** PartitionQueryResponse nextPageToken. */
+                public nextPageToken: string;
+
+                /**
+                 * Creates a PartitionQueryResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns PartitionQueryResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.PartitionQueryResponse;
+
+                /**
+                 * Creates a plain object from a PartitionQueryResponse message. Also converts values to other types if specified.
+                 * @param message PartitionQueryResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.PartitionQueryResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this PartitionQueryResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+            }
+
             /** Properties of a WriteRequest. */
             interface IWriteRequest {
 
@@ -4944,6 +5080,9 @@ export namespace google {
 
                 /** BatchWriteRequest writes */
                 writes?: (google.firestore.v1.IWrite[]|null);
+
+                /** BatchWriteRequest labels */
+                labels?: ({ [k: string]: string }|null);
             }
 
             /** Represents a BatchWriteRequest. */
@@ -4960,6 +5099,9 @@ export namespace google {
 
                 /** BatchWriteRequest writes. */
                 public writes: google.firestore.v1.IWrite[];
+
+                /** BatchWriteRequest labels. */
+                public labels: { [k: string]: string };
 
                 /**
                  * Creates a BatchWriteRequest message from a plain object. Also converts values to their respective internal types.
@@ -5332,47 +5474,6 @@ export namespace google {
                         "OPERATOR_UNSPECIFIED"| "LESS_THAN"| "LESS_THAN_OR_EQUAL"| "GREATER_THAN"| "GREATER_THAN_OR_EQUAL"| "EQUAL"| "ARRAY_CONTAINS"| "IN"| "ARRAY_CONTAINS_ANY";
                 }
 
-                /** Properties of a Projection. */
-                interface IProjection {
-
-                    /** Projection fields */
-                    fields?: (google.firestore.v1.StructuredQuery.IFieldReference[]|null);
-                }
-
-                /** Represents a Projection. */
-                class Projection implements IProjection {
-
-                    /**
-                     * Constructs a new Projection.
-                     * @param [properties] Properties to set
-                     */
-                    constructor(properties?: google.firestore.v1.StructuredQuery.IProjection);
-
-                    /** Projection fields. */
-                    public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
-
-                    /**
-                     * Creates a Projection message from a plain object. Also converts values to their respective internal types.
-                     * @param object Plain object
-                     * @returns Projection
-                     */
-                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.Projection;
-
-                    /**
-                     * Creates a plain object from a Projection message. Also converts values to other types if specified.
-                     * @param message Projection
-                     * @param [options] Conversion options
-                     * @returns Plain object
-                     */
-                    public static toObject(message: google.firestore.v1.StructuredQuery.Projection, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                    /**
-                     * Converts this Projection to JSON.
-                     * @returns JSON object
-                     */
-                    public toJSON(): { [k: string]: any };
-                }
-
                 /** Properties of an UnaryFilter. */
                 interface IUnaryFilter {
 
@@ -5513,6 +5614,47 @@ export namespace google {
 
                     /**
                      * Converts this Order to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                /** Properties of a Projection. */
+                interface IProjection {
+
+                    /** Projection fields */
+                    fields?: (google.firestore.v1.StructuredQuery.IFieldReference[]|null);
+                }
+
+                /** Represents a Projection. */
+                class Projection implements IProjection {
+
+                    /**
+                     * Constructs a new Projection.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IProjection);
+
+                    /** Projection fields. */
+                    public fields: google.firestore.v1.StructuredQuery.IFieldReference[];
+
+                    /**
+                     * Creates a Projection message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Projection
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.Projection;
+
+                    /**
+                     * Creates a plain object from a Projection message. Also converts values to other types if specified.
+                     * @param message Projection
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.Projection, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Projection to JSON.
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
