@@ -898,6 +898,118 @@ describe('v1.FirestoreClient', () => {
     });
   });
 
+  describe('batchWrite', () => {
+    it('invokes batchWrite without error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.BatchWriteRequest()
+      );
+      request.database = '';
+      const expectedHeaderRequestParams = 'database=';
+      const expectedOptions = {
+        otherArgs: {
+          headers: {
+            'x-goog-request-params': expectedHeaderRequestParams,
+          },
+        },
+      };
+      const expectedResponse = generateSampleMessage(
+        new protos.google.firestore.v1.BatchWriteResponse()
+      );
+      client.innerApiCalls.batchWrite = stubSimpleCall(expectedResponse);
+      const [response] = await client.batchWrite(request);
+      assert.deepStrictEqual(response, expectedResponse);
+      assert(
+        (client.innerApiCalls.batchWrite as SinonStub)
+          .getCall(0)
+          .calledWith(request, expectedOptions, undefined)
+      );
+    });
+
+    it('invokes batchWrite without error using callback', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.BatchWriteRequest()
+      );
+      request.database = '';
+      const expectedHeaderRequestParams = 'database=';
+      const expectedOptions = {
+        otherArgs: {
+          headers: {
+            'x-goog-request-params': expectedHeaderRequestParams,
+          },
+        },
+      };
+      const expectedResponse = generateSampleMessage(
+        new protos.google.firestore.v1.BatchWriteResponse()
+      );
+      client.innerApiCalls.batchWrite = stubSimpleCallWithCallback(
+        expectedResponse
+      );
+      const promise = new Promise((resolve, reject) => {
+        client.batchWrite(
+          request,
+          (
+            err?: Error | null,
+            result?: protos.google.firestore.v1.IBatchWriteResponse | null
+          ) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+      });
+      const response = await promise;
+      assert.deepStrictEqual(response, expectedResponse);
+      assert(
+        (client.innerApiCalls.batchWrite as SinonStub)
+          .getCall(0)
+          .calledWith(request, expectedOptions /*, callback defined above */)
+      );
+    });
+
+    it('invokes batchWrite with error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.BatchWriteRequest()
+      );
+      request.database = '';
+      const expectedHeaderRequestParams = 'database=';
+      const expectedOptions = {
+        otherArgs: {
+          headers: {
+            'x-goog-request-params': expectedHeaderRequestParams,
+          },
+        },
+      };
+      const expectedError = new Error('expected');
+      client.innerApiCalls.batchWrite = stubSimpleCall(
+        undefined,
+        expectedError
+      );
+      await assert.rejects(client.batchWrite(request), expectedError);
+      assert(
+        (client.innerApiCalls.batchWrite as SinonStub)
+          .getCall(0)
+          .calledWith(request, expectedOptions, undefined)
+      );
+    });
+  });
+
   describe('createDocument', () => {
     it('invokes createDocument without error', async () => {
       const client = new firestoreModule.FirestoreClient({
@@ -1640,6 +1752,290 @@ describe('v1.FirestoreClient', () => {
       );
       assert.strictEqual(
         (client.descriptors.page.listDocuments
+          .asyncIterate as SinonStub).getCall(0).args[2].otherArgs.headers[
+          'x-goog-request-params'
+        ],
+        expectedHeaderRequestParams
+      );
+    });
+  });
+
+  describe('partitionQuery', () => {
+    it('invokes partitionQuery without error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.PartitionQueryRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedOptions = {
+        otherArgs: {
+          headers: {
+            'x-goog-request-params': expectedHeaderRequestParams,
+          },
+        },
+      };
+      const expectedResponse = [
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+      ];
+      client.innerApiCalls.partitionQuery = stubSimpleCall(expectedResponse);
+      const [response] = await client.partitionQuery(request);
+      assert.deepStrictEqual(response, expectedResponse);
+      assert(
+        (client.innerApiCalls.partitionQuery as SinonStub)
+          .getCall(0)
+          .calledWith(request, expectedOptions, undefined)
+      );
+    });
+
+    it('invokes partitionQuery without error using callback', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.PartitionQueryRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedOptions = {
+        otherArgs: {
+          headers: {
+            'x-goog-request-params': expectedHeaderRequestParams,
+          },
+        },
+      };
+      const expectedResponse = [
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+      ];
+      client.innerApiCalls.partitionQuery = stubSimpleCallWithCallback(
+        expectedResponse
+      );
+      const promise = new Promise((resolve, reject) => {
+        client.partitionQuery(
+          request,
+          (
+            err?: Error | null,
+            result?: protos.google.firestore.v1.ICursor[] | null
+          ) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+      });
+      const response = await promise;
+      assert.deepStrictEqual(response, expectedResponse);
+      assert(
+        (client.innerApiCalls.partitionQuery as SinonStub)
+          .getCall(0)
+          .calledWith(request, expectedOptions /*, callback defined above */)
+      );
+    });
+
+    it('invokes partitionQuery with error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.PartitionQueryRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedOptions = {
+        otherArgs: {
+          headers: {
+            'x-goog-request-params': expectedHeaderRequestParams,
+          },
+        },
+      };
+      const expectedError = new Error('expected');
+      client.innerApiCalls.partitionQuery = stubSimpleCall(
+        undefined,
+        expectedError
+      );
+      await assert.rejects(client.partitionQuery(request), expectedError);
+      assert(
+        (client.innerApiCalls.partitionQuery as SinonStub)
+          .getCall(0)
+          .calledWith(request, expectedOptions, undefined)
+      );
+    });
+
+    it('invokes partitionQueryStream without error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.PartitionQueryRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedResponse = [
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+      ];
+      client.descriptors.page.partitionQuery.createStream = stubPageStreamingCall(
+        expectedResponse
+      );
+      const stream = client.partitionQueryStream(request);
+      const promise = new Promise((resolve, reject) => {
+        const responses: protos.google.firestore.v1.Cursor[] = [];
+        stream.on('data', (response: protos.google.firestore.v1.Cursor) => {
+          responses.push(response);
+        });
+        stream.on('end', () => {
+          resolve(responses);
+        });
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      const responses = await promise;
+      assert.deepStrictEqual(responses, expectedResponse);
+      assert(
+        (client.descriptors.page.partitionQuery.createStream as SinonStub)
+          .getCall(0)
+          .calledWith(client.innerApiCalls.partitionQuery, request)
+      );
+      assert.strictEqual(
+        (client.descriptors.page.partitionQuery
+          .createStream as SinonStub).getCall(0).args[2].otherArgs.headers[
+          'x-goog-request-params'
+        ],
+        expectedHeaderRequestParams
+      );
+    });
+
+    it('invokes partitionQueryStream with error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.PartitionQueryRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedError = new Error('expected');
+      client.descriptors.page.partitionQuery.createStream = stubPageStreamingCall(
+        undefined,
+        expectedError
+      );
+      const stream = client.partitionQueryStream(request);
+      const promise = new Promise((resolve, reject) => {
+        const responses: protos.google.firestore.v1.Cursor[] = [];
+        stream.on('data', (response: protos.google.firestore.v1.Cursor) => {
+          responses.push(response);
+        });
+        stream.on('end', () => {
+          resolve(responses);
+        });
+        stream.on('error', (err: Error) => {
+          reject(err);
+        });
+      });
+      await assert.rejects(promise, expectedError);
+      assert(
+        (client.descriptors.page.partitionQuery.createStream as SinonStub)
+          .getCall(0)
+          .calledWith(client.innerApiCalls.partitionQuery, request)
+      );
+      assert.strictEqual(
+        (client.descriptors.page.partitionQuery
+          .createStream as SinonStub).getCall(0).args[2].otherArgs.headers[
+          'x-goog-request-params'
+        ],
+        expectedHeaderRequestParams
+      );
+    });
+
+    it('uses async iteration with partitionQuery without error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.PartitionQueryRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedResponse = [
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+        generateSampleMessage(new protos.google.firestore.v1.Cursor()),
+      ];
+      client.descriptors.page.partitionQuery.asyncIterate = stubAsyncIterationCall(
+        expectedResponse
+      );
+      const responses: protos.google.firestore.v1.ICursor[] = [];
+      const iterable = client.partitionQueryAsync(request);
+      for await (const resource of iterable) {
+        responses.push(resource!);
+      }
+      assert.deepStrictEqual(responses, expectedResponse);
+      assert.deepStrictEqual(
+        (client.descriptors.page.partitionQuery
+          .asyncIterate as SinonStub).getCall(0).args[1],
+        request
+      );
+      assert.strictEqual(
+        (client.descriptors.page.partitionQuery
+          .asyncIterate as SinonStub).getCall(0).args[2].otherArgs.headers[
+          'x-goog-request-params'
+        ],
+        expectedHeaderRequestParams
+      );
+    });
+
+    it('uses async iteration with partitionQuery with error', async () => {
+      const client = new firestoreModule.FirestoreClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.v1.PartitionQueryRequest()
+      );
+      request.parent = '';
+      const expectedHeaderRequestParams = 'parent=';
+      const expectedError = new Error('expected');
+      client.descriptors.page.partitionQuery.asyncIterate = stubAsyncIterationCall(
+        undefined,
+        expectedError
+      );
+      const iterable = client.partitionQueryAsync(request);
+      await assert.rejects(async () => {
+        const responses: protos.google.firestore.v1.ICursor[] = [];
+        for await (const resource of iterable) {
+          responses.push(resource!);
+        }
+      });
+      assert.deepStrictEqual(
+        (client.descriptors.page.partitionQuery
+          .asyncIterate as SinonStub).getCall(0).args[1],
+        request
+      );
+      assert.strictEqual(
+        (client.descriptors.page.partitionQuery
           .asyncIterate as SinonStub).getCall(0).args[2].otherArgs.headers[
           'x-goog-request-params'
         ],

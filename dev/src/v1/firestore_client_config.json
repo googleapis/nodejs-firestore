@@ -70,6 +70,10 @@
           "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
+        "PartitionQuery": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
         "Write": {
           "timeout_millis": 86400000,
           "retry_codes_name": "non_idempotent",
@@ -85,12 +89,12 @@
           "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
-        "CreateDocument": {
-          "timeout_millis": 60000,
+        "BatchWrite": {
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
-        "BatchWrite": {
+        "CreateDocument": {
+          "timeout_millis": 60000,
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         }

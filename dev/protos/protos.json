@@ -879,6 +879,16 @@
                         "(google.api.http).additional_bindings.body": "*"
                       }
                     },
+                    "PartitionQuery": {
+                      "requestType": "PartitionQueryRequest",
+                      "responseType": "PartitionQueryResponse",
+                      "options": {
+                        "(google.api.http).post": "/v1/{parent=projects/*/databases/*/documents}:partitionQuery",
+                        "(google.api.http).body": "*",
+                        "(google.api.http).additional_bindings.post": "/v1/{parent=projects/*/databases/*/documents/*/**}:partitionQuery",
+                        "(google.api.http).additional_bindings.body": "*"
+                      }
+                    },
                     "Write": {
                       "requestType": "WriteRequest",
                       "requestStream": true,
@@ -910,20 +920,20 @@
                         "(google.api.method_signature)": "parent"
                       }
                     },
+                    "BatchWrite": {
+                      "requestType": "BatchWriteRequest",
+                      "responseType": "BatchWriteResponse",
+                      "options": {
+                        "(google.api.http).post": "/v1/{database=projects/*/databases/*}/documents:batchWrite",
+                        "(google.api.http).body": "*"
+                      }
+                    },
                     "CreateDocument": {
                       "requestType": "CreateDocumentRequest",
                       "responseType": "Document",
                       "options": {
                         "(google.api.http).post": "/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}",
                         "(google.api.http).body": "document"
-                      }
-                    },
-                    "BatchWrite": {
-                      "requestType": "BatchWriteRequest",
-                      "responseType": "BatchWriteResponse",
-                      "options": {
-                        "(google.api.http).post": "/v1beta1/{database=projects/*/databases/*}/documents:batchWrite",
-                        "(google.api.http).body": "*"
                       }
                     }
                   }
@@ -1301,6 +1311,53 @@
                     }
                   }
                 },
+                "PartitionQueryRequest": {
+                  "oneofs": {
+                    "queryType": {
+                      "oneof": [
+                        "structuredQuery"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "parent": {
+                      "type": "string",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    },
+                    "structuredQuery": {
+                      "type": "StructuredQuery",
+                      "id": 2
+                    },
+                    "partitionCount": {
+                      "type": "int64",
+                      "id": 3
+                    },
+                    "pageToken": {
+                      "type": "string",
+                      "id": 4
+                    },
+                    "pageSize": {
+                      "type": "int32",
+                      "id": 5
+                    }
+                  }
+                },
+                "PartitionQueryResponse": {
+                  "fields": {
+                    "partitions": {
+                      "rule": "repeated",
+                      "type": "Cursor",
+                      "id": 1
+                    },
+                    "nextPageToken": {
+                      "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
                 "WriteRequest": {
                   "fields": {
                     "database": {
@@ -1562,12 +1619,20 @@
                   "fields": {
                     "database": {
                       "type": "string",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
                     },
                     "writes": {
                       "rule": "repeated",
                       "type": "Write",
                       "id": 2
+                    },
+                    "labels": {
+                      "keyType": "string",
+                      "type": "string",
+                      "id": 3
                     }
                   }
                 },
@@ -1712,15 +1777,6 @@
                         }
                       }
                     },
-                    "Projection": {
-                      "fields": {
-                        "fields": {
-                          "rule": "repeated",
-                          "type": "FieldReference",
-                          "id": 2
-                        }
-                      }
-                    },
                     "UnaryFilter": {
                       "oneofs": {
                         "operandType": {
@@ -1765,6 +1821,15 @@
                         },
                         "direction": {
                           "type": "Direction",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Projection": {
+                      "fields": {
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "FieldReference",
                           "id": 2
                         }
                       }
@@ -3726,6 +3791,10 @@
                 "options": {
                   "type": "FieldOptions",
                   "id": 8
+                },
+                "proto3Optional": {
+                  "type": "bool",
+                  "id": 17
                 }
               },
               "nested": {
@@ -3961,7 +4030,7 @@
                   "type": "bool",
                   "id": 31,
                   "options": {
-                    "default": false
+                    "default": true
                   }
                 },
                 "objcClassPrefix": {

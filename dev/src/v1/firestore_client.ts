@@ -167,6 +167,11 @@ export class FirestoreClient {
         'nextPageToken',
         'documents'
       ),
+      partitionQuery: new this._gaxModule.PageDescriptor(
+        'pageToken',
+        'nextPageToken',
+        'partitions'
+      ),
       listCollectionIds: new this._gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
@@ -246,9 +251,11 @@ export class FirestoreClient {
       'commit',
       'rollback',
       'runQuery',
+      'partitionQuery',
       'write',
       'listen',
       'listCollectionIds',
+      'batchWrite',
       'createDocument',
     ];
     for (const methodName of firestoreStubMethods) {
@@ -376,7 +383,7 @@ export class FirestoreClient {
    *   Reads the document in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads the version of the document at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -860,6 +867,103 @@ export class FirestoreClient {
     this.initialize();
     return this.innerApiCalls.rollback(request, options, callback);
   }
+  batchWrite(
+    request: protos.google.firestore.v1.IBatchWriteRequest,
+    options?: gax.CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | undefined,
+      {} | undefined
+    ]
+  >;
+  batchWrite(
+    request: protos.google.firestore.v1.IBatchWriteRequest,
+    options: gax.CallOptions,
+    callback: Callback<
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  batchWrite(
+    request: protos.google.firestore.v1.IBatchWriteRequest,
+    callback: Callback<
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  /**
+   * Applies a batch of write operations.
+   *
+   * The BatchWrite method does not apply the write operations atomically
+   * and can apply them out of order. Method does not allow more than one write
+   * per document. Each write succeeds or fails independently. See the
+   * {@link google.firestore.v1.BatchWriteResponse|BatchWriteResponse} for the success status of each write.
+   *
+   * If you require an atomically applied set of writes, use
+   * {@link google.firestore.v1.Firestore.Commit|Commit} instead.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.database
+   *   Required. The database name. In the format:
+   *   `projects/{project_id}/databases/{database_id}`.
+   * @param {number[]} request.writes
+   *   The writes to apply.
+   *
+   *   Method does not apply writes atomically and does not guarantee ordering.
+   *   Each write succeeds or fails independently. You cannot write to the same
+   *   document more than once per request.
+   * @param {number[]} request.labels
+   *   Labels associated with this batch write.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [BatchWriteResponse]{@link google.firestore.v1.BatchWriteResponse}.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   */
+  batchWrite(
+    request: protos.google.firestore.v1.IBatchWriteRequest,
+    optionsOrCallback?:
+      | gax.CallOptions
+      | Callback<
+          protos.google.firestore.v1.IBatchWriteResponse,
+          protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | undefined,
+      {} | undefined
+    ]
+  > | void {
+    request = request || {};
+    let options: gax.CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as gax.CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      database: request.database || '',
+    });
+    this.initialize();
+    return this.innerApiCalls.batchWrite(request, options, callback);
+  }
   createDocument(
     request: protos.google.firestore.v1.ICreateDocumentRequest,
     options?: gax.CallOptions
@@ -986,7 +1090,7 @@ export class FirestoreClient {
    *   stream.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1032,7 +1136,7 @@ export class FirestoreClient {
    *   stream.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
@@ -1142,7 +1246,7 @@ export class FirestoreClient {
    *   Reads documents in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -1250,7 +1354,7 @@ export class FirestoreClient {
    *   Reads documents in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -1318,7 +1422,7 @@ export class FirestoreClient {
    *   Reads documents in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -1353,6 +1457,295 @@ export class FirestoreClient {
       (request as unknown) as RequestType,
       callSettings
     ) as AsyncIterable<protos.google.firestore.v1.IDocument>;
+  }
+  partitionQuery(
+    request: protos.google.firestore.v1.IPartitionQueryRequest,
+    options?: gax.CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.v1.ICursor[],
+      protos.google.firestore.v1.IPartitionQueryRequest | null,
+      protos.google.firestore.v1.IPartitionQueryResponse
+    ]
+  >;
+  partitionQuery(
+    request: protos.google.firestore.v1.IPartitionQueryRequest,
+    options: gax.CallOptions,
+    callback: PaginationCallback<
+      protos.google.firestore.v1.IPartitionQueryRequest,
+      protos.google.firestore.v1.IPartitionQueryResponse | null | undefined,
+      protos.google.firestore.v1.ICursor
+    >
+  ): void;
+  partitionQuery(
+    request: protos.google.firestore.v1.IPartitionQueryRequest,
+    callback: PaginationCallback<
+      protos.google.firestore.v1.IPartitionQueryRequest,
+      protos.google.firestore.v1.IPartitionQueryResponse | null | undefined,
+      protos.google.firestore.v1.ICursor
+    >
+  ): void;
+  /**
+   * Partitions a query by returning partition cursors that can be used to run
+   * the query in parallel. The returned partition cursors are split points that
+   * can be used by RunQuery as starting/end points for the query results.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents`.
+   *   Document resource names are not supported; only database resource names
+   *   can be specified.
+   * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
+   *   A structured query.
+   *   Filters, order bys, limits, offsets, and start/end cursors are not
+   *   supported.
+   * @param {number} request.partitionCount
+   *   The desired maximum number of partition points.
+   *   The partitions may be returned across multiple pages of results.
+   *   The number must be strictly positive. The actual number of partitions
+   *   returned may be fewer.
+   *
+   *   For example, this may be set to one fewer than the number of parallel
+   *   queries to be run, or in running a data pipeline job, one fewer than the
+   *   number of workers or compute instances available.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous call to
+   *   PartitionQuery that may be used to get an additional set of results.
+   *   There are no ordering guarantees between sets of results. Thus, using
+   *   multiple sets of results will require merging the different result sets.
+   *
+   *   For example, two subsequent calls using a page_token may return:
+   *
+   *    * cursor B, cursor M, cursor Q
+   *    * cursor A, cursor U, cursor W
+   *
+   *   To obtain a complete result set ordered with respect to the results of the
+   *   query supplied to PartitionQuery, the results sets should be merged:
+   *   cursor A, cursor B, cursor M, cursor Q, cursor U, cursor W
+   * @param {number} request.pageSize
+   *   The maximum number of partitions to return in this call, subject to
+   *   `partition_count`.
+   *
+   *   For example, if `partition_count` = 10 and `page_size` = 8, the first call
+   *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
+   *   if more results exist. A second call to PartitionQuery will return up to
+   *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is Array of [Cursor]{@link google.firestore.v1.Cursor}.
+   *   The client library support auto-pagination by default: it will call the API as many
+   *   times as needed and will merge results from all the pages into this array.
+   *
+   *   When autoPaginate: false is specified through options, the array has three elements.
+   *   The first element is Array of [Cursor]{@link google.firestore.v1.Cursor} that corresponds to
+   *   the one page received from the API server.
+   *   If the second element is not null it contains the request object of type [PartitionQueryRequest]{@link google.firestore.v1.PartitionQueryRequest}
+   *   that can be used to obtain the next page of the results.
+   *   If it is null, the next page does not exist.
+   *   The third element contains the raw response received from the API server. Its type is
+   *   [PartitionQueryResponse]{@link google.firestore.v1.PartitionQueryResponse}.
+   *
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   */
+  partitionQuery(
+    request: protos.google.firestore.v1.IPartitionQueryRequest,
+    optionsOrCallback?:
+      | gax.CallOptions
+      | PaginationCallback<
+          protos.google.firestore.v1.IPartitionQueryRequest,
+          protos.google.firestore.v1.IPartitionQueryResponse | null | undefined,
+          protos.google.firestore.v1.ICursor
+        >,
+    callback?: PaginationCallback<
+      protos.google.firestore.v1.IPartitionQueryRequest,
+      protos.google.firestore.v1.IPartitionQueryResponse | null | undefined,
+      protos.google.firestore.v1.ICursor
+    >
+  ): Promise<
+    [
+      protos.google.firestore.v1.ICursor[],
+      protos.google.firestore.v1.IPartitionQueryRequest | null,
+      protos.google.firestore.v1.IPartitionQueryResponse
+    ]
+  > | void {
+    request = request || {};
+    let options: gax.CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as gax.CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    this.initialize();
+    return this.innerApiCalls.partitionQuery(request, options, callback);
+  }
+
+  /**
+   * Equivalent to {@link partitionQuery}, but returns a NodeJS Stream object.
+   *
+   * This fetches the paged responses for {@link partitionQuery} continuously
+   * and invokes the callback registered for 'data' event for each element in the
+   * responses.
+   *
+   * The returned object has 'end' method when no more elements are required.
+   *
+   * autoPaginate option will be ignored.
+   *
+   * @see {@link https://nodejs.org/api/stream.html}
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents`.
+   *   Document resource names are not supported; only database resource names
+   *   can be specified.
+   * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
+   *   A structured query.
+   *   Filters, order bys, limits, offsets, and start/end cursors are not
+   *   supported.
+   * @param {number} request.partitionCount
+   *   The desired maximum number of partition points.
+   *   The partitions may be returned across multiple pages of results.
+   *   The number must be strictly positive. The actual number of partitions
+   *   returned may be fewer.
+   *
+   *   For example, this may be set to one fewer than the number of parallel
+   *   queries to be run, or in running a data pipeline job, one fewer than the
+   *   number of workers or compute instances available.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous call to
+   *   PartitionQuery that may be used to get an additional set of results.
+   *   There are no ordering guarantees between sets of results. Thus, using
+   *   multiple sets of results will require merging the different result sets.
+   *
+   *   For example, two subsequent calls using a page_token may return:
+   *
+   *    * cursor B, cursor M, cursor Q
+   *    * cursor A, cursor U, cursor W
+   *
+   *   To obtain a complete result set ordered with respect to the results of the
+   *   query supplied to PartitionQuery, the results sets should be merged:
+   *   cursor A, cursor B, cursor M, cursor Q, cursor U, cursor W
+   * @param {number} request.pageSize
+   *   The maximum number of partitions to return in this call, subject to
+   *   `partition_count`.
+   *
+   *   For example, if `partition_count` = 10 and `page_size` = 8, the first call
+   *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
+   *   if more results exist. A second call to PartitionQuery will return up to
+   *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Stream}
+   *   An object stream which emits an object representing [Cursor]{@link google.firestore.v1.Cursor} on 'data' event.
+   */
+  partitionQueryStream(
+    request?: protos.google.firestore.v1.IPartitionQueryRequest,
+    options?: gax.CallOptions
+  ): Transform {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.partitionQuery.createStream(
+      this.innerApiCalls.partitionQuery as gax.GaxCall,
+      request,
+      callSettings
+    );
+  }
+
+  /**
+   * Equivalent to {@link partitionQuery}, but returns an iterable object.
+   *
+   * for-await-of syntax is used with the iterable to recursively get response element on-demand.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents`.
+   *   Document resource names are not supported; only database resource names
+   *   can be specified.
+   * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
+   *   A structured query.
+   *   Filters, order bys, limits, offsets, and start/end cursors are not
+   *   supported.
+   * @param {number} request.partitionCount
+   *   The desired maximum number of partition points.
+   *   The partitions may be returned across multiple pages of results.
+   *   The number must be strictly positive. The actual number of partitions
+   *   returned may be fewer.
+   *
+   *   For example, this may be set to one fewer than the number of parallel
+   *   queries to be run, or in running a data pipeline job, one fewer than the
+   *   number of workers or compute instances available.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous call to
+   *   PartitionQuery that may be used to get an additional set of results.
+   *   There are no ordering guarantees between sets of results. Thus, using
+   *   multiple sets of results will require merging the different result sets.
+   *
+   *   For example, two subsequent calls using a page_token may return:
+   *
+   *    * cursor B, cursor M, cursor Q
+   *    * cursor A, cursor U, cursor W
+   *
+   *   To obtain a complete result set ordered with respect to the results of the
+   *   query supplied to PartitionQuery, the results sets should be merged:
+   *   cursor A, cursor B, cursor M, cursor Q, cursor U, cursor W
+   * @param {number} request.pageSize
+   *   The maximum number of partitions to return in this call, subject to
+   *   `partition_count`.
+   *
+   *   For example, if `partition_count` = 10 and `page_size` = 8, the first call
+   *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
+   *   if more results exist. A second call to PartitionQuery will return up to
+   *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Object}
+   *   An iterable Object that conforms to @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols.
+   */
+  partitionQueryAsync(
+    request?: protos.google.firestore.v1.IPartitionQueryRequest,
+    options?: gax.CallOptions
+  ): AsyncIterable<protos.google.firestore.v1.ICursor> {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    options = options || {};
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.partitionQuery.asyncIterate(
+      this.innerApiCalls['partitionQuery'] as GaxCall,
+      (request as unknown) as RequestType,
+      callSettings
+    ) as AsyncIterable<protos.google.firestore.v1.ICursor>;
   }
   listCollectionIds(
     request: protos.google.firestore.v1.IListCollectionIdsRequest,

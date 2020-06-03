@@ -146,10 +146,10 @@ s.replace(
 
 os.rename("dev/.gitignore", ".gitignore")
 os.rename("dev/.eslintignore", ".eslintignore")
-os.rename("dev/.eslintrc.json", ".eslintrc.json")
 os.rename("dev/.mocharc.js", ".mocharc.js")
 os.rename("dev/.jsdoc.js", ".jsdoc.js")
 os.rename("dev/.prettierrc.js", ".prettierrc.js")
+os.unlink("dev/.eslintrc.json")
 
 s.replace(".jsdoc.js", "protos", "build/protos", 1)
 
@@ -159,7 +159,7 @@ templates = common_templates.node_library(
     source_location="build/src", test_project="node-gcloud-ci"
 )
 
-s.copy(templates)
+s.copy(templates, excludes=[".eslintrc.json"])
 
 # Remove auto-generated packaging tests
 os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
