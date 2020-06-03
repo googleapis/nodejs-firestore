@@ -146,7 +146,6 @@ s.replace(
 
 os.rename("dev/.gitignore", ".gitignore")
 os.rename("dev/.eslintignore", ".eslintignore")
-os.rename("dev/.eslintrc.json", ".eslintrc.json")
 os.rename("dev/.mocharc.js", ".mocharc.js")
 os.rename("dev/.jsdoc.js", ".jsdoc.js")
 os.rename("dev/.prettierrc.js", ".prettierrc.js")
