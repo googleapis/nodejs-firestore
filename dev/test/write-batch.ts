@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {DocumentData} from '@google-cloud/firestore';
+
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 
@@ -23,7 +25,6 @@ import {
   Timestamp,
   WriteBatch,
   WriteResult,
-  DocumentData,
   QueryDocumentSnapshot,
 } from '../src';
 import {BatchWriteResult} from '../src/write-batch';

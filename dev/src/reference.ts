@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {Transform} from 'stream';
 import * as deepEqual from 'fast-deep-equal';
 
-import {firestore, google} from '../protos/firestore_v1_proto_api';
+import * as protos from '../protos/firestore_v1_proto_api';
 
 import {
   DocumentSnapshot,
@@ -37,16 +39,7 @@ import {
 } from './path';
 import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
-import {
-  defaultConverter,
-  DocumentData,
-  FirestoreDataConverter,
-  OrderByDirection,
-  Precondition,
-  SetOptions,
-  UpdateData,
-  WhereFilterOp,
-} from './types';
+import {defaultConverter} from './types';
 import {autoId, requestTag, wrapError} from './util';
 import {
   invalidArgumentMessage,
@@ -58,7 +51,7 @@ import {
 import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
-import api = google.firestore.v1;
+import api = protos.google.firestore.v1;
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -122,7 +115,8 @@ const comparisonOperators: {
  *
  * @class
  */
-export class DocumentReference<T = DocumentData> implements Serializable {
+export class DocumentReference<T = firestore.DocumentData>
+  implements Serializable, firestore.DocumentReference<T> {
   /**
    * @hideconstructor
    *
@@ -288,7 +282,9 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *   }
    * });
    */
-  listCollections(): Promise<Array<CollectionReference<DocumentData>>> {
+  listCollections(): Promise<
+    Array<CollectionReference<firestore.DocumentData>>
+  > {
     const tag = requestTag();
     return this.firestore.initializeIfNeeded(tag).then(() => {
       const request: api.IListCollectionIdsRequest = {
@@ -305,7 +301,9 @@ export class DocumentReference<T = DocumentData> implements Serializable {
           tag
         )
         .then(collectionIds => {
-          const collections: Array<CollectionReference<DocumentData>> = [];
+          const collections: Array<CollectionReference<
+            firestore.DocumentData
+          >> = [];
 
           // We can just sort this list using the default comparator since it
           // will only contain collection ids.
@@ -367,7 +365,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *   console.log('Document successfully deleted.');
    * });
    */
-  delete(precondition?: Precondition): Promise<WriteResult> {
+  delete(precondition?: firestore.Precondition): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .delete(this, precondition)
@@ -375,7 +373,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
       .then(([writeResult]) => writeResult);
   }
 
-  set(data: Partial<T>, options: SetOptions): Promise<WriteResult>;
+  set(data: Partial<T>, options: firestore.SetOptions): Promise<WriteResult>;
   set(data: T): Promise<WriteResult>;
   /**
    * Writes to the document referred to by this DocumentReference. If the
@@ -400,7 +398,10 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    *   console.log(`Document written at ${res.updateTime}`);
    * });
    */
-  set(data: T | Partial<T>, options?: SetOptions): Promise<WriteResult> {
+  set(
+    data: T | Partial<T>,
+    options?: firestore.SetOptions
+  ): Promise<WriteResult> {
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
       .set(this, data, options)
@@ -438,19 +439,17 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    * });
    */
   update(
-    dataOrField: UpdateData | string | FieldPath,
-    ...preconditionOrValues: Array<unknown | string | FieldPath | Precondition>
+    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
+    ...preconditionOrValues: Array<
+      unknown | string | firestore.FieldPath | firestore.Precondition
+    >
   ): Promise<WriteResult> {
     // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('DocumentReference.update', arguments, 1);
 
     const writeBatch = new WriteBatch(this._firestore);
     return writeBatch
-      .update(
-        this as DocumentReference<unknown>,
-        dataOrField,
-        ...preconditionOrValues
-      )
+      .update(this, dataOrField, ...preconditionOrValues)
       .commit()
       .then(([writeResult]) => writeResult);
   }
@@ -482,7 +481,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    * unsubscribe();
    */
   onSnapshot(
-    onNext: (snapshot: DocumentSnapshot<T>) => void,
+    onNext: (snapshot: firestore.DocumentSnapshot<T>) => void,
     onError?: (error: Error) => void
   ): () => void {
     validateFunction('onNext', onNext);
@@ -517,7 +516,7 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    * @return {boolean} true if this `DocumentReference` is equal to the provided
    * value.
    */
-  isEqual(other: DocumentReference<T>): boolean {
+  isEqual(other: firestore.DocumentReference<T>): boolean {
     return (
       this === other ||
       (other instanceof DocumentReference &&
@@ -581,7 +580,9 @@ export class DocumentReference<T = DocumentData> implements Serializable {
    * Firestore.
    * @return A DocumentReference<U> that uses the provided converter.
    */
-  withConverter<U>(converter: FirestoreDataConverter<U>): DocumentReference<U> {
+  withConverter<U>(
+    converter: firestore.FirestoreDataConverter<U>
+  ): DocumentReference<U> {
     return new DocumentReference<U>(this.firestore, this._path, converter);
   }
 }
@@ -708,7 +709,8 @@ class FieldFilter {
  *
  * @class QuerySnapshot
  */
-export class QuerySnapshot<T = DocumentData> {
+export class QuerySnapshot<T = firestore.DocumentData>
+  implements firestore.QuerySnapshot<T> {
   private _materializedDocs: Array<QueryDocumentSnapshot<T>> | null = null;
   private _materializedChanges: Array<DocumentChange<T>> | null = null;
   private _docs: (() => Array<QueryDocumentSnapshot<T>>) | null = null;
@@ -887,7 +889,7 @@ export class QuerySnapshot<T = DocumentData> {
    * });
    */
   forEach(
-    callback: (result: QueryDocumentSnapshot<T>) => void,
+    callback: (result: firestore.QueryDocumentSnapshot<T>) => void,
     thisArg?: unknown
   ): void {
     validateFunction('callback', callback);
@@ -905,7 +907,7 @@ export class QuerySnapshot<T = DocumentData> {
    * @return {boolean} true if this `QuerySnapshot` is equal to the provided
    * value.
    */
-  isEqual(other: QuerySnapshot<T>): boolean {
+  isEqual(other: firestore.QuerySnapshot<T>): boolean {
     // Since the read time is different on every query read, we explicitly
     // ignore all metadata in this comparison.
 
@@ -966,7 +968,7 @@ export class QueryOptions<T> {
   constructor(
     readonly parentPath: ResourcePath,
     readonly collectionId: string,
-    readonly converter: FirestoreDataConverter<T>,
+    readonly converter: firestore.FirestoreDataConverter<T>,
     readonly allDescendants: boolean,
     readonly fieldFilters: FieldFilter[],
     readonly fieldOrders: FieldOrder[],
@@ -1035,7 +1037,9 @@ export class QueryOptions<T> {
     );
   }
 
-  withConverter<U>(converter: FirestoreDataConverter<U>): QueryOptions<U> {
+  withConverter<U>(
+    converter: firestore.FirestoreDataConverter<U>
+  ): QueryOptions<U> {
     return new QueryOptions<U>(
       this.parentPath,
       this.collectionId,
@@ -1084,7 +1088,7 @@ export class QueryOptions<T> {
  *
  * @class Query
  */
-export class Query<T = DocumentData> {
+export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   private readonly _serializer: Serializer;
   protected readonly _allowUndefined: boolean;
 
@@ -1203,8 +1207,8 @@ export class Query<T = DocumentData> {
    * });
    */
   where(
-    fieldPath: string | FieldPath,
-    opStr: WhereFilterOp,
+    fieldPath: string | firestore.FieldPath,
+    opStr: firestore.WhereFilterOp,
     value: unknown
   ): Query<T> {
     validateFieldPath('fieldPath', fieldPath);
@@ -1319,8 +1323,8 @@ export class Query<T = DocumentData> {
    * });
    */
   orderBy(
-    fieldPath: string | FieldPath,
-    directionStr?: OrderByDirection
+    fieldPath: string | firestore.FieldPath,
+    directionStr?: firestore.OrderByDirection
   ): Query<T> {
     validateFieldPath('fieldPath', fieldPath);
     directionStr = validateQueryOrder('directionStr', directionStr);
@@ -1432,7 +1436,7 @@ export class Query<T = DocumentData> {
    * @param {*} other The value to compare against.
    * @return {boolean} true if this `Query` is equal to the provided value.
    */
-  isEqual(other: Query<T>): boolean {
+  isEqual(other: firestore.Query<T>): boolean {
     if (this === other) {
       return true;
     }
@@ -1631,7 +1635,9 @@ export class Query<T = DocumentData> {
    * });
    */
   startAt(
-    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+    ...fieldValuesOrDocumentSnapshot: Array<
+      firestore.DocumentSnapshot<unknown> | unknown
+    >
   ): Query<T> {
     validateMinNumberOfArguments(
       'Query.startAt',
@@ -1673,7 +1679,9 @@ export class Query<T = DocumentData> {
    * });
    */
   startAfter(
-    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+    ...fieldValuesOrDocumentSnapshot: Array<
+      firestore.DocumentSnapshot<unknown> | unknown
+    >
   ): Query<T> {
     validateMinNumberOfArguments(
       'Query.startAfter',
@@ -1714,7 +1722,9 @@ export class Query<T = DocumentData> {
    * });
    */
   endBefore(
-    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+    ...fieldValuesOrDocumentSnapshot: Array<
+      firestore.DocumentSnapshot<unknown> | unknown
+    >
   ): Query<T> {
     validateMinNumberOfArguments(
       'Query.endBefore',
@@ -1755,7 +1765,9 @@ export class Query<T = DocumentData> {
    * });
    */
   endAt(
-    ...fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
+    ...fieldValuesOrDocumentSnapshot: Array<
+      firestore.DocumentSnapshot<unknown> | unknown
+    >
   ): Query<T> {
     validateMinNumberOfArguments(
       'Query.endAt',
@@ -1962,14 +1974,14 @@ export class Query<T = DocumentData> {
   /**
    * Converts current Query to an IBundledQuery.
    */
-  toBundledQuery(): firestore.IBundledQuery {
+  toBundledQuery(): protos.firestore.IBundledQuery {
     const projectId = this.firestore.projectId;
     const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
       projectId
     );
     const structuredQuery = this.toStructuredQuery();
 
-    const bundledQuery: firestore.IBundledQuery = {
+    const bundledQuery: protos.firestore.IBundledQuery = {
       parent: parentPath.formattedName,
       structuredQuery,
     };
@@ -2110,7 +2122,7 @@ export class Query<T = DocumentData> {
    * unsubscribe();
    */
   onSnapshot(
-    onNext: (snapshot: QuerySnapshot<T>) => void,
+    onNext: (snapshot: firestore.QuerySnapshot<T>) => void,
     onError?: (error: Error) => void
   ): () => void {
     validateFunction('onNext', onNext);
@@ -2220,7 +2232,7 @@ export class Query<T = DocumentData> {
    * Firestore.
    * @return A Query<U> that uses the provided converter.
    */
-  withConverter<U>(converter: FirestoreDataConverter<U>): Query<U> {
+  withConverter<U>(converter: firestore.FirestoreDataConverter<U>): Query<U> {
     return new Query<U>(
       this.firestore,
       this._queryOptions.withConverter(converter)
@@ -2236,7 +2248,8 @@ export class Query<T = DocumentData> {
  * @class
  * @extends Query
  */
-export class CollectionReference<T = DocumentData> extends Query<T> {
+export class CollectionReference<T = firestore.DocumentData> extends Query<T>
+  implements firestore.CollectionReference<T> {
   /**
    * @hideconstructor
    *
@@ -2246,7 +2259,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
   constructor(
     firestore: Firestore,
     path: ResourcePath,
-    converter?: FirestoreDataConverter<T>
+    converter?: firestore.FirestoreDataConverter<T>
   ) {
     super(firestore, QueryOptions.forCollectionQuery(path, converter));
   }
@@ -2289,7 +2302,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    * let documentRef = collectionRef.parent;
    * console.log(`Parent name: ${documentRef.path}`);
    */
-  get parent(): DocumentReference<DocumentData> {
+  get parent(): DocumentReference<firestore.DocumentData> {
     return new DocumentReference(this.firestore, this._queryOptions.parentPath);
   }
 
@@ -2448,7 +2461,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    * @return {boolean} true if this `CollectionReference` is equal to the
    * provided value.
    */
-  isEqual(other: CollectionReference<T>): boolean {
+  isEqual(other: firestore.CollectionReference<T>): boolean {
     return (
       this === other ||
       (other instanceof CollectionReference && super.isEqual(other))
@@ -2501,7 +2514,7 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
    * @return A CollectionReference<U> that uses the provided converter.
    */
   withConverter<U>(
-    converter: FirestoreDataConverter<U>
+    converter: firestore.FirestoreDataConverter<U>
   ): CollectionReference<U> {
     return new CollectionReference<U>(
       this.firestore,
@@ -2524,11 +2537,11 @@ export class CollectionReference<T = DocumentData> extends Query<T> {
 export function validateQueryOrder(
   arg: string,
   op: unknown
-): OrderByDirection | undefined {
+): firestore.OrderByDirection | undefined {
   // For backwards compatibility, we support both lower and uppercase values.
   op = typeof op === 'string' ? op.toLowerCase() : op;
   validateEnumValue(arg, op, Object.keys(directionOperators), {optional: true});
-  return op as OrderByDirection | undefined;
+  return op as firestore.OrderByDirection | undefined;
 }
 
 /**
@@ -2546,7 +2559,7 @@ export function validateQueryOperator(
   arg: string | number,
   op: unknown,
   fieldValue: unknown
-): WhereFilterOp {
+): firestore.WhereFilterOp {
   // For backwards compatibility, we support both `=` and `==` for "equals".
   op = op === '=' ? '==' : op;
 
@@ -2564,7 +2577,7 @@ export function validateQueryOperator(
     );
   }
 
-  return op as WhereFilterOp;
+  return op as firestore.WhereFilterOp;
 }
 
 /**
@@ -2573,14 +2586,16 @@ export function validateQueryOperator(
  * @private
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The argument to validate.
+ * @return the DocumentReference if valid
  */
 export function validateDocumentReference(
   arg: string | number,
   value: unknown
-): void {
+): DocumentReference {
   if (!(value instanceof DocumentReference)) {
     throw new Error(invalidArgumentMessage(arg, 'DocumentReference'));
   }
+  return value;
 }
 
 /**

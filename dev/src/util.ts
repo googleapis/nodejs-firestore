@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {DocumentData} from '@google-cloud/firestore';
+
 import {randomBytes} from 'crypto';
 import {GoogleError, ServiceConfig, Status} from 'google-gax';
-
-import {DocumentData} from './types';
 
 /**
  * A Promise implementation that supports deferred resolution.

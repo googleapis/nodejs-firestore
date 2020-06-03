@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {google} from '../protos/firestore_v1_proto_api';
 import {validateInteger} from './validate';
 
@@ -55,7 +57,7 @@ const MAX_SECONDS = 253402300799;
  *
  * @see https://github.com/google/protobuf/blob/master/src/google/protobuf/timestamp.proto
  */
-export class Timestamp {
+export class Timestamp implements firestore.Timestamp {
   private readonly _seconds: number;
   private readonly _nanoseconds: number;
 
@@ -238,7 +240,7 @@ export class Timestamp {
    * @param {any} other The `Timestamp` to compare against.
    * @return {boolean} 'true' if this `Timestamp` is equal to the provided one.
    */
-  isEqual(other: Timestamp): boolean {
+  isEqual(other: firestore.Timestamp): boolean {
     return (
       this === other ||
       (other instanceof Timestamp &&

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import * as assert from 'assert';
 import * as rbtree from 'functional-red-black-tree';
 import {GoogleError, Status} from 'google-gax';
@@ -27,12 +29,7 @@ import {DocumentReference, Firestore, Query} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {
-  defaultConverter,
-  DocumentData,
-  FirestoreDataConverter,
-  RBTree,
-} from './types';
+import {defaultConverter, RBTree} from './types';
 import {requestTag} from './util';
 
 import api = google.firestore.v1;
@@ -105,7 +102,7 @@ type DocumentComparator<T> = (
   r: QueryDocumentSnapshot<T>
 ) => number;
 
-interface DocumentChangeSet<T = DocumentData> {
+interface DocumentChangeSet<T = firestore.DocumentData> {
   deletes: string[];
   adds: Array<QueryDocumentSnapshot<T>>;
   updates: Array<QueryDocumentSnapshot<T>>;
@@ -118,7 +115,7 @@ interface DocumentChangeSet<T = DocumentData> {
  * @class
  * @private
  */
-abstract class Watch<T = DocumentData> {
+abstract class Watch<T = firestore.DocumentData> {
   protected readonly firestore: Firestore;
   private readonly backoff: ExponentialBackoff;
   private readonly requestTag: string;
@@ -765,7 +762,7 @@ abstract class Watch<T = DocumentData> {
  *
  * @private
  */
-export class DocumentWatch<T = DocumentData> extends Watch<T> {
+export class DocumentWatch<T = firestore.DocumentData> extends Watch<T> {
   constructor(
     firestore: Firestore,
     private readonly ref: DocumentReference<T>
@@ -794,13 +791,13 @@ export class DocumentWatch<T = DocumentData> extends Watch<T> {
  *
  * @private
  */
-export class QueryWatch<T = DocumentData> extends Watch<T> {
+export class QueryWatch<T = firestore.DocumentData> extends Watch<T> {
   private comparator: DocumentComparator<T>;
 
   constructor(
     firestore: Firestore,
     private readonly query: Query<T>,
-    converter?: FirestoreDataConverter<T>
+    converter?: firestore.FirestoreDataConverter<T>
   ) {
     super(firestore, converter);
     this.comparator = query.comparator();

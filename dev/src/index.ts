@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {CallOptions, grpc} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
 import {URL} from 'url';
@@ -48,8 +50,6 @@ import {
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
   GapicClient,
-  ReadOptions,
-  Settings,
   UnaryMethod,
 } from './types';
 import {
@@ -90,15 +90,7 @@ export {DocumentChange} from './document-change';
 export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {setLogFunction} from './logger';
-export {
-  BulkWriterOptions,
-  FirestoreDataConverter,
-  UpdateData,
-  DocumentData,
-  Settings,
-  Precondition,
-  SetOptions,
-} from './types';
+export {BulkWriterOptions} from './types';
 export {Status as GrpcStatus} from 'google-gax';
 
 const libVersion = require('../../package.json').version;
@@ -311,7 +303,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * region_tag:firestore_quickstart
  * Full quickstart example:
  */
-export class Firestore {
+export class Firestore implements firestore.Firestore {
   /**
    * A client pool to distribute requests over multiple GAPIC clients in order
    * to work around a connection limit of 100 concurrent requests per client.
@@ -323,7 +315,7 @@ export class Firestore {
    * The configuration options for the GAPIC client.
    * @private
    */
-  _settings: Settings = {};
+  _settings: firestore.Settings = {};
 
   /**
    * Settings for the exponential backoff used by the streaming endpoints.
@@ -406,13 +398,18 @@ export class Firestore {
    * can specify a `keyFilename` instead.
    * @param {string=} settings.host The host to connect to.
    * @param {boolean=} settings.ssl Whether to use SSL when connecting.
-   * @param {number=} settings.maxIdleChannels  The maximum number of idle GRPC
+   * @param {number=} settings.maxIdleChannels The maximum number of idle GRPC
    * channels to keep. A smaller number of idle channels reduces memory usage
    * but increases request latency for clients with fluctuating request rates.
    * If set to 0, shuts down all GRPC channels when the client becomes idle.
    * Defaults to 1.
+   * @param {boolean=} settings.ignoreUndefinedProperties Whether to skip nested
+   * properties that are set to `undefined` during object serialization. If set
+   * to `true`, these properties are skipped and not written to Firestore. If
+   * set `false` or omitted, the SDK throws an exception when it encounters
+   * properties of type `undefined`.
    */
-  constructor(settings?: Settings) {
+  constructor(settings?: firestore.Settings) {
     const libraryHeader = {
       libName: 'gccl',
       libVersion,
@@ -428,7 +425,7 @@ export class Firestore {
         process.env.FIRESTORE_EMULATOR_HOST
       );
 
-      const emulatorSettings: Settings = {
+      const emulatorSettings: firestore.Settings = {
         ...settings,
         ...libraryHeader,
         host: process.env.FIRESTORE_EMULATOR_HOST,
@@ -517,7 +514,7 @@ export class Firestore {
    *
    * @param {object} settings The settings to use for all Firestore operations.
    */
-  settings(settings: Settings): void {
+  settings(settings: firestore.Settings): void {
     validateObject('settings', settings);
     validateString('settings.projectId', settings.projectId, {optional: true});
 
@@ -534,7 +531,7 @@ export class Firestore {
     this._settingsFrozen = true;
   }
 
-  private validateAndApplySettings(settings: Settings): void {
+  private validateAndApplySettings(settings: firestore.Settings): void {
     if (settings.projectId !== undefined) {
       validateString('settings.projectId', settings.projectId);
       this._projectId = settings.projectId;
@@ -983,7 +980,9 @@ export class Firestore {
    * });
    */
   getAll<T>(
-    ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+    ...documentRefsOrReadOptions: Array<
+      firestore.DocumentReference<T> | firestore.ReadOptions
+    >
   ): Promise<Array<DocumentSnapshot<T>>> {
     validateMinNumberOfArguments(
       'Firestore.getAll',
@@ -1018,8 +1017,8 @@ export class Firestore {
    * @returns A Promise that contains an array with the resulting documents.
    */
   getAll_<T>(
-    docRefs: Array<DocumentReference<T>>,
-    fieldMask: FieldPath[] | null,
+    docRefs: Array<firestore.DocumentReference<T>>,
+    fieldMask: firestore.FieldPath[] | null,
     requestTag: string,
     transactionId?: Uint8Array
   ): Promise<Array<DocumentSnapshot<T>>> {
@@ -1027,7 +1026,7 @@ export class Firestore {
     const retrievedDocuments = new Map<string, DocumentSnapshot>();
 
     for (const docRef of docRefs) {
-      requestedDocuments.add(docRef.formattedName);
+      requestedDocuments.add((docRef as DocumentReference<T>).formattedName);
     }
 
     const request: api.IBatchGetDocumentsRequest = {
@@ -1037,7 +1036,9 @@ export class Firestore {
     };
 
     if (fieldMask) {
-      const fieldPaths = fieldMask.map(fieldPath => fieldPath.formattedName);
+      const fieldPaths = fieldMask.map(
+        fieldPath => (fieldPath as FieldPath).formattedName
+      );
       request.mask = {fieldPaths};
     }
 
@@ -1108,7 +1109,9 @@ export class Firestore {
                 if (document !== undefined) {
                   // Recreate the DocumentSnapshot with the DocumentReference
                   // containing the original converter.
-                  const finalDoc = new DocumentSnapshotBuilder(docRef);
+                  const finalDoc = new DocumentSnapshotBuilder(
+                    docRef as DocumentReference<T>
+                  );
                   finalDoc.fieldsProto = document._fieldsProto;
                   finalDoc.readTime = document.readTime;
                   finalDoc.createTime = document.createTime;

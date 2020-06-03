@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {DocumentData} from '@google-cloud/firestore';
+
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 import {Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
-import {
-  DocumentData,
-  Firestore,
-  setLogFunction,
-  Timestamp,
-  WriteResult,
-} from '../src';
+import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
 import {BulkWriter} from '../src/bulk-writer';
 import {Deferred} from '../src/util';
 import {

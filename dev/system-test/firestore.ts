@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {QuerySnapshot, DocumentData} from '@google-cloud/firestore';
+
 import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
@@ -20,7 +22,6 @@ import {firestore} from '../protos/firestore_v1_proto_api';
 
 import {
   CollectionReference,
-  DocumentData,
   DocumentReference,
   DocumentSnapshot,
   FieldPath,
@@ -29,7 +30,6 @@ import {
   GeoPoint,
   Query,
   QueryDocumentSnapshot,
-  QuerySnapshot,
   setLogFunction,
   Timestamp,
   WriteResult,

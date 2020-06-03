@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {DocumentData} from '@google-cloud/firestore';
+
 import * as duplexify from 'duplexify';
 
 import {it, xit, describe} from 'mocha';
@@ -24,7 +26,6 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {
   DocumentChange,
-  DocumentData,
   DocumentSnapshot,
   FieldPath,
   FieldValue,

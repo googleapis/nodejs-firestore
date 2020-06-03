@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {DocumentData, Settings, SetOptions} from '@google-cloud/firestore';
+
 import {expect} from 'chai';
 import * as extend from 'extend';
 import {grpc} from 'google-gax';
@@ -22,14 +24,9 @@ import {firestore} from '../../protos/firestore_v1_proto_api';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
-import {
-  Firestore,
-  Settings,
-  QueryDocumentSnapshot,
-  SetOptions,
-} from '../../src';
+import {Firestore, QueryDocumentSnapshot} from '../../src';
 import {ClientPool} from '../../src/pool';
-import {DocumentData, GapicClient} from '../../src/types';
+import {GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
