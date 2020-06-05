@@ -384,7 +384,7 @@ export class Transaction implements firestore.Transaction {
    */
   commit(): Promise<void> {
     return this._writeBatch
-      .commit_({
+      ._commit({
         transactionId: this._transactionId,
         requestTag: this._requestTag,
       })
