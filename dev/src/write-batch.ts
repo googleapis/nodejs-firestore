@@ -607,7 +607,7 @@ export class WriteBatch implements firestore.WriteBatch {
     await this._firestore.initializeIfNeeded(tag);
 
     const database = this._firestore.formattedName;
-    
+
     const request: api.ICommitRequest = {
       database,
       writes: this._ops.map(op => op()),
@@ -615,14 +615,14 @@ export class WriteBatch implements firestore.WriteBatch {
     if (commitOptions?.transactionId) {
       request.transaction = commitOptions.transactionId;
     }
-    
+
     logger(
       'WriteBatch.commit',
       tag,
       'Sending %d writes',
       request.writes!.length
     );
-    
+
     const response = await this._firestore.request<
       api.ICommitRequest,
       api.CommitResponse
