@@ -25,23 +25,13 @@ describe('limit to last query', () => {
     const cities = ['San Francisco', 'Los Angeles', 'Tokyo', 'Beijing'];
 
     before(async () => {
-        let promises = [];
-        cities.forEach(city => {
-            const cityDoc = firestore.doc(`cities/${city}`)
-                .create({ name: city });
-            promises.push(cityDoc);
-        });
-        await Promise.all(promises)
+        await Promise.all(cities.map(city => firestore.doc(`cities/${city}`).create({ name: city })));
     });
 
     after(async () => {
         const cityCollectionRef = firestore.collection('cities');
-        const cityDocs = await cityCollectionRef.select('id').get();
-        const promises = [];
-        cityDocs.forEach(doc => {
-            promises.push(cityCollectionRef.doc(doc.id).delete());
-        });
-        await Promise.all(promises);
+        const cityDocs = await cityCollectionRef.select('id').get().docs;
+        await Promise.all(cityDocs.map(doc => cityCollectionRef.doc(doc.id).delete()));
     });
 
     it('should run limitToLast query', () => {
