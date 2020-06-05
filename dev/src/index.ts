@@ -363,18 +363,6 @@ export class Firestore implements firestore.Firestore {
    */
   private bulkWritersCount = 0;
 
-  // GCF currently tears down idle connections after two minutes. Requests
-  // that are issued after this period may fail. On GCF, we therefore issue
-  // these requests as part of a transaction so that we can safely retry until
-  // the network link is reestablished.
-  //
-  // The environment variable FUNCTION_TRIGGER_TYPE is used to detect the GCF
-  // environment.
-  /** @private */
-  _preferTransactions: boolean;
-  /** @private */
-  _lastSuccessfulRequest = 0;
-
   /**
    * @param {Object=} settings [Configuration object](#/docs).
    * @param {string=} settings.projectId The project ID from the Google
@@ -448,20 +436,6 @@ export class Firestore implements firestore.Firestore {
       maxDelayMs: retryConfig.max_retry_delay_millis,
       backoffFactor: retryConfig.retry_delay_multiplier,
     };
-
-    // GCF currently tears down idle connections after two minutes. Requests
-    // that are issued after this period may fail. On GCF, we therefore issue
-    // these requests as part of a transaction so that we can safely retry until
-    // the network link is reestablished.
-    //
-    // The environment variable FUNCTION_TRIGGER_TYPE is used to detect the GCF
-    // environment.
-    this._preferTransactions = process.env.FUNCTION_TRIGGER_TYPE !== undefined;
-    this._lastSuccessfulRequest = 0;
-
-    if (this._preferTransactions) {
-      logger('Firestore', null, 'Detected GCF environment');
-    }
 
     const maxIdleChannels =
       this._settings.maxIdleChannels === undefined
@@ -1284,9 +1258,7 @@ export class Firestore implements firestore.Firestore {
 
       try {
         await backoff.backoffAndWait();
-        const result = await func();
-        this._lastSuccessfulRequest = new Date().getTime();
-        return result;
+        return await func();
       } catch (err) {
         lastError = err;
 
@@ -1445,7 +1417,6 @@ export class Firestore implements firestore.Firestore {
           'Received response: %j',
           result
         );
-        this._lastSuccessfulRequest = new Date().getTime();
         return result;
       } catch (err) {
         logger('Firestore.request', requestTag, 'Received error:', err);

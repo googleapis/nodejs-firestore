@@ -545,7 +545,7 @@ export class WriteBatch implements firestore.WriteBatch {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    return this.commit_().catch(err => {
+    return this._commit().catch(err => {
       throw wrapError(err, stack);
     });
   }
@@ -596,7 +596,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * this request.
    * @returns  A Promise that resolves when this batch completes.
    */
-  async commit_(commitOptions?: {
+  async _commit(commitOptions?: {
     transactionId?: Uint8Array;
     requestTag?: string;
   }): Promise<WriteResult[]> {
@@ -608,26 +608,13 @@ export class WriteBatch implements firestore.WriteBatch {
 
     const database = this._firestore.formattedName;
 
-    // On GCF, we periodically force transactional commits to allow for
-    // request retries in case GCF closes our backend connection.
-    const explicitTransaction = commitOptions && commitOptions.transactionId;
-    if (!explicitTransaction && this._shouldCreateTransaction()) {
-      logger('WriteBatch.commit', tag, 'Using transaction for commit');
-      return this._firestore
-        .request<api.IBeginTransactionRequest, api.IBeginTransactionResponse>(
-          'beginTransaction',
-          {database},
-          tag
-        )
-        .then(resp => {
-          return this.commit_({transactionId: resp.transaction!});
-        });
-    }
-
     const request: api.ICommitRequest = {
       database,
       writes: this._ops.map(op => op()),
     };
+    if (commitOptions?.transactionId) {
+      request.transaction = commitOptions.transactionId;
+    }
 
     logger(
       'WriteBatch.commit',
@@ -636,9 +623,6 @@ export class WriteBatch implements firestore.WriteBatch {
       request.writes!.length
     );
 
-    if (explicitTransaction) {
-      request.transaction = explicitTransaction;
-    }
     const response = await this._firestore.request<
       api.ICommitRequest,
       api.CommitResponse
@@ -650,26 +634,6 @@ export class WriteBatch implements firestore.WriteBatch {
           Timestamp.fromProto(writeResult.updateTime || response.commitTime!)
         )
     );
-  }
-
-  /**
-   * Determines whether we should issue a transactional commit. On GCF, this
-   * happens after two minutes of idleness.
-   *
-   * @private
-   * @returns Whether to use a transaction.
-   */
-  private _shouldCreateTransaction(): boolean {
-    if (!this._firestore._preferTransactions) {
-      return false;
-    }
-
-    if (this._firestore._lastSuccessfulRequest) {
-      const now = new Date().getTime();
-      return now - this._firestore._lastSuccessfulRequest > GCF_IDLE_TIMEOUT_MS;
-    }
-
-    return true;
   }
 
   /**
