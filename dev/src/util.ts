@@ -158,8 +158,8 @@ export function isPermanentRpcError(
   }
 }
 
-/** 
- * Returns the list of retryable error codes specified in the service 
+/**
+ * Returns the list of retryable error codes specified in the service
  * configuration.
  */
 export function getRetryCodes(methodName: string): number[] {
