@@ -30,7 +30,7 @@ describe('limit to last query', () => {
 
     after(async () => {
         const cityCollectionRef = firestore.collection('cities');
-        const cityDocs = await cityCollectionRef.select('id').get().docs;
+        const cityDocs = (await cityCollectionRef.select('id').get()).docs;
         await Promise.all(cityDocs.map(doc => cityCollectionRef.doc(doc.id).delete()));
     });
 
