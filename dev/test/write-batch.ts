@@ -325,14 +325,14 @@ describe('batch support', () => {
     const documentName = firestore.doc('col/doc');
 
     return writeBatch
-        .set(documentName, {foo: FieldValue.serverTimestamp()})
-        .update(documentName, {foo: 'bar'})
-        .create(documentName, {})
-        .delete(documentName)
-        .commit()
-        .then(resp => {
-          verifyResponse(resp);
-        });
+      .set(documentName, {foo: FieldValue.serverTimestamp()})
+      .update(documentName, {foo: 'bar'})
+      .create(documentName, {})
+      .delete(documentName)
+      .commit()
+      .then(resp => {
+        verifyResponse(resp);
+      });
   });
 
   it('handles exception', () => {
@@ -341,14 +341,14 @@ describe('batch support', () => {
     };
 
     return firestore
-        .batch()
-        .commit()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('Expected exception');
-        });
+      .batch()
+      .commit()
+      .then(() => {
+        throw new Error('Unexpected success in Promise');
+      })
+      .catch(err => {
+        expect(err.message).to.equal('Expected exception');
+      });
   });
 
   it('cannot append to committed batch', () => {
