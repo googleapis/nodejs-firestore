@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CallOptions, GoogleError} from 'google-gax';
+import {CallOptions, RetryOptions, Status} from 'google-gax';
 import {Duplex, PassThrough} from 'stream';
 import * as through2 from 'through2';
 import {URL} from 'url';
@@ -53,7 +53,13 @@ import {
   Settings,
   UnaryMethod,
 } from './types';
-import {Deferred, isPermanentRpcError, requestTag, wrapError} from './util';
+import {
+  Deferred,
+  getRetryParams,
+  isPermanentRpcError,
+  requestTag,
+  wrapError,
+} from './util';
 import {
   validateBoolean,
   validateFunction,
@@ -1127,8 +1133,11 @@ export class Firestore {
    * Returns GAX call options that set the cloud resource header.
    * @private
    */
-  private createCallOptions(): CallOptions {
-    return {
+  private createCallOptions(
+    methodName: string,
+    retryCodes?: number[]
+  ): CallOptions {
+    const callOptions: CallOptions = {
       otherArgs: {
         headers: {
           [CLOUD_RESOURCE_HEADER]: this.formattedName,
@@ -1136,6 +1145,13 @@ export class Firestore {
         },
       },
     };
+
+    if (retryCodes) {
+      const retryParams = getRetryParams(methodName);
+      callOptions.retry = new RetryOptions(retryCodes, retryParams);
+    }
+
+    return callOptions;
   }
 
   /**
@@ -1158,7 +1174,7 @@ export class Firestore {
    * and GAX options.
    * @param requestTag A unique client-assigned identifier for this request.
    * @param func Method returning a Promise than can be retried.
-   * @returns  - A Promise with the function's result if successful within
+   * @returns A Promise with the function's result if successful within
    * `attemptsRemaining`. Otherwise, returns the last rejected Promise.
    */
   private async _retry<T>(
@@ -1188,7 +1204,7 @@ export class Firestore {
       } catch (err) {
         lastError = err;
 
-        if (isPermanentRpcError(err, methodName, serviceConfig)) {
+        if (isPermanentRpcError(err, methodName)) {
           break;
         }
       }
@@ -1321,14 +1337,17 @@ export class Firestore {
    * and GAX options.
    * @param request The Protobuf request to send.
    * @param requestTag A unique client-assigned identifier for this request.
+   * @param retryCodes If provided, a custom list of retry codes. If not
+   * provided, retry is based on the behavior as defined in the ServiceConfig.
    * @returns A Promise with the request result.
    */
   request<Req, Resp>(
     methodName: FirestoreUnaryMethod,
     request: Req,
-    requestTag: string
+    requestTag: string,
+    retryCodes?: number[]
   ): Promise<Resp> {
-    const callOptions = this.createCallOptions();
+    const callOptions = this.createCallOptions(methodName, retryCodes);
 
     return this._clientPool.run(requestTag, async gapicClient => {
       try {
@@ -1371,7 +1390,7 @@ export class Firestore {
     request: {},
     requestTag: string
   ): Promise<Duplex> {
-    const callOptions = this.createCallOptions();
+    const callOptions = this.createCallOptions(methodName);
 
     const bidirectional = methodName === 'listen';
 
