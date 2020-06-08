@@ -2327,7 +2327,7 @@ describe('QuerySnapshot class', () => {
   });
 });
 
-describe.only('BulkWriter class', () => {
+describe('BulkWriter class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   let writer: BulkWriter;
@@ -2381,7 +2381,24 @@ describe.only('BulkWriter class', () => {
     await writer.close();
     const result = await ref.get();
     expect(result.exists).to.be.false;
-    await promise;
+    // TODO(b/158502664): Remove this check once we can get write times.
+    const deleteResult = await promise;
+    expect(deleteResult.writeTime).to.deep.equal(new Timestamp(0, 0));
+  });
+
+  // TODO(b/158502664): Remove this test once we can get write times.
+  it('delete uses the latest update time of other operations', async () => {
+    const ref = randomCol.doc('doc1');
+    const ref2 = randomCol.doc('doc2');
+    await ref.set({foo: 'bar'});
+    await ref2.set({foo: 'bar'});
+    // Update a different doc so that the writes are sent in the same batch.
+    const updatePromise = writer.update(randomCol.doc('doc2'), {foo: 'bar1'});
+    const deletePromise = writer.delete(ref);
+    await writer.close();
+    const deleteResult = await deletePromise;
+    const updateResult = await updatePromise;
+    expect(deleteResult.writeTime).to.deep.equal(updateResult.writeTime);
   });
 
   it('can terminate once BulkWriter is closed', async () => {

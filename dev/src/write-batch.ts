@@ -575,12 +575,32 @@ export class WriteBatch implements firestore.WriteBatch {
       api.BatchWriteResponse
     >('batchWrite', request, tag);
 
-    return (response.writeResults || []).map((result, i) => {
+    const writeResults = response.writeResults || [];
+    let latestTimestamp = Timestamp.fromMillis(0);
+    writeResults.forEach(result => {
+      if (
+        result.updateTime &&
+        Timestamp.fromProto(result.updateTime) > latestTimestamp
+      ) {
+        latestTimestamp = Timestamp.fromProto(result.updateTime);
+      }
+    });
+
+    return writeResults.map((result, i) => {
       const status = response.status[i];
       const error = new GoogleError(status.message || undefined);
       error.code = status.code as Status;
+
+      // Since delete operations currently do not have write times, use the latest update time
+      // for deletes, or Timestamp(0,0) if the entire batch consists of deletes.
+      const isSuccessfulDelete =
+        result.updateTime === null && error.code === Status.OK;
       return new BatchWriteResult(
-        result.updateTime ? Timestamp.fromProto(result.updateTime) : null,
+        isSuccessfulDelete
+          ? latestTimestamp
+          : result.updateTime
+          ? Timestamp.fromProto(result.updateTime)
+          : null,
         error
       );
     });
