@@ -591,8 +591,9 @@ export class WriteBatch implements firestore.WriteBatch {
       const error = new GoogleError(status.message || undefined);
       error.code = status.code as Status;
 
-      // Since delete operations currently do not have write times, use the latest update time
-      // for deletes, or Timestamp(0,0) if the entire batch consists of deletes.
+      // Since delete operations currently do not have write times, use the
+      // latest update time for deletes, or Timestamp(0,0) if the entire batch
+      // consists of deletes.
       const isSuccessfulDelete =
         result.updateTime === null && error.code === Status.OK;
       return new BatchWriteResult(

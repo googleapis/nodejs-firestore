@@ -2341,9 +2341,6 @@ describe('BulkWriter class', () => {
   afterEach(() => verifyInstance(firestore));
 
   it('has create() method', async () => {
-    process.on('unhandledRejection', (reason, p) => {
-      console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-    });
     const ref = randomCol.doc('doc1');
     const promise = writer.create(ref, {foo: 'bar'});
     await writer.close();
