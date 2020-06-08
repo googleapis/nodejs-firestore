@@ -2015,7 +2015,7 @@ export class Query<T = DocumentData> {
     if (transactionIdOrReadTime instanceof Uint8Array) {
       reqOpts.transaction = transactionIdOrReadTime;
     } else if (transactionIdOrReadTime instanceof Timestamp) {
-      reqOpts.readTime = transactionIdOrReadTime.toProto();
+      reqOpts.readTime = transactionIdOrReadTime.toProto().timestampValue;
     }
     return reqOpts;
   }
@@ -2065,10 +2065,9 @@ export class Query<T = DocumentData> {
         // catch below.
         let request = this.toProto(transactionId);
 
-        let active = true;
-        while (active) {
-          const deferred = new Deferred<boolean>();
-
+        let streamActive: Deferred<boolean>;
+        do {
+          streamActive = new Deferred<boolean>();
           const backendStream = await this._firestore.requestStream(
             'runQuery',
             request,
@@ -2093,7 +2092,7 @@ export class Query<T = DocumentData> {
                   transactionId ?? lastReceivedDocument.readTime
                 );
               }
-              deferred.resolve(/* active= */ true);
+              streamActive.resolve(/* active= */ true);
             } else {
               logger(
                 'Query._stream',
@@ -2102,17 +2101,15 @@ export class Query<T = DocumentData> {
                 err
               );
               stream.destroy(err);
-              deferred.resolve(/* active= */ false);
+              streamActive.resolve(/* active= */ false);
             }
           });
           backendStream.on('end', () => {
-            deferred.resolve(/* active= */ false);
+            streamActive.resolve(/* active= */ false);
           });
           backendStream.resume();
           backendStream.pipe(stream);
-
-          active = await deferred.promise;
-        }
+        } while (await streamActive.promise);
       })
       .catch(e => stream.destroy(e));
 

@@ -256,7 +256,7 @@ export class Timestamp {
    * @private
    * @returns {Object} The `Timestamp` Protobuf object.
    */
-  toProto(): google.protobuf.ITimestamp {
+  toProto(): api.IValue {
     const timestamp: google.protobuf.ITimestamp = {};
 
     if (this.seconds) {
@@ -267,7 +267,7 @@ export class Timestamp {
       timestamp.nanos = this.nanoseconds;
     }
 
-    return timestamp;
+    return {timestampValue: timestamp};
   }
 
   /**
