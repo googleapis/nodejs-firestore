@@ -48,7 +48,13 @@ import {
   UpdateData,
   WhereFilterOp,
 } from './types';
-import {autoId, requestTag, wrapError} from './util';
+import {
+  autoId,
+  Deferred,
+  isPermanentRpcError,
+  requestTag,
+  wrapError,
+} from './util';
 import {
   invalidArgumentMessage,
   validateEnumValue,
@@ -1915,13 +1921,16 @@ export class Query<T = DocumentData> {
 
   /**
    * Internal method for serializing a query to its RunQuery proto
-   * representation with an optional transaction id.
+   * representation with an optional transaction id or read time.
    *
-   * @param transactionId A transaction ID.
+   * @param transactionIdOrReadTime A transaction ID or the read time at which
+   * to execute the query.
    * @private
    * @returns Serialized JSON for the query.
    */
-  toProto(transactionId?: Uint8Array): api.IRunQueryRequest {
+  toProto(
+    transactionIdOrReadTime?: Uint8Array | Timestamp
+  ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
     const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
       projectId
@@ -2003,8 +2012,11 @@ export class Query<T = DocumentData> {
     structuredQuery.offset = this._queryOptions.offset;
     structuredQuery.select = this._queryOptions.projection;
 
-    reqOpts.transaction = transactionId;
-
+    if (transactionIdOrReadTime instanceof Uint8Array) {
+      reqOpts.transaction = transactionIdOrReadTime;
+    } else if (transactionIdOrReadTime instanceof Timestamp) {
+      reqOpts.readTime = transactionIdOrReadTime.toProto();
+    }
     return reqOpts;
   }
 
@@ -2019,6 +2031,8 @@ export class Query<T = DocumentData> {
     const tag = requestTag();
     const self = this;
 
+    let lastReceivedDocument: QueryDocumentSnapshot<T> | null = null;
+
     const stream = through2.obj(function(this, proto, enc, callback) {
       const readTime = Timestamp.fromProto(proto.readTime);
       if (proto.document) {
@@ -2026,7 +2040,7 @@ export class Query<T = DocumentData> {
           proto.document,
           proto.readTime
         );
-        const finalDoc = new DocumentSnapshotBuilder(
+        const finalDoc = new DocumentSnapshotBuilder<T>(
           document.ref.withConverter(self._queryOptions.converter)
         );
         // Recreate the QueryDocumentSnapshot with the DocumentReference
@@ -2035,7 +2049,8 @@ export class Query<T = DocumentData> {
         finalDoc.readTime = document.readTime;
         finalDoc.createTime = document.createTime;
         finalDoc.updateTime = document.updateTime;
-        this.push({document: finalDoc.build(), readTime});
+        lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<T>;
+        this.push({document: lastReceivedDocument, readTime});
       } else {
         this.push({readTime});
       }
@@ -2048,16 +2063,56 @@ export class Query<T = DocumentData> {
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = this.toProto(transactionId);
-        return this._firestore.requestStream('runQuery', request, tag);
-      })
-      .then(backendStream => {
-        backendStream.on('error', err => {
-          logger('Query._stream', tag, 'Query failed with stream error:', err);
-          stream.destroy(err);
-        });
-        backendStream.resume();
-        backendStream.pipe(stream);
+        let request = this.toProto(transactionId);
+
+        let active = true;
+        while (active) {
+          const deferred = new Deferred<boolean>();
+
+          const backendStream = await this._firestore.requestStream(
+            'runQuery',
+            request,
+            tag
+          );
+          backendStream.on('error', err => {
+            backendStream.unpipe(stream);
+
+            if (!isPermanentRpcError(err, 'runQuery')) {
+              logger(
+                'Query._stream',
+                tag,
+                'Query failed with retryable stream error:',
+                err
+              );
+              if (lastReceivedDocument) {
+                // Restart the query but use the last document we received as the
+                // query cursor. Note that we do not use backoff here. The call to
+                // `requestStream()` will backoff should the restart fail before
+                // delivering any results.
+                request = this.startAfter(lastReceivedDocument).toProto(
+                  transactionId ?? lastReceivedDocument.readTime
+                );
+              }
+              deferred.resolve(/* active= */ true);
+            } else {
+              logger(
+                'Query._stream',
+                tag,
+                'Query failed with stream error:',
+                err
+              );
+              stream.destroy(err);
+              deferred.resolve(/* active= */ false);
+            }
+          });
+          backendStream.on('end', () => {
+            deferred.resolve(/* active= */ false);
+          });
+          backendStream.resume();
+          backendStream.pipe(stream);
+
+          active = await deferred.promise;
+        }
       })
       .catch(e => stream.destroy(e));
 
