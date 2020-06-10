@@ -998,8 +998,7 @@ export class Precondition {
     const proto: api.IPrecondition = {};
 
     if (this._lastUpdateTime !== undefined) {
-      const valueProto = this._lastUpdateTime!.toProto();
-      proto.updateTime = valueProto.timestampValue;
+      proto.updateTime = this._lastUpdateTime!.toProto().timestampValue;
     } else {
       proto.exists = this._exists;
     }
