@@ -18,7 +18,7 @@ const { execSync } = require('child_process');
 const { assert } = require('chai');
 const { describe, it } = require('mocha');
 const exec = (cmd) => execSync(cmd, { encoding: 'utf8' });
-const { Firestore,FieldPath } = require('@google-cloud/firestore');
+const { Firestore, FieldPath } = require('@google-cloud/firestore');
 
 describe('limit to last query', () => {
     const firestore = new Firestore();
