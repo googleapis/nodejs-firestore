@@ -579,10 +579,18 @@ export class WriteBatch implements firestore.WriteBatch {
       const status = response.status[i];
       const error = new GoogleError(status.message || undefined);
       error.code = status.code as Status;
-      return new BatchWriteResult(
-        result.updateTime ? Timestamp.fromProto(result.updateTime) : null,
-        error
-      );
+
+      // Since delete operations currently do not have write times, use a
+      // sentinel Timestamp value.
+      // TODO(b/158502664): Use actual delete timestamp.
+      const isSuccessfulDelete =
+        result.updateTime === null && error.code === Status.OK;
+      const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
+      const updateTime =
+        error.code === Status.OK
+          ? Timestamp.fromProto(result.updateTime || DELETE_TIMESTAMP_SENTINEL)
+          : null;
+      return new BatchWriteResult(updateTime, error);
     });
   }
 

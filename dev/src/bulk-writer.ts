@@ -113,7 +113,7 @@ class BulkCommitBatch {
 
   /**
    * Adds a `delete` operation to the WriteBatch. Returns a promise that
-   * resolves with the result of the delete.
+   * resolves with the sentinel value (Timestamp(0)) for the delete operation.
    */
   delete<T>(
     documentRef: firestore.DocumentReference<T>,
@@ -343,8 +343,9 @@ export class BulkWriter {
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the batch if the
    * document doesn't exist or was last updated at a different time.
-   * @returns {Promise<WriteResult>} A promise that resolves with the result of
-   * the write. Throws an error if the write fails.
+   * @returns {Promise<WriteResult>} A promise that resolves with a sentinel
+   * Timestamp indicating that the delete was successful. Throws an error if
+   * the write fails.
    *
    * @example
    * let bulkWriter = firestore.bulkWriter();
@@ -353,7 +354,7 @@ export class BulkWriter {
    * bulkWriter
    *  .delete(documentRef)
    *  .then(result => {
-   *    console.log('Successfully deleted document at: ', result);
+   *    console.log('Successfully deleted document");
    *  })
    *  .catch(err => {
    *    console.log('Delete failed with: ', err);

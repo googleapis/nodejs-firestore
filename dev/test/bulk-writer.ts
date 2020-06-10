@@ -97,13 +97,13 @@ describe('BulkWriter', () => {
     };
   }
 
-  function successResponse(seconds: number): api.IBatchWriteResponse {
+  function successResponse(updateTimeSeconds: number): api.IBatchWriteResponse {
     return {
       writeResults: [
         {
           updateTime: {
             nanos: 0,
-            seconds,
+            seconds: updateTimeSeconds,
           },
         },
       ],
@@ -111,7 +111,7 @@ describe('BulkWriter', () => {
     };
   }
 
-  function failResponse(): api.IBatchWriteResponse {
+  function failedResponse(): api.IBatchWriteResponse {
     return {
       writeResults: [
         {
@@ -254,7 +254,7 @@ describe('BulkWriter', () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
-        response: failResponse(),
+        response: failedResponse(),
       },
     ]);
 
@@ -332,11 +332,11 @@ describe('BulkWriter', () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(0),
+        response: successResponse(1),
       },
       {
         request: createRequest([updateOp('doc', 'bar1')]),
-        response: successResponse(1),
+        response: successResponse(2),
       },
     ]);
 
@@ -355,7 +355,7 @@ describe('BulkWriter', () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc1', 'bar'), updateOp('doc2', 'bar')]),
-        response: mergeResponses([successResponse(0), successResponse(1)]),
+        response: mergeResponses([successResponse(1), successResponse(2)]),
       },
     ]);
 
@@ -404,7 +404,7 @@ describe('BulkWriter', () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(0),
+        response: successResponse(1),
       },
       {
         request: createRequest([
@@ -447,9 +447,9 @@ describe('BulkWriter', () => {
           createOp('doc3', 'bar'),
         ]),
         response: mergeResponses([
-          successResponse(0),
           successResponse(1),
           successResponse(2),
+          successResponse(3),
         ]),
       },
       {
