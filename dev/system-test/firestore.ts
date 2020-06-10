@@ -217,7 +217,7 @@ describe('CollectionReference class', () => {
 
   it('has parent property', () => {
     const ref = firestore.collection('col/doc/col');
-    expect(ref.parent.id).to.equal('doc');
+    expect(ref.parent!.id).to.equal('doc');
   });
 
   it('has path property', () => {

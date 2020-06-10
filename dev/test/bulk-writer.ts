@@ -143,7 +143,9 @@ describe('BulkWriter', () => {
     enforceSingleConcurrentRequest = false
   ): Promise<BulkWriter> {
     const overrides: ApiOverride = {
-      batchWrite: async request => {
+      batchWrite: async (request, options) => {
+        expect(options!.retry!.retryCodes).contains(Status.ABORTED);
+
         expect(request).to.deep.eq({
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: mock[requestCounter].request.writes,
@@ -547,8 +549,12 @@ describe('BulkWriter', () => {
   describe('500/50/5 support', () => {
     afterEach(() => setTimeoutHandler(setTimeout));
 
+<<<<<<< HEAD
     // TODO(chenbrian): https://github.com/googleapis/nodejs-firestore/issues/1097
     it.skip('does not send batches if doing so exceeds the rate limit', done => {
+=======
+    it('does not send batches if doing so exceeds the rate limit', async () => {
+>>>>>>> master
       // The test is considered a success if BulkWriter tries to send the second
       // batch again after a timeout.
 
@@ -559,7 +565,7 @@ describe('BulkWriter', () => {
       const requests2 = arrayRange2.map(i => setOp('doc' + i, 'bar'));
       const responses2 = arrayRange2.map(i => successResponse(i));
 
-      instantiateInstance([
+      const bulkWriter = await instantiateInstance([
         {
           request: createRequest(requests1),
           response: mergeResponses(responses1),
@@ -568,33 +574,34 @@ describe('BulkWriter', () => {
           request: createRequest(requests2),
           response: mergeResponses(responses2),
         },
-      ]).then(bulkWriter => {
-        setTimeoutHandler(() =>
-          done(new Error('This batch should not have a timeout'))
-        );
-        for (let i = 0; i < 500; i++) {
-          bulkWriter
-            .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
-            .then(incrementOpCount);
-        }
-        bulkWriter.flush();
+      ]);
+      for (let i = 0; i < 500; i++) {
+        bulkWriter
+          .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
+          .then(incrementOpCount);
+      }
+      const flush1 = bulkWriter.flush();
 
-        // Sending this next batch would go over the 500/50/5 capacity, so
-        // check that BulkWriter doesn't send this batch until the first batch
-        // is resolved.
-        setTimeoutHandler((_, timeout) => {
-          // Check that BulkWriter has not yet sent the 2nd batch.
-          expect(requestCounter).to.equal(0);
-          expect(timeout).to.be.greaterThan(0);
-          done();
-        });
-        for (let i = 500; i < 505; i++) {
-          bulkWriter
-            .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
-            .then(incrementOpCount);
-        }
-        return bulkWriter.flush();
+      // Sending this next batch would go over the 500/50/5 capacity, so
+      // check that BulkWriter doesn't send this batch until the first batch
+      // is resolved.
+      let timeoutCalled = false;
+      setTimeoutHandler((_, timeout) => {
+        // Check that BulkWriter has not yet sent the 2nd batch.
+        timeoutCalled = true;
+        expect(requestCounter).to.equal(0);
+        expect(timeout).to.be.greaterThan(0);
       });
+      for (let i = 500; i < 505; i++) {
+        bulkWriter
+          .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
+          .then(incrementOpCount);
+      }
+      const flush2 = bulkWriter.flush();
+      await flush1;
+      await flush2;
+      expect(timeoutCalled).to.be.true;
+      return bulkWriter.close();
     });
   });
 

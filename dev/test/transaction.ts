@@ -295,7 +295,11 @@ function runTransaction<T>(
         return response(request.response as api.IBeginTransactionResponse);
       }
     },
-    commit: actual => {
+    commit: (actual, options) => {
+      // Ensure that we do not specify custom retry behavior for transactional
+      // commits.
+      expect(options!.retry).to.be.undefined;
+
       const request = expectedRequests.shift()!;
       expect(request.type).to.equal('commit');
       expect(actual).to.deep.eq(request.request);

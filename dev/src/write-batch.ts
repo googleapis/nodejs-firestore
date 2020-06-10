@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+<<<<<<< HEAD
 import * as firestore from '@google-cloud/firestore';
 
+=======
+>>>>>>> master
 import {google} from '../protos/firestore_v1_proto_api';
 import {
   DocumentMask,
@@ -29,8 +32,25 @@ import {FieldPath, validateFieldPath} from './path';
 import {validateDocumentReference} from './reference';
 import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
+<<<<<<< HEAD
 import {UpdateMap} from './types';
 import {isObject, isPlainObject, requestTag, wrapError} from './util';
+=======
+import {
+  Precondition as PublicPrecondition,
+  SetOptions,
+  UpdateData,
+  UpdateMap,
+} from './types';
+import {DocumentData} from './types';
+import {
+  getRetryCodes,
+  isObject,
+  isPlainObject,
+  requestTag,
+  wrapError,
+} from './util';
+>>>>>>> master
 import {
   customObjectMessage,
   invalidArgumentMessage,
@@ -570,10 +590,12 @@ export class WriteBatch implements firestore.WriteBatch {
       writes: this._ops.map(op => op()),
     };
 
+    const retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
+
     const response = await this._firestore.request<
       api.IBatchWriteRequest,
       api.BatchWriteResponse
-    >('batchWrite', request, tag);
+    >('batchWrite', request, tag, retryCodes);
 
     return (response.writeResults || []).map((result, i) => {
       const status = response.status[i];
@@ -631,10 +653,23 @@ export class WriteBatch implements firestore.WriteBatch {
       request.writes!.length
     );
 
+<<<<<<< HEAD
+=======
+    let retryCodes: number[] | undefined;
+
+    if (explicitTransaction) {
+      request.transaction = explicitTransaction;
+    } else {
+      // Commits outside of transaction should also be retried when they fail
+      // with status code ABORTED.
+      retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
+    }
+
+>>>>>>> master
     const response = await this._firestore.request<
       api.ICommitRequest,
       api.CommitResponse
-    >('commit', request, tag);
+    >('commit', request, tag, retryCodes);
 
     return (response.writeResults || []).map(
       writeResult =>

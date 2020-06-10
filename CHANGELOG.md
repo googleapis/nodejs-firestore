@@ -4,6 +4,29 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.8.5](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.4...v3.8.5) (2020-06-10)
+
+
+### Bug Fixes
+
+* fix flaky BulkWriter test ([#1115](https://www.github.com/googleapis/nodejs-firestore/issues/1115)) ([9a24cc0](https://www.github.com/googleapis/nodejs-firestore/commit/9a24cc0c6ee68c1dee7ec64d89dfa7c88375f88d))
+* retry ABORTED for non-transactional commits ([#1111](https://www.github.com/googleapis/nodejs-firestore/issues/1111)) ([f175236](https://www.github.com/googleapis/nodejs-firestore/commit/f175236bde2f64365f140b14641f848bd4eb34d9))
+* retry Query streams ([#1116](https://www.github.com/googleapis/nodejs-firestore/issues/1116)) ([d7574ea](https://www.github.com/googleapis/nodejs-firestore/commit/d7574ea4ecd807d501243f8435903cfa385bb630))
+
+### [3.8.4](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.3...v3.8.4) (2020-06-01)
+
+
+### Bug Fixes
+
+* send Authentication header with every emulator request ([#1105](https://www.github.com/googleapis/nodejs-firestore/issues/1105)) ([83f617c](https://www.github.com/googleapis/nodejs-firestore/commit/83f617c753dbcad58eb91be585fd9fcb10480099))
+
+### [3.8.3](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.2...v3.8.3) (2020-05-31)
+
+
+### Bug Fixes
+
+* return null for 'parent' call on root collection ([#1099](https://www.github.com/googleapis/nodejs-firestore/issues/1099)) ([c5c0b15](https://www.github.com/googleapis/nodejs-firestore/commit/c5c0b157bf32466875ace690216a99371d31b461))
+
 ### [3.8.2](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.1...v3.8.2) (2020-05-30)
 
 

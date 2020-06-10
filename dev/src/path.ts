@@ -185,10 +185,7 @@ abstract class Path<T> {
    * @return true if this `Path` is equal to the provided value.
    */
   isEqual(other: Path<T>): boolean {
-    return (
-      this === other ||
-      (other instanceof this.constructor && this.compareTo(other) === 0)
-    );
+    return this === other || this.compareTo(other) === 0;
   }
 }
 

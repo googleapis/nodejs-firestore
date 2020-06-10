@@ -39,8 +39,28 @@ import {
 } from './path';
 import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
+<<<<<<< HEAD
 import {defaultConverter} from './types';
 import {autoId, requestTag, wrapError} from './util';
+=======
+import {
+  defaultConverter,
+  DocumentData,
+  FirestoreDataConverter,
+  OrderByDirection,
+  Precondition,
+  SetOptions,
+  UpdateData,
+  WhereFilterOp,
+} from './types';
+import {
+  autoId,
+  Deferred,
+  isPermanentRpcError,
+  requestTag,
+  wrapError,
+} from './util';
+>>>>>>> master
 import {
   invalidArgumentMessage,
   validateEnumValue,
@@ -1919,13 +1939,16 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
   /**
    * Internal method for serializing a query to its RunQuery proto
-   * representation with an optional transaction id.
+   * representation with an optional transaction id or read time.
    *
-   * @param transactionId A transaction ID.
+   * @param transactionIdOrReadTime A transaction ID or the read time at which
+   * to execute the query.
    * @private
    * @returns Serialized JSON for the query.
    */
-  toProto(transactionId?: Uint8Array): api.IRunQueryRequest {
+  toProto(
+    transactionIdOrReadTime?: Uint8Array | Timestamp
+  ): api.IRunQueryRequest {
     const projectId = this.firestore.projectId;
     const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
       projectId
@@ -2038,7 +2061,16 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     structuredQuery.offset = this._queryOptions.offset;
     structuredQuery.select = this._queryOptions.projection;
 
+<<<<<<< HEAD
     return structuredQuery;
+=======
+    if (transactionIdOrReadTime instanceof Uint8Array) {
+      reqOpts.transaction = transactionIdOrReadTime;
+    } else if (transactionIdOrReadTime instanceof Timestamp) {
+      reqOpts.readTime = transactionIdOrReadTime.toProto().timestampValue;
+    }
+    return reqOpts;
+>>>>>>> master
   }
 
   /**
@@ -2050,6 +2082,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
+<<<<<<< HEAD
 
     const stream = new Transform({
       objectMode: true,
@@ -2074,6 +2107,34 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
           callback(undefined, {readTime});
         }
       },
+=======
+    const self = this;
+
+    let lastReceivedDocument: QueryDocumentSnapshot<T> | null = null;
+
+    const stream = through2.obj(function(this, proto, enc, callback) {
+      const readTime = Timestamp.fromProto(proto.readTime);
+      if (proto.document) {
+        const document = self.firestore.snapshot_(
+          proto.document,
+          proto.readTime
+        );
+        const finalDoc = new DocumentSnapshotBuilder<T>(
+          document.ref.withConverter(self._queryOptions.converter)
+        );
+        // Recreate the QueryDocumentSnapshot with the DocumentReference
+        // containing the original converter.
+        finalDoc.fieldsProto = document._fieldsProto;
+        finalDoc.readTime = document.readTime;
+        finalDoc.createTime = document.createTime;
+        finalDoc.updateTime = document.updateTime;
+        lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<T>;
+        this.push({document: lastReceivedDocument, readTime});
+      } else {
+        this.push({readTime});
+      }
+      callback();
+>>>>>>> master
     });
 
     this.firestore
@@ -2082,16 +2143,55 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
         // `toProto()` might throw an exception. We rely on the behavior of an
         // async function to convert this exception into the rejected Promise we
         // catch below.
-        const request = this.toProto(transactionId);
-        return this._firestore.requestStream('runQuery', request, tag);
-      })
-      .then(backendStream => {
-        backendStream.on('error', err => {
-          logger('Query._stream', tag, 'Query failed with stream error:', err);
-          stream.destroy(err);
-        });
-        backendStream.resume();
-        backendStream.pipe(stream);
+        let request = this.toProto(transactionId);
+
+        let streamActive: Deferred<boolean>;
+        do {
+          streamActive = new Deferred<boolean>();
+          const backendStream = await this._firestore.requestStream(
+            'runQuery',
+            request,
+            tag
+          );
+          backendStream.on('error', err => {
+            backendStream.unpipe(stream);
+
+            // If a non-transactional query failed, attempt to restart.
+            // Transactional queries are retried via the transaction runner.
+            if (!transactionId && !isPermanentRpcError(err, 'runQuery')) {
+              logger(
+                'Query._stream',
+                tag,
+                'Query failed with retryable stream error:',
+                err
+              );
+              if (lastReceivedDocument) {
+                // Restart the query but use the last document we received as the
+                // query cursor. Note that we do not use backoff here. The call to
+                // `requestStream()` will backoff should the restart fail before
+                // delivering any results.
+                request = this.startAfter(lastReceivedDocument).toProto(
+                  lastReceivedDocument.readTime
+                );
+              }
+              streamActive.resolve(/* active= */ true);
+            } else {
+              logger(
+                'Query._stream',
+                tag,
+                'Query failed with stream error:',
+                err
+              );
+              stream.destroy(err);
+              streamActive.resolve(/* active= */ false);
+            }
+          });
+          backendStream.on('end', () => {
+            streamActive.resolve(/* active= */ false);
+          });
+          backendStream.resume();
+          backendStream.pipe(stream);
+        } while (await streamActive.promise);
       })
       .catch(e => stream.destroy(e));
 
@@ -2293,7 +2393,7 @@ export class CollectionReference<T = firestore.DocumentData> extends Query<T>
    * A reference to the containing Document if this is a subcollection, else
    * null.
    *
-   * @type {DocumentReference}
+   * @type {DocumentReference|null}
    * @name CollectionReference#parent
    * @readonly
    *
@@ -2302,8 +2402,20 @@ export class CollectionReference<T = firestore.DocumentData> extends Query<T>
    * let documentRef = collectionRef.parent;
    * console.log(`Parent name: ${documentRef.path}`);
    */
+<<<<<<< HEAD
   get parent(): DocumentReference<firestore.DocumentData> {
     return new DocumentReference(this.firestore, this._queryOptions.parentPath);
+=======
+  get parent(): DocumentReference<DocumentData> | null {
+    if (this._queryOptions.parentPath.isDocument) {
+      return new DocumentReference(
+        this.firestore,
+        this._queryOptions.parentPath
+      );
+    }
+
+    return null;
+>>>>>>> master
   }
 
   /**
