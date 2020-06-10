@@ -587,7 +587,7 @@ export class WriteBatch implements firestore.WriteBatch {
       error.code = status.code as Status;
 
       // Since delete operations currently do not have write times, use a
-      // sentinel Timestamp value.t 
+      // sentinel Timestamp value.
       // TODO(b/158502664): Use actual delete timestamp.
       const isSuccessfulDelete =
         result.updateTime === null && error.code === Status.OK;
