@@ -18,7 +18,7 @@ const { execSync } = require('child_process');
 const { assert } = require('chai');
 const { describe, it } = require('mocha');
 const exec = (cmd) => execSync(cmd, { encoding: 'utf8' });
-const { Firestore } = require('@google-cloud/firestore');
+const { Firestore,FieldPath } = require('@google-cloud/firestore');
 
 describe('limit to last query', () => {
     const firestore = new Firestore();
@@ -30,7 +30,7 @@ describe('limit to last query', () => {
 
     after(async () => {
         const cityCollectionRef = firestore.collection('cities');
-        const cityDocs = (await cityCollectionRef.select('id').get()).docs;
+        const cityDocs = (await cityCollectionRef.select(FieldPath.documentId()).get()).docs;
         await Promise.all(cityDocs.map(doc => cityCollectionRef.doc(doc.id).delete()));
     });
 
