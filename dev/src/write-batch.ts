@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import * as assert from 'assert';
-import {describe, it} from 'mocha';
-
 import {google} from '../protos/firestore_v1_proto_api';
 import {
   DocumentMask,
@@ -37,7 +34,13 @@ import {
   UpdateMap,
 } from './types';
 import {DocumentData} from './types';
-import {isObject, isPlainObject, requestTag, wrapError} from './util';
+import {
+  getRetryCodes,
+  isObject,
+  isPlainObject,
+  requestTag,
+  wrapError,
+} from './util';
 import {
   customObjectMessage,
   invalidArgumentMessage,
@@ -565,10 +568,12 @@ export class WriteBatch {
       request.writes!.push(req.write);
     }
 
+    const retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
+
     const response = await this._firestore.request<
       api.IBatchWriteRequest,
       api.BatchWriteResponse
-    >('batchWrite', request, tag);
+    >('batchWrite', request, tag, retryCodes);
 
     return (response.writeResults || []).map((result, i) => {
       const status = response.status[i];
@@ -637,13 +642,20 @@ export class WriteBatch {
       request.writes!.length
     );
 
+    let retryCodes: number[] | undefined;
+
     if (explicitTransaction) {
       request.transaction = explicitTransaction;
+    } else {
+      // Commits outside of transaction should also be retried when they fail
+      // with status code ABORTED.
+      retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
     }
+
     const response = await this._firestore.request<
       api.ICommitRequest,
       api.CommitResponse
-    >('commit', request, tag);
+    >('commit', request, tag, retryCodes);
 
     return (response.writeResults || []).map(
       writeResult =>
