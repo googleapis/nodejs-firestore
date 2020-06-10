@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions, grpc} from 'google-gax';
+import {CallOptions, RetryOptions, grpc} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
-=======
-import {CallOptions, RetryOptions, Status} from 'google-gax';
-import {Duplex, PassThrough} from 'stream';
-import * as through2 from 'through2';
->>>>>>> master
+
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -59,13 +54,9 @@ import {
   UnaryMethod,
 } from './types';
 import {
-<<<<<<< HEAD
   autoId,
   Deferred,
-=======
-  Deferred,
   getRetryParams,
->>>>>>> master
   isPermanentRpcError,
   requestTag,
   wrapError,

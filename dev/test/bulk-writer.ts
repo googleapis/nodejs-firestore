@@ -549,12 +549,7 @@ describe('BulkWriter', () => {
   describe('500/50/5 support', () => {
     afterEach(() => setTimeoutHandler(setTimeout));
 
-<<<<<<< HEAD
-    // TODO(chenbrian): https://github.com/googleapis/nodejs-firestore/issues/1097
-    it.skip('does not send batches if doing so exceeds the rate limit', done => {
-=======
     it('does not send batches if doing so exceeds the rate limit', async () => {
->>>>>>> master
       // The test is considered a success if BulkWriter tries to send the second
       // batch again after a timeout.
 

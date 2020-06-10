@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD
 import * as firestore from '@google-cloud/firestore';
 
-=======
->>>>>>> master
 import {google} from '../protos/firestore_v1_proto_api';
 import {
   DocumentMask,
@@ -32,17 +29,7 @@ import {FieldPath, validateFieldPath} from './path';
 import {validateDocumentReference} from './reference';
 import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
-<<<<<<< HEAD
 import {UpdateMap} from './types';
-import {isObject, isPlainObject, requestTag, wrapError} from './util';
-=======
-import {
-  Precondition as PublicPrecondition,
-  SetOptions,
-  UpdateData,
-  UpdateMap,
-} from './types';
-import {DocumentData} from './types';
 import {
   getRetryCodes,
   isObject,
@@ -50,7 +37,7 @@ import {
   requestTag,
   wrapError,
 } from './util';
->>>>>>> master
+
 import {
   customObjectMessage,
   invalidArgumentMessage,
@@ -62,13 +49,6 @@ import {
 
 import api = google.firestore.v1;
 import {GoogleError, Status} from 'google-gax';
-
-/*!
- * Google Cloud Functions terminates idle connections after two minutes. After
- * longer periods of idleness, we issue transactional commits to allow for
- * retries.
- */
-const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
@@ -605,8 +585,6 @@ export class WriteBatch implements firestore.WriteBatch {
       // Since delete operations currently do not have write times, use a
       // sentinel Timestamp value.
       // TODO(b/158502664): Use actual delete timestamp.
-      const isSuccessfulDelete =
-        result.updateTime === null && error.code === Status.OK;
       const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
       const updateTime =
         error.code === Status.OK
@@ -637,6 +615,7 @@ export class WriteBatch implements firestore.WriteBatch {
     await this._firestore.initializeIfNeeded(tag);
 
     const database = this._firestore.formattedName;
+    const explicitTransaction = commitOptions && commitOptions.transactionId;
 
     const request: api.ICommitRequest = {
       database,
@@ -653,8 +632,6 @@ export class WriteBatch implements firestore.WriteBatch {
       request.writes!.length
     );
 
-<<<<<<< HEAD
-=======
     let retryCodes: number[] | undefined;
 
     if (explicitTransaction) {
@@ -665,7 +642,6 @@ export class WriteBatch implements firestore.WriteBatch {
       retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
     }
 
->>>>>>> master
     const response = await this._firestore.request<
       api.ICommitRequest,
       api.CommitResponse

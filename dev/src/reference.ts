@@ -39,20 +39,7 @@ import {
 } from './path';
 import {Serializable, Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
-<<<<<<< HEAD
 import {defaultConverter} from './types';
-import {autoId, requestTag, wrapError} from './util';
-=======
-import {
-  defaultConverter,
-  DocumentData,
-  FirestoreDataConverter,
-  OrderByDirection,
-  Precondition,
-  SetOptions,
-  UpdateData,
-  WhereFilterOp,
-} from './types';
 import {
   autoId,
   Deferred,
@@ -60,7 +47,6 @@ import {
   requestTag,
   wrapError,
 } from './util';
->>>>>>> master
 import {
   invalidArgumentMessage,
   validateEnumValue,
@@ -72,6 +58,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = protos.google.firestore.v1;
+import through2 = require('through2');
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1987,11 +1974,18 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
         : undefined;
     }
 
-    return {
+    const runQueryRequest: api.IRunQueryRequest = {
       parent: parentPath.formattedName,
-      transaction: transactionId,
       structuredQuery,
     };
+
+    if (transactionIdOrReadTime instanceof Uint8Array) {
+      runQueryRequest.transaction = transactionIdOrReadTime;
+    } else if (transactionIdOrReadTime instanceof Timestamp) {
+      runQueryRequest.readTime = transactionIdOrReadTime.toProto().timestampValue;
+    }
+
+    return runQueryRequest;
   }
 
   /**
@@ -2061,16 +2055,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     structuredQuery.offset = this._queryOptions.offset;
     structuredQuery.select = this._queryOptions.projection;
 
-<<<<<<< HEAD
     return structuredQuery;
-=======
-    if (transactionIdOrReadTime instanceof Uint8Array) {
-      reqOpts.transaction = transactionIdOrReadTime;
-    } else if (transactionIdOrReadTime instanceof Timestamp) {
-      reqOpts.readTime = transactionIdOrReadTime.toProto().timestampValue;
-    }
-    return reqOpts;
->>>>>>> master
   }
 
   /**
@@ -2082,37 +2067,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
-<<<<<<< HEAD
-
-    const stream = new Transform({
-      objectMode: true,
-      transform: (proto, enc, callback) => {
-        const readTime = Timestamp.fromProto(proto.readTime);
-        if (proto.document) {
-          const document = this.firestore.snapshot_(
-            proto.document,
-            proto.readTime
-          );
-          const finalDoc = new DocumentSnapshotBuilder(
-            document.ref.withConverter(this._queryOptions.converter)
-          );
-          // Recreate the QueryDocumentSnapshot with the DocumentReference
-          // containing the original converter.
-          finalDoc.fieldsProto = document._fieldsProto;
-          finalDoc.readTime = document.readTime;
-          finalDoc.createTime = document.createTime;
-          finalDoc.updateTime = document.updateTime;
-          callback(undefined, {document: finalDoc.build(), readTime});
-        } else {
-          callback(undefined, {readTime});
-        }
-      },
-=======
     const self = this;
 
     let lastReceivedDocument: QueryDocumentSnapshot<T> | null = null;
 
-    const stream = through2.obj(function(this, proto, enc, callback) {
+    const stream = through2.obj(function (this, proto, enc, callback) {
       const readTime = Timestamp.fromProto(proto.readTime);
       if (proto.document) {
         const document = self.firestore.snapshot_(
@@ -2134,7 +2093,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
         this.push({readTime});
       }
       callback();
->>>>>>> master
     });
 
     this.firestore
@@ -2402,11 +2360,7 @@ export class CollectionReference<T = firestore.DocumentData> extends Query<T>
    * let documentRef = collectionRef.parent;
    * console.log(`Parent name: ${documentRef.path}`);
    */
-<<<<<<< HEAD
-  get parent(): DocumentReference<firestore.DocumentData> {
-    return new DocumentReference(this.firestore, this._queryOptions.parentPath);
-=======
-  get parent(): DocumentReference<DocumentData> | null {
+  get parent(): DocumentReference<firestore.DocumentData> | null {
     if (this._queryOptions.parentPath.isDocument) {
       return new DocumentReference(
         this.firestore,
@@ -2415,7 +2369,6 @@ export class CollectionReference<T = firestore.DocumentData> extends Query<T>
     }
 
     return null;
->>>>>>> master
   }
 
   /**

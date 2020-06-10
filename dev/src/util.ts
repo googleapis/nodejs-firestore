@@ -28,10 +28,6 @@ import {
 import {BackoffSettings} from 'google-gax/build/src/gax';
 import * as gapicConfig from './v1/firestore_client_config.json';
 
-<<<<<<< HEAD
-=======
-import {DocumentData} from './types';
-
 const serviceConfig = constructSettings(
   'google.firestore.v1.Firestore',
   gapicConfig as ClientConfig,
@@ -39,7 +35,6 @@ const serviceConfig = constructSettings(
   Status
 ) as {[k: string]: CallSettings};
 
->>>>>>> master
 /**
  * A Promise implementation that supports deferred resolution.
  * @private
