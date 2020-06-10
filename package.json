@@ -52,9 +52,7 @@
   "dependencies": {
     "fast-deep-equal": "^3.1.1",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^2.2.0",
-    "readable-stream": "^3.4.0",
-    "through2": "^3.0.0"
+    "google-gax": "^2.2.0"
   },
   "devDependencies": {
     "@types/assert": "^1.4.0",

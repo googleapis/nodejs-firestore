@@ -58,7 +58,6 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = protos.google.firestore.v1;
-import through2 = require('through2');
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -2067,32 +2066,33 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    */
   _stream(transactionId?: Uint8Array): NodeJS.ReadableStream {
     const tag = requestTag();
-    const self = this;
 
     let lastReceivedDocument: QueryDocumentSnapshot<T> | null = null;
 
-    const stream = through2.obj(function (this, proto, enc, callback) {
-      const readTime = Timestamp.fromProto(proto.readTime);
-      if (proto.document) {
-        const document = self.firestore.snapshot_(
-          proto.document,
-          proto.readTime
-        );
-        const finalDoc = new DocumentSnapshotBuilder<T>(
-          document.ref.withConverter(self._queryOptions.converter)
-        );
-        // Recreate the QueryDocumentSnapshot with the DocumentReference
-        // containing the original converter.
-        finalDoc.fieldsProto = document._fieldsProto;
-        finalDoc.readTime = document.readTime;
-        finalDoc.createTime = document.createTime;
-        finalDoc.updateTime = document.updateTime;
-        lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<T>;
-        this.push({document: lastReceivedDocument, readTime});
-      } else {
-        this.push({readTime});
-      }
-      callback();
+    const stream = new Transform({
+      objectMode: true,
+      transform: (proto, enc, callback) => {
+        const readTime = Timestamp.fromProto(proto.readTime);
+        if (proto.document) {
+          const document = this.firestore.snapshot_(
+            proto.document,
+            proto.readTime
+          );
+          const finalDoc = new DocumentSnapshotBuilder<T>(
+            document.ref.withConverter(this._queryOptions.converter)
+          );
+          // Recreate the QueryDocumentSnapshot with the DocumentReference
+          // containing the original converter.
+          finalDoc.fieldsProto = document._fieldsProto;
+          finalDoc.readTime = document.readTime;
+          finalDoc.createTime = document.createTime;
+          finalDoc.updateTime = document.updateTime;
+          lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<T>;
+          callback(undefined, {document: lastReceivedDocument, readTime});
+        } else {
+          callback(undefined, {readTime});
+        }
+      },
     });
 
     this.firestore
