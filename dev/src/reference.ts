@@ -2076,7 +2076,9 @@ export class Query<T = DocumentData> {
           backendStream.on('error', err => {
             backendStream.unpipe(stream);
 
-            if (!isPermanentRpcError(err, 'runQuery')) {
+            // If a non-transactional query failed, attempt to restart.
+            // Transactional queries are retried via the transaction runner.
+            if (!transactionId && !isPermanentRpcError(err, 'runQuery')) {
               logger(
                 'Query._stream',
                 tag,
@@ -2089,7 +2091,7 @@ export class Query<T = DocumentData> {
                 // `requestStream()` will backoff should the restart fail before
                 // delivering any results.
                 request = this.startAfter(lastReceivedDocument).toProto(
-                  transactionId ?? lastReceivedDocument.readTime
+                  lastReceivedDocument.readTime
                 );
               }
               streamActive.resolve(/* active= */ true);
