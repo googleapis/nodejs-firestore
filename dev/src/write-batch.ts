@@ -586,12 +586,10 @@ export class WriteBatch implements firestore.WriteBatch {
       const isSuccessfulDelete =
         result.updateTime === null && error.code === Status.OK;
       const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
-      let updateTime = null;
-      if (isSuccessfulDelete) {
-        updateTime = DELETE_TIMESTAMP_SENTINEL;
-      } else if (result.updateTime) {
-        updateTime = Timestamp.fromProto(result.updateTime);
-      }
+      const updateTime =
+        error.code === Status.OK
+          ? Timestamp.fromProto(result.updateTime || DELETE_TIMESTAMP_SENTINEL)
+          : null;
       return new BatchWriteResult(updateTime, error);
     });
   }
