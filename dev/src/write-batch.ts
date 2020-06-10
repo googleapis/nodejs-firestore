@@ -50,12 +50,6 @@ import {GoogleError, Status} from 'google-gax';
  */
 const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
 
-/*!
- * Sentinel timestamp used to represent the delete time in bulkCommit().
- * TODO(b/158502664): Remove sentinel value usage and use actual delete time.
- */
-const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
-
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
  * updates(), and creates().
@@ -591,6 +585,7 @@ export class WriteBatch implements firestore.WriteBatch {
       // TODO(b/158502664): Use actual delete timestamp.
       const isSuccessfulDelete =
         result.updateTime === null && error.code === Status.OK;
+      const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
       let updateTime = null;
       if (isSuccessfulDelete) {
         updateTime = DELETE_TIMESTAMP_SENTINEL;

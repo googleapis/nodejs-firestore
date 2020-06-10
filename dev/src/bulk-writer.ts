@@ -113,7 +113,7 @@ class BulkCommitBatch {
 
   /**
    * Adds a `delete` operation to the WriteBatch. Returns a promise that
-   * resolves with the sentinel value for the delete operation.
+   * resolves with the sentinel value (Timestamp(0)) for the delete operation.
    */
   delete<T>(
     documentRef: firestore.DocumentReference<T>,
