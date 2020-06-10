@@ -2342,60 +2342,45 @@ describe('BulkWriter class', () => {
 
   it('has create() method', async () => {
     const ref = randomCol.doc('doc1');
-    const promise = writer.create(ref, {foo: 'bar'});
+    const singleOp = writer.create(ref, {foo: 'bar'});
     await writer.close();
     const result = await ref.get();
     expect(result.data()).to.deep.equal({foo: 'bar'});
-    const writeTime = (await promise).writeTime;
+    const writeTime = (await singleOp).writeTime;
     expect(writeTime).to.not.be.null;
   });
 
   it('has set() method', async () => {
     const ref = randomCol.doc('doc1');
-    const promise = writer.set(ref, {foo: 'bar'});
+    const singleOp = writer.set(ref, {foo: 'bar'});
     await writer.close();
     const result = await ref.get();
     expect(result.data()).to.deep.equal({foo: 'bar'});
-    const writeTime = (await promise).writeTime;
+    const writeTime = (await singleOp).writeTime;
     expect(writeTime).to.not.be.null;
   });
 
   it('has update() method', async () => {
     const ref = randomCol.doc('doc1');
     await ref.set({foo: 'bar'});
-    const promise = writer.update(ref, {foo: 'bar2'});
+    const singleOp = writer.update(ref, {foo: 'bar2'});
     await writer.close();
     const result = await ref.get();
     expect(result.data()).to.deep.equal({foo: 'bar2'});
-    const writeTime = (await promise).writeTime;
+    const writeTime = (await singleOp).writeTime;
     expect(writeTime).to.not.be.null;
   });
 
   it('has delete() method', async () => {
     const ref = randomCol.doc('doc1');
     await ref.set({foo: 'bar'});
-    const promise = writer.delete(ref);
+    const singleOp = writer.delete(ref);
     await writer.close();
     const result = await ref.get();
     expect(result.exists).to.be.false;
     // TODO(b/158502664): Remove this check once we can get write times.
-    const deleteResult = await promise;
+    const deleteResult = await singleOp;
     expect(deleteResult.writeTime).to.deep.equal(new Timestamp(0, 0));
-  });
-
-  // TODO(b/158502664): Remove this test once we can get write times.
-  it('delete uses the latest update time of other operations', async () => {
-    const ref = randomCol.doc('doc1');
-    const ref2 = randomCol.doc('doc2');
-    await ref.set({foo: 'bar'});
-    await ref2.set({foo: 'bar'});
-    // Update a different doc so that the writes are sent in the same batch.
-    const updatePromise = writer.update(randomCol.doc('doc2'), {foo: 'bar1'});
-    const deletePromise = writer.delete(ref);
-    await writer.close();
-    const deleteResult = await deletePromise;
-    const updateResult = await updatePromise;
-    expect(deleteResult.writeTime).to.deep.equal(updateResult.writeTime);
   });
 
   it('can terminate once BulkWriter is closed', async () => {

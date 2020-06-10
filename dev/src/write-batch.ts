@@ -50,6 +50,12 @@ import {GoogleError, Status} from 'google-gax';
  */
 const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
 
+/*!
+ * Sentinel timestamp used to represent the delete time in bulkCommit().
+ * TODO(b/158502664): Remove sentinel value usage and use actual delete time.
+ */
+const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
+
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
  * updates(), and creates().
@@ -575,35 +581,23 @@ export class WriteBatch implements firestore.WriteBatch {
       api.BatchWriteResponse
     >('batchWrite', request, tag);
 
-    const writeResults = response.writeResults || [];
-    let latestTimestamp = Timestamp.fromMillis(0);
-    writeResults.forEach(result => {
-      if (
-        result.updateTime &&
-        Timestamp.fromProto(result.updateTime) > latestTimestamp
-      ) {
-        latestTimestamp = Timestamp.fromProto(result.updateTime);
-      }
-    });
-
-    return writeResults.map((result, i) => {
+    return (response.writeResults || []).map((result, i) => {
       const status = response.status[i];
       const error = new GoogleError(status.message || undefined);
       error.code = status.code as Status;
 
-      // Since delete operations currently do not have write times, use the
-      // latest update time for deletes, or Timestamp(0,0) if the entire batch
-      // consists of deletes.
+      // Since delete operations currently do not have write times, use a
+      // sentinel Timestamp value.t 
+      // TODO(b/158502664): Use actual delete timestamp.
       const isSuccessfulDelete =
         result.updateTime === null && error.code === Status.OK;
-      return new BatchWriteResult(
-        isSuccessfulDelete
-          ? latestTimestamp
-          : result.updateTime
-          ? Timestamp.fromProto(result.updateTime)
-          : null,
-        error
-      );
+      let updateTime = null;
+      if (isSuccessfulDelete) {
+        updateTime = DELETE_TIMESTAMP_SENTINEL;
+      } else if (result.updateTime) {
+        updateTime = Timestamp.fromProto(result.updateTime);
+      }
+      return new BatchWriteResult(updateTime, error);
     });
   }
 
