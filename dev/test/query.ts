@@ -565,30 +565,33 @@ describe('query interface', () => {
   });
 
   it('handles stream exception after initialization (with get())', () => {
+    const responses = [
+      () => stream(result('first'), new Error('Expected error')),
+      () => stream(result('second')),
+    ];
     const overrides: ApiOverride = {
-      runQuery: () => {
-        return stream(result('first'), new Error('Expected error'));
-      },
+      runQuery: () => responses.shift()!(),
     };
 
     return createInstance(overrides).then(firestore => {
       return firestore
         .collection('collectionId')
         .get()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('Expected error');
+        .then(snap => {
+          expect(snap.size).to.equal(2);
+          expect(snap.docs[0].id).to.equal('first');
+          expect(snap.docs[1].id).to.equal('second');
         });
     });
   });
 
   it('handles stream exception after initialization (with stream())', done => {
+    const responses = [
+      () => stream(result('first'), new Error('Expected error')),
+      () => stream(result('second')),
+    ];
     const overrides: ApiOverride = {
-      runQuery: () => {
-        return stream(result('first'), new Error('Expected error'));
-      },
+      runQuery: () => responses.shift()!(),
     };
 
     createInstance(overrides).then(firestore => {
@@ -599,9 +602,8 @@ describe('query interface', () => {
         expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
         ++resultCount;
       });
-      result.on('error', err => {
-        expect(resultCount).to.equal(1);
-        expect(err.message).to.equal('Expected error');
+      result.on('end', () => {
+        expect(resultCount).to.equal(2);
         done();
       });
     });
