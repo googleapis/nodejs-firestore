@@ -586,7 +586,6 @@ describe('query interface', () => {
   });
 
   it('handles stream exception after initialization (with stream())', done => {
-    setLogFunction(console.log);
     const responses = [
       () => stream(result('first'), new Error('Expected error')),
       () => stream(result('second')),
