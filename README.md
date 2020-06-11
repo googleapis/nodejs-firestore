@@ -85,7 +85,7 @@ async function quickstart() {
   console.log('Updated an existing document');
 
   // Read the document.
-  let doc = await document.get();
+  const doc = await document.get();
   console.log('Read the document');
 
   // Delete the document.
@@ -105,6 +105,7 @@ has instructions for running the samples.
 
 | Sample                      | Source Code                       | Try it |
 | --------------------------- | --------------------------------- | ------ |
+| Limit-to-last-query | [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/limit-to-last-query.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/limit-to-last-query.js,samples/README.md) |
 | Quickstart | [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/quickstart.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/quickstart.js,samples/README.md) |
 | Solution-counters | [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/solution-counters.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/solution-counters.js,samples/README.md) |
 

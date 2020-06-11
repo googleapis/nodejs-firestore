@@ -1,0 +1,47 @@
+{
+  "sources": [
+    {
+      "git": {
+        "name": ".",
+        "remote": "git@github.com:googleapis/nodejs-firestore.git",
+        "sha": "6681ef713ff0f09be44034a8b78aae2d5e860010"
+      }
+    },
+    {
+      "git": {
+        "name": "synthtool",
+        "remote": "https://github.com/googleapis/synthtool.git",
+        "sha": "a0ee80e0492a03b9b2bfefb5cca7eaf17bf10438"
+      }
+    }
+  ],
+  "destinations": [
+    {
+      "client": {
+        "source": "googleapis",
+        "apiName": "firestore-admin",
+        "apiVersion": "v1",
+        "language": "typescript",
+        "generator": "gapic-generator-typescript"
+      }
+    },
+    {
+      "client": {
+        "source": "googleapis",
+        "apiName": "firestore",
+        "apiVersion": "v1beta1",
+        "language": "typescript",
+        "generator": "gapic-generator-typescript"
+      }
+    },
+    {
+      "client": {
+        "source": "googleapis",
+        "apiName": "firestore",
+        "apiVersion": "v1",
+        "language": "typescript",
+        "generator": "gapic-generator-typescript"
+      }
+    }
+  ]
+}
