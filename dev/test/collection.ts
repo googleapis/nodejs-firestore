@@ -79,7 +79,12 @@ describe('Collection interface', () => {
     const collection = firestore.collection('col1/doc/col2');
     expect(collection.path).to.equal('col1/doc/col2');
     const document = collection.parent;
-    expect(document.path).to.equal('col1/doc');
+    expect(document!.path).to.equal('col1/doc');
+  });
+
+  it('parent() returns null for root', () => {
+    const collection = firestore.collection('col1');
+    expect(collection.parent).to.equal(null);
   });
 
   it('supports auto-generated ids', () => {

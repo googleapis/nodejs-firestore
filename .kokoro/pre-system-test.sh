@@ -14,4 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-. .kokoro/setup-vars.sh
+export GCLOUD_PROJECT=java-review
+export GOOGLE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/secret_manager/java-review_firestore-nodejs-it-6d41b624fec9

@@ -14,4 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-. .kokoro/setup-vars.sh
+export GCLOUD_PROJECT=nodejs-firestore-ci
+export GOOGLE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/secret_manager/nodejs-firestore-ci-samples-71b5f8aee66e
