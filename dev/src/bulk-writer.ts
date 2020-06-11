@@ -624,6 +624,7 @@ export class BulkWriter {
       if (delayMs === 0) {
         this.sendBatch(batch);
       } else {
+        console.warn('throttling');
         delayExecution(() => this.sendReadyBatches(), delayMs);
         break;
       }
