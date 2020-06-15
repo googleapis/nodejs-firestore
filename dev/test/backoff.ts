@@ -15,7 +15,11 @@
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
-import {ExponentialBackoff, setTimeoutHandler} from '../src/backoff';
+import {
+  ExponentialBackoff,
+  resetTimeoutHandler,
+  setTimeoutHandler,
+} from '../src/backoff';
 
 use(chaiAsPromised);
 
@@ -35,9 +39,7 @@ describe('ExponentialBackoff', () => {
     observedDelays = [];
   });
 
-  after(() => {
-    setTimeoutHandler(setTimeout);
-  });
+  after(() => resetTimeoutHandler());
 
   function assertDelayEquals(expected: number) {
     expect(observedDelays.shift()).to.equal(expected);

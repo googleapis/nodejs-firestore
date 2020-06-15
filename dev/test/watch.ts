@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {WATCH_IDLE_TIMEOUT_MS} from '../src/watch';
+
 const duplexify = require('duplexify');
 
 import {expect} from 'chai';
@@ -36,7 +38,11 @@ import {
   setLogFunction,
   Timestamp,
 } from '../src';
-import {MAX_RETRY_ATTEMPTS, setTimeoutHandler} from '../src/backoff';
+import {
+  MAX_RETRY_ATTEMPTS,
+  resetTimeoutHandler,
+  setTimeoutHandler,
+} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
@@ -679,9 +685,13 @@ describe('Query watch', () => {
 
   beforeEach(() => {
     // We are intentionally skipping the delays to ensure fast test execution.
-    // The retry semantics are uneffected by this, as we maintain their
+    // The retry semantics are unaffected by this, as we maintain their
     // asynchronous behavior.
-    setTimeoutHandler(setImmediate);
+    setTimeoutHandler((op, timeout) => {
+      if (timeout !== WATCH_IDLE_TIMEOUT_MS) {
+        setImmediate(op);
+      }
+    });
 
     targetId = 0x1;
 
@@ -711,7 +721,7 @@ describe('Query watch', () => {
   });
 
   afterEach(() => {
-    setTimeoutHandler(setTimeout);
+    resetTimeoutHandler();
     return verifyInstance(firestore);
   });
 
@@ -840,7 +850,7 @@ describe('Query watch', () => {
     // backoff window during the the stream recovery. We then use this window to
     // unsubscribe from the Watch stream and make sure that we don't
     // re-open the stream once the backoff expires.
-    setTimeoutHandler(setTimeout);
+    resetTimeoutHandler();
 
     const unsubscribe = watchHelper.startWatch();
     return streamHelper
@@ -1600,6 +1610,54 @@ describe('Query watch', () => {
     });
   });
 
+  it('reset after idle timeout', async () => {
+    let idleTimeout = () => {};
+
+    setTimeoutHandler((op, timeout) => {
+      if (timeout === WATCH_IDLE_TIMEOUT_MS) {
+        idleTimeout = op;
+      } else {
+        setTimeout(op, timeout);
+      }
+    });
+
+    await watchHelper.runTest(collQueryJSON(), async () => {
+      // Mock the server responding to the query.
+      watchHelper.sendAddTarget();
+      watchHelper.sendDoc(doc1, {foo: 'a'});
+      watchHelper.sendCurrent();
+      watchHelper.sendSnapshot(1, /* resumeToken= */ Buffer.from([0xabcd]));
+
+      let currentSnapshot = await watchHelper.await('snapshot');
+
+      lastSnapshot = snapshotsEqual(lastSnapshot, 1, currentSnapshot, {
+        docs: [snapshot(doc1, {foo: 'a'})],
+        docChanges: [added(doc1, {foo: 'a'})],
+      });
+
+      // Invoke the idle timeout
+      idleTimeout();
+      await streamHelper.await('end');
+
+      // Restart the stream and send one additional document
+      await streamHelper.awaitOpen();
+
+      watchHelper.sendAddTarget();
+
+      watchHelper.snapshotVersion = 2;
+      watchHelper.sendDoc(doc2, {foo: 'b'});
+      watchHelper.sendCurrent();
+      watchHelper.sendSnapshot(2);
+      currentSnapshot = await watchHelper.await('snapshot');
+
+      // The snapshot now includes both `doc1` and `doc2`.
+      snapshotsEqual(lastSnapshot, 2, currentSnapshot, {
+        docs: [snapshot(doc1, {foo: 'a'}), snapshot(doc2, {foo: 'b'})],
+        docChanges: [added(doc2, {foo: 'b'})],
+      });
+    });
+  });
+
   it('handles reset with phantom doc', () => {
     return watchHelper.runTest(collQueryJSON(), () => {
       // Mock the server responding to the query.
@@ -2231,7 +2289,11 @@ describe('DocumentReference watch', () => {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are uneffected by this, as we maintain their
     // asynchronous behavior.
-    setTimeoutHandler(setImmediate);
+    setTimeoutHandler((op, timeout) => {
+      if (timeout !== WATCH_IDLE_TIMEOUT_MS) {
+        setImmediate(op);
+      }
+    });
 
     targetId = 0x1;
     streamHelper = new StreamHelper();
@@ -2245,7 +2307,7 @@ describe('DocumentReference watch', () => {
   });
 
   afterEach(() => {
-    setTimeoutHandler(setTimeout);
+    resetTimeoutHandler();
     return verifyInstance(firestore);
   });
 

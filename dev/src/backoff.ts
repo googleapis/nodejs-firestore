@@ -57,7 +57,10 @@ export const MAX_RETRY_ATTEMPTS = 10;
 /*!
  * The timeout handler used by `ExponentialBackoff` and `BulkWriter`.
  */
-export let delayExecution: (f: () => void, ms: number) => void = setTimeout;
+export let delayExecution: (
+  f: () => void,
+  ms: number
+) => NodeJS.Timeout = setTimeout;
 
 /**
  * Allows overriding of the timeout handler used by the exponential backoff
@@ -71,7 +74,36 @@ export let delayExecution: (f: () => void, ms: number) => void = setTimeout;
 export function setTimeoutHandler(
   handler: (f: () => void, ms: number) => void
 ): void {
-  delayExecution = handler;
+  delayExecution = (f: () => void, ms: number) => {
+    handler(f, ms);
+    const timeout: NodeJS.Timeout = {
+      hasRef: () => {
+        throw new Error('For tests only. Not Implemented');
+      },
+      ref: () => {
+        throw new Error('For tests only. Not Implemented');
+      },
+      refresh: () => {
+        throw new Error('For tests only. Not Implemented');
+      },
+      unref: () => {
+        throw new Error('For tests only. Not Implemented');
+      },
+    };
+    return timeout;
+  };
+}
+
+/**
+ * Resets the timeout handler back to `setTimeout`. To be used in conjunction
+ * with `setTimeoutHandler()`.
+ *
+ * Used only in testing.
+ *
+ * @private
+ */
+export function resetTimeoutHandler(): void {
+  delayExecution = setTimeout;
 }
 
 /**

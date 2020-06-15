@@ -25,7 +25,7 @@ import {
   setLogFunction,
 } from '../src';
 import {DocumentData, DocumentReference, Query, Timestamp} from '../src';
-import {setTimeoutHandler} from '../src/backoff';
+import {resetTimeoutHandler, setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {QualifiedResourcePath} from '../src/path';
 import {
@@ -311,7 +311,7 @@ describe('query interface', () => {
 
   afterEach(() => {
     verifyInstance(firestore);
-    setTimeoutHandler(setTimeout);
+    resetTimeoutHandler();
   });
 
   it('has isEqual() method', () => {

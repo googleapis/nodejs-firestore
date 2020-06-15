@@ -22,7 +22,7 @@ import * as through2 from 'through2';
 import * as proto from '../protos/firestore_v1_proto_api';
 import * as Firestore from '../src';
 import {DocumentReference, FieldPath, Transaction} from '../src';
-import {setTimeoutHandler} from '../src/backoff';
+import {resetTimeoutHandler, setTimeoutHandler} from '../src/backoff';
 import {
   ApiOverride,
   createInstance,
@@ -331,8 +331,6 @@ function runTransaction<T>(
   };
 
   return createInstance(overrides).then(async firestore => {
-    const defaultTimeoutHandler = setTimeout;
-
     try {
       setTimeoutHandler((callback, timeout) => {
         if (timeout > 0) {
@@ -353,7 +351,7 @@ function runTransaction<T>(
       });
     } finally {
       expect(expectedRequests.length).to.equal(0);
-      setTimeoutHandler(defaultTimeoutHandler);
+      resetTimeoutHandler();
     }
   });
 }
