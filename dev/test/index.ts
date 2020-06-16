@@ -21,7 +21,7 @@ import {google} from '../protos/firestore_v1_proto_api';
 
 import * as Firestore from '../src';
 import {DocumentSnapshot, FieldPath} from '../src';
-import {resetTimeoutHandler, setTimeoutHandler} from '../src/backoff';
+import {setTimeoutHandler} from '../src/backoff';
 import {QualifiedResourcePath} from '../src/path';
 import {
   ApiOverride,
@@ -899,7 +899,7 @@ describe('getAll() method', () => {
     setTimeoutHandler(setImmediate);
   });
 
-  after(() => resetTimeoutHandler());
+  after(() => setTimeoutHandler(setTimeout));
 
   function resultEquals(
     result: DocumentSnapshot[],

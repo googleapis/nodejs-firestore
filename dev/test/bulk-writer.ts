@@ -23,6 +23,7 @@ import {
   Timestamp,
   WriteResult,
 } from '../src';
+import {setTimeoutHandler} from '../src/backoff';
 import {BulkWriter} from '../src/bulk-writer';
 import {Deferred} from '../src/util';
 import {
@@ -39,7 +40,6 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
-import {resetTimeoutHandler, setTimeoutHandler} from '../src/backoff';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(() => {});
@@ -550,7 +550,7 @@ describe('BulkWriter', () => {
   });
 
   describe('500/50/5 support', () => {
-    afterEach(() => resetTimeoutHandler());
+    afterEach(() => setTimeoutHandler(setTimeout));
 
     it('does not send batches if doing so exceeds the rate limit', async () => {
       // The test is considered a success if BulkWriter tries to send the second

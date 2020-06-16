@@ -18,14 +18,17 @@ import * as extend from 'extend';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {
+  DocumentData,
+  DocumentReference,
   FieldPath,
   FieldValue,
   Firestore,
+  Query,
   QueryDocumentSnapshot,
   setLogFunction,
+  Timestamp,
 } from '../src';
-import {DocumentData, DocumentReference, Query, Timestamp} from '../src';
-import {resetTimeoutHandler, setTimeoutHandler} from '../src/backoff';
+import {setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {QualifiedResourcePath} from '../src/path';
 import {
@@ -311,7 +314,7 @@ describe('query interface', () => {
 
   afterEach(() => {
     verifyInstance(firestore);
-    resetTimeoutHandler();
+    setTimeoutHandler(setTimeout);
   });
 
   it('has isEqual() method', () => {

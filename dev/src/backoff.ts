@@ -95,18 +95,6 @@ export function setTimeoutHandler(
 }
 
 /**
- * Resets the timeout handler back to `setTimeout`. To be used in conjunction
- * with `setTimeoutHandler()`.
- *
- * Used only in testing.
- *
- * @private
- */
-export function resetTimeoutHandler(): void {
-  delayExecution = setTimeout;
-}
-
-/**
  * Configuration object to adjust the delays of the exponential backoff
  * algorithm.
  *

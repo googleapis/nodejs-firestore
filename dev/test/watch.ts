@@ -38,11 +38,7 @@ import {
   setLogFunction,
   Timestamp,
 } from '../src';
-import {
-  MAX_RETRY_ATTEMPTS,
-  resetTimeoutHandler,
-  setTimeoutHandler,
-} from '../src/backoff';
+import {MAX_RETRY_ATTEMPTS, setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
@@ -721,7 +717,7 @@ describe('Query watch', () => {
   });
 
   afterEach(() => {
-    resetTimeoutHandler();
+    setTimeoutHandler(setTimeout);
     return verifyInstance(firestore);
   });
 
@@ -850,7 +846,7 @@ describe('Query watch', () => {
     // backoff window during the the stream recovery. We then use this window to
     // unsubscribe from the Watch stream and make sure that we don't
     // re-open the stream once the backoff expires.
-    resetTimeoutHandler();
+    setTimeoutHandler(setTimeout);
 
     const unsubscribe = watchHelper.startWatch();
     return streamHelper
@@ -2307,7 +2303,7 @@ describe('DocumentReference watch', () => {
   });
 
   afterEach(() => {
-    resetTimeoutHandler();
+    setTimeoutHandler(setTimeout);
     return verifyInstance(firestore);
   });
 
