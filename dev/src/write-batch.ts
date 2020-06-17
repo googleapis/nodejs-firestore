@@ -605,7 +605,7 @@ export class WriteBatch implements firestore.WriteBatch {
       logger(
         'WriteBatch.bulkCommit',
         tag,
-        'current batch failed at retry #' +
+        'Current batch failed at retry #' +
           retryCount +
           '. Num failures: ' +
           abortedIndexes.length +

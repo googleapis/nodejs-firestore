@@ -24,7 +24,6 @@ import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {Deferred, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
-import {Status} from 'google-gax';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -193,9 +192,6 @@ class BulkCommitBatch {
       if (result.writeTime) {
         return new WriteResult(result.writeTime);
       } else {
-        if (result.status.code === Status.ABORTED) {
-          console.error('STATUS' + result.status.note);
-        }
         throw result.status;
       }
     });
@@ -628,6 +624,7 @@ export class BulkWriter {
       if (delayMs === 0) {
         this.sendBatch(batch);
       } else {
+        console.warn('throttling');
         delayExecution(() => this.sendReadyBatches(), delayMs);
         break;
       }
