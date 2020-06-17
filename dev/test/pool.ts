@@ -324,7 +324,7 @@ describe('Client pool', () => {
         );
       })
       .catch((err: Error) => {
-        expect(err).to.equal('The client has already been terminated');
+        expect(err.message).to.equal('The client has already been terminated');
       });
   });
 

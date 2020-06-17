@@ -152,7 +152,7 @@ describe('Firestore class', () => {
       })
       .then(() => Promise.reject('set() should have failed'))
       .catch(err => {
-        expect(err).to.equal('The client has already been terminated');
+        expect(err.message).to.equal('The client has already been terminated');
       });
   });
 

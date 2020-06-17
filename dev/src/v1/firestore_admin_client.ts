@@ -310,7 +310,9 @@ export class FirestoreAdminClient {
       const innerCallPromise = this.firestoreAdminStub.then(
         stub => (...args: Array<{}>) => {
           if (this._terminated) {
-            return Promise.reject('The client has already been closed.');
+            return Promise.reject(
+              new Error('The client has already been closed.')
+            );
           }
           const func = stub[methodName];
           return func.apply(stub, args);
