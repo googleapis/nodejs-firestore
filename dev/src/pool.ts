@@ -187,7 +187,9 @@ export class ClientPool<T> {
    */
   run<V>(requestTag: string, op: (client: T) => Promise<V>): Promise<V> {
     if (this.terminated) {
-      return Promise.reject('The client has already been terminated');
+      return Promise.reject(
+        new Error('The client has already been terminated')
+      );
     }
     const client = this.acquire(requestTag);
 
