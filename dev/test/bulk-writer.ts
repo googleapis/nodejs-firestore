@@ -52,10 +52,13 @@ describe('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
-  const activeRequestDeferred = new Deferred<void>();
+  let activeRequestDeferred: Deferred<void>;
   let activeRequestCounter = 0;
+  let requestMadeDeferred: Deferred<void>;
 
   beforeEach(() => {
+    activeRequestDeferred = new Deferred<void>();
+    requestMadeDeferred = new Deferred<void>();
     requestCounter = 0;
     opCount = 0;
   });
@@ -156,6 +159,7 @@ describe('BulkWriter', () => {
           // This expect statement is used to test that only one request is
           // made at a time.
           expect(activeRequestCounter).to.equal(1);
+          requestMadeDeferred.resolve();
           await activeRequestDeferred.promise;
           activeRequestCounter--;
         }
@@ -549,55 +553,63 @@ describe('BulkWriter', () => {
   describe('500/50/5 support', () => {
     afterEach(() => setTimeoutHandler(setTimeout));
 
-    // TODO(chenbrian): Actually fix this test...
-    it.skip('does not send batches if doing so exceeds the rate limit', async () => {
-      // The test is considered a success if BulkWriter tries to send the second
-      // batch again after a timeout.
+    it('does not send batches if doing so exceeds the rate limit', done => {
+      // The test is considered a success if BulkWriter tries to send the
+      // second batch after a timeout.
 
-      const arrayRange = Array.from(new Array(500), (_, i) => i);
+      const arrayRange = Array.from(new Array(499), (_, i) => i);
       const requests1 = arrayRange.map(i => setOp('doc' + i, 'bar'));
       const responses1 = arrayRange.map(i => successResponse(i));
-      const arrayRange2 = [500, 501, 502, 503, 504];
+      const arrayRange2 = Array.from(new Array(100), (_, i) => i + 500);
       const requests2 = arrayRange2.map(i => setOp('doc' + i, 'bar'));
       const responses2 = arrayRange2.map(i => successResponse(i));
 
-      const bulkWriter = await instantiateInstance([
-        {
-          request: createRequest(requests1),
-          response: mergeResponses(responses1),
-        },
-        {
-          request: createRequest(requests2),
-          response: mergeResponses(responses2),
-        },
-      ]);
-      for (let i = 0; i < 500; i++) {
-        bulkWriter
-          .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
-          .then(incrementOpCount);
-      }
-      const flush1 = bulkWriter.flush();
+      instantiateInstance(
+        [
+          {
+            request: createRequest(requests1),
+            response: mergeResponses(responses1),
+          },
+          {
+            request: createRequest(requests2),
+            response: mergeResponses(responses2),
+          },
+        ],
+        /* enforceSingleConcurrentRequest= */ true
+      ).then(async bulkWriter => {
+        for (let i = 0; i < 499; i++) {
+          bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
+        }
+        bulkWriter.flush();
 
-      // Sending this next batch would go over the 500/50/5 capacity, so
-      // check that BulkWriter doesn't send this batch until the first batch
-      // is resolved.
-      let timeoutCalled = false;
-      setTimeoutHandler((_, timeout) => {
-        // Check that BulkWriter has not yet sent the 2nd batch.
-        timeoutCalled = true;
-        expect(requestCounter).to.equal(0);
-        expect(timeout).to.be.greaterThan(0);
+        // Wait until the initial batch has been sent by BulkWriter. Because
+        // there are floating promises, not waiting here can cause a race
+        // condition where the first batch's request has not been made by the
+        // time the second request is sent.
+        await requestMadeDeferred.promise;
+
+        // Sending the second batch would go over the 500/50/5 capacity, so
+        // check that BulkWriter schedules the second batch after a delay.
+        let timeoutCalled = false;
+        setTimeoutHandler((_, timeout) => {
+          if (!timeoutCalled) {
+            timeoutCalled = true;
+            expect(requestCounter).to.equal(0);
+            expect(timeout).to.be.greaterThan(0);
+            done();
+          }
+        });
+
+        for (let i = 500; i < 600; i++) {
+          bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
+        }
+        bulkWriter.flush();
+        activeRequestDeferred.resolve();
+        await bulkWriter.close();
+        if (!timeoutCalled) {
+          done(new Error('timeout handler was not called'));
+        }
       });
-      for (let i = 500; i < 505; i++) {
-        bulkWriter
-          .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
-          .then(incrementOpCount);
-      }
-      const flush2 = bulkWriter.flush();
-      await flush1;
-      await flush2;
-      expect(timeoutCalled).to.be.true;
-      return bulkWriter.close();
     });
   });
 
