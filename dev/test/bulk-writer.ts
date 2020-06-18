@@ -20,7 +20,7 @@ import {Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
-import {BulkWriter, MAX_BATCH_SIZE} from '../src/bulk-writer';
+import {BulkWriter} from '../src/bulk-writer';
 import {Deferred} from '../src/util';
 import {
   ApiOverride,
