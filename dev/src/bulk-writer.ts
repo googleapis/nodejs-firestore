@@ -28,7 +28,7 @@ import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 /*!
  * The maximum number of writes that can be in a single batch.
  */
-const MAX_BATCH_SIZE = 500;
+export const MAX_BATCH_SIZE = 500;
 
 /*!
  * The starting maximum number of operations per second as allowed by the
