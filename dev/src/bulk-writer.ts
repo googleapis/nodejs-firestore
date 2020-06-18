@@ -624,7 +624,6 @@ export class BulkWriter {
       if (delayMs === 0) {
         this.sendBatch(batch);
       } else {
-        console.warn('throttling');
         delayExecution(() => this.sendReadyBatches(), delayMs);
         break;
       }
@@ -678,6 +677,7 @@ export class BulkWriter {
           .filter(batch => batch.state === BatchState.SENT)
           .find(batch => batch.docPaths.has(path)) !== undefined;
       if (isRefInFlight) {
+        // eslint-disable-next-line no-console
         console.warn(
           '[BulkWriter]',
           `Duplicate write to document "${path}" detected.`,

@@ -13,7 +13,8 @@
             "allowExpressions": true,
             "allowTypedFunctionExpressions": true
           }
-        ]
+        ],
+        "no-console": ["error", {"allow": ["error"]}]
       }
     },
     {
