@@ -67,10 +67,6 @@ describe('BulkWriter', () => {
     });
   });
 
-  afterEach(() => {
-    setTimeoutHandler(setTimeout);
-  });
-
   function incrementOpCount(): void {
     opCount++;
   }
@@ -188,6 +184,7 @@ describe('BulkWriter', () => {
   afterEach(() => {
     verifyInstance(firestore);
     expect(timeoutHandlerCounter).to.equal(0);
+    setTimeoutHandler(setTimeout);
   });
 
   it('has a set() method', async () => {
@@ -581,10 +578,8 @@ describe('BulkWriter', () => {
       });
     }
 
-    afterEach(() => setTimeoutHandler(setTimeout));
-
     it('does not send batches if doing so exceeds the rate limit', done => {
-      instantiateInstance().then(async bulkWriter => {
+      instantiateInstance().then(bulkWriter => {
         let timeoutCalled = false;
         setTimeoutHandler((_, timeout) => {
           if (!timeoutCalled) {
@@ -597,10 +592,11 @@ describe('BulkWriter', () => {
         for (let i = 0; i < 600; i++) {
           bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
         }
-        await bulkWriter.close();
-        if (!timeoutCalled) {
-          done(new Error('Expected the timeout handler to be called'));
-        }
+        // The close() promise will never resolve. Since we do not call the
+        // callback function in the overridden handler, subsequent requests
+        // after the timeout will not be made. The close() call is used to
+        // ensure that the final batch is sent.
+        bulkWriter.close();
       });
     });
   });
