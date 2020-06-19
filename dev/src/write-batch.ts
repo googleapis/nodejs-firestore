@@ -579,59 +579,19 @@ export class WriteBatch implements firestore.WriteBatch {
       writes: this._ops.map(op => op()),
     };
 
-    const retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
+    const retryCodes = getRetryCodes('batchWrite');
 
-    const response = await this._firestore.request<
+    let response = await this._firestore.request<
       api.IBatchWriteRequest,
       api.BatchWriteResponse
     >('batchWrite', request, tag, retryCodes);
 
-    let retryCount = 0;
-    while (retryCount < MAX_BATCH_WRITE_RETRY_ATTEMPTS) {
-      // Find the indexes of all writes that failed with ABORTED.
-      const abortedIndexes = response.status.reduce(
-        (arr: number[], status, i) => {
-          if (status.code === Status.ABORTED) {
-            arr.push(i);
-          }
-          return arr;
-        },
-        []
-      );
-
-      if (abortedIndexes.length === 0) {
-        break;
-      }
-      logger(
-        'WriteBatch.bulkCommit',
-        tag,
-        'Current batch failed at retry #' +
-          retryCount +
-          '. Num failures: ' +
-          abortedIndexes.length +
-          '/' +
-          response.status.length
-      );
-
-      // Retry the failed writes in a new request.
-      const retryRequest = {...request};
-      retryRequest.writes = retryRequest.writes?.filter((write, i) => {
-        return abortedIndexes.includes(i);
-      });
-      const retriedResponse = await this._firestore.request<
-        api.IBatchWriteRequest,
-        api.BatchWriteResponse
-      >('batchWrite', retryRequest, tag, retryCodes);
-
-      // Map the results of the retried request back to the original response.
-      for (let i = 0; i < abortedIndexes.length; i++) {
-        const originalIndex = abortedIndexes[i];
-        response.writeResults[originalIndex] = retriedResponse.writeResults[i];
-        response.status[originalIndex] = retriedResponse.status[i];
-      }
-      await this._backoff.backoffAndWait();
-      retryCount++;
-    }
+    response = await this.validateAndRetryResponse(
+      request,
+      response,
+      tag,
+      retryCodes
+    );
 
     return response.writeResults.map((result, i) => {
       const status = response.status[i];
@@ -648,6 +608,65 @@ export class WriteBatch implements firestore.WriteBatch {
           : null;
       return new BatchWriteResult(updateTime, error);
     });
+  }
+
+  /**
+   * Validates the individual statuses of the provided response and retries
+   * any failed writes with retryable error codes. Maps the retried responses
+   * back to the original response.
+   *
+   * @private
+   */
+  async validateAndRetryResponse(
+    request: api.IBatchWriteRequest,
+    response: api.BatchWriteResponse,
+    tag: string,
+    retryCodes: number[]
+  ): Promise<api.BatchWriteResponse> {
+    let retryAttempts = 0;
+    while (retryAttempts < MAX_BATCH_WRITE_RETRY_ATTEMPTS) {
+      // Find all writes that failed with retryable errors.
+      const abortedIndexes: number[] = [];
+      const writesToRetry = response.status.reduce(
+        (writesToRetry: api.IWrite[], status, i) => {
+          if (status.code && retryCodes.includes(status.code)) {
+            writesToRetry.push(request.writes![i]);
+            abortedIndexes.push(i);
+          }
+          return writesToRetry;
+        },
+        []
+      );
+
+      if (abortedIndexes.length === 0) {
+        break;
+      }
+
+      await this._backoff.backoffAndWait();
+      logger(
+        'WriteBatch.bulkCommit',
+        tag,
+        `Current batch failed at retry #${retryAttempts}. Num failures: ` +
+          `${abortedIndexes.length}]/${response.status.length}`
+      );
+
+      // Retry the failed writes in a new request.
+      const retryRequest = {...request};
+      retryRequest.writes = writesToRetry;
+      const retriedResponse = await this._firestore.request<
+        api.IBatchWriteRequest,
+        api.BatchWriteResponse
+      >('batchWrite', retryRequest, tag, retryCodes);
+
+      // Map the results of the retried request back to the original response.
+      for (let i = 0; i < abortedIndexes.length; i++) {
+        const originalIndex = abortedIndexes[i];
+        response.writeResults[originalIndex] = retriedResponse.writeResults[i];
+        response.status[originalIndex] = retriedResponse.status[i];
+      }
+      retryAttempts++;
+    }
+    return response;
   }
 
   /**

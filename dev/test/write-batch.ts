@@ -491,7 +491,7 @@ describe('bulkCommit support', () => {
               updateTime: null,
             },
           ],
-          status: [{code: 0}, {code: 14}],
+          status: [{code: 0}, {code: 4}],
         });
       },
     };
@@ -507,7 +507,7 @@ describe('bulkCommit support', () => {
     expect(writeResults[0].writeTime!.isEqual(new Timestamp(0, 0))).to.be.true;
     expect(writeResults[1].writeTime).to.be.null;
     expect(writeResults[0].status.code).to.equal(Status.OK);
-    expect(writeResults[1].status.code).to.equal(Status.UNAVAILABLE);
+    expect(writeResults[1].status.code).to.equal(Status.DEADLINE_EXCEEDED);
   }
 
   it('bulkCommit', () => {
