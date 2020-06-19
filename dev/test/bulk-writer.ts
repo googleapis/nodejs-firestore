@@ -52,12 +52,19 @@ describe('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
-  const activeRequestDeferred = new Deferred<void>();
+  let activeRequestDeferred: Deferred<void>;
   let activeRequestCounter = 0;
+  let timeoutHandlerCounter = 0;
 
   beforeEach(() => {
+    activeRequestDeferred = new Deferred<void>();
     requestCounter = 0;
     opCount = 0;
+    timeoutHandlerCounter = 0;
+    setTimeoutHandler(fn => {
+      timeoutHandlerCounter++;
+      fn();
+    });
   });
 
   function incrementOpCount(): void {
@@ -174,7 +181,11 @@ describe('BulkWriter', () => {
     });
   }
 
-  afterEach(() => verifyInstance(firestore));
+  afterEach(() => {
+    verifyInstance(firestore);
+    expect(timeoutHandlerCounter).to.equal(0);
+    setTimeoutHandler(setTimeout);
+  });
 
   it('has a set() method', async () => {
     const bulkWriter = await instantiateInstance([
@@ -485,7 +496,7 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('does not send batches if a document containing the same write is in flight', async () => {
+  it('uses timeout for batches that exceed the rate limit', async () => {
     const bulkWriter = await instantiateInstance(
       [
         {
@@ -547,57 +558,46 @@ describe('BulkWriter', () => {
   });
 
   describe('500/50/5 support', () => {
-    afterEach(() => setTimeoutHandler(setTimeout));
-
-    // TODO(chenbrian): Actually fix this test...
-    it.skip('does not send batches if doing so exceeds the rate limit', async () => {
-      // The test is considered a success if BulkWriter tries to send the second
-      // batch again after a timeout.
-
-      const arrayRange = Array.from(new Array(500), (_, i) => i);
-      const requests1 = arrayRange.map(i => setOp('doc' + i, 'bar'));
-      const responses1 = arrayRange.map(i => successResponse(i));
-      const arrayRange2 = [500, 501, 502, 503, 504];
-      const requests2 = arrayRange2.map(i => setOp('doc' + i, 'bar'));
-      const responses2 = arrayRange2.map(i => successResponse(i));
-
-      const bulkWriter = await instantiateInstance([
-        {
-          request: createRequest(requests1),
-          response: mergeResponses(responses1),
+    // Return success responses for all requests.
+    function instantiateInstance(): Promise<BulkWriter> {
+      const overrides: ApiOverride = {
+        batchWrite: request => {
+          const requestLength = request.writes?.length || 0;
+          const responses = mergeResponses(
+            Array.from(new Array(requestLength), (_, i) => successResponse(i))
+          );
+          return response({
+            writeResults: responses.writeResults,
+            status: responses.status,
+          });
         },
-        {
-          request: createRequest(requests2),
-          response: mergeResponses(responses2),
-        },
-      ]);
-      for (let i = 0; i < 500; i++) {
-        bulkWriter
-          .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
-          .then(incrementOpCount);
-      }
-      const flush1 = bulkWriter.flush();
-
-      // Sending this next batch would go over the 500/50/5 capacity, so
-      // check that BulkWriter doesn't send this batch until the first batch
-      // is resolved.
-      let timeoutCalled = false;
-      setTimeoutHandler((_, timeout) => {
-        // Check that BulkWriter has not yet sent the 2nd batch.
-        timeoutCalled = true;
-        expect(requestCounter).to.equal(0);
-        expect(timeout).to.be.greaterThan(0);
+      };
+      return createInstance(overrides).then(firestoreClient => {
+        firestore = firestoreClient;
+        return firestore._bulkWriter();
       });
-      for (let i = 500; i < 505; i++) {
-        bulkWriter
-          .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
-          .then(incrementOpCount);
-      }
-      const flush2 = bulkWriter.flush();
-      await flush1;
-      await flush2;
-      expect(timeoutCalled).to.be.true;
-      return bulkWriter.close();
+    }
+
+    it('does not send batches if doing so exceeds the rate limit', done => {
+      instantiateInstance().then(bulkWriter => {
+        let timeoutCalled = false;
+        setTimeoutHandler((_, timeout) => {
+          if (!timeoutCalled) {
+            timeoutCalled = true;
+            expect(timeout).to.be.greaterThan(0);
+            done();
+          }
+        });
+
+        for (let i = 0; i < 600; i++) {
+          bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
+        }
+        // The close() promise will never resolve. Since we do not call the
+        // callback function in the overridden handler, subsequent requests
+        // after the timeout will not be made. The close() call is used to
+        // ensure that the final batch is sent.
+        bulkWriter.close();
+      });
     });
   });
 
