@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [3.8.6](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.5...v3.8.6) (2020-06-19)
+
+
+### Bug Fixes
+
+* reject all promises with errors ([#1224](https://www.github.com/googleapis/nodejs-firestore/issues/1224)) ([9118521](https://www.github.com/googleapis/nodejs-firestore/commit/9118521a0382fd2d484803a89e590c1bf6d2a3c6))
+* restart onSnapshot() listeners that stop receiving updates ([#1220](https://www.github.com/googleapis/nodejs-firestore/issues/1220)) ([49ca641](https://www.github.com/googleapis/nodejs-firestore/commit/49ca641ca5d813923b3d4efd113bfc5aecd32437))
+
 ### [3.8.5](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.4...v3.8.5) (2020-06-10)
 
 
