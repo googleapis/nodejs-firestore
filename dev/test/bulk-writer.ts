@@ -496,7 +496,7 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('does not send batches if a document containing the same write is in flight', async () => {
+  it('uses timeout for batches that exceed the rate limit', async () => {
     const bulkWriter = await instantiateInstance(
       [
         {
