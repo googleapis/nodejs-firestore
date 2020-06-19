@@ -48,7 +48,14 @@ s.replace(
 # Copy template files
 common_templates = gcp.CommonTemplates()
 templates = common_templates.node_library(
-    source_location="build/src", test_project="node-gcloud-ci"
+    source_location="build/src",
+    test_project="node-gcloud-ci",
+    excludes=[
+      ".kokoro/presubmit/node10/system-test.cfg",
+      ".kokoro/continuous/node10/system-test.cfg",
+      ".kokoro/presubmit/node10/samples-test.cfg",
+      ".kokoro/continuous/node10/samples-test.cfg"
+    ]
 )
 
 s.copy(templates)
