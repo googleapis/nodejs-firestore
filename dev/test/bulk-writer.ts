@@ -560,8 +560,6 @@ describe('BulkWriter', () => {
 
   it('retries writes that fail with ABORTED errors', async () => {
     setTimeoutHandler(setImmediate);
-
-<<<<<<< HEAD
     // Create mock responses that simulate one successful write followed by
     // failed responses.
     const bulkWriter = await instantiateInstance([
@@ -573,7 +571,7 @@ describe('BulkWriter', () => {
         ]),
         response: mergeResponses([
           successResponse(1),
-          failedResponse(Status.ABORTED),
+          failedResponse(Status.UNAVAILABLE),
           failedResponse(Status.ABORTED),
         ]),
       },
@@ -590,55 +588,20 @@ describe('BulkWriter', () => {
       },
     ]);
 
-    bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
-    bulkWriter.set(firestore.doc('collectionId/doc2'), {foo: 'bar'});
-    bulkWriter.set(firestore.doc('collectionId/doc3'), {foo: 'bar'});
-    await bulkWriter.close();
-  });
-=======
-      // Create mock responses that simulate one successful write followed by
-      // failed responses.
-      const bulkWriter = await instantiateInstance([
-        {
-          request: createRequest([
-            setOp('doc1', 'bar'),
-            setOp('doc2', 'bar'),
-            setOp('doc3', 'bar'),
-          ]),
-          response: mergeResponses([
-            successResponse(1),
-            failedResponse(Status.UNAVAILABLE),
-            failedResponse(Status.ABORTED),
-          ]),
-        },
-        {
-          request: createRequest([setOp('doc2', 'bar'), setOp('doc3', 'bar')]),
-          response: mergeResponses([
-            successResponse(2),
-            failedResponse(Status.ABORTED),
-          ]),
-        },
-        {
-          request: createRequest([setOp('doc3', 'bar')]),
-          response: mergeResponses([successResponse(3)]),
-        },
-      ]);
-
-      const set1 = bulkWriter.set(firestore.doc('collectionId/doc1'), {
-        foo: 'bar',
-      });
-      const set2 = bulkWriter.set(firestore.doc('collectionId/doc2'), {
-        foo: 'bar',
-      });
-      const set3 = bulkWriter.set(firestore.doc('collectionId/doc3'), {
-        foo: 'bar',
-      });
-      await bulkWriter.close();
-      expect((await set1).writeTime).to.deep.equal(new Timestamp(1, 0));
-      expect((await set2).writeTime).to.deep.equal(new Timestamp(2, 0));
-      expect((await set3).writeTime).to.deep.equal(new Timestamp(3, 0));
+    const set1 = bulkWriter.set(firestore.doc('collectionId/doc1'), {
+      foo: 'bar',
     });
->>>>>>> b8ce703... resolve comments rd.1
+    const set2 = bulkWriter.set(firestore.doc('collectionId/doc2'), {
+      foo: 'bar',
+    });
+    const set3 = bulkWriter.set(firestore.doc('collectionId/doc3'), {
+      foo: 'bar',
+    });
+    await bulkWriter.close();
+    expect((await set1).writeTime).to.deep.equal(new Timestamp(1, 0));
+    expect((await set2).writeTime).to.deep.equal(new Timestamp(2, 0));
+    expect((await set3).writeTime).to.deep.equal(new Timestamp(3, 0));
+  });
 
   describe('Timeout handler tests', () => {
     // Return success responses for all requests.
