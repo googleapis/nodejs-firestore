@@ -49,6 +49,13 @@ import {
 
 import api = google.firestore.v1;
 import {GoogleError, Status} from 'google-gax';
+import {ExponentialBackoff} from './backoff';
+
+/*!
+ * The maximum number of retries that will be attempted for ABORTED writes
+ * before stopping all retry attempts.
+ */
+const MAX_BATCH_WRITE_RETRY_ATTEMPTS = 5;
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
@@ -127,6 +134,7 @@ export class WriteBatch implements firestore.WriteBatch {
   private readonly _firestore: Firestore;
   private readonly _serializer: Serializer;
   private readonly _allowUndefined: boolean;
+  private readonly _backoff: ExponentialBackoff;
 
   /**
    * An array of write operations that are executed as part of the commit. The
@@ -146,6 +154,7 @@ export class WriteBatch implements firestore.WriteBatch {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
     this._allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
+    this._backoff = new ExponentialBackoff();
   }
 
   /**
@@ -577,7 +586,54 @@ export class WriteBatch implements firestore.WriteBatch {
       api.BatchWriteResponse
     >('batchWrite', request, tag, retryCodes);
 
-    return (response.writeResults || []).map((result, i) => {
+    let retryCount = 0;
+    while (retryCount < MAX_BATCH_WRITE_RETRY_ATTEMPTS) {
+      // Find the indexes of all writes that failed with ABORTED.
+      const abortedIndexes = response.status.reduce(
+        (arr: number[], status, i) => {
+          if (status.code === Status.ABORTED) {
+            arr.push(i);
+          }
+          return arr;
+        },
+        []
+      );
+
+      if (abortedIndexes.length === 0) {
+        break;
+      }
+      logger(
+        'WriteBatch.bulkCommit',
+        tag,
+        'current batch failed at retry #' +
+          retryCount +
+          '. Num failures: ' +
+          abortedIndexes.length +
+          '/' +
+          response.status.length
+      );
+
+      // Retry the failed writes in a new request.
+      const retryRequest = {...request};
+      retryRequest.writes = retryRequest.writes?.filter((write, i) => {
+        return abortedIndexes.includes(i);
+      });
+      const retriedResponse = await this._firestore.request<
+        api.IBatchWriteRequest,
+        api.BatchWriteResponse
+      >('batchWrite', retryRequest, tag, retryCodes);
+
+      // Map the results of the retried request back to the original response.
+      for (let i = 0; i < abortedIndexes.length; i++) {
+        const originalIndex = abortedIndexes[i];
+        response.writeResults[originalIndex] = retriedResponse.writeResults[i];
+        response.status[originalIndex] = retriedResponse.status[i];
+      }
+      await this._backoff.backoffAndWait();
+      retryCount++;
+    }
+
+    return response.writeResults.map((result, i) => {
       const status = response.status[i];
       const error = new GoogleError(status.message || undefined);
       error.code = status.code as Status;
