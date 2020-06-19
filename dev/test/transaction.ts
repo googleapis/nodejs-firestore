@@ -331,8 +331,6 @@ function runTransaction<T>(
   };
 
   return createInstance(overrides).then(async firestore => {
-    const defaultTimeoutHandler = setTimeout;
-
     try {
       setTimeoutHandler((callback, timeout) => {
         if (timeout > 0) {
@@ -352,8 +350,8 @@ function runTransaction<T>(
         return transactionCallback(transaction, docRef);
       });
     } finally {
+      setTimeoutHandler(setTimeout);
       expect(expectedRequests.length).to.equal(0);
-      setTimeoutHandler(defaultTimeoutHandler);
     }
   });
 }

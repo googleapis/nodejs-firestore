@@ -899,9 +899,7 @@ describe('getAll() method', () => {
     setTimeoutHandler(setImmediate);
   });
 
-  after(() => {
-    setTimeoutHandler(setTimeout);
-  });
+  after(() => setTimeoutHandler(setTimeout));
 
   function resultEquals(
     result: DocumentSnapshot[],

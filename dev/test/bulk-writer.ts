@@ -23,6 +23,7 @@ import {
   Timestamp,
   WriteResult,
 } from '../src';
+import {setTimeoutHandler} from '../src/backoff';
 import {BulkWriter} from '../src/bulk-writer';
 import {Deferred} from '../src/util';
 import {
@@ -39,7 +40,6 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
-import {setTimeoutHandler} from '../src/backoff';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(() => {});
