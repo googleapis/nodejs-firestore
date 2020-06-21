@@ -32,7 +32,7 @@ declare namespace FirebaseFirestore {
    * paths (e.g. 'foo' or 'foo.baz') mapped to values. Fields that contain dots
    * reference nested fields within the document.
    */
-  export type UpdateData = {[fieldPath: string]: any};
+  export type UpdateData<T = DocumentData> = {[fieldPath in keyof T]: T[fieldPath]};
 
   /**
    * Sets or disables the log function for all active Firestore instances.
@@ -187,7 +187,7 @@ declare namespace FirebaseFirestore {
      * @param collectionPath A slash-separated path to a collection.
      * @return The `CollectionReference` instance.
      */
-    collection<T>(collectionPath: string): CollectionReference<T>;
+    collection<T = DocumentData>(collectionPath: string): CollectionReference<T>;
 
     /**
      * Gets a `DocumentReference` instance that refers to the document at the
@@ -196,7 +196,7 @@ declare namespace FirebaseFirestore {
      * @param documentPath A slash-separated path to a document.
      * @return The `DocumentReference` instance.
      */
-    doc<T>(documentPath: string): DocumentReference<T>;
+    doc<T = DocumentData>(documentPath: string): DocumentReference<T>;
 
     /**
      * Creates and returns a new Query that includes all documents in the
@@ -208,7 +208,7 @@ declare namespace FirebaseFirestore {
      * will be included. Cannot contain a slash.
      * @return The created Query.
      */
-    collectionGroup<T>(collectionId: string): Query<T>;
+    collectionGroup<T = DocumentData>(collectionId: string): Query<T>;
 
     /**
      * Retrieves multiple documents from Firestore.
@@ -223,7 +223,7 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll<T>(...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>):
+    getAll<T = DocumentData>(...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>):
         Promise<Array<DocumentSnapshot<T>>>;
 
     /**
@@ -239,7 +239,7 @@ declare namespace FirebaseFirestore {
      *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
-    listCollections<T>() : Promise<Array<CollectionReference<T>>>;
+    listCollections<T = DocumentData>() : Promise<Array<CollectionReference<T>>>;
 
     /**
      * Executes the given updateFunction and commits the changes applied within
@@ -625,14 +625,14 @@ declare namespace FirebaseFirestore {
      * @param collectionPath A slash-separated path to a collection.
      * @return The `CollectionReference` instance.
      */
-    collection(collectionPath: string): CollectionReference<DocumentData>;
+    collection<V = DocumentData>(collectionPath: string): CollectionReference<V>;
 
     /**
      * Fetches the subcollections that are direct children of this document.
      *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
-    listCollections() : Promise<Array<CollectionReference<DocumentData>>>;
+    listCollections<V = DocumentData>() : Promise<Array<CollectionReference<V>>>;
 
     /**
      * Creates a document referred to by this `DocumentReference` with the
@@ -666,7 +666,7 @@ declare namespace FirebaseFirestore {
      * @param precondition A Precondition to enforce on this update.
      * @return A Promise resolved with the write time of this update.
      */
-    update(data: UpdateData, precondition?: Precondition): Promise<WriteResult>;
+    update(data: UpdateData<T>, precondition?: Precondition): Promise<WriteResult>;
 
     /**
      * Updates fields in the document referred to by this `DocumentReference`.
