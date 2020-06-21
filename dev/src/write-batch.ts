@@ -49,7 +49,6 @@ import {
 
 import api = google.firestore.v1;
 import {GoogleError, Status} from 'google-gax';
-import {ExponentialBackoff} from './backoff';
 
 /*!
  * The maximum number of retries that will be attempted for ABORTED writes
@@ -134,14 +133,13 @@ export class WriteBatch implements firestore.WriteBatch {
   private readonly _firestore: Firestore;
   private readonly _serializer: Serializer;
   private readonly _allowUndefined: boolean;
-  private readonly _backoff: ExponentialBackoff;
 
   /**
    * An array of write operations that are executed as part of the commit. The
    * resulting `api.IWrite` will be sent to the backend.
    * @private
    */
-  private readonly _ops: Array<PendingWriteOp> = [];
+  private _ops: Array<PendingWriteOp> = [];
 
   private _committed = false;
 
@@ -154,7 +152,6 @@ export class WriteBatch implements firestore.WriteBatch {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
     this._allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
-    this._backoff = new ExponentialBackoff();
   }
 
   /**
@@ -581,17 +578,10 @@ export class WriteBatch implements firestore.WriteBatch {
 
     const retryCodes = getRetryCodes('batchWrite');
 
-    let response = await this._firestore.request<
+    const response = await this._firestore.request<
       api.IBatchWriteRequest,
       api.BatchWriteResponse
     >('batchWrite', request, tag, retryCodes);
-
-    response = await this.validateAndRetryResponse(
-      request,
-      response,
-      tag,
-      retryCodes
-    );
 
     return response.writeResults.map((result, i) => {
       const status = response.status[i];
@@ -642,7 +632,6 @@ export class WriteBatch implements firestore.WriteBatch {
         break;
       }
 
-      await this._backoff.backoffAndWait();
       logger(
         'WriteBatch.bulkCommit',
         tag,
@@ -667,6 +656,29 @@ export class WriteBatch implements firestore.WriteBatch {
       retryAttempts++;
     }
     return response;
+  }
+
+  /**
+   * Removes all operations from the WriteBatch except for the ones located
+   * at the provided indexes.
+   *
+   * @param indexes List of operation indexes to keep
+   * @private
+   */
+  _sliceIndexes(indexes: number[]): void {
+    this._ops = this._ops.filter((_, i) => {
+      return indexes.includes(i);
+    });
+  }
+
+  /**
+   * Marks the WriteBatch as not committed, allowing it to be committed again.
+   *
+   * Used primarily for facilitating retry logic in BulkWriter.
+   * @private
+   */
+  _markNotCommitted(): void {
+    this._committed = false;
   }
 
   /**

@@ -18,12 +18,18 @@ import * as firestore from '@google-cloud/firestore';
 import * as assert from 'assert';
 
 import {FieldPath, Firestore} from '.';
-import {delayExecution} from './backoff';
+import {
+  delayExecution,
+  ExponentialBackoff,
+  MAX_RETRY_ATTEMPTS,
+} from './backoff';
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {Deferred, wrapError} from './util';
+import {Deferred, getRetryCodes, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
+import {GoogleError, Status} from 'google-gax';
+import {logger} from './logger';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -86,11 +92,15 @@ class BulkCommitBatch {
   // A map from each WriteBatch operation to its corresponding result.
   private resultsMap = new Map<number, Deferred<BatchWriteResult>>();
 
+  private readonly backoff: ExponentialBackoff;
+
   constructor(
     private readonly firestore: Firestore,
     private readonly writeBatch: WriteBatch,
     private readonly maxBatchSize: number
-  ) {}
+  ) {
+    this.backoff = new ExponentialBackoff();
+  }
 
   /**
    * The number of writes in this batch.
@@ -198,10 +208,13 @@ class BulkCommitBatch {
   }
 
   /**
-   * Commits the batch and returns a promise that resolves with the result of
-   * all writes in this batch.
+   * Commits the batch and returns a promise that resolves when all the writes
+   * in the batch have finished.
+   *
+   * If any writes in the batch fail with a retryable error, this method will
+   * retry the failed writes.
    */
-  bulkCommit(): Promise<BatchWriteResult[]> {
+  async bulkCommit(): Promise<void> {
     assert(
       this.state === BatchState.READY_TO_SEND,
       'The batch should be marked as READY_TO_SEND before committing'
@@ -211,25 +224,97 @@ class BulkCommitBatch {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    return this.writeBatch.bulkCommit().catch(err => {
-      throw wrapError(err, stack);
-    });
+    let originalIndexMap: Map<number, number> = new Map(
+      Array.from(new Array(this.opCount), (_, i) => [i, i])
+    );
+
+    let retryAttempts = 0;
+    while (retryAttempts < MAX_RETRY_ATTEMPTS) {
+      let retryIndexes: number[] = [];
+      try {
+        await this.backoff.backoffAndWait();
+        const results = await this.writeBatch.bulkCommit();
+        retryIndexes = this.processResults(originalIndexMap, results);
+      } catch (err) {
+        retryIndexes = this.processResults(
+          originalIndexMap,
+          [],
+          wrapError(err, stack)
+        );
+      }
+
+      // Map the indexes that are going to be retried back to their
+      // corresponding indexes in the original batch.
+      originalIndexMap = new Map(
+        Array.from(new Array(retryIndexes.length), (_, i) => [
+          i,
+          originalIndexMap.get(retryIndexes[i])!,
+        ])
+      );
+      if (retryIndexes.length > 0) {
+        logger(
+          'BulkWriter.bulkCommit',
+          null,
+          `Current batch failed at retry #${retryAttempts}. Num failures: ` +
+            `${retryIndexes.length}.`
+        );
+
+        this.writeBatch._sliceIndexes(retryIndexes);
+        this.writeBatch._markNotCommitted();
+      } else {
+        break;
+      }
+      retryAttempts++;
+    }
   }
 
   /**
    * Resolves the individual operations in the batch with the results.
+   *
+   * @param originalIndexMap Map of the results' indexes to the indexes
+   * on resultsMap
+   * @return The indexes of writes that failed with a retryable error.
    */
-  processResults(results: BatchWriteResult[], error?: Error): void {
+  processResults(
+    originalIndexMap: Map<number, number>,
+    results: BatchWriteResult[],
+    error?: Error
+  ): number[] {
+    let indexesToRetry: number[] = [];
     if (error === undefined) {
-      for (let i = 0; i < this.opCount; i++) {
-        this.resultsMap.get(i)!.resolve(results[i]);
+      for (let i = 0; i < results.length; i++) {
+        const writeResult = results[i];
+        if (this.shouldRetry(writeResult.status.code)) {
+          indexesToRetry.push(i);
+        } else {
+          const originalIndex = originalIndexMap.get(i)!;
+          this.resultsMap.get(originalIndex)!.resolve(results[i]);
+        }
       }
     } else {
-      for (let i = 0; i < this.opCount; i++) {
-        this.resultsMap.get(i)!.reject(error);
+      // If the batchWrite RPC fails with a retryable error, retry all writes
+      // in the batch.
+      if (error instanceof GoogleError && this.shouldRetry(error.code)) {
+        indexesToRetry = Array.from(
+          new Array(originalIndexMap.size),
+          (_, i) => i
+        );
+      } else {
+        for (let i = 0; i < this.opCount; i++) {
+          const originalIndex = originalIndexMap.get(i)!;
+          this.resultsMap.get(originalIndex)!.reject(error);
+        }
       }
     }
-    this.completedDeferred.resolve();
+    if (indexesToRetry.length === 0) {
+      this.completedDeferred.resolve();
+    }
+    return indexesToRetry;
+  }
+
+  private shouldRetry(code: Status | undefined): boolean {
+    const retryCodes = getRetryCodes('batchWrite');
+    return code !== undefined && retryCodes.includes(code);
   }
 
   /**
@@ -624,7 +709,6 @@ export class BulkWriter {
       if (delayMs === 0) {
         this.sendBatch(batch);
       } else {
-        console.warn('throttling');
         delayExecution(() => this.sendReadyBatches(), delayMs);
         break;
       }
@@ -642,22 +726,14 @@ export class BulkWriter {
   private sendBatch(batch: BulkCommitBatch): void {
     const success = this.rateLimiter.tryMakeRequest(batch.opCount);
     assert(success, 'Batch should be under rate limit to be sent.');
-    batch
-      .bulkCommit()
-      .then(results => {
-        batch.processResults(results);
-      })
-      .catch((error: Error) => {
-        batch.processResults([], error);
-      })
-      .then(() => {
-        // Remove the batch from the BatchQueue after it has been processed.
-        const batchIndex = this.batchQueue.indexOf(batch);
-        assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
-        this.batchQueue.splice(batchIndex, 1);
+    batch.bulkCommit().then(() => {
+      // Remove the batch from the BatchQueue after it has been processed.
+      const batchIndex = this.batchQueue.indexOf(batch);
+      assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
+      this.batchQueue.splice(batchIndex, 1);
 
-        this.sendReadyBatches();
-      });
+      this.sendReadyBatches();
+    });
   }
 
   /**
