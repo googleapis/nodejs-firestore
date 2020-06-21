@@ -187,7 +187,7 @@ declare namespace FirebaseFirestore {
      * @param collectionPath A slash-separated path to a collection.
      * @return The `CollectionReference` instance.
      */
-    collection(collectionPath: string): CollectionReference<DocumentData>;
+    collection<T>(collectionPath: string): CollectionReference<T>;
 
     /**
      * Gets a `DocumentReference` instance that refers to the document at the
@@ -196,7 +196,7 @@ declare namespace FirebaseFirestore {
      * @param documentPath A slash-separated path to a document.
      * @return The `DocumentReference` instance.
      */
-    doc(documentPath: string): DocumentReference<DocumentData>;
+    doc<T>(documentPath: string): DocumentReference<T>;
 
     /**
      * Creates and returns a new Query that includes all documents in the
@@ -208,7 +208,7 @@ declare namespace FirebaseFirestore {
      * will be included. Cannot contain a slash.
      * @return The created Query.
      */
-    collectionGroup(collectionId: string): Query<DocumentData>;
+    collectionGroup<T>(collectionId: string): Query<T>;
 
     /**
      * Retrieves multiple documents from Firestore.
@@ -223,8 +223,8 @@ declare namespace FirebaseFirestore {
      * @return A Promise that resolves with an array of resulting document
      * snapshots.
      */
-    getAll(...documentRefsOrReadOptions: Array<DocumentReference<DocumentData> | ReadOptions>):
-        Promise<Array<DocumentSnapshot<DocumentData>>>;
+    getAll<T>(...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>):
+        Promise<Array<DocumentSnapshot<T>>>;
 
     /**
      * Terminates the Firestore client and closes all open streams.
@@ -239,7 +239,7 @@ declare namespace FirebaseFirestore {
      *
      * @returns A Promise that resolves with an array of CollectionReferences.
      */
-    listCollections() : Promise<Array<CollectionReference<DocumentData>>>;
+    listCollections<T>() : Promise<Array<CollectionReference<T>>>;
 
     /**
      * Executes the given updateFunction and commits the changes applied within
