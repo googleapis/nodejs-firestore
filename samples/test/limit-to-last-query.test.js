@@ -16,7 +16,7 @@
 
 const {execSync} = require('child_process');
 const {assert} = require('chai');
-const {describe, it, before, after} = require('mocha');
+const {after, before, describe, it} = require('mocha');
 const exec = cmd => execSync(cmd, {encoding: 'utf8'});
 const {Firestore, FieldPath} = require('@google-cloud/firestore');
 

@@ -18,6 +18,7 @@ import * as firestore from '@google-cloud/firestore';
 
 import {CallOptions, grpc, RetryOptions} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
+
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';

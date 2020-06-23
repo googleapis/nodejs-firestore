@@ -31,11 +31,11 @@ import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
 import {UpdateMap} from './types';
 import {
+  getRetryCodes,
   isObject,
   isPlainObject,
   requestTag,
   wrapError,
-  getRetryCodes,
 } from './util';
 import {
   customObjectMessage,
@@ -620,6 +620,9 @@ export class WriteBatch implements firestore.WriteBatch {
       database,
       writes: this._ops.map(op => op()),
     };
+    if (commitOptions?.transactionId) {
+      request.transaction = commitOptions.transactionId;
+    }
 
     logger(
       'WriteBatch.commit',

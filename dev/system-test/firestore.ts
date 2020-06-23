@@ -44,6 +44,7 @@ import {
   verifyInstance,
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
+import {BulkWriter} from '../src/bulk-writer';
 
 use(chaiAsPromised);
 
@@ -2329,22 +2330,75 @@ describe('QuerySnapshot class', () => {
 describe('BulkWriter class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
+  let writer: BulkWriter;
 
   beforeEach(() => {
     firestore = new Firestore({});
+    writer = firestore._bulkWriter();
     randomCol = getTestRoot(firestore);
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  // TODO(BulkWriter): Enable this test once protos are public.
-  it.skip('can terminate once BulkWriter is closed', async () => {
+  it('has create() method', async () => {
     const ref = randomCol.doc('doc1');
-    const writer = firestore._bulkWriter();
+    const singleOp = writer.create(ref, {foo: 'bar'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar'});
+    const writeTime = (await singleOp).writeTime;
+    expect(writeTime).to.not.be.null;
+  });
+
+  it('has set() method', async () => {
+    const ref = randomCol.doc('doc1');
+    const singleOp = writer.set(ref, {foo: 'bar'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar'});
+    const writeTime = (await singleOp).writeTime;
+    expect(writeTime).to.not.be.null;
+  });
+
+  it('has update() method', async () => {
+    const ref = randomCol.doc('doc1');
+    await ref.set({foo: 'bar'});
+    const singleOp = writer.update(ref, {foo: 'bar2'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar2'});
+    const writeTime = (await singleOp).writeTime;
+    expect(writeTime).to.not.be.null;
+  });
+
+  it('has delete() method', async () => {
+    const ref = randomCol.doc('doc1');
+    await ref.set({foo: 'bar'});
+    const singleOp = writer.delete(ref);
+    await writer.close();
+    const result = await ref.get();
+    expect(result.exists).to.be.false;
+    // TODO(b/158502664): Remove this check once we can get write times.
+    const deleteResult = await singleOp;
+    expect(deleteResult.writeTime).to.deep.equal(new Timestamp(0, 0));
+  });
+
+  it('can terminate once BulkWriter is closed', async () => {
+    const ref = randomCol.doc('doc1');
     writer.set(ref, {foo: 'bar'});
-    writer.set(ref, {foo: 'bar2'});
     await writer.close();
     return firestore.terminate();
+  });
+
+  it('writes to the same document in order', async () => {
+    const ref = randomCol.doc('doc1');
+    await ref.set({foo: 'bar0'});
+    writer.set(ref, {foo: 'bar1'});
+    writer.set(ref, {foo: 'bar2'});
+    writer.set(ref, {foo: 'bar3'});
+    await writer.flush();
+    const res = await ref.get();
+    expect(res.data()).to.deep.equal({foo: 'bar3'});
   });
 });
 
