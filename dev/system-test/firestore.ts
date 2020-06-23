@@ -163,7 +163,7 @@ describe('Firestore class', () => {
       })
       .then(() => Promise.reject('set() should have failed'))
       .catch(err => {
-        expect(err).to.equal('The client has already been terminated');
+        expect(err.message).to.equal('The client has already been terminated');
       });
   });
 
@@ -216,7 +216,7 @@ describe('CollectionReference class', () => {
 
   it('has parent property', () => {
     const ref = firestore.collection('col/doc/col');
-    expect(ref.parent.id).to.equal('doc');
+    expect(ref.parent!.id).to.equal('doc');
   });
 
   it('has path property', () => {

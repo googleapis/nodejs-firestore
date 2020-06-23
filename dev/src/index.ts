@@ -16,7 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions, grpc} from 'google-gax';
+import {CallOptions, grpc, RetryOptions} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
 import {URL} from 'url';
 
@@ -55,6 +55,7 @@ import {
 import {
   autoId,
   Deferred,
+  getRetryParams,
   isPermanentRpcError,
   requestTag,
   wrapError,
@@ -363,18 +364,6 @@ export class Firestore implements firestore.Firestore {
    */
   private bulkWritersCount = 0;
 
-  // GCF currently tears down idle connections after two minutes. Requests
-  // that are issued after this period may fail. On GCF, we therefore issue
-  // these requests as part of a transaction so that we can safely retry until
-  // the network link is reestablished.
-  //
-  // The environment variable FUNCTION_TRIGGER_TYPE is used to detect the GCF
-  // environment.
-  /** @private */
-  _preferTransactions: boolean;
-  /** @private */
-  _lastSuccessfulRequest = 0;
-
   /**
    * @param {Object=} settings [Configuration object](#/docs).
    * @param {string=} settings.projectId The project ID from the Google
@@ -449,20 +438,6 @@ export class Firestore implements firestore.Firestore {
       backoffFactor: retryConfig.retry_delay_multiplier,
     };
 
-    // GCF currently tears down idle connections after two minutes. Requests
-    // that are issued after this period may fail. On GCF, we therefore issue
-    // these requests as part of a transaction so that we can safely retry until
-    // the network link is reestablished.
-    //
-    // The environment variable FUNCTION_TRIGGER_TYPE is used to detect the GCF
-    // environment.
-    this._preferTransactions = process.env.FUNCTION_TRIGGER_TYPE !== undefined;
-    this._lastSuccessfulRequest = 0;
-
-    if (this._preferTransactions) {
-      logger('Firestore', null, 'Detected GCF environment');
-    }
-
     const maxIdleChannels =
       this._settings.maxIdleChannels === undefined
         ? DEFAULT_MAX_IDLE_CHANNELS
@@ -477,19 +452,9 @@ export class Firestore implements firestore.Firestore {
           const grpcModule = this._settings.grpc ?? grpc;
           const sslCreds = grpcModule.credentials.createInsecure();
 
-          // Use user-provided headers, but provide an Authorization header by default
-          // so that connection is recognized as admin in Firestore Emulator. (If for
-          // some reason we're not connecting to the emulator, then this will result in
-          // denials with invalid token, rather than behave like clients not logged in.)
-          const customHeaders = {
-            Authorization: 'Bearer owner',
-            ...this._settings.customHeaders,
-          };
-
           client = new module.exports.v1({
             sslCreds,
             ...this._settings,
-            customHeaders,
           });
         } else {
           client = new module.exports.v1(this._settings);
@@ -1202,6 +1167,20 @@ export class Firestore implements firestore.Firestore {
   async initializeIfNeeded(requestTag: string): Promise<void> {
     this._settingsFrozen = true;
 
+    if (this._settings.ssl === false) {
+      // If SSL is false, we assume that we are talking to the emulator. We
+      // provide an Authorization header by default so that the connection is
+      // recognized as admin in Firestore Emulator. (If for some reason we're
+      // not connecting to the emulator, then this will result in denials with
+      // invalid token, rather than behave like clients not logged in. The user
+      // can then provide their own Authorization header, which will take
+      // precedence).
+      this._settings.customHeaders = {
+        Authorization: 'Bearer owner',
+        ...this._settings.customHeaders,
+      };
+    }
+
     if (this._projectId === undefined) {
       try {
         this._projectId = await this._clientPool.run(requestTag, gapicClient =>
@@ -1229,8 +1208,11 @@ export class Firestore implements firestore.Firestore {
    * Returns GAX call options that set the cloud resource header.
    * @private
    */
-  private createCallOptions(): CallOptions {
-    return {
+  private createCallOptions(
+    methodName: string,
+    retryCodes?: number[]
+  ): CallOptions {
+    const callOptions: CallOptions = {
       otherArgs: {
         headers: {
           [CLOUD_RESOURCE_HEADER]: this.formattedName,
@@ -1238,6 +1220,13 @@ export class Firestore implements firestore.Firestore {
         },
       },
     };
+
+    if (retryCodes) {
+      const retryParams = getRetryParams(methodName);
+      callOptions.retry = new RetryOptions(retryCodes, retryParams);
+    }
+
+    return callOptions;
   }
 
   /**
@@ -1260,7 +1249,7 @@ export class Firestore implements firestore.Firestore {
    * and GAX options.
    * @param requestTag A unique client-assigned identifier for this request.
    * @param func Method returning a Promise than can be retried.
-   * @returns  - A Promise with the function's result if successful within
+   * @returns A Promise with the function's result if successful within
    * `attemptsRemaining`. Otherwise, returns the last rejected Promise.
    */
   private async _retry<T>(
@@ -1284,13 +1273,11 @@ export class Firestore implements firestore.Firestore {
 
       try {
         await backoff.backoffAndWait();
-        const result = await func();
-        this._lastSuccessfulRequest = new Date().getTime();
-        return result;
+        return await func();
       } catch (err) {
         lastError = err;
 
-        if (isPermanentRpcError(err, methodName, serviceConfig)) {
+        if (isPermanentRpcError(err, methodName)) {
           break;
         }
       }
@@ -1423,14 +1410,17 @@ export class Firestore implements firestore.Firestore {
    * and GAX options.
    * @param request The Protobuf request to send.
    * @param requestTag A unique client-assigned identifier for this request.
+   * @param retryCodes If provided, a custom list of retry codes. If not
+   * provided, retry is based on the behavior as defined in the ServiceConfig.
    * @returns A Promise with the request result.
    */
   request<Req, Resp>(
     methodName: FirestoreUnaryMethod,
     request: Req,
-    requestTag: string
+    requestTag: string,
+    retryCodes?: number[]
   ): Promise<Resp> {
-    const callOptions = this.createCallOptions();
+    const callOptions = this.createCallOptions(methodName, retryCodes);
 
     return this._clientPool.run(requestTag, async gapicClient => {
       try {
@@ -1445,7 +1435,6 @@ export class Firestore implements firestore.Firestore {
           'Received response: %j',
           result
         );
-        this._lastSuccessfulRequest = new Date().getTime();
         return result;
       } catch (err) {
         logger('Firestore.request', requestTag, 'Received error:', err);
@@ -1473,7 +1462,7 @@ export class Firestore implements firestore.Firestore {
     request: {},
     requestTag: string
   ): Promise<Duplex> {
-    const callOptions = this.createCallOptions();
+    const callOptions = this.createCallOptions(methodName);
 
     const bidirectional = methodName === 'listen';
 

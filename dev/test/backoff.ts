@@ -36,9 +36,7 @@ describe('ExponentialBackoff', () => {
     observedDelays = [];
   });
 
-  after(() => {
-    setTimeoutHandler(setTimeout);
-  });
+  after(() => setTimeoutHandler(setTimeout));
 
   function assertDelayEquals(expected: number) {
     expect(observedDelays.shift()).to.equal(expected);

@@ -213,7 +213,9 @@ describe('batch support', () => {
 
   beforeEach(() => {
     const overrides: ApiOverride = {
-      commit: request => {
+      commit: (request, options) => {
+        expect(options!.retry!.retryCodes).contains(Status.ABORTED);
+
         expect(request).to.deep.eq({
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: [
@@ -431,59 +433,6 @@ describe('batch support', () => {
       return batch.commit().then(results => {
         expect(results[0].isEqual(results[1])).to.be.true;
       });
-    });
-  });
-
-  it('uses transactions on GCF', () => {
-    // We use this environment variable during initialization to detect whether
-    // we are running on GCF.
-    process.env.FUNCTION_TRIGGER_TYPE = 'http-trigger';
-
-    let beginCalled = 0;
-    let commitCalled = 0;
-
-    const overrides: ApiOverride = {
-      beginTransaction: () => {
-        ++beginCalled;
-        return response({transaction: Buffer.from('foo')});
-      },
-      commit: () => {
-        ++commitCalled;
-        return response({
-          commitTime: {
-            nanos: 0,
-            seconds: 0,
-          },
-        });
-      },
-    };
-
-    return createInstance(overrides).then(firestore => {
-      firestore['_preferTransactions'] = true;
-      firestore['_lastSuccessfulRequest'] = 0;
-
-      return firestore
-        .batch()
-        .commit()
-        .then(() => {
-          // The first commit always uses a transcation.
-          expect(beginCalled).to.equal(1);
-          expect(commitCalled).to.equal(1);
-          return firestore.batch().commit();
-        })
-        .then(() => {
-          // The following commits don't use transactions if they happen
-          // within two minutes.
-          expect(beginCalled).to.equal(1);
-          expect(commitCalled).to.equal(2);
-          firestore['_lastSuccessfulRequest'] = 1337;
-          return firestore.batch().commit();
-        })
-        .then(() => {
-          expect(beginCalled).to.equal(2);
-          expect(commitCalled).to.equal(3);
-          delete process.env.FUNCTION_TRIGGER_TYPE;
-        });
     });
   });
 });
