@@ -106,7 +106,7 @@ export class BundleBuilder {
 
     this.namedQueries.set(name, {
       name,
-      bundledQuery: querySnap.query.toBundledQuery(),
+      bundledQuery: querySnap.query._toBundledQuery(),
       readTime: querySnap.readTime.toProto().timestampValue,
     });
 

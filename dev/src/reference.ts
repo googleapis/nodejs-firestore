@@ -1990,7 +1990,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   /**
    * Converts current Query to an IBundledQuery.
    */
-  toBundledQuery(): protos.firestore.IBundledQuery {
+  _toBundledQuery(): protos.firestore.IBundledQuery {
     const projectId = this.firestore.projectId;
     const parentPath = this._queryOptions.parentPath.toQualifiedResourcePath(
       projectId

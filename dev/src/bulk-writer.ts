@@ -281,7 +281,7 @@ export class BulkWriter {
     private readonly firestore: Firestore,
     enableThrottling: boolean
   ) {
-    this.firestore.incrementBulkWritersCount();
+    this.firestore._incrementBulkWritersCount();
 
     if (enableThrottling) {
       this.rateLimiter = new RateLimiter(
@@ -543,7 +543,7 @@ export class BulkWriter {
    */
   close(): Promise<void> {
     this.verifyNotClosed();
-    this.firestore.decrementBulkWritersCount();
+    this.firestore._decrementBulkWritersCount();
     const flushPromise = this.flush();
     this.closed = true;
     return flushPromise;

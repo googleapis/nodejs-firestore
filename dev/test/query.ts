@@ -1446,7 +1446,7 @@ describe('limitToLast() interface', () => {
     return createInstance().then(firestore => {
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').limitToLast(10);
-      const bundledQuery = query.toBundledQuery();
+      const bundledQuery = query._toBundledQuery();
       bundledQueryEquals(
         bundledQuery,
         'LAST',
@@ -1464,7 +1464,7 @@ describe('limitToLast() interface', () => {
         .startAt('start')
         .endAt('end')
         .limitToLast(10);
-      const bundledQuery = query.toBundledQuery();
+      const bundledQuery = query._toBundledQuery();
       bundledQueryEquals(
         bundledQuery,
         'LAST',
@@ -1480,7 +1480,7 @@ describe('limitToLast() interface', () => {
     return createInstance().then(firestore => {
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').limitToLast(10);
-      const bundledQuery = query.toBundledQuery();
+      const bundledQuery = query._toBundledQuery();
       bundledQueryEquals(
         bundledQuery,
         'LAST',
@@ -1498,7 +1498,7 @@ describe('limitToLast() interface', () => {
         .startAt('start')
         .endAt('end')
         .limitToLast(10);
-      const bundledQuery = query.toBundledQuery();
+      const bundledQuery = query._toBundledQuery();
       bundledQueryEquals(
         bundledQuery,
         'LAST',

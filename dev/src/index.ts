@@ -1125,7 +1125,7 @@ export class Firestore implements firestore.Firestore {
    *
    * @private
    */
-  incrementBulkWritersCount(): void {
+  _incrementBulkWritersCount(): void {
     this.bulkWritersCount += 1;
   }
 
@@ -1135,7 +1135,7 @@ export class Firestore implements firestore.Firestore {
    *
    * @private
    */
-  decrementBulkWritersCount(): void {
+  _decrementBulkWritersCount(): void {
     this.bulkWritersCount -= 1;
   }
 
