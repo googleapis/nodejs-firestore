@@ -190,7 +190,7 @@ export class ClientPool<T> {
    */
   run<V>(requestTag: string, op: (client: T) => Promise<V>): Promise<V> {
     if (this.terminated) {
-      return Promise.reject(CLIENT_TERMINATED_ERROR_MSG);
+      return Promise.reject(new Error(CLIENT_TERMINATED_ERROR_MSG));
     }
     const client = this.acquire(requestTag);
 
