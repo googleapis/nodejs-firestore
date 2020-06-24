@@ -5531,47 +5531,6 @@ export namespace google {
                         "OPERATOR_UNSPECIFIED"| "IS_NAN"| "IS_NULL";
                 }
 
-                /** Properties of a FieldReference. */
-                interface IFieldReference {
-
-                    /** FieldReference fieldPath */
-                    fieldPath?: (string|null);
-                }
-
-                /** Represents a FieldReference. */
-                class FieldReference implements IFieldReference {
-
-                    /**
-                     * Constructs a new FieldReference.
-                     * @param [properties] Properties to set
-                     */
-                    constructor(properties?: google.firestore.v1.StructuredQuery.IFieldReference);
-
-                    /** FieldReference fieldPath. */
-                    public fieldPath: string;
-
-                    /**
-                     * Creates a FieldReference message from a plain object. Also converts values to their respective internal types.
-                     * @param object Plain object
-                     * @returns FieldReference
-                     */
-                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.FieldReference;
-
-                    /**
-                     * Creates a plain object from a FieldReference message. Also converts values to other types if specified.
-                     * @param message FieldReference
-                     * @param [options] Conversion options
-                     * @returns Plain object
-                     */
-                    public static toObject(message: google.firestore.v1.StructuredQuery.FieldReference, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                    /**
-                     * Converts this FieldReference to JSON.
-                     * @returns JSON object
-                     */
-                    public toJSON(): { [k: string]: any };
-                }
-
                 /** Properties of an Order. */
                 interface IOrder {
 
@@ -5614,6 +5573,47 @@ export namespace google {
 
                     /**
                      * Converts this Order to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                /** Properties of a FieldReference. */
+                interface IFieldReference {
+
+                    /** FieldReference fieldPath */
+                    fieldPath?: (string|null);
+                }
+
+                /** Represents a FieldReference. */
+                class FieldReference implements IFieldReference {
+
+                    /**
+                     * Constructs a new FieldReference.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IFieldReference);
+
+                    /** FieldReference fieldPath. */
+                    public fieldPath: string;
+
+                    /**
+                     * Creates a FieldReference message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns FieldReference
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.FieldReference;
+
+                    /**
+                     * Creates a plain object from a FieldReference message. Also converts values to other types if specified.
+                     * @param message FieldReference
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.FieldReference, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this FieldReference to JSON.
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
