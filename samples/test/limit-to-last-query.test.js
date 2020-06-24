@@ -26,7 +26,7 @@ describe('limit to last query', () => {
 
   before(async () => {
     await Promise.all(
-      cities.map(city => firestore.doc(`cities/${city}`).create({name: city}))
+      cities.map(city => firestore.doc(`cities/${city}`).set({name: city}))
     );
   });
 

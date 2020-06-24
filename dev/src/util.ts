@@ -180,12 +180,7 @@ export function getRetryParams(methodName: string): BackoffSettings {
  * Used to preserve stack traces across async calls.
  * @private
  */
-export function wrapError(err: Error | string, stack: string): Error {
-  // TODO(b/157506412): Remove `string` type and clean up any string errors
-  // that we are throwing.
-  if (typeof err === 'string') {
-    throw err;
-  }
+export function wrapError(err: Error, stack: string): Error {
   err.stack += '\nCaused by: ' + stack;
   return err;
 }

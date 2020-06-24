@@ -20,6 +20,7 @@ import {GoogleError, Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
+import {setTimeoutHandler} from '../src/backoff';
 import {BulkWriter} from '../src/bulk-writer';
 import {Deferred} from '../src/util';
 import {
@@ -34,7 +35,9 @@ import {
   updateMask,
   verifyInstance,
 } from './util/helpers';
+
 import {setTimeoutHandler} from '../src/backoff';
+
 import api = proto.google.firestore.v1;
 
 // Change the argument to 'console.log' to enable debug output.

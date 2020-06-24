@@ -325,7 +325,7 @@ describe('Client pool', () => {
         );
       })
       .catch((err: Error) => {
-        expect(err).to.equal(CLIENT_TERMINATED_ERROR_MSG);
+        expect(err.message).to.equal(CLIENT_TERMINATED_ERROR_MSG);
       });
   });
 

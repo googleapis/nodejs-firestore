@@ -21,13 +21,15 @@ import * as extend from 'extend';
 
 import {firestore, google} from '../protos/firestore_v1_proto_api';
 import {
+  DocumentReference,
   FieldPath,
   FieldValue,
   Firestore,
+  Query,
   QueryDocumentSnapshot,
   setLogFunction,
+  Timestamp,
 } from '../src';
-import {DocumentReference, Query, Timestamp} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshot, DocumentSnapshotBuilder} from '../src/document';
 import {QualifiedResourcePath} from '../src/path';
@@ -1444,7 +1446,7 @@ describe('limitToLast() interface', () => {
     return createInstance().then(firestore => {
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').limitToLast(10);
-      const bundledQuery = query.toBundledQuery();
+      const bundledQuery = query._toBundledQuery();
       bundledQueryEquals(
         bundledQuery,
         'LAST',
@@ -1462,7 +1464,7 @@ describe('limitToLast() interface', () => {
         .startAt('start')
         .endAt('end')
         .limitToLast(10);
-      const bundledQuery = query.toBundledQuery();
+      const bundledQuery = query._toBundledQuery();
       bundledQueryEquals(
         bundledQuery,
         'LAST',
@@ -1478,7 +1480,7 @@ describe('limitToLast() interface', () => {
     return createInstance().then(firestore => {
       let query: Query = firestore.collection('collectionId');
       query = query.orderBy('foo').limitToLast(10);
-      const bundledQuery = query.toBundledQuery();
+      const bundledQuery = query._toBundledQuery();
       bundledQueryEquals(
         bundledQuery,
         'LAST',
@@ -1496,7 +1498,7 @@ describe('limitToLast() interface', () => {
         .startAt('start')
         .endAt('end')
         .limitToLast(10);
-      const bundledQuery = query.toBundledQuery();
+      const bundledQuery = query._toBundledQuery();
       bundledQueryEquals(
         bundledQuery,
         'LAST',

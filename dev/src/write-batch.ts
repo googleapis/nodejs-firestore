@@ -37,7 +37,6 @@ import {
   requestTag,
   wrapError,
 } from './util';
-
 import {
   customObjectMessage,
   invalidArgumentMessage,

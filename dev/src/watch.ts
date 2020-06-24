@@ -22,7 +22,7 @@ import {GoogleError, Status} from 'google-gax';
 import {Duplex} from 'stream';
 
 import {google} from '../protos/firestore_v1_proto_api';
-import {ExponentialBackoff} from './backoff';
+import {delayExecution, ExponentialBackoff} from './backoff';
 import {DocumentSnapshotBuilder, QueryDocumentSnapshot} from './document';
 import {DocumentChange, DocumentChangeType} from './document-change';
 import {DocumentReference, Firestore, Query} from './index';
@@ -40,6 +40,15 @@ import api = google.firestore.v1;
  * @type {number}
  */
 const WATCH_TARGET_ID = 0x1;
+
+/**
+ * Idle timeout used to detect Watch streams that stall (see
+ * https://github.com/googleapis/nodejs-firestore/issues/1057, b/156308554).
+ * Under normal load, the Watch backend will send a TARGET_CHANGE message
+ * roughly every 30 seconds. As discussed with the backend team, we reset the
+ * Watch stream if we do not receive any message within 120 seconds.
+ */
+export const WATCH_IDLE_TIMEOUT_MS = 120 * 1000;
 
 /*!
  * Sentinel value for a document remove.
@@ -173,6 +182,12 @@ abstract class Watch<T = firestore.DocumentData> {
    */
   private hasPushed = false;
 
+  /**
+   * The handler used to restart the Watch stream if it has been idle for more
+   * than WATCH_IDLE_TIMEOUT_MS.
+   */
+  private idleTimeoutHandle?: NodeJS.Timeout;
+
   private onNext: (
     readTime: Timestamp,
     size: number,
@@ -250,16 +265,9 @@ abstract class Watch<T = firestore.DocumentData> {
     const unsubscribe: () => void = () => {
       logger('Watch.onSnapshot', this.requestTag, 'Unsubscribe called');
       // Prevent further callbacks.
-      if (this.isActive) {
-        // Unregister the listener iff it has not already been unregistered.
-        this.firestore.unregisterListener();
-        this.isActive = false;
-      }
       this.onNext = () => {};
       this.onError = () => {};
-      if (this.currentStream) {
-        this.currentStream.end();
-      }
+      this.shutdown();
     };
     this.firestore.registerListener();
     return unsubscribe;
@@ -327,17 +335,11 @@ abstract class Watch<T = firestore.DocumentData> {
    * @private
    */
   private closeStream(err: GoogleError): void {
-    if (this.currentStream) {
-      this.currentStream.end();
-      this.currentStream = null;
-    }
-
     if (this.isActive) {
-      this.firestore.unregisterListener();
-      this.isActive = false;
       logger('Watch.closeStream', this.requestTag, 'Invoking onError: ', err);
       this.onError(err);
     }
+    this.shutdown();
   }
 
   /**
@@ -350,7 +352,7 @@ abstract class Watch<T = firestore.DocumentData> {
       logger(
         'Watch.maybeReopenStream',
         this.requestTag,
-        'Stream ended, re-opening after retryable error: ',
+        'Stream ended, re-opening after retryable error:',
         err
       );
       this.changeMap.clear();
@@ -363,6 +365,31 @@ abstract class Watch<T = firestore.DocumentData> {
     } else {
       this.closeStream(err);
     }
+  }
+
+  /**
+   * Cancels the current idle timeout and reschedules a new timer.
+   *
+   * @private
+   */
+  private resetIdleTimeout(): void {
+    if (this.idleTimeoutHandle) {
+      clearTimeout(this.idleTimeoutHandle);
+    }
+
+    this.idleTimeoutHandle = delayExecution(() => {
+      logger(
+        'Watch.resetIdleTimeout',
+        this.requestTag,
+        'Resetting stream after idle timeout'
+      );
+      this.currentStream?.end();
+      this.currentStream = null;
+
+      const error = new GoogleError('Watch stream idle timeout');
+      error.code = Status.UNKNOWN;
+      this.maybeReopenStream(error);
+    }, WATCH_IDLE_TIMEOUT_MS);
   }
 
   /**
@@ -417,7 +444,10 @@ abstract class Watch<T = firestore.DocumentData> {
             }
             logger('Watch.initStream', this.requestTag, 'Opened new stream');
             this.currentStream = backendStream;
+            this.resetIdleTimeout();
+
             this.currentStream!.on('data', (proto: api.IListenResponse) => {
+              this.resetIdleTimeout();
               this.onData(proto);
             })
               .on('error', err => {
@@ -754,6 +784,21 @@ abstract class Watch<T = firestore.DocumentData> {
    */
   private isResourceExhaustedError(error: GoogleError): boolean {
     return error.code === Status.RESOURCE_EXHAUSTED;
+  }
+
+  /** Closes the stream and clears all timeouts. */
+  private shutdown(): void {
+    if (this.isActive) {
+      this.isActive = false;
+      if (this.idleTimeoutHandle) {
+        clearTimeout(this.idleTimeoutHandle);
+        this.idleTimeoutHandle = undefined;
+      }
+      this.firestore.unregisterListener();
+    }
+
+    this.currentStream?.end();
+    this.currentStream = null;
   }
 }
 

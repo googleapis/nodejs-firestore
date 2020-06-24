@@ -16,7 +16,7 @@
 
 import * as firestore from '@google-cloud/firestore';
 
-import {CallOptions, RetryOptions, grpc} from 'google-gax';
+import {CallOptions, grpc, RetryOptions} from 'google-gax';
 import {Duplex, PassThrough, Transform} from 'stream';
 
 import {URL} from 'url';
@@ -1125,7 +1125,7 @@ export class Firestore implements firestore.Firestore {
    *
    * @private
    */
-  incrementBulkWritersCount(): void {
+  _incrementBulkWritersCount(): void {
     this.bulkWritersCount += 1;
   }
 
@@ -1135,7 +1135,7 @@ export class Firestore implements firestore.Firestore {
    *
    * @private
    */
-  decrementBulkWritersCount(): void {
+  _decrementBulkWritersCount(): void {
     this.bulkWritersCount -= 1;
   }
 
