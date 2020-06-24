@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {QuerySnapshot, DocumentData} from '@google-cloud/firestore';
+
+import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import * as extend from 'extend';
+import {firestore} from '../protos/firestore_v1_proto_api';
 
 import {
   CollectionReference,
-  DocumentData,
   DocumentReference,
   DocumentSnapshot,
   FieldPath,
@@ -26,13 +30,21 @@ import {
   GeoPoint,
   Query,
   QueryDocumentSnapshot,
-  QuerySnapshot,
   setLogFunction,
   Timestamp,
   WriteResult,
 } from '../src';
 import {autoId, Deferred} from '../src/util';
-import {Post, postConverter, verifyInstance} from '../test/util/helpers';
+import {TEST_BUNDLE_ID, verifyMetadata} from '../test/bundle';
+import {
+  bundleToElementArray,
+  Post,
+  postConverter,
+  postConverterMerge,
+  verifyInstance,
+} from '../test/util/helpers';
+import IBundleElement = firestore.IBundleElement;
+import {BulkWriter} from '../src/bulk-writer';
 
 use(chaiAsPromised);
 
@@ -67,7 +79,7 @@ describe('Firestore class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -162,15 +174,23 @@ describe('Firestore class', () => {
       // No-op
     });
 
-    try {
-      await firestore.terminate();
-      throw new Error('terminate() should have failed');
-    } catch (err) {
-      expect(err).to.equal(
-        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
-      );
-      unsubscribe();
-    }
+    await expect(firestore.terminate()).to.eventually.be.rejectedWith(
+      'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
+        'instances must be closed before terminating the client. There are 1 ' +
+        'active listeners and 0 open BulkWriter instances.'
+    );
+    unsubscribe();
+  });
+
+  it('throws an error if terminate() is called with pending BulkWriter operations', async () => {
+    const writer = firestore._bulkWriter();
+    const ref = randomCol.doc('doc-1');
+    writer.set(ref, {foo: 'bar'});
+    await expect(firestore.terminate()).to.eventually.be.rejectedWith(
+      'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
+        'instances must be closed before terminating the client. There are 0 ' +
+        'active listeners and 1 open BulkWriter instances.'
+    );
   });
 });
 
@@ -258,7 +278,7 @@ describe('DocumentReference class', () => {
   let randomCol: CollectionReference;
 
   beforeEach(() => {
-    firestore = new Firestore({});
+    firestore = new Firestore();
     randomCol = getTestRoot(firestore);
   });
 
@@ -354,6 +374,24 @@ describe('DocumentReference class', () => {
         const actualValue = doc.data()!.nanValue;
         expect(actualValue).to.be.a('number');
         expect(actualValue).to.be.NaN;
+      });
+  });
+
+  it('round-trips BigInts', () => {
+    const bigIntValue = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
+
+    const firestore = new Firestore({useBigInt: true});
+    const randomCol = getTestRoot(firestore);
+    const ref = randomCol.doc('doc');
+    return ref
+      .set({bigIntValue})
+      .then(() => ref.get())
+      .then(doc => ref.set(doc.data()!))
+      .then(() => ref.get())
+      .then(doc => {
+        const actualValue = doc.data()!.bigIntValue;
+        expect(actualValue).to.be.a('bigint');
+        expect(actualValue).to.equal(bigIntValue);
       });
   });
 
@@ -615,7 +653,7 @@ describe('DocumentReference class', () => {
   });
 
   // tslint:disable-next-line:only-arrow-function
-  it('can add and delete fields sequentially', function() {
+  it('can add and delete fields sequentially', function () {
     this.timeout(30 * 1000);
 
     const ref = randomCol.doc('doc');
@@ -689,7 +727,7 @@ describe('DocumentReference class', () => {
   });
 
   // tslint:disable-next-line:only-arrow-function
-  it('can add and delete fields with server timestamps', function() {
+  it('can add and delete fields with server timestamps', function () {
     this.timeout(10 * 1000);
 
     const ref = randomCol.doc('doc');
@@ -909,9 +947,6 @@ describe('DocumentReference class', () => {
       const doc1 = randomCol.doc();
       const doc2 = randomCol.doc();
 
-      let unsubscribe1: () => void;
-      let unsubscribe2: () => void;
-
       // Documents transition from non-existent to existent to non-existent.
       const exists1 = [false, true, false];
       const exists2 = [false, true, false];
@@ -940,12 +975,12 @@ describe('DocumentReference class', () => {
           run.shift()!();
         }
       };
-      unsubscribe1 = doc1.onSnapshot(snapshot => {
+      const unsubscribe1 = doc1.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists1.shift());
         maybeRun();
       });
 
-      unsubscribe2 = doc2.onSnapshot(snapshot => {
+      const unsubscribe2 = doc2.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists2.shift());
         maybeRun();
       });
@@ -953,9 +988,6 @@ describe('DocumentReference class', () => {
 
     it('handles multiple streams on same doc', done => {
       const doc = randomCol.doc();
-
-      let unsubscribe1: () => void;
-      let unsubscribe2: () => void;
 
       // Document transitions from non-existent to existent to non-existent.
       const exists1 = [false, true, false];
@@ -984,12 +1016,12 @@ describe('DocumentReference class', () => {
         }
       };
 
-      unsubscribe1 = doc.onSnapshot(snapshot => {
+      const unsubscribe1 = doc.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists1.shift());
         maybeRun();
       });
 
-      unsubscribe2 = doc.onSnapshot(snapshot => {
+      const unsubscribe2 = doc.onSnapshot(snapshot => {
         expect(snapshot.exists).to.equal(exists2.shift());
         maybeRun();
       });
@@ -1169,10 +1201,7 @@ describe('Query class', () => {
     return ref
       .set({foo: NaN, bar: null})
       .then(() => {
-        return randomCol
-          .where('foo', '==', NaN)
-          .where('bar', '==', null)
-          .get();
+        return randomCol.where('foo', '==', NaN).where('bar', '==', null).get();
       })
       .then(res => {
         expect(
@@ -1282,19 +1311,13 @@ describe('Query class', () => {
 
   it('has limit() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .limit(1)
-      .get();
+    const res = await randomCol.orderBy('foo').limit(1).get();
     expectDocs(res, {foo: 'a'});
   });
 
   it('has limitToLast() method', async () => {
     await addDocs({doc: 1}, {doc: 2}, {doc: 3});
-    const res = await randomCol
-      .orderBy('doc')
-      .limitToLast(2)
-      .get();
+    const res = await randomCol.orderBy('doc').limitToLast(2).get();
     expectDocs(res, {doc: 2}, {doc: 3});
   });
 
@@ -1311,10 +1334,7 @@ describe('Query class', () => {
 
   it('has offset() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .offset(1)
-      .get();
+    const res = await randomCol.orderBy('foo').offset(1).get();
     expectDocs(res, {foo: 'b'});
   });
 
@@ -1381,37 +1401,25 @@ describe('Query class', () => {
 
   it('has startAt() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .startAt('b')
-      .get();
+    const res = await randomCol.orderBy('foo').startAt('b').get();
     expectDocs(res, {foo: 'b'});
   });
 
   it('has startAfter() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .startAfter('a')
-      .get();
+    const res = await randomCol.orderBy('foo').startAfter('a').get();
     expectDocs(res, {foo: 'b'});
   });
 
   it('has endAt() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .endAt('b')
-      .get();
+    const res = await randomCol.orderBy('foo').endAt('b').get();
     expectDocs(res, {foo: 'a'}, {foo: 'b'});
   });
 
   it('has endBefore() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
-    const res = await randomCol
-      .orderBy('foo')
-      .endBefore('b')
-      .get();
+    const res = await randomCol.orderBy('foo').endBefore('b').get();
     expectDocs(res, {foo: 'a'});
   });
 
@@ -1440,7 +1448,8 @@ describe('Query class', () => {
     await randomCol.doc().set({foo: 'bar'});
 
     const stream = randomCol.stream();
-    for await (const chunk of stream) {
+    for await (const doc of stream) {
+      expect(doc).to.be.an.instanceOf(QueryDocumentSnapshot);
       ++received;
     }
 
@@ -1495,7 +1504,7 @@ describe('Query class', () => {
       `a/b/c/d/${collectionGroup}/cg-doc4`,
       `a/c/${collectionGroup}/cg-doc5`,
       `${collectionGroup}/cg-doc6`,
-      `a/b/nope/nope`,
+      'a/b/nope/nope',
     ];
     const batch = firestore.batch();
     for (const docPath of docPaths) {
@@ -1506,7 +1515,7 @@ describe('Query class', () => {
     let querySnapshot = await firestore
       .collectionGroup(collectionGroup)
       .orderBy(FieldPath.documentId())
-      .startAt(`a/b`)
+      .startAt('a/b')
       .endAt('a/b0')
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
@@ -1536,7 +1545,7 @@ describe('Query class', () => {
       `a/b/c/d/${collectionGroup}/cg-doc4`,
       `a/c/${collectionGroup}/cg-doc5`,
       `${collectionGroup}/cg-doc6`,
-      `a/b/nope/nope`,
+      'a/b/nope/nope',
     ];
     const batch = firestore.batch();
     for (const docPath of docPaths) {
@@ -1546,7 +1555,7 @@ describe('Query class', () => {
 
     let querySnapshot = await firestore
       .collectionGroup(collectionGroup)
-      .where(FieldPath.documentId(), '>=', `a/b`)
+      .where(FieldPath.documentId(), '>=', 'a/b')
       .where(FieldPath.documentId(), '<=', 'a/b0')
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
@@ -1557,7 +1566,7 @@ describe('Query class', () => {
 
     querySnapshot = await firestore
       .collectionGroup(collectionGroup)
-      .where(FieldPath.documentId(), '>', `a/b`)
+      .where(FieldPath.documentId(), '>', 'a/b')
       .where(FieldPath.documentId(), '<', `a/b/${collectionGroup}/cg-doc3`)
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
@@ -2070,7 +2079,6 @@ describe('Transaction class', () => {
   it('retries transactions that fail with contention', async () => {
     const ref = randomCol.doc('doc');
 
-    let firstTransaction, secondTransaction: Promise<void>;
     let attempts = 0;
 
     // Create two transactions that both read and update the same document.
@@ -2079,7 +2087,7 @@ describe('Transaction class', () => {
     // and be retried.
     const contentionPromise = [new Deferred<void>(), new Deferred<void>()];
 
-    firstTransaction = firestore.runTransaction(async transaction => {
+    const firstTransaction = firestore.runTransaction(async transaction => {
       ++attempts;
       await transaction.get(ref);
       contentionPromise[0].resolve();
@@ -2087,7 +2095,7 @@ describe('Transaction class', () => {
       transaction.set(ref, {first: true}, {merge: true});
     });
 
-    secondTransaction = firestore.runTransaction(async transaction => {
+    const secondTransaction = firestore.runTransaction(async transaction => {
       ++attempts;
       await transaction.get(ref);
       contentionPromise[1].resolve();
@@ -2135,6 +2143,36 @@ describe('WriteBatch class', () => {
   });
 
   it('has set() method', () => {
+    const ref = randomCol.doc('doc');
+    const batch = firestore.batch();
+    batch.set(ref, {foo: 'a'});
+    return batch
+      .commit()
+      .then(() => {
+        return ref.get();
+      })
+      .then(doc => {
+        expect(doc.get('foo')).to.equal('a');
+      });
+  });
+
+  it('set supports partials', async () => {
+    const ref = randomCol.doc('doc').withConverter(postConverterMerge);
+    await ref.set(new Post('walnut', 'author'));
+    const batch = firestore.batch();
+    batch.set(ref, {title: 'olive'}, {merge: true});
+    return batch
+      .commit()
+      .then(() => {
+        return ref.get();
+      })
+      .then(doc => {
+        expect(doc.get('title')).to.equal('olive');
+        expect(doc.get('author')).to.equal('author');
+      });
+  });
+
+  it('set()', () => {
     const ref = randomCol.doc('doc');
     const batch = firestore.batch();
     batch.set(ref, {foo: 'a'});
@@ -2289,6 +2327,81 @@ describe('QuerySnapshot class', () => {
   });
 });
 
+describe('BulkWriter class', () => {
+  let firestore: Firestore;
+  let randomCol: CollectionReference;
+  let writer: BulkWriter;
+
+  beforeEach(() => {
+    firestore = new Firestore({});
+    writer = firestore._bulkWriter();
+    randomCol = getTestRoot(firestore);
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('has create() method', async () => {
+    const ref = randomCol.doc('doc1');
+    const singleOp = writer.create(ref, {foo: 'bar'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar'});
+    const writeTime = (await singleOp).writeTime;
+    expect(writeTime).to.not.be.null;
+  });
+
+  it('has set() method', async () => {
+    const ref = randomCol.doc('doc1');
+    const singleOp = writer.set(ref, {foo: 'bar'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar'});
+    const writeTime = (await singleOp).writeTime;
+    expect(writeTime).to.not.be.null;
+  });
+
+  it('has update() method', async () => {
+    const ref = randomCol.doc('doc1');
+    await ref.set({foo: 'bar'});
+    const singleOp = writer.update(ref, {foo: 'bar2'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar2'});
+    const writeTime = (await singleOp).writeTime;
+    expect(writeTime).to.not.be.null;
+  });
+
+  it('has delete() method', async () => {
+    const ref = randomCol.doc('doc1');
+    await ref.set({foo: 'bar'});
+    const singleOp = writer.delete(ref);
+    await writer.close();
+    const result = await ref.get();
+    expect(result.exists).to.be.false;
+    // TODO(b/158502664): Remove this check once we can get write times.
+    const deleteResult = await singleOp;
+    expect(deleteResult.writeTime).to.deep.equal(new Timestamp(0, 0));
+  });
+
+  it('can terminate once BulkWriter is closed', async () => {
+    const ref = randomCol.doc('doc1');
+    writer.set(ref, {foo: 'bar'});
+    await writer.close();
+    return firestore.terminate();
+  });
+
+  it('writes to the same document in order', async () => {
+    const ref = randomCol.doc('doc1');
+    await ref.set({foo: 'bar0'});
+    writer.set(ref, {foo: 'bar1'});
+    writer.set(ref, {foo: 'bar2'});
+    writer.set(ref, {foo: 'bar3'});
+    await writer.flush();
+    const res = await ref.get();
+    expect(res.data()).to.deep.equal({foo: 'bar3'});
+  });
+});
+
 describe('Client initialization', () => {
   const ops: Array<[
     string,
@@ -2368,4 +2481,149 @@ describe('Client initialization', () => {
       return op(randomCol);
     });
   }
+});
+
+describe('Bundle building', () => {
+  let firestore: Firestore;
+  let testCol: CollectionReference;
+
+  beforeEach(async () => {
+    firestore = new Firestore({});
+    testCol = getTestRoot(firestore);
+    const ref1 = testCol.doc('doc1');
+    const ref2 = testCol.doc('doc2');
+    const ref3 = testCol.doc('doc3');
+    const ref4 = testCol.doc('doc4');
+
+    await Promise.all([
+      ref1.set({name: '1', sort: 1, value: 'string value'}),
+      ref2.set({name: '2', sort: 2, value: 42}),
+      ref3.set({name: '3', sort: 3, value: {nested: 'nested value'}}),
+      ref4.set({name: '4', sort: 4, value: FieldValue.serverTimestamp()}),
+    ]);
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('succeeds when there are no results', async () => {
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
+    const query = testCol.where('sort', '==', 5);
+    const snap = await query.get();
+
+    bundle.add('query', snap);
+    // `elements` is expected to be [bundleMeta, query].
+    const elements = await bundleToElementArray(bundle.build());
+
+    const meta = (elements[0] as IBundleElement).metadata;
+    verifyMetadata(meta!, snap.readTime.toProto().timestampValue!, 0);
+
+    const namedQuery = (elements[1] as IBundleElement).namedQuery;
+    // Verify saved query.
+    expect(namedQuery).to.deep.equal({
+      name: 'query',
+      readTime: snap.readTime.toProto().timestampValue,
+      // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
+      bundledQuery: extend(
+        true,
+        {},
+        {
+          parent: query.toProto().parent,
+          structuredQuery: query.toProto().structuredQuery,
+        }
+      ),
+    });
+  });
+
+  it('succeeds when added document does not exist', async () => {
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
+    const snap = await testCol.doc('doc5-not-exist').get();
+
+    bundle.add(snap);
+    // `elements` is expected to be [bundleMeta, docMeta].
+    const elements = await bundleToElementArray(bundle.build());
+    expect(elements.length).to.equal(2);
+
+    const meta = (elements[0] as IBundleElement).metadata;
+    verifyMetadata(meta!, snap.readTime.toProto().timestampValue!, 1);
+
+    const docMeta = (elements[1] as IBundleElement).documentMetadata;
+    expect(docMeta).to.deep.equal({
+      name: snap.toDocumentProto().name,
+      readTime: snap.readTime.toProto().timestampValue,
+      exists: false,
+    });
+  });
+
+  it('succeeds to save limit and limitToLast queries', async () => {
+    const bundle = firestore._bundle(TEST_BUNDLE_ID);
+    const limitQuery = testCol.orderBy('sort', 'desc').limit(1);
+    const limitSnap = await limitQuery.get();
+    const limitToLastQuery = testCol.orderBy('sort', 'asc').limitToLast(1);
+    const limitToLastSnap = await limitToLastQuery.get();
+
+    bundle.add('limitQuery', limitSnap);
+    bundle.add('limitToLastQuery', limitToLastSnap);
+    // `elements` is expected to be [bundleMeta, limitQuery, limitToLastQuery, doc4Meta, doc4Snap].
+    const elements = await bundleToElementArray(await bundle.build());
+
+    const meta = (elements[0] as IBundleElement).metadata;
+    verifyMetadata(
+      meta!,
+      limitToLastSnap.readTime.toProto().timestampValue!,
+      1
+    );
+
+    let namedQuery1 = (elements[1] as IBundleElement).namedQuery;
+    let namedQuery2 = (elements[2] as IBundleElement).namedQuery;
+    // We might need to swap them.
+    if (namedQuery1!.name === 'limitToLastQuery') {
+      const temp = namedQuery2;
+      namedQuery2 = namedQuery1;
+      namedQuery1 = temp;
+    }
+
+    // Verify saved limit query.
+    expect(namedQuery1).to.deep.equal({
+      name: 'limitQuery',
+      readTime: limitSnap.readTime.toProto().timestampValue,
+      bundledQuery: extend(
+        true,
+        {},
+        {
+          parent: limitQuery.toProto().parent,
+          structuredQuery: limitQuery.toProto().structuredQuery,
+          limitType: 'FIRST',
+        }
+      ),
+    });
+
+    // `limitToLastQuery`'s structured query should be the same as this one. This together with
+    // `limitType` can re-construct a limitToLast client query by client SDKs.
+    const q = testCol.orderBy('sort', 'asc').limit(1);
+    // Verify saved limitToLast query.
+    expect(namedQuery2).to.deep.equal({
+      name: 'limitToLastQuery',
+      readTime: limitToLastSnap.readTime.toProto().timestampValue,
+      bundledQuery: extend(
+        true,
+        {},
+        {
+          parent: q.toProto().parent,
+          structuredQuery: q.toProto().structuredQuery,
+          limitType: 'LAST',
+        }
+      ),
+    });
+
+    // Verify bundled document
+    const docMeta = (elements[3] as IBundleElement).documentMetadata;
+    expect(docMeta).to.deep.equal({
+      name: limitToLastSnap.docs[0].toDocumentProto().name,
+      readTime: limitToLastSnap.readTime.toProto().timestampValue,
+      exists: true,
+    });
+
+    const bundledDoc = (elements[4] as IBundleElement).document;
+    expect(bundledDoc).to.deep.equal(limitToLastSnap.docs[0].toDocumentProto());
+  });
 });

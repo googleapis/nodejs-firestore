@@ -42,7 +42,7 @@ async function main() {
     const shardsCollectionRef = docRef.collection('shards');
     const shardDocs = await shardsCollectionRef.select('id').get();
     const promises = [];
-    shardDocs.forEach(async (doc) => {
+    shardDocs.forEach(async doc => {
       promises.push(shardsCollectionRef.doc(doc.id).delete());
     });
     return Promise.all(promises);

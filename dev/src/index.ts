@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import {CallOptions, RetryOptions, Status} from 'google-gax';
-import {Duplex, PassThrough} from 'stream';
-import * as through2 from 'through2';
+import * as firestore from '@google-cloud/firestore';
+
+import {CallOptions, grpc, RetryOptions} from 'google-gax';
+import {Duplex, PassThrough, Transform} from 'stream';
+
 import {URL} from 'url';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {ExponentialBackoff, ExponentialBackoffSetting} from './backoff';
 import {BulkWriter} from './bulk-writer';
+import {BundleBuilder} from './bundle';
 import {fieldsFromJson, timestampFromJson} from './convert';
 import {
   DocumentSnapshot,
@@ -45,15 +48,13 @@ import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
   BulkWriterOptions,
-  DocumentData,
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
   GapicClient,
-  ReadOptions,
-  Settings,
   UnaryMethod,
 } from './types';
 import {
+  autoId,
   Deferred,
   getRetryParams,
   isPermanentRpcError,
@@ -91,15 +92,7 @@ export {DocumentChange} from './document-change';
 export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {setLogFunction} from './logger';
-export {
-  BulkWriterOptions,
-  FirestoreDataConverter,
-  UpdateData,
-  DocumentData,
-  Settings,
-  Precondition,
-  SetOptions,
-} from './types';
+export {BulkWriterOptions} from './types';
 export {Status as GrpcStatus} from 'google-gax';
 
 const libVersion = require('../../package.json').version;
@@ -167,6 +160,53 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * to values.
  *
  * @typedef {Object.<string, *>} DocumentData
+ */
+
+/**
+ * Converter used by [withConverter()]{@link Query#withConverter} to transform
+ * user objects of type T into Firestore data.
+ *
+ * Using the converter allows you to specify generic type arguments when storing
+ * and retrieving objects from Firestore.
+ *
+ * @example
+ * class Post {
+ *   constructor(readonly title: string, readonly author: string) {}
+ *
+ *   toString(): string {
+ *     return this.title + ', by ' + this.author;
+ *   }
+ * }
+ *
+ * const postConverter = {
+ *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+ *     return {title: post.title, author: post.author};
+ *   },
+ *   fromFirestore(
+ *     data: FirebaseFirestore.QueryDocumentSnapshot
+ *   ): Post {
+ *     const data = snapshot.data();
+ *     return new Post(data.title, data.author);
+ *   }
+ * };
+ *
+ * const postSnap = await Firestore()
+ *   .collection('posts')
+ *   .withConverter(postConverter)
+ *   .doc().get();
+ * const post = postSnap.data();
+ * if (post !== undefined) {
+ *   post.title; // string
+ *   post.toString(); // Should be defined
+ *   post.someNonExistentProperty; // TS error
+ * }
+ *
+ * @property {Function} toFirestore Called by the Firestore SDK to convert a
+ * custom model object of type T into a plain Javascript object (suitable for
+ * writing directly to the Firestore database).
+ * @property {Function} fromFirestore Called by the Firestore SDK to convert
+ * Firestore data into an object of type T.
+ * @typedef {Object} FirestoreDataConverter
  */
 
 /**
@@ -265,7 +305,7 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  * region_tag:firestore_quickstart
  * Full quickstart example:
  */
-export class Firestore {
+export class Firestore implements firestore.Firestore {
   /**
    * A client pool to distribute requests over multiple GAPIC clients in order
    * to work around a connection limit of 100 concurrent requests per client.
@@ -277,7 +317,7 @@ export class Firestore {
    * The configuration options for the GAPIC client.
    * @private
    */
-  _settings: Settings = {};
+  _settings: firestore.Settings = {};
 
   /**
    * Settings for the exponential backoff used by the streaming endpoints.
@@ -310,22 +350,20 @@ export class Firestore {
   /**
    * Count of listeners that have been registered on the client.
    *
-   * The client can only be terminated when there are no registered listeners.
+   * The client can only be terminated when there are no pending writes or
+   * registered listeners.
    * @private
    */
   private registeredListenersCount = 0;
 
-  // GCF currently tears down idle connections after two minutes. Requests
-  // that are issued after this period may fail. On GCF, we therefore issue
-  // these requests as part of a transaction so that we can safely retry until
-  // the network link is reestablished.
-  //
-  // The environment variable FUNCTION_TRIGGER_TYPE is used to detect the GCF
-  // environment.
-  /** @private */
-  _preferTransactions: boolean;
-  /** @private */
-  _lastSuccessfulRequest = 0;
+  /**
+   * Number of pending operations on the client.
+   *
+   * The client can only be terminated when there are no pending writes or
+   * registered listeners.
+   * @private
+   */
+  private bulkWritersCount = 0;
 
   /**
    * @param {Object=} settings [Configuration object](#/docs).
@@ -350,13 +388,18 @@ export class Firestore {
    * can specify a `keyFilename` instead.
    * @param {string=} settings.host The host to connect to.
    * @param {boolean=} settings.ssl Whether to use SSL when connecting.
-   * @param {number=} settings.maxIdleChannels  The maximum number of idle GRPC
+   * @param {number=} settings.maxIdleChannels The maximum number of idle GRPC
    * channels to keep. A smaller number of idle channels reduces memory usage
    * but increases request latency for clients with fluctuating request rates.
    * If set to 0, shuts down all GRPC channels when the client becomes idle.
    * Defaults to 1.
+   * @param {boolean=} settings.ignoreUndefinedProperties Whether to skip nested
+   * properties that are set to `undefined` during object serialization. If set
+   * to `true`, these properties are skipped and not written to Firestore. If
+   * set `false` or omitted, the SDK throws an exception when it encounters
+   * properties of type `undefined`.
    */
-  constructor(settings?: Settings) {
+  constructor(settings?: firestore.Settings) {
     const libraryHeader = {
       libName: 'gccl',
       libVersion,
@@ -372,7 +415,7 @@ export class Firestore {
         process.env.FIRESTORE_EMULATOR_HOST
       );
 
-      const emulatorSettings: Settings = {
+      const emulatorSettings: firestore.Settings = {
         ...settings,
         ...libraryHeader,
         host: process.env.FIRESTORE_EMULATOR_HOST,
@@ -396,20 +439,6 @@ export class Firestore {
       backoffFactor: retryConfig.retry_delay_multiplier,
     };
 
-    // GCF currently tears down idle connections after two minutes. Requests
-    // that are issued after this period may fail. On GCF, we therefore issue
-    // these requests as part of a transaction so that we can safely retry until
-    // the network link is reestablished.
-    //
-    // The environment variable FUNCTION_TRIGGER_TYPE is used to detect the GCF
-    // environment.
-    this._preferTransactions = process.env.FUNCTION_TRIGGER_TYPE !== undefined;
-    this._lastSuccessfulRequest = 0;
-
-    if (this._preferTransactions) {
-      logger('Firestore', null, 'Detected GCF environment');
-    }
-
     const maxIdleChannels =
       this._settings.maxIdleChannels === undefined
         ? DEFAULT_MAX_IDLE_CHANNELS
@@ -421,8 +450,8 @@ export class Firestore {
         let client: GapicClient;
 
         if (this._settings.ssl === false) {
-          const grpc = require('@grpc/grpc-js');
-          const sslCreds = grpc.credentials.createInsecure();
+          const grpcModule = this._settings.grpc ?? grpc;
+          const sslCreds = grpcModule.credentials.createInsecure();
 
           client = new module.exports.v1({
             sslCreds,
@@ -451,7 +480,7 @@ export class Firestore {
    *
    * @param {object} settings The settings to use for all Firestore operations.
    */
-  settings(settings: Settings): void {
+  settings(settings: firestore.Settings): void {
     validateObject('settings', settings);
     validateString('settings.projectId', settings.projectId, {optional: true});
 
@@ -468,7 +497,7 @@ export class Firestore {
     this._settingsFrozen = true;
   }
 
-  private validateAndApplySettings(settings: Settings): void {
+  private validateAndApplySettings(settings: firestore.Settings): void {
     if (settings.projectId !== undefined) {
       validateString('settings.projectId', settings.projectId);
       this._projectId = settings.projectId;
@@ -745,7 +774,7 @@ export class Firestore {
       convertFields = fieldsFromJson;
     } else {
       throw new Error(
-        `Unsupported encoding format. Expected "json" or "protobufJS", ` +
+        'Unsupported encoding format. Expected "json" or "protobufJS", ' +
           `but was "${encoding}".`
       );
     }
@@ -790,6 +819,20 @@ export class Firestore {
     }
 
     return document.build();
+  }
+
+  /**
+   * Creates a new `BundleBuilder` instance to package selected Firestore data into
+   * a bundle.
+   *
+   * @param bundleId. The id of the bundle. When loaded on clients, client SDKs use this id
+   * and the timestamp associated with the built bundle to tell if it has been loaded already.
+   * If not specified, a random identifier will be used.
+   *
+   * @private
+   */
+  _bundle(name?: string): BundleBuilder {
+    return new BundleBuilder(name || autoId());
   }
 
   /**
@@ -903,9 +946,15 @@ export class Firestore {
    * });
    */
   getAll<T>(
-    ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+    ...documentRefsOrReadOptions: Array<
+      firestore.DocumentReference<T> | firestore.ReadOptions
+    >
   ): Promise<Array<DocumentSnapshot<T>>> {
-    validateMinNumberOfArguments('Firestore.getAll', arguments, 1);
+    validateMinNumberOfArguments(
+      'Firestore.getAll',
+      documentRefsOrReadOptions,
+      1
+    );
 
     const {documents, fieldMask} = parseGetAllArguments(
       documentRefsOrReadOptions
@@ -934,8 +983,8 @@ export class Firestore {
    * @returns A Promise that contains an array with the resulting documents.
    */
   getAll_<T>(
-    docRefs: Array<DocumentReference<T>>,
-    fieldMask: FieldPath[] | null,
+    docRefs: Array<firestore.DocumentReference<T>>,
+    fieldMask: firestore.FieldPath[] | null,
     requestTag: string,
     transactionId?: Uint8Array
   ): Promise<Array<DocumentSnapshot<T>>> {
@@ -943,7 +992,7 @@ export class Firestore {
     const retrievedDocuments = new Map<string, DocumentSnapshot>();
 
     for (const docRef of docRefs) {
-      requestedDocuments.add(docRef.formattedName);
+      requestedDocuments.add((docRef as DocumentReference<T>).formattedName);
     }
 
     const request: api.IBatchGetDocumentsRequest = {
@@ -953,7 +1002,9 @@ export class Firestore {
     };
 
     if (fieldMask) {
-      const fieldPaths = fieldMask.map(fieldPath => fieldPath.formattedName);
+      const fieldPaths = fieldMask.map(
+        fieldPath => (fieldPath as FieldPath).formattedName
+      );
       request.mask = {fieldPaths};
     }
 
@@ -1024,7 +1075,9 @@ export class Firestore {
                 if (document !== undefined) {
                   // Recreate the DocumentSnapshot with the DocumentReference
                   // containing the original converter.
-                  const finalDoc = new DocumentSnapshotBuilder(docRef);
+                  const finalDoc = new DocumentSnapshotBuilder(
+                    docRef as DocumentReference<T>
+                  );
                   finalDoc.fieldsProto = document._fieldsProto;
                   finalDoc.readTime = document.readTime;
                   finalDoc.createTime = document.createTime;
@@ -1067,14 +1120,37 @@ export class Firestore {
   }
 
   /**
+   * Increments the number of open BulkWriter instances. This is used to verify
+   * that all pending operations are complete when terminate() is called.
+   *
+   * @private
+   */
+  _incrementBulkWritersCount(): void {
+    this.bulkWritersCount += 1;
+  }
+
+  /**
+   * Decrements the number of open BulkWriter instances. This is used to verify
+   * that all pending operations are complete when terminate() is called.
+   *
+   * @private
+   */
+  _decrementBulkWritersCount(): void {
+    this.bulkWritersCount -= 1;
+  }
+
+  /**
    * Terminates the Firestore client and closes all open streams.
    *
    * @return A Promise that resolves when the client is terminated.
    */
   terminate(): Promise<void> {
-    if (this.registeredListenersCount > 0) {
+    if (this.registeredListenersCount > 0 || this.bulkWritersCount > 0) {
       return Promise.reject(
-        'All onSnapshot() listeners must be unsubscribed before terminating the client.'
+        'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
+          'instances must be closed before terminating the client. ' +
+          `There are ${this.registeredListenersCount} active listeners and ` +
+          `${this.bulkWritersCount} open BulkWriter instances.`
       );
     }
     return this._clientPool.terminate();
@@ -1198,9 +1274,7 @@ export class Firestore {
 
       try {
         await backoff.backoffAndWait();
-        const result = await func();
-        this._lastSuccessfulRequest = new Date().getTime();
-        return result;
+        return await func();
       } catch (err) {
         lastError = err;
 
@@ -1250,7 +1324,7 @@ export class Firestore {
     let streamInitialized = false;
 
     return new Promise<Duplex>((resolve, reject) => {
-      function streamReady() {
+      function streamReady(): void {
         if (!streamInitialized) {
           streamInitialized = true;
           logger('Firestore._initializeStream', requestTag, 'Releasing stream');
@@ -1258,7 +1332,7 @@ export class Firestore {
         }
       }
 
-      function streamEnded() {
+      function streamEnded(): void {
         logger(
           'Firestore._initializeStream',
           requestTag,
@@ -1269,7 +1343,7 @@ export class Firestore {
         lifetime.resolve();
       }
 
-      function streamFailed(err: Error) {
+      function streamFailed(err: Error): void {
         if (!streamInitialized) {
           // If we receive an error before we were able to receive any data,
           // reject this stream.
@@ -1362,7 +1436,6 @@ export class Firestore {
           'Received response: %j',
           result
         );
-        this._lastSuccessfulRequest = new Date().getTime();
         return result;
       } catch (err) {
         logger('Firestore.request', requestTag, 'Received error:', err);
@@ -1408,14 +1481,17 @@ export class Firestore {
           const stream = bidirectional
             ? gapicClient[methodName](callOptions)
             : gapicClient[methodName](request, callOptions);
-          const logStream = through2.obj(function(this, chunk, enc, callback) {
-            logger(
-              'Firestore.requestStream',
-              requestTag,
-              'Received response: %j',
-              chunk
-            );
-            callback();
+          const logStream = new Transform({
+            objectMode: true,
+            transform: (chunk, encoding, callback) => {
+              logger(
+                'Firestore.requestStream',
+                requestTag,
+                'Received response: %j',
+                chunk
+              );
+              callback();
+            },
           });
           stream.pipe(logStream);
 

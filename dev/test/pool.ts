@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {describe, it} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
-import {ClientPool} from '../src/pool';
+import {ClientPool, CLIENT_TERMINATED_ERROR_MSG} from '../src/pool';
 import {Deferred} from '../src/util';
 
 use(chaiAsPromised);
@@ -324,7 +325,7 @@ describe('Client pool', () => {
         );
       })
       .catch((err: Error) => {
-        expect(err.message).to.equal('The client has already been terminated');
+        expect(err.message).to.equal(CLIENT_TERMINATED_ERROR_MSG);
       });
   });
 

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-const deepEqual = require('deep-equal');
+import * as firestore from '@google-cloud/firestore';
+
+import * as deepEqual from 'fast-deep-equal';
 
 import * as assert from 'assert';
-import {describe, it} from 'mocha';
 
 import {google} from '../protos/firestore_v1_proto_api';
 import {FieldTransform} from './field-value';
@@ -25,7 +26,7 @@ import {FieldPath, validateFieldPath} from './path';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
-import {ApiMapValue, DocumentData, UpdateMap} from './types';
+import {ApiMapValue, defaultConverter, UpdateMap} from './types';
 import {isEmpty, isObject, isPlainObject} from './util';
 
 import api = google.firestore.v1;
@@ -36,7 +37,7 @@ import api = google.firestore.v1;
  *
  * @private
  */
-export class DocumentSnapshotBuilder<T = DocumentData> {
+export class DocumentSnapshotBuilder<T = firestore.DocumentData> {
   /** The fields of the Firestore `Document` Protobuf backing this document. */
   fieldsProto?: ApiMapValue;
 
@@ -95,7 +96,8 @@ export class DocumentSnapshotBuilder<T = DocumentData> {
  *
  * @class
  */
-export class DocumentSnapshot<T = DocumentData> {
+export class DocumentSnapshot<T = firestore.DocumentData>
+  implements firestore.DocumentSnapshot<T> {
   private _ref: DocumentReference<T>;
   private _serializer: Serializer;
   private _readTime: Timestamp | undefined;
@@ -138,11 +140,14 @@ export class DocumentSnapshot<T = DocumentData> {
    * @return The created DocumentSnapshot.
    */
   static fromObject<U>(
-    ref: DocumentReference<U>,
-    obj: DocumentData
+    ref: firestore.DocumentReference<U>,
+    obj: firestore.DocumentData
   ): DocumentSnapshot<U> {
-    const serializer = ref.firestore._serializer!;
-    return new DocumentSnapshot(ref, serializer.encodeFields(obj));
+    const serializer = (ref as DocumentReference<U>).firestore._serializer!;
+    return new DocumentSnapshot(
+      ref as DocumentReference<U>,
+      serializer.encodeFields(obj)
+    );
   }
   /**
    * Creates a DocumentSnapshot from an UpdateMap.
@@ -156,10 +161,10 @@ export class DocumentSnapshot<T = DocumentData> {
    * @return The created DocumentSnapshot.
    */
   static fromUpdateMap<U>(
-    ref: DocumentReference<U>,
+    ref: firestore.DocumentReference<U>,
     data: UpdateMap
   ): DocumentSnapshot<U> {
-    const serializer = ref.firestore._serializer!;
+    const serializer = (ref as DocumentReference<U>).firestore._serializer!;
 
     /**
      * Merges 'value' at the field path specified by the path array into
@@ -229,7 +234,7 @@ export class DocumentSnapshot<T = DocumentData> {
       merge(res, value, path, 0);
     }
 
-    return new DocumentSnapshot(ref, res);
+    return new DocumentSnapshot(ref as DocumentReference<U>, res);
   }
 
   /**
@@ -354,7 +359,7 @@ export class DocumentSnapshot<T = DocumentData> {
    */
   get readTime(): Timestamp {
     if (this._readTime === undefined) {
-      throw new Error(`Called 'readTime' on a local document`);
+      throw new Error("Called 'readTime' on a local document");
     }
     return this._readTime;
   }
@@ -381,11 +386,29 @@ export class DocumentSnapshot<T = DocumentData> {
       return undefined;
     }
 
-    const obj: DocumentData = {};
-    for (const prop of Object.keys(fields)) {
-      obj[prop] = this._serializer.decodeValue(fields[prop]);
+    // We only want to use the converter and create a new QueryDocumentSnapshot
+    // if a converter has been provided.
+    if (this.ref._converter !== defaultConverter()) {
+      const untypedReference = new DocumentReference(
+        this.ref.firestore,
+        this.ref._path
+      );
+      return this.ref._converter.fromFirestore(
+        new QueryDocumentSnapshot<firestore.DocumentData>(
+          untypedReference,
+          this._fieldsProto!,
+          this.readTime,
+          this.createTime!,
+          this.updateTime!
+        )
+      );
+    } else {
+      const obj: firestore.DocumentData = {};
+      for (const prop of Object.keys(fields)) {
+        obj[prop] = this._serializer.decodeValue(fields[prop]);
+      }
+      return obj as T;
     }
-    return this.ref._converter.fromFirestore(obj);
   }
 
   /**
@@ -408,9 +431,8 @@ export class DocumentSnapshot<T = DocumentData> {
    */
   // We deliberately use `any` in the external API to not impose type-checking
   // on end users.
-  // tslint:disable-next-line no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(field: string | FieldPath): any {
-    // tslint:disable-line no-any
     validateFieldPath('field', field);
 
     const protoField = this.protoField(field);
@@ -453,17 +475,30 @@ export class DocumentSnapshot<T = DocumentData> {
   }
 
   /**
-   * Convert a document snapshot to the Firestore 'Document' Protobuf.
+   * Convert a document snapshot to the Firestore 'Write' proto.
    *
    * @private
-   * @returns The document in the format the API expects.
    */
-  toProto(): api.IWrite {
+  toWriteProto(): api.IWrite {
     return {
       update: {
         name: this._ref.formattedName,
         fields: this._fieldsProto,
       },
+    };
+  }
+
+  /**
+   * Convert a document snapshot to the Firestore 'Document' proto.
+   *
+   * @private
+   */
+  toDocumentProto(): api.IDocument {
+    return {
+      name: this._ref.formattedName,
+      createTime: this.createTime,
+      updateTime: this.updateTime,
+      fields: this._fieldsProto,
     };
   }
 
@@ -475,14 +510,14 @@ export class DocumentSnapshot<T = DocumentData> {
    * @return {boolean} true if this `DocumentSnapshot` is equal to the provided
    * value.
    */
-  isEqual(other: DocumentSnapshot<T>): boolean {
+  isEqual(other: firestore.DocumentSnapshot<T>): boolean {
     // Since the read time is different on every document read, we explicitly
     // ignore all document metadata in this comparison.
     return (
       this === other ||
       (other instanceof DocumentSnapshot &&
-        this._ref.isEqual(other._ref) &&
-        deepEqual(this._fieldsProto, other._fieldsProto, {strict: true}))
+        this._ref.isEqual((other as DocumentSnapshot<T>)._ref) &&
+        deepEqual(this._fieldsProto, other._fieldsProto))
     );
   }
 }
@@ -502,9 +537,9 @@ export class DocumentSnapshot<T = DocumentData> {
  * @class
  * @extends DocumentSnapshot
  */
-export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<
-  T
-> {
+export class QueryDocumentSnapshot<T = firestore.DocumentData>
+  extends DocumentSnapshot<T>
+  implements firestore.QueryDocumentSnapshot<T> {
   /**
    * The time the document was created.
    *
@@ -615,7 +650,9 @@ export class DocumentMask {
    * @private
    * @param fieldMask A list of field paths.
    */
-  static fromFieldMask(fieldMask: Array<string | FieldPath>): DocumentMask {
+  static fromFieldMask(
+    fieldMask: Array<string | firestore.FieldPath>
+  ): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
     for (const fieldPath of fieldMask) {
@@ -632,11 +669,11 @@ export class DocumentMask {
    * @param data An object with fields to modify. Only the keys are used to
    * extract the document mask.
    */
-  static fromObject(data: DocumentData): DocumentMask {
+  static fromObject(data: firestore.DocumentData): DocumentMask {
     const fieldPaths: FieldPath[] = [];
 
     function extractFieldPaths(
-      currentData: DocumentData,
+      currentData: firestore.DocumentData,
       currentPath?: FieldPath
     ): void {
       let isEmpty = true;
@@ -679,7 +716,7 @@ export class DocumentMask {
    * @private
    * @return {boolean} Whether this document mask is empty.
    */
-  get isEmpty() {
+  get isEmpty(): boolean {
     return this._sortedPaths.length === 0;
   }
 
@@ -750,19 +787,21 @@ export class DocumentMask {
    * @param data An object to filter.
    * @return A shallow copy of the object filtered by this document mask.
    */
-  applyTo(data: DocumentData): DocumentData {
+  applyTo(data: firestore.DocumentData): firestore.DocumentData {
     /*!
      * Applies this DocumentMask to 'data' and computes the list of field paths
      * that were specified in the mask but are not present in 'data'.
      */
-    const applyDocumentMask = (data: DocumentData) => {
+    const applyDocumentMask: (
+      data: firestore.DocumentData
+    ) => firestore.DocumentData = data => {
       const remainingPaths = this._sortedPaths.slice(0);
 
-      const processObject = (
-        currentData: DocumentData,
+      const processObject: (
+        currentData: firestore.DocumentData,
         currentPath?: FieldPath
-      ) => {
-        let result: DocumentData | null = null;
+      ) => firestore.DocumentData | null = (currentData, currentPath) => {
+        let result: firestore.DocumentData | null = null;
 
         Object.keys(currentData).forEach(key => {
           const childPath = currentPath
@@ -774,7 +813,7 @@ export class DocumentMask {
             result[key] = currentData[key];
           } else if (isObject(currentData[key])) {
             const childObject = processObject(
-              currentData[key] as DocumentData,
+              currentData[key] as firestore.DocumentData,
               childPath
             );
             if (childObject) {
@@ -838,7 +877,7 @@ export class DocumentMask {
  * @private
  * @class
  */
-export class DocumentTransform<T = DocumentData> {
+export class DocumentTransform<T = firestore.DocumentData> {
   /**
    * @private
    * @hideconstructor
@@ -860,8 +899,8 @@ export class DocumentTransform<T = DocumentData> {
    * @returns The Document Transform.
    */
   static fromObject<T>(
-    ref: DocumentReference<T>,
-    obj: DocumentData
+    ref: firestore.DocumentReference<T>,
+    obj: firestore.DocumentData
   ): DocumentTransform<T> {
     const updateMap = new Map<FieldPath, unknown>();
 
@@ -881,12 +920,16 @@ export class DocumentTransform<T = DocumentData> {
    * @returns The Document Transform.
    */
   static fromUpdateMap<T>(
-    ref: DocumentReference<T>,
+    ref: firestore.DocumentReference<T>,
     data: UpdateMap
   ): DocumentTransform<T> {
     const transforms = new Map<FieldPath, FieldTransform>();
 
-    function encode_(val: unknown, path: FieldPath, allowTransforms: boolean) {
+    function encode_(
+      val: unknown,
+      path: FieldPath,
+      allowTransforms: boolean
+    ): void {
       if (val instanceof FieldTransform && val.includeInDocumentTransform) {
         if (allowTransforms) {
           transforms.set(path, val);
@@ -911,7 +954,7 @@ export class DocumentTransform<T = DocumentData> {
       encode_(value, FieldPath.fromArgument(key), true);
     });
 
-    return new DocumentTransform(ref, transforms);
+    return new DocumentTransform(ref as DocumentReference<T>, transforms);
   }
 
   /**
@@ -976,10 +1019,13 @@ export class Precondition {
    * document in Firestore.
    * @param options
    */
-  constructor(options?: {exists?: boolean; lastUpdateTime?: Timestamp}) {
+  constructor(options?: {
+    exists?: boolean;
+    lastUpdateTime?: firestore.Timestamp;
+  }) {
     if (options !== undefined) {
       this._exists = options.exists;
-      this._lastUpdateTime = options.lastUpdateTime;
+      this._lastUpdateTime = options.lastUpdateTime as Timestamp;
     }
   }
 

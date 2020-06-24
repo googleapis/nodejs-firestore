@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {google} from '../protos/firestore_v1_proto_api';
 import {
   DocumentMask,
@@ -24,16 +26,10 @@ import {
 import {Firestore} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
-import {DocumentReference, validateDocumentReference} from './reference';
+import {validateDocumentReference} from './reference';
 import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
-import {
-  Precondition as PublicPrecondition,
-  SetOptions,
-  UpdateData,
-  UpdateMap,
-} from './types';
-import {DocumentData} from './types';
+import {UpdateMap} from './types';
 import {
   getRetryCodes,
   isObject,
@@ -53,20 +49,13 @@ import {
 import api = google.firestore.v1;
 import {GoogleError, Status} from 'google-gax';
 
-/*!
- * Google Cloud Functions terminates idle connections after two minutes. After
- * longer periods of idleness, we issue transactional commits to allow for
- * retries.
- */
-const GCF_IDLE_TIMEOUT_MS = 110 * 1000;
-
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
  * updates(), and creates().
  *
  * @class
  */
-export class WriteResult {
+export class WriteResult implements firestore.WriteResult {
   /**
    * @hideconstructor
    *
@@ -98,7 +87,7 @@ export class WriteResult {
    * @param {*} other The value to compare against.
    * @return true if this `WriteResult` is equal to the provided value.
    */
-  isEqual(other: WriteResult): boolean {
+  isEqual(other: firestore.WriteResult): boolean {
     return (
       this === other ||
       (other instanceof WriteResult &&
@@ -120,12 +109,12 @@ export class BatchWriteResult {
   ) {}
 }
 
-/** Helper type to manage the list of writes in a WriteBatch. */
-// TODO(mrschmidt): Replace with api.IWrite
-interface WriteOp {
-  write: api.IWrite;
-  precondition?: api.IPrecondition | null;
-}
+/**
+ * A lazily-evaluated write that allows us to detect the Project ID before
+ * serializing the request.
+ * @private
+ */
+type PendingWriteOp = () => api.IWrite;
 
 /**
  * A Firestore WriteBatch that can be used to atomically commit multiple write
@@ -133,7 +122,7 @@ interface WriteOp {
  *
  * @class
  */
-export class WriteBatch {
+export class WriteBatch implements firestore.WriteBatch {
   private readonly _firestore: Firestore;
   private readonly _serializer: Serializer;
   private readonly _allowUndefined: boolean;
@@ -143,7 +132,7 @@ export class WriteBatch {
    * resulting `api.IWrite` will be sent to the backend.
    * @private
    */
-  private readonly _ops: Array<() => WriteOp> = [];
+  private readonly _ops: Array<PendingWriteOp> = [];
 
   private _committed = false;
 
@@ -198,9 +187,9 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  create<T>(documentRef: DocumentReference<T>, data: T): WriteBatch {
-    validateDocumentReference('documentRef', documentRef);
-    const firestoreData = documentRef._converter.toFirestore(data);
+  create<T>(documentRef: firestore.DocumentReference<T>, data: T): WriteBatch {
+    const ref = validateDocumentReference('documentRef', documentRef);
+    const firestoreData = ref._converter.toFirestore(data);
     validateDocumentData(
       'data',
       firestoreData,
@@ -210,22 +199,19 @@ export class WriteBatch {
 
     this.verifyNotCommitted();
 
-    const transform = DocumentTransform.fromObject(documentRef, firestoreData);
+    const transform = DocumentTransform.fromObject(ref, firestoreData);
     transform.validate();
 
     const precondition = new Precondition({exists: false});
 
-    const op = () => {
-      const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
-      const write = document.toProto();
+    const op: PendingWriteOp = () => {
+      const document = DocumentSnapshot.fromObject(ref, firestoreData);
+      const write = document.toWriteProto();
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);
       }
-
-      return {
-        write,
-        precondition: precondition.toProto(),
-      };
+      write.currentDocument = precondition.toProto();
+      return write;
     };
 
     this._ops.push(op);
@@ -257,23 +243,22 @@ export class WriteBatch {
    * });
    */
   delete<T>(
-    documentRef: DocumentReference<T>,
-    precondition?: PublicPrecondition
+    documentRef: firestore.DocumentReference<T>,
+    precondition?: firestore.Precondition
   ): WriteBatch {
-    validateDocumentReference('documentRef', documentRef);
+    const ref = validateDocumentReference('documentRef', documentRef);
     validateDeletePrecondition('precondition', precondition, {optional: true});
 
     this.verifyNotCommitted();
 
     const conditions = new Precondition(precondition);
 
-    const op = () => {
-      return {
-        write: {
-          delete: documentRef.formattedName,
-        },
-        precondition: conditions.toProto(),
-      };
+    const op: PendingWriteOp = () => {
+      const write: api.IWrite = {delete: ref.formattedName};
+      if (!conditions.isEmpty) {
+        write.currentDocument = conditions.toProto();
+      }
+      return write;
     };
 
     this._ops.push(op);
@@ -281,16 +266,26 @@ export class WriteBatch {
     return this;
   }
 
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: Partial<T>,
+    options: firestore.SetOptions
+  ): WriteBatch;
+  set<T>(documentRef: firestore.DocumentReference<T>, data: T): WriteBatch;
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T | Partial<T>,
+    options?: firestore.SetOptions
+  ): WriteBatch;
   /**
    * Write to the document referred to by the provided
-   * [DocumentReference]{@link DocumentReference}.
-   * If the document does not exist yet, it will be created. If you pass
-   * [SetOptions]{@link SetOptions}., the provided data can be merged
-   * into the existing document.
+   * [DocumentReference]{@link DocumentReference}. If the document does not
+   * exist yet, it will be created. If you pass [SetOptions]{@link SetOptions},
+   * the provided data can be merged into the existing document.
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
-   * @param {T} data The object to serialize as the document.
+   * @param {T|Partial<T>} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
@@ -312,15 +307,23 @@ export class WriteBatch {
    * });
    */
   set<T>(
-    documentRef: DocumentReference<T>,
-    data: T,
-    options?: SetOptions
+    documentRef: firestore.DocumentReference<T>,
+    data: T | Partial<T>,
+    options?: firestore.SetOptions
   ): WriteBatch {
     validateSetOptions('options', options, {optional: true});
     const mergeLeaves = options && options.merge === true;
     const mergePaths = options && options.mergeFields;
-    validateDocumentReference('documentRef', documentRef);
-    let firestoreData = documentRef._converter.toFirestore(data);
+    const ref = validateDocumentReference('documentRef', documentRef);
+    let firestoreData: firestore.DocumentData;
+    if (mergeLeaves || mergePaths) {
+      // Cast to any in order to satisfy the union type constraint on
+      // toFirestore().
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      firestoreData = (ref._converter as any).toFirestore(data, options);
+    } else {
+      firestoreData = ref._converter.toFirestore(data as T);
+    }
     validateDocumentData(
       'data',
       firestoreData,
@@ -340,7 +343,7 @@ export class WriteBatch {
     const transform = DocumentTransform.fromObject(documentRef, firestoreData);
     transform.validate();
 
-    const op = () => {
+    const op: PendingWriteOp = () => {
       const document = DocumentSnapshot.fromObject(documentRef, firestoreData);
 
       if (mergePaths) {
@@ -349,18 +352,14 @@ export class WriteBatch {
         documentMask = DocumentMask.fromObject(firestoreData);
       }
 
-      const write = document.toProto();
+      const write = document.toWriteProto();
       if (!transform.isEmpty) {
         write.updateTransforms = transform.toProto(this._serializer);
       }
-
       if (mergePaths || mergeLeaves) {
         write.updateMask = documentMask!.toProto();
       }
-
-      return {
-        write,
-      };
+      return write;
     };
 
     this._ops.push(op);
@@ -404,13 +403,17 @@ export class WriteBatch {
    *   console.log('Successfully executed batch.');
    * });
    */
-  update<T = DocumentData>(
-    documentRef: DocumentReference<T>,
-    dataOrField: UpdateData | string | FieldPath,
+  update<T = firestore.DocumentData>(
+    documentRef: firestore.DocumentReference<T>,
+    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
-      {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
+      | {lastUpdateTime?: firestore.Timestamp}
+      | unknown
+      | string
+      | firestore.FieldPath
     >
   ): WriteBatch {
+    // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('WriteBatch.update', arguments, 2);
     validateDocumentReference('documentRef', documentRef);
 
@@ -428,27 +431,31 @@ export class WriteBatch {
       typeof dataOrField === 'string' || dataOrField instanceof FieldPath;
 
     if (usesVarargs) {
+      const argumentOffset = 1; // Respect 'documentRef' in the error message
+      const fieldOrValues = [dataOrField, ...preconditionOrValues];
       try {
-        for (let i = 1; i < arguments.length; i += 2) {
-          if (i === arguments.length - 1) {
-            validateUpdatePrecondition(i, arguments[i]);
-            precondition = new Precondition(arguments[i]);
+        for (let i = 0; i < fieldOrValues.length; i += 2) {
+          if (i === fieldOrValues.length - 1) {
+            const maybePrecondition = fieldOrValues[i];
+            validateUpdatePrecondition(i + argumentOffset, maybePrecondition);
+            precondition = new Precondition(maybePrecondition);
           } else {
-            validateFieldPath(i, arguments[i]);
+            const maybeFieldPath = fieldOrValues[i];
+            validateFieldPath(i + argumentOffset, maybeFieldPath);
             // Unlike the `validateMinNumberOfArguments` invocation above, this
             // validation can be triggered both from `WriteBatch.update()` and
             // `DocumentReference.update()`. Hence, we don't use the fully
             // qualified API name in the error message.
-            validateMinNumberOfArguments('update', arguments, i + 1);
+            validateMinNumberOfArguments('update', fieldOrValues, i + 1);
 
-            const fieldPath = FieldPath.fromArgument(arguments[i]);
+            const fieldPath = FieldPath.fromArgument(maybeFieldPath);
             validateFieldValue(
-              i,
-              arguments[i + 1],
+              i + argumentOffset,
+              fieldOrValues[i + 1],
               this._allowUndefined,
               fieldPath
             );
-            updateMap.set(fieldPath, arguments[i + 1]);
+            updateMap.set(fieldPath, fieldOrValues[i + 1]);
           }
         }
       } catch (err) {
@@ -460,9 +467,10 @@ export class WriteBatch {
     } else {
       try {
         validateUpdateMap('dataOrField', dataOrField, this._allowUndefined);
+        // eslint-disable-next-line prefer-rest-params
         validateMaxNumberOfArguments('update', arguments, 3);
 
-        const data = dataOrField as UpdateData;
+        const data = dataOrField as firestore.UpdateData;
         Object.keys(data).forEach(key => {
           validateFieldPath(key, key);
           updateMap.set(FieldPath.fromArgument(key), data[key]);
@@ -499,17 +507,15 @@ export class WriteBatch {
 
     const documentMask = DocumentMask.fromUpdateMap(updateMap);
 
-    const op = () => {
+    const op: PendingWriteOp = () => {
       const document = DocumentSnapshot.fromUpdateMap(documentRef, updateMap);
-      const write = document.toProto();
-      write!.updateMask = documentMask.toProto();
+      const write = document.toWriteProto();
+      write.updateMask = documentMask.toProto();
       if (!transform.isEmpty) {
-        write!.updateTransforms = transform.toProto(this._serializer);
+        write.updateTransforms = transform.toProto(this._serializer);
       }
-      return {
-        write,
-        precondition: precondition.toProto(),
-      };
+      write.currentDocument = precondition.toProto();
+      return write;
     };
 
     this._ops.push(op);
@@ -538,7 +544,7 @@ export class WriteBatch {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    return this.commit_().catch(err => {
+    return this._commit().catch(err => {
       throw wrapError(err, stack);
     });
   }
@@ -558,15 +564,10 @@ export class WriteBatch {
     await this._firestore.initializeIfNeeded(tag);
 
     const database = this._firestore.formattedName;
-    const request: api.IBatchWriteRequest = {database, writes: []};
-    const writes = this._ops.map(op => op());
-
-    for (const req of writes) {
-      if (req.precondition) {
-        req.write!.currentDocument = req.precondition;
-      }
-      request.writes!.push(req.write);
-    }
+    const request: api.IBatchWriteRequest = {
+      database,
+      writes: this._ops.map(op => op()),
+    };
 
     const retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
 
@@ -579,10 +580,16 @@ export class WriteBatch {
       const status = response.status[i];
       const error = new GoogleError(status.message || undefined);
       error.code = status.code as Status;
-      return new BatchWriteResult(
-        result.updateTime ? Timestamp.fromProto(result.updateTime) : null,
-        error
-      );
+
+      // Since delete operations currently do not have write times, use a
+      // sentinel Timestamp value.
+      // TODO(b/158502664): Use actual delete timestamp.
+      const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
+      const updateTime =
+        error.code === Status.OK
+          ? Timestamp.fromProto(result.updateTime || DELETE_TIMESTAMP_SENTINEL)
+          : null;
+      return new BatchWriteResult(updateTime, error);
     });
   }
 
@@ -596,7 +603,7 @@ export class WriteBatch {
    * this request.
    * @returns  A Promise that resolves when this batch completes.
    */
-  async commit_(commitOptions?: {
+  async _commit(commitOptions?: {
     transactionId?: Uint8Array;
     requestTag?: string;
   }): Promise<WriteResult[]> {
@@ -607,32 +614,14 @@ export class WriteBatch {
     await this._firestore.initializeIfNeeded(tag);
 
     const database = this._firestore.formattedName;
-
-    // On GCF, we periodically force transactional commits to allow for
-    // request retries in case GCF closes our backend connection.
     const explicitTransaction = commitOptions && commitOptions.transactionId;
-    if (!explicitTransaction && this._shouldCreateTransaction()) {
-      logger('WriteBatch.commit', tag, 'Using transaction for commit');
-      return this._firestore
-        .request<api.IBeginTransactionRequest, api.IBeginTransactionResponse>(
-          'beginTransaction',
-          {database},
-          tag
-        )
-        .then(resp => {
-          return this.commit_({transactionId: resp.transaction!});
-        });
-    }
 
-    const request: api.ICommitRequest = {database, writes: []};
-    const writes = this._ops.map(op => op());
-
-    for (const req of writes) {
-      if (req.precondition) {
-        req.write!.currentDocument = req.precondition;
-      }
-
-      request.writes!.push(req.write);
+    const request: api.ICommitRequest = {
+      database,
+      writes: this._ops.map(op => op()),
+    };
+    if (commitOptions?.transactionId) {
+      request.transaction = commitOptions.transactionId;
     }
 
     logger(
@@ -666,30 +655,10 @@ export class WriteBatch {
   }
 
   /**
-   * Determines whether we should issue a transactional commit. On GCF, this
-   * happens after two minutes of idleness.
-   *
-   * @private
-   * @returns Whether to use a transaction.
-   */
-  private _shouldCreateTransaction(): boolean {
-    if (!this._firestore._preferTransactions) {
-      return false;
-    }
-
-    if (this._firestore._lastSuccessfulRequest) {
-      const now = new Date().getTime();
-      return now - this._firestore._lastSuccessfulRequest > GCF_IDLE_TIMEOUT_MS;
-    }
-
-    return true;
-  }
-
-  /**
    * Resets the WriteBatch and dequeues all pending operations.
    * @private
    */
-  _reset() {
+  _reset(): void {
     this._ops.splice(0);
     this._committed = false;
   }
@@ -772,7 +741,7 @@ function validateUpdatePrecondition(
   arg: string | number,
   value: unknown,
   options?: RequiredArgumentOptions
-): void {
+): asserts value is {lastUpdateTime?: Timestamp} {
   if (!validateOptional(value, options)) {
     validatePrecondition(arg, value, /* allowExists= */ false);
   }

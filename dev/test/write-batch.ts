@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {DocumentData} from '@google-cloud/firestore';
+
+import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 
 import {Status} from 'google-gax';
@@ -22,6 +25,7 @@ import {
   Timestamp,
   WriteBatch,
   WriteResult,
+  QueryDocumentSnapshot,
 } from '../src';
 import {BatchWriteResult} from '../src/write-batch';
 import {
@@ -30,6 +34,7 @@ import {
   InvalidApiUsage,
   response,
   verifyInstance,
+  Post,
 } from './util/helpers';
 
 const REQUEST_TIME = 'REQUEST_TIME';
@@ -74,6 +79,24 @@ describe('set() method', () => {
     const nullObject = Object.create(null);
     nullObject.bar = 'ack';
     writeBatch.set(firestore.doc('sub/doc'), nullObject);
+  });
+
+  it('requires the correct converter for Partial usage', async () => {
+    const converter = {
+      toFirestore(post: Post): DocumentData {
+        return {title: post.title, author: post.author};
+      },
+      fromFirestore(snapshot: QueryDocumentSnapshot): Post {
+        const data = snapshot.data();
+        return new Post(data.title, data.author);
+      },
+    };
+    const ref = firestore.doc('sub/doc').withConverter(converter);
+    expect(() =>
+      writeBatch.set(ref, {title: 'foo'} as Partial<Post>, {merge: true})
+    ).to.throw(
+      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "author").'
+    );
   });
 });
 
@@ -379,7 +402,7 @@ describe('batch support', () => {
 
   it('can return same write result', () => {
     const overrides: ApiOverride = {
-      commit: request => {
+      commit: () => {
         return response({
           commitTime: {
             nanos: 0,
@@ -410,59 +433,6 @@ describe('batch support', () => {
       return batch.commit().then(results => {
         expect(results[0].isEqual(results[1])).to.be.true;
       });
-    });
-  });
-
-  it('uses transactions on GCF', () => {
-    // We use this environment variable during initialization to detect whether
-    // we are running on GCF.
-    process.env.FUNCTION_TRIGGER_TYPE = 'http-trigger';
-
-    let beginCalled = 0;
-    let commitCalled = 0;
-
-    const overrides: ApiOverride = {
-      beginTransaction: () => {
-        ++beginCalled;
-        return response({transaction: Buffer.from('foo')});
-      },
-      commit: () => {
-        ++commitCalled;
-        return response({
-          commitTime: {
-            nanos: 0,
-            seconds: 0,
-          },
-        });
-      },
-    };
-
-    return createInstance(overrides).then(firestore => {
-      firestore['_preferTransactions'] = true;
-      firestore['_lastSuccessfulRequest'] = 0;
-
-      return firestore
-        .batch()
-        .commit()
-        .then(() => {
-          // The first commit always uses a transcation.
-          expect(beginCalled).to.equal(1);
-          expect(commitCalled).to.equal(1);
-          return firestore.batch().commit();
-        })
-        .then(() => {
-          // The following commits don't use transactions if they happen
-          // within two minutes.
-          expect(beginCalled).to.equal(1);
-          expect(commitCalled).to.equal(2);
-          firestore['_lastSuccessfulRequest'] = 1337;
-          return firestore.batch().commit();
-        })
-        .then(() => {
-          expect(beginCalled).to.equal(2);
-          expect(commitCalled).to.equal(3);
-          delete process.env.FUNCTION_TRIGGER_TYPE;
-        });
     });
   });
 });

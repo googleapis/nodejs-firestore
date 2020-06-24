@@ -14,29 +14,35 @@
 
 'use strict';
 
-const { execSync } = require('child_process');
-const { assert } = require('chai');
-const { describe, it } = require('mocha');
-const exec = (cmd) => execSync(cmd, { encoding: 'utf8' });
-const { Firestore, FieldPath } = require('@google-cloud/firestore');
+const {execSync} = require('child_process');
+const {assert} = require('chai');
+const {after, before, describe, it} = require('mocha');
+const exec = cmd => execSync(cmd, {encoding: 'utf8'});
+const {Firestore, FieldPath} = require('@google-cloud/firestore');
 
 describe('limit to last query', () => {
-    const firestore = new Firestore();
-    const cities = ['San Francisco', 'Los Angeles', 'Tokyo', 'Beijing'];
+  const firestore = new Firestore();
+  const cities = ['San Francisco', 'Los Angeles', 'Tokyo', 'Beijing'];
 
-    before(async () => {
-        await Promise.all(cities.map(city => firestore.doc(`cities/${city}`).set({ name: city })));
-    });
+  before(async () => {
+    await Promise.all(
+      cities.map(city => firestore.doc(`cities/${city}`).set({name: city}))
+    );
+  });
 
-    after(async () => {
-        const cityCollectionRef = firestore.collection('cities');
-        const cityDocs = (await cityCollectionRef.select(FieldPath.documentId()).get()).docs;
-        await Promise.all(cityDocs.map(doc => cityCollectionRef.doc(doc.id).delete()));
-    });
+  after(async () => {
+    const cityCollectionRef = firestore.collection('cities');
+    const cityDocs = (
+      await cityCollectionRef.select(FieldPath.documentId()).get()
+    ).docs;
+    await Promise.all(
+      cityDocs.map(doc => cityCollectionRef.doc(doc.id).delete())
+    );
+  });
 
-    it('should run limitToLast query', () => {
-        const output = exec('node limit-to-last-query.js');
-        assert.include(output, 'San Francisco');
-        assert.include(output, 'Tokyo');
-    });
+  it('should run limitToLast query', () => {
+    const output = exec('node limit-to-last-query.js');
+    assert.include(output, 'San Francisco');
+    assert.include(output, 'Tokyo');
+  });
 });

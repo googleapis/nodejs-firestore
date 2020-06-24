@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {google} from '../protos/firestore_v1_proto_api';
 import {validateInteger} from './validate';
 
@@ -55,7 +57,7 @@ const MAX_SECONDS = 253402300799;
  *
  * @see https://github.com/google/protobuf/blob/master/src/google/protobuf/timestamp.proto
  */
-export class Timestamp {
+export class Timestamp implements firestore.Timestamp {
   private readonly _seconds: number;
   private readonly _nanoseconds: number;
 
@@ -69,7 +71,7 @@ export class Timestamp {
    *
    * @return {Timestamp} A new `Timestamp` representing the current date.
    */
-  static now() {
+  static now(): Timestamp {
     return Timestamp.fromMillis(Date.now());
   }
 
@@ -86,7 +88,7 @@ export class Timestamp {
    * @return {Timestamp} A new `Timestamp` representing the same point in time
    * as the given date.
    */
-  static fromDate(date: Date) {
+  static fromDate(date: Date): Timestamp {
     return Timestamp.fromMillis(date.getTime());
   }
 
@@ -103,7 +105,7 @@ export class Timestamp {
    * @return {Timestamp}  A new `Timestamp` representing the same point in time
    * as the given number of milliseconds.
    */
-  static fromMillis(milliseconds: number) {
+  static fromMillis(milliseconds: number): Timestamp {
     const seconds = Math.floor(milliseconds / 1000);
     const nanos = (milliseconds - seconds * 1000) * MS_TO_NANOS;
     return new Timestamp(seconds, nanos);
@@ -115,11 +117,8 @@ export class Timestamp {
    * @private
    * @param {Object} timestamp The `Timestamp` Protobuf object.
    */
-  static fromProto(timestamp: google.protobuf.ITimestamp) {
-    return new Timestamp(
-      Number(timestamp.seconds || 0),
-      Number(timestamp.nanos || 0)
-    );
+  static fromProto(timestamp: google.protobuf.ITimestamp): Timestamp {
+    return new Timestamp(Number(timestamp.seconds || 0), timestamp.nanos || 0);
   }
 
   /**
@@ -165,7 +164,7 @@ export class Timestamp {
    *
    * @type {number}
    */
-  get seconds() {
+  get seconds(): number {
     return this._seconds;
   }
 
@@ -182,7 +181,7 @@ export class Timestamp {
    *
    * @type {number}
    */
-  get nanoseconds() {
+  get nanoseconds(): number {
     return this._nanoseconds;
   }
 
@@ -200,7 +199,7 @@ export class Timestamp {
    * @return {Date} JavaScript `Date` object representing the same point in time
    * as this `Timestamp`, with millisecond precision.
    */
-  toDate() {
+  toDate(): Date {
     return new Date(
       this._seconds * 1000 + Math.round(this._nanoseconds / MS_TO_NANOS)
     );
@@ -222,7 +221,7 @@ export class Timestamp {
    * represented as the number of milliseconds since Unix epoch
    * 1970-01-01T00:00:00Z.
    */
-  toMillis() {
+  toMillis(): number {
     return this._seconds * 1000 + Math.floor(this._nanoseconds / MS_TO_NANOS);
   }
 
@@ -241,7 +240,7 @@ export class Timestamp {
    * @param {any} other The `Timestamp` to compare against.
    * @return {boolean} 'true' if this `Timestamp` is equal to the provided one.
    */
-  isEqual(other: Timestamp): boolean {
+  isEqual(other: firestore.Timestamp): boolean {
     return (
       this === other ||
       (other instanceof Timestamp &&

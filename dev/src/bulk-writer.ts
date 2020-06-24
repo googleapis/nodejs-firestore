@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as firestore from '@google-cloud/firestore';
+
 import * as assert from 'assert';
 
 import {FieldPath, Firestore} from '.';
@@ -20,7 +22,6 @@ import {delayExecution} from './backoff';
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {Precondition, SetOptions, UpdateData} from './types';
 import {Deferred, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 
@@ -86,6 +87,7 @@ class BulkCommitBatch {
   private resultsMap = new Map<number, Deferred<BatchWriteResult>>();
 
   constructor(
+    private readonly firestore: Firestore,
     private readonly writeBatch: WriteBatch,
     private readonly maxBatchSize: number
   ) {}
@@ -101,31 +103,48 @@ class BulkCommitBatch {
    * Adds a `create` operation to the WriteBatch. Returns a promise that
    * resolves with the result of the write.
    */
-  create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult> {
+  create<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T
+  ): Promise<WriteResult> {
     this.writeBatch.create(documentRef, data);
     return this.processOperation(documentRef);
   }
 
   /**
    * Adds a `delete` operation to the WriteBatch. Returns a promise that
-   * resolves with the result of the delete.
+   * resolves with the sentinel value (Timestamp(0)) for the delete operation.
    */
   delete<T>(
-    documentRef: DocumentReference<T>,
-    precondition?: Precondition
+    documentRef: firestore.DocumentReference<T>,
+    precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.writeBatch.delete(documentRef, precondition);
     return this.processOperation(documentRef);
   }
 
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: Partial<T>,
+    options: firestore.SetOptions
+  ): Promise<WriteResult>;
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T
+  ): Promise<WriteResult>;
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T | Partial<T>,
+    options?: firestore.SetOptions
+  ): Promise<WriteResult>;
   /**
    * Adds a `set` operation to the WriteBatch. Returns a promise that
    * resolves with the result of the write.
    */
   set<T>(
-    documentRef: DocumentReference<T>,
-    data: T,
-    options?: SetOptions
+    documentRef: firestore.DocumentReference<T>,
+    data: T | Partial<T>,
+    options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this.writeBatch.set(documentRef, data, options);
     return this.processOperation(documentRef);
@@ -136,8 +155,8 @@ class BulkCommitBatch {
    * resolves with the result of the write.
    */
   update<T>(
-    documentRef: DocumentReference<T>,
-    dataOrField: UpdateData | string | FieldPath,
+    documentRef: firestore.DocumentReference<T>,
+    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
@@ -151,7 +170,7 @@ class BulkCommitBatch {
    * return the result.
    */
   private processOperation<T>(
-    documentRef: DocumentReference<T>
+    documentRef: firestore.DocumentReference<T>
   ): Promise<WriteResult> {
     assert(
       !this.docPaths.has(documentRef.path),
@@ -262,6 +281,8 @@ export class BulkWriter {
     private readonly firestore: Firestore,
     enableThrottling: boolean
   ) {
+    this.firestore._incrementBulkWritersCount();
+
     if (enableThrottling) {
       this.rateLimiter = new RateLimiter(
         STARTING_MAXIMUM_OPS_PER_SECOND,
@@ -301,7 +322,10 @@ export class BulkWriter {
    *  });
    * });
    */
-  create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult> {
+  create<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T
+  ): Promise<WriteResult> {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     const resultPromise = bulkCommitBatch.create(documentRef, data);
@@ -319,8 +343,9 @@ export class BulkWriter {
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the batch if the
    * document doesn't exist or was last updated at a different time.
-   * @returns {Promise<WriteResult>} A promise that resolves with the result of
-   * the write. Throws an error if the write fails.
+   * @returns {Promise<WriteResult>} A promise that resolves with a sentinel
+   * Timestamp indicating that the delete was successful. Throws an error if
+   * the write fails.
    *
    * @example
    * let bulkWriter = firestore.bulkWriter();
@@ -329,7 +354,7 @@ export class BulkWriter {
    * bulkWriter
    *  .delete(documentRef)
    *  .then(result => {
-   *    console.log('Successfully deleted document at: ', result);
+   *    console.log('Successfully deleted document');
    *  })
    *  .catch(err => {
    *    console.log('Delete failed with: ', err);
@@ -337,8 +362,8 @@ export class BulkWriter {
    * });
    */
   delete<T>(
-    documentRef: DocumentReference<T>,
-    precondition?: Precondition
+    documentRef: firestore.DocumentReference<T>,
+    precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
@@ -347,6 +372,15 @@ export class BulkWriter {
     return resultPromise;
   }
 
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: Partial<T>,
+    options: firestore.SetOptions
+  ): Promise<WriteResult>;
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: T
+  ): Promise<WriteResult>;
   /**
    * Write to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document does not
@@ -382,9 +416,9 @@ export class BulkWriter {
    * });
    */
   set<T>(
-    documentRef: DocumentReference<T>,
-    data: T,
-    options?: SetOptions
+    documentRef: firestore.DocumentReference<T>,
+    data: T | Partial<T>,
+    options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
@@ -435,8 +469,8 @@ export class BulkWriter {
    * });
    */
   update<T>(
-    documentRef: DocumentReference,
-    dataOrField: UpdateData | string | FieldPath,
+    documentRef: firestore.DocumentReference,
+    dataOrField: firestore.UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
@@ -508,6 +542,8 @@ export class BulkWriter {
    * });
    */
   close(): Promise<void> {
+    this.verifyNotClosed();
+    this.firestore._decrementBulkWritersCount();
     const flushPromise = this.flush();
     this.closed = true;
     return flushPromise;
@@ -525,7 +561,9 @@ export class BulkWriter {
    *
    * @private
    */
-  private getEligibleBatch<T>(ref: DocumentReference<T>): BulkCommitBatch {
+  private getEligibleBatch<T>(
+    ref: firestore.DocumentReference<T>
+  ): BulkCommitBatch {
     if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
       if (
@@ -546,6 +584,7 @@ export class BulkWriter {
    */
   private createNewBatch(): BulkCommitBatch {
     const newBatch = new BulkCommitBatch(
+      this.firestore,
       this.firestore.batch(),
       this.maxBatchSize
     );
@@ -638,6 +677,7 @@ export class BulkWriter {
           .filter(batch => batch.state === BatchState.SENT)
           .find(batch => batch.docPaths.has(path)) !== undefined;
       if (isRefInFlight) {
+        // eslint-disable-next-line no-console
         console.warn(
           '[BulkWriter]',
           `Duplicate write to document "${path}" detected.`,

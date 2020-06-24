@@ -285,7 +285,7 @@ export class ExponentialBackoff {
    * @returns {number} The jitter to apply based on the current delay.
    * @private
    */
-  private jitterDelayMs() {
+  private jitterDelayMs(): number {
     return (Math.random() - 0.5) * this.jitterFactor * this.currentBaseMs;
   }
 }

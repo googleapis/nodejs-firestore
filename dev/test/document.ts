@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 import {GoogleError, Status} from 'google-gax';
 import * as through2 from 'through2';
 
 import {
   DocumentReference,
-  DocumentSnapshot,
   FieldPath,
   FieldValue,
   Firestore,
@@ -36,6 +36,7 @@ import {
   missing,
   Post,
   postConverter,
+  postConverterMerge,
   remove,
   requestEquals,
   response,
@@ -279,6 +280,28 @@ describe('serialize document', () => {
     });
   });
 
+  it('supports BigInt', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'bigIntValue', {
+              integerValue: '9007199254740992',
+            }),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore.doc('collectionId/documentId').set({
+        bigIntValue: BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1),
+      });
+    });
+  });
+
   it('serializes unicode keys', () => {
     const overrides: ApiOverride = {
       commit: request => {
@@ -419,7 +442,7 @@ describe('serialize document', () => {
       // instances, even if they have cyclic references (we shouldn't try to
       // validate them beyond the instanceof check).
       const ref = firestore.doc('collectionId/documentId');
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (ref.firestore as any).firestore = firestore;
       return ref.set({ref});
     });
@@ -524,6 +547,30 @@ describe('deserialize document', () => {
           expect(res.get('nanValue')).to.be.NaN;
           expect(res.get('posInfinity')).to.equal(Infinity);
           expect(res.get('negInfinity')).to.equal(-Infinity);
+        });
+    });
+  });
+
+  it('deserializes BigInt', () => {
+    const overrides: ApiOverride = {
+      batchGetDocuments: () => {
+        return stream(
+          found(
+            document('documentId', 'bigIntValue', {
+              integerValue: '9007199254740992',
+            })
+          )
+        );
+      },
+    };
+
+    return createInstance(overrides, {useBigInt: true}).then(firestore => {
+      return firestore
+        .doc('collectionId/documentId')
+        .get()
+        .then(res => {
+          expect(res.get('bigIntValue')).to.be.a('bigint');
+          expect(res.get('bigIntValue')).to.equal(BigInt('9007199254740992'));
         });
     });
   });
@@ -1187,6 +1234,58 @@ describe('set document', () => {
           merge: true,
         }
       );
+    });
+  });
+
+  it('supports partials with merge', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'title', {
+              stringValue: 'story',
+            }),
+            mask: updateMask('title'),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore
+        .doc('collectionId/documentId')
+        .withConverter(postConverterMerge)
+        .set({title: 'story'} as Partial<Post>, {
+          merge: true,
+        });
+    });
+  });
+
+  it('supports partials with mergeFields', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'title', {
+              stringValue: 'story',
+            }),
+            mask: updateMask('title'),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return firestore
+        .doc('collectionId/documentId')
+        .withConverter(postConverterMerge)
+        .set({title: 'story', author: 'writer'} as Partial<Post>, {
+          mergeFields: ['title'],
+        });
     });
   });
 

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {describe, it, beforeEach} from 'mocha';
 import {expect} from 'chai';
 
 import {RateLimiter} from '../src/rate-limiter';
@@ -71,7 +72,7 @@ describe('RateLimiter', () => {
     expect(limiter.getNextRequestDelayMs(500, timestamp)).to.equal(0);
 
     // Should factor in remaining tokens when calculating the time.
-    expect(limiter.tryMakeRequest(250, timestamp));
+    expect(limiter.tryMakeRequest(250, timestamp)).to.be.true;
     expect(limiter.getNextRequestDelayMs(500, timestamp)).to.equal(500);
 
     // Once tokens have been used, should calculate time before next request.

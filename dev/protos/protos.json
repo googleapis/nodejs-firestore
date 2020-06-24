@@ -879,6 +879,16 @@
                         "(google.api.http).additional_bindings.body": "*"
                       }
                     },
+                    "PartitionQuery": {
+                      "requestType": "PartitionQueryRequest",
+                      "responseType": "PartitionQueryResponse",
+                      "options": {
+                        "(google.api.http).post": "/v1/{parent=projects/*/databases/*/documents}:partitionQuery",
+                        "(google.api.http).body": "*",
+                        "(google.api.http).additional_bindings.post": "/v1/{parent=projects/*/databases/*/documents/*/**}:partitionQuery",
+                        "(google.api.http).additional_bindings.body": "*"
+                      }
+                    },
                     "Write": {
                       "requestType": "WriteRequest",
                       "requestStream": true,
@@ -908,6 +918,14 @@
                         "(google.api.http).additional_bindings.post": "/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds",
                         "(google.api.http).additional_bindings.body": "*",
                         "(google.api.method_signature)": "parent"
+                      }
+                    },
+                    "BatchWrite": {
+                      "requestType": "BatchWriteRequest",
+                      "responseType": "BatchWriteResponse",
+                      "options": {
+                        "(google.api.http).post": "/v1/{database=projects/*/databases/*}/documents:batchWrite",
+                        "(google.api.http).body": "*"
                       }
                     },
                     "CreateDocument": {
@@ -1293,6 +1311,53 @@
                     }
                   }
                 },
+                "PartitionQueryRequest": {
+                  "oneofs": {
+                    "queryType": {
+                      "oneof": [
+                        "structuredQuery"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "parent": {
+                      "type": "string",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    },
+                    "structuredQuery": {
+                      "type": "StructuredQuery",
+                      "id": 2
+                    },
+                    "partitionCount": {
+                      "type": "int64",
+                      "id": 3
+                    },
+                    "pageToken": {
+                      "type": "string",
+                      "id": 4
+                    },
+                    "pageSize": {
+                      "type": "int32",
+                      "id": 5
+                    }
+                  }
+                },
+                "PartitionQueryResponse": {
+                  "fields": {
+                    "partitions": {
+                      "rule": "repeated",
+                      "type": "Cursor",
+                      "id": 1
+                    },
+                    "nextPageToken": {
+                      "type": "string",
+                      "id": 2
+                    }
+                  }
+                },
                 "WriteRequest": {
                   "fields": {
                     "database": {
@@ -1550,6 +1615,41 @@
                     }
                   }
                 },
+                "BatchWriteRequest": {
+                  "fields": {
+                    "database": {
+                      "type": "string",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    },
+                    "writes": {
+                      "rule": "repeated",
+                      "type": "Write",
+                      "id": 2
+                    },
+                    "labels": {
+                      "keyType": "string",
+                      "type": "string",
+                      "id": 3
+                    }
+                  }
+                },
+                "BatchWriteResponse": {
+                  "fields": {
+                    "writeResults": {
+                      "rule": "repeated",
+                      "type": "WriteResult",
+                      "id": 1
+                    },
+                    "status": {
+                      "rule": "repeated",
+                      "type": "google.rpc.Status",
+                      "id": 2
+                    }
+                  }
+                },
                 "StructuredQuery": {
                   "fields": {
                     "select": {
@@ -1677,15 +1777,6 @@
                         }
                       }
                     },
-                    "Projection": {
-                      "fields": {
-                        "fields": {
-                          "rule": "repeated",
-                          "type": "FieldReference",
-                          "id": 2
-                        }
-                      }
-                    },
                     "UnaryFilter": {
                       "oneofs": {
                         "operandType": {
@@ -1730,6 +1821,15 @@
                         },
                         "direction": {
                           "type": "Direction",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Projection": {
+                      "fields": {
+                        "fields": {
+                          "rule": "repeated",
+                          "type": "FieldReference",
                           "id": 2
                         }
                       }
@@ -3691,6 +3791,10 @@
                 "options": {
                   "type": "FieldOptions",
                   "id": 8
+                },
+                "proto3Optional": {
+                  "type": "bool",
+                  "id": 17
                 }
               },
               "nested": {
@@ -3926,7 +4030,7 @@
                   "type": "bool",
                   "id": 31,
                   "options": {
-                    "default": false
+                    "default": true
                   }
                 },
                 "objcClassPrefix": {
@@ -4561,26 +4665,32 @@
               "extend": "google.protobuf.MethodOptions"
             },
             "Operations": {
+              "options": {
+                "(google.api.default_host)": "longrunning.googleapis.com"
+              },
               "methods": {
                 "ListOperations": {
                   "requestType": "ListOperationsRequest",
                   "responseType": "ListOperationsResponse",
                   "options": {
-                    "(google.api.http).get": "/v1/{name=operations}"
+                    "(google.api.http).get": "/v1/{name=operations}",
+                    "(google.api.method_signature)": "name,filter"
                   }
                 },
                 "GetOperation": {
                   "requestType": "GetOperationRequest",
                   "responseType": "Operation",
                   "options": {
-                    "(google.api.http).get": "/v1/{name=operations/**}"
+                    "(google.api.http).get": "/v1/{name=operations/**}",
+                    "(google.api.method_signature)": "name"
                   }
                 },
                 "DeleteOperation": {
                   "requestType": "DeleteOperationRequest",
                   "responseType": "google.protobuf.Empty",
                   "options": {
-                    "(google.api.http).delete": "/v1/{name=operations/**}"
+                    "(google.api.http).delete": "/v1/{name=operations/**}",
+                    "(google.api.method_signature)": "name"
                   }
                 },
                 "CancelOperation": {
@@ -4588,7 +4698,8 @@
                   "responseType": "google.protobuf.Empty",
                   "options": {
                     "(google.api.http).post": "/v1/{name=operations/**}:cancel",
-                    "(google.api.http).body": "*"
+                    "(google.api.http).body": "*",
+                    "(google.api.method_signature)": "name"
                   }
                 },
                 "WaitOperation": {
@@ -4714,6 +4825,7 @@
         },
         "rpc": {
           "options": {
+            "cc_enable_arenas": true,
             "go_package": "google.golang.org/genproto/googleapis/rpc/status;status",
             "java_multiple_files": true,
             "java_outer_classname": "StatusProto",

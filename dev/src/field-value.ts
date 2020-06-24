@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const deepEqual = require('deep-equal');
+import * as firestore from '@google-cloud/firestore';
+
+import * as deepEqual from 'fast-deep-equal';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
@@ -34,7 +36,7 @@ import api = proto.google.firestore.v1;
  *
  * @class
  */
-export class FieldValue {
+export class FieldValue implements firestore.FieldValue {
   /**
    * @hideconstructor
    */
@@ -111,6 +113,7 @@ export class FieldValue {
    * });
    */
   static increment(n: number): FieldValue {
+    // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('FieldValue.increment', arguments, 1);
     return new NumericIncrementTransform(n);
   }
@@ -139,7 +142,7 @@ export class FieldValue {
    * });
    */
   static arrayUnion(...elements: unknown[]): FieldValue {
-    validateMinNumberOfArguments('FieldValue.arrayUnion', arguments, 1);
+    validateMinNumberOfArguments('FieldValue.arrayUnion', elements, 1);
     return new ArrayUnionTransform(elements);
   }
 
@@ -166,7 +169,7 @@ export class FieldValue {
    * });
    */
   static arrayRemove(...elements: unknown[]): FieldValue {
-    validateMinNumberOfArguments('FieldValue.arrayRemove', arguments, 1);
+    validateMinNumberOfArguments('FieldValue.arrayRemove', elements, 1);
     return new ArrayRemoveTransform(elements);
   }
 
@@ -198,7 +201,7 @@ export class FieldValue {
    * }
    * console.log(`Found ${equal} equalities.`);
    */
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return this === other;
   }
 }
@@ -284,7 +287,7 @@ export class DeleteTransform extends FieldTransform {
 
   validate(): void {}
 
-  toProto(serializer: Serializer, fieldPath: FieldPath): never {
+  toProto(): never {
     throw new Error(
       'FieldValue.delete() should not be included in a FieldTransform'
     );
@@ -387,7 +390,7 @@ class NumericIncrementTransform extends FieldTransform {
     return {fieldPath: fieldPath.formattedName, increment: encodedOperand};
   }
 
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return (
       this === other ||
       (other instanceof NumericIncrementTransform &&
@@ -443,11 +446,11 @@ class ArrayUnionTransform extends FieldTransform {
     };
   }
 
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return (
       this === other ||
       (other instanceof ArrayUnionTransform &&
-        deepEqual(this.elements, other.elements, {strict: true}))
+        deepEqual(this.elements, other.elements))
     );
   }
 }
@@ -499,11 +502,11 @@ class ArrayRemoveTransform extends FieldTransform {
     };
   }
 
-  isEqual(other: FieldValue): boolean {
+  isEqual(other: firestore.FieldValue): boolean {
     return (
       this === other ||
       (other instanceof ArrayRemoveTransform &&
-        deepEqual(this.elements, other.elements, {strict: true}))
+        deepEqual(this.elements, other.elements))
     );
   }
 }

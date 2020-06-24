@@ -18,18 +18,18 @@
 
 import * as gax from 'google-gax';
 import {
-  APICallback,
   Callback,
   CallOptions,
-  ClientOptions,
   Descriptors,
+  ClientOptions,
   PaginationCallback,
-  PaginationResponse,
+  GaxCall,
 } from 'google-gax';
 import * as path from 'path';
 
 import {Transform} from 'stream';
-import * as protosTypes from '../../protos/firestore_v1_proto_api';
+import {RequestType} from 'google-gax/build/src/apitypes';
+import * as protos from '../../protos/firestore_v1_proto_api';
 import * as gapicConfig from './firestore_client_config.json';
 
 const version = require('../../../package.json').version;
@@ -47,13 +47,6 @@ const version = require('../../../package.json').version;
  * @memberof v1
  */
 export class FirestoreClient {
-  private _descriptors: Descriptors = {
-    page: {},
-    stream: {},
-    longrunning: {},
-    batching: {},
-  };
-  private _innerApiCalls: {[name: string]: Function};
   private _terminated = false;
   private _opts: ClientOptions;
   private _gaxModule: typeof gax | typeof gax.fallback;
@@ -61,6 +54,13 @@ export class FirestoreClient {
   private _protos: {};
   private _defaults: {[method: string]: gax.CallSettings};
   auth: gax.GoogleAuth;
+  descriptors: Descriptors = {
+    page: {},
+    stream: {},
+    longrunning: {},
+    batching: {},
+  };
+  innerApiCalls: {[name: string]: Function};
   firestoreStub?: Promise<{[name: string]: Function}>;
 
   /**
@@ -152,17 +152,25 @@ export class FirestoreClient {
       'protos.json'
     );
     this._protos = this._gaxGrpc.loadProto(
-      opts.fallback ? require('../../protos/protos.json') : nodejsProtoPath
+      opts.fallback
+        ? // eslint-disable-next-line @typescript-eslint/no-var-requires
+          require('../../protos/protos.json')
+        : nodejsProtoPath
     );
 
     // Some of the methods on this service return "paged" results,
     // (e.g. 50 results at a time, with tokens to get subsequent
     // pages). Denote the keys used for pagination and results.
-    this._descriptors.page = {
+    this.descriptors.page = {
       listDocuments: new this._gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
         'documents'
+      ),
+      partitionQuery: new this._gaxModule.PageDescriptor(
+        'pageToken',
+        'nextPageToken',
+        'partitions'
       ),
       listCollectionIds: new this._gaxModule.PageDescriptor(
         'pageToken',
@@ -173,7 +181,7 @@ export class FirestoreClient {
 
     // Some of the methods on this service provide streaming responses.
     // Provide descriptors for these.
-    this._descriptors.stream = {
+    this.descriptors.stream = {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(
         gax.StreamType.SERVER_STREAMING
       ),
@@ -199,7 +207,7 @@ export class FirestoreClient {
     // Set up a dictionary of "inner API calls"; the core implementation
     // of calling the API is handled in `google-gax`, with this code
     // merely providing the destination and request information.
-    this._innerApiCalls = {};
+    this.innerApiCalls = {};
   }
 
   /**
@@ -226,7 +234,7 @@ export class FirestoreClient {
         ? (this._protos as protobuf.Root).lookupService(
             'google.firestore.v1.Firestore'
           )
-        : // tslint:disable-next-line no-any
+        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._protos as any).google.firestore.v1.Firestore,
       this._opts
     ) as Promise<{[method: string]: Function}>;
@@ -243,14 +251,15 @@ export class FirestoreClient {
       'commit',
       'rollback',
       'runQuery',
+      'partitionQuery',
       'write',
       'listen',
       'listCollectionIds',
+      'batchWrite',
       'createDocument',
     ];
-
     for (const methodName of firestoreStubMethods) {
-      const innerCallPromise = this.firestoreStub.then(
+      const callPromise = this.firestoreStub.then(
         stub => (...args: Array<{}>) => {
           if (this._terminated) {
             return Promise.reject(
@@ -266,20 +275,14 @@ export class FirestoreClient {
       );
 
       const apiCall = this._gaxModule.createApiCall(
-        innerCallPromise,
+        callPromise,
         this._defaults[methodName],
-        this._descriptors.page[methodName] ||
-          this._descriptors.stream[methodName] ||
-          this._descriptors.longrunning[methodName]
+        this.descriptors.page[methodName] ||
+          this.descriptors.stream[methodName] ||
+          this.descriptors.longrunning[methodName]
       );
 
-      this._innerApiCalls[methodName] = (
-        argument: {},
-        callOptions?: CallOptions,
-        callback?: APICallback
-      ) => {
-        return apiCall(argument, callOptions, callback);
-      };
+      this.innerApiCalls[methodName] = apiCall;
     }
 
     return this.firestoreStub;
@@ -339,22 +342,30 @@ export class FirestoreClient {
   // -- Service calls --
   // -------------------
   getDocument(
-    request: protosTypes.google.firestore.v1.IGetDocumentRequest,
+    request: protos.google.firestore.v1.IGetDocumentRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.IGetDocumentRequest | undefined,
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IGetDocumentRequest | undefined,
       {} | undefined
     ]
   >;
   getDocument(
-    request: protosTypes.google.firestore.v1.IGetDocumentRequest,
+    request: protos.google.firestore.v1.IGetDocumentRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.IGetDocumentRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IGetDocumentRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  getDocument(
+    request: protos.google.firestore.v1.IGetDocumentRequest,
+    callback: Callback<
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IGetDocumentRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -374,7 +385,7 @@ export class FirestoreClient {
    *   Reads the document in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads the version of the document at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -382,23 +393,23 @@ export class FirestoreClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   getDocument(
-    request: protosTypes.google.firestore.v1.IGetDocumentRequest,
+    request: protos.google.firestore.v1.IGetDocumentRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.firestore.v1.IDocument,
-          protosTypes.google.firestore.v1.IGetDocumentRequest | undefined,
-          {} | undefined
+          protos.google.firestore.v1.IDocument,
+          protos.google.firestore.v1.IGetDocumentRequest | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.IGetDocumentRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IGetDocumentRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.IGetDocumentRequest | undefined,
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IGetDocumentRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -419,25 +430,33 @@ export class FirestoreClient {
       name: request.name || '',
     });
     this.initialize();
-    return this._innerApiCalls.getDocument(request, options, callback);
+    return this.innerApiCalls.getDocument(request, options, callback);
   }
   updateDocument(
-    request: protosTypes.google.firestore.v1.IUpdateDocumentRequest,
+    request: protos.google.firestore.v1.IUpdateDocumentRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.IUpdateDocumentRequest | undefined,
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IUpdateDocumentRequest | undefined,
       {} | undefined
     ]
   >;
   updateDocument(
-    request: protosTypes.google.firestore.v1.IUpdateDocumentRequest,
+    request: protos.google.firestore.v1.IUpdateDocumentRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.IUpdateDocumentRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IUpdateDocumentRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  updateDocument(
+    request: protos.google.firestore.v1.IUpdateDocumentRequest,
+    callback: Callback<
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IUpdateDocumentRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -471,23 +490,23 @@ export class FirestoreClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   updateDocument(
-    request: protosTypes.google.firestore.v1.IUpdateDocumentRequest,
+    request: protos.google.firestore.v1.IUpdateDocumentRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.firestore.v1.IDocument,
-          protosTypes.google.firestore.v1.IUpdateDocumentRequest | undefined,
-          {} | undefined
+          protos.google.firestore.v1.IDocument,
+          protos.google.firestore.v1.IUpdateDocumentRequest | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.IUpdateDocumentRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IUpdateDocumentRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.IUpdateDocumentRequest | undefined,
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.IUpdateDocumentRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -508,25 +527,33 @@ export class FirestoreClient {
       'document.name': request.document!.name || '',
     });
     this.initialize();
-    return this._innerApiCalls.updateDocument(request, options, callback);
+    return this.innerApiCalls.updateDocument(request, options, callback);
   }
   deleteDocument(
-    request: protosTypes.google.firestore.v1.IDeleteDocumentRequest,
+    request: protos.google.firestore.v1.IDeleteDocumentRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.v1.IDeleteDocumentRequest | undefined,
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IDeleteDocumentRequest | undefined,
       {} | undefined
     ]
   >;
   deleteDocument(
-    request: protosTypes.google.firestore.v1.IDeleteDocumentRequest,
+    request: protos.google.firestore.v1.IDeleteDocumentRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.v1.IDeleteDocumentRequest | undefined,
-      {} | undefined
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IDeleteDocumentRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  deleteDocument(
+    request: protos.google.firestore.v1.IDeleteDocumentRequest,
+    callback: Callback<
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IDeleteDocumentRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -547,23 +574,23 @@ export class FirestoreClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   deleteDocument(
-    request: protosTypes.google.firestore.v1.IDeleteDocumentRequest,
+    request: protos.google.firestore.v1.IDeleteDocumentRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.protobuf.IEmpty,
-          protosTypes.google.firestore.v1.IDeleteDocumentRequest | undefined,
-          {} | undefined
+          protos.google.protobuf.IEmpty,
+          protos.google.firestore.v1.IDeleteDocumentRequest | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.v1.IDeleteDocumentRequest | undefined,
-      {} | undefined
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IDeleteDocumentRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.v1.IDeleteDocumentRequest | undefined,
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IDeleteDocumentRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -584,25 +611,33 @@ export class FirestoreClient {
       name: request.name || '',
     });
     this.initialize();
-    return this._innerApiCalls.deleteDocument(request, options, callback);
+    return this.innerApiCalls.deleteDocument(request, options, callback);
   }
   beginTransaction(
-    request: protosTypes.google.firestore.v1.IBeginTransactionRequest,
+    request: protos.google.firestore.v1.IBeginTransactionRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IBeginTransactionResponse,
-      protosTypes.google.firestore.v1.IBeginTransactionRequest | undefined,
+      protos.google.firestore.v1.IBeginTransactionResponse,
+      protos.google.firestore.v1.IBeginTransactionRequest | undefined,
       {} | undefined
     ]
   >;
   beginTransaction(
-    request: protosTypes.google.firestore.v1.IBeginTransactionRequest,
+    request: protos.google.firestore.v1.IBeginTransactionRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.firestore.v1.IBeginTransactionResponse,
-      protosTypes.google.firestore.v1.IBeginTransactionRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.IBeginTransactionResponse,
+      protos.google.firestore.v1.IBeginTransactionRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  beginTransaction(
+    request: protos.google.firestore.v1.IBeginTransactionRequest,
+    callback: Callback<
+      protos.google.firestore.v1.IBeginTransactionResponse,
+      protos.google.firestore.v1.IBeginTransactionRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -623,23 +658,25 @@ export class FirestoreClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   beginTransaction(
-    request: protosTypes.google.firestore.v1.IBeginTransactionRequest,
+    request: protos.google.firestore.v1.IBeginTransactionRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.firestore.v1.IBeginTransactionResponse,
-          protosTypes.google.firestore.v1.IBeginTransactionRequest | undefined,
-          {} | undefined
+          protos.google.firestore.v1.IBeginTransactionResponse,
+          | protos.google.firestore.v1.IBeginTransactionRequest
+          | null
+          | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.firestore.v1.IBeginTransactionResponse,
-      protosTypes.google.firestore.v1.IBeginTransactionRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.IBeginTransactionResponse,
+      protos.google.firestore.v1.IBeginTransactionRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IBeginTransactionResponse,
-      protosTypes.google.firestore.v1.IBeginTransactionRequest | undefined,
+      protos.google.firestore.v1.IBeginTransactionResponse,
+      protos.google.firestore.v1.IBeginTransactionRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -660,25 +697,33 @@ export class FirestoreClient {
       database: request.database || '',
     });
     this.initialize();
-    return this._innerApiCalls.beginTransaction(request, options, callback);
+    return this.innerApiCalls.beginTransaction(request, options, callback);
   }
   commit(
-    request: protosTypes.google.firestore.v1.ICommitRequest,
+    request: protos.google.firestore.v1.ICommitRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.v1.ICommitResponse,
-      protosTypes.google.firestore.v1.ICommitRequest | undefined,
+      protos.google.firestore.v1.ICommitResponse,
+      protos.google.firestore.v1.ICommitRequest | undefined,
       {} | undefined
     ]
   >;
   commit(
-    request: protosTypes.google.firestore.v1.ICommitRequest,
+    request: protos.google.firestore.v1.ICommitRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.firestore.v1.ICommitResponse,
-      protosTypes.google.firestore.v1.ICommitRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.ICommitResponse,
+      protos.google.firestore.v1.ICommitRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  commit(
+    request: protos.google.firestore.v1.ICommitRequest,
+    callback: Callback<
+      protos.google.firestore.v1.ICommitResponse,
+      protos.google.firestore.v1.ICommitRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -702,23 +747,23 @@ export class FirestoreClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   commit(
-    request: protosTypes.google.firestore.v1.ICommitRequest,
+    request: protos.google.firestore.v1.ICommitRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.firestore.v1.ICommitResponse,
-          protosTypes.google.firestore.v1.ICommitRequest | undefined,
-          {} | undefined
+          protos.google.firestore.v1.ICommitResponse,
+          protos.google.firestore.v1.ICommitRequest | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.firestore.v1.ICommitResponse,
-      protosTypes.google.firestore.v1.ICommitRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.ICommitResponse,
+      protos.google.firestore.v1.ICommitRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.firestore.v1.ICommitResponse,
-      protosTypes.google.firestore.v1.ICommitRequest | undefined,
+      protos.google.firestore.v1.ICommitResponse,
+      protos.google.firestore.v1.ICommitRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -739,25 +784,33 @@ export class FirestoreClient {
       database: request.database || '',
     });
     this.initialize();
-    return this._innerApiCalls.commit(request, options, callback);
+    return this.innerApiCalls.commit(request, options, callback);
   }
   rollback(
-    request: protosTypes.google.firestore.v1.IRollbackRequest,
+    request: protos.google.firestore.v1.IRollbackRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.v1.IRollbackRequest | undefined,
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IRollbackRequest | undefined,
       {} | undefined
     ]
   >;
   rollback(
-    request: protosTypes.google.firestore.v1.IRollbackRequest,
+    request: protos.google.firestore.v1.IRollbackRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.v1.IRollbackRequest | undefined,
-      {} | undefined
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IRollbackRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  rollback(
+    request: protos.google.firestore.v1.IRollbackRequest,
+    callback: Callback<
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IRollbackRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -777,23 +830,23 @@ export class FirestoreClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   rollback(
-    request: protosTypes.google.firestore.v1.IRollbackRequest,
+    request: protos.google.firestore.v1.IRollbackRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.protobuf.IEmpty,
-          protosTypes.google.firestore.v1.IRollbackRequest | undefined,
-          {} | undefined
+          protos.google.protobuf.IEmpty,
+          protos.google.firestore.v1.IRollbackRequest | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.v1.IRollbackRequest | undefined,
-      {} | undefined
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IRollbackRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.protobuf.IEmpty,
-      protosTypes.google.firestore.v1.IRollbackRequest | undefined,
+      protos.google.protobuf.IEmpty,
+      protos.google.firestore.v1.IRollbackRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -814,25 +867,130 @@ export class FirestoreClient {
       database: request.database || '',
     });
     this.initialize();
-    return this._innerApiCalls.rollback(request, options, callback);
+    return this.innerApiCalls.rollback(request, options, callback);
   }
-  createDocument(
-    request: protosTypes.google.firestore.v1.ICreateDocumentRequest,
+  batchWrite(
+    request: protos.google.firestore.v1.IBatchWriteRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | undefined,
+      {} | undefined
+    ]
+  >;
+  batchWrite(
+    request: protos.google.firestore.v1.IBatchWriteRequest,
+    options: gax.CallOptions,
+    callback: Callback<
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  batchWrite(
+    request: protos.google.firestore.v1.IBatchWriteRequest,
+    callback: Callback<
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  /**
+   * Applies a batch of write operations.
+   *
+   * The BatchWrite method does not apply the write operations atomically
+   * and can apply them out of order. Method does not allow more than one write
+   * per document. Each write succeeds or fails independently. See the
+   * {@link google.firestore.v1.BatchWriteResponse|BatchWriteResponse} for the success status of each write.
+   *
+   * If you require an atomically applied set of writes, use
+   * {@link google.firestore.v1.Firestore.Commit|Commit} instead.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.database
+   *   Required. The database name. In the format:
+   *   `projects/{project_id}/databases/{database_id}`.
+   * @param {number[]} request.writes
+   *   The writes to apply.
+   *
+   *   Method does not apply writes atomically and does not guarantee ordering.
+   *   Each write succeeds or fails independently. You cannot write to the same
+   *   document more than once per request.
+   * @param {number[]} request.labels
+   *   Labels associated with this batch write.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing [BatchWriteResponse]{@link google.firestore.v1.BatchWriteResponse}.
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   */
+  batchWrite(
+    request: protos.google.firestore.v1.IBatchWriteRequest,
+    optionsOrCallback?:
+      | gax.CallOptions
+      | Callback<
+          protos.google.firestore.v1.IBatchWriteResponse,
+          protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): Promise<
+    [
+      protos.google.firestore.v1.IBatchWriteResponse,
+      protos.google.firestore.v1.IBatchWriteRequest | undefined,
+      {} | undefined
+    ]
+  > | void {
+    request = request || {};
+    let options: gax.CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as gax.CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      database: request.database || '',
+    });
+    this.initialize();
+    return this.innerApiCalls.batchWrite(request, options, callback);
+  }
+  createDocument(
+    request: protos.google.firestore.v1.ICreateDocumentRequest,
+    options?: gax.CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.ICreateDocumentRequest | undefined,
       {} | undefined
     ]
   >;
   createDocument(
-    request: protosTypes.google.firestore.v1.ICreateDocumentRequest,
+    request: protos.google.firestore.v1.ICreateDocumentRequest,
     options: gax.CallOptions,
     callback: Callback<
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.ICreateDocumentRequest | null | undefined,
+      {} | null | undefined
+    >
+  ): void;
+  createDocument(
+    request: protos.google.firestore.v1.ICreateDocumentRequest,
+    callback: Callback<
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.ICreateDocumentRequest | null | undefined,
+      {} | null | undefined
     >
   ): void;
   /**
@@ -864,23 +1022,23 @@ export class FirestoreClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   createDocument(
-    request: protosTypes.google.firestore.v1.ICreateDocumentRequest,
+    request: protos.google.firestore.v1.ICreateDocumentRequest,
     optionsOrCallback?:
       | gax.CallOptions
       | Callback<
-          protosTypes.google.firestore.v1.IDocument,
-          protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
-          {} | undefined
+          protos.google.firestore.v1.IDocument,
+          protos.google.firestore.v1.ICreateDocumentRequest | null | undefined,
+          {} | null | undefined
         >,
     callback?: Callback<
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
-      {} | undefined
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.ICreateDocumentRequest | null | undefined,
+      {} | null | undefined
     >
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IDocument,
-      protosTypes.google.firestore.v1.ICreateDocumentRequest | undefined,
+      protos.google.firestore.v1.IDocument,
+      protos.google.firestore.v1.ICreateDocumentRequest | undefined,
       {} | undefined
     ]
   > | void {
@@ -901,7 +1059,7 @@ export class FirestoreClient {
       parent: request.parent || '',
     });
     this.initialize();
-    return this._innerApiCalls.createDocument(request, options, callback);
+    return this.innerApiCalls.createDocument(request, options, callback);
   }
 
   /**
@@ -934,14 +1092,14 @@ export class FirestoreClient {
    *   stream.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
    *   An object stream which emits [BatchGetDocumentsResponse]{@link google.firestore.v1.BatchGetDocumentsResponse} on 'data' event.
    */
   batchGetDocuments(
-    request?: protosTypes.google.firestore.v1.IBatchGetDocumentsRequest,
+    request?: protos.google.firestore.v1.IBatchGetDocumentsRequest,
     options?: gax.CallOptions
   ): gax.CancellableStream {
     request = request || {};
@@ -954,7 +1112,7 @@ export class FirestoreClient {
       database: request.database || '',
     });
     this.initialize();
-    return this._innerApiCalls.batchGetDocuments(request, options);
+    return this.innerApiCalls.batchGetDocuments(request, options);
   }
 
   /**
@@ -980,14 +1138,14 @@ export class FirestoreClient {
    *   stream.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Stream}
    *   An object stream which emits [RunQueryResponse]{@link google.firestore.v1.RunQueryResponse} on 'data' event.
    */
   runQuery(
-    request?: protosTypes.google.firestore.v1.IRunQueryRequest,
+    request?: protos.google.firestore.v1.IRunQueryRequest,
     options?: gax.CallOptions
   ): gax.CancellableStream {
     request = request || {};
@@ -1000,7 +1158,7 @@ export class FirestoreClient {
       parent: request.parent || '',
     });
     this.initialize();
-    return this._innerApiCalls.runQuery(request, options);
+    return this.innerApiCalls.runQuery(request, options);
   }
 
   /**
@@ -1015,7 +1173,7 @@ export class FirestoreClient {
    */
   write(options?: gax.CallOptions): gax.CancellableStream {
     this.initialize();
-    return this._innerApiCalls.write(options);
+    return this.innerApiCalls.write({}, options);
   }
 
   /**
@@ -1030,26 +1188,34 @@ export class FirestoreClient {
    */
   listen(options?: gax.CallOptions): gax.CancellableStream {
     this.initialize();
-    return this._innerApiCalls.listen({}, options);
+    return this.innerApiCalls.listen({}, options);
   }
 
   listDocuments(
-    request: protosTypes.google.firestore.v1.IListDocumentsRequest,
+    request: protos.google.firestore.v1.IListDocumentsRequest,
     options?: gax.CallOptions
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IDocument[],
-      protosTypes.google.firestore.v1.IListDocumentsRequest | null,
-      protosTypes.google.firestore.v1.IListDocumentsResponse
+      protos.google.firestore.v1.IDocument[],
+      protos.google.firestore.v1.IListDocumentsRequest | null,
+      protos.google.firestore.v1.IListDocumentsResponse
     ]
   >;
   listDocuments(
-    request: protosTypes.google.firestore.v1.IListDocumentsRequest,
+    request: protos.google.firestore.v1.IListDocumentsRequest,
     options: gax.CallOptions,
-    callback: Callback<
-      protosTypes.google.firestore.v1.IDocument[],
-      protosTypes.google.firestore.v1.IListDocumentsRequest | null,
-      protosTypes.google.firestore.v1.IListDocumentsResponse
+    callback: PaginationCallback<
+      protos.google.firestore.v1.IListDocumentsRequest,
+      protos.google.firestore.v1.IListDocumentsResponse | null | undefined,
+      protos.google.firestore.v1.IDocument
+    >
+  ): void;
+  listDocuments(
+    request: protos.google.firestore.v1.IListDocumentsRequest,
+    callback: PaginationCallback<
+      protos.google.firestore.v1.IListDocumentsRequest,
+      protos.google.firestore.v1.IListDocumentsResponse | null | undefined,
+      protos.google.firestore.v1.IDocument
     >
   ): void;
   /**
@@ -1082,7 +1248,7 @@ export class FirestoreClient {
    *   Reads documents in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -1110,24 +1276,24 @@ export class FirestoreClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   listDocuments(
-    request: protosTypes.google.firestore.v1.IListDocumentsRequest,
+    request: protos.google.firestore.v1.IListDocumentsRequest,
     optionsOrCallback?:
       | gax.CallOptions
-      | Callback<
-          protosTypes.google.firestore.v1.IDocument[],
-          protosTypes.google.firestore.v1.IListDocumentsRequest | null,
-          protosTypes.google.firestore.v1.IListDocumentsResponse
+      | PaginationCallback<
+          protos.google.firestore.v1.IListDocumentsRequest,
+          protos.google.firestore.v1.IListDocumentsResponse | null | undefined,
+          protos.google.firestore.v1.IDocument
         >,
-    callback?: Callback<
-      protosTypes.google.firestore.v1.IDocument[],
-      protosTypes.google.firestore.v1.IListDocumentsRequest | null,
-      protosTypes.google.firestore.v1.IListDocumentsResponse
+    callback?: PaginationCallback<
+      protos.google.firestore.v1.IListDocumentsRequest,
+      protos.google.firestore.v1.IListDocumentsResponse | null | undefined,
+      protos.google.firestore.v1.IDocument
     >
   ): Promise<
     [
-      protosTypes.google.firestore.v1.IDocument[],
-      protosTypes.google.firestore.v1.IListDocumentsRequest | null,
-      protosTypes.google.firestore.v1.IListDocumentsResponse
+      protos.google.firestore.v1.IDocument[],
+      protos.google.firestore.v1.IListDocumentsRequest | null,
+      protos.google.firestore.v1.IListDocumentsResponse
     ]
   > | void {
     request = request || {};
@@ -1147,7 +1313,7 @@ export class FirestoreClient {
       parent: request.parent || '',
     });
     this.initialize();
-    return this._innerApiCalls.listDocuments(request, options, callback);
+    return this.innerApiCalls.listDocuments(request, options, callback);
   }
 
   /**
@@ -1190,7 +1356,7 @@ export class FirestoreClient {
    *   Reads documents in a transaction.
    * @param {google.protobuf.Timestamp} request.readTime
    *   Reads documents as they were at the given time.
-   *   This may not be older than 60 seconds.
+   *   This may not be older than 270 seconds.
    * @param {boolean} request.showMissing
    *   If the list should show missing documents. A missing document is a
    *   document that does not exist but has sub-documents. These documents will
@@ -1205,7 +1371,7 @@ export class FirestoreClient {
    *   An object stream which emits an object representing [Document]{@link google.firestore.v1.Document} on 'data' event.
    */
   listDocumentsStream(
-    request?: protosTypes.google.firestore.v1.IListDocumentsRequest,
+    request?: protos.google.firestore.v1.IListDocumentsRequest,
     options?: gax.CallOptions
   ): Transform {
     request = request || {};
@@ -1219,29 +1385,395 @@ export class FirestoreClient {
     });
     const callSettings = new gax.CallSettings(options);
     this.initialize();
-    return this._descriptors.page.listDocuments.createStream(
-      this._innerApiCalls.listDocuments as gax.GaxCall,
+    return this.descriptors.page.listDocuments.createStream(
+      this.innerApiCalls.listDocuments as gax.GaxCall,
       request,
       callSettings
     );
   }
+
+  /**
+   * Equivalent to {@link listDocuments}, but returns an iterable object.
+   *
+   * for-await-of syntax is used with the iterable to recursively get response element on-demand.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents` or
+   *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
+   *   For example:
+   *   `projects/my-project/databases/my-database/documents` or
+   *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
+   * @param {string} request.collectionId
+   *   Required. The collection ID, relative to `parent`, to list. For example: `chatrooms`
+   *   or `messages`.
+   * @param {number} request.pageSize
+   *   The maximum number of documents to return.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous List request, if any.
+   * @param {string} request.orderBy
+   *   The order to sort results by. For example: `priority desc, name`.
+   * @param {google.firestore.v1.DocumentMask} request.mask
+   *   The fields to return. If not set, returns all fields.
+   *
+   *   If a document has a field that is not present in this mask, that field
+   *   will not be returned in the response.
+   * @param {Buffer} request.transaction
+   *   Reads documents in a transaction.
+   * @param {google.protobuf.Timestamp} request.readTime
+   *   Reads documents as they were at the given time.
+   *   This may not be older than 270 seconds.
+   * @param {boolean} request.showMissing
+   *   If the list should show missing documents. A missing document is a
+   *   document that does not exist but has sub-documents. These documents will
+   *   be returned with a key but will not have fields, {@link google.firestore.v1.Document.create_time|Document.create_time},
+   *   or {@link google.firestore.v1.Document.update_time|Document.update_time} set.
+   *
+   *   Requests with `show_missing` may not specify `where` or
+   *   `order_by`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Object}
+   *   An iterable Object that conforms to @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols.
+   */
+  listDocumentsAsync(
+    request?: protos.google.firestore.v1.IListDocumentsRequest,
+    options?: gax.CallOptions
+  ): AsyncIterable<protos.google.firestore.v1.IDocument> {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    options = options || {};
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.listDocuments.asyncIterate(
+      this.innerApiCalls['listDocuments'] as GaxCall,
+      (request as unknown) as RequestType,
+      callSettings
+    ) as AsyncIterable<protos.google.firestore.v1.IDocument>;
+  }
+  partitionQuery(
+    request: protos.google.firestore.v1.IPartitionQueryRequest,
+    options?: gax.CallOptions
+  ): Promise<
+    [
+      protos.google.firestore.v1.ICursor[],
+      protos.google.firestore.v1.IPartitionQueryRequest | null,
+      protos.google.firestore.v1.IPartitionQueryResponse
+    ]
+  >;
+  partitionQuery(
+    request: protos.google.firestore.v1.IPartitionQueryRequest,
+    options: gax.CallOptions,
+    callback: PaginationCallback<
+      protos.google.firestore.v1.IPartitionQueryRequest,
+      protos.google.firestore.v1.IPartitionQueryResponse | null | undefined,
+      protos.google.firestore.v1.ICursor
+    >
+  ): void;
+  partitionQuery(
+    request: protos.google.firestore.v1.IPartitionQueryRequest,
+    callback: PaginationCallback<
+      protos.google.firestore.v1.IPartitionQueryRequest,
+      protos.google.firestore.v1.IPartitionQueryResponse | null | undefined,
+      protos.google.firestore.v1.ICursor
+    >
+  ): void;
+  /**
+   * Partitions a query by returning partition cursors that can be used to run
+   * the query in parallel. The returned partition cursors are split points that
+   * can be used by RunQuery as starting/end points for the query results.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents`.
+   *   Document resource names are not supported; only database resource names
+   *   can be specified.
+   * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
+   *   A structured query.
+   *   Filters, order bys, limits, offsets, and start/end cursors are not
+   *   supported.
+   * @param {number} request.partitionCount
+   *   The desired maximum number of partition points.
+   *   The partitions may be returned across multiple pages of results.
+   *   The number must be strictly positive. The actual number of partitions
+   *   returned may be fewer.
+   *
+   *   For example, this may be set to one fewer than the number of parallel
+   *   queries to be run, or in running a data pipeline job, one fewer than the
+   *   number of workers or compute instances available.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous call to
+   *   PartitionQuery that may be used to get an additional set of results.
+   *   There are no ordering guarantees between sets of results. Thus, using
+   *   multiple sets of results will require merging the different result sets.
+   *
+   *   For example, two subsequent calls using a page_token may return:
+   *
+   *    * cursor B, cursor M, cursor Q
+   *    * cursor A, cursor U, cursor W
+   *
+   *   To obtain a complete result set ordered with respect to the results of the
+   *   query supplied to PartitionQuery, the results sets should be merged:
+   *   cursor A, cursor B, cursor M, cursor Q, cursor U, cursor W
+   * @param {number} request.pageSize
+   *   The maximum number of partitions to return in this call, subject to
+   *   `partition_count`.
+   *
+   *   For example, if `partition_count` = 10 and `page_size` = 8, the first call
+   *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
+   *   if more results exist. A second call to PartitionQuery will return up to
+   *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is Array of [Cursor]{@link google.firestore.v1.Cursor}.
+   *   The client library support auto-pagination by default: it will call the API as many
+   *   times as needed and will merge results from all the pages into this array.
+   *
+   *   When autoPaginate: false is specified through options, the array has three elements.
+   *   The first element is Array of [Cursor]{@link google.firestore.v1.Cursor} that corresponds to
+   *   the one page received from the API server.
+   *   If the second element is not null it contains the request object of type [PartitionQueryRequest]{@link google.firestore.v1.PartitionQueryRequest}
+   *   that can be used to obtain the next page of the results.
+   *   If it is null, the next page does not exist.
+   *   The third element contains the raw response received from the API server. Its type is
+   *   [PartitionQueryResponse]{@link google.firestore.v1.PartitionQueryResponse}.
+   *
+   *   The promise has a method named "cancel" which cancels the ongoing API call.
+   */
+  partitionQuery(
+    request: protos.google.firestore.v1.IPartitionQueryRequest,
+    optionsOrCallback?:
+      | gax.CallOptions
+      | PaginationCallback<
+          protos.google.firestore.v1.IPartitionQueryRequest,
+          protos.google.firestore.v1.IPartitionQueryResponse | null | undefined,
+          protos.google.firestore.v1.ICursor
+        >,
+    callback?: PaginationCallback<
+      protos.google.firestore.v1.IPartitionQueryRequest,
+      protos.google.firestore.v1.IPartitionQueryResponse | null | undefined,
+      protos.google.firestore.v1.ICursor
+    >
+  ): Promise<
+    [
+      protos.google.firestore.v1.ICursor[],
+      protos.google.firestore.v1.IPartitionQueryRequest | null,
+      protos.google.firestore.v1.IPartitionQueryResponse
+    ]
+  > | void {
+    request = request || {};
+    let options: gax.CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as gax.CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    this.initialize();
+    return this.innerApiCalls.partitionQuery(request, options, callback);
+  }
+
+  /**
+   * Equivalent to {@link partitionQuery}, but returns a NodeJS Stream object.
+   *
+   * This fetches the paged responses for {@link partitionQuery} continuously
+   * and invokes the callback registered for 'data' event for each element in the
+   * responses.
+   *
+   * The returned object has 'end' method when no more elements are required.
+   *
+   * autoPaginate option will be ignored.
+   *
+   * @see {@link https://nodejs.org/api/stream.html}
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents`.
+   *   Document resource names are not supported; only database resource names
+   *   can be specified.
+   * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
+   *   A structured query.
+   *   Filters, order bys, limits, offsets, and start/end cursors are not
+   *   supported.
+   * @param {number} request.partitionCount
+   *   The desired maximum number of partition points.
+   *   The partitions may be returned across multiple pages of results.
+   *   The number must be strictly positive. The actual number of partitions
+   *   returned may be fewer.
+   *
+   *   For example, this may be set to one fewer than the number of parallel
+   *   queries to be run, or in running a data pipeline job, one fewer than the
+   *   number of workers or compute instances available.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous call to
+   *   PartitionQuery that may be used to get an additional set of results.
+   *   There are no ordering guarantees between sets of results. Thus, using
+   *   multiple sets of results will require merging the different result sets.
+   *
+   *   For example, two subsequent calls using a page_token may return:
+   *
+   *    * cursor B, cursor M, cursor Q
+   *    * cursor A, cursor U, cursor W
+   *
+   *   To obtain a complete result set ordered with respect to the results of the
+   *   query supplied to PartitionQuery, the results sets should be merged:
+   *   cursor A, cursor B, cursor M, cursor Q, cursor U, cursor W
+   * @param {number} request.pageSize
+   *   The maximum number of partitions to return in this call, subject to
+   *   `partition_count`.
+   *
+   *   For example, if `partition_count` = 10 and `page_size` = 8, the first call
+   *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
+   *   if more results exist. A second call to PartitionQuery will return up to
+   *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Stream}
+   *   An object stream which emits an object representing [Cursor]{@link google.firestore.v1.Cursor} on 'data' event.
+   */
+  partitionQueryStream(
+    request?: protos.google.firestore.v1.IPartitionQueryRequest,
+    options?: gax.CallOptions
+  ): Transform {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.partitionQuery.createStream(
+      this.innerApiCalls.partitionQuery as gax.GaxCall,
+      request,
+      callSettings
+    );
+  }
+
+  /**
+   * Equivalent to {@link partitionQuery}, but returns an iterable object.
+   *
+   * for-await-of syntax is used with the iterable to recursively get response element on-demand.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent resource name. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents`.
+   *   Document resource names are not supported; only database resource names
+   *   can be specified.
+   * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
+   *   A structured query.
+   *   Filters, order bys, limits, offsets, and start/end cursors are not
+   *   supported.
+   * @param {number} request.partitionCount
+   *   The desired maximum number of partition points.
+   *   The partitions may be returned across multiple pages of results.
+   *   The number must be strictly positive. The actual number of partitions
+   *   returned may be fewer.
+   *
+   *   For example, this may be set to one fewer than the number of parallel
+   *   queries to be run, or in running a data pipeline job, one fewer than the
+   *   number of workers or compute instances available.
+   * @param {string} request.pageToken
+   *   The `next_page_token` value returned from a previous call to
+   *   PartitionQuery that may be used to get an additional set of results.
+   *   There are no ordering guarantees between sets of results. Thus, using
+   *   multiple sets of results will require merging the different result sets.
+   *
+   *   For example, two subsequent calls using a page_token may return:
+   *
+   *    * cursor B, cursor M, cursor Q
+   *    * cursor A, cursor U, cursor W
+   *
+   *   To obtain a complete result set ordered with respect to the results of the
+   *   query supplied to PartitionQuery, the results sets should be merged:
+   *   cursor A, cursor B, cursor M, cursor Q, cursor U, cursor W
+   * @param {number} request.pageSize
+   *   The maximum number of partitions to return in this call, subject to
+   *   `partition_count`.
+   *
+   *   For example, if `partition_count` = 10 and `page_size` = 8, the first call
+   *   to PartitionQuery will return up to 8 partitions and a `next_page_token`
+   *   if more results exist. A second call to PartitionQuery will return up to
+   *   2 partitions, to complete the total of 10 specified in `partition_count`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Object}
+   *   An iterable Object that conforms to @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols.
+   */
+  partitionQueryAsync(
+    request?: protos.google.firestore.v1.IPartitionQueryRequest,
+    options?: gax.CallOptions
+  ): AsyncIterable<protos.google.firestore.v1.ICursor> {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    options = options || {};
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.partitionQuery.asyncIterate(
+      this.innerApiCalls['partitionQuery'] as GaxCall,
+      (request as unknown) as RequestType,
+      callSettings
+    ) as AsyncIterable<protos.google.firestore.v1.ICursor>;
+  }
   listCollectionIds(
-    request: protosTypes.google.firestore.v1.IListCollectionIdsRequest,
+    request: protos.google.firestore.v1.IListCollectionIdsRequest,
     options?: gax.CallOptions
   ): Promise<
     [
       string[],
-      protosTypes.google.firestore.v1.IListCollectionIdsRequest | null,
-      protosTypes.google.firestore.v1.IListCollectionIdsResponse
+      protos.google.firestore.v1.IListCollectionIdsRequest | null,
+      protos.google.firestore.v1.IListCollectionIdsResponse
     ]
   >;
   listCollectionIds(
-    request: protosTypes.google.firestore.v1.IListCollectionIdsRequest,
+    request: protos.google.firestore.v1.IListCollectionIdsRequest,
     options: gax.CallOptions,
-    callback: Callback<
-      string[],
-      protosTypes.google.firestore.v1.IListCollectionIdsRequest | null,
-      protosTypes.google.firestore.v1.IListCollectionIdsResponse
+    callback: PaginationCallback<
+      protos.google.firestore.v1.IListCollectionIdsRequest,
+      protos.google.firestore.v1.IListCollectionIdsResponse | null | undefined,
+      string
+    >
+  ): void;
+  listCollectionIds(
+    request: protos.google.firestore.v1.IListCollectionIdsRequest,
+    callback: PaginationCallback<
+      protos.google.firestore.v1.IListCollectionIdsRequest,
+      protos.google.firestore.v1.IListCollectionIdsResponse | null | undefined,
+      string
     >
   ): void;
   /**
@@ -1278,24 +1810,26 @@ export class FirestoreClient {
    *   The promise has a method named "cancel" which cancels the ongoing API call.
    */
   listCollectionIds(
-    request: protosTypes.google.firestore.v1.IListCollectionIdsRequest,
+    request: protos.google.firestore.v1.IListCollectionIdsRequest,
     optionsOrCallback?:
       | gax.CallOptions
-      | Callback<
-          string[],
-          protosTypes.google.firestore.v1.IListCollectionIdsRequest | null,
-          protosTypes.google.firestore.v1.IListCollectionIdsResponse
+      | PaginationCallback<
+          protos.google.firestore.v1.IListCollectionIdsRequest,
+          | protos.google.firestore.v1.IListCollectionIdsResponse
+          | null
+          | undefined,
+          string
         >,
-    callback?: Callback<
-      string[],
-      protosTypes.google.firestore.v1.IListCollectionIdsRequest | null,
-      protosTypes.google.firestore.v1.IListCollectionIdsResponse
+    callback?: PaginationCallback<
+      protos.google.firestore.v1.IListCollectionIdsRequest,
+      protos.google.firestore.v1.IListCollectionIdsResponse | null | undefined,
+      string
     >
   ): Promise<
     [
       string[],
-      protosTypes.google.firestore.v1.IListCollectionIdsRequest | null,
-      protosTypes.google.firestore.v1.IListCollectionIdsResponse
+      protos.google.firestore.v1.IListCollectionIdsRequest | null,
+      protos.google.firestore.v1.IListCollectionIdsResponse
     ]
   > | void {
     request = request || {};
@@ -1315,7 +1849,7 @@ export class FirestoreClient {
       parent: request.parent || '',
     });
     this.initialize();
-    return this._innerApiCalls.listCollectionIds(request, options, callback);
+    return this.innerApiCalls.listCollectionIds(request, options, callback);
   }
 
   /**
@@ -1349,7 +1883,7 @@ export class FirestoreClient {
    *   An object stream which emits an object representing string on 'data' event.
    */
   listCollectionIdsStream(
-    request?: protosTypes.google.firestore.v1.IListCollectionIdsRequest,
+    request?: protos.google.firestore.v1.IListCollectionIdsRequest,
     options?: gax.CallOptions
   ): Transform {
     request = request || {};
@@ -1363,11 +1897,56 @@ export class FirestoreClient {
     });
     const callSettings = new gax.CallSettings(options);
     this.initialize();
-    return this._descriptors.page.listCollectionIds.createStream(
-      this._innerApiCalls.listCollectionIds as gax.GaxCall,
+    return this.descriptors.page.listCollectionIds.createStream(
+      this.innerApiCalls.listCollectionIds as gax.GaxCall,
       request,
       callSettings
     );
+  }
+
+  /**
+   * Equivalent to {@link listCollectionIds}, but returns an iterable object.
+   *
+   * for-await-of syntax is used with the iterable to recursively get response element on-demand.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The parent document. In the format:
+   *   `projects/{project_id}/databases/{database_id}/documents/{document_path}`.
+   *   For example:
+   *   `projects/my-project/databases/my-database/documents/chatrooms/my-chatroom`
+   * @param {number} request.pageSize
+   *   The maximum number of results to return.
+   * @param {string} request.pageToken
+   *   A page token. Must be a value from
+   *   {@link google.firestore.v1.ListCollectionIdsResponse|ListCollectionIdsResponse}.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Object}
+   *   An iterable Object that conforms to @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols.
+   */
+  listCollectionIdsAsync(
+    request?: protos.google.firestore.v1.IListCollectionIdsRequest,
+    options?: gax.CallOptions
+  ): AsyncIterable<string> {
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = gax.routingHeader.fromParams({
+      parent: request.parent || '',
+    });
+    options = options || {};
+    const callSettings = new gax.CallSettings(options);
+    this.initialize();
+    return this.descriptors.page.listCollectionIds.asyncIterate(
+      this.innerApiCalls['listCollectionIds'] as GaxCall,
+      (request as unknown) as RequestType,
+      callSettings
+    ) as AsyncIterable<string>;
   }
 
   /**

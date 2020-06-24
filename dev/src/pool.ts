@@ -19,6 +19,9 @@ import * as assert from 'assert';
 import {logger} from './logger';
 import {Deferred} from './util';
 
+export const CLIENT_TERMINATED_ERROR_MSG =
+  'The client has already been terminated';
+
 /**
  * An auto-resizing pool that distributes concurrent operations over multiple
  * clients of type `T`.
@@ -142,7 +145,7 @@ export class ClientPool<T> {
     }
 
     let idleCapacityCount = 0;
-    for (const [_, count] of this.activeClients) {
+    for (const [, count] of this.activeClients) {
       idleCapacityCount += this.concurrentOperationLimit - count;
     }
     return (
@@ -187,9 +190,7 @@ export class ClientPool<T> {
    */
   run<V>(requestTag: string, op: (client: T) => Promise<V>): Promise<V> {
     if (this.terminated) {
-      return Promise.reject(
-        new Error('The client has already been terminated')
-      );
+      return Promise.reject(new Error(CLIENT_TERMINATED_ERROR_MSG));
     }
     const client = this.acquire(requestTag);
 
@@ -217,7 +218,7 @@ export class ClientPool<T> {
       );
       await this.terminateDeferred.promise;
     }
-    for (const [client, _requestCount] of this.activeClients) {
+    for (const [client] of this.activeClients) {
       this.activeClients.delete(client);
       await this.clientDestructor(client);
     }

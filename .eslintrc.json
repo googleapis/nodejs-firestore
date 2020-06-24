@@ -1,0 +1,41 @@
+{
+  "extends": "./node_modules/gts",
+  "overrides": [
+    {
+      "files": [
+        "dev/src/*.ts"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": [
+          "error",
+          {
+            "allowExpressions": true,
+            "allowTypedFunctionExpressions": true
+          }
+        ],
+        "no-console": ["error", {"allow": ["error"]}]
+      }
+    },
+    {
+      "files": [
+        "dev/test/*.ts",
+        "dev/system-test/*.ts"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "rules": {
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "describe",
+            "property": "only"
+          },
+          {
+            "object": "it",
+            "property": "only"
+          }
+        ]
+      }
+    }
+  ]
+}

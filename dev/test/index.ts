@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {describe, it, beforeEach, before, afterEach, after} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
@@ -251,7 +252,7 @@ const allSupportedTypesInput = {
     {
       formattedName: DATABASE_ROOT,
       _getProjectId: () => ({projectId: PROJECT_ID, databaseId: '(default)'}),
-    } as any, // tslint:disable-line no-any
+    } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     new QualifiedResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
@@ -281,7 +282,7 @@ const allSupportedTypesOutput = {
     {
       formattedName: DATABASE_ROOT,
       _getProjectId: () => ({projectId: PROJECT_ID, databaseId: '(default)'}),
-    } as any, // tslint:disable-line no-any
+    } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     new QualifiedResourcePath(PROJECT_ID, '(default)', 'collection', 'document')
   ),
   arrayValue: ['foo', 42, 'bar'],
@@ -301,10 +302,10 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore(DEFAULT_SETTINGS);
     firestore.settings({foo: 'bar'});
 
-    /* tslint:disable:no-any */
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     expect((firestore as any)._settings.projectId).to.equal(PROJECT_ID);
     expect((firestore as any)._settings.foo).to.equal('bar');
-    /* tslint:enable:no-any */
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   });
 
   it('can only call settings() once', () => {
@@ -508,7 +509,7 @@ describe('instantiation', () => {
     const firestore = new Firestore.Firestore({projectId: 'foo'});
 
     return expect(firestore.formattedName).to.equal(
-      `projects/foo/databases/(default)`
+      'projects/foo/databases/(default)'
     );
   });
 
@@ -522,7 +523,7 @@ describe('instantiation', () => {
       await firestore.initializeIfNeeded('tag');
       expect(firestore.projectId).to.equal('foo');
       expect(firestore.formattedName).to.equal(
-        `projects/foo/databases/(default)`
+        'projects/foo/databases/(default)'
       );
     });
   });
@@ -905,10 +906,10 @@ describe('getAll() method', () => {
     result: DocumentSnapshot[],
     ...docs: api.IBatchGetDocumentsResponse[]
   ) {
-    expect(result.length).to.equal(arguments.length - 1);
+    expect(result.length).to.equal(docs.length);
 
     for (let i = 0; i < result.length; ++i) {
-      const doc = arguments[i + 1];
+      const doc = docs[i];
 
       if (doc.found) {
         expect(result[i].exists).to.be.true;

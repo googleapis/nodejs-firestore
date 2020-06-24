@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {GoogleError, Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
 import {ExponentialBackoff} from './backoff';
-import {DocumentSnapshot, Precondition} from './document';
+import {DocumentSnapshot} from './document';
 import {Firestore, WriteBatch} from './index';
 import {logger} from './logger';
 import {FieldPath, validateFieldPath} from './path';
@@ -29,13 +31,6 @@ import {
   QuerySnapshot,
   validateDocumentReference,
 } from './reference';
-import {
-  DocumentData,
-  Precondition as PublicPrecondition,
-  ReadOptions,
-  SetOptions,
-  UpdateData,
-} from './types';
 import {isObject, isPlainObject} from './util';
 import {
   invalidArgumentMessage,
@@ -62,7 +57,7 @@ const READ_AFTER_WRITE_ERROR_MSG =
  *
  * @class
  */
-export class Transaction {
+export class Transaction implements firestore.Transaction {
   private _firestore: Firestore;
   private _writeBatch: WriteBatch;
   private _backoff: ExponentialBackoff;
@@ -178,13 +173,19 @@ export class Transaction {
    * });
    */
   getAll<T>(
-    ...documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+    ...documentRefsOrReadOptions: Array<
+      firestore.DocumentReference<T> | firestore.ReadOptions
+    >
   ): Promise<Array<DocumentSnapshot<T>>> {
     if (!this._writeBatch.isEmpty) {
       throw new Error(READ_AFTER_WRITE_ERROR_MSG);
     }
 
-    validateMinNumberOfArguments('Transaction.getAll', arguments, 1);
+    validateMinNumberOfArguments(
+      'Transaction.getAll',
+      documentRefsOrReadOptions,
+      1
+    );
 
     const {documents, fieldMask} = parseGetAllArguments(
       documentRefsOrReadOptions
@@ -219,11 +220,17 @@ export class Transaction {
    *   });
    * });
    */
-  create<T>(documentRef: DocumentReference<T>, data: T): Transaction {
+  create<T>(documentRef: firestore.DocumentReference<T>, data: T): Transaction {
     this._writeBatch.create(documentRef, data);
     return this;
   }
 
+  set<T>(
+    documentRef: firestore.DocumentReference<T>,
+    data: Partial<T>,
+    options: firestore.SetOptions
+  ): Transaction;
+  set<T>(documentRef: firestore.DocumentReference<T>, data: T): Transaction;
   /**
    * Writes to the document referred to by the provided
    * [DocumentReference]{@link DocumentReference}. If the document
@@ -233,7 +240,7 @@ export class Transaction {
    *
    * @param {DocumentReference} documentRef A reference to the document to be
    * set.
-   * @param {T} data The object to serialize as the document.
+   * @param {T|Partial<T>} data The object to serialize as the document.
    * @param {SetOptions=} options An object to configure the set behavior.
    * @param {boolean=} options.merge - If true, set() merges the values
    * specified in its data argument. Fields omitted from this set() call
@@ -252,9 +259,9 @@ export class Transaction {
    * });
    */
   set<T>(
-    documentRef: DocumentReference<T>,
-    data: T,
-    options?: SetOptions
+    documentRef: firestore.DocumentReference<T>,
+    data: T | Partial<T>,
+    options?: firestore.SetOptions
   ): Transaction {
     this._writeBatch.set(documentRef, data, options);
     return this;
@@ -299,10 +306,13 @@ export class Transaction {
    * });
    */
   update<T>(
-    documentRef: DocumentReference<T>,
-    dataOrField: UpdateData | string | FieldPath,
-    ...preconditionOrValues: Array<Precondition | unknown | string | FieldPath>
+    documentRef: firestore.DocumentReference<T>,
+    dataOrField: firestore.UpdateData | string | firestore.FieldPath,
+    ...preconditionOrValues: Array<
+      firestore.Precondition | unknown | string | firestore.FieldPath
+    >
   ): Transaction {
+    // eslint-disable-next-line prefer-rest-params
     validateMinNumberOfArguments('Transaction.update', arguments, 2);
 
     this._writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
@@ -332,7 +342,7 @@ export class Transaction {
    */
   delete<T>(
     documentRef: DocumentReference<T>,
-    precondition?: PublicPrecondition
+    precondition?: firestore.Precondition
   ): this {
     this._writeBatch.delete(documentRef, precondition);
     return this;
@@ -374,7 +384,7 @@ export class Transaction {
    */
   commit(): Promise<void> {
     return this._writeBatch
-      .commit_({
+      ._commit({
         transactionId: this._transactionId,
         requestTag: this._requestTag,
       })
@@ -417,7 +427,7 @@ export class Transaction {
         logger(
           'Firestore.runTransaction',
           this._requestTag,
-          `Retrying transaction after error:`,
+          'Retrying transaction after error:',
           lastError
         );
       }
@@ -470,7 +480,7 @@ export class Transaction {
    * @private
    * @return A Promise that resolves after the delay expired.
    */
-  private async maybeBackoff(error?: GoogleError) {
+  private async maybeBackoff(error?: GoogleError): Promise<void> {
     if (error && error.code === Status.RESOURCE_EXHAUSTED) {
       this._backoff.resetToMax();
     }
@@ -487,10 +497,12 @@ export class Transaction {
  * an optional ReadOptions object.
  */
 export function parseGetAllArguments<T>(
-  documentRefsOrReadOptions: Array<DocumentReference<T> | ReadOptions>
+  documentRefsOrReadOptions: Array<
+    firestore.DocumentReference<T> | firestore.ReadOptions
+  >
 ): {documents: Array<DocumentReference<T>>; fieldMask: FieldPath[] | null} {
   let documents: Array<DocumentReference<T>>;
-  let readOptions: ReadOptions | undefined = undefined;
+  let readOptions: firestore.ReadOptions | undefined = undefined;
 
   if (Array.isArray(documentRefsOrReadOptions[0])) {
     throw new Error(
@@ -505,7 +517,7 @@ export function parseGetAllArguments<T>(
       documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1]
     )
   ) {
-    readOptions = documentRefsOrReadOptions.pop() as ReadOptions;
+    readOptions = documentRefsOrReadOptions.pop() as firestore.ReadOptions;
     documents = documentRefsOrReadOptions as Array<DocumentReference<T>>;
   } else {
     documents = documentRefsOrReadOptions as Array<DocumentReference<T>>;

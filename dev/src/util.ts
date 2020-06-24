@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {DocumentData} from '@google-cloud/firestore';
+
 import {randomBytes} from 'crypto';
 import {
   CallSettings,
@@ -25,8 +27,6 @@ import {
 } from 'google-gax';
 import {BackoffSettings} from 'google-gax/build/src/gax';
 import * as gapicConfig from './v1/firestore_client_config.json';
-
-import {DocumentData} from './types';
 
 const serviceConfig = constructSettings(
   'google.firestore.v1.Firestore',

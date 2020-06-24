@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {google} from '../protos/firestore_v1_proto_api';
 
 import {isObject} from './util';
@@ -242,7 +244,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * database.
    * @private
    */
-  get relativeName() {
+  get relativeName(): string {
     return this.segments.join('/');
   }
 
@@ -408,14 +410,11 @@ export class QualifiedResourcePath extends ResourcePath {
 
   /**
    * Convenience method to match the ResourcePath API. This method always
-   * returns the current instance. The arguments is ignored.
+   * returns the current instance.
    *
-   * @param projectIdIfMissing The project ID of the current Firestore project.
-   * The project ID is only used if it's not provided as part of this
-   * ResourcePath.
    * @private
    */
-  toQualifiedResourcePath(projectIdIfMissing: string): QualifiedResourcePath {
+  toQualifiedResourcePath(): QualifiedResourcePath {
     return this;
   }
 
@@ -494,7 +493,7 @@ export function validateResourcePath(
  *
  * @class
  */
-export class FieldPath extends Path<FieldPath> {
+export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
   /**
    * A special sentinel value to refer to the ID of a document.
    *
@@ -543,7 +542,7 @@ export class FieldPath extends Path<FieldPath> {
    *
    * @returns {FieldPath}
    */
-  static documentId() {
+  static documentId(): FieldPath {
     return FieldPath._DOCUMENT_ID;
   }
 
@@ -556,12 +555,12 @@ export class FieldPath extends Path<FieldPath> {
    * @param {string|FieldPath} fieldPath The FieldPath to create.
    * @returns {FieldPath} A field path representation.
    */
-  static fromArgument(fieldPath: string | FieldPath) {
+  static fromArgument(fieldPath: string | firestore.FieldPath): FieldPath {
     // validateFieldPath() is used in all public API entry points to validate
     // that fromArgument() is only called with a Field Path or a string.
     return fieldPath instanceof FieldPath
       ? fieldPath
-      : new FieldPath(...fieldPath.split('.'));
+      : new FieldPath(...(fieldPath as string).split('.'));
   }
 
   /**
@@ -613,7 +612,7 @@ export class FieldPath extends Path<FieldPath> {
    * @param segments Sequence of field names.
    * @returns The newly created FieldPath.
    */
-  construct(segments: string[]) {
+  construct(segments: string[]): FieldPath {
     return new FieldPath(...segments);
   }
 
@@ -639,7 +638,7 @@ export class FieldPath extends Path<FieldPath> {
 export function validateFieldPath(
   arg: string | number,
   fieldPath: unknown
-): void {
+): asserts fieldPath is string | FieldPath {
   if (fieldPath instanceof FieldPath) {
     return;
   }

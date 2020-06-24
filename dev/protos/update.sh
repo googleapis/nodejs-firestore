@@ -38,8 +38,8 @@ PBTS="$(npm bin)/pbts"
 pushd "$WORK_DIR"
 
 # Clone necessary git repos.
-git clone https://github.com/googleapis/googleapis.git
-git clone https://github.com/google/protobuf.git
+git clone --depth 1 https://github.com/googleapis/googleapis.git
+git clone --depth 1 https://github.com/google/protobuf.git
 
 # Copy necessary protos.
 mkdir -p "${PROTOS_DIR}/google/api"
@@ -74,45 +74,45 @@ mkdir -p "${PROTOS_DIR}/google/protobuf"
 cp protobuf/src/google/protobuf/{any,empty,field_mask,struct,timestamp,wrappers}.proto \
    "${PROTOS_DIR}/google/protobuf/"
 
+popd
+
 # Generate the Protobuf typings
 PBJS_ARGS=( --proto_path=. \
   --js_out=import_style=commonjs,binary:library \
-  --target=static \
+  --target=static-module \
   --no-create \
   --no-encode \
   --no-decode \
   --no-verify \
-  --no-convert \
   --no-delimited \
-  --force-enum-string \
-  --force-number)
+  --force-enum-string)
       
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1_proto_api.js \
+  -r firestore_v1 \
   "${PROTOS_DIR}/google/firestore/v1/*.proto" \
+  "${PROTOS_DIR}/firestore/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
   "${PROTOS_DIR}/google/longrunning/*.proto"
+perl -pi -e 's/number\|Long/number\|string/g' firestore_v1_proto_api.js
 "${PBTS}" -o firestore_v1_proto_api.d.ts firestore_v1_proto_api.js
 
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_admin_v1_proto_api.js \
+  -r firestore_admin_v1 \
   "${PROTOS_DIR}/google/firestore/admin/v1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
   "${PROTOS_DIR}/google/longrunning/*.proto"
+perl -pi -e 's/number\|Long/number\|string/g' firestore_admin_v1_proto_api.js
 "${PBTS}" -o firestore_admin_v1_proto_api.d.ts firestore_admin_v1_proto_api.js
 
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1beta1_proto_api.js \
+  -r firestore_v1beta1 \
   "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" \
   "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
   "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
   "${PROTOS_DIR}/google/longrunning/*.proto"
+perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
 "${PBTS}" -o firestore_v1beta1_proto_api.d.ts firestore_v1beta1_proto_api.js
 
-node  "${PROTOS_DIR}"/../../scripts/license.js *.d.ts *.js
-
-# Copy typings into source repo
-cp {firestore_v1_proto_api.d.ts,firestore_v1_proto_api.js} ${PROTOS_DIR}
-cp {firestore_admin_v1_proto_api.d.ts,firestore_admin_v1_proto_api.js} ${PROTOS_DIR}
-cp {firestore_v1beta1_proto_api.d.ts,firestore_v1beta1_proto_api.js} ${PROTOS_DIR}
-
-popd
+node  ../../scripts/license.js *.d.ts *.js

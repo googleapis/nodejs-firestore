@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import {QueryDocumentSnapshot} from './document';
-import {DocumentData} from './types';
 
 export type DocumentChangeType = 'added' | 'removed' | 'modified';
 
@@ -25,7 +26,8 @@ export type DocumentChangeType = 'added' | 'removed' | 'modified';
  *
  * @class
  */
-export class DocumentChange<T = DocumentData> {
+export class DocumentChange<T = firestore.DocumentData>
+  implements firestore.DocumentChange {
   private readonly _type: DocumentChangeType;
   private readonly _document: QueryDocumentSnapshot<T>;
   private readonly _oldIndex: number;
@@ -73,7 +75,7 @@ export class DocumentChange<T = DocumentData> {
    * // Remove this listener.
    * unsubscribe();
    */
-  get type() {
+  get type(): DocumentChangeType {
     return this._type;
   }
 
@@ -96,7 +98,7 @@ export class DocumentChange<T = DocumentData> {
    * // Remove this listener.
    * unsubscribe();
    */
-  get doc() {
+  get doc(): QueryDocumentSnapshot<T> {
     return this._document;
   }
 
@@ -127,7 +129,7 @@ export class DocumentChange<T = DocumentData> {
    * // Remove this listener.
    * unsubscribe();
    */
-  get oldIndex() {
+  get oldIndex(): number {
     return this._oldIndex;
   }
 
@@ -159,7 +161,7 @@ export class DocumentChange<T = DocumentData> {
    * // Remove this listener.
    * unsubscribe();
    */
-  get newIndex() {
+  get newIndex(): number {
     return this._newIndex;
   }
 
@@ -170,7 +172,7 @@ export class DocumentChange<T = DocumentData> {
    * @param {*} other The value to compare against.
    * @return true if this `DocumentChange` is equal to the provided value.
    */
-  isEqual(other: DocumentChange<T>): boolean {
+  isEqual(other: firestore.DocumentChange<T>): boolean {
     if (this === other) {
       return true;
     }

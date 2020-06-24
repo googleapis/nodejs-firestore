@@ -12,17 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {DocumentData} from '@google-cloud/firestore';
+
+import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 import {Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
-import {
-  DocumentData,
-  Firestore,
-  setLogFunction,
-  Timestamp,
-  WriteResult,
-} from '../src';
+import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {BulkWriter} from '../src/bulk-writer';
 import {Deferred} from '../src/util';
@@ -55,12 +52,19 @@ describe('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
-  const activeRequestDeferred = new Deferred<void>();
+  let activeRequestDeferred: Deferred<void>;
   let activeRequestCounter = 0;
+  let timeoutHandlerCounter = 0;
 
   beforeEach(() => {
+    activeRequestDeferred = new Deferred<void>();
     requestCounter = 0;
     opCount = 0;
+    timeoutHandlerCounter = 0;
+    setTimeoutHandler(fn => {
+      timeoutHandlerCounter++;
+      fn();
+    });
   });
 
   function incrementOpCount(): void {
@@ -100,13 +104,13 @@ describe('BulkWriter', () => {
     };
   }
 
-  function successResponse(seconds: number): api.IBatchWriteResponse {
+  function successResponse(updateTimeSeconds: number): api.IBatchWriteResponse {
     return {
       writeResults: [
         {
           updateTime: {
             nanos: 0,
-            seconds,
+            seconds: updateTimeSeconds,
           },
         },
       ],
@@ -114,7 +118,7 @@ describe('BulkWriter', () => {
     };
   }
 
-  function failResponse(): api.IBatchWriteResponse {
+  function failedResponse(): api.IBatchWriteResponse {
     return {
       writeResults: [
         {
@@ -177,7 +181,11 @@ describe('BulkWriter', () => {
     });
   }
 
-  afterEach(() => verifyInstance(firestore));
+  afterEach(() => {
+    verifyInstance(firestore);
+    expect(timeoutHandlerCounter).to.equal(0);
+    setTimeoutHandler(setTimeout);
+  });
 
   it('has a set() method', async () => {
     const bulkWriter = await instantiateInstance([
@@ -259,7 +267,7 @@ describe('BulkWriter', () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
-        response: failResponse(),
+        response: failedResponse(),
       },
     ]);
 
@@ -330,18 +338,18 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.update(doc, {})).to.throw(expected);
     expect(() => bulkWriter.delete(doc)).to.throw(expected);
     expect(bulkWriter.flush()).to.eventually.be.rejectedWith(expected);
-    expect(bulkWriter.close()).to.eventually.be.rejectedWith(expected);
+    expect(() => bulkWriter.close()).to.throw(expected);
   });
 
   it('sends writes to the same document in separate batches', async () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(0),
+        response: successResponse(1),
       },
       {
         request: createRequest([updateOp('doc', 'bar1')]),
-        response: successResponse(1),
+        response: successResponse(2),
       },
     ]);
 
@@ -360,7 +368,7 @@ describe('BulkWriter', () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc1', 'bar'), updateOp('doc2', 'bar')]),
-        response: mergeResponses([successResponse(0), successResponse(1)]),
+        response: mergeResponses([successResponse(1), successResponse(2)]),
       },
     ]);
 
@@ -409,7 +417,7 @@ describe('BulkWriter', () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(0),
+        response: successResponse(1),
       },
       {
         request: createRequest([
@@ -452,9 +460,9 @@ describe('BulkWriter', () => {
           createOp('doc3', 'bar'),
         ]),
         response: mergeResponses([
-          successResponse(0),
           successResponse(1),
           successResponse(2),
+          successResponse(3),
         ]),
       },
       {
@@ -488,7 +496,7 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('does not send batches if a document containing the same write is in flight', async () => {
+  it('uses timeout for batches that exceed the rate limit', async () => {
     const bulkWriter = await instantiateInstance(
       [
         {
@@ -550,56 +558,46 @@ describe('BulkWriter', () => {
   });
 
   describe('500/50/5 support', () => {
-    afterEach(() => setTimeoutHandler(setTimeout));
-
-    it('does not send batches if doing so exceeds the rate limit', async () => {
-      // The test is considered a success if BulkWriter tries to send the second
-      // batch again after a timeout.
-
-      const arrayRange = Array.from(new Array(500), (_, i) => i);
-      const requests1 = arrayRange.map(i => setOp('doc' + i, 'bar'));
-      const responses1 = arrayRange.map(i => successResponse(i));
-      const arrayRange2 = [500, 501, 502, 503, 504];
-      const requests2 = arrayRange2.map(i => setOp('doc' + i, 'bar'));
-      const responses2 = arrayRange2.map(i => successResponse(i));
-
-      const bulkWriter = await instantiateInstance([
-        {
-          request: createRequest(requests1),
-          response: mergeResponses(responses1),
+    // Return success responses for all requests.
+    function instantiateInstance(): Promise<BulkWriter> {
+      const overrides: ApiOverride = {
+        batchWrite: request => {
+          const requestLength = request.writes?.length || 0;
+          const responses = mergeResponses(
+            Array.from(new Array(requestLength), (_, i) => successResponse(i))
+          );
+          return response({
+            writeResults: responses.writeResults,
+            status: responses.status,
+          });
         },
-        {
-          request: createRequest(requests2),
-          response: mergeResponses(responses2),
-        },
-      ]);
-      for (let i = 0; i < 500; i++) {
-        bulkWriter
-          .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
-          .then(incrementOpCount);
-      }
-      const flush1 = bulkWriter.flush();
-
-      // Sending this next batch would go over the 500/50/5 capacity, so
-      // check that BulkWriter doesn't send this batch until the first batch
-      // is resolved.
-      let timeoutCalled = false;
-      setTimeoutHandler((_, timeout) => {
-        // Check that BulkWriter has not yet sent the 2nd batch.
-        timeoutCalled = true;
-        expect(requestCounter).to.equal(0);
-        expect(timeout).to.be.greaterThan(0);
+      };
+      return createInstance(overrides).then(firestoreClient => {
+        firestore = firestoreClient;
+        return firestore._bulkWriter();
       });
-      for (let i = 500; i < 505; i++) {
-        bulkWriter
-          .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
-          .then(incrementOpCount);
-      }
-      const flush2 = bulkWriter.flush();
-      await flush1;
-      await flush2;
-      expect(timeoutCalled).to.be.true;
-      return bulkWriter.close();
+    }
+
+    it('does not send batches if doing so exceeds the rate limit', done => {
+      instantiateInstance().then(bulkWriter => {
+        let timeoutCalled = false;
+        setTimeoutHandler((_, timeout) => {
+          if (!timeoutCalled) {
+            timeoutCalled = true;
+            expect(timeout).to.be.greaterThan(0);
+            done();
+          }
+        });
+
+        for (let i = 0; i < 600; i++) {
+          bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
+        }
+        // The close() promise will never resolve. Since we do not call the
+        // callback function in the overridden handler, subsequent requests
+        // after the timeout will not be made. The close() call is used to
+        // ensure that the final batch is sent.
+        bulkWriter.close();
+      });
     });
   });
 

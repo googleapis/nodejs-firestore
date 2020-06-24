@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as firestore from '@google-cloud/firestore';
+
 import * as assert from 'assert';
 import * as rbtree from 'functional-red-black-tree';
 import {GoogleError, Status} from 'google-gax';
@@ -27,13 +29,9 @@ import {DocumentReference, Firestore, Query} from './index';
 import {logger} from './logger';
 import {QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
-import {
-  defaultConverter,
-  DocumentData,
-  FirestoreDataConverter,
-  RBTree,
-} from './types';
+import {defaultConverter, RBTree} from './types';
 import {requestTag} from './util';
+
 import api = google.firestore.v1;
 
 /*!
@@ -55,8 +53,7 @@ export const WATCH_IDLE_TIMEOUT_MS = 120 * 1000;
 /*!
  * Sentinel value for a document remove.
  */
-// tslint:disable-next-line:no-any
-const REMOVED = {} as DocumentSnapshotBuilder<any>;
+const REMOVED = {} as DocumentSnapshotBuilder<unknown>;
 
 /*!
  * The change type for document change events.
@@ -72,15 +69,15 @@ const ChangeType: {[k: string]: DocumentChangeType} = {
  * The comparator used for document watches (which should always get called with
  * the same document).
  */
-const DOCUMENT_WATCH_COMPARATOR = <T>(
+const DOCUMENT_WATCH_COMPARATOR: <T>(
   doc1: QueryDocumentSnapshot<T>,
   doc2: QueryDocumentSnapshot<T>
-) => {
+) => number = (doc1, doc2) => {
   assert(doc1 === doc2, 'Document watches only support one document.');
   return 0;
 };
 
-const EMPTY_FUNCTION = () => {};
+const EMPTY_FUNCTION: () => void = () => {};
 
 /**
  * @private
@@ -114,7 +111,7 @@ type DocumentComparator<T> = (
   r: QueryDocumentSnapshot<T>
 ) => number;
 
-interface DocumentChangeSet<T = DocumentData> {
+interface DocumentChangeSet<T = firestore.DocumentData> {
   deletes: string[];
   adds: Array<QueryDocumentSnapshot<T>>;
   updates: Array<QueryDocumentSnapshot<T>>;
@@ -127,7 +124,7 @@ interface DocumentChangeSet<T = DocumentData> {
  * @class
  * @private
  */
-abstract class Watch<T = DocumentData> {
+abstract class Watch<T = firestore.DocumentData> {
   protected readonly firestore: Firestore;
   private readonly backoff: ExponentialBackoff;
   private readonly requestTag: string;
@@ -208,7 +205,7 @@ abstract class Watch<T = DocumentData> {
    */
   constructor(
     firestore: Firestore,
-    readonly _converter = defaultConverter as FirestoreDataConverter<T>
+    readonly _converter = defaultConverter<T>()
   ) {
     this.firestore = firestore;
     this.backoff = new ExponentialBackoff();
@@ -265,7 +262,7 @@ abstract class Watch<T = DocumentData> {
 
     this.initStream();
 
-    const unsubscribe = () => {
+    const unsubscribe: () => void = () => {
       logger('Watch.onSnapshot', this.requestTag, 'Unsubscribe called');
       // Prevent further callbacks.
       this.onNext = () => {};
@@ -324,7 +321,10 @@ abstract class Watch<T = DocumentData> {
     this.docTree.forEach((snapshot: QueryDocumentSnapshot) => {
       // Mark each document as deleted. If documents are not deleted, they
       // will be send again by the server.
-      this.changeMap.set(snapshot.ref.path, REMOVED);
+      this.changeMap.set(
+        snapshot.ref.path,
+        REMOVED as DocumentSnapshotBuilder<T>
+      );
     });
 
     this.current = false;
@@ -559,14 +559,14 @@ abstract class Watch<T = DocumentData> {
         this.changeMap.set(relativeName, snapshot);
       } else if (removed) {
         logger('Watch.onData', this.requestTag, 'Received document remove');
-        this.changeMap.set(relativeName, REMOVED);
+        this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
       }
     } else if (proto.documentDelete || proto.documentRemove) {
       logger('Watch.onData', this.requestTag, 'Processing remove event');
       const name = (proto.documentDelete || proto.documentRemove)!.document!;
       const relativeName = QualifiedResourcePath.fromSlashSeparatedString(name)
         .relativeName;
-      this.changeMap.set(relativeName, REMOVED);
+      this.changeMap.set(relativeName, REMOVED as DocumentSnapshotBuilder<T>);
     } else if (proto.filter) {
       logger('Watch.onData', this.requestTag, 'Processing filter update');
       if (proto.filter.count !== this.currentSize()) {
@@ -807,7 +807,7 @@ abstract class Watch<T = DocumentData> {
  *
  * @private
  */
-export class DocumentWatch<T = DocumentData> extends Watch<T> {
+export class DocumentWatch<T = firestore.DocumentData> extends Watch<T> {
   constructor(
     firestore: Firestore,
     private readonly ref: DocumentReference<T>
@@ -836,13 +836,13 @@ export class DocumentWatch<T = DocumentData> extends Watch<T> {
  *
  * @private
  */
-export class QueryWatch<T = DocumentData> extends Watch<T> {
+export class QueryWatch<T = firestore.DocumentData> extends Watch<T> {
   private comparator: DocumentComparator<T>;
 
   constructor(
     firestore: Firestore,
     private readonly query: Query<T>,
-    converter?: FirestoreDataConverter<T>
+    converter?: firestore.FirestoreDataConverter<T>
   ) {
     super(firestore, converter);
     this.comparator = query.comparator();

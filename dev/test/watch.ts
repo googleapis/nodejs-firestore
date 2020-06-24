@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {WATCH_IDLE_TIMEOUT_MS} from '../src/watch';
+import {DocumentData} from '@google-cloud/firestore';
 
-const duplexify = require('duplexify');
-
+import * as duplexify from 'duplexify';
+import {describe, it, beforeEach, afterEach} from 'mocha';
 import {expect} from 'chai';
 import * as extend from 'extend';
 import {GoogleError, Status} from 'google-gax';
@@ -26,7 +26,6 @@ import {google} from '../protos/firestore_v1_proto_api';
 
 import {
   CollectionReference,
-  DocumentData,
   DocumentReference,
   DocumentSnapshot,
   FieldPath,
@@ -42,6 +41,7 @@ import {MAX_RETRY_ATTEMPTS, setTimeoutHandler} from '../src/backoff';
 import {DocumentSnapshotBuilder} from '../src/document';
 import {DocumentChangeType} from '../src/document-change';
 import {Serializer} from '../src/serializer';
+import {WATCH_IDLE_TIMEOUT_MS} from '../src/watch';
 import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
 import api = google.firestore.v1;
 
@@ -306,7 +306,7 @@ class StreamHelper {
   write(data: string | object): void {
     // The stream returned by the Gapic library accepts Protobuf
     // messages, but the type information does not expose this.
-    // tslint:disable-next-line no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.writeStream!.write(data as any);
   }
 
