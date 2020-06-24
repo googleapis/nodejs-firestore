@@ -159,7 +159,12 @@ templates = common_templates.node_library(
     source_location="build/src", test_project="node-gcloud-ci"
 )
 
-s.copy(templates, excludes=[".eslintrc.json"])
+s.copy(templates, excludes=[
+    ".eslintrc.json", 
+    ".kokoro/*", 
+    ".kokoro/continuous/*", 
+    ".kokoro/presubmit/*"
+])
 
 # Remove auto-generated packaging tests
 os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
