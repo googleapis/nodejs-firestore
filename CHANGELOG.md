@@ -4,6 +4,17 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.6...v4.0.0) (2020-06-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* Drop Node 8 support (#1006)
+
+### Features
+
+* Drop Node 8 support ([#1006](https://www.github.com/googleapis/nodejs-firestore/issues/1006)) ([56355f1](https://www.github.com/googleapis/nodejs-firestore/commit/56355f1c83b055fdbd3ed47e069df813696a1fc0)), closes [#937](https://www.github.com/googleapis/nodejs-firestore/issues/937) [#965](https://www.github.com/googleapis/nodejs-firestore/issues/965) [#1013](https://www.github.com/googleapis/nodejs-firestore/issues/1013) [#1019](https://www.github.com/googleapis/nodejs-firestore/issues/1019) [#1014](https://www.github.com/googleapis/nodejs-firestore/issues/1014) [#1016](https://www.github.com/googleapis/nodejs-firestore/issues/1016) [#1043](https://www.github.com/googleapis/nodejs-firestore/issues/1043) [#1044](https://www.github.com/googleapis/nodejs-firestore/issues/1044) [#1045](https://www.github.com/googleapis/nodejs-firestore/issues/1045) [#1055](https://www.github.com/googleapis/nodejs-firestore/issues/1055) [#1059](https://www.github.com/googleapis/nodejs-firestore/issues/1059) [#1065](https://www.github.com/googleapis/nodejs-firestore/issues/1065) [#1066](https://www.github.com/googleapis/nodejs-firestore/issues/1066) [#1067](https://www.github.com/googleapis/nodejs-firestore/issues/1067) [#1068](https://www.github.com/googleapis/nodejs-firestore/issues/1068) [#1070](https://www.github.com/googleapis/nodejs-firestore/issues/1070) [#1071](https://www.github.com/googleapis/nodejs-firestore/issues/1071) [#1078](https://www.github.com/googleapis/nodejs-firestore/issues/1078) [#1087](https://www.github.com/googleapis/nodejs-firestore/issues/1087) [#1085](https://www.github.com/googleapis/nodejs-firestore/issues/1085) [#1092](https://www.github.com/googleapis/nodejs-firestore/issues/1092) [#1100](https://www.github.com/googleapis/nodejs-firestore/issues/1100) [#1110](https://www.github.com/googleapis/nodejs-firestore/issues/1110) [#1112](https://www.github.com/googleapis/nodejs-firestore/issues/1112) [#1117](https://www.github.com/googleapis/nodejs-firestore/issues/1117) [#1218](https://www.github.com/googleapis/nodejs-firestore/issues/1218) [#1229](https://www.github.com/googleapis/nodejs-firestore/issues/1229) [#1228](https://www.github.com/googleapis/nodejs-firestore/issues/1228)
+
 ### [3.8.6](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.5...v3.8.6) (2020-06-19)
 
 
