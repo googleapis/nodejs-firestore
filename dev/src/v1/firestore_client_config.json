@@ -11,6 +11,9 @@
           "DEADLINE_EXCEEDED",
           "INTERNAL",
           "UNAVAILABLE"
+        ],
+        "unavailable": [
+          "UNAVAILABLE"
         ]
       },
       "retry_params": {
@@ -37,7 +40,7 @@
         },
         "UpdateDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
+          "retry_codes_name": "unavailable",
           "retry_params_name": "default"
         },
         "DeleteDocument": {
@@ -57,7 +60,7 @@
         },
         "Commit": {
           "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
+          "retry_codes_name": "unavailable",
           "retry_params_name": "default"
         },
         "Rollback": {
@@ -95,7 +98,7 @@
         },
         "CreateDocument": {
           "timeout_millis": 60000,
-          "retry_codes_name": "non_idempotent",
+          "retry_codes_name": "unavailable",
           "retry_params_name": "default"
         }
       }
