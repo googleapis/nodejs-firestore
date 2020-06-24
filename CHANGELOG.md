@@ -10,17 +10,17 @@
 ### ⚠ BREAKING CHANGES
 
 * drop Node 8 support (#1006)
-* the `FirestoreDataConverter` is now called with a `QueryDocumentSnapshot` instead of `DocumentData` (#965)
+* `FirestoreDataConverter.fromFirestore()` is now called with a `QueryDocumentSnapshot` instead of `DocumentData` (#965)
 
 ### Features
 
 * add support for serialization to BigInt `(via settings({useBigInt: true})` (#1016)
-* add support for set() with SetOptions when using `FirestoreDataConverte` (#1087)
+* add support for set() with SetOptions when using `FirestoreDataConverter` (#1087)
 * retry CommitRequests that fail with UNAVAILABLE (#1235)
 
 ### Bug Fix
 - remove fallback code that periodically invoked CommitRequests inside Transactions on GCF (#1112)
-- fixes an error that prevented Firestore from connecting to the Emulator if more than one version of `@grpc/grpc-js` was installed (#1233)
+- fixes an error that prevented Firestore from connecting to the Emulator if multiple versions of `@grpc/grpc-js` are installed (#1233)
 
 
 ### [3.8.6](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.5...v3.8.6) (2020-06-19)
