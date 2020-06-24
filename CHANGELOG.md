@@ -20,6 +20,7 @@
 
 ### Bug Fix
 - remove fallback code that periodically invoked CommitRequests inside Transactions on GCF (#1112)
+- fixes an error that prevented Firestore from connecting to the Emulator if more than one version of `@grpc/grpc-js` was installed (#1233)
 
 
 ### [3.8.6](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.5...v3.8.6) (2020-06-19)
