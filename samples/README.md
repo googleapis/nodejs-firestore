@@ -20,6 +20,7 @@ Applications that use Google&#x27;s Server SDKs should not be used in end-user e
 
 * [Before you begin](#before-you-begin)
 * [Samples](#samples)
+  * [Limit-to-last-query](#limit-to-last-query)
   * [Quickstart](#quickstart)
   * [Solution-counters](#solution-counters)
 
@@ -35,6 +36,23 @@ Before running the samples, make sure you've followed the steps outlined in
 `cd ..`
 
 ## Samples
+
+
+
+### Limit-to-last-query
+
+View the [source code](https://github.com/googleapis/nodejs-firestore/blob/master/samples/limit-to-last-query.js).
+
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/limit-to-last-query.js,samples/README.md)
+
+__Usage:__
+
+
+`node samples/limit-to-last-query.js`
+
+
+-----
+
 
 
 
