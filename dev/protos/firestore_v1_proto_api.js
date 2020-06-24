@@ -13329,89 +13329,6 @@
                         return UnaryFilter;
                     })();
     
-                    StructuredQuery.FieldReference = (function() {
-    
-                        /**
-                         * Properties of a FieldReference.
-                         * @memberof google.firestore.v1.StructuredQuery
-                         * @interface IFieldReference
-                         * @property {string|null} [fieldPath] FieldReference fieldPath
-                         */
-    
-                        /**
-                         * Constructs a new FieldReference.
-                         * @memberof google.firestore.v1.StructuredQuery
-                         * @classdesc Represents a FieldReference.
-                         * @implements IFieldReference
-                         * @constructor
-                         * @param {google.firestore.v1.StructuredQuery.IFieldReference=} [properties] Properties to set
-                         */
-                        function FieldReference(properties) {
-                            if (properties)
-                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                    if (properties[keys[i]] != null)
-                                        this[keys[i]] = properties[keys[i]];
-                        }
-    
-                        /**
-                         * FieldReference fieldPath.
-                         * @member {string} fieldPath
-                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
-                         * @instance
-                         */
-                        FieldReference.prototype.fieldPath = "";
-    
-                        /**
-                         * Creates a FieldReference message from a plain object. Also converts values to their respective internal types.
-                         * @function fromObject
-                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
-                         * @static
-                         * @param {Object.<string,*>} object Plain object
-                         * @returns {google.firestore.v1.StructuredQuery.FieldReference} FieldReference
-                         */
-                        FieldReference.fromObject = function fromObject(object) {
-                            if (object instanceof $root.google.firestore.v1.StructuredQuery.FieldReference)
-                                return object;
-                            var message = new $root.google.firestore.v1.StructuredQuery.FieldReference();
-                            if (object.fieldPath != null)
-                                message.fieldPath = String(object.fieldPath);
-                            return message;
-                        };
-    
-                        /**
-                         * Creates a plain object from a FieldReference message. Also converts values to other types if specified.
-                         * @function toObject
-                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
-                         * @static
-                         * @param {google.firestore.v1.StructuredQuery.FieldReference} message FieldReference
-                         * @param {$protobuf.IConversionOptions} [options] Conversion options
-                         * @returns {Object.<string,*>} Plain object
-                         */
-                        FieldReference.toObject = function toObject(message, options) {
-                            if (!options)
-                                options = {};
-                            var object = {};
-                            if (options.defaults)
-                                object.fieldPath = "";
-                            if (message.fieldPath != null && message.hasOwnProperty("fieldPath"))
-                                object.fieldPath = message.fieldPath;
-                            return object;
-                        };
-    
-                        /**
-                         * Converts this FieldReference to JSON.
-                         * @function toJSON
-                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
-                         * @instance
-                         * @returns {Object.<string,*>} JSON object
-                         */
-                        FieldReference.prototype.toJSON = function toJSON() {
-                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                        };
-    
-                        return FieldReference;
-                    })();
-    
                     StructuredQuery.Order = (function() {
     
                         /**
@@ -13523,6 +13440,89 @@
                         };
     
                         return Order;
+                    })();
+    
+                    StructuredQuery.FieldReference = (function() {
+    
+                        /**
+                         * Properties of a FieldReference.
+                         * @memberof google.firestore.v1.StructuredQuery
+                         * @interface IFieldReference
+                         * @property {string|null} [fieldPath] FieldReference fieldPath
+                         */
+    
+                        /**
+                         * Constructs a new FieldReference.
+                         * @memberof google.firestore.v1.StructuredQuery
+                         * @classdesc Represents a FieldReference.
+                         * @implements IFieldReference
+                         * @constructor
+                         * @param {google.firestore.v1.StructuredQuery.IFieldReference=} [properties] Properties to set
+                         */
+                        function FieldReference(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * FieldReference fieldPath.
+                         * @member {string} fieldPath
+                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                         * @instance
+                         */
+                        FieldReference.prototype.fieldPath = "";
+    
+                        /**
+                         * Creates a FieldReference message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.FieldReference} FieldReference
+                         */
+                        FieldReference.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.FieldReference)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.FieldReference();
+                            if (object.fieldPath != null)
+                                message.fieldPath = String(object.fieldPath);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a FieldReference message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.FieldReference} message FieldReference
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        FieldReference.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.fieldPath = "";
+                            if (message.fieldPath != null && message.hasOwnProperty("fieldPath"))
+                                object.fieldPath = message.fieldPath;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this FieldReference to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.FieldReference
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        FieldReference.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        return FieldReference;
                     })();
     
                     StructuredQuery.Projection = (function() {
