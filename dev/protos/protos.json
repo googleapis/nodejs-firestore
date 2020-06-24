@@ -1807,14 +1807,6 @@
                         }
                       }
                     },
-                    "FieldReference": {
-                      "fields": {
-                        "fieldPath": {
-                          "type": "string",
-                          "id": 2
-                        }
-                      }
-                    },
                     "Order": {
                       "fields": {
                         "field": {
@@ -1823,6 +1815,14 @@
                         },
                         "direction": {
                           "type": "Direction",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "FieldReference": {
+                      "fields": {
+                        "fieldPath": {
+                          "type": "string",
                           "id": 2
                         }
                       }
