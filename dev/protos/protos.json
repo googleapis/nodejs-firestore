@@ -1807,18 +1807,6 @@
                         }
                       }
                     },
-                    "Order": {
-                      "fields": {
-                        "field": {
-                          "type": "FieldReference",
-                          "id": 1
-                        },
-                        "direction": {
-                          "type": "Direction",
-                          "id": 2
-                        }
-                      }
-                    },
                     "FieldReference": {
                       "fields": {
                         "fieldPath": {
@@ -1832,6 +1820,18 @@
                         "fields": {
                           "rule": "repeated",
                           "type": "FieldReference",
+                          "id": 2
+                        }
+                      }
+                    },
+                    "Order": {
+                      "fields": {
+                        "field": {
+                          "type": "FieldReference",
+                          "id": 1
+                        },
+                        "direction": {
+                          "type": "Direction",
                           "id": 2
                         }
                       }
