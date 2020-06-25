@@ -13329,119 +13329,6 @@
                         return UnaryFilter;
                     })();
     
-                    StructuredQuery.Order = (function() {
-    
-                        /**
-                         * Properties of an Order.
-                         * @memberof google.firestore.v1.StructuredQuery
-                         * @interface IOrder
-                         * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [field] Order field
-                         * @property {google.firestore.v1.StructuredQuery.Direction|null} [direction] Order direction
-                         */
-    
-                        /**
-                         * Constructs a new Order.
-                         * @memberof google.firestore.v1.StructuredQuery
-                         * @classdesc Represents an Order.
-                         * @implements IOrder
-                         * @constructor
-                         * @param {google.firestore.v1.StructuredQuery.IOrder=} [properties] Properties to set
-                         */
-                        function Order(properties) {
-                            if (properties)
-                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                    if (properties[keys[i]] != null)
-                                        this[keys[i]] = properties[keys[i]];
-                        }
-    
-                        /**
-                         * Order field.
-                         * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} field
-                         * @memberof google.firestore.v1.StructuredQuery.Order
-                         * @instance
-                         */
-                        Order.prototype.field = null;
-    
-                        /**
-                         * Order direction.
-                         * @member {google.firestore.v1.StructuredQuery.Direction} direction
-                         * @memberof google.firestore.v1.StructuredQuery.Order
-                         * @instance
-                         */
-                        Order.prototype.direction = 0;
-    
-                        /**
-                         * Creates an Order message from a plain object. Also converts values to their respective internal types.
-                         * @function fromObject
-                         * @memberof google.firestore.v1.StructuredQuery.Order
-                         * @static
-                         * @param {Object.<string,*>} object Plain object
-                         * @returns {google.firestore.v1.StructuredQuery.Order} Order
-                         */
-                        Order.fromObject = function fromObject(object) {
-                            if (object instanceof $root.google.firestore.v1.StructuredQuery.Order)
-                                return object;
-                            var message = new $root.google.firestore.v1.StructuredQuery.Order();
-                            if (object.field != null) {
-                                if (typeof object.field !== "object")
-                                    throw TypeError(".google.firestore.v1.StructuredQuery.Order.field: object expected");
-                                message.field = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.field);
-                            }
-                            switch (object.direction) {
-                            case "DIRECTION_UNSPECIFIED":
-                            case 0:
-                                message.direction = 0;
-                                break;
-                            case "ASCENDING":
-                            case 1:
-                                message.direction = 1;
-                                break;
-                            case "DESCENDING":
-                            case 2:
-                                message.direction = 2;
-                                break;
-                            }
-                            return message;
-                        };
-    
-                        /**
-                         * Creates a plain object from an Order message. Also converts values to other types if specified.
-                         * @function toObject
-                         * @memberof google.firestore.v1.StructuredQuery.Order
-                         * @static
-                         * @param {google.firestore.v1.StructuredQuery.Order} message Order
-                         * @param {$protobuf.IConversionOptions} [options] Conversion options
-                         * @returns {Object.<string,*>} Plain object
-                         */
-                        Order.toObject = function toObject(message, options) {
-                            if (!options)
-                                options = {};
-                            var object = {};
-                            if (options.defaults) {
-                                object.field = null;
-                                object.direction = options.enums === String ? "DIRECTION_UNSPECIFIED" : 0;
-                            }
-                            if (message.field != null && message.hasOwnProperty("field"))
-                                object.field = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.field, options);
-                            if (message.direction != null && message.hasOwnProperty("direction"))
-                                object.direction = options.enums === String ? $root.google.firestore.v1.StructuredQuery.Direction[message.direction] : message.direction;
-                            return object;
-                        };
-    
-                        /**
-                         * Converts this Order to JSON.
-                         * @function toJSON
-                         * @memberof google.firestore.v1.StructuredQuery.Order
-                         * @instance
-                         * @returns {Object.<string,*>} JSON object
-                         */
-                        Order.prototype.toJSON = function toJSON() {
-                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                        };
-    
-                        return Order;
-                    })();
-    
                     StructuredQuery.FieldReference = (function() {
     
                         /**
@@ -13618,6 +13505,119 @@
                         };
     
                         return Projection;
+                    })();
+    
+                    StructuredQuery.Order = (function() {
+    
+                        /**
+                         * Properties of an Order.
+                         * @memberof google.firestore.v1.StructuredQuery
+                         * @interface IOrder
+                         * @property {google.firestore.v1.StructuredQuery.IFieldReference|null} [field] Order field
+                         * @property {google.firestore.v1.StructuredQuery.Direction|null} [direction] Order direction
+                         */
+    
+                        /**
+                         * Constructs a new Order.
+                         * @memberof google.firestore.v1.StructuredQuery
+                         * @classdesc Represents an Order.
+                         * @implements IOrder
+                         * @constructor
+                         * @param {google.firestore.v1.StructuredQuery.IOrder=} [properties] Properties to set
+                         */
+                        function Order(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Order field.
+                         * @member {google.firestore.v1.StructuredQuery.IFieldReference|null|undefined} field
+                         * @memberof google.firestore.v1.StructuredQuery.Order
+                         * @instance
+                         */
+                        Order.prototype.field = null;
+    
+                        /**
+                         * Order direction.
+                         * @member {google.firestore.v1.StructuredQuery.Direction} direction
+                         * @memberof google.firestore.v1.StructuredQuery.Order
+                         * @instance
+                         */
+                        Order.prototype.direction = 0;
+    
+                        /**
+                         * Creates an Order message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.v1.StructuredQuery.Order
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.v1.StructuredQuery.Order} Order
+                         */
+                        Order.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.v1.StructuredQuery.Order)
+                                return object;
+                            var message = new $root.google.firestore.v1.StructuredQuery.Order();
+                            if (object.field != null) {
+                                if (typeof object.field !== "object")
+                                    throw TypeError(".google.firestore.v1.StructuredQuery.Order.field: object expected");
+                                message.field = $root.google.firestore.v1.StructuredQuery.FieldReference.fromObject(object.field);
+                            }
+                            switch (object.direction) {
+                            case "DIRECTION_UNSPECIFIED":
+                            case 0:
+                                message.direction = 0;
+                                break;
+                            case "ASCENDING":
+                            case 1:
+                                message.direction = 1;
+                                break;
+                            case "DESCENDING":
+                            case 2:
+                                message.direction = 2;
+                                break;
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an Order message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.v1.StructuredQuery.Order
+                         * @static
+                         * @param {google.firestore.v1.StructuredQuery.Order} message Order
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Order.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.field = null;
+                                object.direction = options.enums === String ? "DIRECTION_UNSPECIFIED" : 0;
+                            }
+                            if (message.field != null && message.hasOwnProperty("field"))
+                                object.field = $root.google.firestore.v1.StructuredQuery.FieldReference.toObject(message.field, options);
+                            if (message.direction != null && message.hasOwnProperty("direction"))
+                                object.direction = options.enums === String ? $root.google.firestore.v1.StructuredQuery.Direction[message.direction] : message.direction;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Order to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.v1.StructuredQuery.Order
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Order.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        return Order;
                     })();
     
                     /**
