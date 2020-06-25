@@ -132,7 +132,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * resulting `api.IWrite` will be sent to the backend.
    * @private
    */
-  private readonly _ops: Array<PendingWriteOp> = [];
+  private _ops: Array<PendingWriteOp> = [];
 
   private _committed = false;
 
@@ -569,14 +569,14 @@ export class WriteBatch implements firestore.WriteBatch {
       writes: this._ops.map(op => op()),
     };
 
-    const retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
+    const retryCodes = getRetryCodes('batchWrite');
 
     const response = await this._firestore.request<
       api.IBatchWriteRequest,
       api.BatchWriteResponse
     >('batchWrite', request, tag, retryCodes);
 
-    return (response.writeResults || []).map((result, i) => {
+    return response.writeResults.map((result, i) => {
       const status = response.status[i];
       const error = new GoogleError(status.message || undefined);
       error.code = status.code as Status;
@@ -591,6 +591,21 @@ export class WriteBatch implements firestore.WriteBatch {
           : null;
       return new BatchWriteResult(updateTime, error);
     });
+  }
+
+  /**
+   * Creates a new WriteBatch containing only the operations located at the
+   * provided indexes.
+   *
+   * @param indexes List of operation indexes to keep
+   * @private
+   */
+  _sliceIndexes(indexes: number[]): WriteBatch {
+    const writeBatch = new WriteBatch(this._firestore);
+    writeBatch._ops = this._ops.filter((_, i) => {
+      return indexes.includes(i);
+    });
+    return writeBatch;
   }
 
   /**
