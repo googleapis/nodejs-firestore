@@ -5531,53 +5531,6 @@ export namespace google {
                         "OPERATOR_UNSPECIFIED"| "IS_NAN"| "IS_NULL";
                 }
 
-                /** Properties of an Order. */
-                interface IOrder {
-
-                    /** Order field */
-                    field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
-
-                    /** Order direction */
-                    direction?: (google.firestore.v1.StructuredQuery.Direction|null);
-                }
-
-                /** Represents an Order. */
-                class Order implements IOrder {
-
-                    /**
-                     * Constructs a new Order.
-                     * @param [properties] Properties to set
-                     */
-                    constructor(properties?: google.firestore.v1.StructuredQuery.IOrder);
-
-                    /** Order field. */
-                    public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
-
-                    /** Order direction. */
-                    public direction: google.firestore.v1.StructuredQuery.Direction;
-
-                    /**
-                     * Creates an Order message from a plain object. Also converts values to their respective internal types.
-                     * @param object Plain object
-                     * @returns Order
-                     */
-                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.Order;
-
-                    /**
-                     * Creates a plain object from an Order message. Also converts values to other types if specified.
-                     * @param message Order
-                     * @param [options] Conversion options
-                     * @returns Plain object
-                     */
-                    public static toObject(message: google.firestore.v1.StructuredQuery.Order, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                    /**
-                     * Converts this Order to JSON.
-                     * @returns JSON object
-                     */
-                    public toJSON(): { [k: string]: any };
-                }
-
                 /** Properties of a FieldReference. */
                 interface IFieldReference {
 
@@ -5655,6 +5608,53 @@ export namespace google {
 
                     /**
                      * Converts this Projection to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+                }
+
+                /** Properties of an Order. */
+                interface IOrder {
+
+                    /** Order field */
+                    field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                    /** Order direction */
+                    direction?: (google.firestore.v1.StructuredQuery.Direction|null);
+                }
+
+                /** Represents an Order. */
+                class Order implements IOrder {
+
+                    /**
+                     * Constructs a new Order.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IOrder);
+
+                    /** Order field. */
+                    public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                    /** Order direction. */
+                    public direction: google.firestore.v1.StructuredQuery.Direction;
+
+                    /**
+                     * Creates an Order message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Order
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.Order;
+
+                    /**
+                     * Creates a plain object from an Order message. Also converts values to other types if specified.
+                     * @param message Order
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.Order, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Order to JSON.
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
