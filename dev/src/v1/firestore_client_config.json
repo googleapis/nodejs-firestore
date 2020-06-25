@@ -11,10 +11,6 @@
           "DEADLINE_EXCEEDED",
           "INTERNAL",
           "UNAVAILABLE"
-        ],
-        "aborted_unavailable": [
-          "ABORTED",
-          "UNAVAILABLE"
         ]
       },
       "retry_params": {
@@ -94,8 +90,7 @@
           "retry_params_name": "default"
         },
         "BatchWrite": {
-          "timeout_millis": 60000,
-          "retry_codes_name": "aborted_unavailable",
+          "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
         "CreateDocument": {
