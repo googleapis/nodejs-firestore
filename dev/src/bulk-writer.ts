@@ -28,7 +28,7 @@ import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {Deferred, getRetryCodes, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
-import {GoogleError, Status} from 'google-gax';
+import {Status} from 'google-gax';
 import {logger} from './logger';
 
 /*!
@@ -96,7 +96,7 @@ class BulkCommitBatch {
 
   constructor(
     private readonly firestore: Firestore,
-    private readonly writeBatch: WriteBatch,
+    private writeBatch: WriteBatch,
     private readonly maxBatchSize: number
   ) {
     this.backoff = new ExponentialBackoff();
@@ -231,8 +231,8 @@ class BulkCommitBatch {
     let retryAttempts = 0;
     while (retryAttempts < MAX_RETRY_ATTEMPTS) {
       let retryIndexes: number[] = [];
+      await this.backoff.backoffAndWait();
       try {
-        await this.backoff.backoffAndWait();
         const results = await this.writeBatch.bulkCommit();
         retryIndexes = this.processResults(originalIndexMap, results);
       } catch (err) {
@@ -259,8 +259,7 @@ class BulkCommitBatch {
             `${retryIndexes.length}.`
         );
 
-        this.writeBatch._sliceIndexes(retryIndexes);
-        this.writeBatch._markNotCommitted();
+        this.writeBatch = this.writeBatch._sliceIndexes(retryIndexes);
       } else {
         break;
       }
@@ -280,32 +279,28 @@ class BulkCommitBatch {
     results: BatchWriteResult[],
     error?: Error
   ): number[] {
-    let indexesToRetry: number[] = [];
-    if (error === undefined) {
-      for (let i = 0; i < results.length; i++) {
-        const writeResult = results[i];
-        if (this.shouldRetry(writeResult.status.code)) {
-          indexesToRetry.push(i);
-        } else {
-          const originalIndex = originalIndexMap.get(i)!;
-          this.resultsMap.get(originalIndex)!.resolve(results[i]);
-        }
-      }
-    } else {
-      // If the batchWrite RPC fails with a retryable error, retry all writes
-      // in the batch.
-      if (error instanceof GoogleError && this.shouldRetry(error.code)) {
-        indexesToRetry = Array.from(
-          new Array(originalIndexMap.size),
-          (_, i) => i
-        );
+    const indexesToRetry: number[] = [];
+    if (error) {
+      results = Array.from({length: originalIndexMap.size}, () => {
+        return {
+          writeTime: null,
+          status: error,
+        };
+      });
+    }
+
+    for (let i = 0; i < results.length; i++) {
+      const writeResult = results[i];
+      const originalIndex = originalIndexMap.get(i)!;
+      if (writeResult.status.code === Status.OK) {
+        this.resultsMap.get(originalIndex)!.resolve(results[i]);
+      } else if (this.shouldRetry(writeResult.status.code)) {
+        indexesToRetry.push(i);
       } else {
-        for (let i = 0; i < this.opCount; i++) {
-          const originalIndex = originalIndexMap.get(i)!;
-          this.resultsMap.get(originalIndex)!.reject(error);
-        }
+        this.resultsMap.get(originalIndex)!.reject(writeResult.status);
       }
     }
+
     if (indexesToRetry.length === 0) {
       this.completedDeferred.resolve();
     }

@@ -36,8 +36,6 @@ import {
   verifyInstance,
 } from './util/helpers';
 
-import {setTimeoutHandler} from '../src/backoff';
-
 import api = proto.google.firestore.v1;
 
 // Change the argument to 'console.log' to enable debug output.
@@ -566,7 +564,7 @@ describe('BulkWriter', () => {
     return bulkWriter.close().then(() => verifyOpCount(2));
   });
 
-  it('retries writes that fail with ABORTED errors', async () => {
+  it('retries individual rites that fail with ABORTED errors', async () => {
     setTimeoutHandler(setImmediate);
     // Create mock responses that simulate one successful write followed by
     // failed responses.
@@ -578,7 +576,7 @@ describe('BulkWriter', () => {
           setOp('doc3', 'bar'),
         ]),
         response: mergeResponses([
-          successResponse(1),
+          failedResponse(),
           failedResponse(Status.UNAVAILABLE),
           failedResponse(Status.ABORTED),
         ]),
@@ -596,9 +594,11 @@ describe('BulkWriter', () => {
       },
     ]);
 
-    const set1 = bulkWriter.set(firestore.doc('collectionId/doc1'), {
-      foo: 'bar',
-    });
+    bulkWriter
+      .set(firestore.doc('collectionId/doc1'), {
+        foo: 'bar',
+      })
+      .catch(incrementOpCount);
     const set2 = bulkWriter.set(firestore.doc('collectionId/doc2'), {
       foo: 'bar',
     });
@@ -606,9 +606,11 @@ describe('BulkWriter', () => {
       foo: 'bar',
     });
     await bulkWriter.close();
-    expect((await set1).writeTime).to.deep.equal(new Timestamp(1, 0));
     expect((await set2).writeTime).to.deep.equal(new Timestamp(2, 0));
     expect((await set3).writeTime).to.deep.equal(new Timestamp(3, 0));
+
+    // Check that set1 was not retried
+    verifyOpCount(1);
   });
 
   describe('Timeout handler tests', () => {
@@ -654,14 +656,14 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('retries retryable batchWrite failures', async () => {
+  it('retries batchWrite when the RPC fails with retryable error', async () => {
     setTimeoutHandler(setImmediate);
-    let retryCount = 0;
+    let retryAttempts = 0;
     function instantiateInstance(): Promise<BulkWriter> {
       const overrides: ApiOverride = {
         batchWrite: () => {
-          retryCount++;
-          if (retryCount < 5) {
+          retryAttempts++;
+          if (retryAttempts < 5) {
             const error = new GoogleError('Mock batchWrite failed in test');
             error.code = Status.ABORTED;
             throw error;
