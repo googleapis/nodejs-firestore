@@ -104,6 +104,7 @@ export class WriteResult implements firestore.WriteResult {
  */
 export class BatchWriteResult {
   constructor(
+    readonly key: string,
     readonly writeTime: Timestamp | null,
     readonly status: GoogleError
   ) {}
@@ -128,11 +129,13 @@ export class WriteBatch implements firestore.WriteBatch {
   private readonly _allowUndefined: boolean;
 
   /**
-   * An array of write operations that are executed as part of the commit. The
-   * resulting `api.IWrite` will be sent to the backend.
+   * An array of document paths and the corresponding write operations that are
+   * executed as part of the commit. The resulting `api.IWrite` will be sent to
+   * the backend.
+   *
    * @private
    */
-  private _ops: Array<PendingWriteOp> = [];
+  private _ops: Array<{docPath: string; op: PendingWriteOp}> = [];
 
   private _committed = false;
 
@@ -141,10 +144,26 @@ export class WriteBatch implements firestore.WriteBatch {
    *
    * @param firestore The Firestore Database client.
    */
-  constructor(firestore: Firestore) {
+  constructor(
+    firestore: Firestore,
+    retryBatch: WriteBatch,
+    keysToRetry: string[]
+  );
+  constructor(firestore: Firestore);
+  constructor(
+    firestore: Firestore,
+    retryBatch?: WriteBatch,
+    docsToRetry?: string[]
+  ) {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
     this._allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
+
+    if (retryBatch) {
+      this._ops = retryBatch._ops.filter(
+        v => docsToRetry!.indexOf(v.docPath) !== -1
+      );
+    }
   }
 
   /**
@@ -214,7 +233,7 @@ export class WriteBatch implements firestore.WriteBatch {
       return write;
     };
 
-    this._ops.push(op);
+    this._ops.push({docPath: documentRef.path, op});
 
     return this;
   }
@@ -261,7 +280,7 @@ export class WriteBatch implements firestore.WriteBatch {
       return write;
     };
 
-    this._ops.push(op);
+    this._ops.push({docPath: documentRef.path, op});
 
     return this;
   }
@@ -362,7 +381,7 @@ export class WriteBatch implements firestore.WriteBatch {
       return write;
     };
 
-    this._ops.push(op);
+    this._ops.push({docPath: documentRef.path, op});
 
     return this;
   }
@@ -518,7 +537,7 @@ export class WriteBatch implements firestore.WriteBatch {
       return write;
     };
 
-    this._ops.push(op);
+    this._ops.push({docPath: documentRef.path, op});
 
     return this;
   }
@@ -566,7 +585,7 @@ export class WriteBatch implements firestore.WriteBatch {
     const database = this._firestore.formattedName;
     const request: api.IBatchWriteRequest = {
       database,
-      writes: this._ops.map(op => op()),
+      writes: this._ops.map(op => op.op()),
     };
 
     const retryCodes = getRetryCodes('batchWrite');
@@ -589,7 +608,7 @@ export class WriteBatch implements firestore.WriteBatch {
         error.code === Status.OK
           ? Timestamp.fromProto(result.updateTime || DELETE_TIMESTAMP_SENTINEL)
           : null;
-      return new BatchWriteResult(updateTime, error);
+      return new BatchWriteResult(this._ops[i].docPath, updateTime, error);
     });
   }
 
@@ -600,13 +619,13 @@ export class WriteBatch implements firestore.WriteBatch {
    * @param indexes List of operation indexes to keep
    * @private
    */
-  _sliceIndexes(indexes: number[]): WriteBatch {
-    const writeBatch = new WriteBatch(this._firestore);
-    writeBatch._ops = this._ops.filter((_, i) => {
-      return indexes.includes(i);
-    });
-    return writeBatch;
-  }
+  // _sliceIndexes(indexes: number[]): WriteBatch {
+  //   const writeBatch = new WriteBatch(this._firestore);
+  //   writeBatch._ops = this._ops.filter((_, i) => {
+  //     return indexes.includes(i);
+  //   });
+  //   return writeBatch;
+  // }
 
   /**
    * Commit method that takes an optional transaction ID.
@@ -633,7 +652,7 @@ export class WriteBatch implements firestore.WriteBatch {
 
     const request: api.ICommitRequest = {
       database,
-      writes: this._ops.map(op => op()),
+      writes: this._ops.map(op => op.op()),
     };
     if (commitOptions?.transactionId) {
       request.transaction = commitOptions.transactionId;

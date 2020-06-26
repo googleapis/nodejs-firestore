@@ -48,7 +48,7 @@ interface RequestResponse {
   response: api.IBatchWriteResponse;
 }
 
-describe.only('BulkWriter', () => {
+describe('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
@@ -712,19 +712,16 @@ describe.only('BulkWriter', () => {
       });
     }
     const bulkWriter = await instantiateInstance();
-    let error: Error;
     bulkWriter
       .create(firestore.doc('collectionId/doc'), {
         foo: 'bar',
       })
       .catch(err => {
+        expect(err instanceof GoogleError && err.code === Status.ABORTED).to.be
+          .true;
         incrementOpCount();
-        error = err;
       });
-    return bulkWriter.close().then(async () => {
-      verifyOpCount(1);
-      expect(error instanceof GoogleError && error.code === Status.ABORTED).to.be.true;
-    });
+    return bulkWriter.close().then(() => verifyOpCount(1));
   });
 
   describe('if bulkCommit() fails', async () => {

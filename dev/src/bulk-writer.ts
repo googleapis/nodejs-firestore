@@ -82,15 +82,13 @@ class BulkCommitBatch {
    */
   state = BatchState.OPEN;
 
-  // The set of document reference paths present in the WriteBatch.
-  readonly docPaths = new Set<string>();
-
   // A deferred promise that is resolved after the batch has been sent, and a
   // response is received.
   private completedDeferred = new Deferred<void>();
 
-  // A map from each WriteBatch operation to its corresponding result.
-  private resultsMap = new Map<number, Deferred<BatchWriteResult>>();
+  // A map from each write's document path to its corresponding result.
+  // Only contains writes that have not been resolved.
+  private pendingOps = new Map<string, Deferred<BatchWriteResult>>();
 
   private readonly backoff: ExponentialBackoff;
 
@@ -106,7 +104,7 @@ class BulkCommitBatch {
    * The number of writes in this batch.
    */
   get opCount(): number {
-    return this.resultsMap.size;
+    return this.pendingOps.size;
   }
 
   /**
@@ -183,16 +181,15 @@ class BulkCommitBatch {
     documentRef: firestore.DocumentReference<T>
   ): Promise<WriteResult> {
     assert(
-      !this.docPaths.has(documentRef.path),
+      !this.pendingOps.has(documentRef.path),
       'Batch should not contain writes to the same document'
     );
     assert(
       this.state === BatchState.OPEN,
       'Batch should be OPEN when adding writes'
     );
-    this.docPaths.add(documentRef.path);
     const deferred = new Deferred<BatchWriteResult>();
-    this.resultsMap.set(this.opCount, deferred);
+    this.pendingOps.set(documentRef.path, deferred);
 
     if (this.opCount === this.maxBatchSize) {
       this.state = BatchState.READY_TO_SEND;
@@ -224,94 +221,70 @@ class BulkCommitBatch {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    let originalIndexMap: Map<number, number> = new Map(
-      Array.from(new Array(this.opCount), (_, i) => [i, i])
-    );
-
-    let retryAttempts = 0;
-    while (retryAttempts < MAX_RETRY_ATTEMPTS) {
-      let retryIndexes: number[] = [];
+    let results: BatchWriteResult[] = [];
+    for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
       await this.backoff.backoffAndWait();
-      try {
-        const results = await this.writeBatch.bulkCommit();
-        retryIndexes = this.processResults(originalIndexMap, results);
-      } catch (err) {
-        retryIndexes = this.processResults(
-          originalIndexMap,
-          [],
-          wrapError(err, stack)
-        );
-      }
 
-      // Map the indexes that are going to be retried back to their
-      // corresponding indexes in the original batch.
-      originalIndexMap = new Map(
-        Array.from(new Array(retryIndexes.length), (_, i) => [
-          i,
-          originalIndexMap.get(retryIndexes[i])!,
-        ])
-      );
-      if (retryIndexes.length > 0) {
+      try {
+        results = await this.writeBatch.bulkCommit();
+      } catch (err) {
+        // Map the failure to each individual write's result.
+        results = [...this.pendingOps.keys()].map(key => {
+          return {key, writeTime: null, status: wrapError(err, stack)};
+        });
+      }
+      this.processResults(results, /* shouldRetry= */ true);
+
+      if (this.pendingOps.size > 0) {
         logger(
           'BulkWriter.bulkCommit',
           null,
-          `Current batch failed at retry #${retryAttempts}. Num failures: ` +
-            `${retryIndexes.length}.`
+          `Current batch failed at retry #${attempt}. Num failures: ` +
+            `${this.pendingOps.size}.`
         );
 
-        this.writeBatch = this.writeBatch._sliceIndexes(retryIndexes);
+        this.writeBatch = new WriteBatch(this.firestore, this.writeBatch, [
+          ...this.pendingOps.keys(),
+        ]);
       } else {
-        break;
+        this.completedDeferred.resolve();
+        return;
       }
-      retryAttempts++;
     }
+
+    this.processResults(results, /* shouldRetry= */ false);
+    this.completedDeferred.resolve();
   }
 
   /**
    * Resolves the individual operations in the batch with the results.
-   *
-   * @param originalIndexMap Map of the results' indexes to the indexes
-   * on resultsMap
-   * @return The indexes of writes that failed with a retryable error.
    */
-  processResults(
-    originalIndexMap: Map<number, number>,
-    results: BatchWriteResult[],
-    error?: Error
-  ): number[] {
-    const indexesToRetry: number[] = [];
-    // If the BatchWrite RPC failed, the results array will be empty. Create
-    // a results array containing the error for each write in the request.
-    if (error) {
-      results = Array.from({length: originalIndexMap.size}, () => {
-        return {
-          writeTime: null,
-          status: error,
-        };
-      });
-    }
-
-    for (let i = 0; i < results.length; i++) {
-      const writeResult = results[i];
-      const originalIndex = originalIndexMap.get(i)!;
-      if (writeResult.status.code === Status.OK) {
-        this.resultsMap.get(originalIndex)!.resolve(results[i]);
-      } else if (this.shouldRetry(writeResult.status.code)) {
-        indexesToRetry.push(i);
-      } else {
-        this.resultsMap.get(originalIndex)!.reject(writeResult.status);
+  processResults(results: BatchWriteResult[], shouldRetry: boolean): void {
+    for (const result of results) {
+      if (result.status.code === Status.OK || !shouldRetry) {
+        this.pendingOps.get(result.key)!.resolve(result);
+        this.pendingOps.delete(result.key);
+      } else if (!this.shouldRetry(result.status.code)) {
+        this.pendingOps.get(result.key)!.reject(result.status);
+        this.pendingOps.delete(result.key);
       }
     }
-
-    if (indexesToRetry.length === 0) {
-      this.completedDeferred.resolve();
-    }
-    return indexesToRetry;
   }
 
   private shouldRetry(code: Status | undefined): boolean {
     const retryCodes = getRetryCodes('batchWrite');
     return code !== undefined && retryCodes.includes(code);
+  }
+
+  has(path: string): boolean {
+    for (const [docPath] of this.pendingOps) {
+      if (docPath === path) return true;
+    }
+    return false;
+  }
+
+  docPaths(): IterableIterator<string> {
+    return this.pendingOps.keys();
   }
 
   /**
@@ -648,10 +621,7 @@ export class BulkWriter {
   ): BulkCommitBatch {
     if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
-      if (
-        lastBatch.state === BatchState.OPEN &&
-        !lastBatch.docPaths.has(ref.path)
-      ) {
+      if (lastBatch.state === BatchState.OPEN && !lastBatch.has(ref.path)) {
         return lastBatch;
       }
     }
@@ -745,11 +715,11 @@ export class BulkWriter {
       return false;
     }
 
-    for (const path of batch.docPaths) {
+    for (const path of batch.docPaths()) {
       const isRefInFlight =
         this.batchQueue
           .filter(batch => batch.state === BatchState.SENT)
-          .find(batch => batch.docPaths.has(path)) !== undefined;
+          .find(batch => batch.has(path)) !== undefined;
       if (isRefInFlight) {
         // eslint-disable-next-line no-console
         console.warn(
