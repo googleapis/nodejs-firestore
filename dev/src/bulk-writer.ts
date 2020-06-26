@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import * as firestore from '@google-cloud/firestore';
+import {Status} from 'google-gax';
 
 import * as assert from 'assert';
 
@@ -28,7 +29,6 @@ import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {Deferred, getRetryCodes, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
-import {Status} from 'google-gax';
 import {logger} from './logger';
 
 /*!
@@ -280,6 +280,8 @@ class BulkCommitBatch {
     error?: Error
   ): number[] {
     const indexesToRetry: number[] = [];
+    // If the BatchWrite RPC failed, the results array will be empty. Create
+    // a results array containing the error for each write in the request.
     if (error) {
       results = Array.from({length: originalIndexMap.size}, () => {
         return {

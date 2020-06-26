@@ -48,7 +48,7 @@ interface RequestResponse {
   response: api.IBatchWriteResponse;
 }
 
-describe('BulkWriter', () => {
+describe.only('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
@@ -693,6 +693,37 @@ describe('BulkWriter', () => {
       });
     return bulkWriter.close().then(async () => {
       expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
+    });
+  });
+
+  it('fails writes after all retry attempts failed', async () => {
+    setTimeoutHandler(setImmediate);
+    function instantiateInstance(): Promise<BulkWriter> {
+      const overrides: ApiOverride = {
+        batchWrite: () => {
+          const error = new GoogleError('Mock batchWrite failed in test');
+          error.code = Status.ABORTED;
+          throw error;
+        },
+      };
+      return createInstance(overrides).then(firestoreClient => {
+        firestore = firestoreClient;
+        return firestore._bulkWriter();
+      });
+    }
+    const bulkWriter = await instantiateInstance();
+    let error: Error;
+    bulkWriter
+      .create(firestore.doc('collectionId/doc'), {
+        foo: 'bar',
+      })
+      .catch(err => {
+        incrementOpCount();
+        error = err;
+      });
+    return bulkWriter.close().then(async () => {
+      verifyOpCount(1);
+      expect(error instanceof GoogleError && error.code === Status.ABORTED).to.be.true;
     });
   });
 
