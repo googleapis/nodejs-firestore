@@ -135,7 +135,7 @@ export class WriteBatch implements firestore.WriteBatch {
    *
    * @private
    */
-  private _ops: Array<{docPath: string; op: PendingWriteOp}> = [];
+  private readonly _ops: Array<{docPath: string; op: PendingWriteOp}> = [];
 
   private _committed = false;
 
@@ -611,21 +611,6 @@ export class WriteBatch implements firestore.WriteBatch {
       return new BatchWriteResult(this._ops[i].docPath, updateTime, error);
     });
   }
-
-  /**
-   * Creates a new WriteBatch containing only the operations located at the
-   * provided indexes.
-   *
-   * @param indexes List of operation indexes to keep
-   * @private
-   */
-  // _sliceIndexes(indexes: number[]): WriteBatch {
-  //   const writeBatch = new WriteBatch(this._firestore);
-  //   writeBatch._ops = this._ops.filter((_, i) => {
-  //     return indexes.includes(i);
-  //   });
-  //   return writeBatch;
-  // }
 
   /**
    * Commit method that takes an optional transaction ID.
