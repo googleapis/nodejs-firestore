@@ -143,11 +143,14 @@ export class WriteBatch implements firestore.WriteBatch {
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
+   * @param retryBatch The WriteBatch that needs to be retried.
+   * @param docsToRetry The documents from the provided WriteBatch that need
+   * to be retried.
    */
   constructor(
     firestore: Firestore,
     retryBatch: WriteBatch,
-    keysToRetry: string[]
+    docsToRetry: string[]
   );
   constructor(firestore: Firestore);
   constructor(
@@ -160,6 +163,8 @@ export class WriteBatch implements firestore.WriteBatch {
     this._allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
 
     if (retryBatch) {
+      // Creates a new WriteBatch containing only the operations from the
+      // provided document paths to retry.
       this._ops = retryBatch._ops.filter(
         v => docsToRetry!.indexOf(v.docPath) !== -1
       );

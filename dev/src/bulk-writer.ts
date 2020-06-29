@@ -229,11 +229,11 @@ class BulkCommitBatch {
         results = await this.writeBatch.bulkCommit();
       } catch (err) {
         // Map the failure to each individual write's result.
-        results = [...this.pendingOps.keys()].map(key => {
-          return {key, writeTime: null, status: wrapError(err, stack)};
+        results = [...this.pendingOps.keys()].map(path => {
+          return {key: path, writeTime: null, status: wrapError(err, stack)};
         });
       }
-      this.processResults(results, /* shouldRetry= */ true);
+      this.processResults(results);
 
       if (this.pendingOps.size > 0) {
         logger(
@@ -252,16 +252,16 @@ class BulkCommitBatch {
       }
     }
 
-    this.processResults(results, /* shouldRetry= */ false);
+    this.failRemainingOperations(results);
     this.completedDeferred.resolve();
   }
 
   /**
    * Resolves the individual operations in the batch with the results.
    */
-  processResults(results: BatchWriteResult[], shouldRetry: boolean): void {
+  private processResults(results: BatchWriteResult[]): void {
     for (const result of results) {
-      if (result.status.code === Status.OK || !shouldRetry) {
+      if (result.status.code === Status.OK) {
         this.pendingOps.get(result.key)!.resolve(result);
         this.pendingOps.delete(result.key);
       } else if (!this.shouldRetry(result.status.code)) {
@@ -271,12 +271,23 @@ class BulkCommitBatch {
     }
   }
 
+  private failRemainingOperations(results: BatchWriteResult[]): void {
+    for (const result of results) {
+      assert(
+        result.status.code !== Status.OK,
+        'Should not fail successful operation'
+      );
+      this.pendingOps.get(result.key)!.reject(result.status);
+      this.pendingOps.delete(result.key);
+    }
+  }
+
   private shouldRetry(code: Status | undefined): boolean {
     const retryCodes = getRetryCodes('batchWrite');
     return code !== undefined && retryCodes.includes(code);
   }
 
-  has(path: string): boolean {
+  hasPath(path: string): boolean {
     for (const [docPath] of this.pendingOps) {
       if (docPath === path) return true;
     }
@@ -621,7 +632,7 @@ export class BulkWriter {
   ): BulkCommitBatch {
     if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
-      if (lastBatch.state === BatchState.OPEN && !lastBatch.has(ref.path)) {
+      if (lastBatch.state === BatchState.OPEN && !lastBatch.hasPath(ref.path)) {
         return lastBatch;
       }
     }
@@ -719,7 +730,7 @@ export class BulkWriter {
       const isRefInFlight =
         this.batchQueue
           .filter(batch => batch.state === BatchState.SENT)
-          .find(batch => batch.has(path)) !== undefined;
+          .find(batch => batch.hasPath(path)) !== undefined;
       if (isRefInFlight) {
         // eslint-disable-next-line no-console
         console.warn(
