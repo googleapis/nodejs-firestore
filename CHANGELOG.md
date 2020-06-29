@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.0.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.0.0...v4.0.1) (2020-06-29)
+
+
+### Bug Fixes
+
+* retry ABORTED writes in bulkCommit ([#1243](https://www.github.com/googleapis/nodejs-firestore/issues/1243)) ([6007e43](https://www.github.com/googleapis/nodejs-firestore/commit/6007e43dd51bdc29744fa07daef2e4ac1089a1dc))
+* update maximum batch size in BulkWriter ([#1250](https://www.github.com/googleapis/nodejs-firestore/issues/1250)) ([51d7633](https://www.github.com/googleapis/nodejs-firestore/commit/51d7633d758a532656066bf4ac8ef8c70f89fb86))
+
 ## [4.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.6...v4.0.0) (2020-06-24)
 
 
