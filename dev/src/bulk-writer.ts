@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 import * as firestore from '@google-cloud/firestore';
+import {Status} from 'google-gax';
 
 import * as assert from 'assert';
 
 import {FieldPath, Firestore} from '.';
-import {delayExecution} from './backoff';
+import {
+  delayExecution,
+  ExponentialBackoff,
+  MAX_RETRY_ATTEMPTS,
+} from './backoff';
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {Deferred, wrapError} from './util';
+import {Deferred, getRetryCodes, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
+import {logger} from './logger';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -76,27 +82,29 @@ class BulkCommitBatch {
    */
   state = BatchState.OPEN;
 
-  // The set of document reference paths present in the WriteBatch.
-  readonly docPaths = new Set<string>();
-
   // A deferred promise that is resolved after the batch has been sent, and a
   // response is received.
   private completedDeferred = new Deferred<void>();
 
-  // A map from each WriteBatch operation to its corresponding result.
-  private resultsMap = new Map<number, Deferred<BatchWriteResult>>();
+  // A map from each write's document path to its corresponding result.
+  // Only contains writes that have not been resolved.
+  private pendingOps = new Map<string, Deferred<BatchWriteResult>>();
+
+  private readonly backoff: ExponentialBackoff;
 
   constructor(
     private readonly firestore: Firestore,
-    private readonly writeBatch: WriteBatch,
+    private writeBatch: WriteBatch,
     private readonly maxBatchSize: number
-  ) {}
+  ) {
+    this.backoff = new ExponentialBackoff();
+  }
 
   /**
    * The number of writes in this batch.
    */
   get opCount(): number {
-    return this.resultsMap.size;
+    return this.pendingOps.size;
   }
 
   /**
@@ -173,16 +181,15 @@ class BulkCommitBatch {
     documentRef: firestore.DocumentReference<T>
   ): Promise<WriteResult> {
     assert(
-      !this.docPaths.has(documentRef.path),
+      !this.pendingOps.has(documentRef.path),
       'Batch should not contain writes to the same document'
     );
     assert(
       this.state === BatchState.OPEN,
       'Batch should be OPEN when adding writes'
     );
-    this.docPaths.add(documentRef.path);
     const deferred = new Deferred<BatchWriteResult>();
-    this.resultsMap.set(this.opCount, deferred);
+    this.pendingOps.set(documentRef.path, deferred);
 
     if (this.opCount === this.maxBatchSize) {
       this.state = BatchState.READY_TO_SEND;
@@ -198,10 +205,13 @@ class BulkCommitBatch {
   }
 
   /**
-   * Commits the batch and returns a promise that resolves with the result of
-   * all writes in this batch.
+   * Commits the batch and returns a promise that resolves when all the writes
+   * in the batch have finished.
+   *
+   * If any writes in the batch fail with a retryable error, this method will
+   * retry the failed writes.
    */
-  bulkCommit(): Promise<BatchWriteResult[]> {
+  async bulkCommit(): Promise<void> {
     assert(
       this.state === BatchState.READY_TO_SEND,
       'The batch should be marked as READY_TO_SEND before committing'
@@ -211,25 +221,81 @@ class BulkCommitBatch {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    return this.writeBatch.bulkCommit().catch(err => {
-      throw wrapError(err, stack);
-    });
+    let results: BatchWriteResult[] = [];
+    for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+      await this.backoff.backoffAndWait();
+
+      try {
+        results = await this.writeBatch.bulkCommit();
+      } catch (err) {
+        // Map the failure to each individual write's result.
+        results = [...this.pendingOps.keys()].map(path => {
+          return {key: path, writeTime: null, status: wrapError(err, stack)};
+        });
+      }
+      this.processResults(results);
+
+      if (this.pendingOps.size > 0) {
+        logger(
+          'BulkWriter.bulkCommit',
+          null,
+          `Current batch failed at retry #${attempt}. Num failures: ` +
+            `${this.pendingOps.size}.`
+        );
+
+        this.writeBatch = new WriteBatch(this.firestore, this.writeBatch, [
+          ...this.pendingOps.keys(),
+        ]);
+      } else {
+        this.completedDeferred.resolve();
+        return;
+      }
+    }
+
+    this.failRemainingOperations(results);
+    this.completedDeferred.resolve();
   }
 
   /**
    * Resolves the individual operations in the batch with the results.
    */
-  processResults(results: BatchWriteResult[], error?: Error): void {
-    if (error === undefined) {
-      for (let i = 0; i < this.opCount; i++) {
-        this.resultsMap.get(i)!.resolve(results[i]);
-      }
-    } else {
-      for (let i = 0; i < this.opCount; i++) {
-        this.resultsMap.get(i)!.reject(error);
+  private processResults(results: BatchWriteResult[]): void {
+    for (const result of results) {
+      if (result.status.code === Status.OK) {
+        this.pendingOps.get(result.key)!.resolve(result);
+        this.pendingOps.delete(result.key);
+      } else if (!this.shouldRetry(result.status.code)) {
+        this.pendingOps.get(result.key)!.reject(result.status);
+        this.pendingOps.delete(result.key);
       }
     }
-    this.completedDeferred.resolve();
+  }
+
+  private failRemainingOperations(results: BatchWriteResult[]): void {
+    for (const result of results) {
+      assert(
+        result.status.code !== Status.OK,
+        'Should not fail successful operation'
+      );
+      this.pendingOps.get(result.key)!.reject(result.status);
+      this.pendingOps.delete(result.key);
+    }
+  }
+
+  private shouldRetry(code: Status | undefined): boolean {
+    const retryCodes = getRetryCodes('batchWrite');
+    return code !== undefined && retryCodes.includes(code);
+  }
+
+  hasPath(path: string): boolean {
+    for (const [docPath] of this.pendingOps) {
+      if (docPath === path) return true;
+    }
+    return false;
+  }
+
+  docPaths(): IterableIterator<string> {
+    return this.pendingOps.keys();
   }
 
   /**
@@ -566,10 +632,7 @@ export class BulkWriter {
   ): BulkCommitBatch {
     if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
-      if (
-        lastBatch.state === BatchState.OPEN &&
-        !lastBatch.docPaths.has(ref.path)
-      ) {
+      if (lastBatch.state === BatchState.OPEN && !lastBatch.hasPath(ref.path)) {
         return lastBatch;
       }
     }
@@ -641,22 +704,14 @@ export class BulkWriter {
   private sendBatch(batch: BulkCommitBatch): void {
     const success = this.rateLimiter.tryMakeRequest(batch.opCount);
     assert(success, 'Batch should be under rate limit to be sent.');
-    batch
-      .bulkCommit()
-      .then(results => {
-        batch.processResults(results);
-      })
-      .catch((error: Error) => {
-        batch.processResults([], error);
-      })
-      .then(() => {
-        // Remove the batch from the BatchQueue after it has been processed.
-        const batchIndex = this.batchQueue.indexOf(batch);
-        assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
-        this.batchQueue.splice(batchIndex, 1);
+    batch.bulkCommit().then(() => {
+      // Remove the batch from the BatchQueue after it has been processed.
+      const batchIndex = this.batchQueue.indexOf(batch);
+      assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
+      this.batchQueue.splice(batchIndex, 1);
 
-        this.sendReadyBatches();
-      });
+      this.sendReadyBatches();
+    });
   }
 
   /**
@@ -671,11 +726,11 @@ export class BulkWriter {
       return false;
     }
 
-    for (const path of batch.docPaths) {
+    for (const path of batch.docPaths()) {
       const isRefInFlight =
         this.batchQueue
           .filter(batch => batch.state === BatchState.SENT)
-          .find(batch => batch.docPaths.has(path)) !== undefined;
+          .find(batch => batch.hasPath(path)) !== undefined;
       if (isRefInFlight) {
         // eslint-disable-next-line no-console
         console.warn(

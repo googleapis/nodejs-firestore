@@ -104,6 +104,7 @@ export class WriteResult implements firestore.WriteResult {
  */
 export class BatchWriteResult {
   constructor(
+    readonly key: string,
     readonly writeTime: Timestamp | null,
     readonly status: GoogleError
   ) {}
@@ -128,11 +129,13 @@ export class WriteBatch implements firestore.WriteBatch {
   private readonly _allowUndefined: boolean;
 
   /**
-   * An array of write operations that are executed as part of the commit. The
-   * resulting `api.IWrite` will be sent to the backend.
+   * An array of document paths and the corresponding write operations that are
+   * executed as part of the commit. The resulting `api.IWrite` will be sent to
+   * the backend.
+   *
    * @private
    */
-  private readonly _ops: Array<PendingWriteOp> = [];
+  private readonly _ops: Array<{docPath: string; op: PendingWriteOp}> = [];
 
   private _committed = false;
 
@@ -140,11 +143,32 @@ export class WriteBatch implements firestore.WriteBatch {
    * @hideconstructor
    *
    * @param firestore The Firestore Database client.
+   * @param retryBatch The WriteBatch that needs to be retried.
+   * @param docsToRetry The documents from the provided WriteBatch that need
+   * to be retried.
    */
-  constructor(firestore: Firestore) {
+  constructor(
+    firestore: Firestore,
+    retryBatch: WriteBatch,
+    docsToRetry: string[]
+  );
+  constructor(firestore: Firestore);
+  constructor(
+    firestore: Firestore,
+    retryBatch?: WriteBatch,
+    docsToRetry?: string[]
+  ) {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
     this._allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
+
+    if (retryBatch) {
+      // Creates a new WriteBatch containing only the operations from the
+      // provided document paths to retry.
+      this._ops = retryBatch._ops.filter(
+        v => docsToRetry!.indexOf(v.docPath) !== -1
+      );
+    }
   }
 
   /**
@@ -214,7 +238,7 @@ export class WriteBatch implements firestore.WriteBatch {
       return write;
     };
 
-    this._ops.push(op);
+    this._ops.push({docPath: documentRef.path, op});
 
     return this;
   }
@@ -261,7 +285,7 @@ export class WriteBatch implements firestore.WriteBatch {
       return write;
     };
 
-    this._ops.push(op);
+    this._ops.push({docPath: documentRef.path, op});
 
     return this;
   }
@@ -362,7 +386,7 @@ export class WriteBatch implements firestore.WriteBatch {
       return write;
     };
 
-    this._ops.push(op);
+    this._ops.push({docPath: documentRef.path, op});
 
     return this;
   }
@@ -518,7 +542,7 @@ export class WriteBatch implements firestore.WriteBatch {
       return write;
     };
 
-    this._ops.push(op);
+    this._ops.push({docPath: documentRef.path, op});
 
     return this;
   }
@@ -566,17 +590,17 @@ export class WriteBatch implements firestore.WriteBatch {
     const database = this._firestore.formattedName;
     const request: api.IBatchWriteRequest = {
       database,
-      writes: this._ops.map(op => op()),
+      writes: this._ops.map(op => op.op()),
     };
 
-    const retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
+    const retryCodes = getRetryCodes('batchWrite');
 
     const response = await this._firestore.request<
       api.IBatchWriteRequest,
       api.BatchWriteResponse
     >('batchWrite', request, tag, retryCodes);
 
-    return (response.writeResults || []).map((result, i) => {
+    return response.writeResults.map((result, i) => {
       const status = response.status[i];
       const error = new GoogleError(status.message || undefined);
       error.code = status.code as Status;
@@ -589,7 +613,7 @@ export class WriteBatch implements firestore.WriteBatch {
         error.code === Status.OK
           ? Timestamp.fromProto(result.updateTime || DELETE_TIMESTAMP_SENTINEL)
           : null;
-      return new BatchWriteResult(updateTime, error);
+      return new BatchWriteResult(this._ops[i].docPath, updateTime, error);
     });
   }
 
@@ -618,7 +642,7 @@ export class WriteBatch implements firestore.WriteBatch {
 
     const request: api.ICommitRequest = {
       database,
-      writes: this._ops.map(op => op()),
+      writes: this._ops.map(op => op.op()),
     };
     if (commitOptions?.transactionId) {
       request.transaction = commitOptions.transactionId;

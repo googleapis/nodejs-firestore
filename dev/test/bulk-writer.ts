@@ -14,9 +14,9 @@
 
 import {DocumentData} from '@google-cloud/firestore';
 
-import {describe, it, beforeEach, afterEach} from 'mocha';
+import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect} from 'chai';
-import {Status} from 'google-gax';
+import {GoogleError, Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
@@ -61,8 +61,13 @@ describe('BulkWriter', () => {
     requestCounter = 0;
     opCount = 0;
     timeoutHandlerCounter = 0;
-    setTimeoutHandler(fn => {
-      timeoutHandlerCounter++;
+    setTimeoutHandler((fn, timeout) => {
+      // Since a call to the backoff is made before each batchWrite, only
+      // increment the counter if the timeout is non-zero, which indicates a
+      // retry from an error.
+      if (timeout > 0) {
+        timeoutHandlerCounter++;
+      }
       fn();
     });
   });
@@ -118,14 +123,16 @@ describe('BulkWriter', () => {
     };
   }
 
-  function failedResponse(): api.IBatchWriteResponse {
+  function failedResponse(
+    code = Status.DEADLINE_EXCEEDED
+  ): api.IBatchWriteResponse {
     return {
       writeResults: [
         {
           updateTime: null,
         },
       ],
-      status: [{code: Status.UNAVAILABLE}],
+      status: [{code}],
     };
   }
 
@@ -274,7 +281,7 @@ describe('BulkWriter', () => {
     const doc = firestore.doc('collectionId/doc');
     bulkWriter.set(doc, {foo: 'bar'}).catch(err => {
       incrementOpCount();
-      expect(err.code).to.equal(Status.UNAVAILABLE);
+      expect(err.code).to.equal(Status.DEADLINE_EXCEEDED);
     });
 
     return bulkWriter.close().then(async () => verifyOpCount(1));
@@ -557,7 +564,56 @@ describe('BulkWriter', () => {
     return bulkWriter.close().then(() => verifyOpCount(2));
   });
 
-  describe('500/50/5 support', () => {
+  it('retries individual rites that fail with ABORTED errors', async () => {
+    setTimeoutHandler(setImmediate);
+    // Create mock responses that simulate one successful write followed by
+    // failed responses.
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([
+          setOp('doc1', 'bar'),
+          setOp('doc2', 'bar'),
+          setOp('doc3', 'bar'),
+        ]),
+        response: mergeResponses([
+          failedResponse(),
+          failedResponse(Status.UNAVAILABLE),
+          failedResponse(Status.ABORTED),
+        ]),
+      },
+      {
+        request: createRequest([setOp('doc2', 'bar'), setOp('doc3', 'bar')]),
+        response: mergeResponses([
+          successResponse(2),
+          failedResponse(Status.ABORTED),
+        ]),
+      },
+      {
+        request: createRequest([setOp('doc3', 'bar')]),
+        response: mergeResponses([successResponse(3)]),
+      },
+    ]);
+
+    bulkWriter
+      .set(firestore.doc('collectionId/doc1'), {
+        foo: 'bar',
+      })
+      .catch(incrementOpCount);
+    const set2 = bulkWriter.set(firestore.doc('collectionId/doc2'), {
+      foo: 'bar',
+    });
+    const set3 = bulkWriter.set(firestore.doc('collectionId/doc3'), {
+      foo: 'bar',
+    });
+    await bulkWriter.close();
+    expect((await set2).writeTime).to.deep.equal(new Timestamp(2, 0));
+    expect((await set3).writeTime).to.deep.equal(new Timestamp(3, 0));
+
+    // Check that set1 was not retried
+    verifyOpCount(1);
+  });
+
+  describe('Timeout handler tests', () => {
     // Return success responses for all requests.
     function instantiateInstance(): Promise<BulkWriter> {
       const overrides: ApiOverride = {
@@ -582,9 +638,8 @@ describe('BulkWriter', () => {
       instantiateInstance().then(bulkWriter => {
         let timeoutCalled = false;
         setTimeoutHandler((_, timeout) => {
-          if (!timeoutCalled) {
+          if (!timeoutCalled && timeout > 0) {
             timeoutCalled = true;
-            expect(timeout).to.be.greaterThan(0);
             done();
           }
         });
@@ -599,6 +654,74 @@ describe('BulkWriter', () => {
         bulkWriter.close();
       });
     });
+  });
+
+  it('retries batchWrite when the RPC fails with retryable error', async () => {
+    setTimeoutHandler(setImmediate);
+    let retryAttempts = 0;
+    function instantiateInstance(): Promise<BulkWriter> {
+      const overrides: ApiOverride = {
+        batchWrite: () => {
+          retryAttempts++;
+          if (retryAttempts < 5) {
+            const error = new GoogleError('Mock batchWrite failed in test');
+            error.code = Status.ABORTED;
+            throw error;
+          } else {
+            const mockResponse = successResponse(1);
+            return response({
+              writeResults: mockResponse.writeResults,
+              status: mockResponse.status,
+            });
+          }
+        },
+      };
+      return createInstance(overrides).then(firestoreClient => {
+        firestore = firestoreClient;
+        return firestore._bulkWriter();
+      });
+    }
+    const bulkWriter = await instantiateInstance();
+    let writeResult: WriteResult;
+    bulkWriter
+      .create(firestore.doc('collectionId/doc'), {
+        foo: 'bar',
+      })
+      .then(result => {
+        incrementOpCount();
+        writeResult = result;
+      });
+    return bulkWriter.close().then(async () => {
+      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
+    });
+  });
+
+  it('fails writes after all retry attempts failed', async () => {
+    setTimeoutHandler(setImmediate);
+    function instantiateInstance(): Promise<BulkWriter> {
+      const overrides: ApiOverride = {
+        batchWrite: () => {
+          const error = new GoogleError('Mock batchWrite failed in test');
+          error.code = Status.ABORTED;
+          throw error;
+        },
+      };
+      return createInstance(overrides).then(firestoreClient => {
+        firestore = firestoreClient;
+        return firestore._bulkWriter();
+      });
+    }
+    const bulkWriter = await instantiateInstance();
+    bulkWriter
+      .create(firestore.doc('collectionId/doc'), {
+        foo: 'bar',
+      })
+      .catch(err => {
+        expect(err instanceof GoogleError && err.code === Status.ABORTED).to.be
+          .true;
+        incrementOpCount();
+      });
+    return bulkWriter.close().then(() => verifyOpCount(1));
   });
 
   describe('if bulkCommit() fails', async () => {
