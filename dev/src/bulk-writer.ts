@@ -34,7 +34,7 @@ import {logger} from './logger';
 /*!
  * The maximum number of writes that can be in a single batch.
  */
-const MAX_BATCH_SIZE = 500;
+const MAX_BATCH_SIZE = 20;
 
 /*!
  * The starting maximum number of operations per second as allowed by the
