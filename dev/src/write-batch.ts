@@ -121,6 +121,10 @@ type PendingWriteOp = () => api.IWrite;
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.
  *
+ * @deprecated This class is now deprecated. Use `runTransaction()` to update
+ * multiple documents atomically or `bulkWriter()` to update a large number
+ * of documents in parallel.
+ *
  * @class
  */
 export class WriteBatch implements firestore.WriteBatch {

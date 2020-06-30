@@ -659,6 +659,10 @@ export class Firestore implements firestore.Firestore {
    * @returns {WriteBatch} A WriteBatch that operates on this Firestore
    * client.
    *
+   * @deprecated This class is now deprecated. Use `runTransaction()` to update
+   * multiple documents atomically or `bulkWriter()` to update a large number
+   * of documents in parallel.
+   *
    * @example
    * let writeBatch = firestore.batch();
    *
