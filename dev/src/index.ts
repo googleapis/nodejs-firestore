@@ -659,6 +659,9 @@ export class Firestore implements firestore.Firestore {
    * @returns {WriteBatch} A WriteBatch that operates on this Firestore
    * client.
    *
+   * @deprecated This class is now deprecated. Use Transaction for atomic,
+   * parallel writes, or BulkWriter for parallel writes.
+   *
    * @example
    * let writeBatch = firestore.batch();
    *
