@@ -47,7 +47,6 @@ import {Timestamp} from './timestamp';
 import {parseGetAllArguments, Transaction} from './transaction';
 import {
   ApiMapValue,
-  BulkWriterOptions,
   FirestoreStreamingMethod,
   FirestoreUnaryMethod,
   GapicClient,
@@ -93,7 +92,6 @@ export {DocumentChange} from './document-change';
 export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
 export {setLogFunction} from './logger';
-export {BulkWriterOptions} from './types';
 export {Status as GrpcStatus} from 'google-gax';
 
 const libVersion = require('../../package.json').version;
