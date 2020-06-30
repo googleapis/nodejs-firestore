@@ -123,7 +123,7 @@ type PendingWriteOp = () => api.IWrite;
  *
  * @deprecated This class is now deprecated. Use `runTransaction()` to update
  * multiple documents atomically or `bulkWriter()` to update a large number
- * of document in parallel.
+ * of documents in parallel.
  *
  * @class
  */
