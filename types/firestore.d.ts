@@ -458,6 +458,9 @@ declare namespace FirebaseFirestore {
    *
    * Unlike transactions, write batches are persisted offline and therefore are
    * preferable when you don't need to condition your writes on read data.
+   *
+   * @deprecated This class is now deprecated. Use Transaction for atomic,
+   * parallel writes, or BulkWriter for parallel writes.
    */
   export class WriteBatch {
     private constructor();
