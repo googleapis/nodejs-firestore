@@ -83,6 +83,7 @@ export {
   QuerySnapshot,
   Query,
 } from './reference';
+export {BulkWriter} from './bulk-writer';
 export {DocumentSnapshot, QueryDocumentSnapshot} from './document';
 export {FieldValue} from './field-value';
 export {WriteBatch, WriteResult} from './write-batch';
@@ -682,7 +683,6 @@ export class Firestore implements firestore.Firestore {
    *
    * @see [500/50/5 Documentation]{@link https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic}
    *
-   * @private
    * @param {object=} options BulkWriter options.
    * @param {boolean=} options.disableThrottling Whether to disable throttling
    * as specified by the 500/50/5 rule.
@@ -708,7 +708,7 @@ export class Firestore implements firestore.Firestore {
    *   console.log('Executed all writes');
    * });
    */
-  _bulkWriter(options?: BulkWriterOptions): BulkWriter {
+  bulkWriter(options?: firestore.BulkWriterOptions): BulkWriter {
     return new BulkWriter(this, !options?.disableThrottling);
   }
 
