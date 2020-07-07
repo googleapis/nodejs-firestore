@@ -319,7 +319,6 @@ class BulkCommitBatch {
  * in parallel. Writes to the same document will be executed sequentially.
  *
  * @class
- * @private
  */
 export class BulkWriter {
   /**
