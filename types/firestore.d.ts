@@ -284,6 +284,10 @@ declare namespace FirebaseFirestore {
     /**
      * Creates a write batch, used for performing multiple writes as a single
      * atomic operation.
+     *
+     * @deprecated This class is now deprecated. Use `runTransaction()` to update
+     * multiple documents atomically or `bulkWriter()` to update a large number
+     * of documents in parallel.
      */
     batch(): WriteBatch;
   }
@@ -603,6 +607,10 @@ declare namespace FirebaseFirestore {
    *
    * Unlike transactions, write batches are persisted offline and therefore are
    * preferable when you don't need to condition your writes on read data.
+   *
+   * @deprecated This class is now deprecated. Use `runTransaction()` to update
+   * multiple documents atomically or `bulkWriter()` to update a large number
+   * of documents in parallel.
    */
   export class WriteBatch {
     private constructor();
