@@ -183,7 +183,7 @@ describe('Firestore class', () => {
   });
 
   it('throws an error if terminate() is called with pending BulkWriter operations', async () => {
-    const writer = firestore._bulkWriter();
+    const writer = firestore.bulkWriter();
     const ref = randomCol.doc('doc-1');
     writer.set(ref, {foo: 'bar'});
     await expect(firestore.terminate()).to.eventually.be.rejectedWith(
@@ -2334,7 +2334,7 @@ describe('BulkWriter class', () => {
 
   beforeEach(() => {
     firestore = new Firestore({});
-    writer = firestore._bulkWriter();
+    writer = firestore.bulkWriter();
     randomCol = getTestRoot(firestore);
   });
 

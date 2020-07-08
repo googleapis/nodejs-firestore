@@ -184,7 +184,7 @@ describe('BulkWriter', () => {
     };
     return createInstance(overrides).then(firestoreClient => {
       firestore = firestoreClient;
-      return firestore._bulkWriter();
+      return firestore.bulkWriter();
     });
   }
 
@@ -630,7 +630,7 @@ describe('BulkWriter', () => {
       };
       return createInstance(overrides).then(firestoreClient => {
         firestore = firestoreClient;
-        return firestore._bulkWriter();
+        return firestore.bulkWriter();
       });
     }
 
@@ -678,7 +678,7 @@ describe('BulkWriter', () => {
       };
       return createInstance(overrides).then(firestoreClient => {
         firestore = firestoreClient;
-        return firestore._bulkWriter();
+        return firestore.bulkWriter();
       });
     }
     const bulkWriter = await instantiateInstance();
@@ -708,7 +708,7 @@ describe('BulkWriter', () => {
       };
       return createInstance(overrides).then(firestoreClient => {
         firestore = firestoreClient;
-        return firestore._bulkWriter();
+        return firestore.bulkWriter();
       });
     }
     const bulkWriter = await instantiateInstance();
@@ -733,7 +733,7 @@ describe('BulkWriter', () => {
       };
       return createInstance(overrides).then(firestoreClient => {
         firestore = firestoreClient;
-        return firestore._bulkWriter();
+        return firestore.bulkWriter();
       });
     }
     it('flush() should not fail', async () => {
