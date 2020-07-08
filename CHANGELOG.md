@@ -4,13 +4,12 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
-## [4.1.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.0.0...v4.1.0) (2020-07-07)
+## [4.1.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.0.0...v4.1.0) (2020-07-08)
 
 
 ### Features
 
 * Added `Firestore.bulkWriter()`, which performs large scale writes in parallel. By default, BulkWriter throttles writes according to the "500/50/5" rule and retries writes that fail due to contention. ([#1252](https://www.github.com/googleapis/nodejs-firestore/issues/1252)) ([d0c6c4b](https://www.github.com/googleapis/nodejs-firestore/commit/d0c6c4b116e096a1bb59c89de26cedb8cf5f1224))
-
 
 ## [4.0.0](https://www.github.com/googleapis/nodejs-firestore/compare/v3.8.6...v4.0.0) (2020-06-24)
 
