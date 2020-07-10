@@ -3,16 +3,16 @@
     {
       "git": {
         "name": ".",
-        "remote": "https://github.com/googleapis/nodejs-firestore.git",
-        "sha": "e32198cbee4f2e52954e23a34cd320d143e23b66"
+        "remote": "git@github.com:googleapis/nodejs-firestore.git",
+        "sha": "b02925f44c63b0ac58303fdcd4a2b1f59b5de463"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "0a602be7b3835b51d59daf8f6f5dc2dc22f69d7e",
-        "internalRef": "318331819"
+        "sha": "8500bd52067f0842f56d81369ac36087afe617f8",
+        "internalRef": "320626855"
       }
     },
     {
@@ -29,8 +29,8 @@
         "source": "googleapis",
         "apiName": "firestore-admin",
         "apiVersion": "v1",
-        "language": "typescript",
-        "generator": "gapic-generator-typescript"
+        "language": "nodejs",
+        "generator": "bazel"
       }
     },
     {
@@ -38,8 +38,8 @@
         "source": "googleapis",
         "apiName": "firestore",
         "apiVersion": "v1beta1",
-        "language": "typescript",
-        "generator": "gapic-generator-typescript"
+        "language": "nodejs",
+        "generator": "bazel"
       }
     },
     {
@@ -47,8 +47,8 @@
         "source": "googleapis",
         "apiName": "firestore",
         "apiVersion": "v1",
-        "language": "typescript",
-        "generator": "gapic-generator-typescript"
+        "language": "nodejs",
+        "generator": "bazel"
       }
     }
   ]
