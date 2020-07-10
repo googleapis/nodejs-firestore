@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.1.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.1.0...v4.1.1) (2020-07-09)
+
+
+### Bug Fixes
+
+* typeo in nodejs .gitattribute ([#1257](https://www.github.com/googleapis/nodejs-firestore/issues/1257)) ([2664878](https://www.github.com/googleapis/nodejs-firestore/commit/2664878c0f71d83b0d9e5475d31a9daec1a34eaa))
+
 ## [4.1.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.0.0...v4.1.0) (2020-07-08)
 
 
