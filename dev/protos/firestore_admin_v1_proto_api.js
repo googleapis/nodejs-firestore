@@ -2109,7 +2109,7 @@
                             /**
                              * Order enum.
                              * @name google.firestore.admin.v1.Index.IndexField.Order
-                             * @enum {string}
+                             * @enum {number}
                              * @property {string} ORDER_UNSPECIFIED=ORDER_UNSPECIFIED ORDER_UNSPECIFIED value
                              * @property {string} ASCENDING=ASCENDING ASCENDING value
                              * @property {string} DESCENDING=DESCENDING DESCENDING value
@@ -2125,7 +2125,7 @@
                             /**
                              * ArrayConfig enum.
                              * @name google.firestore.admin.v1.Index.IndexField.ArrayConfig
-                             * @enum {string}
+                             * @enum {number}
                              * @property {string} ARRAY_CONFIG_UNSPECIFIED=ARRAY_CONFIG_UNSPECIFIED ARRAY_CONFIG_UNSPECIFIED value
                              * @property {string} CONTAINS=CONTAINS CONTAINS value
                              */
@@ -2142,7 +2142,7 @@
                         /**
                          * QueryScope enum.
                          * @name google.firestore.admin.v1.Index.QueryScope
-                         * @enum {string}
+                         * @enum {number}
                          * @property {string} QUERY_SCOPE_UNSPECIFIED=QUERY_SCOPE_UNSPECIFIED QUERY_SCOPE_UNSPECIFIED value
                          * @property {string} COLLECTION=COLLECTION COLLECTION value
                          * @property {string} COLLECTION_GROUP=COLLECTION_GROUP COLLECTION_GROUP value
@@ -2158,7 +2158,7 @@
                         /**
                          * State enum.
                          * @name google.firestore.admin.v1.Index.State
-                         * @enum {string}
+                         * @enum {number}
                          * @property {string} STATE_UNSPECIFIED=STATE_UNSPECIFIED STATE_UNSPECIFIED value
                          * @property {string} CREATING=CREATING CREATING value
                          * @property {string} READY=READY READY value
@@ -2773,7 +2773,7 @@
                             /**
                              * ChangeType enum.
                              * @name google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType
-                             * @enum {string}
+                             * @enum {number}
                              * @property {string} CHANGE_TYPE_UNSPECIFIED=CHANGE_TYPE_UNSPECIFIED CHANGE_TYPE_UNSPECIFIED value
                              * @property {string} ADD=ADD ADD value
                              * @property {string} REMOVE=REMOVE REMOVE value
@@ -3448,7 +3448,7 @@
                     /**
                      * OperationState enum.
                      * @name google.firestore.admin.v1.OperationState
-                     * @enum {string}
+                     * @enum {number}
                      * @property {string} OPERATION_STATE_UNSPECIFIED=OPERATION_STATE_UNSPECIFIED OPERATION_STATE_UNSPECIFIED value
                      * @property {string} INITIALIZING=INITIALIZING INITIALIZING value
                      * @property {string} PROCESSING=PROCESSING PROCESSING value
@@ -3923,7 +3923,7 @@
             /**
              * FieldBehavior enum.
              * @name google.api.FieldBehavior
-             * @enum {string}
+             * @enum {number}
              * @property {string} FIELD_BEHAVIOR_UNSPECIFIED=FIELD_BEHAVIOR_UNSPECIFIED FIELD_BEHAVIOR_UNSPECIFIED value
              * @property {string} OPTIONAL=OPTIONAL OPTIONAL value
              * @property {string} REQUIRED=REQUIRED REQUIRED value
@@ -4118,7 +4118,7 @@
                 /**
                  * History enum.
                  * @name google.api.ResourceDescriptor.History
-                 * @enum {string}
+                 * @enum {number}
                  * @property {string} HISTORY_UNSPECIFIED=HISTORY_UNSPECIFIED HISTORY_UNSPECIFIED value
                  * @property {string} ORIGINALLY_SINGLE_PATTERN=ORIGINALLY_SINGLE_PATTERN ORIGINALLY_SINGLE_PATTERN value
                  * @property {string} FUTURE_MULTI_PATTERN=FUTURE_MULTI_PATTERN FUTURE_MULTI_PATTERN value
@@ -5461,7 +5461,7 @@
                 /**
                  * Type enum.
                  * @name google.protobuf.FieldDescriptorProto.Type
-                 * @enum {string}
+                 * @enum {number}
                  * @property {string} TYPE_DOUBLE=TYPE_DOUBLE TYPE_DOUBLE value
                  * @property {string} TYPE_FLOAT=TYPE_FLOAT TYPE_FLOAT value
                  * @property {string} TYPE_INT64=TYPE_INT64 TYPE_INT64 value
@@ -5507,7 +5507,7 @@
                 /**
                  * Label enum.
                  * @name google.protobuf.FieldDescriptorProto.Label
-                 * @enum {string}
+                 * @enum {number}
                  * @property {string} LABEL_OPTIONAL=LABEL_OPTIONAL LABEL_OPTIONAL value
                  * @property {string} LABEL_REQUIRED=LABEL_REQUIRED LABEL_REQUIRED value
                  * @property {string} LABEL_REPEATED=LABEL_REPEATED LABEL_REPEATED value
@@ -6484,7 +6484,7 @@
                 /**
                  * OptimizeMode enum.
                  * @name google.protobuf.FileOptions.OptimizeMode
-                 * @enum {string}
+                 * @enum {number}
                  * @property {string} SPEED=SPEED SPEED value
                  * @property {string} CODE_SIZE=CODE_SIZE CODE_SIZE value
                  * @property {string} LITE_RUNTIME=LITE_RUNTIME LITE_RUNTIME value
@@ -6942,7 +6942,7 @@
                 /**
                  * CType enum.
                  * @name google.protobuf.FieldOptions.CType
-                 * @enum {string}
+                 * @enum {number}
                  * @property {string} STRING=STRING STRING value
                  * @property {string} CORD=CORD CORD value
                  * @property {string} STRING_PIECE=STRING_PIECE STRING_PIECE value
@@ -6958,7 +6958,7 @@
                 /**
                  * JSType enum.
                  * @name google.protobuf.FieldOptions.JSType
-                 * @enum {string}
+                 * @enum {number}
                  * @property {string} JS_NORMAL=JS_NORMAL JS_NORMAL value
                  * @property {string} JS_STRING=JS_STRING JS_STRING value
                  * @property {string} JS_NUMBER=JS_NUMBER JS_NUMBER value
@@ -9085,7 +9085,7 @@
             /**
              * NullValue enum.
              * @name google.protobuf.NullValue
-             * @enum {string}
+             * @enum {number}
              * @property {string} NULL_VALUE=NULL_VALUE NULL_VALUE value
              */
             protobuf.NullValue = (function() {
