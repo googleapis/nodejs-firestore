@@ -286,6 +286,13 @@ declare namespace FirebaseFirestore {
      * atomic operation.
      */
     batch(): WriteBatch;
+
+    /**
+     * Creates a [BulkWriter]{@link BulkWriter}, used for performing
+     * multiple writes in parallel. Gradually ramps up writes as specified
+     * by the 500/50/5 rule.
+     */
+    bulkWriter(options?: BulkWriterOptions): BulkWriter;
   }
 
   /**
