@@ -424,14 +424,25 @@ describe('instantiation', () => {
     }
   });
 
-  it('validates only one endpoint is provided', () => {
-    expect(() => {
-      new Firestore.Firestore({host: 'foo', apiEndpoint: 'foo'});
-    }).to.throw('Cannot set both "settings.host" and "settings.apiEndpoint".');
+  it('uses "settings.host" when more than one option is provided', () => {
+    let firestore = new Firestore.Firestore({
+      apiEndpoint: 'foo',
+    });
+    firestore.settings({host: 'bar'});
+    expect(firestore._settings.servicePath).to.equal('bar');
 
-    expect(() => {
-      new Firestore.Firestore({host: 'foo', servicePath: 'foo'});
-    }).to.throw('Cannot set both "settings.host" and "settings.servicePath".');
+    firestore = new Firestore.Firestore({
+      servicePath: 'foo',
+    });
+    firestore.settings({host: 'bar'});
+    expect(firestore._settings.servicePath).to.equal('bar');
+
+    firestore = new Firestore.Firestore({
+      apiEndpoint: 'boo',
+      servicePath: 'foo',
+    });
+    firestore.settings({host: 'bar'});
+    expect(firestore._settings.servicePath).to.equal('bar');
   });
 
   it('FIRESTORE_EMULATOR_HOST ignores servicePath', () => {

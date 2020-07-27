@@ -504,14 +504,24 @@ export class Firestore implements firestore.Firestore {
 
     if (settings.host !== undefined) {
       validateHost('settings.host', settings.host);
-      if (settings.servicePath !== undefined) {
-        throw new Error(
-          'Cannot set both "settings.host" and "settings.servicePath".'
+      if (
+        settings.servicePath !== undefined &&
+        settings.servicePath !== settings.host
+      ) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          '"settings.servicePath" does not match "settings.host". ' +
+            'Using "settings.host" as host.'
         );
       }
-      if (settings.apiEndpoint !== undefined) {
-        throw new Error(
-          'Cannot set both "settings.host" and "settings.apiEndpoint".'
+      if (
+        settings.apiEndpoint !== undefined &&
+        settings.apiEndpoint !== settings.host
+      ) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          '"settings.apiEndpoint" does not match "settings.host". ' +
+            'Using "settings.host" as host.'
         );
       }
 
