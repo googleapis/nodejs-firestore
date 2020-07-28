@@ -505,23 +505,20 @@ export class Firestore implements firestore.Firestore {
     if (settings.host !== undefined) {
       validateHost('settings.host', settings.host);
       if (
-        settings.servicePath !== undefined &&
-        settings.servicePath !== settings.host
+        (settings.servicePath !== undefined &&
+          settings.servicePath !== settings.host) ||
+        (settings.apiEndpoint !== undefined &&
+          settings.apiEndpoint !== settings.host)
       ) {
         // eslint-disable-next-line no-console
         console.warn(
-          '"settings.servicePath" does not match "settings.host". ' +
-            'Using "settings.host" as host.'
-        );
-      }
-      if (
-        settings.apiEndpoint !== undefined &&
-        settings.apiEndpoint !== settings.host
-      ) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          '"settings.apiEndpoint" does not match "settings.host". ' +
-            'Using "settings.host" as host.'
+          `The provided host (${settings.host}) in "settings" does not match the ` +
+            `existing host (${
+              settings.servicePath !== undefined
+                ? settings.servicePath
+                : settings.apiEndpoint
+            }). ` +
+            'Using the provided host.'
         );
       }
 
@@ -530,10 +527,11 @@ export class Firestore implements firestore.Firestore {
       if (url.port !== '' && settings.port === undefined) {
         settings.port = Number(url.port);
       }
-      // We need to remove the `host` setting, in case a user calls `settings()`,
-      // which will again enforce that `host` and `servicePath` are not both
-      // specified.
+      // We need to remove the `host` and `apiEndpoint` setting, in case a user
+      // calls `settings()`, which will compare the the provided `host` to the
+      // existing host stored on `servicePath`.
       delete settings.host;
+      delete settings.apiEndpoint;
     }
 
     if (settings.ssl !== undefined) {
