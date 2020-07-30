@@ -414,22 +414,15 @@ export class Firestore implements firestore.Firestore {
         process.env.FIRESTORE_EMULATOR_HOST
       );
 
-      const emulatorSettings: firestore.Settings = {
+      settings = {
         ...settings,
-        ...libraryHeader,
         host: process.env.FIRESTORE_EMULATOR_HOST,
         ssl: false,
       };
-
-      // If FIRESTORE_EMULATOR_HOST is set, we unset `servicePath` and `apiEndpoint` to
-      // ensure that only one endpoint setting is provided.
-      delete emulatorSettings.servicePath;
-      delete emulatorSettings.apiEndpoint;
-
-      this.validateAndApplySettings(emulatorSettings);
     } else {
-      this.validateAndApplySettings({...settings, ...libraryHeader});
+      settings = {...settings, ...libraryHeader};
     }
+    this.validateAndApplySettings(settings);
 
     const retryConfig = serviceConfig.retry_params.default;
     this._backoffSettings = {
@@ -496,19 +489,21 @@ export class Firestore implements firestore.Firestore {
     this._settingsFrozen = true;
   }
 
-  private validateAndApplySettings(settings: firestore.Settings): void {
+  private validateAndApplySettings(settings: FirebaseFirestore.Settings): void {
     if (settings.projectId !== undefined) {
       validateString('settings.projectId', settings.projectId);
       this._projectId = settings.projectId;
     }
 
+    let url: URL | null = null;
     if (settings.host !== undefined) {
       validateHost('settings.host', settings.host);
+      url = new URL(`http://${settings.host}`);
       if (
         (settings.servicePath !== undefined &&
-          settings.servicePath !== settings.host) ||
+          settings.servicePath !== url.hostname) ||
         (settings.apiEndpoint !== undefined &&
-          settings.apiEndpoint !== settings.host)
+          settings.apiEndpoint !== url.hostname)
       ) {
         // eslint-disable-next-line no-console
         console.warn(
@@ -521,18 +516,21 @@ export class Firestore implements firestore.Firestore {
             'Using the provided host.'
         );
       }
+    }
 
-      const url = new URL(`http://${settings.host}`);
+    // Only store the host if a valid value was provided in `host`.
+    if (url !== null) {
       settings.servicePath = url.hostname;
       if (url.port !== '' && settings.port === undefined) {
         settings.port = Number(url.port);
       }
-      // We need to remove the `host` and `apiEndpoint` setting, in case a user
-      // calls `settings()`, which will compare the the provided `host` to the
-      // existing host stored on `servicePath`.
-      delete settings.host;
-      delete settings.apiEndpoint;
     }
+
+    // We need to remove the `host` and `apiEndpoint` setting, in case a user
+    // calls `settings()`, which will compare the the provided `host` to the
+    // existing hostname stored on `servicePath`.
+    delete settings.host;
+    delete settings.apiEndpoint;
 
     if (settings.ssl !== undefined) {
       validateBoolean('settings.ssl', settings.ssl);

@@ -426,23 +426,41 @@ describe('instantiation', () => {
 
   it('uses "settings.host" when more than one option is provided', () => {
     let firestore = new Firestore.Firestore({
-      apiEndpoint: 'foo',
+      apiEndpoint: 'api-host',
     });
-    firestore.settings({host: 'bar'});
-    expect(firestore._settings.servicePath).to.equal('bar');
+    firestore.settings({host: 'new-host:100'});
+    expect(firestore._settings.servicePath).to.equal('new-host');
 
     firestore = new Firestore.Firestore({
-      servicePath: 'foo',
+      servicePath: 'service-host',
     });
-    firestore.settings({host: 'bar'});
-    expect(firestore._settings.servicePath).to.equal('bar');
+    firestore.settings({host: 'new-host:100'});
+    expect(firestore._settings.servicePath).to.equal('new-host');
 
     firestore = new Firestore.Firestore({
-      apiEndpoint: 'boo',
-      servicePath: 'foo',
+      apiEndpoint: 'api-host',
+      servicePath: 'service-host',
     });
-    firestore.settings({host: 'bar'});
-    expect(firestore._settings.servicePath).to.equal('bar');
+    firestore.settings({host: 'new-host:100'});
+    expect(firestore._settings.servicePath).to.equal('new-host');
+  });
+
+  it('FIRESTORE_EMULATOR_HOST ignores host', () => {
+    const oldValue = process.env.FIRESTORE_EMULATOR_HOST;
+
+    try {
+      process.env.FIRESTORE_EMULATOR_HOST = 'env-host:8080';
+      const firestore = new Firestore.Firestore({
+        host: 'localhost:8080',
+      });
+      expect(firestore._settings.servicePath).to.equal('env-host');
+    } finally {
+      if (oldValue) {
+        process.env.FIRESTORE_EMULATOR_HOST = oldValue;
+      } else {
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+      }
+    }
   });
 
   it('FIRESTORE_EMULATOR_HOST ignores servicePath', () => {
@@ -470,7 +488,7 @@ describe('instantiation', () => {
       process.env.FIRESTORE_EMULATOR_HOST = 'new';
       const firestore = new Firestore.Firestore({servicePath: 'old'});
       firestore['validateAndApplySettings'] = settings => {
-        expect(settings.servicePath).to.equal('new');
+        expect(settings!.servicePath).to.equal('new');
         done();
       };
       firestore.settings({});
@@ -490,7 +508,7 @@ describe('instantiation', () => {
       process.env.FIRESTORE_EMULATOR_HOST = 'new';
       const firestore = new Firestore.Firestore({customHeaders: {foo: 'bar'}});
       firestore['validateAndApplySettings'] = settings => {
-        expect(settings.customHeaders.foo).to.equal('bar');
+        expect(settings!.customHeaders.foo).to.equal('bar');
         done();
       };
       firestore.settings({});
