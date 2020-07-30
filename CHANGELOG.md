@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.1.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.1.1...v4.1.2) (2020-07-24)
+
+
+### Bug Fixes
+
+* add Firestore.bulkWriter to firestore.d.ts ([#1272](https://www.github.com/googleapis/nodejs-firestore/issues/1272)) ([5e7e627](https://www.github.com/googleapis/nodejs-firestore/commit/5e7e62712ab049ce1adcb26213dd13964939bf65))
+
 ### [4.1.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.1.0...v4.1.1) (2020-07-09)
 
 
