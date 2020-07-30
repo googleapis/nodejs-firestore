@@ -489,7 +489,7 @@ export class Firestore implements firestore.Firestore {
     this._settingsFrozen = true;
   }
 
-  private validateAndApplySettings(settings: FirebaseFirestore.Settings): void {
+  private validateAndApplySettings(settings: firestore.Settings): void {
     if (settings.projectId !== undefined) {
       validateString('settings.projectId', settings.projectId);
       this._projectId = settings.projectId;
@@ -507,13 +507,10 @@ export class Firestore implements firestore.Firestore {
       ) {
         // eslint-disable-next-line no-console
         console.warn(
-          `The provided host (${settings.host}) in "settings" does not match the ` +
-            `existing host (${
-              settings.servicePath !== undefined
-                ? settings.servicePath
-                : settings.apiEndpoint
-            }). ` +
-            'Using the provided host.'
+          `The provided host (${settings.host}) in "settings" does not ` +
+            `match the existing host (${
+              settings.servicePath ?? settings.apiEndpoint
+            }). Using the provided host.`
         );
       }
     }
