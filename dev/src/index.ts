@@ -500,6 +500,10 @@ export class Firestore implements firestore.Firestore {
     } else if (settings.host !== undefined) {
       validateHost('settings.host', settings.host);
       url = new URL(`http://${settings.host}`);
+    }
+
+    // Only store the host if a valid value was provided in `host`.
+    if (url !== null) {
       if (
         (settings.servicePath !== undefined &&
           settings.servicePath !== url.hostname) ||
@@ -514,21 +518,18 @@ export class Firestore implements firestore.Firestore {
             }). Using the provided host.`
         );
       }
-    }
 
-    // Only store the host if a valid value was provided in `host`.
-    if (url !== null) {
       settings.servicePath = url.hostname;
       if (url.port !== '' && settings.port === undefined) {
         settings.port = Number(url.port);
       }
-    }
 
-    // We need to remove the `host` and `apiEndpoint` setting, in case a user
-    // calls `settings()`, which will compare the the provided `host` to the
-    // existing hostname stored on `servicePath`.
-    delete settings.host;
-    delete settings.apiEndpoint;
+      // We need to remove the `host` and `apiEndpoint` setting, in case a user
+      // calls `settings()`, which will compare the the provided `host` to the
+      // existing hostname stored on `servicePath`.
+      delete settings.host;
+      delete settings.apiEndpoint;
+    }
 
     if (settings.ssl !== undefined) {
       validateBoolean('settings.ssl', settings.ssl);
