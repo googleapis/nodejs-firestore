@@ -408,21 +408,7 @@ export class Firestore implements firestore.Firestore {
       libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
     }
 
-    if (process.env.FIRESTORE_EMULATOR_HOST) {
-      validateHost(
-        'FIRESTORE_EMULATOR_HOST',
-        process.env.FIRESTORE_EMULATOR_HOST
-      );
-
-      settings = {
-        ...settings,
-        host: process.env.FIRESTORE_EMULATOR_HOST,
-        ssl: false,
-      };
-    } else {
-      settings = {...settings, ...libraryHeader};
-    }
-    this.validateAndApplySettings(settings);
+    this.validateAndApplySettings({...settings, ...libraryHeader});
 
     const retryConfig = serviceConfig.retry_params.default;
     this._backoffSettings = {
@@ -496,7 +482,22 @@ export class Firestore implements firestore.Firestore {
     }
 
     let url: URL | null = null;
-    if (settings.host !== undefined) {
+
+    // If the environment variable is set, it should always take precedence
+    // over any user passed in settings.
+    if (process.env.FIRESTORE_EMULATOR_HOST) {
+      validateHost(
+        'FIRESTORE_EMULATOR_HOST',
+        process.env.FIRESTORE_EMULATOR_HOST
+      );
+
+      settings = {
+        ...settings,
+        host: process.env.FIRESTORE_EMULATOR_HOST,
+        ssl: false,
+      };
+      url = new URL(`http://${settings.host}`);
+    } else if (settings.host !== undefined) {
       validateHost('settings.host', settings.host);
       url = new URL(`http://${settings.host}`);
       if (
@@ -507,7 +508,7 @@ export class Firestore implements firestore.Firestore {
       ) {
         // eslint-disable-next-line no-console
         console.warn(
-          `The provided host (${settings.host}) in "settings" does not ` +
+          `The provided host (${url.hostname}) in "settings" does not ` +
             `match the existing host (${
               settings.servicePath ?? settings.apiEndpoint
             }). Using the provided host.`

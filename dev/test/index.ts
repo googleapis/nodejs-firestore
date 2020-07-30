@@ -424,25 +424,37 @@ describe('instantiation', () => {
     }
   });
 
-  it('uses "settings.host" when more than one option is provided', () => {
-    let firestore = new Firestore.Firestore({
-      apiEndpoint: 'api-host',
-    });
-    firestore.settings({host: 'new-host:100'});
-    expect(firestore._settings.servicePath).to.equal('new-host');
+  it('uses "settings.host" takes precedence without FIRESTORE_EMULATOR_HOST', () => {
+    const oldValue = process.env.FIRESTORE_EMULATOR_HOST;
 
-    firestore = new Firestore.Firestore({
-      servicePath: 'service-host',
-    });
-    firestore.settings({host: 'new-host:100'});
-    expect(firestore._settings.servicePath).to.equal('new-host');
+    try {
+      delete process.env.FIRESTORE_EMULATOR_HOST;
 
-    firestore = new Firestore.Firestore({
-      apiEndpoint: 'api-host',
-      servicePath: 'service-host',
-    });
-    firestore.settings({host: 'new-host:100'});
-    expect(firestore._settings.servicePath).to.equal('new-host');
+      let firestore = new Firestore.Firestore({
+        apiEndpoint: 'api-host',
+      });
+      firestore.settings({host: 'new-host:100'});
+      expect(firestore._settings.servicePath).to.equal('new-host');
+
+      firestore = new Firestore.Firestore({
+        servicePath: 'service-host',
+      });
+      firestore.settings({host: 'new-host:100'});
+      expect(firestore._settings.servicePath).to.equal('new-host');
+
+      firestore = new Firestore.Firestore({
+        apiEndpoint: 'api-host',
+        servicePath: 'service-host',
+      });
+      firestore.settings({host: 'new-host:100'});
+      expect(firestore._settings.servicePath).to.equal('new-host');
+    } finally {
+      if (oldValue) {
+        process.env.FIRESTORE_EMULATOR_HOST = oldValue;
+      } else {
+        delete process.env.FIRESTORE_EMULATOR_HOST;
+      }
+    }
   });
 
   it('FIRESTORE_EMULATOR_HOST ignores host', () => {
@@ -453,6 +465,8 @@ describe('instantiation', () => {
       const firestore = new Firestore.Firestore({
         host: 'localhost:8080',
       });
+      expect(firestore._settings.servicePath).to.equal('env-host');
+      firestore.settings({host: 'localhost:8080'});
       expect(firestore._settings.servicePath).to.equal('env-host');
     } finally {
       if (oldValue) {
@@ -469,6 +483,8 @@ describe('instantiation', () => {
     try {
       process.env.FIRESTORE_EMULATOR_HOST = 'foo';
       const firestore = new Firestore.Firestore({servicePath: 'bar'});
+      expect(firestore._settings.servicePath).to.equal('foo');
+      firestore.settings({servicePath: 'bar'});
       expect(firestore._settings.servicePath).to.equal('foo');
     } finally {
       if (oldValue) {
