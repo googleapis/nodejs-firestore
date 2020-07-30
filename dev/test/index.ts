@@ -424,7 +424,7 @@ describe('instantiation', () => {
     }
   });
 
-  it('uses "settings.host" takes precedence without FIRESTORE_EMULATOR_HOST', () => {
+  it('"settings.host" takes precedence without FIRESTORE_EMULATOR_HOST', () => {
     const oldValue = process.env.FIRESTORE_EMULATOR_HOST;
 
     try {
