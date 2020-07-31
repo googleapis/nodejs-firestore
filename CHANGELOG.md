@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.2.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.1.2...v4.2.0) (2020-07-31)
+
+
+### Features
+
+* allow `Settings.host` to be used when `Settings.servicePath` is set ([#1275](https://www.github.com/googleapis/nodejs-firestore/issues/1275)) ([34d6728](https://www.github.com/googleapis/nodejs-firestore/commit/34d672870f9a4673e990176e4453c4202a1386f9))
+
 ### [4.1.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.1.1...v4.1.2) (2020-07-24)
 
 
