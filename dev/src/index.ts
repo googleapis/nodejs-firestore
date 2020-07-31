@@ -408,28 +408,7 @@ export class Firestore implements firestore.Firestore {
       libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
     }
 
-    if (process.env.FIRESTORE_EMULATOR_HOST) {
-      validateHost(
-        'FIRESTORE_EMULATOR_HOST',
-        process.env.FIRESTORE_EMULATOR_HOST
-      );
-
-      const emulatorSettings: firestore.Settings = {
-        ...settings,
-        ...libraryHeader,
-        host: process.env.FIRESTORE_EMULATOR_HOST,
-        ssl: false,
-      };
-
-      // If FIRESTORE_EMULATOR_HOST is set, we unset `servicePath` and `apiEndpoint` to
-      // ensure that only one endpoint setting is provided.
-      delete emulatorSettings.servicePath;
-      delete emulatorSettings.apiEndpoint;
-
-      this.validateAndApplySettings(emulatorSettings);
-    } else {
-      this.validateAndApplySettings({...settings, ...libraryHeader});
-    }
+    this.validateAndApplySettings({...settings, ...libraryHeader});
 
     const retryConfig = serviceConfig.retry_params.default;
     this._backoffSettings = {
@@ -502,28 +481,54 @@ export class Firestore implements firestore.Firestore {
       this._projectId = settings.projectId;
     }
 
-    if (settings.host !== undefined) {
+    let url: URL | null = null;
+
+    // If the environment variable is set, it should always take precedence
+    // over any user passed in settings.
+    if (process.env.FIRESTORE_EMULATOR_HOST) {
+      validateHost(
+        'FIRESTORE_EMULATOR_HOST',
+        process.env.FIRESTORE_EMULATOR_HOST
+      );
+
+      settings = {
+        ...settings,
+        host: process.env.FIRESTORE_EMULATOR_HOST,
+        ssl: false,
+      };
+      url = new URL(`http://${settings.host}`);
+    } else if (settings.host !== undefined) {
       validateHost('settings.host', settings.host);
-      if (settings.servicePath !== undefined) {
-        throw new Error(
-          'Cannot set both "settings.host" and "settings.servicePath".'
-        );
-      }
-      if (settings.apiEndpoint !== undefined) {
-        throw new Error(
-          'Cannot set both "settings.host" and "settings.apiEndpoint".'
+      url = new URL(`http://${settings.host}`);
+    }
+
+    // Only store the host if a valid value was provided in `host`.
+    if (url !== null) {
+      if (
+        (settings.servicePath !== undefined &&
+          settings.servicePath !== url.hostname) ||
+        (settings.apiEndpoint !== undefined &&
+          settings.apiEndpoint !== url.hostname)
+      ) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `The provided host (${url.hostname}) in "settings" does not ` +
+            `match the existing host (${
+              settings.servicePath ?? settings.apiEndpoint
+            }). Using the provided host.`
         );
       }
 
-      const url = new URL(`http://${settings.host}`);
       settings.servicePath = url.hostname;
       if (url.port !== '' && settings.port === undefined) {
         settings.port = Number(url.port);
       }
-      // We need to remove the `host` setting, in case a user calls `settings()`,
-      // which will again enforce that `host` and `servicePath` are not both
-      // specified.
+
+      // We need to remove the `host` and `apiEndpoint` setting, in case a user
+      // calls `settings()`, which will compare the the provided `host` to the
+      // existing hostname stored on `servicePath`.
       delete settings.host;
+      delete settings.apiEndpoint;
     }
 
     if (settings.ssl !== undefined) {
