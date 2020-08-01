@@ -22,6 +22,9 @@ Applications that use Google&#x27;s Server SDKs should not be used in end-user e
 **Note:** This Cloud Firestore Server SDK does not support Firestore databases created in [Datastore mode](https://cloud.google.com/datastore/docs/firestore-or-datastore#in_datastore_mode). To access these databases, use the [Datastore SDK](https://www.npmjs.com/package/@google-cloud/datastore).
 
 
+A comprehensive list of changes in each version may be found in
+[the CHANGELOG](https://github.com/googleapis/nodejs-firestore/blob/master/CHANGELOG.md).
+
 * [Cloud Firestore Node.js Client API Reference][client-docs]
 * [Cloud Firestore Documentation][product-docs]
 * [github.com/googleapis/nodejs-firestore](https://github.com/googleapis/nodejs-firestore)
