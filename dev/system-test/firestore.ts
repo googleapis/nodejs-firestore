@@ -2621,7 +2621,7 @@ describe('Bundle building', () => {
       name: limitToLastSnap.docs[0].toDocumentProto().name,
       readTime: limitToLastSnap.readTime.toProto().timestampValue,
       exists: true,
-      query: 'limitToLastQuery'
+      query: 'limitToLastQuery',
     });
 
     const bundledDoc = (elements[4] as IBundleElement).document;
