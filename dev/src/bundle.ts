@@ -84,7 +84,7 @@ export class BundleBuilder {
     return this;
   }
 
-  private addBundledDocument(snap: DocumentSnapshot): void {
+  private addBundledDocument(snap: DocumentSnapshot, queryName?: string): void {
     const docProto = snap.toDocumentProto();
     this.documents.set(snap.id, {
       document: snap.exists ? docProto : undefined,
@@ -92,6 +92,7 @@ export class BundleBuilder {
         name: docProto.name,
         readTime: snap.readTime.toProto().timestampValue,
         exists: snap.exists,
+        query: queryName,
       },
     });
     if (snap.readTime > this.latestReadTime) {
@@ -111,7 +112,7 @@ export class BundleBuilder {
     });
 
     for (const snap of querySnap.docs) {
-      this.addBundledDocument(snap);
+      this.addBundledDocument(snap, name);
     }
 
     if (querySnap.readTime > this.latestReadTime) {

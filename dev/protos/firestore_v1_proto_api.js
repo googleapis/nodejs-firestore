@@ -321,6 +321,7 @@
              * @property {string|null} [name] BundledDocumentMetadata name
              * @property {google.protobuf.ITimestamp|null} [readTime] BundledDocumentMetadata readTime
              * @property {boolean|null} [exists] BundledDocumentMetadata exists
+             * @property {string|null} [query] BundledDocumentMetadata query
              */
     
             /**
@@ -363,6 +364,14 @@
             BundledDocumentMetadata.prototype.exists = false;
     
             /**
+             * BundledDocumentMetadata query.
+             * @member {string} query
+             * @memberof firestore.BundledDocumentMetadata
+             * @instance
+             */
+            BundledDocumentMetadata.prototype.query = "";
+    
+            /**
              * Creates a BundledDocumentMetadata message from a plain object. Also converts values to their respective internal types.
              * @function fromObject
              * @memberof firestore.BundledDocumentMetadata
@@ -383,6 +392,8 @@
                 }
                 if (object.exists != null)
                     message.exists = Boolean(object.exists);
+                if (object.query != null)
+                    message.query = String(object.query);
                 return message;
             };
     
@@ -403,6 +414,7 @@
                     object.name = "";
                     object.readTime = null;
                     object.exists = false;
+                    object.query = "";
                 }
                 if (message.name != null && message.hasOwnProperty("name"))
                     object.name = message.name;
@@ -410,6 +422,8 @@
                     object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
                 if (message.exists != null && message.hasOwnProperty("exists"))
                     object.exists = message.exists;
+                if (message.query != null && message.hasOwnProperty("query"))
+                    object.query = message.query;
                 return object;
             };
     

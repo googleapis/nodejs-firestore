@@ -144,10 +144,20 @@ describe('Bundle Buidler', () => {
       () => []
     );
 
+    const newQuery = firestore.collection('collectionId');
+    const newQuerySnapshot = new QuerySnapshot(
+      newQuery,
+      snap.readTime,
+      1,
+      () => [snap],
+      () => []
+    );
+
     bundle.add('test-query', querySnapshot);
-    // Bundle is expected to be [bundleMeta, namedQuery, snapMeta, snap]
+    bundle.add('test-query-new', newQuerySnapshot);
+    // Bundle is expected to be [bundleMeta, namedQuery, newNamedQuery, snapMeta, snap]
     const elements = await bundleToElementArray(bundle.build());
-    expect(elements.length).to.equal(4);
+    expect(elements.length).to.equal(5);
 
     const meta = (elements[0] as IBundleElement).metadata;
     verifyMetadata(
@@ -158,7 +168,14 @@ describe('Bundle Buidler', () => {
     );
 
     // Verify named query
-    const namedQuery = (elements[1] as IBundleElement).namedQuery;
+    let namedQuery = (elements[1] as IBundleElement).namedQuery;
+    let newNamedQuery = (elements[2] as IBundleElement).namedQuery;
+    if (namedQuery?.name === 'test-query-new') {
+      // Swap
+      const q = namedQuery;
+      namedQuery = newNamedQuery;
+      newNamedQuery = q;
+    }
     expect(namedQuery).to.deep.equal({
       name: 'test-query',
       readTime: snap.readTime.toProto().timestampValue,
@@ -171,14 +188,27 @@ describe('Bundle Buidler', () => {
         }
       ),
     });
+    expect(newNamedQuery).to.deep.equal({
+      name: 'test-query-new',
+      readTime: snap.readTime.toProto().timestampValue,
+      bundledQuery: extend(
+        true,
+        {},
+        {
+          parent: newQuery.toProto().parent,
+          structuredQuery: newQuery.toProto().structuredQuery,
+        }
+      ),
+    });
 
     // Verify docMeta and docSnap
-    const docMeta = (elements[2] as IBundleElement).documentMetadata;
-    const docSnap = (elements[3] as IBundleElement).document;
+    const docMeta = (elements[3] as IBundleElement).documentMetadata;
+    const docSnap = (elements[4] as IBundleElement).document;
     expect(docMeta).to.deep.equal({
       name: snap.toDocumentProto().name,
       readTime: snap.readTime.toProto().timestampValue,
       exists: true,
+      query: 'test-query-new',
     });
     expect(docSnap).to.deep.equal(snap.toDocumentProto());
   });
