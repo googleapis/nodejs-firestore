@@ -168,8 +168,11 @@ describe('Bundle Buidler', () => {
     );
 
     // Verify named query
-    let namedQuery = (elements[1] as IBundleElement).namedQuery;
-    let newNamedQuery = (elements[2] as IBundleElement).namedQuery;
+    let namedQuery = elements.find(e => e.namedQuery?.name === 'test-query')!
+      .namedQuery;
+    let newNamedQuery = elements.find(
+      e => e.namedQuery?.name === 'test-query-new'
+    )!.namedQuery;
     if (namedQuery?.name === 'test-query-new') {
       // Swap
       const q = namedQuery;
