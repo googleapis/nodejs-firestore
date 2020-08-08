@@ -97,7 +97,7 @@ describe('Bundle Buidler', () => {
 
     bundle.add(snap1);
     bundle.add(snap2);
-    // Bundle is expected to be [bundleMeta, snap2Meta, snap2] because `snap2` is added later.
+    // Bundle is expected to be [bundleMeta, snap2Meta, snap2] because `snap1` is newer.
     const elements = await bundleToElementArray(bundle.build());
     expect(elements.length).to.equal(3);
 
@@ -113,11 +113,12 @@ describe('Bundle Buidler', () => {
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
     const docSnap = (elements[2] as IBundleElement).document;
     expect(docMeta).to.deep.equal({
-      name: snap2.toDocumentProto().name,
-      readTime: snap2.readTime.toProto().timestampValue,
+      name: snap1.toDocumentProto().name,
+      readTime: snap1.readTime.toProto().timestampValue,
       exists: true,
+      queries: [],
     });
-    expect(docSnap).to.deep.equal(snap2.toDocumentProto());
+    expect(docSnap).to.deep.equal(snap1.toDocumentProto());
   });
 
   it('succeeds with query snapshots', async () => {
@@ -207,11 +208,12 @@ describe('Bundle Buidler', () => {
     // Verify docMeta and docSnap
     const docMeta = (elements[3] as IBundleElement).documentMetadata;
     const docSnap = (elements[4] as IBundleElement).document;
+    docMeta?.queries?.sort();
     expect(docMeta).to.deep.equal({
       name: snap.toDocumentProto().name,
       readTime: snap.readTime.toProto().timestampValue,
       exists: true,
-      query: 'test-query-new',
+      queries: ['test-query', 'test-query-new'],
     });
     expect(docSnap).to.deep.equal(snap.toDocumentProto());
   });
@@ -250,6 +252,7 @@ describe('Bundle Buidler', () => {
       name: snap1.toDocumentProto().name,
       readTime: snap1.readTime.toProto().timestampValue,
       exists: true,
+      queries: [],
     });
     expect(doc1Snap).to.deep.equal(snap1.toDocumentProto());
 
@@ -286,6 +289,7 @@ describe('Bundle Buidler', () => {
       name: snap2.toDocumentProto().name,
       readTime: snap2.readTime.toProto().timestampValue,
       exists: true,
+      queries: [],
     });
     expect(doc2Snap).to.deep.equal(snap2.toDocumentProto());
   });

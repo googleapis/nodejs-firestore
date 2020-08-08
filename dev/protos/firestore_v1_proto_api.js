@@ -321,7 +321,7 @@
              * @property {string|null} [name] BundledDocumentMetadata name
              * @property {google.protobuf.ITimestamp|null} [readTime] BundledDocumentMetadata readTime
              * @property {boolean|null} [exists] BundledDocumentMetadata exists
-             * @property {string|null} [query] BundledDocumentMetadata query
+             * @property {Array.<string>|null} [queries] BundledDocumentMetadata queries
              */
     
             /**
@@ -333,6 +333,7 @@
              * @param {firestore.IBundledDocumentMetadata=} [properties] Properties to set
              */
             function BundledDocumentMetadata(properties) {
+                this.queries = [];
                 if (properties)
                     for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
@@ -364,12 +365,12 @@
             BundledDocumentMetadata.prototype.exists = false;
     
             /**
-             * BundledDocumentMetadata query.
-             * @member {string} query
+             * BundledDocumentMetadata queries.
+             * @member {Array.<string>} queries
              * @memberof firestore.BundledDocumentMetadata
              * @instance
              */
-            BundledDocumentMetadata.prototype.query = "";
+            BundledDocumentMetadata.prototype.queries = $util.emptyArray;
     
             /**
              * Creates a BundledDocumentMetadata message from a plain object. Also converts values to their respective internal types.
@@ -392,8 +393,13 @@
                 }
                 if (object.exists != null)
                     message.exists = Boolean(object.exists);
-                if (object.query != null)
-                    message.query = String(object.query);
+                if (object.queries) {
+                    if (!Array.isArray(object.queries))
+                        throw TypeError(".firestore.BundledDocumentMetadata.queries: array expected");
+                    message.queries = [];
+                    for (var i = 0; i < object.queries.length; ++i)
+                        message.queries[i] = String(object.queries[i]);
+                }
                 return message;
             };
     
@@ -410,11 +416,12 @@
                 if (!options)
                     options = {};
                 var object = {};
+                if (options.arrays || options.defaults)
+                    object.queries = [];
                 if (options.defaults) {
                     object.name = "";
                     object.readTime = null;
                     object.exists = false;
-                    object.query = "";
                 }
                 if (message.name != null && message.hasOwnProperty("name"))
                     object.name = message.name;
@@ -422,8 +429,11 @@
                     object.readTime = $root.google.protobuf.Timestamp.toObject(message.readTime, options);
                 if (message.exists != null && message.hasOwnProperty("exists"))
                     object.exists = message.exists;
-                if (message.query != null && message.hasOwnProperty("query"))
-                    object.query = message.query;
+                if (message.queries && message.queries.length) {
+                    object.queries = [];
+                    for (var j = 0; j < message.queries.length; ++j)
+                        object.queries[j] = message.queries[j];
+                }
                 return object;
             };
     

@@ -80,8 +80,8 @@ message BundledDocumentMetadata {
   // Whether the document exists.
   bool exists = 3;
 
-  // The query name in this bundle, if the document is added via a named query.
-  string query = 4;
+  // The names of the queries in this bundle that this document matches to.
+  repeated string queries = 4;
 }
 
 // Metadata describing the bundle file/stream.
