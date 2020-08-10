@@ -118,7 +118,7 @@ export class BundleBuilder {
 
   private addNamedQuery(name: string, querySnap: QuerySnapshot): void {
     if (this.namedQueries.has(name)) {
-      throw new Error(`Query name conflict: ${name} is already added.`);
+      throw new Error(`Query name conflict: ${name} has already been added.`);
     }
 
     this.namedQueries.set(name, {

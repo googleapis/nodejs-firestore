@@ -169,17 +169,11 @@ describe('Bundle Buidler', () => {
     );
 
     // Verify named query
-    let namedQuery = elements.find(e => e.namedQuery?.name === 'test-query')!
+    const namedQuery = elements.find(e => e.namedQuery?.name === 'test-query')!
       .namedQuery;
-    let newNamedQuery = elements.find(
+    const newNamedQuery = elements.find(
       e => e.namedQuery?.name === 'test-query-new'
     )!.namedQuery;
-    if (namedQuery?.name === 'test-query-new') {
-      // Swap
-      const q = namedQuery;
-      namedQuery = newNamedQuery;
-      newNamedQuery = q;
-    }
     expect(namedQuery).to.deep.equal({
       name: 'test-query',
       readTime: snap.readTime.toProto().timestampValue,
