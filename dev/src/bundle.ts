@@ -84,16 +84,33 @@ export class BundleBuilder {
     return this;
   }
 
-  private addBundledDocument(snap: DocumentSnapshot): void {
-    const docProto = snap.toDocumentProto();
-    this.documents.set(snap.id, {
-      document: snap.exists ? docProto : undefined,
-      metadata: {
-        name: docProto.name,
-        readTime: snap.readTime.toProto().timestampValue,
-        exists: snap.exists,
-      },
-    });
+  private addBundledDocument(snap: DocumentSnapshot, queryName?: string): void {
+    const originalDocument = this.documents.get(snap.id);
+    const originalQueries = originalDocument?.metadata.queries;
+
+    // Update with document built from `snap` because it is newer.
+    if (
+      !originalDocument ||
+      Timestamp.fromProto(originalDocument.metadata.readTime!) < snap.readTime
+    ) {
+      const docProto = snap.toDocumentProto();
+      this.documents.set(snap.id, {
+        document: snap.exists ? docProto : undefined,
+        metadata: {
+          name: docProto.name,
+          readTime: snap.readTime.toProto().timestampValue,
+          exists: snap.exists,
+        },
+      });
+    }
+
+    // Update `queries` to include both original and `queryName`.
+    const newDocument = this.documents.get(snap.id)!;
+    newDocument.metadata.queries = originalQueries || [];
+    if (queryName) {
+      newDocument.metadata.queries!.push(queryName);
+    }
+
     if (snap.readTime > this.latestReadTime) {
       this.latestReadTime = snap.readTime;
     }
@@ -101,7 +118,7 @@ export class BundleBuilder {
 
   private addNamedQuery(name: string, querySnap: QuerySnapshot): void {
     if (this.namedQueries.has(name)) {
-      throw new Error(`Query name conflict: ${name} is already added.`);
+      throw new Error(`Query name conflict: ${name} has already been added.`);
     }
 
     this.namedQueries.set(name, {
@@ -111,7 +128,7 @@ export class BundleBuilder {
     });
 
     for (const snap of querySnap.docs) {
-      this.addBundledDocument(snap);
+      this.addBundledDocument(snap, name);
     }
 
     if (querySnap.readTime > this.latestReadTime) {

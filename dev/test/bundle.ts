@@ -97,7 +97,7 @@ describe('Bundle Buidler', () => {
 
     bundle.add(snap1);
     bundle.add(snap2);
-    // Bundle is expected to be [bundleMeta, snap2Meta, snap2] because `snap2` is added later.
+    // Bundle is expected to be [bundleMeta, snap2Meta, snap2] because `snap1` is newer.
     const elements = await bundleToElementArray(bundle.build());
     expect(elements.length).to.equal(3);
 
@@ -113,11 +113,12 @@ describe('Bundle Buidler', () => {
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
     const docSnap = (elements[2] as IBundleElement).document;
     expect(docMeta).to.deep.equal({
-      name: snap2.toDocumentProto().name,
-      readTime: snap2.readTime.toProto().timestampValue,
+      name: snap1.toDocumentProto().name,
+      readTime: snap1.readTime.toProto().timestampValue,
       exists: true,
+      queries: [],
     });
-    expect(docSnap).to.deep.equal(snap2.toDocumentProto());
+    expect(docSnap).to.deep.equal(snap1.toDocumentProto());
   });
 
   it('succeeds with query snapshots', async () => {
@@ -144,10 +145,20 @@ describe('Bundle Buidler', () => {
       () => []
     );
 
+    const newQuery = firestore.collection('collectionId');
+    const newQuerySnapshot = new QuerySnapshot(
+      newQuery,
+      snap.readTime,
+      1,
+      () => [snap],
+      () => []
+    );
+
     bundle.add('test-query', querySnapshot);
-    // Bundle is expected to be [bundleMeta, namedQuery, snapMeta, snap]
+    bundle.add('test-query-new', newQuerySnapshot);
+    // Bundle is expected to be [bundleMeta, namedQuery, newNamedQuery, snapMeta, snap]
     const elements = await bundleToElementArray(bundle.build());
-    expect(elements.length).to.equal(4);
+    expect(elements.length).to.equal(5);
 
     const meta = (elements[0] as IBundleElement).metadata;
     verifyMetadata(
@@ -158,7 +169,11 @@ describe('Bundle Buidler', () => {
     );
 
     // Verify named query
-    const namedQuery = (elements[1] as IBundleElement).namedQuery;
+    const namedQuery = elements.find(e => e.namedQuery?.name === 'test-query')!
+      .namedQuery;
+    const newNamedQuery = elements.find(
+      e => e.namedQuery?.name === 'test-query-new'
+    )!.namedQuery;
     expect(namedQuery).to.deep.equal({
       name: 'test-query',
       readTime: snap.readTime.toProto().timestampValue,
@@ -171,14 +186,28 @@ describe('Bundle Buidler', () => {
         }
       ),
     });
+    expect(newNamedQuery).to.deep.equal({
+      name: 'test-query-new',
+      readTime: snap.readTime.toProto().timestampValue,
+      bundledQuery: extend(
+        true,
+        {},
+        {
+          parent: newQuery.toProto().parent,
+          structuredQuery: newQuery.toProto().structuredQuery,
+        }
+      ),
+    });
 
     // Verify docMeta and docSnap
-    const docMeta = (elements[2] as IBundleElement).documentMetadata;
-    const docSnap = (elements[3] as IBundleElement).document;
+    const docMeta = (elements[3] as IBundleElement).documentMetadata;
+    const docSnap = (elements[4] as IBundleElement).document;
+    docMeta?.queries?.sort();
     expect(docMeta).to.deep.equal({
       name: snap.toDocumentProto().name,
       readTime: snap.readTime.toProto().timestampValue,
       exists: true,
+      queries: ['test-query', 'test-query-new'],
     });
     expect(docSnap).to.deep.equal(snap.toDocumentProto());
   });
@@ -217,6 +246,7 @@ describe('Bundle Buidler', () => {
       name: snap1.toDocumentProto().name,
       readTime: snap1.readTime.toProto().timestampValue,
       exists: true,
+      queries: [],
     });
     expect(doc1Snap).to.deep.equal(snap1.toDocumentProto());
 
@@ -253,6 +283,7 @@ describe('Bundle Buidler', () => {
       name: snap2.toDocumentProto().name,
       readTime: snap2.readTime.toProto().timestampValue,
       exists: true,
+      queries: [],
     });
     expect(doc2Snap).to.deep.equal(snap2.toDocumentProto());
   });

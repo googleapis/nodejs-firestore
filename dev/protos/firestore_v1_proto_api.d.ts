@@ -145,6 +145,9 @@ export namespace firestore {
 
         /** BundledDocumentMetadata exists */
         exists?: (boolean|null);
+
+        /** BundledDocumentMetadata queries */
+        queries?: (string[]|null);
     }
 
     /** Represents a BundledDocumentMetadata. */
@@ -164,6 +167,9 @@ export namespace firestore {
 
         /** BundledDocumentMetadata exists. */
         public exists: boolean;
+
+        /** BundledDocumentMetadata queries. */
+        public queries: string[];
 
         /**
          * Creates a BundledDocumentMetadata message from a plain object. Also converts values to their respective internal types.
