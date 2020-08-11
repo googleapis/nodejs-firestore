@@ -90,6 +90,8 @@ class BulkCommitBatch {
   // Only contains writes that have not been resolved.
   private pendingOps = new Map<string, Deferred<BatchWriteResult>>();
 
+  private writeResults: Array<Promise<WriteResult>> = [];
+
   private readonly backoff: ExponentialBackoff;
 
   constructor(
@@ -195,13 +197,19 @@ class BulkCommitBatch {
       this.state = BatchState.READY_TO_SEND;
     }
 
-    return deferred.promise.then(result => {
+    const writeResultPromise = deferred.promise.then(result => {
       if (result.writeTime) {
         return new WriteResult(result.writeTime);
       } else {
         throw result.status;
       }
     });
+    this.writeResults.push(writeResultPromise);
+    return writeResultPromise;
+  }
+
+  returnWriteResults(): Array<Promise<WriteResult>> {
+    return this.writeResults;
   }
 
   /**
@@ -576,12 +584,40 @@ export class BulkWriter {
    *   console.log('Executed all writes');
    * });
    */
-  async flush(): Promise<void> {
+  async flush(): Promise<Array<WriteResult>> {
     this.verifyNotClosed();
     const trackedBatches = this.batchQueue;
-    const writePromises = trackedBatches.map(batch => batch.awaitBulkCommit());
+    let writePromises: Array<Promise<WriteResult>> = [];
+    trackedBatches.forEach(batch => {
+      writePromises = writePromises.concat(batch.returnWriteResults());
+    });
+    const bulkCommitPromises = trackedBatches.map(batch =>
+      batch.awaitBulkCommit()
+    );
     this.sendReadyBatches();
-    await Promise.all(writePromises);
+
+    // TODO: Figure out how to make subsequent flushes only return writes that
+    // were made since the previous flush. The naive way I thought of is to use
+    // yet another form of state tracking to see which batches have been flushed,
+    // but I don't think that's the optimal way.
+    writePromises.map(p =>
+      p.then(
+        v => {
+          return {status: 'resolved', value: v};
+        },
+        e => {
+          return {status: 'rejected', reason: e};
+        }
+      )
+    );
+
+    // TODO: Another issue I ran into is how to make sure that a second flush() called
+    // immediately after the first flush doesn't resolve early. For now, I'm also
+    // awaiting the bulkCommit() promise in addition, but I'm sure there's a more
+    // optimal solution that is eluding me.
+    await Promise.all(bulkCommitPromises);
+
+    return Promise.all(writePromises);
   }
 
   /**
@@ -611,7 +647,7 @@ export class BulkWriter {
     this.firestore._decrementBulkWritersCount();
     const flushPromise = this.flush();
     this.closed = true;
-    return flushPromise;
+    return flushPromise.then(_ => {}).catch();
   }
 
   private verifyNotClosed(): void {

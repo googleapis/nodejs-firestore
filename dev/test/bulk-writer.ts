@@ -315,6 +315,35 @@ describe('BulkWriter', () => {
     });
   });
 
+  it('adds writes to a new batch after calling flush()', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([
+          createOp('doc0', 'bar'),
+          createOp('doc1', 'bar'),
+        ]),
+        response: mergeResponses([successResponse(1), successResponse(1)]),
+      },
+      {
+        request: createRequest([setOp('doc2', 'bar')]),
+        response: successResponse(2),
+      },
+    ]);
+    bulkWriter.create(firestore.doc('collectionId/doc0'), {foo: 'bar'});
+    bulkWriter.create(firestore.doc('collectionId/doc1'), {foo: 'bar'});
+    const flush1 = bulkWriter.flush();
+    bulkWriter.set(firestore.doc('collectionId/doc2'), {foo: 'bar'});
+    const flush2 = bulkWriter.flush();
+    await flush1.then(res => {
+      expect(res.length).to.equal(2);
+      expect((res[0] as any).status).to.equal('resolved');
+      expect((res[1] as any).status).to.equal('resolved');
+    });
+    await flush2.then(res => {
+      expect(res.length).to.equal(1);
+    });
+  });
+
   it('close() sends all writes', async () => {
     const bulkWriter = await instantiateInstance([
       {

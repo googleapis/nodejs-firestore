@@ -573,7 +573,7 @@ declare namespace FirebaseFirestore {
      * @return A promise that resolves when all enqueued writes
      * up to this point have been committed.
      */
-    flush(): Promise<void>;
+    flush(): Promise<Array<WriteResult>>;
 
     /**
      * Commits all enqueued writes and marks the BulkWriter instance as closed.
