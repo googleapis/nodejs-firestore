@@ -474,10 +474,7 @@ declare namespace FirebaseFirestore {
      * @returns A promise that resolves with the result
      * of the write. Throws an error if the write fails.
      */
-    create(
-      documentRef: DocumentReference,
-      data: DocumentData
-    ): Promise<WriteResult>;
+    create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
 
     /**
      * Delete a document from the database.
@@ -493,7 +490,7 @@ declare namespace FirebaseFirestore {
      * of the write. Throws an error if the write fails.
      */
     delete(
-      documentRef: DocumentReference,
+      documentRef: DocumentReference<any>,
       precondition?: Precondition
     ): Promise<WriteResult>;
 
@@ -539,23 +536,47 @@ declare namespace FirebaseFirestore {
      * A Precondition restricting this update can be specified as the last
      * argument.
      *
-     * @param documentRef A reference to the document to be
-     * updated.
-     * @param dataOrField An object containing the
-     * fields and values with which to update the document or the path of the
-     * first field to update.
-     * @param preconditionOrValues - An
-     * alternating list of field paths and values to update or a Precondition to
-     * restrict this update
-     * @returns A promise that resolves with the result
-     * of the write. Throws an error if the write fails.
+     * @param documentRef A reference to the document to be updated.
+     * @param data An object containing the fields and values with which to
+     * update the document.
+     * @param precondition A Precondition to enforce on this update.
+     * @returns A promise that resolves with the result of the write. Throws
+     * an error if the write fails.
      */
     update(
-      documentRef: DocumentReference,
-      dataOrField: UpdateData | string | FieldPath,
-      ...preconditionOrValues: Array<
-        {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
-      >
+      documentRef: DocumentReference<any>,
+      data: UpdateData,
+      precondition?: Precondition
+    ): Promise<WriteResult>;
+
+    /**
+     * Update fields of the document referred to by the provided
+     * [DocumentReference]{@link DocumentReference}. If the document doesn't yet
+     * exist, the update fails and the entire batch will be rejected.
+     *
+     * The update() method accepts either an object with field paths encoded as
+     * keys and field values encoded as values, or a variable number of
+     * arguments that alternate between field paths and field values. Nested
+     * fields can be updated by providing dot-separated field path strings or by
+     * providing FieldPath objects.
+     *
+     *
+     * A Precondition restricting this update can be specified as the last
+     * argument.
+     *
+     * @param documentRef A reference to the document to be updated.
+     * @param field The first field to update.
+     * @param value The first value
+     * @param fieldsOrPrecondition An alternating list of field paths and values
+     * to update, optionally followed a `Precondition` to enforce on this update.
+     * @returns A promise that resolves with the result of the write. Throws
+     * an error if the write fails.
+     */
+    update(
+      documentRef: DocumentReference<any>,
+      field: string | FieldPath,
+      value: any,
+      ...fieldsOrPrecondition: any[]
     ): Promise<WriteResult>;
 
     /**
