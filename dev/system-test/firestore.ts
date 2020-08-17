@@ -2551,6 +2551,7 @@ describe('Bundle building', () => {
       name: snap.toDocumentProto().name,
       readTime: snap.readTime.toProto().timestampValue,
       exists: false,
+      queries: [],
     });
   });
 
@@ -2621,6 +2622,7 @@ describe('Bundle building', () => {
       name: limitToLastSnap.docs[0].toDocumentProto().name,
       readTime: limitToLastSnap.readTime.toProto().timestampValue,
       exists: true,
+      queries: ['limitQuery', 'limitToLastQuery'],
     });
 
     const bundledDoc = (elements[4] as IBundleElement).document;
