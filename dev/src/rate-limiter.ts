@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import * as assert from 'assert';
+import {logger} from './logger';
 
 /**
  * A helper that uses the Token Bucket algorithm to rate limit the number of
@@ -36,6 +37,10 @@ export class RateLimiter {
   // When the token bucket was last refilled.
   lastRefillTimeMillis: number;
 
+  // The last operations per second capacity that was calculated. Used to log
+  // changes to the maximum QPS.
+  previousCapacity: number;
+
   /**
    * @param initialCapacity Initial maximum number of operations per second.
    * @param multiplier Rate by which to increase the capacity.
@@ -52,6 +57,7 @@ export class RateLimiter {
   ) {
     this.availableTokens = initialCapacity;
     this.lastRefillTimeMillis = startTimeMillis;
+    this.previousCapacity = initialCapacity;
   }
 
   /**
@@ -147,6 +153,16 @@ export class RateLimiter {
         Math.floor(millisElapsed / this.multiplierMillis)
       ) * this.initialCapacity
     );
+
+    if (operationsPerSecond !== this.previousCapacity) {
+      logger(
+        'RateLimiter.calculateCapacity',
+        null,
+        `New request capacity: ${operationsPerSecond} operations per second.`
+      );
+    }
+
+    this.previousCapacity = operationsPerSecond;
     return operationsPerSecond;
   }
 }
