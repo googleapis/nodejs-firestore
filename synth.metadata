@@ -3,23 +3,23 @@
     {
       "git": {
         "name": ".",
-        "remote": "https://github.com/googleapis/nodejs-firestore.git",
-        "sha": "9cd53be4a7f37b8d1f61a1b8567fa8b7ccce0e3e"
+        "remote": "git@github.com:googleapis/nodejs-firestore.git",
+        "sha": "382128b83de01cc0f88110393a1271b8d768509e"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "94006b3cb8d2fb44703cf535da15608eed6bf7db",
-        "internalRef": "325949033"
+        "sha": "65097bb8a18449d7ebbb5f61bc4eefed81640d71",
+        "internalRef": "327525660"
       }
     },
     {
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "5936421202fb53ed4641bcb824017dd393a3dbcc"
+        "sha": "9602086c6c5b05db77950c7f7495a2a3868f3537"
       }
     }
   ],
