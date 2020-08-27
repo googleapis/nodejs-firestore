@@ -4,7 +4,7 @@
       "git": {
         "name": ".",
         "remote": "https://github.com/googleapis/nodejs-firestore.git",
-        "sha": "befe625f35b7c96e9a90399a1ca71a8a049224ad"
+        "sha": "388583bae74e0daead296974beaee9c230f770ef"
       }
     },
     {
@@ -117,6 +117,7 @@
     "dev/protos/protos.d.ts",
     "dev/protos/protos.js",
     "dev/protos/protos.json",
+    "dev/src/reference.ts",
     "dev/src/v1/firestore_admin_client.ts",
     "dev/src/v1/firestore_admin_client_config.json",
     "dev/src/v1/firestore_admin_proto_list.json",
@@ -132,9 +133,7 @@
     "dev/test/gapic_firestore_admin_v1.ts",
     "dev/test/gapic_firestore_v1.ts",
     "dev/test/gapic_firestore_v1beta1.ts",
-    "package-lock.json.3261340735",
     "renovate.json",
-    "samples/README.md",
-    "samples/package-lock.json.3433869271"
+    "samples/README.md"
   ]
 }
