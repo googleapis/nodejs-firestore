@@ -1224,6 +1224,88 @@ describe('Query class', () => {
       });
   });
 
+  it('supports !=', async () => {
+    await addDocs(
+      {zip: NaN},
+      {zip: 91102},
+      {zip: 98101},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}},
+      {zip: null}
+    );
+
+    let res = await randomCol.where('zip', '!=', 98101).get();
+    expectDocs(
+      res,
+      {zip: NaN},
+      {zip: 91102},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+
+    res = await randomCol.where('zip', '!=', NaN).get();
+    expectDocs(
+      res,
+      {zip: 91102},
+      {zip: 98101},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+
+    res = await randomCol.where('zip', '!=', null).get();
+    expectDocs(
+      res,
+      {zip: NaN},
+      {zip: 91102},
+      {zip: 98101},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+  });
+
+  it('supports != with document ID', async () => {
+    const refs = await addDocs({count: 1}, {count: 2}, {count: 3});
+    const res = await randomCol
+      .where(FieldPath.documentId(), '!=', refs[0].id)
+      .get();
+    expectDocs(res, {count: 2}, {count: 3});
+  });
+
+  it('supports not-in', async () => {
+    await addDocs(
+      {zip: 98101},
+      {zip: 91102},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+    const res = await randomCol.where('zip', 'not-in', [98101, 98103]).get();
+    expectDocs(
+      res,
+      {zip: 91102},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+  });
+
+  it('supports not-in with document ID array', async () => {
+    const refs = await addDocs({count: 1}, {count: 2}, {count: 3});
+    const res = await randomCol
+      .where(FieldPath.documentId(), 'not-in', [refs[0].id, refs[1]])
+      .get();
+    expectDocs(res, {count: 3});
+  });
+
   it('supports "in"', async () => {
     await addDocs(
       {zip: 98101},

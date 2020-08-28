@@ -1073,17 +1073,19 @@ declare namespace FirebaseFirestore {
 
   /**
    * Filter conditions in a `Query.where()` clause are specified using the
-   * strings '<', '<=', '==', '>=', '>', 'array-contains', 'in', and
-   * 'array-contains-any'.
+   * strings '<', '<=', '==', '!=', '>=', '>', 'array-contains', 'in', 'not-in',
+   * and 'array-contains-any'.
    */
   export type WhereFilterOp =
     | '<'
     | '<='
     | '=='
+    | '!='
     | '>='
     | '>'
     | 'array-contains'
     | 'in'
+    | 'not-in'
     | 'array-contains-any';
 
   /**
