@@ -2308,8 +2308,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
  * @class
  * @extends Query
  */
-export class CollectionReference<T = firestore.DocumentData> extends Query<T>
-  implements firestore.CollectionReference<T> {
+export class CollectionReference<T = firestore.DocumentData>
+    extends Query<T> implements firestore.CollectionReference<T> {
   /**
    * @hideconstructor
    *
