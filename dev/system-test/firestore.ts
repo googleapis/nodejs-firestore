@@ -1288,7 +1288,7 @@ describe('Query class', () => {
       {zip: ['98101', {zip: 98101}]},
       {zip: {zip: 98101}}
     );
-    const res = await randomCol.where('zip', 'not-in', [98101, 98103]).get();
+    let res = await randomCol.where('zip', 'not-in', [98101, 98103]).get();
     expectDocs(
       res,
       {zip: 91102},
@@ -1296,6 +1296,20 @@ describe('Query class', () => {
       {zip: ['98101', {zip: 98101}]},
       {zip: {zip: 98101}}
     );
+
+    res = await randomCol.where('zip', 'not-in', [NaN]).get();
+    expectDocs(
+      res,
+      {zip: 91102},
+      {zip: 98101},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+
+    res = await randomCol.where('zip', 'not-in', [null]).get();
+    expect(res.size).to.equal(0);
   });
 
   it('supports not-in with document ID array', async () => {
