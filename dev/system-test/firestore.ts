@@ -2485,17 +2485,6 @@ describe('BulkWriter class', () => {
     await writer.close();
     return firestore.terminate();
   });
-
-  it('writes to the same document in order', async () => {
-    const ref = randomCol.doc('doc1');
-    await ref.set({foo: 'bar0'});
-    writer.set(ref, {foo: 'bar1'});
-    writer.set(ref, {foo: 'bar2'});
-    writer.set(ref, {foo: 'bar3'});
-    await writer.flush();
-    const res = await ref.get();
-    expect(res.data()).to.deep.equal({foo: 'bar3'});
-  });
 });
 
 describe('Client initialization', () => {
