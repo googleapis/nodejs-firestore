@@ -332,7 +332,7 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.close()).to.throw(expected);
   });
 
-  it('sends writes to the same documents in the same batch', async () => {
+  it('can send writes to the same documents in the same batch', async () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([

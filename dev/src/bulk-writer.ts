@@ -289,6 +289,9 @@ class BulkCommitBatch {
         resolvedOps.push(i);
       }
     }
+
+    // Remove resolved operations by deleting them from the array. Iterate in
+    // reverse order to ensure indices are correct.
     for (let i = resolvedOps.length - 1; i >= 0; i--) {
       this.pendingOps.splice(resolvedOps[i], 1);
     }
