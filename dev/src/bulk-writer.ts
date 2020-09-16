@@ -74,7 +74,7 @@ enum BatchState {
 /*!
  * Used to represent a pending write operation.
  *
- * Contains a pending writes's document path and the corresponding result.
+ * Contains a pending write's document path and the corresponding result.
  */
 interface PendingOp {
   key: string;
