@@ -19,10 +19,14 @@ import {expect} from 'chai';
 import {GoogleError, Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
-import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
+import {
+  BulkWriter,
+  Firestore,
+  setLogFunction,
+  Timestamp,
+  WriteResult,
+} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
-import {BulkWriter} from '../src/bulk-writer';
-import {Deferred} from '../src/util';
 import {
   ApiOverride,
   create,
@@ -52,12 +56,9 @@ describe('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
-  let activeRequestDeferred: Deferred<void>;
-  let activeRequestCounter = 0;
   let timeoutHandlerCounter = 0;
 
   beforeEach(() => {
-    activeRequestDeferred = new Deferred<void>();
     requestCounter = 0;
     opCount = 0;
     timeoutHandlerCounter = 0;
@@ -147,15 +148,8 @@ describe('BulkWriter', () => {
 
   /**
    * Creates an instance with the mocked objects.
-   *
-   * @param enforceSingleConcurrentRequest Whether to check that there is only
-   * one active request at a time. If true, the `activeRequestDeferred` must be
-   * manually resolved for the response to return.
    */
-  function instantiateInstance(
-    mock: RequestResponse[],
-    enforceSingleConcurrentRequest = false
-  ): Promise<BulkWriter> {
+  function instantiateInstance(mock: RequestResponse[]): Promise<BulkWriter> {
     const overrides: ApiOverride = {
       batchWrite: async (request, options) => {
         expect(options!.retry!.retryCodes).contains(Status.ABORTED);
@@ -164,16 +158,6 @@ describe('BulkWriter', () => {
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: mock[requestCounter].request.writes,
         });
-        if (enforceSingleConcurrentRequest) {
-          activeRequestCounter++;
-
-          // This expect statement is used to test that only one request is
-          // made at a time.
-          expect(activeRequestCounter).to.equal(1);
-          await activeRequestDeferred.promise;
-          activeRequestCounter--;
-        }
-
         const responsePromise = response({
           writeResults: mock[requestCounter].response.writeResults,
           status: mock[requestCounter].response.status,
@@ -348,23 +332,20 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.close()).to.throw(expected);
   });
 
-  it('sends writes to the same document in separate batches', async () => {
+  it('sends writes to the same documents in the same batch', async () => {
     const bulkWriter = await instantiateInstance([
       {
-        request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(1),
-      },
-      {
-        request: createRequest([updateOp('doc', 'bar1')]),
-        response: successResponse(2),
+        request: createRequest([
+          setOp('doc1', 'bar'),
+          updateOp('doc1', 'bar2'),
+        ]),
+        response: mergeResponses([successResponse(1), successResponse(2)]),
       },
     ]);
 
-    // Create two document references pointing to the same document.
-    const doc = firestore.doc('collectionId/doc');
-    const doc2 = firestore.doc('collectionId/doc');
-    bulkWriter.set(doc, {foo: 'bar'}).then(incrementOpCount);
-    bulkWriter.update(doc2, {foo: 'bar1'}).then(incrementOpCount);
+    const doc1 = firestore.doc('collectionId/doc1');
+    bulkWriter.set(doc1, {foo: 'bar'}).then(incrementOpCount);
+    bulkWriter.update(doc1, {foo: 'bar2'}).then(incrementOpCount);
 
     return bulkWriter.close().then(async () => {
       verifyOpCount(2);
@@ -420,44 +401,6 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('sends existing batches when a new batch is created', async () => {
-    const bulkWriter = await instantiateInstance([
-      {
-        request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(1),
-      },
-      {
-        request: createRequest([
-          updateOp('doc', 'bar1'),
-          createOp('doc2', 'bar1'),
-        ]),
-        response: mergeResponses([successResponse(1), successResponse(2)]),
-      },
-    ]);
-
-    bulkWriter._setMaxBatchSize(2);
-
-    const doc = firestore.doc('collectionId/doc');
-    const doc2 = firestore.doc('collectionId/doc2');
-
-    // Create a new batch by writing to the same document.
-    const setPromise = bulkWriter.set(doc, {foo: 'bar'}).then(incrementOpCount);
-    const updatePromise = bulkWriter
-      .update(doc, {foo: 'bar1'})
-      .then(incrementOpCount);
-    await setPromise;
-
-    // Create a new batch by reaching the batch size limit.
-    const createPromise = bulkWriter
-      .create(doc2, {foo: 'bar1'})
-      .then(incrementOpCount);
-
-    await updatePromise;
-    await createPromise;
-    verifyOpCount(3);
-    return bulkWriter.close();
-  });
-
   it('sends batches automatically when the batch size limit is reached', async () => {
     const bulkWriter = await instantiateInstance([
       {
@@ -501,32 +444,6 @@ describe('BulkWriter', () => {
     return bulkWriter.close().then(async () => {
       verifyOpCount(4);
     });
-  });
-
-  it('uses timeout for batches that exceed the rate limit', async () => {
-    const bulkWriter = await instantiateInstance(
-      [
-        {
-          request: createRequest([setOp('doc1', 'bar'), setOp('doc2', 'bar')]),
-          response: mergeResponses([successResponse(1), successResponse(2)]),
-        },
-        {
-          request: createRequest([setOp('doc1', 'bar')]),
-          response: successResponse(3),
-        },
-      ],
-      /* enforceSingleConcurrentRequest= */ true
-    );
-    bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
-    bulkWriter.set(firestore.doc('collectionId/doc2'), {foo: 'bar'});
-    const flush1 = bulkWriter.flush();
-    // The third write will be placed in a new batch
-    bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
-    const flush2 = bulkWriter.flush();
-    activeRequestDeferred.resolve();
-    await flush1;
-    await flush2;
-    return bulkWriter.close();
   });
 
   it('supports different type converters', async () => {
