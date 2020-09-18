@@ -58,7 +58,6 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = protos.google.firestore.v1;
-import {DocumentData} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1291,7 +1290,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *   console.log(`y is ${res.docs[0].get('y')}.`);
    * });
    */
-  select(...fieldPaths: Array<string | FieldPath>): Query<DocumentData> {
+  select(
+    ...fieldPaths: Array<string | FieldPath>
+  ): Query<firestore.DocumentData> {
     const fields: api.StructuredQuery.IFieldReference[] = [];
 
     if (fieldPaths.length === 0) {
@@ -1309,7 +1310,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
     // `T`. We there return `Query<DocumentData>`;
     const options = this._queryOptions.with({
       projection: {fields},
-    }) as QueryOptions<DocumentData>;
+    }) as QueryOptions<firestore.DocumentData>;
     return new Query(this._firestore, options);
   }
 
