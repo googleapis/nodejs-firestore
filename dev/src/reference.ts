@@ -58,6 +58,7 @@ import {DocumentWatch, QueryWatch} from './watch';
 import {validateDocumentData, WriteBatch, WriteResult} from './write-batch';
 
 import api = protos.google.firestore.v1;
+import {DocumentData} from '@google-cloud/firestore';
 
 /**
  * The direction of a `Query.orderBy()` clause is specified as 'desc' or 'asc'
@@ -1290,7 +1291,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *   console.log(`y is ${res.docs[0].get('y')}.`);
    * });
    */
-  select(...fieldPaths: Array<string | FieldPath>): Query<T> {
+  select(...fieldPaths: Array<string | FieldPath>): Query<DocumentData> {
     const fields: api.StructuredQuery.IFieldReference[] = [];
 
     if (fieldPaths.length === 0) {
@@ -1304,7 +1305,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       }
     }
 
-    const options = this._queryOptions.with({projection: {fields}});
+    // By specifying a field mask, the query result no longer conforms to type
+    // `T`. We there return `Query<DocumentData>`;
+    const options = this._queryOptions.with({
+      projection: {fields},
+    }) as QueryOptions<DocumentData>;
     return new Query(this._firestore, options);
   }
 
@@ -2308,8 +2313,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
  * @class
  * @extends Query
  */
-export class CollectionReference<T = firestore.DocumentData>
-  extends Query<T>
+export class CollectionReference<T = firestore.DocumentData> extends Query<T>
   implements firestore.CollectionReference<T> {
   /**
    * @hideconstructor

@@ -1190,7 +1190,7 @@ declare namespace FirebaseFirestore {
      * @param field The field paths to return.
      * @return The created Query.
      */
-    select(...field: (string | FieldPath)[]): Query<T>;
+    select(...field: (string | FieldPath)[]): Query<DocumentData>;
 
     /**
      * Creates and returns a new Query that starts at the provided document
