@@ -74,11 +74,13 @@ enum BatchState {
 /*!
  * Used to represent a pending write operation.
  *
- * Contains a pending write's document path and the corresponding result.
+ * Contains a pending write's WriteBatch index, document path, and the
+ * corresponding result.
  */
 interface PendingOp {
+  writeBatchIndex: number;
   key: string;
-  result: Deferred<BatchWriteResult>;
+  deferred: Deferred<BatchWriteResult>;
 }
 
 /**
@@ -195,7 +197,11 @@ class BulkCommitBatch {
       'Batch should be OPEN when adding writes'
     );
     const deferred = new Deferred<BatchWriteResult>();
-    this.pendingOps.push({key: documentRef.path, result: deferred});
+    this.pendingOps.push({
+      writeBatchIndex: this.opCount,
+      key: documentRef.path,
+      deferred: deferred,
+    });
 
     if (this.opCount === this.maxBatchSize) {
       this.state = BatchState.READY_TO_SEND;
@@ -252,7 +258,7 @@ class BulkCommitBatch {
         this.writeBatch = new WriteBatch(
           this.firestore,
           this.writeBatch,
-          this.pendingOps.map(op => op.key)
+          this.pendingOps.map(op => op.writeBatchIndex)
         );
       } else {
         this.completedDeferred.resolve();
@@ -271,30 +277,33 @@ class BulkCommitBatch {
     results: BatchWriteResult[],
     failRemainingOperations = false
   ): void {
-    const resolvedOps = [];
+    const newPendingOps: Array<PendingOp> = [];
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
+      const op = this.pendingOps[i];
       if (failRemainingOperations) {
         assert(
           result.status.code !== Status.OK,
           'Should not fail successful operation'
         );
-        this.pendingOps[i].result.reject(result.status);
-        resolvedOps.push(i);
+        op.deferred.reject(result.status);
       } else if (result.status.code === Status.OK) {
-        this.pendingOps[i].result.resolve(result);
-        resolvedOps.push(i);
+        op.deferred.resolve(result);
       } else if (!this.shouldRetry(result.status.code)) {
-        this.pendingOps[i].result.reject(result.status);
-        resolvedOps.push(i);
+        op.deferred.reject(result.status);
+      } else {
+        // Retry the operation if it is not processed.
+        // Store the current index of pendingOps to preserve the mapping of
+        // this operation's index in the underlying WriteBatch.
+        newPendingOps.push({
+          writeBatchIndex: i,
+          key: op.key,
+          deferred: op.deferred,
+        });
       }
     }
 
-    // Remove resolved operations by deleting them from the array. Iterate in
-    // reverse order to ensure indices are correct.
-    for (let i = resolvedOps.length - 1; i >= 0; i--) {
-      this.pendingOps.splice(resolvedOps[i], 1);
-    }
+    this.pendingOps = newPendingOps;
   }
 
   private shouldRetry(code: Status | undefined): boolean {

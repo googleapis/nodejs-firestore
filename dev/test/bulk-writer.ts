@@ -489,7 +489,7 @@ describe('BulkWriter', () => {
       {
         request: createRequest([
           setOp('doc1', 'bar'),
-          setOp('doc2', 'bar'),
+          setOp('doc1', 'bar2'),
           setOp('doc3', 'bar'),
         ]),
         response: mergeResponses([
@@ -499,7 +499,7 @@ describe('BulkWriter', () => {
         ]),
       },
       {
-        request: createRequest([setOp('doc2', 'bar'), setOp('doc3', 'bar')]),
+        request: createRequest([setOp('doc1', 'bar2'), setOp('doc3', 'bar')]),
         response: mergeResponses([
           successResponse(2),
           failedResponse(Status.ABORTED),
@@ -511,13 +511,15 @@ describe('BulkWriter', () => {
       },
     ]);
 
+    // Test writes to the same document in order to verify that retry logic
+    // is unaffected by the document key.
     bulkWriter
       .set(firestore.doc('collectionId/doc1'), {
         foo: 'bar',
       })
       .catch(incrementOpCount);
-    const set2 = bulkWriter.set(firestore.doc('collectionId/doc2'), {
-      foo: 'bar',
+    const set2 = bulkWriter.set(firestore.doc('collectionId/doc1'), {
+      foo: 'bar2',
     });
     const set3 = bulkWriter.set(firestore.doc('collectionId/doc3'), {
       foo: 'bar',
