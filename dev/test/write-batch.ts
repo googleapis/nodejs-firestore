@@ -40,7 +40,7 @@ import {
 const REQUEST_TIME = 'REQUEST_TIME';
 
 // Change the argument to 'console.log' to enable debug output.
-setLogFunction(() => {});
+setLogFunction(null);
 
 const PROJECT_ID = 'test-project';
 
