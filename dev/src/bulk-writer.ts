@@ -245,7 +245,7 @@ class BulkCommitBatch {
           return {key: op.key, writeTime: null, status: wrapError(err, stack)};
         });
       }
-      this.processResults(results);
+      this.processResults(results, /* allowRetry= */ true);
 
       if (this.pendingOps.length > 0) {
         logger(
@@ -258,7 +258,7 @@ class BulkCommitBatch {
         this.writeBatch = new WriteBatch(
           this.firestore,
           this.writeBatch,
-          this.pendingOps.map(op => op.writeBatchIndex)
+          new Set(this.pendingOps.map(op => op.writeBatchIndex))
         );
       } else {
         this.completedDeferred.resolve();
@@ -266,7 +266,7 @@ class BulkCommitBatch {
       }
     }
 
-    this.processResults(results, /* failRemainingOperations= */ true);
+    this.processResults(results);
     this.completedDeferred.resolve();
   }
 
@@ -275,21 +275,15 @@ class BulkCommitBatch {
    */
   private processResults(
     results: BatchWriteResult[],
-    failRemainingOperations = false
+    allowRetry = false
   ): void {
     const newPendingOps: Array<PendingOp> = [];
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
       const op = this.pendingOps[i];
-      if (failRemainingOperations) {
-        assert(
-          result.status.code !== Status.OK,
-          'Should not fail successful operation'
-        );
-        op.deferred.reject(result.status);
-      } else if (result.status.code === Status.OK) {
+      if (result.status.code === Status.OK) {
         op.deferred.resolve(result);
-      } else if (!this.shouldRetry(result.status.code)) {
+      } else if (!allowRetry || !this.shouldRetry(result.status.code)) {
         op.deferred.reject(result.status);
       } else {
         // Retry the operation if it has not been processed.

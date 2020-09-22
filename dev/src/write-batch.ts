@@ -150,13 +150,13 @@ export class WriteBatch implements firestore.WriteBatch {
   constructor(
     firestore: Firestore,
     retryBatch: WriteBatch,
-    indexesToRetry: number[]
+    indexesToRetry: Set<number>
   );
   constructor(firestore: Firestore);
   constructor(
     firestore: Firestore,
     retryBatch?: WriteBatch,
-    indexesToRetry?: number[]
+    indexesToRetry?: Set<number>
   ) {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
@@ -165,8 +165,8 @@ export class WriteBatch implements firestore.WriteBatch {
     if (retryBatch) {
       // Creates a new WriteBatch containing only the indexes from the provided
       // indexes to retry.
-      this._ops = retryBatch._ops.filter(
-        (op, index) => indexesToRetry!.indexOf(index) !== -1
+      this._ops = retryBatch._ops.filter((op, index) =>
+        indexesToRetry!.has(index)
       );
     }
   }
