@@ -292,7 +292,7 @@ class BulkCommitBatch {
       } else if (!this.shouldRetry(result.status.code)) {
         op.deferred.reject(result.status);
       } else {
-        // Retry the operation if it is not processed.
+        // Retry the operation if it has not been processed.
         // Store the current index of pendingOps to preserve the mapping of
         // this operation's index in the underlying WriteBatch.
         newPendingOps.push({
