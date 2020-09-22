@@ -637,6 +637,7 @@ describe('BulkWriter', () => {
       });
     }
     console.log('running test');
+    setLogFunction(console.log);
     for (let i = 0; i < 1000; i++) {
       it(
         'does not send batches if doing so exceeds the rate limit ' + i,
