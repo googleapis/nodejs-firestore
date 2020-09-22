@@ -32,6 +32,7 @@ import {
   create,
   createInstance,
   document,
+  InvalidApiUsage,
   remove,
   response,
   set,
@@ -176,6 +177,89 @@ describe('BulkWriter', () => {
     verifyInstance(firestore);
     expect(timeoutHandlerCounter).to.equal(0);
     setTimeoutHandler(setTimeout);
+  });
+
+  describe('options', () => {
+    it('requires object', async () => {
+      const firestore = await createInstance();
+      expect(() => firestore.bulkWriter(42 as InvalidApiUsage)).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. Input is not an object.'
+      );
+    });
+
+    it('disableThrottling requires boolean', async () => {
+      const firestore = await createInstance();
+      expect(() =>
+        firestore.bulkWriter({disableThrottling: 42 as InvalidApiUsage})
+      ).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "disableThrottling" is not a boolean.'
+      );
+    });
+
+    it('disableThrottling used with op rates', async () => {
+      const firestore = await createInstance();
+      expect(() =>
+        firestore.bulkWriter({
+          disableThrottling: true,
+          initialOpsPerSecond: 100,
+        })
+      ).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "disableThrottling" cannot be set with "initialOpsPerSecond" or "maxOpsPerSecond".'
+      );
+
+      expect(() =>
+        firestore.bulkWriter({disableThrottling: true, maxOpsPerSecond: 100})
+      ).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "disableThrottling" cannot be set with "initialOpsPerSecond" or "maxOpsPerSecond".'
+      );
+    });
+
+    it('initialOpsPerSecond requires positive integer', async () => {
+      const firestore = await createInstance();
+      expect(() =>
+        firestore.bulkWriter({initialOpsPerSecond: '42' as InvalidApiUsage})
+      ).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "initialOpsPerSecond" is not a positive integer.'
+      );
+
+      expect(() => firestore.bulkWriter({initialOpsPerSecond: -1})).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "initialOpsPerSecond" is not a positive integer.'
+      );
+
+      expect(() => firestore.bulkWriter({initialOpsPerSecond: 500.5})).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "initialOpsPerSecond" is not a positive integer.'
+      );
+    });
+
+    it('maxOpsPerSecond requires positive integer', async () => {
+      const firestore = await createInstance();
+      expect(() =>
+        firestore.bulkWriter({maxOpsPerSecond: '42' as InvalidApiUsage})
+      ).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" is not a positive integer.'
+      );
+
+      expect(() => firestore.bulkWriter({maxOpsPerSecond: -1})).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" is not a positive integer.'
+      );
+
+      expect(() => firestore.bulkWriter({maxOpsPerSecond: 500.5})).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" is not a positive integer.'
+      );
+    });
+
+    it('maxOpsPerSecond must be greater than initial ops per second', async () => {
+      const firestore = await createInstance();
+      expect(() => firestore.bulkWriter({maxOpsPerSecond: 80})).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" must be greater than the default value of 500.'
+      );
+
+      expect(() =>
+        firestore.bulkWriter({initialOpsPerSecond: 550, maxOpsPerSecond: 500})
+      ).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".'
+      );
+    });
   });
 
   it('has a set() method', async () => {

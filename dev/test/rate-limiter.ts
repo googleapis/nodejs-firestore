@@ -25,6 +25,7 @@ describe('RateLimiter', () => {
       /* initialCapacity= */ 500,
       /* multiplier= */ 1.5,
       /* multiplierMillis= */ 5 * 60 * 1000,
+      /* maximumCapacity= */ 1000000,
       /* startTime= */ new Date(0).getTime()
     );
   });
@@ -106,5 +107,10 @@ describe('RateLimiter', () => {
     expect(
       limiter.calculateCapacity(new Date(90 * 60 * 1000).getTime())
     ).to.equal(738945);
+
+    // Check that maximum rate limit is enforced.
+    expect(
+      limiter.calculateCapacity(new Date(1000 * 60 * 1000).getTime())
+    ).to.equal(1000000);
   });
 });

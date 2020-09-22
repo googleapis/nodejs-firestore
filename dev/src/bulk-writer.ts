@@ -27,9 +27,10 @@ import {
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {Deferred, getRetryCodes, wrapError} from './util';
+import {Deferred, getRetryCodes, isObject, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 import {logger} from './logger';
+import {invalidArgumentMessage, validateOptional} from './validate';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -351,21 +352,24 @@ export class BulkWriter {
 
   constructor(
     private readonly firestore: Firestore,
-    enableThrottling: boolean
+    private readonly options?: firestore.BulkWriterOptions
   ) {
     this.firestore._incrementBulkWritersCount();
+    validateBulkWriterOptions('options', options);
 
-    if (enableThrottling) {
+    if (options && !options.disableThrottling) {
       this.rateLimiter = new RateLimiter(
-        STARTING_MAXIMUM_OPS_PER_SECOND,
-        RATE_LIMITER_MULTIPLIER,
-        RATE_LIMITER_MULTIPLIER_MILLIS
-      );
-    } else {
-      this.rateLimiter = new RateLimiter(
+        Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY
+      );
+    } else {
+      this.rateLimiter = new RateLimiter(
+        options?.initialOpsPerSecond || STARTING_MAXIMUM_OPS_PER_SECOND,
+        RATE_LIMITER_MULTIPLIER,
+        RATE_LIMITER_MULTIPLIER_MILLIS,
+        options?.maxOpsPerSecond || Number.POSITIVE_INFINITY
       );
     }
   }
@@ -726,5 +730,103 @@ export class BulkWriter {
   // Visible for testing.
   _setMaxBatchSize(size: number): void {
     this.maxBatchSize = size;
+  }
+}
+
+/**
+ * Validates the use of 'value' as BulkWriterOptions.
+ *
+ * @private
+ * @param arg The argument name or argument index (for varargs methods).
+ * @param value The object to validate.
+ * @throws if the input is not a valid BulkWriterOptions object.
+ */
+function validateBulkWriterOptions(arg: string | number, value: unknown): void {
+  if (validateOptional(value, {optional: true})) {
+    return;
+  }
+
+  if (!isObject(value)) {
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        'bulkWriter() options argument'
+      )} Input is not an object.`
+    );
+  }
+
+  const options = value as {[k: string]: unknown};
+
+  if ('disableThrottling' in options) {
+    if (typeof options.disableThrottling !== 'boolean') {
+      throw new Error(
+        `${invalidArgumentMessage(
+          arg,
+          'bulkWriter() options argument'
+        )} "disableThrottling" is not a boolean.`
+      );
+    }
+
+    if ('initialOpsPerSecond' in options || 'maxOpsPerSecond' in options) {
+      throw new Error(
+        `${invalidArgumentMessage(
+          arg,
+          'bulkWriter() options argument'
+        )} "disableThrottling" cannot be set with "initialOpsPerSecond" or "maxOpsPerSecond".`
+      );
+    }
+  }
+
+  if (
+    'initialOpsPerSecond' in options &&
+    (typeof options.initialOpsPerSecond !== 'number' ||
+      options.initialOpsPerSecond <= 0 ||
+      options.initialOpsPerSecond % 1 !== 0)
+  ) {
+    throw new Error(
+      `${invalidArgumentMessage(
+        arg,
+        'bulkWriter() options argument'
+      )} "initialOpsPerSecond" is not a positive integer.`
+    );
+  }
+
+  if ('maxOpsPerSecond' in options) {
+    if (
+      typeof options.maxOpsPerSecond !== 'number' ||
+      options.maxOpsPerSecond <= 0 ||
+      options.maxOpsPerSecond % 1 !== 0
+    ) {
+      throw new Error(
+        `${invalidArgumentMessage(
+          arg,
+          'bulkWriter() options argument'
+        )} "maxOpsPerSecond" is not a positive integer.`
+      );
+    }
+
+    if (
+      'initialOpsPerSecond' in options &&
+      (options.initialOpsPerSecond as number) > options.maxOpsPerSecond
+    ) {
+      throw new Error(
+        `${invalidArgumentMessage(
+          arg,
+          'bulkWriter() options argument'
+        )} "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".`
+      );
+    }
+
+    if (
+      !('initialOpsPerSecond' in options) &&
+      STARTING_MAXIMUM_OPS_PER_SECOND > options.maxOpsPerSecond
+    ) {
+      throw new Error(
+        `${invalidArgumentMessage(
+          arg,
+          'bulkWriter() options argument'
+        )} "maxOpsPerSecond" must be greater than the default value of ${STARTING_MAXIMUM_OPS_PER_SECOND}.`
+      );
+    }
   }
 }

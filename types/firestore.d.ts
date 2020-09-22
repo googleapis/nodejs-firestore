@@ -291,6 +291,9 @@ declare namespace FirebaseFirestore {
      * Creates a [BulkWriter]{@link BulkWriter}, used for performing
      * multiple writes in parallel. Gradually ramps up writes as specified
      * by the 500/50/5 rule.
+     *
+     * @param options An options object used to configure the throttling
+     * behavior for the underlying BulkWriter.
      */
     bulkWriter(options?: BulkWriterOptions): BulkWriter;
   }
@@ -613,12 +616,28 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * An options object that can be used to disable request throttling in
-   * BulkWriter.
+   * An options object to configure throttling on BulkWriter.
    */
   export interface BulkWriterOptions {
-    /** Whether to disable throttling. */
+    /**
+     * Whether to disable throttling. If set, initialOpsPerSecond and
+     * maxOpsPerSecond cannot be set.
+     */
     readonly disableThrottling?: boolean;
+
+    /**
+     * The initial maximum number of operations per second allowed by the
+     * throttler. If this field is not set, the default is 500 operations per
+     * second.
+     */
+    readonly initialOpsPerSecond?: number;
+
+    /**
+     * The maximum number of operations per second allowed by the
+     * throttler. If this field is set, the throttler's allowed operations per
+     * second does not ramp up past the specified operations per second.
+     */
+    readonly maxOpsPerSecond?: number;
   }
 
   /**
