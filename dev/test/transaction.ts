@@ -45,7 +45,7 @@ const DOCUMENT_ID = 'documentId';
 const DOCUMENT_NAME = `${COLLECTION_ROOT}/${DOCUMENT_ID}`;
 
 // Change the argument to 'console.log' to enable debug output.
-Firestore.setLogFunction(() => {});
+Firestore.setLogFunction(null);
 
 /** Helper to create a transaction ID from either a string or a Uint8Array. */
 function transactionId(transaction?: Uint8Array | string): Uint8Array {

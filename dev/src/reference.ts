@@ -1290,7 +1290,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *   console.log(`y is ${res.docs[0].get('y')}.`);
    * });
    */
-  select(...fieldPaths: Array<string | FieldPath>): Query<T> {
+  select(
+    ...fieldPaths: Array<string | FieldPath>
+  ): Query<firestore.DocumentData> {
     const fields: api.StructuredQuery.IFieldReference[] = [];
 
     if (fieldPaths.length === 0) {
@@ -1304,7 +1306,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       }
     }
 
-    const options = this._queryOptions.with({projection: {fields}});
+    // By specifying a field mask, the query result no longer conforms to type
+    // `T`. We there return `Query<DocumentData>`;
+    const options = this._queryOptions.with({
+      projection: {fields},
+    }) as QueryOptions<firestore.DocumentData>;
     return new Query(this._firestore, options);
   }
 

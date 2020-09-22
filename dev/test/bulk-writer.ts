@@ -43,7 +43,7 @@ import {
 import api = proto.google.firestore.v1;
 
 // Change the argument to 'console.log' to enable debug output.
-setLogFunction(() => {});
+setLogFunction(null);
 
 const PROJECT_ID = 'test-project';
 
