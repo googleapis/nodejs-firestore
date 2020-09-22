@@ -32,7 +32,7 @@ import {createInstance, InvalidApiUsage, verifyInstance} from './util/helpers';
 import api = google.firestore.v1;
 
 // Change the argument to 'console.log' to enable debug output.
-setLogFunction(() => {});
+setLogFunction(null);
 
 describe('Order', () => {
   let firestore: Firestore;
