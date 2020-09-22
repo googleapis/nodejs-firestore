@@ -636,152 +636,34 @@ describe('BulkWriter', () => {
         return firestore.bulkWriter();
       });
     }
-
-    it('does not send batches if doing so exceeds the rate limit', done => {
-      instantiateInstance().then(bulkWriter => {
-        let timeoutCalled = false;
-        setTimeoutHandler((_, timeout) => {
-          if (!timeoutCalled && timeout > 0) {
-            timeoutCalled = true;
-            done();
-          }
-        });
-
-        for (let i = 0; i < 600; i++) {
-          bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
-        }
-        // The close() promise will never resolve. Since we do not call the
-        // callback function in the overridden handler, subsequent requests
-        // after the timeout will not be made. The close() call is used to
-        // ensure that the final batch is sent.
-        bulkWriter.close();
-      });
-    });
-  });
-
-  it('retries batchWrite when the RPC fails with retryable error', async () => {
-    setTimeoutHandler(setImmediate);
-    let retryAttempts = 0;
-    function instantiateInstance(): Promise<BulkWriter> {
-      const overrides: ApiOverride = {
-        batchWrite: () => {
-          retryAttempts++;
-          if (retryAttempts < 5) {
-            const error = new GoogleError('Mock batchWrite failed in test');
-            error.code = Status.ABORTED;
-            throw error;
-          } else {
-            const mockResponse = successResponse(1);
-            return response({
-              writeResults: mockResponse.writeResults,
-              status: mockResponse.status,
+    console.log('running test');
+    for (let i = 0; i < 1000; i++) {
+      it(
+        'does not send batches if doing so exceeds the rate limit ' + i,
+        done => {
+          console.log('running at' + i);
+          instantiateInstance().then(bulkWriter => {
+            let timeoutCalled = false;
+            setTimeoutHandler((_, timeout) => {
+              if (!timeoutCalled && timeout > 0) {
+                timeoutCalled = true;
+                done();
+              }
             });
-          }
-        },
-      };
-      return createInstance(overrides).then(firestoreClient => {
-        firestore = firestoreClient;
-        return firestore.bulkWriter();
-      });
+
+            for (let i = 0; i < 600; i++) {
+              bulkWriter.set(firestore.doc('collectionId/doc' + i), {
+                foo: 'bar',
+              });
+            }
+            // The close() promise will never resolve. Since we do not call the
+            // callback function in the overridden handler, subsequent requests
+            // after the timeout will not be made. The close() call is used to
+            // ensure that the final batch is sent.
+            bulkWriter.close();
+          });
+        }
+      );
     }
-    const bulkWriter = await instantiateInstance();
-    let writeResult: WriteResult;
-    bulkWriter
-      .create(firestore.doc('collectionId/doc'), {
-        foo: 'bar',
-      })
-      .then(result => {
-        incrementOpCount();
-        writeResult = result;
-      });
-    return bulkWriter.close().then(async () => {
-      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
-    });
-  });
-
-  it('fails writes after all retry attempts failed', async () => {
-    setTimeoutHandler(setImmediate);
-    function instantiateInstance(): Promise<BulkWriter> {
-      const overrides: ApiOverride = {
-        batchWrite: () => {
-          const error = new GoogleError('Mock batchWrite failed in test');
-          error.code = Status.ABORTED;
-          throw error;
-        },
-      };
-      return createInstance(overrides).then(firestoreClient => {
-        firestore = firestoreClient;
-        return firestore.bulkWriter();
-      });
-    }
-    const bulkWriter = await instantiateInstance();
-    bulkWriter
-      .create(firestore.doc('collectionId/doc'), {
-        foo: 'bar',
-      })
-      .catch(err => {
-        expect(err instanceof GoogleError && err.code === Status.ABORTED).to.be
-          .true;
-        incrementOpCount();
-      });
-    return bulkWriter.close().then(() => verifyOpCount(1));
-  });
-
-  describe('if bulkCommit() fails', async () => {
-    function instantiateInstance(): Promise<BulkWriter> {
-      const overrides: ApiOverride = {
-        batchWrite: () => {
-          throw new Error('Mock batchWrite failed in test');
-        },
-      };
-      return createInstance(overrides).then(firestoreClient => {
-        firestore = firestoreClient;
-        return firestore.bulkWriter();
-      });
-    }
-    it('flush() should not fail', async () => {
-      const bulkWriter = await instantiateInstance();
-      bulkWriter
-        .create(firestore.doc('collectionId/doc'), {foo: 'bar'})
-        .catch(incrementOpCount);
-      bulkWriter
-        .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
-        .catch(incrementOpCount);
-      await bulkWriter.flush();
-      verifyOpCount(2);
-
-      return bulkWriter.close();
-    });
-
-    it('close() should not fail', async () => {
-      const bulkWriter = await instantiateInstance();
-      bulkWriter
-        .create(firestore.doc('collectionId/doc'), {foo: 'bar'})
-        .catch(incrementOpCount);
-      bulkWriter
-        .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
-        .catch(incrementOpCount);
-
-      return bulkWriter.close().then(() => verifyOpCount(2));
-    });
-
-    it('all individual writes are rejected', async () => {
-      const bulkWriter = await instantiateInstance();
-      bulkWriter
-        .create(firestore.doc('collectionId/doc'), {foo: 'bar'})
-        .catch(err => {
-          expect(err.message).to.equal('Mock batchWrite failed in test');
-          incrementOpCount();
-        });
-
-      bulkWriter
-        .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
-        .catch(err => {
-          expect(err.message).to.equal('Mock batchWrite failed in test');
-          incrementOpCount();
-        });
-
-      return bulkWriter.close().then(() => verifyOpCount(2));
-    });
   });
 });
