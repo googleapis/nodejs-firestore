@@ -357,7 +357,7 @@ export class BulkWriter {
     this.firestore._incrementBulkWritersCount();
     validateBulkWriterOptions('options', options);
 
-    if (options && !options.disableThrottling) {
+    if (options?.disableThrottling !== false) {
       this.rateLimiter = new RateLimiter(
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
