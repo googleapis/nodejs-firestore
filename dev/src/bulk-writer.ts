@@ -366,7 +366,7 @@ export class BulkWriter {
       );
     } else {
       this.rateLimiter = new RateLimiter(
-        options?.initialOpsPerSecond || STARTING_MAXIMUM_OPS_PER_SECOND,
+        options?.initialOpsPerSecond ?? STARTING_MAXIMUM_OPS_PER_SECOND,
         RATE_LIMITER_MULTIPLIER,
         RATE_LIMITER_MULTIPLIER_MILLIS,
         options?.maxOpsPerSecond || Number.POSITIVE_INFINITY
