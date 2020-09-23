@@ -489,7 +489,7 @@ export function validateResourcePath(
 }
 
 /**
- * A dot-separated path for navigating sub-objects, for example a map, within a document.
+ * A dot-separated path for navigating sub-objects (e.g. nested maps) within a document.
  *
  * @class
  */
