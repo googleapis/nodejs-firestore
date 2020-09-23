@@ -16,7 +16,7 @@ import {DocumentData} from '@google-cloud/firestore';
 
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect} from 'chai';
-import {GoogleError, Status} from 'google-gax';
+import {Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 import {
@@ -42,6 +42,7 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
+import {RateLimiter} from '../src/rate-limiter';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);
@@ -643,7 +644,16 @@ describe('BulkWriter', () => {
         'does not send batches if doing so exceeds the rate limit ' + i,
         done => {
           console.log('running at' + i);
+          const mockLimiter: RateLimiter = ({
+            getNextRequestDelayMs: () => {
+              return 100;
+            },
+            tryMakeRequest: () => {
+              return true;
+            },
+          } as unknown) as RateLimiter;
           instantiateInstance().then(bulkWriter => {
+            bulkWriter._setRateLimiter(mockLimiter);
             let timeoutCalled = false;
             setTimeoutHandler((_, timeout) => {
               if (!timeoutCalled && timeout > 0) {
