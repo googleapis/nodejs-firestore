@@ -30,7 +30,11 @@ import {Timestamp} from './timestamp';
 import {Deferred, getRetryCodes, isObject, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 import {logger} from './logger';
-import {invalidArgumentMessage, validateOptional} from './validate';
+import {
+  invalidArgumentMessage,
+  validateInteger,
+  validateOptional,
+} from './validate';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -757,57 +761,33 @@ function validateBulkWriterOptions(arg: string | number, value: unknown): void {
 
   const options = value as {[k: string]: unknown};
 
-  if ('disableThrottling' in options) {
-    if (typeof options.disableThrottling !== 'boolean') {
-      throw new Error(
-        `${invalidArgumentMessage(
-          arg,
-          'bulkWriter() options argument'
-        )} "disableThrottling" is not a boolean.`
-      );
-    }
-
-    if ('initialOpsPerSecond' in options || 'maxOpsPerSecond' in options) {
-      throw new Error(
-        `${invalidArgumentMessage(
-          arg,
-          'bulkWriter() options argument'
-        )} "disableThrottling" cannot be set with "initialOpsPerSecond" or "maxOpsPerSecond".`
-      );
-    }
-  }
-
   if (
-    'initialOpsPerSecond' in options &&
-    (typeof options.initialOpsPerSecond !== 'number' ||
-      options.initialOpsPerSecond <= 0 ||
-      options.initialOpsPerSecond % 1 !== 0)
+    'disableThrottling' in options &&
+    ('initialOpsPerSecond' in options || 'maxOpsPerSecond' in options)
   ) {
     throw new Error(
       `${invalidArgumentMessage(
         arg,
         'bulkWriter() options argument'
-      )} "initialOpsPerSecond" is not a positive integer.`
+      )} "disableThrottling" cannot be set with "initialOpsPerSecond" or "maxOpsPerSecond".`
     );
   }
 
+  if ('initialOpsPerSecond' in options) {
+    validateInteger('initialOpsPerSecond', options.initialOpsPerSecond, {
+      minValue: 0,
+    });
+  }
+
   if ('maxOpsPerSecond' in options) {
-    if (
-      typeof options.maxOpsPerSecond !== 'number' ||
-      options.maxOpsPerSecond <= 0 ||
-      options.maxOpsPerSecond % 1 !== 0
-    ) {
-      throw new Error(
-        `${invalidArgumentMessage(
-          arg,
-          'bulkWriter() options argument'
-        )} "maxOpsPerSecond" is not a positive integer.`
-      );
-    }
+    validateInteger('maxOpsPerSecond', options.maxOpsPerSecond, {
+      minValue: 0,
+    });
 
     if (
       'initialOpsPerSecond' in options &&
-      (options.initialOpsPerSecond as number) > options.maxOpsPerSecond
+      (options.initialOpsPerSecond as number) >
+        (options.maxOpsPerSecond as number)
     ) {
       throw new Error(
         `${invalidArgumentMessage(
@@ -819,7 +799,7 @@ function validateBulkWriterOptions(arg: string | number, value: unknown): void {
 
     if (
       !('initialOpsPerSecond' in options) &&
-      STARTING_MAXIMUM_OPS_PER_SECOND > options.maxOpsPerSecond
+      STARTING_MAXIMUM_OPS_PER_SECOND > (options.maxOpsPerSecond as number)
     ) {
       throw new Error(
         `${invalidArgumentMessage(
