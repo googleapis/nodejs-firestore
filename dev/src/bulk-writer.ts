@@ -47,7 +47,7 @@ const MAX_BATCH_SIZE = 20;
  *
  * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
  */
-const STARTING_MAXIMUM_OPS_PER_SECOND = 500;
+export const DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND = 500;
 
 /*!
  * The rate by which to increase the capacity as specified by the 500/50/5 rule.
@@ -359,7 +359,7 @@ export class BulkWriter {
     private readonly options?: firestore.BulkWriterOptions
   ) {
     this.firestore._incrementBulkWritersCount();
-    validateBulkWriterOptions('options', options);
+    validateBulkWriterOptions(options);
 
     if (options?.throttling === false) {
       this.rateLimiter = new RateLimiter(
@@ -369,16 +369,26 @@ export class BulkWriter {
         Number.POSITIVE_INFINITY
       );
     } else {
-      const startingRate =
-        typeof options?.throttling !== 'boolean' &&
-        options?.throttling?.initialOpsPerSecond !== undefined
-          ? options.throttling.initialOpsPerSecond
-          : STARTING_MAXIMUM_OPS_PER_SECOND;
-      const maxRate =
-        typeof options?.throttling !== 'boolean' &&
-        options?.throttling?.maxOpsPerSecond !== undefined
-          ? options.throttling.maxOpsPerSecond
-          : Number.POSITIVE_INFINITY;
+      let startingRate = DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND;
+      let maxRate = Number.POSITIVE_INFINITY;
+
+      if (typeof options?.throttling !== 'boolean') {
+        if (options?.throttling?.maxOpsPerSecond !== undefined) {
+          maxRate = options.throttling.maxOpsPerSecond;
+        }
+
+        if (options?.throttling?.initialOpsPerSecond !== undefined) {
+          startingRate = options.throttling.initialOpsPerSecond;
+        }
+
+        // The initial validation step ensures that the maxOpsPerSecond is
+        // greater than initialOpsPerSecond. If this inequality is true, that
+        // means initialOpsPerSecond was not set and maxOpsPerSecond is less
+        // than the default starting rate.
+        if (maxRate < startingRate) {
+          startingRate = maxRate;
+        }
+      }
 
       this.rateLimiter = new RateLimiter(
         startingRate,
@@ -746,25 +756,35 @@ export class BulkWriter {
   _setMaxBatchSize(size: number): void {
     this.maxBatchSize = size;
   }
+
+  /**
+   * Returns the rate limiter for testing.
+   *
+   * @private
+   */
+  // Visible for testing.
+  _getRateLimiter(): RateLimiter {
+    return this.rateLimiter;
+  }
 }
 
 /**
  * Validates the use of 'value' as BulkWriterOptions.
  *
  * @private
- * @param arg The argument name or argument index (for varargs methods).
- * @param value The object to validate.
+ * @param value The BulkWriterOptions object to validate.
  * @throws if the input is not a valid BulkWriterOptions object.
  */
-function validateBulkWriterOptions(arg: string | number, value: unknown): void {
+function validateBulkWriterOptions(value: unknown): void {
   if (validateOptional(value, {optional: true})) {
     return;
   }
+  const argName = 'options';
 
   if (!isObject(value)) {
     throw new Error(
       `${invalidArgumentMessage(
-        arg,
+        argName,
         'bulkWriter() options argument'
       )} Input is not an object.`
     );
@@ -779,43 +799,31 @@ function validateBulkWriterOptions(arg: string | number, value: unknown): void {
     return;
   }
 
-  if ('initialOpsPerSecond' in options.throttling) {
+  if (options.throttling.initialOpsPerSecond !== undefined) {
     validateInteger(
       'initialOpsPerSecond',
       options.throttling.initialOpsPerSecond,
       {
-        minValue: 0,
+        minValue: 1,
       }
     );
   }
 
-  if ('maxOpsPerSecond' in options.throttling) {
+  if (options.throttling.maxOpsPerSecond !== undefined) {
     validateInteger('maxOpsPerSecond', options.throttling.maxOpsPerSecond, {
-      minValue: 0,
+      minValue: 1,
     });
 
     if (
-      'initialOpsPerSecond' in options.throttling &&
-      options.throttling.initialOpsPerSecond! >
-        options.throttling.maxOpsPerSecond!
+      options.throttling.initialOpsPerSecond !== undefined &&
+      options.throttling.initialOpsPerSecond >
+        options.throttling.maxOpsPerSecond
     ) {
       throw new Error(
         `${invalidArgumentMessage(
-          arg,
+          argName,
           'bulkWriter() options argument'
         )} "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".`
-      );
-    }
-
-    if (
-      !('initialOpsPerSecond' in options.throttling) &&
-      STARTING_MAXIMUM_OPS_PER_SECOND > options.throttling.maxOpsPerSecond!
-    ) {
-      throw new Error(
-        `${invalidArgumentMessage(
-          arg,
-          'bulkWriter() options argument'
-        )} "maxOpsPerSecond" must be greater than the default value of ${STARTING_MAXIMUM_OPS_PER_SECOND}.`
       );
     }
   }

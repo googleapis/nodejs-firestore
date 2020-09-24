@@ -42,6 +42,7 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
+import {DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND} from '../src/bulk-writer';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);
@@ -192,7 +193,7 @@ describe('BulkWriter', () => {
       expect(() =>
         firestore.bulkWriter({throttling: {initialOpsPerSecond: -1}})
       ).to.throw(
-        'Value for argument "initialOpsPerSecond" must be within [0, Infinity] inclusive, but was: -1'
+        'Value for argument "initialOpsPerSecond" must be within [1, Infinity] inclusive, but was: -1'
       );
 
       expect(() =>
@@ -207,7 +208,7 @@ describe('BulkWriter', () => {
       expect(() =>
         firestore.bulkWriter({throttling: {maxOpsPerSecond: -1}})
       ).to.throw(
-        'Value for argument "maxOpsPerSecond" must be within [0, Infinity] inclusive, but was: -1'
+        'Value for argument "maxOpsPerSecond" must be within [1, Infinity] inclusive, but was: -1'
       );
 
       expect(() =>
@@ -219,11 +220,6 @@ describe('BulkWriter', () => {
 
     it('maxOpsPerSecond must be greater than initial ops per second', async () => {
       const firestore = await createInstance();
-      expect(() =>
-        firestore.bulkWriter({throttling: {maxOpsPerSecond: 80}})
-      ).to.throw(
-        'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" must be greater than the default value of 500.'
-      );
 
       expect(() =>
         firestore.bulkWriter({
@@ -231,6 +227,60 @@ describe('BulkWriter', () => {
         })
       ).to.throw(
         'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".'
+      );
+    });
+
+    it('initial and max rates are properly set', async () => {
+      const firestore = await createInstance();
+
+      let bulkWriter = firestore.bulkWriter({
+        throttling: {initialOpsPerSecond: 500, maxOpsPerSecond: 550},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(500);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(550);
+
+      bulkWriter = firestore.bulkWriter({
+        throttling: {maxOpsPerSecond: 1000},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(500);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(1000);
+
+      bulkWriter = firestore.bulkWriter({
+        throttling: {initialOpsPerSecond: 100},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(100);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+
+      bulkWriter = firestore.bulkWriter({
+        throttling: {maxOpsPerSecond: 100},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(100);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(100);
+
+      bulkWriter = firestore.bulkWriter();
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+        DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
+      );
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+
+      bulkWriter = firestore.bulkWriter({throttling: true});
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+        DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
+      );
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+
+      bulkWriter = firestore.bulkWriter({throttling: false});
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
       );
     });
   });

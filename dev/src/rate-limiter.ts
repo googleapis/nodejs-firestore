@@ -55,7 +55,7 @@ export class RateLimiter {
     private readonly initialCapacity: number,
     private readonly multiplier: number,
     private readonly multiplierMillis: number,
-    private readonly maximumCapacity: number,
+    readonly maximumCapacity: number,
     private readonly startTimeMillis = Date.now()
   ) {
     this.availableTokens = initialCapacity;
