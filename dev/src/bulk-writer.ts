@@ -361,7 +361,7 @@ export class BulkWriter {
     this.firestore._incrementBulkWritersCount();
     validateBulkWriterOptions('options', options);
 
-    if (options?.disableThrottling !== false) {
+    if (options?.throttling === false) {
       this.rateLimiter = new RateLimiter(
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
@@ -369,11 +369,22 @@ export class BulkWriter {
         Number.POSITIVE_INFINITY
       );
     } else {
+      const startingRate =
+        typeof options?.throttling !== 'boolean' &&
+        options?.throttling?.initialOpsPerSecond !== undefined
+          ? options.throttling.initialOpsPerSecond
+          : STARTING_MAXIMUM_OPS_PER_SECOND;
+      const maxRate =
+        typeof options?.throttling !== 'boolean' &&
+        options?.throttling?.maxOpsPerSecond !== undefined
+          ? options.throttling.maxOpsPerSecond
+          : Number.POSITIVE_INFINITY;
+
       this.rateLimiter = new RateLimiter(
-        options?.initialOpsPerSecond ?? STARTING_MAXIMUM_OPS_PER_SECOND,
+        startingRate,
         RATE_LIMITER_MULTIPLIER,
         RATE_LIMITER_MULTIPLIER_MILLIS,
-        options?.maxOpsPerSecond || Number.POSITIVE_INFINITY
+        maxRate
       );
     }
   }
@@ -759,35 +770,34 @@ function validateBulkWriterOptions(arg: string | number, value: unknown): void {
     );
   }
 
-  const options = value as {[k: string]: unknown};
+  const options = value as firestore.BulkWriterOptions;
 
   if (
-    'disableThrottling' in options &&
-    ('initialOpsPerSecond' in options || 'maxOpsPerSecond' in options)
+    options.throttling === undefined ||
+    typeof options.throttling === 'boolean'
   ) {
-    throw new Error(
-      `${invalidArgumentMessage(
-        arg,
-        'bulkWriter() options argument'
-      )} "disableThrottling" cannot be set with "initialOpsPerSecond" or "maxOpsPerSecond".`
+    return;
+  }
+
+  if ('initialOpsPerSecond' in options.throttling) {
+    validateInteger(
+      'initialOpsPerSecond',
+      options.throttling.initialOpsPerSecond,
+      {
+        minValue: 0,
+      }
     );
   }
 
-  if ('initialOpsPerSecond' in options) {
-    validateInteger('initialOpsPerSecond', options.initialOpsPerSecond, {
-      minValue: 0,
-    });
-  }
-
-  if ('maxOpsPerSecond' in options) {
-    validateInteger('maxOpsPerSecond', options.maxOpsPerSecond, {
+  if ('maxOpsPerSecond' in options.throttling) {
+    validateInteger('maxOpsPerSecond', options.throttling.maxOpsPerSecond, {
       minValue: 0,
     });
 
     if (
-      'initialOpsPerSecond' in options &&
-      (options.initialOpsPerSecond as number) >
-        (options.maxOpsPerSecond as number)
+      'initialOpsPerSecond' in options.throttling &&
+      options.throttling.initialOpsPerSecond! >
+        options.throttling.maxOpsPerSecond!
     ) {
       throw new Error(
         `${invalidArgumentMessage(
@@ -798,8 +808,8 @@ function validateBulkWriterOptions(arg: string | number, value: unknown): void {
     }
 
     if (
-      !('initialOpsPerSecond' in options) &&
-      STARTING_MAXIMUM_OPS_PER_SECOND > (options.maxOpsPerSecond as number)
+      !('initialOpsPerSecond' in options.throttling) &&
+      STARTING_MAXIMUM_OPS_PER_SECOND > options.throttling.maxOpsPerSecond!
     ) {
       throw new Error(
         `${invalidArgumentMessage(

@@ -187,54 +187,48 @@ describe('BulkWriter', () => {
       );
     });
 
-    it('disableThrottling used with op rates', async () => {
-      const firestore = await createInstance();
-      expect(() =>
-        firestore.bulkWriter({
-          disableThrottling: true,
-          initialOpsPerSecond: 100,
-        })
-      ).to.throw(
-        'Value for argument "options" is not a valid bulkWriter() options argument. "disableThrottling" cannot be set with "initialOpsPerSecond" or "maxOpsPerSecond".'
-      );
-
-      expect(() =>
-        firestore.bulkWriter({disableThrottling: true, maxOpsPerSecond: 100})
-      ).to.throw(
-        'Value for argument "options" is not a valid bulkWriter() options argument. "disableThrottling" cannot be set with "initialOpsPerSecond" or "maxOpsPerSecond".'
-      );
-    });
-
     it('initialOpsPerSecond requires positive integer', async () => {
       const firestore = await createInstance();
-      expect(() => firestore.bulkWriter({initialOpsPerSecond: -1})).to.throw(
+      expect(() =>
+        firestore.bulkWriter({throttling: {initialOpsPerSecond: -1}})
+      ).to.throw(
         'Value for argument "initialOpsPerSecond" must be within [0, Infinity] inclusive, but was: -1'
       );
 
-      expect(() => firestore.bulkWriter({initialOpsPerSecond: 500.5})).to.throw(
+      expect(() =>
+        firestore.bulkWriter({throttling: {initialOpsPerSecond: 500.5}})
+      ).to.throw(
         'Value for argument "initialOpsPerSecond" is not a valid integer.'
       );
     });
 
     it('maxOpsPerSecond requires positive integer', async () => {
       const firestore = await createInstance();
-      expect(() => firestore.bulkWriter({maxOpsPerSecond: -1})).to.throw(
+      expect(() =>
+        firestore.bulkWriter({throttling: {maxOpsPerSecond: -1}})
+      ).to.throw(
         'Value for argument "maxOpsPerSecond" must be within [0, Infinity] inclusive, but was: -1'
       );
 
-      expect(() => firestore.bulkWriter({maxOpsPerSecond: 500.5})).to.throw(
+      expect(() =>
+        firestore.bulkWriter({throttling: {maxOpsPerSecond: 500.5}})
+      ).to.throw(
         'Value for argument "maxOpsPerSecond" is not a valid integer.'
       );
     });
 
     it('maxOpsPerSecond must be greater than initial ops per second', async () => {
       const firestore = await createInstance();
-      expect(() => firestore.bulkWriter({maxOpsPerSecond: 80})).to.throw(
+      expect(() =>
+        firestore.bulkWriter({throttling: {maxOpsPerSecond: 80}})
+      ).to.throw(
         'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" must be greater than the default value of 500.'
       );
 
       expect(() =>
-        firestore.bulkWriter({initialOpsPerSecond: 550, maxOpsPerSecond: 500})
+        firestore.bulkWriter({
+          throttling: {initialOpsPerSecond: 550, maxOpsPerSecond: 500},
+        })
       ).to.throw(
         'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".'
       );

@@ -620,24 +620,20 @@ declare namespace FirebaseFirestore {
    */
   export interface BulkWriterOptions {
     /**
-     * Whether to disable throttling. If set, initialOpsPerSecond and
-     * maxOpsPerSecond cannot be set.
-     */
-    readonly disableThrottling?: boolean;
-
-    /**
-     * The initial maximum number of operations per second allowed by the
-     * throttler. If this field is not set, the default is 500 operations per
+     * Whether to disable or configure throttling. By default, throttling is
+     * enabled.
+     *
+     * @param initialOpsPerSecond The initial maximum number of operations per
+     * second allowed by the throttler. If this field is not set, the default
+     * is 500 operations per second.
+     * @param maxOpsPerSecond The maximum number of operations per second
+     * allowed by the throttler. If this field is set, the throttler's allowed
+     * operations per second does not ramp up past the specified operations per
      * second.
      */
-    readonly initialOpsPerSecond?: number;
-
-    /**
-     * The maximum number of operations per second allowed by the
-     * throttler. If this field is set, the throttler's allowed operations per
-     * second does not ramp up past the specified operations per second.
-     */
-    readonly maxOpsPerSecond?: number;
+    readonly throttling?:
+      | boolean
+      | {initialOpsPerSecond?: number; maxOpsPerSecond?: number};
   }
 
   /**
