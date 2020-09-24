@@ -621,7 +621,8 @@ declare namespace FirebaseFirestore {
   export interface BulkWriterOptions {
     /**
      * Whether to disable or configure throttling. By default, throttling is
-     * enabled.
+     * enabled. Setting the configuration values in throttling will enable
+     * throttling with the provided values.
      *
      * @param initialOpsPerSecond The initial maximum number of operations per
      * second allowed by the throttler. If this field is not set, the default
