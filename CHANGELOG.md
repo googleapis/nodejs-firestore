@@ -4,6 +4,22 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.3.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.2.0...v4.3.0) (2020-09-22)
+
+
+### Features
+
+* add support for != and not-in queries ([#1292](https://www.github.com/googleapis/nodejs-firestore/issues/1292)) ([786e52f](https://www.github.com/googleapis/nodejs-firestore/commit/786e52f8c8b7b9c6b84ffc988190470a063d5855))
+
+
+### Bug Fixes
+
+* add capacity logging to RateLimiter ([#1287](https://www.github.com/googleapis/nodejs-firestore/issues/1287)) ([befe625](https://www.github.com/googleapis/nodejs-firestore/commit/befe625f35b7c96e9a90399a1ca71a8a049224ad))
+* allow `setLogFunction(null)` ([#1304](https://www.github.com/googleapis/nodejs-firestore/issues/1304)) ([20b1226](https://www.github.com/googleapis/nodejs-firestore/commit/20b122695843bffc106f73c92e112144f0b96070))
+* bulkWriter: writing to the same document does not create a new batch ([#1298](https://www.github.com/googleapis/nodejs-firestore/issues/1298)) ([6243d62](https://www.github.com/googleapis/nodejs-firestore/commit/6243d625481e8f9a852b4a3bf8d77ca9cbca4dd3))
+* change typings for select() to return `Query<DocumentData>` ([#1303](https://www.github.com/googleapis/nodejs-firestore/issues/1303)) ([b678857](https://www.github.com/googleapis/nodejs-firestore/commit/b678857afcdf14be5d645d7552e5f4aa4183b037))
+* correct BulkWriter types in firestore.d.ts ([#1284](https://www.github.com/googleapis/nodejs-firestore/issues/1284)) ([382128b](https://www.github.com/googleapis/nodejs-firestore/commit/382128b83de01cc0f88110393a1271b8d768509e))
+
 ## [4.2.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.1.2...v4.2.0) (2020-07-31)
 
 
