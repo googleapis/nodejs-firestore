@@ -388,6 +388,12 @@ export class BulkWriter {
         if (maxRate < startingRate) {
           startingRate = maxRate;
         }
+
+        // Ensure that the batch size is not larger than the number of allowed
+        // operations per second.
+        if (startingRate < this.maxBatchSize) {
+          this.maxBatchSize = startingRate;
+        }
       }
 
       this.rateLimiter = new RateLimiter(

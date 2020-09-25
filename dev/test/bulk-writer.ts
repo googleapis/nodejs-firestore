@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
+import {BulkWriterOptions, DocumentData} from '@google-cloud/firestore';
 
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect} from 'chai';
@@ -641,7 +641,9 @@ describe('BulkWriter', () => {
 
   describe('Timeout handler tests', () => {
     // Return success responses for all requests.
-    function instantiateInstance(): Promise<BulkWriter> {
+    function instantiateInstance(
+      options?: BulkWriterOptions
+    ): Promise<BulkWriter> {
       const overrides: ApiOverride = {
         batchWrite: request => {
           const requestLength = request.writes?.length || 0;
@@ -656,29 +658,30 @@ describe('BulkWriter', () => {
       };
       return createInstance(overrides).then(firestoreClient => {
         firestore = firestoreClient;
-        return firestore.bulkWriter();
+        return firestore.bulkWriter(options);
       });
     }
 
     it('does not send batches if doing so exceeds the rate limit', done => {
-      instantiateInstance().then(bulkWriter => {
-        let timeoutCalled = false;
-        setTimeoutHandler((_, timeout) => {
-          if (!timeoutCalled && timeout > 0) {
-            timeoutCalled = true;
-            done();
+      instantiateInstance({throttling: {maxOpsPerSecond: 5}}).then(
+        bulkWriter => {
+          let timeoutCalled = false;
+          setTimeoutHandler((_, timeout) => {
+            if (!timeoutCalled && timeout > 0) {
+              timeoutCalled = true;
+              done();
+            }
+          });
+          for (let i = 0; i < 500; i++) {
+            bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
           }
-        });
-
-        for (let i = 0; i < 600; i++) {
-          bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
+          // The close() promise will never resolve. Since we do not call the
+          // callback function in the overridden handler, subsequent requests
+          // after the timeout will not be made. The close() call is used to
+          // ensure that the final batch is sent.
+          bulkWriter.close();
         }
-        // The close() promise will never resolve. Since we do not call the
-        // callback function in the overridden handler, subsequent requests
-        // after the timeout will not be made. The close() call is used to
-        // ensure that the final batch is sent.
-        bulkWriter.close();
-      });
+      );
     });
   });
 
