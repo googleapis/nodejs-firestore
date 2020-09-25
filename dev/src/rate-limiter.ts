@@ -46,6 +46,8 @@ export class RateLimiter {
    * @param multiplier Rate by which to increase the capacity.
    * @param multiplierMillis How often the capacity should increase in
    * milliseconds.
+   * @param maximumCapacity Maximum number of allowed operations per second.
+   * The number of tokens added per second will never exceed this number.
    * @param startTimeMillis The starting time in epoch milliseconds that the
    * rate limit is based on. Used for testing the limiter.
    */
@@ -53,6 +55,7 @@ export class RateLimiter {
     private readonly initialCapacity: number,
     private readonly multiplier: number,
     private readonly multiplierMillis: number,
+    readonly maximumCapacity: number,
     private readonly startTimeMillis = Date.now()
   ) {
     this.availableTokens = initialCapacity;
@@ -147,11 +150,14 @@ export class RateLimiter {
       'startTime cannot be after currentTime'
     );
     const millisElapsed = requestTimeMillis - this.startTimeMillis;
-    const operationsPerSecond = Math.floor(
-      Math.pow(
-        this.multiplier,
-        Math.floor(millisElapsed / this.multiplierMillis)
-      ) * this.initialCapacity
+    const operationsPerSecond = Math.min(
+      Math.floor(
+        Math.pow(
+          this.multiplier,
+          Math.floor(millisElapsed / this.multiplierMillis)
+        ) * this.initialCapacity
+      ),
+      this.maximumCapacity
     );
 
     if (operationsPerSecond !== this.previousCapacity) {

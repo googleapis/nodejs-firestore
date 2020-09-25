@@ -27,9 +27,14 @@ import {
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {Deferred, getRetryCodes, wrapError} from './util';
+import {Deferred, getRetryCodes, isObject, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 import {logger} from './logger';
+import {
+  invalidArgumentMessage,
+  validateInteger,
+  validateOptional,
+} from './validate';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -42,7 +47,7 @@ const MAX_BATCH_SIZE = 20;
  *
  * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
  */
-const STARTING_MAXIMUM_OPS_PER_SECOND = 500;
+export const DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND = 500;
 
 /*!
  * The rate by which to increase the capacity as specified by the 500/50/5 rule.
@@ -351,21 +356,45 @@ export class BulkWriter {
 
   constructor(
     private readonly firestore: Firestore,
-    enableThrottling: boolean
+    options?: firestore.BulkWriterOptions
   ) {
     this.firestore._incrementBulkWritersCount();
+    validateBulkWriterOptions(options);
 
-    if (enableThrottling) {
+    if (options?.throttling === false) {
       this.rateLimiter = new RateLimiter(
-        STARTING_MAXIMUM_OPS_PER_SECOND,
-        RATE_LIMITER_MULTIPLIER,
-        RATE_LIMITER_MULTIPLIER_MILLIS
-      );
-    } else {
-      this.rateLimiter = new RateLimiter(
+        Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY
+      );
+    } else {
+      let startingRate = DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND;
+      let maxRate = Number.POSITIVE_INFINITY;
+
+      if (typeof options?.throttling !== 'boolean') {
+        if (options?.throttling?.maxOpsPerSecond !== undefined) {
+          maxRate = options.throttling.maxOpsPerSecond;
+        }
+
+        if (options?.throttling?.initialOpsPerSecond !== undefined) {
+          startingRate = options.throttling.initialOpsPerSecond;
+        }
+
+        // The initial validation step ensures that the maxOpsPerSecond is
+        // greater than initialOpsPerSecond. If this inequality is true, that
+        // means initialOpsPerSecond was not set and maxOpsPerSecond is less
+        // than the default starting rate.
+        if (maxRate < startingRate) {
+          startingRate = maxRate;
+        }
+      }
+
+      this.rateLimiter = new RateLimiter(
+        startingRate,
+        RATE_LIMITER_MULTIPLIER,
+        RATE_LIMITER_MULTIPLIER_MILLIS,
+        maxRate
       );
     }
   }
@@ -726,5 +755,76 @@ export class BulkWriter {
   // Visible for testing.
   _setMaxBatchSize(size: number): void {
     this.maxBatchSize = size;
+  }
+
+  /**
+   * Returns the rate limiter for testing.
+   *
+   * @private
+   */
+  // Visible for testing.
+  _getRateLimiter(): RateLimiter {
+    return this.rateLimiter;
+  }
+}
+
+/**
+ * Validates the use of 'value' as BulkWriterOptions.
+ *
+ * @private
+ * @param value The BulkWriterOptions object to validate.
+ * @throws if the input is not a valid BulkWriterOptions object.
+ */
+function validateBulkWriterOptions(value: unknown): void {
+  if (validateOptional(value, {optional: true})) {
+    return;
+  }
+  const argName = 'options';
+
+  if (!isObject(value)) {
+    throw new Error(
+      `${invalidArgumentMessage(
+        argName,
+        'bulkWriter() options argument'
+      )} Input is not an object.`
+    );
+  }
+
+  const options = value as firestore.BulkWriterOptions;
+
+  if (
+    options.throttling === undefined ||
+    typeof options.throttling === 'boolean'
+  ) {
+    return;
+  }
+
+  if (options.throttling.initialOpsPerSecond !== undefined) {
+    validateInteger(
+      'initialOpsPerSecond',
+      options.throttling.initialOpsPerSecond,
+      {
+        minValue: 1,
+      }
+    );
+  }
+
+  if (options.throttling.maxOpsPerSecond !== undefined) {
+    validateInteger('maxOpsPerSecond', options.throttling.maxOpsPerSecond, {
+      minValue: 1,
+    });
+
+    if (
+      options.throttling.initialOpsPerSecond !== undefined &&
+      options.throttling.initialOpsPerSecond >
+        options.throttling.maxOpsPerSecond
+    ) {
+      throw new Error(
+        `${invalidArgumentMessage(
+          argName,
+          'bulkWriter() options argument'
+        )} "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".`
+      );
+    }
   }
 }

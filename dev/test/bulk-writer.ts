@@ -32,6 +32,7 @@ import {
   create,
   createInstance,
   document,
+  InvalidApiUsage,
   remove,
   response,
   set,
@@ -41,6 +42,7 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
+import {DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND} from '../src/bulk-writer';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);
@@ -176,6 +178,111 @@ describe('BulkWriter', () => {
     verifyInstance(firestore);
     expect(timeoutHandlerCounter).to.equal(0);
     setTimeoutHandler(setTimeout);
+  });
+
+  describe('options', () => {
+    it('requires object', async () => {
+      const firestore = await createInstance();
+      expect(() => firestore.bulkWriter(42 as InvalidApiUsage)).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. Input is not an object.'
+      );
+    });
+
+    it('initialOpsPerSecond requires positive integer', async () => {
+      const firestore = await createInstance();
+      expect(() =>
+        firestore.bulkWriter({throttling: {initialOpsPerSecond: -1}})
+      ).to.throw(
+        'Value for argument "initialOpsPerSecond" must be within [1, Infinity] inclusive, but was: -1'
+      );
+
+      expect(() =>
+        firestore.bulkWriter({throttling: {initialOpsPerSecond: 500.5}})
+      ).to.throw(
+        'Value for argument "initialOpsPerSecond" is not a valid integer.'
+      );
+    });
+
+    it('maxOpsPerSecond requires positive integer', async () => {
+      const firestore = await createInstance();
+      expect(() =>
+        firestore.bulkWriter({throttling: {maxOpsPerSecond: -1}})
+      ).to.throw(
+        'Value for argument "maxOpsPerSecond" must be within [1, Infinity] inclusive, but was: -1'
+      );
+
+      expect(() =>
+        firestore.bulkWriter({throttling: {maxOpsPerSecond: 500.5}})
+      ).to.throw(
+        'Value for argument "maxOpsPerSecond" is not a valid integer.'
+      );
+    });
+
+    it('maxOpsPerSecond must be greater than initial ops per second', async () => {
+      const firestore = await createInstance();
+
+      expect(() =>
+        firestore.bulkWriter({
+          throttling: {initialOpsPerSecond: 550, maxOpsPerSecond: 500},
+        })
+      ).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".'
+      );
+    });
+
+    it('initial and max rates are properly set', async () => {
+      const firestore = await createInstance();
+
+      let bulkWriter = firestore.bulkWriter({
+        throttling: {initialOpsPerSecond: 500, maxOpsPerSecond: 550},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(500);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(550);
+
+      bulkWriter = firestore.bulkWriter({
+        throttling: {maxOpsPerSecond: 1000},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(500);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(1000);
+
+      bulkWriter = firestore.bulkWriter({
+        throttling: {initialOpsPerSecond: 100},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(100);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+
+      bulkWriter = firestore.bulkWriter({
+        throttling: {maxOpsPerSecond: 100},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(100);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(100);
+
+      bulkWriter = firestore.bulkWriter();
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+        DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
+      );
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+
+      bulkWriter = firestore.bulkWriter({throttling: true});
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+        DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
+      );
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+
+      bulkWriter = firestore.bulkWriter({throttling: false});
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+    });
   });
 
   it('has a set() method', async () => {
