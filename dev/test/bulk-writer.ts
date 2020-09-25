@@ -27,6 +27,7 @@ import {
   WriteResult,
 } from '../src';
 import {setTimeoutHandler} from '../src/backoff';
+import {RateLimiter} from '../src/rate-limiter';
 import {
   ApiOverride,
   create,
@@ -661,7 +662,19 @@ describe('BulkWriter', () => {
     }
 
     it('does not send batches if doing so exceeds the rate limit', done => {
+      // Create a mock RateLimiter that marks every request as over the rate
+      // limit rather than calculating by timestamps.
+      const mockLimiter: RateLimiter = ({
+        getNextRequestDelayMs: () => {
+          return 100;
+        },
+        tryMakeRequest: () => {
+          return true;
+        },
+      } as unknown) as RateLimiter;
+
       instantiateInstance().then(bulkWriter => {
+        bulkWriter._setRateLimiter(mockLimiter);
         let timeoutCalled = false;
         setTimeoutHandler((_, timeout) => {
           if (!timeoutCalled && timeout > 0) {
@@ -669,8 +682,7 @@ describe('BulkWriter', () => {
             done();
           }
         });
-
-        for (let i = 0; i < 600; i++) {
+        for (let i = 0; i < 25; i++) {
           bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
         }
         // The close() promise will never resolve. Since we do not call the
