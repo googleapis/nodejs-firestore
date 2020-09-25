@@ -622,8 +622,9 @@ declare namespace FirebaseFirestore {
     /**
      * Whether to disable or configure throttling. By default, throttling is
      * enabled. This field can be set to either a boolean or a config
-     * object. Setting it to `false` disables throttling, and setting the config
-     * values in throttling will enable throttling with the provided values.
+     * object. Setting it to `true` will use default values. You can override
+     * the defaults by setting it to `false` to disable throttling, or by
+     * setting the config values to enable throttling with the provided values.
      *
      * @param initialOpsPerSecond The initial maximum number of operations per
      * second allowed by the throttler. If this field is not set, the default
