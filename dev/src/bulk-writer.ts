@@ -356,7 +356,7 @@ export class BulkWriter {
 
   constructor(
     private readonly firestore: Firestore,
-    private readonly options?: firestore.BulkWriterOptions
+    options?: firestore.BulkWriterOptions
   ) {
     this.firestore._incrementBulkWritersCount();
     validateBulkWriterOptions(options);
