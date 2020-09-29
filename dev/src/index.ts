@@ -712,7 +712,7 @@ export class Firestore implements firestore.Firestore {
    * });
    */
   bulkWriter(options?: firestore.BulkWriterOptions): BulkWriter {
-    return new BulkWriter(this, !options?.disableThrottling);
+    return new BulkWriter(this, options);
   }
 
   /**

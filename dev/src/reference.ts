@@ -72,8 +72,8 @@ const directionOperators: {[k: string]: api.StructuredQuery.Direction} = {
 
 /**
  * Filter conditions in a `Query.where()` clause are specified using the
- * strings '<', '<=', '==', '>=', '>', 'array-contains', 'in', and
- * 'array-contains-any'.
+ * strings '<', '<=', '==', '!=', '>=', '>', 'array-contains', 'in', 'not-in',
+ * and 'array-contains-any'.
  *
  * @private
  */
@@ -83,10 +83,12 @@ const comparisonOperators: {
   '<': 'LESS_THAN',
   '<=': 'LESS_THAN_OR_EQUAL',
   '==': 'EQUAL',
+  '!=': 'NOT_EQUAL',
   '>': 'GREATER_THAN',
   '>=': 'GREATER_THAN_OR_EQUAL',
   'array-contains': 'ARRAY_CONTAINS',
   in: 'IN',
+  'not-in': 'NOT_IN',
   'array-contains-any': 'ARRAY_CONTAINS_ANY',
 };
 
@@ -675,7 +677,7 @@ class FieldFilter {
           field: {
             fieldPath: this.field.formattedName,
           },
-          op: 'IS_NAN',
+          op: this.op === 'EQUAL' ? 'IS_NAN' : 'IS_NOT_NAN',
         },
       };
     }
@@ -686,7 +688,7 @@ class FieldFilter {
           field: {
             fieldPath: this.field.formattedName,
           },
-          op: 'IS_NULL',
+          op: this.op === 'EQUAL' ? 'IS_NULL' : 'IS_NOT_NULL',
         },
       };
     }
@@ -1238,7 +1240,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
         );
       }
 
-      if (opStr === 'in') {
+      if (opStr === 'in' || opStr === 'not-in') {
         if (!Array.isArray(value) || value.length === 0) {
           throw new Error(
             `Invalid Query. A non-empty array is required for '${opStr}' filters.`
@@ -1288,7 +1290,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *   console.log(`y is ${res.docs[0].get('y')}.`);
    * });
    */
-  select(...fieldPaths: Array<string | FieldPath>): Query<T> {
+  select(
+    ...fieldPaths: Array<string | FieldPath>
+  ): Query<firestore.DocumentData> {
     const fields: api.StructuredQuery.IFieldReference[] = [];
 
     if (fieldPaths.length === 0) {
@@ -1302,7 +1306,11 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       }
     }
 
-    const options = this._queryOptions.with({projection: {fields}});
+    // By specifying a field mask, the query result no longer conforms to type
+    // `T`. We there return `Query<DocumentData>`;
+    const options = this._queryOptions.with({
+      projection: {fields},
+    }) as QueryOptions<firestore.DocumentData>;
     return new Query(this._firestore, options);
   }
 
@@ -2627,19 +2635,26 @@ export function validateQueryOperator(
   fieldValue: unknown
 ): firestore.WhereFilterOp {
   // For backwards compatibility, we support both `=` and `==` for "equals".
-  op = op === '=' ? '==' : op;
+  if (op === '=') {
+    op = '==';
+  }
 
   validateEnumValue(arg, op, Object.keys(comparisonOperators));
 
-  if (typeof fieldValue === 'number' && isNaN(fieldValue) && op !== '==') {
+  if (
+    typeof fieldValue === 'number' &&
+    isNaN(fieldValue) &&
+    op !== '==' &&
+    op !== '!='
+  ) {
     throw new Error(
-      'Invalid query. You can only perform equals comparisons on NaN.'
+      "Invalid query. You can only perform '==' and '!=' comparisons on NaN."
     );
   }
 
-  if (fieldValue === null && op !== '==') {
+  if (fieldValue === null && op !== '==' && op !== '!=') {
     throw new Error(
-      'Invalid query. You can only perform equals comparisons on Null.'
+      "Invalid query. You can only perform '==' and '!=' comparisons on Null."
     );
   }
 

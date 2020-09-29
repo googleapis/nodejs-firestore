@@ -55,7 +55,7 @@ export function logger(
  * `null` to turn off logging.
  */
 export function setLogFunction(logger: ((msg: string) => void) | null): void {
-  validateFunction('logger', logger);
+  if (logger !== null) validateFunction('logger', logger);
   logFunction = logger;
 }
 

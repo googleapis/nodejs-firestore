@@ -27,9 +27,14 @@ import {
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {Deferred, getRetryCodes, wrapError} from './util';
+import {Deferred, getRetryCodes, isObject, wrapError} from './util';
 import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 import {logger} from './logger';
+import {
+  invalidArgumentMessage,
+  validateInteger,
+  validateOptional,
+} from './validate';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -42,7 +47,7 @@ const MAX_BATCH_SIZE = 20;
  *
  * https://cloud.google.com/datastore/docs/best-practices#ramping_up_traffic.
  */
-const STARTING_MAXIMUM_OPS_PER_SECOND = 500;
+export const DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND = 500;
 
 /*!
  * The rate by which to increase the capacity as specified by the 500/50/5 rule.
@@ -71,6 +76,18 @@ enum BatchState {
   SENT,
 }
 
+/*!
+ * Used to represent a pending write operation.
+ *
+ * Contains a pending write's WriteBatch index, document path, and the
+ * corresponding result.
+ */
+interface PendingOp {
+  writeBatchIndex: number;
+  key: string;
+  deferred: Deferred<BatchWriteResult>;
+}
+
 /**
  * Used to represent a batch on the BatchQueue.
  *
@@ -86,9 +103,9 @@ class BulkCommitBatch {
   // response is received.
   private completedDeferred = new Deferred<void>();
 
-  // A map from each write's document path to its corresponding result.
-  // Only contains writes that have not been resolved.
-  private pendingOps = new Map<string, Deferred<BatchWriteResult>>();
+  // An array of pending write operations. Only contains writes that have not
+  // been resolved.
+  private pendingOps: Array<PendingOp> = [];
 
   private readonly backoff: ExponentialBackoff;
 
@@ -104,7 +121,7 @@ class BulkCommitBatch {
    * The number of writes in this batch.
    */
   get opCount(): number {
-    return this.pendingOps.size;
+    return this.pendingOps.length;
   }
 
   /**
@@ -181,15 +198,15 @@ class BulkCommitBatch {
     documentRef: firestore.DocumentReference<T>
   ): Promise<WriteResult> {
     assert(
-      !this.pendingOps.has(documentRef.path),
-      'Batch should not contain writes to the same document'
-    );
-    assert(
       this.state === BatchState.OPEN,
       'Batch should be OPEN when adding writes'
     );
     const deferred = new Deferred<BatchWriteResult>();
-    this.pendingOps.set(documentRef.path, deferred);
+    this.pendingOps.push({
+      writeBatchIndex: this.opCount,
+      key: documentRef.path,
+      deferred: deferred,
+    });
 
     if (this.opCount === this.maxBatchSize) {
       this.state = BatchState.READY_TO_SEND;
@@ -229,73 +246,68 @@ class BulkCommitBatch {
         results = await this.writeBatch.bulkCommit();
       } catch (err) {
         // Map the failure to each individual write's result.
-        results = [...this.pendingOps.keys()].map(path => {
-          return {key: path, writeTime: null, status: wrapError(err, stack)};
+        results = this.pendingOps.map(op => {
+          return {key: op.key, writeTime: null, status: wrapError(err, stack)};
         });
       }
-      this.processResults(results);
+      this.processResults(results, /* allowRetry= */ true);
 
-      if (this.pendingOps.size > 0) {
+      if (this.pendingOps.length > 0) {
         logger(
           'BulkWriter.bulkCommit',
           null,
           `Current batch failed at retry #${attempt}. Num failures: ` +
-            `${this.pendingOps.size}.`
+            `${this.pendingOps.length}.`
         );
 
-        this.writeBatch = new WriteBatch(this.firestore, this.writeBatch, [
-          ...this.pendingOps.keys(),
-        ]);
+        this.writeBatch = new WriteBatch(
+          this.firestore,
+          this.writeBatch,
+          new Set(this.pendingOps.map(op => op.writeBatchIndex))
+        );
       } else {
         this.completedDeferred.resolve();
         return;
       }
     }
 
-    this.failRemainingOperations(results);
+    this.processResults(results);
     this.completedDeferred.resolve();
   }
 
   /**
    * Resolves the individual operations in the batch with the results.
    */
-  private processResults(results: BatchWriteResult[]): void {
-    for (const result of results) {
+  private processResults(
+    results: BatchWriteResult[],
+    allowRetry = false
+  ): void {
+    const newPendingOps: Array<PendingOp> = [];
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const op = this.pendingOps[i];
       if (result.status.code === Status.OK) {
-        this.pendingOps.get(result.key)!.resolve(result);
-        this.pendingOps.delete(result.key);
-      } else if (!this.shouldRetry(result.status.code)) {
-        this.pendingOps.get(result.key)!.reject(result.status);
-        this.pendingOps.delete(result.key);
+        op.deferred.resolve(result);
+      } else if (!allowRetry || !this.shouldRetry(result.status.code)) {
+        op.deferred.reject(result.status);
+      } else {
+        // Retry the operation if it has not been processed.
+        // Store the current index of pendingOps to preserve the mapping of
+        // this operation's index in the underlying WriteBatch.
+        newPendingOps.push({
+          writeBatchIndex: i,
+          key: op.key,
+          deferred: op.deferred,
+        });
       }
     }
-  }
 
-  private failRemainingOperations(results: BatchWriteResult[]): void {
-    for (const result of results) {
-      assert(
-        result.status.code !== Status.OK,
-        'Should not fail successful operation'
-      );
-      this.pendingOps.get(result.key)!.reject(result.status);
-      this.pendingOps.delete(result.key);
-    }
+    this.pendingOps = newPendingOps;
   }
 
   private shouldRetry(code: Status | undefined): boolean {
     const retryCodes = getRetryCodes('batchWrite');
     return code !== undefined && retryCodes.includes(code);
-  }
-
-  hasPath(path: string): boolean {
-    for (const [docPath] of this.pendingOps) {
-      if (docPath === path) return true;
-    }
-    return false;
-  }
-
-  docPaths(): IterableIterator<string> {
-    return this.pendingOps.keys();
   }
 
   /**
@@ -344,21 +356,51 @@ export class BulkWriter {
 
   constructor(
     private readonly firestore: Firestore,
-    enableThrottling: boolean
+    options?: firestore.BulkWriterOptions
   ) {
     this.firestore._incrementBulkWritersCount();
+    validateBulkWriterOptions(options);
 
-    if (enableThrottling) {
+    if (options?.throttling === false) {
       this.rateLimiter = new RateLimiter(
-        STARTING_MAXIMUM_OPS_PER_SECOND,
-        RATE_LIMITER_MULTIPLIER,
-        RATE_LIMITER_MULTIPLIER_MILLIS
-      );
-    } else {
-      this.rateLimiter = new RateLimiter(
+        Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY
+      );
+    } else {
+      let startingRate = DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND;
+      let maxRate = Number.POSITIVE_INFINITY;
+
+      if (typeof options?.throttling !== 'boolean') {
+        if (options?.throttling?.maxOpsPerSecond !== undefined) {
+          maxRate = options.throttling.maxOpsPerSecond;
+        }
+
+        if (options?.throttling?.initialOpsPerSecond !== undefined) {
+          startingRate = options.throttling.initialOpsPerSecond;
+        }
+
+        // The initial validation step ensures that the maxOpsPerSecond is
+        // greater than initialOpsPerSecond. If this inequality is true, that
+        // means initialOpsPerSecond was not set and maxOpsPerSecond is less
+        // than the default starting rate.
+        if (maxRate < startingRate) {
+          startingRate = maxRate;
+        }
+
+        // Ensure that the batch size is not larger than the number of allowed
+        // operations per second.
+        if (startingRate < this.maxBatchSize) {
+          this.maxBatchSize = startingRate;
+        }
+      }
+
+      this.rateLimiter = new RateLimiter(
+        startingRate,
+        RATE_LIMITER_MULTIPLIER,
+        RATE_LIMITER_MULTIPLIER_MILLIS,
+        maxRate
       );
     }
   }
@@ -392,7 +434,7 @@ export class BulkWriter {
     data: T
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    const bulkCommitBatch = this.getEligibleBatch(documentRef);
+    const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.create(documentRef, data);
     this.sendReadyBatches();
     return resultPromise;
@@ -431,7 +473,7 @@ export class BulkWriter {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    const bulkCommitBatch = this.getEligibleBatch(documentRef);
+    const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.delete(documentRef, precondition);
     this.sendReadyBatches();
     return resultPromise;
@@ -486,7 +528,7 @@ export class BulkWriter {
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    const bulkCommitBatch = this.getEligibleBatch(documentRef);
+    const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.set(documentRef, data, options);
     this.sendReadyBatches();
     return resultPromise;
@@ -541,7 +583,7 @@ export class BulkWriter {
     >
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    const bulkCommitBatch = this.getEligibleBatch(documentRef);
+    const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.update(
       documentRef,
       dataOrField,
@@ -626,12 +668,10 @@ export class BulkWriter {
    *
    * @private
    */
-  private getEligibleBatch<T>(
-    ref: firestore.DocumentReference<T>
-  ): BulkCommitBatch {
+  private getEligibleBatch<T>(): BulkCommitBatch {
     if (this.batchQueue.length > 0) {
       const lastBatch = this.batchQueue[this.batchQueue.length - 1];
-      if (lastBatch.state === BatchState.OPEN && !lastBatch.hasPath(ref.path)) {
+      if (lastBatch.state === BatchState.OPEN) {
         return lastBatch;
       }
     }
@@ -675,7 +715,7 @@ export class BulkWriter {
     let index = 0;
     while (
       index < unsentBatches.length &&
-      this.isBatchSendable(unsentBatches[index])
+      unsentBatches[index].state === BatchState.READY_TO_SEND
     ) {
       const batch = unsentBatches[index];
 
@@ -714,38 +754,6 @@ export class BulkWriter {
   }
 
   /**
-   * Checks that the provided batch is sendable. To be sendable, a batch must:
-   * (1) be marked as READY_TO_SEND
-   * (2) not write to references that are currently in flight
-   *
-   * @private
-   */
-  private isBatchSendable(batch: BulkCommitBatch): boolean {
-    if (batch.state !== BatchState.READY_TO_SEND) {
-      return false;
-    }
-
-    for (const path of batch.docPaths()) {
-      const isRefInFlight =
-        this.batchQueue
-          .filter(batch => batch.state === BatchState.SENT)
-          .find(batch => batch.hasPath(path)) !== undefined;
-      if (isRefInFlight) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          '[BulkWriter]',
-          `Duplicate write to document "${path}" detected.`,
-          'Writing to the same document multiple times will slow down BulkWriter. ' +
-            'Write to unique documents in order to maximize throughput.'
-        );
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
    * Sets the maximum number of allowed operations in a batch.
    *
    * @private
@@ -753,5 +761,76 @@ export class BulkWriter {
   // Visible for testing.
   _setMaxBatchSize(size: number): void {
     this.maxBatchSize = size;
+  }
+
+  /**
+   * Returns the rate limiter for testing.
+   *
+   * @private
+   */
+  // Visible for testing.
+  _getRateLimiter(): RateLimiter {
+    return this.rateLimiter;
+  }
+}
+
+/**
+ * Validates the use of 'value' as BulkWriterOptions.
+ *
+ * @private
+ * @param value The BulkWriterOptions object to validate.
+ * @throws if the input is not a valid BulkWriterOptions object.
+ */
+function validateBulkWriterOptions(value: unknown): void {
+  if (validateOptional(value, {optional: true})) {
+    return;
+  }
+  const argName = 'options';
+
+  if (!isObject(value)) {
+    throw new Error(
+      `${invalidArgumentMessage(
+        argName,
+        'bulkWriter() options argument'
+      )} Input is not an object.`
+    );
+  }
+
+  const options = value as firestore.BulkWriterOptions;
+
+  if (
+    options.throttling === undefined ||
+    typeof options.throttling === 'boolean'
+  ) {
+    return;
+  }
+
+  if (options.throttling.initialOpsPerSecond !== undefined) {
+    validateInteger(
+      'initialOpsPerSecond',
+      options.throttling.initialOpsPerSecond,
+      {
+        minValue: 1,
+      }
+    );
+  }
+
+  if (options.throttling.maxOpsPerSecond !== undefined) {
+    validateInteger('maxOpsPerSecond', options.throttling.maxOpsPerSecond, {
+      minValue: 1,
+    });
+
+    if (
+      options.throttling.initialOpsPerSecond !== undefined &&
+      options.throttling.initialOpsPerSecond >
+        options.throttling.maxOpsPerSecond
+    ) {
+      throw new Error(
+        `${invalidArgumentMessage(
+          argName,
+          'bulkWriter() options argument'
+        )} "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".`
+      );
+    }
   }
 }

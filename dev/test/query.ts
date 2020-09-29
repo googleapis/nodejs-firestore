@@ -53,7 +53,7 @@ const PROJECT_ID = 'test-project';
 const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 
 // Change the argument to 'console.log' to enable debug output.
-setLogFunction(() => {});
+setLogFunction(null);
 
 use(chaiAsPromised);
 
@@ -130,7 +130,7 @@ export function fieldFilters(
 
 function unaryFilters(
   fieldPath: string,
-  equals: 'IS_NAN' | 'IS_NULL',
+  equals: 'IS_NAN' | 'IS_NULL' | 'IS_NOT_NAN' | 'IS_NOT_NULL',
   ...fieldPathsAndEquals: string[]
 ): api.IStructuredQuery {
   const filters: api.StructuredQuery.IFilter[] = [];
@@ -141,14 +141,19 @@ function unaryFilters(
     const fieldPath = fieldPathsAndEquals[i];
     const equals = fieldPathsAndEquals[i + 1];
 
-    expect(equals).to.be.oneOf(['IS_NAN', 'IS_NULL']);
+    expect(equals).to.be.oneOf([
+      'IS_NAN',
+      'IS_NULL',
+      'IS_NOT_NAN',
+      'IS_NOT_NULL',
+    ]);
 
     filters.push({
       unaryFilter: {
         field: {
           fieldPath,
         },
-        op: equals as 'IS_NAN' | 'IS_NULL',
+        op: equals as 'IS_NAN' | 'IS_NULL' | 'IS_NOT_NAN' | 'IS_NOT_NULL',
       },
     });
   }
@@ -787,6 +792,12 @@ describe('where() interface', () => {
             arrValue,
             'fooContainsAny',
             'ARRAY_CONTAINS_ANY',
+            arrValue,
+            'fooNotEqual',
+            'NOT_EQUAL',
+            'barEqualsLong',
+            'fooNotIn',
+            'NOT_IN',
             arrValue
           )
         );
@@ -806,6 +817,8 @@ describe('where() interface', () => {
       query = query.where('fooContains', 'array-contains', 'barContains');
       query = query.where('fooIn', 'in', ['barArray']);
       query = query.where('fooContainsAny', 'array-contains-any', ['barArray']);
+      query = query.where('fooNotEqual', '!=', 'barEqualsLong');
+      query = query.where('fooNotIn', 'not-in', ['barArray']);
       return query.get();
     });
   });
@@ -952,7 +965,7 @@ describe('where() interface', () => {
     });
   });
 
-  it('validates references for IN queries', () => {
+  it('validates references for in/not-in queries', () => {
     const query = firestore.collection('collectionId');
 
     expect(() => {
@@ -971,6 +984,24 @@ describe('where() interface', () => {
       query.where(FieldPath.documentId(), 'in', []);
     }).to.throw(
       "Invalid Query. A non-empty array is required for 'in' filters."
+    );
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'not-in', ['foo', 42]);
+    }).to.throw(
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
+    );
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'not-in', 42);
+    }).to.throw(
+      "Invalid Query. A non-empty array is required for 'not-in' filters."
+    );
+
+    expect(() => {
+      query.where(FieldPath.documentId(), 'not-in', []);
+    }).to.throw(
+      "Invalid Query. A non-empty array is required for 'not-in' filters."
     );
   });
 
@@ -1086,13 +1117,33 @@ describe('where() interface', () => {
     });
   });
 
+  it('supports unary filters', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          unaryFilters('foo', 'IS_NOT_NAN', 'bar', 'IS_NOT_NULL')
+        );
+
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      let query: Query = firestore.collection('collectionId');
+      query = query.where('foo', '!=', NaN);
+      query = query.where('bar', '!=', null);
+      return query.get();
+    });
+  });
+
   it('rejects invalid NaN filter', () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '>', NaN);
       return query.get();
     }).to.throw(
-      'Invalid query. You can only perform equals comparisons on NaN.'
+      "Invalid query. You can only perform '==' and '!=' comparisons on NaN."
     );
   });
 
@@ -1102,7 +1153,7 @@ describe('where() interface', () => {
       query = query.where('foo', '>', null);
       return query.get();
     }).to.throw(
-      'Invalid query. You can only perform equals comparisons on Null.'
+      "Invalid query. You can only perform '==' and '!=' comparisons on Null."
     );
   });
 
@@ -1120,7 +1171,7 @@ describe('where() interface', () => {
     expect(() => {
       query = query.where('foo', '@' as InvalidApiUsage, 'foobar');
     }).to.throw(
-      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, >, >=, array-contains, in, array-contains-any'
+      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, !=, >, >=, array-contains, in, not-in, array-contains-any'
     );
   });
 });

@@ -291,6 +291,9 @@ declare namespace FirebaseFirestore {
      * Creates a [BulkWriter]{@link BulkWriter}, used for performing
      * multiple writes in parallel. Gradually ramps up writes as specified
      * by the 500/50/5 rule.
+     *
+     * @param options An options object used to configure the throttling
+     * behavior for the underlying BulkWriter.
      */
     bulkWriter(options?: BulkWriterOptions): BulkWriter;
   }
@@ -613,12 +616,27 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * An options object that can be used to disable request throttling in
-   * BulkWriter.
+   * An options object to configure throttling on BulkWriter.
    */
   export interface BulkWriterOptions {
-    /** Whether to disable throttling. */
-    readonly disableThrottling?: boolean;
+    /**
+     * Whether to disable or configure throttling. By default, throttling is
+     * enabled. This field can be set to either a boolean or a config
+     * object. Setting it to `true` will use default values. You can override
+     * the defaults by setting it to `false` to disable throttling, or by
+     * setting the config values to enable throttling with the provided values.
+     *
+     * @param initialOpsPerSecond The initial maximum number of operations per
+     * second allowed by the throttler. If this field is not set, the default
+     * is 500 operations per second.
+     * @param maxOpsPerSecond The maximum number of operations per second
+     * allowed by the throttler. If this field is set, the throttler's allowed
+     * operations per second does not ramp up past the specified operations per
+     * second.
+     */
+    readonly throttling?:
+      | boolean
+      | {initialOpsPerSecond?: number; maxOpsPerSecond?: number};
   }
 
   /**
@@ -1073,17 +1091,19 @@ declare namespace FirebaseFirestore {
 
   /**
    * Filter conditions in a `Query.where()` clause are specified using the
-   * strings '<', '<=', '==', '>=', '>', 'array-contains', 'in', and
-   * 'array-contains-any'.
+   * strings '<', '<=', '==', '!=', '>=', '>', 'array-contains', 'in', 'not-in',
+   * and 'array-contains-any'.
    */
   export type WhereFilterOp =
     | '<'
     | '<='
     | '=='
+    | '!='
     | '>='
     | '>'
     | 'array-contains'
     | 'in'
+    | 'not-in'
     | 'array-contains-any';
 
   /**
@@ -1188,7 +1208,7 @@ declare namespace FirebaseFirestore {
      * @param field The field paths to return.
      * @return The created Query.
      */
-    select(...field: (string | FieldPath)[]): Query<T>;
+    select(...field: (string | FieldPath)[]): Query<DocumentData>;
 
     /**
      * Creates and returns a new Query that starts at the provided document
