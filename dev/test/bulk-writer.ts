@@ -16,6 +16,7 @@ import {BulkWriterOptions, DocumentData} from '@google-cloud/firestore';
 
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect} from 'chai';
+import {GoogleError, Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 import {
@@ -586,6 +587,38 @@ describe('BulkWriter', () => {
     });
     return bulkWriter.close().then(() => {
       expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
+    });
+  });
+
+  it('retried operations are enqueued after other operations', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc1', 'bar'), updateOp('doc2', 'bar')]),
+        response: mergeResponses([
+          failedResponse(Status.FAILED_PRECONDITION),
+          successResponse(1),
+        ]),
+      },
+      {
+        request: createRequest([deleteOp('doc3'), setOp('doc1', 'bar')]),
+        response: mergeResponses([successResponse(2), successResponse(3)]),
+      },
+    ]);
+    let op: BulkWriterOperation | undefined = undefined;
+    bulkWriter.onError(async (error, operation) => {
+      op = operation;
+    });
+    bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
+    bulkWriter.update(firestore.doc('collectionId/doc2'), {foo: 'bar'});
+    await bulkWriter.flush();
+    bulkWriter.delete(firestore.doc('collectionId/doc3'));
+    expect(op).to.not.be.undefined;
+    let writeResult: WriteResult;
+    bulkWriter.retry(op!).then(res => {
+      writeResult = res;
+    });
+    return bulkWriter.close().then(() => {
+      expect(writeResult.writeTime.isEqual(new Timestamp(3, 0))).to.be.true;
     });
   });
 
