@@ -4,6 +4,14 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.4.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.3.0...v4.4.0) (2020-09-29)
+
+
+### Features
+
+* add starting/max rates to BulkWriterOptions ([#1305](https://www.github.com/googleapis/nodejs-firestore/issues/1305)) ([57dcf1c](https://www.github.com/googleapis/nodejs-firestore/commit/57dcf1c42b406a15ecb960059d67d99a97d42547))
+
+
 ## [4.3.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.2.0...v4.3.0) (2020-09-22)
 
 
