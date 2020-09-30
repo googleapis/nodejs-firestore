@@ -44,7 +44,7 @@ import {
   verifyInstance,
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
-import {BulkWriter} from '../src/bulk-writer';
+import {BulkWriter, BulkWriterOperation} from '../src/bulk-writer';
 
 use(chaiAsPromised);
 
@@ -2484,6 +2484,26 @@ describe('BulkWriter class', () => {
     writer.set(ref, {foo: 'bar'});
     await writer.close();
     return firestore.terminate();
+  });
+
+  it('can retry failed writes with a provided callback', async () => {
+    let retryPerformed = false;
+    let op: BulkWriterOperation | undefined = undefined;
+    writer.onError((error, operation) => {
+      op = operation;
+    });
+
+    // Use an invalid document name that the backend will reject.
+    const ref = randomCol.doc('__doc__');
+
+    writer.set(ref, {foo: 'bar'});
+    await writer.flush();
+    expect(op).to.not.be.undefined;
+    writer.retry(op!).catch(() => {
+      retryPerformed = true;
+    });
+    await writer.close();
+    expect(retryPerformed).to.be.true;
   });
 });
 

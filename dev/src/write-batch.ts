@@ -114,7 +114,7 @@ export class BatchWriteResult {
  * serializing the request.
  * @private
  */
-type PendingWriteOp = () => api.IWrite;
+export type PendingWriteOp = () => api.IWrite;
 
 /**
  * A Firestore WriteBatch that can be used to atomically commit multiple write
@@ -177,6 +177,15 @@ export class WriteBatch implements firestore.WriteBatch {
    */
   get isEmpty(): boolean {
     return this._ops.length === 0;
+  }
+
+  /**
+   * Returns the last operation that was added to the WriteBatch.
+   *
+   * @private
+   */
+  get lastOp(): PendingWriteOp {
+    return this._ops[this._ops.length - 1].op;
   }
 
   /**
@@ -544,6 +553,19 @@ export class WriteBatch implements firestore.WriteBatch {
     this._ops.push({docPath: documentRef.path, op});
 
     return this;
+  }
+
+  /**
+   * Adds the provided document reference and PendingWriteOp to the list of
+   * WriteBatch operations.
+   *
+   * @private
+   */
+  addOperation(
+    documentRef: firestore.DocumentReference,
+    op: PendingWriteOp
+  ): void {
+    this._ops.push({docPath: documentRef.path, op});
   }
 
   /**

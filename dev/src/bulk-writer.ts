@@ -28,7 +28,12 @@ import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {Deferred, getRetryCodes, isObject, wrapError} from './util';
-import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
+import {
+  BatchWriteResult,
+  PendingWriteOp,
+  WriteBatch,
+  WriteResult,
+} from './write-batch';
 import {logger} from './logger';
 import {
   invalidArgumentMessage,
@@ -191,6 +196,15 @@ class BulkCommitBatch {
   }
 
   /**
+   * Adds the provided operation to the WriteBatch. Returns a promise that
+   * resolves with the result of the operation.
+   */
+  retry(operation: BulkWriterOperation): Promise<WriteResult> {
+    this.writeBatch.addOperation(operation.documentRef, operation._data);
+    return this.processOperation(operation.documentRef);
+  }
+
+  /**
    * Helper to update data structures associated with the operation and
    * return the result.
    */
@@ -324,6 +338,27 @@ class BulkCommitBatch {
       this.state = BatchState.READY_TO_SEND;
     }
   }
+
+  /**
+   * Returns the last operation that was added to this batch.
+   */
+  getLastOp(): PendingWriteOp {
+    return this.writeBatch.lastOp;
+  }
+}
+
+/**
+ * A representation of a BulkWriter operation that is available in the
+ * `onError()` callback function. Used to retry a failing operation.
+ *
+ * @class
+ */
+export class BulkWriterOperation {
+  constructor(
+    readonly documentRef: firestore.DocumentReference,
+    readonly operation: 'create' | 'set' | 'update' | 'delete',
+    readonly _data: PendingWriteOp
+  ) {}
 }
 
 /**
@@ -354,11 +389,24 @@ export class BulkWriter {
    */
   private rateLimiter: RateLimiter;
 
+  /**
+   * A deferred promise that is resolved after the BulkWriter has been closed
+   * and all onError callbacks have been run.
+   */
+  private closedDeferred = new Deferred<void>();
+
+  /**
+   * The user-provided callback to be run every time a BulkWriter operation
+   * fails.
+   */
+  private errorFn: (error: Error, operation: BulkWriterOperation) => void;
+
   constructor(
     private readonly firestore: Firestore,
     options?: firestore.BulkWriterOptions
   ) {
     this.firestore._incrementBulkWritersCount();
+    this.errorFn = () => {};
     validateBulkWriterOptions(options);
 
     if (options?.throttling === false) {
@@ -436,6 +484,15 @@ export class BulkWriter {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.create(documentRef, data);
+    const pendingOp = bulkCommitBatch.getLastOp();
+    resultPromise.catch(err => {
+      const operation = new BulkWriterOperation(
+        documentRef,
+        'create',
+        pendingOp
+      );
+      this.errorFn(err, operation);
+    });
     this.sendReadyBatches();
     return resultPromise;
   }
@@ -475,6 +532,15 @@ export class BulkWriter {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.delete(documentRef, precondition);
+    const pendingOp = bulkCommitBatch.getLastOp();
+    resultPromise.catch(err => {
+      const operation = new BulkWriterOperation(
+        documentRef,
+        'delete',
+        pendingOp
+      );
+      this.errorFn(err, operation);
+    });
     this.sendReadyBatches();
     return resultPromise;
   }
@@ -530,6 +596,11 @@ export class BulkWriter {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.set(documentRef, data, options);
+    const pendingOp = bulkCommitBatch.getLastOp();
+    resultPromise.catch(err => {
+      const operation = new BulkWriterOperation(documentRef, 'set', pendingOp);
+      this.errorFn(err, operation);
+    });
     this.sendReadyBatches();
     return resultPromise;
   }
@@ -589,6 +660,43 @@ export class BulkWriter {
       dataOrField,
       ...preconditionOrValues
     );
+    const pendingOp = bulkCommitBatch.getLastOp();
+    resultPromise.catch(err => {
+      const operation = new BulkWriterOperation(
+        documentRef,
+        'update',
+        pendingOp
+      );
+      this.errorFn(err, operation);
+    });
+    this.sendReadyBatches();
+    return resultPromise;
+  }
+
+  /**
+   * Attaches a listener that is run every time a BulkWriter operation fails.
+   *
+   * @param fn A callback to be called every time a BulkWriter operation
+   * fails.
+   */
+  onError(fn: (error: Error, operation: BulkWriterOperation) => void): void {
+    this.errorFn = fn;
+  }
+
+  /**
+   * Retry a BulkWriter operation that has failed.
+   *
+   * The BulkWriterOperation object is a parameter on the `onError()`
+   * callback function that is called whenever a write fails.
+   *
+   * @param operation The operation to retry.
+   * @return A promise that resolves with the result of the operation. Throws
+   * an error if the operation fails.
+   */
+  retry(operation: BulkWriterOperation): Promise<WriteResult> {
+    this.verifyNotClosed();
+    const bulkCommitBatch = this.getEligibleBatch();
+    const resultPromise = bulkCommitBatch.retry(operation);
     this.sendReadyBatches();
     return resultPromise;
   }
@@ -648,12 +756,17 @@ export class BulkWriter {
    *   console.log('Executed all writes');
    * });
    */
-  close(): Promise<void> {
+  async close(): Promise<void> {
     this.verifyNotClosed();
     this.firestore._decrementBulkWritersCount();
     const flushPromise = this.flush();
     this.closed = true;
-    return flushPromise;
+    await flushPromise;
+
+    // Wait for pending retry operations to run.
+    if (this.batchQueue.length > 0) {
+      return this.closedDeferred.promise;
+    }
   }
 
   private verifyNotClosed(): void {
@@ -750,6 +863,12 @@ export class BulkWriter {
       this.batchQueue.splice(batchIndex, 1);
 
       this.sendReadyBatches();
+
+      // Resolve the deferred promise if all operations on this BulkWriter have
+      // completed.
+      if (this.batchQueue.length === 0 && this.closed) {
+        this.closedDeferred.resolve();
+      }
     });
   }
 
