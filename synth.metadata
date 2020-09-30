@@ -4,7 +4,7 @@
       "git": {
         "name": ".",
         "remote": "https://github.com/googleapis/nodejs-firestore.git",
-        "sha": "388583bae74e0daead296974beaee9c230f770ef"
+        "sha": "c098c6afbb45313be35871d2da674c9c61385338"
       }
     },
     {
@@ -116,7 +116,6 @@
     "dev/protos/protos.d.ts",
     "dev/protos/protos.js",
     "dev/protos/protos.json",
-    "dev/src/reference.ts",
     "dev/src/v1/firestore_admin_client.ts",
     "dev/src/v1/firestore_admin_client_config.json",
     "dev/src/v1/firestore_admin_proto_list.json",
