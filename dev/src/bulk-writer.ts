@@ -199,7 +199,7 @@ class BulkCommitBatch {
    * Adds the provided operation to the WriteBatch. Returns a promise that
    * resolves with the result of the operation.
    */
-  retry(operation: BulkWriterOperation): Promise<WriteResult> {
+  addOperation(operation: BulkWriterOperation): Promise<WriteResult> {
     this.writeBatch.addOperation(operation.documentRef, operation._data);
     return this.processOperation(operation.documentRef);
   }
@@ -696,7 +696,7 @@ export class BulkWriter {
   retry(operation: BulkWriterOperation): Promise<WriteResult> {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch();
-    const resultPromise = bulkCommitBatch.retry(operation);
+    const resultPromise = bulkCommitBatch.addOperation(operation);
     this.sendReadyBatches();
     return resultPromise;
   }
