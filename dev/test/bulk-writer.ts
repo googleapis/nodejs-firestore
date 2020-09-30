@@ -16,7 +16,6 @@ import {BulkWriterOptions, DocumentData} from '@google-cloud/firestore';
 
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect} from 'chai';
-import {GoogleError, Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 import {
@@ -27,6 +26,10 @@ import {
   WriteResult,
 } from '../src';
 import {setTimeoutHandler} from '../src/backoff';
+import {
+  BulkWriterOperation,
+  DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND,
+} from '../src/bulk-writer';
 import {
   ApiOverride,
   create,
@@ -42,7 +45,6 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
-import {DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND} from '../src/bulk-writer';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);
@@ -434,9 +436,11 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.set(doc, {})).to.throw(expected);
     expect(() => bulkWriter.create(doc, {})).to.throw(expected);
     expect(() => bulkWriter.update(doc, {})).to.throw(expected);
-    expect(() => bulkWriter.delete(doc)).to.throw(expected);
     expect(bulkWriter.flush()).to.eventually.be.rejectedWith(expected);
-    expect(() => bulkWriter.close()).to.throw(expected);
+    expect(bulkWriter.close()).to.be.eventually.rejectedWith(expected);
+    expect(() => bulkWriter.retry({} as BulkWriterOperation)).to.throw(
+      expected
+    );
   });
 
   it('can send writes to the same documents in the same batch', async () => {
@@ -474,6 +478,114 @@ describe('BulkWriter', () => {
 
     return bulkWriter.close().then(async () => {
       verifyOpCount(2);
+    });
+  });
+
+  it('can retry failed create operations with retry()', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([createOp('doc', 'bar')]),
+        response: failedResponse(Status.FAILED_PRECONDITION),
+      },
+      {
+        request: createRequest([createOp('doc', 'bar')]),
+        response: successResponse(1),
+      },
+    ]);
+    let op: BulkWriterOperation | undefined = undefined;
+    bulkWriter.onError(async (error, operation) => {
+      op = operation;
+    });
+    bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    await bulkWriter.flush();
+    expect(op).to.not.be.undefined;
+    let writeResult: WriteResult;
+    bulkWriter.retry(op!).then(res => {
+      writeResult = res;
+    });
+    return bulkWriter.close().then(() => {
+      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
+    });
+  });
+
+  it('can retry failed set operations with retry()', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.FAILED_PRECONDITION),
+      },
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: successResponse(1),
+      },
+    ]);
+    let op: BulkWriterOperation | undefined = undefined;
+    bulkWriter.onError(async (error, operation) => {
+      op = operation;
+    });
+    bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    await bulkWriter.flush();
+    expect(op).to.not.be.undefined;
+    let writeResult: WriteResult;
+    bulkWriter.retry(op!).then(res => {
+      writeResult = res;
+    });
+    return bulkWriter.close().then(() => {
+      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
+    });
+  });
+
+  it('can retry failed update operations with retry()', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([updateOp('doc', 'bar')]),
+        response: failedResponse(Status.FAILED_PRECONDITION),
+      },
+      {
+        request: createRequest([updateOp('doc', 'bar')]),
+        response: successResponse(1),
+      },
+    ]);
+    let op: BulkWriterOperation | undefined = undefined;
+    bulkWriter.onError(async (error, operation) => {
+      op = operation;
+    });
+    bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    await bulkWriter.flush();
+    expect(op).to.not.be.undefined;
+    let writeResult: WriteResult;
+    bulkWriter.retry(op!).then(res => {
+      writeResult = res;
+    });
+    return bulkWriter.close().then(() => {
+      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
+    });
+  });
+
+  it('can retry failed delete operations with retry()', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([deleteOp('doc')]),
+        response: failedResponse(Status.FAILED_PRECONDITION),
+      },
+      {
+        request: createRequest([deleteOp('doc')]),
+        response: successResponse(1),
+      },
+    ]);
+    let op: BulkWriterOperation | undefined = undefined;
+    bulkWriter.onError(async (error, operation) => {
+      op = operation;
+    });
+    bulkWriter.delete(firestore.doc('collectionId/doc'));
+    await bulkWriter.flush();
+    expect(op).to.not.be.undefined;
+    let writeResult: WriteResult;
+    bulkWriter.retry(op!).then(res => {
+      writeResult = res;
+    });
+    return bulkWriter.close().then(() => {
+      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
     });
   });
 
