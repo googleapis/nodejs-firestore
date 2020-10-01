@@ -104,7 +104,6 @@ export class WriteResult implements firestore.WriteResult {
  */
 export class BatchWriteResult {
   constructor(
-    readonly key: string,
     readonly writeTime: Timestamp | null,
     readonly status: GoogleError
   ) {}
@@ -165,9 +164,9 @@ export class WriteBatch implements firestore.WriteBatch {
     if (retryBatch) {
       // Creates a new WriteBatch containing only the indexes from the provided
       // indexes to retry.
-      this._ops = retryBatch._ops.filter((op, index) =>
-        indexesToRetry!.has(index)
-      );
+      for (const index of indexesToRetry!.values()) {
+        this._ops.push(retryBatch._ops[index]);
+      }
     }
   }
 
@@ -613,7 +612,7 @@ export class WriteBatch implements firestore.WriteBatch {
         error.code === Status.OK
           ? Timestamp.fromProto(result.updateTime || DELETE_TIMESTAMP_SENTINEL)
           : null;
-      return new BatchWriteResult(this._ops[i].docPath, updateTime, error);
+      return new BatchWriteResult(updateTime, error);
     });
   }
 
