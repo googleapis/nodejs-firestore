@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.4.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.4.0...v4.4.1) (2020-10-01)
+
+
+### Bug Fixes
+
+* simplify BulkWriter logic ([#1321](https://www.github.com/googleapis/nodejs-firestore/issues/1321)) ([b493baf](https://www.github.com/googleapis/nodejs-firestore/commit/b493baf44e729fa584b29881ef83f7821967a97b))
+
 ## [4.4.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.3.0...v4.4.0) (2020-09-29)
 
 
