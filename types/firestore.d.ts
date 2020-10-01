@@ -980,16 +980,7 @@ declare namespace FirebaseFirestore {
     ): DocumentReference<U>;
   }
 
-  /**
-   * A `DocumentSnapshot` contains data read from a document in your Firestore
-   * database. The data can be extracted with `.data()` or `.get(<field>)` to
-   * get a specific field.
-   *
-   * For a `DocumentSnapshot` that points to a non-existing document, any data
-   * access will return 'undefined'. You can use the `exists` property to
-   * explicitly verify a document's existence.
-   */
-  export class DocumentSnapshot<T = DocumentData> {
+  class DocumentSnapshotNotTypeGuarded<T = DocumentData> {
     protected constructor();
 
     /** True if the document exists. */
@@ -1047,6 +1038,33 @@ declare namespace FirebaseFirestore {
     isEqual(other: DocumentSnapshot<T>): boolean;
   }
 
+  class DocumentSnapshotNotExists<
+    T = DocumentData
+  > extends DocumentSnapshotNotTypeGuarded<T> {
+    exists: false;
+    data(): undefined;
+  }
+
+  class DocumentSnapshotExists<
+    T = DocumentData
+  > extends DocumentSnapshotNotTypeGuarded<T> {
+    exists: true;
+    data(): T;
+  }
+
+  /**
+   * A `DocumentSnapshot` contains data read from a document in your Firestore
+   * database. The data can be extracted with `.data()` or `.get(<field>)` to
+   * get a specific field.
+   *
+   * For a `DocumentSnapshot` that points to a non-existing document, any data
+   * access will return 'undefined'. You can use the `exists` property to
+   * explicitly verify a document's existence.
+   */
+  export type DocumentSnapshot<T = DocumentData> =
+    | DocumentSnapshotExists<T>
+    | DocumentSnapshotNotExists<T>;
+
   /**
    * A `QueryDocumentSnapshot` contains data read from a document in your
    * Firestore database as part of a query. The document is guaranteed to exist
@@ -1058,9 +1076,9 @@ declare namespace FirebaseFirestore {
    * `exists` property will always be true and `data()` will never return
    * 'undefined'.
    */
-  export class QueryDocumentSnapshot<T = DocumentData> extends DocumentSnapshot<
-    T
-  > {
+  export class QueryDocumentSnapshot<
+    T = DocumentData
+  > extends DocumentSnapshotExists<T> {
     private constructor();
 
     /**
