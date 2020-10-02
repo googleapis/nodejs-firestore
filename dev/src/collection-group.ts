@@ -30,7 +30,8 @@ import api = protos.google.firestore.v1;
  * A `CollectionGroup` refers to all documents that are contained in a
  * collection or subcollection with a specific collection ID.
  */
-export class CollectionGroup<T = firestore.DocumentData> extends Query<T>
+export class CollectionGroup<T = firestore.DocumentData>
+  extends Query<T>
   implements firestore.CollectionGroup<T> {
   /** @hideconstructor */
   constructor(
