@@ -70,6 +70,10 @@ export interface GapicClient {
     options?: CallOptions
   ): Promise<[string[], unknown, unknown]>;
   listen(options?: CallOptions): Duplex;
+  partitionQueryStream(
+    request?: api.IPartitionQueryRequest,
+    options?: CallOptions
+  ): Duplex;
   close(): Promise<void>;
 }
 
@@ -85,6 +89,7 @@ export type FirestoreUnaryMethod =
 /** Streaming methods used in the Firestore SDK. */
 export type FirestoreStreamingMethod =
   | 'listen'
+  | 'partitionQueryStream'
   | 'runQuery'
   | 'batchGetDocuments';
 

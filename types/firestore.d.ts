@@ -219,9 +219,9 @@ declare namespace FirebaseFirestore {
      * @param collectionId Identifies the collections to query over. Every
      * collection or subcollection with this ID as the last segment of its path
      * will be included. Cannot contain a slash.
-     * @return The created Query.
+     * @return The created `CollectionGroup`.
      */
-    collectionGroup(collectionId: string): Query<DocumentData>;
+    collectionGroup(collectionId: string): CollectionGroup<DocumentData>;
 
     /**
      * Retrieves multiple documents from Firestore.
@@ -1530,6 +1530,120 @@ declare namespace FirebaseFirestore {
     withConverter<U>(
       converter: FirestoreDataConverter<U>
     ): CollectionReference<U>;
+  }
+
+  /**
+   * A `CollectionGroup` refers to all documents that are contained in a
+   * collection or subcollection with a specific collection ID.
+   */
+  export class CollectionGroup<T = DocumentData> extends Query<T> {
+    /**
+     * Partitions a query by returning partition cursors that can be used to run
+     * the query in parallel. The returned cursors are split points that can be
+     * used as starting and end points for individual query invocations.
+     *
+     * @param desiredPartitionCount The desired maximum number of partition
+     * points. The number must be strictly positive. The actual number of
+     * partitions returned may be fewer.
+     * @return A Promise with the `QueryPartition`s returned as an array.
+     */
+    getPartitions(desiredPartitionCount: number): Promise<QueryPartition<T>[]>;
+
+    /**
+     * Partitions a query by returning partition cursors that can be used to run
+     * the query in parallel. The returned cursors are split points that can be
+     * used as starting and end points for individual query invocations.
+     *
+     * @param desiredPartitionCount The desired maximum number of partition
+     * points. The number must be strictly positive. The actual number of
+     * partitions returned may be fewer.
+     * @return An AsyncIterable of `QueryPartition`s.
+     */
+    getPartitionsAsync(
+      desiredPartitionCount: number
+    ): AsyncIterable<QueryPartition<T>>;
+
+    /**
+     * Applies a custom data converter to this `CollectionGroup`, allowing you
+     * to use your own custom model objects with Firestore. When you call get()
+     * on the returned `CollectionGroup`, the provided converter will convert
+     * between Firestore data and your custom type U.
+     *
+     * Using the converter allows you to specify generic type arguments when
+     * storing and retrieving objects from Firestore.
+     *
+     * @example
+     * class Post {
+     *   constructor(readonly title: string, readonly author: string) {}
+     *
+     *   toString(): string {
+     *     return this.title + ', by ' + this.author;
+     *   }
+     * }
+     *
+     * const postConverter = {
+     *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+     *     return {title: post.title, author: post.author};
+     *   },
+     *   fromFirestore(
+     *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
+     *   ): Post {
+     *     const data = snapshot.data();
+     *     return new Post(data.title, data.author);
+     *   }
+     * };
+     *
+     * const postSnap = await Firestore()
+     *   .collectionGroup('posts')
+     *   .withConverter(postConverter)
+     *   .doc().get();
+     * const post = postSnap.data();
+     * if (post !== undefined) {
+     *   post.title; // string
+     *   post.toString(); // Should be defined
+     *   post.someNonExistentProperty; // TS error
+     * }
+     *
+     * @param converter Converts objects to and from Firestore.
+     * @return A `CollectionGroup<U>` that uses the provided converter.
+     */
+    withConverter<U>(converter: FirestoreDataConverter<U>): CollectionGroup<U>;
+  }
+
+  /**
+   * A split point that can be used in a query as a starting and/or end point for
+   * the query results. The cursors returned by {@link #startAt} and {@link
+   * #endBefore} can only be used in a query that matches the constraint of query
+   * that produced this partition.
+   */
+  export class QueryPartition<T = DocumentData> {
+    /**
+     * The cursor that defines the first result for this partition or
+     * `undefined` if this is the first partition.
+     *
+     * @return cursor values that can be used with {@link Query#startAt} or
+     * `undefined` if this is the first partition. The returned array must be
+     * destructured when passed to `startAt`.
+     */
+    get startAt(): unknown[] | undefined;
+
+    /**
+     * The cursor that defines the first result after this partition or
+     * `undefined` if this is the last partition.
+     *
+     * @return cursor values that can be used with {@link Query#endBefore} or
+     * `undefined` if this is the last partition. The returned array must be
+     * destructured when passed to `endBefore`.
+     */
+    get endBefore(): unknown[] | undefined;
+
+    /**
+     * Returns a query that only returns the documents for this partition.
+     *
+     * @return a query partitioned by a {@link Query#startAt} and {@link
+     * Query#endBefore} cursor.
+     */
+    toQuery(): Query<T>;
   }
 
   /**
