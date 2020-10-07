@@ -6391,6 +6391,9 @@ export namespace google {
 
             /** ResourceDescriptor singular */
             singular?: (string|null);
+
+            /** ResourceDescriptor style */
+            style?: (google.api.ResourceDescriptor.Style[]|null);
         }
 
         /** Represents a ResourceDescriptor. */
@@ -6420,6 +6423,9 @@ export namespace google {
             /** ResourceDescriptor singular. */
             public singular: string;
 
+            /** ResourceDescriptor style. */
+            public style: google.api.ResourceDescriptor.Style[];
+
             /**
              * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
              * @param object Plain object
@@ -6447,6 +6453,10 @@ export namespace google {
             /** History enum. */
             type History =
                 "HISTORY_UNSPECIFIED"| "ORIGINALLY_SINGLE_PATTERN"| "FUTURE_MULTI_PATTERN";
+
+            /** Style enum. */
+            type Style =
+                "STYLE_UNSPECIFIED"| "DECLARATIVE_FRIENDLY";
         }
 
         /** Properties of a ResourceReference. */
