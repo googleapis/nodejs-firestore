@@ -200,7 +200,7 @@ class BulkCommitBatch {
    * resolves with the result of the operation.
    */
   addOperation(operation: BulkWriterOperation): Promise<WriteResult> {
-    this.writeBatch.addOperation(operation.documentRef, operation._data);
+    this.writeBatch._addOperation(operation.documentRef, operation._data);
     return this.processOperation(operation.documentRef);
   }
 
@@ -343,7 +343,7 @@ class BulkCommitBatch {
    * Returns the last operation that was added to this batch.
    */
   getLastOp(): PendingWriteOp {
-    return this.writeBatch.lastOp;
+    return this.writeBatch._lastOp;
   }
 }
 
@@ -506,7 +506,7 @@ export class BulkWriter {
    * delete.
    * @param {Timestamp=} precondition.lastUpdateTime If set, enforces that the
    * document was last updated at lastUpdateTime. Fails the batch if the
-   * document doesn't exist or was last updated at a different time.
+   * document doesn't exist or was last updatedra at a different time.
    * @returns {Promise<WriteResult>} A promise that resolves with a sentinel
    * Timestamp indicating that the delete was successful. Throws an error if
    * the write fails.
@@ -676,11 +676,13 @@ export class BulkWriter {
   /**
    * Attaches a listener that is run every time a BulkWriter operation fails.
    *
-   * @param fn A callback to be called every time a BulkWriter operation
+   * @param callback A callback to be called every time a BulkWriter operation
    * fails.
    */
-  onError(fn: (error: Error, operation: BulkWriterOperation) => void): void {
-    this.errorFn = fn;
+  onError(
+    callback: (error: Error, operation: BulkWriterOperation) => void
+  ): void {
+    this.errorFn = callback;
   }
 
   /**
@@ -691,7 +693,7 @@ export class BulkWriter {
    *
    * @param operation The operation to retry.
    * @return A promise that resolves with the result of the operation. Throws
-   * an error if the operation fails.
+   * an error if the retry fails.
    */
   retry(operation: BulkWriterOperation): Promise<WriteResult> {
     this.verifyNotClosed();

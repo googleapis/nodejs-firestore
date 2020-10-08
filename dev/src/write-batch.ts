@@ -184,7 +184,7 @@ export class WriteBatch implements firestore.WriteBatch {
    *
    * @private
    */
-  get lastOp(): PendingWriteOp {
+  get _lastOp(): PendingWriteOp {
     return this._ops[this._ops.length - 1].op;
   }
 
@@ -561,7 +561,7 @@ export class WriteBatch implements firestore.WriteBatch {
    *
    * @private
    */
-  addOperation(
+  _addOperation(
     documentRef: firestore.DocumentReference,
     op: PendingWriteOp
   ): void {

@@ -482,112 +482,79 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('can retry failed create operations with retry()', async () => {
+  it('can retry failed operations with retry()', async () => {
     const bulkWriter = await instantiateInstance([
       {
-        request: createRequest([createOp('doc', 'bar')]),
-        response: failedResponse(Status.FAILED_PRECONDITION),
+        request: createRequest([
+          createOp('doc', 'bar'),
+          setOp('doc', 'bar'),
+          updateOp('doc', 'bar'),
+          deleteOp('doc'),
+        ]),
+        response: mergeResponses([
+          failedResponse(Status.INTERNAL),
+          failedResponse(Status.INTERNAL),
+          failedResponse(Status.INTERNAL),
+          failedResponse(Status.INTERNAL),
+        ]),
       },
       {
-        request: createRequest([createOp('doc', 'bar')]),
-        response: successResponse(1),
+        request: createRequest([
+          createOp('doc', 'bar'),
+          setOp('doc', 'bar'),
+          updateOp('doc', 'bar'),
+          deleteOp('doc'),
+        ]),
+        response: mergeResponses([
+          successResponse(1),
+          successResponse(2),
+          successResponse(3),
+          successResponse(4),
+        ]),
       },
     ]);
-    let op: BulkWriterOperation | undefined = undefined;
-    bulkWriter.onError(async (error, operation) => {
-      op = operation;
+    const ops: BulkWriterOperation[] = [];
+    bulkWriter.onError((error, operation) => {
+      ops.push(operation);
     });
     bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    await bulkWriter.flush();
-    expect(op).to.not.be.undefined;
-    let writeResult: WriteResult;
-    bulkWriter.retry(op!).then(res => {
-      writeResult = res;
-    });
-    return bulkWriter.close().then(() => {
-      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
-    });
-  });
-
-  it('can retry failed set operations with retry()', async () => {
-    const bulkWriter = await instantiateInstance([
-      {
-        request: createRequest([setOp('doc', 'bar')]),
-        response: failedResponse(Status.FAILED_PRECONDITION),
-      },
-      {
-        request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(1),
-      },
-    ]);
-    let op: BulkWriterOperation | undefined = undefined;
-    bulkWriter.onError(async (error, operation) => {
-      op = operation;
-    });
     bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    await bulkWriter.flush();
-    expect(op).to.not.be.undefined;
-    let writeResult: WriteResult;
-    bulkWriter.retry(op!).then(res => {
-      writeResult = res;
-    });
-    return bulkWriter.close().then(() => {
-      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
-    });
-  });
-
-  it('can retry failed update operations with retry()', async () => {
-    const bulkWriter = await instantiateInstance([
-      {
-        request: createRequest([updateOp('doc', 'bar')]),
-        response: failedResponse(Status.FAILED_PRECONDITION),
-      },
-      {
-        request: createRequest([updateOp('doc', 'bar')]),
-        response: successResponse(1),
-      },
-    ]);
-    let op: BulkWriterOperation | undefined = undefined;
-    bulkWriter.onError(async (error, operation) => {
-      op = operation;
-    });
     bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    await bulkWriter.flush();
-    expect(op).to.not.be.undefined;
-    let writeResult: WriteResult;
-    bulkWriter.retry(op!).then(res => {
-      writeResult = res;
-    });
-    return bulkWriter.close().then(() => {
-      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
-    });
-  });
-
-  it('can retry failed delete operations with retry()', async () => {
-    const bulkWriter = await instantiateInstance([
-      {
-        request: createRequest([deleteOp('doc')]),
-        response: failedResponse(Status.FAILED_PRECONDITION),
-      },
-      {
-        request: createRequest([deleteOp('doc')]),
-        response: successResponse(1),
-      },
-    ]);
-    let op: BulkWriterOperation | undefined = undefined;
-    bulkWriter.onError(async (error, operation) => {
-      op = operation;
-    });
     bulkWriter.delete(firestore.doc('collectionId/doc'));
     await bulkWriter.flush();
-    expect(op).to.not.be.undefined;
-    let writeResult: WriteResult;
-    bulkWriter.retry(op!).then(res => {
-      writeResult = res;
-    });
+    expect(ops.length).to.equal(4);
+    const writeResults: number[] = [];
+    for (const op of ops) {
+      bulkWriter.retry(op).then(res => {
+        writeResults.push(res.writeTime.seconds);
+      });
+    }
     return bulkWriter.close().then(() => {
-      expect(writeResult.writeTime.isEqual(new Timestamp(1, 0))).to.be.true;
+      expect(writeResults).to.deep.equal([1, 2, 3, 4]);
     });
+  });
+
+  it('errors are still surfaced even if a retry function is specified', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
+      },
+    ]);
+    let onErrorCalled = false;
+    let catchCalled = false;
+    bulkWriter.onError(() => {
+      onErrorCalled = true;
+    });
+    bulkWriter
+      .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
+      .catch(err => {
+        expect(err.code).to.equal(Status.INTERNAL);
+        catchCalled = true;
+      });
+    await bulkWriter.flush();
+    expect(catchCalled).to.be.true;
+    expect(onErrorCalled).to.be.true;
   });
 
   it('retried operations are enqueued after other operations', async () => {
@@ -595,7 +562,7 @@ describe('BulkWriter', () => {
       {
         request: createRequest([setOp('doc1', 'bar'), updateOp('doc2', 'bar')]),
         response: mergeResponses([
-          failedResponse(Status.FAILED_PRECONDITION),
+          failedResponse(Status.INTERNAL),
           successResponse(1),
         ]),
       },
@@ -605,7 +572,7 @@ describe('BulkWriter', () => {
       },
     ]);
     let op: BulkWriterOperation | undefined = undefined;
-    bulkWriter.onError(async (error, operation) => {
+    bulkWriter.onError((error, operation) => {
       op = operation;
     });
     bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});

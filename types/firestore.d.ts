@@ -596,7 +596,9 @@ declare namespace FirebaseFirestore {
      * Retry a BulkWriter operation that has failed.
      *
      * The BulkWriterOperation object is a parameter on the `onError()`
-     * callback function that is called whenever a write fails.
+     * callback function that is called whenever a write fails. Retries should
+     * be made after the `flush()` promise resolves. `retry()` cannot be called
+     * after the `close()` is called.
      *
      * @param operation The operation to retry.
      * @return A promise that resolves with the result of the operation. Throws
