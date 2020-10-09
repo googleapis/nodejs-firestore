@@ -12,9 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {describe, it, beforeEach, afterEach} from 'mocha';
-import {expect} from 'chai';
+import {
+  CollectionGroup,
+  DocumentData,
+  QueryPartition,
+} from '@google-cloud/firestore';
 
+import {describe, it, beforeEach, afterEach} from 'mocha';
+import {expect, use} from 'chai';
+import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
 
 import {google} from '../protos/firestore_v1_proto_api';
@@ -23,10 +29,11 @@ import {setTimeoutHandler} from '../src/backoff';
 import {
   ApiOverride,
   createInstance,
-  document,
   stream,
   verifyInstance,
 } from './util/helpers';
+
+use(chaiAsPromised);
 
 import api = google.firestore.v1;
 
@@ -67,10 +74,6 @@ export function partitionQueryEquals(
   expect(actual).to.deep.eq(query);
 }
 
-export function result(documentId: string): api.IRunQueryResponse {
-  return {document: document(documentId), readTime: {seconds: 5, nanos: 6}};
-}
-
 describe('Partition Query', () => {
   let firestore: Firestore;
 
@@ -86,8 +89,24 @@ describe('Partition Query', () => {
     setTimeoutHandler(setTimeout);
   });
 
+  async function getPartitions(
+    collectionGroup: CollectionGroup<DocumentData>,
+    desiredPartitionsCount: number
+  ): Promise<QueryPartition<DocumentData>[]> {
+    const partitions: QueryPartition<DocumentData>[] = [];
+    for await (const partition of collectionGroup.getPartitions(
+      desiredPartitionsCount
+    )) {
+      partitions.push(partition);
+    }
+    return partitions;
+  }
+
   it('requests one less than desired partitions', () => {
-    const desiredPartitionsCount = 1;
+    const desiredPartitionsCount = 2;
+    const cursorValue = {
+      values: [{referenceValue: 'coll/doc'}],
+    };
 
     const overrides: ApiOverride = {
       partitionQueryStream: request => {
@@ -96,16 +115,105 @@ describe('Partition Query', () => {
           /* partitionCount= */ desiredPartitionsCount - 1
         );
 
+        return stream(cursorValue);
+      },
+    };
+    return createInstance(overrides).then(async firestore => {
+      const query = firestore.collectionGroup('collectionId');
+
+      const result = await getPartitions(query, desiredPartitionsCount);
+      expect(result.length).to.equal(2);
+      expect(result[0].startAt).to.be.undefined;
+      expect(result[0].startAt).to.deep.equal(cursorValue);
+      expect(result[1].endBefore).to.deep.equal(cursorValue);
+      expect(result[1].endBefore).to.be.undefined;
+    });
+  });
+
+  it('does not issue RPC if only a single partition is requested', () => {
+    const desiredPartitionsCount = 1;
+
+    return createInstance().then(async firestore => {
+      const query = firestore.collectionGroup('collectionId');
+
+      const result = await getPartitions(query, desiredPartitionsCount);
+      expect(result.length).to.equal(1);
+      expect(result[0].startAt).to.be.undefined;
+      expect(result[0].endBefore).to.be.undefined;
+    });
+  });
+
+  it('validates partition count', () => {
+    return createInstance().then(firestore => {
+      const query = firestore.collectionGroup('collectionId');
+      return expect(getPartitions(query, 0)).to.eventually.be.rejectedWith(
+        'Value for argument "desiredPartitionCount" must be within [1, Infinity] inclusive, but was: 0'
+      );
+    });
+  });
+
+  it('converts partitions to queries', () => {
+    const desiredPartitionsCount = 3;
+
+    const expectedStartAt: Array<undefined | api.IValue> = [
+      undefined,
+      {referenceValue: 'coll/doc1'},
+      {referenceValue: 'coll/doc2'},
+    ];
+    const expectedEndBefore: Array<undefined | api.IValue> = [
+      {referenceValue: 'coll/doc1'},
+      {referenceValue: 'coll/doc2'},
+      undefined,
+    ];
+
+    const overrides: ApiOverride = {
+      partitionQueryStream: request => {
+        partitionQueryEquals(
+          request,
+          /* partitionCount= */ desiredPartitionsCount - 1
+        );
+
+        return stream<api.ICursor>(
+          {
+            values: [{referenceValue: 'coll/doc1'}],
+          },
+          {
+            values: [{referenceValue: 'coll/doc2'}],
+          }
+        );
+      },
+      runQuery: request => {
+        const startAt = expectedStartAt.shift();
+        if (startAt) {
+          expect(request!.structuredQuery!.startAt).to.deep.equal({
+            before: true,
+            values: [startAt],
+          });
+        } else {
+          expect(request!.structuredQuery!.startAt).to.be.undefined;
+        }
+
+        const endBefore = expectedEndBefore.shift();
+        if (endBefore) {
+          expect(request!.structuredQuery!.endAt).to.deep.equal({
+            before: true,
+            values: [endBefore],
+          });
+        } else {
+          expect(request!.structuredQuery!.endAt).to.be.undefined;
+        }
         return stream();
       },
     };
     return createInstance(overrides).then(async firestore => {
       const query = firestore.collectionGroup('collectionId');
 
-      const result = await query.getPartitions(desiredPartitionsCount);
-      expect(result.length).to.equal(1);
-      expect(result[0].startAt).to.be.undefined;
-      expect(result[0].endBefore).to.be.undefined;
+      const partitions = await getPartitions(query, desiredPartitionsCount);
+      expect(partitions.length).to.equal(3);
+
+      for (const partition of partitions) {
+        await partition.toQuery().get();
+      }
     });
   });
 
@@ -138,7 +246,7 @@ describe('Partition Query', () => {
     return createInstance(overrides).then(async firestore => {
       const query = firestore.collectionGroup('collectionId');
 
-      const result = await query.getPartitions(desiredPartitionsCount);
+      const result = await getPartitions(query, desiredPartitionsCount);
       expect(result.length).to.equal(2);
 
       // If the user uses the cursor directly, we follow the `useBigInt`

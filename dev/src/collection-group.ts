@@ -23,12 +23,15 @@ import {logger} from './logger';
 import {Query, QueryOptions} from './reference';
 import {FieldPath} from './path';
 import {Firestore} from './index';
+import {validateInteger} from './validate';
 
 import api = protos.google.firestore.v1;
 
 /**
  * A `CollectionGroup` refers to all documents that are contained in a
  * collection or subcollection with a specific collection ID.
+ *
+ * @class
  */
 export class CollectionGroup<T = firestore.DocumentData>
   extends Query<T>
@@ -50,51 +53,65 @@ export class CollectionGroup<T = firestore.DocumentData>
    * the query in parallel. The returned cursors are split points that can be
    * used as starting and end points for individual query invocations.
    *
+   * @example
+   * const query = firestore.collectionGroup('collectionId');
+   * for await (const partition of query.getPartitions(42)) {
+   *   const partitionedQuery = partition.toQuery();
+   *   const querySnapshot = await partitionedQuery.get();
+   *   console.log(`Partition contained ${querySnapshot.length} documents`);
+   * }
+   *
    * @param {number} desiredPartitionCount The desired maximum number of
    * partition points. The number must be strictly positive. The actual number
    * of partitions returned may be fewer.
    * @return {AsyncIterable<QueryPartition>} An AsyncIterable of
    * `QueryPartition`s.
    */
-  async *getPartitionsAsync(
+  async *getPartitions(
     desiredPartitionCount: number
   ): AsyncIterable<QueryPartition<T>> {
+    validateInteger('desiredPartitionCount', desiredPartitionCount, {
+      minValue: 1,
+    });
+
     const tag = requestTag();
     await this.firestore.initializeIfNeeded(tag);
-
-    // Partition queries require explicit ordering by __name__.
-    const queryWithDefaultOrder = this.orderBy(FieldPath.documentId());
-    const request: api.IPartitionQueryRequest = queryWithDefaultOrder.toProto();
-
-    // Since we are always returning an extra partition (with en empty endBefore
-    // cursor), we reduce the desired partition count by one.
-    request.partitionCount = desiredPartitionCount - 1;
-
-    const stream = await this.firestore.requestStream(
-      'partitionQueryStream',
-      request,
-      tag
-    );
-    stream.resume();
 
     let lastValues: api.IValue[] | undefined = undefined;
     let partitionCount = 0;
 
-    for await (const currentCursor of stream) {
-      ++partitionCount;
-      const currentValues = currentCursor.values ?? [];
-      yield new QueryPartition(
-        this._firestore,
-        this._queryOptions.collectionId,
-        this._queryOptions.converter,
-        lastValues,
-        currentValues
+    if (desiredPartitionCount > 1) {
+      // Partition queries require explicit ordering by __name__.
+      const queryWithDefaultOrder = this.orderBy(FieldPath.documentId());
+      const request: api.IPartitionQueryRequest = queryWithDefaultOrder.toProto();
+
+      // Since we are always returning an extra partition (with an empty endBefore
+      // cursor), we reduce the desired partition count by one.
+      request.partitionCount = desiredPartitionCount - 1;
+
+      const stream = await this.firestore.requestStream(
+        'partitionQueryStream',
+        request,
+        tag
       );
-      lastValues = currentValues;
+      stream.resume();
+
+      for await (const currentCursor of stream) {
+        ++partitionCount;
+        const currentValues = currentCursor.values ?? [];
+        yield new QueryPartition(
+          this._firestore,
+          this._queryOptions.collectionId,
+          this._queryOptions.converter,
+          lastValues,
+          currentValues
+        );
+        lastValues = currentValues;
+      }
     }
 
     logger(
-      'Firestore.getPartitionsAsync',
+      'Firestore.getPartitions',
       tag,
       'Received %d partitions',
       partitionCount
@@ -108,29 +125,6 @@ export class CollectionGroup<T = firestore.DocumentData>
       lastValues,
       undefined
     );
-  }
-
-  /**
-   * Partitions a query by returning partition cursors that can be used to run
-   * the query in parallel. The returned cursors are split points that can be
-   * used as starting and end points for individual query invocations.
-   *
-   * @param {number} desiredPartitionCount The desired maximum number of
-   * partition points. The number must be strictly positive. The actual number
-   * of partitions returned may be fewer.
-   * @return {Promise<QueryPartition[]>} A Promise with the `QueryPartition`s
-   * returned as an array.
-   */
-  async getPartitions(
-    desiredPartitionCount: number
-  ): Promise<QueryPartition<T>[]> {
-    const result: QueryPartition<T>[] = [];
-    for await (const partition of this.getPartitionsAsync(
-      desiredPartitionCount
-    )) {
-      result.push(partition);
-    }
-    return result;
   }
 
   /**
@@ -163,12 +157,12 @@ export class CollectionGroup<T = firestore.DocumentData>
    *   }
    * };
    *
-   * const postSnap = await Firestore()
+   * const querySnapshot = await Firestore()
    *   .collectionGroup('posts')
    *   .withConverter(postConverter)
-   *   .doc().get();
-   * const post = postSnap.data();
-   * if (post !== undefined) {
+   *   .get();
+   * for (const doc of querySnapshot.docs) {
+   *   const post = doc.data();
    *   post.title; // string
    *   post.toString(); // Should be defined
    *   post.someNonExistentProperty; // TS error

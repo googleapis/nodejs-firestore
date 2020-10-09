@@ -29,6 +29,8 @@ import api = protos.google.firestore.v1;
  * the query results. The cursors returned by {@link #startAt} and {@link
  * #endBefore} can only be used in a query that matches the constraint of query
  * that produced this partition.
+ *
+ * @class
  */
 export class QueryPartition<T = firestore.DocumentData>
   implements firestore.QueryPartition<T> {
@@ -36,12 +38,11 @@ export class QueryPartition<T = firestore.DocumentData>
   private _memoizedStartAt: unknown[] | undefined;
   private _memoizedEndBefore: unknown[] | undefined;
 
+  /** @hideconstructor */
   constructor(
     private readonly _firestore: Firestore,
     private readonly _collectionId: string,
-    private readonly _converter:
-      | firestore.FirestoreDataConverter<T>
-      | undefined,
+    private readonly _converter: firestore.FirestoreDataConverter<T>,
     private readonly _startAt: api.IValue[] | undefined,
     private readonly _endBefore: api.IValue[] | undefined
   ) {
@@ -50,11 +51,27 @@ export class QueryPartition<T = firestore.DocumentData>
 
   /**
    * The cursor that defines the first result for this partition or `undefined`
-   * if this is the first partition.
+   * if this is the first partition. The cursor value must be
+   * destructured when passed to `startAt()` (for example with
+   * `query.startAt(...queryPartition.startAt)`).
    *
-   * @return a cursor value that can be used with {@link Query#startAt} or
-   * `undefined` if this is the first partition. The returned array must be
-   * destructured when passed to `startAt`.
+   * @example
+   * const query = firestore.collectionGroup('collectionId');
+   * for await (const partition of query.getPartitions(42)) {
+   *   let partitionedQuery = query.orderBy(FieldPath.documentId());
+   *   if (partition.startAt) {
+   *     partitionedQuery = partitionedQuery.startAt(...partition.startAt);
+   *   }
+   *   if (partition.endBefore) {
+   *     partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
+   *   }
+   *   const querySnapshot = await partitionedQuery.get();
+   *   console.log(`Partition contained ${querySnapshot.length} documents`);
+   * }
+   *
+   * @type {Array<*>}
+   * @return {Array<*>} A cursor value that can be used with {@link
+   * Query#startAt} or `undefined` if this is the first partition.
    */
   get startAt(): unknown[] | undefined {
     if (this._startAt && !this._memoizedStartAt) {
@@ -68,11 +85,27 @@ export class QueryPartition<T = firestore.DocumentData>
 
   /**
    * The cursor that defines the first result after this partition or
-   * `undefined` if this is the last partition.
+   * `undefined` if this is the last partition.  The cursor value must be
+   * destructured when passed to `endBefore()` (for example with
+   * `query.endBefore(...queryPartition.endBefore)`).
    *
-   * @return a cursor value that can be used with {@link Query#endBefore} or
-   * `undefined` if this is the last partition. The returned array must be
-   * destructured when passed to `endBefore`.
+   * @example
+   * const query = firestore.collectionGroup('collectionId');
+   * for await (const partition of query.getPartitions(42)) {
+   *   let partitionedQuery = query.orderBy(FieldPath.documentId());
+   *   if (partition.startAt) {
+   *     partitionedQuery = partitionedQuery.startAt(...partition.startAt);
+   *   }
+   *   if (partition.endBefore) {
+   *     partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
+   *   }
+   *   const querySnapshot = await partitionedQuery.get();
+   *   console.log(`Partition contained ${querySnapshot.length} documents`);
+   * }
+   *
+   * @type {Array<*>}
+   * @return {Array<*>} A cursor value that can be used with {@link
+   * Query#endBefore} or `undefined` if this is the last partition.
    */
   get endBefore(): unknown[] | undefined {
     if (this._endBefore && !this._memoizedEndBefore) {
@@ -85,10 +118,18 @@ export class QueryPartition<T = firestore.DocumentData>
   }
 
   /**
-   * Returns a query that only returns the documents for this partition.
+   * Returns a query that only encapsulates the documents for this partition.
    *
-   * @return a query partitioned by a {@link Query#startAt} and {@link
-   *     Query#endBefore} cursor.
+   * @example
+   * const query = firestore.collectionGroup('collectionId');
+   * for await (const partition of query.getPartitions(42)) {
+   *   const partitionedQuery = partition.toQuery();
+   *   const querySnapshot = await partitionedQuery.get();
+   *   console.log(`Partition contained ${querySnapshot.length} documents`);
+   * }
+   *
+   * @return {Query<T>} A query partitioned by a {@link Query#startAt} and
+   * {@link Query#endBefore} cursor.
    */
   toQuery(): Query<T> {
     // Since the api.Value to JavaScript type conversion can be lossy (unless

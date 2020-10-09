@@ -216,6 +216,19 @@ describe('CollectionGroup class', () => {
     await batch.commit();
   });
 
+  async function getPartitions<T>(
+    collectionGroup: CollectionGroup<T>,
+    desiredPartitionsCount: number
+  ): Promise<QueryPartition<T>[]> {
+    const partitions: QueryPartition<T>[] = [];
+    for await (const partition of collectionGroup.getPartitions(
+      desiredPartitionsCount
+    )) {
+      partitions.push(partition);
+    }
+    return partitions;
+  }
+
   async function verifyPartitions<T>(
     partitions: QueryPartition<T>[]
   ): Promise<QueryDocumentSnapshot<T>[]> {
@@ -243,29 +256,41 @@ describe('CollectionGroup class', () => {
   }
 
   it('partition query', async () => {
-    const partitions = await collectionGroup.getPartitions(
+    const partitions = await getPartitions(
+      collectionGroup,
       desiredPartitionCount
     );
     await verifyPartitions(partitions);
   });
 
-  it('async partition query', async () => {
-    const partitions: QueryPartition[] = [];
-
-    for await (const partition of collectionGroup.getPartitionsAsync(
+  it('partition query with manual cursors', async () => {
+    const partitions = await getPartitions(
+      collectionGroup,
       desiredPartitionCount
-    )) {
-      partitions.push(partition);
+    );
+
+    const documents: QueryDocumentSnapshot<DocumentData>[] = [];
+    for (const partition of partitions) {
+      // TODO(mrschmidt); Remove the need to add an `orderBy` here
+      let partitionedQuery = collectionGroup.orderBy(FieldPath.documentId());
+      if (partition.startAt) {
+        partitionedQuery = partitionedQuery.startAt(...partition.startAt);
+      }
+      if (partition.endBefore) {
+        partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
+      }
+      documents.push(...(await partitionedQuery.get()).docs);
     }
 
-    await verifyPartitions(partitions);
+    expect(documents.length).to.equal(documentCount);
   });
 
   it('partition query with converter', async () => {
     const collectionGroupWithConverter = collectionGroup.withConverter(
       postConverter
     );
-    const partitions = await collectionGroupWithConverter.getPartitions(
+    const partitions = await getPartitions(
+      collectionGroupWithConverter,
       desiredPartitionCount
     );
     const documents = await verifyPartitions(partitions);
@@ -280,7 +305,8 @@ describe('CollectionGroup class', () => {
 
     const collectionGroupId = randomColl.doc().id;
     const collectionGroup = firestore.collectionGroup(collectionGroupId);
-    const partitions = await collectionGroup.getPartitions(
+    const partitions = await getPartitions(
+      collectionGroup,
       desiredPartitionCount
     );
 
@@ -2641,6 +2667,16 @@ describe('Client initialization', () => {
           deferred.resolve();
         });
         return deferred.promise;
+      },
+    ],
+    [
+      'CollectionGroup.getPartitions()',
+      async randomColl => {
+        const partitions = randomColl.firestore
+          .collectionGroup('id')
+          .getPartitions(2);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _ of partitions);
       },
     ],
     [

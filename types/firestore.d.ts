@@ -1537,17 +1537,7 @@ declare namespace FirebaseFirestore {
    * collection or subcollection with a specific collection ID.
    */
   export class CollectionGroup<T = DocumentData> extends Query<T> {
-    /**
-     * Partitions a query by returning partition cursors that can be used to run
-     * the query in parallel. The returned cursors are split points that can be
-     * used as starting and end points for individual query invocations.
-     *
-     * @param desiredPartitionCount The desired maximum number of partition
-     * points. The number must be strictly positive. The actual number of
-     * partitions returned may be fewer.
-     * @return A Promise with the `QueryPartition`s returned as an array.
-     */
-    getPartitions(desiredPartitionCount: number): Promise<QueryPartition<T>[]>;
+    private constructor();
 
     /**
      * Partitions a query by returning partition cursors that can be used to run
@@ -1559,7 +1549,7 @@ declare namespace FirebaseFirestore {
      * partitions returned may be fewer.
      * @return An AsyncIterable of `QueryPartition`s.
      */
-    getPartitionsAsync(
+    getPartitions(
       desiredPartitionCount: number
     ): AsyncIterable<QueryPartition<T>>;
 
@@ -1593,12 +1583,12 @@ declare namespace FirebaseFirestore {
      *   }
      * };
      *
-     * const postSnap = await Firestore()
+     * const querySnapshot = await Firestore()
      *   .collectionGroup('posts')
      *   .withConverter(postConverter)
-     *   .doc().get();
-     * const post = postSnap.data();
-     * if (post !== undefined) {
+     *   .get();
+     * for (const doc of querySnapshot.docs) {
+     *   const post = doc.data();
      *   post.title; // string
      *   post.toString(); // Should be defined
      *   post.someNonExistentProperty; // TS error
@@ -1617,30 +1607,34 @@ declare namespace FirebaseFirestore {
    * that produced this partition.
    */
   export class QueryPartition<T = DocumentData> {
+    private constructor();
+
     /**
      * The cursor that defines the first result for this partition or
-     * `undefined` if this is the first partition.
+     * `undefined` if this is the first partition.  The cursor value must be
+     * destructured when passed to `startAt()` (for example with
+     * `query.startAt(...queryPartition.startAt)`).
      *
-     * @return cursor values that can be used with {@link Query#startAt} or
-     * `undefined` if this is the first partition. The returned array must be
-     * destructured when passed to `startAt`.
+     * @return Cursor values that can be used with {@link Query#startAt} or
+     * `undefined` if this is the first partition.
      */
     get startAt(): unknown[] | undefined;
 
     /**
      * The cursor that defines the first result after this partition or
-     * `undefined` if this is the last partition.
+     * `undefined` if this is the last partition.  The cursor value must be
+     * destructured when passed to `endBefore()` (for example with
+     * `query.endBefore(...queryPartition.endBefore)`).
      *
-     * @return cursor values that can be used with {@link Query#endBefore} or
-     * `undefined` if this is the last partition. The returned array must be
-     * destructured when passed to `endBefore`.
+     * @return Cursor values that can be used with {@link Query#endBefore} or
+     * `undefined` if this is the last partition.
      */
     get endBefore(): unknown[] | undefined;
 
     /**
      * Returns a query that only returns the documents for this partition.
      *
-     * @return a query partitioned by a {@link Query#startAt} and {@link
+     * @return A query partitioned by a {@link Query#startAt} and {@link
      * Query#endBefore} cursor.
      */
     toQuery(): Query<T>;
