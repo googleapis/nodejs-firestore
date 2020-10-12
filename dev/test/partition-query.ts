@@ -105,7 +105,7 @@ describe('Partition Query', () => {
   it('requests one less than desired partitions', () => {
     const desiredPartitionsCount = 2;
     const cursorValue = {
-      values: [{referenceValue: 'coll/doc'}],
+      values: [{referenceValue: 'projects/p1/databases/d1/documents/coll/doc'}],
     };
 
     const overrides: ApiOverride = {
@@ -124,8 +124,7 @@ describe('Partition Query', () => {
       const result = await getPartitions(query, desiredPartitionsCount);
       expect(result.length).to.equal(2);
       expect(result[0].startAt).to.be.undefined;
-      expect(result[0].startAt).to.deep.equal(cursorValue);
-      expect(result[1].endBefore).to.deep.equal(cursorValue);
+      expect(result[0].endBefore).to.deep.equal(result[1].startAt);
       expect(result[1].endBefore).to.be.undefined;
     });
   });
