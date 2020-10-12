@@ -53,7 +53,7 @@ import {GoogleError, Status} from 'google-gax';
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
  * updates(), and creates().
  *
- * @class
+ * @class WriteResult
  */
 export class WriteResult implements firestore.WriteResult {
   /**
@@ -120,7 +120,7 @@ type PendingWriteOp = () => api.IWrite;
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.
  *
- * @class
+ * @class WriteBatch
  */
 export class WriteBatch implements firestore.WriteBatch {
   private readonly _firestore: Firestore;

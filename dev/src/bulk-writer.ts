@@ -330,7 +330,7 @@ class BulkCommitBatch {
  * A Firestore BulkWriter than can be used to perform a large number of writes
  * in parallel. Writes to the same document will be executed sequentially.
  *
- * @class
+ * @class BulkWriter
  */
 export class BulkWriter {
   /**

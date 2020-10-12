@@ -30,7 +30,7 @@ import api = protos.google.firestore.v1;
  * #endBefore} can only be used in a query that matches the constraint of query
  * that produced this partition.
  *
- * @class
+ * @class QueryPartition
  */
 export class QueryPartition<T = firestore.DocumentData>
   implements firestore.QueryPartition<T> {

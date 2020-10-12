@@ -121,7 +121,7 @@ const comparisonOperators: {
  * [CollectionReference]{@link CollectionReference} to a
  * subcollection.
  *
- * @class
+ * @class DocumentReference
  */
 export class DocumentReference<T = firestore.DocumentData>
   implements Serializable, firestore.DocumentReference<T> {
@@ -2312,7 +2312,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
  * document references, and querying for documents (using the methods
  * inherited from [Query]{@link Query}).
  *
- * @class
+ * @class CollectionReference
  * @extends Query
  */
 export class CollectionReference<T = firestore.DocumentData>
