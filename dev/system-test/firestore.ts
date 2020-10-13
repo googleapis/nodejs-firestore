@@ -44,7 +44,11 @@ import {
   verifyInstance,
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
-import {BulkWriter, BulkWriterOperation} from '../src/bulk-writer';
+import {
+  BulkWriter,
+  BulkWriterError,
+  BulkWriterOperation,
+} from '../src/bulk-writer';
 
 use(chaiAsPromised);
 
@@ -2489,18 +2493,30 @@ describe('BulkWriter class', () => {
   it('can retry failed writes with a provided callback', async () => {
     let retryPerformed = false;
     let op: BulkWriterOperation | undefined = undefined;
-    writer.onError((error, operation) => {
-      op = operation;
+    writer.onWriteError(error => {
+      op = error.operation;
     });
 
     // Use an invalid document name that the backend will reject.
     const ref = randomCol.doc('__doc__');
 
-    writer.set(ref, {foo: 'bar'});
-    await writer.flush();
-    expect(op).to.not.be.undefined;
-    writer.retry(op!).catch(() => {
+    writer.set(ref, {foo: 'bar'}).catch(() => {
       retryPerformed = true;
+    });
+    await writer.close();
+    expect(op).to.not.be.undefined;
+    expect(retryPerformed).to.be.true;
+  });
+
+  it('can retry failed writes with the thrown error', async () => {
+    let retryPerformed = false;
+    // Use an invalid document name that the backend will reject.
+    const ref = randomCol.doc('__doc__');
+
+    writer.set(ref, {foo: 'bar'}).catch((error: BulkWriterError) => {
+      writer.retry(error.operation).catch(() => {
+        retryPerformed = true;
+      });
     });
     await writer.close();
     expect(retryPerformed).to.be.true;

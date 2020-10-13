@@ -28,6 +28,7 @@ import {
 } from '../src';
 import {setTimeoutHandler} from '../src/backoff';
 import {
+  BulkWriterError,
   BulkWriterOperation,
   DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND,
 } from '../src/bulk-writer';
@@ -375,6 +376,7 @@ describe('BulkWriter', () => {
     const doc = firestore.doc('collectionId/doc');
     bulkWriter.set(doc, {foo: 'bar'}).catch(err => {
       incrementOpCount();
+      expect(err instanceof BulkWriterError).to.be.true;
       expect(err.code).to.equal(Status.DEADLINE_EXCEEDED);
     });
 
@@ -482,6 +484,39 @@ describe('BulkWriter', () => {
     });
   });
 
+  it('runs the success handler', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([
+          createOp('doc', 'bar'),
+          setOp('doc', 'bar'),
+          updateOp('doc', 'bar'),
+          deleteOp('doc'),
+        ]),
+        response: mergeResponses([
+          successResponse(1),
+          successResponse(2),
+          successResponse(3),
+          successResponse(4),
+        ]),
+      },
+    ]);
+    const ops: string[] = [];
+    const writeResults: number[] = [];
+    bulkWriter.onWriteResult((result, operation) => {
+      writeResults.push(result.writeTime.seconds);
+      ops.push(operation.operation);
+    });
+    bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    bulkWriter.delete(firestore.doc('collectionId/doc'));
+    return bulkWriter.close().then(() => {
+      expect(ops).to.deep.equal(['create', 'set', 'update', 'delete']);
+      expect(writeResults).to.deep.equal([1, 2, 3, 4]);
+    });
+  });
+
   it('can retry failed operations with retry()', async () => {
     const bulkWriter = await instantiateInstance([
       {
@@ -514,22 +549,19 @@ describe('BulkWriter', () => {
       },
     ]);
     const ops: BulkWriterOperation[] = [];
-    bulkWriter.onError((error, operation) => {
-      ops.push(operation);
+    const writeResults: number[] = [];
+    bulkWriter.onWriteError(error => {
+      ops.push(error.operation);
+      bulkWriter.retry(error.operation).then(res => {
+        writeResults.push(res.writeTime.seconds);
+      });
     });
     bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
     bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
     bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
     bulkWriter.delete(firestore.doc('collectionId/doc'));
-    await bulkWriter.flush();
-    expect(ops.length).to.equal(4);
-    const writeResults: number[] = [];
-    for (const op of ops) {
-      bulkWriter.retry(op).then(res => {
-        writeResults.push(res.writeTime.seconds);
-      });
-    }
     return bulkWriter.close().then(() => {
+      expect(ops.length).to.equal(4);
       expect(writeResults).to.deep.equal([1, 2, 3, 4]);
     });
   });
@@ -541,10 +573,10 @@ describe('BulkWriter', () => {
         response: failedResponse(Status.INTERNAL),
       },
     ]);
-    let onErrorCalled = false;
+    let onWriteErrorCalled = false;
     let catchCalled = false;
-    bulkWriter.onError(() => {
-      onErrorCalled = true;
+    bulkWriter.onWriteError(() => {
+      onWriteErrorCalled = true;
     });
     bulkWriter
       .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
@@ -554,7 +586,7 @@ describe('BulkWriter', () => {
       });
     await bulkWriter.flush();
     expect(catchCalled).to.be.true;
-    expect(onErrorCalled).to.be.true;
+    expect(onWriteErrorCalled).to.be.true;
   });
 
   it('retried operations are enqueued after other operations', async () => {
@@ -572,8 +604,8 @@ describe('BulkWriter', () => {
       },
     ]);
     let op: BulkWriterOperation | undefined = undefined;
-    bulkWriter.onError((error, operation) => {
-      op = operation;
+    bulkWriter.onWriteError(error => {
+      op = error.operation;
     });
     bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
     bulkWriter.update(firestore.doc('collectionId/doc2'), {foo: 'bar'});
@@ -858,8 +890,8 @@ describe('BulkWriter', () => {
         foo: 'bar',
       })
       .catch(err => {
-        expect(err instanceof GoogleError && err.code === Status.ABORTED).to.be
-          .true;
+        expect(err instanceof BulkWriterError).to.be.true;
+        expect(err.code).to.equal(Status.ABORTED);
         incrementOpCount();
       });
     return bulkWriter.close().then(() => verifyOpCount(1));

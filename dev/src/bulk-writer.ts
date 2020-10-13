@@ -40,6 +40,9 @@ import {
   validateInteger,
   validateOptional,
 } from './validate';
+// TODO: How do I get rid of this?
+// eslint-disable-next-line no-undef
+import GrpcStatus = FirebaseFirestore.GrpcStatus;
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -89,8 +92,8 @@ enum BatchState {
  */
 interface PendingOp {
   writeBatchIndex: number;
-  key: string;
   deferred: Deferred<BatchWriteResult>;
+  operation: BulkWriterOperation;
 }
 
 /**
@@ -138,7 +141,12 @@ class BulkCommitBatch {
     data: T
   ): Promise<WriteResult> {
     this.writeBatch.create(documentRef, data);
-    return this.processOperation(documentRef);
+    const operation = new BulkWriterOperation(
+      documentRef,
+      'create',
+      this.writeBatch._lastOp
+    );
+    return this.processOperation(operation);
   }
 
   /**
@@ -150,7 +158,12 @@ class BulkCommitBatch {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.writeBatch.delete(documentRef, precondition);
-    return this.processOperation(documentRef);
+    const operation = new BulkWriterOperation(
+      documentRef,
+      'delete',
+      this.writeBatch._lastOp
+    );
+    return this.processOperation(operation);
   }
 
   set<T>(
@@ -177,7 +190,12 @@ class BulkCommitBatch {
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this.writeBatch.set(documentRef, data, options);
-    return this.processOperation(documentRef);
+    const operation = new BulkWriterOperation(
+      documentRef,
+      'set',
+      this.writeBatch._lastOp
+    );
+    return this.processOperation(operation);
   }
 
   /**
@@ -192,7 +210,12 @@ class BulkCommitBatch {
     >
   ): Promise<WriteResult> {
     this.writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
-    return this.processOperation(documentRef);
+    const operation = new BulkWriterOperation(
+      documentRef,
+      'update',
+      this.writeBatch._lastOp
+    );
+    return this.processOperation(operation);
   }
 
   /**
@@ -201,7 +224,7 @@ class BulkCommitBatch {
    */
   addOperation(operation: BulkWriterOperation): Promise<WriteResult> {
     this.writeBatch._addOperation(operation.documentRef, operation._data);
-    return this.processOperation(operation.documentRef);
+    return this.processOperation(operation);
   }
 
   /**
@@ -209,7 +232,7 @@ class BulkCommitBatch {
    * return the result.
    */
   private processOperation<T>(
-    documentRef: firestore.DocumentReference<T>
+    operation: BulkWriterOperation
   ): Promise<WriteResult> {
     assert(
       this.state === BatchState.OPEN,
@@ -218,8 +241,8 @@ class BulkCommitBatch {
     const deferred = new Deferred<BatchWriteResult>();
     this.pendingOps.push({
       writeBatchIndex: this.opCount,
-      key: documentRef.path,
       deferred: deferred,
+      operation,
     });
 
     if (this.opCount === this.maxBatchSize) {
@@ -260,8 +283,11 @@ class BulkCommitBatch {
         results = await this.writeBatch.bulkCommit();
       } catch (err) {
         // Map the failure to each individual write's result.
-        results = this.pendingOps.map(op => {
-          return {key: op.key, writeTime: null, status: wrapError(err, stack)};
+        results = this.pendingOps.map(() => {
+          return {
+            writeTime: null,
+            status: wrapError(err, stack),
+          };
         });
       }
       this.processResults(results, /* allowRetry= */ true);
@@ -303,15 +329,20 @@ class BulkCommitBatch {
       if (result.status.code === Status.OK) {
         op.deferred.resolve(result);
       } else if (!allowRetry || !this.shouldRetry(result.status.code)) {
-        op.deferred.reject(result.status);
+        const error = new BulkWriterError(
+          op.operation,
+          (result.status.code as unknown) as GrpcStatus,
+          result.status.message
+        );
+        op.deferred.reject(error);
       } else {
         // Retry the operation if it has not been processed.
         // Store the current index of pendingOps to preserve the mapping of
         // this operation's index in the underlying WriteBatch.
         newPendingOps.push({
           writeBatchIndex: i,
-          key: op.key,
           deferred: op.deferred,
+          operation: op.operation,
         });
       }
     }
@@ -349,11 +380,12 @@ class BulkCommitBatch {
 
 /**
  * A representation of a BulkWriter operation that is available in the
- * `onError()` callback function. Used to retry a failing operation.
+ * `onWriteError()` callback function. Used to retry a failing operation.
  *
- * @class
+ * @class BulkWriterOperation
  */
 export class BulkWriterOperation {
+  /** @hideconstructor */
   constructor(
     readonly documentRef: firestore.DocumentReference,
     readonly operation: 'create' | 'set' | 'update' | 'delete',
@@ -362,10 +394,27 @@ export class BulkWriterOperation {
 }
 
 /**
+ * The error thrown when a BulkWriter operation fails. Contains an operation
+ * object that can be used to retry the operation.
+ *
+ * @class BulkWriterError
+ */
+export class BulkWriterError extends Error {
+  /** @hideconstructor */
+  constructor(
+    readonly operation: BulkWriterOperation,
+    readonly code: GrpcStatus,
+    readonly message: string
+  ) {
+    super(message);
+  }
+}
+
+/**
  * A Firestore BulkWriter than can be used to perform a large number of writes
  * in parallel. Writes to the same document will be executed sequentially.
  *
- * @class
+ * @class BulkWriter
  */
 export class BulkWriter {
   /**
@@ -379,34 +428,52 @@ export class BulkWriter {
   private batchQueue: BulkCommitBatch[] = [];
 
   /**
+   * Whether this BulkWriter instance has started to close. Afterwards, no
+   * new operations can be enqueued, except for retry operations scheduled by
+   * the error handler.
+   */
+  private closeCalled = false;
+
+  /**
    * Whether this BulkWriter instance is closed. Once closed, it cannot be
    * opened again.
    */
-  private closed = false;
+  private isClosed = false;
 
   /**
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
    */
-  private rateLimiter: RateLimiter;
+  private readonly rateLimiter: RateLimiter;
 
   /**
    * A deferred promise that is resolved after the BulkWriter has been closed
-   * and all onError callbacks have been run.
+   * and all onWriteError callbacks have been run.
    */
   private closedDeferred = new Deferred<void>();
 
   /**
    * The user-provided callback to be run every time a BulkWriter operation
+   * successfully completes.
+   */
+  private successFn: (
+    result: WriteResult,
+    operation: BulkWriterOperation
+  ) => void;
+
+  /**
+   * The user-provided callback to be run every time a BulkWriter operation
    * fails.
    */
-  private errorFn: (error: Error, operation: BulkWriterOperation) => void;
+  private errorFn: (error: BulkWriterError) => void;
 
+  /** @hideconstructor */
   constructor(
     private readonly firestore: Firestore,
     options?: firestore.BulkWriterOptions
   ) {
     this.firestore._incrementBulkWritersCount();
     this.errorFn = () => {};
+    this.successFn = () => {};
     validateBulkWriterOptions(options);
 
     if (options?.throttling === false) {
@@ -461,7 +528,8 @@ export class BulkWriter {
    * created.
    * @param {T} data The object to serialize as the document.
    * @returns {Promise<WriteResult>} A promise that resolves with the result of
-   * the write. Throws an error if the write fails.
+   * the write.
+   * @throws {BulkWriterError} if the write fails.
    *
    * @example
    * let bulkWriter = firestore.bulkWriter();
@@ -485,14 +553,14 @@ export class BulkWriter {
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.create(documentRef, data);
     const pendingOp = bulkCommitBatch.getLastOp();
-    resultPromise.catch(err => {
-      const operation = new BulkWriterOperation(
-        documentRef,
-        'create',
-        pendingOp
-      );
-      this.errorFn(err, operation);
-    });
+    const operation = new BulkWriterOperation(documentRef, 'create', pendingOp);
+    resultPromise
+      .then(res => {
+        this.successFn(res, operation);
+      })
+      .catch(err => {
+        this.errorFn(err);
+      });
     this.sendReadyBatches();
     return resultPromise;
   }
@@ -508,8 +576,8 @@ export class BulkWriter {
    * document was last updated at lastUpdateTime. Fails the batch if the
    * document doesn't exist or was last updatedra at a different time.
    * @returns {Promise<WriteResult>} A promise that resolves with a sentinel
-   * Timestamp indicating that the delete was successful. Throws an error if
-   * the write fails.
+   * Timestamp indicating that the delete was successful.
+   * @throws {BulkWriterError} if the delete fails.
    *
    * @example
    * let bulkWriter = firestore.bulkWriter();
@@ -533,14 +601,14 @@ export class BulkWriter {
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.delete(documentRef, precondition);
     const pendingOp = bulkCommitBatch.getLastOp();
-    resultPromise.catch(err => {
-      const operation = new BulkWriterOperation(
-        documentRef,
-        'delete',
-        pendingOp
-      );
-      this.errorFn(err, operation);
-    });
+    const operation = new BulkWriterOperation(documentRef, 'delete', pendingOp);
+    resultPromise
+      .then(res => {
+        this.successFn(res, operation);
+      })
+      .catch(err => {
+        this.errorFn(err);
+      });
     this.sendReadyBatches();
     return resultPromise;
   }
@@ -571,7 +639,8 @@ export class BulkWriter {
    * only replaces the specified field paths. Any field path that is not
    * specified is ignored and remains untouched.
    * @returns {Promise<WriteResult>} A promise that resolves with the result of
-   * the write. Throws an error if the write fails.
+   * the write.
+   * @throws {BulkWriterError} if the write fails.
    *
    *
    * @example
@@ -597,10 +666,14 @@ export class BulkWriter {
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.set(documentRef, data, options);
     const pendingOp = bulkCommitBatch.getLastOp();
-    resultPromise.catch(err => {
-      const operation = new BulkWriterOperation(documentRef, 'set', pendingOp);
-      this.errorFn(err, operation);
-    });
+    const operation = new BulkWriterOperation(documentRef, 'set', pendingOp);
+    resultPromise
+      .then(res => {
+        this.successFn(res, operation);
+      })
+      .catch(err => {
+        this.errorFn(err);
+      });
     this.sendReadyBatches();
     return resultPromise;
   }
@@ -629,8 +702,8 @@ export class BulkWriter {
    * alternating list of field paths and values to update or a Precondition to
    * restrict this update
    * @returns {Promise<WriteResult>} A promise that resolves with the result of
-   * the write. Throws an error if the write fails.
-   *
+   * the write.
+   * @throws {BulkWriterError} if the write fails.
    *
    * @example
    * let bulkWriter = firestore.bulkWriter();
@@ -661,16 +734,29 @@ export class BulkWriter {
       ...preconditionOrValues
     );
     const pendingOp = bulkCommitBatch.getLastOp();
-    resultPromise.catch(err => {
-      const operation = new BulkWriterOperation(
-        documentRef,
-        'update',
-        pendingOp
-      );
-      this.errorFn(err, operation);
-    });
+    const operation = new BulkWriterOperation(documentRef, 'update', pendingOp);
+    resultPromise
+      .then(res => {
+        this.successFn(res, operation);
+      })
+      .catch(err => {
+        this.errorFn(err);
+      });
     this.sendReadyBatches();
     return resultPromise;
+  }
+
+  /**
+   * Attaches a listener that is run every time a BulkWriter operation
+   * successfully completes.
+   *
+   * @param callback A callback to be called every time a BulkWriter operation
+   * successfully completes.
+   */
+  onWriteResult(
+    callback: (result: WriteResult, operation: BulkWriterOperation) => void
+  ): void {
+    this.successFn = callback;
   }
 
   /**
@@ -679,16 +765,14 @@ export class BulkWriter {
    * @param callback A callback to be called every time a BulkWriter operation
    * fails.
    */
-  onError(
-    callback: (error: Error, operation: BulkWriterOperation) => void
-  ): void {
+  onWriteError(callback: (error: BulkWriterError) => void): void {
     this.errorFn = callback;
   }
 
   /**
    * Retry a BulkWriter operation that has failed.
    *
-   * The BulkWriterOperation object is a parameter on the `onError()`
+   * The BulkWriterOperation object is a parameter on the `onWriteError()`
    * callback function that is called whenever a write fails.
    *
    * @param operation The operation to retry.
@@ -696,7 +780,7 @@ export class BulkWriter {
    * an error if the retry fails.
    */
   retry(operation: BulkWriterOperation): Promise<WriteResult> {
-    this.verifyNotClosed();
+    this.verifyNotClosed(/* checkIsClosed= */ true);
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.addOperation(operation);
     this.sendReadyBatches();
@@ -730,6 +814,10 @@ export class BulkWriter {
    */
   async flush(): Promise<void> {
     this.verifyNotClosed();
+    return this._flush();
+  }
+
+  private async _flush(): Promise<void> {
     const trackedBatches = this.batchQueue;
     const writePromises = trackedBatches.map(batch => batch.awaitBulkCommit());
     this.sendReadyBatches();
@@ -762,17 +850,29 @@ export class BulkWriter {
     this.verifyNotClosed();
     this.firestore._decrementBulkWritersCount();
     const flushPromise = this.flush();
-    this.closed = true;
+    this.closeCalled = true;
     await flushPromise;
 
     // Wait for pending retry operations to run.
     if (this.batchQueue.length > 0) {
-      return this.closedDeferred.promise;
+      await this._flush();
+      await this.closedDeferred.promise;
     }
+    this.isClosed = true;
   }
 
-  private verifyNotClosed(): void {
-    if (this.closed) {
+  /**
+   * Throws an error if the BulkWriter instance has been closed.
+   *
+   * @param checkIsClosed Throw an error only if the BulkWriter is fully
+   * closed.
+   */
+  private verifyNotClosed(checkIsClosed = false): void {
+    if (!checkIsClosed && this.closeCalled) {
+      throw new Error('BulkWriter has already been closed.');
+    }
+
+    if (checkIsClosed && this.isClosed) {
       throw new Error('BulkWriter has already been closed.');
     }
   }
@@ -868,7 +968,7 @@ export class BulkWriter {
 
       // Resolve the deferred promise if all operations on this BulkWriter have
       // completed.
-      if (this.batchQueue.length === 0 && this.closed) {
+      if (this.batchQueue.length === 0 && this.closeCalled) {
         this.closedDeferred.resolve();
       }
     });

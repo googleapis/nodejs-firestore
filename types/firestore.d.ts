@@ -583,19 +583,28 @@ declare namespace FirebaseFirestore {
     ): Promise<WriteResult>;
 
     /**
+     * Attaches a listener that is run every time a BulkWriter operation
+     * successfully completes.
+     *
+     * @param callback A callback to be called every time a BulkWriter operation
+     * successfully completes.
+     */
+    onWriteResult(
+      callback: (result: WriteResult, operation: BulkWriterOperation) => void
+    ): void;
+
+    /**
      * Attaches a listener that is run every time a BulkWriter operation fails.
      *
-     * @param errorFn A callback to be called every time a BulkWriter operation
+     * @param callback A callback to be called every time a BulkWriter operation
      * fails.
      */
-    onError(
-      errorFn: (error: Error, operation: BulkWriterOperation) => void
-    ): void;
+    onWriteError(callback: (error: BulkWriterError) => void): void;
 
     /**
      * Retry a BulkWriter operation that has failed.
      *
-     * The BulkWriterOperation object is a parameter on the `onError()`
+     * The BulkWriterOperation object is a parameter on the `onWriteError()`
      * callback function that is called whenever a write fails. Retries should
      * be made after the `flush()` promise resolves. `retry()` cannot be called
      * after the `close()` is called.
@@ -664,11 +673,29 @@ declare namespace FirebaseFirestore {
   }
 
   /**
+   * The error thrown when a BulkWriter operation fails. Contains an operation
+   * object that can be used to retry the operation.
+   */
+  export class BulkWriterError extends Error {
+    /** The operation that failed. Can be used to retry the operation. */
+    readonly operation: BulkWriterOperation;
+
+    /** The status code of the error. */
+    readonly code: GrpcStatus;
+
+    /** The error message of the error. */
+    readonly message: string;
+  }
+
+  /**
    * A representation of a BulkWriter operation that is available in the
-   * `onError()` callback function. Used to retry a failing operation.
+   * `onWriteError()` callback function. Used to retry a failing operation.
    */
   export class BulkWriterOperation {
+    /** The document reference the operation was performed on. */
     readonly documentRef: DocumentReference<any>;
+
+    /** The type of operation performed. */
     readonly operation: 'create' | 'set' | 'update' | 'delete';
   }
 
