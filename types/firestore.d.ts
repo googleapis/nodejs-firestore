@@ -590,7 +590,7 @@ declare namespace FirebaseFirestore {
      * successfully completes.
      */
     onWriteResult(
-      callback: (result: WriteResult, operation: BulkWriterOperation) => void
+      callback: (documentRef: DocumentReference, result: WriteResult) => void
     ): void;
 
     /**
@@ -599,21 +599,7 @@ declare namespace FirebaseFirestore {
      * @param callback A callback to be called every time a BulkWriter operation
      * fails.
      */
-    onWriteError(callback: (error: BulkWriterError) => void): void;
-
-    /**
-     * Retry a BulkWriter operation that has failed.
-     *
-     * The BulkWriterOperation object is a parameter on the `onWriteError()`
-     * callback function that is called whenever a write fails. Retries should
-     * be made after the `flush()` promise resolves. `retry()` cannot be called
-     * after the `close()` is called.
-     *
-     * @param operation The operation to retry.
-     * @return A promise that resolves with the result of the operation. Throws
-     * an error if the operation fails.
-     */
-    retry(operation: BulkWriterOperation): Promise<WriteResult>;
+    onWriteError(callback: (error: BulkWriterError) => boolean): void;
 
     /**
      * Commits all writes that have been enqueued up to this point in parallel.
@@ -635,7 +621,9 @@ declare namespace FirebaseFirestore {
     /**
      * Commits all enqueued writes and marks the BulkWriter instance as closed.
      *
-     * After calling `close()`, calling any method wil throw an error.
+     * After calling `close()`, calling any method wil throw an error. Any
+     * retries scheduled as part of an `onWriteError()` handler will be run
+     * before the `close()` promise resolves.
      *
      * Returns a Promise that resolves when all writes have been committed. The
      * Promise will never be rejected. Calling this method will send all
@@ -673,30 +661,23 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * The error thrown when a BulkWriter operation fails. Contains an operation
-   * object that can be used to retry the operation.
+   * The error thrown when a BulkWriter operation fails.
    */
   export class BulkWriterError extends Error {
-    /** The operation that failed. Can be used to retry the operation. */
-    readonly operation: BulkWriterOperation;
-
     /** The status code of the error. */
     readonly code: GrpcStatus;
 
     /** The error message of the error. */
     readonly message: string;
-  }
 
-  /**
-   * A representation of a BulkWriter operation that is available in the
-   * `onWriteError()` callback function. Used to retry a failing operation.
-   */
-  export class BulkWriterOperation {
     /** The document reference the operation was performed on. */
     readonly documentRef: DocumentReference<any>;
 
     /** The type of operation performed. */
-    readonly operation: 'create' | 'set' | 'update' | 'delete';
+    readonly operationType: 'create' | 'set' | 'update' | 'delete';
+
+    /** How many times this operation has been retried. */
+    readonly retryCount: number;
   }
 
   /**

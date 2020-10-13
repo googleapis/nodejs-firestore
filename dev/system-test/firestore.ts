@@ -44,11 +44,8 @@ import {
   verifyInstance,
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
-import {
-  BulkWriter,
-  BulkWriterError,
-  BulkWriterOperation,
-} from '../src/bulk-writer';
+import {BulkWriter} from '../src/bulk-writer';
+import {Status} from 'google-gax';
 
 use(chaiAsPromised);
 
@@ -2490,36 +2487,25 @@ describe('BulkWriter class', () => {
     return firestore.terminate();
   });
 
-  it('can retry failed writes with a provided callback', async () => {
-    let retryPerformed = false;
-    let op: BulkWriterOperation | undefined = undefined;
+  it.only('can retry failed writes with a provided callback', async () => {
+    let retryCount = 0;
+    let code: Status = 0;
     writer.onWriteError(error => {
-      op = error.operation;
+      retryCount = error.retryCount;
+      // TODO: this test passes if retryCount < 6;
+      return error.retryCount < 30;
     });
 
     // Use an invalid document name that the backend will reject.
     const ref = randomCol.doc('__doc__');
-
-    writer.set(ref, {foo: 'bar'}).catch(() => {
-      retryPerformed = true;
+    writer.create(ref, {foo: 'bar'}).catch(err => {
+      console.log('error running');
+      code = err.code;
     });
     await writer.close();
-    expect(op).to.not.be.undefined;
-    expect(retryPerformed).to.be.true;
-  });
-
-  it('can retry failed writes with the thrown error', async () => {
-    let retryPerformed = false;
-    // Use an invalid document name that the backend will reject.
-    const ref = randomCol.doc('__doc__');
-
-    writer.set(ref, {foo: 'bar'}).catch((error: BulkWriterError) => {
-      writer.retry(error.operation).catch(() => {
-        retryPerformed = true;
-      });
-    });
-    await writer.close();
-    expect(retryPerformed).to.be.true;
+    expect(retryCount).to.equal(30);
+    console.log('validating');
+    expect(code).to.equal(Status.INVALID_ARGUMENT);
   });
 });
 
