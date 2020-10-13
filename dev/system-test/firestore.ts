@@ -2508,6 +2508,8 @@ describe('BulkWriter class', () => {
     expect(retryPerformed).to.be.true;
   });
 
+  // TODO: this test should fail since the retry is not called as part of the
+  // error handler.
   it('can retry failed writes with the thrown error', async () => {
     let retryPerformed = false;
     // Use an invalid document name that the backend will reject.

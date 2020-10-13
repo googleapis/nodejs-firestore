@@ -772,12 +772,14 @@ export class BulkWriter {
   /**
    * Retry a BulkWriter operation that has failed.
    *
-   * The BulkWriterOperation object is a parameter on the `onWriteError()`
-   * callback function that is called whenever a write fails.
+   * The BulkWriterOperation object is a property of the `BulkWriterError`
+   * object that is thrown whenever a write fails. `retry()` cannot be called
+   * after `close()` is called.
    *
    * @param operation The operation to retry.
    * @return A promise that resolves with the result of the operation. Throws
    * an error if the retry fails.
+   * @throws {BulkWriterError} if the operation fails.
    */
   retry(operation: BulkWriterOperation): Promise<WriteResult> {
     this.verifyNotClosed(/* checkIsClosed= */ true);
@@ -827,7 +829,9 @@ export class BulkWriter {
   /**
    * Commits all enqueued writes and marks the BulkWriter instance as closed.
    *
-   * After calling `close()`, calling any method wil throw an error.
+   * After calling `close()`, calling any method wil throw an error. Any
+   * retries scheduled as part of an `onWriteError()` handler will be run
+   * before the `close()` promise resolves.
    *
    * Returns a Promise that resolves when there are no more pending writes. The
    * Promise will never be rejected. Calling this method will send all requests.
