@@ -40,7 +40,7 @@ import {
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference, Query, QueryOptions} from './reference';
+import {CollectionReference} from './reference';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
@@ -75,6 +75,7 @@ import {interfaces} from './v1/firestore_client_config.json';
 const serviceConfig = interfaces['google.firestore.v1.Firestore'];
 
 import api = google.firestore.v1;
+import {CollectionGroup} from './collection-group';
 
 export {
   CollectionReference,
@@ -91,6 +92,8 @@ export {Timestamp} from './timestamp';
 export {DocumentChange} from './document-change';
 export {FieldPath} from './path';
 export {GeoPoint} from './geo-point';
+export {CollectionGroup};
+export {QueryPartition} from './query-partition';
 export {setLogFunction} from './logger';
 export {Status as GrpcStatus} from 'google-gax';
 
@@ -632,7 +635,7 @@ export class Firestore implements firestore.Firestore {
    * @param {string} collectionId Identifies the collections to query over.
    * Every collection or subcollection with this ID as the last segment of its
    * path will be included. Cannot contain a slash.
-   * @returns {Query} The created Query.
+   * @returns {CollectionGroup} The created CollectionGroup.
    *
    * @example
    * let docA = firestore.doc('mygroup/docA').set({foo: 'bar'});
@@ -646,14 +649,14 @@ export class Firestore implements firestore.Firestore {
    *    });
    * });
    */
-  collectionGroup(collectionId: string): Query {
+  collectionGroup(collectionId: string): CollectionGroup {
     if (collectionId.indexOf('/') !== -1) {
       throw new Error(
         `Invalid collectionId '${collectionId}'. Collection IDs must not contain '/'.`
       );
     }
 
-    return new Query(this, QueryOptions.forCollectionGroupQuery(collectionId));
+    return new CollectionGroup(this, collectionId, /* converter= */ undefined);
   }
 
   /**

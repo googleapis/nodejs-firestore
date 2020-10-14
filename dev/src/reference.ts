@@ -121,7 +121,7 @@ const comparisonOperators: {
  * [CollectionReference]{@link CollectionReference} to a
  * subcollection.
  *
- * @class
+ * @class DocumentReference
  */
 export class DocumentReference<T = firestore.DocumentData>
   implements Serializable, firestore.DocumentReference<T> {
@@ -601,7 +601,7 @@ export class DocumentReference<T = firestore.DocumentData>
  * @private
  * @class
  */
-class FieldOrder {
+export class FieldOrder {
   /**
    * @param field The name of a document field (member) on which to order query
    * results.
@@ -954,7 +954,7 @@ export class QuerySnapshot<T = firestore.DocumentData>
 /** Internal representation of a query cursor before serialization. */
 interface QueryCursor {
   before: boolean;
-  values: unknown[];
+  values: api.IValue[];
 }
 
 /*!
@@ -1107,7 +1107,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * @param _queryOptions Options that define the query.
    */
   constructor(
-    private readonly _firestore: Firestore,
+    readonly _firestore: Firestore,
     protected readonly _queryOptions: QueryOptions<T>
   ) {
     this._serializer = new Serializer(_firestore);
@@ -1553,7 +1553,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       }
 
       validateQueryValue(i, fieldValue, this._allowUndefined);
-      options.values!.push(fieldValue);
+      options.values!.push(this._serializer.encodeValue(fieldValue)!);
     }
 
     return options;
@@ -1922,10 +1922,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    */
   private toCursor(cursor: QueryCursor | undefined): api.ICursor | undefined {
     if (cursor) {
-      const values = cursor.values.map(
-        val => this._serializer.encodeValue(val) as api.IValue
-      );
-      return cursor.before ? {before: true, values} : {values};
+      return cursor.before
+        ? {before: true, values: cursor.values}
+        : {values: cursor.values};
     }
 
     return undefined;
@@ -1997,6 +1996,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
   /**
    * Converts current Query to an IBundledQuery.
+   *
+   * @private
    */
   _toBundledQuery(): protos.firestore.IBundledQuery {
     const projectId = this.firestore.projectId;
@@ -2311,7 +2312,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
  * document references, and querying for documents (using the methods
  * inherited from [Query]{@link Query}).
  *
- * @class
+ * @class CollectionReference
  * @extends Query
  */
 export class CollectionReference<T = firestore.DocumentData>
