@@ -1116,23 +1116,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   }
 
   /**
-   * Detects the argument type for Firestore cursors.
-   *
-   * @private
-   * @param fieldValuesOrDocumentSnapshot A snapshot of the document or a set
-   * of field values.
-   * @returns 'true' if the input is a single DocumentSnapshot..
-   */
-  static _isDocumentSnapshot(
-    fieldValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
-  ): boolean {
-    return (
-      fieldValuesOrDocumentSnapshot.length === 1 &&
-      fieldValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot
-    );
-  }
-
-  /**
    * Extracts field values from the DocumentSnapshot based on the provided
    * field order.
    *
@@ -1471,7 +1454,15 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   private createImplicitOrderBy(
     cursorValuesOrDocumentSnapshot: Array<DocumentSnapshot<unknown> | unknown>
   ): FieldOrder[] {
-    if (!Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
+    // Add an implicit orderBy if the only cursor value is a DocumentSnapshot
+    // or a DocumentReference.
+    if (
+      cursorValuesOrDocumentSnapshot.length !== 1 ||
+      !(
+        cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot ||
+        cursorValuesOrDocumentSnapshot[0] instanceof DocumentReference
+      )
+    ) {
       return this._queryOptions.fieldOrders;
     }
 
@@ -1527,7 +1518,10 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   ): QueryCursor {
     let fieldValues;
 
-    if (Query._isDocumentSnapshot(cursorValuesOrDocumentSnapshot)) {
+    if (
+      cursorValuesOrDocumentSnapshot.length === 1 &&
+      cursorValuesOrDocumentSnapshot[0] instanceof DocumentSnapshot
+    ) {
       fieldValues = Query._extractFieldValues(
         cursorValuesOrDocumentSnapshot[0] as DocumentSnapshot,
         fieldOrders
