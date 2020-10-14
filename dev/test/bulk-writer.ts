@@ -365,6 +365,10 @@ describe('BulkWriter', () => {
   });
 
   it('surfaces errors', async () => {
+    process.on('unhandledRejection', (reason, p) => {
+      console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+      // application specific logging, throwing an error, or other logic here
+    });
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
@@ -440,7 +444,6 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.update(doc, {})).to.throw(expected);
     expect(bulkWriter.flush()).to.eventually.be.rejectedWith(expected);
     expect(bulkWriter.close()).to.be.eventually.rejectedWith(expected);
-    expect(() => bulkWriter.retry({} as BulkWriterError)).to.throw(expected);
   });
 
   it('can send writes to the same documents in the same batch', async () => {
@@ -498,7 +501,6 @@ describe('BulkWriter', () => {
         ]),
       },
     ]);
-    const ops: string[] = [];
     const writeResults: number[] = [];
     bulkWriter.onWriteResult((documentRef, result) => {
       writeResults.push(result.writeTime.seconds);
@@ -546,10 +548,11 @@ describe('BulkWriter', () => {
     const ops: string[] = [];
     const writeResults: number[] = [];
     bulkWriter.onWriteError(error => {
-      ops.push(error.operation);
-      bulkWriter.retry(error).then(res => {
-        writeResults.push(res.writeTime.seconds);
-      });
+      ops.push(error.operationType);
+      return true;
+    });
+    bulkWriter.onWriteResult((documentRef, result) => {
+      writeResults.push(result.writeTime.seconds);
     });
     bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
     bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
@@ -572,6 +575,7 @@ describe('BulkWriter', () => {
     let catchCalled = false;
     bulkWriter.onWriteError(() => {
       onWriteErrorCalled = true;
+      return false;
     });
     bulkWriter
       .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
@@ -584,36 +588,41 @@ describe('BulkWriter', () => {
     expect(onWriteErrorCalled).to.be.true;
   });
 
-  it('retried operations are enqueued after other operations', async () => {
+  it.only('retries multiple times', async () => {
     const bulkWriter = await instantiateInstance([
       {
-        request: createRequest([setOp('doc1', 'bar'), updateOp('doc2', 'bar')]),
-        response: mergeResponses([
-          failedResponse(Status.INTERNAL),
-          successResponse(1),
-        ]),
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
       },
       {
-        request: createRequest([deleteOp('doc3'), setOp('doc1', 'bar')]),
-        response: mergeResponses([successResponse(2), successResponse(3)]),
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
+      },
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
+      },
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: successResponse(1),
       },
     ]);
-    let error: BulkWriterError | undefined = undefined;
-    bulkWriter.onWriteError(err => {
-      error = err;
+    let writeResult = 0;
+    bulkWriter.onWriteError(() => {
+      return true;
     });
-    bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
-    bulkWriter.update(firestore.doc('collectionId/doc2'), {foo: 'bar'});
-    await bulkWriter.flush();
-    bulkWriter.delete(firestore.doc('collectionId/doc3'));
-    expect(error).to.not.be.undefined;
-    let writeResult: WriteResult;
-    bulkWriter.retry(error!).then(res => {
-      writeResult = res;
-    });
-    return bulkWriter.close().then(() => {
-      expect(writeResult.writeTime.isEqual(new Timestamp(3, 0))).to.be.true;
-    });
+    const setCall = bulkWriter
+      .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
+      .then(res => {
+        writeResult = res.writeTime.seconds;
+      })
+      .catch(err => {
+        throw new Error('oop');
+      });
+    await bulkWriter.close();
+    // Why do I need to wait for setCall() for the test to pass?
+    await setCall;
+    expect(writeResult).to.equal(1);
   });
 
   it('splits into multiple batches after exceeding maximum batch size', async () => {

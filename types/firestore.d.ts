@@ -599,20 +599,7 @@ declare namespace FirebaseFirestore {
      * @param callback A callback to be called every time a BulkWriter operation
      * fails.
      */
-    onWriteError(callback: (error: BulkWriterError) => void): void;
-
-    /**
-     * Retry a BulkWriter operation that has failed.
-     *
-     * The BulkWriterOperation object is a property of the `BulkWriterError`
-     * object that is thrown whenever a write fails. `retry()` cannot be called
-     * after `close()` is called.
-     *
-     * @param operation The operation to retry.
-     * @return A promise that resolves with the result of the operation. Throws
-     * an error if the operation fails.
-     */
-    retry(operation: BulkWriterError): Promise<WriteResult>;
+    onWriteError(callback: (error: BulkWriterError) => boolean): void;
 
     /**
      * Commits all writes that have been enqueued up to this point in parallel.
@@ -687,7 +674,10 @@ declare namespace FirebaseFirestore {
     readonly documentRef: DocumentReference<any>;
 
     /** The type of operation performed. */
-    readonly operation: 'create' | 'set' | 'update' | 'delete';
+    readonly operationType: 'create' | 'set' | 'update' | 'delete';
+
+    /** How many times this operation has been retried. */
+    readonly retryCount: number;
   }
 
   /**

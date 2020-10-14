@@ -2486,22 +2486,19 @@ describe('BulkWriter class', () => {
     return firestore.terminate();
   });
 
-  it('can retry failed writes with a provided callback', async () => {
-    let retryPerformed = false;
-    let op: BulkWriterOperation | undefined = undefined;
+  it.only('can retry failed writes with a provided callback', async () => {
+    let retryCount = 0;
     writer.onWriteError(error => {
-      op = error.operation;
+      retryCount = error.retryCount;
+      return error.retryCount < 5;
     });
 
     // Use an invalid document name that the backend will reject.
     const ref = randomCol.doc('__doc__');
 
-    writer.set(ref, {foo: 'bar'}).catch(() => {
-      retryPerformed = true;
-    });
+    writer.set(ref, {foo: 'bar'}).catch();
     await writer.close();
-    expect(op).to.not.be.undefined;
-    expect(retryPerformed).to.be.true;
+    expect(retryCount).to.equal(5);
   });
 
   // TODO: this test should fail since the retry is not called as part of the
@@ -2511,12 +2508,12 @@ describe('BulkWriter class', () => {
     // Use an invalid document name that the backend will reject.
     const ref = randomCol.doc('__doc__');
 
-    writer.set(ref, {foo: 'bar'}).catch((error: BulkWriterError) => {
-      writer.retry(error).catch(() => {
-        retryPerformed = true;
-      });
-    });
-    await writer.close();
+    // writer.set(ref, {foo: 'bar'}).catch((error: BulkWriterError) => {
+    //   writer.retry(error).catch(() => {
+    //     retryPerformed = true;
+    //   });
+    // });
+    // await writer.close();
     expect(retryPerformed).to.be.true;
   });
 });
