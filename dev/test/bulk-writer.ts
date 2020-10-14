@@ -29,7 +29,6 @@ import {
 import {setTimeoutHandler} from '../src/backoff';
 import {
   BulkWriterError,
-  BulkWriterOperation,
   DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND,
 } from '../src/bulk-writer';
 import {
@@ -441,9 +440,7 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.update(doc, {})).to.throw(expected);
     expect(bulkWriter.flush()).to.eventually.be.rejectedWith(expected);
     expect(bulkWriter.close()).to.be.eventually.rejectedWith(expected);
-    expect(() => bulkWriter.retry({} as BulkWriterOperation)).to.throw(
-      expected
-    );
+    expect(() => bulkWriter.retry({} as BulkWriterError)).to.throw(expected);
   });
 
   it('can send writes to the same documents in the same batch', async () => {
@@ -503,16 +500,14 @@ describe('BulkWriter', () => {
     ]);
     const ops: string[] = [];
     const writeResults: number[] = [];
-    bulkWriter.onWriteResult((result, operation) => {
+    bulkWriter.onWriteResult((documentRef, result) => {
       writeResults.push(result.writeTime.seconds);
-      ops.push(operation.operation);
     });
     bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
     bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
     bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
     bulkWriter.delete(firestore.doc('collectionId/doc'));
     return bulkWriter.close().then(() => {
-      expect(ops).to.deep.equal(['create', 'set', 'update', 'delete']);
       expect(writeResults).to.deep.equal([1, 2, 3, 4]);
     });
   });
@@ -548,11 +543,11 @@ describe('BulkWriter', () => {
         ]),
       },
     ]);
-    const ops: BulkWriterOperation[] = [];
+    const ops: string[] = [];
     const writeResults: number[] = [];
     bulkWriter.onWriteError(error => {
       ops.push(error.operation);
-      bulkWriter.retry(error.operation).then(res => {
+      bulkWriter.retry(error).then(res => {
         writeResults.push(res.writeTime.seconds);
       });
     });
@@ -561,7 +556,7 @@ describe('BulkWriter', () => {
     bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
     bulkWriter.delete(firestore.doc('collectionId/doc'));
     return bulkWriter.close().then(() => {
-      expect(ops.length).to.equal(4);
+      expect(ops).to.deep.equal(['create', 'set', 'update', 'delete']);
       expect(writeResults).to.deep.equal([1, 2, 3, 4]);
     });
   });
@@ -603,17 +598,17 @@ describe('BulkWriter', () => {
         response: mergeResponses([successResponse(2), successResponse(3)]),
       },
     ]);
-    let op: BulkWriterOperation | undefined = undefined;
-    bulkWriter.onWriteError(error => {
-      op = error.operation;
+    let error: BulkWriterError | undefined = undefined;
+    bulkWriter.onWriteError(err => {
+      error = err;
     });
     bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
     bulkWriter.update(firestore.doc('collectionId/doc2'), {foo: 'bar'});
     await bulkWriter.flush();
     bulkWriter.delete(firestore.doc('collectionId/doc3'));
-    expect(op).to.not.be.undefined;
+    expect(error).to.not.be.undefined;
     let writeResult: WriteResult;
-    bulkWriter.retry(op!).then(res => {
+    bulkWriter.retry(error!).then(res => {
       writeResult = res;
     });
     return bulkWriter.close().then(() => {

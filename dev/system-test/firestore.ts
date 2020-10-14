@@ -44,11 +44,7 @@ import {
   verifyInstance,
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
-import {
-  BulkWriter,
-  BulkWriterError,
-  BulkWriterOperation,
-} from '../src/bulk-writer';
+import {BulkWriter, BulkWriterError} from '../src/bulk-writer';
 
 use(chaiAsPromised);
 
@@ -2516,7 +2512,7 @@ describe('BulkWriter class', () => {
     const ref = randomCol.doc('__doc__');
 
     writer.set(ref, {foo: 'bar'}).catch((error: BulkWriterError) => {
-      writer.retry(error.operation).catch(() => {
+      writer.retry(error).catch(() => {
         retryPerformed = true;
       });
     });
