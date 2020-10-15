@@ -321,8 +321,6 @@ export class BulkWriter {
    */
   private batchQueue: BulkCommitBatch[] = [];
 
-  private _pendingOperations: Promise<WriteResult>[] = [];
-
   private _pendingCommits: Promise<void>[] = [];
 
   /**
@@ -479,7 +477,6 @@ export class BulkWriter {
           throw error;
         }
       });
-    this._pendingOperations.push(op);
     return op;
   }
 
@@ -549,7 +546,6 @@ export class BulkWriter {
         }
       });
 
-    this._pendingOperations.push(op);
     return op;
   }
 
@@ -637,7 +633,7 @@ export class BulkWriter {
           throw error;
         }
       });
-    this._pendingOperations.push(op);
+    
     return op;
   }
 
@@ -735,7 +731,7 @@ export class BulkWriter {
           throw error;
         }
       });
-    this._pendingOperations.push(op);
+    
     return op;
   }
 
@@ -797,23 +793,20 @@ export class BulkWriter {
   }
 
   private async _flush(): Promise<void> {
-    const currentOps = this._pendingOperations;
     const trackedBatches = this.batchQueue;
     trackedBatches.map(batch => batch.markReadyToSend());
     let retry = false;
     while (true) {
-      const before = this._pendingCommits;
+      const before = this._pendingCommits.length;
       this.sendReadyBatches(retry);
-      const after = this._pendingCommits;
-      
-      await Promise.all(after);
-      if (retry  && before.length === after.length) {
+      const after = this._pendingCommits.length;
+      await Promise.all(this._pendingCommits);
+      if (before === after) {
         break;
       } else {
         retry = true;
       }
     }
-    await Promise.all(currentOps);
   }
 
   /**

@@ -288,28 +288,24 @@ describe.only('BulkWriter', () => {
     });
   });
 
-  // it.only('has a set() method', async () => {
-  //   const bulkWriter = await instantiateInstance([
-  //     {
-  //       request: createRequest([setOp('doc', 'bar')]),
-  //       response: successResponse(2),
-  //     },
-  //   ]);
-  //   const doc = firestore.doc('collectionId/doc');
-  //   let writeResult: WriteResult;
-  //
-  //
-  //   const op = bulkWriter.set(doc, {foo: 'bar'}).then(result => {
-  //     console.log("here1");
-  //     incrementOpCount();
-  //     writeResult = result;
-  //   });
-  //   const close =  bulkWriter.close();
-  //   await Promise.all([op, close]);
-  //
-  //   verifyOpCount(1);
-  //   expect(writeResult!.writeTime.isEqual(new Timestamp(2, 0))).to.be.true;
-  // });
+  it('has a set() method', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: successResponse(2),
+      },
+    ]);
+    const doc = firestore.doc('collectionId/doc');
+    let writeResult: WriteResult;
+    bulkWriter.set(doc, {foo: 'bar'}).then(result => {
+      incrementOpCount();
+      writeResult = result;
+    });
+    return bulkWriter.close().then(async () => {
+      verifyOpCount(1);
+      expect(writeResult.writeTime.isEqual(new Timestamp(2, 0))).to.be.true;
+    });
+  });
 
   it('has an update() method', async () => {
     const bulkWriter = await instantiateInstance([
@@ -368,74 +364,69 @@ describe.only('BulkWriter', () => {
     });
   });
 
-  // it.only('surfaces errors', async () => {
-  //   process.on('unhandledRejection', (reason, p) => {
-  //     console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-  //     // application specific logging, throwing an error, or other logic here
-  //   });
-  //   const bulkWriter = await instantiateInstance([
-  //     {
-  //       request: createRequest([setOp('doc', 'bar')]),
-  //       response: failedResponse(),
-  //     },
-  //   ]);
-  //
-  //   const doc = firestore.doc('collectionId/doc');
-  //   const op = bulkWriter.set(doc, {foo: 'bar'}).catch(err => {
-  //     incrementOpCount();
-  //     expect(err instanceof BulkWriterError).to.be.true;
-  //     expect(err.code).to.equal(Status.DEADLINE_EXCEEDED);
-  //   });
-  //
-  //   const close = bulkWriter.close();
-  //   await Promise.all([op, close]);
-  //   verifyOpCount(1);
-  // });
+  it('surfaces errors', async () => {
+    process.on('unhandledRejection', (reason, p) => {
+      console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+      // application specific logging, throwing an error, or other logic here
+    });
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(),
+      },
+    ]);
+
+    const doc = firestore.doc('collectionId/doc');
+    bulkWriter.set(doc, {foo: 'bar'}).catch(err => {
+      incrementOpCount();
+      expect(err instanceof BulkWriterError).to.be.true;
+      expect(err.code).to.equal(Status.DEADLINE_EXCEEDED);
+    });
+
+    return bulkWriter.close().then(async () => verifyOpCount(1));
+  });
 
   it('flush() resolves immediately if there are no writes', async () => {
     const bulkWriter = await instantiateInstance([]);
     return bulkWriter.flush().then(() => verifyOpCount(0));
   });
 
-  // it.only('adds writes to a new batch after calling flush()', async () => {
-  //   const bulkWriter = await instantiateInstance([
-  //     {
-  //       request: createRequest([createOp('doc', 'bar')]),
-  //       response: successResponse(2),
-  //     },
-  //     {
-  //       request: createRequest([setOp('doc2', 'bar1')]),
-  //       response: successResponse(2),
-  //     },
-  //   ]);
-  //   const op1 = bulkWriter
-  //     .create(firestore.doc('collectionId/doc'), {foo: 'bar'})
-  //     .then(incrementOpCount);
-  //   bulkWriter.flush();
-  //   const op2 = bulkWriter
-  //     .set(firestore.doc('collectionId/doc2'), {foo: 'bar1'})
-  //     .then(incrementOpCount);
-  //   const close = bulkWriter.close();
-  //
-  //   await Promise.all([op1, op2, close]);
-  //   verifyOpCount(2);
-  //
-  // });
+  it('adds writes to a new batch after calling flush()', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([createOp('doc', 'bar')]),
+        response: successResponse(2),
+      },
+      {
+        request: createRequest([setOp('doc2', 'bar1')]),
+        response: successResponse(2),
+      },
+    ]);
+    bulkWriter
+      .create(firestore.doc('collectionId/doc'), {foo: 'bar'})
+      .then(incrementOpCount);
+    bulkWriter.flush();
+    bulkWriter
+      .set(firestore.doc('collectionId/doc2'), {foo: 'bar1'})
+      .then(incrementOpCount);
+    await bulkWriter.close().then(async () => {
+      verifyOpCount(2);
+    });
+  });
 
-  // it.only('close() sends all writes', async () => {
-  //   const bulkWriter = await instantiateInstance([
-  //     {
-  //       request: createRequest([createOp('doc', 'bar')]),
-  //       response: successResponse(2),
-  //     },
-  //   ]);
-  //   const doc = firestore.doc('collectionId/doc');
-  //   const op  =bulkWriter.create(doc, {foo: 'bar'}).then(incrementOpCount);
-  //   const close = bulkWriter.close();
-  //
-  //   await Promise.all([op, close]);
-  //   verifyOpCount(1);
-  // });
+  it('close() sends all writes', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([createOp('doc', 'bar')]),
+        response: successResponse(2),
+      },
+    ]);
+    const doc = firestore.doc('collectionId/doc');
+    bulkWriter.create(doc, {foo: 'bar'}).then(incrementOpCount);
+    return bulkWriter.close().then(async () => {
+      verifyOpCount(1);
+    });
+  });
 
   it('close() resolves immediately if there are no writes', async () => {
     const bulkWriter = await instantiateInstance([]);
@@ -523,7 +514,7 @@ describe.only('BulkWriter', () => {
     });
   });
 
-  it.only('can retry failed operations with retry()', async () => {
+  it('can retry failed operations with retry()', async () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([
@@ -557,28 +548,20 @@ describe.only('BulkWriter', () => {
     const ops: string[] = [];
     const writeResults: number[] = [];
     bulkWriter.onWriteError(error => {
-      console.log('failed');
       ops.push(error.operationType);
       return true;
     });
     bulkWriter.onWriteResult((documentRef, result) => {
-      console.log('success');
       writeResults.push(result.writeTime.seconds);
     });
-    const op1 = bulkWriter.create(firestore.doc('collectionId/doc'), {
-      foo: 'bar',
+    bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    bulkWriter.delete(firestore.doc('collectionId/doc'));
+    return bulkWriter.close().then(() => {
+      expect(ops).to.deep.equal(['create', 'set', 'update', 'delete']);
+      expect(writeResults).to.deep.equal([1, 2, 3, 4]);
     });
-    const op2 = bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    const op3 = bulkWriter.update(firestore.doc('collectionId/doc'), {
-      foo: 'bar',
-    });
-    const op4 = bulkWriter.delete(firestore.doc('collectionId/doc'));
-    const close = bulkWriter.close();
-    await Promise.all([op1, op2, op3, op4, close]);
-
-    console.log('verify');
-    expect(ops).to.deep.equal(['create', 'set', 'update', 'delete']);
-    expect(writeResults).to.deep.equal([1, 2, 3, 4]);
   });
 
   it('errors are still surfaced even if a retry function is specified', async () => {
@@ -783,7 +766,7 @@ describe.only('BulkWriter', () => {
     return bulkWriter.close().then(() => verifyOpCount(2));
   });
 
-  it('retries individual rites that fail with ABORTED errors', async () => {
+  it('retries individual writes that fail with ABORTED errors', async () => {
     setTimeoutHandler(setImmediate);
     // Create mock responses that simulate one successful write followed by
     // failed responses.
