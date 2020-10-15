@@ -14017,6 +14017,7 @@
                  * @property {google.api.ResourceDescriptor.History|null} [history] ResourceDescriptor history
                  * @property {string|null} [plural] ResourceDescriptor plural
                  * @property {string|null} [singular] ResourceDescriptor singular
+                 * @property {Array.<google.api.ResourceDescriptor.Style>|null} [style] ResourceDescriptor style
                  */
     
                 /**
@@ -14029,6 +14030,7 @@
                  */
                 function ResourceDescriptor(properties) {
                     this.pattern = [];
+                    this.style = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -14084,6 +14086,14 @@
                 ResourceDescriptor.prototype.singular = "";
     
                 /**
+                 * ResourceDescriptor style.
+                 * @member {Array.<google.api.ResourceDescriptor.Style>} style
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.style = $util.emptyArray;
+    
+                /**
                  * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.ResourceDescriptor
@@ -14124,6 +14134,23 @@
                         message.plural = String(object.plural);
                     if (object.singular != null)
                         message.singular = String(object.singular);
+                    if (object.style) {
+                        if (!Array.isArray(object.style))
+                            throw TypeError(".google.api.ResourceDescriptor.style: array expected");
+                        message.style = [];
+                        for (var i = 0; i < object.style.length; ++i)
+                            switch (object.style[i]) {
+                            default:
+                            case "STYLE_UNSPECIFIED":
+                            case 0:
+                                message.style[i] = 0;
+                                break;
+                            case "DECLARATIVE_FRIENDLY":
+                            case 1:
+                                message.style[i] = 1;
+                                break;
+                            }
+                    }
                     return message;
                 };
     
@@ -14140,8 +14167,10 @@
                     if (!options)
                         options = {};
                     var object = {};
-                    if (options.arrays || options.defaults)
+                    if (options.arrays || options.defaults) {
                         object.pattern = [];
+                        object.style = [];
+                    }
                     if (options.defaults) {
                         object.type = "";
                         object.nameField = "";
@@ -14164,6 +14193,11 @@
                         object.plural = message.plural;
                     if (message.singular != null && message.hasOwnProperty("singular"))
                         object.singular = message.singular;
+                    if (message.style && message.style.length) {
+                        object.style = [];
+                        for (var j = 0; j < message.style.length; ++j)
+                            object.style[j] = options.enums === String ? $root.google.api.ResourceDescriptor.Style[message.style[j]] : message.style[j];
+                    }
                     return object;
                 };
     
@@ -14191,6 +14225,20 @@
                     values[valuesById[0] = "HISTORY_UNSPECIFIED"] = "HISTORY_UNSPECIFIED";
                     values[valuesById[1] = "ORIGINALLY_SINGLE_PATTERN"] = "ORIGINALLY_SINGLE_PATTERN";
                     values[valuesById[2] = "FUTURE_MULTI_PATTERN"] = "FUTURE_MULTI_PATTERN";
+                    return values;
+                })();
+    
+                /**
+                 * Style enum.
+                 * @name google.api.ResourceDescriptor.Style
+                 * @enum {string}
+                 * @property {string} STYLE_UNSPECIFIED=STYLE_UNSPECIFIED STYLE_UNSPECIFIED value
+                 * @property {string} DECLARATIVE_FRIENDLY=DECLARATIVE_FRIENDLY DECLARATIVE_FRIENDLY value
+                 */
+                ResourceDescriptor.Style = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "STYLE_UNSPECIFIED"] = "STYLE_UNSPECIFIED";
+                    values[valuesById[1] = "DECLARATIVE_FRIENDLY"] = "DECLARATIVE_FRIENDLY";
                     return values;
                 })();
     
