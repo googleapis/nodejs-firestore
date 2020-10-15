@@ -321,7 +321,9 @@ export class BulkWriter {
    */
   private batchQueue: BulkCommitBatch[] = [];
 
-  private operations: Promise<WriteResult>[] = [];
+  private _pendingOperations: Promise<WriteResult>[] = [];
+
+  private _pendingCommits: Promise<void>[] = [];
 
   /**
    * Whether this BulkWriter instance has started to close. Afterwards, no
@@ -477,7 +479,7 @@ export class BulkWriter {
           throw error;
         }
       });
-    this.operations.push(op);
+    this._pendingOperations.push(op);
     return op;
   }
 
@@ -547,7 +549,7 @@ export class BulkWriter {
         }
       });
 
-    this.operations.push(op);
+    this._pendingOperations.push(op);
     return op;
   }
 
@@ -635,7 +637,7 @@ export class BulkWriter {
           throw error;
         }
       });
-    this.operations.push(op);
+    this._pendingOperations.push(op);
     return op;
   }
 
@@ -733,7 +735,7 @@ export class BulkWriter {
           throw error;
         }
       });
-    this.operations.push(op);
+    this._pendingOperations.push(op);
     return op;
   }
 
@@ -795,16 +797,21 @@ export class BulkWriter {
   }
 
   private async _flush(): Promise<void> {
-    const currentOps = this.operations;
+    const currentOps = this._pendingOperations;
     const trackedBatches = this.batchQueue;
     trackedBatches.map(batch => batch.markReadyToSend());
     let retry = false;
     while (true) {
-      const promises = this.sendReadyBatches(retry);
-      console.log('got promises back ' + promises.length);
-      if (promises.length == 0) break;
-      await Promise.all(promises);
-      retry = true;
+      const before = this._pendingCommits;
+      this.sendReadyBatches(retry);
+      const after = this._pendingCommits;
+      
+      await Promise.all(after);
+      if (retry  && before.length === after.length) {
+        break;
+      } else {
+        retry = true;
+      }
     }
     await Promise.all(currentOps);
   }
@@ -910,13 +917,9 @@ export class BulkWriter {
    *
    * @private
    */
-  private sendReadyBatches(filterRetry = false): Promise<void>[] {
+  private sendReadyBatches(filterRetry = false): void {
     const unsentBatches = this.batchQueue;
     
-    // should i add sendign things 
-    // store all pending commits?
-
-    const deferred : Promise<void>[] = [] ;
     for (let index = 0; 
       index < unsentBatches.length ;
       ++index
@@ -933,7 +936,7 @@ export class BulkWriter {
       if (!shouldRun) continue;
       
       const newDeferred = new Deferred<void>();
-      deferred.push(newDeferred.promise);
+      this._pendingCommits.push(newDeferred.promise);
       
       console.log('sending batch');
       const batch = unsentBatches[index];
@@ -945,13 +948,13 @@ export class BulkWriter {
       if (delayMs === 0) {
         this.sendBatch(batch).then(newDeferred.resolve, newDeferred.reject);
       } else {
-        throw new Error('need to block on this');
-        // delayExecution(() => deferred.push(...this.sendReadyBatches()), delayMs);
-        // break;
+        delayExecution(() => {
+          newDeferred.resolve();
+          this.sendReadyBatches();
+          }, delayMs);
+        break;
       }
     }
-    
-    return deferred;
   }
 
   /**
