@@ -140,34 +140,13 @@ export class WriteBatch implements firestore.WriteBatch {
 
   /**
    * @hideconstructor
-   *
-   * @param firestore The Firestore Database client.
-   * @param retryBatch The WriteBatch that needs to be retried.
-   * @param indexesToRetry The indexes of the operations from the provided
-   * WriteBatch that need to be retried.
    */
   constructor(
     firestore: Firestore,
-    retryBatch: WriteBatch,
-    indexesToRetry: Set<number>
-  );
-  constructor(firestore: Firestore);
-  constructor(
-    firestore: Firestore,
-    retryBatch?: WriteBatch,
-    indexesToRetry?: Set<number>
   ) {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
     this._allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
-
-    if (retryBatch) {
-      // Creates a new WriteBatch containing only the indexes from the provided
-      // indexes to retry.
-      for (const index of indexesToRetry!.values()) {
-        this._ops.push(retryBatch._ops[index]);
-      }
-    }
   }
 
   /**

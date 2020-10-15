@@ -98,9 +98,7 @@ interface PendingOp {
 
 interface OperationInfo {
   documentRef: firestore.DocumentReference;
-  operationType: 'create' | 'set' | 'update' | 'delete';
   retryCount: number;
-  data: PendingWriteOp;
 }
 
 /**
@@ -224,19 +222,7 @@ class BulkCommitBatch {
     } as OperationInfo;
     return this.processOperation(operationInfo);
   }
-
-  /**
-   * Adds the provided operation to the WriteBatch. Returns a promise that
-   * resolves with the result of the operation.
-   */
-  addOperation(operationInfo: OperationInfo): Promise<WriteResult> {
-    this.writeBatch._addOperation(
-      operationInfo.documentRef,
-      operationInfo.data
-    );
-    return this.processOperation(operationInfo);
-  }
-
+  
   /**
    * Helper to update data structures associated with the operation and
    * return the result.
@@ -286,9 +272,6 @@ class BulkCommitBatch {
     const stack = Error().stack!;
 
     let results: BatchWriteResult[] = [];
-    for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
-      await this.backoff.backoffAndWait();
-
       try {
         results = await this.writeBatch.bulkCommit();
       } catch (err) {
@@ -300,72 +283,29 @@ class BulkCommitBatch {
           };
         });
       }
-      this.processResults(results, /* allowRetry= */ true);
-
-      if (this.pendingOps.length > 0) {
-        logger(
-          'BulkWriter.bulkCommit',
-          null,
-          `Current batch failed at retry #${attempt}. Num failures: ` +
-            `${this.pendingOps.length}.`
-        );
-
-        this.writeBatch = new WriteBatch(
-          this.firestore,
-          this.writeBatch,
-          new Set(this.pendingOps.map(op => op.writeBatchIndex))
-        );
-      } else {
-        return;
-      }
-    }
-
-    this.processResults(results);
-    return new Promise(r => setTimeout(r, 10));
+      this.processResults(results);
   }
 
   /**
    * Resolves the individual operations in the batch with the results.
    */
   private processResults(
-    results: BatchWriteResult[],
-    allowRetry = false
+    results: BatchWriteResult[]
   ): void {
-    const newPendingOps: Array<PendingOp> = [];
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
       const op = this.pendingOps[i];
       if (result.status.code === Status.OK) {
         op.deferred.resolve(result);
-      } else if (!allowRetry || !this.shouldRetry(result.status.code)) {
+      } else {
         const error = new BulkWriterError(
-          (result.status.code as number) as GrpcStatus,
-          result.status.message,
-          op.operationInfo
+            (result.status.code as number) as GrpcStatus,
+            result.status.message,
+            op.operationInfo
         );
         op.deferred.reject(error);
-      } else {
-        // Retry the operation if it has not been processed.
-        // Store the current index of pendingOps to preserve the mapping of
-        // this operation's index in the underlying WriteBatch.
-        newPendingOps.push({
-          writeBatchIndex: i,
-          deferred: op.deferred,
-          operationInfo: op.operationInfo,
-        });
-      }
+      } 
     }
-
-    this.pendingOps = newPendingOps;
-  }
-
-  private shouldRetry(code: Status | undefined): boolean {
-    const retryCodes = getRetryCodes('batchWrite');
-    return code !== undefined && retryCodes.includes(code);
-  }
-
-  allPromises(): Array<Promise<BatchWriteResult>> {
-    return this.pendingOps.map(op => op.deferred.promise);
   }
 
   markReadyToSend(): void {
@@ -390,9 +330,6 @@ export class BulkWriterError extends Error {
   /** How many times this operation has been retried. */
   readonly retryCount: number;
 
-  /** Internal proto representation of the operation. */
-  readonly _data: PendingWriteOp;
-
   /** @hideconstructor */
   constructor(
     /** The status code of the error. */
@@ -407,7 +344,6 @@ export class BulkWriterError extends Error {
     this.documentRef = operationInfo.documentRef;
     this.operationType = operationInfo.operationType;
     this.retryCount = operationInfo.retryCount;
-    this._data = operationInfo.data;
   }
 }
 
@@ -477,8 +413,9 @@ export class BulkWriter {
     options?: firestore.BulkWriterOptions
   ) {
     this.firestore._incrementBulkWritersCount();
-    this.errorFn = () => {
-      return false;
+    this.errorFn = (error) => {
+      const retryCodes = getRetryCodes('batchWrite');
+      return error.code !== undefined && retryCodes.includes(error.code) && error.retryCount < 5;
     };
     this.successFn = () => {};
     validateBulkWriterOptions(options);
