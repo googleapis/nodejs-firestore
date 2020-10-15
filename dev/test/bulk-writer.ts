@@ -903,7 +903,7 @@ describe.only('BulkWriter', () => {
     });
   });
 
-  it('fails writes after all retry attempts failed', async () => {
+  it.only('fails writes after all retry attempts failed', async () => {
     setTimeoutHandler(setImmediate);
     function instantiateInstance(): Promise<BulkWriter> {
       const overrides: ApiOverride = {
@@ -924,11 +924,15 @@ describe.only('BulkWriter', () => {
         foo: 'bar',
       })
       .catch(err => {
+        console.log('executing error');
         expect(err instanceof BulkWriterError).to.be.true;
         expect(err.code).to.equal(Status.ABORTED);
         incrementOpCount();
       });
-    return bulkWriter.close().then(() => verifyOpCount(1));
+    return bulkWriter.close().then(() => {
+      console.log('verify');
+      verifyOpCount(1)
+    });
   });
 
   describe('if bulkCommit() fails', async () => {

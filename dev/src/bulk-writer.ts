@@ -316,6 +316,7 @@ export class BulkWriter {
   private batchQueue: BulkCommitBatch[] = [];
 
   private _pendingCommits: Promise<void>[] = [];
+  private _pendingOps: Promise<void>[] = [];
 
   /**
    * Whether this BulkWriter instance has started to close. Afterwards, no
@@ -441,6 +442,7 @@ export class BulkWriter {
     this.verifyNotClosed();
     const op = this._create(documentRef,data);
     this.sendReadyBatches();
+    this._pendingOps.push(op.then(() => {}, () => {}));
     return op;
   }
 
@@ -457,6 +459,7 @@ export class BulkWriter {
           return res;
         })
         .catch(error => {
+          console.log('creating error');
           const bulkWriterError = new BulkWriterError(
               error.code,
               error.message,
@@ -468,7 +471,7 @@ export class BulkWriter {
           if (shouldRetry) {
             return this._create(documentRef, data, retryCount + 1);
           } else {
-            throw error;
+            throw bulkWriterError;
           }
         });
   }
@@ -508,6 +511,7 @@ export class BulkWriter {
     this.verifyNotClosed();
     const op = this._delete(documentRef,precondition);
     this.sendReadyBatches();
+    this._pendingOps.push(op.then(() => {}, () => {}));
     return op;
   }
 
@@ -535,7 +539,7 @@ export class BulkWriter {
           if (shouldRetry) {
             return this._delete(documentRef, precondition, retryCount + 1);
           } else {
-            throw error;
+            throw bulkWriterError;
           }
         });
   }
@@ -592,6 +596,7 @@ export class BulkWriter {
     this.verifyNotClosed();
     const op = this._set(documentRef, data, options);
     this.sendReadyBatches();
+    this._pendingOps.push(op.then(() => {}, () => {}));
     return op;
   }
 
@@ -620,7 +625,7 @@ export class BulkWriter {
           if (shouldRetry) {
             return this._set(documentRef, data, options, retryCount + 1);
           } else {
-            throw error;
+            throw bulkWriterError;
           }
         });
   }
@@ -676,6 +681,7 @@ export class BulkWriter {
     this.verifyNotClosed();
     const op = this._update(documentRef, dataOrField, preconditionOrValues);
     this.sendReadyBatches();
+    this._pendingOps.push(op.then(() => {}, () => {}));
     return op;
   }
 
@@ -716,7 +722,7 @@ export class BulkWriter {
                 retryCount + 1
             );
           } else {
-            throw error;
+            throw bulkWriterError;
           }
         });
   }
@@ -793,6 +799,8 @@ export class BulkWriter {
         retry = true;
       }
     }
+    // Make sure user promises resolve before _flush
+    await Promise.all(this._pendingOps);
   }
 
   /**
