@@ -114,10 +114,6 @@ class BulkCommitBatch {
    */
   state = BatchState.OPEN;
 
-  // A deferred promise that is resolved after the batch has been sent, and a
-  // response is received.
-  private completedDeferred = new Deferred<void>();
-
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
   private pendingOps: Array<PendingOp> = [];
@@ -320,13 +316,11 @@ class BulkCommitBatch {
           new Set(this.pendingOps.map(op => op.writeBatchIndex))
         );
       } else {
-        this.completedDeferred.resolve();
         return;
       }
     }
 
     this.processResults(results);
-    this.completedDeferred.resolve();
   }
 
   /**
@@ -367,15 +361,6 @@ class BulkCommitBatch {
   private shouldRetry(code: Status | undefined): boolean {
     const retryCodes = getRetryCodes('batchWrite');
     return code !== undefined && retryCodes.includes(code);
-  }
-
-  /**
-   * Returns a promise that resolves when the batch has been sent, and a
-   * response is received.
-   */
-  awaitBulkCommit(): Promise<void> {
-    this.markReadyToSend();
-    return this.completedDeferred.promise;
   }
 
   allPromises(): Array<Promise<BatchWriteResult>> {
@@ -443,6 +428,8 @@ export class BulkWriter {
   private batchQueue: BulkCommitBatch[] = [];
   
   private operations: Promise<WriteResult>[] = [];
+  
+  private _flushPending = false;
 
   /**
    * Whether this BulkWriter instance has started to close. Afterwards, no
@@ -569,23 +556,27 @@ export class BulkWriter {
     data: T
   ): Promise<WriteResult> {
     this.verifyNotClosed();
+    return this._create(documentRef, data);
+  }
+
+  private _create<T>(documentRef: FirebaseFirestore.DocumentReference<T>, data: T) {
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.create(documentRef, data);
-    
+
     const deferred = new Deferred<WriteResult>();
     resultPromise
-      .then(res => {
-        this.successFn(documentRef, res);
-        deferred.resolve(res);
-      })
-      .catch(error => {
-        const shouldRetry = this.errorFn(error);
-        if (shouldRetry) {
-          this.create(documentRef, data).then(deferred.resolve, deferred.reject);
-        } else {
-          deferred.reject(error);
-        }
-      });
+        .then(res => {
+          this.successFn(documentRef, res);
+          deferred.resolve(res);
+        })
+        .catch(error => {
+          const shouldRetry = this.errorFn(error);
+          if (shouldRetry) {
+            this._create(documentRef, data).then(deferred.resolve, deferred.reject);
+          } else {
+            deferred.reject(error);
+          }
+        });
     this.sendReadyBatches();
     return deferred.promise;
   }
@@ -623,6 +614,10 @@ export class BulkWriter {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.verifyNotClosed();
+    return this._delete(documentRef, precondition);
+  }
+
+  private _delete<T>(documentRef: FirebaseFirestore.DocumentReference<T>, precondition: FirebaseFirestore.Precondition | undefined) {
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.delete(documentRef, precondition);
 
@@ -635,7 +630,7 @@ export class BulkWriter {
         .catch(error => {
           const shouldRetry = this.errorFn(error);
           if (shouldRetry) {
-            this.delete(documentRef).then(deferred.resolve, deferred.reject);
+            this._delete(documentRef, precondition).then(deferred.resolve, deferred.reject);
           } else {
             deferred.reject(error);
           }
@@ -694,9 +689,13 @@ export class BulkWriter {
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this.verifyNotClosed();
+    return this._set(documentRef, data, options);
+  }
+
+  private _set<T>(documentRef: FirebaseFirestore.DocumentReference<T>, data: Partial<T> | T, options: FirebaseFirestore.SetOptions | undefined) {
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.set(documentRef, data, options);
-    
+
     const deferred = new Deferred<WriteResult>();
     resultPromise
         .then(res => {
@@ -706,7 +705,7 @@ export class BulkWriter {
         .catch(error => {
           const shouldRetry = this.errorFn(error);
           if (shouldRetry) {
-            this.set(documentRef, data, options = {}).then(deferred.resolve, deferred.reject);
+            this._set(documentRef, data, options).then(deferred.resolve, deferred.reject);
           } else {
             deferred.reject(error);
           }
@@ -764,12 +763,17 @@ export class BulkWriter {
     >
   ): Promise<WriteResult> {
     this.verifyNotClosed();
+    return this._update(documentRef, dataOrField, preconditionOrValues);
+  }
+
+  private _update(documentRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>, dataOrField: FirebaseFirestore.UpdateData | string | FieldPath, preconditionOrValues: ({ lastUpdateTime?: Timestamp } | unknown | string | FieldPath)[]) {
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.update(
-      documentRef,
-      dataOrField,
-      ...preconditionOrValues
+        documentRef,
+        dataOrField,
+        ...preconditionOrValues
     );
+
     const deferred = new Deferred<WriteResult>();
     resultPromise
         .then(res => {
@@ -779,7 +783,7 @@ export class BulkWriter {
         .catch(error => {
           const shouldRetry = this.errorFn(error);
           if (shouldRetry) {
-            (this.update as any)(...arguments).then(deferred.resolve, deferred.reject);
+            this._update(documentRef, dataOrField, preconditionOrValues).then(deferred.resolve, deferred.reject);
           } else {
             deferred.reject(error);
           }
@@ -843,14 +847,17 @@ export class BulkWriter {
    */
   async flush(): Promise<void> {
     this.verifyNotClosed();
-    return this._flush();
+    this._flushPending = true;
+    await this._flush();
+    this._flushPending = false;
   }
 
   private async _flush(): Promise<void> {
+    const currentOps = this.operations;
     const trackedBatches = this.batchQueue;
-    const writePromises = trackedBatches.map(batch => batch.awaitBulkCommit());
+    trackedBatches.map(batch => batch.markReadyToSend())
     this.sendReadyBatches();
-    await Promise.all(writePromises);
+    await Promise.all(currentOps);
   }
 
   /**
@@ -883,27 +890,6 @@ export class BulkWriter {
     const flushPromise = this.flush();
     this.closeCalled = true;
     await flushPromise;
-
-    let finalPromises: Array<Promise<BatchWriteResult>> = [];
-    this.batchQueue.forEach(batch => {
-      finalPromises = finalPromises.concat(batch.allPromises());
-    });
-
-    // Wait for pending retry operations to run.
-    while (this.batchQueue.length > 0) {
-      finalPromises = [];
-      this.batchQueue.forEach(batch => {
-        finalPromises = finalPromises.concat(batch.allPromises());
-      });
-      await this._flush();
-    }
-
-    await Promise.all(finalPromises.map(this.reflect));
-
-    // // Wait for pending retry promises to run.
-    // if (didUseRetry) {
-    //   await this.closedDeferred.promise;
-    // }
     this.isClosed = true;
   }
 
@@ -1009,6 +995,10 @@ export class BulkWriter {
     const success = this.rateLimiter.tryMakeRequest(batch.opCount);
     assert(success, 'Batch should be under rate limit to be sent.');
     batch.bulkCommit().then(() => {
+      if (this._flushPending) {
+        this._flush();
+      }
+      
       // Remove the batch from the BatchQueue after it has been processed.
       const batchIndex = this.batchQueue.indexOf(batch);
       assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
@@ -1022,13 +1012,6 @@ export class BulkWriter {
         this.closedDeferred.resolve();
       }
     });
-  }
-
-  private _decrementPendingOperationCount(): void {
-    this.pendingOperationCount--;
-    if (this.closeCalled && this.pendingOperationCount === 0) {
-      this.closedDeferred.resolve();
-    }
   }
 
   /**
