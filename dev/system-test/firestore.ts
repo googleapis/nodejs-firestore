@@ -2493,17 +2493,17 @@ describe('BulkWriter class', () => {
     writer.onWriteError(error => {
       retryCount = error.retryCount;
       // TODO: this test passes if retryCount < 6;
-      return error.retryCount < 7;
+      return error.retryCount < 8;
     });
 
     // Use an invalid document name that the backend will reject.
     const ref = randomCol.doc('__doc__');
 
-    writer.set(ref, {foo: 'bar'}).catch(err => {
+    const setCall = writer.set(ref, {foo: 'bar'}).catch(err => {
       code = err.code;
     });
     await writer.close();
-    expect(retryCount).to.equal(7);
+    expect(retryCount).to.equal(8);
     expect(code).to.equal(Status.INVALID_ARGUMENT);
   });
 });

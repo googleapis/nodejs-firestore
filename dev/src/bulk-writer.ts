@@ -378,6 +378,10 @@ class BulkCommitBatch {
     return this.completedDeferred.promise;
   }
 
+  allPromises(): Array<Promise<BatchWriteResult>> {
+    return this.pendingOps.map(op => op.deferred.promise);
+  }
+
   markReadyToSend(): void {
     if (this.state === BatchState.OPEN) {
       this.state = BatchState.READY_TO_SEND;
@@ -485,7 +489,7 @@ export class BulkWriter {
       // TODO: Figure out some way to throw the error then decrement. I'm
       // currently decrementing first, causing close() to resolve, then continuing
       // with the thrown error.
-      this._decrementPendingOperationCount();
+      // this._decrementPendingOperationCount();
       throw error;
     }
   };
@@ -891,18 +895,38 @@ export class BulkWriter {
     this.closeCalled = true;
     await flushPromise;
 
-    let didUseRetry = false;
+    let finalPromises: Array<Promise<BatchWriteResult>> = [];
+    this.batchQueue.forEach(batch => {
+      finalPromises = finalPromises.concat(batch.allPromises());
+    });
+
     // Wait for pending retry operations to run.
     while (this.batchQueue.length > 0) {
-      didUseRetry = true;
+      finalPromises = [];
+      this.batchQueue.forEach(batch => {
+        finalPromises = finalPromises.concat(batch.allPromises());
+      });
       await this._flush();
     }
 
-    // Wait for pending retry promises to run.
-    if (didUseRetry) {
-      await this.closedDeferred.promise;
-    }
+    await Promise.all(finalPromises.map(this.reflect));
+
+    // // Wait for pending retry promises to run.
+    // if (didUseRetry) {
+    //   await this.closedDeferred.promise;
+    // }
     this.isClosed = true;
+  }
+
+  private reflect(promise: Promise<any>): Promise<any> {
+    return promise.then(
+      v => {
+        return {v: v, status: 'fulfilled'};
+      },
+      e => {
+        return {e: e, status: 'rejected'};
+      }
+    );
   }
 
   /**
