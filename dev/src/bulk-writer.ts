@@ -105,6 +105,7 @@ class BulkCommitBatch {
    * The state of the batch.
    */
   state = BatchState.OPEN;
+  
 
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
@@ -115,7 +116,8 @@ class BulkCommitBatch {
   constructor(
     private readonly firestore: Firestore,
     private writeBatch: WriteBatch,
-    private readonly maxBatchSize: number
+    private readonly maxBatchSize: number,
+    readonly retryCount: number
   ) {
     this.backoff = new ExponentialBackoff();
   }
@@ -318,8 +320,6 @@ export class BulkWriter {
    * A queue of batches to be written.
    */
   private batchQueue: BulkCommitBatch[] = [];
-  
-  private retryBatch? : BulkCommitBatch;
 
   private operations: Promise<WriteResult>[] = [];
 
@@ -342,12 +342,6 @@ export class BulkWriter {
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
    */
   private readonly rateLimiter: RateLimiter;
-
-  /**
-   * A deferred promise that is resolved after the BulkWriter has been closed
-   * and all onWriteError callbacks have been run.
-   */
-  private closedDeferred = new Deferred<void>();
 
   /**
    * The user-provided callback to be run every time a BulkWriter operation
@@ -461,7 +455,7 @@ export class BulkWriter {
     data: T,
     retryCount = 0
   ): Promise<WriteResult> {
-    const bulkCommitBatch = this.getEligibleBatch();
+    const bulkCommitBatch = this.getEligibleBatch(retryCount);
     const op = bulkCommitBatch
       .create(documentRef, data)
       .then(res => {
@@ -484,7 +478,7 @@ export class BulkWriter {
         }
       });
     this.operations.push(op);
-    this.sendReadyBatches();
+    this.sendReadyBatches(retryCount);
     return op;
   }
 
@@ -529,7 +523,7 @@ export class BulkWriter {
     precondition: FirebaseFirestore.Precondition | undefined,
     retryCount = 0
   ): Promise<WriteResult> {
-    const bulkCommitBatch = this.getEligibleBatch();
+    const bulkCommitBatch = this.getEligibleBatch(retryCount);
     const op = bulkCommitBatch
       .delete(documentRef, precondition)
       .then(res => {
@@ -553,7 +547,7 @@ export class BulkWriter {
       });
 
     this.operations.push(op);
-    this.sendReadyBatches();
+    this.sendReadyBatches(retryCount);
     return op;
   }
 
@@ -616,7 +610,7 @@ export class BulkWriter {
     options: FirebaseFirestore.SetOptions | undefined,
     retryCount = 0
   ): Promise<WriteResult> {
-    const bulkCommitBatch = this.getEligibleBatch();
+    const bulkCommitBatch = this.getEligibleBatch(retryCount);
 
     const op = bulkCommitBatch
       .set(documentRef, data, options)
@@ -640,7 +634,7 @@ export class BulkWriter {
         }
       });
     this.operations.push(op);
-    this.sendReadyBatches();
+    this.sendReadyBatches(retryCount);
     return op;
   }
 
@@ -737,7 +731,7 @@ export class BulkWriter {
         }
       });
     this.operations.push(op);
-    this.sendReadyBatches();
+    this.sendReadyBatches(retryCount);
     return op;
   }
 
@@ -804,7 +798,7 @@ export class BulkWriter {
     const currentOps = this.operations;
     const trackedBatches = this.batchQueue;
     trackedBatches.map(batch => batch.markReadyToSend());
-    this.sendReadyBatches();
+    this.sendReadyBatches(0);
     await Promise.all(currentOps);
     console.log('waited');
   }
@@ -869,22 +863,13 @@ export class BulkWriter {
    * @private
    */
   private getEligibleBatch<T>(retryCount:number): BulkCommitBatch {
-    if (retryCount == 0) {
-      if (this.batchQueue.length > 0) {// no batch queue needed
-        const lastBatch = this.batchQueue[this.batchQueue.length - 1];
-        if (lastBatch.state === BatchState.OPEN) {
-          return lastBatch;
-        }
-      }
-      return this.createNewBatch();
-    } else {
-      if (this.retryBatch && this.retryBatch.state == BatchState.OPEN) {
-        return this.retryBatch;
-      } else {
-        this.retryBatch = this.createNewBatch();
-        return this.retryBatch;
+    if (this.batchQueue.length > 0) {// no batch queue needed
+      const lastBatch = this.batchQueue[this.batchQueue.length - 1];
+      if (lastBatch.retryCount == retryCount && lastBatch.state === BatchState.OPEN) {
+        return lastBatch;
       }
     }
+    return this.createNewBatch(retryCount);
   }
 
   /**
@@ -893,17 +878,19 @@ export class BulkWriter {
    *
    * @private
    */
-  private createNewBatch(): BulkCommitBatch {
+  private createNewBatch(retryCount:number): BulkCommitBatch {
     const newBatch = new BulkCommitBatch(
       this.firestore,
       this.firestore.batch(),
-      this.maxBatchSize
+      this.maxBatchSize,
+        retryCount
     );
 
     if (this.batchQueue.length > 0) {
       this.batchQueue[this.batchQueue.length - 1].markReadyToSend();
-      this.sendReadyBatches();
+      this.sendReadyBatches(retryCount);
     }
+    
     this.batchQueue.push(newBatch);
     return newBatch;
   }
@@ -916,7 +903,7 @@ export class BulkWriter {
    *
    * @private
    */
-  private sendReadyBatches(): void {
+  private sendReadyBatches(retryCount:number): void {
     const unsentBatches = this.batchQueue.filter(
       batch => batch.state === BatchState.READY_TO_SEND
     );
@@ -935,7 +922,7 @@ export class BulkWriter {
       if (delayMs === 0) {
         this.sendBatch(batch);
       } else {
-        delayExecution(() => this.sendReadyBatches(), delayMs);
+        delayExecution(() => this.sendReadyBatches(retryCount), delayMs);
         break;
       }
 
@@ -962,13 +949,7 @@ export class BulkWriter {
       assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
       this.batchQueue.splice(batchIndex, 1);
 
-      this.sendReadyBatches();
-
-      // Resolve the deferred promise if all operations on this BulkWriter have
-      // completed.
-      if (this.batchQueue.length === 0 && this.closeCalled) {
-        this.closedDeferred.resolve();
-      }
+      this.sendReadyBatches(batch.retryCount);
     });
   }
 
