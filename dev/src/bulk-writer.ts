@@ -321,6 +321,7 @@ class BulkCommitBatch {
     }
 
     this.processResults(results);
+    return new Promise(r => setTimeout(r, 10));
   }
 
   /**
@@ -559,26 +560,23 @@ export class BulkWriter {
     return this._create(documentRef, data);
   }
 
-  private _create<T>(documentRef: FirebaseFirestore.DocumentReference<T>, data: T) {
+  private _create<T>(documentRef: FirebaseFirestore.DocumentReference<T>, data: T) : Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch();
-    const resultPromise = bulkCommitBatch.create(documentRef, data);
-
-    const deferred = new Deferred<WriteResult>();
-    resultPromise
-        .then(res => {
+    const op = bulkCommitBatch.create(documentRef, data).then(res => {
           this.successFn(documentRef, res);
-          deferred.resolve(res);
+          return res;
         })
         .catch(error => {
           const shouldRetry = this.errorFn(error);
           if (shouldRetry) {
-            this._create(documentRef, data).then(deferred.resolve, deferred.reject);
+           return  this._create(documentRef, data);
           } else {
-            deferred.reject(error);
+       throw error;
           }
         });
+    this.operations.push(op);
     this.sendReadyBatches();
-    return deferred.promise;
+    return op;
   }
 
   /**
@@ -617,26 +615,24 @@ export class BulkWriter {
     return this._delete(documentRef, precondition);
   }
 
-  private _delete<T>(documentRef: FirebaseFirestore.DocumentReference<T>, precondition: FirebaseFirestore.Precondition | undefined) {
+  private _delete<T>(documentRef: FirebaseFirestore.DocumentReference<T>, precondition: FirebaseFirestore.Precondition | undefined) : Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch();
-    const resultPromise = bulkCommitBatch.delete(documentRef, precondition);
-
-    const deferred = new Deferred<WriteResult>();
-    resultPromise
-        .then(res => {
+   const op = bulkCommitBatch.delete(documentRef, precondition).then(res => {
           this.successFn(documentRef, res);
-          deferred.resolve(res);
+          return res;
         })
         .catch(error => {
           const shouldRetry = this.errorFn(error);
           if (shouldRetry) {
-            this._delete(documentRef, precondition).then(deferred.resolve, deferred.reject);
+            return this._delete(documentRef, precondition);
           } else {
-            deferred.reject(error);
+            throw error;
           }
         });
+
+    this.operations.push(op);
     this.sendReadyBatches();
-    return deferred.promise;
+    return op;
   }
 
   set<T>(
@@ -692,26 +688,24 @@ export class BulkWriter {
     return this._set(documentRef, data, options);
   }
 
-  private _set<T>(documentRef: FirebaseFirestore.DocumentReference<T>, data: Partial<T> | T, options: FirebaseFirestore.SetOptions | undefined) {
+  private _set<T>(documentRef: FirebaseFirestore.DocumentReference<T>, data: Partial<T> | T, options: FirebaseFirestore.SetOptions | undefined) : Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch();
-    const resultPromise = bulkCommitBatch.set(documentRef, data, options);
-
-    const deferred = new Deferred<WriteResult>();
-    resultPromise
-        .then(res => {
+    
+    const op = bulkCommitBatch.set(documentRef, data, options).then(res => {
           this.successFn(documentRef, res);
-          deferred.resolve(res);
+          return res;
         })
         .catch(error => {
           const shouldRetry = this.errorFn(error);
           if (shouldRetry) {
-            this._set(documentRef, data, options).then(deferred.resolve, deferred.reject);
+            return this._set(documentRef, data, options);
           } else {
-            deferred.reject(error);
+           throw error;
           }
         });
+    this.operations.push(op);
     this.sendReadyBatches();
-    return deferred.promise;
+    return op;
   }
 
   /**
@@ -766,30 +760,27 @@ export class BulkWriter {
     return this._update(documentRef, dataOrField, preconditionOrValues);
   }
 
-  private _update(documentRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>, dataOrField: FirebaseFirestore.UpdateData | string | FieldPath, preconditionOrValues: ({ lastUpdateTime?: Timestamp } | unknown | string | FieldPath)[]) {
+  private _update(documentRef: FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>, dataOrField: FirebaseFirestore.UpdateData | string | FieldPath, preconditionOrValues: ({ lastUpdateTime?: Timestamp } | unknown | string | FieldPath)[]): Promise<WriteResult>  {
     const bulkCommitBatch = this.getEligibleBatch();
-    const resultPromise = bulkCommitBatch.update(
+const op = bulkCommitBatch.update(
         documentRef,
         dataOrField,
         ...preconditionOrValues
-    );
-
-    const deferred = new Deferred<WriteResult>();
-    resultPromise
-        .then(res => {
+    ).then(res => {
           this.successFn(documentRef, res);
-          deferred.resolve(res);
+        return res;
         })
         .catch(error => {
           const shouldRetry = this.errorFn(error);
           if (shouldRetry) {
-            this._update(documentRef, dataOrField, preconditionOrValues).then(deferred.resolve, deferred.reject);
+            return this._update(documentRef, dataOrField, preconditionOrValues);
           } else {
-            deferred.reject(error);
+      throw error;
           }
         });
+    this.operations.push(op);
     this.sendReadyBatches();
-    return deferred.promise;
+    return op;
   }
 
   /**
@@ -858,6 +849,7 @@ export class BulkWriter {
     trackedBatches.map(batch => batch.markReadyToSend())
     this.sendReadyBatches();
     await Promise.all(currentOps);
+    console.log('waited');
   }
 
   /**
