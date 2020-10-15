@@ -141,9 +141,7 @@ export class WriteBatch implements firestore.WriteBatch {
   /**
    * @hideconstructor
    */
-  constructor(
-    firestore: Firestore,
-  ) {
+  constructor(firestore: Firestore) {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
     this._allowUndefined = !!firestore._settings.ignoreUndefinedProperties;

@@ -297,8 +297,8 @@ describe.only('BulkWriter', () => {
   //   ]);
   //   const doc = firestore.doc('collectionId/doc');
   //   let writeResult: WriteResult;
-  //  
-  //  
+  //
+  //
   //   const op = bulkWriter.set(doc, {foo: 'bar'}).then(result => {
   //     console.log("here1");
   //     incrementOpCount();
@@ -306,7 +306,7 @@ describe.only('BulkWriter', () => {
   //   });
   //   const close =  bulkWriter.close();
   //   await Promise.all([op, close]);
-  //  
+  //
   //   verifyOpCount(1);
   //   expect(writeResult!.writeTime.isEqual(new Timestamp(2, 0))).to.be.true;
   // });
@@ -419,7 +419,7 @@ describe.only('BulkWriter', () => {
   //
   //   await Promise.all([op1, op2, close]);
   //   verifyOpCount(2);
-  //  
+  //
   // });
 
   // it.only('close() sends all writes', async () => {
@@ -557,25 +557,28 @@ describe.only('BulkWriter', () => {
     const ops: string[] = [];
     const writeResults: number[] = [];
     bulkWriter.onWriteError(error => {
-      console.log('failed')
+      console.log('failed');
       ops.push(error.operationType);
       return true;
     });
     bulkWriter.onWriteResult((documentRef, result) => {
-
-      console.log('success')
+      console.log('success');
       writeResults.push(result.writeTime.seconds);
     });
-  const op1=  bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    const op2=    bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    const op3=   bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    const op4=   bulkWriter.delete(firestore.doc('collectionId/doc'));
+    const op1 = bulkWriter.create(firestore.doc('collectionId/doc'), {
+      foo: 'bar',
+    });
+    const op2 = bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
+    const op3 = bulkWriter.update(firestore.doc('collectionId/doc'), {
+      foo: 'bar',
+    });
+    const op4 = bulkWriter.delete(firestore.doc('collectionId/doc'));
     const close = bulkWriter.close();
     await Promise.all([op1, op2, op3, op4, close]);
 
-    console.log('verify')
-      expect(ops).to.deep.equal(['create', 'set', 'update', 'delete']);
-      expect(writeResults).to.deep.equal([1, 2, 3, 4]);
+    console.log('verify');
+    expect(ops).to.deep.equal(['create', 'set', 'update', 'delete']);
+    expect(writeResults).to.deep.equal([1, 2, 3, 4]);
   });
 
   it('errors are still surfaced even if a retry function is specified', async () => {
