@@ -28,13 +28,7 @@ import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
 import {Deferred, getRetryCodes, isObject, wrapError} from './util';
-import {
-  BatchWriteResult,
-  PendingWriteOp,
-  WriteBatch,
-  WriteResult,
-} from './write-batch';
-import {logger} from './logger';
+import {BatchWriteResult, WriteBatch, WriteResult,} from './write-batch';
 import {
   invalidArgumentMessage,
   validateInteger,
@@ -456,28 +450,27 @@ export class BulkWriter {
     retryCount = 0
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(retryCount);
-    const op = bulkCommitBatch
-      .create(documentRef, data)
-      .then(res => {
-        this._successFn(documentRef, res);
-        return res;
-      })
-      .catch(error => {
-        const bulkWriterError = new BulkWriterError(
-          error.code,
-          error.message,
-          documentRef,
-          'create',
-          retryCount
-        );
-        const shouldRetry = this._errorFn(bulkWriterError);
-        if (shouldRetry) {
-          return this._create(documentRef, data, retryCount + 1);
-        } else {
-          throw error;
-        }
-      });
-    return op;
+    return bulkCommitBatch
+        .create(documentRef, data)
+        .then(res => {
+          this._successFn(documentRef, res);
+          return res;
+        })
+        .catch(error => {
+          const bulkWriterError = new BulkWriterError(
+              error.code,
+              error.message,
+              documentRef,
+              'create',
+              retryCount
+          );
+          const shouldRetry = this._errorFn(bulkWriterError);
+          if (shouldRetry) {
+            return this._create(documentRef, data, retryCount + 1);
+          } else {
+            throw error;
+          }
+        });
   }
 
   /**
@@ -524,29 +517,27 @@ export class BulkWriter {
     retryCount = 0
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(retryCount);
-    const op = bulkCommitBatch
-      .delete(documentRef, precondition)
-      .then(res => {
-        this._successFn(documentRef, res);
-        return res;
-      })
-      .catch(error => {
-        const bulkWriterError = new BulkWriterError(
-          error.code,
-          error.message,
-          documentRef,
-          'delete',
-          retryCount
-        );
-        const shouldRetry = this._errorFn(bulkWriterError);
-        if (shouldRetry) {
-          return this._delete(documentRef, precondition, retryCount + 1);
-        } else {
-          throw error;
-        }
-      });
-
-    return op;
+    return bulkCommitBatch
+        .delete(documentRef, precondition)
+        .then(res => {
+          this._successFn(documentRef, res);
+          return res;
+        })
+        .catch(error => {
+          const bulkWriterError = new BulkWriterError(
+              error.code,
+              error.message,
+              documentRef,
+              'delete',
+              retryCount
+          );
+          const shouldRetry = this._errorFn(bulkWriterError);
+          if (shouldRetry) {
+            return this._delete(documentRef, precondition, retryCount + 1);
+          } else {
+            throw error;
+          }
+        });
   }
 
   set<T>(
@@ -611,30 +602,27 @@ export class BulkWriter {
     retryCount = 0
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(retryCount);
-
-    const op = bulkCommitBatch
-      .set(documentRef, data, options)
-      .then(res => {
-        this._successFn(documentRef, res);
-        return res;
-      })
-      .catch(error => {
-        const bulkWriterError = new BulkWriterError(
-          error.code,
-          error.message,
-          documentRef,
-          'set',
-          retryCount
-        );
-        const shouldRetry = this._errorFn(bulkWriterError);
-        if (shouldRetry) {
-          return this._set(documentRef, data, options, retryCount + 1);
-        } else {
-          throw error;
-        }
-      });
-    
-    return op;
+    return bulkCommitBatch
+        .set(documentRef, data, options)
+        .then(res => {
+          this._successFn(documentRef, res);
+          return res;
+        })
+        .catch(error => {
+          const bulkWriterError = new BulkWriterError(
+              error.code,
+              error.message,
+              documentRef,
+              'set',
+              retryCount
+          );
+          const shouldRetry = this._errorFn(bulkWriterError);
+          if (shouldRetry) {
+            return this._set(documentRef, data, options, retryCount + 1);
+          } else {
+            throw error;
+          }
+        });
   }
 
   /**
@@ -705,34 +693,32 @@ export class BulkWriter {
     retryCount = 0
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(retryCount);
-    const op = bulkCommitBatch
-      .update(documentRef, dataOrField, ...preconditionOrValues)
-      .then(res => {
-        this._successFn(documentRef, res);
-        return res;
-      })
-      .catch(error => {
-        const bulkWriterError = new BulkWriterError(
-          error.code,
-          error.message,
-          documentRef,
-          'update',
-          retryCount
-        );
-        const shouldRetry = this._errorFn(bulkWriterError);
-        if (shouldRetry) {
-          return this._update(
-            documentRef,
-            dataOrField,
-            preconditionOrValues,
-            retryCount + 1
+    return bulkCommitBatch
+        .update(documentRef, dataOrField, ...preconditionOrValues)
+        .then(res => {
+          this._successFn(documentRef, res);
+          return res;
+        })
+        .catch(error => {
+          const bulkWriterError = new BulkWriterError(
+              error.code,
+              error.message,
+              documentRef,
+              'update',
+              retryCount
           );
-        } else {
-          throw error;
-        }
-      });
-    
-    return op;
+          const shouldRetry = this._errorFn(bulkWriterError);
+          if (shouldRetry) {
+            return this._update(
+                documentRef,
+                dataOrField,
+                preconditionOrValues,
+                retryCount + 1
+            );
+          } else {
+            throw error;
+          }
+        });
   }
 
   /**
@@ -841,18 +827,7 @@ export class BulkWriter {
     await flushPromise;
     this.isClosed = true;
   }
-
-  private reflect(promise: Promise<any>): Promise<any> {
-    return promise.then(
-      v => {
-        return {v: v, status: 'fulfilled'};
-      },
-      e => {
-        return {e: e, status: 'rejected'};
-      }
-    );
-  }
-
+  
   /**
    * Throws an error if the BulkWriter instance has been closed.
    */
