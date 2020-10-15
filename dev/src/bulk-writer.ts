@@ -441,6 +441,8 @@ export class BulkWriter {
    * A queue of batches to be written.
    */
   private batchQueue: BulkCommitBatch[] = [];
+  
+  private operations: Promise<WriteResult>[] = [];
 
   /**
    * Whether this BulkWriter instance has started to close. Afterwards, no
@@ -480,21 +482,6 @@ export class BulkWriter {
    * fails.
    */
   private errorFn: (error: BulkWriterError) => boolean;
-
-  private errorOrBust = (error: BulkWriterError): Promise<WriteResult> => {
-    const shouldRetry = this.errorFn(error);
-    if (shouldRetry) {
-      return this._retry(error);
-    } else {
-      // TODO: Figure out some way to throw the error then decrement. I'm
-      // currently decrementing first, causing close() to resolve, then continuing
-      // with the thrown error.
-      // this._decrementPendingOperationCount();
-      throw error;
-    }
-  };
-
-  private pendingOperationCount = 0;
 
   /** @hideconstructor */
   constructor(
@@ -584,14 +571,23 @@ export class BulkWriter {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.create(documentRef, data);
-    this.sendReadyBatches();
-    this.pendingOperationCount++;
-    return resultPromise
+    
+    const deferred = new Deferred<WriteResult>();
+    resultPromise
       .then(res => {
         this.successFn(documentRef, res);
-        return res;
+        deferred.resolve(res);
       })
-      .catch(this.errorOrBust);
+      .catch(error => {
+        const shouldRetry = this.errorFn(error);
+        if (shouldRetry) {
+          this.create(documentRef, data).then(deferred.resolve, deferred.reject);
+        } else {
+          deferred.reject(error);
+        }
+      });
+    this.sendReadyBatches();
+    return deferred.promise;
   }
 
   /**
@@ -629,14 +625,23 @@ export class BulkWriter {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.delete(documentRef, precondition);
+
+    const deferred = new Deferred<WriteResult>();
+    resultPromise
+        .then(res => {
+          this.successFn(documentRef, res);
+          deferred.resolve(res);
+        })
+        .catch(error => {
+          const shouldRetry = this.errorFn(error);
+          if (shouldRetry) {
+            this.delete(documentRef).then(deferred.resolve, deferred.reject);
+          } else {
+            deferred.reject(error);
+          }
+        });
     this.sendReadyBatches();
-    return resultPromise
-      .then(res => {
-        this._decrementPendingOperationCount();
-        this.successFn(documentRef, res);
-        return res;
-      })
-      .catch(this.errorOrBust);
+    return deferred.promise;
   }
 
   set<T>(
@@ -691,17 +696,23 @@ export class BulkWriter {
     this.verifyNotClosed();
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.set(documentRef, data, options);
+    
+    const deferred = new Deferred<WriteResult>();
+    resultPromise
+        .then(res => {
+          this.successFn(documentRef, res);
+          deferred.resolve(res);
+        })
+        .catch(error => {
+          const shouldRetry = this.errorFn(error);
+          if (shouldRetry) {
+            this.set(documentRef, data, options = {}).then(deferred.resolve, deferred.reject);
+          } else {
+            deferred.reject(error);
+          }
+        });
     this.sendReadyBatches();
-    this.pendingOperationCount++;
-    return resultPromise
-      .then(res => {
-        this._decrementPendingOperationCount();
-        this.successFn(documentRef, res);
-        return res;
-      })
-      .catch(error => {
-        return this.errorOrBust(error);
-      });
+    return deferred.promise;
   }
 
   /**
@@ -759,15 +770,22 @@ export class BulkWriter {
       dataOrField,
       ...preconditionOrValues
     );
+    const deferred = new Deferred<WriteResult>();
+    resultPromise
+        .then(res => {
+          this.successFn(documentRef, res);
+          deferred.resolve(res);
+        })
+        .catch(error => {
+          const shouldRetry = this.errorFn(error);
+          if (shouldRetry) {
+            (this.update as any)(...arguments).then(deferred.resolve, deferred.reject);
+          } else {
+            deferred.reject(error);
+          }
+        });
     this.sendReadyBatches();
-    this.pendingOperationCount++;
-    return resultPromise
-      .then(res => {
-        this._decrementPendingOperationCount();
-        this.successFn(documentRef, res);
-        return res;
-      })
-      .catch(this.errorOrBust);
+    return deferred.promise;
   }
 
   /**
@@ -796,36 +814,7 @@ export class BulkWriter {
   onWriteError(shouldRetryError: (error: BulkWriterError) => boolean): void {
     this.errorFn = shouldRetryError;
   }
-
-  /**
-   * Retry a BulkWriter operation that has failed.
-   *
-   * The BulkWriterOperation object is a property of the `BulkWriterError`
-   * object that is thrown whenever a write fails. `retry()` cannot be called
-   * after `close()` is called.
-   *
-   * @param error The errored operation to retry.
-   * @return A promise that resolves with the result of the operation. Throws
-   * an error if the retry fails.
-   * @throws {BulkWriterError} if the operation fails.
-   */
-  private _retry(error: BulkWriterError): Promise<WriteResult> {
-    const bulkCommitBatch = this.getEligibleBatch();
-    const operationInfo = {
-      documentRef: error.documentRef,
-      operationType: error.operationType,
-      retryCount: error.retryCount + 1,
-      data: error._data,
-    } as OperationInfo;
-    const resultPromise = bulkCommitBatch.addOperation(operationInfo);
-    this.sendReadyBatches();
-    return resultPromise
-      .then(res => {
-        this.successFn(error.documentRef, res);
-        return res;
-      })
-      .catch(this.errorOrBust);
-  }
+  
 
   /**
    * Commits all writes that have been enqueued up to this point in parallel.
