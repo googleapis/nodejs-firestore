@@ -480,11 +480,17 @@ export class BulkWriter {
   private errorOrBust = (error: BulkWriterError): Promise<WriteResult> => {
     const shouldRetry = this.errorFn(error);
     if (shouldRetry) {
-      return this._retry(error).catch(this.errorOrBust);
+      return this._retry(error);
     } else {
+      // TODO: Figure out some way to throw the error then decrement. I'm
+      // currently decrementing first, causing close() to resolve, then continuing
+      // with the thrown error.
+      this._decrementPendingOperationCount();
       throw error;
     }
   };
+
+  private pendingOperationCount = 0;
 
   /** @hideconstructor */
   constructor(
@@ -575,6 +581,7 @@ export class BulkWriter {
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.create(documentRef, data);
     this.sendReadyBatches();
+    this.pendingOperationCount++;
     return resultPromise
       .then(res => {
         this.successFn(documentRef, res);
@@ -621,6 +628,7 @@ export class BulkWriter {
     this.sendReadyBatches();
     return resultPromise
       .then(res => {
+        this._decrementPendingOperationCount();
         this.successFn(documentRef, res);
         return res;
       })
@@ -680,8 +688,10 @@ export class BulkWriter {
     const bulkCommitBatch = this.getEligibleBatch();
     const resultPromise = bulkCommitBatch.set(documentRef, data, options);
     this.sendReadyBatches();
+    this.pendingOperationCount++;
     return resultPromise
       .then(res => {
+        this._decrementPendingOperationCount();
         this.successFn(documentRef, res);
         return res;
       })
@@ -746,8 +756,10 @@ export class BulkWriter {
       ...preconditionOrValues
     );
     this.sendReadyBatches();
+    this.pendingOperationCount++;
     return resultPromise
       .then(res => {
+        this._decrementPendingOperationCount();
         this.successFn(documentRef, res);
         return res;
       })
@@ -879,11 +891,17 @@ export class BulkWriter {
     this.closeCalled = true;
     await flushPromise;
 
+    let didUseRetry = false;
     // Wait for pending retry operations to run.
     while (this.batchQueue.length > 0) {
+      didUseRetry = true;
       await this._flush();
     }
-    await this.closedDeferred;
+
+    // Wait for pending retry promises to run.
+    if (didUseRetry) {
+      await this.closedDeferred.promise;
+    }
     this.isClosed = true;
   }
 
@@ -991,6 +1009,13 @@ export class BulkWriter {
         this.closedDeferred.resolve();
       }
     });
+  }
+
+  private _decrementPendingOperationCount(): void {
+    this.pendingOperationCount--;
+    if (this.closeCalled && this.pendingOperationCount === 0) {
+      this.closedDeferred.resolve();
+    }
   }
 
   /**

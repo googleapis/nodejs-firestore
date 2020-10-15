@@ -57,7 +57,7 @@ interface RequestResponse {
   response: api.IBatchWriteResponse;
 }
 
-describe('BulkWriter', () => {
+describe.only('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
@@ -588,7 +588,7 @@ describe('BulkWriter', () => {
     expect(onWriteErrorCalled).to.be.true;
   });
 
-  it.only('retries multiple times', async () => {
+  it('retries multiple times', async () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
@@ -611,7 +611,7 @@ describe('BulkWriter', () => {
     bulkWriter.onWriteError(() => {
       return true;
     });
-    const setCall = bulkWriter
+    bulkWriter
       .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
       .then(res => {
         writeResult = res.writeTime.seconds;
@@ -620,9 +620,39 @@ describe('BulkWriter', () => {
         throw new Error('oop');
       });
     await bulkWriter.close();
-    // Why do I need to wait for setCall() for the test to pass?
-    await setCall;
     expect(writeResult).to.equal(1);
+  });
+
+  it('returns the error if no retry is specified', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
+      },
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
+      },
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
+      },
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
+      },
+    ]);
+    let code: Status = 0;
+    bulkWriter.onWriteError(error => {
+      return error.retryCount < 3;
+    });
+    bulkWriter
+      .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
+      .catch(err => {
+        code = err.code;
+      });
+    await bulkWriter.close();
+    expect(code).to.equal(Status.INTERNAL);
   });
 
   it('splits into multiple batches after exceeding maximum batch size', async () => {
