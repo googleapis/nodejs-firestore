@@ -57,7 +57,7 @@ interface RequestResponse {
   response: api.IBatchWriteResponse;
 }
 
-describe.only('BulkWriter', () => {
+describe('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
@@ -443,7 +443,7 @@ describe.only('BulkWriter', () => {
     expect(() => bulkWriter.create(doc, {})).to.throw(expected);
     expect(() => bulkWriter.update(doc, {})).to.throw(expected);
     expect(bulkWriter.flush()).to.eventually.be.rejectedWith(expected);
-    expect(bulkWriter.close()).to.be.eventually.rejectedWith(expected);
+    expect(bulkWriter.close()).to.eventually.be.rejectedWith(expected);
   });
 
   it('can send writes to the same documents in the same batch', async () => {
@@ -615,12 +615,49 @@ describe.only('BulkWriter', () => {
       .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
       .then(res => {
         writeResult = res.writeTime.seconds;
-      })
-      .catch(err => {
-        throw new Error('oop');
       });
     await bulkWriter.close();
     expect(writeResult).to.equal(1);
+  });
+
+  it('retries maintain correct write resolution ordering', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
+      },
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: successResponse(1),
+      },
+      {
+        request: createRequest([setOp('doc2', 'bar')]),
+        response: successResponse(2),
+      },
+    ]);
+    const ops: number[] = [];
+    bulkWriter.onWriteError(() => {
+      return true;
+    });
+    bulkWriter
+      .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
+      .then(res => {
+        ops.push(res.writeTime.seconds);
+      });
+    const flush = bulkWriter.flush().then(() => {
+      ops.push(42);
+    });
+    bulkWriter
+      .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
+      .then(res => {
+        ops.push(res.writeTime.seconds);
+      });
+
+    await flush;
+    expect(ops).to.deep.equal([1, 42]);
+    return bulkWriter.close().then(() => {
+      expect(ops).to.deep.equal([1, 42, 2]);
+    });
   });
 
   it('returns the error if no retry is specified', async () => {
@@ -903,7 +940,7 @@ describe.only('BulkWriter', () => {
     });
   });
 
-  it.only('fails writes after all retry attempts failed', async () => {
+  it('fails writes after all retry attempts failed', async () => {
     setTimeoutHandler(setImmediate);
     function instantiateInstance(): Promise<BulkWriter> {
       const overrides: ApiOverride = {
@@ -924,14 +961,12 @@ describe.only('BulkWriter', () => {
         foo: 'bar',
       })
       .catch(err => {
-        console.log('executing error');
         expect(err instanceof BulkWriterError).to.be.true;
         expect(err.code).to.equal(Status.ABORTED);
         incrementOpCount();
       });
     return bulkWriter.close().then(() => {
-      console.log('verify');
-      verifyOpCount(1)
+      verifyOpCount(1);
     });
   });
 

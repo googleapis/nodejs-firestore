@@ -174,6 +174,14 @@ export function getRetryParams(methodName: string): BackoffSettings {
   );
 }
 
+/** Returns a promise with a void return type. */
+export function voidPromise(promise: Promise<unknown>): Promise<void> {
+  return promise.then(
+    () => {},
+    () => {}
+  );
+}
+
 /**
  * Wraps the provided error in a new error that includes the provided stack.
  *

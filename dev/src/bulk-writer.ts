@@ -27,8 +27,14 @@ import {
 import {RateLimiter} from './rate-limiter';
 import {DocumentReference} from './reference';
 import {Timestamp} from './timestamp';
-import {Deferred, getRetryCodes, isObject, wrapError} from './util';
-import {BatchWriteResult, WriteBatch, WriteResult,} from './write-batch';
+import {
+  Deferred,
+  getRetryCodes,
+  isObject,
+  voidPromise,
+  wrapError,
+} from './util';
+import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 import {
   invalidArgumentMessage,
   validateInteger,
@@ -99,7 +105,6 @@ class BulkCommitBatch {
    * The state of the batch.
    */
   state = BatchState.OPEN;
-  
 
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
@@ -253,15 +258,20 @@ class BulkCommitBatch {
    * Resolves the individual operations in the batch with the results.
    */
   private async processResults(results: BatchWriteResult[]): Promise<void> {
-    return Promise.all(results.map((result, i) => {
-      const op = this.pendingOps[i];
-      if (result.status.code === Status.OK) {
-        op.deferred.resolve(result);
-      } else {
-        op.deferred.reject(result.status);
-      }
-      return op.deferred.promise.then(() => {}, () => {});
-    })).then(() => {});
+    return Promise.all(
+      results.map((result, i) => {
+        const op = this.pendingOps[i];
+        if (result.status.code === Status.OK) {
+          op.deferred.resolve(result);
+        } else {
+          op.deferred.reject(result.status);
+        }
+        return op.deferred.promise.then(
+          () => {},
+          () => {}
+        );
+      })
+    ).then(() => {});
   }
 
   markReadyToSend(): void {
@@ -308,28 +318,33 @@ export class BulkWriter {
   /**
    * The maximum number of writes that can be in a single batch.
    */
-  private maxBatchSize = MAX_BATCH_SIZE;
+  private _maxBatchSize = MAX_BATCH_SIZE;
 
   /**
    * A queue of batches to be written.
    */
-  private batchQueue: BulkCommitBatch[] = [];
+  private _batchQueue: BulkCommitBatch[] = [];
 
-  private _pendingCommits: Promise<void>[] = [];
-  private _pendingOps: Promise<void>[] = [];
+  private _retryBatchQueue: BulkCommitBatch[] = [];
+
+  /**
+   * A list of promises that represent sent batches. Each promise is resolved
+   * when the batch's response is received.
+   */
+  private _pendingBatches: Set<Promise<void>> = new Set();
+
+  /**
+   * A list of promises that represent pending BulkWriter operations. Each
+   * promise is resolved when the BulkWriter operation resolves.
+   */
+  private _pendingOps: Set<Promise<void>> = new Set();
 
   /**
    * Whether this BulkWriter instance has started to close. Afterwards, no
    * new operations can be enqueued, except for retry operations scheduled by
    * the error handler.
    */
-  private closeCalled = false;
-
-  /**
-   * Whether this BulkWriter instance is closed. Once closed, it cannot be
-   * opened again.
-   */
-  private isClosed = false;
+  private closed = false;
 
   /**
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
@@ -343,18 +358,18 @@ export class BulkWriter {
   private _successFn: (
     document: firestore.DocumentReference,
     result: WriteResult
-  ) => void =  () => {};
+  ) => void = () => {};
 
   /**
    * The user-provided callback to be run every time a BulkWriter operation
    * fails.
    */
-  private _errorFn: (error: BulkWriterError) => boolean =  error => {
+  private _errorFn: (error: BulkWriterError) => boolean = error => {
     const retryCodes = getRetryCodes('batchWrite');
     return (
-        error.code !== undefined &&
-        retryCodes.includes(error.code) &&
-        error.retryCount < MAX_RETRY_ATTEMPTS
+      error.code !== undefined &&
+      retryCodes.includes(error.code) &&
+      error.retryCount < MAX_RETRY_ATTEMPTS
     );
   };
 
@@ -396,8 +411,8 @@ export class BulkWriter {
 
         // Ensure that the batch size is not larger than the number of allowed
         // operations per second.
-        if (startingRate < this.maxBatchSize) {
-          this.maxBatchSize = startingRate;
+        if (startingRate < this._maxBatchSize) {
+          this._maxBatchSize = startingRate;
         }
       }
 
@@ -440,9 +455,9 @@ export class BulkWriter {
     data: T
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    const op = this._create(documentRef,data);
+    const op = this._create(documentRef, data);
     this.sendReadyBatches();
-    this._pendingOps.push(op.then(() => {}, () => {}));
+    this._pendingOps.add(voidPromise(op));
     return op;
   }
 
@@ -452,28 +467,15 @@ export class BulkWriter {
     retryCount = 0
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(retryCount);
-    return bulkCommitBatch
-        .create(documentRef, data)
-        .then(res => {
-          this._successFn(documentRef, res);
-          return res;
-        })
-        .catch(error => {
-          console.log('creating error');
-          const bulkWriterError = new BulkWriterError(
-              error.code,
-              error.message,
-              documentRef,
-              'create',
-              retryCount
-          );
-          const shouldRetry = this._errorFn(bulkWriterError);
-          if (shouldRetry) {
-            return this._create(documentRef, data, retryCount + 1);
-          } else {
-            throw bulkWriterError;
-          }
-        });
+    const retryFn = (): Promise<WriteResult> =>
+      this._create(documentRef, data, retryCount + 1);
+    return this.wrapRetry(
+      bulkCommitBatch.create(documentRef, data),
+      documentRef,
+      retryCount,
+      'create',
+      retryFn
+    );
   }
 
   /**
@@ -509,9 +511,9 @@ export class BulkWriter {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    const op = this._delete(documentRef,precondition);
+    const op = this._delete(documentRef, precondition);
     this.sendReadyBatches();
-    this._pendingOps.push(op.then(() => {}, () => {}));
+    this._pendingOps.add(voidPromise(op));
     return op;
   }
 
@@ -521,27 +523,15 @@ export class BulkWriter {
     retryCount = 0
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(retryCount);
-    return bulkCommitBatch
-        .delete(documentRef, precondition)
-        .then(res => {
-          this._successFn(documentRef, res);
-          return res;
-        })
-        .catch(error => {
-          const bulkWriterError = new BulkWriterError(
-              error.code,
-              error.message,
-              documentRef,
-              'delete',
-              retryCount
-          );
-          const shouldRetry = this._errorFn(bulkWriterError);
-          if (shouldRetry) {
-            return this._delete(documentRef, precondition, retryCount + 1);
-          } else {
-            throw bulkWriterError;
-          }
-        });
+    const retryFn = (): Promise<WriteResult> =>
+      this._delete(documentRef, precondition, retryCount + 1);
+    return this.wrapRetry(
+      bulkCommitBatch.delete(documentRef, precondition),
+      documentRef,
+      retryCount,
+      'delete',
+      retryFn
+    );
   }
 
   set<T>(
@@ -596,7 +586,6 @@ export class BulkWriter {
     this.verifyNotClosed();
     const op = this._set(documentRef, data, options);
     this.sendReadyBatches();
-    this._pendingOps.push(op.then(() => {}, () => {}));
     return op;
   }
 
@@ -607,27 +596,15 @@ export class BulkWriter {
     retryCount = 0
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(retryCount);
-    return bulkCommitBatch
-        .set(documentRef, data, options)
-        .then(res => {
-          this._successFn(documentRef, res);
-          return res;
-        })
-        .catch(error => {
-          const bulkWriterError = new BulkWriterError(
-              error.code,
-              error.message,
-              documentRef,
-              'set',
-              retryCount
-          );
-          const shouldRetry = this._errorFn(bulkWriterError);
-          if (shouldRetry) {
-            return this._set(documentRef, data, options, retryCount + 1);
-          } else {
-            throw bulkWriterError;
-          }
-        });
+    const retryFn = (): Promise<WriteResult> =>
+      this._set(documentRef, data, options, retryCount + 1);
+    return this.wrapRetry(
+      bulkCommitBatch.set(documentRef, data, options),
+      documentRef,
+      retryCount,
+      'set',
+      retryFn
+    );
   }
 
   /**
@@ -681,14 +658,12 @@ export class BulkWriter {
     this.verifyNotClosed();
     const op = this._update(documentRef, dataOrField, preconditionOrValues);
     this.sendReadyBatches();
-    this._pendingOps.push(op.then(() => {}, () => {}));
+    this._pendingOps.add(voidPromise(op));
     return op;
   }
 
   private _update(
-    documentRef: FirebaseFirestore.DocumentReference<
-      FirebaseFirestore.DocumentData
-    >,
+    documentRef: FirebaseFirestore.DocumentReference,
     dataOrField: FirebaseFirestore.UpdateData | string | FieldPath,
     preconditionOrValues: (
       | {lastUpdateTime?: Timestamp}
@@ -699,32 +674,20 @@ export class BulkWriter {
     retryCount = 0
   ): Promise<WriteResult> {
     const bulkCommitBatch = this.getEligibleBatch(retryCount);
-    return bulkCommitBatch
-        .update(documentRef, dataOrField, ...preconditionOrValues)
-        .then(res => {
-          this._successFn(documentRef, res);
-          return res;
-        })
-        .catch(error => {
-          const bulkWriterError = new BulkWriterError(
-              error.code,
-              error.message,
-              documentRef,
-              'update',
-              retryCount
-          );
-          const shouldRetry = this._errorFn(bulkWriterError);
-          if (shouldRetry) {
-            return this._update(
-                documentRef,
-                dataOrField,
-                preconditionOrValues,
-                retryCount + 1
-            );
-          } else {
-            throw bulkWriterError;
-          }
-        });
+    const retryFn = (): Promise<WriteResult> =>
+      this._update(
+        documentRef,
+        dataOrField,
+        preconditionOrValues,
+        retryCount + 1
+      );
+    return this.wrapRetry(
+      bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues),
+      documentRef,
+      retryCount,
+      'update',
+      retryFn
+    );
   }
 
   /**
@@ -785,22 +748,21 @@ export class BulkWriter {
   }
 
   private async _flush(): Promise<void> {
-    const trackedBatches = this.batchQueue;
+    const trackedBatches = this._batchQueue;
     trackedBatches.map(batch => batch.markReadyToSend());
-    let retry = false;
-    while (true) {
-      const before = this._pendingCommits.length;
-      this.sendReadyBatches(retry);
-      const after = this._pendingCommits.length;
-      await Promise.all(this._pendingCommits);
+    let retriesCompleted = false;
+    while (!retriesCompleted) {
+      const before = this._pendingBatches.size;
+      this.sendReadyBatches();
+      const after = this._pendingBatches.size;
+      await Promise.all(this._pendingBatches);
+
+      // If no new batches were created from the pending batches, then those
+      // batches did not create more retries, which means we're done.
       if (before === after) {
-        break;
-      } else {
-        retry = true;
+        retriesCompleted = true;
       }
     }
-    // Make sure user promises resolve before _flush
-    await Promise.all(this._pendingOps);
   }
 
   /**
@@ -831,16 +793,18 @@ export class BulkWriter {
     this.verifyNotClosed();
     this.firestore._decrementBulkWritersCount();
     const flushPromise = this.flush();
-    this.closeCalled = true;
+    this.closed = true;
     await flushPromise;
-    this.isClosed = true;
+
+    // Make sure user promises resolve before close() resolves.
+    await Promise.all(this._pendingOps);
   }
-  
+
   /**
    * Throws an error if the BulkWriter instance has been closed.
    */
   private verifyNotClosed(): void {
-    if (this.closeCalled) {
+    if (this.closed) {
       throw new Error('BulkWriter has already been closed.');
     }
   }
@@ -851,13 +815,20 @@ export class BulkWriter {
    *
    * @private
    */
-  private getEligibleBatch<T>(retryCount:number): BulkCommitBatch {
-    if (this.batchQueue.length > 0) {// no batch queue needed
-      const lastBatch = this.batchQueue[this.batchQueue.length - 1];
-      if (lastBatch.retryCount == retryCount && lastBatch.state === BatchState.OPEN) {
+  private getEligibleBatch<T>(retryCount: number): BulkCommitBatch {
+    const batchQueue =
+      retryCount > 0 ? this._retryBatchQueue : this._batchQueue;
+
+    if (batchQueue.length > 0) {
+      const lastBatch = batchQueue[batchQueue.length - 1];
+      if (
+        lastBatch.retryCount === retryCount &&
+        lastBatch.state === BatchState.OPEN
+      ) {
         return lastBatch;
       }
     }
+
     return this.createNewBatch(retryCount);
   }
 
@@ -867,21 +838,23 @@ export class BulkWriter {
    *
    * @private
    */
-  private createNewBatch(retryCount:number): BulkCommitBatch {
-    console.log('adding new batch with retry count ' + retryCount);
+  private createNewBatch(retryCount: number): BulkCommitBatch {
     const newBatch = new BulkCommitBatch(
       this.firestore,
       this.firestore.batch(),
-      this.maxBatchSize,
-        retryCount
+      this._maxBatchSize,
+      retryCount
     );
 
-    if (this.batchQueue.length > 0) {
-      this.batchQueue[this.batchQueue.length - 1].markReadyToSend();
+    const batchQueue =
+      retryCount > 0 ? this._retryBatchQueue : this._batchQueue;
+
+    if (batchQueue.length > 0) {
+      batchQueue[batchQueue.length - 1].markReadyToSend();
       this.sendReadyBatches();
     }
-    
-    this.batchQueue.push(newBatch);
+
+    batchQueue.push(newBatch);
     return newBatch;
   }
 
@@ -893,41 +866,43 @@ export class BulkWriter {
    *
    * @private
    */
-  private sendReadyBatches(filterRetry = false): void {
-    const unsentBatches = this.batchQueue;
-    
-    for (let index = 0; 
-      index < unsentBatches.length ;
-      ++index
-    ) {
-      let shouldRun = false;
-      
-      if (filterRetry && unsentBatches[index].retryCount > 0) {
-        shouldRun = true;
-        unsentBatches[index].markReadyToSend();
-      } else if (unsentBatches[index].state === BatchState.READY_TO_SEND) {
-        shouldRun = true;
-      }
-      
-      if (!shouldRun) continue;
-      
-      const newDeferred = new Deferred<void>();
-      this._pendingCommits.push(newDeferred.promise);
-      
-      console.log('sending batch');
+  private sendReadyBatches(): void {
+    // Always send retry batches first if the retryBatchQueue isn't empty.
+    const sendRetries = this._retryBatchQueue.length > 0;
+    const unsentBatches = sendRetries
+      ? this._retryBatchQueue
+      : this._batchQueue;
+    for (let index = 0; index < unsentBatches.length; ++index) {
       const batch = unsentBatches[index];
+
+      // Send all retries whenever possible.
+      if (sendRetries) {
+        batch.markReadyToSend();
+      }
+
+      if (batch.state !== BatchState.READY_TO_SEND) {
+        continue;
+      }
+
+      const batchDeferred = new Deferred<void>();
+      this._pendingBatches.add(batchDeferred.promise);
 
       // Send the batch if it is under the rate limit, or schedule another
       // attempt after the appropriate timeout.
       const delayMs = this.rateLimiter.getNextRequestDelayMs(batch.opCount);
       assert(delayMs !== -1, 'Batch size should be under capacity');
       if (delayMs === 0) {
-        this.sendBatch(batch).then(newDeferred.resolve, newDeferred.reject);
+        this.sendBatch(batch, sendRetries)
+          .then(batchDeferred.resolve, batchDeferred.reject)
+          .then(() => {
+            this._pendingBatches.delete(batchDeferred.promise);
+          });
       } else {
         delayExecution(() => {
-          newDeferred.resolve();
+          batchDeferred.resolve();
+          this._pendingBatches.delete(batchDeferred.promise);
           this.sendReadyBatches();
-          }, delayMs);
+        }, delayMs);
         break;
       }
     }
@@ -939,17 +914,59 @@ export class BulkWriter {
    *
    * @private
    */
-  private sendBatch(batch: BulkCommitBatch): Promise<void> {
+  private sendBatch(
+    batch: BulkCommitBatch,
+    isRetryBatch = false
+  ): Promise<void> {
     const success = this.rateLimiter.tryMakeRequest(batch.opCount);
     assert(success, 'Batch should be under rate limit to be sent.');
-   return  batch.bulkCommit().then(() => {
+    return batch.bulkCommit().then(() => {
       // Remove the batch from the BatchQueue after it has been processed.
-      const batchIndex = this.batchQueue.indexOf(batch);
+      const batchQueue = isRetryBatch
+        ? this._retryBatchQueue
+        : this._batchQueue;
+      const batchIndex = batchQueue.indexOf(batch);
       assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
-      this.batchQueue.splice(batchIndex, 1);
+      batchQueue.splice(batchIndex, 1);
 
-        this.sendReadyBatches();
+      this.sendReadyBatches();
     });
+  }
+
+  private wrapRetry(
+    promise: Promise<WriteResult>,
+    documentRef: firestore.DocumentReference,
+    retryCount: number,
+    operationType: 'create' | 'set' | 'update' | 'delete',
+    retryFn: () => Promise<WriteResult>
+  ): Promise<WriteResult> {
+    // eslint-disable-next-line prefer-const
+    let voidOperationPromise: Promise<void>;
+    const operation = promise
+      .then(res => {
+        this._successFn(documentRef, res);
+        this._pendingOps.delete(voidOperationPromise);
+        return res;
+      })
+      .catch(error => {
+        const bulkWriterError = new BulkWriterError(
+          error.code,
+          error.message,
+          documentRef,
+          operationType,
+          retryCount
+        );
+        const shouldRetry = this._errorFn(bulkWriterError);
+        this._pendingOps.delete(voidOperationPromise);
+        if (shouldRetry) {
+          return retryFn();
+        } else {
+          throw bulkWriterError;
+        }
+      });
+    voidOperationPromise = voidPromise(operation);
+    this._pendingOps.add(voidOperationPromise);
+    return operation;
   }
 
   /**
@@ -959,7 +976,7 @@ export class BulkWriter {
    */
   // Visible for testing.
   _setMaxBatchSize(size: number): void {
-    this.maxBatchSize = size;
+    this._maxBatchSize = size;
   }
 
   /**
