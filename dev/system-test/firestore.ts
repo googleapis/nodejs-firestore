@@ -271,8 +271,7 @@ describe('CollectionGroup class', () => {
 
     const documents: QueryDocumentSnapshot<DocumentData>[] = [];
     for (const partition of partitions) {
-      // TODO(mrschmidt); Remove the need to add an `orderBy` here
-      let partitionedQuery = collectionGroup.orderBy(FieldPath.documentId());
+      let partitionedQuery: Query = collectionGroup;
       if (partition.startAt) {
         partitionedQuery = partitionedQuery.startAt(...partition.startAt);
       }
@@ -1620,6 +1619,12 @@ describe('Query class', () => {
   it('has startAt() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').startAt('b').get();
+    expectDocs(res, {foo: 'b'});
+  });
+
+  it('startAt() adds implicit order by for DocumentReference', async () => {
+    const references = await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol.startAt(references[1]).get();
     expectDocs(res, {foo: 'b'});
   });
 
