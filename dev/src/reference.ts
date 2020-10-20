@@ -2407,7 +2407,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * let collectionRef = firestore.collection('col');
    *
    * return collectionRef.listDocuments().then(documentRefs => {
-   *    return firestore.getAll(documentRefs);
+   *    return firestore.getAll(...documentRefs);
    * }).then(documentSnapshots => {
    *    for (let documentSnapshot of documentSnapshots) {
    *       if (documentSnapshot.exists) {
