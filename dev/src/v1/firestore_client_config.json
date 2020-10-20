@@ -78,7 +78,8 @@
           "retry_params_name": "default"
         },
         "PartitionQuery": {
-          "retry_codes_name": "non_idempotent",
+          "timeout_millis": 300000,
+          "retry_codes_name": "deadline_exceeded_internal_unavailable",
           "retry_params_name": "default"
         },
         "Write": {

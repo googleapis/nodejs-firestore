@@ -1852,6 +1852,32 @@ describe('startAt() interface', () => {
     });
   });
 
+  it('appends orderBy for DocumentReference cursors', () => {
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(
+          request,
+          orderBy('__name__', 'ASCENDING'),
+          startAt(true, {
+            referenceValue:
+              `projects/${PROJECT_ID}/databases/(default)/` +
+              'documents/collectionId/doc',
+          })
+        );
+
+        return stream();
+      },
+    };
+
+    return createInstance(overrides).then(firestore => {
+      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
+        let query: Query = firestore.collection('collectionId');
+        query = query.startAt(doc.ref);
+        return query.get();
+      });
+    });
+  });
+
   it('can extract implicit direction for document snapshot', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
