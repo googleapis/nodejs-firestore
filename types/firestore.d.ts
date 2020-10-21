@@ -474,8 +474,9 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be
      * created.
      * @param data The object to serialize as the document.
-     * @returns A promise that resolves with the result
-     * of the write. Throws an error if the write fails.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result
+     * of the write. If the write fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
 
@@ -489,8 +490,9 @@ declare namespace FirebaseFirestore {
      * @param precondition.lastUpdateTime If set, enforces that the
      * document was last updated at lastUpdateTime. Fails the batch if the
      * document doesn't exist or was last updated at a different time.
-     * @returns A promise that resolves with the result
-     * of the write. Throws an error if the write fails.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result
+     * of the delete. If the delete fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     delete(
       documentRef: DocumentReference<any>,
@@ -514,8 +516,9 @@ declare namespace FirebaseFirestore {
      * @param options.mergeFields - If provided,
      * set() only replaces the specified field paths. Any field path that is not
      * specified is ignored and remains untouched.
-     * @returns A promise that resolves with the result
-     * of the write. Throws an error if the write fails.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result
+     * of the write. If the write fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     set<T>(
       documentRef: DocumentReference<T>,
@@ -543,8 +546,9 @@ declare namespace FirebaseFirestore {
      * @param data An object containing the fields and values with which to
      * update the document.
      * @param precondition A Precondition to enforce on this update.
-     * @returns A promise that resolves with the result of the write. Throws
-     * an error if the write fails.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result
+     * of the write. If the write fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     update(
       documentRef: DocumentReference<any>,
@@ -572,8 +576,9 @@ declare namespace FirebaseFirestore {
      * @param value The first value
      * @param fieldsOrPrecondition An alternating list of field paths and values
      * to update, optionally followed a `Precondition` to enforce on this update.
-     * @returns A promise that resolves with the result of the write. Throws
-     * an error if the write fails.
+     * @returns {Promise<WriteResult>} A promise that resolves with the result
+     * of the write. If the write fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     update(
       documentRef: DocumentReference<any>,
@@ -596,10 +601,13 @@ declare namespace FirebaseFirestore {
     /**
      * Attaches a listener that is run every time a BulkWriter operation fails.
      *
-     * @param callback A callback to be called every time a BulkWriter operation
-     * fails.
+     * @param shouldRetryCallback A callback to be called every time a BulkWriter
+     * operation fails. Returning `true` will retry the operation. Returning
+     * `false` will stop the retry loop.
      */
-    onWriteError(callback: (error: BulkWriterError) => boolean): void;
+    onWriteError(
+      shouldRetryCallback: (error: BulkWriterError) => boolean
+    ): void;
 
     /**
      * Commits all writes that have been enqueued up to this point in parallel.
@@ -676,8 +684,8 @@ declare namespace FirebaseFirestore {
     /** The type of operation performed. */
     readonly operationType: 'create' | 'set' | 'update' | 'delete';
 
-    /** How many times this operation has been retried. */
-    readonly retryCount: number;
+    /** How many times this operation has been attempted unsuccessfully. */
+    readonly failedAttempts: number;
   }
 
   /**
