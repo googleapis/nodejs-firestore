@@ -2489,11 +2489,10 @@ describe('BulkWriter class', () => {
 
   it.only('can retry failed writes with a provided callback', async () => {
     let retryCount = 0;
-    let code: Status = 0;
+    let code: Status = -1;
     writer.onWriteError(error => {
-      retryCount = error.retryCount;
-      // TODO: this test passes if retryCount < 6;
-      return error.retryCount < 30;
+      retryCount = error.failedAttempts;
+      return error.failedAttempts < 15;
     });
 
     // Use an invalid document name that the backend will reject.
@@ -2503,7 +2502,7 @@ describe('BulkWriter class', () => {
       code = err.code;
     });
     await writer.close();
-    expect(retryCount).to.equal(30);
+    expect(retryCount).to.equal(15);
     console.log('validating');
     expect(code).to.equal(Status.INVALID_ARGUMENT);
   });

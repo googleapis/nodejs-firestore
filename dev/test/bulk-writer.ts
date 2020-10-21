@@ -46,6 +46,7 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
+import {Deferred} from '../src/util';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);
@@ -57,7 +58,7 @@ interface RequestResponse {
   response: api.IBatchWriteResponse;
 }
 
-describe('BulkWriter', () => {
+describe.only('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
@@ -365,10 +366,6 @@ describe('BulkWriter', () => {
   });
 
   it('surfaces errors', async () => {
-    process.on('unhandledRejection', (reason, p) => {
-      console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
-      // application specific logging, throwing an error, or other logic here
-    });
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
@@ -384,6 +381,28 @@ describe('BulkWriter', () => {
     });
 
     return bulkWriter.close().then(async () => verifyOpCount(1));
+  });
+
+  it('throws UnhandledPromiseRejection if the error is not caught', async () => {
+    let errorThrown = false;
+    const unhandledDeferred = new Deferred<void>();
+    process.on('unhandledRejection', () => {
+      errorThrown = true;
+      unhandledDeferred.resolve();
+    });
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(),
+      },
+    ]);
+
+    const doc = firestore.doc('collectionId/doc');
+    bulkWriter.set(doc, {foo: 'bar'});
+
+    await bulkWriter.close();
+    await unhandledDeferred.promise;
+    expect(errorThrown).to.be.true;
   });
 
   it('flush() resolves immediately if there are no writes', async () => {
@@ -442,8 +461,8 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.set(doc, {})).to.throw(expected);
     expect(() => bulkWriter.create(doc, {})).to.throw(expected);
     expect(() => bulkWriter.update(doc, {})).to.throw(expected);
-    expect(bulkWriter.flush()).to.eventually.be.rejectedWith(expected);
-    expect(bulkWriter.close()).to.eventually.be.rejectedWith(expected);
+    expect(() => bulkWriter.flush()).to.throw(expected);
+    expect(() => bulkWriter.close()).to.throw(expected);
   });
 
   it('can send writes to the same documents in the same batch', async () => {
@@ -514,7 +533,7 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('can retry failed operations with retry()', async () => {
+  it('can retry failed operations with global error callback', async () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([
@@ -679,9 +698,9 @@ describe('BulkWriter', () => {
         response: failedResponse(Status.INTERNAL),
       },
     ]);
-    let code: Status = 0;
+    let code: Status = -1;
     bulkWriter.onWriteError(error => {
-      return error.retryCount < 3;
+      return error.failedAttempts < 3;
     });
     bulkWriter
       .set(firestore.doc('collectionId/doc'), {foo: 'bar'})

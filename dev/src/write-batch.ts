@@ -157,15 +157,6 @@ export class WriteBatch implements firestore.WriteBatch {
   }
 
   /**
-   * Returns the last operation that was added to the WriteBatch.
-   *
-   * @private
-   */
-  get _lastOp(): PendingWriteOp {
-    return this._ops[this._ops.length - 1].op;
-  }
-
-  /**
    * Throws an error if this batch has already been committed.
    *
    * @private
@@ -530,19 +521,6 @@ export class WriteBatch implements firestore.WriteBatch {
     this._ops.push({docPath: documentRef.path, op});
 
     return this;
-  }
-
-  /**
-   * Adds the provided document reference and PendingWriteOp to the list of
-   * WriteBatch operations.
-   *
-   * @private
-   */
-  _addOperation(
-    documentRef: firestore.DocumentReference,
-    op: PendingWriteOp
-  ): void {
-    this._ops.push({docPath: documentRef.path, op});
   }
 
   /**

@@ -433,6 +433,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
   // on end users.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(field: string | FieldPath): any {
+    console.error('current field', field);
     validateFieldPath('field', field);
 
     const protoField = this.protoField(field);

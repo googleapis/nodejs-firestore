@@ -174,8 +174,14 @@ export function getRetryParams(methodName: string): BackoffSettings {
   );
 }
 
-/** Returns a promise with a void return type. */
-export function voidPromise(promise: Promise<unknown>): Promise<void> {
+/**
+ * Returns a promise with a void return type. The returned promise swallows all
+ * errors and never throws.
+ *
+ * This is primarily used to wait for a promise to complete when the result of
+ * the promise will be discarded.
+ */
+export function voidPromiseNoThrow(promise: Promise<unknown>): Promise<void> {
   return promise.then(
     () => {},
     () => {}
