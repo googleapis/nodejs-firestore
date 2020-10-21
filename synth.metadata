@@ -4,22 +4,22 @@
       "git": {
         "name": ".",
         "remote": "https://github.com/googleapis/nodejs-firestore.git",
-        "sha": "388583bae74e0daead296974beaee9c230f770ef"
+        "sha": "39a30c24a54078e53ad9c746ee8ae5a4a9471349"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "6db0bbeb6e959dc4a401f7be17ce2fb79e164a5e",
-        "internalRef": "327771486"
+        "sha": "4f3ef93916730f1639179ad623c65279ff5799e7",
+        "internalRef": "337565369"
       }
     },
     {
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "8cf6d2834ad14318e64429c3b94f6443ae83daf9"
+        "sha": "5451633881133e5573cc271a18e73b18caca8b1b"
       }
     }
   ],
@@ -67,6 +67,7 @@
     ".nycrc",
     ".prettierignore",
     ".prettierrc.js",
+    ".trampolinerc",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",
     "LICENSE",
@@ -116,7 +117,6 @@
     "dev/protos/protos.d.ts",
     "dev/protos/protos.js",
     "dev/protos/protos.json",
-    "dev/src/reference.ts",
     "dev/src/v1/firestore_admin_client.ts",
     "dev/src/v1/firestore_admin_client_config.json",
     "dev/src/v1/firestore_admin_proto_list.json",
