@@ -600,7 +600,7 @@ export class BulkWriter {
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
     >
   ): Promise<WriteResult> {
-    return this.runOperation(documentRef, 'set', bulkCommitBatch =>
+    return this.runOperation(documentRef, 'update', bulkCommitBatch =>
       bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues)
     );
   }

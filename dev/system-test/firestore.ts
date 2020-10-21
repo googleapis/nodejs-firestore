@@ -2614,7 +2614,7 @@ describe('BulkWriter class', () => {
     return firestore.terminate();
   });
 
-  it.only('can retry failed writes with a provided callback', async () => {
+  it('can retry failed writes with a provided callback', async () => {
     let retryCount = 0;
     let code: Status = -1;
     writer.onWriteError(error => {
