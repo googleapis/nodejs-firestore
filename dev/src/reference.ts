@@ -2429,9 +2429,10 @@ export class CollectionReference<T = firestore.DocumentData>
         parent: parentPath.formattedName,
         collectionId: this.id,
         showMissing: true,
-        // Setting `pageSize` to the maximum allowed value lets the backend cap
-        // the page size (currently to 300).
-        pageSize: Math.pow(2, 32) - 1,
+        // Setting `pageSize` to an arbitrarily large value lets the backend cap
+        // the page size (currently to 300). Note that the backend rejects
+        // MAX_INT32 (b/146883794).
+        pageSize: Math.pow(2, 16) - 1,
         mask: {fieldPaths: []},
       };
 
