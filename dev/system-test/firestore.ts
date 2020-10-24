@@ -14,7 +14,7 @@
 
 import {QuerySnapshot, DocumentData} from '@google-cloud/firestore';
 
-import {describe, it, beforeEach, afterEach} from 'mocha';
+import {describe, it, before, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
@@ -45,6 +45,8 @@ import {
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
 import {BulkWriter} from '../src/bulk-writer';
+import {QueryPartition} from '../src/query-partition';
+import {CollectionGroup} from '../src/collection-group';
 
 use(chaiAsPromised);
 
@@ -191,6 +193,125 @@ describe('Firestore class', () => {
         'instances must be closed before terminating the client. There are 0 ' +
         'active listeners and 1 open BulkWriter instances.'
     );
+  });
+});
+
+describe('CollectionGroup class', () => {
+  const desiredPartitionCount = 3;
+  const documentCount = 2 * 128 + 127; // Minimum partition size is 128.
+
+  let firestore: Firestore;
+  let randomColl: CollectionReference;
+  let collectionGroup: CollectionGroup;
+
+  before(async () => {
+    firestore = new Firestore({});
+    randomColl = getTestRoot(firestore);
+    collectionGroup = firestore.collectionGroup(randomColl.id);
+
+    const batch = firestore.batch();
+    for (let i = 0; i < documentCount; ++i) {
+      batch.create(randomColl.doc(), {title: 'post', author: 'author'});
+    }
+    await batch.commit();
+  });
+
+  async function getPartitions<T>(
+    collectionGroup: CollectionGroup<T>,
+    desiredPartitionsCount: number
+  ): Promise<QueryPartition<T>[]> {
+    const partitions: QueryPartition<T>[] = [];
+    for await (const partition of collectionGroup.getPartitions(
+      desiredPartitionsCount
+    )) {
+      partitions.push(partition);
+    }
+    return partitions;
+  }
+
+  async function verifyPartitions<T>(
+    partitions: QueryPartition<T>[]
+  ): Promise<QueryDocumentSnapshot<T>[]> {
+    expect(partitions.length).to.not.be.greaterThan(desiredPartitionCount);
+
+    expect(partitions[0].startAt).to.be.undefined;
+    for (let i = 0; i < partitions.length - 1; ++i) {
+      // The cursor value is a single DocumentReference
+      expect(
+        (partitions[i].endBefore![0] as DocumentReference<T>).isEqual(
+          partitions[i + 1].startAt![0] as DocumentReference<T>
+        )
+      ).to.be.true;
+    }
+    expect(partitions[partitions.length - 1].endBefore).to.be.undefined;
+
+    // Validate that we can use the partitions to read the original documents.
+    const documents: QueryDocumentSnapshot<T>[] = [];
+    for (const partition of partitions) {
+      documents.push(...(await partition.toQuery().get()).docs);
+    }
+    expect(documents.length).to.equal(documentCount);
+
+    return documents;
+  }
+
+  it('partition query', async () => {
+    const partitions = await getPartitions(
+      collectionGroup,
+      desiredPartitionCount
+    );
+    await verifyPartitions(partitions);
+  });
+
+  it('partition query with manual cursors', async () => {
+    const partitions = await getPartitions(
+      collectionGroup,
+      desiredPartitionCount
+    );
+
+    const documents: QueryDocumentSnapshot<DocumentData>[] = [];
+    for (const partition of partitions) {
+      let partitionedQuery: Query = collectionGroup;
+      if (partition.startAt) {
+        partitionedQuery = partitionedQuery.startAt(...partition.startAt);
+      }
+      if (partition.endBefore) {
+        partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
+      }
+      documents.push(...(await partitionedQuery.get()).docs);
+    }
+
+    expect(documents.length).to.equal(documentCount);
+  });
+
+  it('partition query with converter', async () => {
+    const collectionGroupWithConverter = collectionGroup.withConverter(
+      postConverter
+    );
+    const partitions = await getPartitions(
+      collectionGroupWithConverter,
+      desiredPartitionCount
+    );
+    const documents = await verifyPartitions(partitions);
+
+    for (const document of documents) {
+      expect(document.data()).to.be.an.instanceOf(Post);
+    }
+  });
+
+  it('empty partition query', async () => {
+    const desiredPartitionCount = 3;
+
+    const collectionGroupId = randomColl.doc().id;
+    const collectionGroup = firestore.collectionGroup(collectionGroupId);
+    const partitions = await getPartitions(
+      collectionGroup,
+      desiredPartitionCount
+    );
+
+    expect(partitions.length).to.equal(1);
+    expect(partitions[0].startAt).to.be.undefined;
+    expect(partitions[0].endBefore).to.be.undefined;
   });
 });
 
@@ -1224,6 +1345,102 @@ describe('Query class', () => {
       });
   });
 
+  it('supports !=', async () => {
+    await addDocs(
+      {zip: NaN},
+      {zip: 91102},
+      {zip: 98101},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}},
+      {zip: null}
+    );
+
+    let res = await randomCol.where('zip', '!=', 98101).get();
+    expectDocs(
+      res,
+      {zip: NaN},
+      {zip: 91102},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+
+    res = await randomCol.where('zip', '!=', NaN).get();
+    expectDocs(
+      res,
+      {zip: 91102},
+      {zip: 98101},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+
+    res = await randomCol.where('zip', '!=', null).get();
+    expectDocs(
+      res,
+      {zip: NaN},
+      {zip: 91102},
+      {zip: 98101},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+  });
+
+  it('supports != with document ID', async () => {
+    const refs = await addDocs({count: 1}, {count: 2}, {count: 3});
+    const res = await randomCol
+      .where(FieldPath.documentId(), '!=', refs[0].id)
+      .get();
+    expectDocs(res, {count: 2}, {count: 3});
+  });
+
+  it('supports not-in', async () => {
+    await addDocs(
+      {zip: 98101},
+      {zip: 91102},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+    let res = await randomCol.where('zip', 'not-in', [98101, 98103]).get();
+    expectDocs(
+      res,
+      {zip: 91102},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+
+    res = await randomCol.where('zip', 'not-in', [NaN]).get();
+    expectDocs(
+      res,
+      {zip: 91102},
+      {zip: 98101},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}}
+    );
+
+    res = await randomCol.where('zip', 'not-in', [null]).get();
+    expect(res.size).to.equal(0);
+  });
+
+  it('supports not-in with document ID array', async () => {
+    const refs = await addDocs({count: 1}, {count: 2}, {count: 3});
+    const res = await randomCol
+      .where(FieldPath.documentId(), 'not-in', [refs[0].id, refs[1]])
+      .get();
+    expectDocs(res, {count: 3});
+  });
+
   it('supports "in"', async () => {
     await addDocs(
       {zip: 98101},
@@ -1402,6 +1619,12 @@ describe('Query class', () => {
   it('has startAt() method', async () => {
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await randomCol.orderBy('foo').startAt('b').get();
+    expectDocs(res, {foo: 'b'});
+  });
+
+  it('startAt() adds implicit order by for DocumentReference', async () => {
+    const references = await addDocs({foo: 'a'}, {foo: 'b'});
+    const res = await randomCol.startAt(references[1]).get();
     expectDocs(res, {foo: 'b'});
   });
 
@@ -2389,17 +2612,6 @@ describe('BulkWriter class', () => {
     await writer.close();
     return firestore.terminate();
   });
-
-  it('writes to the same document in order', async () => {
-    const ref = randomCol.doc('doc1');
-    await ref.set({foo: 'bar0'});
-    writer.set(ref, {foo: 'bar1'});
-    writer.set(ref, {foo: 'bar2'});
-    writer.set(ref, {foo: 'bar3'});
-    await writer.flush();
-    const res = await ref.get();
-    expect(res.data()).to.deep.equal({foo: 'bar3'});
-  });
 });
 
 describe('Client initialization', () => {
@@ -2460,6 +2672,16 @@ describe('Client initialization', () => {
           deferred.resolve();
         });
         return deferred.promise;
+      },
+    ],
+    [
+      'CollectionGroup.getPartitions()',
+      async randomColl => {
+        const partitions = randomColl.firestore
+          .collectionGroup('id')
+          .getPartitions(2);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _ of partitions);
       },
     ],
     [
@@ -2551,6 +2773,7 @@ describe('Bundle building', () => {
       name: snap.toDocumentProto().name,
       readTime: snap.readTime.toProto().timestampValue,
       exists: false,
+      queries: [],
     });
   });
 
@@ -2621,6 +2844,7 @@ describe('Bundle building', () => {
       name: limitToLastSnap.docs[0].toDocumentProto().name,
       readTime: limitToLastSnap.readTime.toProto().timestampValue,
       exists: true,
+      queries: ['limitQuery', 'limitToLastQuery'],
     });
 
     const bundledDoc = (elements[4] as IBundleElement).document;

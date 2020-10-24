@@ -12,22 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {DocumentData} from '@google-cloud/firestore';
+import {BulkWriterOptions, DocumentData} from '@google-cloud/firestore';
 
 import {afterEach, beforeEach, describe, it} from 'mocha';
 import {expect} from 'chai';
 import {GoogleError, Status} from 'google-gax';
 
 import * as proto from '../protos/firestore_v1_proto_api';
-import {Firestore, setLogFunction, Timestamp, WriteResult} from '../src';
+import {
+  BulkWriter,
+  Firestore,
+  setLogFunction,
+  Timestamp,
+  WriteResult,
+} from '../src';
 import {setTimeoutHandler} from '../src/backoff';
-import {BulkWriter} from '../src/bulk-writer';
-import {Deferred} from '../src/util';
 import {
   ApiOverride,
   create,
   createInstance,
   document,
+  InvalidApiUsage,
   remove,
   response,
   set,
@@ -37,9 +42,10 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
+import {DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND} from '../src/bulk-writer';
 
 // Change the argument to 'console.log' to enable debug output.
-setLogFunction(() => {});
+setLogFunction(null);
 
 const PROJECT_ID = 'test-project';
 
@@ -52,12 +58,9 @@ describe('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
-  let activeRequestDeferred: Deferred<void>;
-  let activeRequestCounter = 0;
   let timeoutHandlerCounter = 0;
 
   beforeEach(() => {
-    activeRequestDeferred = new Deferred<void>();
     requestCounter = 0;
     opCount = 0;
     timeoutHandlerCounter = 0;
@@ -147,15 +150,8 @@ describe('BulkWriter', () => {
 
   /**
    * Creates an instance with the mocked objects.
-   *
-   * @param enforceSingleConcurrentRequest Whether to check that there is only
-   * one active request at a time. If true, the `activeRequestDeferred` must be
-   * manually resolved for the response to return.
    */
-  function instantiateInstance(
-    mock: RequestResponse[],
-    enforceSingleConcurrentRequest = false
-  ): Promise<BulkWriter> {
+  function instantiateInstance(mock: RequestResponse[]): Promise<BulkWriter> {
     const overrides: ApiOverride = {
       batchWrite: async (request, options) => {
         expect(options!.retry!.retryCodes).contains(Status.ABORTED);
@@ -164,16 +160,6 @@ describe('BulkWriter', () => {
           database: `projects/${PROJECT_ID}/databases/(default)`,
           writes: mock[requestCounter].request.writes,
         });
-        if (enforceSingleConcurrentRequest) {
-          activeRequestCounter++;
-
-          // This expect statement is used to test that only one request is
-          // made at a time.
-          expect(activeRequestCounter).to.equal(1);
-          await activeRequestDeferred.promise;
-          activeRequestCounter--;
-        }
-
         const responsePromise = response({
           writeResults: mock[requestCounter].response.writeResults,
           status: mock[requestCounter].response.status,
@@ -192,6 +178,111 @@ describe('BulkWriter', () => {
     verifyInstance(firestore);
     expect(timeoutHandlerCounter).to.equal(0);
     setTimeoutHandler(setTimeout);
+  });
+
+  describe('options', () => {
+    it('requires object', async () => {
+      const firestore = await createInstance();
+      expect(() => firestore.bulkWriter(42 as InvalidApiUsage)).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. Input is not an object.'
+      );
+    });
+
+    it('initialOpsPerSecond requires positive integer', async () => {
+      const firestore = await createInstance();
+      expect(() =>
+        firestore.bulkWriter({throttling: {initialOpsPerSecond: -1}})
+      ).to.throw(
+        'Value for argument "initialOpsPerSecond" must be within [1, Infinity] inclusive, but was: -1'
+      );
+
+      expect(() =>
+        firestore.bulkWriter({throttling: {initialOpsPerSecond: 500.5}})
+      ).to.throw(
+        'Value for argument "initialOpsPerSecond" is not a valid integer.'
+      );
+    });
+
+    it('maxOpsPerSecond requires positive integer', async () => {
+      const firestore = await createInstance();
+      expect(() =>
+        firestore.bulkWriter({throttling: {maxOpsPerSecond: -1}})
+      ).to.throw(
+        'Value for argument "maxOpsPerSecond" must be within [1, Infinity] inclusive, but was: -1'
+      );
+
+      expect(() =>
+        firestore.bulkWriter({throttling: {maxOpsPerSecond: 500.5}})
+      ).to.throw(
+        'Value for argument "maxOpsPerSecond" is not a valid integer.'
+      );
+    });
+
+    it('maxOpsPerSecond must be greater than initial ops per second', async () => {
+      const firestore = await createInstance();
+
+      expect(() =>
+        firestore.bulkWriter({
+          throttling: {initialOpsPerSecond: 550, maxOpsPerSecond: 500},
+        })
+      ).to.throw(
+        'Value for argument "options" is not a valid bulkWriter() options argument. "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".'
+      );
+    });
+
+    it('initial and max rates are properly set', async () => {
+      const firestore = await createInstance();
+
+      let bulkWriter = firestore.bulkWriter({
+        throttling: {initialOpsPerSecond: 500, maxOpsPerSecond: 550},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(500);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(550);
+
+      bulkWriter = firestore.bulkWriter({
+        throttling: {maxOpsPerSecond: 1000},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(500);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(1000);
+
+      bulkWriter = firestore.bulkWriter({
+        throttling: {initialOpsPerSecond: 100},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(100);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+
+      bulkWriter = firestore.bulkWriter({
+        throttling: {maxOpsPerSecond: 100},
+      });
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(100);
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(100);
+
+      bulkWriter = firestore.bulkWriter();
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+        DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
+      );
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+
+      bulkWriter = firestore.bulkWriter({throttling: true});
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+        DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
+      );
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+
+      bulkWriter = firestore.bulkWriter({throttling: false});
+      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+        Number.POSITIVE_INFINITY
+      );
+    });
   });
 
   it('has a set() method', async () => {
@@ -348,23 +439,20 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.close()).to.throw(expected);
   });
 
-  it('sends writes to the same document in separate batches', async () => {
+  it('can send writes to the same documents in the same batch', async () => {
     const bulkWriter = await instantiateInstance([
       {
-        request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(1),
-      },
-      {
-        request: createRequest([updateOp('doc', 'bar1')]),
-        response: successResponse(2),
+        request: createRequest([
+          setOp('doc1', 'bar'),
+          updateOp('doc1', 'bar2'),
+        ]),
+        response: mergeResponses([successResponse(1), successResponse(2)]),
       },
     ]);
 
-    // Create two document references pointing to the same document.
-    const doc = firestore.doc('collectionId/doc');
-    const doc2 = firestore.doc('collectionId/doc');
-    bulkWriter.set(doc, {foo: 'bar'}).then(incrementOpCount);
-    bulkWriter.update(doc2, {foo: 'bar1'}).then(incrementOpCount);
+    const doc1 = firestore.doc('collectionId/doc1');
+    bulkWriter.set(doc1, {foo: 'bar'}).then(incrementOpCount);
+    bulkWriter.update(doc1, {foo: 'bar2'}).then(incrementOpCount);
 
     return bulkWriter.close().then(async () => {
       verifyOpCount(2);
@@ -420,44 +508,6 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('sends existing batches when a new batch is created', async () => {
-    const bulkWriter = await instantiateInstance([
-      {
-        request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(1),
-      },
-      {
-        request: createRequest([
-          updateOp('doc', 'bar1'),
-          createOp('doc2', 'bar1'),
-        ]),
-        response: mergeResponses([successResponse(1), successResponse(2)]),
-      },
-    ]);
-
-    bulkWriter._setMaxBatchSize(2);
-
-    const doc = firestore.doc('collectionId/doc');
-    const doc2 = firestore.doc('collectionId/doc2');
-
-    // Create a new batch by writing to the same document.
-    const setPromise = bulkWriter.set(doc, {foo: 'bar'}).then(incrementOpCount);
-    const updatePromise = bulkWriter
-      .update(doc, {foo: 'bar1'})
-      .then(incrementOpCount);
-    await setPromise;
-
-    // Create a new batch by reaching the batch size limit.
-    const createPromise = bulkWriter
-      .create(doc2, {foo: 'bar1'})
-      .then(incrementOpCount);
-
-    await updatePromise;
-    await createPromise;
-    verifyOpCount(3);
-    return bulkWriter.close();
-  });
-
   it('sends batches automatically when the batch size limit is reached', async () => {
     const bulkWriter = await instantiateInstance([
       {
@@ -503,32 +553,6 @@ describe('BulkWriter', () => {
     });
   });
 
-  it('uses timeout for batches that exceed the rate limit', async () => {
-    const bulkWriter = await instantiateInstance(
-      [
-        {
-          request: createRequest([setOp('doc1', 'bar'), setOp('doc2', 'bar')]),
-          response: mergeResponses([successResponse(1), successResponse(2)]),
-        },
-        {
-          request: createRequest([setOp('doc1', 'bar')]),
-          response: successResponse(3),
-        },
-      ],
-      /* enforceSingleConcurrentRequest= */ true
-    );
-    bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
-    bulkWriter.set(firestore.doc('collectionId/doc2'), {foo: 'bar'});
-    const flush1 = bulkWriter.flush();
-    // The third write will be placed in a new batch
-    bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
-    const flush2 = bulkWriter.flush();
-    activeRequestDeferred.resolve();
-    await flush1;
-    await flush2;
-    return bulkWriter.close();
-  });
-
   it('supports different type converters', async () => {
     const bulkWriter = await instantiateInstance([
       {
@@ -572,7 +596,7 @@ describe('BulkWriter', () => {
       {
         request: createRequest([
           setOp('doc1', 'bar'),
-          setOp('doc2', 'bar'),
+          setOp('doc1', 'bar2'),
           setOp('doc3', 'bar'),
         ]),
         response: mergeResponses([
@@ -582,7 +606,7 @@ describe('BulkWriter', () => {
         ]),
       },
       {
-        request: createRequest([setOp('doc2', 'bar'), setOp('doc3', 'bar')]),
+        request: createRequest([setOp('doc1', 'bar2'), setOp('doc3', 'bar')]),
         response: mergeResponses([
           successResponse(2),
           failedResponse(Status.ABORTED),
@@ -594,13 +618,15 @@ describe('BulkWriter', () => {
       },
     ]);
 
+    // Test writes to the same document in order to verify that retry logic
+    // is unaffected by the document key.
     bulkWriter
       .set(firestore.doc('collectionId/doc1'), {
         foo: 'bar',
       })
       .catch(incrementOpCount);
-    const set2 = bulkWriter.set(firestore.doc('collectionId/doc2'), {
-      foo: 'bar',
+    const set2 = bulkWriter.set(firestore.doc('collectionId/doc1'), {
+      foo: 'bar2',
     });
     const set3 = bulkWriter.set(firestore.doc('collectionId/doc3'), {
       foo: 'bar',
@@ -615,7 +641,9 @@ describe('BulkWriter', () => {
 
   describe('Timeout handler tests', () => {
     // Return success responses for all requests.
-    function instantiateInstance(): Promise<BulkWriter> {
+    function instantiateInstance(
+      options?: BulkWriterOptions
+    ): Promise<BulkWriter> {
       const overrides: ApiOverride = {
         batchWrite: request => {
           const requestLength = request.writes?.length || 0;
@@ -630,29 +658,30 @@ describe('BulkWriter', () => {
       };
       return createInstance(overrides).then(firestoreClient => {
         firestore = firestoreClient;
-        return firestore.bulkWriter();
+        return firestore.bulkWriter(options);
       });
     }
 
     it('does not send batches if doing so exceeds the rate limit', done => {
-      instantiateInstance().then(bulkWriter => {
-        let timeoutCalled = false;
-        setTimeoutHandler((_, timeout) => {
-          if (!timeoutCalled && timeout > 0) {
-            timeoutCalled = true;
-            done();
+      instantiateInstance({throttling: {maxOpsPerSecond: 5}}).then(
+        bulkWriter => {
+          let timeoutCalled = false;
+          setTimeoutHandler((_, timeout) => {
+            if (!timeoutCalled && timeout > 0) {
+              timeoutCalled = true;
+              done();
+            }
+          });
+          for (let i = 0; i < 500; i++) {
+            bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
           }
-        });
-
-        for (let i = 0; i < 600; i++) {
-          bulkWriter.set(firestore.doc('collectionId/doc' + i), {foo: 'bar'});
+          // The close() promise will never resolve. Since we do not call the
+          // callback function in the overridden handler, subsequent requests
+          // after the timeout will not be made. The close() call is used to
+          // ensure that the final batch is sent.
+          bulkWriter.close();
         }
-        // The close() promise will never resolve. Since we do not call the
-        // callback function in the overridden handler, subsequent requests
-        // after the timeout will not be made. The close() call is used to
-        // ensure that the final batch is sent.
-        bulkWriter.close();
-      });
+      );
     });
   });
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import * as assert from 'assert';
+import {logger} from './logger';
 
 /**
  * A helper that uses the Token Bucket algorithm to rate limit the number of
@@ -36,11 +37,17 @@ export class RateLimiter {
   // When the token bucket was last refilled.
   lastRefillTimeMillis: number;
 
+  // The last operations per second capacity that was calculated. Used to log
+  // changes to the maximum QPS.
+  previousCapacity: number;
+
   /**
    * @param initialCapacity Initial maximum number of operations per second.
    * @param multiplier Rate by which to increase the capacity.
    * @param multiplierMillis How often the capacity should increase in
    * milliseconds.
+   * @param maximumCapacity Maximum number of allowed operations per second.
+   * The number of tokens added per second will never exceed this number.
    * @param startTimeMillis The starting time in epoch milliseconds that the
    * rate limit is based on. Used for testing the limiter.
    */
@@ -48,10 +55,12 @@ export class RateLimiter {
     private readonly initialCapacity: number,
     private readonly multiplier: number,
     private readonly multiplierMillis: number,
+    readonly maximumCapacity: number,
     private readonly startTimeMillis = Date.now()
   ) {
     this.availableTokens = initialCapacity;
     this.lastRefillTimeMillis = startTimeMillis;
+    this.previousCapacity = initialCapacity;
   }
 
   /**
@@ -141,12 +150,25 @@ export class RateLimiter {
       'startTime cannot be after currentTime'
     );
     const millisElapsed = requestTimeMillis - this.startTimeMillis;
-    const operationsPerSecond = Math.floor(
-      Math.pow(
-        this.multiplier,
-        Math.floor(millisElapsed / this.multiplierMillis)
-      ) * this.initialCapacity
+    const operationsPerSecond = Math.min(
+      Math.floor(
+        Math.pow(
+          this.multiplier,
+          Math.floor(millisElapsed / this.multiplierMillis)
+        ) * this.initialCapacity
+      ),
+      this.maximumCapacity
     );
+
+    if (operationsPerSecond !== this.previousCapacity) {
+      logger(
+        'RateLimiter.calculateCapacity',
+        null,
+        `New request capacity: ${operationsPerSecond} operations per second.`
+      );
+    }
+
+    this.previousCapacity = operationsPerSecond;
     return operationsPerSecond;
   }
 }

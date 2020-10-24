@@ -24,7 +24,7 @@ export type DocumentChangeType = 'added' | 'removed' | 'modified';
  * A DocumentChange represents a change to the documents matching a query.
  * It contains the document affected and the type of change that occurred.
  *
- * @class
+ * @class DocumentChange
  */
 export class DocumentChange<T = firestore.DocumentData>
   implements firestore.DocumentChange {

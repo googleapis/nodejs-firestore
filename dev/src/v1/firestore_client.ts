@@ -276,12 +276,14 @@ export class FirestoreClient {
         }
       );
 
+      const descriptor =
+        this.descriptors.page[methodName] ||
+        this.descriptors.stream[methodName] ||
+        undefined;
       const apiCall = this._gaxModule.createApiCall(
         callPromise,
         this._defaults[methodName],
-        this.descriptors.page[methodName] ||
-          this.descriptors.stream[methodName] ||
-          this.descriptors.longrunning[methodName]
+        descriptor
       );
 
       this.innerApiCalls[methodName] = apiCall;
@@ -1503,12 +1505,13 @@ export class FirestoreClient {
    *   can be specified.
    * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
    *   A structured query.
-   *   Filters, order bys, limits, offsets, and start/end cursors are not
-   *   supported.
+   *   Query must specify collection with all descendants and be ordered by name
+   *   ascending. Other filters, order bys, limits, offsets, and start/end
+   *   cursors are not supported.
    * @param {number} request.partitionCount
    *   The desired maximum number of partition points.
    *   The partitions may be returned across multiple pages of results.
-   *   The number must be strictly positive. The actual number of partitions
+   *   The number must be positive. The actual number of partitions
    *   returned may be fewer.
    *
    *   For example, this may be set to one fewer than the number of parallel
@@ -1617,12 +1620,13 @@ export class FirestoreClient {
    *   can be specified.
    * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
    *   A structured query.
-   *   Filters, order bys, limits, offsets, and start/end cursors are not
-   *   supported.
+   *   Query must specify collection with all descendants and be ordered by name
+   *   ascending. Other filters, order bys, limits, offsets, and start/end
+   *   cursors are not supported.
    * @param {number} request.partitionCount
    *   The desired maximum number of partition points.
    *   The partitions may be returned across multiple pages of results.
-   *   The number must be strictly positive. The actual number of partitions
+   *   The number must be positive. The actual number of partitions
    *   returned may be fewer.
    *
    *   For example, this may be set to one fewer than the number of parallel
@@ -1691,12 +1695,13 @@ export class FirestoreClient {
    *   can be specified.
    * @param {google.firestore.v1.StructuredQuery} request.structuredQuery
    *   A structured query.
-   *   Filters, order bys, limits, offsets, and start/end cursors are not
-   *   supported.
+   *   Query must specify collection with all descendants and be ordered by name
+   *   ascending. Other filters, order bys, limits, offsets, and start/end
+   *   cursors are not supported.
    * @param {number} request.partitionCount
    *   The desired maximum number of partition points.
    *   The partitions may be returned across multiple pages of results.
-   *   The number must be strictly positive. The actual number of partitions
+   *   The number must be positive. The actual number of partitions
    *   returned may be fewer.
    *
    *   For example, this may be set to one fewer than the number of parallel

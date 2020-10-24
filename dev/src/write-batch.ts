@@ -53,7 +53,7 @@ import {GoogleError, Status} from 'google-gax';
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
  * updates(), and creates().
  *
- * @class
+ * @class WriteResult
  */
 export class WriteResult implements firestore.WriteResult {
   /**
@@ -104,7 +104,6 @@ export class WriteResult implements firestore.WriteResult {
  */
 export class BatchWriteResult {
   constructor(
-    readonly key: string,
     readonly writeTime: Timestamp | null,
     readonly status: GoogleError
   ) {}
@@ -121,7 +120,7 @@ type PendingWriteOp = () => api.IWrite;
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.
  *
- * @class
+ * @class WriteBatch
  */
 export class WriteBatch implements firestore.WriteBatch {
   private readonly _firestore: Firestore;
@@ -144,30 +143,30 @@ export class WriteBatch implements firestore.WriteBatch {
    *
    * @param firestore The Firestore Database client.
    * @param retryBatch The WriteBatch that needs to be retried.
-   * @param docsToRetry The documents from the provided WriteBatch that need
-   * to be retried.
+   * @param indexesToRetry The indexes of the operations from the provided
+   * WriteBatch that need to be retried.
    */
   constructor(
     firestore: Firestore,
     retryBatch: WriteBatch,
-    docsToRetry: string[]
+    indexesToRetry: Set<number>
   );
   constructor(firestore: Firestore);
   constructor(
     firestore: Firestore,
     retryBatch?: WriteBatch,
-    docsToRetry?: string[]
+    indexesToRetry?: Set<number>
   ) {
     this._firestore = firestore;
     this._serializer = new Serializer(firestore);
     this._allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
 
     if (retryBatch) {
-      // Creates a new WriteBatch containing only the operations from the
-      // provided document paths to retry.
-      this._ops = retryBatch._ops.filter(
-        v => docsToRetry!.indexOf(v.docPath) !== -1
-      );
+      // Creates a new WriteBatch containing only the indexes from the provided
+      // indexes to retry.
+      for (const index of indexesToRetry!.values()) {
+        this._ops.push(retryBatch._ops[index]);
+      }
     }
   }
 
@@ -613,7 +612,7 @@ export class WriteBatch implements firestore.WriteBatch {
         error.code === Status.OK
           ? Timestamp.fromProto(result.updateTime || DELETE_TIMESTAMP_SENTINEL)
           : null;
-      return new BatchWriteResult(this._ops[i].docPath, updateTime, error);
+      return new BatchWriteResult(updateTime, error);
     });
   }
 

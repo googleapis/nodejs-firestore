@@ -219,9 +219,9 @@ declare namespace FirebaseFirestore {
      * @param collectionId Identifies the collections to query over. Every
      * collection or subcollection with this ID as the last segment of its path
      * will be included. Cannot contain a slash.
-     * @return The created Query.
+     * @return The created `CollectionGroup`.
      */
-    collectionGroup(collectionId: string): Query<DocumentData>;
+    collectionGroup(collectionId: string): CollectionGroup<DocumentData>;
 
     /**
      * Retrieves multiple documents from Firestore.
@@ -291,6 +291,9 @@ declare namespace FirebaseFirestore {
      * Creates a [BulkWriter]{@link BulkWriter}, used for performing
      * multiple writes in parallel. Gradually ramps up writes as specified
      * by the 500/50/5 rule.
+     *
+     * @param options An options object used to configure the throttling
+     * behavior for the underlying BulkWriter.
      */
     bulkWriter(options?: BulkWriterOptions): BulkWriter;
   }
@@ -474,10 +477,7 @@ declare namespace FirebaseFirestore {
      * @returns A promise that resolves with the result
      * of the write. Throws an error if the write fails.
      */
-    create(
-      documentRef: DocumentReference,
-      data: DocumentData
-    ): Promise<WriteResult>;
+    create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
 
     /**
      * Delete a document from the database.
@@ -493,7 +493,7 @@ declare namespace FirebaseFirestore {
      * of the write. Throws an error if the write fails.
      */
     delete(
-      documentRef: DocumentReference,
+      documentRef: DocumentReference<any>,
       precondition?: Precondition
     ): Promise<WriteResult>;
 
@@ -539,23 +539,47 @@ declare namespace FirebaseFirestore {
      * A Precondition restricting this update can be specified as the last
      * argument.
      *
-     * @param documentRef A reference to the document to be
-     * updated.
-     * @param dataOrField An object containing the
-     * fields and values with which to update the document or the path of the
-     * first field to update.
-     * @param preconditionOrValues - An
-     * alternating list of field paths and values to update or a Precondition to
-     * restrict this update
-     * @returns A promise that resolves with the result
-     * of the write. Throws an error if the write fails.
+     * @param documentRef A reference to the document to be updated.
+     * @param data An object containing the fields and values with which to
+     * update the document.
+     * @param precondition A Precondition to enforce on this update.
+     * @returns A promise that resolves with the result of the write. Throws
+     * an error if the write fails.
      */
     update(
-      documentRef: DocumentReference,
-      dataOrField: UpdateData | string | FieldPath,
-      ...preconditionOrValues: Array<
-        {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
-      >
+      documentRef: DocumentReference<any>,
+      data: UpdateData,
+      precondition?: Precondition
+    ): Promise<WriteResult>;
+
+    /**
+     * Update fields of the document referred to by the provided
+     * [DocumentReference]{@link DocumentReference}. If the document doesn't yet
+     * exist, the update fails and the entire batch will be rejected.
+     *
+     * The update() method accepts either an object with field paths encoded as
+     * keys and field values encoded as values, or a variable number of
+     * arguments that alternate between field paths and field values. Nested
+     * fields can be updated by providing dot-separated field path strings or by
+     * providing FieldPath objects.
+     *
+     *
+     * A Precondition restricting this update can be specified as the last
+     * argument.
+     *
+     * @param documentRef A reference to the document to be updated.
+     * @param field The first field to update.
+     * @param value The first value
+     * @param fieldsOrPrecondition An alternating list of field paths and values
+     * to update, optionally followed a `Precondition` to enforce on this update.
+     * @returns A promise that resolves with the result of the write. Throws
+     * an error if the write fails.
+     */
+    update(
+      documentRef: DocumentReference<any>,
+      field: string | FieldPath,
+      value: any,
+      ...fieldsOrPrecondition: any[]
     ): Promise<WriteResult>;
 
     /**
@@ -592,12 +616,27 @@ declare namespace FirebaseFirestore {
   }
 
   /**
-   * An options object that can be used to disable request throttling in
-   * BulkWriter.
+   * An options object to configure throttling on BulkWriter.
    */
   export interface BulkWriterOptions {
-    /** Whether to disable throttling. */
-    readonly disableThrottling?: boolean;
+    /**
+     * Whether to disable or configure throttling. By default, throttling is
+     * enabled. This field can be set to either a boolean or a config
+     * object. Setting it to `true` will use default values. You can override
+     * the defaults by setting it to `false` to disable throttling, or by
+     * setting the config values to enable throttling with the provided values.
+     *
+     * @param initialOpsPerSecond The initial maximum number of operations per
+     * second allowed by the throttler. If this field is not set, the default
+     * is 500 operations per second.
+     * @param maxOpsPerSecond The maximum number of operations per second
+     * allowed by the throttler. If this field is set, the throttler's allowed
+     * operations per second does not ramp up past the specified operations per
+     * second.
+     */
+    readonly throttling?:
+      | boolean
+      | {initialOpsPerSecond?: number; maxOpsPerSecond?: number};
   }
 
   /**
@@ -1052,17 +1091,19 @@ declare namespace FirebaseFirestore {
 
   /**
    * Filter conditions in a `Query.where()` clause are specified using the
-   * strings '<', '<=', '==', '>=', '>', 'array-contains', 'in', and
-   * 'array-contains-any'.
+   * strings '<', '<=', '==', '!=', '>=', '>', 'array-contains', 'in', 'not-in',
+   * and 'array-contains-any'.
    */
   export type WhereFilterOp =
     | '<'
     | '<='
     | '=='
+    | '!='
     | '>='
     | '>'
     | 'array-contains'
     | 'in'
+    | 'not-in'
     | 'array-contains-any';
 
   /**
@@ -1167,7 +1208,7 @@ declare namespace FirebaseFirestore {
      * @param field The field paths to return.
      * @return The created Query.
      */
-    select(...field: (string | FieldPath)[]): Query<T>;
+    select(...field: (string | FieldPath)[]): Query<DocumentData>;
 
     /**
      * Creates and returns a new Query that starts at the provided document
@@ -1489,6 +1530,114 @@ declare namespace FirebaseFirestore {
     withConverter<U>(
       converter: FirestoreDataConverter<U>
     ): CollectionReference<U>;
+  }
+
+  /**
+   * A `CollectionGroup` refers to all documents that are contained in a
+   * collection or subcollection with a specific collection ID.
+   */
+  export class CollectionGroup<T = DocumentData> extends Query<T> {
+    private constructor();
+
+    /**
+     * Partitions a query by returning partition cursors that can be used to run
+     * the query in parallel. The returned cursors are split points that can be
+     * used as starting and end points for individual query invocations.
+     *
+     * @param desiredPartitionCount The desired maximum number of partition
+     * points. The number must be strictly positive. The actual number of
+     * partitions returned may be fewer.
+     * @return An AsyncIterable of `QueryPartition`s.
+     */
+    getPartitions(
+      desiredPartitionCount: number
+    ): AsyncIterable<QueryPartition<T>>;
+
+    /**
+     * Applies a custom data converter to this `CollectionGroup`, allowing you
+     * to use your own custom model objects with Firestore. When you call get()
+     * on the returned `CollectionGroup`, the provided converter will convert
+     * between Firestore data and your custom type U.
+     *
+     * Using the converter allows you to specify generic type arguments when
+     * storing and retrieving objects from Firestore.
+     *
+     * @example
+     * class Post {
+     *   constructor(readonly title: string, readonly author: string) {}
+     *
+     *   toString(): string {
+     *     return this.title + ', by ' + this.author;
+     *   }
+     * }
+     *
+     * const postConverter = {
+     *   toFirestore(post: Post): FirebaseFirestore.DocumentData {
+     *     return {title: post.title, author: post.author};
+     *   },
+     *   fromFirestore(
+     *     snapshot: FirebaseFirestore.QueryDocumentSnapshot
+     *   ): Post {
+     *     const data = snapshot.data();
+     *     return new Post(data.title, data.author);
+     *   }
+     * };
+     *
+     * const querySnapshot = await Firestore()
+     *   .collectionGroup('posts')
+     *   .withConverter(postConverter)
+     *   .get();
+     * for (const doc of querySnapshot.docs) {
+     *   const post = doc.data();
+     *   post.title; // string
+     *   post.toString(); // Should be defined
+     *   post.someNonExistentProperty; // TS error
+     * }
+     *
+     * @param converter Converts objects to and from Firestore.
+     * @return A `CollectionGroup<U>` that uses the provided converter.
+     */
+    withConverter<U>(converter: FirestoreDataConverter<U>): CollectionGroup<U>;
+  }
+
+  /**
+   * A split point that can be used in a query as a starting and/or end point for
+   * the query results. The cursors returned by {@link #startAt} and {@link
+   * #endBefore} can only be used in a query that matches the constraint of query
+   * that produced this partition.
+   */
+  export class QueryPartition<T = DocumentData> {
+    private constructor();
+
+    /**
+     * The cursor that defines the first result for this partition or
+     * `undefined` if this is the first partition.  The cursor value must be
+     * destructured when passed to `startAt()` (for example with
+     * `query.startAt(...queryPartition.startAt)`).
+     *
+     * @return Cursor values that can be used with {@link Query#startAt} or
+     * `undefined` if this is the first partition.
+     */
+    get startAt(): unknown[] | undefined;
+
+    /**
+     * The cursor that defines the first result after this partition or
+     * `undefined` if this is the last partition.  The cursor value must be
+     * destructured when passed to `endBefore()` (for example with
+     * `query.endBefore(...queryPartition.endBefore)`).
+     *
+     * @return Cursor values that can be used with {@link Query#endBefore} or
+     * `undefined` if this is the last partition.
+     */
+    get endBefore(): unknown[] | undefined;
+
+    /**
+     * Returns a query that only returns the documents for this partition.
+     *
+     * @return A query partitioned by a {@link Query#startAt} and {@link
+     * Query#endBefore} cursor.
+     */
+    toQuery(): Query<T>;
   }
 
   /**

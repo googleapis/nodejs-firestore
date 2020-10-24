@@ -145,6 +145,9 @@ export namespace firestore {
 
         /** BundledDocumentMetadata exists */
         exists?: (boolean|null);
+
+        /** BundledDocumentMetadata queries */
+        queries?: (string[]|null);
     }
 
     /** Represents a BundledDocumentMetadata. */
@@ -164,6 +167,9 @@ export namespace firestore {
 
         /** BundledDocumentMetadata exists. */
         public exists: boolean;
+
+        /** BundledDocumentMetadata queries. */
+        public queries: string[];
 
         /**
          * Creates a BundledDocumentMetadata message from a plain object. Also converts values to their respective internal types.
@@ -5471,7 +5477,7 @@ export namespace google {
 
                     /** Operator enum. */
                     type Operator =
-                        "OPERATOR_UNSPECIFIED"| "LESS_THAN"| "LESS_THAN_OR_EQUAL"| "GREATER_THAN"| "GREATER_THAN_OR_EQUAL"| "EQUAL"| "ARRAY_CONTAINS"| "IN"| "ARRAY_CONTAINS_ANY";
+                        "OPERATOR_UNSPECIFIED"| "LESS_THAN"| "LESS_THAN_OR_EQUAL"| "GREATER_THAN"| "GREATER_THAN_OR_EQUAL"| "EQUAL"| "NOT_EQUAL"| "ARRAY_CONTAINS"| "IN"| "ARRAY_CONTAINS_ANY"| "NOT_IN";
                 }
 
                 /** Properties of an UnaryFilter. */
@@ -5528,7 +5534,54 @@ export namespace google {
 
                     /** Operator enum. */
                     type Operator =
-                        "OPERATOR_UNSPECIFIED"| "IS_NAN"| "IS_NULL";
+                        "OPERATOR_UNSPECIFIED"| "IS_NAN"| "IS_NULL"| "IS_NOT_NAN"| "IS_NOT_NULL";
+                }
+
+                /** Properties of an Order. */
+                interface IOrder {
+
+                    /** Order field */
+                    field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                    /** Order direction */
+                    direction?: (google.firestore.v1.StructuredQuery.Direction|null);
+                }
+
+                /** Represents an Order. */
+                class Order implements IOrder {
+
+                    /**
+                     * Constructs a new Order.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IOrder);
+
+                    /** Order field. */
+                    public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                    /** Order direction. */
+                    public direction: google.firestore.v1.StructuredQuery.Direction;
+
+                    /**
+                     * Creates an Order message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Order
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.Order;
+
+                    /**
+                     * Creates a plain object from an Order message. Also converts values to other types if specified.
+                     * @param message Order
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.Order, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Order to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
                 }
 
                 /** Properties of a FieldReference. */
@@ -5608,53 +5661,6 @@ export namespace google {
 
                     /**
                      * Converts this Projection to JSON.
-                     * @returns JSON object
-                     */
-                    public toJSON(): { [k: string]: any };
-                }
-
-                /** Properties of an Order. */
-                interface IOrder {
-
-                    /** Order field */
-                    field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
-
-                    /** Order direction */
-                    direction?: (google.firestore.v1.StructuredQuery.Direction|null);
-                }
-
-                /** Represents an Order. */
-                class Order implements IOrder {
-
-                    /**
-                     * Constructs a new Order.
-                     * @param [properties] Properties to set
-                     */
-                    constructor(properties?: google.firestore.v1.StructuredQuery.IOrder);
-
-                    /** Order field. */
-                    public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
-
-                    /** Order direction. */
-                    public direction: google.firestore.v1.StructuredQuery.Direction;
-
-                    /**
-                     * Creates an Order message from a plain object. Also converts values to their respective internal types.
-                     * @param object Plain object
-                     * @returns Order
-                     */
-                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.Order;
-
-                    /**
-                     * Creates a plain object from an Order message. Also converts values to other types if specified.
-                     * @param message Order
-                     * @param [options] Conversion options
-                     * @returns Plain object
-                     */
-                    public static toObject(message: google.firestore.v1.StructuredQuery.Order, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                    /**
-                     * Converts this Order to JSON.
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
@@ -6385,6 +6391,9 @@ export namespace google {
 
             /** ResourceDescriptor singular */
             singular?: (string|null);
+
+            /** ResourceDescriptor style */
+            style?: (google.api.ResourceDescriptor.Style[]|null);
         }
 
         /** Represents a ResourceDescriptor. */
@@ -6414,6 +6423,9 @@ export namespace google {
             /** ResourceDescriptor singular. */
             public singular: string;
 
+            /** ResourceDescriptor style. */
+            public style: google.api.ResourceDescriptor.Style[];
+
             /**
              * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
              * @param object Plain object
@@ -6441,6 +6453,10 @@ export namespace google {
             /** History enum. */
             type History =
                 "HISTORY_UNSPECIFIED"| "ORIGINALLY_SINGLE_PATTERN"| "FUTURE_MULTI_PATTERN";
+
+            /** Style enum. */
+            type Style =
+                "STYLE_UNSPECIFIED"| "DECLARATIVE_FRIENDLY";
         }
 
         /** Properties of a ResourceReference. */
