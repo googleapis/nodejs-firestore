@@ -46,7 +46,6 @@ import {
 } from './util/helpers';
 
 import api = proto.google.firestore.v1;
-import {Deferred} from '../src/util';
 
 // Change the argument to 'console.log' to enable debug output.
 setLogFunction(null);
@@ -383,13 +382,7 @@ describe('BulkWriter', () => {
     return bulkWriter.close().then(async () => verifyOpCount(1));
   });
 
-  it('throws UnhandledPromiseRejection if the error is not caught', async () => {
-    let errorThrown = false;
-    const unhandledDeferred = new Deferred<void>();
-    process.on('unhandledRejection', () => {
-      errorThrown = true;
-      unhandledDeferred.resolve();
-    });
+  it('swallows UnhandledPromiseRejections even if the error is not caught', async () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([setOp('doc', 'bar')]),
@@ -399,10 +392,7 @@ describe('BulkWriter', () => {
 
     const doc = firestore.doc('collectionId/doc');
     bulkWriter.set(doc, {foo: 'bar'});
-
-    await bulkWriter.close();
-    await unhandledDeferred.promise;
-    expect(errorThrown).to.be.true;
+    return bulkWriter.close();
   });
 
   it('flush() resolves immediately if there are no writes', async () => {
@@ -605,6 +595,48 @@ describe('BulkWriter', () => {
     await bulkWriter.flush();
     expect(catchCalled).to.be.true;
     expect(onWriteErrorCalled).to.be.true;
+  });
+
+  it('surfaces errors thrown by user-provided error callback', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: failedResponse(Status.INTERNAL),
+      },
+    ]);
+    let errorCaught = false;
+    bulkWriter.onWriteError(() => {
+      throw new Error('User provided error callback failed');
+    });
+    bulkWriter
+      .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
+      .catch(err => {
+        expect(err.message).to.equal('User provided error callback failed');
+        errorCaught = true;
+      });
+    await bulkWriter.flush();
+    expect(errorCaught).to.be.true;
+  });
+
+  it('write fails if user-provided success callback fails', async () => {
+    const bulkWriter = await instantiateInstance([
+      {
+        request: createRequest([setOp('doc', 'bar')]),
+        response: successResponse(1),
+      },
+    ]);
+    let errorCaught = false;
+    bulkWriter.onWriteResult(() => {
+      throw new Error('User provided success callback failed');
+    });
+    bulkWriter
+      .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
+      .catch(err => {
+        expect(err.message).to.equal('User provided success callback failed');
+        errorCaught = true;
+      });
+    await bulkWriter.flush();
+    expect(errorCaught).to.be.true;
   });
 
   it('retries multiple times', async () => {

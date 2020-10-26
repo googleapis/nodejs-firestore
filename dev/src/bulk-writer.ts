@@ -369,19 +369,11 @@ export class BulkWriter {
    */
   private _errorFn: (error: BulkWriterError) => boolean = error => {
     const retryCodes = getRetryCodes('batchWrite');
-    const shouldRetry =
+    return (
       error.code !== undefined &&
       retryCodes.includes(error.code) &&
-      error.failedAttempts < MAX_RETRY_ATTEMPTS;
-    logger(
-      'BulkWriter.errorFn',
-      null,
-      'Running error callback on error code:',
-      error.code,
-      ', shouldRetry:',
-      shouldRetry
+      error.failedAttempts < MAX_RETRY_ATTEMPTS
     );
-    return shouldRetry;
   };
 
   /** @hideconstructor */
@@ -466,9 +458,11 @@ export class BulkWriter {
     data: T
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    return this._executeWrite(documentRef, 'create', bulkCommitBatch =>
+    const op = this._executeWrite(documentRef, 'create', bulkCommitBatch =>
       bulkCommitBatch.create(documentRef, data)
     );
+    silencePromise(op);
+    return op;
   }
 
   /**
@@ -504,9 +498,11 @@ export class BulkWriter {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    return this._executeWrite(documentRef, 'delete', bulkCommitBatch =>
+    const op = this._executeWrite(documentRef, 'delete', bulkCommitBatch =>
       bulkCommitBatch.delete(documentRef, precondition)
     );
+    silencePromise(op);
+    return op;
   }
 
   set<T>(
@@ -559,9 +555,11 @@ export class BulkWriter {
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    return this._executeWrite(documentRef, 'set', bulkCommitBatch =>
+    const op = this._executeWrite(documentRef, 'set', bulkCommitBatch =>
       bulkCommitBatch.set(documentRef, data, options)
     );
+    silencePromise(op);
+    return op;
   }
 
   /**
@@ -613,9 +611,11 @@ export class BulkWriter {
     >
   ): Promise<WriteResult> {
     this.verifyNotClosed();
-    return this._executeWrite(documentRef, 'update', bulkCommitBatch =>
+    const op = this._executeWrite(documentRef, 'update', bulkCommitBatch =>
       bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues)
     );
+    silencePromise(op);
+    return op;
   }
 
   /**
@@ -647,7 +647,12 @@ export class BulkWriter {
   }
 
   /**
-   * Attaches a listener that is run every time a BulkWriter operation fails.
+   * Attaches an error handler listener that is run every time a BulkWriter
+   * operation fails.
+   *
+   * BulkWriter has a default error handler that retries UNAVAILABLE and
+   * ABORTED errors up to a maximum of 10 failed attempts. When an error
+   * handler is specified, the default error handler will be overwritten.
    *
    * @param shouldRetryCallback A callback to be called every time a BulkWriter
    * operation fails. Returning `true` will retry the operation. Returning
@@ -717,6 +722,7 @@ export class BulkWriter {
     // flush() will not be sent until the retries are completed.
     batchQueue = this._retryBatchQueue;
     if (batchQueue.length > 0) {
+      batchQueue.forEach(batch => batch.markReadyToSend());
       this.sendReadyBatches(batchQueue);
     }
     // Make sure user promises resolve before flush() resolves.
@@ -812,11 +818,6 @@ export class BulkWriter {
    * @private
    */
   private sendReadyBatches(batchQueue: BulkCommitBatch[]): void {
-    // Always mark retry batches as READY_TO_SEND.
-    if (batchQueue === this._retryBatchQueue) {
-      batchQueue.forEach(batch => batch.markReadyToSend());
-    }
-
     let index = 0;
     while (
       index < batchQueue.length &&
@@ -868,6 +869,10 @@ export class BulkWriter {
       assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
       batchQueue.splice(batchIndex, 1);
 
+      if (batchQueue === this._retryBatchQueue) {
+        batchQueue.forEach(batch => batch.markReadyToSend());
+      }
+
       batchCompletedDeferred.resolve();
       this._pendingBatches.delete(batchCompletedDeferred.promise);
 
@@ -911,6 +916,14 @@ export class BulkWriter {
             failedAttempts
           );
           const shouldRetry = this._errorFn(bulkWriterError);
+          logger(
+            'BulkWriter.errorFn',
+            null,
+            'Running error callback on error code:',
+            error.code,
+            ', shouldRetry:',
+            shouldRetry
+          );
           if (!shouldRetry) {
             throw bulkWriterError;
           }

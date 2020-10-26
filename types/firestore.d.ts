@@ -599,7 +599,12 @@ declare namespace FirebaseFirestore {
     ): void;
 
     /**
-     * Attaches a listener that is run every time a BulkWriter operation fails.
+     * Attaches an error handler listener that is run every time a BulkWriter
+     * operation fails.
+     *
+     * BulkWriter has a default error handler that retries UNAVAILABLE and
+     * ABORTED errors up to a maximum of 10 failed attempts. When an error
+     * handler is specified, the default error handler will be overwritten.
      *
      * @param shouldRetryCallback A callback to be called every time a BulkWriter
      * operation fails. Returning `true` will retry the operation. Returning
