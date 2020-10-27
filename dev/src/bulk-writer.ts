@@ -663,7 +663,7 @@ export class BulkWriter {
    * bulkWriter
    *   .onWriteError((error) => {
    *     if (
-   *       (error.code === GrpcStatus.UNAVAILABLE &&
+   *       error.code === GrpcStatus.UNAVAILABLE &&
    *       error.failedAttempts < MAX_RETRY_ATTEMPTS
    *     ) {
    *       return true;
