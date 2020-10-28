@@ -155,7 +155,7 @@ describe('Collection interface', () => {
           parent: `${DATABASE_ROOT}/documents/a/b`,
           collectionId: 'c',
           showMissing: true,
-          pageSize: 4294967295,
+          pageSize: 65535,
           mask: {fieldPaths: []},
         });
 
