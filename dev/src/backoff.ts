@@ -89,6 +89,9 @@ export function setTimeoutHandler(
       unref: () => {
         throw new Error('For tests only. Not Implemented');
       },
+      [Symbol.toPrimitive]: () => {
+        throw new Error('For tests only. Not Implemented');
+      },
     };
     return timeout;
   };

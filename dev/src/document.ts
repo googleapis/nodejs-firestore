@@ -94,7 +94,7 @@ export class DocumentSnapshotBuilder<T = firestore.DocumentData> {
  * [exists]{@link DocumentSnapshot#exists} property to explicitly verify a
  * document's existence.
  *
- * @class
+ * @class DocumentSnapshot
  */
 export class DocumentSnapshot<T = firestore.DocumentData>
   implements firestore.DocumentSnapshot<T> {
@@ -535,7 +535,7 @@ export class DocumentSnapshot<T = firestore.DocumentData>
  * always be true and [data()]{@link QueryDocumentSnapshot#data} will never
  * return 'undefined'.
  *
- * @class
+ * @class QueryDocumentSnapshot
  * @extends DocumentSnapshot
  */
 export class QueryDocumentSnapshot<T = firestore.DocumentData>

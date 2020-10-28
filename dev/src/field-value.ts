@@ -34,7 +34,7 @@ import api = proto.google.firestore.v1;
  * Sentinel values that can be used when writing documents with set(), create()
  * or update().
  *
- * @class
+ * @class FieldValue
  */
 export class FieldValue implements firestore.FieldValue {
   /**

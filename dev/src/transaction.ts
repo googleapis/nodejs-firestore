@@ -55,7 +55,7 @@ const READ_AFTER_WRITE_ERROR_MSG =
  * the methods to read and write data within the transaction context. See
  * [runTransaction()]{@link Firestore#runTransaction}.
  *
- * @class
+ * @class Transaction
  */
 export class Transaction implements firestore.Transaction {
   private _firestore: Firestore;
