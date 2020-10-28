@@ -2614,23 +2614,21 @@ describe('BulkWriter class', () => {
     return firestore.terminate();
   });
 
-  it.only('can retry failed writes with a provided callback', async () => {
+  it('can retry failed writes with a provided callback', async () => {
     let retryCount = 0;
     let code: Status = -1;
     writer.onWriteError(error => {
       retryCount = error.failedAttempts;
-      return error.failedAttempts < 15;
+      return error.failedAttempts < 30;
     });
 
     // Use an invalid document name that the backend will reject.
     const ref = randomCol.doc('__doc__');
     writer.create(ref, {foo: 'bar'}).catch(err => {
-      console.log('error running');
       code = err.code;
     });
     await writer.close();
-    expect(retryCount).to.equal(15);
-    console.log('validating');
+    expect(retryCount).to.equal(30);
     expect(code).to.equal(Status.INVALID_ARGUMENT);
   });
 });

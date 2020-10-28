@@ -181,7 +181,7 @@ export function getRetryParams(methodName: string): BackoffSettings {
  * This is primarily used to wait for a promise to complete when the result of
  * the promise will be discarded.
  */
-export function voidPromiseNoThrow(promise: Promise<unknown>): Promise<void> {
+export function silencePromise(promise: Promise<unknown>): Promise<void> {
   return promise.then(
     () => {},
     () => {}

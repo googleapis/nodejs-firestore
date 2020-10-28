@@ -474,8 +474,8 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be
      * created.
      * @param data The object to serialize as the document.
-     * @returns {Promise<WriteResult>} A promise that resolves with the result
-     * of the write. If the write fails, the promise is rejected with a
+     * @returns A promise that resolves with the result of the write. If the
+     * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
     create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
@@ -490,8 +490,8 @@ declare namespace FirebaseFirestore {
      * @param precondition.lastUpdateTime If set, enforces that the
      * document was last updated at lastUpdateTime. Fails the batch if the
      * document doesn't exist or was last updated at a different time.
-     * @returns {Promise<WriteResult>} A promise that resolves with the result
-     * of the delete. If the delete fails, the promise is rejected with a
+     * @returns A promise that resolves with the result of the delete. If the
+     * delete fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
     delete(
@@ -516,8 +516,8 @@ declare namespace FirebaseFirestore {
      * @param options.mergeFields - If provided,
      * set() only replaces the specified field paths. Any field path that is not
      * specified is ignored and remains untouched.
-     * @returns {Promise<WriteResult>} A promise that resolves with the result
-     * of the write. If the write fails, the promise is rejected with a
+     * @returns A promise that resolves with the result of the write. If the
+     * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
     set<T>(
@@ -546,8 +546,8 @@ declare namespace FirebaseFirestore {
      * @param data An object containing the fields and values with which to
      * update the document.
      * @param precondition A Precondition to enforce on this update.
-     * @returns {Promise<WriteResult>} A promise that resolves with the result
-     * of the write. If the write fails, the promise is rejected with a
+     * @returns A promise that resolves with the result of the write. If the
+     * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
     update(
@@ -576,8 +576,8 @@ declare namespace FirebaseFirestore {
      * @param value The first value
      * @param fieldsOrPrecondition An alternating list of field paths and values
      * to update, optionally followed a `Precondition` to enforce on this update.
-     * @returns {Promise<WriteResult>} A promise that resolves with the result
-     * of the write. If the write fails, the promise is rejected with a
+     * @returns A promise that resolves with the result of the write. If the
+     * write fails, the promise is rejected with a
      * [BulkWriterError]{@link BulkWriterError}.
      */
     update(
@@ -599,7 +599,12 @@ declare namespace FirebaseFirestore {
     ): void;
 
     /**
-     * Attaches a listener that is run every time a BulkWriter operation fails.
+     * Attaches an error handler listener that is run every time a BulkWriter
+     * operation fails.
+     *
+     * BulkWriter has a default error handler that retries UNAVAILABLE and
+     * ABORTED errors up to a maximum of 10 failed attempts. When an error
+     * handler is specified, the default error handler will be overwritten.
      *
      * @param shouldRetryCallback A callback to be called every time a BulkWriter
      * operation fails. Returning `true` will retry the operation. Returning
