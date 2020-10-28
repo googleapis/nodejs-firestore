@@ -355,7 +355,10 @@ function runTransaction<T>(
       });
     } finally {
       setTimeoutHandler(setTimeout);
-      expect(expectedRequests.length).to.equal(0);
+      expect(expectedRequests.length).to.equal(
+        0,
+        'Missing requests: ' + expectedRequests.map(r => r.type).join(', ')
+      );
     }
   });
 }
@@ -433,6 +436,25 @@ describe('failed transactions', () => {
     }
   });
 
+  it('retries commit for expired transaction', async () => {
+    const transactionFunction = () => Promise.resolve();
+
+    const serverError = new GoogleError(
+      'The referenced transaction has expired or is no longer valid.'
+    );
+    serverError.code = Status.INVALID_ARGUMENT;
+
+    await runTransaction(
+      transactionFunction,
+      begin('foo1'),
+      commit('foo1', undefined, serverError),
+      rollback('foo1'),
+      backoff(),
+      begin('foo2', 'foo1'),
+      commit('foo2')
+    );
+  });
+
   it('retries runQuery based on error code', async () => {
     const transactionFunction = (
       transaction: Transaction,
@@ -500,6 +522,37 @@ describe('failed transactions', () => {
             begin('foo1'),
             getDocument('foo1', serverError),
             rollback('foo1')
+          )
+        ).to.eventually.be.rejected;
+      }
+    }
+  });
+
+  it('retries rollback based on error code', async () => {
+    const transactionFunction = () => Promise.resolve();
+
+    for (const [errorCode, retry] of Object.entries(retryBehavior)) {
+      const serverError = new GoogleError('Test Error');
+      serverError.code = Number(errorCode) as Status;
+
+      if (retry) {
+        await runTransaction(
+          transactionFunction,
+          begin('foo1'),
+          commit('foo1', /* writes=*/ undefined, serverError),
+          rollback('foo1', serverError),
+          rollback('foo1'),
+          backoff(),
+          begin('foo2', 'foo1'),
+          commit('foo2')
+        );
+      } else {
+        await expect(
+          runTransaction(
+            transactionFunction,
+            begin('foo1'),
+            commit('foo1', /* writes=*/ undefined, serverError),
+            rollback('foo1', serverError)
           )
         ).to.eventually.be.rejected;
       }
@@ -617,18 +670,6 @@ describe('failed transactions', () => {
       begin('foo2', 'foo1'),
       commit('foo2')
     );
-  });
-
-  it('fails on rollback', () => {
-    return expect(
-      runTransaction(
-        () => {
-          return Promise.reject();
-        },
-        begin(),
-        rollback('foo', new Error('Fails on rollback'))
-      )
-    ).to.eventually.be.rejectedWith('Fails on rollback');
   });
 });
 
