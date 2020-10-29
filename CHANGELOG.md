@@ -4,6 +4,24 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.5.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.4.0...v4.5.0) (2020-10-26)
+
+
+### Features
+
+* add implicit ordering for startAt(DocumentReference) calls ([#1328](https://www.github.com/googleapis/nodejs-firestore/issues/1328)) ([e9afa38](https://www.github.com/googleapis/nodejs-firestore/commit/e9afa38592b3cc324a8d4685244ee4b249eeedfc))
+* add support for Partition API ([#1320](https://www.github.com/googleapis/nodejs-firestore/issues/1320)) ([51961c3](https://www.github.com/googleapis/nodejs-firestore/commit/51961c3b39ff9c532214eb783458f83da98eb485))
+
+
+### Bug Fixes
+
+* retry PartitionQuery for INTERNAL and DEADLINE_EXCEEDED ([#1336](https://www.github.com/googleapis/nodejs-firestore/issues/1336)) ([fdf5462](https://www.github.com/googleapis/nodejs-firestore/commit/fdf5462917e322cc04bf47ebc337d5a76a4a8b18))
+* simplify BulkWriter logic ([#1321](https://www.github.com/googleapis/nodejs-firestore/issues/1321)) ([b493baf](https://www.github.com/googleapis/nodejs-firestore/commit/b493baf44e729fa584b29881ef83f7821967a97b))
+* speed up listDocuments pagination ([#1344](https://www.github.com/googleapis/nodejs-firestore/issues/1344)) ([498301d](https://www.github.com/googleapis/nodejs-firestore/commit/498301dc06bdd5a1eccaadd7ffb1b470749488f7))
+* Update getAll example in documentation ([#1326](https://www.github.com/googleapis/nodejs-firestore/issues/1326)) ([721fce0](https://www.github.com/googleapis/nodejs-firestore/commit/721fce02440fde39e8a5c2d379b2254079e15201))
+* update required field to implement NodeJS.Timeout ([#1338](https://www.github.com/googleapis/nodejs-firestore/issues/1338)) ([6b7371b](https://www.github.com/googleapis/nodejs-firestore/commit/6b7371b4511a7cf039f85519a9d4b8be1bff8930))
+* **firestore/v1:** give PartitionQuery retry/timeout config ([#1334](https://www.github.com/googleapis/nodejs-firestore/issues/1334)) ([39a30c2](https://www.github.com/googleapis/nodejs-firestore/commit/39a30c24a54078e53ad9c746ee8ae5a4a9471349))
+
 ## [4.4.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.3.0...v4.4.0) (2020-09-29)
 
 
