@@ -693,10 +693,10 @@ describe('BulkWriter', () => {
     bulkWriter
       .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
       .then(res => {
-        ops.push(res.writeTime.seconds);
+        ops.push("before_flush");
       });
     const flush = bulkWriter.flush().then(() => {
-      ops.push(42);
+      ops.push("flush");
     });
     bulkWriter
       .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
@@ -705,9 +705,9 @@ describe('BulkWriter', () => {
       });
 
     await flush;
-    expect(ops).to.deep.equal([1, 42]);
+    expect(ops).to.deep.equal(["before_flush", "flush"]);
     return bulkWriter.close().then(() => {
-      expect(ops).to.deep.equal([1, 42, 2]);
+      expect(ops).to.deep.equal(["before_flush", "flush", "after_flush"]);
     });
   });
 
