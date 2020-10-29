@@ -2619,7 +2619,7 @@ describe('BulkWriter class', () => {
     let code: Status = -1;
     writer.onWriteError(error => {
       retryCount = error.failedAttempts;
-      return error.failedAttempts < 30;
+      return error.failedAttempts < 3;
     });
 
     // Use an invalid document name that the backend will reject.
@@ -2628,7 +2628,7 @@ describe('BulkWriter class', () => {
       code = err.code;
     });
     await writer.close();
-    expect(retryCount).to.equal(30);
+    expect(retryCount).to.equal(3);
     expect(code).to.equal(Status.INVALID_ARGUMENT);
   });
 });

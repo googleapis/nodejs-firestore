@@ -533,7 +533,7 @@ describe('BulkWriter', () => {
           deleteOp('doc'),
         ]),
         response: mergeResponses([
-          failedResponse(Status.INTERNAL),
+          successResponse(1),
           failedResponse(Status.INTERNAL),
           failedResponse(Status.INTERNAL),
           failedResponse(Status.INTERNAL),
@@ -541,13 +541,11 @@ describe('BulkWriter', () => {
       },
       {
         request: createRequest([
-          createOp('doc', 'bar'),
           setOp('doc', 'bar'),
           updateOp('doc', 'bar'),
           deleteOp('doc'),
         ]),
         response: mergeResponses([
-          successResponse(1),
           successResponse(2),
           successResponse(3),
           successResponse(4),
@@ -561,6 +559,7 @@ describe('BulkWriter', () => {
       return true;
     });
     bulkWriter.onWriteResult((documentRef, result) => {
+      ops.push('success');
       writeResults.push(result.writeTime.seconds);
     });
     bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
@@ -568,7 +567,15 @@ describe('BulkWriter', () => {
     bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
     bulkWriter.delete(firestore.doc('collectionId/doc'));
     return bulkWriter.close().then(() => {
-      expect(ops).to.deep.equal(['create', 'set', 'update', 'delete']);
+      expect(ops).to.deep.equal([
+        'success',
+        'set',
+        'update',
+        'delete',
+        'success',
+        'success',
+        'success',
+      ]);
       expect(writeResults).to.deep.equal([1, 2, 3, 4]);
     });
   });
@@ -686,28 +693,26 @@ describe('BulkWriter', () => {
         response: successResponse(2),
       },
     ]);
-    const ops: number[] = [];
+    const ops: string[] = [];
     bulkWriter.onWriteError(() => {
       return true;
     });
-    bulkWriter
-      .set(firestore.doc('collectionId/doc'), {foo: 'bar'})
-      .then(res => {
-        ops.push("before_flush");
-      });
+    bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'}).then(() => {
+      ops.push('before_flush');
+    });
     const flush = bulkWriter.flush().then(() => {
-      ops.push("flush");
+      ops.push('flush');
     });
     bulkWriter
       .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
-      .then(res => {
-        ops.push(res.writeTime.seconds);
+      .then(() => {
+        ops.push('after_flush');
       });
 
     await flush;
-    expect(ops).to.deep.equal(["before_flush", "flush"]);
+    expect(ops).to.deep.equal(['before_flush', 'flush']);
     return bulkWriter.close().then(() => {
-      expect(ops).to.deep.equal(["before_flush", "flush", "after_flush"]);
+      expect(ops).to.deep.equal(['before_flush', 'flush', 'after_flush']);
     });
   });
 

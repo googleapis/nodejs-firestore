@@ -40,10 +40,10 @@ import {
   validateInteger,
   validateOptional,
 } from './validate';
-// TODO(chenbrian): Figure some way to get rid of this.
+import {logger} from './logger';
+
 // eslint-disable-next-line no-undef
 import GrpcStatus = FirebaseFirestore.GrpcStatus;
-import {logger} from './logger';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -85,17 +85,6 @@ enum BatchState {
   SENT,
 }
 
-/*!
- * Used to represent a pending write operation.
- *
- * Contains a pending write's WriteBatch index, document path, and the
- * corresponding result.
- */
-interface PendingOp {
-  writeBatchIndex: number;
-  deferred: Deferred<BatchWriteResult>;
-}
-
 /**
  * Used to represent a batch on the BatchQueue.
  *
@@ -109,7 +98,7 @@ class BulkCommitBatch {
 
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
-  private pendingOps: Array<PendingOp> = [];
+  private pendingOps: Array<Deferred<BatchWriteResult>> = [];
 
   private readonly backoff: ExponentialBackoff;
 
@@ -204,10 +193,7 @@ class BulkCommitBatch {
       'Batch should be OPEN when adding writes'
     );
     const deferred = new Deferred<BatchWriteResult>();
-    this.pendingOps.push({
-      writeBatchIndex: this.opCount,
-      deferred: deferred,
-    });
+    this.pendingOps.push(deferred);
 
     if (this.opCount === this.maxBatchSize) {
       this.state = BatchState.READY_TO_SEND;
@@ -262,11 +248,11 @@ class BulkCommitBatch {
       results.map((result, i) => {
         const op = this.pendingOps[i];
         if (result.status.code === Status.OK) {
-          op.deferred.resolve(result);
+          op.resolve(result);
         } else {
-          op.deferred.reject(result.status);
+          op.reject(result.status);
         }
-        return silencePromise(op.deferred.promise);
+        return silencePromise(op.promise);
       })
     );
   }
