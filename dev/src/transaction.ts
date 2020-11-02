@@ -423,21 +423,22 @@ export class Transaction implements firestore.Transaction {
     let lastError: GoogleError | undefined = undefined;
 
     for (let attempt = 0; attempt < maxAttempts; ++attempt) {
-      if (lastError) {
-        logger(
-          'Firestore.runTransaction',
-          this._requestTag,
-          'Retrying transaction after error:',
-          lastError
-        );
-      }
-
-      this._writeBatch._reset();
-      await this.maybeBackoff(lastError);
-
-      await this.begin();
-
       try {
+        if (lastError) {
+          logger(
+            'Firestore.runTransaction',
+            this._requestTag,
+            'Retrying transaction after error:',
+            lastError
+          );
+          await this.rollback();
+        }
+
+        this._writeBatch._reset();
+        await this.maybeBackoff(lastError);
+
+        await this.begin();
+
         const promise = updateFunction(this);
         if (!(promise instanceof Promise)) {
           throw new Error(
@@ -455,12 +456,10 @@ export class Transaction implements firestore.Transaction {
           err
         );
 
-        await this.rollback();
+        lastError = err;
 
-        if (isRetryableTransactionError(err)) {
-          lastError = err;
-        } else {
-          return Promise.reject(err); // Callback failed w/ non-retryable error
+        if (!this._transactionId || !isRetryableTransactionError(err)) {
+          break;
         }
       }
     }
@@ -471,6 +470,8 @@ export class Transaction implements firestore.Transaction {
       'Transaction not eligible for retry, returning error: %s',
       lastError
     );
+
+    await this.rollback();
     return Promise.reject(lastError);
   }
 
@@ -599,6 +600,11 @@ function isRetryableTransactionError(error: GoogleError): boolean {
       case Status.UNAUTHENTICATED:
       case Status.RESOURCE_EXHAUSTED:
         return true;
+      case Status.INVALID_ARGUMENT:
+        // The Firestore backend uses "INVALID_ARGUMENT" for transactions
+        // IDs that have expired. While INVALID_ARGUMENT is generally not
+        // retryable, we retry this specific case.
+        return !!error.message.match(/transaction has expired/);
       default:
         return false;
     }
