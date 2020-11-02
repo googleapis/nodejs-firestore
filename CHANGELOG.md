@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.5.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.5.0...v4.5.1) (2020-11-02)
+
+
+### Bug Fixes
+
+* retry transactions that fail with expired transaction IDs ([#1347](https://www.github.com/googleapis/nodejs-firestore/issues/1347)) ([a18ab50](https://www.github.com/googleapis/nodejs-firestore/commit/a18ab50f3304f1154caaaab9768b736bdb3d8442))
+
 ## [4.5.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.4.0...v4.5.0) (2020-10-26)
 
 
