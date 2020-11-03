@@ -2607,7 +2607,7 @@ describe('BulkWriter class', () => {
     expect(deleteResult.writeTime).to.deep.equal(new Timestamp(0, 0));
   });
 
-  it('has can write to the same document twice', async () => {
+  it('can write to the same document twice', async () => {
     const ref = randomCol.doc('doc1');
     const op1 = writer.set(ref, {foo: 'bar'});
     const op2 = writer.set(ref, {foo: 'bar2'});
