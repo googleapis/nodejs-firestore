@@ -4,6 +4,18 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.6.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.5.0...v4.6.0) (2020-11-03)
+
+
+### Features
+
+* add onWriteError() and onWriteResult() handlers to BulkWriter ([#1315](https://www.github.com/googleapis/nodejs-firestore/issues/1315)) ([a173f4d](https://www.github.com/googleapis/nodejs-firestore/commit/a173f4defab7a6e750907fcb86431c56fcb3d4cf))
+
+
+### Bug Fixes
+
+* retry transactions that fail with expired transaction IDs ([#1347](https://www.github.com/googleapis/nodejs-firestore/issues/1347)) ([a18ab50](https://www.github.com/googleapis/nodejs-firestore/commit/a18ab50f3304f1154caaaab9768b736bdb3d8442))
+
 ## [4.5.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.4.0...v4.5.0) (2020-10-26)
 
 
