@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.6.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.6.0...v4.6.1) (2020-11-03)
+
+
+### Bug Fixes
+
+* create new batch for writes to the same doc ([#1352](https://www.github.com/googleapis/nodejs-firestore/issues/1352)) ([bd5adc3](https://www.github.com/googleapis/nodejs-firestore/commit/bd5adc35ea1f662ee762ac8b9048556e78a54f35))
+
 ## [4.6.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.5.0...v4.6.0) (2020-11-03)
 
 
