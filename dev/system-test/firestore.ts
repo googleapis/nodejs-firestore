@@ -45,6 +45,7 @@ import {
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
 import {BulkWriter} from '../src/bulk-writer';
+import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
 
@@ -2611,6 +2612,24 @@ describe('BulkWriter class', () => {
     writer.set(ref, {foo: 'bar'});
     await writer.close();
     return firestore.terminate();
+  });
+
+  it('can retry failed writes with a provided callback', async () => {
+    let retryCount = 0;
+    let code: Status = -1;
+    writer.onWriteError(error => {
+      retryCount = error.failedAttempts;
+      return error.failedAttempts < 3;
+    });
+
+    // Use an invalid document name that the backend will reject.
+    const ref = randomCol.doc('__doc__');
+    writer.create(ref, {foo: 'bar'}).catch(err => {
+      code = err.code;
+    });
+    await writer.close();
+    expect(retryCount).to.equal(3);
+    expect(code).to.equal(Status.INVALID_ARGUMENT);
   });
 });
 
