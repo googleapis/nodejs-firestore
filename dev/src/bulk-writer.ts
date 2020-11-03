@@ -96,6 +96,9 @@ class BulkCommitBatch {
    */
   state = BatchState.OPEN;
 
+  // The set of document reference paths present in the WriteBatch.
+  readonly docPaths = new Set<string>();
+
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
   private pendingOps: Array<Deferred<BatchWriteResult>> = [];
@@ -126,7 +129,7 @@ class BulkCommitBatch {
     data: T
   ): Promise<WriteResult> {
     this.writeBatch.create(documentRef, data);
-    return this.processLastOperation();
+    return this.processLastOperation(documentRef);
   }
 
   /**
@@ -138,7 +141,7 @@ class BulkCommitBatch {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this.writeBatch.delete(documentRef, precondition);
-    return this.processLastOperation();
+    return this.processLastOperation(documentRef);
   }
 
   set<T>(
@@ -165,7 +168,7 @@ class BulkCommitBatch {
     options?: firestore.SetOptions
   ): Promise<WriteResult> {
     this.writeBatch.set(documentRef, data, options);
-    return this.processLastOperation();
+    return this.processLastOperation(documentRef);
   }
 
   /**
@@ -180,14 +183,21 @@ class BulkCommitBatch {
     >
   ): Promise<WriteResult> {
     this.writeBatch.update(documentRef, dataOrField, ...preconditionOrValues);
-    return this.processLastOperation();
+    return this.processLastOperation(documentRef);
   }
 
   /**
    * Helper to update data structures associated with the operation and
    * return the result.
    */
-  private processLastOperation<T>(): Promise<WriteResult> {
+  private processLastOperation<T>(
+    documentRef: firestore.DocumentReference
+  ): Promise<WriteResult> {
+    assert(
+      !this.docPaths.has(documentRef.path),
+      'Batch should not contain writes to the same document'
+    );
+    this.docPaths.add(documentRef.path);
     assert(
       this.state === BatchState.OPEN,
       'Batch should be OPEN when adding writes'
@@ -762,10 +772,16 @@ export class BulkWriter {
    *
    * @private
    */
-  private getEligibleBatch<T>(batchQueue: BulkCommitBatch[]): BulkCommitBatch {
+  private getEligibleBatch<T>(
+    documentRef: firestore.DocumentReference,
+    batchQueue: BulkCommitBatch[]
+  ): BulkCommitBatch {
     if (batchQueue.length > 0) {
       const lastBatch = batchQueue[batchQueue.length - 1];
-      if (lastBatch.state === BatchState.OPEN) {
+      if (
+        lastBatch.state === BatchState.OPEN &&
+        !lastBatch.docPaths.has(documentRef.path)
+      ) {
         return lastBatch;
       }
     }
@@ -881,7 +897,7 @@ export class BulkWriter {
       for (let failedAttempts = 0; ; ++failedAttempts) {
         const batchQueue =
           failedAttempts > 0 ? this._retryBatchQueue : this._batchQueue;
-        const bulkCommitBatch = this.getEligibleBatch(batchQueue);
+        const bulkCommitBatch = this.getEligibleBatch(documentRef, batchQueue);
 
         // Send ready batches if this is the first attempt. Subsequent retry
         // batches are scheduled after the initial batch returns.
