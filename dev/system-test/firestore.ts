@@ -2607,6 +2607,19 @@ describe('BulkWriter class', () => {
     expect(deleteResult.writeTime).to.deep.equal(new Timestamp(0, 0));
   });
 
+  it('has can write to the same document twice', async () => {
+    const ref = randomCol.doc('doc1');
+    const op1 = writer.set(ref, {foo: 'bar'});
+    const op2 = writer.set(ref, {foo: 'bar2'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar2'});
+    const writeTime1 = (await op1).writeTime;
+    const writeTime2 = (await op2).writeTime;
+    expect(writeTime1).to.not.be.null;
+    expect(writeTime2).to.not.be.null;
+  });
+
   it('can terminate once BulkWriter is closed', async () => {
     const ref = randomCol.doc('doc1');
     writer.set(ref, {foo: 'bar'});

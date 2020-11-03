@@ -455,14 +455,15 @@ describe('BulkWriter', () => {
     expect(() => bulkWriter.close()).to.throw(expected);
   });
 
-  it('can send writes to the same documents in the same batch', async () => {
+  it('send writes to the same documents in the different batches', async () => {
     const bulkWriter = await instantiateInstance([
       {
-        request: createRequest([
-          setOp('doc1', 'bar'),
-          updateOp('doc1', 'bar2'),
-        ]),
-        response: mergeResponses([successResponse(1), successResponse(2)]),
+        request: createRequest([setOp('doc1', 'bar')]),
+        response: successResponse(1),
+      },
+      {
+        request: createRequest([updateOp('doc1', 'bar2')]),
+        response: successResponse(2),
       },
     ]);
 
@@ -497,10 +498,10 @@ describe('BulkWriter', () => {
     const bulkWriter = await instantiateInstance([
       {
         request: createRequest([
-          createOp('doc', 'bar'),
-          setOp('doc', 'bar'),
-          updateOp('doc', 'bar'),
-          deleteOp('doc'),
+          createOp('doc1', 'bar'),
+          setOp('doc2', 'bar'),
+          updateOp('doc3', 'bar'),
+          deleteOp('doc4'),
         ]),
         response: mergeResponses([
           successResponse(1),
@@ -514,10 +515,10 @@ describe('BulkWriter', () => {
     bulkWriter.onWriteResult((documentRef, result) => {
       writeResults.push(result.writeTime.seconds);
     });
-    bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    bulkWriter.delete(firestore.doc('collectionId/doc'));
+    bulkWriter.create(firestore.doc('collectionId/doc1'), {foo: 'bar'});
+    bulkWriter.set(firestore.doc('collectionId/doc2'), {foo: 'bar'});
+    bulkWriter.update(firestore.doc('collectionId/doc3'), {foo: 'bar'});
+    bulkWriter.delete(firestore.doc('collectionId/doc4'));
     return bulkWriter.close().then(() => {
       expect(writeResults).to.deep.equal([1, 2, 3, 4]);
     });
@@ -528,9 +529,9 @@ describe('BulkWriter', () => {
       {
         request: createRequest([
           createOp('doc', 'bar'),
-          setOp('doc', 'bar'),
-          updateOp('doc', 'bar'),
-          deleteOp('doc'),
+          setOp('doc1', 'bar'),
+          updateOp('doc2', 'bar'),
+          deleteOp('doc3'),
         ]),
         response: mergeResponses([
           successResponse(1),
@@ -541,9 +542,9 @@ describe('BulkWriter', () => {
       },
       {
         request: createRequest([
-          setOp('doc', 'bar'),
-          updateOp('doc', 'bar'),
-          deleteOp('doc'),
+          setOp('doc1', 'bar'),
+          updateOp('doc2', 'bar'),
+          deleteOp('doc3'),
         ]),
         response: mergeResponses([
           successResponse(2),
@@ -563,9 +564,9 @@ describe('BulkWriter', () => {
       writeResults.push(result.writeTime.seconds);
     });
     bulkWriter.create(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    bulkWriter.update(firestore.doc('collectionId/doc'), {foo: 'bar'});
-    bulkWriter.delete(firestore.doc('collectionId/doc'));
+    bulkWriter.set(firestore.doc('collectionId/doc1'), {foo: 'bar'});
+    bulkWriter.update(firestore.doc('collectionId/doc2'), {foo: 'bar'});
+    bulkWriter.delete(firestore.doc('collectionId/doc3'));
     return bulkWriter.close().then(() => {
       expect(ops).to.deep.equal([
         'success',
@@ -867,7 +868,7 @@ describe('BulkWriter', () => {
       {
         request: createRequest([
           setOp('doc1', 'bar'),
-          setOp('doc1', 'bar2'),
+          setOp('doc2', 'bar2'),
           setOp('doc3', 'bar'),
         ]),
         response: mergeResponses([
@@ -877,7 +878,7 @@ describe('BulkWriter', () => {
         ]),
       },
       {
-        request: createRequest([setOp('doc1', 'bar2'), setOp('doc3', 'bar')]),
+        request: createRequest([setOp('doc2', 'bar2'), setOp('doc3', 'bar')]),
         response: mergeResponses([
           successResponse(2),
           failedResponse(Status.ABORTED),
@@ -896,7 +897,7 @@ describe('BulkWriter', () => {
         foo: 'bar',
       })
       .catch(incrementOpCount);
-    const set2 = bulkWriter.set(firestore.doc('collectionId/doc1'), {
+    const set2 = bulkWriter.set(firestore.doc('collectionId/doc2'), {
       foo: 'bar2',
     });
     const set3 = bulkWriter.set(firestore.doc('collectionId/doc3'), {
