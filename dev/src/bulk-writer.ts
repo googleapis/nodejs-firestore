@@ -92,25 +92,25 @@ class BulkCommitBatch extends WriteBatch {
   // been resolved.
   private pendingOps: Array<Deferred<BatchWriteResult>> = [];
 
-  _has(documentRef: firestore.DocumentReference): boolean {
+  has(documentRef: firestore.DocumentReference): boolean {
     return this.docPaths.has(documentRef.path);
   }
 
-  _markReadyToSend(): void {
+  markReadyToSend(): void {
     if (this.state === BatchState.OPEN) {
       this.state = BatchState.READY_TO_SEND;
     }
   }
 
-  _isOpen(): boolean {
+  isOpen(): boolean {
     return this.state === BatchState.OPEN;
   }
 
-  _isReadyToSend(): boolean {
+  isReadyToSend(): boolean {
     return this.state === BatchState.READY_TO_SEND;
   }
 
-  async bulkCommit(): Promise<void> {
+  async _bulkCommit(): Promise<void> {
     assert(
       this.state === BatchState.READY_TO_SEND,
       'The batch should be marked as READY_TO_SEND before committing'
@@ -160,7 +160,7 @@ class BulkCommitBatch extends WriteBatch {
    * Helper to update data structures associated with the operation and returns
    * the result.
    */
-  _processLastOperation<T>(
+  processLastOperation<T>(
     documentRef: firestore.DocumentReference
   ): Promise<WriteResult> {
     assert(
@@ -639,7 +639,7 @@ export class BulkWriter {
 
   private async _flush(pendingOps: Array<Promise<void>>): Promise<void> {
     let batchQueue = this._batchQueue;
-    batchQueue.forEach(batch => batch._markReadyToSend());
+    batchQueue.forEach(batch => batch.markReadyToSend());
 
     // Send all scheduled operations on the BatchQueue first.
     this.sendReadyBatches(batchQueue);
@@ -650,7 +650,7 @@ export class BulkWriter {
     // flush() will not be sent until the retries are completed.
     batchQueue = this._retryBatchQueue;
     if (batchQueue.length > 0) {
-      batchQueue.forEach(batch => batch._markReadyToSend());
+      batchQueue.forEach(batch => batch.markReadyToSend());
       this.sendReadyBatches(batchQueue);
     }
     // Make sure user promises resolve before flush() resolves.
@@ -710,7 +710,7 @@ export class BulkWriter {
   ): BulkCommitBatch {
     if (batchQueue.length > 0) {
       const lastBatch = batchQueue[batchQueue.length - 1];
-      if (lastBatch._isOpen() && !lastBatch._has(documentRef)) {
+      if (lastBatch.isOpen() && !lastBatch.has(documentRef)) {
         return lastBatch;
       }
     }
@@ -728,7 +728,7 @@ export class BulkWriter {
     const newBatch = new BulkCommitBatch(this.firestore, this._maxBatchSize);
 
     if (batchQueue.length > 0) {
-      batchQueue[batchQueue.length - 1]._markReadyToSend();
+      batchQueue[batchQueue.length - 1].markReadyToSend();
       this.sendReadyBatches(batchQueue);
     }
 
@@ -746,7 +746,7 @@ export class BulkWriter {
    */
   private sendReadyBatches(batchQueue: BulkCommitBatch[]): void {
     let index = 0;
-    while (index < batchQueue.length && batchQueue[index]._isReadyToSend()) {
+    while (index < batchQueue.length && batchQueue[index].isReadyToSend()) {
       const batch = batchQueue[index];
 
       // Deferred promise that resolves when the current batch or its
@@ -787,14 +787,14 @@ export class BulkWriter {
   ): Promise<void> {
     const success = this._rateLimiter.tryMakeRequest(batch._opCount);
     assert(success, 'Batch should be under rate limit to be sent.');
-    return batch.bulkCommit().then(() => {
+    return batch._bulkCommit().then(() => {
       // Remove the batch from the BatchQueue after it has been processed.
       const batchIndex = batchQueue.indexOf(batch);
       assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
       batchQueue.splice(batchIndex, 1);
 
       if (batchQueue === this._retryBatchQueue) {
-        batchQueue.forEach(batch => batch._markReadyToSend());
+        batchQueue.forEach(batch => batch.markReadyToSend());
       }
 
       batchCompletedDeferred.resolve();
@@ -829,7 +829,7 @@ export class BulkWriter {
 
         try {
           operationFn(bulkCommitBatch);
-          const operationResult = await bulkCommitBatch._processLastOperation(
+          const operationResult = await bulkCommitBatch.processLastOperation(
             documentRef
           );
           this._successFn(documentRef, operationResult);

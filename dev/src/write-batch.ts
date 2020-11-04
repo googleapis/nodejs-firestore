@@ -604,17 +604,18 @@ export class WriteBatch implements firestore.WriteBatch {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
     this.state = BatchState.SENT;
 
-    const tag = (commitOptions && commitOptions.requestTag) || requestTag();
+    const tag = commitOptions?.requestTag ?? requestTag();
     await this._firestore.initializeIfNeeded(tag);
 
-    const request = {
+    // Note that the request may not always be of type ICommitRequest. This is
+    // just here to ensure type safety.
+    const request: api.ICommitRequest = {
       database: this._firestore.formattedName,
       writes: this._ops.map(op => op.op()),
-      transaction: commitOptions?.transactionId,
     };
 
-    if (request.transaction === undefined) {
-      delete request.transaction;
+    if (commitOptions?.transactionId) {
+      request.transaction = commitOptions.transactionId;
     }
 
     logger(
@@ -626,7 +627,7 @@ export class WriteBatch implements firestore.WriteBatch {
 
     return this._firestore.request<Req, Resp>(
       commitOptions?.methodName || 'commit',
-      (request as unknown) as Req,
+      request as Req,
       tag,
       commitOptions?.retryCodes
     );
