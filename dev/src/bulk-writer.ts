@@ -83,7 +83,7 @@ const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
  */
 class BulkCommitBatch extends WriteBatch {
   constructor(firestore: Firestore, readonly maxBatchSize: number) {
-    super(firestore, maxBatchSize);
+    super(firestore);
   }
   // The set of document reference paths present in the WriteBatch.
   readonly docPaths = new Set<string>();
