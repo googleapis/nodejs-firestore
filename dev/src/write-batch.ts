@@ -29,12 +29,10 @@ import {FieldPath, validateFieldPath} from './path';
 import {validateDocumentReference} from './reference';
 import {Serializer, validateUserInput} from './serializer';
 import {Timestamp} from './timestamp';
-import {UpdateMap} from './types';
+import {FirestoreUnaryMethod, UpdateMap} from './types';
 import {
-  Deferred,
   getRetryCodes,
   isObject,
-  silencePromise,
   isPlainObject,
   requestTag,
   wrapError,
@@ -50,8 +48,6 @@ import {
 
 import api = google.firestore.v1;
 import {GoogleError, Status} from 'google-gax';
-
-import * as assert from 'assert';
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
@@ -126,7 +122,7 @@ export type PendingWriteOp = () => api.IWrite;
  * Writes can only be added while the batch is OPEN. For a batch to be sent,
  * the batch must be READY_TO_SEND. After a batch is sent, it is marked as SENT.
  */
-enum BatchState {
+export enum BatchState {
   OPEN,
   READY_TO_SEND,
   SENT,
@@ -153,28 +149,16 @@ export class WriteBatch implements firestore.WriteBatch {
   private readonly _ops: Array<{docPath: string; op: PendingWriteOp}> = [];
 
   /**
-   * The state of the batch.
-   */
-  private state = BatchState.OPEN;
-
-  // The set of document reference paths present in the WriteBatch.
-  readonly docPaths = new Set<string>();
-
-  // An array of pending write operations. Only contains writes that have not
-  // been resolved.
-  private pendingOps: Array<Deferred<BatchWriteResult>> = [];
-
-  /**
    * The number of writes in this batch.
    */
   get _opCount(): number {
     return this._ops.length;
   }
 
-  // Visible for testing.
-  get _pendingOps(): Array<Deferred<BatchWriteResult>> {
-    return this.pendingOps;
-  }
+  /**
+   * The state of the batch.
+   */
+  protected state = BatchState.OPEN;
 
   /**
    * @hideconstructor
@@ -585,73 +569,23 @@ export class WriteBatch implements firestore.WriteBatch {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
 
-    return this._commit().catch(err => {
-      throw wrapError(err, stack);
-    });
-  }
+    // Commits should also be retried when they fail with status code ABORTED.
+    const retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
 
-  /**
-   * Commits all pending operations to the database and verifies all
-   * preconditions.
-   *
-   * The writes in the batch are not applied atomically and can be applied out
-   * of order.
-   *
-   * @private
-   */
-  async bulkCommit(): Promise<void> {
-    assert(
-      this.state === BatchState.READY_TO_SEND,
-      'The batch should be marked as READY_TO_SEND before committing'
-    );
-    this.state = BatchState.SENT;
-
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    let results: BatchWriteResult[] = [];
-    try {
-      const tag = requestTag();
-      await this._firestore.initializeIfNeeded(tag);
-
-      const request: api.IBatchWriteRequest = {
-        database: this._firestore.formattedName,
-        writes: this._ops.map(op => op.op()),
-      };
-
-      const retryCodes = getRetryCodes('batchWrite');
-      const response = await this._firestore.request<
-        api.IBatchWriteRequest,
-        api.BatchWriteResponse
-      >('batchWrite', request, tag, retryCodes);
-
-      results = response.writeResults.map((result, i) => {
-        const status = response.status[i];
-        const error = new GoogleError(status.message || undefined);
-        error.code = status.code as Status;
-
-        // Since delete operations currently do not have write times, use a
-        // sentinel Timestamp value.
-        // TODO(b/158502664): Use actual delete timestamp.
-        const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
-        const updateTime =
-          error.code === Status.OK
-            ? Timestamp.fromProto(
-                result.updateTime || DELETE_TIMESTAMP_SENTINEL
+    return this._commit<api.CommitRequest, api.CommitResponse>({retryCodes})
+      .then(response => {
+        return (response.writeResults || []).map(
+          writeResult =>
+            new WriteResult(
+              Timestamp.fromProto(
+                writeResult.updateTime || response.commitTime!
               )
-            : null;
-        return new BatchWriteResult(updateTime, error);
+            )
+        );
+      })
+      .catch(err => {
+        throw wrapError(err, stack);
       });
-    } catch (err) {
-      // Map the failure to each individual write's result.
-      results = this.pendingOps.map(() => {
-        return {
-          writeTime: null,
-          status: wrapError(err, stack),
-        };
-      });
-    }
-    return this.processResults(results);
   }
 
   /**
@@ -667,19 +601,23 @@ export class WriteBatch implements firestore.WriteBatch {
   async _commit<Req, Resp>(commitOptions?: {
     transactionId?: Uint8Array;
     requestTag?: string;
-  }): Promise<WriteResult[]> {
+    retryCodes?: number[];
+    methodName?: FirestoreUnaryMethod;
+  }): Promise<Resp> {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
     this.state = BatchState.SENT;
 
     const tag = (commitOptions && commitOptions.requestTag) || requestTag();
     await this._firestore.initializeIfNeeded(tag);
 
-    const request: api.ICommitRequest = {
+    const request = {
       database: this._firestore.formattedName,
       writes: this._ops.map(op => op.op()),
+      transaction: commitOptions?.transactionId,
     };
-    if (commitOptions?.transactionId) {
-      request.transaction = commitOptions.transactionId;
+
+    if (request.transaction === undefined) {
+      delete request.transaction;
     }
 
     logger(
@@ -689,24 +627,11 @@ export class WriteBatch implements firestore.WriteBatch {
       request.writes!.length
     );
 
-    let retryCodes: number[] | undefined;
-
-    if (!commitOptions?.transactionId) {
-      // Commits outside of transaction should also be retried when they fail
-      // with status code ABORTED.
-      retryCodes = [Status.ABORTED, ...getRetryCodes('commit')];
-    }
-
-    const response = await this._firestore.request<
-      api.ICommitRequest,
-      api.CommitResponse
-    >('commit', request, tag, retryCodes);
-
-    return (response.writeResults || []).map(
-      writeResult =>
-        new WriteResult(
-          Timestamp.fromProto(writeResult.updateTime || response.commitTime!)
-        )
+    return this._firestore.request<Req, Resp>(
+      commitOptions?.methodName || 'commit',
+      (request as unknown) as Req,
+      tag,
+      commitOptions?.retryCodes
     );
   }
 
@@ -717,73 +642,6 @@ export class WriteBatch implements firestore.WriteBatch {
   _reset(): void {
     this._ops.splice(0);
     this.state = BatchState.OPEN;
-  }
-
-  /**
-   * Helper to update data structures associated with the operation and returns
-   * the result.
-   */
-  _processLastOperation<T>(
-    documentRef: firestore.DocumentReference
-  ): Promise<WriteResult> {
-    assert(
-      !this.docPaths.has(documentRef.path),
-      'Batch should not contain writes to the same document'
-    );
-    this.docPaths.add(documentRef.path);
-    assert(
-      this.state === BatchState.OPEN,
-      'Batch should be OPEN when adding writes'
-    );
-    const deferred = new Deferred<BatchWriteResult>();
-    this.pendingOps.push(deferred);
-
-    if (this._opCount === this.maxBatchSize) {
-      this.state = BatchState.READY_TO_SEND;
-    }
-
-    return deferred.promise.then(result => {
-      if (result.writeTime) {
-        return new WriteResult(result.writeTime);
-      } else {
-        throw result.status;
-      }
-    });
-  }
-
-  /**
-   * Resolves the individual operations in the batch with the results.
-   */
-  private async processResults(results: BatchWriteResult[]): Promise<void> {
-    await Promise.all(
-      results.map((result, i) => {
-        const op = this.pendingOps[i];
-        if (result.status.code === Status.OK) {
-          op.resolve(result);
-        } else {
-          op.reject(result.status);
-        }
-        return silencePromise(op.promise);
-      })
-    );
-  }
-
-  _has(documentRef: firestore.DocumentReference): boolean {
-    return this.docPaths.has(documentRef.path);
-  }
-
-  _markReadyToSend(): void {
-    if (this.state === BatchState.OPEN) {
-      this.state = BatchState.READY_TO_SEND;
-    }
-  }
-
-  _isOpen(): boolean {
-    return this.state === BatchState.OPEN;
-  }
-
-  _isReadyToSend(): boolean {
-    return this.state === BatchState.READY_TO_SEND;
   }
 }
 
