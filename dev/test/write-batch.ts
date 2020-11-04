@@ -27,7 +27,6 @@ import {
   WriteResult,
   QueryDocumentSnapshot,
 } from '../src';
-import {BatchWriteResult} from '../src/write-batch';
 import {
   ApiOverride,
   createInstance,
@@ -438,7 +437,8 @@ describe('batch support', () => {
 });
 
 describe('bulkCommit support', () => {
-  const documentName = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc`;
+  const doc1 = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc1`;
+  const doc2 = `projects/${PROJECT_ID}/databases/(default)/documents/col/doc2`;
 
   let firestore: Firestore;
   let writeBatch: WriteBatch;
@@ -452,7 +452,7 @@ describe('bulkCommit support', () => {
             {
               update: {
                 fields: {},
-                name: documentName,
+                name: doc1,
               },
               updateTransforms: [
                 {
@@ -471,7 +471,7 @@ describe('bulkCommit support', () => {
                     stringValue: 'bar',
                   },
                 },
-                name: documentName,
+                name: doc2,
               },
               updateMask: {
                 fieldPaths: ['foo'],
@@ -503,21 +503,25 @@ describe('bulkCommit support', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  function verifyResponse(writeResults: BatchWriteResult[]) {
-    expect(writeResults[0].writeTime!.isEqual(new Timestamp(0, 0))).to.be.true;
-    expect(writeResults[1].writeTime).to.be.null;
-    expect(writeResults[0].status.code).to.equal(Status.OK);
-    expect(writeResults[1].status.code).to.equal(Status.DEADLINE_EXCEEDED);
-  }
-
   it('bulkCommit', () => {
-    const documentName = firestore.doc('col/doc');
+    const doc1 = firestore.doc('col/doc1');
+    const doc2 = firestore.doc('col/doc2');
+    const completed: string[] = [];
 
-    writeBatch.set(documentName, {foo: FieldValue.serverTimestamp()});
-    writeBatch.update(documentName, {foo: 'bar'});
-
-    return writeBatch.bulkCommit().then(resp => {
-      verifyResponse(resp);
+    writeBatch.set(doc1, {foo: FieldValue.serverTimestamp()});
+    writeBatch.update(doc2, {foo: 'bar'});
+    writeBatch._processLastOperation(doc1).then(res => {
+      expect(res.writeTime!.isEqual(new Timestamp(0, 0))).to.be.true;
+      completed.push('doc1');
+    });
+    writeBatch._processLastOperation(doc2).catch(err => {
+      expect(err.code).to.equal(Status.DEADLINE_EXCEEDED);
+      completed.push('doc2');
+    });
+    writeBatch._markReadyToSend();
+    return writeBatch.bulkCommit().then(() => {
+      expect(writeBatch._pendingOps.length).to.equal(2);
+      expect(completed).to.deep.equal(['doc1', 'doc2']);
     });
   });
 });
