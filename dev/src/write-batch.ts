@@ -116,18 +116,6 @@ export class BatchWriteResult {
  */
 export type PendingWriteOp = () => api.IWrite;
 
-/*!
- * Used to represent the state of batch.
- *
- * Writes can only be added while the batch is OPEN. For a batch to be sent,
- * the batch must be READY_TO_SEND. After a batch is sent, it is marked as SENT.
- */
-export enum BatchState {
-  OPEN,
-  READY_TO_SEND,
-  SENT,
-}
-
 /**
  * A Firestore WriteBatch that can be used to atomically commit multiple write
  * operations at once.
@@ -148,17 +136,14 @@ export class WriteBatch implements firestore.WriteBatch {
    */
   private readonly _ops: Array<{docPath: string; op: PendingWriteOp}> = [];
 
+  private _committed = false;
+
   /**
    * The number of writes in this batch.
    */
   get _opCount(): number {
     return this._ops.length;
   }
-
-  /**
-   * The state of the batch.
-   */
-  protected state = BatchState.OPEN;
 
   /**
    * @hideconstructor
@@ -184,7 +169,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * @private
    */
   private verifyNotCommitted(): void {
-    if (this.state === BatchState.SENT) {
+    if (this._committed) {
       throw new Error('Cannot modify a WriteBatch that has been committed.');
     }
   }
@@ -602,7 +587,7 @@ export class WriteBatch implements firestore.WriteBatch {
     methodName?: FirestoreUnaryMethod;
   }): Promise<Resp> {
     // Note: We don't call `verifyNotCommitted()` to allow for retries.
-    this.state = BatchState.SENT;
+    this._committed = true;
 
     const tag = commitOptions?.requestTag ?? requestTag();
     await this._firestore.initializeIfNeeded(tag);
@@ -639,7 +624,7 @@ export class WriteBatch implements firestore.WriteBatch {
    */
   _reset(): void {
     this._ops.splice(0);
-    this.state = BatchState.OPEN;
+    this._committed = false;
   }
 }
 
