@@ -42,10 +42,10 @@ import {
   validateOptional,
 } from './validate';
 import {logger} from './logger';
+import {GoogleError, Status} from 'google-gax';
 
 // eslint-disable-next-line no-undef
 import GrpcStatus = FirebaseFirestore.GrpcStatus;
-import {GoogleError, Status} from 'google-gax';
 import api = google.firestore.v1;
 
 /*!
@@ -115,6 +115,7 @@ class BulkCommitBatch extends WriteBatch {
       this.state === BatchState.READY_TO_SEND,
       'The batch should be marked as READY_TO_SEND before committing'
     );
+    this.state = BatchState.SENT;
 
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;

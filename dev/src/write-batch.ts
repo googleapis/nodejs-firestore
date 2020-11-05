@@ -595,7 +595,7 @@ export class WriteBatch implements firestore.WriteBatch {
    * this request.
    * @returns  A Promise that resolves when this batch completes.
    */
-  async _commit<Req, Resp>(commitOptions?: {
+  async _commit<Req extends api.ICommitRequest, Resp>(commitOptions?: {
     transactionId?: Uint8Array;
     requestTag?: string;
     retryCodes?: number[];
