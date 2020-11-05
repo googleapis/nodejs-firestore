@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.7.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.6.1...v4.7.0) (2020-11-05)
+
+
+### Features
+
+* add ability to specify custom headers for individual RPC types ([#1355](https://www.github.com/googleapis/nodejs-firestore/issues/1355)) ([0900379](https://www.github.com/googleapis/nodejs-firestore/commit/0900379e9853a8c2c7c36418dce8beb7ce966889))
+
 ### [4.6.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.6.0...v4.6.1) (2020-11-03)
 
 
