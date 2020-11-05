@@ -30,12 +30,7 @@ import {
   silencePromise,
   wrapError,
 } from './util';
-import {
-  BatchState,
-  BatchWriteResult,
-  WriteBatch,
-  WriteResult,
-} from './write-batch';
+import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
 import {
   invalidArgumentMessage,
   validateInteger,
@@ -76,21 +71,39 @@ const RATE_LIMITER_MULTIPLIER = 1.5;
  */
 const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
+/*!
+ * Used to represent the state of batch.
+ *
+ * Writes can only be added while the batch is OPEN. For a batch to be sent,
+ * the batch must be READY_TO_SEND. After a batch is sent, it is marked as SENT.
+ */
+enum BatchState {
+  OPEN,
+  READY_TO_SEND,
+  SENT,
+}
+
 /**
  * Used to represent a batch on the BatchQueue.
  *
  * @private
  */
 class BulkCommitBatch extends WriteBatch {
-  constructor(firestore: Firestore, readonly maxBatchSize: number) {
-    super(firestore);
-  }
+  /**
+   * The state of the batch.
+   */
+  private state = BatchState.OPEN;
+
   // The set of document reference paths present in the WriteBatch.
   readonly docPaths = new Set<string>();
 
   // An array of pending write operations. Only contains writes that have not
   // been resolved.
   private pendingOps: Array<Deferred<BatchWriteResult>> = [];
+
+  constructor(firestore: Firestore, readonly maxBatchSize: number) {
+    super(firestore);
+  }
 
   has(documentRef: firestore.DocumentReference): boolean {
     return this.docPaths.has(documentRef.path);
@@ -110,7 +123,7 @@ class BulkCommitBatch extends WriteBatch {
     return this.state === BatchState.READY_TO_SEND;
   }
 
-  async _bulkCommit(): Promise<void> {
+  async bulkCommit(): Promise<void> {
     assert(
       this.state === BatchState.READY_TO_SEND,
       'The batch should be marked as READY_TO_SEND before committing'
@@ -787,7 +800,7 @@ export class BulkWriter {
   ): Promise<void> {
     const success = this._rateLimiter.tryMakeRequest(batch._opCount);
     assert(success, 'Batch should be under rate limit to be sent.');
-    return batch._bulkCommit().then(() => {
+    return batch.bulkCommit().then(() => {
       // Remove the batch from the BatchQueue after it has been processed.
       const batchIndex = batchQueue.indexOf(batch);
       assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
