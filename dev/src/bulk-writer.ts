@@ -798,10 +798,10 @@ export class BulkWriter {
     batch: BulkCommitBatch,
     batchQueue: BulkCommitBatch[],
     batchCompletedDeferred: Deferred<void>
-  ): Promise<void> {
+  ): void {
     const success = this._rateLimiter.tryMakeRequest(batch._opCount);
     assert(success, 'Batch should be under rate limit to be sent.');
-    return batch.bulkCommit().then(() => {
+    batch.bulkCommit().then(() => {
       // Remove the batch from the BatchQueue after it has been processed.
       const batchIndex = batchQueue.indexOf(batch);
       assert(batchIndex !== -1, 'The batch should be in the BatchQueue');
