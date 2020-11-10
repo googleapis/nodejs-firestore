@@ -4,6 +4,15 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.7.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.7.0...v4.7.1) (2020-11-10)
+
+
+### Bug Fixes
+
+* do not modify options object, use defaultScopes ([#1360](https://www.github.com/googleapis/nodejs-firestore/issues/1360)) ([bd40d3a](https://www.github.com/googleapis/nodejs-firestore/commit/bd40d3ae73cfd0a8e2503fca8d0aa28cb3bbcb86))
+* ignore 'undefined' in update() with UpdateMap ([#1363](https://www.github.com/googleapis/nodejs-firestore/issues/1363)) ([9bad804](https://www.github.com/googleapis/nodejs-firestore/commit/9bad804205ab886c1a80351a8e7a7726e3d242ec))
+* remove unneeded async signature from BulkWriter.sendBatch() ([#1361](https://www.github.com/googleapis/nodejs-firestore/issues/1361)) ([b5cf449](https://www.github.com/googleapis/nodejs-firestore/commit/b5cf4499724ff41e626a69f2db66be22167a7223))
+
 ## [4.7.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.6.1...v4.7.0) (2020-11-05)
 
 
