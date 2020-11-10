@@ -299,6 +299,7 @@ export class BulkWriter {
   /**
    * The user-provided callback to be run every time a BulkWriter operation
    * successfully completes.
+   * @private
    */
   private _successFn: (
     document: firestore.DocumentReference,
@@ -308,6 +309,7 @@ export class BulkWriter {
   /**
    * The user-provided callback to be run every time a BulkWriter operation
    * fails.
+   * @private
    */
   private _errorFn: (error: BulkWriterError) => boolean = error => {
     const retryCodes = getRetryCodes('batchWrite');
@@ -705,6 +707,7 @@ export class BulkWriter {
 
   /**
    * Throws an error if the BulkWriter instance has been closed.
+   * @private
    */
   private verifyNotClosed(): void {
     if (this._closing) {
@@ -820,6 +823,7 @@ export class BulkWriter {
 
   /**
    * Schedules and runs the provided operation.
+   * @private
    */
   private async _executeWrite(
     documentRef: firestore.DocumentReference,

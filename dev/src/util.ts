@@ -161,12 +161,16 @@ export function isPermanentRpcError(
 /**
  * Returns the list of retryable error codes specified in the service
  * configuration.
+ * @private
  */
 export function getRetryCodes(methodName: string): number[] {
   return serviceConfig[methodName]?.retry?.retryCodes ?? [];
 }
 
-/** Returns the backoff setting from the service configuration. */
+/**
+ * Returns the backoff setting from the service configuration.
+ * @private
+ */
 export function getRetryParams(methodName: string): BackoffSettings {
   return (
     serviceConfig[methodName]?.retry?.backoffSettings ??
@@ -180,6 +184,8 @@ export function getRetryParams(methodName: string): BackoffSettings {
  *
  * This is primarily used to wait for a promise to complete when the result of
  * the promise will be discarded.
+ *
+ * @private
  */
 export function silencePromise(promise: Promise<unknown>): Promise<void> {
   return promise.then(

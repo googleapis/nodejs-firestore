@@ -279,6 +279,15 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  */
 
 /**
+ * Status codes returned by GRPC operations.
+ *
+ * @see https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
+ *
+ * @enum {number}
+ * @typedef {Object} GrpcStatus
+ */
+
+/**
  * The Firestore client represents a Firestore Database and is the entry point
  * for all Firestore operations.
  *
