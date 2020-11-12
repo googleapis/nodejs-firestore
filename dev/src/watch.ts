@@ -41,7 +41,7 @@ import api = google.firestore.v1;
  */
 const WATCH_TARGET_ID = 0x1;
 
-/**
+/*!
  * Idle timeout used to detect Watch streams that stall (see
  * https://github.com/googleapis/nodejs-firestore/issues/1057, b/156308554).
  * Under normal load, the Watch backend will send a TARGET_CHANGE message
