@@ -348,7 +348,7 @@ export function validateUserInput(
         `${invalidArgumentMessage(
           arg,
           desc
-        )} "undefined" values are only ignored in object properties.`
+        )} "undefined" values are only ignored inside of objects.`
       );
     } else if (!options.allowUndefined) {
       throw new Error(
@@ -366,15 +366,26 @@ export function validateUserInput(
           value.methodName
         }() cannot be used inside of an array${fieldPathMessage}.`
       );
-    } else if (
-      (options.allowDeletes === 'root' && level !== 0) ||
-      options.allowDeletes === 'none'
-    ) {
+    } else if (options.allowDeletes === 'none') {
       throw new Error(
         `${invalidArgumentMessage(arg, desc)} ${
           value.methodName
-        }() must appear at the top-level and can only be used in update() or set() with {merge:true}${fieldPathMessage}.`
+        }() must appear at the top-level and can only be used in update() ` +
+          `or set() with {merge:true}${fieldPathMessage}.`
       );
+    } else if (options.allowDeletes === 'root') {
+      if (level === 0) {
+        // Ok (update() with UpdateData).
+      } else if (level === 1 && path?.size === 1) {
+        // Ok (update with varargs).
+      } else {
+        throw new Error(
+          `${invalidArgumentMessage(arg, desc)} ${
+            value.methodName
+          }() must appear at the top-level and can only be used in update() ` +
+            `or set() with {merge:true}${fieldPathMessage}.`
+        );
+      }
     }
   } else if (value instanceof FieldTransform) {
     if (inArray) {

@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "4.7.0",
+  "version": "4.7.1",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -54,7 +54,7 @@
   "dependencies": {
     "fast-deep-equal": "^3.1.1",
     "functional-red-black-tree": "^1.0.1",
-    "google-gax": "^2.2.0"
+    "google-gax": "^2.9.2"
   },
   "devDependencies": {
     "@types/assert": "^1.4.0",

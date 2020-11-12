@@ -45,9 +45,8 @@ import {
   validateMinNumberOfArguments,
   validateOptional,
 } from './validate';
-
-import api = google.firestore.v1;
 import {GoogleError, Status} from 'google-gax';
+import api = google.firestore.v1;
 
 /**
  * A WriteResult wraps the write time set by the Firestore servers on sets(),
@@ -478,9 +477,13 @@ export class WriteBatch implements firestore.WriteBatch {
         validateMaxNumberOfArguments('update', arguments, 3);
 
         const data = dataOrField as firestore.UpdateData;
-        Object.keys(data).forEach(key => {
-          validateFieldPath(key, key);
-          updateMap.set(FieldPath.fromArgument(key), data[key]);
+        Object.entries(data).forEach(([key, value]) => {
+          // Skip `undefined` values (can be hit if `ignoreUndefinedProperties`
+          // is set)
+          if (value !== undefined) {
+            validateFieldPath(key, key);
+            updateMap.set(FieldPath.fromArgument(key), value);
+          }
         });
 
         if (preconditionOrValues.length > 0) {
@@ -900,16 +903,8 @@ function validateUpdateMap(
   if (!isPlainObject(obj)) {
     throw new Error(customObjectMessage(arg, obj));
   }
-
-  let isEmpty = true;
-  if (obj) {
-    for (const prop of Object.keys(obj)) {
-      isEmpty = false;
-      validateFieldValue(arg, obj[prop], allowUndefined, new FieldPath(prop));
-    }
-  }
-
-  if (isEmpty) {
+  if (Object.keys(obj).length === 0) {
     throw new Error('At least one field must be updated.');
   }
+  validateFieldValue(arg, obj, allowUndefined);
 }

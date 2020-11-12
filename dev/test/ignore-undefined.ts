@@ -114,6 +114,30 @@ describe('ignores undefined values', () => {
     );
   });
 
+  it('with top-level field in update()', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          update({
+            document: document('documentId', 'foo', 'bar'),
+            mask: updateMask('foo'),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides, {ignoreUndefinedProperties: true}).then(
+      async firestore => {
+        await firestore.doc('collectionId/documentId').update({
+          foo: 'bar',
+          ignored: undefined,
+        });
+      }
+    );
+  });
+
   it('in query filters', () => {
     const overrides: ApiOverride = {
       runQuery: request => {
@@ -191,9 +215,7 @@ describe('rejects undefined values', () => {
         firestore => {
           expect(() => {
             firestore.doc('collectionId/documentId').update('foo', undefined);
-          }).to.throw(
-            '"undefined" values are only ignored in object properties.'
-          );
+          }).to.throw('"undefined" values are only ignored inside of objects.');
         }
       );
     });
@@ -206,9 +228,7 @@ describe('rejects undefined values', () => {
               .doc('collectionId/documentId')
               .collection('collectionId')
               .where('foo', '==', undefined);
-          }).to.throw(
-            '"undefined" values are only ignored in object properties.'
-          );
+          }).to.throw('"undefined" values are only ignored inside of objects.');
         }
       );
     });
@@ -222,9 +242,7 @@ describe('rejects undefined values', () => {
               .collection('collectionId')
               .orderBy('foo')
               .startAt(undefined);
-          }).to.throw(
-            '"undefined" values are only ignored in object properties.'
-          );
+          }).to.throw('"undefined" values are only ignored inside of objects.');
         }
       );
     });
