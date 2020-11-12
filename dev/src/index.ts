@@ -279,14 +279,14 @@ const MAX_CONCURRENT_REQUESTS_PER_CLIENT = 100;
  */
 
 /**
- * An options object to configure throttling on BulkWriter. 
- * 
+ * An options object to configure throttling on BulkWriter.
+ *
  * Whether to disable or configure throttling. By default, throttling is
  * enabled. `throttling` can be set to either a boolean or a config object.
  * Setting it to `true` will use default values. You can override the defaults
  * by setting it to `false` to disable throttling, or by setting the config
  * values to enable throttling with the provided values.
- * 
+ *
  * @property {boolean|Object} throttling Whether to disable or enable
  * throttling. Throttling is enabled by default, if the field is set to `true`
  * or if any custom throttling options are provided. `{ initialOpsPerSecond:
