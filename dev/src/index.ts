@@ -1224,6 +1224,7 @@ export class Firestore implements firestore.Firestore {
         headers: {
           [CLOUD_RESOURCE_HEADER]: this.formattedName,
           ...this._settings.customHeaders,
+          ...this._settings[methodName]?.customHeaders,
         },
       },
     };

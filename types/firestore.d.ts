@@ -474,8 +474,9 @@ declare namespace FirebaseFirestore {
      * @param documentRef A reference to the document to be
      * created.
      * @param data The object to serialize as the document.
-     * @returns A promise that resolves with the result
-     * of the write. Throws an error if the write fails.
+     * @returns A promise that resolves with the result of the write. If the
+     * write fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     create<T>(documentRef: DocumentReference<T>, data: T): Promise<WriteResult>;
 
@@ -489,8 +490,9 @@ declare namespace FirebaseFirestore {
      * @param precondition.lastUpdateTime If set, enforces that the
      * document was last updated at lastUpdateTime. Fails the batch if the
      * document doesn't exist or was last updated at a different time.
-     * @returns A promise that resolves with the result
-     * of the write. Throws an error if the write fails.
+     * @returns A promise that resolves with the result of the delete. If the
+     * delete fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     delete(
       documentRef: DocumentReference<any>,
@@ -514,8 +516,9 @@ declare namespace FirebaseFirestore {
      * @param options.mergeFields - If provided,
      * set() only replaces the specified field paths. Any field path that is not
      * specified is ignored and remains untouched.
-     * @returns A promise that resolves with the result
-     * of the write. Throws an error if the write fails.
+     * @returns A promise that resolves with the result of the write. If the
+     * write fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     set<T>(
       documentRef: DocumentReference<T>,
@@ -543,8 +546,9 @@ declare namespace FirebaseFirestore {
      * @param data An object containing the fields and values with which to
      * update the document.
      * @param precondition A Precondition to enforce on this update.
-     * @returns A promise that resolves with the result of the write. Throws
-     * an error if the write fails.
+     * @returns A promise that resolves with the result of the write. If the
+     * write fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     update(
       documentRef: DocumentReference<any>,
@@ -572,8 +576,9 @@ declare namespace FirebaseFirestore {
      * @param value The first value
      * @param fieldsOrPrecondition An alternating list of field paths and values
      * to update, optionally followed a `Precondition` to enforce on this update.
-     * @returns A promise that resolves with the result of the write. Throws
-     * an error if the write fails.
+     * @returns A promise that resolves with the result of the write. If the
+     * write fails, the promise is rejected with a
+     * [BulkWriterError]{@link BulkWriterError}.
      */
     update(
       documentRef: DocumentReference<any>,
@@ -581,6 +586,33 @@ declare namespace FirebaseFirestore {
       value: any,
       ...fieldsOrPrecondition: any[]
     ): Promise<WriteResult>;
+
+    /**
+     * Attaches a listener that is run every time a BulkWriter operation
+     * successfully completes.
+     *
+     * @param callback A callback to be called every time a BulkWriter operation
+     * successfully completes.
+     */
+    onWriteResult(
+      callback: (documentRef: DocumentReference, result: WriteResult) => void
+    ): void;
+
+    /**
+     * Attaches an error handler listener that is run every time a BulkWriter
+     * operation fails.
+     *
+     * BulkWriter has a default error handler that retries UNAVAILABLE and
+     * ABORTED errors up to a maximum of 10 failed attempts. When an error
+     * handler is specified, the default error handler will be overwritten.
+     *
+     * @param shouldRetryCallback A callback to be called every time a BulkWriter
+     * operation fails. Returning `true` will retry the operation. Returning
+     * `false` will stop the retry loop.
+     */
+    onWriteError(
+      shouldRetryCallback: (error: BulkWriterError) => boolean
+    ): void;
 
     /**
      * Commits all writes that have been enqueued up to this point in parallel.
@@ -602,7 +634,9 @@ declare namespace FirebaseFirestore {
     /**
      * Commits all enqueued writes and marks the BulkWriter instance as closed.
      *
-     * After calling `close()`, calling any method wil throw an error.
+     * After calling `close()`, calling any method wil throw an error. Any
+     * retries scheduled as part of an `onWriteError()` handler will be run
+     * before the `close()` promise resolves.
      *
      * Returns a Promise that resolves when all writes have been committed. The
      * Promise will never be rejected. Calling this method will send all
@@ -637,6 +671,26 @@ declare namespace FirebaseFirestore {
     readonly throttling?:
       | boolean
       | {initialOpsPerSecond?: number; maxOpsPerSecond?: number};
+  }
+
+  /**
+   * The error thrown when a BulkWriter operation fails.
+   */
+  export class BulkWriterError extends Error {
+    /** The status code of the error. */
+    readonly code: GrpcStatus;
+
+    /** The error message of the error. */
+    readonly message: string;
+
+    /** The document reference the operation was performed on. */
+    readonly documentRef: DocumentReference<any>;
+
+    /** The type of operation performed. */
+    readonly operationType: 'create' | 'set' | 'update' | 'delete';
+
+    /** How many times this operation has been attempted unsuccessfully. */
+    readonly failedAttempts: number;
   }
 
   /**

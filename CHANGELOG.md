@@ -4,6 +4,41 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.7.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.7.0...v4.7.1) (2020-11-10)
+
+
+### Bug Fixes
+
+* do not modify options object, use defaultScopes ([#1360](https://www.github.com/googleapis/nodejs-firestore/issues/1360)) ([bd40d3a](https://www.github.com/googleapis/nodejs-firestore/commit/bd40d3ae73cfd0a8e2503fca8d0aa28cb3bbcb86))
+* ignore 'undefined' in update() with UpdateMap ([#1363](https://www.github.com/googleapis/nodejs-firestore/issues/1363)) ([9bad804](https://www.github.com/googleapis/nodejs-firestore/commit/9bad804205ab886c1a80351a8e7a7726e3d242ec))
+* remove unneeded async signature from BulkWriter.sendBatch() ([#1361](https://www.github.com/googleapis/nodejs-firestore/issues/1361)) ([b5cf449](https://www.github.com/googleapis/nodejs-firestore/commit/b5cf4499724ff41e626a69f2db66be22167a7223))
+
+## [4.7.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.6.1...v4.7.0) (2020-11-05)
+
+
+### Features
+
+* add ability to specify custom headers for individual RPC types ([#1355](https://www.github.com/googleapis/nodejs-firestore/issues/1355)) ([0900379](https://www.github.com/googleapis/nodejs-firestore/commit/0900379e9853a8c2c7c36418dce8beb7ce966889))
+
+### [4.6.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.6.0...v4.6.1) (2020-11-03)
+
+
+### Bug Fixes
+
+* create new batch for writes to the same doc ([#1352](https://www.github.com/googleapis/nodejs-firestore/issues/1352)) ([bd5adc3](https://www.github.com/googleapis/nodejs-firestore/commit/bd5adc35ea1f662ee762ac8b9048556e78a54f35))
+
+## [4.6.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.5.0...v4.6.0) (2020-11-03)
+
+
+### Features
+
+* add onWriteError() and onWriteResult() handlers to BulkWriter ([#1315](https://www.github.com/googleapis/nodejs-firestore/issues/1315)) ([a173f4d](https://www.github.com/googleapis/nodejs-firestore/commit/a173f4defab7a6e750907fcb86431c56fcb3d4cf))
+
+
+### Bug Fixes
+
+* retry transactions that fail with expired transaction IDs ([#1347](https://www.github.com/googleapis/nodejs-firestore/issues/1347)) ([a18ab50](https://www.github.com/googleapis/nodejs-firestore/commit/a18ab50f3304f1154caaaab9768b736bdb3d8442))
+
 ## [4.5.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.4.0...v4.5.0) (2020-10-26)
 
 

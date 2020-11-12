@@ -45,6 +45,7 @@ import {
 } from '../test/util/helpers';
 import IBundleElement = firestore.IBundleElement;
 import {BulkWriter} from '../src/bulk-writer';
+import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
 
@@ -2606,11 +2607,42 @@ describe('BulkWriter class', () => {
     expect(deleteResult.writeTime).to.deep.equal(new Timestamp(0, 0));
   });
 
+  it('can write to the same document twice', async () => {
+    const ref = randomCol.doc('doc1');
+    const op1 = writer.set(ref, {foo: 'bar'});
+    const op2 = writer.set(ref, {foo: 'bar2'});
+    await writer.close();
+    const result = await ref.get();
+    expect(result.data()).to.deep.equal({foo: 'bar2'});
+    const writeTime1 = (await op1).writeTime;
+    const writeTime2 = (await op2).writeTime;
+    expect(writeTime1).to.not.be.null;
+    expect(writeTime2).to.not.be.null;
+  });
+
   it('can terminate once BulkWriter is closed', async () => {
     const ref = randomCol.doc('doc1');
     writer.set(ref, {foo: 'bar'});
     await writer.close();
     return firestore.terminate();
+  });
+
+  it('can retry failed writes with a provided callback', async () => {
+    let retryCount = 0;
+    let code: Status = -1;
+    writer.onWriteError(error => {
+      retryCount = error.failedAttempts;
+      return error.failedAttempts < 3;
+    });
+
+    // Use an invalid document name that the backend will reject.
+    const ref = randomCol.doc('__doc__');
+    writer.create(ref, {foo: 'bar'}).catch(err => {
+      code = err.code;
+    });
+    await writer.close();
+    expect(retryCount).to.equal(3);
+    expect(code).to.equal(Status.INVALID_ARGUMENT);
   });
 });
 
