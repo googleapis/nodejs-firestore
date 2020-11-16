@@ -296,6 +296,27 @@ declare namespace FirebaseFirestore {
      * behavior for the underlying BulkWriter.
      */
     bulkWriter(options?: BulkWriterOptions): BulkWriter;
+
+    /**
+     * Creates a new `BundleBuilder` instance to package selected Firestore data into
+     * a bundle.
+     *
+     * @param bundleId. The id of the bundle. When loaded on clients, client SDKs use this id
+     * and the timestamp associated with the built bundle to tell if it has been loaded already.
+     * If not specified, a random identifier will be used.
+     *
+     *
+     * @example
+     * const bundle = firestore.bundle('data-bundle');
+     * const docSnapshot = await firestore.doc('abc/123').get();
+     * const querySnapshot = await firestore.collection('coll').get();
+     *
+     * const bundleBuffer = bundle.add(docSnapshot); // Add a document
+     *                            .add('coll-query', querySnapshot) // Add a named query.
+     *                            .build()
+     * // Save `bundleBuffer` to CDN or stream it to clients.
+     */
+    bundle(name?: string): BundleBuilder;
   }
 
   /**
@@ -1893,6 +1914,34 @@ declare namespace FirebaseFirestore {
      * @return a string encoding of this object.
      */
     valueOf(): string;
+  }
+
+  /**
+   * Builds a Firestore data bundle with results from the given document and query snapshots.
+   */
+  export class BundleBuilder {
+    /**
+     * Adds a Firestore document snapshot or query snapshot to the bundle.
+     * Both the documents data and the query read time will be included in the bundle.
+     *
+     * @param {DocumentSnapshot=} documentSnapshot A document snapshot to add.
+     * @returns {BundleBuilder} This instance.
+     */
+    add(documentSnapshot: DocumentSnapshot): BundleBuilder;
+    /**
+     * Adds a Firestore document snapshot or query snapshot to the bundle.
+     * Both the documents data and the query read time will be included in the bundle.
+     *
+     * @param {string=} queryName The name of the query to add.
+     * @param {QuerySnapshot=} querySnapshot A query snapshot to add to the bundle.
+     * @returns {BundleBuilder} This instance.
+     */
+    add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
+
+    /**
+     * Builds the bundle into a `Buffer` instance.
+     */
+    build(): Buffer;
   }
 
   /**
