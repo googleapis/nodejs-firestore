@@ -1920,6 +1920,9 @@ declare namespace FirebaseFirestore {
    * Builds a Firestore data bundle with results from the given document and query snapshots.
    */
   export class BundleBuilder {
+    /** The ID of this bundle. */
+    readonly bundleId: string;
+
     /**
      * Adds a Firestore document snapshot or query snapshot to the bundle.
      * Both the documents data and the query read time will be included in the bundle.
