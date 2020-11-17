@@ -302,7 +302,7 @@ declare namespace FirebaseFirestore {
      * a bundle.
      *
      * @param bundleId The ID of the bundle. When loaded on clients, client SDKs use this ID
-     * and the timestamp associated with the built bundle to tell if it has been loaded already.
+     * and the timestamp associated with the bundle to tell if it has been loaded already.
      * If not specified, a random identifier will be used.
      *
      *
@@ -1924,26 +1924,26 @@ declare namespace FirebaseFirestore {
     readonly bundleId: string;
 
     /**
-     * Adds a Firestore document snapshot or query snapshot to the bundle.
-     * Both the documents data and the query read time will be included in the bundle.
+     * Adds a Firestore document snapshot to the bundle. Both the documents data and the document
+     * read time will be included in the bundle.
      *
-     * @param documentSnapshot A document snapshot to add.
+     * @param documentSnapshot A `DocumentSnapshot` to add.
      * @returns This instance.
      */
-    add(documentSnapshot: DocumentSnapshot): BundleBuilder;
+    add<T>(documentSnapshot: DocumentSnapshot<T>): BundleBuilder;
 
     /**
-     * Adds a Firestore document snapshot or query snapshot to the bundle.
-     * Both the documents data and the query read time will be included in the bundle.
+     * Adds a Firestore query snapshot to the bundle. Both the query data and the query read time
+     * will be included in the bundle.
      *
      * @param queryName The name of the query to add.
-     * @param querySnapshot A query snapshot to add to the bundle.
+     * @param querySnapshot A `QuerySnapshot` to add to the bundle.
      * @returns This instance.
      */
-    add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
+    add<T>(queryName: string, querySnapshot: QuerySnapshot<T>): BundleBuilder;
 
     /**
-     * Builds the bundle into a `Buffer` instance.
+     * Builds the bundle and returns the result as a `Buffer` instance.
      */
     build(): Buffer;
   }

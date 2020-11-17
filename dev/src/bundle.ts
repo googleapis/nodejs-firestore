@@ -40,7 +40,7 @@ export class BundleBuilder {
   // The latest read time among all bundled documents and queries.
   private latestReadTime = new Timestamp(0, 0);
 
-  constructor(public readonly bundleId: string) {}
+  constructor(readonly bundleId: string) {}
 
   add(documentSnapshot: DocumentSnapshot): BundleBuilder;
   add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
