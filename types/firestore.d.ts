@@ -1924,7 +1924,7 @@ declare namespace FirebaseFirestore {
     readonly bundleId: string;
 
     /**
-     * Adds a Firestore document snapshot to the bundle. Both the documents data and the document
+     * Adds a Firestore `DocumentSnapshot` to the bundle. Both the documents data and the document
      * read time will be included in the bundle.
      *
      * @param documentSnapshot A `DocumentSnapshot` to add.
@@ -1933,8 +1933,8 @@ declare namespace FirebaseFirestore {
     add<T>(documentSnapshot: DocumentSnapshot<T>): BundleBuilder;
 
     /**
-     * Adds a Firestore query snapshot to the bundle. Both the query data and the query read time
-     * will be included in the bundle.
+     * Adds a Firestore `QuerySnapshot` to the bundle. Both the documents in the query results and
+     * the query read time will be included in the bundle.
      *
      * @param queryName The name of the query to add.
      * @param querySnapshot A `QuerySnapshot` to add to the bundle.
