@@ -3,8 +3,16 @@
     {
       "git": {
         "name": ".",
-        "remote": "git@github.com:googleapis/nodejs-firestore.git",
-        "sha": "dc94946f261db527f913d1ff89a2572cd9539f70"
+        "remote": "https://github.com/googleapis/nodejs-firestore.git",
+        "sha": "11042d32038d4cff64d33069ed302d71791cd749"
+      }
+    },
+    {
+      "git": {
+        "name": "googleapis",
+        "remote": "https://github.com/googleapis/googleapis.git",
+        "sha": "2f019bf70bfe06f1e2af1b04011b0a2405190e43",
+        "internalRef": "343202295"
       }
     },
     {
@@ -71,9 +79,6 @@
     "dev/.jsdoc.js",
     "dev/.mocharc.js",
     "dev/.prettierrc.js",
-    "dev/protos/XX0HTtLI",
-    "dev/protos/XX9QNuAf",
-    "dev/protos/XXb5TB9Z",
     "dev/protos/firestore_admin_v1_proto_api.d.ts",
     "dev/protos/firestore_admin_v1_proto_api.js",
     "dev/protos/firestore_v1_proto_api.d.ts",
@@ -127,9 +132,7 @@
     "dev/test/gapic_firestore_admin_v1.ts",
     "dev/test/gapic_firestore_v1.ts",
     "dev/test/gapic_firestore_v1beta1.ts",
-    "package-lock.json.3706087594",
     "renovate.json",
-    "samples/README.md",
-    "samples/package-lock.json.1776925415"
+    "samples/README.md"
   ]
 }

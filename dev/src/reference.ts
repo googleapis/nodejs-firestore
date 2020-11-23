@@ -309,9 +309,9 @@ export class DocumentReference<T = firestore.DocumentData>
           tag
         )
         .then(collectionIds => {
-          const collections: Array<CollectionReference<
-            firestore.DocumentData
-          >> = [];
+          const collections: Array<
+            CollectionReference<firestore.DocumentData>
+          > = [];
 
           // We can just sort this list using the default comparator since it
           // will only contain collection ids.
