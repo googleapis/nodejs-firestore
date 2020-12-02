@@ -30,8 +30,6 @@ const BUNDLE_VERSION = 1;
 
 /**
  * Builds a Firestore data bundle with results from the given document and query snapshots.
- *
- * @private
  */
 export class BundleBuilder {
   // Resulting documents for the bundle, keyed by full document path.
@@ -42,7 +40,7 @@ export class BundleBuilder {
   // The latest read time among all bundled documents and queries.
   private latestReadTime = new Timestamp(0, 0);
 
-  constructor(private bundleId: string) {}
+  constructor(readonly bundleId: string) {}
 
   add(documentSnapshot: DocumentSnapshot): BundleBuilder;
   add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;

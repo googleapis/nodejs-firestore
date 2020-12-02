@@ -2759,7 +2759,7 @@ describe('Bundle building', () => {
   afterEach(() => verifyInstance(firestore));
 
   it('succeeds when there are no results', async () => {
-    const bundle = firestore._bundle(TEST_BUNDLE_ID);
+    const bundle = firestore.bundle(TEST_BUNDLE_ID);
     const query = testCol.where('sort', '==', 5);
     const snap = await query.get();
 
@@ -2788,7 +2788,7 @@ describe('Bundle building', () => {
   });
 
   it('succeeds when added document does not exist', async () => {
-    const bundle = firestore._bundle(TEST_BUNDLE_ID);
+    const bundle = firestore.bundle(TEST_BUNDLE_ID);
     const snap = await testCol.doc('doc5-not-exist').get();
 
     bundle.add(snap);
@@ -2809,7 +2809,7 @@ describe('Bundle building', () => {
   });
 
   it('succeeds to save limit and limitToLast queries', async () => {
-    const bundle = firestore._bundle(TEST_BUNDLE_ID);
+    const bundle = firestore.bundle(TEST_BUNDLE_ID);
     const limitQuery = testCol.orderBy('sort', 'desc').limit(1);
     const limitSnap = await limitQuery.get();
     const limitToLastQuery = testCol.orderBy('sort', 'asc').limitToLast(1);
