@@ -3,15 +3,23 @@
     {
       "git": {
         "name": ".",
-        "remote": "git@github.com:googleapis/nodejs-firestore.git",
-        "sha": "dc94946f261db527f913d1ff89a2572cd9539f70"
+        "remote": "https://github.com/googleapis/nodejs-firestore.git",
+        "sha": "3cd29d22073cff8d0ca072057c63dfe0a2144841"
+      }
+    },
+    {
+      "git": {
+        "name": "googleapis",
+        "remote": "https://github.com/googleapis/googleapis.git",
+        "sha": "2f019bf70bfe06f1e2af1b04011b0a2405190e43",
+        "internalRef": "343202295"
       }
     },
     {
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "1f1148d3c7a7a52f0c98077f976bd9b3c948ee2b"
+        "sha": "15013eff642a7e7e855aed5a29e6e83c39beba2a"
       }
     }
   ],
@@ -43,93 +51,5 @@
         "generator": "bazel"
       }
     }
-  ],
-  "generatedFiles": [
-    ".eslintignore",
-    ".gitattributes",
-    ".github/ISSUE_TEMPLATE/bug_report.md",
-    ".github/ISSUE_TEMPLATE/feature_request.md",
-    ".github/ISSUE_TEMPLATE/support_request.md",
-    ".github/PULL_REQUEST_TEMPLATE.md",
-    ".github/release-please.yml",
-    ".github/workflows/ci.yaml",
-    ".gitignore",
-    ".jsdoc.js",
-    ".mocharc.js",
-    ".nycrc",
-    ".prettierignore",
-    ".prettierrc.js",
-    ".trampolinerc",
-    "CODE_OF_CONDUCT.md",
-    "CONTRIBUTING.md",
-    "LICENSE",
-    "README.md",
-    "api-extractor.json",
-    "dev/.eslintignore",
-    "dev/.eslintrc.json",
-    "dev/.gitignore",
-    "dev/.jsdoc.js",
-    "dev/.mocharc.js",
-    "dev/.prettierrc.js",
-    "dev/protos/XX0HTtLI",
-    "dev/protos/XX9QNuAf",
-    "dev/protos/XXb5TB9Z",
-    "dev/protos/firestore_admin_v1_proto_api.d.ts",
-    "dev/protos/firestore_admin_v1_proto_api.js",
-    "dev/protos/firestore_v1_proto_api.d.ts",
-    "dev/protos/firestore_v1_proto_api.js",
-    "dev/protos/firestore_v1beta1_proto_api.d.ts",
-    "dev/protos/firestore_v1beta1_proto_api.js",
-    "dev/protos/google/api/annotations.proto",
-    "dev/protos/google/api/client.proto",
-    "dev/protos/google/api/field_behavior.proto",
-    "dev/protos/google/api/http.proto",
-    "dev/protos/google/api/resource.proto",
-    "dev/protos/google/firestore/admin/v1/field.proto",
-    "dev/protos/google/firestore/admin/v1/firestore_admin.proto",
-    "dev/protos/google/firestore/admin/v1/index.proto",
-    "dev/protos/google/firestore/admin/v1/location.proto",
-    "dev/protos/google/firestore/admin/v1/operation.proto",
-    "dev/protos/google/firestore/v1/common.proto",
-    "dev/protos/google/firestore/v1/document.proto",
-    "dev/protos/google/firestore/v1/firestore.proto",
-    "dev/protos/google/firestore/v1/query.proto",
-    "dev/protos/google/firestore/v1/write.proto",
-    "dev/protos/google/firestore/v1beta1/common.proto",
-    "dev/protos/google/firestore/v1beta1/document.proto",
-    "dev/protos/google/firestore/v1beta1/firestore.proto",
-    "dev/protos/google/firestore/v1beta1/query.proto",
-    "dev/protos/google/firestore/v1beta1/write.proto",
-    "dev/protos/google/longrunning/operations.proto",
-    "dev/protos/google/protobuf/any.proto",
-    "dev/protos/google/protobuf/empty.proto",
-    "dev/protos/google/protobuf/field_mask.proto",
-    "dev/protos/google/protobuf/struct.proto",
-    "dev/protos/google/protobuf/timestamp.proto",
-    "dev/protos/google/protobuf/wrappers.proto",
-    "dev/protos/google/rpc/status.proto",
-    "dev/protos/google/type/latlng.proto",
-    "dev/protos/protos.d.ts",
-    "dev/protos/protos.js",
-    "dev/protos/protos.json",
-    "dev/src/v1/firestore_admin_client.ts",
-    "dev/src/v1/firestore_admin_client_config.json",
-    "dev/src/v1/firestore_admin_proto_list.json",
-    "dev/src/v1/firestore_client.ts",
-    "dev/src/v1/firestore_client_config.json",
-    "dev/src/v1/firestore_proto_list.json",
-    "dev/src/v1beta1/firestore_client.ts",
-    "dev/src/v1beta1/firestore_client_config.json",
-    "dev/src/v1beta1/firestore_proto_list.json",
-    "dev/system-test/fixtures/sample/src/index.js",
-    "dev/system-test/fixtures/sample/src/index.ts",
-    "dev/system-test/install.ts",
-    "dev/test/gapic_firestore_admin_v1.ts",
-    "dev/test/gapic_firestore_v1.ts",
-    "dev/test/gapic_firestore_v1beta1.ts",
-    "package-lock.json.3706087594",
-    "renovate.json",
-    "samples/README.md",
-    "samples/package-lock.json.1776925415"
   ]
 }

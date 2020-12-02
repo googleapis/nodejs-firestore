@@ -2647,10 +2647,9 @@ describe('BulkWriter class', () => {
 });
 
 describe('Client initialization', () => {
-  const ops: Array<[
-    string,
-    (coll: CollectionReference) => Promise<unknown>
-  ]> = [
+  const ops: Array<
+    [string, (coll: CollectionReference) => Promise<unknown>]
+  > = [
     ['CollectionReference.get()', randomColl => randomColl.get()],
     ['CollectionReference.add()', randomColl => randomColl.add({})],
     [

@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.7.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.7.1...v4.7.2) (2020-11-25)
+
+
+### Bug Fixes
+
+* **browser:** check for fetch on window ([#1368](https://www.github.com/googleapis/nodejs-firestore/issues/1368)) ([3cd29d2](https://www.github.com/googleapis/nodejs-firestore/commit/3cd29d22073cff8d0ca072057c63dfe0a2144841))
+
 ### [4.7.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.7.0...v4.7.1) (2020-11-10)
 
 
