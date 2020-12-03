@@ -149,7 +149,7 @@ export class ClientPool<T> {
    * @private
    */
   private shouldGarbageCollectClient(client: T): boolean {
-    // Don't garbagae collect clients that have active requests.
+    // Don't garbage collect clients that have active requests.
     if (this.activeClients.get(client) !== 0) {
       return false;
     }
