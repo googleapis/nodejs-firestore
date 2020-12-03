@@ -9,7 +9,7 @@
 
 ### Features
 
-* Add support to build firestore bundles. ([#1365](https://www.github.com/googleapis/nodejs-firestore/issues/1365)) ([bae82dd](https://www.github.com/googleapis/nodejs-firestore/commit/bae82dd4438ac03107c221c62dbce8cf6d20a4b1))
+* Add support to build Firestore bundles ([#1365](https://www.github.com/googleapis/nodejs-firestore/issues/1365)) ([bae82dd](https://www.github.com/googleapis/nodejs-firestore/commit/bae82dd4438ac03107c221c62dbce8cf6d20a4b1))
 
 
 ### Bug Fixes
