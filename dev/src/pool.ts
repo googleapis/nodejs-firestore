@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {GoogleError} from 'google-gax';
 import * as assert from 'assert';
 
 import {logger} from './logger';
@@ -35,9 +36,15 @@ export const CLIENT_TERMINATED_ERROR_MSG =
 export class ClientPool<T> {
   /**
    * Stores each active clients and how many operations it has outstanding.
-   * @private
    */
-  private activeClients: Map<T, number> = new Map();
+  private activeClients = new Map<T, number>();
+
+  /**
+   * A set of clients that have seen RST_STREAM errors (see
+   * https://github.com/googleapis/nodejs-firestore/issues/1023) and should
+   * no longer be used.
+   */
+  private failedClients = new Set<T>();
 
   /**
    * Whether the Firestore instance has been terminated. Once terminated, the
@@ -84,6 +91,7 @@ export class ClientPool<T> {
       // in order to maximize the number of idle clients as operations start to
       // complete.
       if (
+        !this.failedClients.has(client) &&
         requestCount > selectedClientRequestCount &&
         requestCount < this.concurrentOperationLimit
       ) {
@@ -129,6 +137,7 @@ export class ClientPool<T> {
 
     if (this.shouldGarbageCollectClient(client)) {
       this.activeClients.delete(client);
+      this.failedClients.delete(client);
       await this.clientDestructor(client);
       logger('ClientPool.release', requestTag, 'Garbage collected 1 client');
     }
@@ -140,10 +149,19 @@ export class ClientPool<T> {
    * @private
    */
   private shouldGarbageCollectClient(client: T): boolean {
+    // Don't garbagae collect clients that have active requests.
     if (this.activeClients.get(client) !== 0) {
       return false;
     }
 
+    // Idle clients that have received RST_STREAM errors are always garbage
+    // collected.
+    if (this.failedClients.has(client)) {
+      return true;
+    }
+
+    // Otherwise, only garbage collect if we have too much idle capacity (e.g.
+    // more than 100 idle capacity with default settings) .
     let idleCapacityCount = 0;
     for (const [, count] of this.activeClients) {
       idleCapacityCount += this.concurrentOperationLimit - count;
@@ -195,8 +213,14 @@ export class ClientPool<T> {
     const client = this.acquire(requestTag);
 
     return op(client)
-      .catch(async err => {
+      .catch(async (err: GoogleError) => {
         await this.release(requestTag, client);
+        if (err.message?.indexOf('RST_STREAM')) {
+          // Once a client has seen a RST_STREAM error, the GRPC channel can
+          // no longer be used. We mark the client as failed, which ensures that
+          // we open a new GRPC channel for the next request.
+          this.failedClients.add(client);
+        }
         return Promise.reject(err);
       })
       .then(async res => {

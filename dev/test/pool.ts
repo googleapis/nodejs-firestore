@@ -14,6 +14,7 @@
 
 import {describe, it} from 'mocha';
 import {expect, use} from 'chai';
+import {GoogleError} from 'google-gax';
 import * as chaiAsPromised from 'chai-as-promised';
 
 import {ClientPool, CLIENT_TERMINATED_ERROR_MSG} from '../src/pool';
@@ -261,6 +262,25 @@ describe('Client pool', () => {
       Promise.reject('Generated error')
     );
     return expect(op).to.eventually.be.rejectedWith('Generated error');
+  });
+
+  it('does not re-use clients after RST_STREAM', async () => {
+    let instanceCount = 0;
+    const clientPool = new ClientPool<{}>(1, 1, () => {
+      ++instanceCount;
+      return {};
+    });
+
+    const op = clientPool.run(REQUEST_TAG, () =>
+      Promise.reject(
+        new GoogleError('13 INTERNAL: Received RST_STREAM with code 2')
+      )
+    );
+    await op.catch(() => {});
+
+    await clientPool.run(REQUEST_TAG, async () => {});
+
+    expect(instanceCount).to.equal(2);
   });
 
   it('keeps pool of idle clients', async () => {
