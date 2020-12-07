@@ -4,6 +4,18 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [4.8.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.7.2...v4.8.0) (2020-12-03)
+
+
+### Features
+
+* Add support to build Firestore bundles ([#1365](https://www.github.com/googleapis/nodejs-firestore/issues/1365)) ([bae82dd](https://www.github.com/googleapis/nodejs-firestore/commit/bae82dd4438ac03107c221c62dbce8cf6d20a4b1))
+
+
+### Bug Fixes
+
+* stop using GRPC channels after RST_STREAM ([#1373](https://www.github.com/googleapis/nodejs-firestore/issues/1373)) ([504bb5f](https://www.github.com/googleapis/nodejs-firestore/commit/504bb5f34159238cd9bed3645591e6c6c810452b))
+
 ### [4.7.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.7.1...v4.7.2) (2020-11-25)
 
 
