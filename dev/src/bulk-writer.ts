@@ -30,7 +30,7 @@ import {
   silencePromise,
   wrapError,
 } from './util';
-import {BatchWriteResult, WriteBatch, WriteResult} from './write-batch';
+import {WriteBatch, WriteResult} from './write-batch';
 import {
   invalidArgumentMessage,
   validateInteger,
@@ -119,6 +119,12 @@ class BulkCommitBatch extends WriteBatch {
     }
   }
 
+  markSent(): void {
+    if (this.state === BatchState.READY_TO_SEND) {
+      this.state = BatchState.SENT;
+    }
+  }
+
   isOpen(): boolean {
     return this.state === BatchState.OPEN;
   }
@@ -127,12 +133,11 @@ class BulkCommitBatch extends WriteBatch {
     return this.state === BatchState.READY_TO_SEND;
   }
 
-  async bulkCommit(): Promise<BulkCommitBatch> {
+  async bulkCommit(): Promise<void> {
     assert(
       this.state === BatchState.READY_TO_SEND,
       'The batch should be marked as READY_TO_SEND before committing'
     );
-    this.state = BatchState.SENT;
 
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -151,9 +156,9 @@ class BulkCommitBatch extends WriteBatch {
       };
     }
     
-    const retryBatch = new BulkCommitBatch(this._firestore, this.maxBatchSize);
-    
     for (let i = 0; i < (response.writeResults || []).length; ++i) {
+      const op = this.pendingOps.shift()!;
+      
       // Since delete operations currently do not have write times, use a
       // sentinel Timestamp value.
       // TODO(b/158502664): Use actual delete timestamp.
@@ -164,15 +169,13 @@ class BulkCommitBatch extends WriteBatch {
         const updateTime =Timestamp.fromProto(
                 response.writeResults![i].updateTime || DELETE_TIMESTAMP_SENTINEL
                 );
-        this.pendingOps[i].resolve(new WriteResult(updateTime));
+        op.resolve(new WriteResult(updateTime));
       } else {
         const error = new GoogleError(status.message || undefined);
         error.code = status.code as Status;
-        this.pendingOps[i].reject(wrapError(error, stack));
+        op.reject(wrapError(error, stack));
       }
     }
-
-    return retryBatch;
   }
 
   /**
@@ -181,12 +184,9 @@ class BulkCommitBatch extends WriteBatch {
    */
   processLastOperation(
     documentRef: firestore.DocumentReference,
-    onError: (error: GoogleError, retryBatch: BulkCommitBatch) => boolean,
+    onError: (error: GoogleError) => boolean,
     onSuccess: (result:WriteResult) => void
   ): void {
-    if (!this.retryBatch)
-      this.retryBatch = new BulkCommitBatch(this._firestore, this.maxBatchSize);
-    
     assert(
       !this.docPaths.has(documentRef.path),
       'Batch should not contain writes to the same document'
@@ -199,11 +199,11 @@ class BulkCommitBatch extends WriteBatch {
     const deferred = new Deferred<WriteResult>();
     this.pendingOps.push(deferred);
 
-    if (this._opCount === this.maxBatchSize) {
+    if (this._remainingOpCount === this.maxBatchSize) {
       this.state = BatchState.READY_TO_SEND;
     }
 
-    deferred.promise.then(result => onSuccess(result),  error => onError(error, this.retryBatch!));
+    deferred.promise.then(result => onSuccess(result),  error => onError(error));
   }
 }
 
@@ -754,7 +754,7 @@ export class BulkWriter {
   private async sendBatch(batch: BulkCommitBatch): Promise<void> {
     // Send the batch if it is under the rate limit, or schedule another
     // attempt after the appropriate timeout.
-    const delayMs = this._rateLimiter.getNextRequestDelayMs(batch._opCount);
+    const delayMs = this._rateLimiter.getNextRequestDelayMs(batch._remainingOpCount);
 
     if (delayMs > 0) {
       const delayedExecution = new Deferred<void>();
@@ -764,14 +764,14 @@ export class BulkWriter {
       await delayedExecution;
     }
 
-    const success = this._rateLimiter.tryMakeRequest(batch._opCount);
+    const success = this._rateLimiter.tryMakeRequest(batch._remainingOpCount);
     assert(success, 'Batch should be under rate limit to be sent.');
 
-    const retryBatch = await batch.bulkCommit();
-
-    if (retryBatch._opCount) {
-      await this.sendBatch(retryBatch);
+    await batch.bulkCommit();
+    if (batch._remainingOpCount) {
+      await this.sendBatch(batch);
     }
+    batch.markSent();
 
     this.sendReadyBatches();
   }
@@ -794,7 +794,7 @@ export class BulkWriter {
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
     operationFn(bulkCommitBatch);
 
-    const onError = (error:GoogleError, retryBatch:BulkCommitBatch) => {
+    const onError = (error:GoogleError) => {
       ++failedAttempts;
       const bulkWriterError = new BulkWriterError(
           (error.code as number) as GrpcStatus,
@@ -813,8 +813,8 @@ export class BulkWriter {
           shouldRetry
       );
       if (shouldRetry) {
-        operationFn(retryBatch);
-        retryBatch.processLastOperation(
+        operationFn(bulkCommitBatch);
+        bulkCommitBatch.processLastOperation(
             documentRef,
             onError,
             onSuccess);
