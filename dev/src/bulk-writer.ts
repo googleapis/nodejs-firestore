@@ -189,8 +189,9 @@ class BulkCommitBatch extends WriteBatch {
    */
   processLastOperation(
     documentRef: firestore.DocumentReference,
-    onError: (error: GoogleError, retryBatch: BulkCommitBatch) => boolean
-  ): Promise<WriteResult> {
+    onError: (error: GoogleError, retryBatch: BulkCommitBatch) => boolean,
+    onSuccess: (result:BatchWriteResult) => void
+  ): void {
     assert(
       !this.docPaths.has(documentRef.path),
       'Batch should not contain writes to the same document'
@@ -208,13 +209,7 @@ class BulkCommitBatch extends WriteBatch {
       this.state = BatchState.READY_TO_SEND;
     }
 
-    return deferred.promise.then(result => {
-      if (result.writeTime) {
-        return new WriteResult(result.writeTime);
-      } else {
-        throw result.status;
-      }
-    });
+    deferred.promise.then(result => onSuccess(result));
   }
 }
 
@@ -760,8 +755,6 @@ export class BulkWriter {
    * Sends the provided batch and processes the results. After the batch is
    * committed, sends the next group of ready batches.
    *
-   * @param batchCompletedDeferred A deferred promise that resolves when the
-   * batch has been sent and received.
    * @private
    */
   private async sendBatch(batch: BulkCommitBatch): Promise<void> {
@@ -801,50 +794,53 @@ export class BulkWriter {
     // A deferred promise that resolves when operationFn completes.
     const operationCompletedDeferred = new Deferred<void>();
     this._pendingOps.add(operationCompletedDeferred.promise);
+  
 
+    let failedAttempts = 0;
+    
     const bulkCommitBatch = this.getEligibleBatch(documentRef);
+    operationFn(bulkCommitBatch);
 
-    try {
-      operationFn(bulkCommitBatch);
-
-      // Send ready batches if this is the first attempt. Subsequent retry
-      // batches are scheduled after the initial batch returns.
-      this.sendReadyBatches();
-
-      let failedAttempts = 0;
-
-      const operationResult = await bulkCommitBatch.processLastOperation(
-        documentRef,
-        (error, retryBatch) => {
-          ++failedAttempts;
-          const bulkWriterError = new BulkWriterError(
-            (error.code as number) as GrpcStatus,
-            error.message,
-            documentRef,
-            operationType,
-            failedAttempts
-          );
-          const shouldRetry = this._errorFn(bulkWriterError);
-          logger(
-            'BulkWriter.errorFn',
-            null,
-            'Running error callback on error code:',
-            error.code,
-            ', shouldRetry:',
-            shouldRetry
-          );
-          if (shouldRetry) {
-            operationFn(retryBatch);
-          }
-          return shouldRetry;
-        }
+    const onError = (error, retryBatch) => {
+      ++failedAttempts;
+      const bulkWriterError = new BulkWriterError(
+          (error.code as number) as GrpcStatus,
+          error.message,
+          documentRef,
+          operationType,
+          failedAttempts
       );
+      const shouldRetry = this._errorFn(bulkWriterError);
+      logger(
+          'BulkWriter.errorFn',
+          null,
+          'Running error callback on error code:',
+          error.code,
+          ', shouldRetry:',
+          shouldRetry
+      );
+      if (shouldRetry) {
+        operationFn(retryBatch);
+        retryBatch.processLastOperation(
+            documentRef,
+            onError,
+            onSuccess);
+      } else {
+        this._pendingOps.delete(operationCompletedDeferred.promise);
+      }
+      return shouldRetry;
+    };
+    
+    const onSuccess = writeResult => {
       this._successFn(documentRef, operationResult);
-      return operationResult;
-    } finally {
       operationCompletedDeferred.resolve();
       this._pendingOps.delete(operationCompletedDeferred.promise);
     }
+    
+    bulkCommitBatch.processLastOperation(
+        documentRef,
+        onError,
+        onSuccess);
   }
 
   /**

@@ -57,7 +57,7 @@ interface RequestResponse {
   response: api.IBatchWriteResponse;
 }
 
-describe('BulkWriter', () => {
+describe.only('BulkWriter', () => {
   let firestore: Firestore;
   let requestCounter: number;
   let opCount: number;
