@@ -283,6 +283,21 @@ describe('Client pool', () => {
     expect(instanceCount).to.equal(2);
   });
 
+  it('garbage collects after RST_STREAM', async () => {
+    const clientPool = new ClientPool<{}>(1, 1, () => {
+      return {};
+    });
+
+    const op = clientPool.run(REQUEST_TAG, () =>
+      Promise.reject(
+        new GoogleError('13 INTERNAL: Received RST_STREAM with code 2')
+      )
+    );
+    await op.catch(() => {});
+
+    expect(clientPool.size).to.equal(0);
+  });
+
   it('keeps pool of idle clients', async () => {
     const clientPool = new ClientPool<{}>(
       /* concurrentOperationLimit= */ 1,

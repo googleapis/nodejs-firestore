@@ -214,13 +214,13 @@ export class ClientPool<T> {
 
     return op(client)
       .catch(async (err: GoogleError) => {
-        await this.release(requestTag, client);
         if (err.message?.indexOf('RST_STREAM')) {
           // Once a client has seen a RST_STREAM error, the GRPC channel can
           // no longer be used. We mark the client as failed, which ensures that
           // we open a new GRPC channel for the next request.
           this.failedClients.add(client);
         }
+        await this.release(requestTag, client);
         return Promise.reject(err);
       })
       .then(async res => {
