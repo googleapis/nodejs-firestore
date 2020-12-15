@@ -96,19 +96,6 @@ export class WriteResult implements firestore.WriteResult {
 }
 
 /**
- * A BatchWriteResult wraps the write time and status returned by Firestore
- * when making BatchWriteRequests.
- *
- * @private
- */
-export class BatchWriteResult {
-  constructor(
-    readonly writeTime: Timestamp | null,
-    readonly status: GoogleError
-  ) {}
-}
-
-/**
  * A lazily-evaluated write that allows us to detect the Project ID before
  * serializing the request.
  * @private

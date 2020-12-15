@@ -679,44 +679,6 @@ describe('BulkWriter', () => {
     expect(writeResult).to.equal(1);
   });
 
-  it('retries maintain correct write resolution ordering', async () => {
-    const bulkWriter = await instantiateInstance([
-      {
-        request: createRequest([setOp('doc', 'bar')]),
-        response: failedResponse(Status.INTERNAL),
-      },
-      {
-        request: createRequest([setOp('doc', 'bar')]),
-        response: successResponse(1),
-      },
-      {
-        request: createRequest([setOp('doc2', 'bar')]),
-        response: successResponse(2),
-      },
-    ]);
-    const ops: string[] = [];
-    bulkWriter.onWriteError(() => {
-      return true;
-    });
-    bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'}).then(() => {
-      ops.push('before_flush');
-    });
-    const flush = bulkWriter.flush().then(() => {
-      ops.push('flush');
-    });
-    bulkWriter
-      .set(firestore.doc('collectionId/doc2'), {foo: 'bar'})
-      .then(() => {
-        ops.push('after_flush');
-      });
-
-    await flush;
-    expect(ops).to.deep.equal(['before_flush', 'flush']);
-    return bulkWriter.close().then(() => {
-      expect(ops).to.deep.equal(['before_flush', 'flush', 'after_flush']);
-    });
-  });
-
   it('returns the error if no retry is specified', async () => {
     const bulkWriter = await instantiateInstance([
       {
