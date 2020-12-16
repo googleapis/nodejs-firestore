@@ -73,7 +73,7 @@ const RATE_LIMITER_MULTIPLIER = 1.5;
 const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
 /**
- * Represents a single write for BulkWriter, encapsulating operation dispatch 
+ * Represents a single write for BulkWriter, encapsulating operation dispatch
  * and error handling.
  * @private
  */
@@ -81,6 +81,15 @@ class BulkWriterOperation {
   private deferred = new Deferred<WriteResult>();
   private failedAttempts = 0;
 
+  /**
+   * @param ref The document reference being written to.
+   * @param type The type of operation that created this write.
+   * @param op A closure that encapsulates the API call which adds this write to 
+   * a BulkCommitBatch.
+   * @param sendFn A callback to invoke when the operation should be sent.
+   * @param errorFn The user provided global error callback.
+   * @param successFn The user provided global success callback.
+   */
   constructor(
     public ref: firestore.DocumentReference<unknown>,
     private type: 'create' | 'set' | 'update' | 'delete',
