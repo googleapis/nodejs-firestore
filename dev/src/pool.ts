@@ -214,7 +214,7 @@ export class ClientPool<T> {
 
     return op(client)
       .catch(async (err: GoogleError) => {
-        if (err.message?.indexOf('RST_STREAM')) {
+        if (err.message?.match(/RST_STREAM/)) {
           // Once a client has seen a RST_STREAM error, the GRPC channel can
           // no longer be used. We mark the client as failed, which ensures that
           // we open a new GRPC channel for the next request.

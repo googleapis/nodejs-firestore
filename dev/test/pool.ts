@@ -214,13 +214,11 @@ describe('Client pool', () => {
     );
     expect(clientPool.size).to.equal(2);
 
-    operationPromises.forEach(deferred => deferred.reject());
+    operationPromises.forEach(deferred => deferred.reject(new Error()));
 
-    return Promise.all(completionPromises.map(p => p.catch(() => {}))).then(
-      () => {
-        expect(clientPool.size).to.equal(0);
-      }
-    );
+    return Promise.all(
+      completionPromises.map(p => p.catch(() => {}))
+    ).then(() => expect(clientPool.size).to.equal(0));
   });
 
   it('garbage collection calls destructor', () => {
