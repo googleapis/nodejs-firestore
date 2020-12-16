@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.8.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.8.0...v4.8.1) (2020-12-16)
+
+
+### Bug Fixes
+
+* release clients that received a RST_STREAM error ([#1380](https://www.github.com/googleapis/nodejs-firestore/issues/1380)) ([0296dd6](https://www.github.com/googleapis/nodejs-firestore/commit/0296dd65d135f5b809547c69dec03dcc8f4bd071))
+
 ## [4.8.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.7.2...v4.8.0) (2020-12-03)
 
 
