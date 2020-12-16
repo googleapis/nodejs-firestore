@@ -118,11 +118,11 @@ class BulkWriterOperation {
       logger(
         'BulkWriter.errorFn',
         null,
-        'Running error callback on error code:',
+        'Ran error callback on error code:',
         error.code,
         ', shouldRetry:',
         shouldRetry,
-        ' for document: ',
+        ' for document:',
         this.ref.path
       );
 
