@@ -2613,7 +2613,8 @@ describe('BulkWriter class', () => {
     const op2 = writer.set(ref, {foo: 'bar2'});
     await writer.close();
     const result = await ref.get();
-    expect(result.data()).to.deep.equal({foo: 'bar2'});
+    // The order of writes is not guaranteed.
+    expect(result.get('foo')).to.not.be.undefined;
     const writeTime1 = (await op1).writeTime;
     const writeTime2 = (await op2).writeTime;
     expect(writeTime1).to.not.be.null;
