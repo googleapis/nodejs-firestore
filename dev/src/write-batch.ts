@@ -45,7 +45,7 @@ import {
   validateMinNumberOfArguments,
   validateOptional,
 } from './validate';
-import {GoogleError, Status} from 'google-gax';
+import {Status} from 'google-gax';
 import api = google.firestore.v1;
 
 /**
