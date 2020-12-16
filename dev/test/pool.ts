@@ -214,13 +214,11 @@ describe('Client pool', () => {
     );
     expect(clientPool.size).to.equal(2);
 
-    operationPromises.forEach(deferred => deferred.reject());
+    operationPromises.forEach(deferred => deferred.reject(new Error()));
 
-    return Promise.all(completionPromises.map(p => p.catch(() => {}))).then(
-      () => {
-        expect(clientPool.size).to.equal(0);
-      }
-    );
+    return Promise.all(
+      completionPromises.map(p => p.catch(() => {}))
+    ).then(() => expect(clientPool.size).to.equal(0));
   });
 
   it('garbage collection calls destructor', () => {
@@ -281,6 +279,21 @@ describe('Client pool', () => {
     await clientPool.run(REQUEST_TAG, async () => {});
 
     expect(instanceCount).to.equal(2);
+  });
+
+  it('garbage collects after RST_STREAM', async () => {
+    const clientPool = new ClientPool<{}>(1, 1, () => {
+      return {};
+    });
+
+    const op = clientPool.run(REQUEST_TAG, () =>
+      Promise.reject(
+        new GoogleError('13 INTERNAL: Received RST_STREAM with code 2')
+      )
+    );
+    await op.catch(() => {});
+
+    expect(clientPool.size).to.equal(0);
   });
 
   it('keeps pool of idle clients', async () => {
