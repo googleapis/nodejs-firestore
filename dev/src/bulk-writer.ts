@@ -73,10 +73,8 @@ const RATE_LIMITER_MULTIPLIER = 1.5;
 const RATE_LIMITER_MULTIPLIER_MILLIS = 5 * 60 * 1000;
 
 /**
- * Represents a single write for BulkWriter. A write can be in one of four
- * states (READY_TO_SEND, SENT, FAILED, SUCCESS). A SENT write can
- * transition back to READY_TO_SEND if it is scheduled for retry.
- *
+ * Represents a single write for BulkWriter, encapsulating operation dispatch 
+ * and error handling.
  * @private
  */
 class BulkWriterOperation {
