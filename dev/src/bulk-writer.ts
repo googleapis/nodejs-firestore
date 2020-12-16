@@ -276,7 +276,7 @@ export class BulkWriter {
 
   /**
    * A pointer to the tail of all active BulkWriter applications. This pointer
-   * is advanced every time a new operation is enqueued.
+   * is advanced every time a new write is enqueued.
    * @private
    */
   private _lastOp: Promise<void> = Promise.resolve();
@@ -442,7 +442,6 @@ export class BulkWriter {
     precondition?: firestore.Precondition
   ): Promise<WriteResult> {
     this._verifyNotClosed();
-
     const op = this._enqueue(documentRef, 'delete', bulkCommitBatch =>
       bulkCommitBatch.delete(documentRef, precondition)
     );
@@ -767,7 +766,7 @@ export class BulkWriter {
    */
   _sendFn(op: BulkWriterOperation): void {
     if (this._bulkCommitBatch.has(op.ref)) {
-      // Create a new batch since the backend doesn't support  a batch with two
+      // Create a new batch since the backend doesn't support batches with two
       // writes to the same document.
       this._sendCurrentBatch();
     }
