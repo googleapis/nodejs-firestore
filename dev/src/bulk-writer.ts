@@ -84,7 +84,7 @@ class BulkWriterOperation {
   /**
    * @param ref The document reference being written to.
    * @param type The type of operation that created this write.
-   * @param op A closure that encapsulates the API call which adds this write to 
+   * @param op A closure that encapsulates the API call which adds this write to
    * a BulkCommitBatch.
    * @param sendFn A callback to invoke when the operation should be sent.
    * @param errorFn The user provided global error callback.
