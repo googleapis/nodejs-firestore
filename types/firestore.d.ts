@@ -616,7 +616,10 @@ declare namespace FirebaseFirestore {
      * successfully completes.
      */
     onWriteResult(
-      callback: (documentRef: DocumentReference, result: WriteResult) => void
+      callback: (
+        documentRef: DocumentReference<any>,
+        result: WriteResult
+      ) => void
     ): void;
 
     /**

@@ -239,50 +239,50 @@ describe('BulkWriter', () => {
       let bulkWriter = firestore.bulkWriter({
         throttling: {initialOpsPerSecond: 500, maxOpsPerSecond: 550},
       });
-      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(500);
-      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(550);
+      expect(bulkWriter._rateLimiter.availableTokens).to.equal(500);
+      expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(550);
 
       bulkWriter = firestore.bulkWriter({
         throttling: {maxOpsPerSecond: 1000},
       });
-      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(500);
-      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(1000);
+      expect(bulkWriter._rateLimiter.availableTokens).to.equal(500);
+      expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(1000);
 
       bulkWriter = firestore.bulkWriter({
         throttling: {initialOpsPerSecond: 100},
       });
-      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(100);
-      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+      expect(bulkWriter._rateLimiter.availableTokens).to.equal(100);
+      expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(
         Number.POSITIVE_INFINITY
       );
 
       bulkWriter = firestore.bulkWriter({
         throttling: {maxOpsPerSecond: 100},
       });
-      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(100);
-      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(100);
+      expect(bulkWriter._rateLimiter.availableTokens).to.equal(100);
+      expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(100);
 
       bulkWriter = firestore.bulkWriter();
-      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+      expect(bulkWriter._rateLimiter.availableTokens).to.equal(
         DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
       );
-      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+      expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(
         Number.POSITIVE_INFINITY
       );
 
       bulkWriter = firestore.bulkWriter({throttling: true});
-      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+      expect(bulkWriter._rateLimiter.availableTokens).to.equal(
         DEFAULT_STARTING_MAXIMUM_OPS_PER_SECOND
       );
-      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+      expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(
         Number.POSITIVE_INFINITY
       );
 
       bulkWriter = firestore.bulkWriter({throttling: false});
-      expect(bulkWriter._getRateLimiter().availableTokens).to.equal(
+      expect(bulkWriter._rateLimiter.availableTokens).to.equal(
         Number.POSITIVE_INFINITY
       );
-      expect(bulkWriter._getRateLimiter().maximumCapacity).to.equal(
+      expect(bulkWriter._rateLimiter.maximumCapacity).to.equal(
         Number.POSITIVE_INFINITY
       );
     });
@@ -701,7 +701,7 @@ describe('BulkWriter', () => {
     bulkWriter.set(firestore.doc('collectionId/doc'), {foo: 'bar'}).then(() => {
       ops.push('before_flush');
     });
-    const flush = bulkWriter.flush().then(() => {
+    await bulkWriter.flush().then(() => {
       ops.push('flush');
     });
     bulkWriter
@@ -710,7 +710,6 @@ describe('BulkWriter', () => {
         ops.push('after_flush');
       });
 
-    await flush;
     expect(ops).to.deep.equal(['before_flush', 'flush']);
     return bulkWriter.close().then(() => {
       expect(ops).to.deep.equal(['before_flush', 'flush', 'after_flush']);
@@ -768,7 +767,7 @@ describe('BulkWriter', () => {
       },
     ]);
 
-    bulkWriter._setMaxBatchSize(2);
+    bulkWriter._maxBatchSize = 2;
     for (let i = 0; i < 6; i++) {
       bulkWriter
         .set(firestore.doc('collectionId/doc' + i), {foo: 'bar'})
@@ -800,7 +799,7 @@ describe('BulkWriter', () => {
       },
     ]);
 
-    bulkWriter._setMaxBatchSize(3);
+    bulkWriter._maxBatchSize = 3;
     const promise1 = bulkWriter
       .set(firestore.doc('collectionId/doc1'), {foo: 'bar'})
       .then(incrementOpCount);

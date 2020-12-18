@@ -45,7 +45,7 @@ import {
   validateMinNumberOfArguments,
   validateOptional,
 } from './validate';
-import {GoogleError, Status} from 'google-gax';
+import {Status} from 'google-gax';
 import api = google.firestore.v1;
 
 /**
@@ -93,19 +93,6 @@ export class WriteResult implements firestore.WriteResult {
         this._writeTime.isEqual(other._writeTime))
     );
   }
-}
-
-/**
- * A BatchWriteResult wraps the write time and status returned by Firestore
- * when making BatchWriteRequests.
- *
- * @private
- */
-export class BatchWriteResult {
-  constructor(
-    readonly writeTime: Timestamp | null,
-    readonly status: GoogleError
-  ) {}
 }
 
 /**
