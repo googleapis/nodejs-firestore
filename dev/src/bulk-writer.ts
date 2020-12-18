@@ -91,12 +91,12 @@ class BulkWriterOperation {
    * @param successFn The user provided global success callback.
    */
   constructor(
-    public ref: firestore.DocumentReference<unknown>,
-    private type: 'create' | 'set' | 'update' | 'delete',
-    private op: (bulkCommitBatch: BulkCommitBatch) => void,
-    private sendFn: (op: BulkWriterOperation) => void,
-    private errorFn: (error: BulkWriterError) => boolean,
-    private successFn: (
+    readonly ref: firestore.DocumentReference<unknown>,
+    private readonly type: 'create' | 'set' | 'update' | 'delete',
+    private readonly op: (bulkCommitBatch: BulkCommitBatch) => void,
+    private readonly sendFn: (op: BulkWriterOperation) => void,
+    private readonly errorFn: (error: BulkWriterError) => boolean,
+    private readonly successFn: (
       ref: firestore.DocumentReference<unknown>,
       result: WriteResult
     ) => void
@@ -276,7 +276,7 @@ export class BulkWriter {
 
   /**
    * The batch that is currently used to schedule operations. Once this batch
-   * reached maximum capacity, a new batch is created.
+   * reaches maximum capacity, a new batch is created.
    * @private
    */
   private _bulkCommitBatch = new BulkCommitBatch(this.firestore);
@@ -555,7 +555,7 @@ export class BulkWriter {
    * });
    */
   update<T>(
-    documentRef: firestore.DocumentReference,
+    documentRef: firestore.DocumentReference<T>,
     dataOrField: firestore.UpdateData | string | FieldPath,
     ...preconditionOrValues: Array<
       {lastUpdateTime?: Timestamp} | unknown | string | FieldPath
@@ -704,7 +704,7 @@ export class BulkWriter {
   /**
    * Sends the current batch and resets `this._bulkCommitBatch`.
    *
-   * @param flush - If provided, keeps re-sending operations until no more
+   * @param flush If provided, keeps re-sending operations until no more
    * operations are enqueued. This allows retries to resolve as part of a
    * `flush()` or `close()` call.
    * @private
@@ -731,7 +731,7 @@ export class BulkWriter {
         pendingBatch._opCount
       );
       logger(
-        'BulkWriter.sendNextBatch',
+        'BulkWriter._sendCurrentBatch',
         tag,
         `Backing off for ${delayMs} seconds`
       );
@@ -767,7 +767,7 @@ export class BulkWriter {
 
   /**
    * Schedules the provided operations on current BulkCommitBatch.
-   * Sends the BulkCommitBatch if it reach maximum capacity.
+   * Sends the BulkCommitBatch if it reaches maximum capacity.
    *
    * @private
    */
@@ -778,6 +778,9 @@ export class BulkWriter {
       this._sendCurrentBatch();
     }
 
+    // Run the operation on the current batch and advance the `_lastOp` pointer.
+    // This ensures that `_lastOp` only resolves when both the previous and the
+    // current write resolves.
     op.run(this._bulkCommitBatch);
     this._bulkCommitBatch.processLastOperation(op);
     this._lastOp = this._lastOp.then(() => silencePromise(op.promise));
