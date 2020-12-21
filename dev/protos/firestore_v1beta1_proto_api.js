@@ -2783,6 +2783,10 @@
                             case 5:
                                 message[".google.api.fieldBehavior"][i] = 5;
                                 break;
+                            case "UNORDERED_LIST":
+                            case 6:
+                                message[".google.api.fieldBehavior"][i] = 6;
+                                break;
                             }
                     }
                     if (object[".google.api.resourceReference"] != null) {
@@ -13993,6 +13997,7 @@
              * @property {string} OUTPUT_ONLY=OUTPUT_ONLY OUTPUT_ONLY value
              * @property {string} INPUT_ONLY=INPUT_ONLY INPUT_ONLY value
              * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
+             * @property {string} UNORDERED_LIST=UNORDERED_LIST UNORDERED_LIST value
              */
             api.FieldBehavior = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
@@ -14002,6 +14007,7 @@
                 values[valuesById[3] = "OUTPUT_ONLY"] = "OUTPUT_ONLY";
                 values[valuesById[4] = "INPUT_ONLY"] = "INPUT_ONLY";
                 values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
+                values[valuesById[6] = "UNORDERED_LIST"] = "UNORDERED_LIST";
                 return values;
             })();
     
