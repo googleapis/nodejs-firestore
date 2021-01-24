@@ -143,7 +143,7 @@ export class BundleBuilder {
     bundleElement: firestore.IBundleElement
   ): Buffer {
     // Convert to a valid proto message object then take its json representation.
-    // This take cares of converting stuff like converting internal byte array fields
+    // This take cares of stuff like converting internal byte array fields
     // to base64 encodings.
     const message = BundleElement.fromObject(bundleElement).toJSON();
     const buffer = Buffer.from(JSON.stringify(message), 'utf-8');
