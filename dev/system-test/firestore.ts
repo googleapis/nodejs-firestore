@@ -18,7 +18,7 @@ import {describe, it, before, beforeEach, afterEach} from 'mocha';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
-import {firestore} from '../protos/firestore_v1_proto_api';
+import {firestore, google} from '../protos/firestore_v1_proto_api';
 
 import {
   CollectionReference,
@@ -43,7 +43,10 @@ import {
   postConverterMerge,
   verifyInstance,
 } from '../test/util/helpers';
+import BundledDocumentMetadata = firestore.BundledDocumentMetadata;
 import IBundleElement = firestore.IBundleElement;
+import NamedQuery = firestore.NamedQuery;
+import Document = google.firestore.v1.Document;
 import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
@@ -2773,19 +2776,21 @@ describe('Bundle building', () => {
 
     const namedQuery = (elements[1] as IBundleElement).namedQuery;
     // Verify saved query.
-    expect(namedQuery).to.deep.equal({
-      name: 'query',
-      readTime: snap.readTime.toProto().timestampValue,
-      // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
-      bundledQuery: extend(
-        true,
-        {},
-        {
-          parent: query.toProto().parent,
-          structuredQuery: query.toProto().structuredQuery,
-        }
-      ),
-    });
+    expect(namedQuery).to.deep.equal(
+      NamedQuery.fromObject({
+        name: 'query',
+        readTime: snap.readTime.toProto().timestampValue,
+        // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
+        bundledQuery: extend(
+          true,
+          {},
+          {
+            parent: query.toProto().parent,
+            structuredQuery: query.toProto().structuredQuery,
+          }
+        ),
+      }).toJSON()
+    );
   });
 
   it('succeeds when added document does not exist', async () => {
@@ -2801,12 +2806,14 @@ describe('Bundle building', () => {
     verifyMetadata(meta!, snap.readTime.toProto().timestampValue!, 1);
 
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
-    expect(docMeta).to.deep.equal({
-      name: snap.toDocumentProto().name,
-      readTime: snap.readTime.toProto().timestampValue,
-      exists: false,
-      queries: [],
-    });
+    expect(docMeta).to.deep.equal(
+      BundledDocumentMetadata.fromObject({
+        name: snap.toDocumentProto().name,
+        readTime: snap.readTime.toProto().timestampValue,
+        exists: false,
+        queries: [],
+      }).toJSON()
+    );
   });
 
   it('succeeds to save limit and limitToLast queries', async () => {
@@ -2838,48 +2845,56 @@ describe('Bundle building', () => {
     }
 
     // Verify saved limit query.
-    expect(namedQuery1).to.deep.equal({
-      name: 'limitQuery',
-      readTime: limitSnap.readTime.toProto().timestampValue,
-      bundledQuery: extend(
-        true,
-        {},
-        {
-          parent: limitQuery.toProto().parent,
-          structuredQuery: limitQuery.toProto().structuredQuery,
-          limitType: 'FIRST',
-        }
-      ),
-    });
+    expect(namedQuery1).to.deep.equal(
+      NamedQuery.fromObject({
+        name: 'limitQuery',
+        readTime: limitSnap.readTime.toProto().timestampValue,
+        bundledQuery: extend(
+          true,
+          {},
+          {
+            parent: limitQuery.toProto().parent,
+            structuredQuery: limitQuery.toProto().structuredQuery,
+            limitType: 'FIRST',
+          }
+        ),
+      }).toJSON()
+    );
 
     // `limitToLastQuery`'s structured query should be the same as this one. This together with
     // `limitType` can re-construct a limitToLast client query by client SDKs.
     const q = testCol.orderBy('sort', 'asc').limit(1);
     // Verify saved limitToLast query.
-    expect(namedQuery2).to.deep.equal({
-      name: 'limitToLastQuery',
-      readTime: limitToLastSnap.readTime.toProto().timestampValue,
-      bundledQuery: extend(
-        true,
-        {},
-        {
-          parent: q.toProto().parent,
-          structuredQuery: q.toProto().structuredQuery,
-          limitType: 'LAST',
-        }
-      ),
-    });
+    expect(namedQuery2).to.deep.equal(
+      NamedQuery.fromObject({
+        name: 'limitToLastQuery',
+        readTime: limitToLastSnap.readTime.toProto().timestampValue,
+        bundledQuery: extend(
+          true,
+          {},
+          {
+            parent: q.toProto().parent,
+            structuredQuery: q.toProto().structuredQuery,
+            limitType: 'LAST',
+          }
+        ),
+      }).toJSON()
+    );
 
     // Verify bundled document
     const docMeta = (elements[3] as IBundleElement).documentMetadata;
-    expect(docMeta).to.deep.equal({
-      name: limitToLastSnap.docs[0].toDocumentProto().name,
-      readTime: limitToLastSnap.readTime.toProto().timestampValue,
-      exists: true,
-      queries: ['limitQuery', 'limitToLastQuery'],
-    });
+    expect(docMeta).to.deep.equal(
+      BundledDocumentMetadata.fromObject({
+        name: limitToLastSnap.docs[0].toDocumentProto().name,
+        readTime: limitToLastSnap.readTime.toProto().timestampValue,
+        exists: true,
+        queries: ['limitQuery', 'limitToLastQuery'],
+      }).toJSON()
+    );
 
     const bundledDoc = (elements[4] as IBundleElement).document;
-    expect(bundledDoc).to.deep.equal(limitToLastSnap.docs[0].toDocumentProto());
+    expect(bundledDoc).to.deep.equal(
+      Document.fromObject(limitToLastSnap.docs[0].toDocumentProto()).toJSON()
+    );
   });
 });
