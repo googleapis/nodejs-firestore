@@ -26,6 +26,7 @@ import {Firestore} from './index';
 import {validateInteger} from './validate';
 
 import api = protos.google.firestore.v1;
+import {defaultConverter} from './types';
 
 /**
  * A `CollectionGroup` refers to all documents that are contained in a
@@ -136,6 +137,9 @@ export class CollectionGroup<T = firestore.DocumentData>
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
    *
+   * Passing in `null` as the converter parameter applies the the default
+   * `DocumentData` typed converter.
+   *
    * @example
    * class Post {
    *   constructor(readonly title: string, readonly author: string) {}
@@ -168,18 +172,23 @@ export class CollectionGroup<T = firestore.DocumentData>
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param {FirestoreDataConverter} converter Converts objects to and from
-   * Firestore.
+   * @param {FirestoreDataConverter | null} converter Converts objects to and
+   * from Firestore. Passing in `null` applies the default `DocumentData` typed
+   * converter.
    * @return {CollectionGroup} A `CollectionGroup<U>` that uses the provided
    * converter.
    */
+  withConverter(converter: null): CollectionGroup<firestore.DocumentData>;
   withConverter<U>(
     converter: firestore.FirestoreDataConverter<U>
+  ): CollectionGroup<U>;
+  withConverter<U>(
+    converter: firestore.FirestoreDataConverter<U> | null
   ): CollectionGroup<U> {
     return new CollectionGroup<U>(
       this.firestore,
       this._queryOptions.collectionId,
-      converter
+      converter !== null ? converter : defaultConverter()
     );
   }
 }

@@ -148,6 +148,7 @@ describe('Firestore class', () => {
   });
 
   it('getAll() supports generics', async () => {
+    randomCol.doc('lo')._converter;
     const ref1 = randomCol.doc('doc1').withConverter(postConverter);
     const ref2 = randomCol.doc('doc2').withConverter(postConverter);
     await ref1.set(new Post('post1', 'author1'));
