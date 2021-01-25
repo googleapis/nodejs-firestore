@@ -329,3 +329,42 @@ describe('Bundle Builder', () => {
     );
   });
 });
+
+describe('Bundle Builder using BigInt', () => {
+  let firestore: Firestore;
+
+  beforeEach(() => {
+    return createInstance(undefined, {useBigInt: true}).then(
+      firestoreInstance => {
+        firestore = firestoreInstance;
+      }
+    );
+  });
+
+  it('succeeds with document snapshots with BigInt field', async () => {
+    const bundle = firestore.bundle(TEST_BUNDLE_ID);
+    const bigIntValue = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
+    const snap = firestore.snapshot_(
+      {
+        name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
+        fields: {foo: {integerValue: bigIntValue.toString()}},
+        createTime: '1970-01-01T00:00:01.002Z',
+        updateTime: '1970-01-01T00:00:03.000004Z',
+      },
+      // This should be the bundle read time.
+      '2020-01-01T00:00:05.000000006Z',
+      'json'
+    );
+    bundle.add(snap);
+
+    // Bundle is expected to be [bundleMeta, snapMeta, snap]
+    const elements = await bundleToElementArray(bundle.build());
+    // The point is to make sure BigInt gets encoded correctly into a string without losing
+    // precision.
+    expect(elements[2].document?.fields).to.deep.equal({
+      foo: {integerValue: bigIntValue.toString()},
+    });
+  });
+
+  afterEach(() => verifyInstance(firestore));
+});
