@@ -137,8 +137,8 @@ export class CollectionGroup<T = firestore.DocumentData>
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
    *
-   * Passing in `null` as the converter parameter applies the the default
-   * `DocumentData` typed converter.
+   * Passing in `null` as the converter parameter removes the current
+   * converter.
    *
    * @example
    * class Post {
@@ -173,8 +173,7 @@ export class CollectionGroup<T = firestore.DocumentData>
    * }
    *
    * @param {FirestoreDataConverter | null} converter Converts objects to and
-   * from Firestore. Passing in `null` applies the default `DocumentData` typed
-   * converter.
+   * from Firestore. Passing in `null` removes the current converter.
    * @return {CollectionGroup} A `CollectionGroup<U>` that uses the provided
    * converter.
    */
@@ -188,7 +187,7 @@ export class CollectionGroup<T = firestore.DocumentData>
     return new CollectionGroup<U>(
       this.firestore,
       this._queryOptions.collectionId,
-      converter !== null ? converter : defaultConverter()
+      converter ?? defaultConverter()
     );
   }
 }

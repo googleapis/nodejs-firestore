@@ -552,8 +552,8 @@ export class DocumentReference<T = firestore.DocumentData>
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
    *
-   * Passing in `null` as the converter parameter applies the the default
-   * `DocumentData` typed converter.
+   * Passing in `null` as the converter parameter removes the current
+   * converter.
    *
    * @example
    * class Post {
@@ -588,8 +588,7 @@ export class DocumentReference<T = firestore.DocumentData>
    * }
    *
    * @param {FirestoreDataConverter | null} converter Converts objects to and
-   * from Firestore. Passing in `null` applies the default `DocumentData` typed
-   * converter.
+   * from Firestore. Passing in `null` removes the current converter.
    * @return A DocumentReference<U> that uses the provided converter.
    */
   withConverter(converter: null): DocumentReference<firestore.DocumentData>;
@@ -602,7 +601,7 @@ export class DocumentReference<T = firestore.DocumentData>
     return new DocumentReference<U>(
       this.firestore,
       this._path,
-      converter !== null ? converter : defaultConverter()
+      converter ?? defaultConverter()
     );
   }
 }
@@ -2269,8 +2268,8 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
    *
-   * Passing in `null` as the converter parameter applies the the default
-   * `DocumentData` typed converter.
+   * Passing in `null` as the converter parameter removes the current
+   * converter.
    *
    * @example
    * class Post {
@@ -2305,8 +2304,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * }
    *
    * @param {FirestoreDataConverter | null} converter Converts objects to and
-   * from Firestore. Passing in `null` applies the default `DocumentData` typed
-   * converter.
+   * from Firestore. Passing in `null` removes the current converter.
    * @return A Query<U> that uses the provided converter.
    */
   withConverter(converter: null): Query<firestore.DocumentData>;
@@ -2316,9 +2314,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   ): Query<U> {
     return new Query<U>(
       this.firestore,
-      this._queryOptions.withConverter(
-        converter !== null ? converter : defaultConverter()
-      )
+      this._queryOptions.withConverter(converter ?? defaultConverter())
     );
   }
 }
@@ -2569,8 +2565,8 @@ export class CollectionReference<T = firestore.DocumentData>
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
    *
-   * Passing in `null` as the converter parameter applies the the default
-   * `DocumentData` typed converter.
+   * Passing in `null` as the converter parameter removes the current
+   * converter.
    *
    * @example
    * class Post {
@@ -2605,8 +2601,7 @@ export class CollectionReference<T = firestore.DocumentData>
    * }
    *
    * @param {FirestoreDataConverter | null} converter Converts objects to and
-   * from Firestore. Passing in `null` applies the default `DocumentData` typed
-   * converter.
+   * from Firestore. Passing in `null` removes the current converter.
    * @return A CollectionReference<U> that uses the provided converter.
    */
   withConverter(converter: null): CollectionReference<firestore.DocumentData>;
@@ -2619,7 +2614,7 @@ export class CollectionReference<T = firestore.DocumentData>
     return new CollectionReference<U>(
       this.firestore,
       this.resourcePath,
-      converter !== null ? converter : defaultConverter()
+      converter ?? defaultConverter()
     );
   }
 }
