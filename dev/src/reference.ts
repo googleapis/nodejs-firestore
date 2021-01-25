@@ -552,6 +552,9 @@ export class DocumentReference<T = firestore.DocumentData>
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
    *
+   * Passing in `null` as the converter parameter removes the current
+   * converter.
+   *
    * @example
    * class Post {
    *   constructor(readonly title: string, readonly author: string) {}
@@ -584,14 +587,22 @@ export class DocumentReference<T = firestore.DocumentData>
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param {FirestoreDataConverter} converter Converts objects to and from
-   * Firestore.
+   * @param {FirestoreDataConverter | null} converter Converts objects to and
+   * from Firestore. Passing in `null` removes the current converter.
    * @return A DocumentReference<U> that uses the provided converter.
    */
+  withConverter(converter: null): DocumentReference<firestore.DocumentData>;
   withConverter<U>(
     converter: firestore.FirestoreDataConverter<U>
+  ): DocumentReference<U>;
+  withConverter<U>(
+    converter: firestore.FirestoreDataConverter<U> | null
   ): DocumentReference<U> {
-    return new DocumentReference<U>(this.firestore, this._path, converter);
+    return new DocumentReference<U>(
+      this.firestore,
+      this._path,
+      converter ?? defaultConverter()
+    );
   }
 }
 
@@ -2257,6 +2268,9 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
    *
+   * Passing in `null` as the converter parameter removes the current
+   * converter.
+   *
    * @example
    * class Post {
    *   constructor(readonly title: string, readonly author: string) {}
@@ -2289,14 +2303,18 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param {FirestoreDataConverter} converter Converts objects to and from
-   * Firestore.
+   * @param {FirestoreDataConverter | null} converter Converts objects to and
+   * from Firestore. Passing in `null` removes the current converter.
    * @return A Query<U> that uses the provided converter.
    */
-  withConverter<U>(converter: firestore.FirestoreDataConverter<U>): Query<U> {
+  withConverter(converter: null): Query<firestore.DocumentData>;
+  withConverter<U>(converter: firestore.FirestoreDataConverter<U>): Query<U>;
+  withConverter<U>(
+    converter: firestore.FirestoreDataConverter<U> | null
+  ): Query<U> {
     return new Query<U>(
       this.firestore,
-      this._queryOptions.withConverter(converter)
+      this._queryOptions.withConverter(converter ?? defaultConverter())
     );
   }
 }
@@ -2547,6 +2565,9 @@ export class CollectionReference<T = firestore.DocumentData>
    * Using the converter allows you to specify generic type arguments when
    * storing and retrieving objects from Firestore.
    *
+   * Passing in `null` as the converter parameter removes the current
+   * converter.
+   *
    * @example
    * class Post {
    *   constructor(readonly title: string, readonly author: string) {}
@@ -2579,17 +2600,21 @@ export class CollectionReference<T = firestore.DocumentData>
    *   post.someNonExistentProperty; // TS error
    * }
    *
-   * @param {FirestoreDataConverter} converter Converts objects to and from
-   * Firestore.
+   * @param {FirestoreDataConverter | null} converter Converts objects to and
+   * from Firestore. Passing in `null` removes the current converter.
    * @return A CollectionReference<U> that uses the provided converter.
    */
+  withConverter(converter: null): CollectionReference<firestore.DocumentData>;
   withConverter<U>(
     converter: firestore.FirestoreDataConverter<U>
+  ): CollectionReference<U>;
+  withConverter<U>(
+    converter: firestore.FirestoreDataConverter<U> | null
   ): CollectionReference<U> {
     return new CollectionReference<U>(
       this.firestore,
       this.resourcePath,
-      converter
+      converter ?? defaultConverter()
     );
   }
 }

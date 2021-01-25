@@ -277,6 +277,17 @@ describe('Collection interface', () => {
     });
   });
 
+  it('withConverter(null) applies the default converter', async () => {
+    return createInstance().then(async firestore => {
+      const docRef = firestore
+        .collection('collectionId')
+        .withConverter(postConverter)
+        .withConverter(null)
+        .doc('documentId');
+      expect(() => docRef.set(new Post('post', 'author'))).to.throw();
+    });
+  });
+
   it('drops the converter when calling CollectionReference<T>.parent()', () => {
     return createInstance().then(async firestore => {
       const postsCollection = firestore

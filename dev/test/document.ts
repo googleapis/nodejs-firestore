@@ -2194,4 +2194,15 @@ describe('withConverter() support', () => {
       expect(post!.toString()).to.equal('post, by author');
     });
   });
+
+  it('withConverter(null) applies the default converter', async () => {
+    return createInstance().then(async firestore => {
+      const docRef = firestore
+        .collection('collectionId')
+        .doc('documentId')
+        .withConverter(postConverter)
+        .withConverter(null);
+      expect(() => docRef.set(new Post('post', 'author'))).to.throw();
+    });
+  });
 });

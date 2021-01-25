@@ -261,8 +261,8 @@ export class BulkWriterError extends Error {
 }
 
 /**
- * A Firestore BulkWriter than can be used to perform a large number of writes
- * in parallel. Writes to the same document will be executed sequentially.
+ * A Firestore BulkWriter that can be used to perform a large number of writes
+ * in parallel.
  *
  * @class BulkWriter
  */
