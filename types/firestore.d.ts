@@ -1054,10 +1054,10 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A DocumentReference<U> that uses the provided converter.
      */
-    withConverter(converter: null): DocumentReference<DocumentData>;
     withConverter<U>(
       converter: FirestoreDataConverter<U>
     ): DocumentReference<U>;
+    withConverter(converter: null): DocumentReference<DocumentData>;
   }
 
   /**
@@ -1425,8 +1425,8 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A Query<U> that uses the provided converter.
      */
-    withConverter(converter: null): Query<DocumentData>;
     withConverter<U>(converter: FirestoreDataConverter<U>): Query<U>;
+    withConverter(converter: null): Query<DocumentData>;
   }
 
   /**
@@ -1610,10 +1610,10 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A CollectionReference<U> that uses the provided converter.
      */
-    withConverter(converter: null): CollectionReference<DocumentData>;
     withConverter<U>(
       converter: FirestoreDataConverter<U>
     ): CollectionReference<U>;
+    withConverter(converter: null): CollectionReference<DocumentData>;
   }
 
   /**
@@ -1682,8 +1682,8 @@ declare namespace FirebaseFirestore {
      * `null` removes the current converter.
      * @return A `CollectionGroup<U>` that uses the provided converter.
      */
-    withConverter(converter: null): CollectionGroup<DocumentData>;
     withConverter<U>(converter: FirestoreDataConverter<U>): CollectionGroup<U>;
+    withConverter(converter: null): CollectionGroup<DocumentData>;
   }
 
   /**
