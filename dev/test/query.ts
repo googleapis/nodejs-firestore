@@ -742,7 +742,7 @@ describe('query interface', () => {
 
       const posts = await coll.where('title', '==', 'post').get();
       expect(posts.size).to.equal(1);
-      expect(posts.docs[0].data() instanceof Post).to.be.false;
+      expect(posts.docs[0].data()).to.not.be.instanceOf(Post);
     });
   });
 });
