@@ -343,7 +343,8 @@ describe('Bundle Builder using BigInt', () => {
 
   it('succeeds with document snapshots with BigInt field', async () => {
     const bundle = firestore.bundle(TEST_BUNDLE_ID);
-    const bigIntValue = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
+    const bigIntValue =
+      BigInt(Number.MAX_SAFE_INTEGER) + BigInt(Number.MAX_SAFE_INTEGER);
     const snap = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
