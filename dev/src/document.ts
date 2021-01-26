@@ -694,7 +694,11 @@ export class DocumentMask {
           }
         } else if (isPlainObject(value)) {
           extractFieldPaths(value, childPath);
-        } else {
+        } else if (value !== undefined) {
+          // If the value is undefined it can never participate in the document
+          // mask. With `ignoreUndefinedProperties` set to false,
+          // `validateDocumentData` will reject an undefined value before even
+          // computing the document mask.
           fieldPaths.push(childPath);
         }
       }
