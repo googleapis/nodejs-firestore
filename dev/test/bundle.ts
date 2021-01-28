@@ -18,17 +18,18 @@ import {afterEach, beforeEach, describe, it} from 'mocha';
 import {firestore, google} from '../protos/firestore_v1_proto_api';
 import {Firestore, QuerySnapshot, Timestamp} from '../src';
 import {
+  bundledDocumentMetadataEquals,
   bundleToElementArray,
   createInstance,
   DATABASE_ROOT,
+  documentProtoEquals,
+  namedQueryEquals,
   verifyInstance,
 } from './util/helpers';
+
 import IBundleElement = firestore.IBundleElement;
 import IBundleMetadata = firestore.IBundleMetadata;
 import ITimestamp = google.protobuf.ITimestamp;
-import BundledDocumentMetadata = firestore.BundledDocumentMetadata;
-import NamedQuery = firestore.NamedQuery;
-import Document = google.firestore.v1.Document;
 
 export const TEST_BUNDLE_ID = 'test-bundle';
 const TEST_BUNDLE_VERSION = 1;
@@ -117,17 +118,13 @@ describe('Bundle Builder', () => {
     // Verify doc1Meta and doc1Snap
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
     const docSnap = (elements[2] as IBundleElement).document;
-    expect(docMeta).to.deep.equal(
-      BundledDocumentMetadata.fromObject({
-        name: snap1.toDocumentProto().name,
-        readTime: snap1.readTime.toProto().timestampValue,
-        exists: true,
-        queries: [],
-      }).toJSON()
-    );
-    expect(docSnap).to.deep.equal(
-      Document.fromObject(snap1.toDocumentProto()).toJSON()
-    );
+    bundledDocumentMetadataEquals(docMeta, {
+      name: snap1.toDocumentProto().name,
+      readTime: snap1.readTime.toProto().timestampValue,
+      exists: true,
+      queries: [],
+    });
+    documentProtoEquals(docSnap, snap1.toDocumentProto());
   });
 
   it('succeeds with query snapshots', async () => {
@@ -183,50 +180,42 @@ describe('Bundle Builder', () => {
     const newNamedQuery = elements.find(
       e => e.namedQuery?.name === 'test-query-new'
     )!.namedQuery;
-    expect(namedQuery).to.deep.equal(
-      NamedQuery.fromObject({
-        name: 'test-query',
-        readTime: snap.readTime.toProto().timestampValue,
-        bundledQuery: extend(
-          true,
-          {},
-          {
-            parent: query.toProto().parent,
-            structuredQuery: query.toProto().structuredQuery,
-          }
-        ),
-      }).toJSON()
-    );
-    expect(newNamedQuery).to.deep.equal(
-      NamedQuery.fromObject({
-        name: 'test-query-new',
-        readTime: snap.readTime.toProto().timestampValue,
-        bundledQuery: extend(
-          true,
-          {},
-          {
-            parent: newQuery.toProto().parent,
-            structuredQuery: newQuery.toProto().structuredQuery,
-          }
-        ),
-      }).toJSON()
-    );
+    namedQueryEquals(namedQuery, {
+      name: 'test-query',
+      readTime: snap.readTime.toProto().timestampValue,
+      bundledQuery: extend(
+        true,
+        {},
+        {
+          parent: query.toProto().parent,
+          structuredQuery: query.toProto().structuredQuery,
+        }
+      ),
+    });
+    namedQueryEquals(newNamedQuery, {
+      name: 'test-query-new',
+      readTime: snap.readTime.toProto().timestampValue,
+      bundledQuery: extend(
+        true,
+        {},
+        {
+          parent: newQuery.toProto().parent,
+          structuredQuery: newQuery.toProto().structuredQuery,
+        }
+      ),
+    });
 
     // Verify docMeta and docSnap
     const docMeta = (elements[3] as IBundleElement).documentMetadata;
     const docSnap = (elements[4] as IBundleElement).document;
     docMeta?.queries?.sort();
-    expect(docMeta).to.deep.equal(
-      BundledDocumentMetadata.fromObject({
-        name: snap.toDocumentProto().name,
-        readTime: snap.readTime.toProto().timestampValue,
-        exists: true,
-        queries: ['test-query', 'test-query-new'],
-      }).toJSON()
-    );
-    expect(docSnap).to.deep.equal(
-      Document.fromObject(snap.toDocumentProto()).toJSON()
-    );
+    bundledDocumentMetadataEquals(docMeta, {
+      name: snap.toDocumentProto().name,
+      readTime: snap.readTime.toProto().timestampValue,
+      exists: true,
+      queries: ['test-query', 'test-query-new'],
+    });
+    documentProtoEquals(docSnap, snap.toDocumentProto());
   });
 
   it('succeeds with multiple calls to build()', async () => {
@@ -259,17 +248,13 @@ describe('Bundle Builder', () => {
     // Verify doc1Meta and doc1Snap
     const doc1Meta = (elements[1] as IBundleElement).documentMetadata;
     const doc1Snap = (elements[2] as IBundleElement).document;
-    expect(doc1Meta).to.deep.equal(
-      BundledDocumentMetadata.fromObject({
-        name: snap1.toDocumentProto().name,
-        readTime: snap1.readTime.toProto().timestampValue,
-        exists: true,
-        queries: [],
-      }).toJSON()
-    );
-    expect(doc1Snap).to.deep.equal(
-      Document.fromObject(snap1.toDocumentProto()).toJSON()
-    );
+    bundledDocumentMetadataEquals(doc1Meta, {
+      name: snap1.toDocumentProto().name,
+      readTime: snap1.readTime.toProto().timestampValue,
+      exists: true,
+      queries: [],
+    });
+    documentProtoEquals(doc1Snap, snap1.toDocumentProto());
 
     // Add another document
     const snap2 = firestore.snapshot_(
@@ -300,17 +285,13 @@ describe('Bundle Builder', () => {
     // Verify doc2Meta and doc2Snap
     const doc2Meta = (newElements[3] as IBundleElement).documentMetadata;
     const doc2Snap = (newElements[4] as IBundleElement).document;
-    expect(doc2Meta).to.deep.equal(
-      BundledDocumentMetadata.fromObject({
-        name: snap2.toDocumentProto().name,
-        readTime: snap2.readTime.toProto().timestampValue,
-        exists: true,
-        queries: [],
-      }).toJSON()
-    );
-    expect(doc2Snap).to.deep.equal(
-      Document.fromObject(snap2.toDocumentProto()).toJSON()
-    );
+    bundledDocumentMetadataEquals(doc2Meta, {
+      name: snap2.toDocumentProto().name,
+      readTime: snap2.readTime.toProto().timestampValue,
+      exists: true,
+      queries: [],
+    });
+    documentProtoEquals(doc2Snap, snap2.toDocumentProto());
   });
 
   it('succeeds when nothing is added', async () => {
