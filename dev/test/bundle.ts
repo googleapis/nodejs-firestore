@@ -303,4 +303,64 @@ describe('Bundle Buidler', () => {
       true
     );
   });
+
+  it('fails with queries with select()', async () => {
+    const bundle = firestore.bundle(TEST_BUNDLE_ID);
+    const snap = firestore.snapshot_(
+      {
+        name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
+        value: 'string',
+        createTime: '1970-01-01T00:00:01.002Z',
+        updateTime: '1970-01-01T00:00:03.000004Z',
+      },
+      // This should be the bundle read time.
+      '2020-01-01T00:00:05.000000006Z',
+      'json'
+    );
+    const query = firestore
+      .collection('collectionId')
+      .where('value', '==', 'string')
+      .select('value');
+    const querySnapshot = new QuerySnapshot(
+      query,
+      snap.readTime,
+      1,
+      () => [snap],
+      () => []
+    );
+
+    expect(() => bundle.add('select-query', querySnapshot)).to.throw(
+      'Bundled query cannot have projections (select()).'
+    );
+  });
+
+  it('fails with queries with offset()', async () => {
+    const bundle = firestore.bundle(TEST_BUNDLE_ID);
+    const snap = firestore.snapshot_(
+      {
+        name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
+        value: 'string',
+        createTime: '1970-01-01T00:00:01.002Z',
+        updateTime: '1970-01-01T00:00:03.000004Z',
+      },
+      // This should be the bundle read time.
+      '2020-01-01T00:00:05.000000006Z',
+      'json'
+    );
+    const query = firestore
+      .collection('collectionId')
+      .where('value', '==', 'string')
+      .offset(8);
+    const querySnapshot = new QuerySnapshot(
+      query,
+      snap.readTime,
+      1,
+      () => [snap],
+      () => []
+    );
+
+    expect(() => bundle.add('select-query', querySnapshot)).to.throw(
+      'Bundled query cannot have offset().'
+    );
+  });
 });

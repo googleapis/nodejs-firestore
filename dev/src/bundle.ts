@@ -118,6 +118,12 @@ export class BundleBuilder {
     if (this.namedQueries.has(name)) {
       throw new Error(`Query name conflict: ${name} has already been added.`);
     }
+    if (querySnap.query._hasSelect()) {
+      throw new Error('Bundled query cannot have projections (select()).');
+    }
+    if (querySnap.query._hasOffset()) {
+      throw new Error('Bundled query cannot have offset().');
+    }
 
     this.namedQueries.set(name, {
       name,

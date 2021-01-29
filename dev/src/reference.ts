@@ -1309,6 +1309,18 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   }
 
   /**
+   * Whether or not this query has `select`.
+   *
+   * @private
+   */
+  _hasSelect(): boolean {
+    return (
+      !!this._queryOptions.projection?.fields &&
+      this._queryOptions.projection.fields!.length !== 0
+    );
+  }
+
+  /**
    * Creates and returns a new [Query]{@link Query} that's additionally sorted
    * by the specified field, optionally in descending order instead of
    * ascending.
@@ -1436,6 +1448,15 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
 
     const options = this._queryOptions.with({offset});
     return new Query(this._firestore, options);
+  }
+
+  /**
+   * Whether this query has offset.
+   *
+   * @private
+   */
+  _hasOffset(): boolean {
+    return !!this._queryOptions.offset;
   }
 
   /**
