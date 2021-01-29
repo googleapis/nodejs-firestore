@@ -42,6 +42,7 @@ export class BundleBuilder {
   private latestReadTime = new Timestamp(0, 0);
 
   constructor(readonly bundleId: string) {}
+
   add(documentSnapshot: DocumentSnapshot): BundleBuilder;
   add(queryName: string, querySnapshot: QuerySnapshot): BundleBuilder;
   /**
