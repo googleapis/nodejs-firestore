@@ -877,8 +877,8 @@ export class Firestore implements firestore.Firestore {
    * @param  {Transaction} transaction The transaction object for this
    * transaction.
    * @returns {Promise<T>} The promise returned at the end of the transaction.
-   * This promise will be returned by {@link Firestore#runTransaction} if the transaction
-   * completed successfully.
+   * This promise will be returned by {@link Firestore#runTransaction} if the
+   * transaction completed successfully.
    */
 
   /**
