@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.0...v4.9.1) (2021-01-26)
+
+
+### Bug Fixes
+
+* handle ignoreUndefinedProperties in set(merge: true) ([#1396](https://www.github.com/googleapis/nodejs-firestore/issues/1396)) ([d870c9d](https://www.github.com/googleapis/nodejs-firestore/commit/d870c9de75a2c67ffc48d1205a5929df4c57f3cb))
+
 ## [4.9.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.8.1...v4.9.0) (2021-01-25)
 
 
