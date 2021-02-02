@@ -4,7 +4,7 @@
       "git": {
         "name": ".",
         "remote": "https://github.com/googleapis/nodejs-firestore.git",
-        "sha": "0538d90f2c9defb9938ce3851d8283390a6fdc34"
+        "sha": "116cc84b8d58a454ab36d6761e639eac19db1996"
       }
     },
     {
