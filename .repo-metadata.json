@@ -9,5 +9,6 @@
   "repo": "googleapis/nodejs-firestore",
   "distribution_name": "@google-cloud/firestore",
   "api_id": "firestore.googleapis.com",
-  "requires_billing ": false
+  "requires_billing ": false,
+  "codeowner_team": "@googleapis/firestore-dpe"
 }
