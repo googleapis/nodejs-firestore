@@ -37,10 +37,7 @@ import {
 import {autoId, Deferred} from '../src/util';
 import {TEST_BUNDLE_ID, verifyMetadata} from '../test/bundle';
 import {
-  bundledDocumentMetadataEquals,
   bundleToElementArray,
-  documentProtoEquals,
-  namedQueryEquals,
   Post,
   postConverter,
   postConverterMerge,
@@ -2766,7 +2763,7 @@ describe('Bundle building', () => {
 
   it('succeeds when there are no results', async () => {
     const bundle = firestore.bundle(TEST_BUNDLE_ID);
-    const query = testCol.where('sort', '==', 5);
+    const query = testCol.where('value', '==', '42');
     const snap = await query.get();
 
     bundle.add('query', snap);
@@ -2778,7 +2775,7 @@ describe('Bundle building', () => {
 
     const namedQuery = (elements[1] as IBundleElement).namedQuery;
     // Verify saved query.
-    namedQueryEquals(namedQuery!, {
+    expect(namedQuery).to.deep.equal({
       name: 'query',
       readTime: snap.readTime.toProto().timestampValue,
       // TODO(wuandy): Fix query.toProto to skip undefined fields, so we can stop using `extend` here.
@@ -2806,11 +2803,10 @@ describe('Bundle building', () => {
     verifyMetadata(meta!, snap.readTime.toProto().timestampValue!, 1);
 
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
-    bundledDocumentMetadataEquals(docMeta!, {
+    expect(docMeta).to.deep.equal({
       name: snap.toDocumentProto().name,
       readTime: snap.readTime.toProto().timestampValue,
       exists: false,
-      queries: [],
     });
   });
 
@@ -2843,7 +2839,7 @@ describe('Bundle building', () => {
     }
 
     // Verify saved limit query.
-    namedQueryEquals(namedQuery1, {
+    expect(namedQuery1).to.deep.equal({
       name: 'limitQuery',
       readTime: limitSnap.readTime.toProto().timestampValue,
       bundledQuery: extend(
@@ -2861,7 +2857,7 @@ describe('Bundle building', () => {
     // `limitType` can re-construct a limitToLast client query by client SDKs.
     const q = testCol.orderBy('sort', 'asc').limit(1);
     // Verify saved limitToLast query.
-    namedQueryEquals(namedQuery2, {
+    expect(namedQuery2).to.deep.equal({
       name: 'limitToLastQuery',
       readTime: limitToLastSnap.readTime.toProto().timestampValue,
       bundledQuery: extend(
@@ -2877,7 +2873,7 @@ describe('Bundle building', () => {
 
     // Verify bundled document
     const docMeta = (elements[3] as IBundleElement).documentMetadata;
-    bundledDocumentMetadataEquals(docMeta, {
+    expect(docMeta).to.deep.equal({
       name: limitToLastSnap.docs[0].toDocumentProto().name,
       readTime: limitToLastSnap.readTime.toProto().timestampValue,
       exists: true,
@@ -2885,6 +2881,14 @@ describe('Bundle building', () => {
     });
 
     const bundledDoc = (elements[4] as IBundleElement).document;
-    documentProtoEquals(bundledDoc, limitToLastSnap.docs[0].toDocumentProto());
+    // The `valueType` is auxiliary and does not exist in proto.
+    const expected = limitToLastSnap.docs[0].toDocumentProto();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (expected.fields!.name as any).valueType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (expected.fields!.sort as any).valueType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (expected.fields!.value as any).valueType;
+    expect(bundledDoc).to.deep.equal(expected);
   });
 });

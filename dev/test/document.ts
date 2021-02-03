@@ -845,7 +845,7 @@ describe('delete document', () => {
           remove('documentId', {
             updateTime: {
               nanos: 123000000,
-              seconds: 479978400,
+              seconds: '479978400',
             },
           })
         );
@@ -1682,7 +1682,7 @@ describe('update document', () => {
             precondition: {
               updateTime: {
                 nanos: 123000000,
-                seconds: 479978400,
+                seconds: '479978400',
               },
             },
           })

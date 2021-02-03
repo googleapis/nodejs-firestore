@@ -30,12 +30,6 @@ import {GapicClient} from '../../src/types';
 
 import api = proto.google.firestore.v1;
 
-import NamedQuery = firestore.NamedQuery;
-import BundledDocumentMetadata = firestore.BundledDocumentMetadata;
-import INamedQuery = firestore.INamedQuery;
-import IBundledDocumentMetadata = firestore.IBundledDocumentMetadata;
-import IDocument = google.firestore.v1.IDocument;
-
 const SSL_CREDENTIALS = grpc.credentials.createInsecure();
 
 export const PROJECT_ID = 'test-project';
@@ -379,35 +373,4 @@ export async function bundleToElementArray(
     result.push(value as firestore.IBundleElement);
   }
   return result;
-}
-
-export function namedQueryEquals(
-  actual: INamedQuery | undefined | null,
-  expected: object
-): void {
-  expect(actual).to.not.be.undefined;
-  expect(actual).to.not.be.null;
-  expect(actual).to.deep.eq(NamedQuery.fromObject(expected).toJSON());
-}
-
-export function bundledDocumentMetadataEquals(
-  actual: IBundledDocumentMetadata | undefined | null,
-  expected: IBundledDocumentMetadata
-): void {
-  expect(actual).to.not.be.undefined;
-  expect(actual).to.not.be.null;
-  expect(actual).to.deep.eq(
-    BundledDocumentMetadata.fromObject(expected).toJSON()
-  );
-}
-
-export function documentProtoEquals(
-  actual: IDocument | undefined | null,
-  expected: IDocument
-): void {
-  expect(actual).to.not.be.undefined;
-  expect(actual).to.not.be.null;
-  expect(actual).to.deep.eq(
-    google.firestore.v1.Document.fromObject(expected).toJSON()
-  );
 }

@@ -496,8 +496,8 @@ export class DocumentSnapshot<T = firestore.DocumentData>
   toDocumentProto(): api.IDocument {
     return {
       name: this._ref.formattedName,
-      createTime: this.createTime,
-      updateTime: this.updateTime,
+      createTime: this.createTime?.toProto().timestampValue,
+      updateTime: this.updateTime?.toProto().timestampValue,
       fields: this._fieldsProto,
     };
   }

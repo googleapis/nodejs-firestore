@@ -18,12 +18,9 @@ import {afterEach, beforeEach, describe, it} from 'mocha';
 import {firestore, google} from '../protos/firestore_v1_proto_api';
 import {Firestore, QuerySnapshot, Timestamp} from '../src';
 import {
-  bundledDocumentMetadataEquals,
   bundleToElementArray,
   createInstance,
   DATABASE_ROOT,
-  documentProtoEquals,
-  namedQueryEquals,
   verifyInstance,
 } from './util/helpers';
 
@@ -48,9 +45,7 @@ export function verifyMetadata(
   expect(meta.id).to.equal(TEST_BUNDLE_ID);
   expect(meta.version).to.equal(TEST_BUNDLE_VERSION);
   expect(meta.totalDocuments).to.equal(totalDocuments);
-  expect(google.protobuf.Timestamp.fromObject(meta.createTime!)).to.deep.equal(
-    google.protobuf.Timestamp.fromObject(createTime)
-  );
+  expect(meta.createTime).to.deep.equal(createTime);
 }
 
 describe('Bundle Builder', () => {
@@ -81,7 +76,7 @@ describe('Bundle Builder', () => {
     const snap1 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
-        fields: {foo: {stringValue: 'value'}, bar: {integerValue: 42}},
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '42'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -93,7 +88,7 @@ describe('Bundle Builder', () => {
     const snap2 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
-        fields: {foo: {stringValue: 'value'}, bar: {integerValue: -42}},
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '-42'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -118,13 +113,12 @@ describe('Bundle Builder', () => {
     // Verify doc1Meta and doc1Snap
     const docMeta = (elements[1] as IBundleElement).documentMetadata;
     const docSnap = (elements[2] as IBundleElement).document;
-    bundledDocumentMetadataEquals(docMeta, {
+    expect(docMeta).to.deep.equal({
       name: snap1.toDocumentProto().name,
       readTime: snap1.readTime.toProto().timestampValue,
       exists: true,
-      queries: [],
     });
-    documentProtoEquals(docSnap, snap1.toDocumentProto());
+    expect(docSnap).to.deep.equal(snap1.toDocumentProto());
   });
 
   it('succeeds with query snapshots', async () => {
@@ -132,7 +126,7 @@ describe('Bundle Builder', () => {
     const snap = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
-        value: 'string',
+        fields: {foo: {stringValue: 'value'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -180,7 +174,7 @@ describe('Bundle Builder', () => {
     const newNamedQuery = elements.find(
       e => e.namedQuery?.name === 'test-query-new'
     )!.namedQuery;
-    namedQueryEquals(namedQuery, {
+    expect(namedQuery).to.deep.equal({
       name: 'test-query',
       readTime: snap.readTime.toProto().timestampValue,
       bundledQuery: extend(
@@ -192,7 +186,7 @@ describe('Bundle Builder', () => {
         }
       ),
     });
-    namedQueryEquals(newNamedQuery, {
+    expect(newNamedQuery).to.deep.equal({
       name: 'test-query-new',
       readTime: snap.readTime.toProto().timestampValue,
       bundledQuery: extend(
@@ -209,13 +203,13 @@ describe('Bundle Builder', () => {
     const docMeta = (elements[3] as IBundleElement).documentMetadata;
     const docSnap = (elements[4] as IBundleElement).document;
     docMeta?.queries?.sort();
-    bundledDocumentMetadataEquals(docMeta, {
+    expect(docMeta).to.deep.equal({
       name: snap.toDocumentProto().name,
       readTime: snap.readTime.toProto().timestampValue,
       exists: true,
       queries: ['test-query', 'test-query-new'],
     });
-    documentProtoEquals(docSnap, snap.toDocumentProto());
+    expect(docSnap).to.deep.equal(snap.toDocumentProto());
   });
 
   it('succeeds with multiple calls to build()', async () => {
@@ -223,7 +217,7 @@ describe('Bundle Builder', () => {
     const snap1 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
-        fields: {foo: {stringValue: 'value'}, bar: {integerValue: 42}},
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '42'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -248,19 +242,18 @@ describe('Bundle Builder', () => {
     // Verify doc1Meta and doc1Snap
     const doc1Meta = (elements[1] as IBundleElement).documentMetadata;
     const doc1Snap = (elements[2] as IBundleElement).document;
-    bundledDocumentMetadataEquals(doc1Meta, {
+    expect(doc1Meta).to.deep.equal({
       name: snap1.toDocumentProto().name,
       readTime: snap1.readTime.toProto().timestampValue,
       exists: true,
-      queries: [],
     });
-    documentProtoEquals(doc1Snap, snap1.toDocumentProto());
+    expect(doc1Snap).to.deep.equal(snap1.toDocumentProto());
 
     // Add another document
     const snap2 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc2`,
-        fields: {foo: {stringValue: 'value'}, bar: {integerValue: -42}},
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '-42'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -285,13 +278,12 @@ describe('Bundle Builder', () => {
     // Verify doc2Meta and doc2Snap
     const doc2Meta = (newElements[3] as IBundleElement).documentMetadata;
     const doc2Snap = (newElements[4] as IBundleElement).document;
-    bundledDocumentMetadataEquals(doc2Meta, {
+    expect(doc2Meta).to.deep.equal({
       name: snap2.toDocumentProto().name,
       readTime: snap2.readTime.toProto().timestampValue,
       exists: true,
-      queries: [],
     });
-    documentProtoEquals(doc2Snap, snap2.toDocumentProto());
+    expect(doc2Snap).to.deep.equal(snap2.toDocumentProto());
   });
 
   it('succeeds when nothing is added', async () => {
