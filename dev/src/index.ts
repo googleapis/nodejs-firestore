@@ -869,6 +869,19 @@ export class Firestore implements firestore.Firestore {
   }
 
   /**
+   * Function executed by {@link Firestore#runTransaction} within the transaction
+   * context.
+   *
+   * @callback Firestore~updateFunction
+   * @template T
+   * @param  {Transaction} transaction The transaction object for this
+   * transaction.
+   * @returns {Promise<T>} The promise returned at the end of the transaction.
+   * This promise will be returned by {@link Firestore#runTransaction} if the
+   * transaction completed successfully.
+   */
+
+  /**
    * Executes the given updateFunction and commits the changes applied within
    * the transaction.
    *
@@ -876,12 +889,13 @@ export class Firestore implements firestore.Firestore {
    * modify Firestore documents under lock. Transactions are committed once
    * 'updateFunction' resolves and attempted up to five times on failure.
    *
-   * @param {function(Transaction)} updateFunction The function to execute
-   * within the transaction context.
+   * @template T
+   * @param {Firestore~updateFunction} updateFunction The user function to
+   * execute within the transaction context.
    * @param {object=} transactionOptions Transaction options.
    * @param {number=} transactionOptions.maxAttempts - The maximum number of
    * attempts for this transaction.
-   * @returns {Promise} If the transaction completed successfully or was
+   * @returns {Promise<T>} If the transaction completed successfully or was
    * explicitly aborted (by the updateFunction returning a failed Promise), the
    * Promise returned by the updateFunction will be returned here. Else if the
    * transaction failed, a rejected Promise with the corresponding failure
