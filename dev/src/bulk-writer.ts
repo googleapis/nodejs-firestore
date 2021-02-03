@@ -84,8 +84,6 @@ class BulkWriterOperation {
   /**
    * @param ref The document reference being written to.
    * @param type The type of operation that created this write.
-   * @param op A closure that encapsulates the API call which adds this write to
-   * a BulkCommitBatch.
    * @param sendFn A callback to invoke when the operation should be sent.
    * @param errorFn The user provided global error callback.
    * @param successFn The user provided global success callback.
@@ -93,7 +91,6 @@ class BulkWriterOperation {
   constructor(
     readonly ref: firestore.DocumentReference<unknown>,
     private readonly type: 'create' | 'set' | 'update' | 'delete',
-    private readonly op: (bulkCommitBatch: BulkCommitBatch) => void,
     private readonly sendFn: (op: BulkWriterOperation) => void,
     private readonly errorFn: (error: BulkWriterError) => boolean,
     private readonly successFn: (
@@ -104,10 +101,6 @@ class BulkWriterOperation {
 
   get promise(): Promise<WriteResult> {
     return this.deferred.promise;
-  }
-
-  run(batch: BulkCommitBatch): void {
-    this.op(batch);
   }
 
   onError(error: GoogleError): void {
@@ -751,17 +744,16 @@ export class BulkWriter {
   private _enqueue(
     ref: firestore.DocumentReference<unknown>,
     type: 'create' | 'set' | 'update' | 'delete',
-    op: (bulkCommitBatch: BulkCommitBatch) => void
+    enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void
   ): Promise<WriteResult> {
     const bulkWriterOp = new BulkWriterOperation(
       ref,
       type,
-      op,
-      this._sendFn.bind(this),
+      this._sendFn.bind(this, enqueueOnBatchCallback),
       this._errorFn.bind(this),
       this._successFn.bind(this)
     );
-    this._sendFn(bulkWriterOp);
+    this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
     return bulkWriterOp.promise;
   }
 
@@ -771,7 +763,10 @@ export class BulkWriter {
    *
    * @private
    */
-  _sendFn(op: BulkWriterOperation): void {
+  _sendFn(
+    enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
+    op: BulkWriterOperation
+  ): void {
     if (this._bulkCommitBatch.has(op.ref)) {
       // Create a new batch since the backend doesn't support batches with two
       // writes to the same document.
@@ -781,7 +776,7 @@ export class BulkWriter {
     // Run the operation on the current batch and advance the `_lastOp` pointer.
     // This ensures that `_lastOp` only resolves when both the previous and the
     // current write resolves.
-    op.run(this._bulkCommitBatch);
+    enqueueOnBatchCallback(this._bulkCommitBatch);
     this._bulkCommitBatch.processLastOperation(op);
     this._lastOp = this._lastOp.then(() => silencePromise(op.promise));
 
