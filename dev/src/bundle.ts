@@ -145,7 +145,7 @@ export class BundleBuilder {
   ): Buffer {
     // Convert to a valid proto message object then take its JSON representation.
     // This take cares of stuff like converting internal byte array fields
-    // to base64 encodings.
+    // to Base64 encodings.
     const message = BundleElement.fromObject(bundleElement).toJSON();
     const buffer = Buffer.from(JSON.stringify(message), 'utf-8');
     const lengthBuffer = Buffer.from(buffer.length.toString());
