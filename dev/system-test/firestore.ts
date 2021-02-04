@@ -43,7 +43,6 @@ import {
   postConverterMerge,
   verifyInstance,
 } from '../test/util/helpers';
-
 import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
