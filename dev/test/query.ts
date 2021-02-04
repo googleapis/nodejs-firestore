@@ -38,6 +38,7 @@ import {
   createInstance,
   document,
   InvalidApiUsage,
+  Post,
   postConverter,
   requestEquals,
   response,
@@ -721,6 +722,27 @@ describe('query interface', () => {
       const posts = await coll.where('title', '==', 'post').get();
       expect(posts.size).to.equal(1);
       expect(posts.docs[0].data().toString()).to.equal('post, by author');
+    });
+  });
+
+  it('withConverter(null) applies the default converter', async () => {
+    const doc = document('documentId', 'author', 'author', 'title', 'post');
+    const overrides: ApiOverride = {
+      runQuery: request => {
+        queryEquals(request, fieldFilters('title', 'EQUAL', 'post'));
+        return stream({document: doc, readTime: {seconds: 5, nanos: 6}});
+      },
+    };
+
+    return createInstance(overrides).then(async firestore => {
+      const coll = await firestore
+        .collection('collectionId')
+        .withConverter(postConverter)
+        .withConverter(null);
+
+      const posts = await coll.where('title', '==', 'post').get();
+      expect(posts.size).to.equal(1);
+      expect(posts.docs[0].data()).to.not.be.instanceOf(Post);
     });
   });
 });

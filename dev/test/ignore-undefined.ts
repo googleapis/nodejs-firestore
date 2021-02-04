@@ -64,6 +64,33 @@ describe('ignores undefined values', () => {
     );
   });
 
+  it('in set({ merge: true })', () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'foo', 'foo'),
+            mask: updateMask('foo'),
+          })
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    return createInstance(overrides, {ignoreUndefinedProperties: true}).then(
+      firestore => {
+        return firestore.doc('collectionId/documentId').set(
+          {
+            foo: 'foo',
+            bar: undefined,
+          },
+          {merge: true}
+        );
+      }
+    );
+  });
+
   it('in create()', () => {
     const overrides: ApiOverride = {
       commit: request => {

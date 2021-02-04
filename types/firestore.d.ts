@@ -1050,12 +1050,14 @@ declare namespace FirebaseFirestore {
      * provided converter will convert between Firestore data and your custom
      * type U.
      *
-     * @param converter Converts objects to and from Firestore.
+     * @param converter Converts objects to and from Firestore. Passing in
+     * `null` removes the current converter.
      * @return A DocumentReference<U> that uses the provided converter.
      */
     withConverter<U>(
       converter: FirestoreDataConverter<U>
     ): DocumentReference<U>;
+    withConverter(converter: null): DocumentReference<DocumentData>;
   }
 
   /**
@@ -1419,10 +1421,12 @@ declare namespace FirebaseFirestore {
      * returned Query, the provided converter will convert between Firestore
      * data and your custom type U.
      *
-     * @param converter Converts objects to and from Firestore.
+     * @param converter Converts objects to and from Firestore. Passing in
+     * `null` removes the current converter.
      * @return A Query<U> that uses the provided converter.
      */
     withConverter<U>(converter: FirestoreDataConverter<U>): Query<U>;
+    withConverter(converter: null): Query<DocumentData>;
   }
 
   /**
@@ -1602,12 +1606,14 @@ declare namespace FirebaseFirestore {
      * on the returned CollectionReference instance, the provided converter will
      * convert between Firestore data and your custom type U.
      *
-     * @param converter Converts objects to and from Firestore.
+     * @param converter Converts objects to and from Firestore. Passing in
+     * `null` removes the current converter.
      * @return A CollectionReference<U> that uses the provided converter.
      */
     withConverter<U>(
       converter: FirestoreDataConverter<U>
     ): CollectionReference<U>;
+    withConverter(converter: null): CollectionReference<DocumentData>;
   }
 
   /**
@@ -1672,10 +1678,12 @@ declare namespace FirebaseFirestore {
      *   post.someNonExistentProperty; // TS error
      * }
      *
-     * @param converter Converts objects to and from Firestore.
+     * @param converter Converts objects to and from Firestore. Passing in
+     * `null` removes the current converter.
      * @return A `CollectionGroup<U>` that uses the provided converter.
      */
     withConverter<U>(converter: FirestoreDataConverter<U>): CollectionGroup<U>;
+    withConverter(converter: null): CollectionGroup<DocumentData>;
   }
 
   /**

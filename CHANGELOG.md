@@ -4,6 +4,22 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.0...v4.9.1) (2021-01-26)
+
+
+### Bug Fixes
+
+* handle ignoreUndefinedProperties in set(merge: true) ([#1396](https://www.github.com/googleapis/nodejs-firestore/issues/1396)) ([d870c9d](https://www.github.com/googleapis/nodejs-firestore/commit/d870c9de75a2c67ffc48d1205a5929df4c57f3cb))
+
+## [4.9.0](https://www.github.com/googleapis/nodejs-firestore/compare/v4.8.1...v4.9.0) (2021-01-25)
+
+
+### Features
+
+* add support for applying default converter in withConverter() ([#1394](https://www.github.com/googleapis/nodejs-firestore/issues/1394)) ([ab057f7](https://www.github.com/googleapis/nodejs-firestore/commit/ab057f7b362a2929ebffa19e570d3e9cd23bc964))
+* adds UNORDERED_LIST type ([#1382](https://www.github.com/googleapis/nodejs-firestore/issues/1382)) ([5b43e7b](https://www.github.com/googleapis/nodejs-firestore/commit/5b43e7bcb2ea9c014587c84164f9ba8a0ed05397))
+* introduces style enumeration ([#1388](https://www.github.com/googleapis/nodejs-firestore/issues/1388)) ([eb1b4dc](https://www.github.com/googleapis/nodejs-firestore/commit/eb1b4dccf52b09ce395ba2ceabe02e84ee8e4dfd))
+
 ### [4.8.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.8.0...v4.8.1) (2020-12-16)
 
 
