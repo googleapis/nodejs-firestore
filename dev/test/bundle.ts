@@ -23,6 +23,7 @@ import {
   DATABASE_ROOT,
   verifyInstance,
 } from './util/helpers';
+
 import IBundleElement = firestore.IBundleElement;
 import IBundleMetadata = firestore.IBundleMetadata;
 import ITimestamp = google.protobuf.ITimestamp;
@@ -37,9 +38,9 @@ export function verifyMetadata(
   expectEmptyContent = false
 ): void {
   if (!expectEmptyContent) {
-    expect(meta.totalBytes).greaterThan(0);
+    expect(parseInt(meta.totalBytes!.toString())).greaterThan(0);
   } else {
-    expect(meta.totalBytes).to.equal(0);
+    expect(parseInt(meta.totalBytes!.toString())).to.equal(0);
   }
   expect(meta.id).to.equal(TEST_BUNDLE_ID);
   expect(meta.version).to.equal(TEST_BUNDLE_VERSION);
@@ -47,7 +48,7 @@ export function verifyMetadata(
   expect(meta.createTime).to.deep.equal(createTime);
 }
 
-describe('Bundle Buidler', () => {
+describe('Bundle Builder', () => {
   let firestore: Firestore;
 
   beforeEach(() => {
@@ -75,7 +76,7 @@ describe('Bundle Buidler', () => {
     const snap1 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
-        fields: {foo: {stringValue: 'value'}, bar: {integerValue: 42}},
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '42'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -87,7 +88,7 @@ describe('Bundle Buidler', () => {
     const snap2 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
-        fields: {foo: {stringValue: 'value'}, bar: {integerValue: -42}},
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '-42'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -116,7 +117,6 @@ describe('Bundle Buidler', () => {
       name: snap1.toDocumentProto().name,
       readTime: snap1.readTime.toProto().timestampValue,
       exists: true,
-      queries: [],
     });
     expect(docSnap).to.deep.equal(snap1.toDocumentProto());
   });
@@ -126,7 +126,7 @@ describe('Bundle Buidler', () => {
     const snap = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
-        value: 'string',
+        fields: {foo: {stringValue: 'value'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -217,7 +217,7 @@ describe('Bundle Buidler', () => {
     const snap1 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
-        fields: {foo: {stringValue: 'value'}, bar: {integerValue: 42}},
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '42'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -246,7 +246,6 @@ describe('Bundle Buidler', () => {
       name: snap1.toDocumentProto().name,
       readTime: snap1.readTime.toProto().timestampValue,
       exists: true,
-      queries: [],
     });
     expect(doc1Snap).to.deep.equal(snap1.toDocumentProto());
 
@@ -254,7 +253,7 @@ describe('Bundle Buidler', () => {
     const snap2 = firestore.snapshot_(
       {
         name: `${DATABASE_ROOT}/documents/collectionId/doc2`,
-        fields: {foo: {stringValue: 'value'}, bar: {integerValue: -42}},
+        fields: {foo: {stringValue: 'value'}, bar: {integerValue: '-42'}},
         createTime: '1970-01-01T00:00:01.002Z',
         updateTime: '1970-01-01T00:00:03.000004Z',
       },
@@ -283,7 +282,6 @@ describe('Bundle Buidler', () => {
       name: snap2.toDocumentProto().name,
       readTime: snap2.readTime.toProto().timestampValue,
       exists: true,
-      queries: [],
     });
     expect(doc2Snap).to.deep.equal(snap2.toDocumentProto());
   });
@@ -303,4 +301,44 @@ describe('Bundle Buidler', () => {
       true
     );
   });
+});
+
+describe('Bundle Builder using BigInt', () => {
+  let firestore: Firestore;
+
+  beforeEach(() => {
+    return createInstance(undefined, {useBigInt: true}).then(
+      firestoreInstance => {
+        firestore = firestoreInstance;
+      }
+    );
+  });
+
+  it('succeeds with document snapshots with BigInt field', async () => {
+    const bundle = firestore.bundle(TEST_BUNDLE_ID);
+    const bigIntValue =
+      BigInt(Number.MAX_SAFE_INTEGER) + BigInt(Number.MAX_SAFE_INTEGER);
+    const snap = firestore.snapshot_(
+      {
+        name: `${DATABASE_ROOT}/documents/collectionId/doc1`,
+        fields: {foo: {integerValue: bigIntValue.toString()}},
+        createTime: '1970-01-01T00:00:01.002Z',
+        updateTime: '1970-01-01T00:00:03.000004Z',
+      },
+      // This should be the bundle read time.
+      '2020-01-01T00:00:05.000000006Z',
+      'json'
+    );
+    bundle.add(snap);
+
+    // Bundle is expected to be [bundleMeta, snapMeta, snap]
+    const elements = await bundleToElementArray(bundle.build());
+    // The point is to make sure BigInt gets encoded correctly into a string without losing
+    // precision.
+    expect(elements[2].document?.fields).to.deep.equal({
+      foo: {integerValue: bigIntValue.toString()},
+    });
+  });
+
+  afterEach(() => verifyInstance(firestore));
 });
