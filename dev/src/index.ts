@@ -40,7 +40,7 @@ import {
   validateResourcePath,
 } from './path';
 import {ClientPool} from './pool';
-import {CollectionReference} from './reference';
+import {CollectionReference, Query, QueryOptions} from './reference';
 import {DocumentReference} from './reference';
 import {Serializer} from './serializer';
 import {Timestamp} from './timestamp';
@@ -1184,6 +1184,39 @@ export class Firestore implements firestore.Firestore {
    */
   _decrementBulkWritersCount(): void {
     this.bulkWritersCount -= 1;
+  }
+
+  /**
+   * Retrieves all descendant documents nested under the provided reference.
+   *
+   * @private
+   */
+  // TODO(chenbrian): Make this a private method after adding recursive delete.
+  _getAllDescendants(
+    ref: CollectionReference | DocumentReference
+  ): Promise<DocumentReference[]> {
+    const firestore =
+      ref instanceof CollectionReference
+        ? ref._firestore
+        : ref.parent._firestore;
+    const segments = ref.path.split('/');
+    const isDocumentPath = segments.length % 2 === 0;
+
+    // The parent is the closest ancestor document to the location we're
+    // deleting. If we are deleting a document, the parent is the path of that
+    // document. If we are deleting a collection, the parent is the path of the
+    // document containing that collection (or the database root, if it is a
+    // root collection.
+    if (!isDocumentPath) {
+      segments.pop();
+    }
+    const parentPath = ResourcePath.EMPTY.construct(segments);
+
+    const query = new Query(
+      firestore,
+      QueryOptions.forDocumentNamesOnly(parentPath, ref.id, isDocumentPath)
+    );
+    return query._getAllDescendants();
   }
 
   /**

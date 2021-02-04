@@ -2628,6 +2628,56 @@ describe('BulkWriter class', () => {
     return firestore.terminate();
   });
 
+  // TODO(chenbrian): This is a temporary test used to validate that the
+  //  StructuredQuery calls work properly. Remove these tests after adding
+  //  recursive delete tests.
+  it('finds nested documents and collection', async () => {
+    // ROOT-DB
+    // └── randomCol
+    //     ├── anna
+    //     └── bob
+    //         └── parentsCol
+    //             ├── charlie
+    //             └── daniel
+    //                 └── childCol
+    //                     ├── ernie
+    //                     └── francis
+    await firestore.runTransaction(tx => {
+      tx.set(randomCol.doc('anna'), {name: 'anna'});
+      tx.set(randomCol.doc('bob'), {name: 'bob'});
+      tx.set(randomCol.doc('bob/parentsCol/charlie'), {name: 'charlie'});
+      tx.set(randomCol.doc('bob/parentsCol/daniel'), {name: 'daniel'});
+      tx.set(randomCol.doc('bob/parentsCol/daniel/childCol/ernie'), {
+        name: 'ernie',
+      });
+      tx.set(randomCol.doc('bob/parentsCol/daniel/childCol/francis'), {
+        name: 'francis',
+      });
+      return Promise.resolve();
+    });
+    // Query all descendants of collections.
+    let descendants = await firestore._getAllDescendants(randomCol);
+    expect(descendants.length).to.equal(6);
+    descendants = await firestore._getAllDescendants(
+      randomCol.doc('bob').collection('parentsCol')
+    );
+    expect(descendants.length).to.equal(4);
+    descendants = await firestore._getAllDescendants(
+      randomCol.doc('bob').collection('parentsCol/daniel/childCol')
+    );
+    expect(descendants.length).to.equal(2);
+
+    // Query all descendants of documents.
+    descendants = await firestore._getAllDescendants(randomCol.doc('bob'));
+    expect(descendants.length).to.equal(4);
+    descendants = await firestore._getAllDescendants(
+      randomCol.doc('bob/parentsCol/daniel')
+    );
+    expect(descendants.length).to.equal(2);
+    descendants = await firestore._getAllDescendants(randomCol.doc('anna'));
+    expect(descendants.length).to.equal(0);
+  });
+
   it('can retry failed writes with a provided callback', async () => {
     let retryCount = 0;
     let code: Status = -1;
