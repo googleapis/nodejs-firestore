@@ -23,7 +23,7 @@ v1_library = gapic_bazel.node_library(
 )
 
 # skip index, protos, package.json, and README.md
-s.copy(v1_admin_library, "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1/index.ts", 
+s.copy(v1_admin_library, "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1/index.ts",
     "tsconfig.json", "linkinator.config.json", "webpack.config.js"])
 s.copy(v1beta1_library, "dev", excludes=["package.json", "README.md", "src/index.ts", "src/v1beta1/index.ts",
     "tsconfig.json", "linkinator.config.json", "webpack.config.js"])
@@ -153,7 +153,7 @@ templates = common_templates.node_library(
     source_location="build/src", test_project="node-gcloud-ci"
 )
 
-s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*"])
+s.copy(templates, excludes=[".eslintrc.json", ".kokoro/**/*", ".github/CODEOWNERS"])
 
 # Remove auto-generated packaging tests
 os.system('rm -rf dev/system-test/fixtures dev/system-test/install.ts')
