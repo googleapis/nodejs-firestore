@@ -60,6 +60,8 @@ async function main() {
   const docRef = firestore.doc(
     'distributed_counter_samples/distributed_counter'
   );
+  // Clean up documents from potential prior test runs
+  await deleteDocs(docRef);
   const numberOfShards = 10;
   // Increase the document count
   return incrementCounter(docRef, numberOfShards).then(async () => {
