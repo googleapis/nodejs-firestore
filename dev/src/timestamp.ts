@@ -259,7 +259,7 @@ export class Timestamp implements firestore.Timestamp {
     const timestamp: google.protobuf.ITimestamp = {};
 
     if (this.seconds) {
-      timestamp.seconds = this.seconds;
+      timestamp.seconds = this.seconds.toString();
     }
 
     if (this.nanoseconds) {
