@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+### [4.9.2](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.1...v4.9.2) (2021-02-05)
+
+
+### Bug Fixes
+
+* support byte values in Bundles ([#1395](https://www.github.com/googleapis/nodejs-firestore/issues/1395)) ([8cf53a9](https://www.github.com/googleapis/nodejs-firestore/commit/8cf53a92dc13324562ca1a1e841312e43f5c383e))
+
 ### [4.9.1](https://www.github.com/googleapis/nodejs-firestore/compare/v4.9.0...v4.9.1) (2021-01-26)
 
 
