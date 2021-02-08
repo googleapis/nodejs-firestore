@@ -92,18 +92,6 @@ const comparisonOperators: {
 };
 
 /**
- * Datastore allowed numeric IDs where Firestore only allows strings. Numeric
- * IDs are exposed to Firestore as __idNUM__, so this is the lowest possible
- * negative numeric value expressed in that format.
- *
- * This constant is used to specify startAt/endAt values when querying for all
- * descendants in a single collection.
- *
- * @private
- */
-const MIN_ID = '__id-9223372036854775808__';
-
-/**
  * onSnapshot() callback that receives a QuerySnapshot.
  *
  * @callback querySnapshotCallback
@@ -1008,7 +996,7 @@ export class QueryOptions<T> {
     readonly limitType?: LimitType,
     readonly offset?: number,
     readonly projection?: api.StructuredQuery.IProjection,
-    readonly ancestorType?: 'collection' | 'document'
+    readonly omitCollectionId = false
   ) {}
 
   /**
@@ -1055,8 +1043,7 @@ export class QueryOptions<T> {
    */
   static forDocumentNamesOnly<T>(
     parent: ResourcePath,
-    id: string,
-    isDocumentPath: boolean
+    id: string
   ): QueryOptions<T> {
     let options = new QueryOptions<T>(
       parent,
@@ -1068,8 +1055,7 @@ export class QueryOptions<T> {
     );
 
     options = options.with({
-      projection: {fields: [{fieldPath: '__name__'}]},
-      ancestorType: isDocumentPath ? 'document' : 'collection',
+      omitCollectionId: true,
     });
     return options;
   }
@@ -1092,7 +1078,7 @@ export class QueryOptions<T> {
       coalesce(settings.limitType, this.limitType),
       coalesce(settings.offset, this.offset),
       coalesce(settings.projection, this.projection),
-      coalesce(settings.ancestorType, this.ancestorType)
+      coalesce(settings.omitCollectionId, this.omitCollectionId)
     );
   }
 
@@ -1137,7 +1123,7 @@ export class QueryOptions<T> {
       deepEqual(this.startAt, other.startAt) &&
       deepEqual(this.endAt, other.endAt) &&
       deepEqual(this.projection, other.projection) &&
-      this.ancestorType === other.ancestorType
+      this.omitCollectionId === other.omitCollectionId
     );
   }
 }
@@ -1921,34 +1907,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
   }
 
   /**
-   * Internal get() method that returns all descendants of the current doc.
-   *
-   * @private
-   * @param {bytes=} transactionId A transaction ID.
-   */
-  _getAllDescendants(transactionId?: Uint8Array): Promise<DocumentReference[]> {
-    const docs: DocumentReference[] = [];
-
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    return new Promise((resolve, reject) => {
-      this._stream(transactionId)
-        .on('error', err => {
-          reject(wrapError(err, stack));
-        })
-        .on('data', result => {
-          if (result.document) {
-            docs.push(result.document);
-          }
-        })
-        .on('end', () => {
-          resolve(docs);
-        });
-    });
-  }
-
-  /**
    * Executes the query and streams the results as
    * [QueryDocumentSnapshots]{@link QueryDocumentSnapshot}.
    *
@@ -2102,7 +2060,7 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       structuredQuery.from![0].allDescendants = true;
     }
 
-    if (!this._queryOptions.ancestorType) {
+    if (!this._queryOptions.omitCollectionId) {
       structuredQuery.from![0].collectionId = this._queryOptions.collectionId;
     }
 
@@ -2117,54 +2075,6 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
         compositeFilter: {
           op: 'AND',
           filters,
-        },
-      };
-    } else if (this._queryOptions.ancestorType === 'collection') {
-      // To find all descendants of a collection reference, we need to use a
-      // composite filter that captures all documents that start with the
-      // collection prefix. The MIN_KEY constant represents the minimum key in
-      // this collection, and a null byte + the MIN_KEY represents the minimum
-      // key is the next possible collection.
-      const nullChar = String.fromCharCode(0);
-      const parentPrefix =
-        this._queryOptions.parentPath.relativeName === ''
-          ? ''
-          : this._queryOptions.parentPath.relativeName + '/';
-      const path =
-        this.firestore.formattedName +
-        '/documents/' +
-        parentPrefix +
-        this._queryOptions.collectionId;
-      const startAt = path + '/' + MIN_ID;
-      const endAt = path + nullChar + '/' + MIN_ID;
-
-      structuredQuery.where = {
-        compositeFilter: {
-          op: 'AND',
-          filters: [
-            {
-              fieldFilter: {
-                field: {
-                  fieldPath: '__name__',
-                },
-                op: 'GREATER_THAN_OR_EQUAL',
-                value: {
-                  referenceValue: startAt,
-                },
-              },
-            },
-            {
-              fieldFilter: {
-                field: {
-                  fieldPath: '__name__',
-                },
-                op: 'LESS_THAN',
-                value: {
-                  referenceValue: endAt,
-                },
-              },
-            },
-          ],
         },
       };
     }
@@ -2205,27 +2115,21 @@ export class Query<T = firestore.DocumentData> implements firestore.Query<T> {
       transform: (proto, enc, callback) => {
         const readTime = Timestamp.fromProto(proto.readTime);
         if (proto.document) {
-          if (this._queryOptions.ancestorType) {
-            const path = ResourcePath.EMPTY.append(proto.document.name);
-            const docRef = new DocumentReference(this._firestore, path);
-            callback(undefined, {document: docRef});
-          } else {
-            const document = this.firestore.snapshot_(
-              proto.document,
-              proto.readTime
-            );
-            const finalDoc = new DocumentSnapshotBuilder<T>(
-              document.ref.withConverter(this._queryOptions.converter)
-            );
-            // Recreate the QueryDocumentSnapshot with the DocumentReference
-            // containing the original converter.
-            finalDoc.fieldsProto = document._fieldsProto;
-            finalDoc.readTime = document.readTime;
-            finalDoc.createTime = document.createTime;
-            finalDoc.updateTime = document.updateTime;
-            lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<T>;
-            callback(undefined, {document: lastReceivedDocument, readTime});
-          }
+          const document = this.firestore.snapshot_(
+            proto.document,
+            proto.readTime
+          );
+          const finalDoc = new DocumentSnapshotBuilder<T>(
+            document.ref.withConverter(this._queryOptions.converter)
+          );
+          // Recreate the QueryDocumentSnapshot with the DocumentReference
+          // containing the original converter.
+          finalDoc.fieldsProto = document._fieldsProto;
+          finalDoc.readTime = document.readTime;
+          finalDoc.createTime = document.createTime;
+          finalDoc.updateTime = document.updateTime;
+          lastReceivedDocument = finalDoc.build() as QueryDocumentSnapshot<T>;
+          callback(undefined, {document: lastReceivedDocument, readTime});
         } else {
           callback(undefined, {readTime});
         }
