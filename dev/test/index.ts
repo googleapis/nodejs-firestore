@@ -88,7 +88,7 @@ const allSupportedTypesProtobufJs = document(
   {
     timestampValue: {
       nanos: 123000000,
-      seconds: 479978400,
+      seconds: '479978400',
     },
   },
   'doubleValue',

@@ -43,11 +43,12 @@ import {
   postConverterMerge,
   verifyInstance,
 } from '../test/util/helpers';
-import IBundleElement = firestore.IBundleElement;
 import {BulkWriter} from '../src/bulk-writer';
 import {Status} from 'google-gax';
 import {QueryPartition} from '../src/query-partition';
 import {CollectionGroup} from '../src/collection-group';
+
+import IBundleElement = firestore.IBundleElement;
 
 use(chaiAsPromised);
 
@@ -2811,7 +2812,7 @@ describe('Bundle building', () => {
 
   it('succeeds when there are no results', async () => {
     const bundle = firestore.bundle(TEST_BUNDLE_ID);
-    const query = testCol.where('sort', '==', 5);
+    const query = testCol.where('value', '==', '42');
     const snap = await query.get();
 
     bundle.add('query', snap);
@@ -2855,7 +2856,6 @@ describe('Bundle building', () => {
       name: snap.toDocumentProto().name,
       readTime: snap.readTime.toProto().timestampValue,
       exists: false,
-      queries: [],
     });
   });
 
@@ -2930,6 +2930,14 @@ describe('Bundle building', () => {
     });
 
     const bundledDoc = (elements[4] as IBundleElement).document;
-    expect(bundledDoc).to.deep.equal(limitToLastSnap.docs[0].toDocumentProto());
+    // The `valueType` is auxiliary and does not exist in proto.
+    const expected = limitToLastSnap.docs[0].toDocumentProto();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (expected.fields!.name as any).valueType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (expected.fields!.sort as any).valueType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (expected.fields!.value as any).valueType;
+    expect(bundledDoc).to.deep.equal(expected);
   });
 });

@@ -20,7 +20,7 @@ import {grpc} from 'google-gax';
 import {JSONStreamIterator} from 'length-prefixed-json-stream';
 import {Duplex, PassThrough} from 'stream';
 import * as through2 from 'through2';
-import {firestore} from '../../protos/firestore_v1_proto_api';
+import {firestore, google} from '../../protos/firestore_v1_proto_api';
 
 import * as proto from '../../protos/firestore_v1_proto_api';
 import * as v1 from '../../src/v1';
